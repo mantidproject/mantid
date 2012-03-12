@@ -51,20 +51,23 @@ namespace Mantid
         class DLLExport CobaltSpinWaveDSHO : public MDAlgorithms::SimulateResolution
         {
         public:
-            /// Constructor
+            /// Constructors
             CobaltSpinWaveDSHO();
+            CobaltSpinWaveDSHO(std::vector<std::string> extraParams);
             /// Destructor
             virtual ~CobaltSpinWaveDSHO() {}
 
             /// overwrite IFunction base class methods
             std::string name()const{return "CobaltSpinWaveDSHO";}
             /// sqwBroad returns the expected scattering weight for the given Q,w point
-            virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
-                    const double temp, const Kernel::Matrix<double> & ubinv) const;
-           
+            //virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
+            //        const double temp, const Kernel::Matrix<double> & ubinv) const;
         protected:
+            bool userModelIsBroad() const;
+            void userSqw(const std::vector<double> & params, const std::vector<double> & qE, std::vector<double> & result) const;
+
             /// load parameter values into local memory
-            virtual void getParams() const;
+            void getParams() const;
         private:
             /// model amplitude
             mutable double m_amplitude;

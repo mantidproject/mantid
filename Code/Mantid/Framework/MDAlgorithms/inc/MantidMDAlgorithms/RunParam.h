@@ -49,7 +49,7 @@ namespace Mantid
           double de, double x0, double xa, double x1,
           double wa, double ha, double s1, double s2,
           double s3, double s4, double s5, double thetam,
-          int imod, double pslit, double radius,
+          int modModel, double pslit, double radius,
           double rho, double hz, double tjit,
           double as, double bs, double cs,
           double aa, double bb, double cc,
@@ -61,9 +61,15 @@ namespace Mantid
           double yl, double sx, double sy,
           double sz, int isam, double temp,
           double eta);
+       RunParam(const int runID);
 
        /// Destructor
        ~RunParam();
+
+       // constant to convert mm to m
+       static const double mmTom;
+       // These gets are public for now but most will be private when required values are available
+       // The sets will still need to be public
 
        /// return incident energy of run
        double getEi();
@@ -97,8 +103,8 @@ namespace Mantid
        double getS5();
        /// return thetam of run
        double getThetam();
-       /// return Imod of run
-       int getImod();
+       /// return modModel of run
+       int getModModel();
        /// return pslit of run chopper
        double getPslit();
        /// return radius of run chopper
@@ -166,6 +172,7 @@ namespace Mantid
        /// return eta of run
        double getEta();
 
+    public:
        void setEi( const double val);
        void setPsi( const double val);
        void setElo( const double val);
@@ -182,7 +189,7 @@ namespace Mantid
        void setS4( const double val);
        void setS5( const double val);
        void setThetam( const double val);
-       void setImod( const int val);
+       void setModModel( const int val);
        void setPslit( const double val);
        void setRadius( const double val);
        void setRho( const double val);
@@ -220,6 +227,28 @@ namespace Mantid
        void readData(const std::string file);
        void writeData(const std::string file);
 
+       //double moderatorSampleVolumeTable();
+       double moderatorDepartTime(const double randomVar) const;
+       double moderatorTimeLookUp( const double randomVar) const;
+       double areaToTIK(const double area, const double tauF, const double tauS, const double r) const;
+
+       void getAperturePoint(double & pW, double & pH, const double ran1, const double ran2) const;
+
+       double chopperTimeDist(const double ranvar) const;
+       /// get a chopper jitter time based on random vae [0:1]
+       double chopperJitter(const double ranvar) const;
+       /// return tausqr, the chopper variance based on current parameters
+       double tChopVariance() const;
+
+       double tridev(const double a) const;
+    protected:
+       double areaIK(const double x, const double tauF, const double tauS, const double r) const;
+       double funAreaToTIK(const double x) const;
+       //double zBrent(double fun(const double) const, const double low, const double high, const double tol) const;
+       double zeroBrent ( const double a, const double b, const double t /*, double ( *f) ( double x )*/ ) const;
+       double tChop(const double pSlit, const double radius, const double rho, const double angVel, const double eI ) const;
+       double gsqrChop (const double pSlit, const double radius, const double rho, const double angVel, const double eI) const;
+
     private:
        /// @cond
        double m_ei;
@@ -238,11 +267,12 @@ namespace Mantid
        double m_s4;
        double m_s5;
        double m_thetam;
-       int m_imod;
+       int m_modModel;
        double m_pslit;
        double m_radius;
        double m_rho;
        double m_hz;
+       double m_angVel;
        double m_tjit;
        double m_as;
        double m_bs;
@@ -272,6 +302,10 @@ namespace Mantid
        int m_isam;
        double m_temp;
        double m_eta;
+       double m_dtChopEff;
+       double m_tjitSig;
+       bool m_moderatorChange;
+       mutable double m_tauF, m_tauS, m_r, m_offset;
 
        /// @endcond
 

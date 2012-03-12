@@ -18,20 +18,36 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 namespace Mantid
 {
     namespace MDAlgorithms
     {
         // Constructor
-        SimulateResolution::SimulateResolution() : m_randGen(NULL), m_randSeed(12345678), m_sobol(false)
+        SimulateResolution::SimulateResolution() : m_randGen(NULL), m_randSeed(12345678), m_sobol(false), m_integrationMethod(mcIntegration)
         {
+          m_magForm = boost::shared_ptr<MDAlgorithms::MagneticFormFactor>( new MagneticFormFactor(0,0,500) );
+          if( !m_randGen )
+          {
+            m_randGen = new Kernel::MersenneTwister;
+            int seedValue = 12345; //TODO replace this with fixed Sobol sequence, reset every time.
+            m_randGen->setSeed(seedValue);
+            for(int i=0;i<9;i++)
+              m_mcOptVec.push_back(true);
+          }
         }
 
         SimulateResolution::~SimulateResolution()
         {
             delete m_randGen;
         }
+
+        void SimulateResolution::setWorkspaceMD(WorkspaceGroup_sptr wsGroup)
+        {
+          m_mdWorkspaces = wsGroup;
+        }
+
         double SimulateResolution::functionMD(Mantid::API::IMDIterator& it) const
         {
           getParams();
@@ -44,8 +60,7 @@ namespace Mantid
           {
             // TODO: Add code to perform sqwConvolution on this point.
             // Note Janik Zikovsky, Oct 7, 2011. Function was empty, so I removed it.
-            //sqwConvolution(* this event *,fgSignal,fgError);
-            UNUSED_ARG(fgSignal);
+            fgSignal=sqwConvolution(it,j,fgError);
             UNUSED_ARG(fgError);
           }
 
@@ -53,7 +68,92 @@ namespace Mantid
           return fgSignal/double(it.getNumEvents());
         }
 
+        double SimulateResolution::sqwConvolution(const Mantid::API::IMDIterator& it, size_t & event, double & error) const
+        {
+          if(m_integrationMethod == mcIntegration)
+          {
+            return sqwConvolutionMC(it, event, error);
+          }
+          return 0.0;
+        }
 
+        double SimulateResolution::sqwConvolutionMC(const Mantid::API::IMDIterator& it, size_t & event, double & error) const
+        {
+          // find the run and detector for this MDEvent
+          int runID = it.getInnerRunIndex(event);
+          int detectorID = it.getInnerDetectorID(event);
+          double simSig;
+          std::vector<double> qE;
+          const double small=1e-10;
+          for( size_t index=0;index<4;index++)
+            qE.push_back(it.getInnerPosition(event,index));
+          UNUSED_ARG(runID);
+          UNUSED_ARG(detectorID);
+          // get crystal parameters and ubinv/uinv matrix for run
+          //Mantid::Geometry::OrientedLattice& lattice; // = m_mdews->getExperimentInfo(0)->sample().getOrientedLattice();
+          //lattice.;
+          error=0.0;
+          bool broad=userModelIsBroad();
+          double weight;
+          double acc;
+          std::vector<double> result;
+          std::vector<double> perturbQE;
+          std::vector<double> yVec;
+          double sum=0., sumSqr=0.;
+          double eta2,eta3;
+          // temp data which will come from runInfo
+          double gauPre=0.0;
+          std::vector<double> params;
+          int mcLoopLimit=100,mcLoopMin=10; // test values
+          double mcTol=1e-3;
+
+          // MC loop over sample points until accuracy or loop limit reached
+          for( int mcStep=0; mcStep<mcLoopLimit; mcStep++)
+          {
+            mcYVec(runData,yVec,eta2,eta3);
+            mcMapYtoQEVec(yVec,qE,perturbQE);
+            userSqw(params,perturbQE,result);
+            // Models are either broad of sharp and the data returned is different in these cases.
+            if(broad)
+              weight=result[0];
+            else
+            {
+              const double dE=perturbQE[3]-result[1];
+              weight=result[0]*exp(-gauPre*(dE*dE));
+            }
+            // Gather average, and estimate uncertainty
+            sum+=weight;
+            sumSqr+=weight*weight;
+            // check for convergence every mcLoopMin steps, end of loop
+            if( (mcStep % mcLoopMin) ==0 || mcStep==mcLoopLimit-1 )
+            {
+              simSig=sum/mcStep;
+              error=sqrt(fabs( ( sumSqr/mcStep - simSig*simSig ))/mcStep);
+
+              // break on relative error or very small after mcLoop min iterations
+              if(fabs(simSig)>small)
+              {
+                acc=fabs(error/simSig);
+                if(acc<mcTol)
+                  break;
+              }
+              else
+                break;
+            }
+          }
+          //UNUSED_ARG(lattice);
+          return simSig;
+        }
+
+        void SimulateResolution::setMagneticForm(const int atomicNo, const int ionisation)
+        {
+          m_magForm->setFormFactor(atomicNo,ionisation,500);
+        }
+
+        double SimulateResolution::magneticForm(const double qSquared) const
+        {
+          return( m_magForm->formTable(qSquared));
+        }
 //        // simple test interface for fg model - will need vector of parameters
 //        void SimulateResolution::SimForeground(boost::shared_ptr<Mantid::API::IMDWorkspace> imdw,
 //              std::string fgmodel,const double fgparaP1, const double fgparaP2, const double fgparaP3)
@@ -82,12 +182,12 @@ namespace Mantid
 
 
 
-        // Return next pseudo or quasi random point in the N dimensional space
-        void SimulateResolution::getNextPoint(std::vector<double>& point, int count)
+        // Return next pseudo or quasi random point in the N dimensional space - NOT const?
+        void SimulateResolution::getNextPoint(std::vector<double>& point, int count) const
         {
             if(!m_sobol) {
                 for(int i=0;i<count;i++)
-                    point[i]=m_randGen->next();
+                    point.push_back(m_randGen->next());
             }
        }
 
@@ -121,13 +221,11 @@ namespace Mantid
         double SimulateResolution::bose(const double eps, const double temp) const
         {
 
-            if( temp<0. )
-                return( (eps>=0)?(eps):(0.) );
-            else
-            {
-              double kB = 0.08617347;
-              return( (kB*temp)*pop(eps/(kB*temp)) );
-            }
+          if( temp<0. )
+            return( (eps>=0)?(eps):(0.) );
+
+          const double kB = 0.08617347;
+          return( (kB*temp)*pop(eps/(kB*temp)) );
         }
 
         /**
@@ -141,7 +239,7 @@ namespace Mantid
         /**
         * gausdev function from tobyfit
         */
-        void SimulateResolution::gasdev2d(const double ran1, const double ran2, double & gaus1, double & gaus2)
+        void SimulateResolution::gasdev2d(const double ran1, const double ran2, double & gaus1, double & gaus2) const
         {
              const double fac=sqrt(-2.*log(std::max(ran1,1e-20)));
              gaus1=fac*cos(2.*M_PI*ran2);
@@ -167,7 +265,7 @@ namespace Mantid
         /**
         * tridev function from tobyfit
         */
-        double SimulateResolution::tridev(double a)
+        double SimulateResolution::tridev(double a) const
         {
             return( (a>0.5)? (1.0-sqrt(fabs(1.0-2.0*fabs(a-0.5)))):(sqrt(fabs(1.0-2.0*fabs(a-0.5))-1.0)) );
         }
@@ -178,7 +276,7 @@ namespace Mantid
         * The sample bound box is stored globally to make references moe efficient.
         */
         void SimulateResolution::monteCarloSampleVolume( const double ran1 , const double ran2 , const double ran3,
-            double & dx , double & dy, double & dz )
+            double & dx , double & dy, double & dz ) const
         {
             dx = m_sampleBB[0] * (ran1-0.5);
             dy = m_sampleBB[1] * (ran2-0.5);
@@ -407,8 +505,8 @@ namespace Mantid
         /**
         * mc_yvec function from tobyfit - generate a random point in up to 13 dimensional space
         */
-        void SimulateResolution::mcYVec(const double detWidth, const double detHeight, const double detTimeBin,
-            std::vector<double> & yVec, double & eta2, double & eta3 )
+        void SimulateResolution::mcYVec(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run,
+            std::vector<double> & yVec, double & eta2, double & eta3 ) const
         {
             //(irun, det_width, det_height, det_timebin, mc_type, y_vec, eta_2, eta_3)
 
@@ -445,11 +543,9 @@ namespace Mantid
             ! Get vector of random deviates:
             ! ------------------------------
             */
-            UNUSED_ARG(detHeight);
-            UNUSED_ARG(detWidth);
-            UNUSED_ARG(detTimeBin);
 
-            const double rt6 = 2.449489742783178098; // sqrt(6)
+          UNUSED_ARG(run); // this will provide run parameters
+            //const double rt6 = 2.449489742783178098; // sqrt(6)
             int imc(0);
 
             // this may need to be optimised
@@ -458,75 +554,80 @@ namespace Mantid
             // Sample over moderator time distribution:
             if (m_mcOptVec[mcLineShape]) {
                 //if (imoderator(irun) .eq. 1) then ! Ikeda-Carpenter model
-                double xtemp1 = sampleAreaTable (ranvec[imc++]);
+                // moderator model selection delete within within run obect
+                //double xtemp1 = run->moderatorTimeLookUp(ranvec[imc++]); // sampleAreaTable (ranvec[imc++]);
 
-                const double xtemp = std::min (0.999, xtemp1);
-                yVec[1] = 1.0e-6 * m_t_mod_av * (xtemp/(1.0-xtemp) - 1.0);
+                //const double xtemp = std::min (0.999, xtemp1);
+                //yVec[1] = 1.0e-6 * m_t_mod_av * (xtemp/(1.0-xtemp) - 1.0);
+                yVec[0] = run->moderatorDepartTime(ranvec[imc++]);
             }
             else
-                yVec[1] = 0.0;
+                yVec[0] = 0.0;
 
             // Sample over beam-defining aperture:
             if (m_mcOptVec[mcAperture]) {
-                yVec[2] = m_wa * (ranvec[imc++] - 0.5);
-                yVec[3] = m_ha * (ranvec[imc++] - 0.5);
+                run->getAperturePoint(yVec[1],yVec[2],ranvec[imc],ranvec[imc+1]);
+                imc+=2;
+                //yVec[2] = m_wa * (ranvec[imc++] - 0.5);
+                //yVec[3] = m_ha * (ranvec[imc++] - 0.5);
             }
             else {
+                yVec[1] = 0.0;
                 yVec[2] = 0.0;
-                yVec[3] = 0.0;
             }
 
 
             // Sample over chopper time distribution: Assume symmetric triangular distributions
             if (m_mcOptVec[mcChopper]) {
-                yVec[4] = m_dt_chop_eff * tridev(ranvec[imc++]);
+                //yVec[4] = m_dt_chop_eff * tridev(ranvec[imc++]);
+                yVec[3] = run->chopperTimeDist(ranvec[imc++]);
             }
             else
-                yVec[4] = 0.0;
+                yVec[3] = 0.0;
 
             if (m_mcOptVec[mcChopperJitter]) {
-                yVec[4] += + m_tjit_sig * rt6 * tridev(ranvec[imc++]);
+                yVec[3] += + run->chopperJitter(ranvec[imc++]); //m_tjit_sig * rt6 * tridev(ranvec[imc++]);
             }
 
             // Sample over crystal volume:
             if (m_mcOptVec[mcSample]) {
                 // need to pass three ranvec values here and increment count
                 // sample shape is implicitly used in the method
-                monteCarloSampleVolume ( ranvec[imc], ranvec[imc+1], ranvec[imc+2], yVec[5], yVec[6], yVec[7]);
+                monteCarloSampleVolume ( ranvec[imc], ranvec[imc+1], ranvec[imc+2], yVec[4], yVec[5], yVec[6]);
                 imc += 3;
             }
             else {
+                yVec[4] = 0.0;
                 yVec[5] = 0.0;
                 yVec[6] = 0.0;
-                yVec[7] = 0.0;
             }
 
 
             // Sample over detector volume:
             if (m_mcOptVec[mcDetectorDepth]) { // a rough approximation
                 //yVec[8] = 0.6 * det_width * (ranvec(imc) - 0.5); // Introduces error if use false detector parameters e.g.HET rings
-                yVec[8] = 0.6 * 0.025   * (ranvec[imc++] - 0.5);   // Assume detectors are 25mm diameter
+                yVec[7] = 0.6 * 0.025   * (ranvec[imc++] - 0.5);   // Assume detectors are 25mm diameter
             }
             else
-                yVec[8] = 0.0;
+                yVec[7] = 0.0;
 
             if (m_mcOptVec[mcDetectorArea]) {
-                yVec[9]  = m_detectorBB[0] * (ranvec[imc++] - 0.5); // need to check BB, need width, height
-                yVec[10] = m_detectorBB[2] * (ranvec[imc++] - 0.5);
+                yVec[8]  = m_detectorBB[0] * (ranvec[imc++] - 0.5); // need to check BB, need width, height
+                yVec[9] = m_detectorBB[2] * (ranvec[imc++] - 0.5);
             }
             else {
-                yVec[9]  = 0.0;
-                yVec[10] = 0.0;
+                yVec[8]  = 0.0;
+                yVec[9] = 0.0;
             }
 
 
             // Sample over detector time-bin:
 
             if (m_mcOptVec[mcDetectorTimeBin]) {
-                yVec[11] = m_detectorTimebin * (ranvec[imc++] - 0.5);
+                yVec[10] = m_detectorTimebin * (ranvec[imc++] - 0.5);
             }
             else
-                yVec[11] = 0.0;
+                yVec[10] = 0.0;
 
 
             // Sample over crystal mosaic:
@@ -543,10 +644,22 @@ namespace Mantid
                 eta3 = 0.0;
             }
         }
+
+        /**
+         * Map from yVec to modified qE - null implementation for now
+         */
+        void SimulateResolution::mcMapYtoQEVec(const std::vector<double> & yVec,const std::vector<double> & qE,std::vector<double> & perturbQE) const
+        {
+          UNUSED_ARG(yVec); UNUSED_ARG(qE);
+          perturbQE.push_back(0.0);
+          perturbQE.push_back(0.0);
+          perturbQE.push_back(0.0);
+          perturbQE.push_back(0.0);
+        }
       /**
         * sampleAreaTable function from tobyfit - 
         */
-        double SimulateResolution::sampleAreaTable(const double area )
+        double SimulateResolution::sampleAreaTable(const double area ) const
         {
             int i = static_cast<int>((area*static_cast<double>(m_xtab.size())));
             double da = (area*static_cast<double>(m_xtab.size()-1)) - static_cast<double>(i);

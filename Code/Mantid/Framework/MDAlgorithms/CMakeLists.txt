@@ -21,6 +21,7 @@ set ( SRC_FILES
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
 	src/LogarithmMD.cpp
+	src/MagneticFormFactor.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -76,6 +77,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MagneticFormFactor.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -123,6 +125,7 @@ set ( TEST_FILES
 	test/InvalidParameterTest.h
 	test/LessThanMDTest.h
 	test/LogarithmMDTest.h
+        test/MagneticFormFactorTest.h
 	test/MaskMDTest.h
 	test/MergeMDFilesTest.h
 	test/MergeMDTest.h
@@ -137,6 +140,7 @@ set ( TEST_FILES
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
+	test/SimulateResolutionTest.h
 	test/TobyFitSimulateTest.h
 	test/TransformMDTest.h
 	test/UnaryOperationMDTest.h
