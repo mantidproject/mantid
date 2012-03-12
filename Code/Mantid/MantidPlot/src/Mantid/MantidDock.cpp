@@ -1686,7 +1686,10 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* workspa
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//
-
+/** Create a QDockWidget containing:
+ * The AlgorithmSelectorWidget
+ * The progress bar and Details button
+ */
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
 QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
 {
@@ -1708,13 +1711,13 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   m_runningLayout->addStretch();
   m_runningLayout->addWidget(m_runningButton);
   connect(m_runningButton,SIGNAL(clicked()),m_mantidUI,SLOT(showAlgMonitor()));
-  //
-  QVBoxLayout * layout = new QVBoxLayout(this, 4 /*border*/, 4 /*spacing*/);
+
+
   QFrame *f = new QFrame(this);
+  QVBoxLayout * layout = new QVBoxLayout(f, 4 /*border*/, 4 /*spacing*/);
   f->setLayout(layout);
   layout->addWidget(m_selector);
   layout->addLayout(m_runningLayout);
-  //
 
   setWidget(f);
 
