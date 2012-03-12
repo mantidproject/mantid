@@ -103,6 +103,12 @@ namespace MantidWidgets
     m_tree->blockSignals(true);
     m_tree->setCurrentIndex(QModelIndex());
     m_tree->blockSignals(false);
+
+    // Emit the signal
+    QString algName;
+    int version;
+    this->getSelectedAlgorithm(algName,version);
+    emit algorithmSelectionChanged(algName, version);
   }
 
   //---------------------------------------------------------------------------
@@ -116,6 +122,8 @@ namespace MantidWidgets
     m_findAlg->blockSignals(true);
     m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
     m_findAlg->blockSignals(false);
+    // Emit the signal
+    emit algorithmSelectionChanged(algName, version);
   }
 
   //---------------------------------------------------------------------------

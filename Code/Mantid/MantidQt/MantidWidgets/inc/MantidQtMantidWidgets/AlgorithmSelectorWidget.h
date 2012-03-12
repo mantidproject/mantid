@@ -42,6 +42,7 @@ namespace MantidWidgets
 
   signals:
     void executeAlgorithm(const QString &, int);
+    void algorithmSelectionChanged(const QString &, int);
 
   protected:
     AlgorithmTreeWidget *m_tree;

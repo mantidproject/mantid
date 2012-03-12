@@ -173,7 +173,7 @@ protected:
   /** @name Helper functions */
   //@{
   ///Tie a widget to a property
-  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout,
+  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout=NULL,
       bool readHistory = true);
 
   ///Untie a widget to a property

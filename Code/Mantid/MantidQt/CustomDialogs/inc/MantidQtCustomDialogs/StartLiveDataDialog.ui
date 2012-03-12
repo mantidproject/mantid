@@ -6,27 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1023</width>
-    <height>800</height>
+    <width>988</width>
+    <height>905</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Start Live Data Monitoring</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="mainLayout">
    <item>
-    <widget class="QSplitter" name="splitter">
+    <widget class="QSplitter" name="splitterMain">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="widgetLeft" native="true">
       <property name="minimumSize">
        <size>
         <width>200</width>
         <height>0</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
+      <layout class="QVBoxLayout" name="widgetLeftLayout">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
@@ -61,6 +61,9 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
               </property>
               <property name="text">
                <string>Now</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -103,6 +106,9 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
             </item>
             <item>
              <widget class="QDateTimeEdit" name="dateTimeEdit">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="displayFormat">
                <string>MM/dd/yy hh:mm:ss AP</string>
               </property>
@@ -180,6 +186,9 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
               </property>
               <property name="text">
                <string>No Processing</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -295,6 +304,9 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
               <property name="text">
                <string>No Processing</string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -336,6 +348,30 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
         </layout>
        </item>
        <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Accumulation Workspace: </string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="editAccumulationWorkspace"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Output Workspace: </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="editOutputWorkspace"/>
+         </item>
+        </layout>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -352,47 +388,71 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
-      <widget class="QWidget" name="tab_1">
+      <widget class="QWidget" name="tabProcessAlgo">
        <attribute name="title">
-        <string>Processing Algo</string>
+        <string>Processing Step</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QSplitter" name="splitterProcessing">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="processingAlgoSelector">
-           <property name="showExecuteButton" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-          <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="processingAlgoProperties">
-           <property name="algorithmName">
-            <string>Rebin</string>
-           </property>
-          </widget>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="lblProcessingInfo">
+            <property name="text">
+             <string>Select either Algorithm or Python Script under &quot;Processing&quot; to perform processing on each chunk of live data.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSplitter" name="splitterProcessing">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="processingAlgoSelector">
+             <property name="showExecuteButton" stdset="0">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="processingAlgoProperties">
+             <property name="algorithmName">
+              <string/>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="ScriptEditor" name="processingScript"/>
+          </item>
+         </layout>
         </item>
        </layout>
+       <zorder>splitterProcessing</zorder>
+       <zorder>processingScript</zorder>
+       <zorder>processingScript</zorder>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabPostAlgo">
        <attribute name="title">
-        <string>Processing Script</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="ScriptEditor" name="processingScript"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_3">
-       <attribute name="title">
-        <string>PostProcessing Algo</string>
+        <string>Post-Processing Step</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="lblPostProcessingInfo">
+          <property name="text">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Select either Algorithm or Python Script under &amp;quot;Post Processing&amp;quot; to perform processing on the &lt;span style=&quot; font-style:italic;&quot;&gt;accumulated&lt;/span&gt; data, after each chunk is added.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QSplitter" name="splitterPost">
           <property name="orientation">
@@ -406,13 +466,6 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
           </widget>
          </widget>
         </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_4">
-       <attribute name="title">
-        <string>PostProcessing Script</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="ScriptEditor" name="postScript"/>
         </item>
