@@ -82,7 +82,7 @@ namespace Mantid
           // find the run and detector for this MDEvent
           int runID = it.getInnerRunIndex(event);
           int detectorID = it.getInnerDetectorID(event);
-          double simSig;
+          double simSig=0.;
           std::vector<double> qE;
           const double small=1e-10;
           for( size_t index=0;index<4;index++)
