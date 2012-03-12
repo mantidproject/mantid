@@ -1057,13 +1057,15 @@ namespace Mantid
       // Go through each entry in the input group(s)
       for (size_t entry=0; entry<m_groupSize; entry++)
       {
-        // Create a new instance of the algorithm
-        IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
+        // Create a new instance of the algorithm, unmanaged so that it does not get deleted prematurely
+        Algorithm_sptr alg_sptr = API::AlgorithmManager::Instance().createUnmanaged(this->name(), this->version());
+        IAlgorithm* alg = alg_sptr.get();
         if(!alg)
         {
           g_log.error()<<"CreateAlgorithm failed for "<<this->name()<<"("<<this->version()<<")"<<std::endl;
           throw std::runtime_error("Algorithm creation failed.");
         }
+        alg->initialize();
 
         // Set all non-workspace properties
         this->copyNonWorkspaceProperties(alg, int(entry)+1);
