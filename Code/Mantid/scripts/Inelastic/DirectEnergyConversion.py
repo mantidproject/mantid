@@ -723,7 +723,6 @@ class DirectEnergyConversion(object):
         if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA" or self.instr_name == "HYSPEC"):
             self.facility = "SNS"
             self.normalise_method  = 'current'
-
         else:
             self.facility = str(mtd.settings.facility())
         
