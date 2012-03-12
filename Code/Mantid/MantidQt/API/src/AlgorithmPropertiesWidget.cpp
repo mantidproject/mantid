@@ -128,8 +128,16 @@ namespace API
   }
 
 
+  //---------------------------------------------------------------------------------------------------------------
+  /** Sets the properties to force as enabled/disabled */
+  void AlgorithmPropertiesWidget::addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled)
+  {
+    this->m_enabled = enabled;
+    this->m_disabled = disabled;
+  }
 
   //---------------------------------------------------------------------------------------------------------------
+  /** @return true if the workspace has an input workspace */
   bool haveInputWS(const std::vector<Property*> & prop_list)
   {
     // For the few algorithms (mainly loading) that do not have input workspaces, we do not
@@ -306,6 +314,35 @@ namespace API
 
 
   //-------------------------------------------------------------------------------------------------
+  /** Check if the control should be enabled for this property
+   * @param propName :: The name of the property
+   */
+  bool AlgorithmPropertiesWidget::isWidgetEnabled(Property * property, const QString & propName) const
+  {
+    // To avoid errors
+    if( propName.isEmpty() ) return true;
+    if (!property) return true;
+
+    // Keep things enabled if requested
+    if( m_enabled.contains(propName) ) return true;
+
+    /** The control is disabled if
+    *   (1) It is contained in the disabled list or
+    *   (2) A user passed a value into the dialog
+    */
+    if(m_disabled.contains(propName))
+    {
+      return false;
+    }
+    else
+    {
+      // Rely on the property to determine if it is enabled.
+      return property->isEnabled();
+    }
+
+  }
+
+  //-------------------------------------------------------------------------------------------------
   /** Go through all the properties, and check their validators to determine
    * whether they should be made disabled/invisible.
    * It also shows/hids the validators.
@@ -321,10 +358,9 @@ namespace API
       QString propName = pitr.key();
 
       // Set the enabled and visible flags based on what the validators say. Default is always true.
-
-      // TODO: Also use a list of enabled/disabled from AlgorithmDialog
-      bool enabled = prop->isEnabled();
       bool visible = prop->isVisible();
+      // Dynamically check if the widget should be enabled.
+      bool enabled = this->isWidgetEnabled(prop, propName);
 
       // Dynamic PropertySettings objects allow a property to change validators.
       // This removes the old widget and creates a new one instead.

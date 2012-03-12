@@ -23,6 +23,7 @@
 #include <QSplashScreen>
 #include <QtCore/qstring.h>
 #include <QThread>
+#include <QtCore/qstringlist.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -52,7 +53,13 @@ int main( int argc, char ** argv )
   //dlg->setPresetValues(preset_values);
   //dlg->isForScript(forScript);
   dlg->setOptionalMessage(QString::fromStdString(alg->getOptionalMessage()));
-  //dlg->addEnabledAndDisableLists(enabled, disabled);
+
+  QStringList enabled;
+  if (argc > 2) enabled = QStringList::split(",", argv[2], false);
+  QStringList disabled;
+  if (argc > 3) disabled = QStringList::split(",", argv[3], false);
+  dlg->addEnabledAndDisableLists(enabled, disabled);
+
   dlg->showHiddenWorkspaces(false);
 
   // Setup the layout

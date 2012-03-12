@@ -105,6 +105,13 @@ void GenericDialog::initLayout()
     this->setPreviousValue(it.value(), it.key());
   }
 
+  // Mark the properties that will be forced
+  QStringList enabled = m_enabled;
+  QStringList disabled = m_disabled;
+  // Disabled the python arguments
+  disabled += m_python_arguments;
+  m_propsWidget->addEnabledAndDisableLists(enabled, disabled);
+
   // Using the default values, hide or disable the dynamically shown properties
   m_propsWidget->hideOrDisableProperties();
 

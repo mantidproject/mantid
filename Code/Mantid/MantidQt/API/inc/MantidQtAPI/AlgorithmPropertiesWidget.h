@@ -10,6 +10,7 @@
 #include <QtGui>
 #include "DllOption.h"
 #include <QtCore/qvariant.h>
+#include "MantidKernel/Property.h"
 
 
 namespace MantidQt
@@ -61,6 +62,8 @@ namespace API
     QString getAlgorithmName() const;
     void setAlgorithmName(QString name);
 
+    void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
+
     void hideOrDisableProperties();
 
     /// Each dynamically created PropertyWidget
@@ -80,6 +83,9 @@ namespace API
     void replaceWSClicked(const QString & propName);
 
   private:
+
+    bool isWidgetEnabled(Mantid::Kernel::Property * property, const QString & propName) const;
+
     /// Chosen algorithm name
     QString m_algoName;
 
@@ -97,6 +103,13 @@ namespace API
 
     /// A map where key = property name; value = the error for this property (i.e. it is not valid).
     QHash<QString, QString> m_errors;
+
+    /// A list of property names that are FORCED to stay enabled.
+    QStringList m_enabled;
+
+    /// A list of property names that are FORCED to stay disabled.
+    /// e.g. when callid AlgorithmNameDialog()
+    QStringList m_disabled;
 
   };
 
