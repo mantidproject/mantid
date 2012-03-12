@@ -76,11 +76,11 @@ void GenericDialog::initLayout()
 
   // Make the widget with all the properties
   m_propsWidget = new AlgorithmPropertiesWidget(this);
-  dialog_layout->addWidget(m_propsWidget);
+  dialog_layout->addWidget(m_propsWidget, 1);
   m_propsWidget->setAlgorithm(this->getAlgorithm());
 
   // Create and add the OK/Cancel/Help. buttons
-  dialog_layout->addLayout(this->createDefaultButtonLayout());
+  dialog_layout->addLayout(this->createDefaultButtonLayout(), 0);
 
   QCoreApplication::processEvents();
 
@@ -98,6 +98,16 @@ void GenericDialog::initLayout()
     m_propsWidget->m_scroll->setFixedHeight(dialogHeight+10);
 
   dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
+
+  // Set all previous values (from history, etc.)
+  for( auto it = m_propsWidget->m_propWidgets.begin(); it != m_propsWidget->m_propWidgets.end(); it++)
+  {
+    this->setPreviousValue(it.value(), it.key());
+  }
+
+  // Using the default values, hide or disable the dynamically shown properties
+  m_propsWidget->hideOrDisableProperties();
+
 }
 
 

@@ -248,8 +248,8 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
 
 
 //-------------------------------------------------------------------------------------------------
-/** To be overridden in GenericDialog (only) */
-void AlgorithmDialog::hideOrDisableProperties()
+/** Show the validators for all the properties */
+void AlgorithmDialog::showValidators()
 {
   // Do nothing for non-generic algorithm dialogs
   QStringList::const_iterator pend = m_algProperties.end();
@@ -304,10 +304,7 @@ bool AlgorithmDialog::setPropertyValue(const QString pName, bool validateOthers)
 
   // Go through all the other properties' validators
   if (validateOthers)
-  {
-    //std::cout << "setPropertyValue(" << pName.toStdString() << ") calling hideOrDisableProperties\n";
-    this->hideOrDisableProperties();
-  }
+    this->showValidators();
 
 
   // Prop was valid if the error string is empty
@@ -344,7 +341,7 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
   }
 
   // OK all the values have been set once. Time to look for which should be enabled
-  this->hideOrDisableProperties();
+  this->showValidators();
 
   return allValid;
 }
@@ -381,7 +378,7 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay)
   inputMessage->setText(getOptionalMessage());
   QHBoxLayout *msgArea = new QHBoxLayout;
   msgArea->addWidget(inputMessage);
-  mainLay->addLayout(msgArea);
+  mainLay->addLayout(msgArea, 0);
 }
 
 

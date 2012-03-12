@@ -149,7 +149,7 @@ protected:
   bool setPropertyValues(const QStringList & skipList = QStringList());
   bool setPropertyValue(const QString pName, bool validateOthers);
 
-  virtual void hideOrDisableProperties();
+  void showValidators();
   //@}
 
   /** @name Dialog information */
@@ -215,7 +215,7 @@ protected slots:
   /// Help button clicked;
   virtual void helpClicked();
 
-private:
+protected:
 
   /// Parse out the input from the dialog
   void parse();

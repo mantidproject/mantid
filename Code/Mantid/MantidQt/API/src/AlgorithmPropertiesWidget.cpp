@@ -260,6 +260,7 @@ namespace API
    */
   void AlgorithmPropertiesWidget::propertyChanged(const QString & pName)
   {
+    UNUSED_ARG(pName);
     //PropertyWidget * widget = m_propWidgets[pName];
     this->hideOrDisableProperties();
   }
