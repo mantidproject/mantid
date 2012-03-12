@@ -37,20 +37,28 @@ void StartLiveDataDialog::initLayout()
 {
   ui.setupUi(this);
 
-  tie(ui.editAccumulationWorkspace, "AccumulationWorkspace");
-  tie(ui.editOutputWorkspace, "OutputWorkspace");
+  fillAndSetComboBox("Instrument", ui.cmbInstrument);
+  tie(ui.edtUpdateEvery, "UpdateEvery", ui.layoutUpdateEvery);
+//  tie(ui.editAccumulationWorkspace, "AccumulationWorkspace");
+//  tie(ui.editOutputWorkspace, "OutputWorkspace");
+  fillAndSetComboBox("AccumulationMethod", ui.cmbAccumulationMethod);
+//  tie(ui.cmbAccumulationMethod, "AccumulationMethod");
 
-  ui.editAccumulationWorkspace->setEnabled(false);
-
+  // ========== Update GUIs =============
   ui.processingAlgoSelector->update();
   ui.postAlgoSelector->update();
+  radioProcessClicked();
+  radioPostProcessClicked();
 
   // ========== Layout Tweaks =============
   ui.processingScript->setVisible(false);
-  QList<int> sizes; sizes.push_back(200); sizes.push_back(1000);
+  QList<int> sizes; sizes.push_back(300); sizes.push_back(1000);
   ui.splitterProcessing->setSizes(sizes);
   ui.splitterProcessing->setStretchFactor(0, 0);
   ui.splitterProcessing->setStretchFactor(1, 0);
+  ui.splitterPost->setSizes(sizes);
+  ui.splitterPost->setStretchFactor(0, 0);
+  ui.splitterPost->setStretchFactor(1, 0);
   ui.tabWidget->setCurrentIndex(0);
 
   //=========== SLOTS =============
@@ -69,9 +77,31 @@ void StartLiveDataDialog::initLayout()
   ui.mainLayout->addLayout(buttonLayout);
 }
 
+//------------------------------------------------------------------------------
 /// Parse input when the dialog is accepted
 void StartLiveDataDialog::parseInput()
 {
+  storePropertyValue("Instrument", ui.cmbInstrument->currentText());
+  storePropertyValue("StartTime", "2001-01-01"); //FIXME
+  storePropertyValue("UpdateEvery", ui.edtUpdateEvery->text());
+  storePropertyValue("AccumulationMethod", ui.cmbAccumulationMethod->currentText());
+  storePropertyValue("AccumulationWorkspace", ui.editAccumulationWorkspace->text());
+  storePropertyValue("OutputWorkspace", ui.editOutputWorkspace->text());
+  storePropertyValue("ProcessingAlgorithm", "");
+  storePropertyValue("ProcessingProperties", "");
+  storePropertyValue("ProcessingScript", "");
+  storePropertyValue("PostProcessingAlgorithm", "");
+  storePropertyValue("PostProcessingProperties", "");
+  storePropertyValue("PostProcessingScript", "");
+  if (m_useProcessAlgo)
+  {
+    storePropertyValue("ProcessingAlgorithm", ui.processingAlgoSelector->getSelectedAlgorithm());
+    std::string props;
+    props = m_processingAlg->asString();
+    storePropertyValue("ProcessingProperties", QString::fromStdString(props));
+  }
+  else if (m_useProcessScript)
+    storePropertyValue("ProcessingScript", ui.processingScript->text());
 }
 
 
@@ -93,6 +123,8 @@ void StartLiveDataDialog::radioPostProcessClicked()
   m_usePostProcessScript = ui.radPostProcessScript->isChecked();
   ui.splitterPost->setVisible(m_usePostProcessAlgo);
   ui.postScript->setVisible(m_usePostProcessScript);
+  // Disable the AccumulationWorkspace widget unless it is needed
+  ui.editAccumulationWorkspace->setEnabled(m_usePostProcessAlgo || m_usePostProcessScript);
 }
 
 

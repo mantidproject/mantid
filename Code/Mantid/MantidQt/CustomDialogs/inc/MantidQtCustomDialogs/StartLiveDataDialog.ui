@@ -133,7 +133,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="layoutUpdateEvery">
          <item>
           <widget class="QLabel" name="lblUpdateEvery">
            <property name="text">
@@ -388,7 +388,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabProcessAlgo">
        <attribute name="title">
@@ -458,10 +458,14 @@ p, li { white-space: pre-wrap; }
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="postAlgoSelector"/>
+          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="postAlgoSelector">
+           <property name="showExecuteButton" stdset="0">
+            <bool>false</bool>
+           </property>
+          </widget>
           <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="postAlgoProperties">
            <property name="algorithmName">
-            <string>Plus</string>
+            <string/>
            </property>
           </widget>
          </widget>

@@ -138,6 +138,13 @@ namespace MantidWidgets
       m_findAlg->getSelectedAlgorithm(algName, version);
   }
 
+  QString AlgorithmSelectorWidget::getSelectedAlgorithm()
+  {
+    QString algName; int version;
+    this->getSelectedAlgorithm(algName, version);
+    return algName;
+  }
+
 
 
   //============================================================================

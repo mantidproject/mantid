@@ -33,8 +33,9 @@ namespace DataHandling
    */
   void LiveDataAlgorithm::initProps()
   {
-
-    declareProperty(new PropertyWithValue<std::string>("Instrument","",Direction::Input),
+    // Options for the Instrument = all the listeners that are registered.
+    std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
+    declareProperty(new PropertyWithValue<std::string>("Instrument","", new ListValidator(listeners)),
         "Name of the instrument to monitor.");
 
     declareProperty(new PropertyWithValue<std::string>("StartTime","",Direction::Input),

@@ -31,6 +31,7 @@ namespace MantidWidgets
     AlgorithmSelectorWidget(QWidget *parent);
     virtual ~AlgorithmSelectorWidget();
     void getSelectedAlgorithm(QString& algName, int& version);
+    QString getSelectedAlgorithm();
     bool showExecuteButton() const;
     void showExecuteButton(const bool);
 
