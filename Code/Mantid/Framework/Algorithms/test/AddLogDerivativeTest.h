@@ -43,15 +43,15 @@ public:
     AnalysisDataService::Instance().addOrReplace("Dummy", ws);
 
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT( p->addValue("2007-11-30T16:17:00",1.00) );
-    TS_ASSERT( p->addValue("2007-11-30T16:17:10",2.00) );
-    TS_ASSERT( p->addValue("2007-11-30T16:17:20",0.00) );
-    TS_ASSERT( p->addValue("2007-11-30T16:17:30",5.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",0.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",5.00) );
     if (addRepeatedTimes)
     {
-      TS_ASSERT( p->addValue("2007-11-30T16:17:30",10.00) );
-      TS_ASSERT( p->addValue("2007-11-30T16:17:40",15.00) );
-      TS_ASSERT( p->addValue("2007-11-30T16:17:50",20.00) );
+      TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",10.00) );
+      TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:40",15.00) );
+      TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:50",20.00) );
     }
     ws->mutableRun().addProperty(p, true);
 
