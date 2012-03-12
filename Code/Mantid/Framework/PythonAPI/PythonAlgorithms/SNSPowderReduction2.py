@@ -280,27 +280,25 @@ class SNSPowderReduction2(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension, **chunk)
 
-    def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
-               normByCurrent=True, filterBadPulsesOverride=True):
+    def _getStrategy(self, runnumber, extension):
+        from mantid.simpleapi import *
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
         if self._chunks > 0 and not "histo" in extension:
-            alg = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            table = alg['OutputWorkspace']
-            cNames = table.getColumnNames()
-            if table.getRowCount() > 0:
-                for i in range(0,table.getRowCount()):
-                     chunk = {}
-                     for j in range(0,table.getColumnCount()):
-                         chunk[cNames[j]] = table.getInt(cNames[j],i)
-                     strategy.append(chunk)
-            else:
-                chunk = {}
-                strategy.append(chunk)
+            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+            for i in range(len(Chunks)): strategy.append(Chunks.row(i))
         else:
             chunk = {}
             strategy.append(chunk)
+
+        return strategy
+
+    def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
+               normByCurrent=True, filterBadPulsesOverride=True):
+        # generate the workspace name
+        wksp = "%s_%d" % (self._instrument, runnumber)
+        strategy = self._getStrategy(runnumber, extension)
         firstChunk = True
         for chunk in strategy:
             if "ChunkNumber" in chunk:
