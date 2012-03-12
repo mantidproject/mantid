@@ -282,7 +282,12 @@ public:
         if (detId <= alg->eventid_max)
         {
           // We have cached the vector of events for this detector ID
+#if defined(__GNUC__)
+      // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+          alg->eventVectors[detId]->emplace_back( tof, pulsetime );
+#else
           alg->eventVectors[detId]->push_back( TofEvent(tof, pulsetime) );
+#endif
 
           //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
