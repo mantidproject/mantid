@@ -125,6 +125,13 @@ add_executable ( PropertyWidgetsDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUND
 target_link_libraries ( PropertyWidgetsDemo 
                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  Geometry
                        QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
+
+# Extra, optional targets for demoing GUI elements
+add_executable ( GenericDialogDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} test/GenericDialogDemo.cpp  
+                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+target_link_libraries ( GenericDialogDemo 
+                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  Geometry
+                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
                        
 endif () # (not for windows)
 

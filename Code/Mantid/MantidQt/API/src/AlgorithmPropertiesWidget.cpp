@@ -32,52 +32,6 @@ namespace API
     m_algoName(""),
     m_algo(NULL), m_deleteAlgo(false)
   {
-//    // Create a m_scroll area for the (rare) occasion when an algorithm has
-//    // so many properties it won't fit on the screen
-//    Qm_scrollArea *m_scroll = new Qm_scrollArea(this);
-//
-//    QWidget *viewport = new QWidget(this);
-//    // Put everything in a vertical box and put it inside the m_scroll area
-//    QVBoxLayout *mainLay = new QVBoxLayout();
-//    viewport->setLayout(mainLay);
-//
-//    // Add a layout for QDialog
-//    QVBoxLayout *dialog_layout = new QVBoxLayout();
-//    setLayout(dialog_layout);
-//    m_inputGrid = new QGridLayout;
-//
-//    // -------------- Layout the grid -------------------
-//    this->initLayout();
-//
-//    //The property boxes
-//    mainLay->addLayout(m_inputGrid);
-//
-//    // Add a stretchy item to allow the properties grid to be top-aligned
-//    mainLay->addStretch(1);
-//
-//    dialog_layout->addWidget(m_scroll); // add m_scroll to the QDialog's layout
-//
-//    m_scroll->setHorizontalm_scrollBarPolicy(Qt::m_scrollBarAlwaysOff);
-//    m_scroll->setVerticalm_scrollBarPolicy(Qt::m_scrollBarAsNeeded);
-//    m_scroll->setWidget(viewport);
-//    m_scroll->setWidgetResizable(true);
-//    m_scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
-//
-//    // At this point, all the widgets have been added and are visible.
-//    // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-//    viewport->setMinimumHeight( viewport->height() + 10 );
-//
-//    const int screenHeight = QApplication::desktop()->height();
-//    const int dialogHeight = viewport->height();
-//    // If the thing won't end up too big compared to the screen height,
-//    // resize the m_scroll area so we don't get a m_scroll bar
-//    if ( (dialogHeight+100) < 0.8*screenHeight )
-//    {
-//      m_scroll->setFixedHeight(viewport->height()+10);
-//    }
-//
-//    dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
-
     // Create the grid layout that will have all the widgets
     m_inputGrid = new QGridLayout;
 

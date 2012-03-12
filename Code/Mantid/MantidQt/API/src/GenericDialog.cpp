@@ -257,43 +257,5 @@ void GenericDialog::replaceWSClicked(const QString & propName)
     }
   }
 
-//  QPushButton *btn = qobject_cast<QPushButton*>(m_signal_mapper->mapping(outputEdit));
-//  if( !btn ) return;
-//  int input =  m_wsbtn_tracker.value(btn);
-//
-//  QWidget *wsInputWidget = m_inputws_opts.value(input-1);
-//  QString wsname("");
-//  if( QComboBox *options = qobject_cast<QComboBox*>(wsInputWidget) )
-//  {
-//    wsname = options->currentText();
-//  }
-//  else if( QLineEdit *editField = qobject_cast<QLineEdit*>(wsInputWidget) )
-//  {
-//    wsname = editField->text();
-//  }
-//  else return;
-//
-//  //Adjust tracker
-//  input = (input % m_inputws_opts.size() ) + 1;
-//  m_wsbtn_tracker[btn] = input;
-//
-//  // Check if any of the other line edits have this name
-//  QVector<QLineEdit*>::const_iterator iend = m_outputws_fields.constEnd();
-//  for( QVector<QLineEdit*>::const_iterator itr = m_outputws_fields.constBegin();
-//       itr != iend; ++itr )
-//  {
-//    //Check that we are not the field we are actually comparing against
-//    if( (*itr) == outputEdit ) continue;
-//    if( (*itr)->text() == wsname )
-//    {
-//      wsname += "-1";
-//      break;
-//    }
-//  }
-//  QLineEdit *edit = qobject_cast<QLineEdit*>(outputEdit);
-//  if( edit )
-//  {
-//    edit->setText(wsname);
-//  }
 }
 
