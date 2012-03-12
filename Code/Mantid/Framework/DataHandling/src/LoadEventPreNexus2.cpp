@@ -1095,7 +1095,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
       // This is equivalent to workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
       // But should be faster as a bunch of these calls were cached.
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
       // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
       arrayOfVectors[pid]->emplace_back( tof, pulsetime );
 #else

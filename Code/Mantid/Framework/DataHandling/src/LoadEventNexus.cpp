@@ -282,7 +282,7 @@ public:
         if (detId <= alg->eventid_max)
         {
           // We have cached the vector of events for this detector ID
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
       // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
           alg->eventVectors[detId]->emplace_back( tof, pulsetime );
 #else
