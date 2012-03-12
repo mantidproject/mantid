@@ -154,16 +154,17 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
 }
 
 // the class to verify and modify interconnected properties affecting the different ways to normalize ws by this ws spectrum. 
-class EnabledIfWs2WS: public Kernel::IPropertySettings
-{
-    bool is_enabled;
-    // the pointer to the main host algorithm.
-    Kernel::IPropertyManager * host_algo;
-public:
-    EnabledIfWs2WS(Kernel::IPropertyManager * algo,const std::string &WSProperty,const std::string &MonWSProperty):
-      is_enabled(true),host_algo(algo){};
-
-};
+//class EnabledIfWs2WS: public Kernel::IPropertySettings
+//{
+//    bool is_enabled;
+//    // the pointer to the main host algorithm.
+//    Kernel::IPropertyManager * host_algo;
+//public:
+//    EnabledIfWs2WS(Kernel::IPropertyManager * algo,const std::string &WSProperty,const std::string &MonWSProperty):
+//      is_enabled(true),host_algo(algo){
+//      };
+//
+//};
 
 
 // Register with the algorithm factory
