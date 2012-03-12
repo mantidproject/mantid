@@ -6,67 +6,373 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>942</width>
-    <height>804</height>
+    <width>1023</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QScrollArea" name="scrollArea_2">
-      <property name="widgetResizable">
-       <bool>true</bool>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>82</width>
-         <height>784</height>
-        </rect>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="lblInstrument">
+           <property name="text">
+            <string>Instrument:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cmbInstrument"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="styleSheet">
+          <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+</string>
+         </property>
+         <property name="title">
+          <string>Starting Time</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QRadioButton" name="radNow">
+              <property name="toolTip">
+               <string>Start collecting data from current time</string>
+              </property>
+              <property name="text">
+               <string>Now</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radNow_2">
+              <property name="toolTip">
+               <string>Start processing data from the beginning of the current run</string>
+              </property>
+              <property name="text">
+               <string>Start of Run</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QRadioButton" name="radNow_3">
+              <property name="toolTip">
+               <string>Start collecting data from a specific time:</string>
+              </property>
+              <property name="text">
+               <string>Absolute Time:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateTimeEdit" name="dateTimeEdit">
+              <property name="displayFormat">
+               <string>MM/dd/yy hh:mm:ss AP</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="lblUpdateEvery">
+           <property name="text">
+            <string>Update Every:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtUpdateEvery"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblSeconds">
+           <property name="text">
+            <string>seconds</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="grpProcess">
+           <property name="styleSheet">
+            <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+</string>
+           </property>
+           <property name="title">
+            <string>Processing</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QRadioButton" name="radProcessNone">
+              <property name="toolTip">
+               <string>Perform no processing on data chunks</string>
+              </property>
+              <property name="text">
+               <string>No Processing</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radProcessAlgorithm">
+              <property name="toolTip">
+               <string>Process chunks with the algorithm selected on the right</string>
+              </property>
+              <property name="text">
+               <string>Algorithm</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radProcessScript">
+              <property name="toolTip">
+               <string>Process chunks using the python script on the right</string>
+              </property>
+              <property name="text">
+               <string>Python Script</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblInstrument_2">
+           <property name="text">
+            <string>Accumulation Method:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cmbAccumulationMethod"/>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="grpPostProcessing">
+           <property name="styleSheet">
+            <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+</string>
+           </property>
+           <property name="title">
+            <string>Post Processing</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QRadioButton" name="radPostProcessNone">
+              <property name="toolTip">
+               <string>Perform no processing on data chunks</string>
+              </property>
+              <property name="text">
+               <string>No Processing</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radPostProcessAlgorithm">
+              <property name="toolTip">
+               <string>Process chunks with the algorithm selected on the right</string>
+              </property>
+              <property name="text">
+               <string>Algorithm</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radPostProcessScript">
+              <property name="toolTip">
+               <string>Process chunks using the python script on the right</string>
+              </property>
+              <property name="text">
+               <string>Python Script</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tab_1">
        <attribute name="title">
         <string>Processing Algo</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QSplitter" name="splitter_2">
+         <widget class="QSplitter" name="splitterProcessing">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="algorithmSelectorWidget">
+          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="processingAlgoSelector">
            <property name="showExecuteButton" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QScrollArea" name="scrollArea">
-           <property name="widgetResizable">
-            <bool>true</bool>
+          <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="processingAlgoProperties">
+           <property name="algorithmName">
+            <string>Rebin</string>
            </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>810</width>
-              <height>82</height>
-             </rect>
-            </property>
-           </widget>
           </widget>
          </widget>
         </item>
@@ -78,7 +384,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="ScriptEditor" name="scriptEditor"/>
+         <widget class="ScriptEditor" name="processingScript"/>
         </item>
        </layout>
       </widget>
@@ -86,6 +392,21 @@
        <attribute name="title">
         <string>PostProcessing Algo</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QSplitter" name="splitterPost">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="postAlgoSelector"/>
+          <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="postAlgoProperties">
+           <property name="algorithmName">
+            <string>Plus</string>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
@@ -93,7 +414,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="ScriptEditor" name="scriptEditor_2"/>
+         <widget class="ScriptEditor" name="postScript"/>
         </item>
        </layout>
       </widget>
@@ -112,6 +433,11 @@
    <class>MantidQt::MantidWidgets::AlgorithmSelectorWidget</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/AlgorithmSelectorWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::AlgorithmPropertiesWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtAPI/AlgorithmPropertiesWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
