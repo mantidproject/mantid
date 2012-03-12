@@ -79,7 +79,7 @@ private:
   std::string m_name;                      ///< instrument name
   std::string m_shortName;                 ///< instrument short name
   int m_zeroPadding;                       ///< default zero padding for this facility
-  std::string m_delimiter;                 ///  default delimiter between instrument name and run number
+  std::string m_delimiter;                 ///< default delimiter between instrument name and run number
   std::set<std::string> m_technique;       ///< list of techniques the instrument can do
   static Logger& g_log;                    ///< logger
 };

@@ -25,8 +25,8 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @throw std::runtime_error if name or file extensions are not defined
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
-  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_extensions(), m_soapEndPoint(""), m_archiveSearch(),
-  m_instruments()
+  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
+  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener()
 {
   if (m_name.empty())
   {

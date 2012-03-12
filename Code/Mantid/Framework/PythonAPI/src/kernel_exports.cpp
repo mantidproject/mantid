@@ -275,10 +275,10 @@ namespace PythonAPI
   void export_facilityinfo()
   {
     class_<FacilityInfo>("FacilityInfo",no_init)
-      .def("name", &FacilityInfo::name)
+      .def("name", &FacilityInfo::name, return_value_policy<copy_const_reference>())
       .def("zeroPadding", &FacilityInfo::zeroPadding)
       .def("extensions", &FacilityInfo::extensions)
-      .def("preferredExt", &FacilityInfo::preferredExtension)
+      .def("preferredExt", &FacilityInfo::preferredExtension, return_value_policy<copy_const_reference>())
       .def("instrument", &FacilityInfo::Instrument, FacilityInfo_instrumentOverloads()[return_value_policy<copy_const_reference>()])
       .def("instruments", (const std::vector<InstrumentInfo>& (FacilityInfo::*)() const)&FacilityInfo::Instruments, return_value_policy<copy_const_reference>())
       .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const)&FacilityInfo::Instruments)

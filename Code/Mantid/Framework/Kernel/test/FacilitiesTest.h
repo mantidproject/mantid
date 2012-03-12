@@ -79,6 +79,9 @@ public:
     const std::vector<InstrumentInfo> crysInstr = fac->Instruments("Single Crystal Diffraction");
     TS_ASSERT_EQUALS(crysInstr.size(),1);
 
+    // Test default live listener is empty
+    TS_ASSERT( fac->liveListener().empty() )
+
     delete fac;
   }
 
