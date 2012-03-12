@@ -1,6 +1,18 @@
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidQtAPI/BoolPropertyWidget.h"
+#include "MantidQtAPI/GenericDialog.h"
+#include "MantidQtAPI/PropertyWidgetFactory.h"
+#include "MantidQtAPI/TextPropertyWidget.h"
 #include "qmainwindow.h"
 #include <iostream>
 #include <QApplication>
@@ -9,30 +21,15 @@
 #include <qlayout.h>
 #include <QMessageBox>
 #include <QSplashScreen>
-#include <QThread>
-#include "MantidQtAPI/BoolPropertyWidget.h"
-#include "MantidQtAPI/TextPropertyWidget.h"
-#include "MantidQtAPI/PropertyWidgetFactory.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidQtAPI/GenericDialog.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Algorithm.h"
 #include <QtCore/qstring.h>
-#include "MantidAPI/AlgorithmManager.h"
+#include <QThread>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
-/** Main application
- *
- * @param argc :: ignored
- * @param argv :: ignored
- * @return return code
+/** This application will be used for debugging and testing the
+ * GenericDialog and the AlgorithmPropertiesWidget.
  */
 int main( int argc, char ** argv )
 {

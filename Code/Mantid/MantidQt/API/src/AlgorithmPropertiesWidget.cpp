@@ -250,5 +250,73 @@ namespace API
   }
 
 
+
+
+  //-------------------------------------------------------------------------------------------------
+  /** Go through all the properties, and check their validators to determine
+   * whether they should be made disabled/invisible.
+   * It also shows/hids the validators.
+   * All properties' values should be set already, otherwise the validators
+   * will be running on old data.
+   */
+  void AlgorithmPropertiesWidget::hideOrDisableProperties()
+  {
+    for( auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr )
+    {
+      PropertyWidget * widget = *pitr;
+      Mantid::Kernel::Property *prop = widget->getProperty();
+      QString propName = QString::fromStdString(prop->name());
+
+      // Set the enabled and visible flags based on what the validators say. Default is always true.
+
+      // TODO: Also use a list of enabled/disabled from AlgorithmDialog
+      bool enabled = prop->isEnabled();
+      bool visible = prop->isVisible();
+
+      // Dynamic PropertySettings objects allow a property to change validators.
+      // This removes the old widget and creates a new one instead.
+      if (prop->isConditionChanged())
+      {
+        prop->getSettings()->applyChanges(prop);
+
+        // Delete the old widget
+        int row = widget->getGridRow();
+        QGridLayout * layout = widget->getGridLayout();
+        widget->deleteLater();
+
+        // Create the appropriate widget at this row in the grid.
+        widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+
+//        // Record in the list of tied widgets (used in the base AlgorithmDialog)
+//        tie(widget, propName, layout);
+//
+//        // Whenever the value changes in the widget, this fires propertyChanged()
+//        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+      }
+
+      // Show/hide the validator label (that red star)
+      QString error = "";
+      if (m_errors.contains(propName)) error = m_errors[propName];
+      // Always show controls that are in error
+      if (error.length() != 0)
+        visible = true;
+
+      // Hide/disable the widget
+      widget->setEnabled( enabled );
+      widget->setVisible( visible );
+
+//      QLabel *validator = getValidatorMarker(propName);
+//      // If there's no validator then assume it's handling its own validation notification
+//      if( validator )
+//      {
+//        validator->setToolTip( error );
+//        validator->setVisible( error.length() != 0);
+//      }
+    } // for each property
+
+    this->repaint(true);
+  }
+
+
 } // namespace Mantid
 } // namespace API

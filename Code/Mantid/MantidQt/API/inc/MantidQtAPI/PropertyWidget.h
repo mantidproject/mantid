@@ -72,7 +72,7 @@ namespace API
     void addReplaceWSButton();
 
     /// @return the property in the widget
-    const Mantid::Kernel::Property * getProperty() const
+    Mantid::Kernel::Property * getProperty()
     { return m_prop; }
 
   public slots:
@@ -111,6 +111,9 @@ namespace API
 
     /// All contained widgets
     QVector<QWidget*> m_widgets;
+
+    /// Error message received when trying to set the value
+    QString m_error;
   };
 
 

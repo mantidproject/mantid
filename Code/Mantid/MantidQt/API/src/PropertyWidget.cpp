@@ -41,15 +41,15 @@ namespace API
       m_parent = parent;
     }
 
-//    // Create the validator label (that red star)
-//    m_validLbl = new QLabel("*");
-//    QPalette pal = m_validLbl->palette();
-//    pal.setColor(QPalette::WindowText, Qt::darkRed);
-//    m_validLbl->setPalette(pal);
-//    // Start off hidden
-//    m_validLbl->setVisible(false);
-//    // Put it in the 4th column.
-//    m_gridLayout->addWidget(m_validLbl, m_row, 4);
+    // Create the validator label (that red star)
+    m_validLbl = new QLabel("*");
+    QPalette pal = m_validLbl->palette();
+    pal.setColor(QPalette::WindowText, Qt::darkRed);
+    m_validLbl->setPalette(pal);
+    // Start off hidden
+    m_validLbl->setVisible(false);
+    // Put it in the 4th column.
+    m_gridLayout->addWidget(m_validLbl, m_row, 4);
 
     /// Save the documentation tooltip
     m_doc = QString::fromStdString(prop->documentation());
@@ -108,6 +108,17 @@ namespace API
   {
     // This will be caught by the GenericDialog.
     emit valueChanged( QString::fromStdString(m_prop->name()) ) ;
+
+    // Try to set the value
+    m_error = QString::fromStdString(m_prop->setValue(this->getValue().toStdString()));
+    // Show the invalid star if there was an error
+    if (m_error.isEmpty())
+      m_validLbl->setVisible(false);
+    else
+    {
+      m_validLbl->setVisible(true);
+      m_validLbl->setToolTip(m_error);
+    }
   }
 
   //----------------------------------------------------------------------------------------------

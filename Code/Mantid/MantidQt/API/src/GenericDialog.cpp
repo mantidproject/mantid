@@ -69,24 +69,6 @@ void GenericDialog::propertyChanged(const QString & pName)
 
 
 
-//---------------------------------------------------------------------------------------------------------------
-bool haveInputWS(const std::vector<Property*> & prop_list)
-{
-  // For the few algorithms (mainly loading) that do not have input workspaces, we do not
-  // want to render the 'replace input workspace button'. Do a quick scan to check.
-  // Also the ones that don't have a set of allowed values as input workspace
-  std::vector<Property*>::const_iterator pEnd = prop_list.end();
-  for(std::vector<Property*>::const_iterator pIter = prop_list.begin();
-    pIter != pEnd; ++pIter)
-  {
-    Property *prop = *pIter;
-    if( prop->direction() == Direction::Input && dynamic_cast<IWorkspaceProperty*>(prop) )
-    {
-      return true;
-    }
-  }
-  return false;
-}
 
 //----------------------------------
 // Protected member functions

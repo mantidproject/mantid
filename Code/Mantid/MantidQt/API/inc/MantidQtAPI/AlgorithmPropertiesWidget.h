@@ -60,6 +60,8 @@ namespace API
     QString getAlgorithmName() const;
     void setAlgorithmName(QString name);
 
+    void hideOrDisableProperties();
+
     /// Each dynamically created PropertyWidget
     QVector<PropertyWidget*> m_propWidgets;
 
@@ -84,6 +86,10 @@ namespace API
 
     /// We own the m_algo pointer and need to delete it.
     bool m_deleteAlgo;
+
+    /// A map where key = property name; value = the error for this property (i.e. it is not valid).
+    QHash<QString, QString> m_errors;
+
   };
 
 
