@@ -21,9 +21,8 @@ using namespace Mantid::VATES;
 
 /**
 Constructor
-@param binDisplay : Enum indicating how to display bin information
 */
-DimensionWidget::DimensionWidget(Mantid::VATES::BinDisplay binDisplay)
+DimensionWidget::DimensionWidget() 
 {
   m_binStackedWidget = new QStackedWidget;
   BinInputWidget* simple = new SimpleBinInputWidget;
@@ -70,6 +69,11 @@ DimensionWidget::DimensionWidget(Mantid::VATES::BinDisplay binDisplay)
   m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
 
   this->setLayout(m_layout);
+}
+
+void DimensionWidget::initalizeViewMode(BinDisplay binDisplay)
+{
+  m_initialBinDisplay = binDisplay;
 }
 
 
@@ -193,7 +197,7 @@ void DimensionWidget::configureStrongly()
 
   std::string minValueString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getMinimum());
   m_minBox->setText(minValueString.c_str());
- 
+  setViewMode(m_initialBinDisplay);
 }
       
 void DimensionWidget::accept(Mantid::VATES::DimensionPresenter* pDimensionPresenter)
@@ -265,7 +269,6 @@ void DimensionWidget::setViewMode(Mantid::VATES::BinDisplay mode)
   BinInputWidget* binInputWidget = getCurrentBinInputWidget();
   int nBins = binInputWidget->getEntry(min, max);
   
-  BinInputWidget* newWidget;
   BinInputWidget* temp = binInputWidget;
 
   if(mode == Simple)

@@ -16,7 +16,7 @@ GeometryWidget::GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, Bin
 {
   m_ckBinDisplay->setText("By Number of Bins");
   m_ckBinDisplay->setToolTip("Specify the exact number of bins or a step in a low, high step schenario");
-  m_ckBinDisplay->setChecked(true);
+  m_ckBinDisplay->setChecked(binDisplay == Simple);
   connect(m_ckBinDisplay, SIGNAL(clicked(bool)), this, SLOT(binModeChanged(bool)));
 
   QGridLayout* headerLayout = new QGridLayout();
@@ -28,8 +28,6 @@ GeometryWidget::GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, Bin
   bodyLayout->addWidget(m_ckBinDisplay);
   bodyLayout->addLayout(headerLayout);
   
-  
-
   this->setLayout(bodyLayout);
   m_pPresenter->acceptView(this);
 }

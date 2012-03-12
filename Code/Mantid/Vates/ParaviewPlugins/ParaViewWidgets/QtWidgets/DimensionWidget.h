@@ -43,7 +43,7 @@ Q_OBJECT
 public:
 
   /// Constructor.
-  DimensionWidget(Mantid::VATES::BinDisplay binDisplay);
+  DimensionWidget();
 
   /// Destructor
   ~DimensionWidget();
@@ -84,6 +84,8 @@ private:
 
   //Stacked widget to contain the bins input widget types.
   QStackedWidget* m_binStackedWidget;
+
+  Mantid::VATES::BinDisplay m_initialBinDisplay;
 
   /// Helper method to set names in all places required.
   void setDimensionName(const std::string& name);
@@ -134,6 +136,7 @@ public:
   // End DimensionView implementations
   //---------------------------------------------------------
 
+  void initalizeViewMode(Mantid::VATES::BinDisplay binDisplay);
 };
 
 #endif
