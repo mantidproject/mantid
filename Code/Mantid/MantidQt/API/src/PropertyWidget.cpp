@@ -102,7 +102,10 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   /** Slot called when the value of the property had been changed.
-   * Called by all sub-classes.
+   * This performs validation of the value and shows/hides that validator
+   * star.
+   *
+   * It then emits a signal that the value of the property was changed.
    * */
   void PropertyWidget::valueChangedSlot()
   {

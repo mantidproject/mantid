@@ -10,6 +10,7 @@
 #include <QtCore/qvariant.h>
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Property.h"
+#include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 
 //----------------------------------
 // Forward declarations
@@ -64,6 +65,11 @@ public:
 
 private:
   virtual void initLayout();
+
+  void parseInput();
+
+  /// Widget containing all the PropertyWidgets
+  AlgorithmPropertiesWidget * m_propsWidget;
 
 };
 

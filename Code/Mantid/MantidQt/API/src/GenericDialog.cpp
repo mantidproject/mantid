@@ -75,9 +75,9 @@ void GenericDialog::initLayout()
     this->addOptionalMessage(dialog_layout);
 
   // Make the widget with all the properties
-  AlgorithmPropertiesWidget * propsWidget = new AlgorithmPropertiesWidget(this);
-  dialog_layout->addWidget(propsWidget);
-  propsWidget->setAlgorithm(this->getAlgorithm());
+  m_propsWidget = new AlgorithmPropertiesWidget(this);
+  dialog_layout->addWidget(m_propsWidget);
+  m_propsWidget->setAlgorithm(this->getAlgorithm());
 
   // Create and add the OK/Cancel/Help. buttons
   dialog_layout->addLayout(this->createDefaultButtonLayout());
@@ -86,7 +86,7 @@ void GenericDialog::initLayout()
 
   // At this point, all the widgets have been added and are visible.
   // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-  QWidget * viewport = propsWidget->m_viewport;
+  QWidget * viewport = m_propsWidget->m_viewport;
   viewport->layout()->update();
 
   const int screenHeight = QApplication::desktop()->height();
@@ -95,10 +95,25 @@ void GenericDialog::initLayout()
   // If the thing won't end up too big compared to the screen height,
   // resize the scroll area so we don't get a scroll bar
   if ( (dialogHeight+100) < 0.8*screenHeight )
-    propsWidget->m_scroll->setFixedHeight(dialogHeight+10);
+    m_propsWidget->m_scroll->setFixedHeight(dialogHeight+10);
 
   dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
 }
+
+
+//-----------------------------------------------------------------------------
+/** Parse out information from the dialog
+ */
+void GenericDialog::parseInput()
+{
+  auto itr = m_propsWidget->m_propWidgets.begin();
+  for(; itr != m_propsWidget->m_propWidgets.end(); itr++ )
+  {
+    // Get the value from each widget and store it
+    storePropertyValue(itr.key(), itr.value()->getValue());
+  }
+}
+
 
 
 

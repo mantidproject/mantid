@@ -339,11 +339,8 @@ namespace API
         // Create the appropriate widget at this row in the grid.
         widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
 
-//        // Record in the list of tied widgets (used in the base AlgorithmDialog)
-//        tie(widget, propName, layout);
-//
-//        // Whenever the value changes in the widget, this fires propertyChanged()
-//        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+        // Whenever the value changes in the widget, this fires propertyChanged()
+        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
       }
 
       // Show/hide the validator label (that red star)
@@ -356,14 +353,6 @@ namespace API
       // Hide/disable the widget
       widget->setEnabled( enabled );
       widget->setVisible( visible );
-
-//      QLabel *validator = getValidatorMarker(propName);
-//      // If there's no validator then assume it's handling its own validation notification
-//      if( validator )
-//      {
-//        validator->setToolTip( error );
-//        validator->setVisible( error.length() != 0);
-//      }
     } // for each property
 
     this->repaint(true);
