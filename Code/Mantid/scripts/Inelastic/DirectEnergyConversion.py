@@ -36,6 +36,7 @@ import diagnostics
 from mantidsimple import *
 import glob
 import os.path
+import math
 
 def setup_reducer(inst_name):
     """
@@ -259,7 +260,7 @@ class DirectEnergyConversion(object):
             self.fix_ei = True
             ei_value = ei_guess
             if (self.instr_name == "HYSPEC"):
-              Tzero=0.0
+                Tzero=25.0 + 85.0 / (1+math.pow((ei_value/27.0),4.0))
             if (Tzero is None):
                 tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
             else:
@@ -722,6 +723,7 @@ class DirectEnergyConversion(object):
         if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA" or self.instr_name == "HYSPEC"):
             self.facility = "SNS"
             self.normalise_method  = 'current'
+
         else:
             self.facility = str(mtd.settings.facility())
         
