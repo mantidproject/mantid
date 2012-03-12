@@ -37,12 +37,6 @@ if ( stdint )
 endif ( stdint )
 
 ###########################################################################
-# Include the file that contains the minor (iteration) version number
-###########################################################################
-
-include ( VersionNumber )
-
-###########################################################################
 # Look for dependencies - bail out if any not found
 ###########################################################################
 
@@ -134,6 +128,14 @@ else()
 endif()
 
 mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE )
+
+###########################################################################
+# Include the file that contains the version number
+# This must come after the git describe business above because it can be
+# used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
+###########################################################################
+
+include ( VersionNumber )
 
 ###########################################################################
 # Look for OpenMP and set compiler flags if found
