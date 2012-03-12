@@ -50,9 +50,14 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
     # This finds OpenMPI on rhel6 (assuming it's installed, of course)
     find_package ( MPI REQUIRED )
     # Set things up to use the OpenMPI 'wrapper' compilers
-    INCLUDE(CMakeForceCompiler)
-    CMAKE_FORCE_C_COMPILER(mpicc "MPI C Compiler")
-    CMAKE_FORCE_CXX_COMPILER(mpicxx "MPI C++ Compiler")
+    if ( MPI_CXX_COMPILER )
+      set ( CMAKE_C_COMPILER ${MPI_C_COMPILER} )
+      set ( CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER} )
+    else ()
+      # Handle older FindMPI.cmake
+      set ( CMAKE_C_COMPILER ${MPI_COMPILER} )
+      set ( CMAKE_CXX_COMPILER ${MPI_COMPILER} )
+    endif ()
     include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
   
     set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where openmpi winds up on rhel6
