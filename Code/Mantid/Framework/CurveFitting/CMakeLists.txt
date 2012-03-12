@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
 	src/StretchExp.cpp
+	src/StretchExpMuon.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 )
@@ -94,6 +95,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
 	inc/MantidCurveFitting/StretchExp.h
+	inc/MantidCurveFitting/StretchExpMuon.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
 )
@@ -132,6 +134,7 @@ set ( TEST_FILES
 	test/SpecialFunctionSupportTest.h
 	test/SplineBackgroundTest.h
 	test/StretchExpTest.h
+	test/StretchExpMuonTest.h
 	test/UserFunction1DTest.h
 	test/UserFunctionTest.h
 )
