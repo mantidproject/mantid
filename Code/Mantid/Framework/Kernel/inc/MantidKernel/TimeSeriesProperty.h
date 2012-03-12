@@ -11,6 +11,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
+
+#include <algorithm>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -46,14 +48,87 @@ struct TimeSeriesPropertyStatistics
 };
 
 //================================================================================================
+/** Class to hold unit value (DateAndTime, T)
+ *
+ */
+
+template<class TYPE>
+class TimeValueUnit
+{
+private:
+  Kernel::DateAndTime mtime;
+  TYPE mvalue;
+
+public:
+  TimeValueUnit(Kernel::DateAndTime time, TYPE value)
+  {
+    mtime = time;
+    mvalue = value;
+  }
+
+  ~TimeValueUnit()
+  {
+  }
+
+  bool operator>(const TimeValueUnit& rhs)
+  {
+    return (mtime > rhs.mtime);
+  }
+
+  friend bool operator>(const TimeValueUnit& lhs, const TimeValueUnit& rhs)
+  {
+    return (lhs.mtime > rhs.mtime);
+  }
+
+  bool operator==(const TimeValueUnit& rhs)
+  {
+    return (mtime == rhs.mtime);
+  }
+
+  friend bool operator==(const TimeValueUnit& lhs, const TimeValueUnit& rhs)
+  {
+    return (lhs.mtime == rhs.mtime);
+  }
+
+  bool operator<(const TimeValueUnit& rhs)
+  {
+    return (mtime < rhs.mtime);
+  }
+
+  friend bool operator<(const TimeValueUnit& lhs, const TimeValueUnit& rhs)
+  {
+    return (lhs.mtime < rhs.mtime);
+  }
+
+  /* This is a wrong and dangerous definition
+  TimeValueUnit<TYPE>& operator=(const TimeValueUnit<TYPE>& rhs) const
+  {
+    TimeValueUnit<TYPE>* newentry = new TimeValueUnit<TYPE>(rhs.mtime, rhs.mvalue);
+    // TimeValueUnit<TYPE> newentry(rhs.mtime, rhs.mvalue);
+
+    std::cout << "DB941 Operator =  New Value: " << newentry->mtime << std::endl;
+
+    return *newentry;
+  }
+  */
+
+  Kernel::DateAndTime time() const
+  {
+    return mtime;
+  }
+
+  TYPE value() const
+  {
+    return mvalue;
+  }
+
+};
+
+
+//================================================================================================
 /** 
  A specialised Property class for holding a series of time-value pairs.
  Required by the LoadLog class.
- 
- @author Russell Taylor, Tessella Support Services plc
- @date 26/11/2007
- @author Anders Markvardsen, ISIS, RAL
- @date 12/12/2007
 
  Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -80,21 +155,366 @@ class DLLExport TimeSeriesProperty: public Property
 {
 private:
   /// typedef for the storage of a TimeSeries
-  typedef std::multimap<DateAndTime, TYPE> timeMap;
+  // typedef std::multimap<DateAndTime, TYPE> timeMap;
+
+  /// Holds the time series data
+  mutable std::vector<TimeValueUnit<TYPE> > mP;
+  //  mutable std::vector<Kernel::DateAndTime> mT;
 
   /// Holds the time series data 
-  timeMap m_propertySeries;
+  // timeMap m_propertySeries;
 
   /// The number of values (or time intervals) in the time series. It can be different from m_propertySeries.size()
-  int m_size;
+  // int m_size;
+  mutable int m_size2;
+
+  /// Flag to state whether mP is sorted or not
+  mutable bool mPropSortedFlag;
+
+  mutable std::vector<std::pair<Kernel::DateAndTime, bool> > mFilter;
+  mutable std::vector<std::pair<size_t, size_t> > mFilterQuickRef;
+
+  mutable bool mFilterApplied;
+
+  /*
+   * Sort vector mP and set the flag
+   */
+  void sort() const
+  {
+    if (!mPropSortedFlag)
+    {
+      std::sort(mP.begin(), mP.end());
+      mPropSortedFlag = true;
+    }
+  }
+
+  /*
+   * Find the index of the entry of time t in the mP vector (sorted)
+   * Return @ if t is within log.begin and log.end, then the value equal or just smaller than t
+   */
+  int findIndex(Kernel::DateAndTime t) const
+  {
+    sort();
+
+    // 2. Define something
+    typename std::vector<TimeValueUnit<TYPE> >::iterator ith; // head
+    typename std::vector<TimeValueUnit<TYPE> >::iterator itt; // tail
+    typename std::vector<TimeValueUnit<TYPE> >::iterator it2; // 1/2
+
+    ith = mP.begin();
+    itt = mP.end()-1;
+
+    bool found = false;
+    int index = -1;
+
+    while(!found)
+    {
+      //  std::cout << "In While...  From " << ith->time() << " to " << itt->time() << std::endl;
+
+      if (t < ith->time())
+      {
+        // a) Falls out of lower bound
+        found = true;
+        index = int(ith-mP.begin());
+        // std::cout << "Out (a) value = " << value << std::endl;
+      }
+      else if (t > itt->time())
+      {
+        // b) Falls out of upper bound
+        found = true;
+        index = int(itt-mP.begin());
+        // std::cout << "Out (b) value = " << value << std::endl;
+      }
+      else if (ith == itt || int(itt-ith) == 1)
+      {
+        // c) Have the time located, between ith and itt
+        found = true;
+        if (itt->time()==t)
+          index = int(itt-mP.begin());
+        else
+          index = int(ith-mP.begin());
+        // std::cout << "Out (c) value = " << value << std::endl;
+      }
+      else
+      {
+        // d) Split half...
+        it2 = mP.begin() + (int(itt-mP.begin())+int(ith-mP.begin()))/2;
+        if (t == it2->time())
+        {
+          // d1) middle
+          found = true;
+          index = int(it2-mP.begin());
+          // std::cout << "Out (d) value = " << value << std::endl;
+        }
+        else if (t < it2->time())
+        {
+          // d2) lower half
+          itt = it2;
+        }
+        else
+        {
+          // d3) upper half
+          ith = it2;
+        }
+      }
+    } // ENDWHILE
+
+    if (index < 0)
+      throw std::runtime_error("Index found is error!");
+
+    return index;
+  }
+
+  /*
+   * Find the upper_bound of time t in container.
+   * Search range:  begin+istart to begin+iend
+   * Return C[ir] == t or C[ir] > t and C[ir-1] < t
+   *        -1:          exceeding lower bound
+   *        mP.size():   exceeding upper bound
+   */
+  int upperBound(Kernel::DateAndTime t, int istart, int iend) const
+  {
+    // 0. Check validity
+    if (istart < 0)
+    {
+      throw std::invalid_argument("Start Index cannot be less than 0");
+    }
+    if (iend >= static_cast<int>(mP.size()))
+    {
+      throw std::invalid_argument("End Index cannot exceed the boundary");
+    }
+    if (istart > iend)
+    {
+      throw std::invalid_argument("Start index cannot be greater than end index");
+    }
+
+    // 1. Return instantly if it is out of boundary
+    if (t < (mP.begin()+istart)->time())
+    {
+      return -1;
+    }
+    if (t > (mP.begin()+iend)->time())
+    {
+      return static_cast<int>(mP.size());
+    }
+
+    // 2. Sort
+    sort();
+
+    // 3. Define something
+    typename std::vector<TimeValueUnit<TYPE> >::iterator ith; // head
+    typename std::vector<TimeValueUnit<TYPE> >::iterator itt; // tail
+    typename std::vector<TimeValueUnit<TYPE> >::iterator it2; // 1/2
+
+    ith = mP.begin()+istart;
+    itt = mP.begin()+iend;
+
+    bool found = false;
+    int index = -1;
+
+    while(!found)
+    {
+      //  std::cout << "In While...  From " << ith->time() << " to " << itt->time() << std::endl;
+
+      if (t < ith->time())
+      {
+        // a) Falls out of lower bound
+        found = true;
+        index = int(ith-mP.begin());
+        if (t < (mP.begin()+istart)->time() || t > (mP.end()+iend)->time())
+        {
+          throw std::invalid_argument("upperBound().  Input range does not contain search target. ");
+        }
+      }
+      else if (t > itt->time())
+      {
+        // b) Falls out of upper bound
+        found = true;
+        index = int(itt-mP.begin());
+        if (t < (mP.begin()+istart)->time() || t > (mP.end()+iend)->time())
+        {
+          throw std::invalid_argument("upperBound().  Input range does not contain search target. ");
+        }
+      }
+      else if (ith == itt || int(itt-ith) == 1)
+      {
+        // c) Have the time located, between ith and itt
+        found = true;
+        if (ith->time()==t)
+          index = int(ith-mP.begin());
+        else
+          index = int(itt-mP.begin());
+        /*
+        std::cout << "Search " << t;
+        std::cout << " (out c) index = " << index;
+        std::cout << " From " << ith->time() << " and " << itt->time() << std::endl;
+        */
+      }
+      else
+      {
+        // d) Split half...
+        it2 = mP.begin() + (int(itt-mP.begin())+int(ith-mP.begin()))/2;
+        if (t == it2->time())
+        {
+          // d1) middle
+          found = true;
+          index = int(it2-mP.begin());
+          // std::cout << "Out (d) value = " << value << std::endl;
+        }
+        else if (t < it2->time())
+        {
+          // d2) lower half
+          itt = it2;
+        }
+        else
+        {
+          // d3) upper half
+          ith = it2;
+        }
+      } // END-IF-ELSE-IF-ELSE
+    } // ENDWHILE
+
+    if (index < 0)
+      throw std::runtime_error("Index found is error!");
+
+    return index;
+  } // ENDDEF FUNCTION
+
+  /*
+   * Apply filter
+   * Requirement: There is no 2 consecutive 'second' values that are same in mFilter
+   */
+  void applyFilter() const
+  {
+    // 1. Check and reset
+    if (mFilterApplied)
+      return;
+
+    mFilterQuickRef.clear();
+
+    if (mFilter.size() == 0)
+      return;
+
+    // 2. Apply filter
+    int icurlog = 0;
+    for (size_t ift = 0; ift < mFilter.size(); ift ++)
+    {
+      if (mFilter[ift].second)
+      {
+        // a) Filter == True: indicating the start of a quick reference region
+        if (icurlog < static_cast<int>(mP.size()))
+          icurlog = this->upperBound(mFilter[ift].first, icurlog, static_cast<int>(mP.size())-1);
+
+        if (icurlog < 0)
+        {
+          // i.   If it is out of lower boundary, add filter time, add 0 time
+          if (mFilterQuickRef.size() > 0)
+            throw std::logic_error("return log index < 0 only occurs with the first log entry");
+
+          mFilterQuickRef.push_back(std::make_pair(ift, 0));
+          mFilterQuickRef.push_back(std::make_pair(0, 1));
+
+          icurlog = 0;
+
+        }
+        else if (icurlog >= static_cast<int>(mP.size()))
+        {
+          // ii.  If it is out of upper boundary, still record it.  but make the log entry to mP.size()+1
+          size_t ip = 0;
+          if (mFilterQuickRef.size() >= 4)
+            ip = mFilterQuickRef.back().second + 1;
+          mFilterQuickRef.push_back(std::make_pair(ift, ip));
+          mFilterQuickRef.push_back(std::make_pair(mP.size()+1, ip));
+        }
+        else
+        {
+          // iii. The returned value is in the boundary.
+          size_t numintervals = 0;
+          if (mFilterQuickRef.size() > 0)
+          {
+            numintervals = mFilterQuickRef.back().second+1;
+          }
+
+          mFilterQuickRef.push_back(std::make_pair(ift, numintervals));
+          if (mFilter[ift].first < mP[icurlog].time())
+          {
+            numintervals ++;
+          }
+          mFilterQuickRef.push_back(std::make_pair(icurlog, numintervals));
+        }
+      }
+      else  if (mFilterQuickRef.size()%4 == 2)
+      {
+        // b) Filter == False: indicating the end of a quick reference region
+        if (icurlog < static_cast<int>(mP.size()))
+          icurlog = this->upperBound(mFilter[ift].first, icurlog, static_cast<int>(mP.size())-1);
+
+        if (icurlog < 0)
+        {
+          // i.   Some false filter is before the first log entry.  The previous filter does not make sensse
+          if (mFilterQuickRef.size() != 2)
+            throw std::logic_error("False filter is before first log entry.  QuickRef size must be 2.");
+          mFilterQuickRef.pop_back();
+          mFilterQuickRef.clear();
+        }
+        else
+        {
+          // ii.  Register the end of a valid log
+          // std::cout << "DB625  False-filter:  icurlog = " << icurlog << " for ift = " << ift << std::endl;
+
+          int lastlog = icurlog;
+          if (icurlog >= static_cast<int>(mP.size()))
+          {
+            // If the log is outside of upper boundary, register the last log entry
+            lastlog = static_cast<int>(mP.size())-1;
+          }
+          else
+          {
+            // As the log time is same as filter time (false) or lager than , use the previous
+            lastlog = lastlog-1;
+            icurlog = lastlog;
+          }
+          if (lastlog < 0)
+            throw std::logic_error("LastLog is not expected to be less than 0");
+
+          size_t new_numintervals;
+          int delta_numintervals = lastlog- static_cast<int>(mFilterQuickRef.back().first);
+          if (delta_numintervals < 0)
+          {
+            // It means that quick reference is out of log time, and use filter time only
+            lastlog = static_cast<int>(icurlog);
+            new_numintervals = mFilterQuickRef.back().second;
+          }
+          else
+          {
+            new_numintervals = mFilterQuickRef.back().second+static_cast<size_t>(delta_numintervals);
+          }
+
+          mFilterQuickRef.push_back(std::make_pair(lastlog, new_numintervals));
+          mFilterQuickRef.push_back(std::make_pair(ift, new_numintervals));
+        }
+      }
+
+    } // ENDFOR
+
+    // 5. Change flag
+    mFilterApplied = true;
+
+    // 6. Re-count size
+    countSize();
+
+    return;
+  }
 
 public:
   /** Constructor
    *  @param name :: The name to assign to the property
    */
   explicit TimeSeriesProperty(const std::string &name) :
-    Property(name, typeid(timeMap)), m_propertySeries(), m_size()
+    Property(name, typeid(std::vector<TimeValueUnit<TYPE> >)), mP(), m_size2(), mPropSortedFlag(), mFilterApplied()
   {
+    // m_size2 = 0;
+    // mPropSortedFlag = true;
   }
 
   /// Virtual destructor
@@ -109,7 +529,7 @@ public:
   size_t getMemorySize() const
   {
     //Rough estimate
-    return m_propertySeries.size() * (sizeof(TYPE) + sizeof(DateAndTime));
+    return mP.size() * (sizeof(TYPE) + sizeof(DateAndTime));
   }
 
   /** Just returns the property (*this) unless overridden
@@ -135,15 +555,20 @@ public:
       if (this->operator!=(*rhs))
       {
         //Concatenate the maps!
-        m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
+        // std::cout << "Test +=:  They are not same " << std::endl;
+        mP.insert(mP.end(), rhs->mP.begin(), rhs->mP.end());
+        mPropSortedFlag = false;
+        // m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
       }
       else
       {
+        ;
+        // std::cout << "Test +=:  They are exactly same " << std::endl;
         // Do nothing if appending yourself to yourself. The net result would be the same anyway
       }
 
       //Count the REAL size.
-      m_size = static_cast<int>(m_propertySeries.size());
+      m_size2 = static_cast<int>(mP.size());
 
     }
     else
@@ -159,24 +584,38 @@ public:
    */
   virtual bool operator==( const TimeSeriesProperty & right ) const
   {
-    if (this->name() != right.name()) // should this be done?
-      return false;
+    sort();
 
-    if (this->m_size != right.m_size)
+    if (this->name() != right.name()) // should this be done?
+    {
+      // std::cout << "Names are not same: " << this->name() << "  vs  " << right.name() << std::endl;
       return false;
+    }
+
+    if (this->m_size2 != right.m_size2)
+    {
+      // std::cout << "Sizes are not same" << std::endl;
+      return false;
+    }
 
     { // so vectors can go out of scope
       std::vector<DateAndTime> lhsTimes = this->timesAsVector();
       std::vector<DateAndTime> rhsTimes = right.timesAsVector();
       if (!std::equal(lhsTimes.begin(), lhsTimes.end(), rhsTimes.begin()))
+      {
+        // std::cout << "Time stamps are not same!" << std::endl;
         return false;
+      }
     }
 
     { // so vectors can go out of scope
       std::vector<TYPE> lhsValues = this->valuesAsVector();
       std::vector<TYPE> rhsValues = right.valuesAsVector();
       if (!std::equal(lhsValues.begin(), lhsValues.end(), rhsValues.begin()))
+      {
+        // std::cout << "The values are not same!" << std::endl;
         return false;
+      }
     }
 
     return true;
@@ -208,16 +647,46 @@ public:
    * "constant" so the value is kept even if the time is outside the range.
    *
    * @param start :: Absolute start time. Any log entries at times >= to this time are kept.
-   * @param stop :: Absolute stop time. Any log entries at times < than this time are kept.
+   * @param stop  :: Absolute stop time. Any log entries at times < than this time are kept.
    */
   void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
   {
+    // 0. Sort
+    sort();
+
+    // 1. Do nothing for single (constant) value
+    if (mP.size() <= 1)
+      return;
+
+    // 2. Determine index for start and remove  Note erase is [...)
+    int istart = this->findIndex(start);
+    if (mP[istart].time() != start)
+    {
+      // increment by 1 to insure mP[istart] be deleted
+      istart ++;
+    }
+    typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead;
+    iterhead = mP.begin()+istart;
+    mP.erase(mP.begin(), iterhead);
+
+    // 3. Determine index for end and remove  Note erase is [...)
+    int iend = this->findIndex(stop);
+    if (static_cast<size_t>(iend) < mP.size())
+    {
+      // Delete from [iend to mp.end)
+      iterhead = mP.begin() + iend;
+      mP.erase(iterhead, mP.end());
+    }
+
+    m_size2 = static_cast<int>(mP.size());
+
+    /*
     // Do nothing for single (constant) value
     if (m_propertySeries.size() <= 1)
       return;
 
     typename timeMap::iterator it;
-    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); /*increment within loop*/)
+    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); //increment within loop)
     {
       DateAndTime t = it->first;
       // Avoid iterator invalidation by caching current value and incrementing ahead of erase.
@@ -231,6 +700,8 @@ public:
     }
     //Cache the size for later. Any filtered TSP's will have to fend for themselves.
     m_size = static_cast<int>(m_propertySeries.size());
+    */
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -241,32 +712,36 @@ public:
    *  and so is not split, but simply copied to all outputs.
    *
    * @param splitter :: a TimeSplitterType object containing the list of intervals and destinations.
-   * @param outputs :: A vector of output TimeSeriesProperty pointers of the same type.
+   * @param outputs  :: A vector of output TimeSeriesProperty pointers of the same type.
    */
   void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
   {
+    // 0. Sort if necessary
+    sort();
+
     size_t numOutputs = outputs.size();
     if (numOutputs <= 0)
       return;
 
     std::vector< TimeSeriesProperty<TYPE> *> outputs_tsp;
-    //Clear the outputs before you start
+
+    // 1. Clear the outputs before you start
     for (size_t i=0; i < numOutputs; i++)
     {
       TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
       if (myOutput)
       {
         outputs_tsp.push_back(myOutput);
-        if (this->m_propertySeries.size() == 1)
+        if (this->mP.size() == 1)
         {
           // Special case for TSP with a single entry = just copy.
-          myOutput->m_propertySeries = this->m_propertySeries;
-          myOutput->m_size = 1;
+          myOutput->mP = this->mP;
+          myOutput->m_size2 = 1;
         }
         else
         {
-          myOutput->m_propertySeries.clear();
-          myOutput->m_size=0;
+          myOutput->mP.clear();
+          myOutput->m_size2=0;
         }
       }
       else
@@ -275,15 +750,15 @@ public:
       }
     }
 
-    // Special case for TSP with a single entry = just copy.
-    if (this->m_propertySeries.size() == 1)
+    // 2. Special case for TSP with a single entry = just copy.
+    if (this->mP.size() == 1)
       return;
 
-    //We will be iterating through all the entries in the the map
-    typename timeMap::const_iterator it;
-    it = m_propertySeries.begin();
+    // 3. We will be iterating through all the entries in the the map/vector
+    //    typename timeMap::const_iterator it;  it = m_propertySeries.begin();
+    size_t ip = 0;
 
-    //And at the same time, iterate through the splitter
+    //    And at the same time, iterate through the splitter
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
     //Info of each splitter
@@ -297,21 +772,26 @@ public:
       stop = itspl->stop();
       index = itspl->index();
 
-      //Skip the events before the start of the time
-      while ((it != this->m_propertySeries.end()) && (it->first < start))
-        it++;
+      // Skip the events before the start of the time
+      // TODO  Algorithm here can be refactored for better performance
+      while (ip < this->mP.size() && mP[ip].time() < start)
+        ip ++;
+
+      // while ((it != this->m_propertySeries.end()) && (it->first < start))
+      //   it++;
 
       //Go through all the events that are in the interval (if any)
-      while ((it != this->m_propertySeries.end()) && (it->first < stop))
+      // while ((it != this->m_propertySeries.end()) && (it->first < stop))
+      while (ip < this->mP.size() && mP[ip].time() < stop)
       {
         if ((index >= 0) && (index < static_cast<int>(numOutputs)))
         {
           TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[index];
           //Copy the log out to the output
           if (myOutput)
-            myOutput->addValue(it->first, it->second);
+            myOutput->addValue(mP[ip].time(), mP[ip].value());
         }
-        ++it;
+        ++ip;
       }
 
       //Go to the next interval
@@ -321,7 +801,7 @@ public:
         break;
 
       //No need to keep looping through the filter if we are out of events
-      if (it == this->m_propertySeries.end())
+      if (ip == this->mP.size())
         break;
 
     } //Looping through entries in the splitter vector
@@ -331,7 +811,7 @@ public:
     {
       TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
       if (myOutput)
-        myOutput->m_size = myOutput->realSize();
+        myOutput->m_size2 = myOutput->realSize();
     }
 
   }
@@ -352,10 +832,13 @@ public:
   void makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre=true)
   {
     //Do nothing if the log is empty.
-    if (m_propertySeries.size() == 0)
+    if (mP.size() == 0)
       return;
 
-    typename timeMap::iterator it;
+    // 1. Sort
+    sort();
+
+    // 2. Do the rest
     bool lastGood = false;
     bool isGood;
     time_duration tol = DateAndTime::durationFromSeconds( TimeTolerance );
@@ -363,12 +846,12 @@ public:
     DateAndTime lastTime, t;
     DateAndTime start, stop;
 
-    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
+    for (size_t i = 0; i < mP.size(); i ++)
     {
       lastTime = t;
       //The new entry
-      t = it->first;
-      TYPE val = it->second;
+      t =mP[i].time();
+      TYPE val = mP[i].value();
 
       //A good value?
       isGood = ((val >= min) && (val < max));
@@ -416,6 +899,8 @@ public:
       split.push_back( SplittingInterval(start, stop, 0) );
       numgood = 0;
     }
+
+    return;
   }
 
 
@@ -427,12 +912,17 @@ public:
    */
   std::map<DateAndTime, TYPE> valueAsCorrectMap() const
   {
+    // 1. Sort if necessary
+    sort();
+
+    // 2. Data Strcture
     std::map<DateAndTime, TYPE> asMap;
-    if (m_propertySeries.size() == 0)
-      return asMap;
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-    for (; p != m_propertySeries.end(); p++)
-      asMap[p->first] = p->second;
+
+    if (mP.size() > 0)
+    {
+      for (size_t i = 0; i < mP.size(); i ++)
+        asMap[mP[i].time()] = mP[i].value();
+    }
 
     return asMap;
   }
@@ -443,12 +933,22 @@ public:
    */
   std::vector<TYPE> valuesAsVector() const
   {
+    sort();
+
     std::vector<TYPE> out;
+    out.reserve(mP.size());
+
+    for (size_t i = 0; i < mP.size(); i ++)
+      out.push_back(mP[i].value());
+
+    /*
     out.reserve(m_propertySeries.size());
 
     typename timeMap::const_iterator p = m_propertySeries.begin();
     for (; p != m_propertySeries.end(); p++)
       out.push_back(p->second);
+      */
+
     return out;
   }
 
@@ -457,12 +957,24 @@ public:
     */
   std::vector<DateAndTime> timesAsVector() const
   {
-    std::vector<DateAndTime> out;
-    out.reserve(m_propertySeries.size());
 
+    sort();
+
+    std::vector<DateAndTime> out;
+    out.reserve(mP.size());
+
+    for (size_t i = 0; i < mP.size(); i ++)
+    {
+      out.push_back(mP[i].time());
+    }
+
+    /*
+    out.reserve(m_propertySeries.size());
     typename timeMap::const_iterator p = m_propertySeries.begin();
     for (; p != m_propertySeries.end(); p++)
       out.push_back(p->first);
+      */
+
     return out;
   }
 
@@ -472,15 +984,19 @@ public:
    */
   std::vector<double> timesAsVectorSeconds() const
   {
-    std::vector<double> out;
-    out.reserve(m_propertySeries.size());
+    // 1. Sort if necessary
+    sort();
 
-    if (m_propertySeries.size() == 0)
-      return out;
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-    Kernel::DateAndTime start = p->first;
-    for (; p != m_propertySeries.end(); p++)
-      out.push_back( DateAndTime::secondsFromDuration(p->first - start) );
+    // 2. Output data structure
+    std::vector<double> out;
+    out.reserve(mP.size());
+
+    Kernel::DateAndTime start = mP[0].time();
+    for (size_t i = 0; i < mP.size(); i ++)
+    {
+      out.push_back( DateAndTime::secondsFromDuration(mP[i].time() - start) );
+    }
+
     return out;
   }
 
@@ -490,10 +1006,15 @@ public:
    *  @param value :: The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
-  bool addValue(const Kernel::DateAndTime &time, const TYPE value)
+  void addValue(const Kernel::DateAndTime &time, const TYPE value)
   {
-    m_size++;
-    return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
+    m_size2 ++;
+    TimeValueUnit<TYPE> newvalue(time, value);
+    mP.push_back(newvalue);
+    mPropSortedFlag = false;
+    mFilterApplied = false;
+
+    return;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -502,7 +1023,7 @@ public:
    *  @param value :: The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
-  bool addValue(const std::string &time, const TYPE value)
+  void addValue(const std::string &time, const TYPE value)
   {
     return addValue(Kernel::DateAndTime(time), value);
   }
@@ -513,7 +1034,7 @@ public:
    *  @param value :: The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
-  bool addValue(const std::time_t &time, const TYPE value)
+  void addValue(const std::time_t &time, const TYPE value)
   {
     Kernel::DateAndTime dt;
     dt.set_from_time_t(time);
@@ -528,15 +1049,21 @@ public:
   void addValues(const std::vector<Kernel::DateAndTime> &times,
       const std::vector<TYPE> & values)
   {
-    typename timeMap::iterator it = m_propertySeries.begin();
-    for (size_t i=0; i < times.size(); i++)
+    for (size_t i = 0; i < times.size(); i ++)
     {
-      // Bail out if fewer value than times
-      if ( i >= values.size() ) return;
-      // By feeding back the iterator, inserting N objects is O(N) instead of O(N * log N)
-      it = m_propertySeries.insert(it, typename timeMap::value_type(times[i], values[i]));
-      m_size++;
+      if (i >= values.size())
+        break;
+      else
+      {
+        mP.push_back(TimeValueUnit<TYPE>(times[i], values[i]));
+        m_size2 ++;
+      }
     }
+
+    if (values.size() > 0)
+      mPropSortedFlag = false;
+
+    return;
   }
 
 
@@ -546,9 +1073,12 @@ public:
    */
   DateAndTime lastTime() const
   {
-    if (m_propertySeries.empty())
+    if (mP.size()==0)
       throw std::runtime_error("TimeSeriesProperty is empty");
-    return m_propertySeries.rbegin()->first;
+
+    sort();
+
+    return mP.rbegin()->time();
   }
 
 
@@ -558,9 +1088,18 @@ public:
    */
   TYPE firstValue() const
   {
+    if (mP.size() == 0)
+      throw std::runtime_error("TimeSeriesProperty is empty");
+
+    sort();
+
+    return mP[0].value();
+
+    /*
     if (m_propertySeries.empty())
       throw std::runtime_error("TimeSeriesProperty is empty");
     return m_propertySeries.begin()->second;
+    */
   }
 
 
@@ -570,9 +1109,18 @@ public:
    */
   DateAndTime firstTime() const
   {
+    if (mP.size()==0)
+      throw std::runtime_error("TimeSeriesProperty is empty");
+
+    sort();
+
+    return mP[0].time();
+
+    /*
     if (m_propertySeries.empty())
       throw std::runtime_error("TimeSeriesProperty is empty");
     return m_propertySeries.begin()->first;
+    */
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -580,8 +1128,12 @@ public:
   TimeSeriesProperty<TYPE>* clone() const
   {
     TimeSeriesProperty<TYPE>* p = new TimeSeriesProperty<TYPE> (name());
-    p->m_propertySeries = m_propertySeries;
-    p->m_size = m_size;
+    p->mP = mP;
+    p->m_size2 = m_size2;
+    p->mFilter = mFilter;
+    p->mFilterApplied = mFilterApplied;
+    p->mFilterQuickRef = mFilterQuickRef;
+
     return p;
   }
 
@@ -589,7 +1141,7 @@ public:
   /// Returns the number of values at UNIQUE time intervals in the time series
   int size() const
   {
-    return m_size;
+    return m_size2;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -598,7 +1150,8 @@ public:
    */
   int realSize() const
   {
-    return static_cast<int>(m_propertySeries.size());
+    return static_cast<int>(mP.size());
+    // return static_cast<int>(m_propertySeries.size());
   }
 
   // ==== The following functions are specific to the odd mechanism of FilterByLogValue =========
@@ -610,24 +1163,43 @@ public:
    */
   std::string value() const
   {
+    sort();
+
     std::stringstream ins;
-
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-
-    while (p != m_propertySeries.end())
+    for (size_t i = 0; i < mP.size(); i ++)
     {
       try
       {
-        ins << p->first.toSimpleString();
-        ins << "  " << p->second << std::endl;
+        ins << mP[i].time().toSimpleString();
+        ins << "  " << mP[i].value() << std::endl;
       }
       catch (...)
       {
         //Some kind of error; for example, invalid year, can occur when converting boost time.
         ins << "Error Error" << std::endl;
       }
+    }
+
+    /*
+     * TODO Delete Later
+    std::stringstream ins1;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+
+    while (p != m_propertySeries.end())
+    {
+      try
+      {
+        ins1 << p->first.toSimpleString();
+        ins1 << "  " << p->second << std::endl;
+      }
+      catch (...)
+      {
+        //Some kind of error; for example, invalid year, can occur when converting boost time.
+        ins1 << "Error Error" << std::endl;
+      }
       p++;
     }
+    */
 
     return ins.str();
   }
@@ -639,17 +1211,16 @@ public:
    */
   std::vector<std::string> time_tValue() const
   {
+    sort();
+
     std::vector<std::string> values;
-    values.reserve(m_propertySeries.size());
+    values.reserve(mP.size());
 
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-
-    while (p != m_propertySeries.end())
+    for (size_t i = 0; i < mP.size(); i ++)
     {
       std::stringstream line;
-      line << p->first.toSimpleString() << " " << p->second;
+      line << mP[i].time().toSimpleString() << " " << mP[i].value();
       values.push_back(line.str());
-      p++;
     }
 
     return values;
@@ -664,7 +1235,29 @@ public:
    */
   std::map<DateAndTime, TYPE> valueAsMap() const
   {
+    // 1. Sort if necessary
+    sort();
+
+    // 2. Build map
+
     std::map<DateAndTime, TYPE> asMap;
+    if (mP.size() == 0)
+      return asMap;
+
+    TYPE d = mP[0].value();
+    asMap[mP[0].time()] = d;
+
+    for (size_t i = 1; i < mP.size(); i ++)
+    {
+      if (mP[i].value() != d)
+      {
+        // Only put entry with different value from last entry to map
+        asMap[mP[i].time()] = mP[i].value();
+        d = mP[i].value();
+      }
+    }
+
+    /*
     if (m_propertySeries.size() == 0)
       return asMap;
     typename timeMap::const_iterator p = m_propertySeries.begin();
@@ -676,6 +1269,7 @@ public:
       d = p->second;
       asMap[p->first] = d;
     }
+    */
 
     return asMap;
   }
@@ -731,20 +1325,26 @@ public:
     if (new_times.size() != new_values.size())
       throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
 
-    m_size = 0;
-    m_propertySeries.clear();
+    m_size2 = 0;
+    mP.clear();
+    mP.reserve(new_times.size());
 
-    // Give a guess as to where it goes
-    typename std::multimap<Kernel::DateAndTime, TYPE>::iterator iter = m_propertySeries.begin();
     std::size_t num = new_values.size();
     for (std::size_t i=0; i < num; i++)
     {
       // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
-      iter = m_propertySeries.insert(iter, typename timeMap::value_type(new_times[i], new_values[i]));
+      TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
+      mP.push_back(newentry);
+      // iter = m_propertySeries.insert(iter, typename timeMap::value_type(new_times[i], new_values[i]));
     }
 
     // reset the size
-    m_size = static_cast<int>(m_propertySeries.size());
+    m_size2 = static_cast<int>(mP.size());
+
+    mPropSortedFlag = false;
+    mFilterApplied = false;
+
+    return;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -754,6 +1354,81 @@ public:
    */
   TYPE getSingleValue(const DateAndTime& t) const
   {
+    if (mP.size() == 0)
+      throw std::runtime_error("Property is empty.  Cannot return any value");
+
+    // 1. Get sorted
+    sort();
+
+    // 2. Define something
+    typename std::vector<TimeValueUnit<TYPE> >::iterator ith; // head
+    typename std::vector<TimeValueUnit<TYPE> >::iterator itt; // tail
+    typename std::vector<TimeValueUnit<TYPE> >::iterator it2; // 1/2
+
+    ith = mP.begin();
+    itt = mP.end()-1;
+
+    bool found = false;
+    TYPE value;
+    while(!found)
+    {
+      //  std::cout << "In While...  From " << ith->time() << " to " << itt->time() << std::endl;
+
+      if (t < ith->time())
+      {
+        // a) Falls out of lower bound
+        found = true;
+        value = ith->value();
+        // std::cout << "Out (a) value = " << value << std::endl;
+      }
+      else if (t > itt->time())
+      {
+        // b) Falls out of upper bound
+        found = true;
+        value = itt->value();
+        // std::cout << "Out (b) value = " << value << std::endl;
+      }
+      else if (ith == itt || int(itt-ith) == 1)
+      {
+        // c) Have the time located, between ith and itt
+        found = true;
+        if (t == itt->time())
+        {
+          value = itt->value();
+        }
+        else
+        {
+          value = ith->value();
+        }
+      }
+      else
+      {
+        // d) Split half...
+        it2 = mP.begin() + (int(itt-mP.begin())+int(ith-mP.begin()))/2;
+        if (t == it2->time())
+        {
+          // d1) middle
+          found = true;
+          value = it2->value();
+          // std::cout << "Out (d) value = " << value << std::endl;
+        }
+        else if (t < it2->time())
+        {
+          // d2) lower half
+          itt = it2;
+        }
+        else
+        {
+          // d3) upper half
+          ith = it2;
+        }
+      }
+    } // ENDWHILE
+
+    // std::cout << "Final Result Value = " << value << std::endl;
+    return value;
+
+    /*
     // 1. Find upper bound
     typename timeMap::const_iterator lowboundit = m_propertySeries.upper_bound(t);
 
@@ -763,6 +1438,7 @@ public:
 
     // 3. return
     return lowboundit->second;
+    */
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -771,24 +1447,185 @@ public:
    */
   TYPE getTotalValue() const
   {
-    typename timeMap::const_iterator it = m_propertySeries.begin();
     TYPE total = 0;
+
+    for (size_t i = 0; i < mP.size(); i ++)
+      total += mP[i].value();
+
+    /*
+    typename timeMap::const_iterator it = m_propertySeries.begin();
+
     for (; it != m_propertySeries.end(); it++)
       total += it->second;
+      */
+
     return total;
   }
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns n-th value in an incredibly inefficient way.
+  /** Returns n-th value of n-th interval in an incredibly inefficient way.
+   *  The algorithm is migrated from mthInterval()
    *  @param n :: index
    *  @return Value 
    */
   TYPE nthValue(int n) const
   {
-    if (m_propertySeries.empty())
+    TYPE value;
+
+    // 1. Throw error if property is empty
+    if (mP.size() == 0)
       throw std::runtime_error("TimeSeriesProperty is empty");
 
+    // 2. Sort and apply filter
+    sort();
+
+    if (mFilter.size() == 0)
+    {
+      // 3. Situation 1:  No filter
+      if (static_cast<size_t>(n) < mP.size())
+      {
+        TimeValueUnit<TYPE> entry = mP[n];
+        value = entry.value();
+      }
+      else
+      {
+        TimeValueUnit<TYPE> entry = mP[m_size2-1];
+        value = entry.value();
+      }
+    }
+    else
+    {
+      // 4. Situation 2: There is filter
+      this->applyFilter();
+
+      bool valuefound = false;
+      if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
+      {
+        // 1. n >= size of the allowed region
+        size_t ilog = (mFilterQuickRef.rbegin()+1)->first;
+        value = mP[ilog].value();
+        valuefound = true;
+      }
+      else
+      {
+        // 2. n < size
+        Kernel::DateAndTime t0;
+        Kernel::DateAndTime tf;
+
+        // TODO Use linear search (low efficiency) at first to prove the algorithm of filter works
+
+        // a) Search for n
+        for (size_t i = 0; i < mFilterQuickRef.size()-1; i ++)
+        {
+          if (static_cast<size_t>(n) >= mFilterQuickRef[i].second &&
+              static_cast<size_t>(n) <= mFilterQuickRef[i+1].second)
+          {
+            // The nth interval falls into this range
+            if (i%4 == 0 && mFilterQuickRef[i].second != mFilterQuickRef[i+1].second)
+            {
+              // i.  Filter time start... In this case, i == second
+              if (n != static_cast<int>(mFilterQuickRef[i].second) &&
+                  n != static_cast<int>(mFilterQuickRef[i+1].second))
+              {
+                std::cout << "Interval n = " << n << "  i = " << i << std::endl;
+                throw std::logic_error("In this case, Ref[i].second must be same as equal to 0");
+              }
+              if (n == static_cast<int>(mFilterQuickRef[i+1].second))
+              {
+                // Fall into case (x, x+1) from filter to log.  while n == n+1.
+                // Best solution is to let it go to next iteration
+                continue;
+              }
+
+              // size_t it0 = mFilterQuickRef[i].first;
+              size_t itf = mFilterQuickRef[i+1].first;
+
+              // std::cout << "DB508A n = " << n << " it0 = " << it0 << "  itf = " << itf << std::endl;
+
+              if (itf == 0)
+              {
+                value =mP[itf].value();
+              }
+              else
+              {
+                value = mP[itf-1].value();
+              }
+              valuefound = true;
+
+              // t0 = Kernel::DateAndTime(mFilter[it0].first);
+              // tf = Kernel::DateAndTime(mP[itf].time());
+            } // ENDIF (i)
+            else if (i%4 == 0 && mFilterQuickRef[i+1].first >= mP.size())
+            {
+              valuefound = true;
+              value = mP.back().value();
+            }
+            else if (i%4 == 0 || i%4 == 1)
+            {
+              // ii. Filter time start on an log entry
+              size_t i2;
+              if (i%4 == 0)
+                i2 = i+1;
+              else
+                i2 = i;
+
+              size_t it0 = mFilterQuickRef[i2].first + (n-mFilterQuickRef[i2].second);
+              // std::cout << "DB522  i2 = " << i2 << "  itm = " << itmp << std::endl;
+              // t0 = mP[it0].time();
+              value = mP[it0].value();
+              valuefound = true;
+
+              /*
+              size_t itf;
+              if (it0 != mFilterQuickRef[i2+1].first)
+              {
+                // From log to log
+                itf = it0 + 1;
+                tf = mP[itf].time();
+
+                std::cout << "DB508B n = " << n << "  it0 = " << it0 << "  itf = " << itf << std::endl;
+              }
+              else
+              {
+                // From log to filter
+                itf = mFilterQuickRef[i2+2].first;
+                tf = mFilter[itf].first;
+
+                std::cout << "DB508C n = " << n << "  it0 = " << it0 << "  itf = " << itf << std::endl;
+              }
+              */
+
+            }
+            else if (i%4 == 3)
+            {
+              // iii. Transition from one region to another.  Do nothing.  Not a regular one
+              continue;
+            }
+            else
+            {
+              std::cout << "Index i = " << i << " for interval " << n
+                  << "  in region " << mFilterQuickRef[i].second << " and "
+                  << mFilterQuickRef[i+1].second << std::endl;
+              throw std::logic_error("This cannot happen!");
+            }
+          } // If... in the region
+
+          if (valuefound)
+            break;
+
+        } // ENDFOR Loop
+
+        if (!valuefound)
+        {
+          value = mP[0].value();
+          throw std::logic_error("It is impossible not to find a value");
+        }
+
+      } // END-IF-ELSE Cases
+    }
+
+    /*
     typename timeMap::const_iterator it = m_propertySeries.begin();
     for (std::size_t j = 0; it != m_propertySeries.end(); it++)
     {
@@ -798,8 +1635,14 @@ public:
         return it->second;
       j++;
     }
+    // return m_propertySeries.rbegin()->second;
 
-    return m_propertySeries.rbegin()->second;
+    if (m_propertySeries.rbegin()->second != value)
+      throw std::runtime_error("Mismatch");
+      */
+
+    return value;
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -810,6 +1653,17 @@ public:
    */
   Kernel::DateAndTime nthTime(int n) const
   {
+    sort();
+
+    if (mP.size() == 0)
+      throw std::runtime_error("TimeSeriesProperty is empty");
+
+    if (n < 0 || n >= static_cast<int>(mP.size()))
+      n = static_cast<int>(mP.size())-1;
+
+    return mP[n].time();
+
+    /*
     if (m_propertySeries.empty())
       throw std::runtime_error("TimeSeriesProperty is empty");
 
@@ -822,6 +1676,7 @@ public:
     }
 
     return m_propertySeries.rbegin()->first;
+    */
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -830,9 +1685,18 @@ public:
    */
   TYPE lastValue() const
   {
+    if (mP.size() == 0)
+      throw std::runtime_error("TimeSeriesProperty is empty");
+
+    sort();
+
+    return mP.rbegin()->value();
+
+    /*
     if (m_propertySeries.empty())
       throw std::runtime_error("TimeSeriesProperty is empty");
     return m_propertySeries.rbegin()->second;
+    */
   }
 
 
@@ -850,9 +1714,159 @@ public:
    */
   TimeInterval nthInterval(int n) const
   {
-    if (m_propertySeries.empty())
-      throw std::runtime_error("TimeSeriesProperty is empty");
+    // 0. Throw exception
+    if (mP.size() == 0)
+      throw std::runtime_error("TimeSeriesProperty is empty (nthInterval)");
 
+    // I. No filter
+    if (mFilter.size() == 0)
+    {
+
+      if (n >= static_cast<int>(mP.size()))
+      {
+        // 1. Out of bound
+        return Kernel::TimeInterval();
+      }
+      else if (n == static_cast<int>(mP.size())-1)
+      {
+        // 2. Last one by making up an end time.
+        time_duration d = mP.rbegin()->time() - (mP.rbegin()+1)->time();
+        DateAndTime endTime = mP.rbegin()->time() + d;
+        return TimeInterval(mP.rbegin()->time(), endTime);
+      }
+      else
+      {
+        // 3. Regular
+        DateAndTime startT = mP[n].time();
+        DateAndTime endT = mP[n+1].time();
+        return TimeInterval(startT, endT);
+      }
+    }
+
+    // II. Filter
+    // II.0 apply Filter
+    this->applyFilter();
+
+    if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
+    {
+      // 1. n > size of the allowed region, do nothing to dt
+      return Kernel::TimeInterval();
+    }
+    else if (static_cast<size_t>(n) == mFilterQuickRef.back().second+1)
+    {
+      // 2. n = size of the allowed region, duplicate the last one
+      size_t ind_t1 = mFilterQuickRef.back().first;
+      size_t ind_t2 = ind_t1-1;
+      Kernel::DateAndTime t1 = (mP.begin()+ind_t1)->time();
+      Kernel::DateAndTime t2 = (mP.begin()+ind_t2)->time();
+      time_duration d = t1-t2;
+      Kernel::DateAndTime t3 = t1+d;
+      return Kernel::TimeInterval(t1, t3);
+    }
+    else
+    {
+      // 3. n < size
+      Kernel::DateAndTime t0;
+      Kernel::DateAndTime tf;
+
+      // TODO Use linear search (low efficiency) at first to prove the algorithm of filter works
+
+      // a) Search for n
+      for (size_t i = 0; i < mFilterQuickRef.size()-1; i ++)
+      {
+        if (static_cast<size_t>(n) >= mFilterQuickRef[i].second &&
+            static_cast<size_t>(n) <= mFilterQuickRef[i+1].second)
+        {
+          // The nth interval falls into this range
+          if (i%4 == 0 && mFilterQuickRef[i].second != mFilterQuickRef[i+1].second)
+          {
+            // i.  Filter time start... In this case, i == second
+            if (n != static_cast<int>(mFilterQuickRef[i].second) &&
+                n != static_cast<int>(mFilterQuickRef[i+1].second))
+            {
+              std::cout << "Interval n = " << n << "  i = " << i << std::endl;
+              throw std::logic_error("In this case, Ref[i].second must be same as equal to 0");
+            }
+            if (n == static_cast<int>(mFilterQuickRef[i+1].second))
+            {
+              // Fall into case (x, x+1) from filter to log.  while n == n+1.
+              // Best solution is to let it go to next iteration
+              continue;
+            }
+
+            size_t it0 = mFilterQuickRef[i].first;
+            size_t itf = mFilterQuickRef[i+1].first;
+
+            std::cout << "DB508A n = " << n << " it0 = " << it0 << "  itf = " << itf << std::endl;
+            t0 = Kernel::DateAndTime(mFilter[it0].first);
+            tf = Kernel::DateAndTime(mP[itf].time());
+
+          } // IF (i)
+          else if (i%4 == 0 && mFilterQuickRef[i+1].first >= mP.size())
+          {
+            // ii.  Filer quick referrence's time is beyond log time
+            size_t it0 = mFilterQuickRef[i].first;
+            size_t itf = mFilterQuickRef[i+3].first;
+            t0 = mFilter[it0].first;
+            tf = mFilter[itf].first;
+
+          } // ENDIF (ii)
+          else if (i%4 == 0 || i%4 == 1)
+          {
+            // iii. Filter time start on an log entry
+            size_t i2;
+            if (i%4 == 0)
+              i2 = i+1;
+            else
+              i2 = i;
+
+            size_t it0 = mFilterQuickRef[i2].first + (n-mFilterQuickRef[i2].second);
+            // std::cout << "DB522  i2 = " << i2 << "  itm = " << itmp << std::endl;
+            t0 = mP[it0].time();
+
+            size_t itf;
+            if (it0 != mFilterQuickRef[i2+1].first)
+            {
+              // From log to log
+              itf = it0 + 1;
+              tf = mP[itf].time();
+
+              std::cout << "DB508B n = " << n << "  it0 = " << it0 << "  itf = " << itf << std::endl;
+            }
+            else
+            {
+              // From log to filter
+              itf = mFilterQuickRef[i2+2].first;
+              tf = mFilter[itf].first;
+
+              std::cout << "DB508C n = " << n << "  it0 = " << it0 << "  itf = " << itf << std::endl;
+            }
+
+          } // IF (ii)
+          else if (i%4 == 3)
+          {
+            // iii. Transition from one region to another.  Do nothing.  Not a regular one
+            continue;
+          }
+          else
+          {
+            std::cout << "Index i = " << i << " for interval " << n
+                << "  in region " << mFilterQuickRef[i].second << " and "
+                << mFilterQuickRef[i+1].second << std::endl;
+            throw std::logic_error("This cannot happen!");
+          }
+
+          return Kernel::TimeInterval(t0, tf);
+        } // If... in the region
+      } // ENDFOR Loop
+
+      // b) Tell whether dt will be in filter or next log
+      throw std::runtime_error("To be continued");
+
+      return Kernel::TimeInterval();
+    } // END-IF-ELSE Cases
+
+    /*
     typename timeMap::const_iterator it = m_propertySeries.begin();
     DateAndTime t = it->first;
     for (size_t j = 0; it != m_propertySeries.end(); it++)
@@ -886,8 +1900,9 @@ public:
       t = it->first;
       j++;
     }
+    */
 
-    return TimeInterval();
+    return Kernel::TimeInterval();
   }
 
 
@@ -899,123 +1914,114 @@ public:
 
    The disallowed region will be hidden for countSize() and nthInterval()
 
+   Boundary condition
+   ?. If filter[0].time > log[0].time, then all log before filter[0] are considered TRUE
+   2. If filter[-1].time < log[-1].time, then all log after filter[-1] will be considered same as filter[-1]
+
    @param filter :: The filter mask to apply
+   */
+  /*
+   * New filterWith to use the new container
    */
   void filterWith(const TimeSeriesProperty<bool>* filter)
   {
-    std::map<DateAndTime, bool> fmap = filter->valueAsMap();
-    std::map<DateAndTime, bool>::const_iterator f = fmap.begin();
-        if(fmap.empty()) return;
-    typename timeMap::iterator it = m_propertySeries.begin();
-    if (f->first < it->first)// expand this series
+    // 1. Clear the current
+    mFilter.clear();
+    mFilterQuickRef.clear();
+
+    if (filter->size() == 0)
     {
-      m_propertySeries.insert(typename timeMap::value_type(f->first, it->second));
-      it = m_propertySeries.begin();
+      // if filter is empty, return
+      return;
     }
-    bool hide = !f->second;
-    bool finished = false;
-    // At the start f->first >= it->first
-    for (; f != fmap.end(); hide = !(f++)->second)
+
+    // 2. Construct mFilter
+    std::vector<Kernel::DateAndTime> filtertimes = filter->timesAsVector();
+    std::vector<bool> filtervalues = filter->valuesAsVector();
+    mFilter.reserve(filtertimes.size()+1);
+
+    // a) Boundary condition
+    if (filtertimes[0] > mP[0].time())
     {
-      // element next to it
-      typename timeMap::iterator it1 = it;
-      it1++;
-      if (it1 == m_propertySeries.end())
+      // Extend the lower boundary
+      mFilter.push_back(std::make_pair(mP[0].time(), true));
+    }
+
+    // b) Rest
+    for (size_t i = 0; i < filtertimes.size(); i ++)
+    {
+      if (mFilter.size() == 0 || mFilter.back().second != filtervalues[i])
       {
-        if (f->first < it->first && hide)
-          if (m_propertySeries.count(it->first) == 1)
-            m_propertySeries.insert(typename timeMap::value_type(it->first, it->second));
-        finished = true;
-        break;
+        mFilter.push_back(std::make_pair(filtertimes[i], filtervalues[i]));
       }
-      else
-        // we want f to be between it and it1
-        while (f->first < it->first || f->first >= it1->first)
-        {
-          // we are still in the scope of the previous filter value, and if it 'false' we must hide the interval
-          if (hide)
-          {
-            if (m_propertySeries.count(it->first) == 1)
-            {
-              it = m_propertySeries.insert(typename timeMap::value_type(it->first, it->second));
-            }
-            if (it1 != m_propertySeries.end() && m_propertySeries.count(it1->first) == 1 && f->first
-                > it1->first)
-              m_propertySeries.insert(typename timeMap::value_type(it1->first, it1->second));
-          }
-          it++;
-          it1 = it;
-          it1++;
-          if (it1 == m_propertySeries.end())
-          {
-            if (hide && f->first != it->first)
-            {
-              if (m_propertySeries.count(it->first) == 1)
-                it = m_propertySeries.insert(typename timeMap::value_type(it->first, it->second));
-              it1 = m_propertySeries.end();
-            }
-            finished = true;
-            break;
-          }
-        };
-      bool gap = m_propertySeries.count(it->first) > 1;
-      if (gap && it1 != m_propertySeries.end())
+    }
+
+    // c) Make the filter in True/False pair
+    if (filtervalues.back())
+    {
+      DateAndTime lastTime, nextLastT;
+      if (mP.back().time() > filtertimes.back())
       {
-        if (f->second == true)
-          it = m_propertySeries.insert(typename timeMap::value_type(f->first, it->second));
+        // Last log time is later than last filter time
+        lastTime = mP.back().time();
+        if ( mP[mP.size()-2].time() > filtertimes.back() )
+          nextLastT = mP[mP.size()-2].time();
+        else
+          nextLastT = filtertimes.back();
       }
       else
       {
-        if (f->second == false)
+        // Last log time is no later than last filter time
+        lastTime = filtertimes.back();
+        if (mP.back().time() > filtertimes[filtertimes.size()-1])
         {
-          if (f->first != it->first)
-            m_propertySeries.insert(typename timeMap::value_type(f->first, it->second));
-          it = m_propertySeries.insert(typename timeMap::value_type(f->first, it->second));
+          nextLastT = mP.back().time();
+        }
+        else
+        {
+          nextLastT = *(filtertimes.rbegin()+1);
         }
       }
-    }
-    // If filter stops in the middle of this series with value 'false' (meaning hide the rest of the values)
-    if (!finished && fmap.rbegin()->second == false)
-    {
-      for (; it != m_propertySeries.end(); it++)
-        if (m_propertySeries.count(it->first) == 1)
-          it = m_propertySeries.insert(typename timeMap::value_type(it->first, it->second));
+      // std::cout << "Last Time = " << lastTime << ", Next Last Time = " << nextLastT << std::endl;
+
+      time_duration dtime = lastTime - nextLastT;
+
+      mFilter.push_back(std::make_pair(lastTime+dtime, false));
     }
 
-    // Extend this series if the filter end later than the data
-    if (finished && f != fmap.end())
+    /* TODO remove Later */
+    std::cout << "Log Entries: " << std::endl;
+    for (size_t i = 0; i < mP.size(); i ++)
     {
-      TYPE v = m_propertySeries.rbegin()->second;
-      for (; f != fmap.end(); f++)
-      {
-        m_propertySeries.insert(typename timeMap::value_type(f->first, v));
-        if (!f->second)
-          m_propertySeries.insert(typename timeMap::value_type(f->first, v));
-      }
+      std::cout << "Entry "<< i << ":\t" << mP[i].time() << ", " << mP[i].value() << std::endl;
     }
+    std::cout << std::endl;
+    std::cout << "Filter: " << std::endl;
+    for (size_t i = 0; i < mFilter.size(); i ++)
+      std::cout << "Filter " << i << ":\t" << mFilter[i].first << ", " << mFilter[i].second << std::endl;
+    /* END TODO */
 
-    countSize();
+    // 3. Reset flag and do filter
+    mFilterApplied = false;
+    applyFilter();
+
+    // 4. Debug out
+    /* TODO Remove this section after testing */
+    std::cout << "\nFilter Quick Reference:" << std::endl;
+    for (size_t i = 0; i < mFilterQuickRef.size(); i ++)
+      std::cout << "Ref " << i << ":\t" << mFilterQuickRef[i].first << ", " << mFilterQuickRef[i].second << std::endl;
+
+    return;
   }
-
 
   //-----------------------------------------------------------------------------------------------
   /// Restores the property to the unsorted state
   void clearFilter()
   {
-    std::map<DateAndTime, TYPE> pmap = valueAsMap();
-    m_propertySeries.clear();
-    m_size = 0;
-    if (pmap.size() == 0)
-      return;
-    TYPE val = pmap.begin()->second;
-    typename std::map<DateAndTime, TYPE>::const_iterator it = pmap.begin();
-    addValue(it->first, it->second);
-    for (; it != pmap.end(); it++)
-    {
-      if (it->second != val)
-        addValue(it->first, it->second);
-      val = it->second;
-    }
+    mFilter.clear();
+    mFilterQuickRef.clear();
+
+    return;
   }
 
 
@@ -1024,8 +2030,27 @@ public:
   /** Updates m_size.
    * TODO: Warning! COULD BE VERY SLOW, since it counts each entry each time.
    */
-  void countSize()
+  void countSize() const
   {
+
+    if (mFilter.size() == 0)
+    {
+      // 1. Not filter
+      m_size2 = int(mP.size());
+    }
+    else
+    {
+      // 2. With Filter
+      if (!mFilterApplied)
+      {
+        this->applyFilter();
+      }
+      m_size2 = int(mFilterQuickRef.back().second+1);
+    }
+
+    return;
+
+    /*
     m_size = 0;
     if (m_propertySeries.size() == 0)
       return;
@@ -1035,6 +2060,7 @@ public:
       if (m_propertySeries.count(it->first) == 1)
         m_size++;
     }
+    */
   }
 
 
