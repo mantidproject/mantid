@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include <QtGui>
 #include "DllOption.h"
+#include <QtCore/qvariant.h>
 
 
 namespace MantidQt
@@ -63,13 +64,20 @@ namespace API
     void hideOrDisableProperties();
 
     /// Each dynamically created PropertyWidget
-    QVector<PropertyWidget*> m_propWidgets;
+    QHash<QString, PropertyWidget*> m_propWidgets;
 
     /// Viewport containing the grid of property widgets
     QWidget * m_viewport;
 
     /// Scroll area containing the viewport
     QScrollArea * m_scroll;
+
+  public slots:
+    /// Any property changed
+    void propertyChanged(const QString & pName);
+
+    /// Replace WS button was clicked
+    void replaceWSClicked(const QString & propName);
 
   private:
     /// Chosen algorithm name

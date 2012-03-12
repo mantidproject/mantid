@@ -106,11 +106,23 @@ namespace API
    * */
   void PropertyWidget::valueChangedSlot()
   {
-    // This will be caught by the GenericDialog.
-    emit valueChanged( QString::fromStdString(m_prop->name()) ) ;
-
     // Try to set the value
-    m_error = QString::fromStdString(m_prop->setValue(this->getValue().toStdString()));
+    QString value = this->getValue().trimmed();
+    // Use the default if empty
+    if( value.isEmpty() )
+      value = QString::fromStdString(m_prop->getDefault());
+
+    std::string error("");
+    try
+    {
+      error = m_prop->setValue(value.toStdString());
+    }
+    catch(std::exception & err_details)
+    {
+      error = err_details.what();
+    }
+    m_error = QString::fromStdString(error).trimmed();
+
     // Show the invalid star if there was an error
     if (m_error.isEmpty())
       m_validLbl->setVisible(false);
@@ -119,6 +131,9 @@ namespace API
       m_validLbl->setVisible(true);
       m_validLbl->setToolTip(m_error);
     }
+
+    // This will be caught by the GenericDialog.
+    emit valueChanged( QString::fromStdString(m_prop->name()) ) ;
   }
 
   //----------------------------------------------------------------------------------------------

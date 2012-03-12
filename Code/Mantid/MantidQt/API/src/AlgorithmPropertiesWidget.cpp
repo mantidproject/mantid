@@ -150,9 +150,7 @@ namespace API
 
 
 
-  //----------------------------------
-  // Protected member functions
-  //----------------------------------
+  //---------------------------------------------------------------------------------------------------------------
   /**
   * Create the layout for this dialog.
   */
@@ -235,9 +233,13 @@ namespace API
         // Create the appropriate widget at this row in the grid.
         PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
 
-        m_propWidgets.push_back(widget);
+        m_propWidgets[propName] = widget;
 
-        //TODO: Connect and TIE the widget (this is in GenericDialog.cpp)
+        // Whenever the value changes in the widget, this fires propertyChanged()
+        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+
+        // For clicking the "Replace Workspace" button (if any)
+        connect(widget, SIGNAL( replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
 
         // Only show the "Replace Workspace" button if the algorithm has an input workspace.
         if (hasInputWS)
@@ -251,6 +253,56 @@ namespace API
 
 
 
+  //--------------------------------------------------------------------------------------
+  /** SLOT to be called whenever a property's value has just been changed
+   * and the widget has lost focus/value has been changed.
+   * @param pName :: name of the property that was changed
+   */
+  void AlgorithmPropertiesWidget::propertyChanged(const QString & pName)
+  {
+    //PropertyWidget * widget = m_propWidgets[pName];
+    this->hideOrDisableProperties();
+  }
+
+
+  //-------------------------------------------------------------------------------------------------
+  /** A slot to handle the replace workspace button click
+   *
+   * @param propName :: the property for which we clicked "Replace Workspace"
+   */
+  void AlgorithmPropertiesWidget::replaceWSClicked(const QString & propName)
+  {
+    if (m_propWidgets.contains(propName))
+    {
+      PropertyWidget * propWidget = m_propWidgets[propName];
+      if (propWidget)
+      {
+        // Find the name to put in the spot
+        QString wsName("");
+        for (auto it = m_propWidgets.begin(); it != m_propWidgets.end(); it++)
+        {
+          // Only look at workspace properties
+          PropertyWidget* otherWidget = it.value();
+          Property * prop = it.value()->getProperty();
+          IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+          if (otherWidget && wsProp)
+          {
+            if (prop->direction() == Direction::Input)
+            {
+              // Input workspace property. Get the text typed in.
+              wsName = otherWidget->getValue();
+              break;
+            }
+          }
+        }
+
+        if (!wsName.isEmpty())
+          propWidget->setValue(wsName);
+      }
+    }
+
+  }
+
 
   //-------------------------------------------------------------------------------------------------
   /** Go through all the properties, and check their validators to determine
@@ -263,9 +315,9 @@ namespace API
   {
     for( auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr )
     {
-      PropertyWidget * widget = *pitr;
+      PropertyWidget * widget = pitr.value();
       Mantid::Kernel::Property *prop = widget->getProperty();
-      QString propName = QString::fromStdString(prop->name());
+      QString propName = pitr.key();
 
       // Set the enabled and visible flags based on what the validators say. Default is always true.
 
