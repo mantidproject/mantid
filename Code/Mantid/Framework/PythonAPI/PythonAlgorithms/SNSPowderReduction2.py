@@ -287,10 +287,9 @@ class SNSPowderReduction2(PythonAlgorithm):
         strategy = []
         if self._chunks > 0 and not "histo" in extension:
             Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            for i in range(len(Chunks)): strategy.append(Chunks.row(i))
+            for row in Chunks: strategy.append(row)
         else:
-            chunk = {}
-            strategy.append(chunk)
+            strategy.append({})
 
         return strategy
 
