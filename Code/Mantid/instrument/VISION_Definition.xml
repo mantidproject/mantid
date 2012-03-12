@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-03-09 11:44:35.283768">
-  <!-- Created by Stuart Campbell -->
+  <!-- Created by Stuart Campbell (ORNL) -->
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
