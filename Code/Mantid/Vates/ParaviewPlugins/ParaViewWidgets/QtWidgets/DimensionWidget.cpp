@@ -58,12 +58,14 @@ DimensionWidget::DimensionWidget()
 
   m_layout->addWidget(new QLabel("Min"), 1, 2, Qt::AlignLeft);
   m_minBox = new QLineEdit();
+  m_minBox->setValidator(new QDoubleValidator(this));
 
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
   m_layout->addWidget(m_minBox, 1, 3, Qt::AlignLeft);
   
   m_layout->addWidget(new QLabel("Max"), 1, 4, Qt::AlignLeft);
   m_maxBox = new QLineEdit();
+  m_maxBox->setValidator(new QDoubleValidator(this));
   
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
   m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
