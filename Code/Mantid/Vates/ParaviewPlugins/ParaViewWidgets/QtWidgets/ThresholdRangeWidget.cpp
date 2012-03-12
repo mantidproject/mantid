@@ -7,6 +7,7 @@
 #include <QFont>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <QDoubleValidator>
 
 ThresholdRangeWidget::ThresholdRangeWidget(double min, double max) 
 {
@@ -26,6 +27,7 @@ ThresholdRangeWidget::ThresholdRangeWidget(double min, double max)
   layout->addWidget(m_thresholdStrategyComboBox, 1, 0, Qt::AlignLeft);
 
   m_minEditBox = new QLineEdit();
+  m_minEditBox->setValidator(new QDoubleValidator(this));
   std::string minValueString = boost::str(boost::format("%0.2f") % min);
   m_minEditBox->setText(minValueString.c_str());
   layout->addWidget(new QLabel("Min"), 1, 1, Qt::AlignLeft);
@@ -34,6 +36,7 @@ ThresholdRangeWidget::ThresholdRangeWidget(double min, double max)
   connect(m_minEditBox, SIGNAL(textEdited(const QString &)), this, SLOT(minThresholdListener(const QString &)));
  
   m_maxEditBox = new QLineEdit();
+  m_maxEditBox->setValidator(new QDoubleValidator(this));
   std::string maxValueString = boost::str(boost::format("%0.2f") % max);
   m_maxEditBox->setText(maxValueString.c_str());
   m_maxEditBox->setDisabled(true); //Disabled by default
