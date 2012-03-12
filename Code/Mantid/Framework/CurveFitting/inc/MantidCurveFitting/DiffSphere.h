@@ -71,10 +71,13 @@ namespace Mantid
       InelasticDiffSphere();
       /// Destructor
       virtual ~InelasticDiffSphere() {}
+      /// overwrite IFunction base class methods
+      std::string name()const{return "InelasticDiffSphere";}
+      virtual const std::string category() const { return "Optimization\\FitModels";}
 
     protected:
-      virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
-      //virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData); //not yet implemented
+      void functionMW(double* out, const double* xValues, const size_t nData)const;
+      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
       std::vector<double> LorentzianCoefficients(double a) const;
 
     private:
@@ -101,13 +104,6 @@ namespace Mantid
       std::string name()const{return "DiffSphere";}
       virtual const std::string category() const { return "Optimization\\FitModels";}
       virtual int version() const { return 1;}
-
-      void functionMW(double* out, const double* xValues, const size_t nData)const;
-      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
-
-    protected:
-      /// overwrite IFunction base class method, which declare function parameters
-      virtual void init() {};
 
     private:
       API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor

@@ -109,6 +109,7 @@ set ( TEST_FILES
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
+        test/DiffSphereTest.h
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h

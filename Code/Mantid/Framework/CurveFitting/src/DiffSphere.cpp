@@ -2,9 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DiffSphere.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
 #include <cmath>
 #include <boost/math/special_functions/bessel.hpp>
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/Expression.h"
 
 
 #ifndef M_PI
@@ -19,10 +21,12 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FUNCTION(DiffSphere)
+DECLARE_FUNCTION(ElasticDiffSphere);
+DECLARE_FUNCTION(InelasticDiffSphere);
+DECLARE_FUNCTION(DiffSphere);
 
 ElasticDiffSphere::ElasticDiffSphere(){
-  declareParameter("Height", 1.0);
+  //declareParameter("Height", 1.0); //parameter "Height" already declared in constructor of base class DeltaFunction
   declareParameter("Radius", 1.0, "Sphere radius");
   declareParameter("Q",1.0, "Momentum transfer");
 }
@@ -108,6 +112,22 @@ InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1) {
   declareParameter("Diffusion", 1.0, "Diffusion coefficient, in units of");
   declareParameter("Q",1.0, "Momentum transfer");
 
+  // Ensure positive values for Intensity, Radius, and Diffusion coefficient
+  BoundaryConstraint* IntensityConstraint = new BoundaryConstraint("Intensity");
+  IntensityConstraint->setLower(0);
+  IntensityConstraint->reset(this,parameterIndex("Intensity"));
+  addConstraint(IntensityConstraint);
+
+  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint("Radius");
+  RadiusConstraint->setLower(0);
+  RadiusConstraint->reset(this,parameterIndex("Radius"));
+  addConstraint(RadiusConstraint);
+
+  BoundaryConstraint* DiffusionConstraint = new BoundaryConstraint("Diffusion");
+  DiffusionConstraint->setLower(0);
+  DiffusionConstraint->reset(this,parameterIndex("Diffusion"));
+  addConstraint(DiffusionConstraint);
+
   initXnlCoeff();   // initialize this->xnl with the list of coefficients xnlist
   initAlphaCoeff(); // initialize this->alpha, certain factors constant over the fit
   initLinJlist();   // initialize this->linJlist, linear interpolation around numerical divergence
@@ -178,17 +198,18 @@ void InelasticDiffSphere::functionMW(double* out, const double* xValues, const s
 
 /* calNumericalDeriv requires evaluation of four extra functionMW. We can avoid by requiring
  *  the 'Simplex' algorithm, which does not require derivative
+ *  */
 void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
   calNumericalDeriv(out, xValues, nData);
 }
-*/
-
 
 DiffSphere::DiffSphere() {
+
   m_elastic = dynamic_cast<ElasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   addFunction( m_elastic );
   m_inelastic = dynamic_cast<InelasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   addFunction( m_inelastic );
+
   //Set the ties between Elastic and Inelastic parameters
   API::ParameterTie* tie_H=new API::ParameterTie(this,"f0.Height");
   tie_H->set("f0.Height=f1.Intensity");
