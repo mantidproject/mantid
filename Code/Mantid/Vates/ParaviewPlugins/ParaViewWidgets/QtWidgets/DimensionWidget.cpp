@@ -269,8 +269,6 @@ void DimensionWidget::setViewMode(Mantid::VATES::BinDisplay mode)
   BinInputWidget* binInputWidget = getCurrentBinInputWidget();
   int nBins = binInputWidget->getEntry(min, max);
   
-  BinInputWidget* temp = binInputWidget;
-
   if(mode == Simple)
   {
     m_binStackedWidget->setCurrentIndex(0);

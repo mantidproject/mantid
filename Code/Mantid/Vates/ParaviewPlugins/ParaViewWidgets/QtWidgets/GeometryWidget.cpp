@@ -24,7 +24,6 @@ GeometryWidget::GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, Bin
   
   headerLayout->addWidget(new QLabel("Geometry"), 0, 0, 1, 2, Qt::AlignCenter); 
   
-  QCheckBox* box = new QCheckBox;
   bodyLayout->addWidget(m_ckBinDisplay);
   bodyLayout->addLayout(headerLayout);
   
