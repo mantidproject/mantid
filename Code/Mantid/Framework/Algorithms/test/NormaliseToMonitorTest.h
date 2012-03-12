@@ -236,6 +236,50 @@ public:
     TS_ASSERT_THROWS_NOTHING( norm4.execute() )
     TS_ASSERT( norm4.isExecuted() )
   }
+
+  void testMonIDPropChangerEnabled()
+  {
+    NormaliseToMonitor norm5;
+    norm5.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("InputWorkspace","normMon"));
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("OutputWorkspace","normMon5"));
+
+    std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(&norm5,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+
+    // property is enabled but the conditions have not changed;
+    TS_ASSERT(pID->isEnabled());
+    // workspace has monitors so the condition has changed
+    TS_ASSERT(pID->isConditionChanged());
+
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorWorkspace","monWS"));
+    // monitor ws disables this property;
+    TS_ASSERT(!pID->isEnabled());
+    // but no changes to condition for disabled property
+    TS_ASSERT(!pID->isConditionChanged());
+
+    // no mon ws should enable it again
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorWorkspace",""));
+    TS_ASSERT(pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+
+    // and MonitorSpectrum disable: 
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","1"));
+    TS_ASSERT(!pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+    // and enable:
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","-1"));
+    TS_ASSERT(pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+    // and disable: 
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","10"));
+    TS_ASSERT(!pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+
+
+
+  }
+
 };
 
 #endif /*NORMALISETOMONITORTEST_H_*/

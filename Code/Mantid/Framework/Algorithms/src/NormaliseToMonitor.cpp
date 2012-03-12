@@ -55,17 +55,17 @@ namespace Algorithms
 bool 
 MonIDPropChanger::isEnabled()const
 {
-       int sp_id =host_algo->getProperty(spectra_id_prop);
+       int sp_id =host_algo->getProperty(SpectraNum);
        // if there is spectra number set to norbalize by, nothing else can be selected;
-       if(sp_id<0){
+       if(sp_id>0){
            is_enabled=false;
            return false;
        }else{
            is_enabled=true;;
        }
 
-       // is there the ws property, which describes monitors ws?
-       API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(host_monws_name);
+       // is there the ws property, which describes monitors ws. It also disables the monitors ID property
+       API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(MonitorWorkspaceProp);
        if(monitorsWS){
            is_enabled = false;
        }else{
@@ -79,12 +79,10 @@ MonIDPropChanger::isConditionChanged()const{
       // is enabled is based on other properties:
        if(!is_enabled)return false;
        // read monitors list from the input workspace
-       API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(host_ws_name);
-       if(!monitorIdReader(inputWS))return false;
+       API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
+       bool monitors_changed = monitorIdReader(inputWS);
+       if(!monitors_changed)return false;
 
-       // clear MonitorSpectraProperty if you decided to use MonitorID 
-       //host_algo->setProperty("MonitorSpectrum","-1");
-       //Kernel::Property *pProperty = host_algo->getPointerToProperty(
        return true;
 }
    // function which modifies the allowed values for the list of monitors. 
@@ -94,34 +92,66 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        if(!piProp){
            throw(std::invalid_argument("modify allowed value has been called on wrong property"));
        }
-       std::vector<int> ival(allowed_values.size());
-       for(size_t i=0;i<ival.size();i++){
-                ival[i]=boost::lexical_cast<int>(allowed_values[i]);
+       //
+       if(iExistingAllowedValues.empty()){
+           // TO DO: fix it -- provide correct BV value; currently max=2^31
+           piProp->modify_validator(new Kernel::BoundedValidator<int>(-1,2147483648));
+       }else{
+            piProp->modify_validator(new Kernel::ListAnyValidator<int>(iExistingAllowedValues));
        }
-       piProp->modify_validator(new Kernel::ListAnyValidator<int>(ival));
            
    }
 
-// read the monitors list from the workspace;
+/** read the monitors list from the workspace and try to do it once for any particular ws;
+  * sets up list of availible monitors for the ws and returns true if this list is different from the previous one  */
 bool
 MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
 {
-    allowed_values.clear();
-    if(!inputWS){
-        return false;
+    // no workspace
+    if(!inputWS) return false;
+    
+    // no instrument
+    Geometry::Instrument_const_sptr pInstr = inputWS->getInstrument();
+    if (!pInstr)    return false;
+   
+    std::vector<detid_t> mon = pInstr->getMonitors();
+    // get the list of ws indexes, which correspond to monitors:
+    std::vector<size_t>  indexList;
+    inputWS->getIndicesFromDetectorIDs(mon,indexList);
+    if (indexList.empty()){
+        if(iExistingAllowedValues.empty()){ 
+            return false;
+        }else{
+            iExistingAllowedValues.clear();
+            return true;
+        }
+    }
+    // assume that monitors are either there or they are not. 
+    size_t existing_mon_list_size = (mon.size()<=indexList.size())?mon.size():indexList.size();
+    // and fill in the all monitors list;
+    std::vector<int> allowed_values;
+    allowed_values.resize(existing_mon_list_size);  
+    for(size_t i=0;i<existing_mon_list_size;i++){
+        allowed_values[i]=mon[i];
+    }
+    if(iExistingAllowedValues.empty()){
+        iExistingAllowedValues.assign(allowed_values.begin(),allowed_values.end());
+        return true;
+    }
+    if(iExistingAllowedValues.size()!=allowed_values.size()){
+        iExistingAllowedValues.clear();
+        iExistingAllowedValues.assign(allowed_values.begin(),allowed_values.end());
+        return true;
     }
 
-    Geometry::Instrument_const_sptr pInstr = inputWS->getInstrument();
-    if (!pInstr){
-        return false;
+    bool values_redefined=false;
+    for(size_t i=0;i<iExistingAllowedValues.size();i++){
+        if(iExistingAllowedValues[i]!=allowed_values[i]){
+            values_redefined=true;
+            iExistingAllowedValues[i]=allowed_values[i];
+        }
     }
-    std::vector<detid_t> mon = pInstr->getMonitors();
-    if (mon.empty())return false;
-    allowed_values.resize(mon.size());
-    for(size_t i=0;i<mon.size();i++){
-        allowed_values[i]=boost::lexical_cast<std::string>(mon[i]);
-    }
-    return true;
+    return values_redefined;
 }
 
 // the class to verify and modify interconnected properties affecting the different ways to normalize ws by this ws spectrum. 
@@ -189,7 +219,7 @@ void NormaliseToMonitor::init()
    declareProperty("MonitorID",-1,
     "The monitor ID, which defines the monitor spectrum within the InputWorkspace. Will be overridden by Monitor spectrum if one is provided in the field above");
    // set up the validator, which would verify if spectrum is correct
-   setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorWorkspace","MonitorID"));
+   setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
