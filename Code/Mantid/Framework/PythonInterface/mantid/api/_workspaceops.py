@@ -169,7 +169,7 @@ def attach_tableworkspaceiterator():
                 self.__pos = 0
                 self.__max = wksp.rowCount()
             def next(self):
-                if self.__pos + 1 >= self.__max:
+                if self.__pos + 1 > self.__max:
                     raise StopIteration
                 self.__pos += 1
                 return self.__wksp.row(self.__pos-1)
