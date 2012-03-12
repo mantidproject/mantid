@@ -39,6 +39,7 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 #include <cfloat>
 #include <iomanip>
@@ -83,6 +84,11 @@ MonIDPropChanger::isConditionChanged()const{
        bool monitors_changed = monitorIdReader(inputWS);
        if(!monitors_changed)return false;
 
+
+       
+       // clear MonitorSpectraProperty if you decided to use MonitorID 
+       //host_algo->setProperty("MonitorSpectrum","-1");
+       //Kernel::Property *pProperty = host_algo->getPointerToProperty(
        return true;
 }
    // function which modifies the allowed values for the list of monitors. 
@@ -94,16 +100,15 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        }
        //
        if(iExistingAllowedValues.empty()){
-           // TO DO: fix it -- provide correct BV value; currently max=2^31
-           piProp->modify_validator(new Kernel::BoundedValidator<int>(-1,2147483648));
+           // TO DO: fix it -- provide correct BV value;
+           piProp->modify_validator(new Kernel::BoundedValidator<int>(-1,100000));
        }else{
             piProp->modify_validator(new Kernel::ListAnyValidator<int>(iExistingAllowedValues));
        }
            
    }
 
-/** read the monitors list from the workspace and try to do it once for any particular ws;
-  * sets up list of availible monitors for the ws and returns true if this list is different from the previous one  */
+// read the monitors list from the workspace and try to do it once for any particular ws;
 bool
 MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
 {
@@ -115,10 +120,7 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
     if (!pInstr)    return false;
    
     std::vector<detid_t> mon = pInstr->getMonitors();
-    // get the list of ws indexes, which correspond to monitors:
-    std::vector<size_t>  indexList;
-    inputWS->getIndicesFromDetectorIDs(mon,indexList);
-    if (indexList.empty()){
+    if (mon.empty()){
         if(iExistingAllowedValues.empty()){ 
             return false;
         }else{
@@ -126,12 +128,9 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
             return true;
         }
     }
-    // assume that monitors are either there or they are not. 
-    size_t existing_mon_list_size = (mon.size()<=indexList.size())?mon.size():indexList.size();
-    // and fill in the all monitors list;
     std::vector<int> allowed_values;
-    allowed_values.resize(existing_mon_list_size);  
-    for(size_t i=0;i<existing_mon_list_size;i++){
+    allowed_values.resize(mon.size());  
+    for(size_t i=0;i<mon.size();i++){
         allowed_values[i]=mon[i];
     }
     if(iExistingAllowedValues.empty()){
@@ -224,6 +223,7 @@ void NormaliseToMonitor::init()
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
     "A workspace containing the monitor spectrum");
+  setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
   declareProperty("MonitorWorkspaceSpectrum",0,
       "The spectrum number within the MonitorWorkspace you want to normalize by (usually monitor spectrum but can be any)",Direction::InOut);
 
