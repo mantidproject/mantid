@@ -63,7 +63,25 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
-  
+
+  void test_AccumulationWorkspace_validator()
+  {
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "output") );
+    TSM_ASSERT_THROWS_NOTHING("Empty is OK when not post-processing",
+        alg.setPropertyValue("AccumulationWorkspace", "") );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingAlgorithm", "RenameWorkspace") );
+
+    TSM_ASSERT_THROWS_ANYTHING("Empty is NOT OK when not post-processing",
+        alg.setPropertyValue("AccumulationWorkspace", "") );
+
+    TSM_ASSERT_THROWS_ANYTHING("Accum must != Output",
+        alg.setPropertyValue("AccumulationWorkspace", "output") );
+  }
+
   void test_validateInputs()
   {
     LiveDataAlgorithmImpl alg;
@@ -79,11 +97,10 @@ public:
     TS_ASSERT( alg.hasPostProcessing() );
 
     TSM_ASSERT_THROWS_ANYTHING("No AccumulationWorkspace",  alg.validateInputs() );
-    alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
+    alg.setPropertyValue("AccumulationWorkspace", "accum_ws") ;
     TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
 
-    alg.setPropertyValue("AccumulationWorkspace", "out_ws");
-    TSM_ASSERT_THROWS_ANYTHING("AccumulationWorkspace == OutputWorkspace",  alg.validateInputs() );
+    TS_ASSERT_THROWS_ANYTHING( alg.setPropertyValue("AccumulationWorkspace", "out_ws") );
   }
 
   /** Test creating the processing algorithm.
