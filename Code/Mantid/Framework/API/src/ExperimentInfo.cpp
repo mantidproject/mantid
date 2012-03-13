@@ -560,19 +560,21 @@ namespace API
    */
   void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File * file) const
   {
+    Instrument_const_sptr instrument = getInstrument();
+
     // Start with instrument info (name, file, full XML text)
     file->makeGroup("instrument", "NXinstrument", true);
     file->putAttr("version", 1);
-    file->writeData("name", getInstrument()->getName() );
+    file->writeData("name", instrument->getName() );
 
     // XML contents of instrument, as a NX note
     file->makeGroup("instrument_xml", "NXnote", true);
-    file->writeData("data", getInstrument()->getXmlText() );
+    file->writeData("data", instrument->getXmlText() );
     file->writeData("type", "text/xml"); // mimetype
     file->writeData("description", "XML contents of the instrument IDF file.");
     file->closeGroup();
 
-    file->writeData("instrument_source", Poco::Path(getInstrument()->getFilename()).getFileName());
+    file->writeData("instrument_source", Poco::Path(instrument->getFilename()).getFileName());
 
     // Now the parameter map, as a NXnote
     const Geometry::ParameterMap& params = constInstrumentParameters();
@@ -585,8 +587,8 @@ namespace API
     // Add physical detector and monitor data
     std::vector<detid_t> detectorIDs;
     std::vector<detid_t> detmonIDs;
-    detectorIDs = getInstrument()->getDetectorIDs( true );
-    detmonIDs = getInstrument()->getDetectorIDs( false );
+    detectorIDs = instrument->getDetectorIDs( true );
+    detmonIDs = instrument->getDetectorIDs( false );
     if( detmonIDs.size() > 0 )
     {
       // Add detectors group
@@ -597,7 +599,7 @@ namespace API
 
       // Create Monitor IDs vector
       std::vector<IDetector_const_sptr> detmons;
-      detmons = getInstrument()->getDetectors( detmonIDs );
+      detmons = instrument->getDetectors( detmonIDs );
       std::vector<detid_t> monitorIDs;
       for (size_t i=0; i < detmonIDs.size(); i++) 
       {
@@ -624,12 +626,14 @@ namespace API
   */
   void ExperimentInfo::saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const
   { 
+    Instrument_const_sptr instrument = getInstrument();
+
     size_t nDets = detIDs.size();
     if( nDets == 0) return;
     std::vector<IDetector_const_sptr> detectors;
-    detectors = getInstrument()->getDetectors( detIDs );
+    detectors = instrument->getDetectors( detIDs );
 
-    Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
     Kernel::V3D sample_pos;
     if(sample) sample_pos = sample->getPos();
 
