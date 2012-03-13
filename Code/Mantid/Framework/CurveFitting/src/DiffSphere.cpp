@@ -131,7 +131,7 @@ InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1) {
 std::vector<double> InelasticDiffSphere::LorentzianCoefficients(double a)const{
 
   //precompute the 2+lmax spherical bessel functions (26 in total)
-  double jl[2+lmax];
+  double* jl = new double[2+lmax];
   for(unsigned int l=0; l<=1+lmax; l++){
     jl[l] = boost::math::sph_bessel(l,a);
   }
@@ -163,6 +163,8 @@ std::vector<double> InelasticDiffSphere::LorentzianCoefficients(double a)const{
     ++italpha;
     ++itlinJ;  //retrieve next linear interpolation
   } // end of for(std::vector<xnlc>::const_iterator it=xnl.begin()
+
+  delete[] jl;
   return YJ;
 } // end of LorentzianCoefficients
 

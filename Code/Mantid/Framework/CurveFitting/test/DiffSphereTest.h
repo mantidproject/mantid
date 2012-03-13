@@ -122,7 +122,6 @@ public:
     TS_ASSERT_DELTA( out->getParameter("Radius"), 2.66 ,0.05);
     TS_ASSERT_DELTA( out->getParameter("Diffusion"), 1.45 ,0.05);
     TS_ASSERT_DELTA( out->getParameter("Q"), 0.7 ,0.001);
-    std::cout<<out->getParameter("Intensity")<<" "<<out->getParameter("Radius")<<" "<<out->getParameter("Diffusion")<<" "<<out->getParameter("Q")<<"\n";
     AnalysisDataService::Instance().remove(wsName);
 
   }// end of void testAgainstMockData
