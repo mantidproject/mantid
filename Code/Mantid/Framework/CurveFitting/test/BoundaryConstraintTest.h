@@ -140,6 +140,19 @@ public:
     TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
   }
 
+  //test constructor with lower boundary only
+  void testInitialize7()
+  {
+    Gaussian gaus;
+    gaus.initialize();
+    BoundaryConstraint bc(&gaus,"Sigma",0.0);
+    TS_ASSERT(bc.hasLower());
+    TS_ASSERT(!bc.hasUpper());
+    TS_ASSERT_EQUALS(bc.lower(),0.0);
+    TS_ASSERT_EQUALS(bc.getParameterName(),"Sigma");
+    TS_ASSERT_EQUALS(bc.getFunction(),&gaus);
+  }
+
   void testAsString()
   {
     Gaussian gaus;
