@@ -16,6 +16,11 @@ algorithms and data objects that are:
       Implementing Algorithms, Virtual Instrument Geometry. 
 
 """
+###############################################################################
+# Allow warnings so that users will see deprecation messages etc
+###############################################################################
+import warnings as _warn
+_warn.simplefilter("default")
 
 ###############################################################################
 # Define the api version
