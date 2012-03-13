@@ -29,7 +29,7 @@ class EQSANSDataSet(DataSet):
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
         try:
-            mantidsimple.LoadEventNexus(file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
+            mantidsimple.LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
             return True
         except:
             return False
