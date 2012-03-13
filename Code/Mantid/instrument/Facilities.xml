@@ -317,10 +317,12 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
+   <livedata listener="FakeEventDataListener" />
+
    <instrument name="MINITOPAZ"> 
       <technique>Test Neutron Diffraction</technique>
+      <livedata address="127.0.0.1:0" />
    </instrument>
-
 </facility>
 
 </facilities>
