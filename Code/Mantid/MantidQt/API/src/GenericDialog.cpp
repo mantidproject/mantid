@@ -82,35 +82,53 @@ void GenericDialog::initLayout()
   // Create and add the OK/Cancel/Help. buttons
   dialog_layout->addLayout(this->createDefaultButtonLayout(), 0);
 
-  QCoreApplication::processEvents();
+  // Mark the properties that will be forced enabled or disabled
+  QStringList enabled = m_enabled;
+  QStringList disabled = m_disabled;
+  // Disabled the python arguments
+  disabled += m_python_arguments;
+  m_propsWidget->addEnabledAndDisableLists(enabled, disabled);
+
 
   // At this point, all the widgets have been added and are visible.
   // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
   QWidget * viewport = m_propsWidget->m_viewport;
+  //QScrollArea * scroll = m_propsWidget->m_scroll;
   viewport->layout()->update();
+  // This makes the layout minimum size = that of the widgets inside
+  viewport->layout()->setSizeConstraint(QLayout::SetMinimumSize);
 
-  const int screenHeight = QApplication::desktop()->height();
-  const int dialogHeight = viewport->sizeHint().height();
+  QCoreApplication::processEvents();
+
+  int screenHeight = QApplication::desktop()->height();
+  int dialogHeight = viewport->sizeHint().height();
+
+//  std::cout << m_propsWidget->sizeHint().height() << " m_propsWidget->sizeHint().height()\n";
+//  std::cout << viewport->sizeHint().height() << " viewport->sizeHint().height()\n";
+//  std::cout << viewport->layout()->sizeHint().height() << " viewport->layout()->sizeHint().height\n";
+//  std::cout << m_propsWidget->size().height() << " m_propsWidget->size().height()\n";
+//  std::cout << viewport->size().height() << " viewport->size().height()\n";
+//  std::cout << this->size().height() << " this->size().height()\n";
 
   // If the thing won't end up too big compared to the screen height,
   // resize the scroll area so we don't get a scroll bar
   if ( (dialogHeight+100) < 0.8*screenHeight )
-    m_propsWidget->m_scroll->setFixedHeight(dialogHeight+10);
-
-  dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
+  {
+    m_propsWidget->m_scroll->setMinimumHeight(dialogHeight+10);
+    // Find the size that the dialog WANTS to be.
+    dialogHeight = this->sizeHint().height();
+//    int dialogWidth = this->sizeHint().height() + 25;
+    // But allow the scroll area to resize smaller again
+    m_propsWidget->m_scroll->setMinimumHeight(60);
+    // But resize the dialog again to its preferred size.
+    this->resize(this->width(), dialogHeight);
+  }
 
   // Set all previous values (from history, etc.)
   for( auto it = m_propsWidget->m_propWidgets.begin(); it != m_propsWidget->m_propWidgets.end(); it++)
   {
     this->setPreviousValue(it.value(), it.key());
   }
-
-  // Mark the properties that will be forced
-  QStringList enabled = m_enabled;
-  QStringList disabled = m_disabled;
-  // Disabled the python arguments
-  disabled += m_python_arguments;
-  m_propsWidget->addEnabledAndDisableLists(enabled, disabled);
 
   // Using the default values, hide or disable the dynamically shown properties
   m_propsWidget->hideOrDisableProperties();
