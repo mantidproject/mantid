@@ -921,6 +921,7 @@ namespace Mantid
     double MatrixWorkspace::detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const
     {
       Instrument_const_sptr instrument = getInstrument();
+
       Geometry::IObjComponent_const_sptr source = instrument->getSource();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
       if ( source == NULL || sample == NULL )

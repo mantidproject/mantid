@@ -29,6 +29,8 @@ The units currently available to this algorithm are listed [[Unit Factory|here]]
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <cfloat>
 #include <iostream>
 #include <limits>
@@ -53,6 +55,8 @@ void ConvertUnits::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using boost::function;
+using boost::bind;
 
 /// Default constructor
 ConvertUnits::ConvertUnits() : Algorithm(), m_numberOfSpectra(0), m_inputEvents(false)
@@ -441,9 +445,13 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     efixedProp = 0.0;
   }
 
+  std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
+  bool bUseSignedVersion = parameters.size() > 0 && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+  function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
+
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int64_t i = 0; i < numberOfSpectra_i; ++i)
+    for (int64_t i = 0; i < numberOfSpectra_i; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
@@ -460,7 +468,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
       {
         l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
-        twoTheta = outputWS->detectorTwoTheta(det);
+        twoTheta = thetaFunction(det);
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode==2) // indirect
         {

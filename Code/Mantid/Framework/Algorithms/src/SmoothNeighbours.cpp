@@ -543,7 +543,7 @@ void SmoothNeighbours::exec()
   boost::regex query("^(.*)managed(.*)$",boost::regex::icase);
   if (boost::regex_match(typeName, query))
   {
-    throw std::invalid_argument("SmoothNeighbours algorithm cannot be used with Managed Workspaces");
+    //throw std::invalid_argument("SmoothNeighbours algorithm cannot be used with Managed Workspaces");
   }
 
   // Retrieve the optional properties
