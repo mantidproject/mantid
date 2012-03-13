@@ -100,6 +100,27 @@ namespace API
     }
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Externally set an error string to display in the validator
+   *
+   * @param error :: string to show in the star, empty means no error
+   */
+  void PropertyWidget::setError(const QString & error)
+  {
+    m_error = error.trimmed();
+
+    // Show the invalid star if there was an error
+    if (m_error.isEmpty())
+      m_validLbl->setVisible(false);
+    else
+    {
+      m_validLbl->setVisible(true);
+      m_validLbl->setToolTip(m_error);
+    }
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Slot called when the value of the property had been changed.
    * This performs validation of the value and shows/hides that validator
@@ -124,16 +145,7 @@ namespace API
     {
       error = err_details.what();
     }
-    m_error = QString::fromStdString(error).trimmed();
-
-    // Show the invalid star if there was an error
-    if (m_error.isEmpty())
-      m_validLbl->setVisible(false);
-    else
-    {
-      m_validLbl->setVisible(true);
-      m_validLbl->setToolTip(m_error);
-    }
+    this->setError(QString::fromStdString(error).trimmed());
 
     // This will be caught by the GenericDialog.
     emit valueChanged( QString::fromStdString(m_prop->name()) ) ;

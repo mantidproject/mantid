@@ -344,6 +344,21 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
     }
   }
 
+  // Do additional validation on the WHOLE set of properties
+  std::map<std::string, std::string> errs = m_algorithm->validateInputs();
+  for (auto it = errs.begin(); it != errs.end(); it++)
+  {
+    const QString pName = QString::fromStdString(it->first);
+    const QString value = QString::fromStdString(it->second);
+    if (m_errors.contains(pName))
+      m_errors[pName] += "\n" + value;
+    else
+      m_errors[pName] = value;
+    // There is at least one whole-algo error
+    allValid = false;
+  }
+
+
   // OK all the values have been set once. Time to look for which should be enabled
   this->showValidators();
 

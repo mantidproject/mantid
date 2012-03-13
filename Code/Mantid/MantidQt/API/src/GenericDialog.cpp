@@ -149,6 +149,38 @@ void GenericDialog::parseInput()
   }
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * A slot that can be used to connect a button that accepts the dialog if
+ * all of the properties are valid
+ */
+void GenericDialog::accept()
+{
+  // Get property values
+  parse();
+
+  //Try and set and validate the properties and
+  if( setPropertyValues() )
+  {
+    //Store input for next time
+    saveInput();
+    QDialog::accept();
+  }
+  else
+  {
+    // Highlight the validators that are in error (combined from them + whole algorithm)
+    auto itr = m_propsWidget->m_propWidgets.begin();
+    for(; itr != m_propsWidget->m_propWidgets.end(); itr++ )
+    {
+      if (m_errors.contains(itr.key()))
+        itr.value()->setError( m_errors[itr.key()] );
+    }
+
+    QMessageBox::critical(this, "",
+              "One or more properties are invalid. The invalid properties are\n"
+        "marked with a *, hold your mouse over the * for more information." );
+  }
+}
 
 
 

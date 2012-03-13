@@ -75,6 +75,8 @@ namespace API
     Mantid::Kernel::Property * getProperty()
     { return m_prop; }
 
+    void setError(const QString & error);
+
   public slots:
     void replaceWSButtonClicked();
 
