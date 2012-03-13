@@ -57,7 +57,9 @@ public:
     if ( !offsets.isInitialized() ) offsets.initialize();
     TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace","temp_event_ws" ) );
     std::string outputWS("offsetsped");
+    std::string maskWS("masksped");
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
@@ -69,6 +71,11 @@ public:
     TS_ASSERT_DELTA( output->dataY(0)[0], -0.00196, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
+
+    MatrixWorkspace_const_sptr mask;
+    TS_ASSERT_THROWS_NOTHING( mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS) );
+    if (!mask) return;
+    TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
   }
 
 
@@ -91,7 +98,9 @@ public:
     if ( !offsets.isInitialized() ) offsets.initialize();
     TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace","temp_event_ws") );
     std::string outputWS("offsetsped");
+    std::string maskWS("masksped");
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
@@ -104,6 +113,12 @@ public:
     TS_ASSERT_EQUALS( output->getValue(1), output->getValue(3));
 
     AnalysisDataService::Instance().remove(outputWS);
+
+    MatrixWorkspace_const_sptr mask;
+    TS_ASSERT_THROWS_NOTHING( mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS) );
+    if (!mask) return;
+    TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
+
   }
 
 
