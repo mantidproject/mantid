@@ -168,13 +168,6 @@ private:
     }
   }
 
-  bool compareTime(TimeValueUnit<TYPE>& x, TimeValueUnit<TYPE>& y)
-  {
-    if (x.time() < y.time())
-      return true;
-    else
-      return false;
-  }
 
   /*
    * Find the index of the entry of time t in the mP vector (sorted)
@@ -481,6 +474,88 @@ private:
     countSize();
 
     return;
+  }
+
+
+  /*
+   * Find the index for nth value/interval
+   * No boundary condition should be considered
+   * Return:
+   */
+  std::pair<size_t, int> findNthIndex(int n) const
+  {
+    size_t index = 0;
+    int caseid = -1;
+    bool found = false;
+
+    for (size_t i = 0; i < mFilterQuickRef.size()-1; i ++)
+    {
+      if (static_cast<size_t>(n) >= mFilterQuickRef[i].second &&
+          static_cast<size_t>(n) <= mFilterQuickRef[i+1].second)
+      {
+        // The nth interval falls into this range
+        if (i%4 == 0 && mFilterQuickRef[i].second != mFilterQuickRef[i+1].second)
+        {
+          // i.  Filter time start... In this case, i == second
+          if (n != static_cast<int>(mFilterQuickRef[i].second) &&
+              n != static_cast<int>(mFilterQuickRef[i+1].second))
+          {
+            std::stringstream ss;
+            ss << "For Interval n = " << n << "  i = " << i <<
+                " Ref[i].second must be same as equal to n" << std::endl;
+            throw std::logic_error(ss.str());
+          }
+          else if (n == static_cast<int>(mFilterQuickRef[i+1].second))
+          {
+            // Fall into case (x, x+1) from filter to log.  while n == n+1.
+            // Best solution is to let it go to next iteration
+            continue;
+          }
+          else
+          {
+            caseid = 1;
+          }
+        } // ENDIF (i)
+        else if (i%4 == 0 && mFilterQuickRef[i+1].first >= mP.size())
+        {
+          // ii. Filter's quick reference is beyond log time range
+          caseid = 2;
+        }
+        else if (i%4 == 0 || i%4 == 1)
+        {
+          // iii. Filter time start on an log entry
+          caseid = 3;
+        }
+        else if (i%4 == 3)
+        {
+          // iii. Transition from one region to another.  Do nothing.  Not a regular one
+          continue;
+        }
+        else
+        {
+          std::stringstream ss;
+          ss << "This cannot happen! Index i = " << i << " for interval " << n
+              << "  in region " << mFilterQuickRef[i].second << " and "
+              << mFilterQuickRef[i+1].second << std::endl;
+          throw std::logic_error(ss.str());
+        }
+
+        // Clean the result
+        index = i;
+        found = true;
+        break;
+      } // If... in the region
+    } // ENDFOR Loop
+
+    // Organize the return
+    if (!found)
+    {
+      throw std::logic_error("nth is not found.  It cannot happend!");
+    }
+
+    std::pair<size_t, int> rp = std::make_pair(index, caseid);
+
+    return rp;
   }
 
 public:
@@ -1239,65 +1314,30 @@ public:
     // 1. Get sorted
     sort();
 
-    // 2. Define something
-    typename std::vector<TimeValueUnit<TYPE> >::iterator ith; // head
-    typename std::vector<TimeValueUnit<TYPE> >::iterator itt; // tail
-    typename std::vector<TimeValueUnit<TYPE> >::iterator it2; // 1/2
-
-    ith = mP.begin();
-    itt = mP.end()-1;
-
-    bool found = false;
+    // 2.
     TYPE value;
-    while(!found)
+    if (t < mP[0].time())
     {
-      if (t < ith->time())
-      {
-        // a) Falls out of lower bound
-        found = true;
-        value = ith->value();
-      }
-      else if (t > itt->time())
-      {
-        // b) Falls out of upper bound
-        found = true;
-        value = itt->value();
-      }
-      else if (ith == itt || int(itt-ith) == 1)
-      {
-        // c) Have the time located, between ith and itt
-        found = true;
-        if (t == itt->time())
-        {
-          value = itt->value();
-        }
-        else
-        {
-          value = ith->value();
-        }
-      }
-      else
-      {
-        // d) Split half...
-        it2 = mP.begin() + (int(itt-mP.begin())+int(ith-mP.begin()))/2;
-        if (t == it2->time())
-        {
-          // d1) middle
-          found = true;
-          value = it2->value();
-        }
-        else if (t < it2->time())
-        {
-          // d2) lower half
-          itt = it2;
-        }
-        else
-        {
-          // d3) upper half
-          ith = it2;
-        }
-      }
-    } // ENDWHILE
+      // 1. Out side of lower bound
+      value = mP[0].value();
+    }
+    else if (t >= mP.back().time())
+    {
+      // 2. Out side of upper bound
+      value = mP.back().value();
+    }
+    else
+    {
+      // 3. Within boundary
+      int index = this->findIndex(t);
+
+      std::cout << "DB512:  Index = " << index << "  for t = " << t << std::endl;
+
+      if (index < 0 || index >= int(mP.size()))
+        throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
+
+      value = mP[static_cast<size_t>(index)].value();
+    }
 
     return value;
   }
@@ -1337,149 +1377,124 @@ public:
     // 1. Sort
     sort();
 
-    // I. No filter
+    // 2. Calculate time interval
+
+    Kernel::TimeInterval deltaT;
+
     if (mFilter.size() == 0)
     {
-
+      // I. No filter
       if (n >= static_cast<int>(mP.size()))
       {
         // 1. Out of bound
-        return Kernel::TimeInterval();
+        ;
       }
       else if (n == static_cast<int>(mP.size())-1)
       {
         // 2. Last one by making up an end time.
         time_duration d = mP.rbegin()->time() - (mP.rbegin()+1)->time();
         DateAndTime endTime = mP.rbegin()->time() + d;
-        return TimeInterval(mP.rbegin()->time(), endTime);
+        Kernel::TimeInterval dt(mP.rbegin()->time(), endTime);
+        deltaT = dt;
       }
       else
       {
         // 3. Regular
         DateAndTime startT = mP[n].time();
         DateAndTime endT = mP[n+1].time();
-        return TimeInterval(startT, endT);
+        TimeInterval dt(startT, endT);
+        deltaT = dt;
       }
-    }
-
-    // II. Filter
-    // II.0 apply Filter
-    this->applyFilter();
-
-    if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
-    {
-      // 1. n > size of the allowed region, do nothing to dt
-      return Kernel::TimeInterval();
-    }
-    else if (static_cast<size_t>(n) == mFilterQuickRef.back().second+1)
-    {
-      // 2. n = size of the allowed region, duplicate the last one
-      size_t ind_t1 = mFilterQuickRef.back().first;
-      size_t ind_t2 = ind_t1-1;
-      Kernel::DateAndTime t1 = (mP.begin()+ind_t1)->time();
-      Kernel::DateAndTime t2 = (mP.begin()+ind_t2)->time();
-      time_duration d = t1-t2;
-      Kernel::DateAndTime t3 = t1+d;
-      return Kernel::TimeInterval(t1, t3);
     }
     else
     {
-      // 3. n < size
-      Kernel::DateAndTime t0;
-      Kernel::DateAndTime tf;
+      // II. Filter
+      // II.0 apply Filter
+      this->applyFilter();
 
-      // TODO Use linear search (low efficiency) at first to prove the algorithm of filter works
-
-      // a) Search for n
-      for (size_t i = 0; i < mFilterQuickRef.size()-1; i ++)
+      if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
       {
-        if (static_cast<size_t>(n) >= mFilterQuickRef[i].second &&
-            static_cast<size_t>(n) <= mFilterQuickRef[i+1].second)
+        // 1. n > size of the allowed region, do nothing to dt
+        ;
+      }
+      else if (static_cast<size_t>(n) == mFilterQuickRef.back().second+1)
+      {
+        // 2. n = size of the allowed region, duplicate the last one
+        size_t ind_t1 = mFilterQuickRef.back().first;
+        size_t ind_t2 = ind_t1-1;
+        Kernel::DateAndTime t1 = (mP.begin()+ind_t1)->time();
+        Kernel::DateAndTime t2 = (mP.begin()+ind_t2)->time();
+        time_duration d = t1-t2;
+        Kernel::DateAndTime t3 = t1+d;
+        Kernel::TimeInterval dt(t1, t3);
+        deltaT = dt;
+      }
+      else
+      {
+        // 3. n < size
+        Kernel::DateAndTime t0;
+        Kernel::DateAndTime tf;
+
+        std::pair<size_t, int> indcase = this->findNthIndex(n);
+
+        if (indcase.second == 1)
         {
-          // The nth interval falls into this range
-          if (i%4 == 0 && mFilterQuickRef[i].second != mFilterQuickRef[i+1].second)
+          // Case 1: Filter-Log
+          size_t it0 = mFilterQuickRef[indcase.first].first;
+          size_t itf = mFilterQuickRef[indcase.first+1].first;
+          t0 = Kernel::DateAndTime(mFilter[it0].first);
+          tf = Kernel::DateAndTime(mP[itf].time());
+        }
+        else if (indcase.second == 2)
+        {
+          // Case 2: Filter's quick reference is beyond log time range
+          size_t it0 = mFilterQuickRef[indcase.first].first;
+          size_t itf = mFilterQuickRef[indcase.first+3].first;
+          t0 = mFilter[it0].first;
+          tf = mFilter[itf].first;
+        }
+        else if (indcase.second == 3)
+        {
+          // Case 3: Filter-Filter
+          size_t i2;
+          if (indcase.first%4 == 0)
+            i2 = indcase.first+1;
+          else
+            i2 = indcase.first;
+
+          size_t it0 = mFilterQuickRef[i2].first + (n-mFilterQuickRef[i2].second);
+          t0 = mP[it0].time();
+
+          size_t itf;
+          if (it0 != mFilterQuickRef[i2+1].first)
           {
-            // i.  Filter time start... In this case, i == second
-            if (n != static_cast<int>(mFilterQuickRef[i].second) &&
-                n != static_cast<int>(mFilterQuickRef[i+1].second))
-            {
-              // std::cout << "Interval n = " << n << "  i = " << i << std::endl;
-              throw std::logic_error("In this case, Ref[i].second must be same as equal to 0");
-            }
-            if (n == static_cast<int>(mFilterQuickRef[i+1].second))
-            {
-              // Fall into case (x, x+1) from filter to log.  while n == n+1.
-              // Best solution is to let it go to next iteration
-              continue;
-            }
-
-            size_t it0 = mFilterQuickRef[i].first;
-            size_t itf = mFilterQuickRef[i+1].first;
-            t0 = Kernel::DateAndTime(mFilter[it0].first);
-            tf = Kernel::DateAndTime(mP[itf].time());
-
-          } // IF (i)
-          else if (i%4 == 0 && mFilterQuickRef[i+1].first >= mP.size())
-          {
-            // ii.  Filer quick referrence's time is beyond log time
-            size_t it0 = mFilterQuickRef[i].first;
-            size_t itf = mFilterQuickRef[i+3].first;
-            t0 = mFilter[it0].first;
-            tf = mFilter[itf].first;
-
-          } // ENDIF (ii)
-          else if (i%4 == 0 || i%4 == 1)
-          {
-            // iii. Filter time start on an log entry
-            size_t i2;
-            if (i%4 == 0)
-              i2 = i+1;
-            else
-              i2 = i;
-
-            size_t it0 = mFilterQuickRef[i2].first + (n-mFilterQuickRef[i2].second);
-            t0 = mP[it0].time();
-
-            size_t itf;
-            if (it0 != mFilterQuickRef[i2+1].first)
-            {
-              // From log to log
-              itf = it0 + 1;
-              tf = mP[itf].time();
-            }
-            else
-            {
-              // From log to filter
-              itf = mFilterQuickRef[i2+2].first;
-              tf = mFilter[itf].first;
-            }
-
-          } // IF (ii)
-          else if (i%4 == 3)
-          {
-            // iii. Transition from one region to another.  Do nothing.  Not a regular one
-            continue;
+            // From log to log
+            itf = it0 + 1;
+            tf = mP[itf].time();
           }
           else
           {
-            std::cout << "Index i = " << i << " for interval " << n
-                << "  in region " << mFilterQuickRef[i].second << " and "
-                << mFilterQuickRef[i+1].second << std::endl;
-            throw std::logic_error("This cannot happen!");
+            // From log to filter
+            itf = mFilterQuickRef[i2+2].first;
+            tf = mFilter[itf].first;
           }
+        }
+        else
+        {
+          // Not supported case
+          std::stringstream ss;
+          ss << "Case " << indcase.second << " returned from findNthIndex() is not defined" << std::endl;
+          throw std::logic_error(ss.str());
+        } // END-IF-ELSE Case.Second
 
-          return Kernel::TimeInterval(t0, tf);
-        } // If... in the region
-      } // ENDFOR Loop
+        Kernel::TimeInterval dt(t0, tf);
+        deltaT = dt;
+      } // END-IF-ELSE Cases
+    }
 
-      // b) Tell whether dt will be in filter or next log
-      throw std::runtime_error("To be continued");
-
-      return Kernel::TimeInterval();
-    } // END-IF-ELSE Cases
-
-    return Kernel::TimeInterval();
+    return deltaT;
   }
+
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th value of n-th interval in an incredibly inefficient way.
    *  The algorithm is migrated from mthInterval()
@@ -1516,13 +1531,11 @@ public:
       // 4. Situation 2: There is filter
       this->applyFilter();
 
-      bool valuefound = false;
       if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
       {
         // 1. n >= size of the allowed region
         size_t ilog = (mFilterQuickRef.rbegin()+1)->first;
         value = mP[ilog].value();
-        valuefound = true;
       }
       else
       {
@@ -1530,88 +1543,44 @@ public:
         Kernel::DateAndTime t0;
         Kernel::DateAndTime tf;
 
-        // TODO Use linear search (low efficiency) at first to prove the algorithm of filter works
+        std::pair<size_t, int> indcase = this->findNthIndex(n);
 
-        // a) Search for n
-        for (size_t i = 0; i < mFilterQuickRef.size()-1; i ++)
+        if (indcase.second == 1)
         {
-          if (static_cast<size_t>(n) >= mFilterQuickRef[i].second &&
-              static_cast<size_t>(n) <= mFilterQuickRef[i+1].second)
+          // Case 1: Filter-Log
+          size_t itf = mFilterQuickRef[indcase.first+1].first;
+          if (itf == 0)
           {
-            // The nth interval falls into this range
-            if (i%4 == 0 && mFilterQuickRef[i].second != mFilterQuickRef[i+1].second)
-            {
-              // i.  Filter time start... In this case, i == second
-              if (n != static_cast<int>(mFilterQuickRef[i].second) &&
-                  n != static_cast<int>(mFilterQuickRef[i+1].second))
-              {
-                // std::cout << "Interval n = " << n << "  i = " << i << std::endl;
-                throw std::logic_error("In this case, Ref[i].second must be same as equal to 0");
-              }
-              if (n == static_cast<int>(mFilterQuickRef[i+1].second))
-              {
-                // Fall into case (x, x+1) from filter to log.  while n == n+1.
-                // Best solution is to let it go to next iteration
-                continue;
-              }
-
-              // size_t it0 = mFilterQuickRef[i].first;
-              size_t itf = mFilterQuickRef[i+1].first;
-
-              if (itf == 0)
-              {
-                value =mP[itf].value();
-              }
-              else
-              {
-                value = mP[itf-1].value();
-              }
-              valuefound = true;
-
-            } // ENDIF (i)
-            else if (i%4 == 0 && mFilterQuickRef[i+1].first >= mP.size())
-            {
-              valuefound = true;
-              value = mP.back().value();
-            }
-            else if (i%4 == 0 || i%4 == 1)
-            {
-              // ii. Filter time start on an log entry
-              size_t i2;
-              if (i%4 == 0)
-                i2 = i+1;
-              else
-                i2 = i;
-
-              size_t it0 = mFilterQuickRef[i2].first + (n-mFilterQuickRef[i2].second);
-              value = mP[it0].value();
-              valuefound = true;
-            }
-            else if (i%4 == 3)
-            {
-              // iii. Transition from one region to another.  Do nothing.  Not a regular one
-              continue;
-            }
-            else
-            {
-              std::cout << "Index i = " << i << " for interval " << n
-                  << "  in region " << mFilterQuickRef[i].second << " and "
-                  << mFilterQuickRef[i+1].second << std::endl;
-              throw std::logic_error("This cannot happen!");
-            }
-          } // If... in the region
-
-          if (valuefound)
-            break;
-
-        } // ENDFOR Loop
-
-        if (!valuefound)
-        {
-          value = mP[0].value();
-          throw std::logic_error("It is impossible not to find a value");
+            value =mP[itf].value();
+          }
+          else
+          {
+            value = mP[itf-1].value();
+          }
         }
-
+        else if (indcase.second == 2)
+        {
+          // Case 2: Filter reference is beyond log time range
+          value = mP.back().value();
+        }
+        else if (indcase.second == 3)
+        {
+          // Case 3. Log-Log case
+          size_t i2;
+          if (indcase.first%4 == 0)
+            i2 = indcase.first+1;
+          else
+            i2 = indcase.first;
+          size_t it0 = mFilterQuickRef[i2].first + (n-mFilterQuickRef[i2].second);
+          value = mP[it0].value();
+        }
+        else
+        {
+          // Error case
+          std::stringstream ss;
+          ss << "findNthIndex return case " << indcase.second << ".  It is not defined!" << std::endl;
+          throw std::logic_error(ss.str());
+        }
       } // END-IF-ELSE Cases
     }
 
