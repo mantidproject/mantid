@@ -7,7 +7,9 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Property.h"
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::Geometry::Instrument;
@@ -276,9 +278,41 @@ public:
     TS_ASSERT(!pID->isEnabled());
     TS_ASSERT(!pID->isConditionChanged());
 
-
+  }
+  void testIsConditionChanged(){
+        NormaliseToMonitor norm6;
+        norm6.initialize();
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","normMon"));
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("OutputWorkspace","normMon6"));
+        std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(&norm6,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+        // first time in a row the condition has changed as it shluld read the monitors from the workspace
+        TS_ASSERT(pID->isConditionChanged());
+        // and second time the monitons should be the same so no changes
+        TS_ASSERT(!pID->isConditionChanged());
 
   }
+   void testAlgoConditionChanged(){
+        NormaliseToMonitor norm6;
+        norm6.initialize();
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","normMon"));
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("OutputWorkspace","normMon6"));
+
+        
+        Property* monSpec = norm6.getProperty("MonitorID");
+        // this function is usually called by GUI when senning input workspace. It should read monitors and report the condition changed
+        TS_ASSERT(monSpec->isConditionChanged());
+        // this funciton is called by gui when the above is true. It should not throw and change the validator
+        IPropertySettings *pSett;
+        TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
+        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(monSpec));
+        // it should return the list of allowed monitor ID-s
+        std::set<std::string> monitors = monSpec->allowedValues();
+        TS_ASSERT_EQUALS(1,monitors.size());
+        TS_ASSERT_EQUALS("0",*(monitors.begin()));
+
+   }
+
+
 
 };
 

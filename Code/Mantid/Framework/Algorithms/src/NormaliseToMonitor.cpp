@@ -217,7 +217,7 @@ void NormaliseToMonitor::init()
   // Or take monitor ID to identify the spectrum one wish to use or
    declareProperty("MonitorID",-1,
        "The monitor ID (pixelID), which defines the monitor spectrum within the InputWorkspace. Will be overridden by Monitor spectrum if one is provided in the field above.\n"
-       "If worskpace do not have monitors, the monitor's ID can refer to empty spectra.");
+       "If workspace do not have monitors, the MonitorID can refer to empty spectra and will accept any monitorID within the InputWorkspace.");
    // set up the validator, which would verify if spectrum is correct
    setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
@@ -272,7 +272,8 @@ void NormaliseToMonitor::exec()
  */
 void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspace)
 {
-  // Check where the monitor spectrum should come from
+
+   // Check where the monitor spectrum should come from
   Property* monSpec = getProperty("MonitorSpectrum");
   Property* monWS   = getProperty("MonitorWorkspace");
   Property* monID   = getProperty("MonitorID");
@@ -281,7 +282,7 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   // Or is it in a separate workspace
   bool sepWS = !monWS->isDefault();
   // or monitor ID
-  bool monIDs = !monID->isDefault();
+  bool monIDs = !monID->isDefault();  
   // something has to be set
   if ( !inWS && !sepWS && !monIDs)
   {
@@ -311,9 +312,10 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   // Do a check for common binning and store
   m_commonBins = API::WorkspaceHelpers::commonBoundaries(inputWorkspace);
 
-  int spec_num(-1);
+  
+   int spec_num(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
-  m_monitor = sepWS ? this->getMonitorWorkspace(inputWorkspace) : this->getInWSMonitorSpectrum(inputWorkspace,spec_num) ;
+  m_monitor = sepWS ? this->getMonitorWorkspace(inputWorkspace,spec_num) : this->getInWSMonitorSpectrum(inputWorkspace,spec_num) ;
 
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if not
   try {
@@ -382,13 +384,13 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
  *  @returns A workspace containing the monitor spectrum only
  *  @throw std::runtime_error If the properties are invalid
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace)
+API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace,int &wsID)
 {
   // Get the workspace from the ADS. Will throw if it's not there.
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
-  int monitorSpec = getProperty("MonitorWorkspaceIndex");
+  wsID = getProperty("MonitorWorkspaceIndex");
   // Check that it's a single spectrum workspace
-  if ( static_cast<int>(monitorWS->getNumberHistograms()) < monitorSpec+1 )
+  if ( static_cast<int>(monitorWS->getNumberHistograms()) < wsID )
   {
     throw std::runtime_error("The MonitorWorkspace must contain the MonitorWorkspaceIndex");
   }
@@ -408,7 +410,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
                   API::WorkspaceHelpers::matchingBins(inputWorkspace,monitorWS,true) );
 
   // If the workspace passes all these tests, make a local copy because it will get changed
-  return this->extractMonitorSpectrum(monitorWS,monitorSpec);
+  return this->extractMonitorSpectrum(monitorWS,wsID);
 }
 
 /** Pulls the monitor spectrum out of a larger workspace

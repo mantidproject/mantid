@@ -86,7 +86,7 @@ private:
 protected: // for testing
   void checkProperties(API::MatrixWorkspace_sptr inputWorkspace);
   API::MatrixWorkspace_sptr getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace, int &spectra_num);
-  API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace,int &workspaceIndex);
   API::MatrixWorkspace_sptr extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index);
   bool setIntegrationProps();
 
