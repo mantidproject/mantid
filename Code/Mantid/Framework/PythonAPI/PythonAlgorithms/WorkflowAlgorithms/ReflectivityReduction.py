@@ -212,7 +212,6 @@ class ReflectivityReduction(PythonAlgorithm):
         if self.getProperty("PerformNormalization"):
             self._output_message += "   Normalization:\n"
             ws_wl_profile = self._process_normalization()
-            CloneWorkspace(ws_wl_profile, ws_wl_profile+'_nomode')
             RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
                              WorkspaceToMatch=ws_name,
                              OutputWorkspace=ws_wl_profile)
@@ -492,4 +491,4 @@ class ReflectivityReduction(PythonAlgorithm):
         
         return ws_name
                                
-#mtd.registerPyAlgorithm(ReflectivityReduction())
+mtd.registerPyAlgorithm(ReflectivityReduction())

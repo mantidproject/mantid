@@ -361,9 +361,11 @@ class RefMReduction(PythonAlgorithm):
                                 Z=sdd-det_distance, RelativePosition=True)        
         
         # Rebin and crop out both sides of the TOF distribution
+        nbins = self.getProperty("NBins")
         if self.TOFrange[0] == self.TOFrange[1]:
             self.TOFrange[0] = min(mtd[ws_name_raw].readX(0))
             self.TOFrange[1] = max(mtd[ws_name_raw].readX(0))
+        self.TOFsteps = (self.TOFrange[1]-self.TOFrange[0])/nbins
         Rebin(InputWorkspace=ws_name_raw, OutputWorkspace=ws_name, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]], PreserveEvents=True)
         
         # Normalized by Current (proton charge)
@@ -371,7 +373,6 @@ class RefMReduction(PythonAlgorithm):
         
         # Convert to wavelength and rebin to ensure we have common bins for all pixels
         ConvertUnits(InputWorkspace=ws_name, Target="Wavelength", OutputWorkspace=ws_name)
-        nbins = self.getProperty("NBins")
         
         wave_x = mtd[ws_name].readX(0)
         wl_min = min(wave_x)

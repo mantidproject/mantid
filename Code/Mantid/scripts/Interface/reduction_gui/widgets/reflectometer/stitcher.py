@@ -210,6 +210,12 @@ class StitcherWidget(BaseWidget):
             return
 
     def _apply(self):
+        try:
+            self._scale_data_sets()
+        except:
+            mtd.sendLogMessage("Could not scale data")
+            
+    def _scale_data_sets(self):
         """
             Perform auto-scaling
         """
