@@ -220,10 +220,10 @@ public:
     norm3.initialize();
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorSpectrum","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspaceIndex","0") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") )
     TS_ASSERT_THROWS_NOTHING( norm3.execute() )
-    TS_ASSERT( ! norm3.isExecuted() )
+    TS_ASSERT(  norm3.isExecuted() )
   }
 
   void testSeparateWorkspaceWithRebin()

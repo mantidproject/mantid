@@ -128,23 +128,34 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
             return true;
         }
     }
-    std::vector<int> allowed_values;
-    allowed_values.resize(mon.size());  
-    for(size_t i=0;i<mon.size();i++){
-        allowed_values[i]=mon[i];
+    // are these monitors really there?
+    // got the index of correspondent spectras (should be only one). 
+    std::vector<size_t>  indexList;
+    inputWS->getIndicesFromDetectorIDs(mon,indexList);
+    if(indexList.empty()){
+        if(iExistingAllowedValues.empty()){ 
+            return false;
+        }else{
+            iExistingAllowedValues.clear();
+            return true;
+        }
     }
-    if(iExistingAllowedValues.empty()){
-        iExistingAllowedValues.assign(allowed_values.begin(),allowed_values.end());
-        return true;
+    //ASSUME?  index list can be less or equal to mon size
+    size_t mon_count = (mon.size()<indexList.size())?mon.size():indexList.size();
+    std::vector<int> allowed_values(mon_count);
+    for(size_t i=0;i<mon_count;i++){
+          allowed_values[i]=mon[i];
     }
-    if(iExistingAllowedValues.size()!=allowed_values.size()){
+    
+  // are known values the same as the values we have just identified?
+    if(iExistingAllowedValues.size()!=mon_count){
         iExistingAllowedValues.clear();
         iExistingAllowedValues.assign(allowed_values.begin(),allowed_values.end());
         return true;
     }
 
     bool values_redefined=false;
-    for(size_t i=0;i<iExistingAllowedValues.size();i++){
+    for(size_t i=0;i<mon_count;i++){
         if(iExistingAllowedValues[i]!=allowed_values[i]){
             values_redefined=true;
             iExistingAllowedValues[i]=allowed_values[i];
@@ -152,19 +163,6 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
     }
     return values_redefined;
 }
-
-//// the class to verify and modify interconnected properties affecting the different ways to normalize ws by this ws spectrum. 
-//class EnabledIfWs2Enabled: public Kernel::IPropertySettings
-//{
-//    bool is_enabled;
-//    // the pointer to the main host algorithm.
-//    Kernel::IPropertyManager * host_algo;
-//public:
-//    EnabledIfWs2Enabled(Kernel::IPropertyManager * algo,const std::string &MonWSProperty):
-//      is_enabled(true),host_algo(algo){
-//      };
-//
-//};
 
 
 // Register with the algorithm factory
@@ -213,11 +211,13 @@ void NormaliseToMonitor::init()
   // should be any spectrum ID, but named this property MonitorSpectrum to keep compartibility with previous scripts
   // Can either set a spectrum within the workspace to be the monitor spectrum.....
   declareProperty("MonitorSpectrum",-1,
-      "The spectrum number within the InputWorkspace you want to normalize by (usually monitor spectrum but can be any)",Direction::InOut);
+      "The spectrum number within the InputWorkspace you want to normalize by (It can be a monitor spectrum or a spectrum responsible for a group of detectors or monitors)",
+       Direction::InOut);
 
   // Or take monitor ID to identify the spectrum one wish to use or
    declareProperty("MonitorID",-1,
-    "The monitor ID, which defines the monitor spectrum within the InputWorkspace. Will be overridden by Monitor spectrum if one is provided in the field above");
+       "The monitor ID (pixelID), which defines the monitor spectrum within the InputWorkspace. Will be overridden by Monitor spectrum if one is provided in the field above.\n"
+       "If worskpace do not have monitors, the monitor's ID can refer to empty spectra.");
    // set up the validator, which would verify if spectrum is correct
    setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
@@ -225,9 +225,10 @@ void NormaliseToMonitor::init()
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
     "A workspace containing the monitor spectrum");
   setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
-  declareProperty("MonitorWorkspaceSpectrum",0,
-      "The spectrum number within the MonitorWorkspace you want to normalize by (usually monitor spectrum but can be any)",Direction::InOut);
-  setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
+  declareProperty("MonitorWorkspaceIndex",0,
+      "The index of the spectrum within the MonitorWorkspace (0<=ind<=nHistohrams in Monitor Workspace) you want to normalize by (usually the monitor spectrum but can be any)"
+      "If no value is provided in this field, '''InputWorkspace''' will be normalized by first spectra (with index 0)",Direction::InOut);
+  setPropertySettings("MonitorWorkspaceIndex",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
   // 1) normalisation is by an integrated count instead of bin-by-bin
@@ -280,9 +281,9 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   // Or is it in a separate workspace
   bool sepWS = !monWS->isDefault();
   // or monitor ID
-  bool monSP = !monID->isDefault();
+  bool monIDs = !monID->isDefault();
   // something has to be set
-  if ( !inWS && !sepWS && !monSP)
+  if ( !inWS && !sepWS && !monIDs)
   {
     const std::string mess("Neither the MonitorSpectrum, nor the MonitorID or the MonitorWorkspace property has been set");
     g_log.error()<<mess<<std::endl;
@@ -290,11 +291,20 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   }
   // One and only one of these properties should have been set
   // input from separate workspace is owerwritten by monitor spectrum
-  if ( inWS && sepWS )sepWS = false;
+  if ( inWS && sepWS ){
+      g_log.information("Both input workspace MonitorSpectrum number and monitor workspace are specified. Ignoring Monitor Workspace");
+      sepWS = false;
+  }
   // input from detector ID is rejected in favour of monitor sp 
-  if ( inWS && monSP )monSP = false;
-  // separate ws takes over detectorID (does it checked?)
-  if ( sepWS && monSP )monSP = false;
+  if ( inWS && monIDs ){
+      g_log.information("Both input workspace MonitorSpectrum number and detector ID are specified. Ignoring Detector ID");
+      monIDs = false;
+  }
+  // separate ws takes over detectorID (this logic is dublicated within  getInWSMonitorSpectrum)
+  if ( sepWS && monIDs ){
+      g_log.information("Both input MonitorWorkspace and detector ID are specified. Ignoring Detector ID");
+      monIDs= false;
+  }
 
 
 
@@ -333,7 +343,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
 // try monitor spectrum. If it is specified, it overides everything
   int monitorSpec = getProperty("MonitorSpectrum");
   if(monitorSpec<0){ 
-      // Get hold of the monitor spectrum
+      // Get hold of the monitor spectrum through detector ID
     int monitorID = getProperty("MonitorID");
     if (monitorID < 0) {
         throw std::runtime_error("Both MonitorSpectrum and MonitorID can not be negative");
@@ -376,11 +386,11 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
 {
   // Get the workspace from the ADS. Will throw if it's not there.
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
-  int monitorSpec = getProperty("MonitorWorkspaceSpectrum");
+  int monitorSpec = getProperty("MonitorWorkspaceIndex");
   // Check that it's a single spectrum workspace
   if ( static_cast<int>(monitorWS->getNumberHistograms()) < monitorSpec+1 )
   {
-    throw std::runtime_error("The MonitorWorkspace must contain the MonitorWorkspaceSpectrum");
+    throw std::runtime_error("The MonitorWorkspace must contain the MonitorWorkspaceIndex");
   }
   // Check that the two workspace come from the same instrument
   if ( monitorWS->getInstrument()->getName() != inputWorkspace->getInstrument()->getName() )
