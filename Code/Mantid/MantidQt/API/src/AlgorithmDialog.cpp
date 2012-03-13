@@ -25,9 +25,13 @@
 #include <QSignalMapper>
 #include "MantidQtAPI/FilePropertyWidget.h"
 #include "MantidQtAPI/PropertyWidgetFactory.h"
+#include <qcheckbox.h>
+#include <QtGui>
+#include "MantidKernel/DateAndTime.h"
 
 using namespace MantidQt::API;
 using Mantid::API::IAlgorithm;
+using Mantid::Kernel::DateAndTime;
 
 //------------------------------------------------------
 // Public member functions
@@ -828,16 +832,18 @@ QString AlgorithmDialog::getValue(QWidget *widget)
   {
     return textfield->text().trimmed();
   }
-  else if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
+  else if( QAbstractButton *checker = qobject_cast<QAbstractButton*>(widget) )
   {
-    if( checker->checkState() == Qt::Checked )
-    {
+    if(checker->isChecked())
       return QString("1");
-    }
     else
-    {
       return QString("0");
-    }
+  }
+  else if( QDateTimeEdit *dateEdit = qobject_cast<QDateTimeEdit*>(widget) )
+  {
+    // String in ISO8601 format /* add toUTC() to go from local time */
+    QString value = dateEdit->dateTime().toString(Qt::ISODate);
+    return value;
   }
   else if( MantidWidget *mtd_widget = qobject_cast<MantidWidget*>(widget) )
   {
@@ -898,20 +904,23 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString & propName
     }
     return;
   }
-  if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
+  if( QAbstractButton *checker = qobject_cast<QAbstractButton*>(widget) )
   {
     if( value.isEmpty() && dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(property) )
-    {
       value = QString::fromStdString(property->value());
-    }
-    if( value == "0" )
-    {
-      checker->setCheckState(Qt::Unchecked);
-    }
-    else
-    {
-      checker->setCheckState(Qt::Checked);
-    }
+    checker->setChecked(value != "0");
+    return;
+  }
+  if( QDateTimeEdit *dateEdit = qobject_cast<QDateTimeEdit*>(widget) )
+  {
+    // String in ISO8601 format
+    DateAndTime t = DateAndTime::getCurrentTime();
+    try
+    { t.setFromISO8601(value.toStdString()); }
+    catch (std::exception &)
+    { }
+    dateEdit->setDate( QDate(t.year(), t.month(), t.day()) );
+    dateEdit->setTime( QTime(t.hour(), t.minute(), t.second(), 0) );
     return;
   }
 

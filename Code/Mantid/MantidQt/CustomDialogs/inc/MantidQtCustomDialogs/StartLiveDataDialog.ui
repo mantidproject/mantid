@@ -68,7 +68,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radNow_2">
+             <widget class="QRadioButton" name="radStartOfRun">
               <property name="toolTip">
                <string>Start processing data from the beginning of the current run</string>
               </property>
@@ -95,7 +95,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QRadioButton" name="radNow_3">
+             <widget class="QRadioButton" name="radAbsoluteTime">
               <property name="toolTip">
                <string>Start collecting data from a specific time:</string>
               </property>
@@ -109,8 +109,14 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="displayFormat">
-               <string>MM/dd/yy hh:mm:ss AP</string>
+               <string>MM/dd/yyyy hh:mm:ss AP</string>
               </property>
              </widget>
             </item>

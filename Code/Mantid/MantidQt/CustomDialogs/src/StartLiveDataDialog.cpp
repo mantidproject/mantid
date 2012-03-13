@@ -8,6 +8,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include <QtCore/qvariant.h>
 #include <QtCore/qstringlist.h>
+#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/SingletonHolder.h"
+#include <QtGui>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -21,6 +25,8 @@ namespace CustomDialogs
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
+using Mantid::API::Algorithm_sptr;
+using Mantid::Kernel::DateAndTime;
 
 //----------------------
 // Public member functions
@@ -37,12 +43,19 @@ void StartLiveDataDialog::initLayout()
 {
   ui.setupUi(this);
 
+  // ========== Set previous values from history =============
   fillAndSetComboBox("Instrument", ui.cmbInstrument);
   tie(ui.edtUpdateEvery, "UpdateEvery", ui.layoutUpdateEvery);
-//  tie(ui.editAccumulationWorkspace, "AccumulationWorkspace");
-//  tie(ui.editOutputWorkspace, "OutputWorkspace");
   fillAndSetComboBox("AccumulationMethod", ui.cmbAccumulationMethod);
-//  tie(ui.cmbAccumulationMethod, "AccumulationMethod");
+
+  tie(ui.radNow, "FromNow");
+  tie(ui.radStartOfRun, "FromStartOfRun");
+  tie(ui.radAbsoluteTime, "FromTime");
+  tie(ui.dateTimeEdit, "StartTime");
+  radioTimeClicked();
+
+  tie(ui.editAccumulationWorkspace, "AccumulationWorkspace", ui.gridLayout);
+  tie(ui.editOutputWorkspace, "OutputWorkspace", ui.gridLayout);
 
   // ========== Update GUIs =============
   ui.processingAlgoSelector->update();
@@ -64,6 +77,8 @@ void StartLiveDataDialog::initLayout()
   //=========== SLOTS =============
   connect(ui.processingAlgoSelector, SIGNAL(algorithmSelectionChanged(const QString &, int)),
       this, SLOT(changeProcessingAlgorithm()));
+  connect(ui.postAlgoSelector, SIGNAL(algorithmSelectionChanged(const QString &, int)),
+      this, SLOT(changePostProcessingAlgorithm()));
 
   connect(ui.radProcessNone, SIGNAL(toggled(bool)), this, SLOT(radioProcessClicked()));
   connect(ui.radProcessAlgorithm, SIGNAL(toggled(bool)), this, SLOT(radioProcessClicked()));
@@ -72,6 +87,10 @@ void StartLiveDataDialog::initLayout()
   connect(ui.radPostProcessNone, SIGNAL(toggled(bool)), this, SLOT(radioPostProcessClicked()));
   connect(ui.radPostProcessAlgorithm, SIGNAL(toggled(bool)), this, SLOT(radioPostProcessClicked()));
   connect(ui.radPostProcessScript, SIGNAL(toggled(bool)), this, SLOT(radioPostProcessClicked()));
+
+  connect(ui.radNow, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
+  connect(ui.radStartOfRun, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
+  connect(ui.radAbsoluteTime, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
 
   QHBoxLayout * buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
@@ -82,18 +101,18 @@ void StartLiveDataDialog::initLayout()
 void StartLiveDataDialog::parseInput()
 {
   storePropertyValue("Instrument", ui.cmbInstrument->currentText());
-  storePropertyValue("StartTime", "2001-01-01"); //FIXME
-  storePropertyValue("UpdateEvery", ui.edtUpdateEvery->text());
   storePropertyValue("AccumulationMethod", ui.cmbAccumulationMethod->currentText());
+
   storePropertyValue("AccumulationWorkspace", ui.editAccumulationWorkspace->text());
+  if (!m_usePostProcessAlgo && !m_usePostProcessScript)
+    storePropertyValue("AccumulationWorkspace", "");
+
   storePropertyValue("OutputWorkspace", ui.editOutputWorkspace->text());
+
   storePropertyValue("ProcessingAlgorithm", "");
   storePropertyValue("ProcessingProperties", "");
   storePropertyValue("ProcessingScript", "");
-  storePropertyValue("PostProcessingAlgorithm", "");
-  storePropertyValue("PostProcessingProperties", "");
-  storePropertyValue("PostProcessingScript", "");
-  if (m_useProcessAlgo)
+  if (m_useProcessAlgo && m_processingAlg)
   {
     storePropertyValue("ProcessingAlgorithm", ui.processingAlgoSelector->getSelectedAlgorithm());
     std::string props;
@@ -102,6 +121,19 @@ void StartLiveDataDialog::parseInput()
   }
   else if (m_useProcessScript)
     storePropertyValue("ProcessingScript", ui.processingScript->text());
+
+  storePropertyValue("PostProcessingAlgorithm", "");
+  storePropertyValue("PostProcessingProperties", "");
+  storePropertyValue("PostProcessingScript", "");
+  if (m_usePostProcessAlgo && m_postProcessingAlg)
+  {
+    storePropertyValue("PostProcessingAlgorithm", ui.postAlgoSelector->getSelectedAlgorithm());
+    std::string props;
+    props = m_postProcessingAlg->asString();
+    storePropertyValue("PostProcessingProperties", QString::fromStdString(props));
+  }
+  else if (m_usePostProcessScript)
+    storePropertyValue("PostProcessingScript", ui.postScript->text());
 }
 
 
@@ -127,30 +159,64 @@ void StartLiveDataDialog::radioPostProcessClicked()
   ui.editAccumulationWorkspace->setEnabled(m_usePostProcessAlgo || m_usePostProcessScript);
 }
 
+//------------------------------------------------------------------------------
+/** Slot called when one of the radio buttons in "starting time" are picked */
+void StartLiveDataDialog::radioTimeClicked()
+{
+  ui.dateTimeEdit->setEnabled( ui.radAbsoluteTime->isChecked() );
+}
 
 //------------------------------------------------------------------------------
 /** Slot called when picking a different algorithm
  * in the AlgorithmSelectorWidget */
 void StartLiveDataDialog::changeProcessingAlgorithm()
 {
+  Algorithm_sptr alg = this->changeAlgorithm(ui.processingAlgoSelector, ui.processingAlgoProperties);
+  if (!alg) return;
+  m_processingAlg = alg;
+}
+
+//------------------------------------------------------------------------------
+/** Slot called when picking a different algorithm
+ * in the AlgorithmSelectorWidget */
+void StartLiveDataDialog::changePostProcessingAlgorithm()
+{
+  Algorithm_sptr alg = this->changeAlgorithm(ui.postAlgoSelector, ui.postAlgoProperties);
+  if (!alg) return;
+  m_postProcessingAlg = alg;
+}
+
+//------------------------------------------------------------------------------
+/** Called when the pre- or post-processing algorithm is being modified
+ *
+ * @param selector :: AlgorithmSelectorWidget
+ * @param propWidget :: AlgorithmPropertiesWidget
+ * @return the created algorithm
+ */
+Mantid::API::Algorithm_sptr StartLiveDataDialog::changeAlgorithm(MantidQt::MantidWidgets::AlgorithmSelectorWidget * selector,
+    MantidQt::API::AlgorithmPropertiesWidget * propWidget)
+{
+  Algorithm_sptr alg;
   QString algName;
   int version;
-  ui.processingAlgoSelector->getSelectedAlgorithm(algName,version);
+  selector->getSelectedAlgorithm(algName,version);
   try
   {
-    m_processingAlg = AlgorithmManager::Instance().createUnmanaged(algName.toStdString(), version);
-    m_processingAlg->initialize();
+    alg = AlgorithmManager::Instance().createUnmanaged(algName.toStdString(), version);
+    alg->initialize();
   }
   catch (std::runtime_error &)
   {
     // Ignore when the algorithm is not found
-    return;
+    return Algorithm_sptr();
   }
   QStringList disabled;
   disabled.push_back("OutputWorkspace");
   disabled.push_back("InputWorkspace");
-  ui.processingAlgoProperties->addEnabledAndDisableLists(QStringList(), disabled);
-  ui.processingAlgoProperties->setAlgorithm(m_processingAlg.get());
+  propWidget->addEnabledAndDisableLists(QStringList(), disabled);
+  propWidget->setAlgorithm(alg.get());
   // TODO: Set from history?
-  ui.processingAlgoProperties->hideOrDisableProperties();
+  propWidget->hideOrDisableProperties();
+  return alg;
 }
+
