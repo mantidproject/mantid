@@ -285,7 +285,7 @@ namespace DataHandling
    */
   void LoadLiveData::exec()
   {
-    this->validateInputs();
+    this->throwIfInvalidInputs();
 
     // The full, post-processed output workspace
     m_outputWS = this->getProperty("OutputWorkspace");

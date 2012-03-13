@@ -11,6 +11,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MemoryManager.h"
 
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -25,6 +27,7 @@
 #include <Poco/StringTokenizer.h>
 
 #include <iomanip>
+#include <map>
 
 using namespace Mantid::Kernel;
 
@@ -249,6 +252,20 @@ namespace Mantid
         g_log.fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Perform validation of ALL the input properties of the algorithm.
+     * This is to be overridden by specific algorithms.
+     * It will be called in dialogs after parsing all inputs and setting the
+     * properties, but BEFORE executing.
+     *
+     * @return a map where: Key = string name of the the property;
+                Value = string describing the problem with the property.
+     */
+    std::map<std::string, std::string> Algorithm::validateInputs()
+    {
+      return std::map<std::string, std::string>();
     }
 
     //---------------------------------------------------------------------------------------------

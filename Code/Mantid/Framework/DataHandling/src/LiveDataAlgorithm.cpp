@@ -212,26 +212,38 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Validate the properties together */
+  std::map<std::string, std::string> LiveDataAlgorithm::validateInputs()
+  {
+    std::map<std::string, std::string> out;
+    if (this->getPropertyValue("OutputWorkspace").empty())
+      out["OutputWorkspace"] = "Must specify the OutputWorkspace.";
+
+    // Validate inputs
+    if (this->hasPostProcessing())
+    {
+      if (this->getPropertyValue("AccumulationWorkspace").empty())
+        out["AccumulationWorkspace"] = "Must specify the AccumulationWorkspace parameter if using PostProcessing.";
+
+      if (this->getPropertyValue("AccumulationWorkspace") == this->getPropertyValue("OutputWorkspace"))
+        out["AccumulationWorkspace"] = "The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.";
+    }
+    return out;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Perform validation of the inputs.
    * This should be called before starting the listener to give fast feedback
    * to the user that they did something wrong.
    *
    * @throw std::invalid_argument if there is a problem.
    */
-  void LiveDataAlgorithm::validateInputs()
+  void LiveDataAlgorithm::throwIfInvalidInputs()
   {
-    if (this->getPropertyValue("OutputWorkspace").empty())
-      throw std::invalid_argument("Must specify the OutputWorkspace.");
-
-    // Validate inputs
-    if (this->hasPostProcessing())
-    {
-      if (this->getPropertyValue("AccumulationWorkspace").empty())
-        throw std::invalid_argument("Must specify the AccumulationWorkspace parameter if using PostProcessing.");
-
-      if (this->getPropertyValue("AccumulationWorkspace") == this->getPropertyValue("OutputWorkspace"))
-        throw std::invalid_argument("The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.");
-    }
+    std::map<std::string, std::string> out = this->validateInputs();
+    for (auto it = out.begin(); it != out.end(); it++)
+      throw std::invalid_argument(it->first + ": " + it->second);
   }
 
 } // namespace Mantid

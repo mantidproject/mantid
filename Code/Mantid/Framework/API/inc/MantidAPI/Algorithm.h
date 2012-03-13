@@ -187,6 +187,7 @@ public:
   void initialize();
   bool execute();
   void executeAsSubAlg();
+  virtual std::map<std::string, std::string> validateInputs();
   virtual bool isInitialized() const;
   virtual bool isExecuted() const;
   using Kernel::PropertyManagerOwner::getProperty;

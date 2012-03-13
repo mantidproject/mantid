@@ -76,7 +76,7 @@ namespace DataHandling
    */
   void MonitorLiveData::exec()
   {
-    this->validateInputs();
+    this->throwIfInvalidInputs();
 
     std::string outName = this->getPropertyValue("OutputWorkspace");
     std::string accumName = this->getPropertyValue("AccumulationWorkspace");
