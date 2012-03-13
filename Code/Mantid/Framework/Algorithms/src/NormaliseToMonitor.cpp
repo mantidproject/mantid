@@ -51,8 +51,8 @@ namespace Mantid
 namespace Algorithms
 {
 
-
-
+// Method of complex validator class
+// method checks if the property is enabled
 bool 
 MonIDPropChanger::isEnabled()const
 {
@@ -74,7 +74,8 @@ MonIDPropChanger::isEnabled()const
        }
        return is_enabled;
 }
-//
+
+// method checks if other properties have chanded and these changes affected MonID property
 bool 
 MonIDPropChanger::isConditionChanged()const{
       // is enabled is based on other properties:
@@ -84,14 +85,9 @@ MonIDPropChanger::isConditionChanged()const{
        bool monitors_changed = monitorIdReader(inputWS);
        if(!monitors_changed)return false;
 
-
-       
-       // clear MonitorSpectraProperty if you decided to use MonitorID 
-       //host_algo->setProperty("MonitorSpectrum","-1");
-       //Kernel::Property *pProperty = host_algo->getPointerToProperty(
        return true;
 }
-   // function which modifies the allowed values for the list of monitors. 
+// function which modifies the allowed values for the list of monitors. 
 void 
 MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        Kernel::PropertyWithValue<int>* piProp  = dynamic_cast<Kernel::PropertyWithValue<int>* >(pProp);
@@ -100,8 +96,13 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        }
        //
        if(iExistingAllowedValues.empty()){
-           // TO DO: fix it -- provide correct BV value;
-           piProp->modify_validator(new Kernel::BoundedValidator<int>(-1,100000));
+
+           API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
+           size_t spectra_max(-1);
+           if(inputWS){ // let's assueme that detectors IDs correspond to spectraID -- not always the case but often. 
+               spectra_max = inputWS->getNumberHistograms()+1;
+           }
+           piProp->modify_validator(new Kernel::BoundedValidator<int>(-1,(int)spectra_max));
        }else{
             piProp->modify_validator(new Kernel::ListAnyValidator<int>(iExistingAllowedValues));
        }
@@ -140,7 +141,7 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
             return true;
         }
     }
-    //ASSUME?  index list can be less or equal to mon size
+    //ASSUME?  index list can be less or equal to mon list size
     size_t mon_count = (mon.size()<indexList.size())?mon.size():indexList.size();
     std::vector<int> allowed_values(mon_count);
     for(size_t i=0;i<mon_count;i++){

@@ -310,9 +310,27 @@ public:
         TS_ASSERT_EQUALS(1,monitors.size());
         TS_ASSERT_EQUALS("0",*(monitors.begin()));
 
+        // now deal with ws without monitors
+       // create ws without monitors. 
+        MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+        boost::shared_ptr<Instrument> instr(new Instrument);
+        input->setInstrument(instr);
+        AnalysisDataService::Instance().add("someWS",input);
+
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","someWS"));
+        // this function is usually called by GUI when setting an input workspace. It should read monitors and report the condition changed
+        TS_ASSERT(monSpec->isConditionChanged());
+        // this funciton is called by gui when the above is true. It should not throw and change the validator  
+        TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
+        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(monSpec));
+        // it should return the list of allowed monitor ID-s
+        monitors = monSpec->allowedValues();
+        TS_ASSERT(monitors.empty());
+
+
+
    }
-
-
+  
 
 };
 
