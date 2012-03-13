@@ -64,7 +64,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsEventWSAutoRebin.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/DivideMD.h
