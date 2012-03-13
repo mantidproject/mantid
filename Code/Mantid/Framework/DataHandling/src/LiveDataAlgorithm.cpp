@@ -3,7 +3,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidKernel/IValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -13,60 +12,20 @@ namespace Mantid
 namespace DataHandling
 {
 
-  //=============================================================================
-  /** Custom validator for the AccumulationWorkspace */
-  class WorkspaceNotOptionalValidator : public IValidator<std::string>
-  {
-  public:
-    WorkspaceNotOptionalValidator(LiveDataAlgorithm * alg)
-    : m_alg(alg)
-    {
-    }
-
-    IValidator<std::string>* clone() const
-    {
-      return new WorkspaceNotOptionalValidator(m_alg);
-    }
-
-
-  private:
-    /** Checks that the units of the workspace data are declared match any required units
-     *
-     *  @param value :: The workspace to test
-     *  @return A user level description of the error or "" for no error
-     */
-    std::string checkValidity( const std::string& value ) const
-    {
-      if (m_alg->hasPostProcessing())
-      {
-        if (value.empty())
-          return "Must specify the AccumulationWorkspace parameter if using PostProcessing.";
-
-        if (value == m_alg->getPropertyValue("OutputWorkspace"))
-          return "The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.";
-      }
-      return "";
-    }
-
-    LiveDataAlgorithm * m_alg;
-  };
-
-
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   LiveDataAlgorithm::LiveDataAlgorithm()
   {
   }
-
+    
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   LiveDataAlgorithm::~LiveDataAlgorithm()
   {
   }
-
+  
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string LiveDataAlgorithm::category() const { return "DataHandling\\LiveData";}
 

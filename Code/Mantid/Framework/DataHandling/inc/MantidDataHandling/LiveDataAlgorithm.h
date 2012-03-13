@@ -51,14 +51,14 @@ namespace DataHandling
     Mantid::API::ILiveListener_sptr getLiveListener();
     void setLiveListener(Mantid::API::ILiveListener_sptr listener);
 
-    bool hasPostProcessing() const;
-
   protected:
     void initProps();
 
     Mantid::Kernel::DateAndTime getStartTime() const;
 
     Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
+
+    bool hasPostProcessing() const;
 
     void validateInputs();
 

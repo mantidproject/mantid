@@ -297,14 +297,7 @@ namespace DataHandling
         throw std::invalid_argument("Must specify the AccumulationWorkspace parameter if using PostProcessing.");
 
       // The accumulated but not post-processed output workspace
-      m_accumWS.reset();
-      try
-      {
-        m_accumWS = AnalysisDataService::Instance().retrieveWS<Workspace>(
-            this->getPropertyValue("AccumulationWorkspace"));
-      }
-      catch (Exception::NotFoundError &)
-      { }
+      m_accumWS = this->getProperty("AccumulationWorkspace");
     }
     else
     {
@@ -350,7 +343,7 @@ namespace DataHandling
       // ----------- Run post-processing -------------
       this->runPostProcessing();
       // Set both output workspaces
-      //this->setProperty("AccumulationWorkspace", m_accumWS);
+      this->setProperty("AccumulationWorkspace", m_accumWS);
       this->setProperty("OutputWorkspace", m_outputWS);
     }
     else

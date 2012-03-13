@@ -154,6 +154,9 @@ namespace DataHandling
     // Copy the output workspace properties from LoadLiveData
     Workspace_sptr outWS = loadAlg.getProperty("OutputWorkspace");
     this->setProperty("OutputWorkspace", outWS);
+    Workspace_sptr accumWS = loadAlg.getProperty("AccumulationWorkspace");
+    this->setProperty("AccumulationWorkspace", accumWS);
+
 
     double UpdateEvery = this->getProperty("UpdateEvery");
     if (UpdateEvery > 0)
