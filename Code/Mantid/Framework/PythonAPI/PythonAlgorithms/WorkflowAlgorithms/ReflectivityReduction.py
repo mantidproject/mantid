@@ -491,4 +491,4 @@ class ReflectivityReduction(PythonAlgorithm):
         
         return ws_name
                                
-mtd.registerPyAlgorithm(ReflectivityReduction())
+#mtd.registerPyAlgorithm(ReflectivityReduction())
