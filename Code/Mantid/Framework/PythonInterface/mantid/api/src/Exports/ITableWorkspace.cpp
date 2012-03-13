@@ -158,8 +158,13 @@ namespace
 void export_ITableWorkspace()
 {
   register_ptr_to_python<ITableWorkspace_sptr>();
-
-  class_<ITableWorkspace,bases<Workspace>, boost::noncopyable>("ITableWorkspace", no_init)
+  std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
+  iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
+  iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";
+  iTableWorkspace_docstring += "ITableWorkspace'.";
+  class_<ITableWorkspace,bases<Workspace>, boost::noncopyable>("ITableWorkspace",
+                                                               iTableWorkspace_docstring.c_str(),
+                                                               no_init)
     .def("columnCount", &ITableWorkspace::columnCount, "Returns the number of columns in the workspace")
     .def("rowCount", &ITableWorkspace::rowCount, "Returns the number of rows within the workspace")
     .def("__len__",  &ITableWorkspace::rowCount, "Returns the number of rows within the workspace")
