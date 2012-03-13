@@ -11,12 +11,14 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Geometry::Goniometer;
 using Mantid::Kernel::V3D;
@@ -49,6 +51,28 @@ public:
     
   }
   
+  /** Create an "empty" goniometer by NOT giving any axes. */
+  void test_exec_emptyGoniometer()
+  {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
+
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis0", "") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() ); //no log values
+
+    // Check the results
+    Goniometer & gon = ws->mutableRun().getGoniometer();
+    TS_ASSERT_EQUALS( gon.getNumberAxes(), 0);
+    DblMatrix rot = ws->mutableRun().getGoniometerMatrix();
+    TSM_ASSERT_EQUALS( "Goniometer Rotation matrix is 3x3 identity", rot,  DblMatrix(3,3, true) );
+
+  }
+
   void test_exec()
   {
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
@@ -133,9 +157,6 @@ public:
 
   void test_param_ZeroVector()
   { do_test_param("name, 0.0, 0.0, 0.0, 1"); }
-
-  void test_param_Empty()
-  { do_test_param(""); }
 
   void test_ok()
   { do_test_param("name, 1.0, 2.0, 3.0, 1",1); }

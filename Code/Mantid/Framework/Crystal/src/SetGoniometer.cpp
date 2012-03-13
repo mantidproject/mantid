@@ -123,7 +123,7 @@ namespace Crystal
     }
 
     if (gon.getNumberAxes() == 0)
-      throw std::invalid_argument("No axes defined!");
+      g_log.warning() << "Empty goniometer created; will always return an identity rotation matrix." << std::endl;
 
     // All went well, copy the goniometer into it
     ws->mutableRun().getGoniometer() = gon;
