@@ -15,6 +15,7 @@ The output workspace will be an exact copy of the input workspace except for the
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -61,16 +62,16 @@ namespace Mantid
         "Name of the input workspace");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output workspace");
-      BoundedValidator<double> *isDouble = new BoundedValidator<double>();
+      auto isDouble = boost::make_shared<BoundedValidator<double> >();
       declareProperty("Offset", 0.0, isDouble,
         "The amount to change each time bin by");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("IndexMin", 0, mustBePositive,
         "The workspace index of the first spectrum to shift. Only used if\n"
         "IndexMax is set.");
-      declareProperty("IndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+      declareProperty("IndexMax", Mantid::EMPTY_INT(), mustBePositive,
         "The workspace index of the last spectrum to shift. Only used if\n"
         "explicitly set.");
 

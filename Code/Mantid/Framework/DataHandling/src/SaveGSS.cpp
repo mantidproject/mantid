@@ -18,6 +18,7 @@ The format is limited to saving 99 spectra in total. Trying to save more will ge
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
 #include <fstream>
@@ -53,14 +54,14 @@ namespace Mantid
     {
       // Data must be in TOF
       declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
-          new API::WorkspaceUnitValidator<>("TOF")),
+                                                   boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
           "The input workspace, which must be in time-of-flight");
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
           "The filename to use for the saved data");
       std::vector<std::string> Split(2);
       Split[0] = "True";
       Split[1] = "False";
-      declareProperty("SplitFiles", "True", new Kernel::ListValidator(Split),
+      declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
           "Save each spectrum in a different file (default true)");
       declareProperty("Append", true, "If true and Filename already exists, append, else overwrite");
       declareProperty(
@@ -70,7 +71,7 @@ namespace Mantid
       std::vector<std::string> formats;
       formats.push_back(RALF);
       formats.push_back(SLOG);
-      declareProperty("Format", RALF, new Kernel::ListValidator(formats), "GSAS format to save as");
+      declareProperty("Format", RALF, boost::make_shared<Kernel::StringListValidator>(formats), "GSAS format to save as");
       declareProperty("MultiplyByBinWidth", true,
           "Multiply the intensity (Y) by the bin width; default TRUE.");
       declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");

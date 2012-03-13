@@ -10,6 +10,7 @@
 #include <iostream>
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;

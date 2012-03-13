@@ -20,6 +20,7 @@ Note:  The Solid angle calculation assumes that the path between the sample and 
 #include "MantidKernel/UnitFactory.h"
 #include <cfloat>
 #include <iostream>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -54,7 +55,8 @@ namespace Mantid
     void SolidAngle::init()
     {
       declareProperty(
-        new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+        new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,
+                                                    boost::make_shared<InstrumentValidator>()),
         "This workspace is used to identify the instrument to use and also which\n"
         "spectra to create a solid angle for. If the Max and Min spectra values are\n"
         "not provided one solid angle will be created for each spectra in the input\n"
@@ -63,14 +65,12 @@ namespace Mantid
         new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the algorithm" );
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("StartWorkspaceIndex",0, mustBePositive,
         "The index number of the first spectrum for which to find the solid angle\n"
         "(default: 0)" );
-      // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-      // pointer to each property.
-      declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
+      declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive,
         "The index of the last spectrum whose solid angle is to be found (default: the\n"
         "last spectrum in the workspace)");
     }

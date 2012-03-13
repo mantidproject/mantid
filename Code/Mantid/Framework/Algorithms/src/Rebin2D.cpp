@@ -63,8 +63,9 @@ namespace Mantid
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.";
-      declareProperty(new ArrayProperty<double>("Axis1Binning", new RebinParamsValidator), docString);
-      declareProperty(new ArrayProperty<double>("Axis2Binning", new RebinParamsValidator), docString);
+      auto rebinValidator = boost::make_shared<RebinParamsValidator>();
+      declareProperty(new ArrayProperty<double>("Axis1Binning", rebinValidator), docString);
+      declareProperty(new ArrayProperty<double>("Axis2Binning", rebinValidator), docString);
     }
 
     /** 

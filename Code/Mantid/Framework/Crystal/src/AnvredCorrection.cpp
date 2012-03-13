@@ -39,6 +39,7 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
@@ -107,9 +108,8 @@ AnvredCorrection::AnvredCorrection() : API::Algorithm()
 void AnvredCorrection::init()
 {
   // The input workspace must have an instrument and units of wavelength
-  CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
-  //wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
-  wsValidator->add(new InstrumentValidator<>());
+  boost::shared_ptr<CompositeValidator> wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add(boost::make_shared<InstrumentValidator>());
 
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,wsValidator),
     "The X values for the input workspace must be in units of wavelength or TOF");
@@ -122,14 +122,13 @@ void AnvredCorrection::init()
    declareProperty("ReturnTransmissionOnly", false, "Corrections applied to data if false (default).\n"
       "If true, only return the transmission coefficient.");
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
     "Linear scattering coefficient in 1/cm");
-  declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive->clone(),
+  declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive,
     "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
-  declareProperty("Radius", -1.0, mustBePositive->clone(),
-    "Radius of the sample in centimeters");
+  declareProperty("Radius", -1.0, mustBePositive, "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
 

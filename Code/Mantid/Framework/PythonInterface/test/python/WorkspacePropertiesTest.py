@@ -4,7 +4,7 @@ property types
 import unittest
 import testhelpers
 from mantid.api import (WorkspaceProperty, MatrixWorkspaceProperty, IEventWorkspaceProperty, 
-                        ITableWorkspaceProperty)
+                        ITableWorkspaceProperty, PropertyMode, LockMode)
 from mantid.kernel import Direction
 
 class WorkspacePropertiesTest(unittest.TestCase):
@@ -21,15 +21,15 @@ class WorkspacePropertiesTest(unittest.TestCase):
         self.assertEquals("test", prop.valueAsStr)
         
     def _do_construction_with_name_default_direction_optional(self, classtype):
-        prop = classtype("IsOptional", "test", Direction.Output, True)
+        prop = classtype("IsOptional", "test", Direction.Output, PropertyMode.Optional)
         self.assertTrue(isinstance(prop, classtype))
         self.assertEquals("IsOptional", prop.name)
         self.assertEquals(Direction.Output, prop.direction)
         self.assertTrue(prop.isOptional())
         self.assertEquals("test", prop.valueAsStr)
 
-    def _do_construction_with_name_default_direction_optional_locking(self, classtype):
-        prop = classtype("DoesNotLock", "test", Direction.Output, True, False)
+    def _do_construction_with_name_default_direction_optional_no_locking(self, classtype):
+        prop = classtype("DoesNotLock", "test", Direction.Output, PropertyMode.Optional, LockMode.NoLock)
         self.assertTrue(isinstance(prop, classtype))
         self.assertEquals("DoesNotLock", prop.name)
         self.assertEquals(Direction.Output, prop.direction)

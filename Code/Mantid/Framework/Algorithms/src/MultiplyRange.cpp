@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultiplyRange.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -35,12 +36,12 @@ void MultiplyRange::init()
   // Declare an output workspace property.
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   // StartBin
   declareProperty("StartBin", 0, mustBePositive, "Bin index to start from");
   // EndBin
-  declareProperty("EndBin", EMPTY_INT(), mustBePositive->clone(), "Bin index to finish at");
+  declareProperty("EndBin", EMPTY_INT(), mustBePositive, "Bin index to finish at");
   // factor
   declareProperty("Factor", 0.0, "Multiplier");
 }

@@ -25,8 +25,11 @@ Uses the algorithm [[linear]] to fit to the calculated transmission fraction.
 #include "MantidAlgorithms/CalculateTransmission.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include <cmath>
 
 namespace Mantid
@@ -55,16 +58,16 @@ CalculateTransmission::~CalculateTransmission()
 
 void CalculateTransmission::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new CommonBinsValidator<>);
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<CommonBinsValidator>();
+  wsValidator->add<HistogramValidator>();
   
   declareProperty(new WorkspaceProperty<>("SampleRunWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace","",Direction::Input,wsValidator->clone()));
+  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  BoundedValidator<int> *zeroOrMore = new BoundedValidator<int>();
+  auto zeroOrMore = boost::make_shared<BoundedValidator<int> >();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
   declareProperty("IncidentBeamMonitor",EMPTY_INT(),"The UDET of the incident beam monitor");
@@ -78,7 +81,7 @@ void CalculateTransmission::init()
   std::vector<std::string> options(2);
   options[0] = "Linear";
   options[1] = "Log";
-  declareProperty("FitMethod","Log",new ListValidator(options),
+  declareProperty("FitMethod","Log",boost::make_shared<StringListValidator>(options),
     "Whether to fit directly to the transmission curve (Linear) or to the log of it (Log)");
 
   declareProperty("OutputUnfittedData",false);

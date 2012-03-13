@@ -4,11 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/IValidator.h"
 #include <boost/shared_ptr.hpp>
 #include <numeric>
 #include <vector>
@@ -45,11 +43,14 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport CompositeWorkspaceValidator : public Kernel::CompositeValidator<boost::shared_ptr<TYPE> >
+
+//==============================================================================================
+/**
+ * An interface for those validators that require the MatrixWorkspace interface
+ */
+class MatrixWorkspaceValidator : public Kernel::TypedValidator<MatrixWorkspace_sptr>
 {
 };
-
 
 //===============================================================================================
 /** A validator which checks that the unit of the workspace referred to
@@ -58,22 +59,20 @@ class DLLExport CompositeWorkspaceValidator : public Kernel::CompositeValidator<
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport WorkspaceUnitValidator : public MatrixWorkspaceValidator
 {
 public:
   /** Constructor
    *  @param unitID :: The name of the unit that the workspace must have. If left empty,
    *                the validator will simply check that the workspace is not unitless.
    */
-  explicit WorkspaceUnitValidator(const std::string& unitID = "") : m_unitID(unitID) {}
-
-  virtual ~WorkspaceUnitValidator() {}
+  explicit WorkspaceUnitValidator(const std::string& unitID = "") 
+    : MatrixWorkspaceValidator(), m_unitID(unitID) {}
 
   ///Gets the type of the validator
   std::string getType() const { return "workspaceunit"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new WorkspaceUnitValidator(*this); }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<WorkspaceUnitValidator>(*this); }
 
 private:
   /** Checks that the units of the workspace data are declared match any required units
@@ -81,7 +80,7 @@ private:
    *  @param value :: The workspace to test
    *  @return A user level description of the error or "" for no error
    */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const MatrixWorkspace_sptr & value ) const
   {
     // This effectively checks for single-valued workspaces
     if ( value->axes() == 0 ) return "A single valued workspace has no unit, which is required for this algorithm";
@@ -115,30 +114,27 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport HistogramValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport HistogramValidator : public MatrixWorkspaceValidator
 {
 public:
   /** Constructor
    *  @param mustBeHistogram :: Flag indicating whether the check is that a workspace should
    *                         contain histogram data (true, default) or shouldn't (false).
    */
-  explicit HistogramValidator(const bool& mustBeHistogram = true) :
-    m_mustBeHistogram(mustBeHistogram) {}
-
-  virtual ~HistogramValidator() {}
+  explicit HistogramValidator(const bool& mustBeHistogram = true) 
+    : MatrixWorkspaceValidator(), m_mustBeHistogram(mustBeHistogram) {}
 
   ///Gets the type of the validator
   std::string getType() const { return "histogram"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new HistogramValidator(*this); }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<HistogramValidator>(*this); }
 
 private:
   /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
    *  @param value :: The workspace to test
    *  @return A user level description if a problem exists or ""
    */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     if (m_mustBeHistogram)
     {
@@ -163,8 +159,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport RawCountValidator : public MatrixWorkspaceValidator
 {
 public:
   /** Constructor
@@ -174,19 +169,17 @@ public:
   RawCountValidator(const bool& mustNotBeDistribution = true) :
     m_mustNotBeDistribution(mustNotBeDistribution) {}
 
-  virtual ~RawCountValidator() {}
-
   ///Gets the type of the validator
   std::string getType() const { return "rawcount"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new RawCountValidator(*this); }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<RawCountValidator>(*this); }
 
 private:
   /** Checks if the workspace must be a distribution but isn't and vice-versa
    *  @param value :: The workspace to test
    *  @return A user level description of any problem that exists or "" no problem
    */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const MatrixWorkspace_sptr & value ) const
   {
     if (m_mustNotBeDistribution)
     {
@@ -214,24 +207,20 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 18/09/2008
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport CommonBinsValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport CommonBinsValidator : public MatrixWorkspaceValidator
 {
 public:
-  CommonBinsValidator() {}
-  virtual ~CommonBinsValidator() {}
-
   ///Gets the type of the validator
   std::string getType() const { return "commonbins"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new CommonBinsValidator(*this); }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<CommonBinsValidator>(*this); }
 
 private:
   /** Checks that the bin boundaries of each histogram in the workspace are the same
    *  @param value :: The workspace to test
    *  @return A message for users saying that bins are different, otherwise ""
    */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     if ( !value ) return "Enter an existing workspace"; 
     //there being only one or zero histograms is accepted as not being an error
@@ -256,27 +245,25 @@ private:
  *  @author Michael Whitty, STFC
  *  @date 15/09/2010
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport SpectraAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport SpectraAxisValidator : public MatrixWorkspaceValidator
 {
 public:
   /** Class constructor with parameter.
    * @param axisNumber :: set the axis number to validate
    */
   SpectraAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
-  virtual ~SpectraAxisValidator() {}
 
   ///Gets the type of the validator
   std::string getType() const { return "spectraaxis"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new SpectraAxisValidator(*this); }
+  /// Clone the current validator
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<SpectraAxisValidator>(*this); }
 
 private:
   /** Checks that the axis stated 
   *  @param value :: The workspace to test
   *  @return A message for users with negative results, otherwise ""
   */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     Mantid::API::Axis* axis = value->getAxis(m_axisNumber);
     if ( axis->isSpectra() ) return "";
@@ -290,27 +277,25 @@ private:
  *  @author Michael Whitty, STFC
  *  @date 15/09/2010
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport NumericAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport NumericAxisValidator : public MatrixWorkspaceValidator
 {
 public:
   /** Class constructor with parameter.
    * @param axisNumber :: set the axis number to validate
    */
   NumericAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
-  virtual ~NumericAxisValidator() {}
 
   ///Gets the type of the validator
   std::string getType() const { return "numericaaxis"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new NumericAxisValidator(*this); }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<NumericAxisValidator>(*this); }
 
 private:
   /** Checks that the axis stated 
   *  @param value :: The workspace to test
   *  @return A message for users with negative results, otherwise ""
   */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     Mantid::API::Axis* axis = value->getAxis(m_axisNumber);
     if ( axis->isNumeric() ) return "";
@@ -327,27 +312,20 @@ private:
  *  @author Russell Taylor, Tessella
  *  @date 17/12/2010
  */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport InstrumentValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport InstrumentValidator : public Kernel::TypedValidator<boost::shared_ptr<ExperimentInfo> >
 {
 public:
-  /** Constructor
-   */
-  explicit InstrumentValidator() {}
-
-  virtual ~InstrumentValidator() {}
-
   ///Gets the type of the validator
   std::string getType() const { return "Instrument"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new InstrumentValidator(*this); }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<InstrumentValidator>(*this); }
 
 private:
   /** Checks that the workspace has an instrument defined
    *  @param value :: The workspace to test
    *  @return A user level description if a problem exists or ""
    */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const boost::shared_ptr<ExperimentInfo>& value ) const
   {
     // Just checks that an instrument has a sample position.
     // Could be extended for more detailed checks if needed.

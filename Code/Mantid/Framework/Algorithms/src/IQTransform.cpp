@@ -45,6 +45,8 @@ A SANS reduction results in data in the form I(Q) vs Q, where Q is Momentum Tran
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -89,11 +91,11 @@ IQTransform::~IQTransform() {}
 
 void IQTransform::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
+  auto wsValidator = boost::make_shared<CompositeValidator>();
   // Require the input to be in units of Q and to be a distribution
   // (which the result of a SANS reduction in Mantid will be)
-  wsValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));
-  wsValidator->add(new RawCountValidator<>(false));
+  wsValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
+  wsValidator->add<RawCountValidator>(false);
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
                   "The input workspace must be a distribution with units of Q");
@@ -106,15 +108,15 @@ void IQTransform::init()
   {
     plottype.insert(it->first);
   }
-  declareProperty("TransformType","",new ListValidator(plottype),
+  declareProperty("TransformType","",boost::make_shared<StringListValidator>(plottype),
                   "The name of the transformation to be performed on the workspace");
 
   // A background to be subtracted can be a value or a workspace. Both properties are optional.
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("BackgroundValue",0.0,mustBePositive,
                   "A constant value to subtract from the data prior to its transformation");
-  declareProperty(new WorkspaceProperty<>("BackgroundWorkspace","",Direction::Input,true),
+  declareProperty(new WorkspaceProperty<>("BackgroundWorkspace","",Direction::Input,PropertyMode::Optional),
                   "A workspace to subtract from the input workspace prior to its transformation."
                   "Must be compatible with the input (as for the Minus algorithm).");
 

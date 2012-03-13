@@ -8,6 +8,7 @@ Uses the binary operation algorithms [[Multiply]] or [[Plus]] to scale the input
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Scale.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -37,7 +38,7 @@ void Scale::init()
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";
-  declareProperty("Operation","Multiply",new ListValidator(op),"The scaling operation: multiply (default) or add");
+  declareProperty("Operation","Multiply",boost::make_shared<StringListValidator>(op),"The scaling operation: multiply (default) or add");
 }
 
 void Scale::exec()

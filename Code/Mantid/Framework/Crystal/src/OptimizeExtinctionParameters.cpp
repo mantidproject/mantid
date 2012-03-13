@@ -14,6 +14,8 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <iomanip>
@@ -88,10 +90,10 @@ namespace Mantid
     corrOptions.push_back("Type I&II Gaussian" );
     corrOptions.push_back("Type I&II Lorentzian" );
     corrOptions.push_back( "None, Scaling Only" );
-    declareProperty("ExtinctionCorrectionType", corrOptions[0],new ListValidator(corrOptions),
+    declareProperty("ExtinctionCorrectionType", corrOptions[0],boost::make_shared<StringListValidator>(corrOptions),
       "Select the type of extinction correction.");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)",Direction::InOut);
@@ -99,7 +101,7 @@ namespace Mantid
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_pointGroups.size(); ++i)
       propOptions.push_back( m_pointGroups[i]->getName() );
-    declareProperty("PointGroup", propOptions[0],new ListValidator(propOptions),
+    declareProperty("PointGroup", propOptions[0], boost::make_shared<StringListValidator>(propOptions),
       "Which point group applies to this crystal?");
     declareProperty("OutputChi2", 0.0,Direction::Output);
 

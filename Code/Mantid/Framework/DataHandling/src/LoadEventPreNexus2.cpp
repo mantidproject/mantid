@@ -45,6 +45,8 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
 #include <sstream>
@@ -244,11 +246,11 @@ void LoadEventPreNexus2::init()
   declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
       "A list of individual spectra (pixel IDs) to read, specified as e.g. 10:20. Only used if set.");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
@@ -258,7 +260,7 @@ void LoadEventPreNexus2::init()
   propOptions.push_back("Auto");
   propOptions.push_back("Serial");
   propOptions.push_back("Parallel");
-  declareProperty("UseParallelProcessing", "Auto",new ListValidator(propOptions),
+  declareProperty("UseParallelProcessing", "Auto", boost::make_shared<StringListValidator>(propOptions),
       "Use multiple cores for loading the data?\n"
       "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
       "  Serial: Use a single core.\n"

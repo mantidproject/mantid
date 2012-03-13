@@ -11,7 +11,6 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 
 class ToyAlgorithmProxy : public Algorithm
 {

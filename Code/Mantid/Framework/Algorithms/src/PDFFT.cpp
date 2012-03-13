@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,8 +39,7 @@ void PDFFT::initDocs() {
 /** Initialize the algorithm's properties.
  */
 void PDFFT::init() {
-	API::WorkspaceUnitValidator<>* uv = new API::WorkspaceUnitValidator<>(
-			"MomentumTransfer");
+	auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
 	// Set up input data type
 	std::vector<std::string> input_options;
@@ -54,7 +54,7 @@ void PDFFT::init() {
 			Direction::Input, uv), "An input workspace S(d).");
 	declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "",
 			Direction::Output), "An output workspace G(r)");
-	declareProperty("InputSofQType", "S(Q)", new ListValidator(input_options),
+	declareProperty("InputSofQType", "S(Q)", boost::make_shared<StringListValidator>(input_options),
 	    "Select the input Workspace type.  It can be S(Q) or S(Q)-1");
   declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20, Direction::Input),
       "Maximum r value of output G(r).");
@@ -65,7 +65,7 @@ void PDFFT::init() {
 	    "Staring value Q of S(Q) for Fourier Transform");
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 50.0, Direction::Input),
 	    "Ending value of Q of S(Q) for Fourier Transform");
-	declareProperty("PDFType", "GofR", new ListValidator(outputGoption),
+	declareProperty("PDFType", "GofR", boost::make_shared<StringListValidator>(outputGoption),
 	    "Select the output PDF type");
 }
 

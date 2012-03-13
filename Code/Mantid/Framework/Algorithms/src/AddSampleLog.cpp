@@ -13,6 +13,7 @@ The log can be either a String, a Number, or a Number Series. If you select Numb
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -40,7 +41,7 @@ void AddSampleLog::init()
 {
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
     "Workspace to add the log entry to");
-  declareProperty("LogName", "", new MandatoryValidator<std::string>,
+  declareProperty("LogName", "", boost::make_shared<MandatoryValidator<std::string> >(),
     "The name that will identify the log entry");
 
   declareProperty("LogText", "",
@@ -50,7 +51,7 @@ void AddSampleLog::init()
   propOptions.push_back("String");
   propOptions.push_back("Number");
   propOptions.push_back("Number Series");
-  declareProperty("LogType", "String",new ListValidator(propOptions),
+  declareProperty("LogType", "String",boost::make_shared<StringListValidator>(propOptions),
     "The type that the log data will be."
      );
 }

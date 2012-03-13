@@ -3,7 +3,7 @@
    arguments
 """
 
-__requires__ = 'Sphinx==1.1.2'
+__requires__ = 'Sphinx==1.0.7'
 import sys
 import os
 from pkg_resources import load_entry_point

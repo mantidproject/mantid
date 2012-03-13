@@ -12,6 +12,7 @@
 #include "Poco/NumberFormatter.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -46,15 +47,15 @@ void HFIRLoad::init()
 
   // Optionally, we can specify the wavelength and wavelength spread and overwrite
   // the value in the data file (used when the data file is not populated)
-  Kernel::BoundedValidator<double> *mustBePositive = new Kernel::BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
       "Wavelength value to use when loading the data file (Angstrom).");
-  declareProperty("WavelengthSpread", 0.1, mustBePositive->clone(),
+  declareProperty("WavelengthSpread", 0.1, mustBePositive,
     "Wavelength spread to use when loading the data file (default 0.0)" );
 
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
+  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
 
 }
 

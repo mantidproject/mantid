@@ -1,8 +1,7 @@
 #ifndef MANTID_KERNEL_DATEVALIDATOR_H_
 #define MANTID_KERNEL_DATEVALIDATOR_H_
 
-#include "IValidator.h"
-#include <time.h>
+#include "MantidKernel/TypedValidator.h"
 
 namespace Mantid
 {
@@ -35,15 +34,18 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL DateValidator : public IValidator<std::string>
+class MANTID_KERNEL_DLL DateValidator : public TypedValidator<std::string>
 {
 public:
+  /// Default constructor
   DateValidator();
+  /// Destructor
   virtual ~DateValidator();
-  IValidator<std::string> * clone() const;
+  /// Clone the current state
+  IValidator_sptr clone() const;
 
 private:
-  struct tm getTimevalue(const std::string& sDate, std::string & error) const;
+  /// Checks the value is valid
   std::string checkValidity(const std::string& value) const;
 };
 

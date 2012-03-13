@@ -15,6 +15,7 @@
 #include <vector>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -39,9 +40,9 @@ using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty("Output","","If not empty, a table workspace of that "
       "name will contain the center of mass position.");
@@ -54,7 +55,7 @@ void FindCenterOfMassPosition2::init()
       "If true, a direct beam calculation will be performed. Otherwise, the center of mass "
       "of the scattering data will be computed by excluding the beam area.");
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
   declareProperty("BeamRadius", 0.0155, positiveDouble,
       "Radius of the beam area, in meters, used the exclude the beam when calculating "
@@ -278,7 +279,7 @@ void FindCenterOfMassPosition2::exec()
     setProperty("OutputWorkspace",m_result);
   } else {
     // Store the results using an ArrayProperty
-    declareProperty(new ArrayProperty<double> ("CenterOfMass",new NullValidator<std::vector<double> >,Direction::Output));
+    declareProperty(new ArrayProperty<double> ("CenterOfMass",boost::make_shared<NullValidator>(),Direction::Output));
     std::vector<double> center_of_mass;
     center_of_mass.push_back(center_x);
     center_of_mass.push_back(center_y);

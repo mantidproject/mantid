@@ -64,7 +64,7 @@ using std::vector;
 void MultipleScatteringCylinderAbsorption::init()
 {
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
-                  "",Direction::Input, new InstrumentValidator<>), "The name of the input workspace.");
+                  "",Direction::Input, boost::make_shared<InstrumentValidator>()), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
 

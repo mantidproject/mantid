@@ -45,7 +45,7 @@ public:
   explicit DirectoryValidator(bool testDirectoryExists = true);
   virtual ~DirectoryValidator();
   virtual std::set<std::string> allowedValues() const;
-  virtual IValidator<std::string>* clone() const;
+  IValidator_sptr clone() const;
 
 private:
   virtual std::string checkValidity(const std::string &value) const;

@@ -54,8 +54,7 @@ namespace Mantid
        */
       static TypedWorkspaceProperty *
       createPropertyWithValidator(const std::string &name, const std::string &wsName,
-                                  const unsigned int direction,
-                                  Kernel::IValidator<WorkspaceType_sptr> * validator)
+                                  const unsigned int direction, Kernel::IValidator *validator)
       {
         return new TypedWorkspaceProperty(name, wsName, direction, validator->clone());
       }
@@ -71,8 +70,8 @@ namespace Mantid
        */
       static TypedWorkspaceProperty *
       createPropertyWithOptionalFlag(const std::string &name, const std::string &wsName,
-                                  const unsigned int direction, bool optional,
-                                  Kernel::IValidator<WorkspaceType_sptr> * validator)
+                                     const unsigned int direction, API::PropertyMode optional,
+                                     Kernel::IValidator * validator)
       {
         return new TypedWorkspaceProperty(name, wsName, direction, optional, validator->clone());
       }
@@ -90,8 +89,8 @@ namespace Mantid
       static TypedWorkspaceProperty *
       createPropertyWithLockFlag(const std::string &name, const std::string &wsName,
                                  const unsigned int direction,
-                                 bool optional, bool locking,
-                                 Kernel::IValidator<WorkspaceType_sptr> * validator)
+                                 API::PropertyMode optional, API::LockMode locking,
+                                 Kernel::IValidator * validator)
       {
         return new TypedWorkspaceProperty(name, wsName, direction, optional, locking,validator->clone());
       }
@@ -114,9 +113,9 @@ namespace Mantid
           .def(init<const std::string &, const std::string &, const unsigned int
                     >(args("name","defaultValue", "direction")))
           .def(init<const std::string &, const std::string &, const unsigned int,
-                    bool>(args("name","defaultValue", "direction", "optional")))
+                    API::PropertyMode >(args("name","defaultValue", "direction", "optional")))
           .def(init<const std::string &, const std::string &, const unsigned int,
-                    bool, bool>(args("name","defaultValue", "direction", "optional", "locking")))
+                    API::PropertyMode , API::LockMode>(args("name","defaultValue", "direction", "optional", "locking")))
           // These variants require the validator object to be cloned
           .def("__init__", make_constructor(&createPropertyWithValidator,
                                             default_call_policies(), args("name","defaultValue", "direction", "validator")))

@@ -35,7 +35,9 @@ namespace Mantid
 
     void Transpose::init()
     {
-      declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, false, new CommonBinsValidator<>()),"The input workspace.");
+      declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
+                                              boost::make_shared<CommonBinsValidator>()),
+                      "The input workspace.");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The output workspace.");
     }
 

@@ -67,7 +67,7 @@ private:
     const std::string category() const { return "Dummy";}    
     void init()
     {
-      declareProperty(new AlgorithmProperty("CalculateStep", new AlgorithmHasProperty("Output1")));
+      declareProperty(new AlgorithmProperty("CalculateStep", boost::make_shared<AlgorithmHasProperty>("Output1")));
     }
     void exec()
     {

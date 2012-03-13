@@ -77,9 +77,9 @@ namespace Mantid
       nGroups = 0;
 
       //Input workspace must be in dSpacing and be an inputWorkspace
-      API::CompositeWorkspaceValidator<EventWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<EventWorkspace>;
-      wsValidator->add(new API::WorkspaceUnitValidator<EventWorkspace>("TOF"));
-      wsValidator->add(new API::RawCountValidator<EventWorkspace>);
+      auto wsValidator = boost::make_shared<CompositeValidator>();
+      wsValidator->add<API::WorkspaceUnitValidator>("TOF");
+      wsValidator->add<API::RawCountValidator>();
 
       declareProperty(
         new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",Direction::Input, wsValidator),
@@ -90,15 +90,15 @@ namespace Mantid
         "The name to give the output workspace; it will be a Workspace2D");
 
       declareProperty(
-        new ArrayProperty<double>("BinParams", new RebinParamsValidator),
+        new ArrayProperty<double>("BinParams", boost::make_shared<RebinParamsValidator>()),
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
 
-      declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace", "", Direction::Input, false),
+      declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace", "", Direction::Input),
           "GroupingWorkspace that specifies how to group spectra together." );
 
-      declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, false),
+      declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input),
           "OffsetsWorkspace that specifies how to calibrate detector positions." );
 
       declareProperty(new FileProperty("GhostCorrectionFilename", "", FileProperty::Load, "dat"),

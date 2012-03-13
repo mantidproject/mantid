@@ -56,6 +56,7 @@ None
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
@@ -105,7 +106,8 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
       "The name of the workspace to apply the scaling to. This must be\n"
       "associated with an instrument appropriate for the scaling file" );
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
     declareProperty("ScalingOption",0, mustBePositive,
       "Control scaling calculation - 0 => use average of left and right\n"

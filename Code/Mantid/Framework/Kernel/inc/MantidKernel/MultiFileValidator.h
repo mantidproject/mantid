@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "IValidator.h"
 #include "FileValidator.h"
 
 #include <vector>
@@ -41,7 +40,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL MultiFileValidator : public IValidator<std::vector<std::vector<std::string> > >
+class MANTID_KERNEL_DLL MultiFileValidator : public TypedValidator<std::vector<std::vector<std::string> > >
 {
 public:
   MultiFileValidator();
@@ -49,7 +48,7 @@ public:
   explicit MultiFileValidator(const std::vector<std::string>& extensions);
   virtual ~MultiFileValidator();
 
-  virtual IValidator<std::vector<std::vector<std::string> > >* clone() const;
+  IValidator_sptr clone() const;
 
   /// Returns the set of allowed extensions.
   virtual std::set<std::string> allowedValues() const;

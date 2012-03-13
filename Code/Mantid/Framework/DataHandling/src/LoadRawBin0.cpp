@@ -18,6 +18,7 @@ The LoadRawBin0 algorithm stores bin 0 data from the selected [[RAW_File | RAW]]
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 
@@ -59,12 +60,12 @@ LoadRawBin0::~LoadRawBin0()
 void LoadRawBin0::init()
 {
   LoadRawHelper::init();
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", 1, mustBePositive,
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
-  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
   declareProperty(new ArrayProperty<specid_t> ("SpectrumList"),

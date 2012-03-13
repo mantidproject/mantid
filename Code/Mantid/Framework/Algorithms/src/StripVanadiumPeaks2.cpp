@@ -10,6 +10,8 @@
 
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -52,20 +54,20 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
       "The name of the workspace to be created as the output of the algorithm.\n"
       "If the input workspace is an EventWorkspace, then the output must be different (and will be made into a Workspace2D)." );
 
-    BoundedValidator<int> *min = new BoundedValidator<int>();
+    auto min = boost::make_shared<BoundedValidator<int> >();
     min->setLower(1);
     // The estimated width of a peak in terms of number of channels
     declareProperty("FWHM", 7, min,
       "The number of points covered, on average, by the fwhm of a peak. Passed through to FindPeaks. Default 7." );
 
     // The tolerance allowed in meeting the conditions
-    declareProperty("Tolerance",4, min->clone(),
+    declareProperty("Tolerance",4, min,
       "A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks. Default 4.");
 
     std::vector<std::string> bkgdtypes;
     bkgdtypes.push_back("Linear");
     bkgdtypes.push_back("Quadratic");
-    declareProperty("BackgroundType", "Linear", new ListValidator(bkgdtypes),
+    declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
         "The type of background of the histogram. Present choices include Linear and Quadratic. ");
 
     declareProperty("HighBackground", true,
@@ -74,7 +76,7 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     declareProperty("PeakPositionTolerance", -1.0,
         "Tolerance on the found peaks' positions against the input peak positions. A non-positive value turns this option off. ");
 
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
     declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
       "If set, peaks will only be removed from this workspace index (otherwise from all) ");

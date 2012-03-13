@@ -9,6 +9,8 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/WriteLock.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
@@ -92,11 +94,11 @@ public:
   void init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, true));
-    declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, true));
+    declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
+    declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
     declareProperty(new WorkspaceProperty<>("OutputWorkspace1","",Direction::Output));
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, true));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, PropertyMode::Optional));
   }
   void exec()
   {
@@ -130,8 +132,8 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink";}
   void init()
   {
-    declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, true, false));
-    declareProperty(new WorkspaceProperty<>("NonLockingOutputWorkspace","",Direction::Output, true, false));
+    declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, PropertyMode::Optional, LockMode::NoLock));
+    declareProperty(new WorkspaceProperty<>("NonLockingOutputWorkspace","",Direction::Output, PropertyMode::Optional, LockMode::NoLock));
   }
   void exec()
   {

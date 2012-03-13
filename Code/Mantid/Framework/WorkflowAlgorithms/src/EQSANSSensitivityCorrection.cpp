@@ -34,13 +34,13 @@ using namespace Geometry;
 
 void EQSANSSensitivityCorrection::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new CommonBinsValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add(boost::make_shared<CommonBinsValidator>());
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
 
-  HistogramValidator<> * histoValidator = new HistogramValidator<>();
+  auto histoValidator = boost::make_shared<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("EfficiencyWorkspace","",Direction::Input, histoValidator));
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

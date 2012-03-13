@@ -14,6 +14,7 @@ setting of the Operation property.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ExponentialCorrection.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -41,7 +42,7 @@ namespace Algorithms
     std::vector<std::string> operations(2);
     operations[0] = "Multiply";
     operations[1] = "Divide";
-    declareProperty("Operation", "Divide", new Kernel::ListValidator(operations)); 
+    declareProperty("Operation", "Divide", boost::make_shared<Kernel::StringListValidator>(operations));
   }
   
   void ExponentialCorrection::retrieveProperties()

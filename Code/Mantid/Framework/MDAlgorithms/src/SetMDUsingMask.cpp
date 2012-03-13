@@ -84,7 +84,7 @@ namespace MDAlgorithms
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("MaskWorkspace","",Direction::Input),
         "A mask MDHistoWorkspace, where true indicates where to set the value.");
 
-    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("ValueWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("ValueWorkspace","",Direction::Input, PropertyMode::Optional),
         "Workspace to copy to the output workspace over the input. Optional - specify this or Value.");
 
     declareProperty("Value", DBL_MAX,

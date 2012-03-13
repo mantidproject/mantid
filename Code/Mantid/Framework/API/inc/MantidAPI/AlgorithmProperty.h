@@ -7,10 +7,6 @@
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class DataItem;
-  }
   namespace API
   {
     //-------------------------------------------------------------------------
@@ -62,7 +58,7 @@ namespace Mantid
 
       /// Constructor
       AlgorithmProperty(const std::string & propName,
-                        Kernel::IValidator<HeldType> *validator = new Kernel::NullValidator<HeldType>(), 
+                        Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>(),
                         unsigned int direction = Kernel::Direction::Input);
       /// Copy constructor
       AlgorithmProperty(const AlgorithmProperty & rhs);
@@ -87,8 +83,6 @@ namespace Mantid
       virtual std::string getDefault() const;
       /// Sets the value of the algorithm
       virtual std::string setValue(const std::string& value);
-      /// Set a property value via a DataItem
-      virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> data);
 
     private:
       /// Default constructor

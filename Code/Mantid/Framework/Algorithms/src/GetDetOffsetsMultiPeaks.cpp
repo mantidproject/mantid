@@ -98,7 +98,7 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-          new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
+          boost::make_shared<WorkspaceUnitValidator>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
       declareProperty(new ArrayProperty<double>("DReference"),"Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 

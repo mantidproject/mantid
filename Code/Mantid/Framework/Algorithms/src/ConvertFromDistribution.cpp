@@ -12,6 +12,7 @@ The workspace to convert must contain histogram data which is flagged as being a
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertFromDistribution.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 
 namespace Mantid
 {
@@ -33,9 +34,9 @@ using namespace API;
 
 void ConvertFromDistribution::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new RawCountValidator<>(false));
+  auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<RawCountValidator>(false);
   declareProperty(new WorkspaceProperty<>("Workspace", "",
     Kernel::Direction::InOut, wsValidator),
     "The name of the workspace to convert");

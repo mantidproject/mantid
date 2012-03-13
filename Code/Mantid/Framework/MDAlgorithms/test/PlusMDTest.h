@@ -12,6 +12,7 @@
 #include <iostream>
 #include <Poco/File.h>
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;

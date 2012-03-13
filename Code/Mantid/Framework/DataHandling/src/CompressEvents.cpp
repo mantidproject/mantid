@@ -62,7 +62,7 @@ void CompressEvents::init()
     "The name of the output EventWorkspace.");
 
   // Tolerance must be >= 0.0
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty(  new PropertyWithValue<double>("Tolerance", 1e-5, mustBePositive, Direction::Input),
     "The tolerance on each event's X value (normally TOF, but may be a different unit if you have used ConvertUnits).\n"

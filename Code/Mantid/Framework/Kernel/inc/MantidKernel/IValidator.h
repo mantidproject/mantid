@@ -6,19 +6,31 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/DataItem.h"
+#include <boost/any.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/type_traits/is_convertible.hpp>
+#include <set>
 #include <string>
+#include <sstream>
 
 namespace Mantid
 {
 namespace Kernel
 {
+// Forward declaration so that the typedef boost::shared_ptr<Validator>
+class IValidator;
+
+/// A shared_ptr to an IValidator
+typedef boost::shared_ptr<IValidator> IValidator_sptr;
 
 /** IValidator is the basic interface for all validators for properties
 
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
     
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -38,7 +50,6 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE>
 class DLLExport IValidator
 {
 public:
@@ -55,10 +66,21 @@ public:
    *  @param value :: The value to be checked
    *  @returns An error message to display to users or an empty string on no error
    */
+  template <typename TYPE>
   std::string isValid(const TYPE &value) const
   {
-    std::string failure = checkValidity(value);
-    return failure;
+    return isValidImpl(value, boost::is_convertible<TYPE, DataItem_sptr>());
+  }
+
+  /**
+   * Deal with a C-style string by first coverting it to a std::string
+   * so that boost::any can deal with it, calls isValid(std::string)
+   * @param value :: The value to be checked
+   * @returns An error message to display to users or an empty string on no error
+   */
+  std::string isValid(const char * value) const
+  {
+    return isValid(std::string(value));
   }
 
   //------------------------------------------------------------------------------------------------------------
@@ -69,15 +91,34 @@ public:
   virtual std::set<std::string> allowedValues() const { return std::set<std::string>(); }
   
   /// Make a copy of the present type of validator
-  virtual IValidator* clone() const = 0;
+  virtual IValidator_sptr clone() const = 0;
 
- 
-protected:
   /** Checks the value based on the validator's rules
    * 
    *  @returns An error message to display to users or an empty string on no error
    */
-  virtual std::string checkValidity(const TYPE &) const = 0;
+  virtual std::string check(const boost::any&) const = 0;
+
+private:
+  /** Calls the validator for a general type
+   * @param value :: The value to be checked
+   * @returns An error message to display to users or an empty string on no error
+   */
+  template<typename T>
+  std::string isValidImpl(const T & value, const boost::false_type &) const
+  {
+    return check(boost::any(value));
+  }
+
+  /** Calls the validator. This ensures the wrapped value is a DataItem_sptr
+   * @param value :: The value to be checked
+   * @returns An error message to display to users or an empty string on no error
+   */
+  template<typename T>
+  std::string isValidImpl(const T & value, const boost::true_type &) const
+  {
+    return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
+  }
 
 };
 

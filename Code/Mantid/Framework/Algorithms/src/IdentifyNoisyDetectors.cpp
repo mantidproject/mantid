@@ -41,11 +41,11 @@ void IdentifyNoisyDetectors::initDocs()
 
 void IdentifyNoisyDetectors::init()
 {
-  CompositeWorkspaceValidator<> *wsVal = new CompositeWorkspaceValidator<>;
-  wsVal->add(new WorkspaceUnitValidator<>("TOF"));
-  wsVal->add(new HistogramValidator<>);
-  wsVal->add(new SpectraAxisValidator<>);
-  wsVal->add(new InstrumentValidator<>);
+  auto wsVal = boost::make_shared<CompositeValidator>();
+  wsVal->add<WorkspaceUnitValidator>("TOF");
+  wsVal->add<HistogramValidator>();
+  wsVal->add<SpectraAxisValidator>();
+  wsVal->add<InstrumentValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsVal));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
 }

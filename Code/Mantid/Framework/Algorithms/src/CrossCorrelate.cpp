@@ -23,6 +23,7 @@ More details can be found [http://en.wikipedia.org/wiki/Cross-correlation here.]
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include <numeric>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -46,9 +47,9 @@ namespace Mantid
     /// Initialisation method.
     void CrossCorrelate::init()
     {
-      API::CompositeWorkspaceValidator<MatrixWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<MatrixWorkspace>;
-      wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
-      wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
+      auto wsValidator = boost::make_shared<CompositeValidator>();
+      wsValidator->add<API::WorkspaceUnitValidator>("dSpacing");
+      wsValidator->add<API::RawCountValidator>();
 
     	//Input and output workspaces
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsValidator),
@@ -56,15 +57,15 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
           "The name of the output workspace");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       // Reference spectra against which cross correlation is performed
       declareProperty("ReferenceSpectra",0, mustBePositive,
           "The Workspace Index of the spectra to correlate all other spectra against. ");
       // Spectra in the range [min to max] will be cross correlated to reference.
-      declareProperty("WorkspaceIndexMin",0, mustBePositive->clone(),
+      declareProperty("WorkspaceIndexMin",0, mustBePositive,
           "The workspace index of the first member of the range of spectra to cross-correlate against.");
-      declareProperty("WorkspaceIndexMax",0, mustBePositive->clone(),
+      declareProperty("WorkspaceIndexMax",0, mustBePositive,
           " The workspace index of the last member of the range of spectra to cross-correlate against.");
       // Only the data in the range X_min, X_max will be used
       declareProperty("XMin",0.0,

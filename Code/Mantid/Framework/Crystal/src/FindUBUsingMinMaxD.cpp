@@ -6,7 +6,7 @@ Given a set of peaks, and given a range of possible a,b,c values, this algorithm
 
 *WIKI*/
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -64,10 +64,10 @@ namespace Crystal
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
           "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    boost::shared_ptr<BoundedValidator<double> >mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
 
-    BoundedValidator<int> *atLeast3Int = new BoundedValidator<int>();
+    boost::shared_ptr<BoundedValidator<int> > atLeast3Int(new BoundedValidator<int>());
     atLeast3Int->setLower(3);
 
     // use negative values, force user to input all parameters
@@ -76,7 +76,7 @@ namespace Crystal
           "Lower Bound on Lattice Parameters a, b, c");
 
     this->declareProperty(new PropertyWithValue<double>( "MaxD",-1.0,
-          mustBePositive->clone(),Direction::Input),
+          mustBePositive,Direction::Input),
           "Upper Bound on Lattice Parameters a, b, c");
 
     this->declareProperty(new PropertyWithValue<int>( "NumInitial", 20,
@@ -84,7 +84,7 @@ namespace Crystal
           "Number of Peaks to Use on First Pass(20)");
 
     this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
-          mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");
+          mustBePositive,Direction::Input),"Indexing Tolerance (0.15)");
   }
 
   //--------------------------------------------------------------------------

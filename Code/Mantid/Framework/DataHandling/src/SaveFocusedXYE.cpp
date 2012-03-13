@@ -18,6 +18,7 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include <Poco/File.h>
 #include <fstream>
 #include <iomanip>
@@ -51,7 +52,7 @@ void SaveFocusedXYE::init()
   std::vector<std::string> Split(2);
   Split[0] = "True";
   Split[1] = "False";
-  declareProperty("SplitFiles", "True", new Kernel::ListValidator(Split),
+  declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
       "Save each spectrum in a different file (default true)");
   declareProperty("StartAtBankNumber", 0, "Start bank (spectrum) numbers at this number in the file.  "
     "The bank number in the file will be the workspace index + StartAtBankNumber.");

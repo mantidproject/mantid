@@ -19,6 +19,7 @@ Uses the [[Integration]] algorithm to sum the spectra.
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/System.h"
 #include <fstream>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -49,17 +50,17 @@ namespace Mantid
         "Each histogram from the input workspace maps to a histogram in this\n"
         "workspace with one value that indicates if there was a dead detector" );
 
-      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0);
       declareProperty("DeadThreshold",0.0, mustBePositive,
         "The threshold against which to judge if a spectrum belongs to a dead\n"
         "detector" );
       // As the property takes ownership of the validator pointer, have to take care to pass in a unique
       // pointer to each property.
-      declareProperty("LiveValue",0.0, mustBePositive->clone(),
+      declareProperty("LiveValue",0.0, mustBePositive,
         "The value to assign to an integrated spectrum flagged as 'live'\n"
         "(default 0.0)");
-      declareProperty("DeadValue",100.0, mustBePositive->clone(),
+      declareProperty("DeadValue",100.0, mustBePositive,
         "The value to assign to an integrated spectrum flagged as 'dead'\n"
         "(default 100.0)" );
       //EMPTY_DBL() is a tag that tells us that no value has been set and we want to use the default

@@ -28,6 +28,7 @@ You must specify:
 #include "MantidAPI/FileProperty.h"
 
 #include <fstream>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -78,7 +79,7 @@ void FilterByTime::init()
     "The name to use for the output workspace" );
 
 
-  BoundedValidator<double> *min = new BoundedValidator<double>();
+  auto min = boost::make_shared<BoundedValidator<double> >();
   min->setLower(0.0);
   declareProperty("StartTime", 0.0, min,
       "The start time, in seconds, since the start of the run. Events before this time are filtered out. \nThe time of the first pulse (i.e. the first entry in the ProtonCharge sample log) is used as the zero. " + commonHelp);

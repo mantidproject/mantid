@@ -72,7 +72,7 @@ namespace Mantid
           }
           else
           {
-            const Kernel::IValidator<ValueType> * propValidator = extract<Kernel::IValidator<ValueType> *>(validator);
+            const Kernel::IValidator *propValidator = extract<Kernel::IValidator*>(validator);
             valueProp = new Kernel::PropertyWithValue<ValueType>(name, valueInC, propValidator->clone(), direction);
           }
           return valueProp;

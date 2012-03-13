@@ -16,6 +16,7 @@
 #include "MantidNexusCPP/NeXusException.hpp"
 
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
@@ -60,12 +61,12 @@ namespace Mantid
         "The name of the Nexus file to load" );
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      BoundedValidator<int64_t> *mustBePositive = new BoundedValidator<int64_t>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int64_t> >();
       mustBePositive->setLower(0);
       declareProperty("SpectrumMin",(int64_t)0, mustBePositive);
-      declareProperty("SpectrumMax",(int64_t)EMPTY_INT(), mustBePositive->clone());
+      declareProperty("SpectrumMax",(int64_t)EMPTY_INT(), mustBePositive);
       declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
-      declareProperty("EntryNumber", (int64_t)0, mustBePositive->clone(),
+      declareProperty("EntryNumber", (int64_t)0, mustBePositive,
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
     }
 

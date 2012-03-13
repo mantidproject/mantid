@@ -46,6 +46,7 @@ The subalgorithms used by LoadMuonNexus are:
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
@@ -114,20 +115,20 @@ void LoadNexusProcessed::init()
 
 
   // optional
-  BoundedValidator<int64_t> *mustBePositive = new BoundedValidator<int64_t> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int64_t> >();
   mustBePositive->setLower(0);
 
   declareProperty("SpectrumMin", (int64_t)1, mustBePositive,
       "Index number of the first spectrum to read, only used if\n"
       "spectrum_max is set and only for single period data, not\n"
       " yet implemented (default 0)");
-  declareProperty("SpectrumMax", (int64_t)Mantid::EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("SpectrumMax", (int64_t)Mantid::EMPTY_INT(), mustBePositive,
       "Index of last spectrum to read, only for single period data,\n"
       " not yet implemented (default the last spectrum).");
   declareProperty(new ArrayProperty<int64_t> ("SpectrumList"),
       "Array, or comma separated list, of indexes of spectra to\n"
       "load. Not yet implemented.");
-  declareProperty("EntryNumber", (int64_t)0, mustBePositive->clone(),
+  declareProperty("EntryNumber", (int64_t)0, mustBePositive,
       "The particular entry number to read (default: read all entries)" );
 }
 

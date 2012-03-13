@@ -11,6 +11,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

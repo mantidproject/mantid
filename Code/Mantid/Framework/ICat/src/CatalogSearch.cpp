@@ -36,14 +36,17 @@ namespace Mantid
     /// Initialisation method.
     void CatalogSearch::init()
     {
-      BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
 
       declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
-      declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
+      declareProperty("EndRun",0.0,mustBePositive,"The end run number for the range of investigations to be searched.");
       declareProperty("Instrument","","The name of the instrument used for investigation search.");
-      declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-      declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+      auto isDate = boost::make_shared<DateValidator>();
+      declareProperty("StartDate","", isDate,
+                      "The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+      declareProperty("EndDate","", isDate,
+                      "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
       declareProperty("Keywords","","An option to search investigations data");
       declareProperty("CaseSensitive", false, "Boolean option to do case sensitive ICat investigations search.");
 

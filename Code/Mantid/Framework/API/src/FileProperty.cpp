@@ -34,13 +34,13 @@ using namespace Mantid::Kernel;
  * @param direction ::     An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-         const std::vector<std::string> & exts, unsigned int direction)
+                           const std::vector<std::string> & exts, unsigned int direction)
   : PropertyWithValue<std::string>(name, default_value,
-      /* Create either a FileValidator or a DirectoryValidator, depending on Action */
-      (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
-          new DirectoryValidator(action == FileProperty::Directory) :
-          new FileValidator(exts, (action == FileProperty::Load) )
-      , direction),
+                                   /* Create either a FileValidator or a DirectoryValidator, depending on Action */
+                                   (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
+                                   boost::make_shared<DirectoryValidator>(action == FileProperty::Directory) :
+                                   boost::make_shared<FileValidator>(exts, (action == FileProperty::Load) )
+                                   , direction),
     m_action(action),
     m_defaultExt(""),
     m_runFileProp(false)
@@ -63,8 +63,8 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
   : PropertyWithValue<std::string>(name, default_value,
       /* Create either a FileValidator or a DirectoryValidator, depending on Action */
       (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
-          new DirectoryValidator(action == FileProperty::Directory) :
-          new FileValidator(std::vector<std::string>(1,ext), (action == FileProperty::Load) )
+          boost::make_shared<DirectoryValidator>(action == FileProperty::Directory) :
+          boost::make_shared<FileValidator>(std::vector<std::string>(1,ext), (action == FileProperty::Load) )
       , direction),
     m_action(action),
     m_defaultExt(ext),
@@ -159,18 +159,6 @@ std::string FileProperty::setValue(const std::string & propValue)
   }
   return errorMsg;
 }
-
-/**
- * Set a property value via a DataItem
- * @param data :: A shared pointer to a data item
- * @return "" if the assignment was successful or a user level description of the problem
-*/
-std::string FileProperty::setValue(const boost::shared_ptr<Kernel::DataItem> data )
-{
-  // Implemented this method for documentation reasons. Just calls base class method.
-  return PropertyWithValue<std::string>::setValue(data);
-}
-
 
 /**
  * Set up the property

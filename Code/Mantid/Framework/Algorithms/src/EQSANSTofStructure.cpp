@@ -43,8 +43,9 @@ using namespace Geometry;
 
 void EQSANSTofStructure::init()
 {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new WorkspaceUnitValidator<EventWorkspace>("TOF")),
-      "Workspace to apply the TOF correction to");
+  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,
+                                                        boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                  "Workspace to apply the TOF correction to");
   declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
   declareProperty("LowTOFCut", 0.0, Kernel::Direction::Input);
   declareProperty("HighTOFCut", 0.0, Kernel::Direction::Input);

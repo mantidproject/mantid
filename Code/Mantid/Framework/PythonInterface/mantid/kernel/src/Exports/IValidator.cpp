@@ -4,21 +4,9 @@
 using Mantid::Kernel::IValidator;
 using namespace boost::python;
 
-namespace
+void export_IValidator()
 {
-  /// Export an IValidator base class
-  #define EXPORT_IVALIDATOR(ElementType,Suffix) \
-    class_<IValidator<ElementType>, boost::noncopyable>("IValidator_"#Suffix, no_init) \
-      .def("isValid", &IValidator<ElementType>::isValid, "Returns an empty string if the given value is valid. " \
-           "Otherwise a user-level error is returned.") \
-    ;
-}
-
-void export_IValidators()
-{
-  EXPORT_IVALIDATOR(double,double);
-  EXPORT_IVALIDATOR(int,int);
-  EXPORT_IVALIDATOR(long,long);
-  EXPORT_IVALIDATOR(std::string,std_string);
+  class_<IValidator, boost::noncopyable>("IValidator", no_init)
+  ;
 }
 

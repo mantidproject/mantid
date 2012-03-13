@@ -48,14 +48,14 @@ namespace Mantid
     {
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                                new HistogramValidator<>),
+                                boost::make_shared<HistogramValidator>()),
         "Name of the input workspace" );
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
         "a zero is also masked on the output");
 
-      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0);
       declareProperty("SignificanceTest", 3.3, mustBePositive,
                       "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
@@ -68,12 +68,12 @@ namespace Mantid
       declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
       declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
                       "the median calculation, otherwise they will not be included but they will be left unmasked");
-      BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
                       "The index number of the first spectrum to include in the calculation\n"
                       "(default 0)" );
-      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
                       "The index number of the last spectrum to include in the calculation\n"
                       "(default the last histogram)" );
       declareProperty("RangeLower", EMPTY_DBL(),

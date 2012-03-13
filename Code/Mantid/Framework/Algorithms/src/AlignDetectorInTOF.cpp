@@ -71,19 +71,19 @@ namespace Algorithms
   void AlignDetectorInTOF::init()
   {
     /*
-    CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
+    auto wsValidator = boost::make_shared<CompositeValidator>();
     //Workspace unit must be TOF.
-    wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
-    wsValidator->add(new RawCountValidator<>);
-    wsValidator->add(new InstrumentValidator<>);
+    wsValidator->add<WorkspaceUnitValidator>("TOF");
+    wsValidator->add<RawCountValidator>();
+    wsValidator->add<InstrumentValidator>();
 
     declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
       "A workspace with units of TOF" );
     */
 
     //Input workspace must be in dSpacing and be an inputWorkspace
-    API::CompositeWorkspaceValidator<EventWorkspace> *wsValidator2 = new API::CompositeWorkspaceValidator<EventWorkspace>;
-    wsValidator2->add(new API::WorkspaceUnitValidator<EventWorkspace>("TOF"));
+    auto wsValidator2 = boost::make_shared<CompositeValidator>();
+    wsValidator2->add<API::WorkspaceUnitValidator>("TOF");
 
     declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input, wsValidator2),
          "An EventWorkspace with units of TOF" );

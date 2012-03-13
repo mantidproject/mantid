@@ -40,6 +40,8 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <cfloat>
 #include <iomanip>
@@ -96,15 +98,16 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        }
        //
        if(iExistingAllowedValues.empty()){
-
            API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
            size_t spectra_max(-1);
            if(inputWS){ // let's assueme that detectors IDs correspond to spectraID -- not always the case but often. 
                spectra_max = inputWS->getNumberHistograms()+1;
            }
-           piProp->modify_validator(new Kernel::BoundedValidator<int>(-1,(int)spectra_max));
+           piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int>>(-1,(int)spectra_max));
+           // TO DO: fix it -- provide correct BV value;
+         piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int> >(-1,100000));
        }else{
-            piProp->modify_validator(new Kernel::ListAnyValidator<int>(iExistingAllowedValues));
+         piProp->replaceValidator(boost::make_shared<Kernel::ListValidator<int> >(iExistingAllowedValues));
        }
            
    }
@@ -196,9 +199,9 @@ void NormaliseToMonitor::initDocs()
 
 void NormaliseToMonitor::init()
 {
-  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
-  val->add(new HistogramValidator<>);
-  val->add(new RawCountValidator<>);
+  auto val = boost::make_shared<CompositeValidator>();
+  val->add<HistogramValidator>();
+  val->add<RawCountValidator>();
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
     "Name of the input workspace. Must be a non-distribution histogram.");
@@ -223,7 +226,7 @@ void NormaliseToMonitor::init()
    setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
+  declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,PropertyMode::Optional,val),
     "A workspace containing the monitor spectrum");
   setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
   declareProperty("MonitorWorkspaceIndex",0,

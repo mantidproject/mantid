@@ -18,13 +18,13 @@ nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
 
 *WIKI*/
 #include "MantidCrystal/ShowPossibleCells.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cstdio>
 
 namespace Mantid
@@ -77,7 +77,7 @@ namespace Crystal
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
           "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
 
     this->declareProperty(new PropertyWithValue<double>( "MaxScalarError",0.2,

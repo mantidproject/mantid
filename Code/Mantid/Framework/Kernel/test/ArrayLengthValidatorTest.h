@@ -42,11 +42,9 @@ public:
   /// test the clone function
   void testClone()
   {
-    ArrayLengthValidator<int> *vi= new ArrayLengthValidator<int>;
-    IValidator<std::vector<int> > *vvi = vi->clone();
+    boost::shared_ptr<ArrayLengthValidator<int> > vi(new ArrayLengthValidator<int>);
+    IValidator_sptr vvi = vi->clone();
     TS_ASSERT_DIFFERS( vi, vvi );
-    delete vi;
-    delete vvi;
   }
 
   /// test for setLength and clearLength

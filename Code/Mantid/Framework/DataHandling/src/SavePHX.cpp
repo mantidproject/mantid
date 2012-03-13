@@ -50,7 +50,7 @@ using namespace Mantid::Geometry;
 
 void SavePHX::init() {
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
-      Direction::Input,new InstrumentValidator<>), "The input workspace");
+      Direction::Input, boost::make_shared<InstrumentValidator>()), "The input workspace");
   declareProperty(new FileProperty("Filename", "", FileProperty::Save),
       "The filename to use for the saved data");
 

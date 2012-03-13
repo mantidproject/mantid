@@ -33,7 +33,7 @@ using namespace DataObjects;
 void RefRoi::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-      new CommonBinsValidator<>),"Workspace to calculate the ROI from");
+      boost::make_shared<CommonBinsValidator>()),"Workspace to calculate the ROI from");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Workspace containing the summed up region of interest");
   declareProperty("NXPixel", 304,

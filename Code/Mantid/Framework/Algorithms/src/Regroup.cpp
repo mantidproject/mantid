@@ -50,9 +50,9 @@ using API::MatrixWorkspace;
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init()
 {
-  API::CompositeWorkspaceValidator<> *wsVal = new API::CompositeWorkspaceValidator<>;
-  wsVal->add(new API::HistogramValidator<>);
-  wsVal->add(new API::CommonBinsValidator<>);
+  auto wsVal = boost::make_shared<CompositeValidator>();
+  wsVal->add<API::HistogramValidator>();
+  wsVal->add<API::CommonBinsValidator>();
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsVal),
     "Name of the input workspace" );
@@ -61,7 +61,7 @@ void Regroup::init()
     "The name of the workspace to be created as the output of the regrouping");
 
   declareProperty(
-    new ArrayProperty<double>("Params", new RebinParamsValidator),
+    new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
     "The new bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
 }
 

@@ -14,6 +14,7 @@ This algorithm rebins a 2D workspace in units of wavelength into 2D Q, and the r
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -38,37 +39,37 @@ using namespace Geometry;
 
 void Qxy::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new InstrumentValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(1.0e-12);
   
   declareProperty("MaxQxy",-1.0,mustBePositive);
-  declareProperty("DeltaQ",-1.0,mustBePositive->clone());
-  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true),
+  declareProperty("DeltaQ",-1.0,mustBePositive);
+  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, PropertyMode::Optional),
     "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
     "the same number of spectra as the DetBankWorkspace");
-  CompositeWorkspaceValidator<> *wavVal = new CompositeWorkspaceValidator<>;
-  wavVal->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wavVal->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, true, wavVal),
+  auto wavVal = boost::make_shared<CompositeValidator>();
+  wavVal->add<WorkspaceUnitValidator>("Wavelength");
+  wavVal->add<HistogramValidator>();
+  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, PropertyMode::Optional, wavVal),
     "The scaling to apply to each bin to account for monitor counts, transmission\n"
     "fraction, etc");
   declareProperty("AccountForGravity",false,Direction::Input);
   declareProperty("SolidAngleWeighting",true,
       "If true, pixels will be weighted by their solid angle.", Direction::Input);
-  BoundedValidator<double> *mustBePositive2 = new BoundedValidator<double>();
+  auto mustBePositive2 = boost::make_shared<BoundedValidator<double> >();
   mustBePositive2->setLower(0.0);
   declareProperty("RadiusCut", 0.0, mustBePositive2,
     "To increase resolution some wavelengths are excluded within this distance from\n"
     "the beam center (mm)");
-  declareProperty("WaveCut", 0.0, mustBePositive2->clone(),
+  declareProperty("WaveCut", 0.0, mustBePositive2,
     "To increase resolution by starting to remove some wavelengths below this"
     "freshold (angstrom)");
 }

@@ -32,7 +32,7 @@ using namespace DataObjects;
 void SetupHFIRReduction::init()
 {
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
+  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
 }
 
 void SetupHFIRReduction::exec()

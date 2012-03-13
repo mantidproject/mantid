@@ -11,6 +11,7 @@ The x and y units in the DAVE file refer to different things from what is often 
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <fstream>
@@ -37,11 +38,11 @@ void SaveDASC::initDocs()
  */
 void SaveDASC::init()
 {
-  API::CompositeWorkspaceValidator<> *wsValidator = new API::CompositeWorkspaceValidator<>;
+  auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
   // Data must havec common bins
-  wsValidator->add(new API::CommonBinsValidator<>);
+  wsValidator->add<API::CommonBinsValidator>();
   // the output of this algorithm is spectrum data, not histogram, but as a histogram to spectrum conversion is built in a spectrum as input would be no good, at the moment
-  wsValidator->add(new API::HistogramValidator<>);
+  wsValidator->add<API::HistogramValidator>();
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,wsValidator),
       "The input workspace");
   declareProperty(new FileProperty("Filename","",FileProperty::Save),

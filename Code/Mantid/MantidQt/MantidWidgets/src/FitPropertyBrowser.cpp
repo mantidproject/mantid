@@ -9,6 +9,7 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"

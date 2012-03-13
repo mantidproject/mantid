@@ -4,6 +4,7 @@
 #include "MantidMDEvents/CentroidPeaksMD.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"

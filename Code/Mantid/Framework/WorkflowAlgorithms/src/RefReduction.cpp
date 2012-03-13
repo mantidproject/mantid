@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/ListValidator.h"
 #include "Poco/File.h"
 #include "Poco/String.h"
 #include "Poco/NumberFormatter.h"
@@ -106,7 +107,7 @@ void RefReduction::init()
   std::vector<std::string> instrOptions;
   instrOptions.push_back("REF_L");
   instrOptions.push_back("REF_M");
-  declareProperty("Instrument","REF_M",new ListValidator(instrOptions),
+  declareProperty("Instrument","REF_M",boost::make_shared<StringListValidator>(instrOptions),
     "Instrument to reduce for");
   declareProperty("OutputWorkspacePrefix","reflectivity");
 

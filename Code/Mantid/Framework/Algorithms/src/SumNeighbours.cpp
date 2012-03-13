@@ -24,6 +24,7 @@ The algorithm looks through the [[Instrument]] to find all the [[RectangularDete
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/algorithm/string.hpp>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -51,22 +52,21 @@ using namespace DataObjects;
  */
 void SumNeighbours::init()
 {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<EventWorkspace>),
+  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,
+                                                        boost::make_shared<InstrumentValidator>()),
     "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours)." );
 
   declareProperty(
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );
 
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
 
   declareProperty("SumX", 4, mustBePositive,
     "The number of X (horizontal) pixels to sum together. This must evenly divide the number of X pixels in a detector." );
 
-  declareProperty("SumY", 4, mustBePositive->clone(),
+  declareProperty("SumY", 4, mustBePositive,
     "The number of Y (vertical) pixels to sum together. This must evenly divide the number of Y pixels in a detector" );
 
   declareProperty(

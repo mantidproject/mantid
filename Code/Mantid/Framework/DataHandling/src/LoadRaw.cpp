@@ -33,6 +33,7 @@ LoadRaw runs the following algorithms as child algorithms to populate aspects of
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> // Required for gcc 4.4
@@ -82,12 +83,12 @@ namespace Mantid
         "RAW file contains multiple periods higher periods will be stored in\n"
         "separate workspaces called OutputWorkspace_PeriodNo.");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);
       declareProperty(new PropertyWithValue<specid_t>("SpectrumMin", 1, mustBePositive),
         "The index number of the first spectrum to read.  Only used if\n"
         "spectrum_max is set.");
-      declareProperty(new PropertyWithValue<specid_t>("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone()),
+      declareProperty(new PropertyWithValue<specid_t>("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
         "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 

@@ -5,9 +5,11 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
@@ -59,7 +61,7 @@ const double GroupDetectors2::READFILE = 0.15;
 void GroupDetectors2::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-    new CommonBinsValidator<>),"The name of the input 2D workspace");
+                                          boost::make_shared<CommonBinsValidator>()),"The name of the input 2D workspace");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
   std::vector<std::string> fileExts(2);
@@ -83,8 +85,9 @@ void GroupDetectors2::init()
   std::vector<std::string> groupTypes(2);
   groupTypes[0] = "Sum";
   groupTypes[1] = "Average";
-  declareProperty("Behaviour", "Sum", new Mantid::Kernel::ListValidator(groupTypes),
-    "Whether to sum or average the values when grouping detectors.");
+  using Mantid::Kernel::StringListValidator;
+  declareProperty("Behaviour", "Sum", boost::make_shared<StringListValidator>(groupTypes),
+                  "Whether to sum or average the values when grouping detectors.");
 }
 
 void GroupDetectors2::exec()

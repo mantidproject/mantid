@@ -15,6 +15,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

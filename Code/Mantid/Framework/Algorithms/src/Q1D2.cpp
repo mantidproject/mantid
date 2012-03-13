@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -34,38 +35,38 @@ using namespace Geometry;
 
 void Q1D2::init()
 {
-  CompositeWorkspaceValidator<> *dataVal = new CompositeWorkspaceValidator<>;
-  dataVal->add(new WorkspaceUnitValidator<>("Wavelength"));
-  dataVal->add(new HistogramValidator<>);
-  dataVal->add(new InstrumentValidator<>);
-  dataVal->add(new CommonBinsValidator<>);
+  auto dataVal = boost::make_shared<CompositeValidator>();
+  dataVal->add<WorkspaceUnitValidator>("Wavelength");
+  dataVal->add<HistogramValidator>();
+  dataVal->add<InstrumentValidator>();
+  dataVal->add<CommonBinsValidator>();
   declareProperty(new WorkspaceProperty<>("DetBankWorkspace", "", Direction::Input, dataVal),
     "Particle counts as a function of wavelength");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "Name of the workspace that will contain the result of the calculation");
-  declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator),
+  declareProperty(new ArrayProperty<double>("OutputBinning", boost::make_shared<RebinParamsValidator>()),
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
-  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true),
+  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, PropertyMode::Optional),
     "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
     "the same number of spectra as the DetBankWorkspace");
-  CompositeWorkspaceValidator<> *wavVal = new CompositeWorkspaceValidator<>;
-  wavVal->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wavVal->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, true, wavVal),
+  auto wavVal = boost::make_shared<CompositeValidator>();
+  wavVal->add<WorkspaceUnitValidator>("Wavelength");
+  wavVal->add<HistogramValidator>();
+  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, PropertyMode::Optional, wavVal),
     "The scaling to apply to each bin to account for monitor counts, transmission\n"
     "fraction, etc");
   declareProperty("AccountForGravity",false,
     "Whether to correct for the effects of gravity");
   declareProperty("SolidAngleWeighting",true,
       "If true, pixels will be weighted by their solid angle.", Direction::Input);
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("RadiusCut", 0.0, mustBePositive,
     "To increase resolution some wavelengths are excluded within this distance from\n"
     "the beam center (mm)");
-  declareProperty("WaveCut", 0.0, mustBePositive->clone(),
+  declareProperty("WaveCut", 0.0, mustBePositive,
     "To increase resolution by starting to remove some wavelengths below this"
     "freshold (angstrom)");
 }

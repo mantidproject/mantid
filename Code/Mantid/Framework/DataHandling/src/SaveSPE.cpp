@@ -15,6 +15,7 @@ The input workspace must have units of Momentum Transfer ('DeltaE') and contain 
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include <cstdio>
 #include <cmath>
 
@@ -61,9 +62,9 @@ namespace Mantid
     void SaveSPE::init()
     {
       // Data must be in Energy Transfer and common bins
-      API::CompositeWorkspaceValidator<> *wsValidator = new API::CompositeWorkspaceValidator<>;
-      wsValidator->add(new API::CommonBinsValidator<>);
-      wsValidator->add(new API::HistogramValidator<>);
+      auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+      wsValidator->add<API::CommonBinsValidator>();
+      wsValidator->add<API::HistogramValidator>();
       declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsValidator),
         "The input workspace, which must be in Energy Transfer");
       declareProperty(new FileProperty("Filename","", FileProperty::Save),

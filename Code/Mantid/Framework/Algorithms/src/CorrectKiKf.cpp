@@ -11,6 +11,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -47,8 +49,8 @@ CorrectKiKf::~CorrectKiKf()
 /// Initialisation method
 void CorrectKiKf::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("DeltaE");
 
   this->declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "Name of the input workspace");
@@ -58,9 +60,9 @@ void CorrectKiKf::init()
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
-  this->declareProperty("EMode","Direct",new ListValidator(propOptions),
+  this->declareProperty("EMode","Direct",boost::make_shared<StringListValidator>(propOptions),
     "The energy mode (default: Direct)");
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   this->declareProperty("EFixed",EMPTY_DBL(),mustBePositive,
     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect) .");

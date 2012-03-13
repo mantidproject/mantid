@@ -62,6 +62,7 @@ This text file will create a Workspace2D with 3 spectra.
 #include "MantidDataHandling/LoadSpec.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include <fstream>
 #include <cstring>
@@ -103,7 +104,7 @@ namespace Mantid
 
 	  std::vector<std::string> units = UnitFactory::Instance().getKeys();
 	  units.insert(units.begin(),"MomemtumTransfer");
-	  declareProperty("Unit","Energy",new Kernel::ListValidator(units),
+	  declareProperty("Unit","Energy", boost::make_shared<Kernel::StringListValidator>(units),
 			"The unit to assign to the X axis (default: Energy)");
     }
 

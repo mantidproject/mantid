@@ -16,6 +16,7 @@ The algorithm rebins data by adding together ''n_bunch'' successive bins.
 #include <sstream>
 #include <numeric>
 #include <cmath>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -50,7 +51,7 @@ void Rebunch::initDocs()
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the algorithm");
 
-			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
 			mustBePositive->setLower(1);
 			declareProperty("NBunch",1, mustBePositive,
         "The number of bins to that will be summed in each bunch");

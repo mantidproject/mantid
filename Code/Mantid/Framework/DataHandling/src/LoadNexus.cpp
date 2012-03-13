@@ -27,6 +27,7 @@ If a spectrum_list is given than those values will be loaded.
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -74,16 +75,16 @@ namespace Mantid
         "multiperiod files, one workspace will be generated for each period");
 
       // Declare optional input parameters
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("SpectrumMin",1, mustBePositive,
         "Index number of first spectrum to read, only for single period data");
-      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
         "Index number of last spectrum to read, only for single period data");
       declareProperty(new ArrayProperty<int>("SpectrumList"),
         "A comma seperated or array with the list of index number to read" );
 
-      declareProperty("EntryNumber",0, mustBePositive->clone(), 
+      declareProperty("EntryNumber",0, mustBePositive, 
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)" );
     }
 

@@ -43,11 +43,11 @@ plotSpectrum('peak_vs_rad', [0,2,3], error_bars=True)
 *WIKI*/
 
 #include "MantidCrystal/PeakIntensityVsRadius.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -110,7 +110,7 @@ namespace Crystal
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "Q (lab frame)",new ListValidator(propOptions),
+    declareProperty("CoordinatesToUse", "Q (lab frame)", boost::make_shared<StringListValidator>(propOptions),
       "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
        );
 

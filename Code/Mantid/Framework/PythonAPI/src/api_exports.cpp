@@ -185,10 +185,9 @@ using namespace boost::python;
     //Save some typing for all of the templated declareProperty and getProperty methods
 #define EXPORT_DECLAREPROPERTY(type, suffix)\
     .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
-    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, Kernel::IValidator<type> &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
+    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, Kernel::IValidator &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
     .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)\
-    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, Kernel::IValidator<type> &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>) \
-    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, Kernel::IValidator<std::vector<type> > &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)
+    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, Kernel::IValidator &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>) \
     
 #define EXPORT_GETPROPERTY(type, suffix)\
     .def("getProperty_"#suffix,(type(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getProperty<type>)
@@ -204,9 +203,9 @@ using namespace boost::python;
       .def("_setTableWorkspaceProperty", &PyAlgorithmBase::_setTableWorkspaceProperty)
       .def("_declareFileProperty", &PyAlgorithmBase::_declareFileProperty)
       .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
-      .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::Workspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
+      .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
       .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
-      .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::MatrixWorkspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
+      .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
       .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)
       .def("_declareAlgorithmProperty", &PyAlgorithmBase::_declareAlgorithmProperty)
       .def("_setAlgorithmProperty", &PyAlgorithmBase::_setAlgorithmProperty)
@@ -730,26 +729,20 @@ using namespace boost::python;
 
   void export_apivalidators()
   {
-    class_<Kernel::IValidator<API::MatrixWorkspace_sptr>, boost::noncopyable>("IValidator_matrix", no_init)
+    class_<API::MatrixWorkspaceValidator, bases<Kernel::IValidator>, boost::noncopyable>("MatrixWorkspaceValidator", no_init)
       ;
 
     // Unit checking
-    class_<API::WorkspaceUnitValidator<API::MatrixWorkspace>, 
-      bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("WorkspaceUnitValidator", init<std::string>())
+    class_<API::WorkspaceUnitValidator, bases<API::MatrixWorkspaceValidator> >("WorkspaceUnitValidator", init<std::string>())
       ;
     // Histogram checking
-    class_<API::HistogramValidator<API::MatrixWorkspace>, 
-      bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("HistogramValidator", init<bool>())
+    class_<API::HistogramValidator, bases<API::MatrixWorkspaceValidator> >("HistogramValidator", init<bool>())
       ;
     // Raw count checker
-    class_<API::RawCountValidator<API::MatrixWorkspace>, 
-	   bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("RawCountValidator", init<bool>())
+    class_<API::RawCountValidator, bases<API::MatrixWorkspaceValidator> >("RawCountValidator", init<bool>())
       ;
     // Check for common bins
-    class_<API::CommonBinsValidator<API::MatrixWorkspace>, 
-	   bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("CommonBinsValidator")
-      ;
-	
+    class_<API::CommonBinsValidator, bases<API::MatrixWorkspaceValidator> >("CommonBinsValidator");
   }
 
   void export_workspace_history()

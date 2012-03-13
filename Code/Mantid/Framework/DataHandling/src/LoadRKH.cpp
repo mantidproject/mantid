@@ -15,6 +15,7 @@ Loads the given file in the RKH text format, which can be a file with three colu
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>
@@ -68,7 +69,7 @@ void LoadRKH::init()
   propOptions.insert(propOptions.end(), m_RKHKeys.begin(), m_RKHKeys.end());
 
   declareProperty("FirstColumnValue", "Wavelength",
-    new Kernel::ListValidator(propOptions),
+                  boost::make_shared<Kernel::StringListValidator>(propOptions),
     "Only used for 1D files, the units of the first column in the RKH\n"
     "file (default Wavelength)" );
 }

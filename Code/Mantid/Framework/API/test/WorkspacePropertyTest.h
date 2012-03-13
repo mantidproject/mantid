@@ -43,8 +43,8 @@ public:
     wsp2 = new WorkspaceProperty<Workspace>("workspace2","",Direction::Output);
     wsp3 = new WorkspaceProperty<WorkspaceTester2>("workspace3","ws3",Direction::InOut);
     // Two optional properties of different types
-    wsp4 = new WorkspaceProperty<Workspace>("workspace4","",Direction::Input, true);
-    wsp5 = new WorkspaceProperty<WorkspaceTester2>("workspace5","",Direction::Input, true);
+    wsp4 = new WorkspaceProperty<Workspace>("workspace4","",Direction::Input, PropertyMode::Optional);
+    wsp5 = new WorkspaceProperty<WorkspaceTester2>("workspace5","",Direction::Input, PropertyMode::Optional);
     wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest","",Direction::Output);
   }
 
@@ -245,7 +245,7 @@ public:
     TS_ASSERT( wsp5->isLocking());
 
     // Create one that is not locking
-    WorkspaceProperty<Workspace> * p1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input, false, false);
+    WorkspaceProperty<Workspace> * p1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input, PropertyMode::Mandatory, LockMode::NoLock);
     TS_ASSERT( !p1->isLocking());
 
     // Copy constructor, both ways

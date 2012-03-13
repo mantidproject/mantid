@@ -26,7 +26,7 @@ namespace Kernel
 Logger& FileValidator::g_log = Logger::get("FileValidator");
 
 /// Default constructor.
-FileValidator::FileValidator() : IValidator<std::string>(), m_extensions(), m_fullTest(true)
+FileValidator::FileValidator() : TypedValidator<std::string>(), m_extensions(), m_fullTest(true)
 {}
 
 /** Constructor
@@ -34,7 +34,7 @@ FileValidator::FileValidator() : IValidator<std::string>(), m_extensions(), m_fu
  *  @param testFileExists :: Flag indicating whether to test for existence of file (default: yes)
  */
 FileValidator::FileValidator(const std::vector<std::string>& extensions, bool testFileExists) :
-  IValidator<std::string>(),
+  TypedValidator<std::string>(),
   m_extensions(extensions.begin(),extensions.end()),
   m_fullTest(testFileExists)
 {
@@ -54,9 +54,9 @@ std::set<std::string> FileValidator::allowedValues() const
  * Clone the validator
  * @returns A pointer to a new validator with the same properties as this one
  */
-IValidator<std::string>* FileValidator::clone() const
+IValidator_sptr FileValidator::clone() const
 { 
-  return new FileValidator(*this); 
+  return boost::make_shared<FileValidator>(*this); 
 }
 
 /** If m_fullTest=true if checks that the files exists, otherwise just that path syntax looks valid

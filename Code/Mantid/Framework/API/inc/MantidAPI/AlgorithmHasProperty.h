@@ -5,7 +5,7 @@
 //Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/IValidator.h"
+#include "MantidKernel/TypedValidator.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -46,7 +46,7 @@ namespace Mantid
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class MANTID_API_DLL AlgorithmHasProperty : 
-      public Kernel::IValidator<boost::shared_ptr<IAlgorithm> >
+      public Kernel::TypedValidator<boost::shared_ptr<IAlgorithm> >
     {
     public:
       /// Constructor 
@@ -59,9 +59,9 @@ namespace Mantid
        */
       inline std::string getType() const { return "AlgorithmHasProperty"; }
       /// Make a copy of the present type of validator
-      inline Kernel::IValidator<boost::shared_ptr<IAlgorithm> >* clone() const
+      inline Kernel::IValidator_sptr clone() const
       { 
-        return new AlgorithmHasProperty(*this); 
+        return boost::make_shared<AlgorithmHasProperty>(*this); 
       }
 
     protected:

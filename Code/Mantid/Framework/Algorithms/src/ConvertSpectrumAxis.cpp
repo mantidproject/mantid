@@ -20,6 +20,8 @@ For units other than <math>\theta</math>, the value placed in the axis is genera
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <cfloat>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -42,24 +44,24 @@ namespace Algorithms
   void ConvertSpectrumAxis::init()
   {
     // Validator for Input Workspace
-    CompositeWorkspaceValidator<> *wsVal = new CompositeWorkspaceValidator<>;
-    wsVal->add(new HistogramValidator<>);
-    wsVal->add(new SpectraAxisValidator<>);
-    wsVal->add(new InstrumentValidator<>);
+    auto wsVal = boost::make_shared<CompositeValidator>();
+    wsVal->add<HistogramValidator>();
+    wsVal->add<SpectraAxisValidator>();
+    wsVal->add<InstrumentValidator>();
     
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsVal));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
     std::vector<std::string> targetOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
     targetOptions.push_back("theta");
     targetOptions.push_back("signed_theta");
-    declareProperty("Target","",new ListValidator(targetOptions),
+    declareProperty("Target","",boost::make_shared<StringListValidator>(targetOptions),
       "The detector attribute to convert the spectrum axis to");
     std::vector<std::string> eModeOptions;
     eModeOptions.push_back("Direct");
     eModeOptions.push_back("Indirect");
-    declareProperty("EMode", "Direct",new ListValidator(eModeOptions),
+    declareProperty("EMode", "Direct",boost::make_shared<StringListValidator>(eModeOptions),
       "The energy mode type required for some conversions");
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("EFixed",EMPTY_DBL(),mustBePositive,
     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect))");

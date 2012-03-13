@@ -13,6 +13,7 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include <vector>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -41,17 +42,17 @@ using namespace DataObjects;
 void CalculateEfficiency::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new CommonBinsValidator<>),
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<CommonBinsValidator>()),
                             "The workspace containing the flood data" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
   declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
       "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble->clone(),
+  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
 
 }

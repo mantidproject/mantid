@@ -2,6 +2,7 @@
 #define LOADSNSEVENTNEXUSTEST_H_
 
 #include "MantidDataHandling/LoadSNSEventNexus.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 

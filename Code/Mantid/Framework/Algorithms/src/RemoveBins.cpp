@@ -28,6 +28,8 @@ The Interpolation property is applicable to this situation. If it is set to "Lin
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -56,32 +58,32 @@ RemoveBins::RemoveBins() : API::Algorithm(), m_rangeUnit()
  */
 void RemoveBins::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>);
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>();
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
     "Name of the input workspace");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace");
 
-  MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
+  auto mustHaveValue = boost::make_shared<MandatoryValidator<double> >();
   declareProperty("XMin",Mantid::EMPTY_DBL(), mustHaveValue,
     "The lower bound of the region to be removed");
-  declareProperty("XMax",Mantid::EMPTY_DBL(), mustHaveValue->clone(),
+  declareProperty("XMax",Mantid::EMPTY_DBL(), mustHaveValue,
     "The upper bound of the region to be removed");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(),"AsInput");
-  declareProperty( "RangeUnit", "AsInput", new ListValidator(units),
+  declareProperty( "RangeUnit", "AsInput", boost::make_shared<StringListValidator>(units),
     "The units of XMin and XMax" );
 
   std::vector<std::string> propOptions;
   propOptions.push_back("None");
   propOptions.push_back("Linear");
-  declareProperty("Interpolation", "None", new ListValidator(propOptions),
+  declareProperty("Interpolation", "None", boost::make_shared<StringListValidator>(propOptions),
     "Used when the region to be removed is within a bin. Linear scales the value in that bin by the proportion of it that is outside the region to be removed and none sets it to zero" );
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
     "If set, only this spectrum will be acted upon (otherwise all are)");

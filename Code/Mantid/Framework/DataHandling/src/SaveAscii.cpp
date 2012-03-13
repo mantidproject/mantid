@@ -14,8 +14,9 @@ The algorithm assumes that the workspace has common X values for all spectra (i.
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <set>
 #include <fstream>
@@ -59,12 +60,12 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace",
         "",Direction::Input), "The name of the workspace that will be saved.");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);
       declareProperty("WorkspaceIndexMin", 1, mustBePositive);
-      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive->clone());
+      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive);
       declareProperty(new ArrayProperty<int>("SpectrumList"));
-      declareProperty("Precision", EMPTY_INT(), mustBePositive->clone());
+      declareProperty("Precision", EMPTY_INT(), mustBePositive);
       declareProperty("WriteXError", false, "If true, the error on X with be written as the fourth column.");
 
       declareProperty("CommentIndicator", "", "Characters to put in front of comment lines.");
@@ -80,7 +81,7 @@ namespace Mantid
         sepOptions.push_back(option);
       }
       
-      declareProperty("Separator", "CSV", new ListValidator(sepOptions),
+      declareProperty("Separator", "CSV", boost::make_shared<StringListValidator>(sepOptions),
         "Characters to put as separator between X, Y, E values. (Default: CSV)");
 
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),

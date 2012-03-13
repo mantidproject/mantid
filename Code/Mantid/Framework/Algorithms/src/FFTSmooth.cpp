@@ -27,6 +27,8 @@ For both filter types, the resulting spectrum has the same size as the original 
 #include "MantidKernel/Exception.h"
 
 #include <iostream>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -55,14 +57,14 @@ void FFTSmooth::init()
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
         "",Direction::Output), "The name of the output workspace.");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum index for smoothing");
 
       std::vector<std::string> type;
       //type.push_back("Truncation");
       type.push_back("Zeroing");
-      declareProperty("Filter","Zeroing",new ListValidator(type),"The type of the applied filter");
+      declareProperty("Filter","Zeroing",boost::make_shared<StringListValidator>(type),"The type of the applied filter");
       declareProperty("Params","","The filter parameters");
 
 }

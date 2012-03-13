@@ -24,6 +24,7 @@ The distances between the monitors are read from the instrument definition file.
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h" 
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/IObjComponent.h"
 
@@ -31,6 +32,7 @@ The distances between the monitors are read from the instrument definition file.
 #include <cmath>
 #include <algorithm>
 #include <sstream>
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -65,22 +67,22 @@ GetEi2::GetEi2() : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(fal
 void GetEi2::init()
 
 {// Declare required input parameters for algorithm and do some validation here
-  CompositeWorkspaceValidator<> *validator = new CompositeWorkspaceValidator<>;
-  validator->add(new WorkspaceUnitValidator<>("TOF"));
-  validator->add(new HistogramValidator<>);
-  validator->add(new InstrumentValidator<>);
+  auto validator = boost::make_shared<CompositeValidator>();
+  validator->add<WorkspaceUnitValidator>("TOF");
+  validator->add<HistogramValidator>();
+  validator->add<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<>(
     "InputWorkspace","",Direction::InOut, validator),
     "The X units of this workspace must be time of flight with times in\n"
     "microseconds");
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", -1, mustBePositive,
     "The spectrum number of the output of the first monitor, e.g. MAPS 41474, MARI 2, MERLIN 69634\n");
-  declareProperty("Monitor2Spec", -1, mustBePositive->clone(),
+  declareProperty("Monitor2Spec", -1, mustBePositive,
     "The spectrum number of the output of the second monitor e.g. MAPS 41475, MARI 3, MERLIN 69638\n");
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0.0);
   declareProperty("EnergyEstimate", -1.0 , positiveDouble,
     "An approximate value for the typical incident energy, energy of\n"

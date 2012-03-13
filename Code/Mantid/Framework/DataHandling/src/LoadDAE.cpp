@@ -21,6 +21,7 @@ If the optional 'spectrum' properties are set for a multiperiod dataset, then th
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/DateAndTime.h"
@@ -96,7 +97,7 @@ namespace Mantid
     /// Initialisation method.
     void LoadDAE::init()
     {
-      declareProperty("DAEname","", new MandatoryValidator<std::string>(),
+      declareProperty("DAEname","", boost::make_shared<MandatoryValidator<std::string> >(),
         "The name of and path to the input DAE host.");
 
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
@@ -107,20 +108,20 @@ namespace Mantid
         "stored in separate workspaces called OutputWorkspace_PeriodNo.");
 
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("SpectrumMin", 0, mustBePositive,
         "The number of the first spectrum to read (default 0).  Only used\n"
         "if spectrum_max is set and is not available for multiperiod data\n"
         "files.");
-      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
         "The number of the last spectrum to read.  Only used if explicitly\n"
         "set and is not available for multiperiod data files. ");
       declareProperty(new ArrayProperty<int>("SpectrumList"),
         "A comma-separated list of individual spectra to read.  Only used\n"
         "if explicitly set. Not available for multiperiod data files.");
 
-      declareProperty("UpdateRate",0, mustBePositive->clone());
+      declareProperty("UpdateRate",0, mustBePositive);
     }
 
     /** Function called by IDC routines to report an error. Passes the error through to the logger

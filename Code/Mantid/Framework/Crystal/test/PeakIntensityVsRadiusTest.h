@@ -9,6 +9,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>

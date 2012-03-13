@@ -18,6 +18,7 @@ The algorithm looks at sample logs ("proton_charge"), finds the mean, and reject
 #include "MantidKernel/V3D.h"
 
 #include <fstream>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -83,7 +84,7 @@ void FilterBadPulses::init()
   declareProperty(
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
-  BoundedValidator<double> *range = new BoundedValidator<double>();
+  auto range = boost::make_shared<BoundedValidator<double> >();
   range->setBounds(0., 100.);
   declareProperty("LowerCutoff", 95., range,
                   "The percentage of the average to use as the lower bound");

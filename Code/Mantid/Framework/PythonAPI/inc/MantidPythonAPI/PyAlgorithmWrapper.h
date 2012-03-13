@@ -87,7 +87,7 @@ public:
    */
   template<typename TYPE>
   void _declareProperty(const std::string & prop_name, TYPE default_value, 
-			Kernel::IValidator<TYPE> & validator, 
+			Kernel::IValidator & validator,
 			const std::string & description, const unsigned int direction)
   {
     this->IAlgorithm::declareProperty(prop_name, default_value, validator.clone(), description, direction);
@@ -116,26 +116,8 @@ public:
    * @param direction :: The direction
    */
   template<typename TYPE>
-  void _declareListProperty(const std::string & prop_name, boost::python::list values, 
-    Kernel::IValidator<TYPE> & validator,const std::string &doc, const unsigned int direction)
-  {
-    // FIXME validator is not passed in - but I'm not sure this would ever reasonably be called.
-    (void)validator;
-    //Extract the values from the python list into a std vector
-    this->IAlgorithm::declareProperty(prop_name, Conversions::toStdVector<TYPE>(values), doc, direction);
-  }
-
-  /**
-   * Declare a list property, templated on the list type
-   * @param prop_name :: The name of the property
-   * @param values :: A python list of values
-   * @param validator :: A validator for the parameter
-   * @param doc :: A string describing the property
-   * @param direction :: The direction
-   */
-  template<typename TYPE>
   void _declareListProperty(const std::string & prop_name, boost::python::list values,
-    Kernel::IValidator<std::vector<TYPE> > & validator,const std::string &doc, const unsigned int direction)
+    Kernel::IValidator & validator,const std::string &doc, const unsigned int direction)
   {
     (void)validator;
     //Extract the values from the python list into a std vector
@@ -179,7 +161,7 @@ public:
      * @param direction :: The direction
      */
     void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
-        Kernel::IValidator<API::Workspace_sptr> & validator,
+        Kernel::IValidator & validator,
         const std::string & description, const unsigned int direction)
     {
       this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction, validator.clone()), description);
@@ -207,7 +189,7 @@ public:
    * @param direction :: The direction
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname,
-			       Kernel::IValidator<API::MatrixWorkspace_sptr> & validator,
+			       Kernel::IValidator & validator,
 			       const std::string & description, const unsigned int direction)
   {
     this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, validator.clone()), description);
@@ -222,7 +204,7 @@ public:
   void _declareAlgorithmProperty(const std::string & prop_name,
              const std::string & description, const unsigned int direction)
   {
-    this->Algorithm::declareProperty(new API::AlgorithmProperty(prop_name, new Kernel::NullValidator<boost::shared_ptr<IAlgorithm> >(), direction), description);
+    this->Algorithm::declareProperty(new API::AlgorithmProperty(prop_name, boost::make_shared<Kernel::NullValidator>(), direction), description);
   }
 
   /**

@@ -12,7 +12,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
@@ -60,12 +61,12 @@ LoadRaw3::~LoadRaw3()
 void LoadRaw3::init()
 {
   LoadRawHelper::init();
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", 1, mustBePositive,
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
-  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
   declareProperty(new ArrayProperty<specid_t> ("SpectrumList"),
@@ -76,7 +77,7 @@ void LoadRaw3::init()
   monitorOptions.push_back("Include");
   monitorOptions.push_back("Exclude");
   monitorOptions.push_back("Separate");
-  declareProperty("LoadMonitors","Include",new ListValidator(monitorOptions),
+  declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
       "Use this option to control the loading of monitors.\n"
       "The defalut is Include option  which loads the monitors into the output workspace.\n"
       "Other options are Exclude and Separate.The Exclude option exludes monitors from the output workspace \n"

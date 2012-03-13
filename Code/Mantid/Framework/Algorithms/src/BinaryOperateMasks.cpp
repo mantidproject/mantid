@@ -51,9 +51,9 @@ namespace Algorithms
 
     declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace1", "", Direction::Input),
         "SpecialWorkspace2D 1 for binary operation");
-    declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace2", "", Direction::Input, true),
+    declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
         "Optional SpecialWorkspace2D 2 for binary operation");
-    declareProperty("OperationType", "AND", new ListValidator(operators),
+    declareProperty("OperationType", "AND", boost::make_shared<StringListValidator>(operators),
         "Operator for Workspace1 and Workspace2");
     declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "", Direction::Output),
         "Output SpecialWorkspace2D as result of binary operation");

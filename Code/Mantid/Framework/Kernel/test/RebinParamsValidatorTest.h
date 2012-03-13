@@ -11,18 +11,16 @@ class RebinParamsValidatorTest : public CxxTest::TestSuite
 public:
   void testClone()
   {
-    IValidator<std::vector<double> > *v = new RebinParamsValidator;
-    IValidator<std::vector<double> > *vv = v->clone();
+    IValidator_sptr v = boost::make_shared<RebinParamsValidator>();
+    IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS( v, vv );
-    TS_ASSERT( dynamic_cast<RebinParamsValidator*>(vv) );
-    delete v;
-    delete vv;
+    TS_ASSERT( boost::dynamic_pointer_cast<RebinParamsValidator>(vv) );
   }
 
   void testCast()
   {
     RebinParamsValidator *d = new RebinParamsValidator;
-    TS_ASSERT( dynamic_cast<IValidator<std::vector<double> >*>(d) );
+    TS_ASSERT( dynamic_cast<IValidator*>(d) );
     delete d;
   }
 

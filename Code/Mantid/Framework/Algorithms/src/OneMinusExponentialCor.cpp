@@ -14,6 +14,8 @@ setting of the Operation property.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/OneMinusExponentialCor.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -35,7 +37,7 @@ namespace Algorithms
 
   void OneMinusExponentialCor::defineProperties()
   {
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("C",1.0,mustBePositive);
     
@@ -44,7 +46,7 @@ namespace Algorithms
     std::vector<std::string> operations(2);
     operations[0] = "Multiply";
     operations[1] = "Divide";
-    declareProperty("Operation", "Divide", new Kernel::ListValidator(operations)); 
+    declareProperty("Operation", "Divide", boost::make_shared<Kernel::StringListValidator>(operations));
   }
   
   void OneMinusExponentialCor::retrieveProperties()

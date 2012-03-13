@@ -7,6 +7,7 @@
 #include "MantidMDEvents/FindPeaksMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>

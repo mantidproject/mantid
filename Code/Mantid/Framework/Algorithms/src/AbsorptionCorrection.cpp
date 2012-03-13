@@ -23,6 +23,8 @@ The input workspace must have units of wavelength. The [[instrument]] associated
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -43,25 +45,25 @@ AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
 void AbsorptionCorrection::init()
 {
   // The input workspace must have an instrument and units of wavelength
-  CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
-  wsValidator->add(new InstrumentValidator<>());
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,wsValidator),
     "The X values for the input workspace must be in units of wavelength");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", -1.0, mustBePositive,
     "The attenuation cross-section for the sample material in barns");
-  declareProperty("ScatteringXSection", -1.0, mustBePositive->clone(),
+  declareProperty("ScatteringXSection", -1.0, mustBePositive,
     "The scattering cross-section for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
+  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
     "The number density of the sample in number per cubic angstrom");
 
-  BoundedValidator<int64_t> *positiveInt = new BoundedValidator<int64_t> ();
+  auto positiveInt = boost::make_shared<BoundedValidator<int64_t> >();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", static_cast<int64_t>(EMPTY_INT()), positiveInt,
     "The number of wavelength points for which the numerical integral is\n"
@@ -70,7 +72,7 @@ void AbsorptionCorrection::init()
   std::vector<std::string> exp_options;
   exp_options.push_back("Normal");
   exp_options.push_back("FastApprox");
-  declareProperty("ExpMethod", "Normal", new ListValidator(exp_options),
+  declareProperty("ExpMethod", "Normal", boost::make_shared<StringListValidator>(exp_options),
     "Select the method to use to calculate exponentials, normal or a\n"
     "fast approximation (default: Normal)" );
 
@@ -78,9 +80,9 @@ void AbsorptionCorrection::init()
   propOptions.push_back("Elastic");
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
-  declareProperty("EMode","Elastic",new ListValidator(propOptions),
+  declareProperty("EMode","Elastic",boost::make_shared<StringListValidator>(propOptions),
     "The energy mode (default: elastic)");
-  declareProperty("EFixed",0.0,mustBePositive->clone(),
+  declareProperty("EFixed",0.0,mustBePositive,
     "The value of the initial or final energy, as appropriate, in meV.\n"
     "Will be taken from the instrument definition file, if available.");
 

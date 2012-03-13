@@ -1244,9 +1244,9 @@ public:
    *  @throw Exception::NotImplementedError Not yet implemented
    * @return Nothing in this case
    */
-  std::string setValue(const boost::shared_ptr<DataItem>)
+  std::string setDataItem(const boost::shared_ptr<DataItem>)
   {
-    throw Exception::NotImplementedError("Not implemented in this class");
+    throw Exception::NotImplementedError("Cannot extract TimeSeries from DataItem");
   }
 
   //-----------------------------------------------------------------------------------------------

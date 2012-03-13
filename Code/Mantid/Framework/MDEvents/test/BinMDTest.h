@@ -7,6 +7,7 @@
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ConfigService.h"

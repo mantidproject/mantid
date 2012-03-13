@@ -13,7 +13,7 @@ namespace Kernel
   /** No arg constructor
    */
   template <typename TYPE>
-ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> >(),m_arraySize(size_t(0)),m_hasArraySize(false),
+  ArrayLengthValidator<TYPE>::ArrayLengthValidator():TypedValidator<std::vector<TYPE> >(),m_arraySize(size_t(0)),m_hasArraySize(false),
   m_arraySizeMin(size_t(0)),m_hasArraySizeMin(false),m_arraySizeMax(size_t(0)),m_hasArraySizeMax(false)
   {
   }
@@ -22,7 +22,7 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
    * @param len:: the legth of the array
    */
   template <typename TYPE>
-  ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t len):IValidator<std::vector<TYPE> >(),m_arraySize(size_t(len)),m_hasArraySize(true),
+  ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t len):TypedValidator<std::vector<TYPE> >(),m_arraySize(size_t(len)),m_hasArraySize(true),
     m_arraySizeMin(size_t(0)),m_hasArraySizeMin(false),m_arraySizeMax(size_t(0)),m_hasArraySizeMax(false)
   {
   }
@@ -32,7 +32,7 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
    * @param lenmax:: the maximum legth of the array
    */
   template <typename TYPE>
-  ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t lenmin, const size_t lenmax):IValidator<std::vector<TYPE> >(),m_arraySize(size_t(0)),
+  ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t lenmin, const size_t lenmax):TypedValidator<std::vector<TYPE> >(),m_arraySize(size_t(0)),
     m_hasArraySize(false), m_arraySizeMin(size_t(lenmin)),m_hasArraySizeMin(true),m_arraySizeMax(size_t(lenmax)),m_hasArraySizeMax(true)
   {
   }
@@ -176,19 +176,9 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
     @returns a clone of the validator
     */
   template <typename TYPE>
-  IValidator<std::vector <TYPE> >* ArrayLengthValidator<TYPE>::clone() const
+  IValidator_sptr ArrayLengthValidator<TYPE>::clone() const
   {
-    return new ArrayLengthValidator(*this);
-  }
-
-  /**
-  Public interface to check validity
-  @returns a string, the result of checkValidity
-  */
-  template <typename TYPE>
-  std::string ArrayLengthValidator<TYPE>::isValid(const std::vector<TYPE> &value ) const
-  {
-    return this->checkValidity(value);
+    return boost::make_shared<ArrayLengthValidator>(*this);
   }
 
   /**

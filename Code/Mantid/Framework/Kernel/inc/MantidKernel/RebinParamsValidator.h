@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/IValidator.h"
+#include "MantidKernel/TypedValidator.h"
 #include <vector>
 
 namespace Mantid
@@ -36,12 +36,12 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL RebinParamsValidator : public IValidator<std::vector<double> >
+class MANTID_KERNEL_DLL RebinParamsValidator : public TypedValidator<std::vector<double> >
 {
 public:
   RebinParamsValidator() {}
   virtual ~RebinParamsValidator() {}
-  Kernel::IValidator<std::vector<double> >* clone() const { return new RebinParamsValidator(*this); }
+  IValidator_sptr clone() const { return boost::make_shared<RebinParamsValidator>(*this); }
 
 private:
   std::string checkValidity( const std::vector<double> &value ) const;

@@ -10,7 +10,6 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <iostream>
@@ -20,6 +19,16 @@ namespace Mantid
 {
   namespace API
   {
+    // -------------------------------------------------------------------------
+    // Forward decaration
+    // -------------------------------------------------------------------------
+    class MatrixWorkspace;
+
+    /// Enumeration for a mandatory/optional property
+    enum PropertyMode { Mandatory, Optional };
+    /// Enumeration for locking behaviour
+    enum LockMode { Lock, NoLock };
+
     /** A property class for workspaces. Inherits from PropertyWithValue, with the value being
     a pointer to the workspace type given to the WorkspaceProperty constructor. This kind
     of property also holds the name of the workspace (as used by the AnalysisDataService)
@@ -68,9 +77,9 @@ namespace Mantid
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
-          Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+                                  Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>() ) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(false), m_locking(true)
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock)
       {
       }
 
@@ -79,15 +88,15 @@ namespace Mantid
       *  @param name :: The name to assign to the property
       *  @param wsName :: The name of the workspace
       *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
-      *  @param optional :: A boolean indicating whether the property is mandatory or not. Only matters 
-      *                     for input properties
+      *  @param optional :: If true then the property is optional
       *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
-      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction, bool optional,
-          Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+      explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction, 
+                                  const PropertyMode optional,
+                                  Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>() ) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(true)
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(LockMode::Lock)
       {
       }
 
@@ -103,8 +112,9 @@ namespace Mantid
       *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
-      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction, bool optional, bool locking,
-          Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction, 
+                                 const PropertyMode optional, const LockMode locking,
+                                 Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>()) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(locking)
       {
@@ -190,23 +200,24 @@ namespace Mantid
       }
 
       /** Set a value from a data item
-      *  @param value :: A shared pointer to a DataItem. If it is of the correct
-      *  type it will set validated, if not the property's value will be cleared. 
-      *  @return 
-      */
-      virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> value)
+       *  @param value :: A shared pointer to a DataItem. If it is of the correct
+       *  type it will set validated, if not the property's value will be cleared. 
+       *  @return 
+       */
+      virtual std::string setDataItem(const boost::shared_ptr<Kernel::DataItem> value)
       {
-	      boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
-	      if(typed)
-	      {
-	        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = typed;
-     	  }
-	      else
-	      {
-	        this->clear();
-	      }
-	      return isValid();
+        boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
+        if(typed)
+        {
+          Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = typed;
+        }
+        else
+        {
+          this->clear();
+        }
+        return isValid();
       }
+
 
       /** Checks whether the entered workspace is valid.
       *  To be valid, in addition to satisfying the conditions of any validators,
@@ -271,13 +282,13 @@ namespace Mantid
        * @return true if the workspace can be blank   */
       bool isOptional() const
       {
-        return m_optional;
+        return (m_optional == PropertyMode::Optional);
       }
       /** Does the workspace need to be locked before starting an algorithm?
        * @return true (default) if the workspace will be locked */
       bool isLocking() const
       {
-        return m_locking;
+        return (m_locking == LockMode::Lock);
       }
 
       /** Returns the current contents of the AnalysisDataService for input workspaces.
@@ -290,7 +301,7 @@ namespace Mantid
         {
           // If an input workspace, get the list of workspaces currently in the ADS
           std::set<std::string> vals = AnalysisDataService::Instance().getObjectNames();
-          if (m_optional) // Insert an empty option
+          if (isOptional()) // Insert an empty option
           {
             vals.insert("");
           }
@@ -329,7 +340,7 @@ namespace Mantid
       virtual bool store()
       {
         bool result = false;
-        if ( ! this->operator()() && m_optional ) return result;
+        if ( ! this->operator()() && isOptional() ) return result;
         if ( this->direction() ) // Output or InOut
         {
           // Check that workspace exists
@@ -418,7 +429,7 @@ namespace Mantid
         }
         else
         {
-          if( m_optional ) error = ""; // Optional ones don't need a name
+          if( isOptional() ) error = ""; // Optional ones don't need a name
           else error = "Enter a name for the Output workspace";
         }
         return error;
@@ -434,7 +445,7 @@ namespace Mantid
 
         if( m_workspaceName.empty() )
         {
-          if( m_optional )
+          if( isOptional() )
           {
             error = "";
           }

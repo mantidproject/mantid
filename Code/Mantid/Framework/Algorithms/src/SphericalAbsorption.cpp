@@ -16,6 +16,7 @@ Calculates bin-by-bin correction factors for attenuation due to absorption and s
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -45,24 +46,24 @@ SphericalAbsorption::SphericalAbsorption() : API::Algorithm(), m_inputWS(),
 void SphericalAbsorption::init()
 {
   // The input workspace must have an instrument and units of wavelength
-  CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
-  wsValidator->add(new InstrumentValidator<>());
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,wsValidator),
     "The X values for the input workspace must be in units of wavelength");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", -1.0, mustBePositive,
     "The attenuation cross-section for the sample material in barns");
-  declareProperty("ScatteringXSection", -1.0, mustBePositive->clone(),
+  declareProperty("ScatteringXSection", -1.0, mustBePositive,
     "The scattering cross-section for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
+  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
     "The number density of the sample in number per cubic angstrom");
-  declareProperty("SphericalSampleRadius", -1.0, mustBePositive->clone(),
+  declareProperty("SphericalSampleRadius", -1.0, mustBePositive,
     "The radius of the spherical sample in centimetres");
 
 }

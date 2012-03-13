@@ -15,6 +15,8 @@
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidAPI/FrameworkManager.h"
+
 
 using namespace Mantid::API;
 using namespace Mantid::VATES;

@@ -32,6 +32,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include <numeric>
 #include <cmath>
 #include <iomanip>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -72,7 +73,7 @@ namespace CurveFitting
 
     declareProperty("Function","",Direction::InOut );
 
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );

@@ -32,6 +32,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/IPeak.h"

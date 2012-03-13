@@ -20,6 +20,7 @@ Filter events for VULCAN
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
 #include <fstream>
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -73,7 +74,7 @@ namespace Algorithms
     timeoptions.push_back("Absolute Time (nano second)");
     timeoptions.push_back("Relative Time (second)");
     timeoptions.push_back("Percentage");
-    this->declareProperty("TimeRangeOption", "Relative Time (second)", new ListValidator(timeoptions),
+    this->declareProperty("TimeRangeOption", "Relative Time (second)", boost::make_shared<StringListValidator>(timeoptions),
         "User defined time range (T0, Tf) is of absolute time (second). ");
     this->declareProperty("T0", 0.0, "Earliest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
     this->declareProperty("Tf", 100.0, "Latest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");

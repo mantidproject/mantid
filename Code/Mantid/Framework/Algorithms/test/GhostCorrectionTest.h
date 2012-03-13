@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <Poco/File.h>
 
 using namespace Mantid;

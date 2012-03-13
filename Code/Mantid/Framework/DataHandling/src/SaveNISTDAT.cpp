@@ -34,9 +34,9 @@ using namespace Geometry;
 
 void SaveNISTDAT::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add(boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator));
   declareProperty(new FileProperty("Filename", "",FileProperty::Save, ".dat"),
     "The filename of the output text file" );

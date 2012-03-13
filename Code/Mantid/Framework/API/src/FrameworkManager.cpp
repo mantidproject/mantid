@@ -6,6 +6,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"

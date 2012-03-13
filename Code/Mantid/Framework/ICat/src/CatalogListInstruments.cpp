@@ -31,8 +31,10 @@ namespace Mantid
     /// Init method
     void CatalogListInstruments::init()
     {
-      declareProperty( new ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),new NullValidator<std::vector<std::string> >,
-          Direction::Output),"A list containing instrument names");
+      declareProperty( new ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),
+                                                      boost::make_shared<NullValidator>(),
+                                                      Direction::Output),
+                       "A list containing instrument names");
       declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Direction::Output);
     }
 

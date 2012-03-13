@@ -21,6 +21,8 @@ The [[Linear]] algorithm is used when the Mode = Linear Fit. From the resulting 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
 #include <climits>
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -44,15 +46,16 @@ using namespace API;
 void FlatBackground::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-    new HistogramValidator<> ),
+    boost::make_shared<HistogramValidator>() ),
     "The input workspace must either have constant width bins or is a distribution\n"
     "workspace. It is also assumed that all spectra have the same X bin boundaries");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ),
     "Name to use for the output workspace.");
-  MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
+  auto mustHaveValue = boost::make_shared<MandatoryValidator<double> >();
+
   declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
     "The X value at which to start the background fit");
-  declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(),
+  declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue,
     "The X value at which to end the background fit");
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
     "Indices of the spectra that will have their background removed\n"
@@ -60,14 +63,14 @@ void FlatBackground::init()
   std::vector<std::string> modeOptions;
   modeOptions.push_back("Linear Fit");
   modeOptions.push_back("Mean");
-  declareProperty("Mode","Linear Fit",new ListValidator(modeOptions),
+  declareProperty("Mode","Linear Fit",boost::make_shared<StringListValidator>(modeOptions),
     "The background count rate is estimated either by taking a mean or doing a\n"
     "linear fit (default: Linear Fit)");
   // Property to determine whether we subtract the background or just return the background.
   std::vector<std::string> outputOptions;
   outputOptions.push_back("Subtract Background");
   outputOptions.push_back("Return Background");
-  declareProperty("OutputMode", "Subtract Background", new ListValidator(outputOptions),
+  declareProperty("OutputMode", "Subtract Background", boost::make_shared<StringListValidator>(outputOptions),
       "Once the background has been determined it can either be subtracted from \n"
       "the InputWorkspace and returned or just returned (default: Subtract Background)");
 }

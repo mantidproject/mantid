@@ -36,9 +36,11 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 #include "MantidAPI/SpectraAxis.h"
+
 
 #include <fstream>
 #include <sstream>
@@ -933,11 +935,12 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
       "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
       "This specified the tolerance to use (in microseconds) when compressing.");
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation

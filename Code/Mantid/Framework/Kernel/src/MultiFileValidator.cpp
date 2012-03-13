@@ -13,7 +13,7 @@ namespace Kernel
   Logger& MultiFileValidator::g_log = Logger::get("MultiFileValidator");
 
   /// Default constructor.
-  MultiFileValidator::MultiFileValidator() : IValidator<std::vector<std::vector<std::string> > >(),
+  MultiFileValidator::MultiFileValidator() : TypedValidator<std::vector<std::vector<std::string> > >(),
     m_fileValidator(std::vector<std::string>(), true)
   {}
 
@@ -21,7 +21,7 @@ namespace Kernel
    *  @param mfv :: The object with which to construct this object.
    */
   MultiFileValidator::MultiFileValidator(const MultiFileValidator & mfv) :
-    IValidator<std::vector<std::vector<std::string> > >(),
+    TypedValidator<std::vector<std::vector<std::string> > >(),
       m_fileValidator(mfv.m_fileValidator)
   {
   }
@@ -31,7 +31,7 @@ namespace Kernel
    *  @param testFileExists :: Flag indicating whether to test for existence of file (default: yes)
    */
   MultiFileValidator::MultiFileValidator(const std::vector<std::string>& extensions) :
-    IValidator<std::vector<std::vector<std::string> > >(),
+    TypedValidator<std::vector<std::vector<std::string> > >(),
     m_fileValidator(extensions, true)
   {}
 
@@ -48,9 +48,9 @@ namespace Kernel
    * Clone the validator
    * @returns A pointer to a new validator with the same properties as this one
    */
-  IValidator<std::vector<std::vector<std::string> > >* MultiFileValidator::clone() const
+  IValidator_sptr MultiFileValidator::clone() const
   { 
-    return new MultiFileValidator(*this);
+    return boost::make_shared<MultiFileValidator>(*this);
   }
 
   /** Checks that the files exist. The filenames of any files that dont exist

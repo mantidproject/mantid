@@ -107,17 +107,16 @@ namespace DataHandling
   void LoadIsawDetCal::init()
   {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, 
+                                           boost::make_shared<InstrumentValidator>()),
                             "The workspace containing the geometry to be calibrated." );
-  /*declareProperty(
-    new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "The name of the workspace to be created as the output of the algorithm." );*/
 
-    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"), "The input filename of the ISAW DetCal file (East banks for SNAP) ");
+    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"), 
+                    "The input filename of the ISAW DetCal file (East banks for SNAP) ");
 
-    declareProperty(new API::FileProperty("Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"), "The input filename of the second ISAW DetCal file (West banks for SNAP) ");
+    declareProperty(new API::FileProperty("Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"), 
+                    "The input filename of the second ISAW DetCal file (West banks for SNAP) ");
 
-    return;
   }
 
 

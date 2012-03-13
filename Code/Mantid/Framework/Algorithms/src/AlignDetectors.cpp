@@ -153,11 +153,11 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
+  auto wsValidator = boost::make_shared<CompositeValidator>();
   //Workspace unit must be TOF.
-  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
-  wsValidator->add(new RawCountValidator<>);
-  wsValidator->add(new InstrumentValidator<>);
+  wsValidator->add<WorkspaceUnitValidator>("TOF");
+  wsValidator->add<RawCountValidator>();
+  wsValidator->add<InstrumentValidator>();
 
   declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A workspace with units of TOF" );
@@ -170,7 +170,7 @@ void AlignDetectors::init()
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
      "Optional: The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to be specified.");
 
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, true),
+  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
      "Optional: A OffsetsWorkspace containing the calibration offsets. Either this or CalibrationFile needs to be specified.");
 
 }

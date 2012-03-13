@@ -13,13 +13,12 @@ using namespace Mantid::API;
 class WorkspaceValidatorsTest : public CxxTest::TestSuite
 {
 private:
-  WorkspaceUnitValidator<>* wavUnitVal;
-  WorkspaceUnitValidator<>* anyUnitVal;
-  HistogramValidator<>* histVal;
-  RawCountValidator<>* rawVal;
-  RawCountValidator<>* nonRawVal;
-  CommonBinsValidator<>* binVal;
-  CompositeWorkspaceValidator<> compVal;
+  WorkspaceUnitValidator* wavUnitVal;
+  WorkspaceUnitValidator* anyUnitVal;
+  HistogramValidator* histVal;
+  RawCountValidator* rawVal;
+  RawCountValidator* nonRawVal;
+  CommonBinsValidator* binVal;
 
   MatrixWorkspace_sptr ws1;
   MatrixWorkspace_sptr ws2;
@@ -32,12 +31,12 @@ public:
 
   WorkspaceValidatorsTest()
   {
-    wavUnitVal = new WorkspaceUnitValidator<>("Wavelength");
-    anyUnitVal = new WorkspaceUnitValidator<>("");
-    histVal = new HistogramValidator<>();
-    rawVal = new RawCountValidator<>();
-    nonRawVal = new RawCountValidator<>(false);
-    binVal = new CommonBinsValidator<>();
+    wavUnitVal = new WorkspaceUnitValidator("Wavelength");
+    anyUnitVal = new WorkspaceUnitValidator("");
+    histVal = new HistogramValidator();
+    rawVal = new RawCountValidator();
+    nonRawVal = new RawCountValidator(false);
+    binVal = new CommonBinsValidator();
 
     ws1 = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
     ws1->initialize(2,10,9);
@@ -60,17 +59,17 @@ public:
 
   void testCast()
   {
-    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(wavUnitVal) );
-    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(anyUnitVal) );
-    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(histVal) );
-    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(rawVal) );
-    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(nonRawVal) );
-    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(binVal) );
+    TS_ASSERT( dynamic_cast<IValidator* >(wavUnitVal) );
+    TS_ASSERT( dynamic_cast<IValidator* >(anyUnitVal) );
+    TS_ASSERT( dynamic_cast<IValidator* >(histVal) );
+    TS_ASSERT( dynamic_cast<IValidator* >(rawVal) );
+    TS_ASSERT( dynamic_cast<IValidator* >(nonRawVal) );
+    TS_ASSERT( dynamic_cast<IValidator* >(binVal) );
   }
 
   void testWorkspaceUnitValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator<>() );
+    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator() );
   }
 
   void testWorkspaceUnitValidator_getType()
@@ -81,23 +80,15 @@ public:
 
   void testWorkspaceUnitValidator_isValid()
   {
-	  TS_ASSERT_EQUALS( wavUnitVal->isValid(ws1), "The workspace must have units of Wavelength" );
+    TS_ASSERT_EQUALS( wavUnitVal->isValid(ws1), "The workspace must have units of Wavelength" );
     TS_ASSERT_EQUALS( wavUnitVal->isValid(ws2), "" );
     TS_ASSERT_EQUALS( anyUnitVal->isValid(ws1), "The workspace must have units" );
     TS_ASSERT_EQUALS( anyUnitVal->isValid(ws2), "" );
   }
 
-  void testWorkspaceUnitValidator_clone()
-  {
-    IValidator<MatrixWorkspace_sptr> *v = wavUnitVal->clone();
-    TS_ASSERT_DIFFERS( v, wavUnitVal );
-    TS_ASSERT( dynamic_cast<WorkspaceUnitValidator<>*>(v) );
-    delete v;
-  }
-
   void testHistogramValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( HistogramValidator<>(false) );
+    TS_ASSERT_THROWS_NOTHING( HistogramValidator(false) );
   }
 
   void testHistogramValidator_getType()
@@ -109,17 +100,9 @@ public:
   {
     TS_ASSERT_EQUALS( histVal->isValid(ws1), "" );
     TS_ASSERT_EQUALS( histVal->isValid(ws2), "The workspace must contain histogram data" );
-    HistogramValidator<> reverse(false);
+    HistogramValidator reverse(false);
     TS_ASSERT_EQUALS( reverse.isValid(ws1), "The workspace must not contain histogram data" );
     TS_ASSERT_EQUALS( reverse.isValid(ws2), "" );
-  }
-
-  void testHistogramValidator_clone()
-  {
-    IValidator<MatrixWorkspace_sptr> *v = histVal->clone();
-    TS_ASSERT_DIFFERS( v, histVal );
-    TS_ASSERT( dynamic_cast<HistogramValidator<>*>(v) );
-    delete v;
   }
 
   void testRawCountValidator_getType()
@@ -137,13 +120,6 @@ public:
     TS_ASSERT_EQUALS( nonRawVal->isValid(ws2), "" );
   }
 
-  void testRawCountValidator_clone()
-  {
-    IValidator<MatrixWorkspace_sptr> *v = rawVal->clone();
-    TS_ASSERT_DIFFERS( v, rawVal );
-    TS_ASSERT( dynamic_cast<RawCountValidator<>*>(v) );
-    delete v;
-  }
 
   void testCommonBinsValidator_getType()
   {
@@ -161,63 +137,10 @@ public:
         "The workspace must have common bin boundaries for all histograms");
   }
 
-  void testCommonBinsValidator_clone()
-  {
-    IValidator<MatrixWorkspace_sptr> *v = binVal->clone();
-    TS_ASSERT_DIFFERS( v, binVal );
-    TS_ASSERT( dynamic_cast<CommonBinsValidator<>*>(v) );
-    delete v;
-  }
-
-  void testCompositeWorkspaceValidator_getType()
-  {
-    TS_ASSERT_EQUALS( compVal.getType(), "composite" );
-  }
-
-  void testCompositeWorkspaceValidator_clone()
-  {
-    IValidator<MatrixWorkspace_sptr> *v = compVal.clone();
-    TS_ASSERT_DIFFERS( v, &compVal );
-    TS_ASSERT( v );
-    delete v;
-  }
-
-  void testCompositeWorkspaceValidator_isValidandAdd()
-  {
-    // Passes if empty
-    TS_ASSERT_EQUALS( compVal.isValid(ws1), "" );
-    TS_ASSERT_EQUALS( compVal.isValid(ws2), "" );
-    compVal.add(wavUnitVal->clone());
-    TS_ASSERT_EQUALS( compVal.isValid(ws1),
-        "The workspace must have units of Wavelength");
-    TS_ASSERT_EQUALS( compVal.isValid(ws2), "" );
-
-    CompositeWorkspaceValidator<> compVal2;
-    compVal2.add(histVal->clone());
-    TS_ASSERT_EQUALS( compVal2.isValid(ws1), "" );
-    TS_ASSERT_EQUALS( compVal2.isValid(ws2),
-        "The workspace must contain histogram data" );
-    compVal2.add(rawVal->clone());
-    TS_ASSERT_EQUALS( compVal2.isValid(ws1), "" );
-    TS_ASSERT_EQUALS( compVal2.isValid(ws2),
-        "The workspace must contain histogram data" );
-    compVal2.add(anyUnitVal->clone());
-    TS_ASSERT_EQUALS( compVal2.isValid(ws1),
-        "The workspace must have units" );
-    TS_ASSERT_EQUALS( compVal2.isValid(ws2),
-        "The workspace must contain histogram data" );
-
-    IValidator<MatrixWorkspace_sptr>* compVal3 = compVal.clone();
-    TS_ASSERT_EQUALS( compVal3->isValid(ws1),
-        "The workspace must have units of Wavelength");
-    TS_ASSERT_EQUALS( compVal3->isValid(ws2), "" );
-    delete compVal3;
-  }
-
   void testWSPropertyandValidator()
   {
-      
-    WorkspaceProperty<MatrixWorkspace> wsp1("workspace1","ws1",Direction::Input,wavUnitVal->clone());
+    auto wavUnitValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+    WorkspaceProperty<MatrixWorkspace> wsp1("workspace1","ws1",Direction::Input, wavUnitValidator);
     //test property validation    
     TS_ASSERT_EQUALS( wsp1.isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service" );;
     
@@ -236,7 +159,7 @@ public:
 
   void testInstrumentValidator()
   {
-    IValidator<MatrixWorkspace_sptr> * instVal = new InstrumentValidator<>();
+    auto instVal = boost::make_shared<InstrumentValidator>();
     MatrixWorkspace_sptr ws = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
 
     // Fails if no instrument
@@ -249,8 +172,6 @@ public:
     inst->add(sample);  // This takes care of deletion
     inst->markAsSamplePos(sample);
     TS_ASSERT_EQUALS( instVal->isValid(ws), "" );
-
-    delete instVal;
   }
 
 };

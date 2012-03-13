@@ -53,6 +53,7 @@ Of course, your basis vectors can be aligned with the dimensions, which is equiv
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -117,7 +118,7 @@ namespace MDEvents
 
     declareProperty("TakeMaxRecursionDepthFromInput", true, "Copy the maximum recursion depth from the input workspace.");
 
-    BoundedValidator<int> *mustBePositiveInteger = new BoundedValidator<int>();
+    auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int> >();
     mustBePositiveInteger->setLower(0);
 
     declareProperty("MaxRecursionDepth", 1000, mustBePositiveInteger,

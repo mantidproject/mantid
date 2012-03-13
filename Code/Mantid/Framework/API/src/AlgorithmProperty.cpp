@@ -18,7 +18,7 @@ namespace Mantid
     *  @param validator :: The validator to use for this property (this class will take ownership of the validator)
     *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
     */
-    AlgorithmProperty::AlgorithmProperty(const std::string & propName, Kernel::IValidator<HeldType> *validator, 
+    AlgorithmProperty::AlgorithmProperty(const std::string & propName, Kernel::IValidator_sptr validator,
                                          unsigned int direction)
       : Kernel::PropertyWithValue<HeldType>(propName, HeldType(), validator, direction), m_algStr("")
     {
@@ -100,18 +100,6 @@ namespace Mantid
       }
       else return message;
     }
-
-    /**
-     * Set a property value via a DataItem
-     * @param data :: A shared pointer to a data item
-     * @return "" if the assignment was successful or a user level description of the problem
-    */
-    std::string AlgorithmProperty::setValue(const boost::shared_ptr<Kernel::DataItem> data )
-    {
-      UNUSED_ARG(data);
-      return "Cannot convert a pointer to a DataItem to a pointer to an IAlgorithm object";
-    }
-
 
   } // namespace Mantid
 } // namespace API

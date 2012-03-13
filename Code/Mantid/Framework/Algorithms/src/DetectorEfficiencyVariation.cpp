@@ -23,6 +23,7 @@ Uses the [[Integration]] algorithm to sum the spectra.
 #include "MantidAPI/WorkspaceValidators.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -56,25 +57,25 @@ namespace Mantid
     /// Initialize the algorithm
     void DetectorEfficiencyVariation::init()
     {
-      HistogramValidator<MatrixWorkspace> *val = new HistogramValidator<MatrixWorkspace>;
+      auto val = boost::make_shared<HistogramValidator>();
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",Direction::Input,val),
           "Name of a white beam vanadium workspace" );
       // The histograms, the detectors in each histogram and their first and last bin boundary must match
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
-              val->clone()),
+              val),
               "Name of a matching second white beam vanadium run from the same\n"
               "instrument" );
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
           "A MaskWorkpace where each spectra that failed the test is masked" );
 
-      BoundedValidator<double> *moreThanZero = new BoundedValidator<double>();
+      auto moreThanZero = boost::make_shared<BoundedValidator<double> >();
       moreThanZero->setLower(0.0);
       declareProperty("Variation", 1.1, moreThanZero,
                       "Identify spectra whose total number of counts has changed by more\n"
                       "than this factor of the median change between the two input workspaces" );
-      BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
                       "The index number of the first entry in the Workspace to include in\n"
@@ -82,7 +83,7 @@ namespace Mantid
 
       //Mantid::EMPTY_INT() and EMPTY_DBL() are tags that indicate that no 
       // value has been set and we want to use the default
-      declareProperty("EndWorkspaceIndex", Mantid::EMPTY_INT(), mustBePosInt->clone(),
+      declareProperty("EndWorkspaceIndex", Mantid::EMPTY_INT(), mustBePosInt,
                       "The index number of the last entry in the Workspace to include in\n"
                       "the calculation (default: the last spectrum in the workspace)" );
       declareProperty("RangeLower", Mantid::EMPTY_DBL(),

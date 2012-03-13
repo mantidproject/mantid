@@ -16,6 +16,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/shared_ptr.hpp>
 #include <Poco/Path.h>
 #include <cmath>
@@ -68,11 +70,11 @@ namespace Mantid
         "RAW file contains multiple periods higher periods will be stored in\n"
         "separate workspaces called OutputWorkspace_PeriodNo.");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);
       declareProperty("SpectrumMin",1, mustBePositive, "The index number of the first spectrum to read.  Only used if\n"
         "spectrum_max is set.");
-      declareProperty("SpectrumMax",Mantid::EMPTY_INT(), mustBePositive->clone(), "The number of the last spectrum to read. Only used if explicitly\n"
+      declareProperty("SpectrumMax",Mantid::EMPTY_INT(), mustBePositive, "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 
       declareProperty(new ArrayProperty<specid_t>("SpectrumList"), "A comma-separated list of individual spectra to read.  Only used if\n"
@@ -80,7 +82,7 @@ namespace Mantid
       m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
       m_cache_options.push_back("Never");
-      declareProperty("Cache","If Slow",new ListValidator(m_cache_options));
+      declareProperty("Cache","If Slow", boost::make_shared<StringListValidator>(m_cache_options));
 
     }
 

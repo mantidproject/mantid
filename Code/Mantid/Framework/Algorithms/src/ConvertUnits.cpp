@@ -32,6 +32,8 @@ The units currently available to this algorithm are listed [[Unit Factory|here]]
 #include <cfloat>
 #include <iostream>
 #include <limits>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -65,25 +67,25 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>);
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>();
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "Name of the input workspace");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace, can be the same as the input" );
 
   // Extract the current contents of the UnitFactory to be the allowed values of the Target property
-  declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()),
+  declareProperty("Target","",boost::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
     "The name of the units to convert to (must be one of those registered in\n"
     "the Unit Factory)");
   std::vector<std::string> propOptions;
   propOptions.push_back("Elastic");
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
-  declareProperty("EMode","Elastic",new ListValidator(propOptions),
+  declareProperty("EMode","Elastic",boost::make_shared<StringListValidator>(propOptions),
     "The energy mode (default: elastic)");
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed",EMPTY_DBL(),mustBePositive,
     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect) . Must be\n"
@@ -278,7 +280,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
 
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
-  CommonBinsValidator<> sameBins;
+  CommonBinsValidator sameBins;
   bool commonBoundaries = false;
   if ( sameBins.isValid(outputWS) == "" )
   {

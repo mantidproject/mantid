@@ -36,6 +36,7 @@ workspace will have its spectrum numbers reset starting at 0 and increasing by
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -97,10 +98,10 @@ namespace Algorithms
   void AppendSpectra::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace1",
-      "", Direction::Input, new CommonBinsValidator<>),
+      "", Direction::Input, boost::make_shared<CommonBinsValidator>()),
       "The name of the first input workspace");
     declareProperty(new WorkspaceProperty<>("InputWorkspace2",
-      "", Direction::Input, new CommonBinsValidator<>),
+      "", Direction::Input, boost::make_shared<CommonBinsValidator>()),
       "The name of the second input workspace");
 
     declareProperty("ValidateInputs", true,

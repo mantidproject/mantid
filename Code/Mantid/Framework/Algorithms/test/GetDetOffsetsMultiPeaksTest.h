@@ -10,6 +10,7 @@
 #include <Poco/File.h>
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetOffsetsMultiPeaks;

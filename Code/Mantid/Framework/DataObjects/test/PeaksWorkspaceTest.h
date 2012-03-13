@@ -17,6 +17,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <Poco/File.h>
 
 

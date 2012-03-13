@@ -9,9 +9,11 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
-#include <numeric>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
+#include <numeric>
 
 namespace Mantid
 {

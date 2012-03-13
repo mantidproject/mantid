@@ -1,47 +1,29 @@
 #ifndef MANTID_API_ALGORITHM_H_
 #define MANTID_API_ALGORITHM_H_
 
-/* Used to register classes into the factory. creates a global object in an
- * anonymous namespace. The object itself does nothing, but the comma operator
- * is used in the call to its constructor to effect a call to the factory's
- * subscribe method.
- */
-#define DECLARE_ALGORITHM(classname) \
-    namespace { \
-  Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-      ((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()) \
-          , 0)); \
-}
-
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/FileValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
+
+// -- These headers will (most-likely) be used by every inheriting algorithm
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/WorkspaceFactory.h"
+
 #include <boost/shared_ptr.hpp>
 #include <Poco/ActiveMethod.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 #include <Poco/NObserver.h>
 #include <Poco/Void.h>
+
 #include <string>
 #include <vector>
 #include <map>
@@ -55,6 +37,7 @@ namespace API
 // Forward Declaration
 //----------------------------------------------------------------------
 class AlgorithmProxy;
+class AlgorithmHistory;
 
 /**
  Base class from which all concrete algorithm classes should be derived.
@@ -327,6 +310,8 @@ protected:
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
 
 private:
+  /// VectorWorkspaces
+  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
 
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -338,8 +323,8 @@ private:
 
   void store();
   void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
-  void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
-      std::vector<Workspace_sptr>& outputWorkspaces) const;
+  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
+      WorkspaceVector& outputWorkspaces) const;
   void logAlgorithmInfo() const;
 
 
@@ -365,9 +350,9 @@ private:
 
 
   /// Vector of all the workspaces that have been read-locked
-  std::vector<Workspace_sptr> m_readLockedWorkspaces;
+  WorkspaceVector m_readLockedWorkspaces;
   /// Vector of all the workspaces that have been write-locked
-  std::vector<Workspace_sptr> m_writeLockedWorkspaces;
+  WorkspaceVector m_writeLockedWorkspaces;
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
@@ -381,9 +366,9 @@ private:
   void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// One vector of workspaces for each input workspace property
-  std::vector<std::vector<Workspace_sptr> > m_groups;
+  std::vector<WorkspaceVector> m_groups;
   /// Pointer to the WorkspaceGroup (if any) for each input workspace property
-  std::vector<WorkspaceGroup_sptr> m_groupWorkspaces;
+  std::vector<boost::shared_ptr<WorkspaceGroup> > m_groupWorkspaces;
   /// Flag set true if processGroups() should be called
   bool m_processGroups;
   /// If only one input is a group, this is its index. -1 if they are all groups
@@ -401,5 +386,16 @@ typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
 } // namespace API
 } // namespace Mantid
 
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+#define DECLARE_ALGORITHM(classname) \
+    namespace { \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+      ((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()) \
+          , 0)); \
+}
 
 #endif /*MANTID_API_ALGORITHM_H_*/

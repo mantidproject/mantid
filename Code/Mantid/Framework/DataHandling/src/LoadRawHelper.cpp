@@ -12,6 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
@@ -66,7 +67,7 @@ namespace Mantid
       m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
       m_cache_options.push_back("Never");
-      declareProperty("Cache", "If Slow", new ListValidator(m_cache_options));
+      declareProperty("Cache", "If Slow", boost::make_shared<StringListValidator>(m_cache_options));
 
       declareProperty("LoadLogFiles", true, " Boolean option to load or skip log files.");
 

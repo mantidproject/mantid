@@ -29,6 +29,8 @@ GetDetectorOffsets("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -67,14 +69,14 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-          new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
+          boost::make_shared<WorkspaceUnitValidator>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
-      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0);
 
       declareProperty("Step",0.001, mustBePositive,
         "Step size used to bin d-spacing data");
-      declareProperty("DReference",2.0, mustBePositive->clone(),
+      declareProperty("DReference",2.0, mustBePositive,
          "Center of reference peak in d-space");
       declareProperty("XMin",0.0, "Minimum of CrossCorrelation data to search for peak, usually negative");
       declareProperty("XMax",0.0, "Maximum of CrossCorrelation data to search for peak, usually positive");
@@ -87,7 +89,7 @@ namespace Mantid
           "An output workspace containing the mask.");
       // Only keep peaks
       std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-      declareProperty("PeakFunction", "Gaussian", new ListValidator(peakNames));
+      declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peakNames));
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
     }
 

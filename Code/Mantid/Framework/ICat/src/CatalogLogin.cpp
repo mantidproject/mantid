@@ -32,12 +32,10 @@ namespace Mantid
     /// Init method to declare algorithm properties
     void CatalogLogin::init()
     {
-      declareProperty("Username","", new Kernel::MandatoryValidator<std::string>(),
-          "The name/federal ID of the logged in user");
-      declareProperty(new MaskedProperty<std::string>("Password","",new Kernel::MandatoryValidator<std::string>()),
-          "The password of the logged in user ");
-
-      //declareProperty("DBServer","","Parameter that will identify the ICat DB server URL");
+      auto requireValue = boost::make_shared<Kernel::MandatoryValidator<std::string>>();
+      declareProperty("Username","", requireValue,"The name/federal ID of the logged in user");
+      declareProperty(new MaskedProperty<std::string>("Password","", requireValue),
+                      "The password of the logged in user ");
     }
     /// execute the algorithm
     void CatalogLogin::exec()

@@ -22,6 +22,8 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidAPI/TableRow.h"
 #include <iostream>
 #include <vector>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/NullValidator.h"
 
 namespace Mantid
 {
@@ -45,27 +47,27 @@ using namespace Geometry;
 
 void FindCenterOfMassPosition::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty("Output","","If not empty, a table workspace of that "
       "name will contain the center of mass position.");
 
-  BoundedValidator<int> *positiveInt = new BoundedValidator<int>();
+  auto positiveInt = boost::make_shared<BoundedValidator<int> >();
   positiveInt->setLower(0);
   declareProperty("NPixelX", 192, positiveInt,
       "Number of detector pixels in the X direction.");
 
   positiveInt->setLower(0);
-  declareProperty("NPixelY", 192, positiveInt->clone(),
+  declareProperty("NPixelY", 192, positiveInt,
       "Number of detector pixels in the Y direction.");
 
   declareProperty("DirectBeam", true,
       "If true, a direct beam calculation will be performed. Otherwise, the center of mass "
       "of the scattering data will be computed by excluding the beam area.");
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
   declareProperty("BeamRadius", 20.0, positiveDouble,
       "Radius of the beam area, in pixels, used the exclude the beam when calculating "
@@ -243,7 +245,7 @@ void FindCenterOfMassPosition::exec()
     setProperty("OutputWorkspace",m_result);
   } else {
     // Store the results using an ArrayProperty
-    declareProperty(new ArrayProperty<double> ("CenterOfMass",new NullValidator<std::vector<double> >,Direction::Output));
+    declareProperty(new ArrayProperty<double> ("CenterOfMass", boost::make_shared<NullValidator>(),Direction::Output));
     std::vector<double> center_of_mass;
     center_of_mass.push_back(center_x);
     center_of_mass.push_back(center_y);

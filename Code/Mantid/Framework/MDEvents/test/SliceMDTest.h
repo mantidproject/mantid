@@ -8,6 +8,7 @@
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/SliceMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>

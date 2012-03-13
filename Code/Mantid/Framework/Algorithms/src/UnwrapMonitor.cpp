@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -39,11 +40,11 @@ UnwrapMonitor::~UnwrapMonitor()
 /// Initialisation method
 void UnwrapMonitor::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new RawCountValidator<>);
-  wsValidator->add(new InstrumentValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("TOF");
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<RawCountValidator>();
+  wsValidator->add<InstrumentValidator>();
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A workspace with x values in units of TOF and y values in counts" );
@@ -51,7 +52,7 @@ void UnwrapMonitor::init()
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<double> *validator = new BoundedValidator<double>;
+  auto validator = boost::make_shared<BoundedValidator<double> >();
   validator->setLower(0.01);
   declareProperty("LRef", 0.0, validator,
     "The length of the reference flight path (in metres)" );

@@ -23,6 +23,7 @@
 #endif
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IBackgroundFunction.h"

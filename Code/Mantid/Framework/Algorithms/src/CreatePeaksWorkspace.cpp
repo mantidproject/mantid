@@ -53,7 +53,7 @@ namespace Algorithms
    */
   void CreatePeaksWorkspace::init()
   {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InstrumentWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InstrumentWorkspace","",Direction::Input, PropertyMode::Optional),
         "An optional input workspace containing the default instrument for peaks in this workspace.");
     declareProperty("NumberOfPeaks", 1,
         "Number of dummy peaks to initially create.");

@@ -42,7 +42,6 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-//#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
@@ -50,6 +49,8 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_ptr.hpp>
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -80,14 +81,14 @@ namespace Mantid
       declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext));
       declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext));
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-      declareProperty("LogValue","",new MandatoryValidator<std::string>());
+      declareProperty("LogValue","",boost::make_shared<MandatoryValidator<std::string>>());
       declareProperty("Red", 1, Direction::Input);
       declareProperty("Green", EMPTY_INT(), Direction::Input);
 
       std::vector<std::string> options;
       options.push_back("Integral");
       options.push_back("Differential");
-      declareProperty("Type","Integral",new ListValidator(options));
+      declareProperty("Type","Integral",boost::make_shared<StringListValidator>(options));
 
       declareProperty("TimeMin",EMPTY_DBL(),"Starting X value for integration");
       declareProperty("TimeMax",EMPTY_DBL(),"Ending X value for integration");

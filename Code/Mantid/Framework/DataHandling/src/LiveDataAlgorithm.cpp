@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LiveDataAlgorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/LiveListenerFactory.h"
 
 using namespace Mantid::Kernel;
@@ -35,7 +36,7 @@ namespace DataHandling
   {
     // Options for the Instrument = all the listeners that are registered.
     std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
-    declareProperty(new PropertyWithValue<std::string>("Instrument","", new ListValidator(listeners)),
+    declareProperty(new PropertyWithValue<std::string>("Instrument","", boost::make_shared<StringListValidator>(listeners)),
         "Name of the instrument to monitor.");
 
     declareProperty(new PropertyWithValue<std::string>("StartTime","",Direction::Input),
@@ -57,7 +58,7 @@ namespace DataHandling
     propOptions.push_back("Add");
     propOptions.push_back("Replace");
     propOptions.push_back("Append");
-    declareProperty("AccumulationMethod", "Add", new ListValidator(propOptions),
+    declareProperty("AccumulationMethod", "Add", boost::make_shared<StringListValidator>(propOptions),
         "Method to use for accumulating each chunk of live data.\n"
         " - Add: the processed chunk will be summed to the previous outpu (default).\n"
         " - Replace: the processed chunk will replace the previous output.\n"
@@ -75,18 +76,18 @@ namespace DataHandling
         "Not currently supported, but reserved for future use.");
 
     declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
-        true /* optional */, false /* no locking */),
+                                                     PropertyMode::Optional, LockMode::NoLock),
         "Optional, unless performing PostProcessing:\n"
         " Give the name of the intermediate, accumulation workspace.\n"
         " This is the workspace after accumulation but before post-processing steps.");
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output,
-        false /* not optional */, false /* no locking */),
-        "Name of the processed output workspace.");
+                                                     PropertyMode::Mandatory, LockMode::NoLock),
+                    "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
-        "The time stamp of the last event, frame or pulse recorded.\n"
-        "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
+                    "The time stamp of the last event, frame or pulse recorded.\n"
+                    "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
   }
 
 

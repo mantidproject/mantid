@@ -12,6 +12,8 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -35,9 +37,9 @@ using namespace Geometry;
 
 void ApplyTransmissionCorrection::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to apply the transmission correction to");
   declareProperty("TransmissionWorkspace", "", "Workspace containing the transmission values");
@@ -48,7 +50,7 @@ void ApplyTransmissionCorrection::init()
   declareProperty("TransmissionValue", EMPTY_DBL(),
       "Transmission value to apply to all wavelengths. If specified, "
       "TransmissionWorkspace will not be used.");
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("TransmissionError", 0.0, mustBePositive,
     "The error on the transmission value (default 0.0)" );

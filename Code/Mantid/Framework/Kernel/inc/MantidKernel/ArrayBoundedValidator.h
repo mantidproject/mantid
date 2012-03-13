@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_ARRAYBOUNDEDVALIDATOR_H_
 #define MANTID_KERNEL_ARRAYBOUNDEDVALIDATOR_H_
 
-#include "MantidKernel/IValidator.h"
+#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <vector>
 
@@ -38,7 +38,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class MANTID_KERNEL_DLL ArrayBoundedValidator: public IValidator<std::vector<TYPE> >
+class MANTID_KERNEL_DLL ArrayBoundedValidator: public TypedValidator<std::vector<TYPE> >
 {
 public:
   ArrayBoundedValidator();
@@ -46,10 +46,10 @@ public:
   ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound);
   ArrayBoundedValidator(BoundedValidator<TYPE> &bv);
   virtual ~ArrayBoundedValidator();
-
-  IValidator<std::vector<TYPE> >* clone() const;
-  BoundedValidator<TYPE>* getValidator() const;
-  std::string isValid(const std::vector<TYPE> &value) const;
+  /// Clone the current state
+  IValidator_sptr clone() const;
+  /// Return the object that checks the bounds
+  boost::shared_ptr<BoundedValidator<TYPE> > getValidator() const;
 
   /// Return if it has a lower bound
   bool        hasLower() const;
@@ -69,10 +69,10 @@ public:
   /// Clear upper bound value
   void clearUpper();
 private:
-  std::string checkValidity( const std::vector<TYPE> &value ) const;
+  std::string checkValidity( const std::vector<TYPE>&value ) const;
 
   /// The object used to do the actual validation
-  BoundedValidator<TYPE> *boundVal;
+  boost::shared_ptr<BoundedValidator<TYPE> > boundVal;
 };
 
 } // Kernel

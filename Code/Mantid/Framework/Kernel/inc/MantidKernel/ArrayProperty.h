@@ -49,7 +49,7 @@ public:
    *  @param direction :: The direction (Input/Output/InOut) of this property
    */
   ArrayProperty(const std::string &name, const std::vector<T> &vec,
-                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >, 
+                IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input) :
     PropertyWithValue< std::vector<T> >(name, vec, validator, direction)
   {
@@ -63,7 +63,7 @@ public:
    *  @param direction :: The direction (Input/Output/InOut) of this property
    */
   ArrayProperty(const std::string &name,
-                IValidator<std::vector<T> > *validator,
+                IValidator_sptr validator,
                 const unsigned int direction = Direction::Input) :
     PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator, direction)
   {
@@ -77,7 +77,7 @@ public:
    */
   ArrayProperty(const std::string &name,
                 const unsigned int direction = Direction::Input) :
-    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), new NullValidator<std::vector<T> >, direction)
+    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), IValidator_sptr(new NullValidator), direction)
   {
   }
   /** Constructor from which you can set the property's values through a string
@@ -88,7 +88,7 @@ public:
    *  @throw std::invalid_argument if the string passed is not compatible with the array type
    */
   ArrayProperty(const std::string &name, const std::string& values,
-                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >,
+                IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input) :
     PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator, direction)
   {
@@ -134,18 +134,6 @@ public:
     // Implemented this method for documentation reasons. Just calls base class method.
     return PropertyWithValue< std::vector<T> >::setValue(value);
   }
-
-  /**
-   * Set a property value via a DataItem
-   * @param data :: A shared pointer to a data item
-   * @return "" if the assignment was successful or a user level description of the problem
-   */
-  std::string setValue(const boost::shared_ptr<DataItem> data )
-  {
-    // Implemented this method for documentation reasons. Just calls base class method.
-    return PropertyWithValue< std::vector<T> >::setValue(data);
-  }
-
   // May want to add specialisation the the class later, e.g. setting just one element of the vector
 };
 

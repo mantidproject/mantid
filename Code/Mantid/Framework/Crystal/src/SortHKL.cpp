@@ -14,6 +14,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -65,7 +66,7 @@ namespace Crystal
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_pointGroups.size(); ++i)
       propOptions.push_back( m_pointGroups[i]->getName() );
-    declareProperty("PointGroup", propOptions[0],new ListValidator(propOptions),
+    declareProperty("PointGroup", propOptions[0], boost::make_shared<StringListValidator>(propOptions),
       "Which point group applies to this crystal?");
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));

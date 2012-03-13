@@ -20,6 +20,7 @@ to attach a UB Matrix onto the sample. The CopySample algorithm will allow this 
 #include "MantidAPI/Column.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <sstream>
 #include <algorithm>
 
@@ -46,10 +47,10 @@ namespace Mantid
     */
     void IndexSXPeaks::init()
     {
-      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
 
-      BoundedValidator<double> *reasonable_angle = new BoundedValidator<double>();
+      auto reasonable_angle = boost::make_shared<BoundedValidator<double> >();
       reasonable_angle->setLower(5.0);
       reasonable_angle->setUpper(175.0);
 
@@ -60,19 +61,19 @@ namespace Mantid
         mustBePositive,Direction::Input),"Lattice parameter a");
 
       declareProperty(new PropertyWithValue<double>( "b",-1.0,
-        mustBePositive->clone(),Direction::Input),"Lattice parameter b");
+        mustBePositive,Direction::Input),"Lattice parameter b");
 
       declareProperty(new PropertyWithValue<double>( "c",-1.0,
-        mustBePositive->clone(),Direction::Input),"Lattice parameter c");
+        mustBePositive,Direction::Input),"Lattice parameter c");
 
       declareProperty(new PropertyWithValue<double>( "alpha",-1.0,
         reasonable_angle,Direction::Input),"Lattice parameter alpha");
 
       declareProperty(new PropertyWithValue<double>("beta",-1.0,
-        reasonable_angle->clone(),Direction::Input),"Lattice parameter beta");
+        reasonable_angle,Direction::Input),"Lattice parameter beta");
 
       declareProperty(new PropertyWithValue<double>("gamma",-1.0,
-        reasonable_angle->clone(),Direction::Input),"Lattice parameter gamma");
+        reasonable_angle,Direction::Input),"Lattice parameter gamma");
 
       declareProperty(new ArrayProperty<int> ("PeakIndices"),
         "Index of the peaks in the table workspace to be used. If no index are provided, all will be used.");

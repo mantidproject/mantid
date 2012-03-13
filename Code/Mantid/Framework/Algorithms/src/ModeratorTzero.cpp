@@ -66,8 +66,8 @@ using namespace Mantid::DataObjects;
 void ModeratorTzero::init()
 {
 
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("TOF");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
 		  "The name of the input workspace, containing events and/or histogram data, in units of time-of-flight");
   //declare the output workspace

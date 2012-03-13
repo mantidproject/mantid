@@ -5,6 +5,7 @@ You can perform this from the MantidPlot GUI by selecting the WorkspaceGroup and
 
 *WIKI*/
 #include "MantidAlgorithms/UnGroupWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -44,7 +45,7 @@ namespace Mantid
         }
       }
       // Declare a text property with the list of group workspaces as its allowed values
-      declareProperty("InputWorkspace","","Name of the input workspace to ungroup",new ListValidator(groupWorkspaceList) );
+      declareProperty("InputWorkspace","","Name of the input workspace to ungroup",boost::make_shared<StringListValidator>(groupWorkspaceList) );
     }
     
     /** Executes the algorithm

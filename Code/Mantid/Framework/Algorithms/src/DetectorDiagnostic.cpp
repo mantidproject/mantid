@@ -12,6 +12,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -59,12 +60,12 @@ namespace Mantid
                       "Name of the input workspace" );
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output),
                       "A SpecialWorkspace2D containing the masked spectra as zeroes and ones.");
-      BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
                       "The index number of the first spectrum to include in the calculation\n"
                       "(default 0)" );
-      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
                       "The index number of the last spectrum to include in the calculation\n"
                       "(default the last histogram)" );
       declareProperty("RangeLower", EMPTY_DBL(),
@@ -89,7 +90,7 @@ namespace Mantid
       string medianDetTestGrp("Median Detector Test");
       declareProperty("RunMedianDetectorTest", true, "");
       this->setPropertyGroup("RunMedianDetectorTest", medianDetTestGrp);
-      BoundedValidator<double> *mustBePositiveDbl = new BoundedValidator<double>();
+      auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double> >();
       mustBePositiveDbl->setLower(0);
       declareProperty("SignificanceTest", 3.3, mustBePositiveDbl,
                       "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
@@ -116,21 +117,21 @@ namespace Mantid
       setPropertySettings("ExcludeZeroesFromMedian", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
 
       string detEffVarGrp("Detector Efficiency Variation");
-      declareProperty(new WorkspaceProperty<>("WhiteBeamCompare","",Direction::Input, true),
+      declareProperty(new WorkspaceProperty<>("WhiteBeamCompare","",Direction::Input, PropertyMode::Optional),
                       "Name of a matching second white beam vanadium run from the same\n"
                       "instrument" );
       this->setPropertyGroup("WhiteBeamCompare", detEffVarGrp);
-      declareProperty("WhiteBeamVariation", 1.1, mustBePositiveDbl->clone(),
+      declareProperty("WhiteBeamVariation", 1.1, mustBePositiveDbl,
                       "Identify spectra whose total number of counts has changed by more\n"
                       "than this factor of the median change between the two input workspaces" );
       this->setPropertyGroup("WhiteBeamVariation", detEffVarGrp);
       setPropertySettings("WhiteBeamVariation", new EnabledWhenProperty(this, "WhiteBeamCompare", IS_NOT_DEFAULT));
 
       string psdBleedMaskGrp("Create PSD Bleed Mask");
-      declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl->clone(),
+      declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl,
           "The maximum rate allowed for a tube in counts/us/frame.");
       this->setPropertyGroup("MaxTubeFramerate", psdBleedMaskGrp);
-      declareProperty("NIgnoredCentralPixels", 80, mustBePosInt->clone(),
+      declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
           "The number of pixels about the centre to ignore.");
       this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
       setPropertySettings("NIgnoredCentralPixels", new EnabledWhenProperty(this, "MaxTubeFramerate", IS_NOT_DEFAULT));

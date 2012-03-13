@@ -121,6 +121,8 @@ The output workspace for an inverse ("Backward") transform has 3 spectra for the
 #include <algorithm>
 #include <functional>
 #include <cmath>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -149,15 +151,15 @@ void FFT::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("Real",0,mustBePositive,"Spectrum number to use as real part for transform");
-  declareProperty("Imaginary",EMPTY_INT(),mustBePositive->clone(),"Spectrum number to use as imaginary part for transform");
+  declareProperty("Imaginary",EMPTY_INT(),mustBePositive,"Spectrum number to use as imaginary part for transform");
 
   std::vector<std::string> fft_dir;
   fft_dir.push_back("Forward");
   fft_dir.push_back("Backward");
-  declareProperty("Transform","Forward",new ListValidator(fft_dir),"Direction of the transform: forward or backward");
+  declareProperty("Transform","Forward",boost::make_shared<StringListValidator>(fft_dir),"Direction of the transform: forward or backward");
 }
 
 /** Executes the algorithm

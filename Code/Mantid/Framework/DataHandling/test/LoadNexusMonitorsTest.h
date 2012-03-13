@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/shared_ptr.hpp>

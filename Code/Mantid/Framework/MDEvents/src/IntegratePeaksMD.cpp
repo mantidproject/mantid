@@ -71,6 +71,7 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/IntegratePeaksMD.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -121,7 +122,7 @@ namespace MDEvents
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "Q (lab frame)",new ListValidator(propOptions),
+    declareProperty("CoordinatesToUse", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
       "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
        );
 

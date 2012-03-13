@@ -8,6 +8,8 @@
 
 
 #include <iostream>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -36,7 +38,7 @@ void FFTSmooth2::init()
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
         "",Direction::Output), "The name of the output workspace.");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum index for smoothing");
 
@@ -44,7 +46,7 @@ void FFTSmooth2::init()
       //type.push_back("Truncation");
       type.push_back("Zeroing");
       type.push_back("Butterworth");
-      declareProperty("Filter","Zeroing",new ListValidator(type),"The type of the applied filter");
+      declareProperty("Filter","Zeroing",boost::make_shared<StringListValidator>(type),"The type of the applied filter");
       declareProperty("Params","",
           "The filter parameters:\n"
           "For Zeroing, 1 parameter: 'n' - an integer greater than 1 meaning that the Fourier coefficients with frequencies outside the 1/n of the original range will be set to zero.\n"

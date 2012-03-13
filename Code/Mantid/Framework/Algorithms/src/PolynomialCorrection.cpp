@@ -15,6 +15,8 @@ The order of the polynomial is determined by the length of the Coefficients prop
 #include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <cmath>
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -37,11 +39,11 @@ namespace Algorithms
   void PolynomialCorrection::defineProperties()
   {
     // We need an array property for the coefficients of the polynomial: C0 + C1*x + C2*x*x + ....
-    declareProperty(new ArrayProperty<double>("Coefficients",new MandatoryValidator<std::vector<double> >)); 
+    declareProperty(new ArrayProperty<double>("Coefficients",boost::make_shared<MandatoryValidator<std::vector<double>>>()));
     std::vector<std::string> propOptions;
     propOptions.push_back("Multiply");
     propOptions.push_back("Divide");
-    declareProperty("Operation","Multiply",new ListValidator(propOptions),
+    declareProperty("Operation","Multiply",boost::make_shared<StringListValidator>(propOptions),
     "The operation with which the correction is applied to the data (default: Multiply)");
   }
   

@@ -61,8 +61,9 @@ namespace Crystal
    */
   void SaveIsawPeaks::init()
   {
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<PeaksWorkspace>()),
-        "An input PeaksWorkspace with an instrument.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, 
+                                                          boost::make_shared<InstrumentValidator>()),
+                    "An input PeaksWorkspace with an instrument.");
 
     declareProperty("AppendFile", false, "Append to file if true.\n"
       "If false, new file (default).");

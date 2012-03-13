@@ -39,6 +39,7 @@ Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventio
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -85,7 +86,7 @@ namespace MDEvents
   void ConvertToDiffractionMDWorkspace::init()
   {
     // Input units must be TOF
-    API::WorkspaceUnitValidator<MatrixWorkspace>* validator = new API::WorkspaceUnitValidator<MatrixWorkspace>("TOF");
+    auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, validator),
         "An input workspace in time-of-flight. If you specify a Workspace2D, it gets converted to "
         "an EventWorkspace using ConvertToEventWorkspace.");
@@ -101,7 +102,7 @@ namespace MDEvents
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("OutputDimensions", "Q (lab frame)",new ListValidator(propOptions),
+    declareProperty("OutputDimensions", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  Q (sample frame): Wave-vector change of the lattice in the frame of the sample (taking out goniometer rotation).\n"

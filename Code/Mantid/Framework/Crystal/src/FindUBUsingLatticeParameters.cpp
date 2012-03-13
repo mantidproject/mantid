@@ -6,11 +6,11 @@ Given a set of peaks, and given lattice parameters (<math>a,b,c,alpha,beta,gamma
 
 *WIKI*/
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cstdio>
 
 namespace Mantid
@@ -63,41 +63,25 @@ namespace Crystal
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
           "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
 
-    BoundedValidator<int> *moreThan2Int = new BoundedValidator<int>();
+    boost::shared_ptr<BoundedValidator<int> > moreThan2Int(new BoundedValidator<int>());
     moreThan2Int->setLower(2);
 
-    BoundedValidator<double> *reasonable_angle = new BoundedValidator<double>();
+    boost::shared_ptr<BoundedValidator<double> > reasonable_angle(new BoundedValidator<double>());
     reasonable_angle->setLower(5.0);
     reasonable_angle->setUpper(175.0);
 
     // use negative values, force user to input all parameters
-    this->declareProperty(new PropertyWithValue<double>( "a",-1.0,
-          mustBePositive,Direction::Input),"Lattice parameter a");
-
-    this->declareProperty(new PropertyWithValue<double>( "b",-1.0,
-          mustBePositive->clone(),Direction::Input),"Lattice parameter b");
-
-    this->declareProperty(new PropertyWithValue<double>( "c",-1.0,
-          mustBePositive->clone(),Direction::Input),"Lattice parameter c");
-
-    this->declareProperty(new PropertyWithValue<double>( "alpha",-1.0,
-          reasonable_angle,Direction::Input),"Lattice parameter alpha");
-
-    this->declareProperty(new PropertyWithValue<double>("beta",-1.0,
-          reasonable_angle->clone(),Direction::Input),"Lattice parameter beta");
-
-    this->declareProperty(new PropertyWithValue<double>("gamma",-1.0,
-          reasonable_angle->clone(),Direction::Input),"Lattice parameter gamma");
-
-    this->declareProperty(new PropertyWithValue<int>( "NumInitial", 15,
-          moreThan2Int,Direction::Input), 
-          "Number of Peaks to Use on First Pass(15)");
-
-    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
-          mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");
+    this->declareProperty("a",-1.0, mustBePositive, "Lattice parameter a");
+    this->declareProperty("b",-1.0, mustBePositive, "Lattice parameter b");
+    this->declareProperty("c",-1.0, mustBePositive, "Lattice parameter c");
+    this->declareProperty("alpha",-1.0,reasonable_angle,"Lattice parameter alpha");
+    this->declareProperty("beta",-1.0, reasonable_angle,"Lattice parameter beta");
+    this->declareProperty("gamma",-1.0,reasonable_angle,"Lattice parameter gamma");
+    this->declareProperty("NumInitial", 15, moreThan2Int, "Number of Peaks to Use on First Pass(15)");
+    this->declareProperty("Tolerance",0.15, mustBePositive,"Indexing Tolerance (0.15)");
   }
 
   //--------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 #define MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_
 
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"

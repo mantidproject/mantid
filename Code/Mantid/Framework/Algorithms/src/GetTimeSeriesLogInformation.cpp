@@ -11,6 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
 #include <fstream>
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -53,27 +54,26 @@ namespace Algorithms
     funcoptions.push_back("Time Range Info");
     funcoptions.push_back("Generate Calibration File");
     funcoptions.push_back("Export Log");
-    this->declareProperty("Function", "Time Range Info", new ListValidator(funcoptions),
+    this->declareProperty("Function", "Time Range Info", boost::make_shared<StringListValidator>(funcoptions),
         "Options for functionalities.");
 
     this->declareProperty("LogName", "", "Log's name to filter events.");
-    bool optional = true;
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("SampleEnvironmentWorkspace", "", Direction::Input, optional),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("SampleEnvironmentWorkspace", "",
+         Direction::Input, PropertyMode::Optional),
         "Input 2D workspace storing sample environment data along with absolute time");
 
     std::vector<std::string> timeoptions;
     timeoptions.push_back("Absolute Time (nano second)");
     timeoptions.push_back("Relative Time (second)");
     timeoptions.push_back("Percentage");
-    this->declareProperty("TimeRangeOption", "Relative Time (second)", new ListValidator(timeoptions),
+    this->declareProperty("TimeRangeOption", "Relative Time (second)", boost::make_shared<StringListValidator>(timeoptions),
         "User defined time range (T0, Tf) is of absolute time (second). ");
     this->declareProperty("T0", 0.0, "Earliest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
     this->declareProperty("Tf", 100.0, "Latest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
 
-    bool optionalopws = true;
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("TimeOutputWorkspace", "TimeStat", Direction::Output, optionalopws),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("TimeOutputWorkspace", "TimeStat", Direction::Output, PropertyMode::Optional),
         "Output Workspace as the statistic on time (second).");
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("PercentOutputWorkspace", "PercentStat", Direction::Output, optionalopws),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("PercentOutputWorkspace", "PercentStat", Direction::Output, PropertyMode::Optional),
         "Output Workspace as the statistic on percentage time.");
 
     this->declareProperty("Resolution", 10, "Resolution of statistic workspace");

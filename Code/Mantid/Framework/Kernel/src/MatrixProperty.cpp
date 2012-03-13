@@ -17,7 +17,7 @@ namespace Mantid
      */
     template<typename TYPE>
     MatrixProperty<TYPE>::MatrixProperty(const std::string & propName,
-      IValidator<HeldType> *validator, unsigned int direction) 
+                                         IValidator_sptr validator, unsigned int direction)
       : PropertyWithValue<HeldType>(propName, HeldType(), validator, direction)
     {
     }

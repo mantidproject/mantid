@@ -14,6 +14,7 @@
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

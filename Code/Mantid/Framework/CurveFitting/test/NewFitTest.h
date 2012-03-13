@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;

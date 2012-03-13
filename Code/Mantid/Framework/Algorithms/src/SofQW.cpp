@@ -22,6 +22,8 @@ If the input workspace is a distribution (i.e. counts / meV ) then the output wo
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -64,23 +66,23 @@ void SofQW::init()
  */
 void SofQW::createInputProperties(API::Algorithm & alg)
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
-  wsValidator->add(new SpectraAxisValidator<>());
-  wsValidator->add(new CommonBinsValidator<>);
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new InstrumentValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("DeltaE");
+  wsValidator->add<SpectraAxisValidator>();
+  wsValidator->add<CommonBinsValidator>();
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<InstrumentValidator>();
   alg.declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  alg.declareProperty(new ArrayProperty<double>("QAxisBinning", new RebinParamsValidator));
+  alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()));
   
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
-  alg.declareProperty("EMode","",new ListValidator(propOptions),
+  alg.declareProperty("EMode","",boost::make_shared<StringListValidator>(propOptions),
     "The energy mode");
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   alg.declareProperty("EFixed",0.0,mustBePositive,
       "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect).");

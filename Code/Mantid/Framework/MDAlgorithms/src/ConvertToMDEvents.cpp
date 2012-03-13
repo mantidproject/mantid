@@ -42,6 +42,8 @@ Depending on the user input and the data, find in the input workspace, the algor
 
 #include <algorithm>
 #include <float.h>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -178,11 +180,11 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
 void 
 ConvertToMDEvents::init()
 {
-      CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
+      auto ws_valid = boost::make_shared<CompositeValidator>();
       //
-      ws_valid->add(new InstrumentValidator<>);
+      ws_valid->add<InstrumentValidator>();
       // the validator which checks if the workspace has axis and any units
-      ws_valid->add(new WorkspaceUnitValidator<>(""));
+      ws_valid->add<WorkspaceUnitValidator>("");
 
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
@@ -194,7 +196,7 @@ ConvertToMDEvents::init()
               "Unselect this if you want to add new events to the workspace, which already exist. Can be very inefficient for file-based workspaces.");
 
      /// this variable describes default possible ID-s for Q-dimensions   
-     declareProperty("QDimensions",Q_modes[modQ],new ListValidator(Q_modes),
+     declareProperty("QDimensions",Q_modes[modQ],boost::make_shared<StringListValidator>(Q_modes),
          "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
          " (No Q analysis, or Q conversion is performed),\n"
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""QhQkQl"". \n"
@@ -205,7 +207,7 @@ ConvertToMDEvents::init()
          " Setting this property to true will normalize three momentums obtained in QhQkQl mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
          " ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
      /// this variable describes implemented modes for energy transfer analysis
-     declareProperty("dEAnalysisMode",dE_modes[Direct],new ListValidator(dE_modes),
+     declareProperty("dEAnalysisMode",dE_modes[Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
         " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
         """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
@@ -254,7 +256,7 @@ ConvertToMDEvents::init()
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
     // additional box controller settings property. 
-    BoundedValidator<int> *mustBeMoreThen1 = new BoundedValidator<int> ();
+    auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int> >();
     mustBeMoreThen1->setLower(1);
 
     declareProperty(

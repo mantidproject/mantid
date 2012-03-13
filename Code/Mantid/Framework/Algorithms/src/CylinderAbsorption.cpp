@@ -22,6 +22,7 @@ The method used here is based upon work presented in the following two papers, a
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CylinderAbsorption.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -51,19 +52,19 @@ CylinderAbsorption::CylinderAbsorption() : AbsorptionCorrection(),
 
 void CylinderAbsorption::defineProperties()
 {
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("CylinderSampleHeight", -1.0, mustBePositive,
     "The height of the cylindrical sample in centimetres");
-  declareProperty("CylinderSampleRadius", -1.0, mustBePositive->clone(),
+  declareProperty("CylinderSampleRadius", -1.0, mustBePositive,
     "The radius of the cylindrical sample in centimetres");
 
-  BoundedValidator<int> *positiveInt = new BoundedValidator<int> ();
+  auto positiveInt = boost::make_shared<BoundedValidator<int> >();
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices", 1, positiveInt, 
     "The number of slices into which the cylinder is divided for the\n"
     "calculation");
-  declareProperty("NumberOfAnnuli", 1, positiveInt->clone(), 
+  declareProperty("NumberOfAnnuli", 1, positiveInt, 
     "The number of annuli into which each slice is divided for the\n"
     "calculation");
 }
