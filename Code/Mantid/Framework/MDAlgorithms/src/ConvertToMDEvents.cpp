@@ -38,7 +38,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsEventWSAutoRebin.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsEventWSAutoRebin.h"
 
 #include <algorithm>
 #include <float.h>
