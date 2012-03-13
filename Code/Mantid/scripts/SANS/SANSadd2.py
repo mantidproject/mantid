@@ -3,7 +3,7 @@ from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'), lowMem=False):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'), lowMem=False, binning='Monitors'):
   #check if there is at least one file in the list
   if len(runs) < 1 : return
 
@@ -78,25 +78,51 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
     # in case of event file force it into a histogram workspace
     if isFirstDataSetEvent:
-        Rebin('AddFilesSumTempory','AddFilesSumTempory_Rebin','5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0', PreserveEvents=False)
+        wsInMonitor = mtd['AddFilesSumTempory_monitors']
+        if binning == 'Monitors':
+            monX = wsInMonitor.dataX(i)
+            binning = str(monX[0])
+            binGap = monX[1] - monX[0]
+            binning = binning + "," + str(binGap)
+            for j in range(2,len(monX)):
+                nextBinGap = monX[j] - monX[j-1]
+                if nextBinGap != binGap:
+                    binGap = nextBinGap
+                    binning = binning + "," + str(monX[j-1]) + "," + str(binGap)    
+            binning = binning + "," + str(monX[len(monX)-1])
+            
+        mantid.sendLogMessage(binning)        
+        Rebin('AddFilesSumTempory','AddFilesSumTempory_Rebin', binning, PreserveEvents=False)
         
         filename, ext = _makeFilename(runs[0], defType, inst)
         LoadNexus(filename, OutputWorkspace='AddFilesSumTempory')
+        # User may have selected a binning which is different from the default
+        Rebin('AddFilesSumTempory','AddFilesSumTempory', binning)
+        # For now the monitor binning must be the same as the detector binning
+        # since otherwise both cannot exist in the same output histogram file
+        Rebin('AddFilesSumTempory_monitors','AddFilesSumTempory_monitors', binning)
         
+        wsInMonitor = mtd['AddFilesSumTempory_monitors']
         wsOut = mtd['AddFilesSumTempory']    
         wsInDetector = mtd['AddFilesSumTempory_Rebin']
-        wsInMonitor = mtd['AddFilesSumTempory_monitors']
         for i in range(4):
             outY = wsOut.dataY(i)
+            outE = wsOut.dataE(i)
             monitorY = wsInMonitor.readY(i)
-            for j in range(wsOut.blocksize()):
+            monitorE = wsInMonitor.readE(i)            
+            for j in range(len(outY)):
                 outY[j] = monitorY[j]
+                outE[j] = monitorE[j]
+                
                 
         for i in range(4, 73732):
             outY = wsOut.dataY(i+4)
+            outE = wsOut.dataE(i+4)            
             detectorY = wsInDetector.readY(i)
-            for j in range(wsOut.blocksize()):
-                outY[j] = detectorY[j]         
+            detectorE = wsInDetector.readE(i)            
+            for j in range(len(outY)):
+                outY[j] = detectorY[j]   
+                outE[j] = detectorE[j]                         
                        
         if mantid.workspaceExists('AddFilesSumTempory_Rebin') : mantid.deleteWorkspace('AddFilesSumTempory_Rebin')
 
