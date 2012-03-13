@@ -89,7 +89,7 @@
 		// get close to exact values with an initial guess
 		fn.setParameter("A",1.5);
 		fn.setParameter("Lambda",0.2);
-		fn.setParameter("beta",0.4);
+		fn.setParameter("Beta",0.4);
 
 		//alg2.setFunction(fn);
 		alg2.setPropertyValue("Function",fn.asString());
@@ -117,7 +117,7 @@
 		//allow for a 1% error in Amplitude and Decay rate, and 10% error in the Stretching exponent
 		TS_ASSERT_DELTA( out->getParameter("A"), 2.0 ,0.02);
 		TS_ASSERT_DELTA( out->getParameter("Lambda"), 0.25 ,0.0025);
-		TS_ASSERT_DELTA( out->getParameter("beta"), 0.5 ,0.05);
+		TS_ASSERT_DELTA( out->getParameter("Beta"), 0.5 ,0.05);
 
     // check its categories
     const std::vector<std::string> categories = out->categories();
