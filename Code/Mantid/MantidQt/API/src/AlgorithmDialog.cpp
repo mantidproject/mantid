@@ -351,7 +351,11 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
     const QString pName = QString::fromStdString(it->first);
     const QString value = QString::fromStdString(it->second);
     if (m_errors.contains(pName))
-      m_errors[pName] += "\n" + value;
+    {
+      if (!m_errors[pName].isEmpty())
+        m_errors[pName] += "\n";
+      m_errors[pName] += value;
+    }
     else
       m_errors[pName] = value;
     // There is at least one whole-algo error

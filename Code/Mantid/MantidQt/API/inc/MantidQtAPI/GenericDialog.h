@@ -63,6 +63,9 @@ public:
   // Destructor
   virtual ~GenericDialog();
 
+protected slots:
+  virtual void accept();
+
 private:
   virtual void initLayout();
 
