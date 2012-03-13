@@ -92,7 +92,7 @@ public:
     TS_ASSERT_EQUALS(p.getL(),1 );
     TS_ASSERT_EQUALS(p.getIntensity(),1.1 );
     TS_ASSERT_EQUALS(p.getSigmaIntensity(),1.05 );
-    TS_ASSERT_EQUALS(p.getWavelength(),1.5 );
+    TS_ASSERT_DELTA(p.getWavelength(),1.5, 1e-4 );
     TS_ASSERT_EQUALS(p.getRunNumber(),1000. );
     TS_ASSERT_DELTA(p.getDSpacing(),3.5933, 1e-4 );
     const API::Run & run = wsout->run();
