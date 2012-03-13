@@ -71,19 +71,19 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT( !alg.hasPostProcessing() );
 
-    TSM_ASSERT_THROWS_ANYTHING("No OutputWorkspace",  alg.validateInputs() );
+    TSM_ASSERT("No OutputWorkspace",  !alg.validateInputs()["OutputWorkspace"].empty() );
     alg.setPropertyValue("OutputWorkspace", "out_ws");
-    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+    TSM_ASSERT("Is OK now",  alg.validateInputs().empty() );
 
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingScript", "Pause(1)") );
     TS_ASSERT( alg.hasPostProcessing() );
 
-    TSM_ASSERT_THROWS_ANYTHING("No AccumulationWorkspace",  alg.validateInputs() );
+    TSM_ASSERT("No AccumulationWorkspace",  !alg.validateInputs()["AccumulationWorkspace"].empty() );
     alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
-    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+    TSM_ASSERT("Is OK now",  alg.validateInputs().empty() );
 
     alg.setPropertyValue("AccumulationWorkspace", "out_ws");
-    TSM_ASSERT_THROWS_ANYTHING("AccumulationWorkspace == OutputWorkspace",  alg.validateInputs() );
+    TSM_ASSERT("AccumulationWorkspace == OutputWorkspace",  !alg.validateInputs()["AccumulationWorkspace"].empty() );
   }
 
   /** Test creating the processing algorithm.

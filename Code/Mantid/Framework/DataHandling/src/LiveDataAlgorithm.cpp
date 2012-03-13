@@ -3,6 +3,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -228,6 +229,29 @@ namespace DataHandling
       if (this->getPropertyValue("AccumulationWorkspace") == this->getPropertyValue("OutputWorkspace"))
         out["AccumulationWorkspace"] = "The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.";
     }
+
+    /** Validate that the workspace names chosen are not in use already */
+    std::string outName = this->getPropertyValue("OutputWorkspace");
+    std::string accumName = this->getPropertyValue("AccumulationWorkspace");
+
+    // Check that no other MonitorLiveData thread is running with the same settings
+    auto it = AlgorithmManager::Instance().algorithms().begin();
+    for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
+    {
+      IAlgorithm_sptr alg = *it;
+      // MonitorLiveData thread that is running, except THIS one.
+      if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
+          && alg->isRunning())
+      {
+        if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
+          out["AccumulationWorkspace"] += "Another MonitorLiveData thread is running with the same AccumulationWorkspace. "
+              "Please specify a different AccumulationWorkspace name.";
+        if (alg->getPropertyValue("OutputWorkspace") == outName)
+          out["OutputWorkspace"] += "Another MonitorLiveData thread is running with the same OutputWorkspace. "
+              "Please specify a different OutputWorkspace name.";
+      }
+    }
+
     return out;
   }
 
