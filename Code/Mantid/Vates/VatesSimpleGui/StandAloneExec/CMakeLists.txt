@@ -46,13 +46,13 @@ VatesSimpleGuiViewWidgets
 if( SQUISH_FOUND )
   # Need to set the AUT first
   set( SQUISH_AUT VatesSimpleGui )
-  set( SQUISH_AUT_PATH ${CMAKE_BINARY_DIR}/bin )
+  set( SQUISH_AUT_PATH $<TARGET_FILE_DIR:${SQUISH_AUT}> )
 
   # Need to set environmental variables next
   set( auto_test_dir ${CMAKE_SOURCE_DIR} )
   string( REGEX REPLACE "Code/Mantid" "Test/AutoTestData" auto_test_dir ${auto_test_dir} )
   set( SQUISH_ENV_VARS
-    PV_PLUGIN_PATH=${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+    PV_PLUGIN_PATH=$<TARGET_FILE_DIR:${SQUISH_AUT}>/${PVPLUGINS_DIR}
     MANTID_AUTOTEST_DATA=${auto_test_dir}
     SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}
   )

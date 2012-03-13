@@ -17,10 +17,11 @@ def open_file(filename):
     for i in range(count):
         clickButton(fileDialog_NavigateUp)
     
-    # Now, click down the file path
-    dirs = dirname.split(os.path.sep)
+    # Now, click down the file path. CMake uses Linux slashes on Windows too.
+    dirs = dirname.split('/')
     for dir in dirs:
-        if '' == dir:
+        # Left: Linux, Right: Windows
+        if '' == dir or ':' in dir:
             continue
         dir = fix_slashes(dir)
         #test.log("Clicking Dir %s" % dir)

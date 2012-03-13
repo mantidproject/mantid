@@ -101,11 +101,11 @@ MantidQtFactory
 if( SQUISH_FOUND )
   # Need to set the AUT first
   set( SQUISH_AUT MantidPlot )
-  set( SQUISH_AUT_PATH ${CMAKE_BINARY_DIR}/bin )
+  set( SQUISH_AUT_PATH $<TARGET_FILE_DIR:${SQUISH_AUT}> )
 
   # Need to set environmental variables next
   set( SQUISH_ENV_VARS
-    PV_PLUGIN_PATH=${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+    PV_PLUGIN_PATH=$<TARGET_FILE_DIR:${SQUISH_AUT}>/${PVPLUGINS_DIR}
     SCRIPTS_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
     SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}:${CMAKE_CURRENT_SOURCE_DIR}/test/common/scripts
   )

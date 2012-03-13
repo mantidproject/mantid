@@ -13,8 +13,8 @@ macro( SQUISH_ADD_TEST_SUITE )
     set( testName ${_test_suite}SquishTests )
     #message( STATUS "Creating Squish test ${testName}" )
     set( resultFile "${CMAKE_BINARY_DIR}/bin/Testing/TEST-${testName}.xml" )
-    add_test(${testName}
-             ${CMAKE_COMMAND}
+    add_test(NAME ${testName}
+             COMMAND ${CMAKE_COMMAND}
              "-Dsquish_server_executable:STRING=${SQUISH_SERVER_EXECUTABLE}"
              "-Dsquish_client_executable:STRING=${SQUISH_CLIENT_EXECUTABLE}"
              "-Dsquish_aut:STRING=${SQUISH_AUT}"
