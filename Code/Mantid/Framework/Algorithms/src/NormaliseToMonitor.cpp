@@ -153,14 +153,14 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
     return values_redefined;
 }
 
-// the class to verify and modify interconnected properties affecting the different ways to normalize ws by this ws spectrum. 
-//class EnabledIfWs2WS: public Kernel::IPropertySettings
+//// the class to verify and modify interconnected properties affecting the different ways to normalize ws by this ws spectrum. 
+//class EnabledIfWs2Enabled: public Kernel::IPropertySettings
 //{
 //    bool is_enabled;
 //    // the pointer to the main host algorithm.
 //    Kernel::IPropertyManager * host_algo;
 //public:
-//    EnabledIfWs2WS(Kernel::IPropertyManager * algo,const std::string &WSProperty,const std::string &MonWSProperty):
+//    EnabledIfWs2Enabled(Kernel::IPropertyManager * algo,const std::string &MonWSProperty):
 //      is_enabled(true),host_algo(algo){
 //      };
 //
@@ -227,6 +227,7 @@ void NormaliseToMonitor::init()
   setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
   declareProperty("MonitorWorkspaceSpectrum",0,
       "The spectrum number within the MonitorWorkspace you want to normalize by (usually monitor spectrum but can be any)",Direction::InOut);
+  setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
   // 1) normalisation is by an integrated count instead of bin-by-bin
@@ -277,9 +278,9 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
   // Or is it in a separate workspace
-  const bool sepWS = !monWS->isDefault();
+  bool sepWS = !monWS->isDefault();
   // or monitor ID
-  const bool monSP = !monID->isDefault();
+  bool monSP = !monID->isDefault();
   // something has to be set
   if ( !inWS && !sepWS && !monSP)
   {
@@ -288,11 +289,14 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
     throw std::runtime_error(mess);
   }
   // One and only one of these properties should have been set
-  if ( inWS && sepWS )
-  {
-    const std::string mess("Only one of the MonitorSpectrum and MonitorWorkspace properties should be set");
-    throw std::runtime_error(mess);
-  }
+  // input from separate workspace is owerwritten by monitor spectrum
+  if ( inWS && sepWS )sepWS = false;
+  // input from detector ID is rejected in favour of monitor sp 
+  if ( inWS && monSP )monSP = false;
+  // separate ws takes over detectorID (does it checked?)
+  if ( sepWS && monSP )monSP = false;
+
+
 
   // Do a check for common binning and store
   m_commonBins = API::WorkspaceHelpers::commonBoundaries(inputWorkspace);
