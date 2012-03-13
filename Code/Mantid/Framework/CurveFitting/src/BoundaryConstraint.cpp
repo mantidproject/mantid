@@ -38,6 +38,16 @@ m_upperBound(upperBound)
   reset(fun,fun->parameterIndex(paramName));
 }
 
+BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound) :
+m_penaltyFactor(1000.0),
+m_parameterName(paramName),
+m_hasLowerBound( true),
+m_hasUpperBound( false),
+m_lowerBound(lowerBound)
+{
+  reset(fun,fun->parameterIndex(paramName));
+}
+
 /** Initialize the constraint from an expression.
  * @param fun :: The function
  * @param expr :: The initializing expression which must look like this:

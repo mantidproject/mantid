@@ -113,19 +113,13 @@ InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1) {
   declareParameter("Q",1.0, "Momentum transfer");
 
   // Ensure positive values for Intensity, Radius, and Diffusion coefficient
-  BoundaryConstraint* IntensityConstraint = new BoundaryConstraint("Intensity");
-  IntensityConstraint->setLower(0);
-  IntensityConstraint->reset(this,parameterIndex("Intensity"));
+  BoundaryConstraint* IntensityConstraint = new BoundaryConstraint(this,"Intensity",0);
   addConstraint(IntensityConstraint);
 
-  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint("Radius");
-  RadiusConstraint->setLower(0);
-  RadiusConstraint->reset(this,parameterIndex("Radius"));
+  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint(this,"Radius",0);
   addConstraint(RadiusConstraint);
 
-  BoundaryConstraint* DiffusionConstraint = new BoundaryConstraint("Diffusion");
-  DiffusionConstraint->setLower(0);
-  DiffusionConstraint->reset(this,parameterIndex("Diffusion"));
+  BoundaryConstraint* DiffusionConstraint = new BoundaryConstraint(this,"Diffusion",0);
   addConstraint(DiffusionConstraint);
 
   initXnlCoeff();   // initialize this->xnl with the list of coefficients xnlist
