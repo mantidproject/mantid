@@ -128,42 +128,41 @@ public:
 
     void testF12()
     {
-      std::cout << "\n\n----- Test F12 ------\n";
+      TimeSeriesProperty<bool> f("1");
+      f.addValue("2007-11-30T16:16:50",true);
+      f.addValue("2007-11-30T16:17:25",false);
+      f.addValue("2007-11-30T16:17:39",true);
 
-        TimeSeriesProperty<bool> f("1");
-        f.addValue("2007-11-30T16:16:50",true);
-        f.addValue("2007-11-30T16:17:25",false);
-        f.addValue("2007-11-30T16:17:39",true);
+      TimeSeriesProperty<bool> f2("2");
+      f2.addValue("2007-11-30T16:17:05",false);
+      f2.addValue("2007-11-30T16:17:12",true);
 
-        TimeSeriesProperty<bool> f2("2");
-        f2.addValue("2007-11-30T16:17:05",false);
-        f2.addValue("2007-11-30T16:17:12",true);
+      LogFilter flt(p);
+      flt.addFilter(&f);
+      flt.addFilter(&f2);
 
-        LogFilter flt(p);
-        flt.addFilter(&f);
-        flt.addFilter(&f2);
 
-        TS_ASSERT_EQUALS( flt.data()->size(), 5 );
+      TS_ASSERT_EQUALS( flt.data()->size(), 6 );
 
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00" );
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:05" );
-        TS_ASSERT_EQUALS( flt.data()->nthValue(0), 1 );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:00" );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:05" );
+      TS_ASSERT_EQUALS( flt.data()->nthValue(1), 1 );
 
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:12" );
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:20" );
-        TS_ASSERT_EQUALS( flt.data()->nthValue(1), 2 );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(2).begin_str(), "2007-Nov-30 16:17:12" );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(2).end_str(), "2007-Nov-30 16:17:20" );
+      TS_ASSERT_EQUALS( flt.data()->nthValue(2), 2 );
 
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20" );
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(2).end_str(), "2007-Nov-30 16:17:25" );
-        TS_ASSERT_EQUALS( flt.data()->nthValue(2), 3 );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(3).begin_str(), "2007-Nov-30 16:17:20" );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(3).end_str(), "2007-Nov-30 16:17:25" );
+      TS_ASSERT_EQUALS( flt.data()->nthValue(3), 3 );
 
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(3).begin_str(), "2007-Nov-30 16:17:39" );
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(3).end_str(), "2007-Nov-30 16:17:40" );
-        TS_ASSERT_EQUALS( flt.data()->nthValue(3), 4 );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(4).begin_str(), "2007-Nov-30 16:17:39" );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(4).end_str(), "2007-Nov-30 16:17:40" );
+      TS_ASSERT_EQUALS( flt.data()->nthValue(4), 4 );
 
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40" );
-        TS_ASSERT_EQUALS( flt.data()->nthInterval(4).end_str(), "2007-Nov-30 16:17:41" );
-        TS_ASSERT_EQUALS( flt.data()->nthValue(4), 5 );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(5).begin_str(), "2007-Nov-30 16:17:40" );
+      TS_ASSERT_EQUALS( flt.data()->nthInterval(5).end_str(), "2007-Nov-30 16:17:41" );
+      TS_ASSERT_EQUALS( flt.data()->nthValue(5), 5 );
 
     }
 
