@@ -76,8 +76,6 @@ namespace DataHandling
    */
   void MonitorLiveData::exec()
   {
-    this->throwIfInvalidInputs();
-
     double UpdateEvery = getProperty("UpdateEvery");
     if (UpdateEvery <= 0)
       throw std::runtime_error("UpdateEvery must be > 0");

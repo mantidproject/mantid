@@ -62,8 +62,6 @@ namespace DataHandling
 
     bool hasPostProcessing() const;
 
-    void throwIfInvalidInputs();
-
     /// Live listener
     Mantid::API::ILiveListener_sptr m_listener;
 

@@ -230,52 +230,35 @@ namespace DataHandling
         out["AccumulationWorkspace"] = "The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.";
     }
 
-    return out;
-    //FIXME: enable the rest here
-
-    /** Validate that the workspace names chosen are not in use already */
-    std::string outName = this->getPropertyValue("OutputWorkspace");
-    std::string accumName = this->getPropertyValue("AccumulationWorkspace");
-
-    // Check that no other MonitorLiveData thread is running with the same settings
-    auto it = AlgorithmManager::Instance().algorithms().begin();
-    for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
+    // For StartLiveData and MonitorLiveData, make sure another thread is not already using these names
+    if (this->name() != "LoadLiveData")
     {
-      IAlgorithm_sptr alg = *it;
-      if (alg->name() == "MonitorLiveData")
+      /** Validate that the workspace names chosen are not in use already */
+      std::string outName = this->getPropertyValue("OutputWorkspace");
+      std::string accumName = this->getPropertyValue("AccumulationWorkspace");
+
+      // Check that no other MonitorLiveData thread is running with the same settings
+      auto it = AlgorithmManager::Instance().algorithms().begin();
+      for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
       {
-        std::cout << "Other algorithm ID is " << alg->getAlgorithmID() << " and THIS id is " << this->getAlgorithmID() << std::endl;
-      }
-      // MonitorLiveData thread that is running, except THIS one.
-      if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
-          && alg->isRunning())
-      {
-        if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
-          out["AccumulationWorkspace"] += "Another MonitorLiveData thread is running with the same AccumulationWorkspace. "
-              "Please specify a different AccumulationWorkspace name.";
-        if (alg->getPropertyValue("OutputWorkspace") == outName)
-          out["OutputWorkspace"] += "Another MonitorLiveData thread is running with the same OutputWorkspace. "
-              "Please specify a different OutputWorkspace name.";
+        IAlgorithm_sptr alg = *it;
+        // MonitorLiveData thread that is running, except THIS one.
+        if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
+            && alg->isRunning())
+        {
+          if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
+            out["AccumulationWorkspace"] += "Another MonitorLiveData thread is running with the same AccumulationWorkspace.\n"
+                "Please specify a different AccumulationWorkspace name.";
+          if (alg->getPropertyValue("OutputWorkspace") == outName)
+            out["OutputWorkspace"] += "Another MonitorLiveData thread is running with the same OutputWorkspace.\n"
+                "Please specify a different OutputWorkspace name.";
+        }
       }
     }
 
     return out;
   }
 
-
-  //----------------------------------------------------------------------------------------------
-  /** Perform validation of the inputs.
-   * This should be called before starting the listener to give fast feedback
-   * to the user that they did something wrong.
-   *
-   * @throw std::invalid_argument if there is a problem.
-   */
-  void LiveDataAlgorithm::throwIfInvalidInputs()
-  {
-    std::map<std::string, std::string> out = this->validateInputs();
-    for (auto it = out.begin(); it != out.end(); it++)
-      throw std::invalid_argument(it->first + ": " + it->second);
-  }
 
 } // namespace Mantid
 } // namespace DataHandling
