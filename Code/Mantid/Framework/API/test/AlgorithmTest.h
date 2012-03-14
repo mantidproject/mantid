@@ -11,7 +11,7 @@
 #include "MantidKernel/WriteLock.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
-#include <c++/4.5/map>
+#include <map>
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
