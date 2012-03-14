@@ -65,7 +65,7 @@ public:
 
     // This algorithm dies because another thread has the same output
     IAlgorithm_sptr alg2 = makeAlgo("fake1");
-    alg2->execute();
+    TS_ASSERT_THROWS_ANYTHING( alg2->execute(); );
     TS_ASSERT( !alg2->isExecuted() );
 
     // Abort the thread.
@@ -82,7 +82,7 @@ public:
 
     // This algorithm dies because another thread has the same output
     IAlgorithm_sptr alg2 = makeAlgo("fake2", "accum1");
-    alg2->execute();
+    TS_ASSERT_THROWS_ANYTHING( alg2->execute() );
     TS_ASSERT( !alg2->isExecuted() );
 
     // Abort the thread.
