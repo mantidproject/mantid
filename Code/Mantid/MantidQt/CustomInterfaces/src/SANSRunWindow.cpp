@@ -585,7 +585,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 
 /**
  * Trim off Python markers surrounding things like strings or lists that have been 
- * printed by Python
+ * printed by Python by removing the first and last character
  */
 void SANSRunWindow::trimPyMarkers(QString & txt)
 {
@@ -1449,6 +1449,7 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
   boost::shared_ptr<const Mantid::Geometry::IComponent> sample = instr->getSample();
   boost::shared_ptr<const Mantid::Geometry::IComponent> source = instr->getSource();
   double distance = source->getDistance(*sample) * unitconv;
+
   //Moderator-sample
   QLabel *dist_label(NULL); 
   if( wscode == 0 )
@@ -1463,9 +1464,9 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
   {
     dist_label = m_uiForm.dist_bkgd_ms_s2d;
   }
-  dist_label->setText(formatDouble(distance, "black"));
+  dist_label->setText(formatDouble(distance, "black", 'f', 1));
 
-  //Detectors
+  // Detectors
   QStringList det_info = logs.split(",");
   QStringListIterator itr(det_info);
   while( itr.hasNext() )
@@ -1475,7 +1476,19 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
     QString detname = values[0].trimmed();
     QString distance = values[1].trimmed();
     trimPyMarkers(detname);
-    trimPyMarkers(distance);
+
+    // instrument scientists wants distances printed
+    // out with just one digit
+    try 
+    {
+      double d = distance.toDouble();
+      distance = QString::number(d, 'f', 1);
+    } 
+    catch(...)
+    {
+      // if distance is not a double for some reason
+      // for now just proceed
+    }
   
     QLabel *lbl = m_s2d_detlabels[wscode].value(detname);
     if( lbl ) lbl->setText(distance);
