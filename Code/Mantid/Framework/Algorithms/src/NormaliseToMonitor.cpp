@@ -104,8 +104,6 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
                spectra_max = inputWS->getNumberHistograms()+1;
            }
            piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int>>(-1,(int)spectra_max));
-           // TO DO: fix it -- provide correct BV value;
-         piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int> >(-1,100000));
        }else{
          piProp->replaceValidator(boost::make_shared<Kernel::ListValidator<int> >(iExistingAllowedValues));
        }
@@ -226,14 +224,10 @@ void NormaliseToMonitor::init()
    setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-<<<<<<< HEAD
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,PropertyMode::Optional,val),
-    "A workspace containing the monitor spectrum");
-=======
-  declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
     "A workspace containing one or more spectra to normalize the InputWorkspace by.");
->>>>>>> bd647e1... refs #4400 More comments
   setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
+
   declareProperty("MonitorWorkspaceIndex",0,
       "The index of the spectrum within the MonitorWorkspace(2 (0<=ind<=nHistohrams in MonitorWorkspace) you want to normalize by\n"
       "(usually related to the index, responsible for the monitor's data but can be any).\n"
