@@ -42,7 +42,7 @@ namespace Mantid
     public:
       /// Constructor
       MatrixProperty(const std::string & propName,
-                     IValidator_sptr validator = boost::make_shared<NullValidator>(),
+                     IValidator_sptr validator = IValidator_sptr(new NullValidator),
                      unsigned int direction = Direction::Input);
       /// Copy constructor
       MatrixProperty(const MatrixProperty & rhs);

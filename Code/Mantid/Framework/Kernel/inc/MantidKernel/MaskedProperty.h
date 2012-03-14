@@ -47,7 +47,7 @@ namespace Mantid
        * @param validator :: property validator
        * @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
        */
-      MaskedProperty(const std::string& name,TYPE defaultvalue,IValidator_sptr validator = boost::make_shared<NullValidator>(),
+      MaskedProperty(const std::string& name,TYPE defaultvalue,IValidator_sptr validator = IValidator_sptr(new NullValidator),
                      const unsigned int direction = Direction::Input):
         Kernel::PropertyWithValue<TYPE>(name,defaultvalue , validator, direction ),m_maskedValue("")
         {
