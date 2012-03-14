@@ -71,8 +71,8 @@ public:
   {
     /// The interface requires strings
     std::set<std::string> allowedStrings;
-    auto cend = m_allowedValues.cend();
-    for(auto cit = m_allowedValues.cbegin(); cit != cend; ++cit)
+    auto cend = m_allowedValues.end();
+    for(auto cit = m_allowedValues.begin(); cit != cend; ++cit)
     {
       allowedStrings.insert(boost::lexical_cast<std::string>(*cit));
     }
