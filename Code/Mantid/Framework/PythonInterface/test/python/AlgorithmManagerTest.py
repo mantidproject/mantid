@@ -15,7 +15,7 @@ class NotAnAlgorithm(object):
 class AlgorithmManagerTest(unittest.TestCase):
     
     def test_create_default_version(self):
-        alg = testhelpers.assert_raises_nothing(self, AlgorithmManager.Instance().create, "ConvertUnits")
+        alg = testhelpers.assertRaisesNothing(self, AlgorithmManager.Instance().create, "ConvertUnits")
         # Tests
         self.assertNotEqual(alg, None)
         self.assertEquals(alg.name(), "ConvertUnits")
@@ -43,7 +43,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_algorithm_registration_with_valid_object_succeeds(self):
-        testhelpers.assert_raises_nothing(self, registerAlgorithm, IsAnAlgorithm)
+        testhelpers.assertRaisesNothing(self, registerAlgorithm, IsAnAlgorithm)
 
     def test_algorithm_registration_with_invalid_object_throws(self):
         self.assertRaises(ValueError, registerAlgorithm, NotAnAlgorithm)

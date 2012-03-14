@@ -30,7 +30,7 @@ class UnitCellTest(unittest.TestCase):
         gstar = np.array( [row0,row1,row2] )
         
         u = UnitCell()
-        testhelpers.assert_raises_nothing(self, u.recalculateFromGstar, gstar)
+        testhelpers.assertRaisesNothing(self, u.recalculateFromGstar, gstar)
         self._check_cell(u)
 
     def _check_cell(self, cell):

@@ -110,6 +110,7 @@ set ( TEST_PY_FILES
   test/python/WorkspaceTest.py
   test/python/WorkspaceGroupTest.py
   test/python/WorkspacePropertiesTest.py
+  test/python/WorkspaceValidatorsTest.py
 )
 
 set ( PYTEST_HELPERS test/python/testhelpers.py )

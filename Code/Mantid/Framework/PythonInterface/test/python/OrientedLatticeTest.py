@@ -25,7 +25,7 @@ class OrientedLatticeTest(unittest.TestCase):
     def test_setu_matrix_from_vectors(self):
         def run_test(v1, v2):
             cell = OrientedLattice()
-            testhelpers.assert_raises_nothing(self, cell.setUFromVectors, v1, v2)
+            testhelpers.assertRaisesNothing(self, cell.setUFromVectors, v1, v2)
             rot = cell.getUB();
             expected = np.array([(0,1.,0.), (0.,0.,1.), (1.,0.,0.)])
             np.testing.assert_array_almost_equal(expected, rot, 8)

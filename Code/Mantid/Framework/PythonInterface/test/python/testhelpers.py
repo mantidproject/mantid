@@ -27,7 +27,8 @@ def run_algorithm(name, **kwargs):
     alg.execute()
     return alg
 
-def assert_raises_nothing(testobj, callable, *args): 
+# Case difference is to be consistent with the unittest module
+def assertRaisesNothing(testobj, callable, *args): 
     """
         unittest does not have an assertRaisesNothing. This
         provides that functionality

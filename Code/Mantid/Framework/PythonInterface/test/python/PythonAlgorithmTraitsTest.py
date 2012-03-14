@@ -58,16 +58,16 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_alg_with_default_attrs(self):
-        testhelpers.assert_raises_nothing(self,AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")
+        testhelpers.assertRaisesNothing(self,AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")
         alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDefaultAttrs")
-        testhelpers.assert_raises_nothing(self,alg.initialize)
+        testhelpers.assertRaisesNothing(self,alg.initialize)
        
         self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
         self.assertEquals(alg.version(), 1)
         self.assertEquals(alg.category(), "PythonAlgorithms")
 
     def test_alg_with_overridden_attrs(self):
-        testhelpers.assert_raises_nothing(self,AlgorithmManager.Instance().createUnmanaged, "CoolAlgorithm")
+        testhelpers.assertRaisesNothing(self,AlgorithmManager.Instance().createUnmanaged, "CoolAlgorithm")
         alg = AlgorithmManager.Instance().createUnmanaged("CoolAlgorithm")
         self.assertEquals(alg.name(), "CoolAlgorithm")
         self.assertEquals(alg.version(), 2)

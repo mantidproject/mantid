@@ -6,10 +6,10 @@ class FrameworkManagerTest(unittest.TestCase):
 
     def test_clear_functions_do_not_throw(self):
         # Test they don't throw for now
-        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clear)
-        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clearData)
-        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clearAlgorithms)
-        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clearInstruments)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clear)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clearData)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clearAlgorithms)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clearInstruments)
         
     def _is_managed_test(self, alg, version):
         self.assertTrue(alg.isInitialized())

@@ -36,6 +36,8 @@ set ( EXPORT_FILES
   src/Exports/IPeaksWorkspace.cpp
   src/Exports/BinaryOperations.cpp
   src/Exports/WorkspaceGroup.cpp
+  src/Exports/WorkspaceValidators.cpp
+  src/Exports/InstrumentValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp

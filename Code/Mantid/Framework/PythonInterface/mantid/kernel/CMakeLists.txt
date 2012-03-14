@@ -64,6 +64,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/Environment/CallStack.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
+  ${HEADER_DIR}/kernel/TypedValidatorExportMacro.h
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
 )
 
