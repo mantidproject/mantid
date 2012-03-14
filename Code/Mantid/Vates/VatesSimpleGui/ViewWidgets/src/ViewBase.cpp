@@ -251,7 +251,7 @@ void ViewBase::setTimeSteps(bool withUpdate)
       emit this->setAnimationControlState(false);
       return;
     }
-    if (2 == numSrcs)
+    if (2 <= numSrcs)
     {
       return;
     }
