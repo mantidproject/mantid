@@ -25,9 +25,15 @@ namespace Mantid
     class MatrixWorkspace;
 
     /// Enumeration for a mandatory/optional property
-    enum PropertyMode { Mandatory, Optional };
+    struct PropertyMode
+    {
+      enum Type { Mandatory, Optional };
+    };
     /// Enumeration for locking behaviour
-    enum LockMode { Lock, NoLock };
+    struct LockMode
+    {
+      enum Type { Lock, NoLock };
+    };
 
     /** A property class for workspaces. Inherits from PropertyWithValue, with the value being
     a pointer to the workspace type given to the WorkspaceProperty constructor. This kind
@@ -77,7 +83,7 @@ namespace Mantid
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
-                                  Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>() ) :
+                                  Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator)) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock)
       {
@@ -93,8 +99,8 @@ namespace Mantid
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction, 
-                                  const PropertyMode optional,
-                                  Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>() ) :
+                                  const PropertyMode::Type optional,
+                                  Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator) ) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(LockMode::Lock)
       {
@@ -113,8 +119,8 @@ namespace Mantid
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction, 
-                                 const PropertyMode optional, const LockMode locking,
-                                 Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>()) :
+                                 const PropertyMode::Type optional, const LockMode::Type locking,
+                                 Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator)) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(locking)
       {
@@ -490,10 +496,10 @@ namespace Mantid
       /// The name of the workspace that the this this object was created for
       std::string m_initialWSName;
       /// A flag indicating whether the property should be considered optional. Only matters for input workspaces
-      bool m_optional;
+      PropertyMode::Type m_optional;
       /** A flag indicating whether the workspace should be read or write-locked
        * when an algorithm begins. Default=true. */
-      bool m_locking;
+      LockMode::Type m_locking;
 
       /// for access to logging streams
       static Kernel::Logger& g_log;

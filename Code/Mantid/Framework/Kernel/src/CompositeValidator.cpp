@@ -82,8 +82,8 @@ namespace Mantid
      */
     std::string CompositeValidator::check( const boost::any& value ) const
     {
-      std::list<IValidator_sptr>::const_iterator itrEnd = m_children.cend();
-      for(std::list<IValidator_sptr>::const_iterator itr = m_children.cbegin(); itr != itrEnd; ++itr)
+      std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
+      for(std::list<IValidator_sptr>::const_iterator itr = m_children.begin(); itr != itrEnd; ++itr)
       {
         std::string error = (*itr)->isValid(value);
         //exit on the first error, to avoid passing doing more tests on invalid objects that could fail

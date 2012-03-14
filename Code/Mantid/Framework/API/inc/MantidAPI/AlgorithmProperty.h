@@ -58,7 +58,7 @@ namespace Mantid
 
       /// Constructor
       AlgorithmProperty(const std::string & propName,
-                        Kernel::IValidator_sptr validator = boost::make_shared<Kernel::NullValidator>(),
+                        Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator),
                         unsigned int direction = Kernel::Direction::Input);
       /// Copy constructor
       AlgorithmProperty(const AlgorithmProperty & rhs);

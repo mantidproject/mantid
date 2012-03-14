@@ -258,7 +258,7 @@ public:
    *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
   PropertyWithValue( const std::string &name, const TYPE& defaultValue, 
-                     IValidator_sptr validator = boost::make_shared<NullValidator>(),
+                     IValidator_sptr validator = IValidator_sptr(new NullValidator),
                      const unsigned int direction = Direction::Input) :
     Property( name, typeid( TYPE ), direction ),
     m_value( defaultValue ),
