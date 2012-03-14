@@ -356,7 +356,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        <item>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="lblAccumulationWorkspace">
            <property name="text">
             <string>Accumulation Workspace: </string>
            </property>
@@ -436,9 +436,6 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
          </layout>
         </item>
        </layout>
-       <zorder>splitterProcessing</zorder>
-       <zorder>processingScript</zorder>
-       <zorder>processingScript</zorder>
       </widget>
       <widget class="QWidget" name="tabPostAlgo">
        <attribute name="title">

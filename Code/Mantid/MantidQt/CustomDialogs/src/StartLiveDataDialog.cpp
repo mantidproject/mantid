@@ -157,6 +157,7 @@ void StartLiveDataDialog::radioPostProcessClicked()
   ui.postScript->setVisible(m_usePostProcessScript);
   // Disable the AccumulationWorkspace widget unless it is needed
   ui.editAccumulationWorkspace->setEnabled(m_usePostProcessAlgo || m_usePostProcessScript);
+  ui.lblAccumulationWorkspace->setEnabled(m_usePostProcessAlgo || m_usePostProcessScript);
 }
 
 //------------------------------------------------------------------------------
