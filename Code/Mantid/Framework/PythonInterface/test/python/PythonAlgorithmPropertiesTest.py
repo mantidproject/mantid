@@ -8,17 +8,7 @@ import testhelpers
 from mantid import PythonAlgorithm, Direction
 from mantid import BoundedValidator, FileProperty, FileAction
 
-    
-class BasicPropsAlg(PythonAlgorithm):
-    
-    def PyInit(self):
-        self.declareProperty('SimpleInput', 1)
-        self.declareProperty('SimpleOutput', 1.0, Direction.Output)
-        self.declareProperty('InputString', "", Direction.Input)
-        
-    def PyExec(self):
-        pass
-    
+
 # ======================================================================
 
 class PythonAlgorithmPropertiesTest(unittest.TestCase):
@@ -32,6 +22,7 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
             _testdocstring = "This is a doc string"
             def PyInit(self):
                 self.declareProperty('SimpleInput', 1)
+                self.declareProperty('Switch', True)
                 self.declareProperty('SimpleOutput', 1.0, Direction.Output)
                 self.declareProperty('InputString', "", Direction.Input)
                 self.declareProperty('PropWithDocDefaultDir', 1, self._testdocstring)
@@ -46,11 +37,14 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         self.assertEquals(0, len(props))
         alg.initialize()
         props = alg.getProperties()
-        self.assertEquals(5, len(props))
+        self.assertEquals(6, len(props))
         
         input = alg.getProperty("SimpleInput")
         self.assertEquals(input.direction, Direction.Input)
         self.assertEquals(input.value, 1)
+        switch = alg.getProperty("Switch")
+        self.assertEquals(switch.direction, Direction.Input)
+        self.assertEquals(switch.value, True)
         output = alg.getProperty("SimpleOutput")
         self.assertEquals(output.direction, Direction.Output)
         self.assertEquals(output.value, 1.0)
