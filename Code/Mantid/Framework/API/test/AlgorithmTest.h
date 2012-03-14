@@ -11,6 +11,7 @@
 #include "MantidKernel/WriteLock.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include <c++/4.5/map>
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
@@ -141,6 +142,33 @@ public:
 };
 DECLARE_ALGORITHM(WorkspaceAlgorithm2)
 
+class AlgorithmWithValidateInputs : public Algorithm
+{
+public:
+  AlgorithmWithValidateInputs() : Algorithm() {}
+  virtual ~AlgorithmWithValidateInputs() {}
+  const std::string name() const { return "WorkspaceAlgorithm2";}
+  int version() const  { return 1;}
+  const std::string category() const { return "Cat;Leopard;Mink";}
+  void init()
+  {
+    declareProperty("PropertyA", 12);
+    declareProperty("PropertyB", 12);
+  }
+  void exec()
+  {  }
+  std::map<std::string, std::string> validateInputs()
+  {
+    std::map<std::string, std::string> out;
+    int A = getProperty("PropertyA");
+    int B = getProperty("PropertyB");
+    if (B < A)
+      out["PropertyB"] = "B must be >= A!";
+    return out;
+  }
+};
+DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
+
 
 class AlgorithmTest : public CxxTest::TestSuite
 {
@@ -261,6 +289,21 @@ public:
     TS_ASSERT( ! vec.empty() )
     TS_ASSERT( vec.size() == 2 )
     TS_ASSERT( ! vec[0]->name().compare("prop1") )
+  }
+
+  /** The check in validateInputs() makes the algo throw if there is anything wrong */
+  void test_validateInputs_makesAlgorithmFail()
+  {
+    AlgorithmWithValidateInputs alg;
+    alg.initialize();
+    alg.setProperty("PropertyA", 12);
+    alg.setProperty("PropertyB", 5);
+    TS_ASSERT_THROWS_ANYTHING( alg.execute() );
+    TS_ASSERT( !alg.isExecuted() );
+
+    alg.setProperty("PropertyB", 15);
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
   }
 
   void testStringization()

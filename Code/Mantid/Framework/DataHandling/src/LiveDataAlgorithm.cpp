@@ -230,6 +230,9 @@ namespace DataHandling
         out["AccumulationWorkspace"] = "The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.";
     }
 
+    return out;
+    //FIXME: enable the rest here
+
     /** Validate that the workspace names chosen are not in use already */
     std::string outName = this->getPropertyValue("OutputWorkspace");
     std::string accumName = this->getPropertyValue("AccumulationWorkspace");
@@ -239,6 +242,10 @@ namespace DataHandling
     for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
     {
       IAlgorithm_sptr alg = *it;
+      if (alg->name() == "MonitorLiveData")
+      {
+        std::cout << "Other algorithm ID is " << alg->getAlgorithmID() << " and THIS id is " << this->getAlgorithmID() << std::endl;
+      }
       // MonitorLiveData thread that is running, except THIS one.
       if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
           && alg->isRunning())
