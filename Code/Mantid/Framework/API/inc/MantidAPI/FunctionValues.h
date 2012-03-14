@@ -53,7 +53,7 @@ public:
   FunctionValues(const FunctionValues& values);
   /// Reset the values to match a new domain.
   void reset(const FunctionDomain& domain);
-  /// Return the number of points, values, etc in the domain
+  /// Return the number of values
   size_t size() const {return m_calculated.size();}
   /// store i-th calculated value. 0 <= i < size()
   void setCalculated(size_t i,double value) {m_calculated[i] = value;}
@@ -63,6 +63,7 @@ public:
   double getCalculated(size_t i) const {return m_calculated[i];}
   double operator[](size_t i) const {return m_calculated[i];}
   void addToCalculated(size_t i, double value) {m_calculated[i] += value;}
+  void addToCalculated(size_t i, const FunctionValues& values);
   /// Get a pointer to calculated data at index i
   double* getPointerToCalculated(size_t i);
   /// Add other calculated values

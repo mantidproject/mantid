@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/ImplictFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/LiveListenerFactory.cpp
+	src/JointDomain.cpp
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
@@ -63,6 +64,8 @@ set ( SRC_FILES
 	src/MemoryManager.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
+	src/MultiDomainFunction.cpp
+	src/NumericAxis.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
@@ -170,6 +173,7 @@ set ( INC_FILES
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
@@ -180,6 +184,8 @@ set ( INC_FILES
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+	inc/MantidAPI/MultiDomainFunction.h
+	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -247,6 +253,7 @@ set ( TEST_FILES
 	test/MDGeometryTest.h
 	test/MatrixWorkspaceMDIteratorTest.h
 	test/MemoryManagerTest.h
+	test/MultiDomainFunctionTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
 	test/NumericAxisTest.h

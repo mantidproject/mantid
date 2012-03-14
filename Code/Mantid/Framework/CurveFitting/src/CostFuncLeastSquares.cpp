@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/CompositeDomain.h"
 
 namespace
 {
@@ -24,7 +25,36 @@ double CostFuncLeastSquares::val() const
   if ( !m_dirtyVal ) return m_value;
 
   checkValidity();
-  m_domain->reset();
+
+  m_value = 0.0;
+
+  auto compDomain = boost::dynamic_pointer_cast<API::CompositeDomain>(m_domain);
+
+  //if (compDomain)
+  //{
+  //}
+  //else
+  {
+    addVal(m_domain,m_values);
+  }
+
+  // add penalty
+  for(size_t i=0;i<m_function->nParams();++i)
+  {
+    if ( !m_function->isActive(i) ) continue;
+    API::IConstraint* c = m_function->getConstraint(i);
+    if (c)
+    {
+      m_value += c->check();
+    }
+  }
+
+  m_dirtyVal = false;
+  return m_value;
+}
+
+void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)const
+{
   m_function->function(*m_domain,*m_values);
   size_t ny = m_values->size();
 
@@ -36,21 +66,10 @@ double CostFuncLeastSquares::val() const
     retVal += val * val;
   }
   
-  retVal *= 0.5;
+  m_value += 0.5 * retVal;
 
-  for(size_t i=0;i<m_function->nParams();++i)
-  {
-    if ( !m_function->isActive(i) ) continue;
-    API::IConstraint* c = m_function->getConstraint(i);
-    if (c)
-    {
-      retVal += c->check();
-    }
-  }
-
-  m_dirtyVal = false;
-  return retVal;
 }
+
 
 /// Calculate the derivatives of the cost function
 /// @param der :: Container to output the derivatives
@@ -104,21 +123,102 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
   if (m_dirtyVal) evalFunction = true;
 
   checkValidity();
+
+  if (evalFunction)
+  {
+    m_value = 0.0;
+  }
+  if (evalDeriv)
+  {
+    m_der.resize(nParams());
+    m_der.zero();
+  }
+  if (evalHessian)
+  {
+    m_hessian.resize(nParams(),nParams());
+    m_hessian.zero();
+  }
+
+  auto compDomain = boost::dynamic_pointer_cast<API::CompositeDomain>(m_domain);
+
+  //if (compDomain)
+  //{
+  //}
+  //else
+  {
+    addValDerivHessian(m_domain,m_values,evalFunction,evalDeriv,evalHessian);
+  }
+
+  // Add constraints penaly
+  size_t np = m_function->nParams();
+  if (evalFunction)
+  {
+    for(size_t i = 0; i < np; ++i)
+    {
+      API::IConstraint* c = m_function->getConstraint(i);
+      if (c)
+      {
+        m_value += c->check();
+      }
+    }
+    m_dirtyVal = false;
+  }
+
+  if (evalDeriv)
+  {
+    size_t i = 0;
+    for(size_t ip = 0; ip < np; ++ip)
+    {
+      API::IConstraint* c = m_function->getConstraint(ip);
+      if (c)
+      {
+        if ( !m_function->isActive(ip) ) continue;
+        double d =  m_der.get(i) + c->checkDeriv();
+        m_der.set(i,d);
+      }
+      ++i;
+    }
+    m_dirtyDeriv = false;
+  }
+
+  if (evalDeriv)
+  {
+    size_t i = 0;
+    for(size_t ip = 0; ip < np; ++ip)
+    {
+      API::IConstraint* c = m_function->getConstraint(ip);
+      if (c)
+      {
+        if ( !m_function->isActive(ip) ) continue;
+        double d =  m_hessian.get(i,i) + c->checkDeriv2();
+        m_hessian.set(i,i,d);
+      }
+      ++i;
+    }
+    m_dirtyHessian = false;
+  }
+
+  return m_value;
+}
+
+/**
+ * Update the cost function, derivatives and hessian by adding values calculated
+ * on a domain.
+ */
+void CostFuncLeastSquares::addValDerivHessian(
+  API::FunctionDomain_sptr domain,
+  API::FunctionValues_sptr values,
+  bool evalFunction , bool evalDeriv, bool evalHessian) const
+{
   size_t np = m_function->nParams();  // number of parameters 
   size_t ny = m_domain->size(); // number of data points
   Jacobian jacobian(ny,np);
   if (evalFunction)
   {
-    m_domain->reset();
-    m_function->function(*m_domain,*m_values);
+    m_function->function(*domain,*values);
   }
-  m_domain->reset();
-  m_function->functionDeriv(*m_domain,jacobian);
+  m_function->functionDeriv(*domain,jacobian);
 
-  if (m_der.size() != nParams())
-  {
-    m_der.resize(nParams());
-  }
   size_t iActiveP = 0;
   double fVal = 0.0;
   if (debug)
@@ -137,7 +237,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
   for(size_t ip = 0; ip < np; ++ip)
   {
     if ( !m_function->isActive(ip) ) continue;
-    double d = 0.0;
+    double d = m_der.get(iActiveP);
     for(size_t i = 0; i < ny; ++i)
     {
       double calc = m_values->getCalculated(i);
@@ -150,11 +250,6 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
         fVal += y * y;
       }
     }
-    API::IConstraint* c = m_function->getConstraint(ip);
-    if (c)
-    {
-      d += c->checkDeriv();
-    }
     m_der.set(iActiveP, d);
     //std::cerr << "der " << ip << ' ' << der[iActiveP] << std::endl;
     ++iActiveP;
@@ -162,27 +257,12 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 
   if (evalFunction)
   {
-    fVal *= 0.5;
-    for(size_t i = 0; i < np; ++i)
-    {
-      API::IConstraint* c = m_function->getConstraint(i);
-      if (c)
-      {
-        fVal += c->check();
-      }
-    }
-    m_value = fVal;
-    m_dirtyVal = false;
+    m_value += 0.5 * fVal;
   }
-  m_dirtyDeriv = false;
 
-  if (!evalHessian) return m_value;
+  if (!evalHessian) return;
 
   size_t na = m_der.size(); // number of active parameters
-  if (m_hessian.size1() != na || m_hessian.size2() != na)
-  {
-    m_hessian.resize(na,na);
-  }
 
   size_t i1 = 0; // active parameter index
   for(size_t i = 0; i < np; ++i) // over parameters
@@ -192,19 +272,11 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     for(size_t j = 0; j <= i; ++j) // over ~ half of parameters
     {
       if ( !m_function->isActive(j) ) continue;
-      double d = 0.0;
+      double d = m_hessian.get(i1,i2);
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
         double w = m_values->getFitWeight(k);
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
-      }
-      if (i == j)
-      {
-        API::IConstraint* c = m_function->getConstraint(i);
-        if (c)
-        {
-          d += c->checkDeriv2();
-        }
       }
       m_hessian.set(i1,i2,d);
       //std::cerr << "hess " << i1 << ' ' << i2 << std::endl;
@@ -216,10 +288,8 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     }
     ++i1;
   }
-
-  m_dirtyHessian = false;
-  return m_value;
 }
+
 
 const GSLVector& CostFuncLeastSquares::getDeriv() const
 {

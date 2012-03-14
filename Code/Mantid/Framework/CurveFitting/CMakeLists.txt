@@ -168,6 +168,7 @@ set ( TEST_FILES
 	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
+	test/MultiDomainFunctionTest.h
 #	test/MultiBGTest.h
 	test/PlotPeakByLogValueTest.h
 	test/PRConjugateGradientTest.h

@@ -109,6 +109,12 @@ namespace Mantid
       throw std::out_of_range("GSLVector index is out of range.");
     }
 
+    // Set all elements to zero
+    void zero()
+    {
+      gsl_vector_set_zero( m_vector );
+    }
+
     GSLVector& operator+=(const GSLVector& v)
     {
       gsl_vector_add(m_vector, v.gsl());

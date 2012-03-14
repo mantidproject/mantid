@@ -126,7 +126,6 @@ void CompositeFunction::function(const FunctionDomain& domain, FunctionValues& v
   values.zeroCalculated();
   for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
   {
-    domain.reset();
     m_functions[ iFun ]->function(domain,tmp);
     values += tmp;
   }
@@ -141,7 +140,6 @@ void CompositeFunction::functionDeriv(const FunctionDomain& domain, Jacobian& ja
 {
   for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
   {
-    domain.reset();
     PartialJacobian J(&jacobian,paramOffset(iFun));
     getFunction(iFun)->functionDeriv(domain,J);
   }

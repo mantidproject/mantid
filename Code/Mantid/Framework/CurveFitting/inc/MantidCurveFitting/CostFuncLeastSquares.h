@@ -77,6 +77,15 @@ protected:
 
   virtual void calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
 
+  void addVal(
+    API::FunctionDomain_sptr domain,
+    API::FunctionValues_sptr values
+    )const;
+  void addValDerivHessian(
+    API::FunctionDomain_sptr domain,
+    API::FunctionValues_sptr values,
+    bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
+
 private:
 
   mutable double m_value;

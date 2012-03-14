@@ -93,6 +93,23 @@ namespace API
     setCalculated(0.0);
   }
 
+  /**
+   * Add values starting at index i.
+   */
+  void FunctionValues::addToCalculated(size_t i, const FunctionValues& values)
+  {
+    if (i + values.size() > size())
+    {
+      throw std::runtime_error("Cannot add function values: different sizes.");
+    }
+    std::transform(
+      m_calculated.begin() + i,
+      m_calculated.begin() + i + values.size(),
+      values.m_calculated.begin(),
+      m_calculated.begin() + i,
+      std::plus<double>()
+    );
+  }
 
   /**
    * Set a fitting data value.

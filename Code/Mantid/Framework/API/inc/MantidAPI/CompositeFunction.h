@@ -197,15 +197,21 @@ typedef boost::shared_ptr<const CompositeFunction> CompositeFunction_const_sptr;
 class PartialJacobian: public Jacobian
 {
   Jacobian* m_J;  ///< pointer to the overall Jacobian
-  size_t m_iP0;      ///< offset in the overall Jacobian for a particular function
-  //size_t m_iaP0;      ///< offset in the active Jacobian for a particular function
+  size_t m_iY0;      ///< fitting data index offset in the overall Jacobian for a particular function
+  size_t m_iP0;      ///< parameter index offset in the overall Jacobian for a particular function
 public:
   /** Constructor
    * @param J :: A pointer to the overall Jacobian
    * @param iP0 :: The parameter index (declared) offset for a particular function
-   * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
-  PartialJacobian(Jacobian* J,size_t iP0):m_J(J),m_iP0(iP0)//,m_iaP0(iap0)
+  PartialJacobian(Jacobian* J,size_t iP0):m_J(J),m_iY0(0),m_iP0(iP0)//,m_iaP0(iap0)
+  {}
+  /** Constructor
+   * @param J :: A pointer to the overall Jacobian
+   * @param iY0 :: The data index offset for a particular function
+   * @param iP0 :: The parameter index offset for a particular function
+   */
+  PartialJacobian(Jacobian* J,size_t iY0,size_t iP0):m_J(J),m_iY0(iY0),m_iP0(iP0)
   {}
   /**
    * Overridden Jacobian::set(...).
@@ -215,7 +221,7 @@ public:
    */
   void set(size_t iY, size_t iP, double value)
   {
-      m_J->set(iY,m_iP0 + iP,value);
+      m_J->set(m_iY0 + iY,m_iP0 + iP,value);
   }
   /**
    * Overridden Jacobian::get(...).
@@ -224,17 +230,18 @@ public:
    */
   double get(size_t iY, size_t iP)
   {
-      return m_J->get(iY,m_iP0 + iP);
+      return m_J->get(m_iY0 + iY,m_iP0 + iP);
   }
  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value :: Value to add
-  *   @param iActiveP :: The index of an active parameter.
+  *   @param iP :: The index of an active parameter.
   */
   virtual void addNumberToColumn(const double& value, const size_t& iP) 
   {
     m_J->addNumberToColumn(value,m_iP0+iP);
   }
 };
+
 
 } // namespace API
 } // namespace Mantid
