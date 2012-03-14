@@ -29,8 +29,8 @@ namespace Mantid
       std::multiset<std::string> elem_all;
       // how many validators return non-empty list of allowed values
       int n_combinations(0);
-      auto itrEnd = m_children.cend();
-      for( auto itr = m_children.cbegin(); itr != itrEnd; ++itr)
+      std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
+      for( std::list<IValidator_sptr>::const_iterator itr = m_children.begin(); itr != itrEnd; ++itr)
       {
         std::set<std::string> subs = (*itr)->allowedValues();
         if ( subs.empty())continue;
@@ -60,8 +60,8 @@ namespace Mantid
     Kernel::IValidator_sptr CompositeValidator::clone() const
     {
       boost::shared_ptr<CompositeValidator> copy = boost::make_shared<CompositeValidator>();
-      auto itrEnd = m_children.cend();
-      for( auto itr = m_children.cbegin(); itr != itrEnd; ++itr)
+      std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
+      for(   std::list<IValidator_sptr>::const_iterator itr = m_children.begin(); itr != itrEnd; ++itr)
       {
         copy->add( (*itr)->clone() );
       }
@@ -82,8 +82,8 @@ namespace Mantid
      */
     std::string CompositeValidator::check( const boost::any& value ) const
     {
-      auto itrEnd = m_children.cend();
-      for( auto itr = m_children.cbegin(); itr != itrEnd; ++itr)
+      std::list<IValidator_sptr>::const_iterator itrEnd = m_children.cend();
+      for(std::list<IValidator_sptr>::const_iterator itr = m_children.cbegin(); itr != itrEnd; ++itr)
       {
         std::string error = (*itr)->isValid(value);
         //exit on the first error, to avoid passing doing more tests on invalid objects that could fail
