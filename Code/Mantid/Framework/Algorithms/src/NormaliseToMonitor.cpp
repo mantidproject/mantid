@@ -220,18 +220,25 @@ void NormaliseToMonitor::init()
 
   // Or take monitor ID to identify the spectrum one wish to use or
    declareProperty("MonitorID",-1,
-       "The monitor ID (pixelID), which defines the monitor spectrum within the InputWorkspace. Will be overridden by Monitor spectrum if one is provided in the field above.\n"
-       "If workspace do not have monitors, the MonitorID can refer to empty spectra and will accept any monitorID within the InputWorkspace.");
+       "The MonitorID (pixel ID), which defines the monitor's data within the InputWorkspace. Will be overridden by the values correspondent to MonitorSpectrum field if one is provided in the field above.\n"
+       "If workspace do not have monitors, the MonitorID can refer to empty data and the field then can accepts any MonitorID within the InputWorkspace.");
    // set up the validator, which would verify if spectrum is correct
    setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
+<<<<<<< HEAD
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,PropertyMode::Optional,val),
     "A workspace containing the monitor spectrum");
+=======
+  declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
+    "A workspace containing one or more spectra to normalize the InputWorkspace by.");
+>>>>>>> bd647e1... refs #4400 More comments
   setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
   declareProperty("MonitorWorkspaceIndex",0,
-      "The index of the spectrum within the MonitorWorkspace (0<=ind<=nHistohrams in Monitor Workspace) you want to normalize by (usually the monitor spectrum but can be any)"
-      "If no value is provided in this field, '''InputWorkspace''' will be normalized by first spectra (with index 0)",Direction::InOut);
+      "The index of the spectrum within the MonitorWorkspace(2 (0<=ind<=nHistohrams in MonitorWorkspace) you want to normalize by\n"
+      "(usually related to the index, responsible for the monitor's data but can be any).\n"
+      "If no value is provided in this field, '''InputWorkspace''' will be normalized by first spectra (with index 0)",
+       Direction::InOut);
   setPropertySettings("MonitorWorkspaceIndex",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
