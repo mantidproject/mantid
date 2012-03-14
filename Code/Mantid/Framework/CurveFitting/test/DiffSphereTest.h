@@ -2,23 +2,14 @@
 #define DIFFSPHERETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidCurveFitting/Fit.h"
+#include "MantidDataHandling/LoadRaw.h"
 
 #include "MantidCurveFitting/DiffSphere.h"
 #include "MantidCurveFitting/DeltaFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Convolution.h"
 #include <boost/math/special_functions/bessel.hpp>
+#include "MantidAPI/ParameterTie.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -96,6 +87,7 @@ public:
   }
 
 };
+
 
 
 class DiffSphereTest : public CxxTest::TestSuite
@@ -236,6 +228,31 @@ public:
       TS_ASSERT_DELTA(out[i],H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
     }
   }// end of testElasticDiffSphere
+
+
+  //assert the ties between the elastic and inelastic contributions
+  void testDiffSphereTies()
+  {
+    double I=2.9, Q=0.7, R=2.3, D=0.45;
+    DiffSphere* ds = new DiffSphere();
+    ds->setParameter("f1.Intensity",I);
+    ds->setParameter("f1.Q",Q);
+    ds->setParameter("f1.Radius",R);
+    ds->setParameter("f1.Diffusion",D);
+
+    InelasticDiffSphere* ids = dynamic_cast<InelasticDiffSphere*>(ds->getFunction(1));
+    TS_ASSERT_EQUALS(ids->getParameter("Intensity"),I);
+    TS_ASSERT_EQUALS(ids->getParameter("Q"),Q);
+    TS_ASSERT_EQUALS(ids->getParameter("Radius"),R);
+    TS_ASSERT_EQUALS(ids->getParameter("Diffusion"),D);
+
+    ds->applyTies();
+
+    ElasticDiffSphere* eds = dynamic_cast<ElasticDiffSphere*>(ds->getFunction(0));
+    TS_ASSERT_EQUALS(eds->getParameter("Height"),I);
+    TS_ASSERT_EQUALS(eds->getParameter("Q"),Q);
+    TS_ASSERT_EQUALS(eds->getParameter("Radius"),R);
+  }
 
 };
 

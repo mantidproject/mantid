@@ -6,7 +6,6 @@
 #include <cmath>
 #include <boost/math/special_functions/bessel.hpp>
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/Expression.h"
 
 
 #ifndef M_PI
@@ -198,7 +197,6 @@ void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xVal
 }
 
 DiffSphere::DiffSphere() {
-
   m_elastic = dynamic_cast<ElasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   addFunction( m_elastic );
   m_inelastic = dynamic_cast<InelasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
@@ -214,6 +212,7 @@ DiffSphere::DiffSphere() {
   API::ParameterTie* tie_Q=new API::ParameterTie(this,"f0.Q");
   tie_Q->set("f0.Q=f1.Q");
   addTie(tie_Q);
+
 }
 
 } // namespace CurveFitting
