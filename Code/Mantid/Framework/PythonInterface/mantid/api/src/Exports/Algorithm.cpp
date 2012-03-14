@@ -3,9 +3,6 @@
 #endif
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/Algorithm.h"
-#ifdef _MSC_VER
-  #pragma warning( default: 4250 )
-#endif
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -25,3 +22,6 @@ void export_algorithm()
   class_<AlgorithmProxy, bases<IAlgorithm>, boost::noncopyable>("AlgorithmProxy", "Proxy class returned by managed algorithms", no_init);
 }
 
+#ifdef _MSC_VER
+  #pragma warning( default: 4250 )
+#endif

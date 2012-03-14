@@ -50,12 +50,12 @@ void export_leaf_classes()
 
     .def("declareProperty", (declarePropertyType3)&AlgorithmWrapper::declareProperty,
          declarePropertyType3_Overload(args("name", "defaultValue", "doc","direction=Direction.Input"),
-                                            "Declares a named property where the type is taken from the type "
-                                            "of the defaultValue and mapped to an appropriate C++ type"))
+                                       "Declares a named property where the type is taken from the type "
+                                       "of the defaultValue and mapped to an appropriate C++ type"))
 
     .def("declareProperty", (declarePropertyType4)&AlgorithmWrapper::declareProperty,
          args("name", "defaultValue", "direction"),
-         "Declares a named property where the type is taken from the type of "
-         "the defaultValue and mapped to an appropriate C++ type")
+         "Declares a named property where the type is taken from the type "
+         "of the defaultValue and mapped to an appropriate C++ type")
   ;
 }

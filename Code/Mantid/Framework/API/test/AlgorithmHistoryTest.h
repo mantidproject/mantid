@@ -71,7 +71,7 @@ public:
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg1_param"), "x");
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg2_param"), "5");
     
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("testalg|1");
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("testalg1",1);
 
   }
 

@@ -30,35 +30,7 @@ namespace Mantid
   {
   }
 
-  /** Creates a mangled name for interal storage
-  * @param name :: the name of the Algrorithm 
-  * @param version :: the version of the algroithm 
-  * @returns a mangled name string
-  */
-  std::string AlgorithmFactoryImpl::createName(const std::string& name, const int& version)const
-  {
-    std::ostringstream oss;
-    oss << name << "|" << version;
-    return(oss.str());
-  }
-
-  /** Decodes a mangled name for interal storage
-  * @param mangledName :: the mangled name of the Algrorithm 
-  * @returns a pair of the name and version
-  */
-  std::pair<std::string,int> AlgorithmFactoryImpl::decodeName(const std::string& mangledName)const
-  {
-    std::string::size_type seperatorPosition = mangledName.find("|");
-    std::string name = mangledName.substr(0,seperatorPosition);
-    int version;
-    std::istringstream ss(mangledName.substr(seperatorPosition+1));
-    ss >> version;
-    
-    g_log.debug() << "mangled string:" << mangledName << " name:" << name << " version:" << version << std::endl;
-    return std::pair<std::string,int>(name,version);
-  }
-
-  /** Creates an instance of an algorithm
+    /** Creates an instance of an algorithm
   * @param name :: the name of the Algrorithm to create
   * @param version :: the version of the algroithm to create
   * @returns a shared pointer to the created algorithm
@@ -99,6 +71,74 @@ namespace Mantid
       }
     }
   }
+
+
+  /**
+   * Override the unsubscribe method so that it knows how algorithm names are encoded in the factory
+   * @param algorithmName :: The name of the algorithm to unsubscribe
+   * @param version :: The version number of the algorithm to unsubscribe
+   */
+  void AlgorithmFactoryImpl::unsubscribe(const std::string & algorithmName, const int version)
+  {
+    std::string key = this->createName(algorithmName, version);
+    try
+    {
+      Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
+    }
+    catch(Kernel::Exception::NotFoundError&)
+    {
+      g_log.warning() << "Error unsubscribing algorithm " << algorithmName << " version " 
+                      << version << ". Nothing registered with this name and version.";
+    }
+  }
+
+  /**
+   * Does an algorithm of the given name and version exist already
+   * @param algorithmName :: The name of the algorithm 
+   * @param version :: The version number. -1 checks whether anything exists
+   * @returns True if a matching registration is found
+   */
+  bool AlgorithmFactoryImpl::exists(const std::string & algorithmName, const int version)
+  {
+    if( version == -1 ) // Find anything
+    {
+      return (m_vmap.find(algorithmName) != m_vmap.end());
+    }
+    else
+    {
+      std::string key = this->createName(algorithmName, version);
+      return Kernel::DynamicFactory<Algorithm>::exists(key);
+    }
+  }
+
+  /** Creates a mangled name for interal storage
+  * @param name :: the name of the Algrorithm 
+  * @param version :: the version of the algroithm 
+  * @returns a mangled name string
+  */
+  std::string AlgorithmFactoryImpl::createName(const std::string& name, const int& version)const
+  {
+    std::ostringstream oss;
+    oss << name << "|" << version;
+    return(oss.str());
+  }
+
+  /** Decodes a mangled name for interal storage
+  * @param mangledName :: the mangled name of the Algrorithm 
+  * @returns a pair of the name and version
+  */
+  std::pair<std::string,int> AlgorithmFactoryImpl::decodeName(const std::string& mangledName)const
+  {
+    std::string::size_type seperatorPosition = mangledName.find("|");
+    std::string name = mangledName.substr(0,seperatorPosition);
+    int version;
+    std::istringstream ss(mangledName.substr(seperatorPosition+1));
+    ss >> version;
+    
+    g_log.debug() << "mangled string:" << mangledName << " name:" << name << " version:" << version << std::endl;
+    return std::pair<std::string,int>(name,version);
+  }
+
 
   /** Return the keys used for identifying algorithms. This includes those within the Factory itself and 
    * any cleanly constructed algorithms stored here.

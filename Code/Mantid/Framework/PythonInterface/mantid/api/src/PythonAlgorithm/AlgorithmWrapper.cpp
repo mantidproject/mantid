@@ -104,9 +104,12 @@ namespace Mantid
      */
     void AlgorithmWrapper::exec()
     {
+      
+
       if( boost::python::override fn = this->get_override("PyExec") )
       {
-        fn();
+        //fn();
+        throw Kernel::Exception::NotImplementedError("Sort out the threading!!!!!");
       }
       else
       {

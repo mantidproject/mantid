@@ -78,9 +78,10 @@ public:
    * Subscribes an algorithm using a custom instantiator. This
    * object takes ownership of the instantiator
    * @param instantiator - A pointer to a custom instantiator
+   * @param replaceExisting - If true an existing algorithm of the same name and version is replaced
    */
   template<class T>
-  void subscribe(Kernel::AbstractInstantiator<T> *instantiator)
+  void subscribe(Kernel::AbstractInstantiator<T> *instantiator, const bool replaceExisting = false)
   {
     boost::shared_ptr<IAlgorithm> tempAlg = instantiator-> createInstance();
     const int version = extractAlgVersion(tempAlg);
@@ -88,21 +89,34 @@ public:
     typename VersionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty())
     {
-      if( it == m_vmap.end())
-        m_vmap[className] = version;    
+      const std::string key = createName(className,version);
+      if( it == m_vmap.end() )
+      {
+        m_vmap[className] = version;
+      }
       else
       {
-        if(version == it->second )
+        if( replaceExisting )
+        {
+          Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
+        }
+        else if(version == it->second)
         {
           g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
           return;
         }
         if(version > it->second)
+        {
           m_vmap[className]=version;
+        }
       }  
-      Kernel::DynamicFactory<Algorithm>::subscribe(createName(className,version), instantiator);
+      Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator);
     }
   }
+  /// Unsubscribe the given algorithm
+  void unsubscribe(const std::string & algorithmName, const int version);
+  /// Does an algorithm of the given name and version exist
+  bool exists(const std::string & algorithmName, const int version = -1);
 
   /// Get the algorithm names and version - mangled use decodeName to separate
   const std::vector<std::string> getKeys() const;
