@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
+	src/ConvertToMDEventsParams.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -61,6 +62,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
@@ -114,6 +116,7 @@ set ( TEST_FILES
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsMethodsTest.h
 	test/ConvertToMDEventsTest.h
+	test/ConvertToMDEventsParamsTest.h	
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
 	test/DivideMDTest.h

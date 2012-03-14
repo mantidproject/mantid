@@ -31,6 +31,19 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
     }
 
 }
+/**function compares old workspace description with the new workspace description, defined by the algorithm properties and 
+ * selects/changes the properties which can be changed through input parameters given that target MD workspace exist   
+ *
+ * @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm parameters
+ *
+ * @returns NewMDWorkspaceD -- modified md workspace description, which is compartible with existing MD workspace
+ *
+*/
+void  
+MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
+{
+    UNUSED_ARG(NewMDWorkspaceD);
+}
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
  * values vere defined and min values are smaller then mav values */

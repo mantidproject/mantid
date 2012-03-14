@@ -84,5 +84,7 @@ IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS
 IConvertToMDEventsMethods::IConvertToMDEventsMethods()
 {}
 
+
+
 } // endNamespace MDAlgorithms
 }

@@ -1,6 +1,7 @@
 #ifndef MANTID_MD_CONVERT2_MDEVENTS
 #define MANTID_MD_CONVERT2_MDEVENTS
-    
+
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
@@ -39,8 +40,6 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
  
- // vectors of strings are here everywhere
-  typedef  std::vector<std::string> Strings;
  
 /// Convert to MD Events class itself:
   class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
@@ -64,69 +63,28 @@ namespace MDAlgorithms
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
-  /// pointer to the input workspace;
+   /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
  
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
-    static PreprocessedDetectors det_loc;  
+   static PreprocessedDetectors det_loc;  
    /// the pointer to class which is responsible for adding data to N-dimensional workspace;
-    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
   /// progress reporter
    std::auto_ptr<API::Progress > pProg;
     /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
   //------------------------------------------------------------------------------------------------------------------------------------------
-  // Internal helper variables
-  //
-    /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
-    std::vector<std::string> Q_modes;
-    /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
-    std::vector<std::string> dE_modes;
-    /// known conversion modes ID-s       (symbolic representation of correspondent enum)
-    std::vector<std::string> ConvModes;
-    /// supported input workspace types  (names of supported workspace types )
-    std::vector<std::string> SupportedWS;
-
-    /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
-    std::string  native_elastic_unitID; // currently it is Q
-    /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
-    std::string  native_inelastic_unitID; // currently it is energy transfer (DeltaE)
-
-    /**  The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
-      *  Any other input workspace units have to be converted into these, and these have to correspond to actual units, defined in workspace */
-    std::string subalgorithm_units;
+    ConvertToMDEventsParams ParamParser;
     /// string -Key to identify the algorithm -- rather for testing and debugging, though may be reliet upon somewhere by bad practice
     std::string algo_id;
-    // the vector describes default dimension names, specified along the axis if nothing explicitly requested;
-    std::vector<std::string> default_dim_ID;
+
+
     /// the properties of the requested target MD workpsace:
     MDEvents::MDWSDescription TWS;
  
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
-   //>---> Parts of the identifyTheAlg;
-   /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
-   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
-   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
-   std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                Strings &out_dim_IDs,Strings &out_dim_units, bool &is_detector_information_lost);
-   //>---> Parts of the identifyMatrixAlg, separated for unit testing:
-   // identify Q - mode
-   std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
-   // identify energy transfer mode
-   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names, 
-                                 Strings &out_dim_units, int &ndE_dims,std::string &natural_units);
-   // indentify input units conversion mode
-   std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_units);
-   // identify what kind of input workspace is there:
-   std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const;
-   //<---< Parts of the identifyMatrixAlg;
-   /** identifies the ID of the conversion subalgorithm to run on a workspace */
-   std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                              const Strings &other_dim_names,bool convert_to_hkl,MDEvents::MDWSDescription &TargWSDescription);
-   //<---< Parts of the identifyTheAlg;
-
- 
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
@@ -143,20 +101,6 @@ namespace MDAlgorithms
  
    /// map to select an algorithm as function of the key, which describes it
    std::map<std::string, IConvertToMDEventsMethods *> alg_selector;
-
-    // strictly for testing!!!
-    void setAlgoID(const std::string &newID){
-        this->algo_id=newID;
-    }
-    // strictly for testing!!!
-    void setAlgoUnits(int emode){
-        if(emode==0){
-            this->subalgorithm_units=native_elastic_unitID;
-        }
-        if(emode==1||emode==2){
-            this->subalgorithm_units=native_inelastic_unitID;
-        }
-    }
   private: 
    //--------------------------------------------------------------------------------------------------   
      /// helper class to orginize metaloop instantiating various subalgorithms 
@@ -168,7 +112,7 @@ namespace MDAlgorithms
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
     void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;
  };
- 
+
 } // namespace Mantid
 } // namespace MDAlgorithms
 

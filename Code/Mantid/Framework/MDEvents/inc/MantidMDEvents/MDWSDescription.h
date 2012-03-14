@@ -48,6 +48,8 @@ namespace MDEvents
      MDWSDescription(size_t nDimesnions);
      /// function build MD Event description from existing workspace
      void build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS);
+     /// compare two descriptions and select the coplimentary result.
+     void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD);
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
     size_t nDims;
@@ -80,7 +82,7 @@ namespace MDEvents
     std::vector<std::string> defailtQNames;
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID;
-    /// shows if workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
+    /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
     bool detInfoLost;
     /// if defined, specifies number of bins in each dimension
     std::vector<size_t> nBins;
