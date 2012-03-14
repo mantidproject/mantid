@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/DiffSphere.h"
+#include "MantidCurveFitting/DeltaFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -16,12 +16,86 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/Convolution.h"
+#include <boost/math/special_functions/bessel.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+
+//same class as ConvolutionTest_Gauss in ConvolutionTest.h
+class DiffSphereTest_Gauss: public IPeakFunction
+{
+public:
+	DiffSphereTest_Gauss()
+  {
+    declareParameter("c");     // center of the peak
+    declareParameter("h",1.);  // height of the peak
+    declareParameter("s",1.);  // 1/(2*sigma^2)
+  }
+
+  std::string name()const{return "DiffSphereTest_Gauss";}
+
+  void functionLocal(double* out, const double* xValues, const size_t nData)const
+  {
+    double c = getParameter("c");
+    double h = getParameter("h");
+    double w = getParameter("s");
+    for(size_t i=0;i<nData;i++)
+    {
+      double x = xValues[i] - c;
+      out[i] = h*exp(-x*x*w);
+    }
+  }
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
+  {
+    //throw Mantid::Kernel::Exception::NotImplementedError("");
+    double c = getParameter("c");
+    double h = getParameter("h");
+    double w = getParameter("s");
+    for(size_t i=0;i<nData;i++)
+    {
+      double x = xValues[i] - c;
+      double e = h*exp(-x*x*w);
+      out->set(i,0,x*h*e*w);
+      out->set(i,1,e);
+      out->set(i,2,-x*x*h*e);
+    }
+  }
+
+  double centre()const
+  {
+    return getParameter(0);
+  }
+
+  double height()const
+  {
+    return getParameter(1);
+  }
+
+  double width()const
+  {
+    return getParameter(2);
+  }
+
+  void setCentre(const double c)
+  {
+    setParameter(0,c);
+  }
+  void setHeight(const double h)
+  {
+    setParameter(1,h);
+  }
+
+  void setWidth(const double w)
+  {
+    setParameter(2,w);
+  }
+
+};
 
 
 class DiffSphereTest : public CxxTest::TestSuite
@@ -126,6 +200,42 @@ public:
 
   }// end of void testAgainstMockData
 
+
+  //convolve a Gaussian resolution function with a delta-Dirac of type ElasticDiffSphere
+  void testElasticDiffSphere()
+  {
+    Convolution conv;
+    //set the resolution function
+    double h = 3.0;  // height
+    double a = 1.3;  // 1/(2*sigma^2)
+
+    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
+    res->setParameter("c",0);
+    res->setParameter("h",h);
+    res->setParameter("s",a);
+    conv.addFunction(res);
+
+    //set the "structure factor"
+    double H=1.5, R=2.6, Q=0.7;
+    ElasticDiffSphere* eds = new ElasticDiffSphere();
+    eds->setParameter("Height",H);
+    eds->setParameter("Radius",R);
+    eds->setParameter("Q",Q);
+    conv.addFunction(eds);
+
+    //set up some frequency values centered around zero
+    const int N = 117;
+    double w[N],out[N],w0,dw = 0.13;
+    w0=-dw*int(N/2);
+    for(int i=0;i<N;i++) w[i] = w0 + i*dw;
+
+    //convolve. The result must be the resolution multiplied by factor H*hf);
+    conv.functionMW(out,w,N);
+    double hpf = pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2); // height pre-factor
+    for(int i=0;i<N;i++){
+      TS_ASSERT_DELTA(out[i],H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
+    }
+  }// end of testElasticDiffSphere
 
 };
 

@@ -32,11 +32,9 @@ ElasticDiffSphere::ElasticDiffSphere(){
 }
 
 double ElasticDiffSphere::HeightPrefactor() const{
-  const double& H = getParameter("Height");
   const double& R = getParameter("Radius");
   const double& Q = getParameter("Q");
-
-  return H * pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2);
+  return pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2);
 }
 
 // initialize class attribute xnl with a list of coefficients in string format
