@@ -149,7 +149,7 @@ public:
   };
 
   // Test that all the IDFs contain valid-to and valid-from dates and that
-  // for a single instrument none of these overlap
+  // for a single instrument none of the valid-from dates are equal
   void testAllDatesInIDFs()
   {
     ExperimentInfo helper;
@@ -204,14 +204,10 @@ public:
         {
           if (it1 != it2)
           {
-            if ( it2->second.from >= it1->second.to || it2->second.to <= it1->second.from )
-            {
-              //std::cout << "\nOK\n";
-            }
-            else
+            if ( it2->second.from == it1->second.from )
             {
               // some more intelligent stuff here later
-              TS_ASSERT_EQUALS("dates in IDF overlap", "0");
+              TS_ASSERT_EQUALS("Two IDFs for one instrument have equal valid-from dates", "0");
             }
           }
         }
@@ -234,6 +230,17 @@ public:
     ExperimentInfo helper;
     std::string boevs = helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
+  }
+
+  void testHelper_ValidDateOverlap()
+  {
+    ExperimentInfo helper;
+    std::string boevs = helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
+    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"),std::string::npos);
+    boevs = helper.getInstrumentFilename("ARGUS", "1909-03-31 22:59:59");
+    TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"),std::string::npos);
+    boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
+    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"),std::string::npos);
   }
 
 

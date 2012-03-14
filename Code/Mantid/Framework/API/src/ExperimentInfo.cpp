@@ -475,6 +475,10 @@ namespace API
   *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
   *  then is the part of a filename that identifies the IDF valid at a given date.
   *
+  *  If several IDF files are valid at the given date the file with the most recent from
+  *  date is selected. If no such files are found the file with the latest from date is 
+  *  selected.
+  *
   *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
   *  @param date :: ISO 8601 date
   *  @return full path of IDF
@@ -491,8 +495,10 @@ namespace API
     Poco::RegularExpression regex(instrument+"_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
     Poco::DirectoryIterator end_iter;
     DateAndTime d(date);
-    std::string mostRecentIDF; // store most recent IDF which is returned if no match for the date found
-    DateAndTime refDate("1900-01-31 23:59:59"); // used to help determine the most recent IDF
+    bool foundGoodFile = false; // True if we have found a matching file (valid at the given date)
+    std::string mostRecentIDF; // store most recently starting matching IDF if found, else most recently starting IDF.
+    DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most recently starting IDF, if none match 
+    DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine the most recently starting matching IDF 
     for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
     {
       if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
@@ -514,17 +520,21 @@ namespace API
 
         if ( from <= d && d <= to )
         {
-          return dir_itr->path();
+          if( from > refDateGoodFile ) 
+          { // We'd found a matching file more recently starting than any other matching file found
+            foundGoodFile = true;
+            refDateGoodFile = from;
+            mostRecentIDF = dir_itr->path();
+          }
         }
-        if ( to > refDate )
-        {
-          refDate = to;
+        if ( !foundGoodFile && ( from > refDate ) )
+        {  // Use most recently starting file, in case we don't find a matching file.
+          refDate = from;
           mostRecentIDF = dir_itr->path();
         }
       }
     }
 
-    // No date match found return most recent
     return mostRecentIDF;
   }
 
