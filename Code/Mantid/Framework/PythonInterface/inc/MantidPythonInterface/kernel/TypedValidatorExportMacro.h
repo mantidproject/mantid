@@ -32,7 +32,7 @@
                         boost::python::bases<Mantid::Kernel::IValidator>,\
                         boost::noncopyable\
                        >("TypedValidator_"#Type, boost::python::no_init)\
-    .def("isValid", &Mantid::Kernel::TypedValidator<Type>::isValid, \
+    .def("isValid", &Mantid::Kernel::TypedValidator<Type>::isValid<Type>, \
           "Returns an empty string if the value is considered valid, otherwise a string defining the error is returned.")
 
 #endif // MANTID_PYTHONINTERFACE_TYPEDVALIDATOREXPORT_MACRO_H_
