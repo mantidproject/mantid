@@ -36,9 +36,9 @@ SplatterPlotView::~SplatterPlotView()
 void SplatterPlotView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  if (this->peaksSource)
+  if (!this->peaksSource.isEmpty())
   {
-    builder->destroy(this->peaksSource);
+    this->destroyPeakSources();
     pqActiveObjects::instance().setActiveSource(this->origSrc);
   }
   if (this->threshSource)
@@ -75,7 +75,7 @@ void SplatterPlotView::render()
   }
   else
   {
-    this->peaksSource = src;
+    this->peaksSource.append(src);
     renderType = VTK_WIREFRAME;
   }
 
@@ -89,7 +89,7 @@ void SplatterPlotView::render()
   prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   this->resetDisplay();
-  if (NULL == this->peaksSource)
+  if (this->peaksSource.isEmpty())
   {
     this->onAutoScale();
   }
@@ -120,7 +120,7 @@ void SplatterPlotView::onThresholdButtonClicked()
 
 void SplatterPlotView::checkView()
 {
-  if (NULL == this->peaksSource)
+  if (this->peaksSource.isEmpty())
   {
     ViewBase::checkView();
   }
@@ -129,6 +129,15 @@ void SplatterPlotView::checkView()
 void SplatterPlotView::resetCamera()
 {
   this->view->resetCamera();
+}
+
+void SplatterPlotView::destroyPeakSources()
+{
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  for( int i = 0; i < this->peaksSource.size(); ++i )
+  {
+    builder->destroy(this->peaksSource.at(i));
+  }
 }
 
 } // SimpleGui
