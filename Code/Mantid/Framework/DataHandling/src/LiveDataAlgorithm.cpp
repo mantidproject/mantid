@@ -65,6 +65,10 @@ namespace DataHandling
         " - Replace: the processed chunk will replace the previous output.\n"
         " - Append: the spectra of the chunk will be appended to the output workspace, increasing its size.");
 
+//    declareProperty("PreserveEvents", false, Direction::Input,
+//        "Preserve events after performing the Processing step. Default False.\n"
+//        "It is strongly recommended to keep this unchecked, because preserving events may cause significant slowdowns when the run becomes large!");
+
     declareProperty(new PropertyWithValue<std::string>("PostProcessingAlgorithm","",Direction::Input),
         "Name of the algorithm that will be run to process the accumulated data.\n"
         "Optional. If blank, no post-processing will occur.");

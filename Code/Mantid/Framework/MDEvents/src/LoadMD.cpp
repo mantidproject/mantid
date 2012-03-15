@@ -226,7 +226,11 @@ namespace Mantid
       m_filename = getPropertyValue("Filename");
 
       // Start loading
-      file = new ::NeXus::File(m_filename, NXACC_RDWR);
+      bool fileBacked = this->getProperty("FileBackEnd");
+      if (fileBacked)
+        file = new ::NeXus::File(m_filename, NXACC_RDWR);
+      else
+        file = new ::NeXus::File(m_filename, NXACC_READ);
 
       // The main entry
       file->openGroup("MDEventWorkspace", "NXentry");
