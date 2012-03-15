@@ -170,6 +170,8 @@ namespace Mantid
           size_t nparams;
           double minD, maxD;
           fitSpectra(wi, inputW, peakPositions, nparams, minD, maxD, peakPosToFit, peakPosFitted);
+          if (nparams > 0)
+          {
           //double * params = new double[2*nparams+1];
           double params[103];
           if(nparams > 50) nparams = 50;
@@ -240,6 +242,11 @@ namespace Mantid
           gsl_vector_free(ss);
           gsl_multimin_fminimizer_free (s);
           //delete [] params;
+          }
+          else
+          {
+              offset = 1000.;
+          }
         }
         double mask=0.0;
         if (std::abs(offset) > maxOffset)
@@ -330,11 +337,21 @@ namespace Mantid
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
+      std::vector<size_t> banned;
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
+        double centre = peakslist->getRef<double>("centre",i);
+        if (centre <= minD || centre >= maxD)
+        {
+            banned.push_back(i);
+            continue;
+        }
         // Get references to the data
-        peakPosFitted.push_back(peakslist->getRef<double>("centre",i));
+        peakPosFitted.push_back(centre);
       }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
       nparams = peakPosFitted.size();
       peakPos.clear();
       return;
