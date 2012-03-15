@@ -282,10 +282,14 @@ class SNSPowderReduction2(PythonAlgorithm):
 
     def _getStrategy(self, runnumber, extension):
         from mantid.simpleapi import *
+        import boostmpi as mpi
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
-        if self._chunks > 0 and not "histo" in extension:
+        comm = mpi.world
+        if comm.size > 1:
+            strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
+        elif self._chunks > 0 and not "histo" in extension:
             Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
             for row in Chunks: strategy.append(row)
         else:
@@ -295,6 +299,7 @@ class SNSPowderReduction2(PythonAlgorithm):
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
+        import boostmpi as mpi
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = self._getStrategy(runnumber, extension)
@@ -306,14 +311,21 @@ class SNSPowderReduction2(PythonAlgorithm):
             if self._info is None:
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
-            if firstChunk:
-                alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
+            comm = mpi.world
+            if comm.size > 1:
+                alg = GatherWorkspaces(InputWorkspace=temp, OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
-                firstChunk = False
+                if comm.rank == 0:
+                    SumSpectra(wksp, wksp)
             else:
-                wksp += temp
-                DeleteWorkspace(temp)
-        if self._chunks > 0 and not "histo" in extension:
+                if firstChunk:
+                    alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
+                    wksp = alg['OutputWorkspace']
+                    firstChunk = False
+                else:
+                    wksp += temp
+                    DeleteWorkspace(temp)
+        if comm.size == 1 and self._chunks > 0 and not "histo" in extension:
             # When chunks are added, proton charge is summed for all chunks
             proton_charge = wksp.getRun().getProperty('gd_prtn_chrg').value / len(strategy)
             wksp.getRun().setProtonCharge(proton_charge)
@@ -465,6 +477,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
 
     def PyExec(self):
+        import boostmpi as mpi
         # get generic information
         SUFFIX = self.getProperty("Extension")
         self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile"))
@@ -646,7 +659,7 @@ class SNSPowderReduction2(PythonAlgorithm):
             else:
                 normalized = False
 
-            if not "histo" in self.getProperty("Extension") and preserveEvents:
+            if not "histo" in self.getProperty("Extension") and preserveEvents and mpi.world.size ==1:
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
 
@@ -656,13 +669,15 @@ class SNSPowderReduction2(PythonAlgorithm):
                 ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=False, ResetValue=0.)
 
             # write out the files
-            self._save(samRun, self._info, normalized)
-            samRun = str(samRun)
+            if mpi.world.rank == 0:
+                self._save(samRun, self._info, normalized)
+                samRun = str(samRun)
             mtd.releaseFreeMemory()
 
         # convert everything into d-spacing
         workspacelist = set(workspacelist) # only do each workspace once
         for wksp in workspacelist:
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
+            if mpi.world.rank == 0:
+                ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
 
 mtd.registerPyAlgorithm(SNSPowderReduction2())
