@@ -181,6 +181,7 @@ set ( INC_FILES
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
+	inc/MantidKernel/TypedValidator.h
 	inc/MantidKernel/Unit.h
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UserStringParser.h
