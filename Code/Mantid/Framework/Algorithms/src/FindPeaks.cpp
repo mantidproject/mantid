@@ -186,6 +186,7 @@ void FindPeaks::init()
   m_peaks->addColumn("double","backgroundintercept");
   m_peaks->addColumn("double","backgroundslope");
   m_peaks->addColumn("double", "A2");
+  m_peaks->addColumn("double", "chi2");
 }
 
 
@@ -930,7 +931,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
       << ", Height=" << height << ", Background slope=" << bgslope
       << ", Background intercept=" << bgintercept << std::endl;
   API::TableRow t = m_peaks->appendRow();
-  t << spectrum << centre << width << height << bgintercept << bgslope;
+  t << spectrum << centre << width << height << bgintercept << bgslope << 0. << mincost;
 
   return;
 }
@@ -1299,9 +1300,16 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   // j) Set return value
   API::TableRow t = m_peaks->appendRow();
-  t << spectrum << bestcenter << bestsigma << bestheight << a0 << a1 << a2;
+  if (bestcenter < X.front() || bestcenter > X.back())
+  {
+    t << spectrum << 0. << 0. << 0. << 0. << 0. << 0. << 1.e10;
+  }
+  else
+  {
+    t << spectrum << bestcenter << bestsigma << bestheight << a0 << a1 << a2 << fcost;
+  }
 
-  g_log.information() << "(High Background) Final-Find Peak: Cost = " << fcost << "  vs. Min cost = " << mincost
+  g_log.debug() << "(High Background) Final-Find Peak: Cost = " << fcost << "  vs. Min cost = " << mincost
       << " Background cost = " << bkgdchi2 << " x0 = " << bestcenter << "(" << X[i2] << ", " << X[i0] <<
       ") H = " << bestheight << std::endl;
 
