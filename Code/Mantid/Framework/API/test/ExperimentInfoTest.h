@@ -236,7 +236,6 @@ public:
   {
     const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
     const std::string testDir = instDir + "IDFs_for_UNIT_TESTING";
-    std::cout << testDir << std::endl;
     ConfigService::Instance().setString("instrumentDefinition.directory", testDir);
     ExperimentInfo helper;
     std::string boevs = helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
