@@ -29,7 +29,7 @@ void StretchExpMuon::functionMW(double* out, const double* xValues, const size_t
   const double& b = getParameter("Beta");
 
 
-  for (int i = 0; i < nData; i++) {
+  for (size_t i = 0; i < nData; i++) {
     out[i] = A*exp(-pow(G*xValues[i],b));
   }
 }
