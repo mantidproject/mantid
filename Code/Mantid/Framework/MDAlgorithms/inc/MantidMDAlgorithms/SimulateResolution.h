@@ -14,8 +14,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidMDAlgorithms/MagneticFormFactor.h"
 
-using namespace Mantid::API;
-
 namespace Mantid
 {
     namespace MDAlgorithms
@@ -67,7 +65,7 @@ namespace Mantid
             std::string name()const{return "SimulateResolution";}
 
             /// set pointer to runData vector
-            void setWorkspaceMD(WorkspaceGroup_sptr wsGroup);
+            void setWorkspaceMD(API::WorkspaceGroup_sptr wsGroup);
             //void setRunDataInfo(boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData);
 
         protected:
@@ -157,7 +155,7 @@ namespace Mantid
             /// Pointer to the run parameter objects, yet to be defined
             boost::shared_ptr<MDAlgorithms::RunParam> m_runData;
             /// Pointer to the group of input MDWorkspaces
-            WorkspaceGroup_sptr m_mdWorkspaces;
+            API::WorkspaceGroup_sptr m_mdWorkspaces;
             boost::shared_ptr<MagneticFormFactor> m_magForm;
 
             /// The default seed for MT random numbers
