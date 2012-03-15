@@ -87,7 +87,7 @@ public:
   }
 
 };
-
+DECLARE_FUNCTION(DiffSphereTest_Gauss); //register DiffSphereTest_Gauss in the DynamicFactory
 
 
 class DiffSphereTest : public CxxTest::TestSuite
@@ -134,14 +134,49 @@ public:
     }
   } // end of void getMockData
 
-  void testAgainstMockData()
+  //convolve a Gaussian resolution function with a delta-Dirac of type ElasticDiffSphere
+  void testElasticDiffSphere()
+  {
+    Convolution conv;
+    //set the resolution function
+    double h = 3.0;  // height
+    double a = 1.3;  // 1/(2*sigma^2)
+    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
+    res->setParameter("c",0);
+    res->setParameter("h",h);
+    res->setParameter("s",a);
+    conv.addFunction(res);
+
+    //set the "structure factor"
+    double H=1.5, R=2.6, Q=0.7;
+    ElasticDiffSphere* eds = new ElasticDiffSphere();
+    eds->setParameter("Height",H);
+    eds->setParameter("Radius",R);
+    eds->setParameter("Q",Q);
+    conv.addFunction(eds);
+
+    //set up some frequency values centered around zero
+    const int N = 117;
+    double w[N],out[N],w0,dw = 0.13;
+    w0=-dw*int(N/2);
+    for(int i=0;i<N;i++) w[i] = w0 + i*dw;
+
+    //convolve. The result must be the resolution multiplied by factor H*hf);
+    conv.functionMW(out,w,N);
+    double hpf = pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2); // height pre-factor
+    for(int i=0;i<N;i++){
+      TS_ASSERT_DELTA(out[i],H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
+    }
+  }// end of testElasticDiffSphere
+
+  void testInelasticDiffSphere()
   {
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "DiffSphereMockData";
+    std::string wsName = "InelasticDiffSphereMockData";
     int histogramNumber = 1;
     int timechannels = 200;
 
@@ -190,45 +225,7 @@ public:
     TS_ASSERT_DELTA( out->getParameter("Q"), 0.7 ,0.001);
     AnalysisDataService::Instance().remove(wsName);
 
-  }// end of void testAgainstMockData
-
-
-  //convolve a Gaussian resolution function with a delta-Dirac of type ElasticDiffSphere
-  void testElasticDiffSphere()
-  {
-    Convolution conv;
-    //set the resolution function
-    double h = 3.0;  // height
-    double a = 1.3;  // 1/(2*sigma^2)
-
-    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
-    res->setParameter("c",0);
-    res->setParameter("h",h);
-    res->setParameter("s",a);
-    conv.addFunction(res);
-
-    //set the "structure factor"
-    double H=1.5, R=2.6, Q=0.7;
-    ElasticDiffSphere* eds = new ElasticDiffSphere();
-    eds->setParameter("Height",H);
-    eds->setParameter("Radius",R);
-    eds->setParameter("Q",Q);
-    conv.addFunction(eds);
-
-    //set up some frequency values centered around zero
-    const int N = 117;
-    double w[N],out[N],w0,dw = 0.13;
-    w0=-dw*int(N/2);
-    for(int i=0;i<N;i++) w[i] = w0 + i*dw;
-
-    //convolve. The result must be the resolution multiplied by factor H*hf);
-    conv.functionMW(out,w,N);
-    double hpf = pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2); // height pre-factor
-    for(int i=0;i<N;i++){
-      TS_ASSERT_DELTA(out[i],H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
-    }
-  }// end of testElasticDiffSphere
-
+  }// end of void testInelastic
 
   //assert the ties between the elastic and inelastic contributions
   void testDiffSphereTies()
@@ -253,6 +250,65 @@ public:
     TS_ASSERT_EQUALS(eds->getParameter("Q"),Q);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"),R);
   }
+
+
+  //generate first data from convolution of a Gaussian and a DiffSphere function.
+  //Then reset the DiffSphere parameters and do the fit to recover the original values
+  void testDiffSphere(){
+    Convolution conv;
+
+    //set the resolution function
+    double h = 3.0;  // height
+    double a = 1.3;  // 1/(2*sigma^2)
+    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
+    res->setParameter("c",0);
+    res->setParameter("h",h);
+    res->setParameter("s",a);
+    conv.addFunction(res);
+
+    //set the structure factor
+    double I=2.9, Q=0.7, R=2.3, D=0.45;
+    DiffSphere* ds = new DiffSphere();
+    ds->setParameter("f1.Intensity",I);
+    ds->setParameter("f1.Q",Q);
+    ds->setParameter("f1.Radius",R);
+    ds->setParameter("f1.Diffusion",D);
+    ds->applyTies(); //update the ties between elastic and inelastic parts
+    conv.addFunction(ds);
+
+    //set up some frequency values centered around zero
+    const int N = 117;
+    double w[N],in[N],w0,dw = 0.13;
+    w0=-dw*int(N/2);
+    for(int i=0;i<N;i++) w[i] = w0 + i*dw;
+
+    //obtain the set of values from the convolution and store in array 'in'
+    conv.functionMW(in,w,N);
+
+    //Initialize to some other values.
+    ds->setParameter("f1.Intensity",1.1);
+    ds->setParameter("f1.Q",1.1);
+    ds->setParameter("f1.Radius",1.1);
+    ds->setParameter("f1.Diffusion",1.1);
+    ds->applyTies();  //update the ties between elastic and inelastic parts
+
+    //Set up the workspace
+    std::string wsName = "ConvGaussDiffSphere";
+    int histogramNumber = 1;
+    int timechannels = N;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Mantid::MantidVec& x = ws2D->dataX(0); // x-values (frequencies)
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (structure factor)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of the structure factor
+ 	const double cc=0.1;
+    for(int i=0; i<N; i++){
+      x[i] = w[i];
+      y[i] = in[i];
+      e[i] = cc*in[i];
+    }
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D)); //put workspace in the data service
+  } // end of testDiffSphere
 
 };
 

@@ -196,12 +196,11 @@ void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xVal
   calNumericalDeriv(out, xValues, nData);
 }
 
-DiffSphere::DiffSphere() {
+DiffSphere::DiffSphere(){
   m_elastic = dynamic_cast<ElasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   addFunction( m_elastic );
   m_inelastic = dynamic_cast<InelasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   addFunction( m_inelastic );
-
   //Set the ties between Elastic and Inelastic parameters
   API::ParameterTie* tie_H=new API::ParameterTie(this,"f0.Height");
   tie_H->set("f0.Height=f1.Intensity");
@@ -212,7 +211,7 @@ DiffSphere::DiffSphere() {
   API::ParameterTie* tie_Q=new API::ParameterTie(this,"f0.Q");
   tie_Q->set("f0.Q=f1.Q");
   addTie(tie_Q);
-
+  applyTies();
 }
 
 } // namespace CurveFitting
