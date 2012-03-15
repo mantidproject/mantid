@@ -96,6 +96,10 @@ void GatherWorkspaces::exec()
     outputWorkspace->dataX(0) = inputWorkspace->readX(0);
     outputWorkspace->dataY(0) = inputWorkspace->readY(0);
     outputWorkspace->dataE(0) = inputWorkspace->readE(0);
+    const ISpectrum * inSpec = inputWorkspace->getSpectrum(0);
+    ISpectrum * outSpec = outputWorkspace->getSpectrum(0);
+    outSpec->clearDetectorIDs();
+    outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
 
     const int numReqs(3*(included.size()-1));
     mpi::request reqs[numReqs];
@@ -109,6 +113,9 @@ void GatherWorkspaces::exec()
       reqs[j++] = included.irecv(i,0,outputWorkspace->dataX(i));
       reqs[j++] = included.irecv(i,1,outputWorkspace->dataY(i));
       reqs[j++] = included.irecv(i,2,outputWorkspace->dataE(i));
+      ISpectrum * outSpec = outputWorkspace->getSpectrum(i);
+      outSpec->clearDetectorIDs();
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
     }
 
     // Make sure everything's been received before exiting the algorithm
