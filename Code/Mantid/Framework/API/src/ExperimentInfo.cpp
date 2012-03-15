@@ -735,7 +735,7 @@ namespace API
       // Use the instrument name to find the file
       try
       {
-        std::string filename = this->getInstrumentFilename(instrumentName, getWorkspaceStartDate() );
+        std::string filename = getInstrumentFilename(instrumentName, getWorkspaceStartDate() );
         // And now load the contents
         instrumentFilename = filename;
         instrumentXml = Strings::loadFile(filename);

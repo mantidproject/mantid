@@ -234,6 +234,10 @@ public:
 
   void testHelper_ValidDateOverlap()
   {
+    const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
+    const std::string testDir = instDir + "IDFs_for_UNIT_TESTING";
+    std::cout << testDir << std::endl;
+    ConfigService::Instance().setString("instrumentDefinition.directory", testDir);
     ExperimentInfo helper;
     std::string boevs = helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"),std::string::npos);
@@ -241,6 +245,7 @@ public:
     TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"),std::string::npos);
     boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"),std::string::npos);
+    ConfigService::Instance().setString("instrumentDefinition.directory", instDir);
   }
 
 
