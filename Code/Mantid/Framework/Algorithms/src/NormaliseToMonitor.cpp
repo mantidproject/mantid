@@ -99,11 +99,11 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        //
        if(iExistingAllowedValues.empty()){
            API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
-           size_t spectra_max(-1);
+           int spectra_max(-1);
            if(inputWS){ // let's assueme that detectors IDs correspond to spectraID -- not always the case but often. 
-               spectra_max = inputWS->getNumberHistograms()+1;
+               spectra_max = static_cast<int>(inputWS->getNumberHistograms())+1;
            }
-           piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int>>(-1,(int)spectra_max));
+           piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int>>(-1,spectra_max));
        }else{
          piProp->replaceValidator(boost::make_shared<Kernel::ListValidator<int> >(iExistingAllowedValues));
        }
