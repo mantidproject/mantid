@@ -1845,7 +1845,6 @@ class UserFile(ReductionStep):
             # check first if what to turn of a background for a specific
             # monitor using 'BACK/M2/OFF'.
             parts = arguments.split('/OFF')
-            print parts
             if len(parts) == 2:
                 # set specific monitor to OFF
                 reducer.inst.set_TOFs(None, None, int(parts[0]))
