@@ -212,9 +212,9 @@ namespace Mantid
       fit_alg->setProperty("EndX",Xmax);
       fit_alg->setProperty("MaxIterations",100);
 
-      std::string fun_str = createFunctionString(peakHeight, peakLoc);
+      IFitFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
       
-      fit_alg->setPropertyValue("Function",fun_str);
+      fit_alg->setProperty("Function",fun_ptr);
       fit_alg->executeAsSubAlg();
       std::string fitStatus = fit_alg->getProperty("OutputStatus");
       //Pixel with large offset will be masked
@@ -232,7 +232,7 @@ namespace Mantid
      * @param peakHeight :: The height of the peak
      * @param peakLoc :: The location of the peak
      */
-    std::string GetDetectorOffsets::createFunctionString(const double peakHeight, const double peakLoc) 
+    IFitFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc)
     {
       FunctionFactoryImpl & creator = FunctionFactory::Instance();
       IBackgroundFunction *background = 
@@ -244,11 +244,11 @@ namespace Mantid
       const double sigma(10.0);
       peak->setWidth(2.0*std::sqrt(2.0*std::log(2.0))*sigma);
 
-      CompositeFunctionMW fitFunc; //Takes ownership of the functions
-      fitFunc.addFunction(background);
-      fitFunc.addFunction(peak);
+      CompositeFunctionMW* fitFunc = new CompositeFunctionMW(); //Takes ownership of the functions
+      fitFunc->addFunction(background);
+      fitFunc->addFunction(peak);
 
-      return fitFunc.asString();
+      return boost::shared_ptr<IFitFunction>(fitFunc);
     }
 
 
