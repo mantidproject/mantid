@@ -670,6 +670,8 @@ void InstrumentWindowPickTab::setSelectionType()
   */
 void InstrumentWindowPickTab::addPeak(double x,double y)
 {
+  using namespace Mantid::PhysicalConstants;
+
   UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
   Mantid::API::IPeaksWorkspace_sptr tw;
@@ -677,9 +679,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
   try
   {
-    const double mN =   1.67492729e-27;
-    const double hbar = 1.054571628e-34;
-
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
     Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
     // This does need to get the instrument from the workspace as it's doing calculations
@@ -751,8 +750,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       tof = xdata[0];
     }
 
-    double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
-    //knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
+    double knorm=NeutronMass*(l1 + l2)/(h_bar*tof*1e-6)/1e10;
     Qx *= knorm;
     Qy *= knorm;
     Qz *= knorm;

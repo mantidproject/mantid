@@ -149,8 +149,6 @@ private:
   Mantid::detid_t _detectorId;
   /// Number of contributing pixels
   int npixels; 
-  static double mN;
-	static double hbar;
 };
 
 typedef std::vector<SXPeak> peakvector;

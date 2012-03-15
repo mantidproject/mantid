@@ -29,9 +29,6 @@ namespace Mantid
 {
   namespace Crystal
   {
-    double SXPeak::mN=1.67492729e-27;
-    double SXPeak::hbar=1.054571628e-34;
-
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(FindSXPeaks)
 
