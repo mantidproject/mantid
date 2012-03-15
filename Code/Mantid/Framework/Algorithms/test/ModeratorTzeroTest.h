@@ -31,18 +31,15 @@ public:
   //Test several workspace inputs
   void testInit()
   {
-	/*
-	TS_ASSERT_THROWS_NOTHING(alg.initialize());
-	TS_ASSERT( alg.isInitialized() );
-	*/
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
   }
 
   void testExec2D()
   {
-	/*
     //load ASCII histogram file, data
     const std::string inputWStr("inputWS");
-	Mantid::DataHandling::LoadAscii loader;
+    Mantid::DataHandling::LoadAscii loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "BSS_11841_histo.dat");
     loader.setPropertyValue("Unit", "TOF");
@@ -52,11 +49,11 @@ public:
 
     //load the instrument into the workspace
     Mantid::DataHandling::LoadInstrument loaderX;
-  	loaderX.initialize();
-  	loaderX.setPropertyValue("InstrumentName", "BASIS");
-  	loaderX.setPropertyValue("Workspace", inputWStr);
-  	loaderX.execute();
-  	TS_ASSERT(loader.isExecuted() );
+    loaderX.initialize();
+    loaderX.setPropertyValue("InstrumentName", "BASIS");
+    loaderX.setPropertyValue("Workspace", inputWStr);
+    loaderX.execute();
+    TS_ASSERT(loader.isExecuted() );
 
     if (!alg.isInitialized()) alg.initialize();
 
@@ -66,7 +63,6 @@ public:
     alg.setPropertyValue("OutputWorkspace", outputWStr);
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
-    */
   } //end of void testExec2D()
 
   void testExecEvents()
