@@ -67,9 +67,9 @@ public:
 
   void testExecEvents()
   {
-	/*
-	//load events file. Input and ouptut are set to be non-equal
-	Mantid::DataHandling::LoadEventNexus loader;
+
+    //load events file. Input and ouptut are set to be non-equal
+    Mantid::DataHandling::LoadEventNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "BSS_11841_event.nxs");
     const std::string inputWStr("inputWS");
@@ -93,7 +93,6 @@ public:
 
     //Spectrum index 422 of BSS_11841_event.nxs containing three events
     //std::size_t wkspIndex = 422;
-   */
   }
 
 private:
