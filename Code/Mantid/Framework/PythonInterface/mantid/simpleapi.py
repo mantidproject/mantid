@@ -19,19 +19,15 @@
     and assign it to the rebinned variable
     
 """
-import mantid
-import api
-import kernel
+import api as _api
+import kernel as _kernel
 from kernel import funcreturns as _funcreturns
+from kernel import logger as _logger
+from api import AnalysisDataService as _ads
+from api import FrameworkManager as _framework
 
-# Make "mtd" and "logger" available if a user just types from mantid.simpleapi import *
-from mantid import mtd, logger, apiVersion
-
-_ads = api.AnalysisDataService.Instance()
-_framework = api.FrameworkManager.Instance()
-
-def version():
-    return "simpleapi - memory-based version"
+# Give a user access to this
+from mantid import apiVersion, __gui__
 
 def _is_workspace_property(prop):
     """
@@ -43,7 +39,7 @@ def _is_workspace_property(prop):
         @param prop - A property object
         @returns True if the property is considered to be of type workspace
     """
-    if isinstance(prop, api.IWorkspaceProperty):
+    if isinstance(prop, _api.IWorkspaceProperty):
         return True
     if 'Workspace' in prop.name: return True
     # Doesn't look like a workspace property
@@ -158,7 +154,7 @@ def _set_properties(alg_object, *args, **kwargs):
         value = kwargs[key]
         # Anything stored in the ADS must be set by string value
         # if it is not a child algorithm. 
-        if (not alg_object.isChild()) and isinstance(value, kernel.DataItem):
+        if (not alg_object.isChild()) and isinstance(value, _kernel.DataItem):
             alg_object.setPropertyValue(key, value.name())
         else:
             alg_object.setProperty(key, value)
@@ -242,7 +238,7 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
     dialog box call. If the dialog is cancelled raise a runtime error, otherwise 
     return the algorithm ready to execute.
     """
-    if not mantid.__gui__:
+    if not __gui__:
         raise RuntimeError("Can only display properties dialog in gui mode")
 
     # generic setup
@@ -408,7 +404,7 @@ def Load(*args, **kwargs):
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
-            mantid.logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
+            _logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
@@ -470,8 +466,8 @@ def translate():
     """
     from api import AlgorithmFactory, AlgorithmManager
      
-    algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
-    algorithm_mgr = AlgorithmManager.Instance()
+    algs = AlgorithmFactory.getRegisteredAlgorithms(True)
+    algorithm_mgr = AlgorithmManager
     for name, versions in algs.iteritems():
         if name == "Load":
             continue

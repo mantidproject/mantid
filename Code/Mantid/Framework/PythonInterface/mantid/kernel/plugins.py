@@ -6,7 +6,8 @@ algorithms, fit functions etc.
 """
 import os as _os
 import imp as _imp
-from mantid.kernel import Logger
+from mantid.kernel import Logger, ConfigService
+
 
 class PluginLoader(object):
 
@@ -96,8 +97,7 @@ class PyAlgLoader(object):
         """
         Import Python modules containing Python algorithms
         """
-        from mantid.kernel import ConfigService
-        dir_list = ConfigService.Instance()["pythonalgorithms.directories"].split(';')
+        dir_list = ConfigService["pythonalgorithms.directories"].split(';')
        
         # Check defined Python algorithm directories and load any modules
         changes = False

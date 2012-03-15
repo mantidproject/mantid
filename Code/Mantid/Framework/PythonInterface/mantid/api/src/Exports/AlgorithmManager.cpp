@@ -23,12 +23,12 @@ namespace
 
 void export_AlgorithmManager()
 {
-  class_<AlgorithmManagerImpl,boost::noncopyable>("AlgorithmManager", no_init)
-    .def("Instance", &AlgorithmManager::Instance, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
-        "Returns a reference to the AlgorithmManager singleton")
-    .staticmethod("Instance")
+  class_<AlgorithmManagerImpl,boost::noncopyable>("AlgorithmManagerImpl", no_init)
     .def("create", &AlgorithmManagerImpl::create, create_overloads(args("name", "version"), "Creates a managed algorithm."))
     .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
         createUnmanaged_overloads(args("name", "version"), "Creates an unmanaged algorithm."))
-    ;
+    .def("Instance", &AlgorithmManager::Instance, return_value_policy<reference_existing_object>(),
+        "Returns a reference to the AlgorithmManager singleton")
+    .staticmethod("Instance")
+  ;
 }

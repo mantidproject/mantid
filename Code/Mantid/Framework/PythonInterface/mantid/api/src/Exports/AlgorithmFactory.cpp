@@ -60,11 +60,11 @@ namespace
 void export_AlgorithmFactory()
 {
 
-  class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactory", no_init)
-      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
+  class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)
+      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
+      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
         "Returns a reference to the AlgorithmFactory singleton")
       .staticmethod("Instance")
-      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
     ;
 
 }

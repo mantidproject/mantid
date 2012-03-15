@@ -19,6 +19,18 @@ from _api import *
 _dlopen.restore_flags(flags)
 
 ###############################################################################
+# Alias singleton objects so they just look like classes with only
+# static methods, which is really what they are
+###############################################################################
+FrameworkManager = FrameworkManagerImpl.Instance()
+AnalysisDataService = AnalysisDataServiceImpl.Instance()
+mtd = AnalysisDataService #tradition
+AlgorithmFactory = AlgorithmFactoryImpl.Instance()
+AlgorithmManager = AlgorithmManagerImpl.Instance()
+FileFinder = FileFinderImpl.Instance()
+
+
+###############################################################################
 # Add importAll member to ADS 
 ###############################################################################
 import _adsimports
@@ -29,11 +41,6 @@ import _adsimports
 import _workspaceops
 
 ###############################################################################
-# Make the singleton objects available as named variables 
-###############################################################################
-FrameworkManager.Instance() # This starts the framework
-
-###############################################################################
 # Starting the FrameworkManager loads the C++ plugin libraries
 # we need to load in the Python plugins as well
 ###############################################################################
@@ -42,7 +49,6 @@ import mantid.kernel.plugins as _plugins
 from mantid.kernel import config as _cfg
 # Disabled for the time being as all algorithms are of the old kind
 #_plugins.load(_cfg['pythonalgorithm.directories']) 
-
 
 ###############################################################################
 # When in GUI mode we want to be picky about algorithm execution as we

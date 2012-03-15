@@ -74,16 +74,16 @@ void export_AnalysisDataService()
 {
   register_ptr_to_python<DataItem_wptr>();
 
-  class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataService", no_init)
-    .def("Instance", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
-         "Return a reference to the ADS singleton")
-    .staticmethod("Instance")
+  class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataServiceImpl", no_init)
     .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>(),
          "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
     .def("size", &AnalysisDataServiceImpl::size, "Returns the number of objects within the service")
     .def("getObjectNames", &getObjectNamesAsList, "Return the list of names currently known to the ADS")
+    .def("Instance", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
+         "Return a reference to the ADS singleton")
+    .staticmethod("Instance")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
     .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>())

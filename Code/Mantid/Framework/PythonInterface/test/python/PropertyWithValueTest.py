@@ -12,10 +12,10 @@ class PropertyWithValueTest(unittest.TestCase):
     
     def setUp(self):
         if self._integration is None:
-            self.__class__._integration = AlgorithmManager.Instance().createUnmanaged("Integration")
+            self.__class__._integration = AlgorithmManager.createUnmanaged("Integration")
             self.__class__._integration.initialize()
         if self._mask_dets is None:
-            self.__class__._mask_dets = AlgorithmManager.Instance().createUnmanaged("MaskDetectors")
+            self.__class__._mask_dets = AlgorithmManager.createUnmanaged("MaskDetectors")
             self.__class__._mask_dets.initialize()
   
     def test_getproperty_value_returns_derived_type(self):
@@ -54,7 +54,7 @@ class PropertyWithValueTest(unittest.TestCase):
             self.assertEquals(det_list[i], i+2)
             
     def test_set_property_succeeds_with_python_float_lists(self):
-        rebin = AlgorithmManager.Instance().createUnmanaged("Rebin")
+        rebin = AlgorithmManager.createUnmanaged("Rebin")
         rebin.initialize()
         input = [0.5,1.0,5.5]
         rebin.setProperty('Params',input)
@@ -74,7 +74,7 @@ class PropertyWithValueTest(unittest.TestCase):
         self._do_vector_double_numpy_test(True)
 
     def _do_vector_double_numpy_test(self, int_type=False):
-        create_ws = AlgorithmManager.Instance().createUnmanaged('CreateWorkspace')
+        create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
         create_ws.initialize()
         if int_type:
             datax = np.arange(10)

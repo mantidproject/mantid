@@ -8,7 +8,7 @@
     The function is also attached to the AnalysisDataService and named importAll.
     
 """
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataServiceImpl
 import inspect as _inspect
 import keyword as _keyword
 import re as _re
@@ -78,4 +78,4 @@ def _importAll(mtd):
     locals_.update(vars)
 
 # Attach to ADS as importAll
-setattr(AnalysisDataService, "importAll", _importAll)
+setattr(AnalysisDataServiceImpl, "importAll", _importAll)

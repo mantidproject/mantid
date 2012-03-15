@@ -7,7 +7,6 @@
 from mantid.api import Workspace, AnalysisDataService, FrameworkManager, ITableWorkspace
 from mantid.api import performBinaryOp as _performBinaryOp
 from mantid.kernel.funcreturns import lhs_info
-_ads = AnalysisDataService.Instance()
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -83,8 +82,8 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
 
     if clear_tmps:
         for name in _workspace_op_tmps:
-            if name in _ads and output_name != name:
-                del _ads[name]
+            if name in AnalysisDataService and output_name != name:
+                del AnalysisDataService[name]
         _workspace_op_tmps = []
         
     if inplace:
@@ -143,16 +142,16 @@ def _do_unary_operation(op, self, lhs_vars):
         _workspace_op_tmps.append(output_name)
 
     # Do the operation
-    alg = FrameworkManager.Instance().createAlgorithm(op)
+    alg = FrameworkManager.createAlgorithm(op)
     alg.setPropertyValue("InputWorkspace", self.name())
     alg.setPropertyValue("OutputWorkspace", output_name)
     alg.execute()
-    resultws = _ads[output_name]
+    resultws = AnalysisDataService[output_name]
 
     if clear_tmps:
         for name in _workspace_op_tmps:
-            if name in _ads and output_name != name:
-                _ads.remove(name)
+            if name in AnalysisDataService and output_name != name:
+                AnalysisDataService.remove(name)
         _workspace_op_tmps = []
         
     return resultws

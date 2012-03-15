@@ -1,20 +1,20 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService, MatrixWorkspace, Workspace
+from mantid import AnalysisDataService, AnalysisDataServiceImpl, MatrixWorkspace, Workspace
 from mantid import mtd
 
 class AnalysisDataServiceTest(unittest.TestCase):
   
     def test_len_returns_correct_value(self):
-        self.assertEquals(len(AnalysisDataService.Instance()), 0)
+        self.assertEquals(len(AnalysisDataService), 0)
         
     def test_mtd_is_same_object_type_as_analysis_data_service(self):
-        self.assertTrue(isinstance(AnalysisDataService.Instance(), AnalysisDataService))
-        self.assertTrue(isinstance(mtd, AnalysisDataService))
+        self.assertTrue(isinstance(AnalysisDataService, AnalysisDataServiceImpl))
+        self.assertTrue(isinstance(mtd, AnalysisDataServiceImpl))
 
     def test_retrieval_of_non_existent_data_raises_KeyError(self):
         try:
-            AnalysisDataService.Instance()['NotHere']
+            AnalysisDataService['NotHere']
             self.fail('AnalysisDataService did not throw when object does not exist')
         except KeyError:
             pass
@@ -29,19 +29,19 @@ class AnalysisDataServiceTest(unittest.TestCase):
         
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
-        current_len = len(AnalysisDataService.Instance())
+        current_len = len(AnalysisDataService)
         self._run_createws(wsname)
-        self.assertEquals(len(AnalysisDataService.Instance()), current_len + 1)
+        self.assertEquals(len(AnalysisDataService), current_len + 1)
         # Remove to clean the test up
-        AnalysisDataService.Instance().remove(wsname)
+        AnalysisDataService.remove(wsname)
         
     def test_len_decreases_when_item_removed(self):
         wsname = 'ADSTest_test_len_decreases_when_item_removed'
         self._run_createws(wsname)
-        current_len = len(AnalysisDataService.Instance())
+        current_len = len(AnalysisDataService)
         # Remove to clean the test up
-        del AnalysisDataService.Instance()[wsname]
-        self.assertEquals(len(AnalysisDataService.Instance()), current_len - 1)
+        del AnalysisDataService[wsname]
+        self.assertEquals(len(AnalysisDataService), current_len - 1)
     
     def do_check_for_matrix_workspace_type(self, workspace):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
@@ -53,14 +53,14 @@ class AnalysisDataServiceTest(unittest.TestCase):
     def test_retrieve_gives_back_derived_type_not_DataItem(self):
         wsname = 'ADSTest_test_retrieve_gives_back_derived_type_not_DataItem'
         self._run_createws(wsname)
-        self.do_check_for_matrix_workspace_type(AnalysisDataService.Instance().retrieve(wsname))
-        AnalysisDataService.Instance().remove(wsname)
+        self.do_check_for_matrix_workspace_type(AnalysisDataService.retrieve(wsname))
+        AnalysisDataService.remove(wsname)
     
     def test_key_operator_does_same_as_retrieve(self):
         wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
         self._run_createws(wsname)
-        ws_from_op = AnalysisDataService.Instance()[wsname]
-        ws_from_method = AnalysisDataService.Instance().retrieve(wsname)
+        ws_from_op = AnalysisDataService[wsname]
+        ws_from_method = AnalysisDataService.retrieve(wsname)
         
         self.do_check_for_matrix_workspace_type(ws_from_op)
         self.do_check_for_matrix_workspace_type(ws_from_method)
@@ -69,7 +69,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertEquals(ws_from_op.getMemorySize(), ws_from_method.getMemorySize())
 
         # Remove to clean the test up
-        AnalysisDataService.Instance().remove(wsname)
+        AnalysisDataService.remove(wsname)
 
     def test_removing_item_invalidates_extracted_handles(self):
         # If a reference to a DataItem has been extracted from the ADS
@@ -77,7 +77,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         # be able to access the DataItem
         wsname = 'ADSTest_test_removing_item_invalidates_extracted_handles'
         self._run_createws(wsname)
-        ws_handle = AnalysisDataService.Instance()[wsname]
+        ws_handle = AnalysisDataService[wsname]
         succeeded = False
         try:
             ws_handle.id() # Should be okay
@@ -85,11 +85,11 @@ class AnalysisDataServiceTest(unittest.TestCase):
         except RuntimeError:
             pass
         self.assertTrue(succeeded, "DataItem handle should be valid and allow function calls")
-        AnalysisDataService.Instance().remove(wsname)
+        AnalysisDataService.remove(wsname)
         self.assertRaises(RuntimeError, ws_handle.id)
         
     def test_importAll_exists_as_member(self):
-        self.assertTrue(hasattr(AnalysisDataService.Instance(), "importAll"))
+        self.assertTrue(hasattr(AnalysisDataService, "importAll"))
         
     def test_importAll_creates_variable_in_current_global_dict_pointing_to_each_workspace(self):
         obj_names = mtd.getObjectNames()

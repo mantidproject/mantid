@@ -47,19 +47,19 @@ class PythonAlgorithmTest(unittest.TestCase):
             registerAlgorithm(TestPyAlgOverriddenAttrs)
             
     def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
-        alg = AlgorithmManager.Instance().create("TestPyAlgDefaultAttrs")
+        alg = AlgorithmManager.create("TestPyAlgDefaultAttrs")
         self.assertTrue(isinstance(alg, AlgorithmProxy))
         self.assertTrue(isinstance(alg, IAlgorithm))
 
     def test_unmanaged_alg_is_descendent_of_PythonAlgorithm(self):
-        alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDefaultAttrs")
+        alg = AlgorithmManager.createUnmanaged("TestPyAlgDefaultAttrs")
         self.assertTrue(isinstance(alg, PythonAlgorithm))
         self.assertTrue(isinstance(alg, Algorithm))
         self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_alg_with_default_attrs(self):
-        testhelpers.assertRaisesNothing(self,AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")
-        alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDefaultAttrs")
+        testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "TestPyAlgDefaultAttrs")
+        alg = AlgorithmManager.createUnmanaged("TestPyAlgDefaultAttrs")
         testhelpers.assertRaisesNothing(self,alg.initialize)
        
         self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
@@ -67,8 +67,8 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.category(), "PythonAlgorithms")
 
     def test_alg_with_overridden_attrs(self):
-        testhelpers.assertRaisesNothing(self,AlgorithmManager.Instance().createUnmanaged, "CoolAlgorithm")
-        alg = AlgorithmManager.Instance().createUnmanaged("CoolAlgorithm")
+        testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "CoolAlgorithm")
+        alg = AlgorithmManager.createUnmanaged("CoolAlgorithm")
         self.assertEquals(alg.name(), "CoolAlgorithm")
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")

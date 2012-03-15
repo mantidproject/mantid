@@ -20,7 +20,8 @@ from validators import *
 ###############################################################################
 # Make the singleton objects available as named variables 
 ###############################################################################
-config = ConfigService.Instance()
+ConfigService = ConfigServiceImpl.Instance()
+config = ConfigService #shorter alias
 
 ###############################################################################
 # Set up a general Python logger. Others can be created as they are required

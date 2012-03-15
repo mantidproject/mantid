@@ -11,7 +11,7 @@ def run_algorithm(name, **kwargs):
         name - The name of the algorithm
         kwargs - A dictionary of property name:value pairs
     """
-    alg = AlgorithmManager.Instance().createUnmanaged(name)
+    alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     # Avoid problem that Load needs to set Filename first if it exists
     if name == 'Load' and 'Filename' in kwargs:

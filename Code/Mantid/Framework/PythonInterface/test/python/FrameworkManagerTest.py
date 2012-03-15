@@ -1,15 +1,15 @@
 import unittest
 import testhelpers
-from mantid.api import FrameworkManager, AlgorithmProxy
+from mantid.api import FrameworkManager, FrameworkManagerImpl, AlgorithmProxy
 
 class FrameworkManagerTest(unittest.TestCase):
 
     def test_clear_functions_do_not_throw(self):
         # Test they don't throw for now
-        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clear)
-        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clearData)
-        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clearAlgorithms)
-        testhelpers.assertRaisesNothing(self, FrameworkManager.Instance().clearInstruments)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.clear)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.clearData)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.clearAlgorithms)
+        testhelpers.assertRaisesNothing(self, FrameworkManager.clearInstruments)
         
     def _is_managed_test(self, alg, version):
         self.assertTrue(alg.isInitialized())
@@ -19,11 +19,11 @@ class FrameworkManagerTest(unittest.TestCase):
         self.assertTrue(alg.__async__)
         
     def test_create_algorithm_produces_managed_alg_outside_PyExec_with_async_attr_and_is_true(self):
-        alg = FrameworkManager.Instance().createAlgorithm("Rebin")
+        alg = FrameworkManager.createAlgorithm("Rebin")
         self._is_managed_test(alg, 1)
         
     def test_create_algorithm_with_version_produces_managed_alg_outside_PyExec_with_async_and_is_true(self):
-        alg = FrameworkManager.Instance().createAlgorithm("LoadRaw", 2)
+        alg = FrameworkManager.createAlgorithm("LoadRaw", 2)
         self._is_managed_test(alg, 2)
         
     def test_create_algorithm_produces_unmanaged_inside_PyExec_with_async_and_is_false(self):
@@ -34,7 +34,7 @@ class FrameworkManagerTest(unittest.TestCase):
                 self._test_obj = test_object
             
             def PyExec(self):
-                alg = FrameworkManager.Instance().createAlgorithm("Rebin")
+                alg = FrameworkManager.createAlgorithm("Rebin")
                 self._test_obj.assertTrue(alg.isInitialized())
                 self._test_obj.assertFalse(isinstance(alg, AlgorithmProxy))
                 self._test_obj.assertTrue(hasattr(alg, '__async__'))

@@ -8,7 +8,7 @@ class AlgorithmTest(unittest.TestCase):
 
     def setUp(self):
         if self._load is None:
-            self.__class__._load = AlgorithmManager.Instance().createUnmanaged('Load')
+            self.__class__._load = AlgorithmManager.createUnmanaged('Load')
             self._load.initialize()
   
     def test_alg_attrs_are_correct(self):
@@ -23,13 +23,13 @@ class AlgorithmTest(unittest.TestCase):
         self._load.setProperty('Filename', 'LOQ48127.raw')
         
     def test_alg_set_invalid_prop_raises_error(self):
-        alg = AlgorithmManager.Instance().createUnmanaged('Load')
+        alg = AlgorithmManager.createUnmanaged('Load')
         alg.initialize()
         args = ('Filename', 'nonexistent.txt')
         self.assertRaises(ValueError, alg.setProperty, *args)
         
     def test_cannot_execute_with_invalid_properties(self):
-        alg = AlgorithmManager.Instance().createUnmanaged('Load')
+        alg = AlgorithmManager.createUnmanaged('Load')
         alg.initialize()
         self.assertRaises(RuntimeError, alg.execute)
         
