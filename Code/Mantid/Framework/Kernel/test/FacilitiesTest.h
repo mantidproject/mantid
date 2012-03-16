@@ -120,6 +120,27 @@ public:
 
     TS_ASSERT_EQUALS(fac->name(),"ISIS");
     TS_ASSERT_EQUALS(fac->archiveSearch().size(),0);
+
+    delete fac;
+  }
+
+  void testListener()
+  {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility name=\"TESTER\" FileExtensions=\"*.*\" >"
+      "    <livedata listener=\"Listener1\" />"
+      "    <instrument name=\"ABCD\" >"
+      "      <livedata listener=\"Listener2\" />"
+      "      <technique>None</technique>"
+      "    </instrument>"
+      "  </facility>"
+      "</facilities>";
+
+    FacilityInfo* fac = getFacility(xmlStr);
+    TS_ASSERT(fac);
+    TS_ASSERT_EQUALS( fac->liveListener(), "Listener1" );
+    delete fac;
   }
 
 private:
@@ -139,7 +160,11 @@ private:
     Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_facility->item(0));
     TS_ASSERT(elem);
 
-    return new FacilityInfo(elem);
+    FacilityInfo * facility = new FacilityInfo(elem);
+    pNL_facility->release();
+    pDoc->release();
+
+    return facility;
   }
 
 };

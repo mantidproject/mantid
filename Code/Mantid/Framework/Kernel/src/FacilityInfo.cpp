@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <iostream>
 
+using Poco::XML::Element;
+
 namespace Mantid
 {
 namespace Kernel
@@ -42,6 +44,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillArchiveNames(elem);
   fillCatalogName(elem);
   fillInstruments(elem);
+  fillLiveListener(elem);
 }
 
 /// Called from constructor to fill zero padding field
@@ -106,11 +109,13 @@ void FacilityInfo::fillSoapEndPoint(const Poco::XML::Element* elem)
     g_log.error("Facility must have only one soapEndPoint tag");
     throw std::runtime_error("Facility must have only one csoapEndPoint tag");
   }
-
-  Poco::XML::Element* endpoint = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
-  if(!endpoint->getAttribute("url").empty())
+  else if (pNL_soapEndPoint->length() == 1)
   {
-    m_soapEndPoint= endpoint->getAttribute("url");
+    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
+    if(!elem->getAttribute("url").empty())
+    {
+      m_soapEndPoint= elem->getAttribute("url");
+    }
   }
   pNL_soapEndPoint->release();
 }
@@ -151,13 +156,14 @@ void FacilityInfo::fillCatalogName(const Poco::XML::Element* elem)
     g_log.error("Facility must have only one catalog tag");
     throw std::runtime_error("Facility must have only one catalog tag");
   }
-
-  Poco::XML::Element* catalog = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
-  if(!catalog->getAttribute("name").empty())
+  else if (pNL_catalogs->length() == 1)
   {
-    m_catalogName= catalog->getAttribute("name");
+    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
+    if(!elem->getAttribute("name").empty())
+    {
+      m_catalogName= elem->getAttribute("name");
+    }
   }
-
   pNL_catalogs->release();
 }
 
@@ -187,6 +193,18 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element* elem)
   if (m_instruments.empty())
   {
     throw std::runtime_error("Facility "+m_name+" does not have any instruments;");
+  }
+}
+
+/// Called from constructor to fill instrument list
+void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
+{
+  // Get the first livedata element (will be NULL if there's none)
+  Element * live = elem->getChildElement("livedata");
+  if ( live )
+  {
+    // Get the name of the listener - empty string will be returned if missing
+    m_liveListener = live->getAttribute("listener");
   }
 }
 

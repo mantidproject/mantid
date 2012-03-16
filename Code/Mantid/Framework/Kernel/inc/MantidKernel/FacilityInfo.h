@@ -91,6 +91,7 @@ private:
   void fillArchiveNames(const Poco::XML::Element* elem);
   void fillCatalogName(const Poco::XML::Element* elem);
   void fillInstruments(const Poco::XML::Element* elem);
+  void fillLiveListener(const Poco::XML::Element* elem);
 
   /// Add new extension
   void addExtension(const std::string& ext);
