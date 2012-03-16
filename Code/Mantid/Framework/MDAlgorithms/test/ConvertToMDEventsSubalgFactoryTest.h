@@ -28,7 +28,7 @@ void testInit()
     TS_ASSERT_THROWS_NOTHING(pFact->initSubalgorithms(*pParams));
 }
 
-ConvertToMDEventsSubalgFactoryTest::ConvertToMDEventsSubalgFactoryTest()
+ConvertToMDEventsSubalgFactoryTest()
 {
         pFact = std::auto_ptr<ConvertToMDEventsSubalgFactory>(new ConvertToMDEventsSubalgFactory());
         pParams=std::auto_ptr<ConvertToMDEventsParams>(new ConvertToMDEventsParams());
