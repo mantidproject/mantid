@@ -76,6 +76,9 @@ namespace Crystal
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "Path to an ISAW-style UB matrix text file.");
+
+    declareProperty("CheckUMatrix", true,
+          "If true then the U Matrix validity is checked before creating the oriented lattice");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -130,8 +133,8 @@ namespace Crystal
       U2[0][r] = U[1][r];
     }
     U = U2;
-
-    latt->setU( U );
+    const bool checkU = getProperty("CheckUMatrix");
+    latt->setU(U, !checkU);
 
     // Save it into the workspace
     ws->mutableSample().setOrientedLattice(latt);

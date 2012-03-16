@@ -104,10 +104,12 @@ namespace Geometry
   }
 
   /** Sets the U matrix
-    @param newU :: the new U matrix*/
-  void OrientedLattice::setU(const DblMatrix& newU)
+    @param newU :: the new U matrix
+    @param force :: If true, do not check that U matrix is valid
+    */
+  void OrientedLattice::setU(const DblMatrix& newU, const bool force)
   {
-    if (newU.isRotation()==true)
+    if (force || newU.isRotation())
     {
       U=newU;
       UB=U*getB();
