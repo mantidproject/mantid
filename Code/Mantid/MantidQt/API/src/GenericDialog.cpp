@@ -103,25 +103,23 @@ void GenericDialog::initLayout()
   int screenHeight = QApplication::desktop()->height();
   int dialogHeight = viewport->sizeHint().height();
 
-//  std::cout << m_propsWidget->sizeHint().height() << " m_propsWidget->sizeHint().height()\n";
-//  std::cout << viewport->sizeHint().height() << " viewport->sizeHint().height()\n";
-//  std::cout << viewport->layout()->sizeHint().height() << " viewport->layout()->sizeHint().height\n";
-//  std::cout << m_propsWidget->size().height() << " m_propsWidget->size().height()\n";
-//  std::cout << viewport->size().height() << " viewport->size().height()\n";
-//  std::cout << this->size().height() << " this->size().height()\n";
-
   // If the thing won't end up too big compared to the screen height,
   // resize the scroll area so we don't get a scroll bar
   if ( (dialogHeight+100) < 0.8*screenHeight )
   {
     m_propsWidget->m_scroll->setMinimumHeight(dialogHeight+10);
+
     // Find the size that the dialog WANTS to be.
     dialogHeight = this->sizeHint().height();
-//    int dialogWidth = this->sizeHint().height() + 25;
+
+    // Choose a width given the desired size, but limit it
+    int dialogWidth = this->sizeHint().width() + 25;
+    if (dialogWidth > 640) dialogWidth = 640;
+
     // But allow the scroll area to resize smaller again
     m_propsWidget->m_scroll->setMinimumHeight(60);
     // But resize the dialog again to its preferred size.
-    this->resize(this->width(), dialogHeight);
+    this->resize(dialogWidth, dialogHeight);
   }
 
   // Set all previous values (from history, etc.)
