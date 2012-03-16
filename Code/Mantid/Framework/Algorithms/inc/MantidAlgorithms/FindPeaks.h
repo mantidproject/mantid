@@ -93,7 +93,7 @@ private:
 
   bool checkFitResultParameterNames(std::vector<std::string> paramnames, std::string backgroundtype, std::string &errormessage);
 
-  void createFunctions(const std::string& backgroundtype);
+  API::IFitFunction_sptr createFunction(const bool withPeak = true);
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
@@ -109,11 +109,6 @@ private:
   int index; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool mHighBackground; ///<flag for find relatively weak peak in high background
-
-  // Functions for reused 
-  API::IFitFunction_sptr m_peakFunction;
-  API::IFitFunction_sptr m_backgroundFunction;
-  API::IFitFunction_sptr m_peakAndBackgroundFunction;
 
   unsigned int minGuessedPeakWidth;
   unsigned int maxGuessedPeakWidth;
