@@ -211,6 +211,7 @@ DiffSphere::DiffSphere(){
   API::ParameterTie* tie_Q=new API::ParameterTie(this,"f0.Q");
   tie_Q->set("f0.Q=f1.Q");
   addTie(tie_Q);
+
   applyTies();
 }
 

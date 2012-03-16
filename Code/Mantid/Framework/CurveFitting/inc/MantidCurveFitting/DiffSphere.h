@@ -57,6 +57,8 @@ namespace Mantid
       ElasticDiffSphere();
       /// Destructor
       virtual ~ElasticDiffSphere() {};
+      /// overwrite IFunction base class methods
+      std::string name()const{return "ElasticDiffSphere";}
       double HeightPrefactor() const;
 
     };
@@ -106,8 +108,9 @@ namespace Mantid
       virtual int version() const { return 1;}
 
     private:
-      API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
-      API::IFunctionMW* m_inelastic;  //inelastic intensity of the DiffSphere structure factor
+      //API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
+      ElasticDiffSphere *m_elastic;
+      InelasticDiffSphere *m_inelastic;  //inelastic intensity of the DiffSphere structure factor
     };
 
   } // namespace CurveFitting

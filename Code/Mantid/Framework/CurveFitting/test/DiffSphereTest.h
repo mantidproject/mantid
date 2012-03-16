@@ -274,6 +274,7 @@ public:
     ds->setParameter("f1.Radius",R);
     ds->setParameter("f1.Diffusion",D);
     ds->applyTies(); //update the ties between elastic and inelastic parts
+
     conv.addFunction(ds);
 
     //set up some frequency values centered around zero
@@ -285,11 +286,16 @@ public:
     //obtain the set of values from the convolution and store in array 'in'
     conv.functionMW(in,w,N);
 
-    //Initialize to some other values.
-    ds->setParameter("f1.Intensity",1.1);
-    ds->setParameter("f1.Q",1.1);
-    ds->setParameter("f1.Radius",1.1);
-    ds->setParameter("f1.Diffusion",1.1);
+    //Initialize now the parameters to some other values.
+    ds->setParameter("f0.Height",1.0);
+    ds->setParameter("f0.Radius",1.1);
+    ds->setParameter("f0.Q",1.2);
+
+    ds->setParameter("f1.Intensity",1.3);
+    ds->setParameter("f1.Radius",1.4);
+    ds->setParameter("f1.Diffusion",1.5);
+    ds->setParameter("f1.Q",1.6);
+
     ds->applyTies();  //update the ties between elastic and inelastic parts
 
     //Set up the workspace
@@ -301,13 +307,20 @@ public:
     Mantid::MantidVec& x = ws2D->dataX(0); // x-values (frequencies)
     Mantid::MantidVec& y = ws2D->dataY(0); // y-values (structure factor)
     Mantid::MantidVec& e = ws2D->dataE(0); // error values of the structure factor
- 	const double cc=0.1;
+    const double cc=0.1;
     for(int i=0; i<N; i++){
       x[i] = w[i];
       y[i] = in[i];
       e[i] = cc*in[i];
     }
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D)); //put workspace in the data service
+
+    //Initialize the fitting algorithm
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+    alg2.setPropertyValue("Function",conv.asString());
+
   } // end of testDiffSphere
 
 };
