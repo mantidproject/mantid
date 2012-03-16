@@ -276,7 +276,7 @@ void testGetWS4DimIDFine()
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlDirectCnvNo",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DRuggedQhQkQlDirectCnvNo",Alg_ID);
     TS_ASSERT(!is_detInfoLost);
 }
 void testGetWS3DimIDFine()
@@ -298,7 +298,7 @@ void testGetWS3DimIDFine()
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlElasticCnvByTOF",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DRuggedQhQkQlElasticCnvByTOF",Alg_ID);
     TS_ASSERT(!is_detInfoLost);
 }
 void testGetWSDimNames2AxisNoQ()
@@ -355,7 +355,7 @@ void testIdentifyMatrixAlg_1()
     bool is_detInfoLost;
     ConvertToMDEventsParams params;
 
-    TS_ASSERT_EQUALS("WS2DCopyToMDNoDECnvNo",params.identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DRuggedCopyToMDNoDECnvNo",params.identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_names,dim_units,is_detInfoLost));
     TS_ASSERT_EQUALS(ws_dim_names[0],dim_names[0]);
     TS_ASSERT_EQUALS(ws_dim_names[1],dim_names[1]);
     TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
@@ -404,7 +404,7 @@ void testIdentifyMatrixAlg_2()
     pAx = new API::NumericAxis(3);
     pAx->setUnit("TOF");
     ws2D->replaceAxis(0,pAx);
-    TS_ASSERT_EQUALS("WS2D|Q|ElasticCnvFromTOF",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DRugged|Q|ElasticCnvFromTOF",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
 
     TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be logically wrong)",1,dim_names.size());
@@ -425,7 +425,7 @@ void testIdentifyMatrixAlg_3()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2D|Q|DirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DRugged|Q|DirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units,is_detInfoLost));
     TSM_ASSERT_EQUALS("One dimension comes from Q",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
@@ -445,7 +445,7 @@ void testIdentifyMatrixAlg_4()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2D|Q|IndirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DRugged|Q|IndirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units,is_detInfoLost));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
@@ -464,7 +464,7 @@ void testIdentifyMatrixAlg_5()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2DQhQkQlIndirectCnvNo",params.identifyMatrixAlg(ws2D,"QhQkQl","Indirect",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DRuggedQhQkQlIndirectCnvNo",params.identifyMatrixAlg(ws2D,"QhQkQl","Indirect",dim_names,dim_units,is_detInfoLost));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"Q1");
     TS_ASSERT_EQUALS(dim_names[1],"Q2");

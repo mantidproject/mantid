@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
 	src/ConvertToMDEventsParams.cpp
+	src/ConvertToMDEventsSubalgFactory.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -67,6 +68,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -118,6 +120,7 @@ set ( TEST_FILES
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsParamsTest.h	
 	test/ConvertToMDEventsUnitsConvTest.h
+	test/ConvertToMDEventsSubalgFactoryTest.h	
 	test/ConvertToQ3DdETest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h

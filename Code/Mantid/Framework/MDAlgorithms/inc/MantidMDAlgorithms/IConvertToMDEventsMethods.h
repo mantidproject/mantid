@@ -95,6 +95,29 @@ namespace MDAlgorithms
 
 };
 
+/// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
+template<InputWSType WS,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
+{ 
+public:
+    ConvertToMDEventsWS(){};
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+    {
+        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
+    }
+
+    void runConversion(API::Progress *)
+    {
+        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
+    }
+private:
+    virtual size_t conversionChunk(size_t job_ID)
+    {
+        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
+    }
+};
+
+
  
 
 } // end namespace MDAlgorithms

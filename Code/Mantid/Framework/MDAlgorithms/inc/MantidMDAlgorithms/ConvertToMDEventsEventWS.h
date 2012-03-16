@@ -52,7 +52,7 @@ namespace MDAlgorithms
 
 // Class to process event workspace by direct conversion:
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods 
+class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
@@ -63,7 +63,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates
-    std::vector<coord_t> Coord;
+     std::vector<coord_t> Coord;
  public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)

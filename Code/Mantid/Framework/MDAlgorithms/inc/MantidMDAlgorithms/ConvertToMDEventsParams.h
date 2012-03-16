@@ -10,10 +10,10 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** Helper class describes the possible properties of the algorithm, which converts a workspace to MDEventWorkspace 
+/** Helper class describes the possible properties of the algorithm, converting a workspace to a MDEventWorkspace 
   *
   *  It is used to convert user input and input data into the key, which is responsible for calling appropriate 
-  *  subalgorithm, performing actual conversion.
+  *  subalgorithm, performing the actual conversion.
   *
   * @date 14-03-2012
 
@@ -66,7 +66,8 @@ namespace MDAlgorithms
   };
   enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
   {
-      Workspace2DType, //< 2D matirix workspace
+      Ws2DAlighnType, //< 2D matirix workspace with the same x-axis for each sign
+      Ws2DRuggedType, //<2D matirix workspace with own x-axis for every sign
       EventWSType,     //< Event worskapce
       NInWSTypes
   };

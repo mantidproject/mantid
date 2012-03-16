@@ -1,10 +1,10 @@
 #ifndef MANTID_MD_CONVERT2_MDEVENTS
 #define MANTID_MD_CONVERT2_MDEVENTS
 
-#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
 
 namespace Mantid
 {
@@ -75,11 +75,6 @@ namespace MDAlgorithms
     /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
   //------------------------------------------------------------------------------------------------------------------------------------------
-    ConvertToMDEventsParams ParamParser;
-    /// string -Key to identify the algorithm -- rather for testing and debugging, though may be reliet upon somewhere by bad practice
-    std::string algo_id;
-
-
     /// the properties of the requested target MD workpsace:
     MDEvents::MDWSDescription TWS;
  
@@ -99,15 +94,11 @@ namespace MDAlgorithms
    /// construct meaningful dimension names:
    void buildDimNames(MDEvents::MDWSDescription &TargWSDescription);
  
-   /// map to select an algorithm as function of the key, which describes it
-   std::map<std::string, IConvertToMDEventsMethods *> alg_selector;
   private: 
-   //--------------------------------------------------------------------------------------------------   
-     /// helper class to orginize metaloop instantiating various subalgorithms 
-     template<Q_state Q,size_t N_ALGORITHMS >
-     friend class LOOP_ALGS;
-  
-  
+    /// the class which generates alforithm ID as function of input parameters and knows about existing subalgorithms. 
+    ConvertToMDEventsParams ParamParser;   
+    /// The class which contains all existing subalgorithms to convert to MDEventWorkspace. Shoud be done through a singleton if used elsewhere, not only here. 
+    ConvertToMDEventsSubalgFactory  subAlgFactory;
     /** helper function which verifies if projection vectors are specified and if their values are correct when present.
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
     void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;

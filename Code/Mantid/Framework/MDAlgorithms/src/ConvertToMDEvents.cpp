@@ -33,12 +33,6 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidMDEvents/MDEventFactory.h"
 //
 #include "MantidDataObjects/Workspace2D.h"
-//
-#include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
-
 
 #include <algorithm>
 #include <float.h>
@@ -80,13 +74,6 @@ void ConvertToMDEvents::initDocs()
  */
 ConvertToMDEvents::~ConvertToMDEvents()
 {
-
-    std::map<std::string, IConvertToMDEventsMethods *>::iterator it;
-
-    for(it= alg_selector.begin(); it!=alg_selector.end();++it){
-        delete it->second;  
-    }
-    alg_selector.clear();
 }
 //
 //const double rad2deg = 180.0 / M_PI;
@@ -191,8 +178,9 @@ ConvertToMDEvents::init()
 /* Execute the algorithm.   */
 void ConvertToMDEvents::exec()
 {
-  // in case of subsequent calls
-  this->algo_id="";
+    // initiate all availible subalgorithms for further usage (it will do it only once);
+    this->subAlgFactory.initSubalgorithms(ParamParser);
+
   // initiate class which would deal with any dimension workspaces, handling 
   if(!pWSWrapper.get()){
     pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
@@ -242,7 +230,7 @@ void ConvertToMDEvents::exec()
     bool convert_to_hkl                      = getProperty("QinHKL");
 
     // Identify the algorithm to deploy and 
-    algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,pWSWrapper->getMaxNDim(),TWS);
+    std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,pWSWrapper->getMaxNDim(),TWS);
     // identify/set the (multi)dimension's names to use
     // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
     // also (temporary) redefines transformation matrix in convert to hkl mode
@@ -305,7 +293,7 @@ void ConvertToMDEvents::exec()
   }
 
   // call selected algorithm
-  IConvertToMDEventsMethods * algo =  alg_selector[algo_id];
+  IConvertToMDEventsMethods * algo =  subAlgFactory.getAlg(algo_id);
   if(algo)
   {
      size_t n_steps = algo->setUPConversion(inWS2D,det_loc,TWS, pWSWrapper);
@@ -489,91 +477,6 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
     TargWSDescription.u=u;
     TargWSDescription.v=v;
 }
-// TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
-//e.g.
-// template<> void ConvertToMDEvents::processQND<modQ,Elastic,ConvertNo>()
-// {
-//   User specific code for workspace  processed to obtain modQ in elastic mode, without unit conversion:
-// }
-//----------------------------------------------------------------------------------------------
-// AUTOINSTANSIATION OF EXISTING CODE:
-/** helper class to orginize metaloop instantiating various subalgorithms dealing with particular 
-  * workspaces and implementing particular user requests */
-template<Q_state Q, size_t NumAlgorithms=0>
-class LOOP_ALGS{
-private:
-    enum{
-        CONV = NumAlgorithms%NConvUintsStates,           // internal oop over conversion modes, the variable changes first
-        MODE = (NumAlgorithms/NConvUintsStates)%ANY_Mode // one level up loop over momentum conversion mode  
-    
-    };
-  public:
-    static inline void EXEC(ConvertToMDEvents *pH){
-        // cast loop integers to proper enum type
-        CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
-        AnalMode   Mode = static_cast<AnalMode>(MODE);
-
-        std::string  Key = pH->ParamParser.getAlgoID(Q,Mode,Conv,Workspace2DType);
-        pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-                (new ConvertToMDEvensHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
-
-        Key = pH->ParamParser.getAlgoID(Q,Mode,Conv,EventWSType);
-        pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-            (new ConvertToMDEvensEventWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
-
-/*#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif*/
-            LOOP_ALGS<Q, NumAlgorithms+1>::EXEC(pH);
-    }
-};
-
-/** Templated metaloop specialization for noQ case */
-template< size_t NumAlgorithms>
-class LOOP_ALGS<NoQ,NumAlgorithms>{
-private:
-    enum{
-        CONV = NumAlgorithms%NConvUintsStates       // internal Loop over conversion modes, the variable changes first
-        //MODE => noQ -- no mode conversion ANY_Mode, 
-    
-    };
-  public:
-    static inline void EXEC(ConvertToMDEvents *pH){
-
-      // cast loop integers to proper enum type
-      CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
-
-      std::string  Key0  = pH->ParamParser.getAlgoID(NoQ,ANY_Mode,Conv,Workspace2DType);
-      pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key0,
-                         (new ConvertToMDEvensHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
-
-       std::string  Key1 = pH->ParamParser.getAlgoID(NoQ,ANY_Mode,Conv,EventWSType);
-       pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key1,
-                       (new ConvertToMDEvensEventWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
-
-           
-//#ifdef _DEBUG
-//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-//#endif
-
-             LOOP_ALGS<NoQ,NumAlgorithms+1>::EXEC(pH);
-    }
-};
-
-/** Q3d and modQ metaloop terminator */
-template<Q_state Q >
-class LOOP_ALGS<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
-  public:
-      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
-};
-
-/** ANY_Mode (NoQ) metaloop terminator */
-template<>
-class LOOP_ALGS<NoQ,static_cast<size_t>(NConvUintsStates) >{
-  public:
-      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
-};
-//-------------------------------------------------------------------------------------------------------------------------------
 
 /** Constructor 
  *  picks up an instanciates all known sub-algorithms for ConvertToMDEvents
@@ -583,16 +486,7 @@ ConvertToMDEvents::ConvertToMDEvents():
 // when N-dim constructor wass called
 TWS(4)
 {
-
-// Subalgorithm factories:
-// NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-   LOOP_ALGS<NoQ,0>::EXEC(this);
  
-// MOD Q
-    LOOP_ALGS<modQ,0>::EXEC(this);
-  // Q3D
-    LOOP_ALGS<Q3D,0>::EXEC(this);
-  
 }
 
 

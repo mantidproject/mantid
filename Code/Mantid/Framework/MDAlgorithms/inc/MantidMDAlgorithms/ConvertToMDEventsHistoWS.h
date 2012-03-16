@@ -53,9 +53,9 @@ namespace MDAlgorithms
 #define SPLIT_LEVEL  2048
 
 //-----------------------------------------------
-// Method to process histohram workspace
+// Method to process rugged histohram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ConvertToMDEvensHistoWS: public IConvertToMDEventsMethods 
+class ConvertToMDEventsWS<Ws2DRuggedType,Q,MODE,CONV>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
@@ -70,7 +70,6 @@ public:
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
-
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
         trn.setUpTransf(this); 
 
