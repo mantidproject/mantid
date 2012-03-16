@@ -3,7 +3,7 @@
 
 import sys
 import time
-import argparse
+import optparse
 import os
 
 from PyQt4 import QtGui, uic, QtCore
@@ -634,17 +634,24 @@ def start():
     settings_bin_folder = str(settings.value("bin_folder", "../../Mantid/bin").toString())
     settings_source_folder = str(settings.value("source_folder", "../../Mantid/Framework").toString())
     
-    parser = argparse.ArgumentParser(description='GUI to run and view Mantid tests.')
-    parser.add_argument('bin_folder', metavar='BINFOLDER', type=str, nargs='?',
-                        default="", 
-                        help='path to the bin/ folder that contains the test executables. Will use the last path used if not specified:\n%s' % settings_bin_folder)
-    parser.add_argument('source_folder', metavar='SOURCEFOLDER', type=str, nargs='?',
-                        default="", 
-                        help='path to the root of the framework source folder. Will use the last path used if not specified:\n%s' % settings_source_folder)
+    bin_folder = ""
+    if len(sys.argv) > 1: bin_folder = sys.argv[1]
     
-    args = parser.parse_args()
-    bin_folder = args.bin_folder
-    source_folder = args.source_folder
+    source_folder = ""
+    if len(sys.argv) > 2: source_folder = sys.argv[1]
+    
+    if bin_folder == "--help":
+        print """TestViewer.py [BINFOLDER] [SOURCEFOLDER]
+ GUI to run and view Mantid tests.
+
+   BINFOLDER       Path to the bin/ folder that contains the test executables.
+                   Will use the last path used if not specified: 
+                   %s
+   SOURCEFOLDER    Path to the root of the framework source folder. 
+                   Will use the last path used if not specified: 
+                   %s
+""" % (settings_bin_folder, settings_source_folder)
+        sys.exit()
     
     # No command line arguments? Get them from the settings
     if bin_folder == "":
