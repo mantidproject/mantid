@@ -79,8 +79,7 @@ public:
 
     const std::vector<InstrumentInfo> crysInstr = fac->instruments("Single Crystal Diffraction");
     TS_ASSERT_EQUALS(crysInstr.size(),1);
-
-    TS_ASSERT_THROWS(fac->instruments("rubbish category"), Exception::NotFoundError);
+    TS_ASSERT_EQUALS(fac->instruments("rubbish category").size(), 0);
 
     // Test default live listener is empty
     TS_ASSERT( fac->liveListener().empty() )
