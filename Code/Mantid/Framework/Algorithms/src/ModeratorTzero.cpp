@@ -174,8 +174,8 @@ void ModeratorTzero::exec()
       {
         outbins[j] = this->scaling*inbins[j] + offset;
       }
-      g_log.debug() << "inbins[0]=" << inbins[0] << " outbins[0]=" << outbins[0] << std::endl;
-      g_log.debug() << "inbins[last] " << inbins[inbins.size()-1] << " outbins[last]" << outbins[inbins.size()-1] << std::endl;
+      //g_log.debug() << "inbins[0]=" << inbins[0] << " outbins[0]=" << outbins[0] << std::endl;
+      //g_log.debug() << "inbins[last] " << inbins[inbins.size()-1] << " outbins[last]" << outbins[inbins.size()-1] << std::endl;
     }
     else
     {
@@ -254,10 +254,10 @@ void ModeratorTzero::execEvent()
       if(t_f > 0)
       {
         //Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
-        g_log.debug() << "dataX before: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
+        //g_log.debug() << "dataX before: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
         evlist.convertTof(this->scaling, (1-this->scaling)*t_f - this->scaling*intercept);
-        g_log.debug() << this->scaling << " " << (1-this->scaling)*t_f - this->scaling*intercept << std::endl;
-        g_log.debug() << "dataX after: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
+        //g_log.debug() << this->scaling << " " << (1-this->scaling)*t_f - this->scaling*intercept << std::endl;
+        //g_log.debug() << "dataX after: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
       }
     }
     prog.report();
@@ -270,7 +270,7 @@ void ModeratorTzero::execEvent()
 //calculate time from sample to detector. Determined only by detector specs
 double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorkspace_sptr inputWS, int64_t i)
 {
-  static const double convFact = sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
+  static const double convFact = 1.0e-6*sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; //signal error when calculating final time
   // Get detector position
   IDetector_const_sptr det;
@@ -290,16 +290,15 @@ double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorksp
   if ( !wsProp.empty() )
   {
     double E_f = wsProp.at(0); //[E_f]=meV
-    double v_f = convFact * sqrt(E_f);
-    g_log.debug() << "detector: " << i << " E_f:="<< E_f << " v_f=" << v_f << std::endl;
+    double v_f = convFact * sqrt(E_f); //[v_f]=meter/microsec
+    //g_log.debug() << "detector: " << i << " E_f:="<< E_f << " v_f=" << v_f << std::endl;
     //obtain L_f, calculate t_f
     double L_f;
     try
     {
       L_f = det->getDistance(*sample);
-      // Time needs to be in microseconds
-      t_f = (L_f / v_f) * 1.0e6;
-      g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
+      t_f = L_f / v_f;
+      //g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
     }
     catch (Exception::NotFoundError &)
     {
