@@ -84,6 +84,9 @@ private:
   static Logger& g_log;                    ///< logger
 };
 
+/// Allow this object to be printed to a stream
+std::ostream & operator<<(std::ostream & buffer, const InstrumentInfo & instrumentDescriptor);
+
 } // namespace Kernel
 } // namespace Mantid
 

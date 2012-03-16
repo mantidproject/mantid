@@ -1,7 +1,8 @@
 import unittest
 import os
 
-from mantid import ConfigService, ConfigServiceImpl, config, std_vector_str
+from mantid import (ConfigService, ConfigServiceImpl, config, 
+                    std_vector_str, FacilityInfo, InstrumentInfo)
 
 class ConfigServiceTest(unittest.TestCase):
 
@@ -18,6 +19,19 @@ class ConfigServiceTest(unittest.TestCase):
     def test_getUserFilename(self):
         user = config.getUserFilename().lower()
         self.assertTrue('user' in user)
+
+    def test_getFacilityReturns_A_FacilityInfo_Object(self):
+        facility = config.getFacility()
+        self.assertTrue(isinstance(facility, FacilityInfo))
+
+    def test_getFacility_With_Name_Returns_A_FacilityInfo_Object(self):
+        facility = config.getFacility("ISIS")
+        self.assertTrue(isinstance(facility, FacilityInfo))
+        self.assertRaises(RuntimeError, config.getFacility, "MadeUpFacility")
+
+    def test_getInstrumentReturns_A_InstrumentInfo_Object(self):
+        self.assertTrue(isinstance(config.getInstrument("WISH"), InstrumentInfo))
+        self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")
 
     def test_service_acts_like_dictionary(self):
         test_prop = "algorithms.retained"

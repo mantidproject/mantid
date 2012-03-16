@@ -131,7 +131,7 @@ def write_unittest(headerfile, overwrite):
 """import unittest
 from mantid import %(classname)s
 
-class %(classname)sTest(object):
+class %(classname)sTest(unittest.TestCase):
 
     def test_something(self):
         self.fail("Test something")

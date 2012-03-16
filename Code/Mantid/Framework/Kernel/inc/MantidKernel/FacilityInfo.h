@@ -74,11 +74,11 @@ public:
   /// Return the archive search interface names
   const std::vector<std::string> & archiveSearch() const { return m_archiveSearch; }
   /// Returns a list of instruments of this facility
-  const std::vector<InstrumentInfo> & Instruments() const { return m_instruments; }
+  const std::vector<InstrumentInfo> & instruments() const { return m_instruments; }
   /// Returns a list of instruments of given technique
-  std::vector<InstrumentInfo> Instruments(const std::string& tech) const;
+  std::vector<InstrumentInfo> instruments(const std::string& tech) const;
   /// Returns instruments with given name
-  const InstrumentInfo & Instrument(const std::string& iName = "") const;
+  const InstrumentInfo & instrument(const std::string& iName = "") const;
 
   /// Returns the catalog name
   const std::string & catalogName()const {return m_catalogName;}

@@ -5,6 +5,7 @@
 
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -58,26 +59,28 @@ public:
     TS_ASSERT_EQUALS(*it,"ADataSearch");
     TS_ASSERT_EQUALS(*++it,"BDataSearch");
 
-    const std::vector<InstrumentInfo> instrums = fac->Instruments();
+    const std::vector<InstrumentInfo> instrums = fac->instruments();
     TS_ASSERT_EQUALS(instrums.size(),2);
 
-    TS_ASSERT_THROWS_NOTHING(fac->Instrument("HRPD"));
-    InstrumentInfo instr = fac->Instrument("HRPD");
+    TS_ASSERT_THROWS_NOTHING(fac->instrument("HRPD"));
+    InstrumentInfo instr = fac->instrument("HRPD");
     TS_ASSERT_EQUALS(instr.name(),"HRPD");
     TS_ASSERT_EQUALS(instr.shortName(),"HRP");
     TS_ASSERT_EQUALS(instr.zeroPadding(),5);
 
-    TS_ASSERT_THROWS_NOTHING(fac->Instrument("WISH"));
-    instr = fac->Instrument("WISH");
+    TS_ASSERT_THROWS_NOTHING(fac->instrument("WISH"));
+    instr = fac->instrument("WISH");
     TS_ASSERT_EQUALS(instr.name(),"WISH");
     TS_ASSERT_EQUALS(instr.shortName(),"WISH");
     TS_ASSERT_EQUALS(instr.zeroPadding(),8);
 
-    const std::vector<InstrumentInfo> pwdInstr = fac->Instruments("Powder Diffraction");
+    const std::vector<InstrumentInfo> pwdInstr = fac->instruments("Powder Diffraction");
     TS_ASSERT_EQUALS(pwdInstr.size(),2);
 
-    const std::vector<InstrumentInfo> crysInstr = fac->Instruments("Single Crystal Diffraction");
+    const std::vector<InstrumentInfo> crysInstr = fac->instruments("Single Crystal Diffraction");
     TS_ASSERT_EQUALS(crysInstr.size(),1);
+
+    TS_ASSERT_THROWS(fac->instruments("rubbish category"), Exception::NotFoundError);
 
     // Test default live listener is empty
     TS_ASSERT( fac->liveListener().empty() )

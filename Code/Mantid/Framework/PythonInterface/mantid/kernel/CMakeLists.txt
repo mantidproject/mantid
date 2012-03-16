@@ -23,6 +23,8 @@ set ( EXPORT_FILES
   src/Exports/BoundedValidator.cpp
   src/Exports/TimeSeriesProperty.cpp
   src/Exports/DateAndTime.cpp
+  src/Exports/InstrumentInfo.cpp
+  src/Exports/FacilityInfo.cpp
 )  
 
 set ( SRC_FILES

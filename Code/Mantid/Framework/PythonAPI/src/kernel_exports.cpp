@@ -270,7 +270,7 @@ namespace PythonAPI
       ;
    }
 
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FacilityInfo_instrumentOverloads, Mantid::Kernel::FacilityInfo::Instrument, 0, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FacilityInfo_instrumentOverloads, Mantid::Kernel::FacilityInfo::instrument, 0, 1)
 
   void export_facilityinfo()
   {
@@ -279,9 +279,9 @@ namespace PythonAPI
       .def("zeroPadding", &FacilityInfo::zeroPadding)
       .def("extensions", &FacilityInfo::extensions)
       .def("preferredExt", &FacilityInfo::preferredExtension, return_value_policy<copy_const_reference>())
-      .def("instrument", &FacilityInfo::Instrument, FacilityInfo_instrumentOverloads()[return_value_policy<copy_const_reference>()])
-      .def("instruments", (const std::vector<InstrumentInfo>& (FacilityInfo::*)() const)&FacilityInfo::Instruments, return_value_policy<copy_const_reference>())
-      .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const)&FacilityInfo::Instruments)
+      .def("instrument", &FacilityInfo::instrument, FacilityInfo_instrumentOverloads()[return_value_policy<copy_const_reference>()])
+      .def("instruments", (const std::vector<InstrumentInfo>& (FacilityInfo::*)() const)&FacilityInfo::instruments, return_value_policy<copy_const_reference>())
+      .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const)&FacilityInfo::instruments)
       ;
   }
 
