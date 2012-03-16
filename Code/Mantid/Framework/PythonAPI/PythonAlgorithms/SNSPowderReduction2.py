@@ -315,8 +315,6 @@ class SNSPowderReduction2(PythonAlgorithm):
             if comm.size > 1:
                 alg = GatherWorkspaces(InputWorkspace=temp, OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
-                if comm.rank == 0:
-                    SumSpectra(wksp, wksp)
             else:
                 if firstChunk:
                     alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
