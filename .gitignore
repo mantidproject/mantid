@@ -148,14 +148,3 @@ Desktop.ini
 # Mac OS X Finder
 .DS_Store
 
-/Code/Mantid/Build/CMake/OutputBinaryTo.cmake
-
-Code/Mantid/instrument/Grouping/tempMuonAnalysisGrouping.xml
-
-/Code/Mantid/Framework/DataHandling/logs/.gitignore
-/Code/Mantid/Framework/DataObjects/test/.gitignore
-/Code/Mantid/Framework/MDAlgorithms/logs/.gitignore
-/Code/Mantid/Framework/MDEvents/test/mantid.log
-/Code/Mantid/Framework/CurveFitting/test/test_header.h
-/Code/Mantid/Framework/CurveFitting/test/test_header.cpp
-/Code/Mantid/Framework/Algorithms/test/mantid.log
