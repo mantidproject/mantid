@@ -70,8 +70,7 @@ void GatherWorkspaces::exec()
   }
 
   // Get the total number of spectra in the combined inputs
-  std::size_t totalSpec;
-  reduce(included, inputWorkspace->getNumberHistograms(), totalSpec, std::plus<std::size_t>(), 0);
+  std::size_t totalSpec = inputWorkspace->getNumberHistograms();
 
   // The root process needs to create a workspace of the appropriate size
   MatrixWorkspace_sptr outputWorkspace;
@@ -79,28 +78,27 @@ void GatherWorkspaces::exec()
   {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
-    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,1,numBins+hist,numBins);
+    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,totalSpec,numBins+hist,numBins);
     setProperty("OutputWorkspace",outputWorkspace);
   }
 
-  // Let's assume 1 spectrum in each workspace for the first try....
-  // TODO: Generalise
-
-  MantidVec out;
-  if ( world.rank() == 0 )
+  for (size_t wi = 0; wi < totalSpec; wi++)
   {
-    outputWorkspace->dataX(0) = inputWorkspace->readX(0);
-    reduce(included, inputWorkspace->readY(0), outputWorkspace->dataY(0), vplus(), 0);
-    reduce(included, inputWorkspace->readE(0), outputWorkspace->dataE(0), eplus(), 0);
-    const ISpectrum * inSpec = inputWorkspace->getSpectrum(0);
-    ISpectrum * outSpec = outputWorkspace->getSpectrum(0);
-    outSpec->clearDetectorIDs();
-    outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-  }
-  else
-  {
-    reduce(included, inputWorkspace->readY(0), vplus(), 0);
-    reduce(included, inputWorkspace->readE(0), eplus(), 0);
+    if ( world.rank() == 0 )
+    {
+      outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
+      reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi), vplus(), 0);
+      reduce(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi), eplus(), 0);
+      const ISpectrum * inSpec = inputWorkspace->getSpectrum(wi);
+      ISpectrum * outSpec = outputWorkspace->getSpectrum(wi);
+      outSpec->clearDetectorIDs();
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+    }
+    else
+    {
+      reduce(included, inputWorkspace->readY(wi), vplus(), 0);
+      reduce(included, inputWorkspace->readE(wi), eplus(), 0);
+    }
   }
 
 }
