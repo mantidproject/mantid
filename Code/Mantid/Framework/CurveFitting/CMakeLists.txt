@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
+	src/MuonFInteraction.cpp
 	src/MultiBG.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/PlotPeakByLogValue.cpp
@@ -86,6 +87,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
+	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/MultiBG.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
@@ -129,6 +131,7 @@ set ( TEST_FILES
 	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
+	test/MuonFInteractionTest.h
 	test/MultiBGTest.h
 	test/PlotPeakByLogValueTest.h
 	test/ProductFunctionMWTest.h
