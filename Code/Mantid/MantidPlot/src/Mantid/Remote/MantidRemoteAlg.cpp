@@ -1,15 +1,16 @@
 #include "MantidRemoteAlg.h"
-#include "MantidDock.h"
+#include "../MantidDock.h"
 #include "NewClusterDialog.h"
-#include "MantidUI.h"
+#include "../MantidUI.h"
 #include "RemoteJobManager.h"
 #include <QtGui>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
+#include <QDomDocument>
 
-#include "MantidWSIndexDialog.h"
-#include "FlowLayout.h"
+#include "../MantidWSIndexDialog.h"
+#include "../FlowLayout.h"
 
 #include <map>
 #include <vector>
@@ -47,7 +48,7 @@ QDockWidget(w),m_progressBar(NULL),m_mantidUI(mui)
     m_clusterCombo->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     QPushButton *newCluster = new QPushButton( tr("New Cluster"), f);
     QLabel *statusLabel = new QLabel( tr(""), f);  // Status is blank until user chooses a cluster
-    m_tree = new AlgorithmTreeWidget(f,mui);
+    m_tree = new MantidTreeWidget(f,mui);
     m_tree->setHeaderLabel("Remote Algorithms");
     QVBoxLayout *vbLayout = new QVBoxLayout();
     QHBoxLayout *hbLayout = new QHBoxLayout();
@@ -164,16 +165,67 @@ void RemoteAlgorithmDockWidget::update()
 {
     m_tree->clear();
 
-    QTreeWidgetItem *catItem;
+
     if (m_configReply)
     {
-      catItem = new QTreeWidgetItem(QStringList(m_configReply->read(25)));
+        QDomDocument doc("ServerSettings");
+        if (!doc.setContent(m_configReply))
+        {
+            QMessageBox( QMessageBox::Warning, "XML Error", tr("Failed to read XML configuration file."), QMessageBox::Ok).exec();
+            return;
+        }
+
+        QDomElement root = doc.documentElement();
+        if( root.tagName() != "document" )
+        {
+            QMessageBox( QMessageBox::Warning, "XML Error", tr("Unexpected document root in the XML configuration file."), QMessageBox::Ok).exec();
+            return;
+        }
+
+        QDomNode n = root.firstChild();
+        while( !n.isNull() )
+        {
+          QDomElement e = n.toElement();
+          if (!e.isNull())
+          {
+            if (e.tagName() == "server_attributes" )
+                xmlParseServerAttributes( e);
+            else if (e.tagName() == "algorithm")
+                xmlParseAlgorithm( e);
+            else
+            {
+                QMessageBox msgBox;
+                msgBox.setText("Unrecognized XML Element");
+                msgBox.setInformativeText( e.tagName() + QString(tr(" is not a recognized XML element.  It will be ignored.")));
+                msgBox.exec();
+            }
+          }
+
+          n = n.nextSibling();
+        }
+
+
+        QTreeWidgetItem *catItem;
+        if (m_configReply)
+        {
+          catItem = new QTreeWidgetItem(QStringList(m_configReply->read(25)));
+        }
+        else
+        {
+            catItem = new QTreeWidgetItem(QStringList("Update() has just been called."));
+        }
+        m_tree->addTopLevelItem(catItem);
     }
-    else
-    {
-        catItem = new QTreeWidgetItem(QStringList("Update() has just been called."));
-    }
-    m_tree->addTopLevelItem(catItem);
+
+
+
+
+
+
+
+
+
+
 
     // We're done with the network reply (assuming we used it at all), so schedule it for deletion
     if (m_configReply)
@@ -260,4 +312,56 @@ void RemoteAlgorithmDockWidget::algorithmFinished(void* alg)
 }
 
 
+void RemoteAlgorithmDockWidget::xmlParseServerAttributes( QDomElement &elm)
+{
+    // We don't actually do anything with the server attributes yet...
+    return;
+}
+
+
+/*
+  NOTE: All I'm doing right now is parsing this silly thing for the name tag so I can
+  add it to the algorithm tree.  I'll add more code once I have a better idea of what
+  actually needs to be done.
+  */
+void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
+{
+
+    QDomNode n = elm.firstChild();
+    while( !n.isNull() )
+    {
+      QDomElement e = n.toElement();
+      if (!e.isNull())
+      {
+        if (e.tagName() == "name" )
+        {
+            QString algName = e.text();
+            QTreeWidgetItem *catItem;
+            catItem = new QTreeWidgetItem(QStringList(algName));
+            m_tree->addTopLevelItem(catItem);
+        }
+
+/*
+        else if (e.tagName() == "executable")
+        else if (e.tagName() == "parameter_list")
+        else
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Unrecognized XML Element");
+            msgBox.setInformativeText( e.tagName() + QString(tr(" is not a recognized XML element.  It will be ignored.")));
+            msgBox.exec();
+        }
+*/
+      }
+
+      n = n.nextSibling();
+    }
+
+
+
+
+    QTreeWidgetItem *catItem;
+    catItem = new QTreeWidgetItem(QStringList(m_configReply->read(25)));
+
+}
 

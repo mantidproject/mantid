@@ -27,6 +27,7 @@ class MantidUI;
 class ApplicationWindow;
 class MantidTreeWidgetItem;
 class MantidTreeWidget;
+class QDomElement;
 class QLabel;
 class QMenu;
 class QPushButton;
@@ -62,9 +63,12 @@ public slots:
 protected:
     void showProgressBar();
     void hideProgressBar();
+
+    void xmlParseServerAttributes( QDomElement &elm);
+    void xmlParseAlgorithm( QDomElement &elm);
     
     QComboBox *m_clusterCombo;
-    QTreeWidget *m_tree;
+    MantidTreeWidget *m_tree;
 //    FindAlgComboBox* m_findAlg;
 //    QPushButton *m_runningButton;
     QProgressBar* m_progressBar;

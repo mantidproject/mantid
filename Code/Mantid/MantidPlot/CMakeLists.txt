@@ -175,15 +175,12 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
-                   src/Mantid/MantidRemoteAlg.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
-                   src/Mantid/NewClusterDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
-                   src/Mantid/RemoteJobManager.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/SetUpParaview.cpp				   
                    src/Mantid/UserFitFunctionDialog.cpp
@@ -229,6 +226,9 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
                    src/Mantid/InstrumentWidget/DetXMLFile.cpp
+                   src/Mantid/Remote/MantidRemoteAlg.cpp	
+                   src/Mantid/Remote/NewClusterDialog.cpp
+                   src/Mantid/Remote/RemoteJobManager.cpp
 )
 
 ###########################################################################
@@ -405,16 +405,13 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidAlgorithmMetatype.h
-                   src/Mantid/MantidRemoteAlg.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
-                   src/Mantid/NewClusterDialog.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
-                   src/Mantid/RemoteJobManager.h
                    src/Mantid/SetUpParaview.h				   
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/InstrumentWidget/BinDialog.h
@@ -459,6 +456,9 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
+                   src/Mantid/Remote/MantidRemoteAlg.h
+                   src/Mantid/Remote/NewClusterDialog.h
+                   src/Mantid/Remote/RemoteJobManager.h
 )
 
 ###########################################################################
@@ -670,12 +670,10 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMDCurveDialog.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
-                       src/Mantid/MantidRemoteAlg.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
-                       src/Mantid/NewClusterDialog.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/SetUpParaview.h					   
@@ -701,6 +699,8 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/Projection3D.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
                        src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                       src/Mantid/Remote/MantidRemoteAlg.h
+                       src/Mantid/Remote/NewClusterDialog.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
@@ -711,7 +711,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/MantidMDCurveDialog.ui
-               src/Mantid/NewClusterDialog.ui
+               src/Mantid/Remote/NewClusterDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
