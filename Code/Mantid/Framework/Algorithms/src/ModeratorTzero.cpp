@@ -284,7 +284,8 @@ void ModeratorTzero::execEvent(){
 	  try
 	  {
 	    L_f = det->getDistance(*sample);
-	    t_f = L_f / v_f;
+      // Time needs to be in microseconds
+      t_f = (L_f / v_f) * 1.0e6;
         g_log.debug() << "detector " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
 	  }
 	  catch (Exception::NotFoundError &)
