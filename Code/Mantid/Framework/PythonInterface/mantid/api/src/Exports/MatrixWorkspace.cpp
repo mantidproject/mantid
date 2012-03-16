@@ -1,15 +1,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/implicit.hpp>
 
 using namespace Mantid::API;
 using Mantid::Geometry::IDetector_sptr;
@@ -21,6 +22,13 @@ using namespace boost::python;
 
 namespace
 {
+  /// Typedef for data access, i.e. dataX,Y,E members
+  typedef Mantid::MantidVec&(MatrixWorkspace::*data_modifier)(const std::size_t);
+  /// return_value_policy for read-only numpy array
+  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
+  /// return_value_policy for read-write numpy array
+  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadWrite> > return_readwrite_numpy;
+
   //------------------------------- Overload macros ---------------------------
   // Overloads for binIndexOf function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
@@ -29,16 +37,7 @@ namespace
 
 void export_MatrixWorkspace()
 {
-  register_ptr_to_python<MatrixWorkspace_sptr>();
-
-  /// Typedef for data access, i.e. dataX,Y,E members
-  typedef Mantid::MantidVec&(MatrixWorkspace::*data_modifier)(const std::size_t);
-  /// return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
-  /// return_value_policy for read-write numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadWrite> > return_readwrite_numpy;
-
-
+  REGISTER_SHARED_PTR_TO_PYTHON(MatrixWorkspace);
 
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     //--------------------------------------- Meta information -----------------------------------------------------------------------
@@ -54,7 +53,7 @@ void export_MatrixWorkspace()
              "Return the Run object for this workspace")
     .def("axes", &MatrixWorkspace::axes, "Returns the number of axes attached to the workspace")
     .def("getAxis", &MatrixWorkspace::getAxis, return_internal_reference<>())
-    .def("isHistogramData", &MatrixWorkspace::isHistogramData, "Returns True if this is conisdered to be binned data.")
+    .def("isHistogramData", &MatrixWorkspace::isHistogramData, "Returns True if this is considered to be binned data.")
     .def("isDistribution", (const bool& (MatrixWorkspace::*)() const)&MatrixWorkspace::isDistribution,
          return_value_policy<copy_const_reference>(), "Returns the status of the distribution flag")
     .def("YUnit", &MatrixWorkspace::YUnit, "Returns the current Y unit for the data (Y axis) in the workspace")

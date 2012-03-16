@@ -1,7 +1,8 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/enum.hpp>
 
 using Mantid::Geometry::ReferenceFrame;
@@ -11,7 +12,7 @@ void export_ReferenceFrame()
 {
   using namespace Mantid::Geometry;
 
-    register_ptr_to_python<boost::shared_ptr<const ReferenceFrame> >();
+    REGISTER_SHARED_PTR_TO_PYTHON(ReferenceFrame);
 
     enum_<PointingAlong>("PointingAlong")
        .value("X", X)

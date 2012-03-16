@@ -1,6 +1,6 @@
 #include "MantidGeometry/IDetector.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::IObjComponent;
@@ -23,7 +23,7 @@ namespace
 
 void export_IDetector()
 {
-  register_ptr_to_python<boost::shared_ptr<IDetector> >();
+  REGISTER_SHARED_PTR_TO_PYTHON(IDetector);
   
   class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector", no_init)
     .def("getID", &IDetector::getID, "Returns the detector ID")

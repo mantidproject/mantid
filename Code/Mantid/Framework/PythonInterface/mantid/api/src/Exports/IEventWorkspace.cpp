@@ -1,11 +1,11 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::IEventWorkspace;
 using Mantid::API::IEventWorkspace_sptr;
@@ -17,6 +17,8 @@ using namespace boost::python;
 
 void export_IEventWorkspace()
 {
+  REGISTER_SHARED_PTR_TO_PYTHON(IEventWorkspace);
+
   class_<IEventWorkspace, bases<Mantid::API::MatrixWorkspace>, boost::noncopyable>("IEventWorkspace", no_init)
     .def("getNumberEvents", &IEventWorkspace::getNumberEvents, 
          "Returns the number of events in the workspace")

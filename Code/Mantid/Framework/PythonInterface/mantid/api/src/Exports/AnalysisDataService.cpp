@@ -1,5 +1,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/DataItem.h"
+
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 #include "MantidPythonInterface/kernel/Policies/upcast_returned_value.h"
 
@@ -7,7 +9,6 @@
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/list.hpp>
 
 using Mantid::API::AnalysisDataServiceImpl;

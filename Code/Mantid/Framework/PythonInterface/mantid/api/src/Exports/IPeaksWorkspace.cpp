@@ -1,5 +1,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -15,7 +16,7 @@ using namespace boost::python;
 
 void export_IPeaksWorkspace()
 {
-  register_ptr_to_python<IPeaksWorkspace_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(IPeaksWorkspace);
 
   // IPeaksWorkspace class
   class_< IPeaksWorkspace, bases<ITableWorkspace, ExperimentInfo>, boost::noncopyable >("IPeaksWorkspace", no_init)

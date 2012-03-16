@@ -4,8 +4,10 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/Algorithm.h"
 
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
+
 
 using Mantid::API::IAlgorithm;
 using Mantid::API::Algorithm;
@@ -15,10 +17,10 @@ using namespace boost::python;
 
 void export_algorithm()
 {
-  register_ptr_to_python<boost::shared_ptr<Algorithm> >();
+  REGISTER_SHARED_PTR_TO_PYTHON(Algorithm);
   class_<Algorithm, bases<IAlgorithm>, boost::noncopyable>("Algorithm", "Base-class for C algorithms", no_init);
 
-  register_ptr_to_python<boost::shared_ptr<AlgorithmProxy> >();
+  REGISTER_SHARED_PTR_TO_PYTHON(AlgorithmProxy);
   class_<AlgorithmProxy, bases<IAlgorithm>, boost::noncopyable>("AlgorithmProxy", "Proxy class returned by managed algorithms", no_init);
 }
 

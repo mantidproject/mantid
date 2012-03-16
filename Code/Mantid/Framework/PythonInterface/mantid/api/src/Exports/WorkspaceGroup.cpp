@@ -1,9 +1,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/Policies/upcast_returned_value.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -29,7 +29,7 @@ namespace
 
 void export_WorkspaceGroup()
 {
-  register_ptr_to_python<WorkspaceGroup_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(WorkspaceGroup);
 
   class_< WorkspaceGroup, bases<Workspace>, boost::noncopyable >("WorkspaceGroup", no_init)
     .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries, "Returns the number of entries in the group")

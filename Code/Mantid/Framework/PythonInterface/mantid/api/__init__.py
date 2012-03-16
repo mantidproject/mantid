@@ -17,18 +17,9 @@ flags = _dlopen.setup_dlopen(clib, ['libMantidKernel', 'libMantidGeometry', 'lib
 from mantid.kernel import _kernel
 from _api import *
 _dlopen.restore_flags(flags)
-
 ###############################################################################
-# Alias singleton objects so they just look like classes with only
-# static methods, which is really what they are
-###############################################################################
-FrameworkManager = FrameworkManagerImpl.Instance()
-AnalysisDataService = AnalysisDataServiceImpl.Instance()
-mtd = AnalysisDataService #tradition
-AlgorithmFactory = AlgorithmFactoryImpl.Instance()
-AlgorithmManager = AlgorithmManagerImpl.Instance()
-FileFinder = FileFinderImpl.Instance()
 
+from _aliases import *
 
 ###############################################################################
 # Add importAll member to ADS 

@@ -6,9 +6,9 @@
   #pragma warning( default: 4250 )
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/object.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
 
@@ -168,7 +168,8 @@ namespace
 
 void export_ialgorithm()
 {
-  register_ptr_to_python<IAlgorithm_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(IAlgorithm);
+
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
     .def("name", &IAlgorithm::name, "Returns the name of the algorithm")
     .def("alias", &IAlgorithm::alias, "Return the aliases for the algorithm")

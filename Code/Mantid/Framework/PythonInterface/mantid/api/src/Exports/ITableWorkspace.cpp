@@ -1,12 +1,12 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 #include <vector>
 
@@ -157,7 +157,7 @@ namespace
 
 void export_ITableWorkspace()
 {
-  register_ptr_to_python<ITableWorkspace_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(ITableWorkspace);
   std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
   iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
   iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";

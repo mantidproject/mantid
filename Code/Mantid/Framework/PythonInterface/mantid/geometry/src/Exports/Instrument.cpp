@@ -1,23 +1,16 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
-using Mantid::Geometry::Instrument;
-using Mantid::Geometry::Instrument_sptr;
-using Mantid::Geometry::Instrument_const_sptr;
-using Mantid::Geometry::CompAssembly;
-using Mantid::Geometry::IObjComponent;
-using Mantid::Geometry::IDetector;
-using Mantid::Geometry::IComponent;
-using Mantid::Geometry::ReferenceFrame;
+#include <boost/python/class.hpp>
+
+using namespace Mantid::Geometry;
 using Mantid::detid_t;
 using namespace boost::python;
 
 void export_Instrument()
 {
-  register_ptr_to_python<Instrument_sptr>();
-  register_ptr_to_python<Instrument_const_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(Instrument);
 
   class_<Instrument, bases<CompAssembly>, boost::noncopyable>("Instrument", no_init)
     .def("getSample", (boost::shared_ptr<IObjComponent> (Instrument::*)())&Instrument::getSample, 

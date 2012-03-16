@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/self.hpp>
 
 using Mantid::API::IMDWorkspace;
@@ -11,7 +11,7 @@ using namespace boost::python;
 
 void export_IMDWorkspace()
 {
-  register_ptr_to_python<IMDWorkspace_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(IMDWorkspace);
 
   // EventWorkspace class
   class_< IMDWorkspace, bases<Workspace>, boost::noncopyable >("IMDWorkspace", no_init)

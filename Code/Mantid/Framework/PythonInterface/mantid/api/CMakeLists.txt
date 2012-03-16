@@ -44,6 +44,7 @@ set ( EXPORT_FILES
   src/Exports/FileFinder.cpp
   src/Exports/Sample.cpp
   src/Exports/Run.cpp
+  src/Exports/WorkspaceFactory.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
@@ -66,6 +67,7 @@ set ( INC_FILES
 set ( PY_FILES 
   __init__.py
   _adsimports.py
+  _aliases.py
   _workspaceops.py
 )
 
