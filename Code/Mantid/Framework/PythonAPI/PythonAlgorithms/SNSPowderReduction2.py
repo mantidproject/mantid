@@ -324,8 +324,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                     DeleteWorkspace(temp)
         if comm.size == 1 and self._chunks > 0 and not "histo" in extension:
             # When chunks are added, proton charge is summed for all chunks
-            proton_charge = wksp.getRun().getProperty('gd_prtn_chrg').value / len(strategy)
-            wksp.getRun().setProtonCharge(proton_charge)
+            wksp.getRun().integrateProtonCharge()
             mtd.deleteWorkspace('Chunks')
         print "Done focussing data"
 

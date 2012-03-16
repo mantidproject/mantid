@@ -814,6 +814,7 @@ using namespace boost::python;
       .def("hasProperty", &API::Run::hasProperty)
       .def("getProperty", &API::Run::getProperty, return_value_policy<return_by_value>())
       .def("setProtonCharge", &API::Run::setProtonCharge)
+      .def("integrateProtonCharge", &API::Run::integrateProtonCharge)
       .def("getProperties", &API::Run::getProperties, return_internal_reference<>())
 //      .def("addProperty", (void (API::Run::*) (const std::string&, const std::string&, bool))&Run::addProperty)
       .def("getGoniometer", (const Goniometer & (API::Run::*)() const)&API::Run::getGoniometer, return_value_policy<copy_const_reference>())
