@@ -5,7 +5,15 @@
 
 from MantidFramework import *
 from mantidsimple import *
+from mantid.api import AlgorithmFactory
 import os
+
+all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
+if 'GatherWorkspaces' in all_algs:
+    HAVE_MPI = True
+    import boostmpi as mpi
+else:
+    HAVE_MPI = False
 
 COMPRESS_TOL_TOF = .01
 
@@ -285,14 +293,16 @@ class SNSPowderReduction2(PythonAlgorithm):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
-        comm = mpi.world
-        if comm.size > 1:
-            strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
-        elif self._chunks > 0 and not "histo" in extension:
-            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-            for row in Chunks: strategy.append(row)
+        if HAVE_MPI:
+            comm = mpi.world
+            if comm.size > 1:
+                strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
         else:
-            strategy.append({})
+            if self._chunks > 0 and not "histo" in extension:
+                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+                for row in Chunks: strategy.append(row)
+            else:
+                strategy.append({})
 
         return strategy
 
@@ -311,7 +321,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
             comm = mpi.world
-            if comm.size > 1:
+            if HAVE_MPI:
                 alg = GatherWorkspaces(InputWorkspace=temp, OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
             else:
@@ -322,7 +332,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                 else:
                     wksp += temp
                     DeleteWorkspace(temp)
-        if comm.size == 1 and self._chunks > 0 and not "histo" in extension:
+        if self._chunks > 0 and not "histo" in extension:
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
             mtd.deleteWorkspace('Chunks')
@@ -655,7 +665,7 @@ class SNSPowderReduction2(PythonAlgorithm):
             else:
                 normalized = False
 
-            if not "histo" in self.getProperty("Extension") and preserveEvents and mpi.world.size ==1:
+            if not "histo" in self.getProperty("Extension") and preserveEvents and HAVE_MPI is False:
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
 
@@ -665,15 +675,19 @@ class SNSPowderReduction2(PythonAlgorithm):
                 ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=False, ResetValue=0.)
 
             # write out the files
-            if mpi.world.rank == 0:
+            if HAVE_MPI:
+                if mpi.world.rank == 0:
+                    self._save(samRun, self._info, normalized)
+                    samRun = str(samRun)
+            else:
                 self._save(samRun, self._info, normalized)
                 samRun = str(samRun)
             mtd.releaseFreeMemory()
 
         # convert everything into d-spacing
         workspacelist = set(workspacelist) # only do each workspace once
-        for wksp in workspacelist:
-            if mpi.world.rank == 0:
+        if HAVE_MPI is False:
+            for wksp in workspacelist:
                 ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
 
 mtd.registerPyAlgorithm(SNSPowderReduction2())
