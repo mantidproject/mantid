@@ -79,59 +79,28 @@ void GatherWorkspaces::exec()
   {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
-    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,totalSpec,numBins+hist,numBins);
+    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,1,numBins+hist,numBins);
     setProperty("OutputWorkspace",outputWorkspace);
-
-    // Keep it lean-and-mean and don't bother with the spectra map, etc.
-    // This line is needed to stop a crash on a subsequent SaveNexus
-//    outputWorkspace->replaceSpectraMap(new SpectraDetectorMap);
   }
 
   // Let's assume 1 spectrum in each workspace for the first try....
   // TODO: Generalise
 
+  MantidVec out;
   if ( world.rank() == 0 )
   {
-    // Copy over data from own input workspace
     outputWorkspace->dataX(0) = inputWorkspace->readX(0);
-    outputWorkspace->dataY(0) = inputWorkspace->readY(0);
-    outputWorkspace->dataE(0) = inputWorkspace->readE(0);
+    reduce(included, inputWorkspace->readY(0), outputWorkspace->dataY(0), vplus(), 0);
+    reduce(included, inputWorkspace->readE(0), outputWorkspace->dataE(0), eplus(), 0);
     const ISpectrum * inSpec = inputWorkspace->getSpectrum(0);
     ISpectrum * outSpec = outputWorkspace->getSpectrum(0);
     outSpec->clearDetectorIDs();
     outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-
-    const int numReqs(3*(included.size()-1));
-    mpi::request reqs[numReqs];
-    int j(0);
-
-    // Receive data from all the other processes
-    // This works because the process ranks are ordered the same in 'included' as
-    // they are in 'world', but in general this is not guaranteed. TODO: robustify
-    for ( int i = 1; i < included.size(); ++i )
-    {
-      reqs[j++] = included.irecv(i,0,outputWorkspace->dataX(i));
-      reqs[j++] = included.irecv(i,1,outputWorkspace->dataY(i));
-      reqs[j++] = included.irecv(i,2,outputWorkspace->dataE(i));
-      ISpectrum * outSpec = outputWorkspace->getSpectrum(i);
-      outSpec->clearDetectorIDs();
-      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-    }
-
-    // Make sure everything's been received before exiting the algorithm
-    mpi::wait_all(reqs,reqs+numReqs);
   }
   else
   {
-    mpi::request reqs[3];
-
-    // Send the spectrum to the root process
-    reqs[0] = included.isend(0,0,inputWorkspace->readX(0));
-    reqs[1] = included.isend(0,1,inputWorkspace->readY(0));
-    reqs[2] = included.isend(0,2,inputWorkspace->readE(0));
-
-    // Make sure the sends have completed before exiting the algorithm
-    mpi::wait_all(reqs,reqs+3);
+    reduce(included, inputWorkspace->readY(0), vplus(), 0);
+    reduce(included, inputWorkspace->readE(0), eplus(), 0);
   }
 
 }
