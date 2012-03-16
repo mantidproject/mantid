@@ -29,11 +29,17 @@ FindPeaksMD(InputWorkspace='TOPAZ_3131_md',PeakDistanceThreshold='0.15',MaxPeaks
 FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
 IndexPeaks(PeaksWorkspace='peaks')
 
-# Run the PeakIntensityVsRadius algorithm
+# Run the PeakIntensityVsRadius algorithm, where the background shell scales with the PeakRadius
 PeakIntensityVsRadius(InputWorkspace='TOPAZ_3131_md',PeaksWorkspace='peaks',
     RadiusStart=0.00, RadiusEnd=0.15, NumSteps=51,
     BackgroundInnerFactor=1.5,BackgroundOuterFactor=2,
     OutputWorkspace='peak_vs_rad')
+
+# Run the PeakIntensityVsRadius algorithm, with fixed background shell radius
+PeakIntensityVsRadius(InputWorkspace='TOPAZ_3131_md',PeaksWorkspace='peaks',
+    RadiusStart=0.00, RadiusEnd=0.15, NumSteps=51,
+    BackgroundInnerRadius=0.15,BackgroundOuterRadius=0.2,
+    OutputWorkspace='peak_vs_rad_fixed')
 
 # Plot a few of the peaks
 plotSpectrum('peak_vs_rad', [0,2,3], error_bars=True)
