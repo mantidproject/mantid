@@ -50,8 +50,8 @@ public:
     ~ConvertToMDEventsSubalgFactory();
     /// access to a subalgorithm 
     IConvertToMDEventsMethods * getAlg(const std::string &AlgName);
-    /// initiate the subalgorithm creation
-    void initSubalgorithms(const ConvertToMDEventsParams &SubAlgDescriptor);
+    /// initiate the subalgorithms and made them availible for getAlg function
+    void init(const ConvertToMDEventsParams &SubAlgDescriptor);
 private:
  //--------------------------------------------------------------------------------------------------   
      /// helper class to orginize metaloop instantiating various subalgorithms 

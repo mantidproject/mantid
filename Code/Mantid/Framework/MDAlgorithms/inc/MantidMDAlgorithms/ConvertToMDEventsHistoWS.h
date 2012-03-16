@@ -24,7 +24,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** The templated class to transform matrix workspace into MDEvent workspace
+/** The templated class to transform matrix workspace into MDEvent workspace when matrix workspace is ragged
    *
    * @date 11-10-2011
 
@@ -55,7 +55,7 @@ namespace MDAlgorithms
 //-----------------------------------------------
 // Method to process rugged histohram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ConvertToMDEventsWS<Ws2DRuggedType,Q,MODE,CONV>: public IConvertToMDEventsMethods 
+class ConvertToMDEventsWS<Ws2DHistoType,Q,MODE,CONV>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined

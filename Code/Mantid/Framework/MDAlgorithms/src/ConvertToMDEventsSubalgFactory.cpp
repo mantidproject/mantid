@@ -49,12 +49,13 @@ ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
 // AUTOINSTANSIATION OF EXISTING CODE:
 /** helper class to orginize metaloop instantiating various subalgorithms dealing with particular 
   * workspaces and implementing particular user requests */
-template<Q_state Q, size_t NumAlgorithms=0>
+template<Q_state Q, size_t AlgoNum>
 class LOOP_ALGS{
 private:
     enum{
-        CONV = NumAlgorithms%NConvUintsStates,           // internal oop over conversion modes, the variable changes first
-        MODE = (NumAlgorithms/NConvUintsStates)%ANY_Mode // one level up loop over momentum conversion mode  
+        CONV = AlgoNum%NConvUintsStates,                        // internal loop over conversion modes, the variable changes first
+        MODE = (AlgoNum/NConvUintsStates)%ANY_Mode,             // level one loop over momentum conversion mode  
+        WS   = ((AlgoNum/NConvUintsStates)/ANY_Mode)%NInWSTypes  //level two loop over ws type;
     
     };
   public:
@@ -62,88 +63,93 @@ private:
         // cast loop integers to proper enum type
         CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
         AnalMode   Mode = static_cast<AnalMode>(MODE);
+        InputWSType Ws  = static_cast<InputWSType>(WS);
 
-        std::string  Key = AlgoKey.getAlgoID(Q,Mode,Conv,Ws2DRuggedType);
+        std::string  Key = AlgoKey.getAlgoID(Q,Mode,Conv,Ws);
         pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-                (new ConvertToMDEventsWS<Ws2DRuggedType,Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
-
-        Key = AlgoKey.getAlgoID(Q,Mode,Conv,EventWSType);
-        pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-            (new  ConvertToMDEventsWS<EventWSType,Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
+                (new ConvertToMDEventsWS<static_cast<InputWSType>(WS),Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
 
 /*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 #endif*/
-            LOOP_ALGS<Q, NumAlgorithms+1>::EXEC(AlgoKey,pH);
+            LOOP_ALGS<Q, AlgoNum-1>::EXEC(AlgoKey,pH);
     }
 };
 
 /** Templated metaloop specialization for noQ case */
-template< size_t NumAlgorithms>
-class LOOP_ALGS<NoQ,NumAlgorithms>{
+template< size_t AlgoNum>
+class LOOP_ALGS<NoQ,AlgoNum>{
 private:
     enum{
-        CONV = NumAlgorithms%NConvUintsStates       // internal Loop over conversion modes, the variable changes first
-        //MODE => noQ -- no mode conversion ANY_Mode, 
-    
+        CONV = AlgoNum%NConvUintsStates,       // internal Loop over conversion modes, the variable changes first
+        WS   = ((AlgoNum/NConvUintsStates))%NInWSTypes  //level two loop over ws type;
+        //MODE => noQ -- no mode conversion ANY_Mode,     
     };
   public:
     static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH){
 
       // cast loop integers to proper enum type
       CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
+      InputWSType Ws  = static_cast<InputWSType>(WS);
 
-      std::string  Key0  = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws2DRuggedType);
-      pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key0,
-                         (new ConvertToMDEventsWS<Ws2DRuggedType,NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
-
-       std::string  Key1 = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,EventWSType);
-       pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key1,
-                       (new ConvertToMDEventsWS<Ws2DRuggedType,NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
-
+      std::string  Key   = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws);
+      pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
+         (new ConvertToMDEventsWS<static_cast<InputWSType>(WS),NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
            
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
 
-             LOOP_ALGS<NoQ,NumAlgorithms+1>::EXEC(AlgoKey,pH);
+             LOOP_ALGS<NoQ,AlgoNum-1>::EXEC(AlgoKey,pH);
     }
 };
 
+//static_cast<size_t>(ANY_Mode*NConvUintsStates)
 /** Q3d and modQ metaloop terminator */
 template<Q_state Q >
-class LOOP_ALGS<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
+class LOOP_ALGS<Q,0>{
   public:
       static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH)
       {
-          UNUSED_ARG(AlgoKey);UNUSED_ARG(pH);
+          CnvrtUnits Conv = static_cast<CnvrtUnits>(0);
+          AnalMode   Mode = static_cast<AnalMode>(0);
+          InputWSType Ws  = static_cast<InputWSType>(0);
+
+          std::string  Key   = AlgoKey.getAlgoID(Q,Mode,Conv,Ws);
+          pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
+            (new ConvertToMDEventsWS<InputWSType(0),Q,AnalMode(0),CnvrtUnits(0)>())));     
       } 
 };
 
 /** ANY_Mode (NoQ) metaloop terminator */
 template<>
-class LOOP_ALGS<NoQ,static_cast<size_t>(NConvUintsStates) >{
+class LOOP_ALGS<NoQ,0>{
   public:
       static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH)
-      {          
-          UNUSED_ARG(AlgoKey);UNUSED_ARG(pH);
+      {     
+          CnvrtUnits Conv = static_cast<CnvrtUnits>(0);
+          InputWSType Ws  = static_cast<InputWSType>(0);
+
+          std::string  Key   = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws);
+          pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
+          (new ConvertToMDEventsWS<InputWSType(0),NoQ,ANY_Mode,CnvrtUnits(0)>())));
+
       } 
 };
-//-------------------------------------------------------------------------------------------------------------------------------
-/** Function Initiate the subalgorithm creation for further possible usage
+
+/** initiate the subalgorithms and made them availible for getAlg function
   * @param SubAlgDescriptor  -- the class which has infromation about existing subalgorthms and used to generate subalgorithms keys.
 */
-void ConvertToMDEventsSubalgFactory::initSubalgorithms(const ConvertToMDEventsParams &SubAlgDescriptor)
+void ConvertToMDEventsSubalgFactory::init(const ConvertToMDEventsParams &SubAlgDescriptor)
 {
-    if (alg_selector.empty())
-    {
- // Instanciate the subalgorithms for different cases
- // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-        LOOP_ALGS<NoQ,0>::EXEC(SubAlgDescriptor,this); 
+    if (alg_selector.empty()) // Instanciate the subalgorithms for different cases
+    {    
+    // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
+        LOOP_ALGS<NoQ,NInWSTypes*NConvUintsStates>::EXEC(SubAlgDescriptor,this); 
     // MOD Q
-        LOOP_ALGS<modQ,0>::EXEC(SubAlgDescriptor,this);
+        LOOP_ALGS<modQ,NInWSTypes*NConvUintsStates*ANY_Mode>::EXEC(SubAlgDescriptor,this);
     // Q3D
-        LOOP_ALGS<Q3D,0>::EXEC(SubAlgDescriptor,this);
+        LOOP_ALGS<Q3D,NInWSTypes*NConvUintsStates*ANY_Mode>::EXEC(SubAlgDescriptor,this);
     }
 
 }

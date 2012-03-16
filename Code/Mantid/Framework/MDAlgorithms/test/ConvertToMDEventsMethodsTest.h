@@ -56,7 +56,7 @@ static void destroySuite(ConvertToMDEventsMethodsTest  * suite) { delete suite; 
 void test_TwoTransfMethods()
 {
   
-    ConvertToMDEventsWS<Ws2DRuggedType,Q3D,Direct,ConvertNo> HistoConv;
+    ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvertNo> HistoConv;
     
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
     TestWS.emode= MDAlgorithms::Direct;
@@ -91,7 +91,7 @@ void test_buildFromEWS()
      pEventMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
      pEventMDWSWrapper->createEmptyMDWS(TestWS);
      // set up conversion just to deliver proper pointers to tof convertor
-     ConvertToMDEventsWS<Ws2DRuggedType,Q3D,Direct,ConvByTOF> tmp;
+     ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvByTOF> tmp;
      tmp.setUPConversion(ws2D,det_loc,TestWS,pEventMDWSWrapper);
 
      // provide arguments for convertor

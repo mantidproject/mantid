@@ -189,7 +189,7 @@ ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)
 
     const DataObjects::Workspace2D *pMWS2D = dynamic_cast<const DataObjects::Workspace2D *>(inMatrixWS.get());
     if(pMWS2D){
-        return SupportedWS[Ws2DRuggedType];
+        return SupportedWS[Ws2DHistoType];
     }
  
     convert_log.error()<<" Unsupported workspace type provided. Currently supported types are:\n";
@@ -506,8 +506,7 @@ default_dim_ID(nDefaultID)
      ConvModes[ConvByTOF]  = "CnvByTOF";
      ConvModes[ConvFromTOF]= "CnvFromTOF";
      // possible input workspace ID-s
-     SupportedWS[Ws2DAlighnType] = "WS2DAligh";
-     SupportedWS[Ws2DRuggedType] = "WS2DRugged";
+     SupportedWS[Ws2DHistoType] = "WS2DHisto";
      SupportedWS[EventWSType]    = "WSEvent";
 
      // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later

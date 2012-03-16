@@ -66,10 +66,9 @@ namespace MDAlgorithms
   };
   enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
   {
-      Ws2DAlighnType, //< 2D matirix workspace with the same x-axis for each sign
-      Ws2DRuggedType, //<2D matirix workspace with own x-axis for every sign
+      Ws2DHistoType, //< 2D matirix workspace with the x-axis for each sign
       EventWSType,     //< Event worskapce
-      NInWSTypes
+      NInWSTypes     // number of input ws types which should be treated differently
   };
 // way to treat the X-coorinate in the workspace:
     enum XCoordType

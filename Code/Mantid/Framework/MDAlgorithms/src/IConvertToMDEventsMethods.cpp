@@ -6,19 +6,6 @@ namespace MDAlgorithms
 
 // logger for loading workspaces  
    Kernel::Logger& IConvertToMDEventsMethods::convert_log =Kernel::Logger::get("MD-Algorithms");
-/** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates for 
-    the particular workspace.
-
-    @param Coord             -- vector of coordinates for current multidimensional event
-    @param nd                -- number of the event's dimensions
-    @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
-                                workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
-                                -- 1 for elastic and 2 for inelastic mode. Number of these properties is determined by the deployed algorithm
-                                The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
-                                obtained from dimensions placed after them. 
-    *@returns        -- true if all coordinates are within the range allowed for the algorithm and false otherwise
-
- */
 
 /** Helper function to obtain the units set along X-axis of the input workspace. 
   *
@@ -39,9 +26,21 @@ IConvertToMDEventsMethods::getAxisUnits()const{
     }
     return this->inWS2D->getAxis(0)->unit();
 }
+/** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates for 
+    the particular workspace.
 
-bool 
-IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
+    @param Coord             -- vector of coordinates for current multidimensional event
+    @param nd                -- number of the event's dimensions
+    @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
+                                workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
+                                -- 1 for elastic and 2 for inelastic mode. Number of these properties is determined by the deployed algorithm
+                                The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
+                                obtained from dimensions placed after them. 
+    *@returns        -- true if all coordinates are within the range allowed for the algorithm and false otherwise
+
+ */
+
+bool IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
@@ -63,9 +62,13 @@ IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t 
      return true;
 }
 
-///method which initates all main class variables
-size_t
-IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+/** method which initates all main class variables
+  * @param pWS2D      -- shared pointer to input matirx workspace to process
+  * @param detLoc     -- class with information about datecotrs, partially transformed for convenient Q calculations
+  * @param WSD        -- class describing the target workspace. Only target workspace limints are used by the algorithm at the moment
+  * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
+*/
+size_t  IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
         inWS2D= pWS2D;
