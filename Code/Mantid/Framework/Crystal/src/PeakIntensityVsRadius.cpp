@@ -15,8 +15,8 @@ a [[Workspace2D]] with one spectrum per peak, where:
 This algorithm calls [[IntegratePeaksMD]] repeatedly, with the following
 parameters filled in:
 * '''PeakRadius''' = the radius, ranging from RadiusStart to RadiusEnd in NumSteps steps.
-* '''BackgroundStartRadius''' = radius * BackgroundStartFactor
-* '''BackgroundRadius''' = radius * BackgroundEndFactor
+* '''BackgroundStartRadius''' = radius * BackgroundInnerFactor
+* '''BackgroundRadius''' = radius * BackgroundOuterFactor
 
 === Sample Usage ===
 
@@ -31,7 +31,7 @@ IndexPeaks(PeaksWorkspace='peaks')
 # Run the PeakIntensityVsRadius algorithm
 PeakIntensityVsRadius(InputWorkspace='TOPAZ_3131_md',PeaksWorkspace='peaks',
     RadiusStart=0.00, RadiusEnd=0.15, NumSteps=51,
-    BackgroundStartFactor=1.5,BackgroundEndFactor=2,
+    BackgroundInnerFactor=1.5,BackgroundOuterFactor=2,
     OutputWorkspace='peak_vs_rad')
 
 # Plot a few of the peaks
@@ -117,11 +117,11 @@ namespace Crystal
     declareProperty("RadiusStart", 0.0, "Radius at which to start integrating." );
     declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating." );
     declareProperty("NumSteps", 10, "Number of steps, between start and end, to calculate radius." );
-    declareProperty("BackgroundStartFactor", 0.0,
+    declareProperty("BackgroundInnerFactor", 0.0,
         "For background subtraction: the peak radius will be multiplied\n"
         "by this factor and passed to the BackgroundStartRadius parameter.\n"
         "Default 0.0 (no background)." );
-    declareProperty("BackgroundEndFactor", 0.0,
+    declareProperty("BackgroundOuterFactor", 0.0,
         "For background subtraction: the peak radius will be multiplied\n"
         "by this factor and passed to the BackgroundRadius parameter.\n"
         "Default 0.0 (no background)." );
@@ -139,8 +139,8 @@ namespace Crystal
     PeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
     double RadiusStart = getProperty("RadiusStart");
     double RadiusEnd = getProperty("RadiusEnd");
-    double BackgroundStartFactor = getProperty("BackgroundStartFactor");
-    double BackgroundEndFactor = getProperty("BackgroundEndFactor");
+    double BackgroundInnerFactor = getProperty("BackgroundInnerFactor");
+    double BackgroundOuterFactor = getProperty("BackgroundOuterFactor");
     int NumSteps = getProperty("NumSteps");
 
     // Create a workspace with one spectrum per peak, and one point per radius step
@@ -171,8 +171,8 @@ namespace Crystal
       alg->setProperty("PeaksWorkspace", peaksWS);
       alg->setPropertyValue("CoordinatesToUse", this->getPropertyValue("CoordinatesToUse"));
       alg->setProperty("PeakRadius", radius);
-      alg->setProperty("BackgroundRadius", radius * BackgroundEndFactor);
-      alg->setProperty("BackgroundStartRadius", radius * BackgroundStartFactor);
+      alg->setProperty("BackgroundOuterRadius", radius * BackgroundOuterFactor);
+      alg->setProperty("BackgroundInnerrRadius", radius * BackgroundInnerFactor);
       alg->setPropertyValue("OutputWorkspace", "__tmp__PeakIntensityVsRadius");
       alg->execute();
       if (alg->isExecuted())
