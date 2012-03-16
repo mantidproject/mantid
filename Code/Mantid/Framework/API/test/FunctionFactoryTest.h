@@ -402,6 +402,22 @@ public:
   //  TS_ASSERT_EQUALS(gauss->getParameter("Sigma"),0.33);
   //}
 
+  void test_MultiDomainFunction_creation()
+  {
+    std::string fnString = "composite=MultiDomainFunction;"
+      "name=FunctionFactoryTest_FunctA;"
+      "name=FunctionFactoryTest_FunctB";
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
+
+    if (!fun)
+    {
+      std::cerr << "\nFailed to create MultiDomainFunction\n";
+    }
+    else
+    {
+      std::cerr << "\n" << fun->asString() << std::endl;
+    }
+  }
 
 };
 

@@ -178,6 +178,8 @@ public:
   class MANTID_API_DLL Attribute
   {
   public:
+    /// Create empty string attribute
+    explicit Attribute():m_data(""), m_quoteValue(false) {}
     /// Create string attribute
     explicit Attribute(const std::string& str, bool quoteValue=false):m_data(str), m_quoteValue(quoteValue) {}
     /// Create int attribute

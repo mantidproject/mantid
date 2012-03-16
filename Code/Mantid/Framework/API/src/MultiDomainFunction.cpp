@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/Expression.h"
 
 #include <boost/lexical_cast.hpp>
 #include <set>
@@ -11,6 +13,8 @@ namespace Mantid
 {
 namespace API
 {
+
+  DECLARE_FUNCTION(MultiDomainFunction)
 
   /**
    * Associate a member function and a domain. The function will only be applied
@@ -74,6 +78,24 @@ namespace API
     countNumberOfDomains();
   }
 
+  /**
+   * Populates a vector with domain indices assigned to function i.
+   */
+  void MultiDomainFunction::getFunctionDomains(size_t i, const CompositeDomain& cd, std::vector<size_t>& domains)const
+  {
+      auto it = m_domains.find(i);
+      if (it == m_domains.end())
+      {// apply to all domains
+        domains.resize(cd.getNParts());
+        size_t i = 0;
+        std::generate(domains.begin(),domains.end(),[&i]()->size_t{return i++;});
+      }
+      else
+      {// apply to selected domains
+        domains.assign(it->second.begin(),it->second.end());
+      }
+  }
+
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   void MultiDomainFunction::function(const FunctionDomain& domain, FunctionValues& values)const
@@ -97,25 +119,15 @@ namespace API
       throw std::invalid_argument("MultiDomainFunction: domain and values have different sizes.");
     }
 
+    countValueOffsets(cd);
     // evaluate member functions
     values.zeroCalculated();
     for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
     {
       // find the domains member function must be applied to
       std::vector<size_t> domains;
-      auto it = m_domains.find(iFun);
-      if (it == m_domains.end())
-      {// apply to all domains
-        domains.resize(cd.getNParts());
-        size_t i = 0;
-        std::generate(domains.begin(),domains.end(),[&i]()->size_t{return i++;});
-      }
-      else
-      {// apply to selected domains
-        domains.assign(it->second.begin(),it->second.end());
-      }
+      getFunctionDomains(iFun, cd, domains);
 
-      countValueOffsets(cd);
       for(auto i = domains.begin(); i != domains.end(); ++i)
       {
         const FunctionDomain& d = cd.getDomain(*i);
@@ -143,24 +155,14 @@ namespace API
         ") for MultiDomainFunction (max index " + boost::lexical_cast<std::string>(m_maxIndex) + ").");
     }
 
+    countValueOffsets(cd);
     // evaluate member functions derivatives
     for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
     {
       // find the domains member function must be applied to
       std::vector<size_t> domains;
-      auto it = m_domains.find(iFun);
-      if (it == m_domains.end())
-      {// apply to all domains
-        domains.resize(cd.getNParts());
-        size_t i = 0;
-        std::generate(domains.begin(),domains.end(),[&i]()->size_t{return i++;});
-      }
-      else
-      {// apply to selected domains
-        domains.assign(it->second.begin(),it->second.end());
-      }
+      getFunctionDomains(iFun, cd, domains);
 
-      countValueOffsets(cd);
       for(auto i = domains.begin(); i != domains.end(); ++i)
       {
         const FunctionDomain& d = cd.getDomain(*i);
@@ -169,6 +171,84 @@ namespace API
       }
     }
   }
+
+  /// Return a value of attribute attName
+  IFunction::Attribute MultiDomainFunction::getLocalAttribute(size_t i, const std::string& attName)const
+  {
+    if (attName != "domains")
+    {
+      throw std::invalid_argument("MultiDomainFunction does not have attribute " + attName);
+    }
+    if (i >= nFunctions())
+    {
+      throw std::out_of_range("Function index is out of range.");
+    }
+    auto it = m_domains.find(i);
+    if (it == m_domains.end())
+    {
+      return IFunction::Attribute("All");
+    }
+    else if (it->second.size() == 1 && it->second.front() == i)
+    {
+      return IFunction::Attribute("i");
+    }
+    else if ( !it->second.empty() )
+    {
+      std::string out(boost::lexical_cast<std::string>(it->second.front()));
+      for(auto i = it->second.begin() + 1; i != it->second.end(); ++it)
+      {
+        out += "," + boost::lexical_cast<std::string>(*i);
+      }
+      return IFunction::Attribute(out);
+    }
+    return IFunction::Attribute("");
+  }
+
+  /**
+   * Set a value to attribute attName
+   */
+  void MultiDomainFunction::setLocalAttribute(size_t i, const std::string& attName,const IFunction::Attribute& att)
+  {
+    if (attName != "domains")
+    {
+      throw std::invalid_argument("MultiDomainFunction does not have attribute " + attName);
+    }
+    if (i >= nFunctions())
+    {
+      throw std::out_of_range("Function index is out of range.");
+    }
+    std::string value = att.asString();
+    auto it = m_domains.find(i);
+
+    if (value == "All")
+    {// fit to all domains
+      if (it != m_domains.end())
+      {
+        m_domains.erase(it);
+      }
+      return;
+    }
+    else if (value == "i")
+    {// fit to domain with the same index as the function
+      setDomainIndex(i,i);
+      return;
+    }
+    else if (value.empty())
+    {// do not fit to any domain
+      setDomainIndices(i,std::vector<size_t>());
+    }
+    // fit to a selection of domains
+    std::vector<size_t> indx;
+    Expression list;
+    list.parse(value);
+    list.toList();
+    for(size_t k = 0; k < list.size(); ++k)
+    {
+      indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+    }
+    setDomainIndices(i,indx);
+  }
+
 
 } // namespace API
 } // namespace Mantid

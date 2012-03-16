@@ -1,6 +1,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -59,15 +60,15 @@ namespace Mantid
       }
 
       const Expression& e = expr.bracketsRemoved();
-
+      std::map<std::string,std::string> parentAttributes;
       if (e.name() == ";")
       {
-        IFunction_sptr fun = createComposite(e);
+        IFunction_sptr fun = createComposite(e,parentAttributes);
         if (!fun) inputError();
         return fun;
       }
 
-      return createSimple(e);
+      return createSimple(e,parentAttributes);
 
     }
 
@@ -76,7 +77,7 @@ namespace Mantid
      * @param expr :: The input expression
      * @return A pointer to the created function
      */
-    IFunction_sptr FunctionFactoryImpl::createSimple(const Expression& expr)const
+    IFunction_sptr FunctionFactoryImpl::createSimple(const Expression& expr, std::map<std::string,std::string>& parentAttributes)const
     {
       if (expr.name() == "=" && expr.size() > 1)
       {
@@ -122,6 +123,11 @@ namespace Mantid
         {
           addTies(fun,(*term)[1]);
         }
+        else if (!parName.empty() && parName[0] == '$')
+        {
+          parName.erase(0,1);
+          parentAttributes[parName] = parValue;
+        }
         else
         {// set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
@@ -136,7 +142,7 @@ namespace Mantid
      * @param expr :: The input expression
      * @return A pointer to the created function
      */
-    CompositeFunction_sptr FunctionFactoryImpl::createComposite(const Expression& expr)const
+    CompositeFunction_sptr FunctionFactoryImpl::createComposite(const Expression& expr, std::map<std::string,std::string>& parentAttributes)const
     {
       if (expr.name() != ";") inputError(expr.str());
 
@@ -175,7 +181,7 @@ namespace Mantid
         {
           if (firstTerm->terms()[0].name() == "composite")
           {
-            cfun = boost::dynamic_pointer_cast<CompositeFunction>(createSimple(term));
+            cfun = boost::dynamic_pointer_cast<CompositeFunction>(createSimple(term,parentAttributes));
             if (!cfun) inputError(expr.str());
             ++it;
           }
@@ -204,9 +210,10 @@ namespace Mantid
       {
         const Expression& term = it->bracketsRemoved();
         IFunction_sptr fun;
+        std::map<std::string,std::string> pAttributes;
         if (term.name() == ";")
         {
-          fun = createComposite(term);
+          fun = createComposite(term,pAttributes);
           if (!fun) continue;
         }
         else
@@ -225,10 +232,15 @@ namespace Mantid
           }
           else
           {
-            fun = createSimple(term);
+            fun = createSimple(term,pAttributes);
           }
         }
         cfun->addFunction(fun);
+        size_t i = cfun->nFunctions() - 1;
+        for(auto att = pAttributes.begin(); att != pAttributes.end(); ++att)
+        {
+          cfun->setLocalAttributeValue(i,att->first,att->second);
+        }
       }
 
       return cfun;

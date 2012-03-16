@@ -7,6 +7,7 @@
 #include "MantidAPI/JointDomain.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
@@ -47,6 +48,8 @@ protected:
     }
   }
 };
+
+DECLARE_FUNCTION(MultiDomainFunctionTest_Function);
 
 class MultiDomainFunctionTest : public CxxTest::TestSuite
 {
@@ -234,6 +237,97 @@ public:
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
     }
+
+  }
+
+  void test_attribute()
+  {
+    multi.clearDomainIndices();
+    multi.setLocalAttributeValue(0,"domains","i");
+    multi.setLocalAttributeValue(1,"domains","0,1");
+    multi.setLocalAttributeValue(2,"domains","0,2");
+
+    FunctionValues values(domain);
+    multi.function(domain,values);
+
+    double A = multi.getFunction(0)->getParameter("A") + 
+      multi.getFunction(1)->getParameter("A") + 
+      multi.getFunction(2)->getParameter("A");
+    double B = multi.getFunction(0)->getParameter("B") + 
+      multi.getFunction(1)->getParameter("B") + 
+      multi.getFunction(2)->getParameter("B");
+    auto d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    for(size_t i = 0; i < 9; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
+    }
+
+    A = multi.getFunction(1)->getParameter("A");
+    B = multi.getFunction(1)->getParameter("B");
+    auto d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    for(size_t i = 9; i < 19; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
+    }
+
+    A = multi.getFunction(2)->getParameter("A");
+    B = multi.getFunction(2)->getParameter("B");
+    auto d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    for(size_t i = 19; i < 30; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
+    }
+
+  }
+
+  void test_attribute_in_FunctionFactory()
+  {
+    std::string ini = "composite=MultiDomainFunction;"
+      "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
+      "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=(0,1);"
+      "name=MultiDomainFunctionTest_Function,A=2,B=3,$domains=(0,2)"
+      ;
+    auto mfun = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createInitialized(ini));
+
+    FunctionValues values(domain);
+    mfun->function(domain,values);
+
+    double A = mfun->getFunction(0)->getParameter("A") + 
+      mfun->getFunction(1)->getParameter("A") + 
+      mfun->getFunction(2)->getParameter("A");
+    double B = mfun->getFunction(0)->getParameter("B") + 
+      mfun->getFunction(1)->getParameter("B") + 
+      mfun->getFunction(2)->getParameter("B");
+    auto d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    double checksum = 0;
+    for(size_t i = 0; i < 9; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
+      checksum += values.getCalculated(i);
+    }
+    TS_ASSERT_DIFFERS(checksum,0);
+
+    checksum = 0;
+    A = mfun->getFunction(1)->getParameter("A");
+    B = mfun->getFunction(1)->getParameter("B");
+    auto d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    for(size_t i = 9; i < 19; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
+      checksum += values.getCalculated(i);
+    }
+    TS_ASSERT_DIFFERS(checksum,0);
+
+    checksum = 0;
+    A = mfun->getFunction(2)->getParameter("A");
+    B = mfun->getFunction(2)->getParameter("B");
+    auto d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    for(size_t i = 19; i < 30; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
+      checksum += values.getCalculated(i);
+    }
+    TS_ASSERT_DIFFERS(checksum,0);
 
   }
 

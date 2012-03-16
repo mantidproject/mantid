@@ -98,9 +98,15 @@ namespace API
     using Kernel::DynamicFactory<IFunction>::createUnwrapped;
 
     /// Create a simple function
-    boost::shared_ptr<IFunction> createSimple(const Expression& expr)const;
+    boost::shared_ptr<IFunction> createSimple(
+      const Expression& expr, 
+      std::map<std::string,std::string>& parentAttributes
+      )const;
     /// Create a composite function
-    boost::shared_ptr<CompositeFunction> createComposite(const Expression& expr)const;
+    boost::shared_ptr<CompositeFunction> createComposite(
+      const Expression& expr, 
+      std::map<std::string,std::string>& parentAttributes
+      )const;
     ///Creates an instance of a function
     boost::shared_ptr<IFunction> createFitFunction(const Expression& expr) const;
 

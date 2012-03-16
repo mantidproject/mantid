@@ -6,7 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
+
 #include <boost/shared_array.hpp>
+#include <map>
 
 namespace Mantid
 {
@@ -132,7 +134,6 @@ public:
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 
-
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
@@ -157,6 +158,27 @@ public:
   std::string parameterLocalName(size_t i)const;
   /// Check the function.
   void checkFunction();
+
+  /// Returns the number of attributes associated with the function
+  virtual size_t nLocalAttributes()const {return 0;}
+  /// Returns a list of attribute names
+  virtual std::vector<std::string> getLocalAttributeNames()const {return std::vector<std::string>();}
+  /// Return a value of attribute attName
+  virtual Attribute getLocalAttribute(size_t i, const std::string& attName)const
+  {
+    (void)i;
+    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
+  }
+  /// Set a value to attribute attName
+  virtual void setLocalAttribute(size_t i, const std::string& attName,const Attribute& )
+  {
+    (void)i;
+    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
+  }
+  /// Check if attribute attName exists
+  virtual bool hasLocalAttribute(const std::string&)const {return false;}
+  template<typename T>
+  void setLocalAttributeValue(size_t i, const std::string& attName,const T& value){setLocalAttribute(i,attName,Attribute(value));}
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -184,7 +206,6 @@ private:
   size_t m_nParams;
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
-
 };
 
 ///shared pointer to the composite function base class

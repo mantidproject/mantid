@@ -1206,7 +1206,6 @@ public:
 
     delete mfun;
   }
-
 };
 
 #endif /*COMPOSITEFUNCTIONTEST_H_*/

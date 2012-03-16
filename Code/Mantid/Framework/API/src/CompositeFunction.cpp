@@ -837,6 +837,5 @@ IFunction_sptr CompositeFunction::getContainingFunction(const ParameterReference
   return IFunction_sptr();
 }
 
-
 } // namespace API
 } // namespace Mantid

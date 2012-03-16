@@ -46,6 +46,8 @@ public:
   /// Constructor
   MultiDomainFunction():m_nDomains(0),m_maxIndex(0){}
 
+  /// Returns the function's name
+  virtual std::string name()const {return "MultiDomainFunction";}
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const;
@@ -60,11 +62,25 @@ public:
 
   /// Clear all domain indices
   void clearDomainIndices();
+
+  /// Returns the number of attributes associated with the function
+  virtual size_t nLocalAttributes()const {return 1;}
+  /// Returns a list of attribute names
+  virtual std::vector<std::string> getLocalAttributeNames()const {return std::vector<std::string>(1,"domains");}
+  /// Return a value of attribute attName
+  virtual Attribute getLocalAttribute(size_t i, const std::string& attName)const;
+  /// Set a value to attribute attName
+  virtual void setLocalAttribute(size_t i, const std::string& attName,const Attribute& );
+  /// Check if attribute attName exists
+  virtual bool hasLocalAttribute(const std::string& attName)const {return attName == "domains";}
+
 protected:
 
   /// Counts number of the domains
   void countNumberOfDomains();
   void countValueOffsets(const CompositeDomain& domain)const;
+  void getFunctionDomains(size_t i, const CompositeDomain& cd, std::vector<size_t>& domains)const;
+
   /// Domain index map: finction -> domain
   std::map<size_t, std::vector<size_t> > m_domains;
   /// Number of domains this MultiDomainFunction operates on. == number of different values in m_domains
