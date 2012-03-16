@@ -28,7 +28,6 @@ set ( INC_FILES
 	inc/MantidPythonAPI/api_exports.h
 	inc/MantidPythonAPI/geometryhelper.h
 	inc/MantidPythonAPI/kernel_exports.h
-	inc/MantidPythonAPI/std_operator_definitions.h
 	inc/MantidPythonAPI/stl_proxies.h
 )
 
