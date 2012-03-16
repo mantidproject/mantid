@@ -1029,35 +1029,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2 <<
       " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
 //-----------------------------------------------------------------------------------------------
-  // f) Create theoretic background workspace and thus peak workspace
-  size_t fitsize = i_max-i_min+1;
-  API::MatrixWorkspace_sptr tbkgdWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, fitsize, fitsize);
-  API::MatrixWorkspace_sptr peakWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, fitsize, fitsize);
-  MantidVec& tX = tbkgdWS->dataX(0);
-  MantidVec& tY = tbkgdWS->dataY(0);
-  MantidVec& tE = tbkgdWS->dataE(0);
-  MantidVec& pX = peakWS->dataX(0);
-  MantidVec& pY = peakWS->dataY(0);
-  MantidVec& pE = peakWS->dataE(0);
 
-  double xPeak = 0;
-  double vPeak = 0;
-  for (size_t i = 0; i < fitsize; i ++){
-    double d = X[i+i_min];
-    double bkgd = a0+a1*d+a2*d*d;
-    tX[i] = d;
-    tY[i] = bkgd;
-    tE[i] = sqrt(fabs(bkgd));
-
-    pX[i] = d;
-    pY[i] = Y[i+i_min]-bkgd;
-    pE[i] = sqrt(fabs(pY[i]));
-
-    if (pY[i] > vPeak){
-      vPeak = pY[i];
-      xPeak = pX[i];
-    }
-  }
+  const double in_height = Y[i4] - in_bg0;
+  const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
 
   // g) Looping on peak width for the best fit
   double mincost = 1.0E10;
@@ -1068,7 +1042,23 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   g_log.information() << "Loop From " << minGuessedPeakWidth << " To " << maxGuessedPeakWidth << " with step "
       << stepGuessedPeakWidth << "  Over about " << 10*(i0-i2) << " pixels" << std::endl;
-  API::IFitFunction_sptr peakFunction = this->createFunction(true);
+  API::IFitFunction_sptr peakAndBackgroundFunction = this->createFunction(true);
+  peakAndBackgroundFunction->setParameter("f1.A0", a0);
+  peakAndBackgroundFunction->setParameter("f1.A1", a1);
+  if (backgroundtype.compare("Quadratic") == 0)
+  {
+    peakAndBackgroundFunction->setParameter("f1.A2", a2);
+  }
+  std::string ties;
+  {
+      std::stringstream temp;
+      temp << "f1.A0=" << a0;
+      temp << ",f1.A1=" << a1;
+      if (backgroundtype.compare("Quadratic") == 0)
+          temp << ",f1.A2=" << a2;
+      ties = temp.str();
+
+  }
   for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
     // a) Set up sub algorithm Fit
     IAlgorithm_sptr gfit;
@@ -1081,19 +1071,18 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       g_log.error("The FindPeaks algorithm requires the CurveFitting library");
       throw;
     }
-    gfit->setProperty("InputWorkspace", peakWS);
-    gfit->setProperty("WorkspaceIndex", 0);
+    gfit->setProperty("InputWorkspace", input);
+    gfit->setProperty("WorkspaceIndex", spectrum);
     gfit->setProperty("MaxIterations", 50);
 
     // b) Guess sigma
     double in_sigma = (i4 + iwidth < X.size()) ? X[i4 + iwidth] - X[i4] : 0.;
-    double in_centre = xPeak;
-    double in_height = vPeak;
+
 
     // c) Set initial fitting parameters
-    peakFunction->setParameter("f0.Height", in_height);
-    peakFunction->setParameter("f0.PeakCentre", in_centre);
-    peakFunction->setParameter("f0.Sigma", in_sigma);
+    peakAndBackgroundFunction->setParameter("f0.Height", in_height);
+    peakAndBackgroundFunction->setParameter("f0.PeakCentre", in_centre);
+    peakAndBackgroundFunction->setParameter("f0.Sigma", in_sigma);
     //ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma=" << in_sigma;
     //std::string function = ss.str();
 
@@ -1102,9 +1091,10 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     gfit->setProperty("EndX",   (X[i4] + 5 * (X[i0] - X[i2])));
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
-    gfit->setProperty("Function", peakFunction);
+    gfit->setProperty("Function", peakAndBackgroundFunction);
+    gfit->setProperty("Ties", ties);
 
-    g_log.debug() << "Function: " << *peakFunction<< "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
+    g_log.debug() << "Function: " << *peakAndBackgroundFunction<< "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
@@ -1147,7 +1137,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       if (chi2 < mincost)
       {
         isthebest = true;
-        if (usePeakHeightTolerance && fheight > vPeak*peakHeightTolerance)
+        if (usePeakHeightTolerance && fheight > in_height*peakHeightTolerance)
           isthebest = false;
       }
 
@@ -1182,7 +1172,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   lastfit->setProperty("MaxIterations", 50);
 
   // c) Set initial fitting parameters
-  IFitFunction_sptr peakAndBackgroundFunction = this->createFunction();
   peakAndBackgroundFunction->setParameter("f0.Height", bestheight);
   peakAndBackgroundFunction->setParameter("f0.PeakCentre", bestcenter);
   peakAndBackgroundFunction->setParameter("f0.Sigma", bestsigma);
@@ -1222,7 +1211,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   {
     bool isbest = true;
 
-    if (usePeakHeightTolerance && tempheight > vPeak*peakHeightTolerance)
+    if (usePeakHeightTolerance && tempheight > in_height*peakHeightTolerance)
     {
       isbest = false;
     }
