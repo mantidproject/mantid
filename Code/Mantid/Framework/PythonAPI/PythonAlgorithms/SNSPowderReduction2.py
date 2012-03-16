@@ -281,7 +281,6 @@ class SNSPowderReduction2(PythonAlgorithm):
             return self._loadPreNeXusData(runnumber, extension, **chunk)
 
     def _getStrategy(self, runnumber, extension):
-        from mantid.simpleapi import *
         import boostmpi as mpi
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
@@ -290,7 +289,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         if comm.size > 1:
             strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
         elif self._chunks > 0 and not "histo" in extension:
-            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
             for row in Chunks: strategy.append(row)
         else:
             strategy.append({})
