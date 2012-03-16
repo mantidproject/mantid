@@ -85,7 +85,7 @@ private:
 };
 
 /// Allow this object to be printed to a stream
-std::ostream & operator<<(std::ostream & buffer, const InstrumentInfo & instrumentDescriptor);
+MANTID_KERNEL_DLL std::ostream & operator<<(std::ostream & buffer, const InstrumentInfo & instrumentDescriptor);
 
 } // namespace Kernel
 } // namespace Mantid
