@@ -33,15 +33,37 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
     g_log.error("Facility name is not defined");
     throw std::runtime_error("Facility name is not defined");
   }
+
+  // Fill the various fields from the XML
+  fillZeroPadding(elem);
+  fillDelimiter(elem);
+  fillExtensions(elem);
+  fillSoapEndPoint(elem);
+  fillArchiveNames(elem);
+  fillCatalogName(elem);
+  fillInstruments(elem);
+}
+
+/// Called from constructor to fill zero padding field
+void FacilityInfo::fillZeroPadding(const Poco::XML::Element* elem)
+{
   std::string paddingStr = elem->getAttribute("zeropadding");
   if ( paddingStr.empty() || !Mantid::Kernel::Strings::convert(paddingStr,m_zeroPadding) )
   {
     m_zeroPadding = 0;
   }
+}
 
+/// Called from constructor to fill default delimiter
+void FacilityInfo::fillDelimiter(const Poco::XML::Element* elem)
+{
   // The string to separate the instrument name and the run number.
   m_delimiter = elem->getAttribute("delimiter");
+}
 
+/// Called from constructor to fill file extensions
+void FacilityInfo::fillExtensions(const Poco::XML::Element* elem)
+{
   std::string extsStr = elem->getAttribute("FileExtensions");
   if (extsStr.empty())
   {
@@ -54,27 +76,48 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   {
     addExtension(*it);
   }
+}
 
-  Poco::XML::NodeList* pNL_soapEndPoint = elem->getElementsByTagName("soapEndPoint");
-  if(!pNL_soapEndPoint)
+/**
+  * Add new extension. Adds both a lowercase and uppercase version
+  * @param ext :: File extension, including the dot, e.g. ".nxs" or ".raw"
+  */
+void FacilityInfo::addExtension(const std::string& ext)
+{
+  std::string casedExt(ext);
+  std::transform(ext.begin(), ext.end(), casedExt.begin(), tolower);
+  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),casedExt);
+  if (it == m_extensions.end())
   {
-    throw std::runtime_error("Facilities.xml file  must have soapEndPoint information");
+    m_extensions.push_back(casedExt);
+    std::transform(ext.begin(), ext.end(), casedExt.begin(), toupper);
+    m_extensions.push_back(casedExt);
   }
+}
+
+/// Called from constructor to fill ICAT soap end point
+void FacilityInfo::fillSoapEndPoint(const Poco::XML::Element* elem)
+{
+  Poco::XML::NodeList* pNL_soapEndPoint = elem->getElementsByTagName("soapEndPoint");
+
   if (pNL_soapEndPoint->length() > 1)
   {
+    pNL_soapEndPoint->release();
     g_log.error("Facility must have only one soapEndPoint tag");
     throw std::runtime_error("Facility must have only one csoapEndPoint tag");
   }
-  else if (pNL_soapEndPoint->length() == 1)
+
+  Poco::XML::Element* endpoint = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
+  if(!endpoint->getAttribute("url").empty())
   {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
-    if(!elem->getAttribute("url").empty())
-    {
-      m_soapEndPoint= elem->getAttribute("url");
-    }
+    m_soapEndPoint= endpoint->getAttribute("url");
   }
   pNL_soapEndPoint->release();
+}
 
+/// Called from constructor to fill archive interface names
+void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
+{
   Poco::XML::NodeList* pNL_archives = elem->getElementsByTagName("archive");
   if (pNL_archives->length() > 1)
   {
@@ -96,29 +139,34 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
     pNL_interfaces->release();
   }
   pNL_archives->release();
+}
 
+/// Called from constructor to fill catalog name
+void FacilityInfo::fillCatalogName(const Poco::XML::Element* elem)
+{
   Poco::XML::NodeList* pNL_catalogs = elem->getElementsByTagName("catalog");
-  if(!pNL_catalogs)
-  {
-    throw std::runtime_error("Facilities.xml file  must have catalog information");
-  }
+
   if (pNL_catalogs->length() > 1)
   {
     g_log.error("Facility must have only one catalog tag");
     throw std::runtime_error("Facility must have only one catalog tag");
   }
-  else if (pNL_catalogs->length() == 1)
-  {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
-    if(!elem->getAttribute("name").empty())
-    {
-      m_catalogName= elem->getAttribute("name");
-    }
-  }
-  pNL_catalogs->release();
 
+  Poco::XML::Element* catalog = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
+  if(!catalog->getAttribute("name").empty())
+  {
+    m_catalogName= catalog->getAttribute("name");
+  }
+
+  pNL_catalogs->release();
+}
+
+/// Called from constructor to fill instrument list
+void FacilityInfo::fillInstruments(const Poco::XML::Element* elem)
+{
   Poco::XML::NodeList* pNL_instrument = elem->getElementsByTagName("instrument");
   unsigned long n = pNL_instrument->length();
+  m_instruments.reserve(n);
 
   for (unsigned long i = 0; i < n; ++i)
   {
@@ -139,23 +187,6 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   if (m_instruments.empty())
   {
     throw std::runtime_error("Facility "+m_name+" does not have any instruments;");
-  }
-}
-
-/**
-  * Add new extension. Adds both a lowercase and uppercase version
-  * @param ext :: File extension, including the dot, e.g. ".nxs" or ".raw"
-  */
-void FacilityInfo::addExtension(const std::string& ext)
-{
-  std::string casedExt(ext); 
-  std::transform(ext.begin(), ext.end(), casedExt.begin(), tolower);
-  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),casedExt);
-  if (it == m_extensions.end())
-  {
-    m_extensions.push_back(casedExt);
-    std::transform(ext.begin(), ext.end(), casedExt.begin(), toupper);
-    m_extensions.push_back(casedExt);
   }
 }
 
@@ -223,15 +254,6 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string& tech)co
     }
   }
   return out;
-}
-
-/**
- * Returns the delimiter between the instrument name and the run number.
- * @return the delimiter as a string
- */
-const std::string FacilityInfo::getDelimiter() const
-{
-  return m_delimiter;
 }
 
 } // namespace Kernel

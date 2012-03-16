@@ -29,10 +29,7 @@ namespace Kernel
 
 /** A class that holds information about a facility.
 
-    @author Roman Tolchenov, Tessella plc
-    @date 20/07/2010
-
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -57,10 +54,9 @@ class MANTID_KERNEL_DLL FacilityInfo
 public:
   explicit FacilityInfo(const Poco::XML::Element* elem);
 
-  const std::string getDelimiter() const;
-
   /// Return the name of the facility
   const std::string & name() const { return m_name; }
+
   /// Returns default zero padding for this facility
   int zeroPadding() const { return m_zeroPadding; }
   /// Returns the default delimiter between instrument name and run number
@@ -69,10 +65,17 @@ public:
   const std::vector<std::string> extensions() const { return m_extensions; }
   /// Returns the preferred file extension
   const std::string & preferredExtension()const { return m_extensions.front(); }
+
   /// Return the soap endpoint name
   const std::string & getSoapEndPoint() const { return m_soapEndPoint; }
+  /// Returns the catalog name
+  const std::string & catalogName()const {return m_catalogName;}
   /// Return the archive search interface names
   const std::vector<std::string> & archiveSearch() const { return m_archiveSearch; }
+
+  /// Returns the name of the default live listener
+  const std::string & liveListener() const { return m_liveListener; }
+
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo> & instruments() const { return m_instruments; }
   /// Returns a list of instruments of given technique
@@ -80,12 +83,15 @@ public:
   /// Returns instruments with given name
   const InstrumentInfo & instrument(const std::string& iName = "") const;
 
-  /// Returns the catalog name
-  const std::string & catalogName()const {return m_catalogName;}
-  /// Returns the name of the default live listener
-  const std::string & liveListener() const { return m_liveListener; }
-
 private:
+  void fillZeroPadding(const Poco::XML::Element* elem);
+  void fillDelimiter(const Poco::XML::Element* elem);
+  void fillExtensions(const Poco::XML::Element* elem);
+  void fillSoapEndPoint(const Poco::XML::Element* elem);
+  void fillArchiveNames(const Poco::XML::Element* elem);
+  void fillCatalogName(const Poco::XML::Element* elem);
+  void fillInstruments(const Poco::XML::Element* elem);
+
   /// Add new extension
   void addExtension(const std::string& ext);
 
