@@ -55,8 +55,7 @@ namespace Algorithms
 
 // Method of complex validator class
 // method checks if the property is enabled
-bool 
-MonIDPropChanger::isEnabled()const
+bool MonIDPropChanger::isEnabled()const
 {
        int sp_id =host_algo->getProperty(SpectraNum);
        // if there is spectra number set to norbalize by, nothing else can be selected;
@@ -78,8 +77,8 @@ MonIDPropChanger::isEnabled()const
 }
 
 // method checks if other properties have chanded and these changes affected MonID property
-bool 
-MonIDPropChanger::isConditionChanged()const{
+bool MonIDPropChanger::isConditionChanged()const
+{
       // is enabled is based on other properties:
        if(!is_enabled)return false;
        // read monitors list from the input workspace
@@ -90,8 +89,8 @@ MonIDPropChanger::isConditionChanged()const{
        return true;
 }
 // function which modifies the allowed values for the list of monitors. 
-void 
-MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
+void MonIDPropChanger::applyChanges(Kernel::Property *const pProp)
+{
        Kernel::PropertyWithValue<int>* piProp  = dynamic_cast<Kernel::PropertyWithValue<int>* >(pProp);
        if(!piProp){
            throw(std::invalid_argument("modify allowed value has been called on wrong property"));
@@ -100,7 +99,7 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
        if(iExistingAllowedValues.empty()){
            API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
            int spectra_max(-1);
-           if(inputWS){ // let's assueme that detectors IDs correspond to spectraID -- not always the case but often. 
+           if(inputWS){ // let's assume that detectors IDs correspond to spectraID -- not always the case but often. TODO: should be fixed
                spectra_max = static_cast<int>(inputWS->getNumberHistograms())+1;
            }
            piProp->replaceValidator(boost::make_shared<Kernel::BoundedValidator<int>>(-1,spectra_max));
@@ -111,8 +110,7 @@ MonIDPropChanger::applyChanges(Kernel::Property *const pProp){
    }
 
 // read the monitors list from the workspace and try to do it once for any particular ws;
-bool
-MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
+bool MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
 {
     // no workspace
     if(!inputWS) return false;
@@ -131,7 +129,7 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
         }
     }
     // are these monitors really there?
-    // got the index of correspondent spectras (should be only one). 
+    // got the index of correspondent spectras . 
     std::vector<size_t>  indexList;
     inputWS->getIndicesFromDetectorIDs(mon,indexList);
     if(indexList.empty()){
@@ -142,7 +140,7 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
             return true;
         }
     }
-    //ASSUME?  index list can be less or equal to mon list size
+    //index list can be less or equal to the mon list size (some monitors do not have spectra)
     size_t mon_count = (mon.size()<indexList.size())?mon.size():indexList.size();
     std::vector<int> allowed_values(mon_count);
     for(size_t i=0;i<mon_count;i++){
@@ -155,7 +153,7 @@ MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const
         iExistingAllowedValues.assign(allowed_values.begin(),allowed_values.end());
         return true;
     }
-
+    // the monitor list has the same size as before. Is it equivalent to the existing one?
     bool values_redefined=false;
     for(size_t i=0;i<mon_count;i++){
         if(iExistingAllowedValues[i]!=allowed_values[i]){
