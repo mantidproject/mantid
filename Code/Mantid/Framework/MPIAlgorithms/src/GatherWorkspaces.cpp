@@ -6,6 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace mpi = boost::mpi;
 
@@ -16,6 +17,7 @@ namespace MPIAlgorithms
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GatherWorkspaces)
@@ -29,6 +31,8 @@ void GatherWorkspaces::init()
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,PropertyMode::Mandatory));
   // Output is optional - only the root process will output a workspace
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output,PropertyMode::Optional));
+  declareProperty("PreserveEvents", false, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
+      "If false, then the workspace gets converted to a Workspace2D histogram.");
 }
 
 void GatherWorkspaces::exec()
@@ -50,7 +54,7 @@ void GatherWorkspaces::exec()
   }
 
   // Get the number of bins in each workspace and check they're all the same
-  const std::size_t numBins = inputWorkspace->blocksize();
+  numBins = inputWorkspace->blocksize();
   std::vector<std::size_t> all_numBins;
   all_gather(included, numBins, all_numBins);
   if ( std::count(all_numBins.begin(),all_numBins.end(),numBins) != (int)all_numBins.size() )
@@ -60,7 +64,7 @@ void GatherWorkspaces::exec()
   }
   // Also check that all workspaces are either histogram or not
   // N.B. boost mpi doesn't seem to like me using booleans in the all_gather
-  const int hist = inputWorkspace->isHistogramData();
+  hist = inputWorkspace->isHistogramData();
   std::vector<int> all_hist;
   all_gather(included, hist, all_hist);
   if ( std::count(all_hist.begin(),all_hist.end(),hist) != (int)all_hist.size() )
@@ -70,7 +74,18 @@ void GatherWorkspaces::exec()
   }
 
   // Get the total number of spectra in the combined inputs
-  std::size_t totalSpec = inputWorkspace->getNumberHistograms();
+  totalSpec = inputWorkspace->getNumberHistograms();
+
+  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputWorkspace);
+  if (eventW != NULL)
+  {
+    if (getProperty("PreserveEvents"))
+    {
+      //Input workspace is an event workspace. Use the other exec method
+      this->execEvent();
+      return;
+    }
+  }
 
   // The root process needs to create a workspace of the appropriate size
   MatrixWorkspace_sptr outputWorkspace;
@@ -98,6 +113,40 @@ void GatherWorkspaces::exec()
     {
       reduce(included, inputWorkspace->readY(wi), vplus(), 0);
       reduce(included, inputWorkspace->readE(wi), eplus(), 0);
+    }
+  }
+
+}
+void GatherWorkspaces::execEvent()
+{
+
+  // Every process in an MPI job must hit this next line or everything hangs!
+  mpi::communicator world; // The communicator containing all processes
+  // The root process needs to create a workspace of the appropriate size
+  EventWorkspace_sptr outputWorkspace;
+  if ( world.rank() == 0 )
+  {
+    g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
+    // Create the workspace for the output
+    outputWorkspace =
+    boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", totalSpec,numBins+hist,numBins));
+    setProperty("OutputWorkspace",outputWorkspace);
+  }
+
+  for (size_t wi = 0; wi < totalSpec; wi++)
+  {
+    if ( world.rank() == 0 )
+    {
+      outputWorkspace->dataX(wi) = eventW->readX(wi);
+      //gather(world, eventW->getEventList(wi), outputWorkspace->getOrAddEventList(wi), 0);
+      const ISpectrum * inSpec = eventW->getSpectrum(wi);
+      ISpectrum * outSpec = outputWorkspace->getSpectrum(wi);
+      outSpec->clearDetectorIDs();
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+    }
+    else
+    {
+      //gather(world, eventW->getEventList(wi), 0);
     }
   }
 

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -98,7 +99,11 @@ private:
     }
   };
 
-  //void execEvent(); TODO: Make event-aware? (might lead to transmission of too much data)
+  void execEvent();
+  DataObjects::EventWorkspace_const_sptr eventW;
+  std::size_t totalSpec;
+  int hist;
+  std::size_t numBins;
 
 };
 
