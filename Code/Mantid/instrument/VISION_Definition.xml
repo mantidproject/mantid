@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-03-09 11:44:35.283768">
-  <!-- Created by Stuart Campbell  -->
+<instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-03-16 16:10:45.753992">
+  <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
@@ -266,10 +266,10 @@
   </type>
   <type name="bank21">
     <component type="tube-long-bs-elastic">
-      <location y="0.329945427767" x="0.0129635911636" z="-0.998">
+      <location y="0.329945427767" x="-0.0129635911636" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-2.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="2.25"/>
           </rot>
         </rot>
       </location>
@@ -277,10 +277,10 @@
   </type>
   <type name="bank22">
     <component type="tube-short-bs-elastic">
-      <location y="0.365747112696" x="0.0432890234837" z="-0.998">
+      <location y="0.365747112696" x="-0.0432890234837" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-6.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="6.75"/>
           </rot>
         </rot>
       </location>
@@ -288,10 +288,10 @@
   </type>
   <type name="bank23">
     <component type="tube-long-bs-elastic">
-      <location y="0.323855299589" x="0.0644188243297" z="-0.998">
+      <location y="0.323855299589" x="-0.0644188243297" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-11.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="11.25"/>
           </rot>
         </rot>
       </location>
@@ -299,10 +299,10 @@
   </type>
   <type name="bank24">
     <component type="tube-short-bs-elastic">
-      <location y="0.354472263586" x="0.0999715176853" z="-0.998">
+      <location y="0.354472263586" x="-0.0999715176853" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-15.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="15.75"/>
           </rot>
         </rot>
       </location>
@@ -310,10 +310,10 @@
   </type>
   <type name="bank25">
     <component type="tube-long-bs-elastic">
-      <location y="0.309790779122" x="0.114287852247" z="-0.998">
+      <location y="0.309790779122" x="-0.114287852247" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-20.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="20.25"/>
           </rot>
         </rot>
       </location>
@@ -321,10 +321,10 @@
   </type>
   <type name="bank26">
     <component type="tube-short-bs-elastic">
-      <location y="0.33446913092" x="0.154192381335" z="-0.998">
+      <location y="0.33446913092" x="-0.154192381335" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-24.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="24.75"/>
           </rot>
         </rot>
       </location>
@@ -332,10 +332,10 @@
   </type>
   <type name="bank27">
     <component type="tube-long-bs-elastic">
-      <location y="0.288098181535" x="0.161342733942" z="-0.998">
+      <location y="0.288098181535" x="-0.161342733942" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-29.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="29.25"/>
           </rot>
         </rot>
       </location>
@@ -343,10 +343,10 @@
   </type>
   <type name="bank28">
     <component type="tube-short-bs-elastic">
-      <location y="0.306230258211" x="0.204616516821" z="-0.998">
+      <location y="0.306230258211" x="-0.204616516821" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-33.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="33.75"/>
           </rot>
         </rot>
       </location>
@@ -354,10 +354,10 @@
   </type>
   <type name="bank29">
     <component type="tube-long-bs-elastic">
-      <location y="0.259311650577" x="0.204424822062" z="-0.998">
+      <location y="0.259311650577" x="-0.204424822062" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-38.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="38.25"/>
           </rot>
         </rot>
       </location>
@@ -365,10 +365,10 @@
   </type>
   <type name="bank30">
     <component type="tube-short-bs-elastic">
-      <location y="0.270450980225" x="0.25000231458" z="-0.998">
+      <location y="0.270450980225" x="-0.25000231458" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-42.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="42.75"/>
           </rot>
         </rot>
       </location>
@@ -376,10 +376,10 @@
   </type>
   <type name="bank31">
     <component type="tube-long-bs-elastic">
-      <location y="0.224140006175" x="0.242473292616" z="-0.998">
+      <location y="0.224140006175" x="-0.242473292616" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-47.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="47.25"/>
           </rot>
         </rot>
       </location>
@@ -387,10 +387,10 @@
   </type>
   <type name="bank32">
     <component type="tube-short-bs-elastic">
-      <location y="0.228012301531" x="0.289232225643" z="-0.998">
+      <location y="0.228012301531" x="-0.289232225643" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-51.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="51.75"/>
           </rot>
         </rot>
       </location>
@@ -398,10 +398,10 @@
   </type>
   <type name="bank33">
     <component type="tube-long-bs-elastic">
-      <location y="0.183449290943" x="0.274551265982" z="-0.998">
+      <location y="0.183449290943" x="-0.274551265982" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-56.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="56.25"/>
           </rot>
         </rot>
       </location>
@@ -409,10 +409,10 @@
   </type>
   <type name="bank34">
     <component type="tube-short-bs-elastic">
-      <location y="0.179959203243" x="0.321340279405" z="-0.998">
+      <location y="0.179959203243" x="-0.321340279405" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-60.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="60.75"/>
           </rot>
         </rot>
       </location>
@@ -420,10 +420,10 @@
   </type>
   <type name="bank35">
     <component type="tube-long-bs-elastic">
-      <location y="0.138241445335" x="0.299868875997" z="-0.998">
+      <location y="0.138241445335" x="-0.299868875997" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-65.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="65.25"/>
           </rot>
         </rot>
       </location>
@@ -431,10 +431,10 @@
   </type>
   <type name="bank36">
     <component type="tube-short-bs-elastic">
-      <location y="0.127474912122" x="0.34553586902" z="-0.998">
+      <location y="0.127474912122" x="-0.34553586902" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-69.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="69.75"/>
           </rot>
         </rot>
       </location>
@@ -442,10 +442,10 @@
   </type>
   <type name="bank37">
     <component type="tube-long-bs-elastic">
-      <location y="0.0896296365454" x="0.317802719077" z="-0.998">
+      <location y="0.0896296365454" x="-0.317802719077" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-74.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="74.25"/>
           </rot>
         </rot>
       </location>
@@ -453,10 +453,10 @@
   </type>
   <type name="bank38">
     <component type="tube-short-bs-elastic">
-      <location y="0.0718517655985" x="0.361223218773" z="-0.998">
+      <location y="0.0718517655985" x="-0.361223218773" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-78.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="78.75"/>
           </rot>
         </rot>
       </location>
@@ -464,10 +464,10 @@
   </type>
   <type name="bank39">
     <component type="tube-long-bs-elastic">
-      <location y="0.0388108486406" x="0.327911204487" z="-0.998">
+      <location y="0.0388108486406" x="-0.327911204487" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-83.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="83.25"/>
           </rot>
         </rot>
       </location>
@@ -475,10 +475,10 @@
   </type>
   <type name="bank40">
     <component type="tube-short-bs-elastic">
-      <location y="0.0144593901441" x="0.368016054047" z="-0.998">
+      <location y="0.0144593901441" x="-0.368016054047" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-87.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="87.75"/>
           </rot>
         </rot>
       </location>
@@ -486,10 +486,10 @@
   </type>
   <type name="bank41">
     <component type="tube-long-bs-elastic">
-      <location y="-0.0129635911636" x="0.329945427767" z="-0.998">
+      <location y="-0.0129635911636" x="-0.329945427767" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-92.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="92.25"/>
           </rot>
         </rot>
       </location>
@@ -497,10 +497,10 @@
   </type>
   <type name="bank42">
     <component type="tube-short-bs-elastic">
-      <location y="-0.0432890234837" x="0.365747112696" z="-0.998">
+      <location y="-0.0432890234837" x="-0.365747112696" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-96.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="96.75"/>
           </rot>
         </rot>
       </location>
@@ -508,10 +508,10 @@
   </type>
   <type name="bank43">
     <component type="tube-long-bs-elastic">
-      <location y="-0.0644188243297" x="0.323855299589" z="-0.998">
+      <location y="-0.0644188243297" x="-0.323855299589" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-101.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="101.25"/>
           </rot>
         </rot>
       </location>
@@ -519,10 +519,10 @@
   </type>
   <type name="bank44">
     <component type="tube-short-bs-elastic">
-      <location y="-0.0999715176853" x="0.354472263586" z="-0.998">
+      <location y="-0.0999715176853" x="-0.354472263586" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-105.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="105.75"/>
           </rot>
         </rot>
       </location>
@@ -530,10 +530,10 @@
   </type>
   <type name="bank45">
     <component type="tube-long-bs-elastic">
-      <location y="-0.114287852247" x="0.309790779122" z="-0.998">
+      <location y="-0.114287852247" x="-0.309790779122" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-110.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="110.25"/>
           </rot>
         </rot>
       </location>
@@ -541,10 +541,10 @@
   </type>
   <type name="bank46">
     <component type="tube-short-bs-elastic">
-      <location y="-0.154192381335" x="0.33446913092" z="-0.998">
+      <location y="-0.154192381335" x="-0.33446913092" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-114.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="114.75"/>
           </rot>
         </rot>
       </location>
@@ -552,10 +552,10 @@
   </type>
   <type name="bank47">
     <component type="tube-long-bs-elastic">
-      <location y="-0.161342733942" x="0.288098181535" z="-0.998">
+      <location y="-0.161342733942" x="-0.288098181535" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-119.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="119.25"/>
           </rot>
         </rot>
       </location>
@@ -563,10 +563,10 @@
   </type>
   <type name="bank48">
     <component type="tube-short-bs-elastic">
-      <location y="-0.204616516821" x="0.306230258211" z="-0.998">
+      <location y="-0.204616516821" x="-0.306230258211" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-123.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="123.75"/>
           </rot>
         </rot>
       </location>
@@ -574,10 +574,10 @@
   </type>
   <type name="bank49">
     <component type="tube-long-bs-elastic">
-      <location y="-0.204424822062" x="0.259311650577" z="-0.998">
+      <location y="-0.204424822062" x="-0.259311650577" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-128.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="128.25"/>
           </rot>
         </rot>
       </location>
@@ -585,10 +585,10 @@
   </type>
   <type name="bank50">
     <component type="tube-short-bs-elastic">
-      <location y="-0.25000231458" x="0.270450980225" z="-0.998">
+      <location y="-0.25000231458" x="-0.270450980225" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-132.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="132.75"/>
           </rot>
         </rot>
       </location>
@@ -596,10 +596,10 @@
   </type>
   <type name="bank51">
     <component type="tube-long-bs-elastic">
-      <location y="-0.242473292616" x="0.224140006175" z="-0.998">
+      <location y="-0.242473292616" x="-0.224140006175" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-137.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="137.25"/>
           </rot>
         </rot>
       </location>
@@ -607,10 +607,10 @@
   </type>
   <type name="bank52">
     <component type="tube-short-bs-elastic">
-      <location y="-0.289232225643" x="0.228012301531" z="-0.998">
+      <location y="-0.289232225643" x="-0.228012301531" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-141.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="141.75"/>
           </rot>
         </rot>
       </location>
@@ -618,10 +618,10 @@
   </type>
   <type name="bank53">
     <component type="tube-long-bs-elastic">
-      <location y="-0.274551265982" x="0.183449290943" z="-0.998">
+      <location y="-0.274551265982" x="-0.183449290943" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-146.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="146.25"/>
           </rot>
         </rot>
       </location>
@@ -629,10 +629,10 @@
   </type>
   <type name="bank54">
     <component type="tube-short-bs-elastic">
-      <location y="-0.321340279405" x="0.179959203243" z="-0.998">
+      <location y="-0.321340279405" x="-0.179959203243" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-150.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="150.75"/>
           </rot>
         </rot>
       </location>
@@ -640,10 +640,10 @@
   </type>
   <type name="bank55">
     <component type="tube-long-bs-elastic">
-      <location y="-0.299868875997" x="0.138241445335" z="-0.998">
+      <location y="-0.299868875997" x="-0.138241445335" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-155.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="155.25"/>
           </rot>
         </rot>
       </location>
@@ -651,10 +651,10 @@
   </type>
   <type name="bank56">
     <component type="tube-short-bs-elastic">
-      <location y="-0.34553586902" x="0.127474912122" z="-0.998">
+      <location y="-0.34553586902" x="-0.127474912122" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-159.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="159.75"/>
           </rot>
         </rot>
       </location>
@@ -662,10 +662,10 @@
   </type>
   <type name="bank57">
     <component type="tube-long-bs-elastic">
-      <location y="-0.317802719077" x="0.0896296365454" z="-0.998">
+      <location y="-0.317802719077" x="-0.0896296365454" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-164.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="164.25"/>
           </rot>
         </rot>
       </location>
@@ -673,10 +673,10 @@
   </type>
   <type name="bank58">
     <component type="tube-short-bs-elastic">
-      <location y="-0.361223218773" x="0.0718517655985" z="-0.998">
+      <location y="-0.361223218773" x="-0.0718517655985" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-168.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="168.75"/>
           </rot>
         </rot>
       </location>
@@ -684,10 +684,10 @@
   </type>
   <type name="bank59">
     <component type="tube-long-bs-elastic">
-      <location y="-0.327911204487" x="0.0388108486406" z="-0.998">
+      <location y="-0.327911204487" x="-0.0388108486406" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-173.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="173.25"/>
           </rot>
         </rot>
       </location>
@@ -695,10 +695,10 @@
   </type>
   <type name="bank60">
     <component type="tube-short-bs-elastic">
-      <location y="-0.368016054047" x="0.0144593901441" z="-0.998">
+      <location y="-0.368016054047" x="-0.0144593901441" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-177.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="177.75"/>
           </rot>
         </rot>
       </location>
@@ -706,10 +706,10 @@
   </type>
   <type name="bank61">
     <component type="tube-long-bs-elastic">
-      <location y="-0.329945427767" x="-0.0129635911636" z="-0.998">
+      <location y="-0.329945427767" x="0.0129635911636" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-182.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="182.25"/>
           </rot>
         </rot>
       </location>
@@ -717,10 +717,10 @@
   </type>
   <type name="bank62">
     <component type="tube-short-bs-elastic">
-      <location y="-0.365747112696" x="-0.0432890234837" z="-0.998">
+      <location y="-0.365747112696" x="0.0432890234837" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-186.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="186.75"/>
           </rot>
         </rot>
       </location>
@@ -728,10 +728,10 @@
   </type>
   <type name="bank63">
     <component type="tube-long-bs-elastic">
-      <location y="-0.323855299589" x="-0.0644188243297" z="-0.998">
+      <location y="-0.323855299589" x="0.0644188243297" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-191.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="191.25"/>
           </rot>
         </rot>
       </location>
@@ -739,10 +739,10 @@
   </type>
   <type name="bank64">
     <component type="tube-short-bs-elastic">
-      <location y="-0.354472263586" x="-0.0999715176853" z="-0.998">
+      <location y="-0.354472263586" x="0.0999715176853" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-195.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="195.75"/>
           </rot>
         </rot>
       </location>
@@ -750,10 +750,10 @@
   </type>
   <type name="bank65">
     <component type="tube-long-bs-elastic">
-      <location y="-0.309790779122" x="-0.114287852247" z="-0.998">
+      <location y="-0.309790779122" x="0.114287852247" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-200.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="200.25"/>
           </rot>
         </rot>
       </location>
@@ -761,10 +761,10 @@
   </type>
   <type name="bank66">
     <component type="tube-short-bs-elastic">
-      <location y="-0.33446913092" x="-0.154192381335" z="-0.998">
+      <location y="-0.33446913092" x="0.154192381335" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-204.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="204.75"/>
           </rot>
         </rot>
       </location>
@@ -772,10 +772,10 @@
   </type>
   <type name="bank67">
     <component type="tube-long-bs-elastic">
-      <location y="-0.288098181535" x="-0.161342733942" z="-0.998">
+      <location y="-0.288098181535" x="0.161342733942" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-209.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="209.25"/>
           </rot>
         </rot>
       </location>
@@ -783,10 +783,10 @@
   </type>
   <type name="bank68">
     <component type="tube-short-bs-elastic">
-      <location y="-0.306230258211" x="-0.204616516821" z="-0.998">
+      <location y="-0.306230258211" x="0.204616516821" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-213.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="213.75"/>
           </rot>
         </rot>
       </location>
@@ -794,10 +794,10 @@
   </type>
   <type name="bank69">
     <component type="tube-long-bs-elastic">
-      <location y="-0.259311650577" x="-0.204424822062" z="-0.998">
+      <location y="-0.259311650577" x="0.204424822062" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-218.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="218.25"/>
           </rot>
         </rot>
       </location>
@@ -805,10 +805,10 @@
   </type>
   <type name="bank70">
     <component type="tube-short-bs-elastic">
-      <location y="-0.270450980225" x="-0.25000231458" z="-0.998">
+      <location y="-0.270450980225" x="0.25000231458" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-222.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="222.75"/>
           </rot>
         </rot>
       </location>
@@ -816,10 +816,10 @@
   </type>
   <type name="bank71">
     <component type="tube-long-bs-elastic">
-      <location y="-0.224140006175" x="-0.242473292616" z="-0.998">
+      <location y="-0.224140006175" x="0.242473292616" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-227.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="227.25"/>
           </rot>
         </rot>
       </location>
@@ -827,10 +827,10 @@
   </type>
   <type name="bank72">
     <component type="tube-short-bs-elastic">
-      <location y="-0.228012301531" x="-0.289232225643" z="-0.998">
+      <location y="-0.228012301531" x="0.289232225643" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-231.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="231.75"/>
           </rot>
         </rot>
       </location>
@@ -838,10 +838,10 @@
   </type>
   <type name="bank73">
     <component type="tube-long-bs-elastic">
-      <location y="-0.183449290943" x="-0.274551265982" z="-0.998">
+      <location y="-0.183449290943" x="0.274551265982" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-236.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="236.25"/>
           </rot>
         </rot>
       </location>
@@ -849,10 +849,10 @@
   </type>
   <type name="bank74">
     <component type="tube-short-bs-elastic">
-      <location y="-0.179959203243" x="-0.321340279405" z="-0.998">
+      <location y="-0.179959203243" x="0.321340279405" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-240.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="240.75"/>
           </rot>
         </rot>
       </location>
@@ -860,10 +860,10 @@
   </type>
   <type name="bank75">
     <component type="tube-long-bs-elastic">
-      <location y="-0.138241445335" x="-0.299868875997" z="-0.998">
+      <location y="-0.138241445335" x="0.299868875997" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-245.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="245.25"/>
           </rot>
         </rot>
       </location>
@@ -871,10 +871,10 @@
   </type>
   <type name="bank76">
     <component type="tube-short-bs-elastic">
-      <location y="-0.127474912122" x="-0.34553586902" z="-0.998">
+      <location y="-0.127474912122" x="0.34553586902" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-249.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="249.75"/>
           </rot>
         </rot>
       </location>
@@ -882,10 +882,10 @@
   </type>
   <type name="bank77">
     <component type="tube-long-bs-elastic">
-      <location y="-0.0896296365454" x="-0.317802719077" z="-0.998">
+      <location y="-0.0896296365454" x="0.317802719077" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-254.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="254.25"/>
           </rot>
         </rot>
       </location>
@@ -893,10 +893,10 @@
   </type>
   <type name="bank78">
     <component type="tube-short-bs-elastic">
-      <location y="-0.0718517655985" x="-0.361223218773" z="-0.998">
+      <location y="-0.0718517655985" x="0.361223218773" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-258.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="258.75"/>
           </rot>
         </rot>
       </location>
@@ -904,10 +904,10 @@
   </type>
   <type name="bank79">
     <component type="tube-long-bs-elastic">
-      <location y="-0.0388108486406" x="-0.327911204487" z="-0.998">
+      <location y="-0.0388108486406" x="0.327911204487" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-263.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="263.25"/>
           </rot>
         </rot>
       </location>
@@ -915,10 +915,10 @@
   </type>
   <type name="bank80">
     <component type="tube-short-bs-elastic">
-      <location y="-0.0144593901441" x="-0.368016054047" z="-0.998">
+      <location y="-0.0144593901441" x="0.368016054047" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-267.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="267.75"/>
           </rot>
         </rot>
       </location>
@@ -926,10 +926,10 @@
   </type>
   <type name="bank81">
     <component type="tube-long-bs-elastic">
-      <location y="0.0129635911636" x="-0.329945427767" z="-0.998">
+      <location y="0.0129635911636" x="0.329945427767" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-272.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="272.25"/>
           </rot>
         </rot>
       </location>
@@ -937,10 +937,10 @@
   </type>
   <type name="bank82">
     <component type="tube-short-bs-elastic">
-      <location y="0.0432890234837" x="-0.365747112696" z="-0.998">
+      <location y="0.0432890234837" x="0.365747112696" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-276.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="276.75"/>
           </rot>
         </rot>
       </location>
@@ -948,10 +948,10 @@
   </type>
   <type name="bank83">
     <component type="tube-long-bs-elastic">
-      <location y="0.0644188243297" x="-0.323855299589" z="-0.998">
+      <location y="0.0644188243297" x="0.323855299589" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-281.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="281.25"/>
           </rot>
         </rot>
       </location>
@@ -959,10 +959,10 @@
   </type>
   <type name="bank84">
     <component type="tube-short-bs-elastic">
-      <location y="0.0999715176853" x="-0.354472263586" z="-0.998">
+      <location y="0.0999715176853" x="0.354472263586" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-285.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="285.75"/>
           </rot>
         </rot>
       </location>
@@ -970,10 +970,10 @@
   </type>
   <type name="bank85">
     <component type="tube-long-bs-elastic">
-      <location y="0.114287852247" x="-0.309790779122" z="-0.998">
+      <location y="0.114287852247" x="0.309790779122" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-290.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="290.25"/>
           </rot>
         </rot>
       </location>
@@ -981,10 +981,10 @@
   </type>
   <type name="bank86">
     <component type="tube-short-bs-elastic">
-      <location y="0.154192381335" x="-0.33446913092" z="-0.998">
+      <location y="0.154192381335" x="0.33446913092" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-294.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="294.75"/>
           </rot>
         </rot>
       </location>
@@ -992,10 +992,10 @@
   </type>
   <type name="bank87">
     <component type="tube-long-bs-elastic">
-      <location y="0.161342733942" x="-0.288098181535" z="-0.998">
+      <location y="0.161342733942" x="0.288098181535" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-299.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="299.25"/>
           </rot>
         </rot>
       </location>
@@ -1003,10 +1003,10 @@
   </type>
   <type name="bank88">
     <component type="tube-short-bs-elastic">
-      <location y="0.204616516821" x="-0.306230258211" z="-0.998">
+      <location y="0.204616516821" x="0.306230258211" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-303.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="303.75"/>
           </rot>
         </rot>
       </location>
@@ -1014,10 +1014,10 @@
   </type>
   <type name="bank89">
     <component type="tube-long-bs-elastic">
-      <location y="0.204424822062" x="-0.259311650577" z="-0.998">
+      <location y="0.204424822062" x="0.259311650577" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-308.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="308.25"/>
           </rot>
         </rot>
       </location>
@@ -1025,10 +1025,10 @@
   </type>
   <type name="bank90">
     <component type="tube-short-bs-elastic">
-      <location y="0.25000231458" x="-0.270450980225" z="-0.998">
+      <location y="0.25000231458" x="0.270450980225" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-312.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="312.75"/>
           </rot>
         </rot>
       </location>
@@ -1036,10 +1036,10 @@
   </type>
   <type name="bank91">
     <component type="tube-long-bs-elastic">
-      <location y="0.242473292616" x="-0.224140006175" z="-0.998">
+      <location y="0.242473292616" x="0.224140006175" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-317.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="317.25"/>
           </rot>
         </rot>
       </location>
@@ -1047,10 +1047,10 @@
   </type>
   <type name="bank92">
     <component type="tube-short-bs-elastic">
-      <location y="0.289232225643" x="-0.228012301531" z="-0.998">
+      <location y="0.289232225643" x="0.228012301531" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-321.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="321.75"/>
           </rot>
         </rot>
       </location>
@@ -1058,10 +1058,10 @@
   </type>
   <type name="bank93">
     <component type="tube-long-bs-elastic">
-      <location y="0.274551265982" x="-0.183449290943" z="-0.998">
+      <location y="0.274551265982" x="0.183449290943" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-326.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="326.25"/>
           </rot>
         </rot>
       </location>
@@ -1069,10 +1069,10 @@
   </type>
   <type name="bank94">
     <component type="tube-short-bs-elastic">
-      <location y="0.321340279405" x="-0.179959203243" z="-0.998">
+      <location y="0.321340279405" x="0.179959203243" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-330.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="330.75"/>
           </rot>
         </rot>
       </location>
@@ -1080,10 +1080,10 @@
   </type>
   <type name="bank95">
     <component type="tube-long-bs-elastic">
-      <location y="0.299868875997" x="-0.138241445335" z="-0.998">
+      <location y="0.299868875997" x="0.138241445335" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-335.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="335.25"/>
           </rot>
         </rot>
       </location>
@@ -1091,10 +1091,10 @@
   </type>
   <type name="bank96">
     <component type="tube-short-bs-elastic">
-      <location y="0.34553586902" x="-0.127474912122" z="-0.998">
+      <location y="0.34553586902" x="0.127474912122" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-339.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="339.75"/>
           </rot>
         </rot>
       </location>
@@ -1102,10 +1102,10 @@
   </type>
   <type name="bank97">
     <component type="tube-long-bs-elastic">
-      <location y="0.317802719077" x="-0.0896296365454" z="-0.998">
+      <location y="0.317802719077" x="0.0896296365454" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-344.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="344.25"/>
           </rot>
         </rot>
       </location>
@@ -1113,10 +1113,10 @@
   </type>
   <type name="bank98">
     <component type="tube-short-bs-elastic">
-      <location y="0.361223218773" x="-0.0718517655985" z="-0.998">
+      <location y="0.361223218773" x="0.0718517655985" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-348.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="348.75"/>
           </rot>
         </rot>
       </location>
@@ -1124,10 +1124,10 @@
   </type>
   <type name="bank99">
     <component type="tube-long-bs-elastic">
-      <location y="0.327911204487" x="-0.0388108486406" z="-0.998">
+      <location y="0.327911204487" x="0.0388108486406" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-353.25"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="353.25"/>
           </rot>
         </rot>
       </location>
@@ -1135,10 +1135,10 @@
   </type>
   <type name="bank100">
     <component type="tube-short-bs-elastic">
-      <location y="0.368016054047" x="-0.0144593901441" z="-0.998">
+      <location y="0.368016054047" x="0.0144593901441" z="-0.998">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-357.75"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="357.75"/>
           </rot>
         </rot>
       </location>
@@ -1378,7 +1378,7 @@
   </type>
   <type name="bank1">
     <component type="eightpack-inelastic">
-      <location y="0.365857048586" x="0.365857048586" z="0.01">
+      <location y="0.365857048586" x="-0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="135.0"/>
@@ -1389,7 +1389,7 @@
   </type>
   <type name="bank2">
     <component type="eightpack-inelastic">
-      <location y="0.365857048586" x="0.365857048586" z="-0.01">
+      <location y="0.365857048586" x="-0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="135.0"/>
@@ -1400,7 +1400,7 @@
   </type>
   <type name="bank4">
     <component type="eightpack-inelastic">
-      <location y="0.0" x="0.5174" z="0.01">
+      <location y="0.0" x="-0.5174" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
@@ -1411,7 +1411,7 @@
   </type>
   <type name="bank5">
     <component type="eightpack-inelastic">
-      <location y="0.0" x="0.5174" z="-0.01">
+      <location y="0.0" x="-0.5174" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
@@ -1422,7 +1422,7 @@
   </type>
   <type name="bank7">
     <component type="eightpack-inelastic">
-      <location y="-0.365857048586" x="0.365857048586" z="0.01">
+      <location y="-0.365857048586" x="-0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="45.0"/>
@@ -1433,7 +1433,7 @@
   </type>
   <type name="bank8">
     <component type="eightpack-inelastic">
-      <location y="-0.365857048586" x="0.365857048586" z="-0.01">
+      <location y="-0.365857048586" x="-0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="45.0"/>
@@ -1444,7 +1444,7 @@
   </type>
   <type name="bank10">
     <component type="eightpack-inelastic">
-      <location y="-0.5174" x="3.16816126939e-17" z="0.01">
+      <location y="-0.5174" x="-3.16816126939e-17" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="0.0"/>
@@ -1455,7 +1455,7 @@
   </type>
   <type name="bank11">
     <component type="eightpack-inelastic">
-      <location y="-0.5174" x="3.16816126939e-17" z="-0.01">
+      <location y="-0.5174" x="-3.16816126939e-17" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="0.0"/>
@@ -1466,7 +1466,7 @@
   </type>
   <type name="bank13">
     <component type="eightpack-inelastic">
-      <location y="-0.365857048586" x="-0.365857048586" z="0.01">
+      <location y="-0.365857048586" x="0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="-45.0"/>
@@ -1477,7 +1477,7 @@
   </type>
   <type name="bank14">
     <component type="eightpack-inelastic">
-      <location y="-0.365857048586" x="-0.365857048586" z="-0.01">
+      <location y="-0.365857048586" x="0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="-45.0"/>
@@ -1488,7 +1488,7 @@
   </type>
   <type name="bank16">
     <component type="eightpack-inelastic">
-      <location y="6.33632253879e-17" x="-0.5174" z="0.01">
+      <location y="6.33632253879e-17" x="0.5174" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="270.0"/>
@@ -1499,7 +1499,7 @@
   </type>
   <type name="bank17">
     <component type="eightpack-inelastic">
-      <location y="6.33632253879e-17" x="-0.5174" z="-0.01">
+      <location y="6.33632253879e-17" x="0.5174" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="270.0"/>
@@ -1510,7 +1510,7 @@
   </type>
   <type name="bank19">
     <component type="eightpack-inelastic">
-      <location y="0.365857048586" x="-0.365857048586" z="0.01">
+      <location y="0.365857048586" x="0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="225.0"/>
@@ -1521,7 +1521,7 @@
   </type>
   <type name="bank20">
     <component type="eightpack-inelastic">
-      <location y="0.365857048586" x="-0.365857048586" z="-0.01">
+      <location y="0.365857048586" x="0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
             <rot axis-z="1" axis-x="0" axis-y="0" val="225.0"/>
