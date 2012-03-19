@@ -107,7 +107,6 @@ void MuonAnalysis::initLayout()
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
 
   m_optionTab->initLayout();
-  m_resultTableTab->initLayout();
   m_fitDataTab->init();
 
   // connect guess alpha

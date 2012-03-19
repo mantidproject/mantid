@@ -30,24 +30,14 @@ namespace Muon
   using namespace Mantid::Kernel;
   using namespace MantidQt::MantidWidgets;
 
-
 /**
-* Init the layout.
+* Constructor
 */
-void MuonAnalysisResultTableTab::initLayout()
-{
+MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
+  : m_uiForm(uiForm), m_numLogsdisplayed(0) 
+{  
   // Connect the help button to the wiki page.
   connect(m_uiForm.muonAnalysisHelpResults, SIGNAL(clicked()), this, SLOT(helpResultsClicked()));
-  
-  // add check boxes for the include columns on log table and fitting table.
-  for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
-  {
-    m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
-  }
-  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
-  {
-    m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
-  }
 
   //Set the default name
   m_uiForm.tableName->setText("ResultsTable");
@@ -110,7 +100,7 @@ void MuonAnalysisResultTableTab::selectAllFittings(bool state)
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
     {
       QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.fittingResultsTable->item(i,0));
-      // If there is an item there then check the box
+       // If there is an item there then check the box
       if (temp != NULL)
       {
         QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
@@ -154,9 +144,29 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
     // Make sure all params match.
     QVector<QString> sameFittedWsList(fittedWsList);
 
+    // Clear the previous tables.
+    const int fittingRowCount(m_uiForm.fittingResultsTable->rowCount());
+    for (int i=0; i < fittingRowCount; ++i)
+	    m_uiForm.fittingResultsTable->removeRow(0);
+    const int logRowCount(m_uiForm.fittingResultsTable->rowCount());
+    for (int i=0; i < logRowCount; ++i)
+	    m_uiForm.fittingResultsTable->removeRow(0);
+
+    // Add number of rows  for the amount of fittings.
+    for(int i=0; i < sameFittedWsList.size(); ++i)
+      m_uiForm.fittingResultsTable->insertRow(m_uiForm.fittingResultsTable->rowCount() );
+
+    // Add check boxes for the include column on fitting table.
+    for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
+      m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
+
     // Populate the individual log values and fittings into their respective tables.
     populateFittings(sameFittedWsList);
-    populateLogsAndValues(sameFittedWsList);
+    populateLogsAndValues(sameFittedWsList);    
+    
+    // Add check boxes for the include column on log table.
+    for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
+      m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
 
     QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
     // If there is no item in the first row then there must be no log files found between the two data sets.
@@ -256,7 +266,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
               }
             }
             if (reg==true)
-            logsToDisplay.push_back(logFile);
+              logsToDisplay.push_back(logFile);
           }
         }
       }
@@ -288,6 +298,10 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   {
     logsToDisplay.remove(toRemove[i]-i);
   }
+  
+  // Add number of rows to the table based on number of logs to display.
+  for (int i=0; i < logsToDisplay.size(); ++i)
+    m_uiForm.valueTable->insertRow(m_uiForm.valueTable->rowCount() );
 
   // If there isn't enough rows in the table to populate all logs then display error message
   if(logsToDisplay.size() > m_uiForm.valueTable->rowCount())
