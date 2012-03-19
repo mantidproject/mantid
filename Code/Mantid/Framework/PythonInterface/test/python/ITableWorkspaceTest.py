@@ -54,6 +54,18 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(len(table), 5)
         table.addColumn(type="int",name="index")
         self.assertEquals(table.columnCount(), 1)
+        
+    def test_setcell_sets_the_correct_cell(self):
+        test_table = self._create_test_table()
+        data = '11'
+        col = 1
+        row = 2
+        test_table.setCell(row, col, data)
+        self.assertEquals(test_table.cell(row,col), data)
+        data = '12'
+        col = 'name'
+        test_table.setCell(col, row, data)
+        self.assertEquals(test_table.cell(col,row), data)
 
     def test_adding_table_data_using_dictionary(self):
         table = WorkspaceFactory.createTable()

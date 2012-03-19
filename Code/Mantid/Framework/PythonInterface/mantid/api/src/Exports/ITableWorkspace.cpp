@@ -18,6 +18,7 @@ using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::Column_sptr;
+using Mantid::API::Column_const_sptr;
 using Mantid::API::Workspace;
 using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
@@ -99,35 +100,9 @@ namespace
   /**
    * Access a cell and return a corresponding Python type
    * @param self A reference to the TableWorkspace python object that we were called on
-   * @param value A python object containing either a row index or a column name
-   * @param row_or_col An integer giving the row if value is a string or the column if value is an index
-   */
-  PyObject * cell(ITableWorkspace &self, bpl::object value, int row_or_col)
-  {
-    // Find the column and row
-    Mantid::API::Column_const_sptr column;
-    int row(-1);
-    if( PyString_Check(value.ptr()) )
-    {
-      column = self.getColumn( extract<std::string>(value)());
-      row = row_or_col;
-    }
-    else
-    {
-      row = extract<int>(value)();
-      column = self.getColumn(row_or_col);
-    }
-
-    const std::type_info & typeID = column->get_type_info();
-    return getValue(column, typeID, row);
-  }
-
-  /**
-   * Access a cell and return a corresponding Python type
-   * @param self A reference to the TableWorkspace python object that we were called on
    * @param value A python object containing a column name or index
    */
-  PyObject * column(ITableWorkspace &self, bpl::object value)
+  PyObject * column(ITableWorkspace &self, const bpl::object & value)
   {
     // Find the column and row
     Mantid::API::Column_const_sptr column;
@@ -256,6 +231,58 @@ namespace
     }
   }
 
+  /**
+   * @param self A reference to the TableWorkspace python object that we were called on
+   * @param value A python object containing either a row index or a column name
+   * @param row_or_col An integer giving the row if value is a string or the column if value is an index
+   * @param column [Out]:: The column pointer will be stored here
+   * @param rowIndex [Out]:: The row index will be stored here
+   */
+  void getCellLoc(ITableWorkspace &self, const bpl::object & col_or_row, const int row_or_col,
+                  Column_sptr &column, int &rowIndex)
+  {
+    if( PyString_Check(col_or_row.ptr()) )
+    {
+      column = self.getColumn( extract<std::string>(col_or_row)());
+      rowIndex = row_or_col;
+    }
+    else
+    {
+      rowIndex = extract<int>(col_or_row)();
+      column = self.getColumn(row_or_col);
+    }
+  }
+
+  /**
+    * Returns an appropriate Python object for the value at the given cell
+    * @param self A reference to the TableWorkspace python object that we were called on
+    * @param value A python object containing either a row index or a column name
+    * @param row_or_col An integer giving the row if value is a string or the column if value is an index
+    */
+   PyObject * cell(ITableWorkspace &self, const bpl::object & value, int row_or_col)
+   {
+     // Find the column and row
+     Mantid::API::Column_sptr column;
+     int row(-1);
+     getCellLoc(self, value, row_or_col, column, row);
+     const std::type_info & typeID = column->get_type_info();
+     return getValue(column, typeID, row);
+   }
+
+   /**
+    * Sets the value of the given cell
+    * @param self A reference to the TableWorkspace python object that we were called on
+    * @param value A python object containing either a row index or a column name
+    * @param row_or_col An integer giving the row if value is a string or the column if value is an index
+    */
+   void setCell(ITableWorkspace &self, const bpl::object & col_or_row, const int row_or_col,
+                const bpl::object & value)
+   {
+     Mantid::API::Column_sptr column;
+     int row(-1);
+     getCellLoc(self, col_or_row, row_or_col, column, row);
+     setValue(column, row, value);
+   }
 }
 
 void export_ITableWorkspace()
@@ -302,6 +329,9 @@ void export_ITableWorkspace()
          "It it assumed that the items are in the correct order for the defined columns")
 
     .def("cell", &cell, "Return the given cell. If the first argument is a "
+         "number then it is interpreted as a row otherwise it is interpreted as a column name")
+
+    .def("setCell", &setCell, "Sets the value of a given cell. If the first argument is a "
          "number then it is interpreted as a row otherwise it is interpreted as a column name")
       ;
 
