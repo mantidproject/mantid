@@ -76,22 +76,20 @@ private:
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
   long long computePhi(const int& w) const;
 
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4, std::string backgroundtype);
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess, std::string backgroundtype);
-  void findPeaksUsingMariscotti(std::string backgroundtype);
-  void findPeaksGivenStartingPoints(std::vector<double> peakCenters, std::string backgroundtype);
-
-  // void fitPeakHighBackground(MantidVec& X, MantidVec& Y, MantidVec& E, int i0, int i2, int i4, int i_min, int i_max,
-  //    double in_bg0, double in_bg1, double in_bg2, std::string backgroundtype);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
+  void findPeaksUsingMariscotti();
+  void findPeaksGivenStartingPoints(std::vector<double> peakCenters);
 
   void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const unsigned int& i_min, const unsigned int& i_max,
-      const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype);
+      const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
-      const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype);
+      const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
-  bool checkFitResultParameterNames(std::vector<std::string> paramnames, std::string backgroundtype, std::string &errormessage);
+  bool updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestparams, double &mincost);
+  void checkFitResultParameterNames(const std::vector<std::string> &paramnames);
 
   API::IFitFunction_sptr createFunction(const bool withPeak = true);
 
@@ -108,7 +106,8 @@ private:
   int fwhm; ///<holder for the requested peak FWHM
   int index; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
-  bool mHighBackground; ///<flag for find relatively weak peak in high background
+  bool m_highBackground; ///<flag for find relatively weak peak in high background
+  std::string m_backgroundType; //< The type of background to fit
 
   unsigned int minGuessedPeakWidth;
   unsigned int maxGuessedPeakWidth;

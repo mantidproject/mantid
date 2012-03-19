@@ -246,22 +246,22 @@ void FindPeaks::exec()
   std::vector<double> centers = getProperty("PeakPositions");
 
   // c) Background
-  std::string backgroundtype = getProperty("BackgroundType");
+  m_backgroundType = getPropertyValue("BackgroundType");
 
   // d) Choice of fitting approach
-  mHighBackground = getProperty("HighBackground");
+  m_highBackground = getProperty("HighBackground");
 
   // 4. Fit
   if (!centers.empty())
   {
     //Perform fit with fixed start positions.
     //std::cout << "Number of Centers = " << centers.size() << std::endl;
-    this->findPeaksGivenStartingPoints(centers, backgroundtype);
+    this->findPeaksGivenStartingPoints(centers);
   }
   else
   {
     //Use Mariscotti's method to find the peak centers
-    this->findPeaksUsingMariscotti(backgroundtype);
+    this->findPeaksUsingMariscotti();
   }
 
   // 5. Output
@@ -275,9 +275,8 @@ void FindPeaks::exec()
 //=================================================================================================
 /** Use the Mariscotti method to find the start positions to fit gaussian peaks
  * @param peakCenters :: vector of the center x-positions specified to perform fits.
- * @param backgroundtype :: background function type name
  */
-void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, std::string backgroundtype)
+void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
 {
   std::vector<double>::iterator it;
 
@@ -301,7 +300,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, st
 
       // Check whether it is the in data range
       if (x_center > datax[0] && x_center < datax[datax.size()-1]){
-        this->fitPeak(inputWS, spec, x_center, this->fwhm, backgroundtype);
+        this->fitPeak(inputWS, spec, x_center, this->fwhm);
       }
 
     } // loop through the peaks specified
@@ -317,7 +316,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, st
 /** Use the Mariscotti method to find the start positions to fit gaussian peaks
  *
  */
-void FindPeaks::findPeaksUsingMariscotti(std::string backgroundtype)
+void FindPeaks::findPeaksUsingMariscotti()
 {
 
   //At this point the data has not been smoothed yet.
@@ -478,7 +477,7 @@ void FindPeaks::findPeaksUsingMariscotti(std::string backgroundtype)
         // If we get to here then we've identified a peak
         g_log.debug() << "Spectrum=" << k << " i0=" << inputWS->readX(k)[i0] << " i1=" << i1 << " i2=" << i2 << " i3=" << i3 << " i4=" << i4 << " i5=" << i5 << std::endl;
 
-        this->fitPeak(inputWS,k,i0,i2,i4, backgroundtype);
+        this->fitPeak(inputWS,k,i0,i2,i4);
         
         // reset and go searching for the next peak
         i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -632,10 +631,8 @@ long long FindPeaks::computePhi(const int& w) const
  *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
  *  @param center_guess :: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
  *  @param FWHM_guess :: A guess of the full-width-half-max of the peak, in # of bins.
- *  @param backgroundtype :: The background function type name
 */
-void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess,
-    std::string backgroundtype)
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess)
 {
   g_log.debug() << "FindPeaks.fitPeak():  guessed center = " << center_guess << "  FWHM = " << FWHM_guess << std::endl;
 
@@ -691,7 +688,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
   g_log.debug() << "FindPeaks.fitPeak(): Fitting range = " << X[i_left] << ",  " << X[i_right] << std::endl;
 
-  this->fitPeak(input, spectrum, i_right, i_left, i_center, backgroundtype);
+  this->fitPeak(input, spectrum, i_right, i_left, i_center);
 
   return;
 
@@ -705,11 +702,9 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
  *  @param i0 ::       Channel number of peak candidate i0 - the higher side of the peak (right side)
  *  @param i2 ::       Channel number of peak candidate i2 - the lower side of the peak (left side)
  *  @param i4 ::       Channel number of peak candidate i4 - the center of the peak
- *  @param backgroundtype :: The background function type name
  */
 
-void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4,
-    std::string backgroundtype)
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4)
 {
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
@@ -738,12 +733,12 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const double in_bg2 = 0.0;
 
   // TODO max guessed width = 10 is good for SNS.  But it may be broken in extreme case
-  if (!mHighBackground){
+  if (!m_highBackground){
 
     /** Not high background.  Fit background and peak together
      *  The original Method
      */
-    fitPeakOneStep(input, spectrum, i0, i2, i4, in_bg0, in_bg1, in_bg2, backgroundtype);
+    fitPeakOneStep(input, spectrum, i0, i2, i4, in_bg0, in_bg1, in_bg2);
 
   } // // not high background
   else {
@@ -751,7 +746,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     /** High background
      **/
 
-    fitPeakHighBackground(input, spectrum, i0, i2, i4, i_min, i_max, in_bg0, in_bg1, in_bg2, backgroundtype);
+    fitPeakHighBackground(input, spectrum, i0, i2, i4, i_min, i_max, in_bg0, in_bg1, in_bg2);
 
   } // if high background
 
@@ -776,7 +771,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
  * @param backgroundtype: type of background (linear or quadratic)
  */
 void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
-    const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype)
+    const double& in_bg0, const double& in_bg1, const double& in_bg2)
 {
   g_log.information("Fitting Peak in one-step approach");
 
@@ -818,11 +813,11 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     fitFunction->setParameter("f0.Sigma", in_sigma);
     fitFunction->setParameter("f1.A0", in_bg0);
     fitFunction->setParameter("f1.A1", in_bg1);
-    if (backgroundtype.compare("Quadratic") == 0)
+    if (m_backgroundType.compare("Quadratic") == 0)
     {
       fitFunction->setParameter("f1.A2", in_bg2);
     }
-    g_log.debug() << "  Function: " << *fitFunction << "; Background Type = " << backgroundtype << std::endl;
+    g_log.debug() << "  Function: " << *fitFunction << "; Background Type = " << m_backgroundType << std::endl;
 
     // d) complete fit
     fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
@@ -839,10 +834,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
 
     // i. Check order of names
-    std::string errormessage;
-    if (!checkFitResultParameterNames(paramnames, backgroundtype, errormessage)){
-      throw std::runtime_error(errormessage);
-    }
+    checkFitResultParameterNames(paramnames);
 
     double height = params[0];
     if (height <= 0){
@@ -899,7 +891,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     width = bestparams[2];
     bgintercept = bestparams[3];
     bgslope = bestparams[4];
-    if (backgroundtype.compare("Quadratic") == 0){
+    if (m_backgroundType.compare("Quadratic") == 0){
       a2 = bestparams[5];
     }
   }
@@ -925,12 +917,11 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
  * @param in_bg0: guessed value of a0
  * @param in_bg1: guessed value of a1
  * @param in_bg2: guessed value of a2
- * @param backgroundtype: type of background (linear or quadratic)
  */
 void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum,
     const int& i0, const int& i2, const int& i4,
     const unsigned int& i_min, const unsigned int& i_max,
-    const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype){
+    const double& in_bg0, const double& in_bg1, const double& in_bg2){
 
   g_log.debug("Fitting A Peak in high-background approach");
 
@@ -983,11 +974,11 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   IFitFunction_sptr backgroundFunction = this->createFunction(false);
   backgroundFunction->setParameter("A0", in_bg0);
   backgroundFunction->setParameter("A1", in_bg1);
-  if (backgroundtype.compare("Quadratic") == 0)
+  if (m_backgroundType.compare("Quadratic") == 0)
   {
     backgroundFunction->setParameter("A2", in_bg2);
   }
-  g_log.debug() << "Background Type = " << backgroundtype << "  Function: " << *backgroundFunction << std::endl;
+  g_log.debug() << "Background Type = " << m_backgroundType << "  Function: " << *backgroundFunction << std::endl;
 
   // d) complete fit
   fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
@@ -1009,14 +1000,14 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   if (fitStatus.compare("success") == 0){
     a0 = params[0];
     a1 = params[1];
-    if (backgroundtype.compare("Quadratic")==0){
+    if (m_backgroundType.compare("Quadratic")==0){
       a2 = params[2];
     } else {
       a2 = 0.0;
     }
     bkgdchi2 = fit->getProperty("OutputChi2overDoF");
   } else {
-    g_log.warning() << "Fit " << backgroundtype << " Fails For Peak @ " << X[i4] << std::endl;
+    g_log.warning() << "Fit " << m_backgroundType << " Fails For Peak @ " << X[i4] << std::endl;
     a0 = a1 = a2 = 0;
     bkgdchi2 = -100;
   }
@@ -1038,7 +1029,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   API::IFitFunction_sptr peakAndBackgroundFunction = this->createFunction(true);
   peakAndBackgroundFunction->setParameter("f1.A0", a0);
   peakAndBackgroundFunction->setParameter("f1.A1", a1);
-  if (backgroundtype.compare("Quadratic") == 0)
+  if (m_backgroundType.compare("Quadratic") == 0)
   {
     peakAndBackgroundFunction->setParameter("f1.A2", a2);
   }
@@ -1047,7 +1038,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       std::stringstream temp;
       temp << "f1.A0=" << a0;
       temp << ",f1.A1=" << a1;
-      if (backgroundtype.compare("Quadratic") == 0)
+      if (m_backgroundType.compare("Quadratic") == 0)
           temp << ",f1.A2=" << a2;
       ties = temp.str();
 
@@ -1097,10 +1088,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     std::vector<std::string> paramnames = gfit->getProperty("ParameterNames");
 
     // Check order of names
-    std::string errormessage;
-    if (!checkFitResultParameterNames(paramnames, backgroundtype, errormessage)){
-      throw std::runtime_error(errormessage);
-    }
+    checkFitResultParameterNames(paramnames);
 
     double height = params[0];
     if (height <= 0){
@@ -1172,7 +1160,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   peakAndBackgroundFunction->setParameter("f0.Sigma", bestparams[2]);
   peakAndBackgroundFunction->setParameter("f1.A0", a0);
   peakAndBackgroundFunction->setParameter("f1.A1", a1);
-  if (backgroundtype.compare("Quadratic") == 0)
+  if (m_backgroundType.compare("Quadratic") == 0)
   {
     peakAndBackgroundFunction->setParameter("f1.A2", a2);
   }
@@ -1193,10 +1181,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   paramnames = lastfit->getProperty("ParameterNames");
 
   // Check order of names
-  std::string errormessage;
-  if (!checkFitResultParameterNames(paramnames, backgroundtype, errormessage)){
-    throw std::runtime_error(errormessage);
-  }
+  checkFitResultParameterNames(paramnames);
 
   double tempheight = params[0];
   double fcost = lastfit->getProperty("OutputChi2overDoF");
@@ -1237,7 +1222,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   else
   {
     t << spectrum << bestparams[1] << bestparams[2] << bestparams[0] << bestparams[3] << bestparams[4];
-    if (backgroundtype.compare("Quadratic") == 0)
+    if (m_backgroundType.compare("Quadratic") == 0)
         t << bestparams[4];
     else
         t << 0.;
@@ -1255,49 +1240,57 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
 } // END-FUNCTION
 
+/**
+ * Check the results of the fit algorithm to see if they make sense and update the best parameters.
+ * @return true if something went wrong and the rest of the iteration should be skipped.
+ */
+bool FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestparams, double &mincost)
+{
+  this->checkFitResultParameterNames(fitAlg->getProperty("ParameterNames"));
+
+  std::string fitStatus = fitAlg->getProperty("OutputStatus");
+  std::vector<double> params = fitAlg->getProperty("Parameters");
+
+  return false;
+}
+
 /*
  * Check the result of peak fitting
  */
-bool FindPeaks::checkFitResultParameterNames(std::vector<std::string> paramnames, std::string backgroundtype,
-    std::string &errormessage){
-
-  std::stringstream ss;
-  bool correct = true;
+void FindPeaks::checkFitResultParameterNames(const std::vector<std::string> &paramnames){
+  std::stringstream error;
 
   if (paramnames[0].compare("f0.Height") != 0)
   {
-    ss << "Parameter 0 should be f0.Height, but is " << paramnames[0] << std::endl;
-    correct = false;
+    error << "Parameter 0 should be f0.Height, but is " << paramnames[0] << std::endl;
   }
   if (paramnames[1].compare("f0.PeakCentre") != 0)
   {
-    ss << "Parameter 1 should be f0.PeakCentre, but is " << paramnames[1] << std::endl;
-    correct = false;
+    error << "Parameter 1 should be f0.PeakCentre, but is " << paramnames[1] << std::endl;
   }
   if (paramnames[2].compare("f0.Sigma") != 0)
   {
-    ss << "Parameter 2 should be f0.Sigma, but is " << paramnames[2] << std::endl;
-    correct = false;
+    error << "Parameter 2 should be f0.Sigma, but is " << paramnames[2] << std::endl;
   }
   if (paramnames[3].compare("f1.A0") != 0)
   {
-    ss << "Parameter 3 should be f1.A0, but is " << paramnames[3] << std::endl;
-    correct = false;
+    error << "Parameter 3 should be f1.A0, but is " << paramnames[3] << std::endl;
   }
   if (paramnames[4].compare("f1.A1") != 0)
   {
-    ss << "Parameter 4 should be f1.A1, but is " << paramnames[4] << std::endl;
-    correct = false;
+    error << "Parameter 4 should be f1.A1, but is " << paramnames[4] << std::endl;
   }
-  if (backgroundtype.compare("Quadratic") == 0 && paramnames[5].compare("f1.A2") != 0)
+  if (m_backgroundType.compare("Quadratic") == 0 && paramnames[5].compare("f1.A2") != 0)
   {
-    ss << "Parameter 5 should be f1.A2, but is " << paramnames[5] << std::endl;
-    correct = false;
+    error << "Parameter 5 should be f1.A2, but is " << paramnames[5] << std::endl;
   }
 
-  errormessage = ss.str();
+  // throw an exception if things didn't work out
+  if (!error.str().empty())
+  {
+    throw std::runtime_error(error.str());
+  }
 
-  return correct;
 }
 
 /**
@@ -1308,7 +1301,7 @@ bool FindPeaks::checkFitResultParameterNames(std::vector<std::string> paramnames
 IFitFunction_sptr FindPeaks::createFunction(const bool withPeak)
 {
     // determine the background
-    std::string background = this->getProperty("BackgroundType");
+    std::string background = m_backgroundType;
     if (background.compare("Linear") == 0)
     {
         background = "LinearBackground";
