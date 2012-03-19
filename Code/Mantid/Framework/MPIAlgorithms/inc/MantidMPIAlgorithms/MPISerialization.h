@@ -43,6 +43,7 @@ namespace boost
            int64_t time = itev->pulseTime().totalNanoseconds();
            ar & time;
          }
+         break;
        }
        case Mantid::API::WEIGHTED:
        {
@@ -64,6 +65,7 @@ namespace boost
            double error = itev->error();
            ar & error;
          }
+         break;
        }
        case Mantid::API::WEIGHTED_NOTIME:
        {
@@ -83,6 +85,7 @@ namespace boost
            double error = itev->error();
            ar & error;
          }
+         break;
        }
      }
    }
@@ -111,8 +114,9 @@ namespace boost
            mylist.push_back(Mantid::DataObjects::TofEvent(tof,pulseTime));
          }
          elist = Mantid::DataObjects::EventList(mylist);
+         break;
        }
-         case 2:
+       case 2:
        {
          std::vector<Mantid::DataObjects::WeightedEvent> mylist;
          double tof = 0.0;
@@ -130,8 +134,9 @@ namespace boost
            mylist.push_back(Mantid::DataObjects::WeightedEvent(tof,pulseTime,weight,error));
          }
          elist = Mantid::DataObjects::EventList(mylist);
+         break;
        }
-         case 3:
+       case 3:
        {
          std::vector<Mantid::DataObjects::WeightedEventNoTime> mylist;
          double tof = 0.0;
@@ -145,6 +150,7 @@ namespace boost
            mylist.push_back(Mantid::DataObjects::WeightedEventNoTime(tof,weight,error));
          }
          elist = Mantid::DataObjects::EventList(mylist);
+         break;
        }
      }
    }
