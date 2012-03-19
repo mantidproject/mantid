@@ -126,6 +126,10 @@ public:
 
   EventList(const std::vector<TofEvent> &events);
 
+  EventList(const std::vector<WeightedEvent> &events);
+
+  EventList(const std::vector<WeightedEventNoTime> &events);
+
   virtual ~EventList();
 
   EventList& operator=(const EventList&);

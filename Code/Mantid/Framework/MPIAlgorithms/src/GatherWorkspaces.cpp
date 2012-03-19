@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
+#include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -76,8 +77,7 @@ void GatherWorkspaces::exec()
   // Get the total number of spectra in the combined inputs
   totalSpec = inputWorkspace->getNumberHistograms();
 
-  //Serialization for gather in execEvent not working yet
-  /*eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputWorkspace);
+  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputWorkspace);
   if (eventW != NULL)
   {
     if (getProperty("PreserveEvents"))
@@ -86,7 +86,7 @@ void GatherWorkspaces::exec()
       this->execEvent();
       return;
     }
-  }*/
+  }
 
   // The root process needs to create a workspace of the appropriate size
   MatrixWorkspace_sptr outputWorkspace;
@@ -131,6 +131,8 @@ void GatherWorkspaces::execEvent()
     // Create the workspace for the output
     outputWorkspace =
     boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", totalSpec,numBins+hist,numBins));
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(eventW, outputWorkspace, true);
     setProperty("OutputWorkspace",outputWorkspace);
   }
 
@@ -139,7 +141,10 @@ void GatherWorkspaces::execEvent()
     if ( world.rank() == 0 )
     {
       outputWorkspace->dataX(wi) = eventW->readX(wi);
-      //gather(world, eventW->getEventList(wi), outputWorkspace->getOrAddEventList(wi), 0);
+      std::vector<Mantid::DataObjects::EventList> out_values;
+      gather(world, eventW->getEventList(wi), out_values, 0);
+      for (int n = 0; n < world.size(); n++)
+        outputWorkspace->getOrAddEventList(wi) += out_values[n];
       const ISpectrum * inSpec = eventW->getSpectrum(wi);
       ISpectrum * outSpec = outputWorkspace->getSpectrum(wi);
       outSpec->clearDetectorIDs();
@@ -147,7 +152,7 @@ void GatherWorkspaces::execEvent()
     }
     else
     {
-      //gather(world, eventW->getEventList(wi), 0);
+      gather(world, eventW->getEventList(wi), 0);
     }
   }
 

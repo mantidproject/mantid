@@ -108,6 +108,24 @@ namespace DataObjects
     this->order = UNSORTED;
   }
 
+  /** Constructor, taking a vector of events.
+   * @param events :: Vector of WeightedEvent's */
+  EventList::EventList(const std::vector<WeightedEvent> &events)
+  {
+    this->weightedEvents.assign(events.begin(), events.end());
+    this->eventType = WEIGHTED;
+    this->order = UNSORTED;
+  }
+
+  /** Constructor, taking a vector of events.
+   * @param events :: Vector of WeightedEventNoTime's */
+  EventList::EventList(const std::vector<WeightedEventNoTime> &events)
+  {
+    this->weightedEventsNoTime.assign(events.begin(), events.end());
+    this->eventType = WEIGHTED_NOTIME;
+    this->order = UNSORTED;
+  }
+
   /// Destructor
   EventList::~EventList()
   {
