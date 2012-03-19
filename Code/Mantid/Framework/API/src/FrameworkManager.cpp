@@ -12,6 +12,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include <cstdarg>
+#include <napi.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -47,6 +48,10 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   {
     Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
   }
+
+  // Disable reporting errors from Nexus (they clutter up the output).
+  NXMDisableErrorReporting();
+
   g_log.debug() << "FrameworkManager created." << std::endl;
 }
 

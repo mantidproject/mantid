@@ -84,7 +84,6 @@ LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
     m_axis1vals(), m_list(false), m_interval(false),
     m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),m_cppFile(NULL)
 {
-  NXMDisableErrorReporting();
 }
 
 /// Delete NexusFileIO in destructor

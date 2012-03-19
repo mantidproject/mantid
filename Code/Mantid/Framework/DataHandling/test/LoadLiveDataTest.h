@@ -130,10 +130,10 @@ public:
   //--------------------------------------------------------------------------------------------
   void test_add_DontPreserveEvents()
   {
-    MatrixWorkspace_sptr ws1, ws2;
+    Workspace2D_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws1 = doExec<MatrixWorkspace>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
+    ws1 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
@@ -142,7 +142,7 @@ public:
     TS_ASSERT_DELTA( total, 100.0, 1e-4);
 
     // Next one adds the histograms together
-    ws2 = doExec<MatrixWorkspace>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
+    ws2 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
 
     // The new total signal is 200.0
