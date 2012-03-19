@@ -27,6 +27,7 @@ public slots:
   void changeProcessingAlgorithm();
   void changePostProcessingAlgorithm();
   void radioTimeClicked();
+  void chkPreserveEventsToggled();
 
 private:
   /// Initialize the layout

@@ -54,6 +54,9 @@ void StartLiveDataDialog::initLayout()
   tie(ui.dateTimeEdit, "StartTime");
   radioTimeClicked();
 
+  tie(ui.chkPreserveEvents, "PreserveEvents");
+  chkPreserveEventsToggled();
+
   tie(ui.editAccumulationWorkspace, "AccumulationWorkspace", ui.gridLayout);
   tie(ui.editOutputWorkspace, "OutputWorkspace", ui.gridLayout);
 
@@ -91,6 +94,8 @@ void StartLiveDataDialog::initLayout()
   connect(ui.radNow, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
   connect(ui.radStartOfRun, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
   connect(ui.radAbsoluteTime, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
+
+  connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this, SLOT(chkPreserveEventsToggled()));
 
   QHBoxLayout * buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
@@ -165,6 +170,12 @@ void StartLiveDataDialog::radioPostProcessClicked()
 void StartLiveDataDialog::radioTimeClicked()
 {
   ui.dateTimeEdit->setEnabled( ui.radAbsoluteTime->isChecked() );
+}
+
+/** Slot called when the preserve events checkbox changes */
+void StartLiveDataDialog::chkPreserveEventsToggled()
+{
+  ui.lblPreserveEventsWarning->setVisible( ui.chkPreserveEvents->isChecked());
 }
 
 //------------------------------------------------------------------------------
