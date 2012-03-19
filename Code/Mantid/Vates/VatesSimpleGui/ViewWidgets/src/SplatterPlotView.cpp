@@ -11,6 +11,8 @@
 #include "vtkProperty.h"
 #include "vtkSMPropertyHelper.h"
 
+#include <QMessageBox>
+
 namespace Mantid
 {
 namespace Vates
@@ -20,6 +22,7 @@ namespace SimpleGui
 
 SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
 {
+  this->noOverlay = false;
   this->ui.setupUi(this);
 
   // Set the threshold button to create a threshold filter on data
@@ -62,8 +65,24 @@ void SplatterPlotView::render()
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
-  int renderType = VTK_SURFACE;
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+
+  // Do not allow overplotting of MDWorkspaces
+  if (!this->isPeaksWorkspace(src) && NULL != this->splatSource)
+  {
+    QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
+                         QApplication::tr("SplatterPlot mode does not allow "\
+                                          "more that one MDEventWorkspace to "\
+                                          "be plotted."));
+    // Need to destroy source since we tried to load it and set the active
+    // back to something. In this case we'll choose the splatter plot filter.
+    builder->destroy(src);
+    pqActiveObjects::instance().setActiveSource(this->splatSource);
+    this->noOverlay = true;
+    return;
+  }
+
+  int renderType = VTK_SURFACE;
 
   if (!this->isPeaksWorkspace(src))
   {
@@ -120,10 +139,11 @@ void SplatterPlotView::onThresholdButtonClicked()
 
 void SplatterPlotView::checkView()
 {
-  if (this->peaksSource.isEmpty())
+  if (!this->noOverlay && this->peaksSource.isEmpty())
   {
     ViewBase::checkView();
   }
+  this->noOverlay = false;
 }
 
 void SplatterPlotView::resetCamera()

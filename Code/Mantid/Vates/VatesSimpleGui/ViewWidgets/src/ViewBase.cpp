@@ -298,6 +298,11 @@ unsigned int ViewBase::getNumSources()
  */
 void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
 {
+  if (NULL == dvp)
+  {
+    // This is a normal filter and therefore has no timesteps.
+    return;
+  }
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
   if (0 != numTimesteps)
   {
