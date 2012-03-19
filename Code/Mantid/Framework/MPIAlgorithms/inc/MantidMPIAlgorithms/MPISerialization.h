@@ -62,8 +62,8 @@ namespace boost
            ar & time;
            double weight = itev->weight();
            ar & weight;
-           double error = itev->error();
-           ar & error;
+           double errSq = itev->errorSquared();
+           ar & errSq;
          }
          break;
        }
@@ -82,8 +82,8 @@ namespace boost
            ar & tof;
            double weight = itev->weight();
            ar & weight;
-           double error = itev->error();
-           ar & error;
+           double errSq = itev->errorSquared();
+           ar & errSq;
          }
          break;
        }
@@ -123,15 +123,15 @@ namespace boost
          Mantid::Kernel::DateAndTime pulseTime = 0;
          int64_t time = 0;
          double weight = 0.0;
-         double error = 0.0;
+         double errSq = 0.0;
          for (int ev=0; ev<evsize; ev++)
          {
            ar & tof;
            ar & time;
            ar & weight;
-           ar & error;
+           ar & errSq;
            pulseTime = Mantid::Kernel::DateAndTime(time);
-           mylist.push_back(Mantid::DataObjects::WeightedEvent(tof,pulseTime,weight,error));
+           mylist.push_back(Mantid::DataObjects::WeightedEvent(tof,pulseTime,weight,errSq));
          }
          elist = Mantid::DataObjects::EventList(mylist);
          break;
@@ -141,13 +141,13 @@ namespace boost
          std::vector<Mantid::DataObjects::WeightedEventNoTime> mylist;
          double tof = 0.0;
          double weight = 0.0;
-         double error = 0.0;
+         double errSq = 0.0;
          for (int ev=0; ev<evsize; ev++)
          {
            ar & tof;
            ar & weight;
-           ar & error;
-           mylist.push_back(Mantid::DataObjects::WeightedEventNoTime(tof,weight,error));
+           ar & errSq;
+           mylist.push_back(Mantid::DataObjects::WeightedEventNoTime(tof,weight,errSq));
          }
          elist = Mantid::DataObjects::EventList(mylist);
          break;
