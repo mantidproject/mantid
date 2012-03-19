@@ -49,6 +49,10 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   if ( MPI_BUILD )
     # This finds OpenMPI on rhel6 (assuming it's installed, of course)
     find_package ( MPI REQUIRED )
+    # The FindMPI module doesn't seem to respect the REQUIRED specifier (as of CMake 2.8.7)
+    if ( NOT MPI_FOUND )
+      message ( SEND_ERROR "MPI_BUILD flag is ON, but MPI could not be found" )
+    endif ()
     # Set things up to use the OpenMPI 'wrapper' compilers
     if ( MPI_CXX_COMPILER )
       set ( CMAKE_C_COMPILER ${MPI_C_COMPILER} )
@@ -74,7 +78,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
     # Framework dependencies
     set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,nexus,gsl,glibc,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
     set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
-    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
     set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},boost-openmpi,boost-openmpi-python" )
     include ( CPack )
   endif ( MPI_BUILD )
