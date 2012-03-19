@@ -840,10 +840,8 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
 
     // i. Check order of names
     std::string errormessage;
-    bool parnamecorrect = checkFitResultParameterNames(paramnames, backgroundtype, errormessage);
-    if (!parnamecorrect){
-      g_log.error() << errormessage << std::endl;
-      throw std::invalid_argument(errormessage);
+    if (!checkFitResultParameterNames(paramnames, backgroundtype, errormessage)){
+      throw std::runtime_error(errormessage);
     }
 
     double height = params[0];
@@ -873,12 +871,8 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
       {
         // An acceptable fit.  Record it if it has a smaller chi^2
         if (chi2 < mincost){
-          if (!bestparams.empty())
-            bestparams.clear();
-          for (size_t i = 0; i < params.size(); i ++){
-            bestparams.push_back(params[i]);
-          }
-          mincost = chi2;
+            bestparams.assign(params.begin(), params.end());
+            mincost = chi2;
         }
       } // IF-ELSE:  NaN
 
@@ -1028,17 +1022,16 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   }
   g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2 <<
       " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
-//-----------------------------------------------------------------------------------------------
 
   const double in_height = Y[i4] - in_bg0;
   const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
 
   // g) Looping on peak width for the best fit
   double mincost = 1.0E10;
-//  std::vector<double> bestparams;
-  double bestsigma = 0;  // bestparams[2]
-  double bestcenter = 0; // bestparams[1]
-  double bestheight = 0; // bestparams[0]
+  std::vector<double> bestparams;
+//  double bestsigma = 0;  // bestparams[2]
+//  double bestcenter = 0; // bestparams[1]
+//  double bestheight = 0; // bestparams[0]
 
   g_log.information() << "Loop From " << minGuessedPeakWidth << " To " << maxGuessedPeakWidth << " with step "
       << stepGuessedPeakWidth << "  Over about " << 10*(i0-i2) << " pixels" << std::endl;
@@ -1104,20 +1097,16 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     std::vector<std::string> paramnames = gfit->getProperty("ParameterNames");
 
     // Check order of names
-    if (paramnames[0].compare("f0.Height") != 0)
-    {
-      g_log.error() << "Parameter 0 should be f0.Height, but is " << paramnames[0] << std::endl;
-      throw std::invalid_argument("Parameter 0 should be f0.Height");
+    std::string errormessage;
+    if (!checkFitResultParameterNames(paramnames, backgroundtype, errormessage)){
+      throw std::runtime_error(errormessage);
     }
-    if (paramnames[1].compare("f0.PeakCentre") != 0)
-    {
-      g_log.error() << "Parameter 1 should be f0.PeakCentre, but is " << paramnames[1] << std::endl;
-      throw std::invalid_argument("Parameter 1 should be f0.PeakCentre");
-    }
-    if (paramnames[2].compare("f0.Sigma") != 0)
-    {
-      g_log.error() << "Parameter 2 should be f0.Sigma, but is " << paramnames[2] << std::endl;
-      throw std::invalid_argument("Parameter 2 should be f0.Sigma");
+
+    double height = params[0];
+    if (height <= 0){
+      // Height must be strictly positive
+      fitStatus.clear();
+      continue;
     }
 
     // f) get value
@@ -1143,10 +1132,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
       if (isthebest)
       {
-        bestheight = fheight;
-        bestcenter = fcenter;
-        bestsigma = fsigma;
-        mincost = chi2;
+          bestparams.assign(params.begin(), params.end());
+          mincost = chi2;
       }
       g_log.information() << "\tTrial " << iwidth << "  Chi2 = " << chi2 << " H = " << fheight << " Sigma = " << fsigma
           << " X0 = " << fcenter << std::endl;
@@ -1155,6 +1142,14 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         << ", " << fcenter << ", " << fsigma << std::endl;
 
   } // ENDFOR
+
+  // check to see if the last one went through
+  if (bestparams.empty())
+  {
+      API::TableRow t = m_peaks->appendRow();
+      t << spectrum << 0. << 0. << 0. << 0. << 0. << 0. << 1.e10;
+      return;
+  }
 
   // h) Fit again with everything altogether
   IAlgorithm_sptr lastfit;
@@ -1172,9 +1167,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   lastfit->setProperty("MaxIterations", 50);
 
   // c) Set initial fitting parameters
-  peakAndBackgroundFunction->setParameter("f0.Height", bestheight);
-  peakAndBackgroundFunction->setParameter("f0.PeakCentre", bestcenter);
-  peakAndBackgroundFunction->setParameter("f0.Sigma", bestsigma);
+  peakAndBackgroundFunction->setParameter("f0.Height", bestparams[0]);
+  peakAndBackgroundFunction->setParameter("f0.PeakCentre", bestparams[1]);
+  peakAndBackgroundFunction->setParameter("f0.Sigma", bestparams[2]);
   peakAndBackgroundFunction->setParameter("f1.A0", a0);
   peakAndBackgroundFunction->setParameter("f1.A1", a1);
   if (backgroundtype.compare("Quadratic") == 0)
@@ -1199,10 +1194,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   // Check order of names
   std::string errormessage;
-  bool parnamecorrect = checkFitResultParameterNames(paramnames, backgroundtype, errormessage);
-  if (!parnamecorrect){
-    g_log.error(errormessage);
-    throw std::invalid_argument(errormessage);
+  if (!checkFitResultParameterNames(paramnames, backgroundtype, errormessage)){
+    throw std::runtime_error(errormessage);
   }
 
   double tempheight = params[0];
@@ -1218,14 +1211,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
     if (isbest)
     {
-      bestheight = tempheight;
-      bestcenter = params[1];
-      bestsigma  = params[2];
-      a0 = params[3];
-      a1 = params[4];
-      if (backgroundtype.compare("Quadratic") == 0){
-        a2 = params[5];
-      }
+            bestparams.assign(params.begin(), params.end());
     }
     else
     {
@@ -1237,25 +1223,30 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     g_log.information() << "FindPeaks: Final Composite Fit Error!  Message: " << fitStatus2 << std::endl;
   }
   // i) Analyze whether the result is a good fit
-  if (usePeakPositionTolerance && fabs(bestcenter-X[i4]) > peakPositionTolerance )
+  if (usePeakPositionTolerance && fabs(bestparams[1]-X[i4]) > peakPositionTolerance )
   {
-      bestheight = 0.0;
+      bestparams[0] = 0.0;
   }
 
   // j) Set return value
   API::TableRow t = m_peaks->appendRow();
-  if (bestcenter < X.front() || bestcenter > X.back())
+  if (bestparams[1] < X.front() || bestparams[1] > X.back())
   {
     t << spectrum << 0. << 0. << 0. << 0. << 0. << 0. << 1.e10;
   }
   else
   {
-    t << spectrum << bestcenter << bestsigma << bestheight << a0 << a1 << a2 << fcost;
+    t << spectrum << bestparams[1] << bestparams[2] << bestparams[0] << bestparams[3] << bestparams[4];
+    if (backgroundtype.compare("Quadratic") == 0)
+        t << bestparams[4];
+    else
+        t << 0.;
+    t << fcost;
   }
 
   g_log.debug() << "(High Background) Final-Find Peak: Cost = " << fcost << "  vs. Min cost = " << mincost
-      << " Background cost = " << bkgdchi2 << " x0 = " << bestcenter << "(" << X[i2] << ", " << X[i0] <<
-      ") H = " << bestheight << std::endl;
+      << " Background cost = " << bkgdchi2 << " x0 = " << bestparams[1] << "(" << X[i2] << ", " << X[i0] <<
+      ") H = " << bestparams[0] << std::endl;
 
 
   g_log.debug() << "Chi2   Combine = " << fcost << " vs.  Background = " << bkgdchi2 << " + Gaussian = " << mincost << std::endl;
