@@ -22,6 +22,21 @@ namespace Mantid
 {
 namespace API
 {
+
+  /** This is a function called every time NeXuS raises an error.
+   * This swallows the errors and outputs nothing.
+   *
+   * @param data :: data passed in NXMSetError (will be NULL)
+   * @param text :: text of the error.
+   */
+  void NexusErrorFunction(void *data, char *text)
+  {
+    UNUSED_ARG(data);
+    UNUSED_ARG(text);
+    // Do nothing.
+  }
+
+
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 #ifdef MPI_BUILD
@@ -50,7 +65,7 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   }
 
   // Disable reporting errors from Nexus (they clutter up the output).
-  NXMDisableErrorReporting();
+  NXMSetError(NULL, NexusErrorFunction);
 
   g_log.debug() << "FrameworkManager created." << std::endl;
 }
