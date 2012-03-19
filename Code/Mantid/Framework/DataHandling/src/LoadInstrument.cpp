@@ -134,7 +134,7 @@ namespace Mantid
         const std::string::size_type stripPath = m_filename.find_last_of("\\/");
         std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
         // Strip off "_Definition.xml"
-        m_instName = instrumentFile.substr(0,instrumentFile.find_first_of("_Def"));
+        m_instName = instrumentFile.substr(0,instrumentFile.find_first_of("_"));
       }
 
       // Load the XML text into a string
