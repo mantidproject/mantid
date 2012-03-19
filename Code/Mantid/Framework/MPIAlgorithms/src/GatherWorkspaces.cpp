@@ -45,7 +45,7 @@ void GatherWorkspaces::exec()
 
   // Create a new communicator that includes only those processes that have an input workspace
   const int haveWorkspace(inputWorkspace ? 1 : 0);
-  mpi::communicator included = world.split(haveWorkspace);
+  included = world.split(haveWorkspace);
 
   // If the present process doesn't have an input workspace then its work is done
   if ( !haveWorkspace )
@@ -90,7 +90,7 @@ void GatherWorkspaces::exec()
 
   // The root process needs to create a workspace of the appropriate size
   MatrixWorkspace_sptr outputWorkspace;
-  if ( world.rank() == 0 )
+  if ( included.rank() == 0 )
   {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
@@ -100,7 +100,7 @@ void GatherWorkspaces::exec()
 
   for (size_t wi = 0; wi < totalSpec; wi++)
   {
-    if ( world.rank() == 0 )
+    if ( included.rank() == 0 )
     {
       outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
       reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi), vplus(), 0);
@@ -122,10 +122,10 @@ void GatherWorkspaces::execEvent()
 {
 
   // Every process in an MPI job must hit this next line or everything hangs!
-  mpi::communicator world; // The communicator containing all processes
+  mpi::communicator included; // The communicator containing all processes
   // The root process needs to create a workspace of the appropriate size
   EventWorkspace_sptr outputWorkspace;
-  if ( world.rank() == 0 )
+  if ( included.rank() == 0 )
   {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
@@ -138,12 +138,12 @@ void GatherWorkspaces::execEvent()
 
   for (size_t wi = 0; wi < totalSpec; wi++)
   {
-    if ( world.rank() == 0 )
+    if ( included.rank() == 0 )
     {
       outputWorkspace->dataX(wi) = eventW->readX(wi);
       std::vector<Mantid::DataObjects::EventList> out_values;
-      gather(world, eventW->getEventList(wi), out_values, 0);
-      for (int n = 0; n < world.size(); n++)
+      gather(included, eventW->getEventList(wi), out_values, 0);
+      for (int n = 0; n < included.size(); n++)
         outputWorkspace->getOrAddEventList(wi) += out_values[n];
       const ISpectrum * inSpec = eventW->getSpectrum(wi);
       ISpectrum * outSpec = outputWorkspace->getSpectrum(wi);
@@ -152,7 +152,7 @@ void GatherWorkspaces::execEvent()
     }
     else
     {
-      gather(world, eventW->getEventList(wi), 0);
+      gather(included, eventW->getEventList(wi), 0);
     }
   }
 

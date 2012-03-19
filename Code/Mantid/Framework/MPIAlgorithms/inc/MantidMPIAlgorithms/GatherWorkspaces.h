@@ -6,6 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <boost/mpi.hpp>
+
+namespace mpi = boost::mpi;
 
 namespace Mantid
 {
@@ -104,6 +107,7 @@ private:
   std::size_t totalSpec;
   int hist;
   std::size_t numBins;
+  mpi::communicator included;
 
 };
 
