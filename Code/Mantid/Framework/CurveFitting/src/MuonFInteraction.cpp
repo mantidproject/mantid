@@ -31,7 +31,7 @@ void MuonFInteraction::functionMW(double* out, const double* xValues, const size
   const double& A = getParameter("A"); 
   const double& sqrt3 = sqrt(3.0);
 
-  for (int i = 0; i < nData; i++) {
+  for (size_t i = 0; i < nData; i++) {
     double A1=exp(-pow(lambda*xValues[i],beta))*A/6;
     double A2=cos(sqrt3*omega*xValues[i]);
     double A3=(1.0-1.0/sqrt3)*cos(((3.0-sqrt3)/2.0)*omega*xValues[i]);
