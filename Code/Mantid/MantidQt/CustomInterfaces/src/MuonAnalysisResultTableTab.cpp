@@ -148,9 +148,9 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
     const int fittingRowCount(m_uiForm.fittingResultsTable->rowCount());
     for (int i=0; i < fittingRowCount; ++i)
 	    m_uiForm.fittingResultsTable->removeRow(0);
-    const int logRowCount(m_uiForm.fittingResultsTable->rowCount());
+    const int logRowCount(m_uiForm.valueTable->rowCount());
     for (int i=0; i < logRowCount; ++i)
-	    m_uiForm.fittingResultsTable->removeRow(0);
+      m_uiForm.valueTable->removeRow(0);
 
     // Add number of rows  for the amount of fittings.
     for(int i=0; i < sameFittedWsList.size(); ++i)

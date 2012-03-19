@@ -1444,7 +1444,6 @@ void FitPropertyBrowser::populateWorkspaceNames()
   std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
   {
-    std::cout << "\n\n" << (*it) << "\n";
     tmp<<QString::fromStdString(*it);
   }
 
