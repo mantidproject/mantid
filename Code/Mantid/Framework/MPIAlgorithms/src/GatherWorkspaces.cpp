@@ -76,7 +76,8 @@ void GatherWorkspaces::exec()
   // Get the total number of spectra in the combined inputs
   totalSpec = inputWorkspace->getNumberHistograms();
 
-  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputWorkspace);
+  //Serialization for gather in execEvent not working yet
+  /*eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputWorkspace);
   if (eventW != NULL)
   {
     if (getProperty("PreserveEvents"))
@@ -85,7 +86,7 @@ void GatherWorkspaces::exec()
       this->execEvent();
       return;
     }
-  }
+  }*/
 
   // The root process needs to create a workspace of the appropriate size
   MatrixWorkspace_sptr outputWorkspace;
