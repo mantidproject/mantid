@@ -99,7 +99,8 @@ namespace DataHandling
       Poco::Thread::sleep(50);
 
       DateAndTime now = DateAndTime::getCurrentTime();
-      double seconds = DateAndTime::secondsFromDuration( now - lastTime );
+      double seconds;
+      seconds = DateAndTime::secondsFromDuration( now - lastTime );
       if (seconds > UpdateEvery)
       {
         lastTime = now;
@@ -129,6 +130,11 @@ namespace DataHandling
         //progress( double(chunk % 100)*0.01, "chunk " + Strings::toString(chunk));
         progress( 0.0, "Live Data " + Strings::toString(chunk));
       }
+
+      // This is the time to process a single chunk. Is it too long?
+      seconds = DateAndTime::secondsFromDuration( now - lastTime );
+      if (seconds > UpdateEvery)
+        g_log.warning() << "Cannot process live data as quickly as requested: requested every " << UpdateEvery << " seconds but it takes " << seconds << " seconds!" << std::endl;
     }
   }
 

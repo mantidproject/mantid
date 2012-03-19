@@ -48,9 +48,11 @@ by the [[MonitorLiveData]] algorithm.
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -270,7 +272,7 @@ namespace DataHandling
       alg->execute();
       if (!alg->isExecuted())
       {
-        throw std::runtime_error("Error when calling conjoinChunk to append the spectra of the chunk of live data. See log.");
+        throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
       }
     } // Release the locks.
 
@@ -315,6 +317,22 @@ namespace DataHandling
 
     // Now we process the chunk
     Workspace_sptr processed = this->processChunk(chunkWS);
+
+    bool PreserveEvents = this->getProperty("PreserveEvents");
+    EventWorkspace_sptr processedEvent = boost::dynamic_pointer_cast<EventWorkspace>(processed);
+    if (!PreserveEvents && processedEvent)
+    {
+      Algorithm_sptr alg = this->createSubAlgorithm("ConvertToMatrixWorkspace");
+      alg->setProperty("InputWorkspace", processedEvent);
+      std::string outputName = "__anonymous_livedata_convert_" + this->getPropertyValue("OutputWorkspace");
+      alg->setPropertyValue("OutputWorkspace", outputName);
+      alg->execute();
+      if (!alg->isExecuted())
+        throw std::runtime_error("Error when calling ConvertToMatrixWorkspace (since PreserveEvents=False). See log.");
+      // Replace the "processed" workspace with the converted one.
+      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      processed = temp;
+    }
 
     // How do we accumulate the data?
     std::string accum = this->getPropertyValue("AccumulationMethod");

@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -48,7 +49,8 @@ public:
       std::string ProcessingAlgorithm = "",
       std::string ProcessingProperties = "",
       std::string PostProcessingAlgorithm = "",
-      std::string PostProcessingProperties = ""
+      std::string PostProcessingProperties = "",
+      bool PreserveEvents = true
       )
   {
     LoadLiveData alg;
@@ -60,6 +62,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingProperties", ProcessingProperties) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingProperties", PostProcessingProperties) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PreserveEvents", PreserveEvents) );
     if (!PostProcessingAlgorithm.empty())
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationWorkspace", "fake_accum") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "fake") );
@@ -123,16 +126,57 @@ public:
     TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
   }
+
+  //--------------------------------------------------------------------------------------------
+  void test_add_DontPreserveEvents()
+  {
+    MatrixWorkspace_sptr ws1, ws2;
+
+    // First go creates the fake ws
+    ws1 = doExec<MatrixWorkspace>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
+    TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
+    double total;
+    total = 0;
+    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
+      total += *it;
+    TS_ASSERT_DELTA( total, 100.0, 1e-4);
+
+    // Next one adds the histograms together
+    ws2 = doExec<MatrixWorkspace>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
+    TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
+
+    // The new total signal is 200.0
+    total = 0;
+    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
+      total += *it;
+    TS_ASSERT_DELTA( total, 200.0, 1e-4);
+
+    TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+  }
   
 
   //--------------------------------------------------------------------------------------------
   /** Simple processing of a chunk */
-  void test_ProcessChunk()
+  void test_ProcessChunk_DoPreserveEvents()
   {
     EventWorkspace_sptr ws;
-    ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=40e3, 1e3, 60e3");
+    ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=40e3, 1e3, 60e3", "", "", true);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
+    // Check that rebin was called
+    TS_ASSERT_EQUALS(ws->blocksize(), 20);
+    TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** DONT convert to workspace 2D when processing */
+  void test_ProcessChunk_DontPreserveEvents()
+  {
+    Workspace2D_sptr ws;
+    ws = doExec<Workspace2D>("Replace", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
