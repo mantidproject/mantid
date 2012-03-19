@@ -7,8 +7,11 @@ Subtract two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
 ** The scalar is subtracted from every element of the MDHistoWorkspace. The squares of errors are summed.
 * '''Scalar - MDHistoWorkspace'''
 ** This is not allowed.
-* '''[[MDEventWorkspace]]'s'''
-** This is not currently supported, but it could be in the future.
+* '''[[MDEventWorkspace]] - [[MDEventWorkspace]]'''
+** The signal of each event on the right-hand-side is multiplied by -1 before the events are summed.
+** The number of events in the output MDEventWorkspace is that of the LHS and RHS workspaces put together.
+* '''[[MDEventWorkspace]] - Scalar or MDHistoWorkspace'''
+** This is not possible.
 
 == Usage ==
 
@@ -63,8 +66,8 @@ namespace MDAlgorithms
   /// Sets documentation strings for this algorithm
   void MinusMD::initDocs()
   {
-    this->setWikiSummary("Subtract two [[MDHistoWorkspace]]s");
-    this->setOptionalMessage("Subtract two MDHistoWorkspaces.");
+    this->setWikiSummary("Subtract two [[MDWorkspace]]s");
+    this->setOptionalMessage("Subtract two MDWorkspaces.");
   }
 
 
