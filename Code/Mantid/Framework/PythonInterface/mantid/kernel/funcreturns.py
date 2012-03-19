@@ -89,18 +89,18 @@ def decompile(code_object):
 
 # A must list all of the operators that behave like a function calls in byte-code
 # This is for the lhs functionality
-__operator_names=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_NOT',
-                      'UNARY_CONVERT','UNARY_INVERT','GET_ITER', 'BINARY_POWER',
-                      'BINARY_MULTIPLY','BINARY_DIVIDE', 'BINARY_FLOOR_DIVIDE', 
-                      'BINARY_TRUE_DIVIDE', 'BINARY_MODULO','BINARY_ADD','BINARY_SUBTRACT',
-                      'BINARY_SUBSCR','BINARY_LSHIFT','BINARY_RSHIFT','BINARY_AND',
-                      'BINARY_XOR','BINARY_OR', 'INPLACE_POWER', 'INPLACE_MULTIPLY', 
-                      'INPLACE_DIVIDE', 'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
-                      'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT', 
-                      'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
-                      'INPLACE_OR',
-                      'COMPARE_OP'])
-
+__operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW', 
+                        'CALL_FUNCTION_VAR_KW','UNARY_POSITIVE',
+                        'UNARY_NEGATIVE','UNARY_NOT', 'UNARY_CONVERT','UNARY_INVERT',
+                        'GET_ITER', 'BINARY_POWER', 'BINARY_MULTIPLY','BINARY_DIVIDE', 
+                        'BINARY_FLOOR_DIVIDE', 'BINARY_TRUE_DIVIDE', 'BINARY_MODULO',
+                        'BINARY_ADD','BINARY_SUBTRACT', 'BINARY_SUBSCR','BINARY_LSHIFT',
+                        'BINARY_RSHIFT','BINARY_AND', 'BINARY_XOR','BINARY_OR', 
+                        'INPLACE_POWER', 'INPLACE_MULTIPLY', 'INPLACE_DIVIDE', 
+                        'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
+                        'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT', 
+                        'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
+                        'INPLACE_OR', 'COMPARE_OP'])
 #--------------------------------------------------------------------------------------
 
 def process_frame(frame, use_object_names):
