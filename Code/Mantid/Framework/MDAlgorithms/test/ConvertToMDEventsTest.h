@@ -82,27 +82,7 @@ void testInit(){
     TSM_ASSERT_EQUALS("algortithm should have 16 propeties",16,(size_t)(pAlg->getProperties().size()));
 }
 
-// --> GET ALL DIMENSION NAMES:
-//void xtestGetDimNames(){
-//    // get ws from the DS    
-//    Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
-//    // check the private function
-//    std::vector<std::string> dim_names = pAlg->get_dimension_names(ws2D);
-//
-//   TSM_ASSERT_EQUALS("the algorithm for this workpace can choose from 7 properties/dimensions",7,dim_names.size());
-//
-//   std::vector<std::string> basic_properties(7);
-//   basic_properties[0]="|Q|";
-//   basic_properties[1]="QhQkQl";
-//   basic_properties[2]="DeltaE";
-//   basic_properties[3]="phi";
-//   basic_properties[4]="chi";
-//   basic_properties[5]="omega";
-//   basic_properties[6]="Ei";
-//   for(size_t i=0;i<basic_properties.size();i++){
-//        TSM_ASSERT_EQUALS("The workspace property have to be specific",basic_properties[i],dim_names[i]);
-//   }
-//}
+
 void testSetUpThrow()
 {
     //TODO: check if wrong WS throws (should on validator)

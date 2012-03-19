@@ -11,6 +11,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 /** Helper class describes the possible properties of the algorithm, converting a workspace to a MDEventWorkspace 
+  * and allows 
   *
   *  It is used to convert user input and input data into the key, which is responsible for calling appropriate 
   *  subalgorithm, performing the actual conversion.

@@ -292,7 +292,7 @@ void ConvertToMDEvents::exec()
     spws->setMinRecursionDepth(size_t(minDepth));  
   }
 
-  // call selected algorithm
+  // call selected algorithm, will throw if logic is wrong and subalgorithm is not found
   IConvertToMDEventsMethods * algo =  subAlgFactory.getAlg(algo_id);
   if(algo)
   {
@@ -300,11 +300,6 @@ void ConvertToMDEvents::exec()
       // progress reporter
       pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
       algo->runConversion(pProg.get());
-  }
-  else
-  {
-    g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
-    throw(std::invalid_argument("undefined subalgoritm requested "));
   }
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
