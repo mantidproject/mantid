@@ -64,6 +64,7 @@ class RefLReduction(PythonAlgorithm):
         # Q binning for output distribution
         q_min = self.getProperty("QMin")
         q_step = self.getProperty("QStep")
+        print 'q_step'
           
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
@@ -473,7 +474,7 @@ class RefLReduction(PythonAlgorithm):
                                         source_to_detector=dMD,
                                         sample_to_detector=dSD,
                                         theta=theta,
-                                        geo_correction=True,
+                                        geo_correction=False,
                                         q_binning=[q_min,q_step,q_max])
 
         mt = mtd[ws_data_Q]
@@ -513,8 +514,17 @@ class RefLReduction(PythonAlgorithm):
                             DataE=data_y_error,
                             Nspec=1,
                             UnitX="MomentumTransfer")
- 
-        #space
+
+        #removing first and last Q points (edge effect) 
+        mt=mtd[output_ws]
+        x_axis = mt.readX(0)[:]
+        qmin = x_axis[1]
+        qmax = x_axis[-2]
+        CropWorkspace(InputWorkspace=output_ws,
+                      OutputWorkspace=output_ws,
+                      XMin=qmin, XMax=qmax)
+
+         #space
         print
 
         self.setProperty("OutputWorkspace", mtd[output_ws])

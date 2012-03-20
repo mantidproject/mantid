@@ -305,6 +305,12 @@ def convertWorkspaceToQ(ws_data,
                         Nspec=maxY,
                         UnitX="MomentumTransfer",
                         ParentWorkspace=mt1)
+
+        mtd[outputWorkspace].setDistribution(True)
+
+        Rebin(InputWorkspace=outputWorkspace,
+              OutputWorkspace=outputWorkspace,
+              Params=q_binning)        
             
 def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.xml"):
     # This should be read from the 

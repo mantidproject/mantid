@@ -450,9 +450,33 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
-def getSlitsValueAndLambda(full_list_runs, S1H, S2H, lambdaRequest):
+def getS1w(mt=None):
+    """    
+        returns the width and units of the slit #1 
     """
-    Retrieve the S1H, S2H and lambda requested values
+    if mt != None:
+        _h, units = getSh(mt, 's1t', 's1b') 
+        return _h, units
+    return None, ''
+    
+def getS2w(mt=None):
+    """    
+        returns the width and units of the slit #2 
+    """
+    if mt != None:
+        _h, units = getSh(mt, 's2t', 's2b') 
+        return _h, units
+    return None, None
+
+def getSlitsValueAndLambda(full_list_runs, 
+                           S1H, S2H, 
+                           S1W, S2W, lambdaRequest):
+    """
+    Retrieve the S1H (slit 1 height), 
+                 S2H (slit 2 height), 
+                 S1W (slit 1 width), 
+                 S2W (slit 2 width) and 
+                 lambda requested values
     """
     _nbr_files = len(full_list_runs)
     for i in range(_nbr_files):
@@ -465,6 +489,11 @@ def getSlitsValueAndLambda(full_list_runs, S1H, S2H, lambdaRequest):
         _s2h_value, _s2h_units = getS2h(mt1)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
+        
+        _s1w_value, _s1w_units = getS1w(mt1)
+        _s2w_value, _s2w_units = getS2w(mt1)
+        S1W[i] = _s1w_value
+        S2W[i] = _s2w_value
         
         _lambda_value = getLambdaValue(mt1)
         lambdaRequest[i] = _lambda_value
@@ -603,7 +632,7 @@ def calculate(string_runs=None,
     S1H = {}
     S2H = {}
     lambdaRequest = {}
-    getSlitsValueAndLambda(list_runs, S1H, S2H, lambdaRequest)
+    getSlitsValueAndLambda(list_runs, S1H, S2H, S1W, S2W, lambdaRequest)
 
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
@@ -630,6 +659,9 @@ def calculate(string_runs=None,
 
         finalS1H = []
         finalS2H = []
+        
+        finalS1W = []
+        finalS2W = []
 
         #array of True/False flags that will allow us
         #to escale the calculation on the first attenuator
