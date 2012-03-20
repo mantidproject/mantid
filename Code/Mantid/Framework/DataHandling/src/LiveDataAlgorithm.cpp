@@ -4,7 +4,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "/usr/include/boost/tokenizer.hpp"
+#include "boost/tokenizer.hpp"
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
