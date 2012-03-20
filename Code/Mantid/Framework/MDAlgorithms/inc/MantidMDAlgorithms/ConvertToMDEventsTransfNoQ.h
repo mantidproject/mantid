@@ -10,7 +10,7 @@ namespace MDAlgorithms
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
    *
-  * This file defines  specializations of generic coordinate transformation templated class to the NoQ case
+  * This file defines  specializations of generic coordinate transformation templated to the NoQ case
   *
    * @date 11-10-2011
 

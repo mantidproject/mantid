@@ -76,7 +76,7 @@ namespace MDAlgorithms
 /// way to treat the X-coorinate in the workspace:
   enum XCoordType
   {
-        Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
+        Histogram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
         Centered   // typical for events
   };
   // powder or Crystall -- what kind of sample is analyzed
@@ -174,6 +174,11 @@ class DLLExport ConvertToMDEventsParams
 
    /// helper function to obtain the eMode from existing algorithm ID;
    int getEMode(const std::string &AlgID)const;
+   /// helper function returning Q-mode from existing algorithm ID
+   Q_state getQMode(const std::string &AlgID)const;
+   /// helper function returning Sample mode from existing algorithm ID
+   SampleType getSamplType(const std::string &AlgID)const;
+
    /// helper function to obtain input energy of neurtons from input workspace. Will work properly only for the workspace where this energy is defined. 
    double getEi(API::MatrixWorkspace_const_sptr inMatrixWS)const;
 

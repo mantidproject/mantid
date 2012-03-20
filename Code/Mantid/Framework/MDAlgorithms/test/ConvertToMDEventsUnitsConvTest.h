@@ -64,7 +64,7 @@ void testSetUp_and_PreprocessDetectors()
 
 void testConvertFastFromInelasticWS()
 {
-    UNITS_CONVERSION<ConvFast,Histohram> Conv;
+    UNITS_CONVERSION<ConvFast,Histogram> Conv;
     TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(pConvMethods.get(),"DeltaE_inWavenumber"));
 
      const MantidVec& X        = ws2D->readX(0);

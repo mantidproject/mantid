@@ -55,7 +55,7 @@ namespace MDAlgorithms
 #define SPLIT_LEVEL  2048
 
 //-----------------------------------------------
-// Method to process rugged histohram workspace
+// Method to process rugged Histogram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
 class ConvertToMDEventsWS<Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
@@ -64,7 +64,7 @@ class ConvertToMDEventsWS<Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMD
      template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType XSample>
      friend struct COORD_TRANSFORMER;
   // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,CONV,Histohram,Sample> trn; 
+     COORD_TRANSFORMER<Q,MODE,CONV,Histogram,Sample> trn; 
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:

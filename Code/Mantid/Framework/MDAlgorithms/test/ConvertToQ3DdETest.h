@@ -27,12 +27,13 @@ class ConvertTo3DdETestHelper: public ConvertToMDEvents
 public:
     ConvertTo3DdETestHelper(){};
    // private (PROTECTED) methods, exposed for testing:
-   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDWSDescription &TargWSDescription, 
-                                       bool is_powder=false)const{
-       return ConvertToMDEvents::getTransfMatrix(inWS2D,TargWSDescription);
+   std::vector<double> getTransfMatrix(const std::string &wsName,MDWSDescription &TargWSDescription)const
+   {
+       return ConvertToMDEvents::getTransfMatrix(wsName,TargWSDescription);
    }
    /// construct meaningful dimension names:
-   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
+   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription)
+   {
         ConvertToMDEvents::buildDimensions(TargWSDescription);
    }
 
@@ -194,20 +195,20 @@ void testExecAndAdd(){
 
 void testTransfMat1()
 {
-     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
-     OrientedLattice * latt = new OrientedLattice(10.4165,3.4165,10.4165, 90., 90., 90.);
+     MDEvents::MDWSDescription TWS(4);
+     TWS.pLatt = std::auto_ptr<OrientedLattice>(new OrientedLattice(10.4165,3.4165,10.4165, 90., 90., 90.));
      V3D u(1,0,0);
      V3D v(0,0,1);
-     Kernel::Matrix<double> U0=latt->setUFromVectors(u,v);
+     Kernel::Matrix<double> U0=TWS.pLatt->setUFromVectors(u,v);
      std::vector<double> rot0=U0.get_vector();
-     ws2D->mutableSample().setOrientedLattice(latt);
+     //ws2D->mutableSample().setOrientedLattice(latt);
 
-     MDWSDescription TWS(4);
      TWS.convert_to_hkl=false;
      TWS.is_uv_default=true;
      TWS.emode=1;
+
      // get transformation matrix from oriented lattice. 
-     std::vector<double> rot=pAlg->getTransfMatrix(ws2D,TWS);
+     std::vector<double> rot=pAlg->getTransfMatrix("TestWS",TWS);
   
      for(int i=0;i<9;i++){
         TS_ASSERT_DELTA(rot0[i],rot[i],1.e-6);
@@ -221,11 +222,11 @@ void testTransfMat1()
      TS_ASSERT_EQUALS(V3D(1,0,0),ex);
 
      // to allow recalculate axis names specific for Q3D mode
-     TWS.AlgID="Q3D";
+     TWS.AlgID="WSEventQ3DPowdDirectCnvFromTOF";
      pAlg->buildDimNames(TWS);
-     TS_ASSERT_EQUALS("[Qh,0,0]",TWS.dimNames[0]);
-     TS_ASSERT_EQUALS("[0,Qk,0]",TWS.dimNames[1]);
-     TS_ASSERT_EQUALS("[0,0,Ql]",TWS.dimNames[2]);
+     TS_ASSERT_EQUALS("[Q1,0,0]",TWS.dimNames[0]);
+     TS_ASSERT_EQUALS("[0,Q2,0]",TWS.dimNames[1]);
+     TS_ASSERT_EQUALS("[0,0,Q3]",TWS.dimNames[2]);
  
 
 }

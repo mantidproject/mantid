@@ -73,7 +73,7 @@ static void destroySuite(ConvertToMDEventsCoordTransfTest  * suite) { delete sui
 
 void test_CoordTransfNOQ()
 {
-    COORD_TRANSFORMER<NoQ,ANY_Mode,ConvertNo,Histohram,NSampleTypes> Copy;
+    COORD_TRANSFORMER<NoQ,ANY_Mode,ConvertNo,Histogram,NSampleTypes> Copy;
     Copy.setUpTransf(pConvMethods.get());
     std::vector<coord_t> Coord(4);
 
@@ -90,7 +90,7 @@ void test_CoordTransfNOQ()
 
 void test_CoordTransfQ3DDirect()
 {
-    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histohram,CrystType> ConvFromHisto;
+    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histogram,CrystType> ConvFromHisto;
 
     MDEvents::MDWSDescription TestWS(4);
 
@@ -112,10 +112,10 @@ void test_CoordTransfQ3DDirect()
     size_t nValidSpectra = det_loc.nDetectors();
 
     // helper conversion to TOF
-    UNITS_CONVERSION<ConvByTOF,Histohram> ConvToTOF;
+    UNITS_CONVERSION<ConvByTOF,Histogram> ConvToTOF;
     TS_ASSERT_THROWS_NOTHING(ConvToTOF.setUpConversion(pConvMethods.get(),"TOF"));
 
-    // set up the run over the histohram methods
+    // set up the run over the Histogram methods
     ConvFromHisto.setUpTransf(pConvMethods.get());
     std::vector<coord_t> Coord(4);
 
@@ -151,7 +151,7 @@ void test_CoordTransfQ3DDirect()
     }
     // compare with conversion from TOF
 
-    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histohram,CrystType> ConvFromTOFHisto;
+    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
 
     // make axis untit to be TOF to be able to work with conversion from TOF
     NumericAxis *pAxis0 = new NumericAxis(specSize); 
@@ -161,7 +161,9 @@ void test_CoordTransfQ3DDirect()
     TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.setUpTransf(pConvMethods.get()));    
     TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcGenericVariables(Coord,4));    
     size_t icc(0);
-    ic = 0;    for (size_t i = 0; i < nValidSpectra; ++i){
+    ic = 0;   
+    for (size_t i = 0; i < nValidSpectra; ++i)
+    {
         //size_t iSpctr             = det_loc.detIDMap[i];
         //int32_t det_id            = det_loc.det_id[i];
 
@@ -169,7 +171,8 @@ void test_CoordTransfQ3DDirect()
          TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcYDepCoordinates(Coord,i));
            
          //=> START INTERNAL LOOP OVER THE "TIME"
-         for (size_t j = 0; j < specSize; ++j){
+         for (size_t j = 0; j < specSize; ++j)
+         {
 
               TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.ConvertAndCalcMatrixCoord(TOF_data[ic],Coord));
               // compare with results from TOF
@@ -179,7 +182,7 @@ void test_CoordTransfQ3DDirect()
               TS_ASSERT_DELTA(allCoordDir[icc+3],Coord[3],1.e-5);
               icc+=4;
               ic++;
-            }   
+         }
     }
 
 

@@ -30,15 +30,12 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
         dimUnits[i]= pDim->getUnits();   
         nBins[i]   = pDim->getNBins();
     }
-    uint16_t num_experiments = pWS->getNumExperimentInfo();
-    
+    uint16_t num_experiments = pWS->getNumExperimentInfo();   
     // target ws does not have experiment info, so this can be only powder.
     if (num_experiments==0)
     {
-        is_powder = true;
         return;
     }else{
-        is_powder=false;
         this->Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
     }
 
@@ -89,12 +86,12 @@ dimMax(nDimesnions,1),
 dimNames(nDimesnions,"mdn"),
 dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
+GoniomMatr(3,3,true),
 Wtransf(3,3,true),
 convert_to_hkl(false),
 u(1,0,0),
 v(0,1,0),
 is_uv_default(true),
-is_powder(false),
 detInfoLost(false)
 {
     for(size_t i=0;i<nDimesnions;i++)
@@ -115,6 +112,8 @@ std::string DLLExport sprintfd(const double data, const double eps)
 MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
 {
     this->nDims = rhs.nDims;
+    this->emode = rhs.emode;
+    this->Ei    = rhs.Ei;
     // prepare all arrays:
     this->dimMin = rhs.dimMin;
     this->dimMax = rhs.dimMax;
@@ -129,13 +128,13 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
     this->rotMatrix     = rhs.rotMatrix;
     this->AlgID         = rhs.AlgID;
     this->is_uv_default = rhs.is_uv_default;
-    this->is_powder     = rhs.is_powder;
     this->detInfoLost   = rhs.detInfoLost;
 
     if(rhs.pLatt.get()){
         this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(*(rhs.pLatt)));
     }
-    this->Wtransf=rhs.Wtransf;
+    this->Wtransf    = rhs.Wtransf;
+    this->GoniomMatr = rhs.GoniomMatr;
 
     return *this;
 

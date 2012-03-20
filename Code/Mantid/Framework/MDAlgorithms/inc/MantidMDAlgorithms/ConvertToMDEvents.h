@@ -94,7 +94,7 @@ namespace MDAlgorithms
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
-   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDEvents::MDWSDescription &TargWSDescription)const;
+   std::vector<double> getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription)const;
    /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
      defined by existing workspace */
     std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS)const; 

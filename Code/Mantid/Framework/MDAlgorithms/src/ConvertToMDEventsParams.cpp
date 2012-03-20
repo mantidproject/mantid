@@ -177,8 +177,6 @@ std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,
     return CONV_MODE_ID;
 }
 
-
-
 /** identify what kind of input workspace is provided as input argument
  *
  *@param inMatrixWS  a pointer to the workspace, obtained from the analysis data service
@@ -194,6 +192,7 @@ std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr
     }else{
         TargWSDescription.pLatt.reset();
     }
+    TargWSDescription.GoniomMatr = inMatrixWS->run().getGoniometer().getR();
    
 
     const DataObjects::EventWorkspace *pWSEv= dynamic_cast<const DataObjects::EventWorkspace *>(inMatrixWS.get());
@@ -214,7 +213,6 @@ std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr
     throw(std::invalid_argument("Unsupported worspace type provided"));
     return "";
 }
-
 
 /**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
@@ -269,7 +267,7 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
 
     std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID,WS_ID;
     int nQ_dims(0),ndE_dims(0);
-    // identify, what kind of input workspace is there and if it has oriented lattice. If it has, retrieve it. 
+    // identify, what kind of input workspace is there and if it has oriented lattice and goniometer. If it has, retrieve it. 
     WS_ID = parseWSType(inMatrixWS,TargWSDescription);
     algo_id =WS_ID;
 
@@ -310,6 +308,7 @@ std::string ConvertToMDEventsParams::getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnit
     return SupportedWS[WS]+Q_modes[Q]+SampleK +dE_modes[Mode]+ConvModes[Conv];
     
 }
+
 /** auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID 
  *@param  AlgoID  -- string wich specifies the algorithm ID
  * 
@@ -321,15 +320,8 @@ std::string ConvertToMDEventsParams::getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnit
 void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, Q_state &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS)
 {
     int i;
-
     // Q_mode
-    Q  = NQStates;
-    for(i=0;i<NQStates;i++){
-        if(AlgoID.find(Q_modes[i])!=std::string::npos){
-            Q=static_cast<Q_state>(i);
-            break;
-        }
-    }
+    Q = getQMode(AlgoID);
     if(Q==NQStates){
         std::string ERR(" Algorithm with ID: "+AlgoID+" does not defines recognized Momentum conversion mode");
         throw(std::invalid_argument(ERR));
@@ -375,7 +367,6 @@ void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, Q_state &
 
 }
 
-
 /** function processes the input arguments and tries to establish what subalgorithm should be deployed; 
     *
     * @param inWS           -- input workspace (2D or Events)
@@ -386,8 +377,7 @@ void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, Q_state &
     * @param dim_names_requested [out] -- dimension names for the target workspace
     * @param dim_units_requested [out] -- dimension units for the target workspace
 */
-std::string 
-ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
+std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
                                  const std::string &dE_mode_req,const std::vector<std::string> &other_dim_names,
                                  bool convert_to_hkl,size_t maxNdim,
                                  MDEvents::MDWSDescription &TargWSDescription)
@@ -475,7 +465,11 @@ ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,con
     // set up the target workspace description;
     TargWSDescription.nDims          = nDims;
     TargWSDescription.emode          = emode;
-    TargWSDescription.convert_to_hkl = convert_to_hkl;
+    if(this->getSamplType(TargWSDescription.AlgID)==PowdType){
+        TargWSDescription.convert_to_hkl = false;
+    }else{
+        TargWSDescription.convert_to_hkl = convert_to_hkl;
+    }
     TargWSDescription.dimNames       = dim_IDs_requested;
     TargWSDescription.dimIDs         = dim_IDs_requested;
     TargWSDescription.dimUnits       = dim_units_requested;
@@ -522,8 +516,8 @@ void ConvertToMDEventsParams::getAddDimensionNames(API::MatrixWorkspace_const_sp
   *@returns the mode 0-elastic, 1--direct, 2 indirect. Throws if the mode is not defined or should not be defined 
   (NoQ mode -- no analysis expected)
 */
-int  
-ConvertToMDEventsParams::getEMode(const std::string &AlgID)const{
+int ConvertToMDEventsParams::getEMode(const std::string &AlgID)const
+{
     if(AlgID.empty()){
         convert_log.error()<<"getEMode: emode undefined\n";
         throw(std::logic_error(" should not call this function when emode is undefined"));
@@ -544,6 +538,36 @@ ConvertToMDEventsParams::getEMode(const std::string &AlgID)const{
     throw(std::logic_error(" can not identify correct emode"));
     return -1;
 }
+/// helper function returning Q-mode from existing algorithm ID
+Q_state ConvertToMDEventsParams::getQMode(const std::string &AlgID)const
+{
+    // Q_mode
+    Q_state Q(NQStates);
+    for(int i=0;i<NQStates;i++){
+        if(AlgID.find(Q_modes[i])!=std::string::npos){
+            Q=static_cast<Q_state>(i);
+            break;
+        }
+    }
+    return Q;
+   
+}
+/// helper function returning Sample mode from existing algorithm ID
+SampleType ConvertToMDEventsParams::getSamplType(const std::string &AlgID)const
+{
+    // Sample mode
+    SampleType Sample(NSampleTypes);
+    for(int i=0;i<NSampleTypes;i++)
+    {
+        if(AlgID.find(SampleKind[i])!=std::string::npos)
+        {
+            Sample=static_cast<SampleType>(i);
+            break;
+        }
+    }
+    return Sample;
+}
+
 
 /** Helper function to obtain the energy of incident neutrons from the input workspaec
   *
@@ -599,7 +623,7 @@ Strings ConvertToMDEventsParams::getDefaultQNames(Q_state Qmode,AnalMode Mode)co
              rez.resize(3);
         }else{
              rez.resize(4);
-             rez[4]=default_dim_ID[dE_ID];
+             rez[3]=default_dim_ID[dE_ID];
         }
         rez[0]=default_dim_ID[Q1_ID];
         rez[1]=default_dim_ID[Q2_ID];

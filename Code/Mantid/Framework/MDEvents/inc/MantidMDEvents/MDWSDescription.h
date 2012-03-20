@@ -71,19 +71,20 @@ namespace MDEvents
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
 
+    // UB matrix components:
     /// the oriented lattice which should be picked up from source ws and be carryed out to target ws. Defined for transfromation from Matrix or Event WS
     std::auto_ptr<Geometry::OrientedLattice> pLatt;
+    // Goniometer is always present in a workspace
+    Kernel::DblMatrix GoniomMatr;   
   /// the matrix transforming Q-coodinates in crystal cartesian coordinate system into target coodinate system. 
     Kernel::DblMatrix  Wtransf;
     /// the indicator, informing if the uv plain has been set as a parameter. If they are not, the UB matrix from the source workspace is used uncnanged
     bool is_uv_default;
-    /// parameter, which specify if the ws describes powder analysis
-    bool is_powder;
     /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
     bool detInfoLost;
 //=======================
       /// constructor
-     MDWSDescription():nDims(0),emode(-1),Ei(std::numeric_limits<double>::quiet_NaN()),is_powder(false),Wtransf(3,3,true){};
+     MDWSDescription():nDims(0),emode(-1),Ei(std::numeric_limits<double>::quiet_NaN()),GoniomMatr(3,3,true),Wtransf(3,3,true){};
      /// mainly test constructor;
      MDWSDescription(size_t nDimesnions);
      /// function build MD Event description from existing workspace

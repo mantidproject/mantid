@@ -33,7 +33,7 @@ namespace MDAlgorithms
 {
     
 // How to treat X-coordinates:
-// for histohram we take centerpiece average
+// for Histogram we take centerpiece average
 template<XCoordType TYPE>
 inline double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
 // for axis type -- just value

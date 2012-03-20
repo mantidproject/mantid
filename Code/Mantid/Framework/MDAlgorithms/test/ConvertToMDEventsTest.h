@@ -177,14 +177,14 @@ void test_buildDimNames(){
     TargWSDescription.u=Kernel::V3D(1,0,0);
     TargWSDescription.v=Kernel::V3D(0,1,0);
     TargWSDescription.emode=1;
-    TargWSDescription.AlgID = "Q3D";
+    TargWSDescription.AlgID = "WS2DHistoQ3DElasticCnvNo";
     TargWSDescription.convert_to_hkl=true;
     TargWSDescription.rotMatrix.assign(9,0);
 
     pAlg->buildDimNames(TargWSDescription);
-    TS_ASSERT_EQUALS("[Qh,0,0]",TargWSDescription.dimNames[0]);
-    TS_ASSERT_EQUALS("[0,Qk,0]",TargWSDescription.dimNames[1]);
-    TS_ASSERT_EQUALS("[0,0,Ql]",TargWSDescription.dimNames[2]);
+    TS_ASSERT_EQUALS("[Q1,0,0]",TargWSDescription.dimNames[0]);
+    TS_ASSERT_EQUALS("[0,Q2,0]",TargWSDescription.dimNames[1]);
+    TS_ASSERT_EQUALS("[0,0,Q3]",TargWSDescription.dimNames[2]);
     
 
 }
