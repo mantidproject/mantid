@@ -365,7 +365,8 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     }
     else
     {
-      xUnits = "Time of flight";
+      xUnits = QString::fromStdString(instrActor->getWorkspace()->getAxis(0)->unit()->caption());
+      //xUnits = "Time of flight";
     }
     text += "X units: " + xUnits + '\n';
     m_selectionInfoDisplay->setText(text);
@@ -540,7 +541,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
 
   m_plot->clearPeakLabels();
   // set the data 
-  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
@@ -550,7 +551,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
     QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
     foreach(PeakMarker2D* marker,markers)
     {
-      m_plot->addPeakLabel(new PeakLabel(marker));
+      m_plot->addPeakLabel(marker);
     }
   }
 }
@@ -604,7 +605,7 @@ void InstrumentWindowPickTab::plotTubeSums(int detid)
   Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Sum"; 
-  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel(label);
 }
 

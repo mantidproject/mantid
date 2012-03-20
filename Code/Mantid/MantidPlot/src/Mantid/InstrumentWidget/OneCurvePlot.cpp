@@ -18,7 +18,7 @@
 #include <cmath>
 
 OneCurvePlot::OneCurvePlot(QWidget* parent):
-QwtPlot(parent),m_curve(NULL)
+QwtPlot(parent),m_curve(NULL),m_xUnits("")
 {
   setAxisFont(QwtPlot::xBottom, parent->font());
   setAxisFont(QwtPlot::yLeft, parent->font());
@@ -202,8 +202,9 @@ void OneCurvePlot::setYScale(double from, double to)
   * @param y :: A pointer to y values
   * @param dataSize :: The size of the data
   */
-void OneCurvePlot::setData(const double* x,const double* y,int dataSize)
+void OneCurvePlot::setData(const double* x,const double* y,int dataSize,const std::string& xUnits)
 {
+  m_xUnits = xUnits;
   if (!m_curve)
   {
     m_curve = new QwtPlotCurve();
@@ -242,6 +243,7 @@ void OneCurvePlot::clearCurve()
     m_curve->attach(0);
     m_curve = NULL;
   }
+  clearPeakLabels();
   // if there are stored curves rescale axes to make them fully visible
   if (hasStored())
   {
@@ -373,8 +375,9 @@ void OneCurvePlot::setYLinearScale()
  * Add new peak label
  * @param label :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
  */
-void OneCurvePlot::addPeakLabel(PeakLabel* label)
+void OneCurvePlot::addPeakLabel(const PeakMarker2D* marker)
 {
+  PeakLabel* label = new PeakLabel(marker,this);
   label->attach(this);
   m_peakLabels.append(label);
 }
@@ -500,7 +503,21 @@ void PeakLabel::draw(QPainter *painter,
         const QRect &canvasRect) const
 {
   (void)yMap;
-  int x = xMap.transform(m_marker->getTOF());
+  double peakX;
+  if (m_plot->getXUnits().empty()) return;
+  if (m_plot->getXUnits() == "dSpacing")
+  {
+    peakX = m_marker->getPeak().getDSpacing();
+  }
+  else if (m_plot->getXUnits() == "Wavelength")
+  {
+    peakX = m_marker->getPeak().getWavelength();
+  }
+  else
+  {
+    peakX = m_marker->getPeak().getTOF();
+  }
+  int x = xMap.transform(peakX);
   int y = static_cast<int>(canvasRect.top() + m_marker->getLabelRect().height());
   painter->drawText(x,y,m_marker->getLabel());
   //std::cerr << x << ' ' << y << ' ' << m_marker->getLabel().toStdString() << std::endl;

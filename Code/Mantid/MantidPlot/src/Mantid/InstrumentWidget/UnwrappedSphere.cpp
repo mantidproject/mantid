@@ -26,7 +26,7 @@ void UnwrappedSphere::project(double & u, double & v, double & uscale, double & 
   uscale = 1./sqrt(x*x+y*y);
   vscale = 1./r;
 
-  u = -atan2(y,x);
+  u = applyUCorrection( -atan2(y,x) );
   v = -acos(v/r);
 }
 

@@ -21,7 +21,7 @@ void UnwrappedCylinder::project(double & u, double & v, double & uscale, double 
   v = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);
   double y = pos.scalar_prod(m_yaxis);
-  u = -atan2(y,x);
+  u = applyUCorrection( -atan2(y,x) );
 
   uscale = 1./sqrt(x*x+y*y);
   vscale = 1.;
