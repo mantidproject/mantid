@@ -11,6 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits/is_pointer.hpp>
 #include <set>
 #include <string>
 #include <sstream>
@@ -19,11 +20,26 @@ namespace Mantid
 {
 namespace Kernel
 {
-// Forward declaration so that the typedef boost::shared_ptr<Validator>
+// Forward declaration so that the typedef boost::shared_ptr<Validator> understand it
 class IValidator;
 
 /// A shared_ptr to an IValidator
 typedef boost::shared_ptr<IValidator> IValidator_sptr;
+
+namespace
+{
+  /// Helper object to determine if a type is either a pointer/shared_ptr
+  /// Generic implementation says it is not
+  template<class T>
+  struct IsPtrType : public boost::is_pointer<T>
+  {};
+  /// Helper object to determine if a type is either a pointer/shared_ptr
+  /// Specialized implementation for shared_ptr
+  template<class T>
+  struct IsPtrType<boost::shared_ptr<T> > : public boost::true_type
+  {};
+
+}
 
 /** IValidator is the basic interface for all validators for properties
 
@@ -69,7 +85,7 @@ public:
   template <typename TYPE>
   std::string isValid(const TYPE &value) const
   {
-    return isValidImpl(value, boost::is_convertible<TYPE, DataItem_sptr>());
+    return runCheck(value, IsPtrType<TYPE>());
   }
 
   /**
@@ -100,22 +116,40 @@ public:
   virtual std::string check(const boost::any&) const = 0;
 
 private:
-  /** Calls the validator for a general type
+  /** Calls the validator for a type that is not a pointer type
    * @param value :: The value to be checked
    * @returns An error message to display to users or an empty string on no error
    */
   template<typename T>
-  std::string isValidImpl(const T & value, const boost::false_type &) const
+  std::string runCheck(const T & value, const boost::false_type &) const
+  {
+    const T *valuePtr = &value; // Avoid a copy by storing the pointer in the any holder
+    return check(boost::any(valuePtr));
+  }
+
+  /** Calls the validator for a type that is either a raw pointer or a boost::shared pointer
+   * @returns An error message to display to users or an empty string on no error
+   */
+  template<typename T>
+  std::string runCheck(const T & value, const boost::true_type &) const
+  {
+    return runCheckWithDataItemPtr(value, boost::is_convertible<T, DataItem_sptr>());
+  }
+  /** Calls the validator for a pointer type that is NOT convertible to DataItem_sptr
+   * @param value :: The value to be checked
+   * @returns An error message to display to users or an empty string on no error
+   */
+  template<typename T>
+  std::string runCheckWithDataItemPtr(const T & value, const boost::false_type &) const
   {
     return check(boost::any(value));
   }
-
-  /** Calls the validator. This ensures the wrapped value is a DataItem_sptr
+  /** Calls the validator for a pointer type that IS convertible to DataItem_sptr
    * @param value :: The value to be checked
    * @returns An error message to display to users or an empty string on no error
    */
   template<typename T>
-  std::string isValidImpl(const T & value, const boost::true_type &) const
+  std::string runCheckWithDataItemPtr(const T & value, const boost::true_type &) const
   {
     return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
   }

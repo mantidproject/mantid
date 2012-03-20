@@ -55,7 +55,8 @@ namespace Mantid
       {
         try
         {
-          return checkValidity(boost::any_cast<HeldType>(value));
+          const HeldType *dataPtr = boost::any_cast<const HeldType*>(value);
+          return checkValidity(*dataPtr);
         }
         catch(boost::bad_any_cast&)
         {
@@ -112,11 +113,11 @@ namespace Mantid
       {
         if( value.type() == typeid(DataItem_sptr) )
         {
-          return extractDataItem(value);
+          return extractFromDataItem(value);
         }
         else
         {
-          return extractSharedPtr(value);
+          return extractFromSharedPtr(value);
         }
       }
       /**
@@ -124,7 +125,7 @@ namespace Mantid
        * @param value :: The value
        * @returns The concrete type
        */
-      ElementType_sptr extractDataItem(const boost::any & value) const
+      ElementType_sptr extractFromDataItem(const boost::any & value) const
       {
         const DataItem_sptr data = boost::any_cast<DataItem_sptr>(value);
         // First try and push it up to the type of the validator
@@ -140,7 +141,7 @@ namespace Mantid
        * @param value :: The value
        * @returns The concrete type
        */
-      ElementType_sptr extractSharedPtr(const boost::any & value) const
+      ElementType_sptr extractFromSharedPtr(const boost::any & value) const
       {
         try
         {
@@ -148,7 +149,7 @@ namespace Mantid
         }
         catch(boost::bad_any_cast&)
         {
-          throw std::invalid_argument("Value is not of the expected type");
+          throw std::invalid_argument("Value was not a shared_ptr type");
         }
       }
     };

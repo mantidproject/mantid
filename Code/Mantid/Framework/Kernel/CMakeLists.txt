@@ -1,5 +1,5 @@
 set ( SRC_FILES
-        src/ANN_complete.cpp
+    src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
 	src/ArrayProperty.cpp
@@ -225,6 +225,7 @@ set ( TEST_FILES
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
 	test/InterpolationTest.h
+	test/IValidatorTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
 	test/LogParserTest.h
@@ -265,6 +266,7 @@ set ( TEST_FILES
 	test/TimeSeriesPropertyTest.h
 	test/TimeSplitterTest.h
 	test/TimerTest.h
+	test/TypedValidatorTest.h
 	test/UnitFactoryTest.h
 	test/UnitTest.h
 	test/UserStringParserTest.h

@@ -26,17 +26,17 @@ public:
     CompositeValidator comp;
     comp.add(IValidator_sptr(val1));
     //
-    TS_ASSERT(  comp.allowedValues().empty());
+    TS_ASSERT(comp.allowedValues().empty());
 
-    TS_ASSERT(  comp.isValid(150).empty() );
-    TS_ASSERT(  comp.isValid(950).empty() );
-    TS_ASSERT( !comp.isValid(1200).empty() );
+    TS_ASSERT_EQUALS(comp.isValid(150), "");
+    TS_ASSERT_EQUALS(comp.isValid(950), "");
+    TS_ASSERT_DIFFERS(comp.isValid(1200), "");
     comp.add(IValidator_sptr(val2));
-    TS_ASSERT( !comp.isValid(150).empty() ); // This one is now blocked by validator 2
-    TS_ASSERT(  comp.isValid(950).empty() );
-    TS_ASSERT( !comp.isValid(1200).empty() );
+    TS_ASSERT_DIFFERS(comp.isValid(150), ""); // This one is now blocked by validator 2
+    TS_ASSERT_EQUALS(comp.isValid(950), "");
+    TS_ASSERT_DIFFERS(comp.isValid(1200), "");
     //
-    TS_ASSERT(  comp.allowedValues().empty());
+    TS_ASSERT(comp.allowedValues().empty());
 
     // Test cloning
     IValidator_sptr comp2 = comp.clone();

@@ -85,7 +85,7 @@ namespace Mantid
       std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
       for(std::list<IValidator_sptr>::const_iterator itr = m_children.begin(); itr != itrEnd; ++itr)
       {
-        std::string error = (*itr)->isValid(value);
+        std::string error = (*itr)->check(value);
         //exit on the first error, to avoid passing doing more tests on invalid objects that could fail
         if (error != "") return error;
       }
