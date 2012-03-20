@@ -87,10 +87,10 @@ dimNames(nDimesnions,"mdn"),
 dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
 convert_to_hkl(false),
-GoniomMatr(3,3,true),
-Wtransf(3,3,true),
 u(1,0,0),
 v(0,1,0),
+GoniomMatr(3,3,true),
+Wtransf(3,3,true),
 is_uv_default(true),
 detInfoLost(false)
 {
