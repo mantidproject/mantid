@@ -88,10 +88,12 @@ private:
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
-  bool updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestparams, double &mincost);
+  void addRow(const int spectrum, const std::vector<double> &params, const double mincost, bool error);
+  void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestparams, double &mincost, const double expPeakPos, const double expPeakHeight);
   void checkFitResultParameterNames(const std::vector<std::string> &paramnames);
 
   API::IFitFunction_sptr createFunction(const bool withPeak = true);
+  uint backgroundOrder();
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
