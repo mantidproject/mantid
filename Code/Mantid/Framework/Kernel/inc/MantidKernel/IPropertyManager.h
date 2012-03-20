@@ -124,7 +124,7 @@ public:
     }
 
     /// Return the property manager serialized as a string.
-    virtual std::string asString(bool withDefaultValues = false) const = 0;
+    virtual std::string asString(bool withDefaultValues = false, char separator=',') const = 0;
 
     /** Give settings to a property to determine when it gets enabled/hidden
      * @param name :: property name

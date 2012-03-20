@@ -288,7 +288,19 @@ public:
     TS_ASSERT_EQUALS(mgr.propertyCount(), 3);
     TS_ASSERT_THROWS_NOTHING(mgr.clear());
     TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
+  }
 
+  void test_asString()
+  {
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 10));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", 15));
+    TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(), "");
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "Prop1=10,Prop2=15");
+    TSM_ASSERT_EQUALS("Different separator", mgr.asString(true, ';'), "Prop1=10;Prop2=15");
+    mgr.setProperty("Prop1", 123);
+    mgr.setProperty("Prop2", 456);
+    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false, ';'), "Prop1=123;Prop2=456");
   }
 
   //-----------------------------------------------------------------------------------------------------------

@@ -81,7 +81,7 @@ public:
     /// Get the value of a property
     TypedValue getProperty(const std::string &name) const;
     /// Return the property manager serialized as a string.
-    virtual std::string asString(bool withDefaultValues = false) const;
+    virtual std::string asString(bool withDefaultValues = false, char separator=',') const;
  
     /// Removes the property from management
     void removeProperty(const std::string &name, const bool delproperty);
