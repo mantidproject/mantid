@@ -26,12 +26,12 @@ public:
   {
     std::size_t numPoints = 100;
     double expValue = 10.;
-    double yValues[numPoints];
+    std::vector<double> yValues(numPoints);
 
     FlatBackground *bkgd = new FlatBackground();
     bkgd->initialize();
     bkgd->setParameter("A0", expValue);
-    bkgd->functionMW(yValues, NULL, numPoints); // don't need x-values
+    bkgd->functionMW(yValues.data(), NULL, numPoints); // don't need x-values
     delete bkgd;
 
     for (std::size_t i = 0; i < numPoints; i++)
