@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
 	src/MDWSDescription.cpp
+	src/MDWSSlice.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/SaveMD.cpp
@@ -82,6 +83,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MDWSDescription.h
+	inc/MantidMDEvents/MDWSSlice.h	
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/SaveMD.h
@@ -124,6 +126,7 @@ set ( TEST_FILES
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
 	test/MDWSDescriptionTest.h
+	test/MDWSSliceTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/SaveMDTest.h

@@ -491,6 +491,30 @@ void testIdentifyMatrixAlg_5()
     TS_ASSERT_EQUALS(dim_names[3],"DeltaE");
     TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 }
+void testIdentifyMatrixAlg_LatticeSet()
+{  
+    ConvertToMDEventsParams params;
+
+    std::vector<std::string> dim_names,dim_units;
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+    ws2D->mutableSample().setOrientedLattice(new Mantid::Geometry::OrientedLattice());
+
+    MDEvents::MDWSDescription TWS;
+
+    API::NumericAxis *pAx = new API::NumericAxis(3);
+    pAx->title()="A";
+    pAx->setUnit("DeltaE");
+    ws2D->replaceAxis(0,pAx);
+
+    TS_ASSERT_EQUALS("WS2DHistoQ3DCrystIndirectCnvNo",params.identifyMatrixAlg(ws2D,"Q3D","Indirect",dim_names,dim_units,TWS));
+    TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
+    TS_ASSERT_EQUALS(dim_names[0],"Q1");
+    TS_ASSERT_EQUALS(dim_names[1],"Q2");
+    TS_ASSERT_EQUALS(dim_names[2],"Q3");
+    TS_ASSERT_EQUALS(dim_names[3],"DeltaE");
+    TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
+}
+
 
 };
 
