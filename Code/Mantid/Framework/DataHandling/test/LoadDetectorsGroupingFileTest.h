@@ -86,8 +86,35 @@ public:
     Poco::File cleanfile(xmlfilename);
     cleanfile.remove(false);
 
+    return;
   }
 
+  void generateAutoGroupIDGroupXMLFile(std::string xmlfilename)
+  {
+    std::ofstream ofs;
+    ofs.open(xmlfilename.c_str(), std::ios::out);
+
+    ofs << "<?xml version=\"1.0\"?>" << std::endl;
+    ofs << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>" << std::endl;
+    ofs << "<detector-grouping instrument=\"VULCAN\">" << std::endl;
+    ofs << "  <group>" << std::endl;
+    ofs << "    <detids>26250-27481,27500-28731,28750-29981</detids>" << std::endl;
+    ofs << "  </group>" << std::endl;
+    ofs << "  <group>" << std::endl;
+    ofs << "    <component>bank26</component>" << std::endl;
+    ofs << "    <component>bank27</component>" << std::endl;
+    ofs << "    <component>bank28</component>" << std::endl;
+    ofs << "  </group>" << std::endl;
+    ofs << "</detector-grouping>" << std::endl;
+
+    ofs.close();
+
+    return;
+  }
+
+  /*
+   * Test XML file using "ids"
+   */
   void test_SpectrumIDs()
   {
     LoadDetectorsGroupingFile load;
@@ -116,29 +143,6 @@ public:
     return;
   }
 
-  void generateAutoGroupIDGroupXMLFile(std::string xmlfilename)
-  {
-    std::ofstream ofs;
-    ofs.open(xmlfilename.c_str(), std::ios::out);
-
-    ofs << "<?xml version=\"1.0\"?>" << std::endl;
-    ofs << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>" << std::endl;
-    ofs << "<detector-grouping instrument=\"VULCAN\">" << std::endl;
-    ofs << "  <group>" << std::endl;
-    ofs << "    <detids>26250-27481,27500-28731,28750-29981</detids>" << std::endl;
-    ofs << "  </group>" << std::endl;
-    ofs << "  <group>" << std::endl;
-    ofs << "    <component>bank26</component>" << std::endl;
-    ofs << "    <component>bank27</component>" << std::endl;
-    ofs << "    <component>bank28</component>" << std::endl;
-    ofs << "  </group>" << std::endl;
-    ofs << "</detector-grouping>" << std::endl;
-
-    ofs.close();
-
-    return;
-  }
-
   void generateSpectrumIDXMLFile(std::string xmlfilename)
   {
     std::ofstream ofs;
@@ -146,7 +150,6 @@ public:
 
     ofs << "<?xml version=\"1.0\"?>" << std::endl;
     ofs << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>" << std::endl;
-    // ofs << "<detector-grouping instrument=\"WhatEver\">" << std::endl;
     ofs << "<detector-grouping>" << std::endl;
     ofs << "  <group>" << std::endl;
     ofs << "    <ids>30-36,12-16,100-111</ids>" << std::endl;
@@ -156,6 +159,7 @@ public:
     ofs << "    <ids>291</ids>" << std::endl;
     ofs << "    <ids>22-25</ids>" << std::endl;
     ofs << "  </group>" << std::endl;
+    ofs << "  <group name=\"bwd2\"><ids val=\"333,444,555\"/>334,557</group>" << std::endl;
     ofs << "</detector-grouping>" << std::endl;
 
     ofs.close();
@@ -163,6 +167,53 @@ public:
     return;
   }
 
+  /*
+   * Test XML file using "ids" in old format
+   */
+  void test_OldFormat()
+  {
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+
+    std::string xmlfilename = "testoldformat.xml";
+    generateOldSpectrumIDXMLFile(xmlfilename);
+
+    TS_ASSERT(load.setProperty("InputFile", xmlfilename));
+    TS_ASSERT(load.setProperty("OutputWorkspace", "Random_Group_Old"));
+
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+
+    DataObjects::GroupingWorkspace_sptr gws =
+        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Random_Group_Old"));
+
+    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(31)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(32)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(39)[0], 2.0, 1.0E-5);
+
+    // Clean
+    Poco::File cleanfile(xmlfilename);
+    cleanfile.remove(false);
+
+    return;
+  }
+
+  void generateOldSpectrumIDXMLFile(std::string xmlfilename)
+  {
+    std::ofstream ofs;
+    ofs.open(xmlfilename.c_str(), std::ios::out);
+
+    ofs << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
+    ofs << "<detector-grouping>" << std::endl;
+    ofs << "  <group name=\"fwd1\"> <ids val=\"1-32\"/> </group>" << std::endl;
+    ofs << "  <group name=\"bwd1\"> <ids val=\"33,36,38,60-64\"/> </group>" << std::endl;
+    ofs << "</detector-grouping>" << std::endl;
+
+    ofs.close();
+
+    return;
+  }
 
 };
 
