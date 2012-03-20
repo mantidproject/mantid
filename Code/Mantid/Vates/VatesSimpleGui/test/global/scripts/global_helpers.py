@@ -45,4 +45,12 @@ def make_slice(axisScaleName, coordinate):
     else:
         y = scaleFactor * (coordinate - min)
         mouseClick(scaleWidget, y, x, 0, Qt.LeftButton)
-
+# Get the pipeline filter at a specific index position in the pqPipelineBrowserWidget. Do not 
+# include the server line in the index position.
+def get_pipeline_filter_at_position(index):
+    pipeline_model = waitForObject(":_pqPipelineModel")
+    pipeline = pipeline_model.index(0, 0)
+    for i in range(index):
+        pipeline = pipeline_model.index(0, 0, pipeline)
+        #test.log("Pipeline Filter: %s" % pipeline_model.data(pipeline).toString())
+    return pipeline
