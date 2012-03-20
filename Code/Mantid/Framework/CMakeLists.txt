@@ -44,8 +44,6 @@ endif ()
 # Only available on Linux (specifically RedHat), and for a framework-only build
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
-  # Create the variable because it needs to exist later even if it's left empty
-  set ( MPI_LIBRARIES )
   if ( MPI_BUILD )
     # This finds OpenMPI on rhel6 (assuming it's installed, of course)
     find_package ( MPI REQUIRED )
@@ -64,7 +62,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
     endif ()
     include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
   
-    set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where openmpi winds up on rhel6
+    set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where (boost-)openmpi winds up on rhel6
     find_package ( Boost REQUIRED mpi serialization )
     include_directories( ${Boost_INCLUDE_DIRS} )
     
@@ -89,8 +87,8 @@ endif ()
 ###########################################################################
 
 # Might just as well link everything to Boost & Poco (found in CommonSetup)
-# TCMalloc & MPI variables will be empty if not using
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI_LIBRARIES} )
+# TCMalloc variable will be empty if not using
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
