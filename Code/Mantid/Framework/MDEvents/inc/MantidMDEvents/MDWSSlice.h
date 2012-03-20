@@ -40,5 +40,7 @@ class MDWSSlice
 
 };
 
+}
+}
 
 #endif
