@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/Quadratic.cpp
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
+	src/StaticKuboToyabe.cpp
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
@@ -95,6 +96,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
+	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
@@ -112,7 +114,7 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
 	test/DeltaFunctionTest.h
-        test/DiffSphereTest.h
+  test/DiffSphereTest.h
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
@@ -138,6 +140,7 @@ set ( TEST_FILES
 	test/QuadraticBackgroundTest.h
 	test/QuadraticTest.h
 	test/ResolutionTest.h
+	test/StaticKuboToyabeTest.h
 	test/SpecialFunctionSupportTest.h
 	test/SplineBackgroundTest.h
 	test/StretchExpTest.h
