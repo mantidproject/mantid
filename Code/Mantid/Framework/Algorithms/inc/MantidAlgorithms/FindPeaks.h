@@ -93,7 +93,7 @@ private:
   void checkFitResultParameterNames(const std::vector<std::string> &paramnames);
 
   API::IFitFunction_sptr createFunction(const bool withPeak = true);
-  uint backgroundOrder();
+  int backgroundOrder();
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
