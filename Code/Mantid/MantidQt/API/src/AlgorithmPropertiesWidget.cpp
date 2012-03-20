@@ -30,7 +30,8 @@ namespace API
   AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget * parent)
   : QWidget(parent),
     m_algoName(""),
-    m_algo(NULL), m_deleteAlgo(false)
+    m_algo(NULL), m_deleteAlgo(false),
+    m_inputHistory(NULL)
   {
     // Create the grid layout that will have all the widgets
     m_inputGrid = new QGridLayout;
@@ -73,6 +74,16 @@ namespace API
     if (m_deleteAlgo) delete m_algo;
   }
   
+  //----------------------------------------------------------------------------------------------
+  /** Sets the AlgorithmInputHistoryImpl object holding all histories.
+   * This object does NOT take ownership
+   *
+   * @param inputHistory :: AlgorithmInputHistoryImpl ptr
+   */
+  void AlgorithmPropertiesWidget::setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory)
+  {
+    m_inputHistory = inputHistory;
+  }
 
   //----------------------------------------------------------------------------------------------
   ///@return the algorithm being viewed
@@ -88,6 +99,7 @@ namespace API
   void AlgorithmPropertiesWidget::setAlgorithm(Mantid::API::IAlgorithm * algo)
   {
     if (!algo) return;
+    saveInput();
     if (m_deleteAlgo) delete m_algo;
     m_algo = algo;
     m_algoName = QString::fromStdString(m_algo->name());
@@ -240,6 +252,18 @@ namespace API
 
         // Create the appropriate widget at this row in the grid.
         PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
+
+        // Set the previous input value, if any
+        if (m_inputHistory)
+        {
+          QString oldValue = m_inputHistory->previousInput(m_algoName, propName);
+          // Empty string if not found. This means use the default.
+          if (!oldValue.isEmpty())
+          {
+            prop->setValue(oldValue.toStdString());
+            widget->setValue(oldValue);
+          }
+        }
 
         m_propWidgets[propName] = widget;
 
@@ -395,6 +419,25 @@ namespace API
     this->repaint(true);
   }
 
+  //-------------------------------------------------------------------------------------------------
+  /** When closing or changing algorithm, this saves the input
+   * history to QSettings
+   */
+  void AlgorithmPropertiesWidget::saveInput()
+  {
+    if (m_inputHistory)
+    {
+      for( auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr )
+      {
+        PropertyWidget * widget = pitr.value();
+        QString propName = pitr.key();
+        QString value = widget->getValue();
+//        Mantid::Kernel::Property *prop = widget->getProperty();
+//        if (!prop || prop->remember())
+        m_inputHistory->storeNewValue(m_algoName, QPair<QString, QString>(propName, value));
+      }
+    }
+  }
 
 } // namespace Mantid
 } // namespace API

@@ -8,6 +8,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 namespace MantidQt
 {
@@ -20,6 +21,7 @@ class StartLiveDataDialog : public MantidQt::API::AlgorithmDialog
 public:
   /// Default Constructor
   StartLiveDataDialog(QWidget *parent = 0);
+  virtual ~StartLiveDataDialog();
 
 public slots:
   void radioProcessClicked();
@@ -52,6 +54,9 @@ private:
 
   /// The algorithm for processing the accumulated workspace
   Mantid::API::Algorithm_sptr m_postProcessingAlg;
+
+  /// History of the inputs to the processing algorithms
+  MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
 
 };
 

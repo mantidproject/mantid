@@ -12,6 +12,28 @@ using namespace MantidQt::API;
 //----------------------------------
 // Public member functions
 //----------------------------------
+
+/**
+ * Constructor
+ */
+AlgorithmInputHistoryImpl::AlgorithmInputHistoryImpl(QString settingsGroup)
+: m_lastInput(), m_previousDirectory(""),
+  m_algorithmsGroup(settingsGroup), m_dirKey("LastDirectory")
+{
+  //Fill the stored map from the QSettings information
+  load();
+}
+
+
+/**
+ * Destructor
+ */
+AlgorithmInputHistoryImpl::~AlgorithmInputHistoryImpl()
+{
+  //Can't write the history out here since, in Linux, the singletons are destroyed after
+  //the QApplication object and then we get a crash
+}
+
 /**
  * Update the stored map with new property value. If the algorithm
  * doesn't exist then it is appended to the list otherwise the previous
@@ -93,24 +115,6 @@ void AlgorithmInputHistoryImpl::save() const
 //----------------------------------
 // Private member functions
 //----------------------------------
-/**
- * Constructor
- */
-AlgorithmInputHistoryImpl::AlgorithmInputHistoryImpl() : m_lastInput(), m_previousDirectory(""), 
-m_algorithmsGroup("Mantid/Algorithms"), m_dirKey("LastDirectory")
-{
-  //Fill the stored map from the QSettings information
-  load();
-}
-
-/**
- * Destructor
- */
-AlgorithmInputHistoryImpl::~AlgorithmInputHistoryImpl()
-{
-  //Can't write the history out here since, in Linux, the singletons are destroyed after 
-  //the QApplication object and then we get a crash
-}
 
 /**
   * Load any values that are available from persistent storage. Note: this clears all currently values stored

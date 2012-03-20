@@ -1,16 +1,17 @@
 #ifndef MANTID_API_ALGORITHMPROPERTIESWIDGET_H_
 #define MANTID_API_ALGORITHMPROPERTIESWIDGET_H_
 
-#include "MantidKernel/System.h"
-#include <QtGui/qwidget.h>
-#include <qgridlayout.h>
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidQtAPI/PropertyWidget.h"
-#include "MantidAPI/Algorithm.h"
-#include <QtGui>
 #include "DllOption.h"
-#include <QtCore/qvariant.h>
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/PropertyWidget.h"
+#include <qgridlayout.h>
+#include <QtCore/qvariant.h>
+#include <QtGui/qwidget.h>
+#include <QtGui>
 
 
 namespace MantidQt
@@ -54,6 +55,8 @@ namespace API
     AlgorithmPropertiesWidget(QWidget * parent = NULL);
     virtual ~AlgorithmPropertiesWidget();
     
+    void setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory);
+
     void initLayout();
 
     Mantid::API::IAlgorithm * getAlgorithm();
@@ -65,6 +68,8 @@ namespace API
     void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
 
     void hideOrDisableProperties();
+
+    void saveInput();
 
     /// Each dynamically created PropertyWidget
     QHash<QString, PropertyWidget*> m_propWidgets;
@@ -110,6 +115,9 @@ namespace API
     /// A list of property names that are FORCED to stay disabled.
     /// e.g. when callid AlgorithmNameDialog()
     QStringList m_disabled;
+
+    /// History of inputs to the algorithm
+    MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
 
   };
 

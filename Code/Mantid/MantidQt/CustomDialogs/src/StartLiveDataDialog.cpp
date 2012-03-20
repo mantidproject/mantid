@@ -12,6 +12,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <QtGui>
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -35,13 +36,26 @@ using Mantid::Kernel::DateAndTime;
 StartLiveDataDialog::StartLiveDataDialog(QWidget *parent) :
   AlgorithmDialog(parent)
 {
+  // Create the input history. This loads it too.
+  m_inputHistory = new AlgorithmInputHistoryImpl("LiveDataAlgorithms");
 }
 
+/// Destructor
+StartLiveDataDialog::~StartLiveDataDialog()
+{
+  // Save the input history to QSettings
+  m_inputHistory->save();
+  delete m_inputHistory;
+}
 
 /// Set up the dialog layout
 void StartLiveDataDialog::initLayout()
 {
   ui.setupUi(this);
+
+  // To save the history of inputs
+  ui.processingAlgoProperties->setInputHistory(m_inputHistory);
+  ui.postAlgoProperties->setInputHistory(m_inputHistory);
 
   // ========== Set previous values from history =============
   fillAndSetComboBox("Instrument", ui.cmbInstrument);
@@ -139,6 +153,10 @@ void StartLiveDataDialog::parseInput()
   }
   else if (m_usePostProcessScript)
     storePropertyValue("PostProcessingScript", ui.postScript->text());
+
+  // Save to QSettings
+  ui.processingAlgoProperties->saveInput();
+  ui.postAlgoProperties->saveInput();
 }
 
 

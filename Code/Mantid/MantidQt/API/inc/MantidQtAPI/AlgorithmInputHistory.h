@@ -67,6 +67,11 @@ class EXPORT_OPT_MANTIDQT_API AlgorithmInputHistoryImpl
   
 public:
 
+  /// Constructor
+  AlgorithmInputHistoryImpl(QString settingsGroup = "Mantid/Algorithms");
+  /// Destructor
+  virtual ~AlgorithmInputHistoryImpl();
+
   /// Update the old values that are stored here. Only valid
   /// values are stored here
   void storeNewValue(const QString & algName, const QPair<QString, QString> & property);
@@ -88,15 +93,11 @@ public:
   
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
-  
-  ///Private Constructor
-  AlgorithmInputHistoryImpl();
+
   /// Private copy constructor - NO COPY ALLOWED
   AlgorithmInputHistoryImpl(const AlgorithmInputHistoryImpl&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   AlgorithmInputHistoryImpl& operator = (const AlgorithmInputHistoryImpl&);
-  ///Private Destructor
-  virtual ~AlgorithmInputHistoryImpl();
   
   /// Load any values that are available from persistent storage
   void load();
@@ -107,7 +108,7 @@ private:
   /// The directory that last used by an open file dialog
   QString m_previousDirectory;
   
-  /// The string denoting the group where the algorithm properties are stored
+  /// The string denoting the group (in the QSettings) where the algorithm properties are stored
   QString m_algorithmsGroup;
   
   /// The string denoting the key for the previous dir storage
