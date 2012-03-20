@@ -58,6 +58,35 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
+def getSw(mt, left_tag, rigth_tag):
+    """
+        returns the width and units of the given slits
+    """
+    mt_run = mt.getRun()
+    sl = mt_run.getProperty(left_tag).value
+    sr = mt_run.getProperty(right_tag).value
+    sw = float(sl[0]) - float(sr[0])
+    units = mt_run.getProperty(left_tag).units
+    return sw, units
+
+def getS1w(mt=None):
+    """    
+        returns the width and units of the slit #1 
+    """
+    if mt != None:
+        _w, units = getSw(mt, 's1l', 's1r') 
+        return _w, units
+    return None, ''
+    
+def getS2w(mt=None):
+    """    
+        returns the width and units of the slit #2 
+    """
+    if mt != None:
+        _w, units = getSh(mt, 's2l', 's2r') 
+        return _w, units
+    return None, None
+
 def getLambdaValue(mt):
     """
     return the lambdaRequest value
@@ -394,65 +423,6 @@ def convertToThetaVsLambda(_tof_axis,
     
     return dico
 
-#def _convertToRvsQ(_tof_axis,
-#                  _pixel_axis_of_peak,
-#                  data_of_peak,
-#                  central_pixel,
-#                  pixel_size=0.0007,
-#                  theta= -1,
-#                  dSD= -1,
-#                  dMD= -1):
-#    """
-#    This function converts the pixel/tof array to the R(Q) array
-#    
-#    """
-#
-#    h = 6.626e-34 #m^2 kg s^-1
-#    m = 1.675e-27 #kg
-#
-#    ##convert tof_axis into seconds
-#    #_tof_axis = _tof_axis * 1e-6
-#
-##    vel_array = dMD / _tof_axis         #mm/ms = m/s
-##    _lambda = h / (m * vel_array)  #m
-##    _lambda = _lambda * 1e10  #angstroms
-#  
-#    d_vec = (_pixel_axis_of_peak - central_pixel) * pixel_size
-#    theta_vec = arctan2(d_vec, dSD) + theta
-#    
-#    #create Q axis
-#    nbr_pixel = shape(_pixel_axis_of_peak)[0]
-#    nbr_tof = shape(_tof_axis)[0]
-#    q_array = zeros(nbr_tof)
-#    
-#    _const = float(4) * math.pi * m * dMD / h
-#    
-#    for t in range(nbr_tof):
-#        _Q = _const * sin(theta) / _tof_axis[t]
-#        q_array[t] = _Q
-#    
-#    return q_array
-
-#def convertToRvsQ(dMD= -1, theta= -1, tof=None):
-#    """
-#    This function converts the pixel/TOF array to the R(Q) array
-#    using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
-#    with    L: distance central_pixel->source
-#            TOF: TOF of pixel
-#            theta: angle of detector
-#    """
-#    _const = float(4) * math.pi * m * dMD / h
-#    sz_tof = numpy.shape(tof)[0]
-#    q_array = zeros(sz_tof - 1)
-#    for t in range(sz_tof - 1):
-#        tof1 = tof[t]
-#        tof2 = tof[t + 1]
-#        tofm = (tof1 + tof2) / 2.
-#        _Q = _const * math.sin(theta) / (tofm * 1e-6)
-#        q_array[t] = _Q * 1e-10
-#
-#    return q_array
-        
 def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, cpix=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
@@ -740,21 +710,44 @@ def applySF(InputWorkspace,
         s2h_precision = slitsValuePrecision * s2h_value
         s2h_value_low = s2h_value - s2h_precision
         s2h_value_high = s2h_value + s2h_precision
+
+        #retrieve s1w and s2w values
+        s1w = getS1w(mtd[InputWorkspace])
+        s2w = getS2w(mtd[InputWorkspace])
+        
+        s1w_value = s1w[0]
+        s2w_value = s2w[0]
+        
+        #locate the row with s1w and s2w having the right value
+        s1w_precision = slitsValuePrecision * s1w_value
+        s1w_value_low = s1w_value - s1w_precision
+        s1w_value_high = s1w_value + s1w_precision
+        
+        s2w_precision = slitsValuePrecision * s2w_value
+        s2w_value_low = s2w_value - s2w_precision
+        s2w_value_high = s2w_value + s2w_precision
         
         for i in range(nbr_row):
-            
+                        
             _s1h_table_value = float(sfFactorTable[i][0])
             _s2h_table_value = float(sfFactorTable[i][1])
+        
+            _s1w_table_value = float(sfFactorTable[i][2])
+            _s2w_table_value = float(sfFactorTable[i][3])
         
             if (_s1h_table_value >= s1h_value_low and
                 _s1h_table_value <= s1h_value_high and
                 _s2h_table_value >= s2h_value_low and
-                _s2h_table_value <= s2h_value_high):
+                _s2h_table_value <= s2h_value_high and 
+                _s1w_table_value >= s1w_value_low and
+                _s1w_table_value <= s1w_value_high and
+                _s2w_table_value >= s2w_value_low and
+                _s2w_table_value <= s2w_value_high):
                
-                a = float(sfFactorTable[i][2])
-                b = float(sfFactorTable[i][3])
-                a_error = float(sfFactorTable[i][4])
-                b_error = float(sfFactorTable[i][5])
+                a = float(sfFactorTable[i][4])
+                b = float(sfFactorTable[i][5])
+                a_error = float(sfFactorTable[i][6])
+                b_error = float(sfFactorTable[i][7])
                 
                 OutputWorkspace = _applySFtoArray(InputWorkspace,
                                                   a, b, a_error, b_error)
