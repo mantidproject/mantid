@@ -224,7 +224,7 @@ void ConvertToMDEvents::exec()
     //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units be converted to hkl
     bool convert_to_hkl                      = getProperty("QinHKL");
 
-    // Identify the algorithm to deploy on workspace. Also partially fills in the target workspace description
+    // Identify the algorithm to deploy on workspace. Also fills in the target workspace description
     std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,pWSWrapper->getMaxNDim(),TWS);
 
     // set the min and max values for the dimensions from the input porperties

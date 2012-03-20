@@ -64,10 +64,13 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h	
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h		
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h			
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h		
 	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/DivideMD.h

@@ -31,7 +31,7 @@ void testParseQMode_WrongThrows()
      std::vector<std::string> out_dim_names,out_dim_units;
      ConvertToMDEventsParams params;
      int nQ_dims;    
-     TS_ASSERT_THROWS(params.parseQMode("WrongMode",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims),std::invalid_argument);
+     TS_ASSERT_THROWS(params.parseQMode("WrongMode",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims,false),std::invalid_argument);
 
 }
 void testParseQMode_NoQ()
@@ -73,7 +73,7 @@ void testParseQMode_Q3D()
      int nQ_dims;
      std::string MODE;
      ConvertToMDEventsParams params;
-     TS_ASSERT_THROWS_NOTHING(MODE=params.parseQMode("Q3D",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_THROWS_NOTHING(MODE=params.parseQMode("Q3D",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims,false));
      TS_ASSERT_EQUALS(3,nQ_dims);
      TS_ASSERT_EQUALS("Q3D",MODE);
      TS_ASSERT_EQUALS("Q1",out_dim_names[0]);

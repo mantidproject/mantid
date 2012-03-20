@@ -18,7 +18,9 @@
 
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
 
 namespace Mantid
 {
@@ -54,15 +56,15 @@ namespace MDAlgorithms
 
 //-----------------------------------------------
 // Method to process rugged histohram workspace
-template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ConvertToMDEventsWS<Ws2DHistoType,Q,MODE,CONV>: public IConvertToMDEventsMethods 
+template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+class ConvertToMDEventsWS<Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state QX, AnalMode MODEX,CnvrtUnits CONVX,  XCoordType Type> 
+     template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType XSample>
      friend struct COORD_TRANSFORMER;
-     // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
+  // the instanciation of the class which does the transformation itself
+     COORD_TRANSFORMER<Q,MODE,CONV,Histohram,Sample> trn; 
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:

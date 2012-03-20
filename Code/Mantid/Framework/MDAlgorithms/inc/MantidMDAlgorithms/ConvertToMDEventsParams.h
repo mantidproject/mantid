@@ -39,9 +39,9 @@ namespace MDAlgorithms
 */
 
   /// known sates for algorithms, caluclating momentums
-  enum Q_state
+  enum Q_state 
   {
-       modQ,    //< calculate mod Q
+       modQ,    //< calculate mod Q 
        Q3D,     //< calculate 3 component of Q in fractional coordinate system.
        NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
        NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
@@ -79,6 +79,13 @@ namespace MDAlgorithms
         Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
         Centered   // typical for events
   };
+  // powder or Crystall -- what kind of sample is analyzed
+  enum SampleType
+  {
+      CrystType,
+      PowdType,
+      NSampleTypes
+  };
 
 /** describes default dimensions ID currently used by multidimensional workspace
  * 
@@ -111,6 +118,8 @@ class DLLExport ConvertToMDEventsParams
     Strings ConvModes;
     /// supported input workspace types  (names of supported workspace types )
     Strings SupportedWS;
+    /// Supported sample types. Crystal || Powder
+    Strings  SampleKind;
 
     /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
     std::string  native_elastic_unitID; // currently it is Q
@@ -128,7 +137,7 @@ class DLLExport ConvertToMDEventsParams
                                const Strings &other_dim_names,bool convert_to_hkl,size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription);
   /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during subalgorithm instanciation
     * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable subalgorithm.  */
-  std::string getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS)const;
+  std::string getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
 
   /** auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID */
   void  getAlgoModes(const std::string &AlgoID, Q_state &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS);
@@ -148,7 +157,8 @@ class DLLExport ConvertToMDEventsParams
   /// indentify input units conversion mode
   std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &UnitsToConvert2,const Strings &ws_dim_unit)const;
   /// identify momentum transfer mode
-  std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims)const;
+  std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,
+                         Strings &out_dim_units, int &nQdims,bool isPowder=false)const;
    /// identify energy transfer mode
   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,                                
                                 Strings &out_dim_IDs,Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const;

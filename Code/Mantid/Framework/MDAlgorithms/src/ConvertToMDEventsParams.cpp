@@ -39,7 +39,7 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
   *@param nQ_dims [out]       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
 */
 std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_ID,Strings &out_dim_units, 
-                                    int &nQ_dims)const
+                                    int &nQ_dims, bool isPowder)const
 {
     std::string Q_MODE_ID("Unknown");
     if(is_member(Q_modes,Q_mode_req)<0){
@@ -54,7 +54,7 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
         out_dim_ID   = ws_dim_names;
         out_dim_units= ws_dim_units;
     }
-    if(Q_mode_req.compare(Q_modes[modQ])==0) // At the moment we assume that |Q| make sense for inelastic only,      
+    if(Q_mode_req.compare(Q_modes[modQ])==0)       
     {  // so the only one variable is availible form the workspace. 
         nQ_dims=1;      
         out_dim_ID.resize(1);
@@ -74,6 +74,15 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
        Q_MODE_ID = Q_modes[Q3D];
        out_dim_units.assign(3,native_elastic_unitID);
 
+    }
+    // modQ and Q3D mode can have crystal and powder submodes
+    if(Q_mode_req.compare(Q_modes[NoQ])!=0)
+    {
+        if(isPowder){
+            Q_MODE_ID+=SampleKind[PowdType];
+        }else{
+            Q_MODE_ID+=SampleKind[CrystType];
+        }
     }
     return Q_MODE_ID;
 }
@@ -244,6 +253,7 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
         ws_dim_names.push_back(pXAxis->title());
         ws_dim_units.push_back(Dim1Unit);
     }
+
     // get optional Y axis which can be used in NoQ-kind of algorithms
     bool is_detector_information_lost= false;
     API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
@@ -259,12 +269,21 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
 
     std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID,WS_ID;
     int nQ_dims(0),ndE_dims(0);
-    // identify, what kind of input workspace is there and if it has oriented lattice:
+    // identify, what kind of input workspace is there and if it has oriented lattice. If it has, retrieve it. 
     WS_ID = parseWSType(inMatrixWS,TargWSDescription);
     algo_id =WS_ID;
-    // identify Q_mode
-    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_IDs,out_dim_units,nQ_dims);  
+
+
+    // identify Q_mode; if modQ and no oriented lattice, then it is real powder, if Q3D and no lattice -- unit matrix which we will call "Powder"
+    bool isPowder = false;
+    if(!TargWSDescription.pLatt.get()) // No lattice
+    { 
+          isPowder = true;
+    }
+    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_IDs,out_dim_units,nQ_dims,isPowder);  
     algo_id += Q_MODE_ID;
+ 
+
     // identify dE mode    
     DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_IDs,out_dim_units,ndE_dims,natural_units);
     // identify conversion mode;
@@ -281,9 +300,14 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
 /** function returns the algorithm ID as function of different integer conversion modes. 
   * This ID should coinside with the ID, obtained by identifyTheAlg method.
 */
-std::string ConvertToMDEventsParams::getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS)const
+std::string ConvertToMDEventsParams::getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const
 {
-    return SupportedWS[WS]+Q_modes[Q]+dE_modes[Mode]+ConvModes[Conv];
+    std::string SampleK("");
+    if(Sample<NSampleTypes)
+    {
+        SampleK = SampleKind[Sample];
+    }
+    return SupportedWS[WS]+Q_modes[Q]+SampleK +dE_modes[Mode]+ConvModes[Conv];
     
 }
 /** auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID 
@@ -424,7 +448,7 @@ ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,con
     }
     // get emode
     int emode;
-    // if not found NoQ mode, then dE should be availible
+    // if not NoQ mode, then emode should be availible
     if (QMode!=NoQ){
         emode = getEMode(the_algID);
     }else{
@@ -591,6 +615,7 @@ Q_modes(NQStates),
 dE_modes(4),
 ConvModes(NConvUintsStates),
 SupportedWS(NInWSTypes),
+SampleKind(NSampleTypes),
  /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
 native_elastic_unitID("Momentum"),// currently it is Q
 /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
@@ -613,7 +638,10 @@ default_dim_ID(nDefaultID)
      ConvModes[ConvFromTOF]= "CnvFromTOF";
      // possible input workspace ID-s
      SupportedWS[Ws2DHistoType] = "WS2DHisto";
-     SupportedWS[EventWSType]    = "WSEvent";
+     SupportedWS[EventWSType]   = "WSEvent";
+     // possible samples
+     SampleKind[CrystType] = "Cryst";
+     SampleKind[PowdType] = "Powd";
 
      // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
      // for modQ transformation:

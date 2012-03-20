@@ -7,7 +7,11 @@
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
+
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
+
 
 //namespace ConvertToMDEventsTest
 //{
@@ -69,7 +73,7 @@ static void destroySuite(ConvertToMDEventsCoordTransfTest  * suite) { delete sui
 
 void test_CoordTransfNOQ()
 {
-    COORD_TRANSFORMER<NoQ,ANY_Mode,ConvertNo,Histohram> Copy;
+    COORD_TRANSFORMER<NoQ,ANY_Mode,ConvertNo,Histohram,NSampleTypes> Copy;
     Copy.setUpTransf(pConvMethods.get());
     std::vector<coord_t> Coord(4);
 
@@ -86,7 +90,7 @@ void test_CoordTransfNOQ()
 
 void test_CoordTransfQ3DDirect()
 {
-    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histohram> ConvFromHisto;
+    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histohram,CrystType> ConvFromHisto;
 
     MDEvents::MDWSDescription TestWS(4);
 
@@ -147,7 +151,7 @@ void test_CoordTransfQ3DDirect()
     }
     // compare with conversion from TOF
 
-    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histohram> ConvFromTOFHisto;
+    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histohram,CrystType> ConvFromTOFHisto;
 
     // make axis untit to be TOF to be able to work with conversion from TOF
     NumericAxis *pAxis0 = new NumericAxis(specSize); 

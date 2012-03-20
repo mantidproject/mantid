@@ -38,21 +38,25 @@ void testGetAlg()
     for(int iq=0;iq<NoQ;iq++)
     {
         Q_state q = (Q_state)iq;
-        for(int im=0;im<ANY_Mode;im++)
-        {
-            AnalMode m = (AnalMode)im;
-            for(int ic=0;ic<NConvUintsStates;ic++)
-            {
-                CnvrtUnits c= (CnvrtUnits)ic;
-                for(int iw=0;iw<NInWSTypes;iw++){
+        for(int im=0;im<ANY_Mode;im++){
 
+            AnalMode m = (AnalMode)im;
+            for(int ic=0;ic<NConvUintsStates;ic++){
+                CnvrtUnits c= (CnvrtUnits)ic;
+
+                for(int iw=0;iw<NInWSTypes;iw++){
                     InputWSType w =InputWSType(iw);
-                    std::string alg_id = pParams->getAlgoID(q,m,c,w);
-                    TSM_ASSERT_THROWS_NOTHING("Q-type subalgorithm with id: "+alg_id+" has not been initated properly",pFact->getAlg(alg_id));
+
+                    for(int is=0;is<NSampleTypes;is++){
+                        SampleType s = SampleType(is);
+                        std::string alg_id = pParams->getAlgoID(q,m,c,w,s);
+                        TSM_ASSERT_THROWS_NOTHING("Q-type subalgorithm with id: "+alg_id+" has not been initated properly",pFact->getAlg(alg_id));
+                    }
                 }
             }
         }
     }
+
 // NoQ mode is special, it has less options        
    for(int ic=0;ic<NConvUintsStates;ic++)
    {
@@ -60,7 +64,7 @@ void testGetAlg()
        for(int iw=0;iw<NInWSTypes;iw++)
        {
            InputWSType w =InputWSType(iw);
-           std::string alg_id = pParams->getAlgoID(NoQ,ANY_Mode,c,w);
+           std::string alg_id = pParams->getAlgoID(NoQ,ANY_Mode,c,w,NSampleTypes);
            TSM_ASSERT_THROWS_NOTHING("NoQ-type subalgorithm with id: "+alg_id+" has not been initated properly",pFact->getAlg(alg_id));
        }
    }

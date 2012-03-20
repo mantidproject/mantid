@@ -55,7 +55,8 @@ private:
     enum{
         CONV = AlgoNum%NConvUintsStates,                        // internal loop over conversion modes, the variable changes first
         MODE = (AlgoNum/NConvUintsStates)%ANY_Mode,             // level one loop over momentum conversion mode  
-        WS   = ((AlgoNum/NConvUintsStates)/ANY_Mode)%NInWSTypes  //level two loop over ws type;
+        SAMPL= ((AlgoNum/NConvUintsStates)/ANY_Mode)%NSampleTypes, //level two loop over crystal or powder sample
+        WS   = (((AlgoNum/NConvUintsStates)/ANY_Mode)/NSampleTypes)%NInWSTypes //level three loop ws type;
     
     };
   public:
@@ -63,11 +64,13 @@ private:
         // cast loop integers to proper enum type
         CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
         AnalMode   Mode = static_cast<AnalMode>(MODE);
+        SampleType Sampl= static_cast<SampleType>(SAMPL);
         InputWSType Ws  = static_cast<InputWSType>(WS);
 
-        std::string  Key = AlgoKey.getAlgoID(Q,Mode,Conv,Ws);
+        std::string  Key = AlgoKey.getAlgoID(Q,Mode,Conv,Ws,Sampl);
         pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-                (new ConvertToMDEventsWS<static_cast<InputWSType>(WS),Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
+                (new ConvertToMDEventsWS<InputWSType(WS),Q,AnalMode(MODE),
+                 CnvrtUnits(CONV),SampleType(SAMPL)>())));
 
 /*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
@@ -82,7 +85,7 @@ class LOOP_ALGS<NoQ,AlgoNum>{
 private:
     enum{
         CONV = AlgoNum%NConvUintsStates,       // internal Loop over conversion modes, the variable changes first
-        WS   = ((AlgoNum/NConvUintsStates))%NInWSTypes  //level two loop over ws type;
+        WS   = ((AlgoNum/NConvUintsStates))%NInWSTypes  //level one loop over ws type;
         //MODE => noQ -- no mode conversion ANY_Mode,     
     };
   public:
@@ -92,9 +95,9 @@ private:
       CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
       InputWSType Ws  = static_cast<InputWSType>(WS);
 
-      std::string  Key   = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws);
+      std::string  Key   = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws,NSampleTypes);
       pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
-         (new ConvertToMDEventsWS<static_cast<InputWSType>(WS),NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
+         (new ConvertToMDEventsWS<InputWSType(WS),NoQ,ANY_Mode,CnvrtUnits(CONV),NSampleTypes>())));
            
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
@@ -113,11 +116,12 @@ class LOOP_ALGS<Q,0>{
       {
           CnvrtUnits Conv = static_cast<CnvrtUnits>(0);
           AnalMode   Mode = static_cast<AnalMode>(0);
+          SampleType Sampl= static_cast<SampleType>(0);
           InputWSType Ws  = static_cast<InputWSType>(0);
 
-          std::string  Key   = AlgoKey.getAlgoID(Q,Mode,Conv,Ws);
+          std::string  Key   = AlgoKey.getAlgoID(Q,Mode,Conv,Ws,Sampl);
           pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
-            (new ConvertToMDEventsWS<InputWSType(0),Q,AnalMode(0),CnvrtUnits(0)>())));     
+            (new ConvertToMDEventsWS<InputWSType(0),Q,AnalMode(0),CnvrtUnits(0),SampleType(0)>())));     
       } 
 };
 
@@ -130,9 +134,9 @@ class LOOP_ALGS<NoQ,0>{
           CnvrtUnits Conv = static_cast<CnvrtUnits>(0);
           InputWSType Ws  = static_cast<InputWSType>(0);
 
-          std::string  Key   = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws);
+          std::string  Key   = AlgoKey.getAlgoID(NoQ,ANY_Mode,Conv,Ws,NSampleTypes);
           pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
-          (new ConvertToMDEventsWS<InputWSType(0),NoQ,ANY_Mode,CnvrtUnits(0)>())));
+          (new ConvertToMDEventsWS<InputWSType(0),NoQ,ANY_Mode,CnvrtUnits(0),NSampleTypes>())));
 
       } 
 };

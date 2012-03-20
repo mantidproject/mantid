@@ -3,7 +3,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
@@ -12,6 +12,8 @@
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -42,7 +44,11 @@ namespace MDAlgorithms
 */
  class DLLExport IConvertToMDEventsMethods
  {
-    template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
+ protected:
+   /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
+    /// presumably will be completely inlined
+ 
+    template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
     friend struct COORD_TRANSFORMER;
  public:
      // constructor;
@@ -96,7 +102,7 @@ namespace MDAlgorithms
 };
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-template<InputWSType WS,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+template<InputWSType WS,Q_state Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
 class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
 { 
 public:
