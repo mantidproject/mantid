@@ -35,7 +35,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	# Check that the 3rd party directory exists.
 	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
-        message ( FATAL_ERROR "Specified THIRD_PARTY directory doesn't exist!" )
+        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
 	endif()
 	
 	include ( WindowsSetup )
@@ -56,7 +56,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 	# Check that the 3rd party directory exists.
 	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
-        message ( FATAL_ERROR "Specified THIRD_PARTY directory doesn't exist!" )
+        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
 	endif()
 
     include ( DarwinSetup )	
