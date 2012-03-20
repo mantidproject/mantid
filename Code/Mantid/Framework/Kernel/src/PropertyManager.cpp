@@ -375,15 +375,16 @@ namespace Mantid
     {
       std::ostringstream writer;
       const size_t count = propertyCount();
+      size_t numAdded = 0;
       for( size_t i = 0; i < count; ++i )
       {
         Property *p = getPointerToPropertyOrdinal((int)i);
         if( withDefaultValues || !(p->isDefault()) )
         {
-          writer << p->name() << "=" << p->value();
-          // Skip last comma
-          if (i < count-1)
+          if (numAdded > 0)
             writer << separator;
+          writer << p->name() << "=" << p->value();
+          numAdded++;
         }
       }
       return writer.str();
