@@ -76,10 +76,12 @@ private:
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
   long long computePhi(const int& w) const;
 
+  int getCentreIndex(const MantidVec &X, double centre);
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double left, const double right);
   void findPeaksUsingMariscotti();
-  void findPeaksGivenStartingPoints(std::vector<double> peakCenters);
+  void findPeaksGivenStartingPoints(const std::vector<double> &peakCentres, const std::vector<double> &fitWindows);
 
   void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const unsigned int& i_min, const unsigned int& i_max,

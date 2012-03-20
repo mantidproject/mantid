@@ -134,6 +134,8 @@ void FindPeaks::init()
   
   declareProperty(new ArrayProperty<double>("PeakPositions"),
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
+  declareProperty(new ArrayProperty<double>("FitWindows"),
+    "Optional: enter a comma-separated list of the expected X-position of windows to fit. The number of values must be exactly double the number of specified peaks." );
 
   std::vector<std::string> bkgdtypes;
   bkgdtypes.push_back("Flat");
@@ -245,6 +247,7 @@ void FindPeaks::exec()
 
   // b) Get the specified peak positions, which is optional
   std::vector<double> centers = getProperty("PeakPositions");
+  std::vector<double> fitWindows = getProperty("FitWindows");
 
   // c) Background
   m_backgroundType = getPropertyValue("BackgroundType");
@@ -255,9 +258,16 @@ void FindPeaks::exec()
   // 4. Fit
   if (!centers.empty())
   {
+    if (!fitWindows.empty())
+    {
+      if (fitWindows.size() != (centers.size()*2))
+      {
+        throw std::invalid_argument("Number of FitWindows must be exactly twice the number of PeakPositions");
+      }
+    }
     //Perform fit with fixed start positions.
     //std::cout << "Number of Centers = " << centers.size() << std::endl;
-    this->findPeaksGivenStartingPoints(centers);
+    this->findPeaksGivenStartingPoints(centers, fitWindows);
   }
   else
   {
@@ -275,11 +285,15 @@ void FindPeaks::exec()
 
 //=================================================================================================
 /** Use the Mariscotti method to find the start positions to fit gaussian peaks
- * @param peakCenters :: vector of the center x-positions specified to perform fits.
+ * @param peakCenters Vector of the center x-positions specified to perform fits.
+ * @param fitWindows List of windows around each peak. If not specified windows will
+ * be determined automatically.
  */
-void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
+void FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakCentres,
+                                             const std::vector<double> &fitWindows)
 {
-  std::vector<double>::iterator it;
+  bool useWindows = (!fitWindows.empty());
+  std::size_t numPeaks = peakCentres.size();
 
   // Loop over the spectra searching for peaks
   const int start = singleSpectrum ? index : 0;
@@ -292,16 +306,25 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
 
     const MantidVec& datax = inputWS->readX(spec);
 
-    for (it = peakCenters.begin(); it != peakCenters.end(); ++it)
+    for (std::size_t i = 0; i < numPeaks; i++)
     {
       //Try to fit at this center
-      double x_center = *it;
+      double x_center = peakCentres[i];
 
-      g_log.information() << " @ d = " << x_center << std::endl;
+      g_log.information() << " @ d = " << x_center;
+      if (useWindows)
+      {
+        g_log.information() << " [" << fitWindows[2*i] << "<" << fitWindows[2*i+1] << "]";
+      }
+      g_log.information() << "\n";
 
       // Check whether it is the in data range
-      if (x_center > datax[0] && x_center < datax[datax.size()-1]){
-        this->fitPeak(inputWS, spec, x_center, this->fwhm);
+      if (x_center > datax.front() && x_center < datax.back())
+      {
+        if (useWindows)
+          this->fitPeak(inputWS, spec, x_center, fitWindows[2*i], fitWindows[2*i+1]);
+        else
+          this->fitPeak(inputWS, spec, x_center, this->fwhm);
       }
 
     } // loop through the peaks specified
@@ -625,6 +648,36 @@ long long FindPeaks::computePhi(const int& w) const
   return retval;
 }
 
+int FindPeaks::getCentreIndex(const MantidVec &X, double centre)
+{
+  if (X[0] < centre && X[X.size()-1] > centre){
+    int i_centre = static_cast<int>(getLowerBound(X, 0, X.size()-1, centre));
+
+    if ((centre >= X[i_centre]) && (centre < X[i_centre+1]))
+    {
+      // Find the nearest peak
+      if ((centre-X[i_centre] > X[i_centre+1]-centre) && static_cast<size_t>(i_centre) < X.size()-1)
+        i_centre ++;
+    }
+    else
+    {
+      g_log.error() << centre << " >= " << X[i_centre] << " = " << (centre >= X[i_centre]) << std::endl;
+      g_log.error() << centre << " <  " << X[i_centre+1] << " = " << (centre < X[i_centre+1]) << std::endl;
+      g_log.error() << "Try to find " << centre << "  But found value between " << X[i_centre] << ", " << X[i_centre+1] << std::endl;
+      throw std::runtime_error("Logic error in using lower_bound");
+    }
+    return i_centre;
+  }
+  else if (X[X.size()-1] <= centre)
+  {
+    return static_cast<int>(X.size())-1;
+  }
+  else {
+    //else, bin 0 is closest to it by default;
+    return 0;
+  }
+}
+
 //=================================================================================================
 /** Attempts to fit a candidate peak given a center and width guess.
  *
@@ -644,38 +697,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const MantidVec &X = input->readX(spectrum);
 
   // 1. find i_center - the index of the center - The guess is within the X axis?
-  if (X[0] < center_guess && X[X.size()-1] > center_guess){
-    i_center = static_cast<int>(getLowerBound(X, 0, X.size()-1, center_guess));
-
-    if ((center_guess >= X[i_center]) && (center_guess < X[i_center+1]))
-    {
-      // Find the nearest peak
-      if ((center_guess-X[i_center] > X[i_center+1]-center_guess) && static_cast<size_t>(i_center) < X.size()-1)
-        i_center ++;
-    }
-    else
-    {
-      g_log.error() << center_guess << " >= " << X[i_center] << " = " << (center_guess >= X[i_center]) << std::endl;
-      g_log.error() << center_guess << " <  " << X[i_center+1] << " = " << (center_guess < X[i_center+1]) << std::endl;
-      g_log.error() << "Try to find " << center_guess << "  But found value between " << X[i_center] << ", " << X[i_center+1] << std::endl;
-      throw std::runtime_error("Logic error in using lower_bound");
-    }
-    /*
-    for (i_center=0; i_center<static_cast<int>(X.size()-1); i_center++)
-    {
-      if ((center_guess >= X[i_center]) && (center_guess < X[i_center+1]))
-        break;
-    }
-    */
-  }
-  else if (X[X.size()-1] <= center_guess)
-  {
-    i_center = static_cast<int>(X.size())-1;
-  }
-  else {
-    //else, bin 0 is closest to it by default;
-    i_center = 0;
-  }
+  i_center = this->getCentreIndex(X, center_guess);
 
   // 2. Determine the fitting range X[]
   i_left = i_center - FWHM_guess / 2;
@@ -693,6 +715,66 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
   return;
 
+}
+
+/** Attempts to fit a candidate peak
+ *
+ *  @param input    The input workspace
+ *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
+ *  @param center   Channel number of peak candidate i0 - the higher side of the peak (right side)
+ *  @param left     Channel number of peak candidate i2 - the lower side of the peak (left side)
+ *  @param right    Channel number of peak candidate i4 - the center of the peak
+ */
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
+                        const double centre, const double left, const double right)
+{
+  g_log.debug() << "FindPeaks.fitPeak():  guessed center = " << centre << "  left = " << left
+                << " right = " << right << "\n";
+
+
+
+  //The X axis you are looking at
+  const MantidVec &X = input->readX(spectrum);
+
+  //The centre index
+  int i_centre = this->getCentreIndex(X, centre);
+
+  //The left index
+  int i_left;
+  if (left < X.front())
+  {
+    i_left = 0;
+  }
+  else
+  {
+    i_left = static_cast<int>(getLowerBound(X, 0, X.size()-1, left));
+  }
+  if (i_left > i_centre)
+  {
+    i_left = i_centre-1;
+    if (i_left < 0)
+      i_left = 0;
+  }
+
+  //The right index
+  int i_right;
+  if (right > X.back())
+  {
+    i_right = static_cast<int>(X.size() - 1);
+  }
+  else
+  {
+    i_right = static_cast<int>(getLowerBound(X, 0, X.size()-1, right));
+  }
+  if (i_right < i_centre)
+  {
+    i_right = i_centre+1;
+    if (i_right > static_cast<int>(X.size() - 1))
+      i_right = static_cast<int>(X.size() - 1);
+  }
+
+  // finally do the actual fit
+  this->fitPeak(input, spectrum, i_right, i_left, i_centre);
 }
 
 //=================================================================================================
