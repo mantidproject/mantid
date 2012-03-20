@@ -13,6 +13,9 @@ namespace MantidQt
 {
 namespace CustomDialogs
 {
+
+typedef QMap<QString, QString> PropertyDimensionMap;
+
 class SlicingAlgorithmDialog : public MantidQt::API::AlgorithmDialog
 {
   Q_OBJECT
@@ -32,16 +35,38 @@ protected slots:
 
   void onWorkspaceChanged();
 
+  void onAxisAlignedChanged(bool);
+
+  void accept();
+
 private:
 
   /// Initialize the layout
   virtual void initLayout();
 
-  /// Build dimension info from the current input workspace.
-  void buildFromCurrentInput();
+  /// Determine if axis aligned or non-axis aligned is required.
+  bool doAxisAligned() const;
+
+  /// Gets the input workspace name provided
+  QString getInputWorkspaceName() const;
+
+  /// Gets the output workspace name provided
+  QString getOutputWorkspaceName() const;
+
+  /// Build dimension inputs.
+  void buildDimensionInputs();
+
+  /// Build dimension inputs.
+  void buildDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr));
+
+  /// Cleans a given layout.
+  void cleanLayoutOfDimensions(QLayout* layout);
 
   /// Clear out any exisiting dimension widgets.
   void clearExistingDimensions();
+
+  /// Extract the dimension information provided by the user.
+  PropertyDimensionMap extractDimensionInputs() const;
 
   /// view
   Ui::Dialog ui; 
