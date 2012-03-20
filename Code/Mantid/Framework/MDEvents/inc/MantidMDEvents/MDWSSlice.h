@@ -37,7 +37,8 @@ namespace MDEvents
 */
 class MDWSSlice
 {
-
+public:
+    MDWSSlice(){};
 };
 
 }
