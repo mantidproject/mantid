@@ -1249,7 +1249,7 @@ IFitFunction_sptr FindPeaks::createFunction(const bool withPeak)
 /**
  * @return The order of the polynomial for the bacground fit.
  */
-uint FindPeaks::backgroundOrder()
+int FindPeaks::backgroundOrder()
 {
   if (m_backgroundType.compare("Linear") == 0)
     return 1;
