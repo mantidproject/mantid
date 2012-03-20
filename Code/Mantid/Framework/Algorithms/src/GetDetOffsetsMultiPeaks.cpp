@@ -24,6 +24,7 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -101,7 +102,14 @@ namespace Mantid
           boost::make_shared<WorkspaceUnitValidator>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
       declareProperty(new ArrayProperty<double>("DReference"),"Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
-
+      std::vector<std::string> bkgdtypes;
+      bkgdtypes.push_back("Flat");
+      bkgdtypes.push_back("Linear");
+      bkgdtypes.push_back("Quadratic");
+      declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
+          "Type of Background. The choice can be either Linear or Quadratic");
+      declareProperty("HighBackground", true,
+          "Relatively weak peak in high background");
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
@@ -331,8 +339,8 @@ namespace Mantid
   
       //Get the specified peak positions, which is optional
       findpeaks->setProperty("PeakPositions", peakPosToFit);
-      findpeaks->setProperty<std::string>("BackgroundType", "Linear");
-      findpeaks->setProperty<bool>("HighBackground", true);
+      findpeaks->setProperty<std::string>("BackgroundType", this->getPropertyValue("BackgroundType"));
+      findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
       findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
       findpeaks->executeAsSubAlg();
