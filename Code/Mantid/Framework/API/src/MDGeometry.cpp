@@ -21,7 +21,8 @@ namespace API
    m_originalWorkspaces(),
    m_transforms_FromOriginal(), m_transforms_ToOriginal(),
    m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
-   m_observingDelete(false)
+   m_observingDelete(false),
+   m_Wtransf(3,3,true)
   {
   }
 
@@ -30,11 +31,12 @@ namespace API
    */
   MDGeometry::MDGeometry(const MDGeometry & other) :
    m_originalWorkspaces(),
-   m_basisVectors(other.m_basisVectors),
    m_origin(other.m_origin),
    m_transforms_FromOriginal(), m_transforms_ToOriginal(),
    m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
-   m_observingDelete(false)
+   m_observingDelete(false),
+   m_Wtransf(other.m_Wtransf),
+   m_basisVectors(other.m_basisVectors)
   {
     // Perform a deep copy of the dimensions
     std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;

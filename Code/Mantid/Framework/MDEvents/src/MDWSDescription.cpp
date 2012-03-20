@@ -20,7 +20,8 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
     this->dimIDs.resize(nDims);
     this->dimUnits.resize(nDims);   
     this->nBins.resize(nDims);
-    for(size_t i=0;i<nDims;i++){
+    for(size_t i=0;i<nDims;i++)
+    {
         const Geometry::IMDDimension *pDim = pWS->getDimension(i).get();
         dimMin[i]  = pDim->getMinimum();
         dimMax[i]  = pDim->getMaximum();
@@ -29,6 +30,18 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
         dimUnits[i]= pDim->getUnits();   
         nBins[i]   = pDim->getNBins();
     }
+    uint16_t num_experiments = pWS->getNumExperimentInfo();
+    
+    // target ws does not have experiment info, so this can be only powder.
+    if (num_experiments==0)
+    {
+        is_powder = true;
+        return;
+    }else{
+        is_powder=false;
+        this->Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
+    }
+
 
 }
 /**function compares old workspace description with the new workspace description, defined by the algorithm properties and 
@@ -76,19 +89,19 @@ dimMax(nDimesnions,1),
 dimNames(nDimesnions,"mdn"),
 dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
+Wtransf(3,3,true),
 convert_to_hkl(false),
 u(1,0,0),
 v(0,1,0),
 is_uv_default(true),
-defailtQNames(3),
+is_powder(false),
 detInfoLost(false)
 {
-    for(size_t i=0;i<nDimesnions;i++){
-        dimIDs[i]= dimIDs[i]+boost::lexical_cast<std::string>(i);
+    for(size_t i=0;i<nDimesnions;i++)
+    {
+        dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
+        dimNames[i]=dimNames[i]+boost::lexical_cast<std::string>(i);
     }
-    defailtQNames[0]="Qh";
-    defailtQNames[1]="Qk";
-    defailtQNames[2]="Ql";
 
 }
 std::string DLLExport sprintfd(const double data, const double eps)
@@ -98,6 +111,36 @@ std::string DLLExport sprintfd(const double data, const double eps)
      return boost::str(boost::format("%d")%dist);
 
 }
+
+MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
+{
+    this->nDims = rhs.nDims;
+    // prepare all arrays:
+    this->dimMin = rhs.dimMin;
+    this->dimMax = rhs.dimMax;
+    this->dimNames=rhs.dimNames;
+    this->dimIDs  =rhs.dimIDs;
+    this->dimUnits=rhs.dimUnits;   
+    this->nBins   =rhs.nBins;
+
+    this->convert_to_hkl= rhs.convert_to_hkl;
+    this->u             = rhs.u;
+    this->v             = rhs.v;
+    this->rotMatrix     = rhs.rotMatrix;
+    this->AlgID         = rhs.AlgID;
+    this->is_uv_default = rhs.is_uv_default;
+    this->is_powder     = rhs.is_powder;
+    this->detInfoLost   = rhs.detInfoLost;
+
+    if(rhs.pLatt.get()){
+        this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(*(rhs.pLatt)));
+    }
+    this->Wtransf=rhs.Wtransf;
+
+    return *this;
+
+}
+
 
 std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &QNames)
 {

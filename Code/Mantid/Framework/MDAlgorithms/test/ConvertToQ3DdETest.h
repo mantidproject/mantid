@@ -29,11 +29,11 @@ public:
    // private (PROTECTED) methods, exposed for testing:
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDWSDescription &TargWSDescription, 
                                        bool is_powder=false)const{
-       return ConvertToMDEvents::getTransfMatrix(inWS2D,TargWSDescription,is_powder);
+       return ConvertToMDEvents::getTransfMatrix(inWS2D,TargWSDescription);
    }
    /// construct meaningful dimension names:
    void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
-        ConvertToMDEvents::buildDimNames(TargWSDescription);
+        ConvertToMDEvents::buildDimensions(TargWSDescription);
    }
 
  
@@ -74,7 +74,7 @@ void t__tWithExistingLatticeTrowsLowEnergy(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Inelastic"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
@@ -112,7 +112,7 @@ void testExecFailsOnNewWorkspaceNoMaxLimits(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -131,7 +131,7 @@ void testExecFailsLimits_MinGeMax(){
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
  
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -152,7 +152,7 @@ void testExecFine(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -176,7 +176,7 @@ void testExecAndAdd(){
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -221,7 +221,7 @@ void testTransfMat1()
      TS_ASSERT_EQUALS(V3D(1,0,0),ex);
 
      // to allow recalculate axis names specific for Q3D mode
-     TWS.AlgID="QhQkQl";
+     TWS.AlgID="Q3D";
      pAlg->buildDimNames(TWS);
      TS_ASSERT_EQUALS("[Qh,0,0]",TWS.dimNames[0]);
      TS_ASSERT_EQUALS("[0,Qk,0]",TWS.dimNames[1]);

@@ -73,9 +73,9 @@ void testParseQMode_Q3D()
      int nQ_dims;
      std::string MODE;
      ConvertToMDEventsParams params;
-     TS_ASSERT_THROWS_NOTHING(MODE=params.parseQMode("QhQkQl",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_THROWS_NOTHING(MODE=params.parseQMode("Q3D",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
      TS_ASSERT_EQUALS(3,nQ_dims);
-     TS_ASSERT_EQUALS("QhQkQl",MODE);
+     TS_ASSERT_EQUALS("Q3D",MODE);
      TS_ASSERT_EQUALS("Q1",out_dim_names[0]);
      TS_ASSERT_EQUALS("Q2",out_dim_names[1]);
      TS_ASSERT_EQUALS("Q3",out_dim_names[2]);
@@ -253,31 +253,31 @@ void testParseConv_ByTOF()
 // --> GET DIMENSIONS FROM WS MATRIX:
 void testNeedsNumericAxis()
 {
+    MDEvents::MDWSDescription TWS;
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     ws2D->replaceAxis(0,new API::TextAxis(3));
     std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     ConvertToMDEventsParams params;
 
-    bool is_detInfoLost;
-    TS_ASSERT_THROWS(params.identifyMatrixAlg(ws2D,"QhQkQl","CopyToMD",dim_ID,dim_units,is_detInfoLost),std::invalid_argument);
+    TS_ASSERT_THROWS(params.identifyMatrixAlg(ws2D,"Q3D","CopyToMD",dim_ID,dim_units,TWS),std::invalid_argument);
 }
 void testGetWS4DimIDFine()
 {
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+    MDEvents::MDWSDescription TWS;
 
     std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    bool is_detInfoLost;
     ConvertToMDEventsParams params;
 
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=params.identifyMatrixAlg(ws2D,"QhQkQl","Direct",dim_ID,dim_units,is_detInfoLost));
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=params.identifyMatrixAlg(ws2D,"Q3D","Direct",dim_ID,dim_units,TWS));
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DHistoQhQkQlDirectCnvNo",Alg_ID);
-    TS_ASSERT(!is_detInfoLost);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DHistoQ3DDirectCnvNo",Alg_ID);
+    TS_ASSERT(!TWS.detInfoLost);
 }
 void testGetWS3DimIDFine()
 {
@@ -286,24 +286,24 @@ void testGetWS3DimIDFine()
     pAx->title() = "Dim1";
     pAx->setUnit("dSpacing");
     ws2D->replaceAxis(0,pAx);
-
+    MDEvents::MDWSDescription TWS;
 
     std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
-    std::string Alg_ID;
-    bool is_detInfoLost;
+    std::string Alg_ID; 
     ConvertToMDEventsParams params;
 
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=params.identifyMatrixAlg(ws2D,"QhQkQl","Elastic",dim_ID,dim_units, is_detInfoLost));
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=params.identifyMatrixAlg(ws2D,"Q3D","Elastic",dim_ID,dim_units, TWS));
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DHistoQhQkQlElasticCnvByTOF",Alg_ID);
-    TS_ASSERT(!is_detInfoLost);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DHistoQ3DElasticCnvByTOF",Alg_ID);
+    TS_ASSERT(!TWS.detInfoLost);
 }
 void testGetWSDimNames2AxisNoQ()
 {
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+    MDEvents::MDWSDescription TWS;
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title() = "Dim1";
@@ -318,12 +318,11 @@ void testGetWSDimNames2AxisNoQ()
     std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string AlgID;
-    bool is_detInfoLost;
     ConvertToMDEventsParams params;
 
-    TS_ASSERT_THROWS_NOTHING(AlgID=params.identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_ID,dim_units,  is_detInfoLost));
+    TS_ASSERT_THROWS_NOTHING(AlgID=params.identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_ID,dim_units,TWS));
 
-    TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
+    TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",TWS.detInfoLost);
 
     TS_ASSERT_EQUALS(2,dim_ID.size());
     TS_ASSERT_EQUALS("Dim1",dim_ID[0]);
@@ -338,6 +337,7 @@ void testGetWSDimNames2AxisNoQ()
 void testIdentifyMatrixAlg_1()
 {  
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+    MDEvents::MDWSDescription TWS;
     
     std::vector<std::string> ws_dim_names(2);
     std::vector<std::string> dim_names,dim_units;
@@ -352,13 +352,12 @@ void testIdentifyMatrixAlg_1()
     pAx->title() = ws_dim_names[1];
     pAx->setUnit("QSquared");
     ws2D->replaceAxis(1,pAx);
-    bool is_detInfoLost;
     ConvertToMDEventsParams params;
 
-    TS_ASSERT_EQUALS("WS2DHistoCopyToMDNoDECnvNo",params.identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DHistoCopyToMDNoDECnvNo",params.identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_names,dim_units,TWS));
     TS_ASSERT_EQUALS(ws_dim_names[0],dim_names[0]);
     TS_ASSERT_EQUALS(ws_dim_names[1],dim_names[1]);
-    TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
+    TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",TWS.detInfoLost);
 
 }
 
@@ -369,44 +368,44 @@ void testIdentifyMatrixAlg_2()
 
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     std::vector<std::string> dim_names,dim_units;
-    bool is_detInfoLost;
+    MDEvents::MDWSDescription TWS;
  
     API::NumericAxis *
     pAx = new API::NumericAxis(3);
     pAx->setUnit("TOF");
     ws2D->replaceAxis(0,pAx);
 
-    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
-    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,TWS));
+    TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("Wavelength");
     ws2D->replaceAxis(0,pAx);
     // This is probably bug in conversion --> does not work in elastic mode
-   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
+   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,TWS));
     //TSM_ASSERT_THROWS("Can not convert wavelength to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
-   TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+   TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("Energy");
     ws2D->replaceAxis(0,pAx);
     // This is probably bug in conversion --> does not work in elastic mode
-   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
+   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,TWS));
    // TSM_ASSERT_THROWS("Can not convert Energy to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
-   TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+   TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("dSpacing");
     ws2D->replaceAxis(0,pAx);
-    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
-    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,TWS));
+    TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("TOF");
     ws2D->replaceAxis(0,pAx);
-    TS_ASSERT_EQUALS("WS2DHisto|Q|ElasticCnvFromTOF",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DHisto|Q|ElasticCnvFromTOF",params.identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,TWS));
 
-    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+    TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be logically wrong)",1,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
 
@@ -418,18 +417,18 @@ void testIdentifyMatrixAlg_3()
 
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     std::vector<std::string> dim_names,dim_units;
-    bool is_detInfoLost;
+    MDEvents::MDWSDescription TWS;
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title()="A";
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2DHisto|Q|DirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DHisto|Q|DirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units,TWS));
     TSM_ASSERT_EQUALS("One dimension comes from Q",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
-     TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+     TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 }
 
 void testIdentifyMatrixAlg_4()
@@ -438,18 +437,19 @@ void testIdentifyMatrixAlg_4()
 
     std::vector<std::string> dim_names,dim_units;
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
-    bool is_detInfoLost;
+    MDEvents::MDWSDescription TWS;
+
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title()="A";
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2DHisto|Q|IndirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DHisto|Q|IndirectCnvNo",params.identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units,TWS));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
-    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+    TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 }
 void testIdentifyMatrixAlg_5()
 {  
@@ -457,20 +457,20 @@ void testIdentifyMatrixAlg_5()
 
     std::vector<std::string> dim_names,dim_units;
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
-    bool is_detInfoLost;
+    MDEvents::MDWSDescription TWS;
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title()="A";
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2DHistoQhQkQlIndirectCnvNo",params.identifyMatrixAlg(ws2D,"QhQkQl","Indirect",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DHistoQ3DIndirectCnvNo",params.identifyMatrixAlg(ws2D,"Q3D","Indirect",dim_names,dim_units,TWS));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"Q1");
     TS_ASSERT_EQUALS(dim_names[1],"Q2");
     TS_ASSERT_EQUALS(dim_names[2],"Q3");
     TS_ASSERT_EQUALS(dim_names[3],"DeltaE");
-    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
+    TSM_ASSERT("Det info should be defined for conversion",!TWS.detInfoLost);
 }
 
 };

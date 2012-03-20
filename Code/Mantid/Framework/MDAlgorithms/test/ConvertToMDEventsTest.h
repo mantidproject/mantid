@@ -27,7 +27,7 @@ public:
     Convert2AnyTestHelper(){};
     //
    void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
-       this->ConvertToMDEvents::buildDimNames(TargWSDescription);
+       this->ConvertToMDEvents::buildDimensions(TargWSDescription);
    }
   
 
@@ -158,7 +158,7 @@ void testExecQ3D()
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     pAlg->setPropertyValue("UsePreprocessedDetectors","0");
      
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
@@ -177,7 +177,7 @@ void test_buildDimNames(){
     TargWSDescription.u=Kernel::V3D(1,0,0);
     TargWSDescription.v=Kernel::V3D(0,1,0);
     TargWSDescription.emode=1;
-    TargWSDescription.AlgID = "QhQkQl";
+    TargWSDescription.AlgID = "Q3D";
     TargWSDescription.convert_to_hkl=true;
     TargWSDescription.rotMatrix.assign(9,0);
 
@@ -219,7 +219,7 @@ void testAlgorithmProperties()
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, QDimValues.size());
   TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("CopyToMD") != QDimValues.end());
   TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("|Q|") != QDimValues.end());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("QhQkQl") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("Q3D") != QDimValues.end());
 
   Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
   PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();

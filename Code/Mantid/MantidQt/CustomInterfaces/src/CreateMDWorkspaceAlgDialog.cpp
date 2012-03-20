@@ -1,10 +1,12 @@
 #include "MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QFileDialog>
 
+using namespace Mantid::MDAlgorithms;
 /**
 Constructor
 */
@@ -15,12 +17,23 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   connect(m_uiForm.buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-  m_uiForm.combo_q_dimensions->addItem("|Q|");
-  m_uiForm.combo_q_dimensions->addItem("QhQkQl");
+  ConvertToMDEventsParams ConvParams;
+  std::vector<std::string> QModes = ConvParams.getQModes();
+  // based on noQ mode being first in the list
+  QString name1(QModes[modQ].c_str());
+  m_uiForm.combo_q_dimensions->addItem(name1);
+  QString name2(QModes[Q3D].c_str());
+  m_uiForm.combo_q_dimensions->addItem(name2);
 
-  m_uiForm.combo_analysis_mode->addItem("Direct");
-  m_uiForm.combo_analysis_mode->addItem("Elastic");
-  m_uiForm.combo_analysis_mode->addItem("Indirect");
+  std::vector<std::string> dEModes = ConvParams.getDEModes();
+  for(size_t i=0;i<ANY_Mode;i++)
+  {
+      QString name(dEModes[i].c_str());
+      m_uiForm.combo_analysis_mode->addItem(name);
+  }
+
+  //m_uiForm.combo_analysis_mode->addItem(dEModes[Elastic]);
+ // m_uiForm.combo_analysis_mode->addItem(dEModes[Indirect]);
 
   this->setWindowTitle("Set MDWorkspace Creation Parameters");
 }

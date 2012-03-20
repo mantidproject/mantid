@@ -65,43 +65,45 @@ namespace MDAlgorithms
     virtual void initDocs();
    /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
- 
+   /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
+    /// the properties of the requested target MD workpsace:
+    MDEvents::MDWSDescription TWS;
+
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
    static PreprocessedDetectors det_loc;  
-   /// the pointer to class which is responsible for adding data to N-dimensional workspace;
-   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
   /// progress reporter
    std::auto_ptr<API::Progress > pProg;
     /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
+
+   /// the class which knows about existing subalgorithms amd generates alforithm ID as function of input parameters of this algorithm. 
+    ConvertToMDEventsParams ParamParser;   
+    /// The class which keeps map of all existing subalgorithms to convert to MDEventWorkspace.
+    /// It returns the pointer to the subalgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
+    ConvertToMDEventsSubalgFactory  subAlgFactory;
   //------------------------------------------------------------------------------------------------------------------------------------------
-    /// the properties of the requested target MD workpsace:
-    MDEvents::MDWSDescription TWS;
- 
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
 
+   //-> The code below should be refactored and (probably) moved elsewhere while working on ticket: #4813
+
+  /** helper function which verifies if projection vectors are specified and if their values are correct when present.
+      * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
+    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;
+
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
-   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDEvents::MDWSDescription &TargWSDescription, 
-                                       bool is_powder=false)const;
+   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDEvents::MDWSDescription &TargWSDescription)const;
    /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
      defined by existing workspace */
-    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS,bool is_powder=false)const; 
+    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS)const; 
 
    /// get transformation matrix currently defined for the algorithm
    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
-   /// construct meaningful dimension names:
-   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription);
+   /// construct meaningful dimension names and :
+   void buildDimensions(MDEvents::MDWSDescription &TargWSDescription);
  
-  private: 
-    /// the class which generates alforithm ID as function of input parameters and knows about existing subalgorithms. 
-    ConvertToMDEventsParams ParamParser;   
-    /// The class which contains all existing subalgorithms to convert to MDEventWorkspace. Shoud be done through a singleton if used elsewhere, not only here. 
-    ConvertToMDEventsSubalgFactory  subAlgFactory;
-    /** helper function which verifies if projection vectors are specified and if their values are correct when present.
-      * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
-    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;
  };
 
 } // namespace Mantid

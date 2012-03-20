@@ -27,7 +27,7 @@
    <item row="3" column="0">
     <widget class="QLabel" name="label">
      <property name="toolTip">
-      <string>You can to transfer source workspace dimensions into target worskpace directly (NoQ) or transform into mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space</string>
+      <string>You can to transfer source workspace dimensions into target worskpace directly (NoQ) or transform into mod(Q) (1 dimension) or Q3D (3 dimensions) in Q space</string>
      </property>
      <property name="text">
       <string>Q Dimensions</string>
@@ -80,7 +80,7 @@
 
         a) 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or 
 
-        b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  QxQyQz or 
+        b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  Q3D or 
 
         c) (1 or 2)+N_OtherDimesnions if QDimesnins property is empty. 
 

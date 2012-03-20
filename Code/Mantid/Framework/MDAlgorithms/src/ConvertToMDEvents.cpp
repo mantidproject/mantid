@@ -103,12 +103,12 @@ ConvertToMDEvents::init()
      declareProperty("QDimensions",Q_modes[modQ],boost::make_shared<StringListValidator>(Q_modes),
          "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
          " (No Q analysis, or Q conversion is performed),\n"
-         "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""QhQkQl"". \n"
+         "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
      declareProperty(new PropertyWithValue<bool>("QinHKL", true, Direction::Input),
-         " Setting this property to true will normalize three momentums obtained in QhQkQl mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
+         " Setting this property to true will normalize three momentums obtained in Q3D mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
          " ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
      /// this variable describes implemented modes for energy transfer analysis
           Strings dE_modes = ParamParser.getDEModes();
@@ -133,12 +133,12 @@ ConvertToMDEvents::init()
     declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is defined as: \n"
         "a) 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
-        "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  QhQkQl or \n"
+        "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  Q3D or \n"
         "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
         " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
          " This property contains minimal values for all dimensions.\n"
          " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
-         " In case b), the target dimensions for QhQkQl are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
+         " In case b), the target dimensions for Q3D are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
          " All other values are in the [[units]] they are expressed in their log files\n"
          " Values lower then the specified one will be ignored and not transferred into the target MD workspace\n");
 //TODO:    " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead " );
@@ -148,13 +148,13 @@ ConvertToMDEvents::init()
          " Values higher or equal to the specified by this list will be ignored\n");
 //TODO:    "If a maximal target workspace range is lower, then one of specified here, the target workspace range will be used instead" );
     
-    declareProperty(new ArrayProperty<double>("u"),
-     "Optional: First base vector (in hkl) defining fractional coordinate system for neutron diffraction;\n"
+    declareProperty(new ArrayProperty<double>("Uproj"),
+     "Optional: First base vector (in hkl) defining fractional or crystal catrezian coordinate system for neutron diffraction;\n"
      "If nothing is specified as input, it will try to recover this vector from the input workspace's oriented lattice,\n"
     " where it should define the initial orientation of the crystal wrt the beam. \n"
     " If no oriented lattice is not found, the workspace is processed with unit coordinate transformation matrix or in powder mode.\n"); 
-    declareProperty(new ArrayProperty<double>("v"),
-    "Optional:  Second base vector (in hkl) defining fractional coordinate system for neutron diffraction; \n"
+    declareProperty(new ArrayProperty<double>("Vproj"),
+    "Optional:  Second base vector (in hkl) defining fractional rystal catrezian coordinate system for neutron diffraction; \n"
     "If nothing is specified as input, it will try to recover this vector from the input workspace's oriented lattice\n"
     "and if this fails, proceed as for property u above.");
 
@@ -208,14 +208,9 @@ void ConvertToMDEvents::exec()
   }
   if (create_new_ws){
     //identify if u,v are present among input parameters and use defaults if not
-    std::vector<double> ut = getProperty("u");
-    std::vector<double> vt = getProperty("v");
+    std::vector<double> ut = getProperty("UProj");
+    std::vector<double> vt = getProperty("VProj");
     this->checkUVsettings(ut,vt,TWS);
-
-    // set up target coordinate system
-    TWS.rotMatrix = getTransfMatrix(inWS2D,TWS);
-  }else{ // existing workspace defines target coordinate system:
-    TWS.rotMatrix = getTransfMatrix(spws,inWS2D);
   }
     // Collite and Analyze the requests to the job, which are specified by the input parameters
 
@@ -229,45 +224,55 @@ void ConvertToMDEvents::exec()
     //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units be converted to hkl
     bool convert_to_hkl                      = getProperty("QinHKL");
 
-    // Identify the algorithm to deploy and 
+    // Identify the algorithm to deploy on workspace. Also partially fills in the target workspace description
     std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,pWSWrapper->getMaxNDim(),TWS);
-    // identify/set the (multi)dimension's names to use
-    // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
-    // also (temporary) redefines transformation matrix in convert to hkl mode
-    this->buildDimNames(TWS);
-
 
     // set the min and max values for the dimensions from the input porperties
     TWS.dimMin = getProperty("MinValues");
     TWS.dimMax = getProperty("MaxValues");
 
-  if(!create_new_ws) // let's check if target workspace redefines some settings:
-  {    // user input is mainly ignored
-    MDEvents::MDWSDescription OLDWSD;
-    OLDWSD.build_from_MDWS(spws);
-    // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
-    OLDWSD.compareDescriptions(TWS);
 
-    throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
-  }
-  // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
-  TWS.checkMinMaxNdimConsistent(convert_log);    
+ 
+    if(!create_new_ws) // let's check if target workspace redefines some settings:
+    {    // user input is mainly ignored
+        MDEvents::MDWSDescription OLDWSD;
+        OLDWSD.build_from_MDWS(spws);
+        // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
+        OLDWSD.compareDescriptions(TWS);
+
+        throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
+    }
+
+    // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
+    TWS.checkMinMaxNdimConsistent(convert_log);    
+    if(create_new_ws){
+        // set up target coordinate system
+        TWS.rotMatrix = getTransfMatrix(inWS2D,TWS);
+        // identify/set the (multi)dimension's names to use
+        // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
+        // also (temporary) redefines transformation matrix in convert to hkl mode
+        this->buildDimensions(TWS);
+    }else{ // existing workspace defines target coordinate system:
+        TWS.rotMatrix = getTransfMatrix(spws,inWS2D);
+        // dimensions are already build
+    }
 
 
-  // Check what to do with detectors:  
-  if(TWS.detInfoLost){ // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
-      buildFakeDetectorsPositions(inWS2D,det_loc);
-  }else{
-    bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-    if(!(reuse_preprocecced_detectors&&det_loc.isDefined(inWS2D))){
-      // amount of work:
-      const size_t nHist = inWS2D->getNumberHistograms();
-      pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
-      processDetectorsPositions(inWS2D,det_loc,convert_log,pProg.get());
-      if(det_loc.det_id.empty()){
-          g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
-          throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
-      }
+
+     // Check what to do with detectors:  
+     if(TWS.detInfoLost){ // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
+         buildFakeDetectorsPositions(inWS2D,det_loc);
+     }else{
+          bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
+          if(!(reuse_preprocecced_detectors&&det_loc.isDefined(inWS2D))){
+         // amount of work:
+          const size_t nHist = inWS2D->getNumberHistograms();
+          pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
+          processDetectorsPositions(inWS2D,det_loc,convert_log,pProg.get());
+          if(det_loc.det_id.empty()){
+                g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
+                throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
+          }
     }
   }
 
@@ -292,7 +297,7 @@ void ConvertToMDEvents::exec()
     spws->setMinRecursionDepth(size_t(minDepth));  
   }
 
-  // call selected algorithm, will throw if logic is wrong and subalgorithm is not found
+  // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
   IConvertToMDEventsMethods * algo =  subAlgFactory.getAlg(algo_id);
   if(algo)
   {
@@ -315,7 +320,7 @@ void ConvertToMDEvents::exec()
 
 /** The matrix to convert neutron momentums into the target coordinate system   */
 std::vector<double>
-ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWSDescription &TargWSDescription,bool is_powder)const
+ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWSDescription &TargWSDescription)const
 {
   
     Kernel::Matrix<double> mat(3,3,true);
@@ -324,11 +329,9 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
 
     bool has_lattice(false);
     try{
-        // try to get the oriented lattice
-        TargWSDescription.Latt = inWS->sample().getOrientedLattice();      
-        has_lattice=true;
+         has_lattice=true;
     }catch(std::runtime_error &){
-        if(!is_powder){
+        if(!TargWSDescription.is_powder){
             convert_log.warning()<<
                 " Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<
                  " as no oriented lattice has been defined. \n"
@@ -339,12 +342,12 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
     if(has_lattice){
       if(TargWSDescription.is_uv_default){
          // we need to set up u,v for axis caption as it is defined in workspace UB matrix;
-         TargWSDescription.u = TargWSDescription.Latt.getuVector();
-         TargWSDescription.v = TargWSDescription.Latt.getvVector(); 
-         umat  = TargWSDescription.Latt.getU();
+         TargWSDescription.u = TargWSDescription.pLatt->getuVector();
+         TargWSDescription.v = TargWSDescription.pLatt->getvVector(); 
+         umat  = TargWSDescription.pLatt->getU();
       }else{
          // thansform the lattice above into the Cartezian coordinate system related to projection vectors u,v;
-         umat = TargWSDescription.Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
+         umat = TargWSDescription.pLatt->setUFromVectors(TargWSDescription.u,TargWSDescription.v);
       }
 
       Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
@@ -354,23 +357,16 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
      //mat = gon*Latt.getUB();
       mat.Invert();
     }
-
-    if(is_powder){ // it is powder. u,v should not be used but let's define them just in case
-        TargWSDescription.u=Kernel::V3D(1,0,0);
-        TargWSDescription.v=Kernel::V3D(0,1,0);
-    }
-   
+ 
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
 /** The matrix to convert neutron momentums into the target coordinate system, if the target coordinate system is already defined by existing 
   *   MD workspace */
-std::vector<double>
-ConvertToMDEvents::getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS, bool is_powder)const
+std::vector<double> ConvertToMDEvents::getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS)const
 {
     UNUSED_ARG(spws);
-    UNUSED_ARG(inWS);
-    UNUSED_ARG(is_powder);
+    UNUSED_ARG(inWS);  
     throw(Kernel::Exception::NotImplementedError("Not yet implemented"));
 
 }
@@ -379,7 +375,7 @@ ConvertToMDEvents::getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::Matrix
   * Currently modifies Q3D mode
   * Currently modifies the coordinate transformation matrix, if it is Q3D mode converted in hkl
   */
-void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescription)
+void ConvertToMDEvents::buildDimensions(MDEvents::MDWSDescription &TargWSDescription)
 {
     // non-energy transformation modes currently do not change any units and dimension names
     //if(TargWSDescription.emode<0)return;
@@ -392,12 +388,16 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
          }
 
      }
+     Q_state Q;
+     AnalMode Mode;
+     CnvrtUnits cUnits;
+     InputWSType WS;
+     this->ParamParser.getAlgoModes(TargWSDescription.AlgID,Q,Mode,cUnits,WS);
 
-     Strings Q_modes = ParamParser.getQModes();
     // Q3D mode needs special treatment for dimension names:
-    if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
+    if(Q==Q3D){
         std::vector<Kernel::V3D> dim_directions(3);
-        Kernel::Matrix<double> Bm = TargWSDescription.Latt.getB();
+        Kernel::Matrix<double> Bm = TargWSDescription.pLatt->getB();
         if(TargWSDescription.is_uv_default){
             dim_directions[0]=Bm*Kernel::V3D(1,0,0);
             dim_directions[0].normalize();
@@ -408,7 +408,7 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
         }else{
             for(int i=0;i<3;i++){
                 for(int j=0;j<3;j++){
-                    Bm[i][j]*= TargWSDescription.Latt.a(i);
+                    Bm[i][j]*= TargWSDescription.pLatt->a(i);
                 }
             }
             dim_directions[0]=Bm*TargWSDescription.u;
@@ -421,10 +421,10 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
         }
 
         for(int i=0;i<3;i++){
-            TargWSDescription.dimNames[i]=MDEvents::makeAxisName(dim_directions[i],TWS.defailtQNames);
+            TargWSDescription.dimNames[i]=MDEvents::makeAxisName(dim_directions[i],this->ParamParser.getDefaultQNames(Q3D));
             if(TargWSDescription.convert_to_hkl){
                 // lattice wave vector
-                double cr=TargWSDescription.Latt.a(i)/(2*M_PI);
+                double cr=TargWSDescription.pLatt->a(i)/(2*M_PI);
                 for(int j=0;j<3;j++){
                     TargWSDescription.rotMatrix[3*i+j]*=cr;
                 }

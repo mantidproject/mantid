@@ -14,10 +14,10 @@ namespace MDAlgorithms
 
 /** The helper class for ConvertToMDEvents, which instantiates various subalgorithms, availible to convert a workspace into MDEvent workspace
    * and accessed on request:
+   * It contains the map alg_id->subAlgorithm, where alg_id is provided by ConvertToMDEventsParams class
    *
    * @date 16-03-2012
    *
-   * Gateway for number of subalgorithms, some are very important, some are questionable 
    * Intended to cover wide range of cases;    
 
    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
