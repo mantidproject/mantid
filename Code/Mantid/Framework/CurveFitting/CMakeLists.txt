@@ -120,7 +120,6 @@ set ( TEST_FILES
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
-	test/ExpDecayTest.h
 	test/FitTest.h
 	test/FlatBackgroundTest.h
 	test/FuncMinimizerFactoryTest.h
