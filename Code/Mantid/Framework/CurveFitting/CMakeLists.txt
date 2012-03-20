@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
+	src/FlatBackground.cpp
 	src/FuncMinimizerFactory.cpp
 	src/GSLFunctions.cpp
 	src/GausDecay.cpp
@@ -24,7 +25,6 @@ set ( SRC_FILES
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
 	src/GenericFit.cpp
-	src/NewFit.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LevenbergMarquardtMinimizer.cpp
 	src/Linear.cpp
@@ -32,8 +32,9 @@ set ( SRC_FILES
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
-	src/MuonFInteraction.cpp
 	src/MultiBG.cpp
+	src/MuonFInteraction.cpp
+	src/NewFit.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunctionMW.cpp
@@ -71,6 +72,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
+	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GausDecay.h
@@ -79,7 +81,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
 	inc/MantidCurveFitting/GenericFit.h
-	inc/MantidCurveFitting/NewFit.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -88,8 +89,9 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
-	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/MultiBG.h
+	inc/MantidCurveFitting/MuonFInteraction.h
+	inc/MantidCurveFitting/NewFit.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunctionMW.h
@@ -114,18 +116,19 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
 	test/DeltaFunctionTest.h
-  test/DiffSphereTest.h
+	test/DiffSphereTest.h
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
+	test/ExpDecayTest.h
 	test/FitTest.h
-	test/NewFitTest.h
+	test/FlatBackgroundTest.h
 	test/FuncMinimizerFactoryTest.h
 	test/FunctionFactoryTest.h
 	test/FunctionTest.h
-	test/Gaussian1DTest.h
 	test/GausDecayTest.h
 	test/GausOscTest.h
+	test/Gaussian1DTest.h
 	test/GaussianTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LinearBackgroundTest.h
@@ -133,8 +136,9 @@ set ( TEST_FILES
 	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
-	test/MuonFInteractionTest.h
 	test/MultiBGTest.h
+	test/MuonFInteractionTest.h
+	test/NewFitTest.h
 	test/PlotPeakByLogValueTest.h
 	test/ProductFunctionMWTest.h
 	test/QuadraticBackgroundTest.h
@@ -143,8 +147,8 @@ set ( TEST_FILES
 	test/StaticKuboToyabeTest.h
 	test/SpecialFunctionSupportTest.h
 	test/SplineBackgroundTest.h
-	test/StretchExpTest.h
 	test/StretchExpMuonTest.h
+	test/StretchExpTest.h
 	test/UserFunction1DTest.h
 	test/UserFunctionTest.h
 )
