@@ -77,8 +77,6 @@ void StartLiveDataDialog::initLayout()
   // ========== Update GUIs =============
   ui.processingAlgoSelector->update();
   ui.postAlgoSelector->update();
-  radioProcessClicked();
-  radioPostProcessClicked();
 
   // ========== Layout Tweaks =============
   ui.processingScript->setVisible(false);
@@ -90,6 +88,51 @@ void StartLiveDataDialog::initLayout()
   ui.splitterPost->setStretchFactor(0, 0);
   ui.splitterPost->setStretchFactor(1, 0);
   ui.tabWidget->setCurrentIndex(0);
+
+  // ========== Set previous values for Algorithms/scripts ============
+  for (int i=0; i<2; i++)
+  {
+    bool post = i > 0;
+    QString prefix = "Processing";
+
+    if (post) prefix = "PostProcessing";
+    QString algo = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix+"Algorithm");
+    QString algoProps = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix+"Properties");
+    QString script = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix+"Script");
+
+    if (!post)
+    {
+      if (!algo.isEmpty())
+        ui.radProcessAlgorithm->setChecked(true);
+      else if (!script.isEmpty())
+        ui.radProcessScript->setChecked(true);
+      else
+        ui.radProcessNone->setChecked(true);
+      radioProcessClicked();
+      // Set the script to the previous value
+      ui.processingScript->setText(script);
+      ui.processingAlgoSelector->setSelectedAlgorithm(algo);
+      // Create the algorithm and set the (old) values
+      m_processingAlg = changeAlgorithm(ui.processingAlgoSelector, ui.processingAlgoProperties);
+    }
+    else
+    {
+      if (!algo.isEmpty())
+        ui.radPostProcessAlgorithm->setChecked(true);
+      else if (!script.isEmpty())
+        ui.radPostProcessScript->setChecked(true);
+      else
+        ui.radPostProcessNone->setChecked(true);
+      radioPostProcessClicked();
+      // Set the script to the previous value
+      ui.postScript->setText(script);
+      ui.postAlgoSelector->setSelectedAlgorithm(algo);
+      // Create the algorithm and set the (old) values
+      m_postProcessingAlg = changeAlgorithm(ui.postAlgoSelector, ui.postAlgoProperties);
+    }
+  }
+
+  radioPostProcessClicked();
 
   //=========== SLOTS =============
   connect(ui.processingAlgoSelector, SIGNAL(algorithmSelectionChanged(const QString &, int)),
@@ -135,7 +178,7 @@ void StartLiveDataDialog::parseInput()
   {
     storePropertyValue("ProcessingAlgorithm", ui.processingAlgoSelector->getSelectedAlgorithm());
     std::string props;
-    props = m_processingAlg->asString();
+    props = m_processingAlg->asString(false, ';'); /* use semicolon to properly separate the props */
     storePropertyValue("ProcessingProperties", QString::fromStdString(props));
   }
   else if (m_useProcessScript)
@@ -148,7 +191,7 @@ void StartLiveDataDialog::parseInput()
   {
     storePropertyValue("PostProcessingAlgorithm", ui.postAlgoSelector->getSelectedAlgorithm());
     std::string props;
-    props = m_postProcessingAlg->asString();
+    props = m_postProcessingAlg->asString(false, ';'); /* use semicolon to properly separate the props */
     storePropertyValue("PostProcessingProperties", QString::fromStdString(props));
   }
   else if (m_usePostProcessScript)
@@ -244,8 +287,8 @@ Mantid::API::Algorithm_sptr StartLiveDataDialog::changeAlgorithm(MantidQt::Manti
   disabled.push_back("OutputWorkspace");
   disabled.push_back("InputWorkspace");
   propWidget->addEnabledAndDisableLists(QStringList(), disabled);
+  // Sets the algorithm and also the properties from the InputHistory
   propWidget->setAlgorithm(alg.get());
-  // TODO: Set from history?
   propWidget->hideOrDisableProperties();
   return alg;
 }

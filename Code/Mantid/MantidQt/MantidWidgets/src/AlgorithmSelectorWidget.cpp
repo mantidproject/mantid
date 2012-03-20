@@ -138,11 +138,30 @@ namespace MantidWidgets
       m_findAlg->getSelectedAlgorithm(algName, version);
   }
 
+  //---------------------------------------------------------------------------
+  /** @return just the name of the selected algorithm */
   QString AlgorithmSelectorWidget::getSelectedAlgorithm()
   {
     QString algName; int version;
     this->getSelectedAlgorithm(algName, version);
     return algName;
+  }
+
+  //---------------------------------------------------------------------------
+  /** Set which algorithm is currently selected. Does not fire any signals.
+   * Updates the combobox, deselects in the tree.
+   *
+   * @param algName :: name of the algorithm
+   */
+  void AlgorithmSelectorWidget::setSelectedAlgorithm(QString & algName)
+  {
+    m_findAlg->blockSignals(true);
+    m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
+    m_findAlg->blockSignals(false);
+    // De-select from the tree
+    m_tree->blockSignals(true);
+    m_tree->setCurrentIndex(QModelIndex());
+    m_tree->blockSignals(false);
   }
 
 
