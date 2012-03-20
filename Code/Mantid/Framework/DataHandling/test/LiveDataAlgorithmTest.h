@@ -102,10 +102,6 @@ public:
         prefix = "Post";
       std::cout << prefix << "Processing algo" << std::endl;
 
-      Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
-      AnalysisDataService::Instance().addOrReplace("first", ws);
-      AnalysisDataService::Instance().remove("second");
-
       LiveDataAlgorithmImpl alg;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
@@ -114,22 +110,15 @@ public:
       procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
-      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingAlgorithm", "RenameWorkspace") );
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingAlgorithm", "Rebin") );
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingProperties",
-          "InputWorkspace=first;OutputWorkspace=second") );
+          "Params=0,100,1000") );
 
       procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);
       TS_ASSERT( procAlg->isInitialized() );
-      TS_ASSERT_EQUALS( procAlg->getPropertyValue("InputWorkspace"), "first" );
-      TS_ASSERT_EQUALS( procAlg->getPropertyValue("OutputWorkspace"), "second" );
+      TS_ASSERT_EQUALS( procAlg->getPropertyValue("Params"), "0,100,1000" );
 
-      // Just so the ADS gets updated properly.
-      procAlg->setChild(false);
-      // Run the algorithm and check that it was done correctly
-      procAlg->execute();
-      TS_ASSERT( !AnalysisDataService::Instance().doesExist("first") );
-      TS_ASSERT( AnalysisDataService::Instance().doesExist("second") );
     }
   }
 
