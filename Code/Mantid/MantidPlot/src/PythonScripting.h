@@ -92,6 +92,8 @@ public:
   PyObject *sysDict() { return m_sys; }
   /// The language name
   static const char * langName;
+
+  PyThreadState *mainThreadState;
              
 public slots:
   /// Refresh Python algorithms state
@@ -118,6 +120,7 @@ private:
   PyObject *m_sys;
   /// Refresh protection
   int refresh_allowed;
+
 };
 
 //-----------------------------------------------------------------------------

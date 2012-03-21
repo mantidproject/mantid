@@ -689,7 +689,8 @@ def __getWorkspaceIndices(source):
 
 # Try plotting, raising an error if no plot object is created
 def __tryPlot(workspace_names, indices, error_bars, type):
-    graph = proxies.Graph(_qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars, type))
+    adapter = _qti.ThreadAdapter(_qti.app, _qti.app.mantidUI)
+    graph = proxies.Graph(adapter.plotSpectraList(workspace_names, indices, error_bars, type))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:

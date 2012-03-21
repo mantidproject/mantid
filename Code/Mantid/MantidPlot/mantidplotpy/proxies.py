@@ -11,8 +11,27 @@ from PyQt4.QtCore import Qt
 #--------------------------- Proxy Objects -----------------------------------
 #-----------------------------------------------------------------------------
 
-
-
+class AttributeProxy(object):
+    
+    _proxied = None
+    _attr_name = None
+    
+    def __init__(self, proxied, attr_name):
+        self._proxied = proxied
+        self._attr_name = attr_name
+        
+    def __call__(self, *args):
+        if self._proxied is None:
+          raise RunTimeError("No attribute has been set to be proxied")
+        if len(args) > 9:
+            raise RuntimeError("Asynchronous method call cannot handle > 9 arguments")
+        
+        qt_args = []
+        for arg in args:
+            qt_args.append(QtCore.Q_ARG(type(arg), arg))
+        
+        QtCore.QMetaObject.invokeMethod(self._proxied, self._attr_name, Qt.AutoConnection, *qt_args)
+    
 #-----------------------------------------------------------------------------
 class QtProxyObject(QtCore.QObject):
     """Generic Proxy object for wrapping Qt C++ QObjects.
@@ -42,7 +61,8 @@ class QtProxyObject(QtCore.QObject):
         """
         Reroute a method call to the the stored object
         """
-        return getattr(self._getHeldObject(), attr)
+        print 'Rerouting method call'
+        return AttributeProxy(self._getHeldObject(), attr)
 
     def __str__(self):
         """

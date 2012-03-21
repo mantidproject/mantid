@@ -65,7 +65,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
-    m_sys(NULL), refresh_allowed(0)
+    m_sys(NULL), refresh_allowed(0), mainThreadState(NULL)
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
@@ -118,8 +118,9 @@ bool PythonScripting::start()
   try
   {
     if( Py_IsInitialized() ) return true;
-    // Initialize interpreter, disabling signal registration as we don't need it
-    Py_InitializeEx(0);
+    Py_Initialize();
+    PyEval_InitThreads();
+    mainThreadState = PyThreadState_Get();
 
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *pymodule = PyImport_AddModule("__main__");
@@ -203,6 +204,9 @@ bool PythonScripting::start()
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     d_initialized = false;
   }
+  // release the lock
+  PyEval_ReleaseLock();
+
   return d_initialized;
 }
 
@@ -211,6 +215,9 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
+  // release the lock
+  PyEval_AcquireLock();
+  PyThreadState_Swap(mainThreadState);
   Py_XDECREF(m_math);
   Py_Finalize();
 }

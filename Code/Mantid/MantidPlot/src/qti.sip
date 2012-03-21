@@ -1298,7 +1298,6 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
@@ -1323,4 +1322,24 @@ public:
 
 private:
   MantidUI(const MantidUI &);
+};
+
+class ThreadAdapter: QObject
+{
+%TypeHeaderCode
+#include "src/ThreadAdapter.h"
+%End
+%ConvertToSubClassCode
+// we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
+// Russell Taylor, 4/8/09: Change needed for mac build.
+//   Taken from main qtiplot svn revision 1187.
+sipClass=sipFindClass(sipCpp->className());
+%End
+public:
+  ThreadAdapter(ApplicationWindow & appWindow, MantidUI & mantidUI);
+  
+  MultiLayer * plotSpectraList(const QStringList& wsNames, const QList<int>& spectrumList,
+                               bool errs = true, Graph::CurveType style = Graph::Unspecified);
+private:
+  ThreadAdapter(const MantidUI &);
 };

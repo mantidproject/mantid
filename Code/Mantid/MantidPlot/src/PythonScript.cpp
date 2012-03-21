@@ -42,10 +42,12 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <QtConcurrentRun>
+
 namespace
 {
   // Keep a reference to the current PyCode filename object for the line tracing.
-  // The tracing function is a static member function so this varibable needs to be global
+  // The tracing function is a static member function so this variable needs to be global
   // so it's kept in an anonymous namespace to keep it at this file scope.
   PyObject* ROOT_CODE_OBJECT = NULL;
   PythonScript *CURRENT_SCRIPT_OBJECT = NULL;
@@ -93,7 +95,6 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
 
-  GILHolder gil;
   PyObject *pymodule = PyImport_AddModule("__main__");
   localDict = PyDict_Copy(PyModule_GetDict(pymodule));
   if( QFileInfo(Name).exists() )
@@ -317,70 +318,101 @@ QVariant PythonScript::eval()
     return qret;
 }
 
-bool PythonScript::exec()
+namespace
 {
-  // Cannot have two things executing at the same time
-  if( env()->isRunning() ) return false;
-
-  CURRENT_SCRIPT_OBJECT = this;
-  ScriptNullifier nullifier(CURRENT_SCRIPT_OBJECT); // Ensure the current code object reference is nullified after execution
-
-  // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
-  GILHolder gil;
-
-  env()->setIsRunning(true);
-
-  if (isFunction) compiled = notCompiled;
-  if (compiled != Script::isCompiled && !compile(false))
+  bool execScript(PyThreadState *mainThreadState, const QString & code)
   {
-    env()->setIsRunning(false);
-    return false;
-  }
-  // Redirect the output, if required
-  if ( redirectStdOut() ) beginStdoutRedirect();
+    PyEval_AcquireLock();
+    // get a reference to the PyInterpreterState
+    PyInterpreterState * mainInterpreterState = mainThreadState->interp;
+    // create a thread state object for this thread
+    PyThreadState * myThreadState = PyThreadState_New(mainInterpreterState);
+    PyThreadState_Swap(myThreadState);
 
-  if( reportProgress() )
-  {
-    // This stores the address of the main file that is being executed so that
-    // we can track line numbers from the main code only
-    ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
-    CURRENT_SCRIPT_OBJECT = this;
-    PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
-  }
-  else
-  {
-    ROOT_CODE_OBJECT = NULL;
-    CURRENT_SCRIPT_OBJECT = NULL;
-    PyEval_SetTrace(NULL, NULL);
-  }
-
-  PyObject *pyret(NULL), *empty_tuple(NULL);
-  if( PyCallable_Check(PyCode) )
-  {
-    empty_tuple = PyTuple_New(0);
-    if (!empty_tuple) 
+    PyRun_SimpleString(code.toAscii());
+    if(PyErr_Occurred())
     {
-      emit_error(constructErrorMsg(), 0);
-      env()->setIsRunning(false);
+      PyErr_Clear();
       return false;
     }
-  }
-  /// Return value is non-NULL if everything succeeded
-  pyret = executeScript(empty_tuple);
-  // Restore output
-  if ( redirectStdOut() ) endStdoutRedirect();
-  /// Disable trace
-  PyEval_SetTrace(NULL, NULL);
-
-  if( pyret ) 
-  {
-    Py_DECREF(pyret);
-    env()->setIsRunning(false);
+    // free the lock
+    PyThreadState_Swap(mainThreadState);
+    PyThreadState_Clear(myThreadState);
+    PyThreadState_Delete(myThreadState);
+    PyEval_ReleaseLock();
     return true;
   }
-  emit_error(constructErrorMsg(), 0);
-  env()->setIsRunning(false);
-  return false;
+}
+
+bool PythonScript::exec()
+{
+  const QString myCode = Code;
+  QtConcurrent::run(execScript, env()->mainThreadState, myCode);
+  //PyRun_SimpleString(myCode.toAscii());
+
+  return true;
+//  // Cannot have two things executing at the same time
+//  if( env()->isRunning() ) return false;
+//
+//  CURRENT_SCRIPT_OBJECT = this;
+//  ScriptNullifier nullifier(CURRENT_SCRIPT_OBJECT); // Ensure the current code object reference is nullified after execution
+
+//  // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
+//  GILHolder gil;
+
+//  env()->setIsRunning(true);
+//
+//  if (isFunction) compiled = notCompiled;
+//  if (compiled != Script::isCompiled && !compile(false))
+//  {
+//    env()->setIsRunning(false);
+//    return false;
+//  }
+//  // Redirect the output, if required
+//  if ( redirectStdOut() ) beginStdoutRedirect();
+//
+//  if( reportProgress() )
+//  {
+//    // This stores the address of the main file that is being executed so that
+//    // we can track line numbers from the main code only
+//    ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
+//    CURRENT_SCRIPT_OBJECT = this;
+//    PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
+//  }
+//  else
+//  {
+//    ROOT_CODE_OBJECT = NULL;
+//    CURRENT_SCRIPT_OBJECT = NULL;
+//    PyEval_SetTrace(NULL, NULL);
+//  }
+//
+//  PyObject *pyret(NULL), *empty_tuple(NULL);
+//  if( PyCallable_Check(PyCode) )
+//  {
+//    empty_tuple = PyTuple_New(0);
+//    if (!empty_tuple)
+//    {
+//      emit_error(constructErrorMsg(), 0);
+//      env()->setIsRunning(false);
+//      return false;
+//    }
+//  }
+//  /// Return value is non-NULL if everything succeeded
+//  pyret = executeScript(empty_tuple);
+//  // Restore output
+//  if ( redirectStdOut() ) endStdoutRedirect();
+//  /// Disable trace
+//  PyEval_SetTrace(NULL, NULL);
+//
+//  if( pyret )
+//  {
+//    Py_DECREF(pyret);
+//    env()->setIsRunning(false);
+//    return true;
+//  }
+//  emit_error(constructErrorMsg(), 0);
+//  env()->setIsRunning(false);
+//  return false;
 }
 
 /**
@@ -402,7 +434,6 @@ void PythonScript::updatePath(const QString & filename, bool append)
       "    sys.path.remove(r'%1')";
   }
   pyCode = pyCode.arg(scriptPath);
-  GILHolder gil;
   PyRun_SimpleString(pyCode.toAscii());
 }
 
@@ -589,7 +620,6 @@ QString PythonScript::constructErrorMsg()
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
-  GILHolder gil; // Aqcuire the GIL
   if (localDict) // Avoid segfault for un-initialized object
   {
     if (!PyDict_Contains(localDict, PyString_FromString(name)))
@@ -602,7 +632,7 @@ bool PythonScript::setQObject(QObject *val, const char *name)
 
 bool PythonScript::setInt(int val, const char *name)
 {
-  GILHolder gil; // Aqcuire the GIL
+
   if (!PyDict_Contains(localDict, PyString_FromString(name)))
     compiled = notCompiled;
   return env()->setInt(val, name, localDict);
@@ -610,7 +640,7 @@ bool PythonScript::setInt(int val, const char *name)
 
 bool PythonScript::setDouble(double val, const char *name)
 {
-  GILHolder gil; // Aqcuire the GIL
+
   if (!PyDict_Contains(localDict, PyString_FromString(name)))
     compiled = notCompiled;
   return env()->setDouble(val, name, localDict);
@@ -666,7 +696,6 @@ PythonScripting * PythonScript::env() const
  */
 void PythonScript::beginStdoutRedirect()
 {
-  GILHolder gil; // Aqcuire the GIL
   stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
   Py_XINCREF(stdoutSave);
   stderrSave = PyDict_GetItemString(env()->sysDict(), "stderr");
@@ -682,7 +711,7 @@ void PythonScript::beginStdoutRedirect()
 void PythonScript::endStdoutRedirect()
 {
 
-  GILHolder gil; // Aqcuire the GIL
+
   PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);
   PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);
@@ -754,7 +783,6 @@ void PythonScript::addPythonReference(const std::string& wsName,const Mantid::AP
   char * code = new char[length + 1];
   const char * name = wsName.c_str();
   sprintf(code, "%s = mtd['%s']", name, name);
-  GILHolder gil;
   PyObject *codeObj = Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
   if( codeObj )
   {
@@ -784,7 +812,6 @@ void PythonScript::deletePythonReference(const std::string& wsName)
   const size_t length = wsName.length() + 4;
   char * code = new char[length + 1];
   sprintf(code, "del %s", wsName.c_str());
-  GILHolder gil;
   PyObject *codeObj = Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
   if( codeObj )
   {
