@@ -36,6 +36,13 @@ namespace Mantid
       Kernel::RandomNumberGenerator * m_rand;
 
       void createEmptyWorkspace();
+
+      /// Number of times extractData() was called since start or last reset.
+      int m_timesCalled;
+
+      /// For testing: set the reset flag after this many calls to extractData()
+      int m_resetAfter;
+
     };
 
   } // namespace DataHandling

@@ -5,10 +5,12 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::ConfigService;
 
 namespace Mantid
 {
@@ -25,6 +27,11 @@ namespace DataHandling
     // Set a sample tof range
     m_rand->setRange(40000,60000);
     m_rand->setSeed(Kernel::DateAndTime::getCurrentTime().totalNanoseconds());
+
+    m_timesCalled = 0;
+    m_dataReset = false;
+    if ( ! ConfigService::Instance().getValue("testdatalistener.reset_after",m_resetAfter) )
+      m_resetAfter = 0;
   }
     
   /// Destructor
@@ -67,6 +74,8 @@ namespace DataHandling
 
   boost::shared_ptr<MatrixWorkspace> TestDataListener::extractData()
   {
+    m_dataReset = false;
+
     // Add a small number of uniformly distributed events to each event list.
     using namespace DataObjects;
     EventList & el1 = m_buffer->getEventList(0);
@@ -80,6 +89,14 @@ namespace DataHandling
     // Copy the workspace pointer to a temporary variable
     EventWorkspace_sptr extracted = m_buffer;
     this->createEmptyWorkspace();
+
+    m_timesCalled++;
+
+    if (m_resetAfter > 0 && m_timesCalled >= m_resetAfter)
+    {
+      m_dataReset = true;
+      m_timesCalled = 0;
+    }
 
     return extracted;
   }

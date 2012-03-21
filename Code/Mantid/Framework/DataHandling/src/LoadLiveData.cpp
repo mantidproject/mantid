@@ -308,6 +308,9 @@ namespace DataHandling
     // Get or create the live listener
     ILiveListener_sptr listener = this->getLiveListener();
 
+    // Do we need to reset the data?
+    bool dataReset = listener->dataReset();
+
     // The listener returns a MatrixWorkspace containing the chunk of live data.
     MatrixWorkspace_sptr chunkWS = listener->extractData();
 
@@ -338,7 +341,8 @@ namespace DataHandling
     std::string accum = this->getPropertyValue("AccumulationMethod");
 
     // If the AccumulationWorkspace does not exist, we always replace the AccumulationWorkspace.
-    if (!m_accumWS)
+    // Also, if the listener said we are resetting the data, then we clear out the old.
+    if (!m_accumWS || dataReset)
       accum = "Replace";
 
     g_log.notice() << "Performing the " << accum << " operation." << std::endl;
