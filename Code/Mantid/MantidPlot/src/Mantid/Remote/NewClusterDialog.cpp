@@ -11,7 +11,7 @@ NewClusterDialog::NewClusterDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     
-    // OK button starts of disabled
+    // OK button starts off disabled
     ui->buttonBox->buttons()[0]->setEnabled( false);
     
     QObject::connect( ui->displayNameEdit, SIGNAL( textChanged( QString)), this, SLOT( validateInput()));

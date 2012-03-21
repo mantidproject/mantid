@@ -14,6 +14,7 @@ class MwsRemoteJobManager;      // Concrete class - communicates w/ Moab Web Ser
 
 class RemoteJobManagerFactory;  // Knows how to create the various concrete classes
 
+class RemoteAlg;                // Holds info about a particular remote algorithm (executable name, cmd line params, etc...)
 
 
 class RemoteJobManager
@@ -26,11 +27,20 @@ public:
     virtual ~RemoteJobManager() { }
 
     // The basic API: submit a job, abort a job and check on the status of a job
-    virtual std::string submitJob() = 0;  // returns a job id
+    virtual bool submitJob( const RemoteAlg &remoteAlg, std::string &retString) = 0;
     virtual int abortJob( std::string jobId) = 0;
     virtual bool jobHeld( std::string jobId) = 0;
     virtual bool jobRunning( std::string jobId) = 0;
     virtual bool jobComplete( std::string jobId) = 0;
+    
+    // This is provided as a standardized means of allowing the user to
+    // enter authentication info.  For the MwsRemoteJobManager, I expect it
+    // to pop up a dialog box asking for user name and password.  For Globus,
+    // it'll probably ask for a certificate...
+    //
+    // NOTE: Actually - I'm not sure about this.  I really want to separate the UI from
+    // the implementation of these classes....
+    virtual void setAuthInfo() = 0;
 
     const std::string & getDisplayName() const { return m_displayName; }
     const std::string & getConfigFileUrl() const { return m_configFileUrl; }
@@ -81,13 +91,18 @@ public:
     // Returns the type of job manager it actually is (MWS, Globus, etc..)
     virtual const std::string getType() const { return "MWS"; }
 
+    virtual bool submitJob( const RemoteAlg &remoteAlg, std::string &retString);
     // TODO: IMPLEMENT THESE FUNCTIONS FOR REAL!
-    virtual std::string submitJob() { return "0"; }  // returns a job id
     virtual int abortJob( std::string jobId) { return 0; }
     virtual bool jobHeld( std::string jobId) { return false; }
     virtual bool jobRunning( std::string jobId) { return false; }
     virtual bool jobComplete( std::string jobId) { return false; }
     virtual void saveProperties( int itemNum);
+    virtual void setAuthInfo()
+    {
+        // TODO: Implement this for real!
+        return;
+    }
 
 private:
     std::string m_serviceBaseUrl;
@@ -98,8 +113,9 @@ private:
                             // it every time and that would be way too tedious).  I'm expecting
                             // the GUI to pop up a dialog box asking for it before it's needed.
 
-
-
+    std::string m_json; // This will hold the complete json text for the job submission.
+                        // It exists merely for debugging purposes so I can look at the output
+                        // in a debugger....
 
 
 };

@@ -15,6 +15,7 @@
 #include <QTreeWidgetItem>
 #include <QVector>
 #include <QList>
+#include <QHash>
 #include <QActionGroup>
 #include <QSortFilterProxyModel>
 #include <QStringList>
@@ -29,6 +30,8 @@ class MantidTreeWidgetItem;
 class MantidTreeWidget;
 class QDomElement;
 class QLabel;
+class QListWidget;
+class QListWidgetItem;
 class QMenu;
 class QPushButton;
 class QTreeWidget;
@@ -40,7 +43,7 @@ class QSignalMapper;
 class QSortFilterProxyModel;
 
 class RemoteJobManager;
-
+class RemoteAlg;
 
 // Note: This is based closely on the AlgorithmDockWidget.  It might be
 // better to have it actually inherit from that instead of QDockWidget...
@@ -55,31 +58,31 @@ public slots:
     void findAlgTextChanged(const QString& text);
     void treeSelectionChanged();
     void selectionChanged(const QString& algName);
-    void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
+//    void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
     void algorithmStarted(void* alg);
     void algorithmFinished(void* alg);
     void addNewCluster();
     void clusterChoiceChanged(int index);
+    void submitJob();
+    
 protected:
-    void showProgressBar();
-    void hideProgressBar();
+//    void showProgressBar();
+    //void hideProgressBar();
+    
 
     void xmlParseServerAttributes( QDomElement &elm);
     void xmlParseAlgorithm( QDomElement &elm);
     
     QComboBox *m_clusterCombo;
-    MantidTreeWidget *m_tree;
-//    FindAlgComboBox* m_findAlg;
-//    QPushButton *m_runningButton;
-    QProgressBar* m_progressBar;
-//    QHBoxLayout * m_runningLayout;
-//    bool m_treeChanged;
-//    bool m_findAlgChanged;
-//    QVector<void*> m_algID;
+    QListWidget *m_algList;
+
     QNetworkAccessManager *m_netManager;
     QNetworkReply * m_configReply;
     
     QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
+    
+    // Maps item pointers from m_tree to their associated RemoteAlg objects
+    QHash <QListWidgetItem *, RemoteAlg> m_algorithmHash;  
 
     friend class MantidUI;
 private:

@@ -228,6 +228,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/DetXMLFile.cpp
                    src/Mantid/Remote/MantidRemoteAlg.cpp	
                    src/Mantid/Remote/NewClusterDialog.cpp
+                   src/Mantid/Remote/RemoteAlg.cpp
                    src/Mantid/Remote/RemoteJobManager.cpp
 )
 
@@ -458,6 +459,8 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
                    src/Mantid/Remote/MantidRemoteAlg.h
                    src/Mantid/Remote/NewClusterDialog.h
+                   src/Mantid/Remote/RemoteAlg.h
+                   src/Mantid/Remote/RemoteJob.h
                    src/Mantid/Remote/RemoteJobManager.h
 )
 
