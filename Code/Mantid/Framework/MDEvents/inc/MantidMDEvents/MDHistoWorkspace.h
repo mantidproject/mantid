@@ -140,6 +140,12 @@ namespace MDEvents
       return m_errorsSquared;
     }
 
+    /** @return the direct pointer to the array of the number of events. For speed */
+    signal_t * getNumEventsArray()
+    {
+      return m_numEvents;
+    }
+
     void setTo(signal_t signal, signal_t errorSquared);
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);

@@ -58,9 +58,9 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
-    /// Helper method
-    template<typename MDE, size_t nd>
-    void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
+//    /// Helper method
+//    template<typename MDE, size_t nd>
+//    void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
     /// Helper method
     template<typename MDE, size_t nd>
@@ -82,6 +82,7 @@ namespace MDEvents
     size_t * indexMultiplier;
     signal_t * signals;
     signal_t * errors;
+    signal_t * numEvents;
 
 
   };

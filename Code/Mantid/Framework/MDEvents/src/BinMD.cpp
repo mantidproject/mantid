@@ -249,6 +249,9 @@ namespace MDEvents
         // Add the CACHED signal from the entire box
         signals[lastLinearIndex] += box->getSignal();
         errors[lastLinearIndex] += box->getErrorSquared();
+        // TODO: If MDEvents get a weight, this would need to get the summed weight.
+        numEvents[lastLinearIndex] += static_cast<signal_t>(box->getNPoints());
+
         // And don't bother looking at each event. This may save lots of time loading from disk.
         delete [] outCenter;
         return;
@@ -299,6 +302,8 @@ namespace MDEvents
         // Sum the signals as doubles to preserve precision
         signals[linearIndex] += static_cast<signal_t>(it->getSignal());
         errors[linearIndex] += static_cast<signal_t>(it->getErrorSquared());
+        // TODO: If MDEvents get a weight, this would need to get the summed weight.
+        numEvents[linearIndex] += 1.0;
       }
     }
     // Done with the events list
@@ -332,6 +337,7 @@ namespace MDEvents
     }
     signals = outWS->getSignalArray();
     errors = outWS->getErrorSquaredArray();
+    numEvents = outWS->getNumEventsArray();
 
     // The dimension (in the output workspace) along which we chunk for parallel processing
     // TODO: Find the smartest dimension to chunk against
@@ -426,112 +432,112 @@ namespace MDEvents
       outWS->applyImplicitFunction(implicitFunction, nan, nan);
     }
   }
-
-  //----------------------------------------------------------------------------------------------
-  /** Templated method to apply the binning operation to the particular
-   * MDEventWorkspace passed in.
-   *
-   * @param ws :: MDEventWorkspace of the given type
-   */
-  template<typename MDE, size_t nd>
-  void BinMD::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
-  {
-    bool DODEBUG = true;
-
-    CPUTimer tim;
-
-    // Number of output binning dimensions found
-    size_t m_outD = m_binDimensions.size();
-
-    //Since the costs are not known ahead of time, use a simple FIFO buffer.
-    ThreadScheduler * ts = new ThreadSchedulerFIFO();
-
-    // Create the threadpool with: all CPUs, a progress reporter
-    ThreadPool tp(ts, 0, prog);
-
-    // For progress reporting, the approx  # of tasks
-    if (prog)
-      prog->setNumSteps( int(outWS->getNPoints()/100) );
-
-    // The root-level box.
-    IMDBox<MDE,nd> * rootBox = ws->getBox();
-
-    // This is the limit to loop over in each dimension
-    size_t * index_max = new size_t[m_outD];
-    for (size_t bd=0; bd<m_outD; bd++) index_max[bd] = m_binDimensions[bd]->getNBins();
-
-    // Cache a calculation to convert indices x,y,z,t into a linear index.
-    size_t * index_maker = new size_t[m_outD];
-    Utils::NestedForLoop::SetUpIndexMaker(m_outD, index_maker, index_max);
-
-    int numPoints = int(outWS->getNPoints());
-
-    // Big efficiency gain is obtained by grouping a few bins per task.
-    size_t binsPerTask = 100; (void)binsPerTask; // Avoid a compiler warning on gcc 4.6
-
-    // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
-    // Right now, not parallel for file-backed systems.
-    bool fileBacked = (ws->getBoxController()->getFile() != NULL);
-    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask) if (!fileBacked)  )
-    for (int i=0; i < numPoints; i++)
-    {
-      PARALLEL_START_INTERUPT_REGION
-
-      size_t linear_index = size_t(i);
-      // nd >= m_outD in all cases so this is safe.
-      size_t index[nd];
-
-      // Get the index at each dimension for this bin.
-      Utils::NestedForLoop::GetIndicesFromLinearIndex(m_outD, linear_index, index_maker, index_max, index);
-
-      // Construct the bin and its coordinates
-      MDBin<MDE,nd> bin;
-      for (size_t bd=0; bd<m_outD; bd++)
-      {
-        // Index in this binning dimension (i_x, i_y, etc.)
-        size_t idx = index[bd];
-        // Dimension in the MDEventWorkspace
-        size_t d = m_dimensionToBinFrom[bd];
-        // Corresponding extents
-        bin.m_min[d] = coord_t(m_binDimensions[bd]->getX(idx));
-        bin.m_max[d] = coord_t(m_binDimensions[bd]->getX(idx+1));
-      }
-      bin.m_index = linear_index;
-
-      // Check if the bin is in the ImplicitFunction (if any)
-      bool binContained = true;
-      if (implicitFunction)
-      {
-        binContained = implicitFunction->isPointContained(bin.m_min); //TODO. Correct argument passed to this method?
-      }
-
-      if (binContained)
-      {
-        // Array of bools set to true when a dimension is fully contained (binary splitting only)
-        bool fullyContained[nd];
-        for (size_t d=0; d<nd; d++)
-          fullyContained[d] = false;
-
-        // This will recursively bin into the sub grids
-        rootBox->centerpointBin(bin, fullyContained);
-
-        // Save the data into the dense histogram
-        outWS->setSignalAt(linear_index, bin.m_signal);
-        outWS->setErrorSquaredAt(linear_index, bin.m_errorSquared);
-      }
-
-      // Report progress but not too often.
-      if (((linear_index % 100) == 0) && prog ) prog->report();
-
-      PARALLEL_END_INTERUPT_REGION
-    } // (for each linear index)
-    PARALLEL_CHECK_INTERUPT_REGION
-
-    if (DODEBUG) std::cout << tim << " to run the openmp loop.\n";
-
-    delete [] index_max;
-    delete [] index_maker;
-  }
+//
+//  //----------------------------------------------------------------------------------------------
+//  /** Templated method to apply the binning operation to the particular
+//   * MDEventWorkspace passed in.
+//   *
+//   * @param ws :: MDEventWorkspace of the given type
+//   */
+//  template<typename MDE, size_t nd>
+//  void BinMD::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
+//  {
+//    bool DODEBUG = true;
+//
+//    CPUTimer tim;
+//
+//    // Number of output binning dimensions found
+//    size_t m_outD = m_binDimensions.size();
+//
+//    //Since the costs are not known ahead of time, use a simple FIFO buffer.
+//    ThreadScheduler * ts = new ThreadSchedulerFIFO();
+//
+//    // Create the threadpool with: all CPUs, a progress reporter
+//    ThreadPool tp(ts, 0, prog);
+//
+//    // For progress reporting, the approx  # of tasks
+//    if (prog)
+//      prog->setNumSteps( int(outWS->getNPoints()/100) );
+//
+//    // The root-level box.
+//    IMDBox<MDE,nd> * rootBox = ws->getBox();
+//
+//    // This is the limit to loop over in each dimension
+//    size_t * index_max = new size_t[m_outD];
+//    for (size_t bd=0; bd<m_outD; bd++) index_max[bd] = m_binDimensions[bd]->getNBins();
+//
+//    // Cache a calculation to convert indices x,y,z,t into a linear index.
+//    size_t * index_maker = new size_t[m_outD];
+//    Utils::NestedForLoop::SetUpIndexMaker(m_outD, index_maker, index_max);
+//
+//    int numPoints = int(outWS->getNPoints());
+//
+//    // Big efficiency gain is obtained by grouping a few bins per task.
+//    size_t binsPerTask = 100; (void)binsPerTask; // Avoid a compiler warning on gcc 4.6
+//
+//    // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
+//    // Right now, not parallel for file-backed systems.
+//    bool fileBacked = (ws->getBoxController()->getFile() != NULL);
+//    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask) if (!fileBacked)  )
+//    for (int i=0; i < numPoints; i++)
+//    {
+//      PARALLEL_START_INTERUPT_REGION
+//
+//      size_t linear_index = size_t(i);
+//      // nd >= m_outD in all cases so this is safe.
+//      size_t index[nd];
+//
+//      // Get the index at each dimension for this bin.
+//      Utils::NestedForLoop::GetIndicesFromLinearIndex(m_outD, linear_index, index_maker, index_max, index);
+//
+//      // Construct the bin and its coordinates
+//      MDBin<MDE,nd> bin;
+//      for (size_t bd=0; bd<m_outD; bd++)
+//      {
+//        // Index in this binning dimension (i_x, i_y, etc.)
+//        size_t idx = index[bd];
+//        // Dimension in the MDEventWorkspace
+//        size_t d = m_dimensionToBinFrom[bd];
+//        // Corresponding extents
+//        bin.m_min[d] = coord_t(m_binDimensions[bd]->getX(idx));
+//        bin.m_max[d] = coord_t(m_binDimensions[bd]->getX(idx+1));
+//      }
+//      bin.m_index = linear_index;
+//
+//      // Check if the bin is in the ImplicitFunction (if any)
+//      bool binContained = true;
+//      if (implicitFunction)
+//      {
+//        binContained = implicitFunction->isPointContained(bin.m_min); //TODO. Correct argument passed to this method?
+//      }
+//
+//      if (binContained)
+//      {
+//        // Array of bools set to true when a dimension is fully contained (binary splitting only)
+//        bool fullyContained[nd];
+//        for (size_t d=0; d<nd; d++)
+//          fullyContained[d] = false;
+//
+//        // This will recursively bin into the sub grids
+//        rootBox->centerpointBin(bin, fullyContained);
+//
+//        // Save the data into the dense histogram
+//        outWS->setSignalAt(linear_index, bin.m_signal);
+//        outWS->setErrorSquaredAt(linear_index, bin.m_errorSquared);
+//      }
+//
+//      // Report progress but not too often.
+//      if (((linear_index % 100) == 0) && prog ) prog->report();
+//
+//      PARALLEL_END_INTERUPT_REGION
+//    } // (for each linear index)
+//    PARALLEL_CHECK_INTERUPT_REGION
+//
+//    if (DODEBUG) std::cout << tim << " to run the openmp loop.\n";
+//
+//    delete [] index_max;
+//    delete [] index_maker;
+//  }
 
 
 
@@ -585,20 +591,13 @@ namespace MDEvents
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");
-    if (!m_axisAligned && !IterateEvents)
+    if (!IterateEvents)
     {
-      g_log.notice() << "Algorithm does not currently support IterateEvents=False if AxisAligned=False. Setting IterateEvents=True." << std::endl;
+      g_log.warning() << "IterateEvents=False is no longer supported. Setting IterateEvents=True." << std::endl;
       IterateEvents = true;
     }
 
-    if (IterateEvents)
-    {
-      CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
-    }
-    else
-    {
-      CALL_MDEVENT_FUNCTION(this->do_centerpointBin, m_inWS);
-    }
+    CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
 
     // Copy the experiment infos to the output
     IMDEventWorkspace_sptr inEWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
