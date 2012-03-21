@@ -95,7 +95,7 @@ public:
   SliceMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
   {
   }
-  SliceMDDialog::~SliceMDDialog(){}
+  ~SliceMDDialog(){}
 
   void customiseInitLayout();
 };
@@ -111,7 +111,7 @@ public:
   BinMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
   {
   }
-  BinMDDialog::~BinMDDialog(){}
+  ~BinMDDialog(){}
   void customiseInitLayout();
 };
 
