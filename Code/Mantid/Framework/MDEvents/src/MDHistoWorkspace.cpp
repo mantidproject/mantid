@@ -634,6 +634,7 @@ namespace MDEvents
     {
       m_signals[i] += b.m_signals[i];
       m_errorsSquared[i] += b.m_errorsSquared[i];
+      m_numEvents[i] += b.m_numEvents[i];
     }
   }
 
@@ -677,6 +678,7 @@ namespace MDEvents
     {
       m_signals[i] -= b.m_signals[i];
       m_errorsSquared[i] += b.m_errorsSquared[i];
+      m_numEvents[i] += b.m_numEvents[i];
     }
   }
 
