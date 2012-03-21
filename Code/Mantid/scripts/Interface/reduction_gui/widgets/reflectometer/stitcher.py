@@ -292,7 +292,7 @@ class StitcherWidget(BaseWidget):
                 plot_name = '%s: %s' % (self._graph, pol)
                 g = _qti.app.graph(plot_name)
                 if g is not None:
-                    return
+                    continue
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(plot_name)
                 l=g.activeLayer()
