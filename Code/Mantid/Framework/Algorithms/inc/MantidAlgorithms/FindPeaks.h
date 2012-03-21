@@ -94,6 +94,7 @@ private:
   void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestparams, double &mincost, const double expPeakPos, const double expPeakHeight);
   void checkFitResultParameterNames(const std::vector<std::string> &paramnames);
 
+  std::string createTies(const double height, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
   API::IFitFunction_sptr createFunction(const bool withPeak = true);
   int backgroundOrder();
 
@@ -111,16 +112,17 @@ private:
   int index; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool m_highBackground; ///<flag for find relatively weak peak in high background
+  bool m_searchPeakPos; ///<flag to search for peak in the window
   std::string m_backgroundType; //< The type of background to fit
 
   unsigned int minGuessedPeakWidth;
   unsigned int maxGuessedPeakWidth;
   unsigned int stepGuessedPeakWidth;
 
-  bool usePeakPositionTolerance;
+  bool m_usePeakPositionTolerance;
   double peakPositionTolerance;
 
-  bool usePeakHeightTolerance;
+  bool m_usePeakHeightTolerance;
   double peakHeightTolerance;
 
 };

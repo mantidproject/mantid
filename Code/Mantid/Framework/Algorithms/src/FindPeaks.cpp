@@ -235,15 +235,15 @@ void FindPeaks::exec()
 
   peakPositionTolerance = getProperty("PeakPositionTolerance");
   if (peakPositionTolerance > 0)
-    usePeakPositionTolerance = true;
+    m_usePeakPositionTolerance = true;
   else
-    usePeakPositionTolerance = false;
+    m_usePeakPositionTolerance = false;
 
   peakHeightTolerance = getProperty("PeakHeightTolerance");
   if (peakHeightTolerance > 0)
-    usePeakHeightTolerance = true;
+    m_usePeakHeightTolerance = true;
   else
-    usePeakHeightTolerance = false;
+    m_usePeakHeightTolerance = false;
 
   // b) Get the specified peak positions, which is optional
   std::vector<double> centers = getProperty("PeakPositions");
@@ -256,6 +256,7 @@ void FindPeaks::exec()
   m_highBackground = getProperty("HighBackground");
 
   // 4. Fit
+  m_searchPeakPos = false;
   if (!centers.empty())
   {
     if (!fitWindows.empty())
@@ -264,6 +265,7 @@ void FindPeaks::exec()
       {
         throw std::invalid_argument("Number of FitWindows must be exactly twice the number of PeakPositions");
       }
+      m_searchPeakPos = true;
     }
     //Perform fit with fixed start positions.
     //std::cout << "Number of Centers = " << centers.size() << std::endl;
@@ -272,6 +274,8 @@ void FindPeaks::exec()
   else
   {
     //Use Mariscotti's method to find the peak centers
+    m_usePeakPositionTolerance = false;
+    m_usePeakHeightTolerance = false;
     this->findPeaksUsingMariscotti();
   }
 
@@ -499,7 +503,7 @@ void FindPeaks::findPeaksUsingMariscotti()
         }
 
         // If we get to here then we've identified a peak
-        g_log.debug() << "Spectrum=" << k << " i0=" << inputWS->readX(k)[i0] << " i1=" << i1 << " i2=" << i2 << " i3=" << i3 << " i4=" << i4 << " i5=" << i5 << std::endl;
+        g_log.debug() << "Spectrum=" << k << " i0="  << i0 << " X=" << inputWS->readX(k)[i0] << " i1=" << i1 << " i2=" << i2 << " i3=" << i3 << " i4=" << i4 << " i5=" << i5 << std::endl;
 
         this->fitPeak(inputWS,k,i0,i2,i4);
         
@@ -678,6 +682,20 @@ int FindPeaks::getCentreIndex(const MantidVec &X, double centre)
   }
 }
 
+int getMaxHeightIndex( const MantidVec &Y, const int leftIndex, const int rightIndex)
+{
+  double height = Y[leftIndex];
+  int indexMax = leftIndex;
+  for (int i = leftIndex+1; i < rightIndex; i++) {
+    if (Y[i] > height)
+    {
+      height = Y[i];
+      indexMax = i;
+    }
+  }
+  return indexMax;
+}
+
 //=================================================================================================
 /** Attempts to fit a candidate peak given a center and width guess.
  *
@@ -773,6 +791,10 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
       i_right = static_cast<int>(X.size() - 1);
   }
 
+  // look for the heigh point
+  if (m_searchPeakPos)
+    i_centre = getMaxHeightIndex(input->readY(spectrum), i_left, i_right);
+
   // finally do the actual fit
   this->fitPeak(input, spectrum, i_right, i_left, i_centre);
 }
@@ -792,8 +814,8 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
   
-  g_log.debug() << "Fit Peak @ " << X[i4] << "  of Spectrum " << spectrum << "  ";
-  g_log.debug() << "Peak In Range " << X[i0] << ", " << X[i2] << "  Peak @ " << X[i4] << std::endl;
+  g_log.debug() << "Fit Peak @ " << X[i4] << "  of Spectrum " << spectrum << "  Peak In Range " << X[i2] << ", " << X[i0]
+                << "  [i0,i2,i4]=[" << i0 << "," << i2 << "," << i4 << "]\n";
 
   // Get the initial estimate of the width, in # of bins
   const int fitWidth = i0-i2;
@@ -862,7 +884,8 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
   const MantidVec &Y = input->readY(spectrum);
 
   const double in_height = Y[i4] - in_bg0;
-  const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
+//  double in_centre; // = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0]; // TODO should be const
+  const double in_centre = input->isHistogramData() ? 0.5*(X[i4]+X[i4+1]) : X[i4];
 
   double mincost = 1.0E10;
   std::vector<double> bestparams;
@@ -906,8 +929,10 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     g_log.debug() << "  Function: " << *fitFunction << "; Background Type = " << m_backgroundType << std::endl;
 
     // d) complete fit
-    fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
-    fit->setProperty("EndX", (X[i0] + 5 * (X[i0] - X[i2])));
+    double windowSize = 5. * fabs(X[i0] - X[i2]);
+    g_log.debug() << "  Window: " << (in_centre - windowSize) << " to " << (in_centre + windowSize) <<"\n";
+    fit->setProperty("StartX", (in_centre - windowSize)); //(X[i0] - 5 * (X[i0] - X[i2])));
+    fit->setProperty("EndX", (in_centre + windowSize)); //(X[i0] + 5 * (X[i0] - X[i2])));
     fit->setProperty("Minimizer", "Levenberg-Marquardt");
     fit->setProperty("CostFunction", "Least squares");
     fit->setProperty("Function", fitFunction);
@@ -1039,7 +1064,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
 
   const double in_height = Y[i4] - in_bg0;
-  const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
+  const double in_centre = input->isHistogramData() ? 0.5*(X[i4]+X[i4+1]) : X[i4];
 
   // g) Looping on peak width for the best fit
   double mincost = 1.0E10;
@@ -1058,20 +1083,10 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       peakAndBackgroundFunction->setParameter("f1.A2", a2);
     }
   }
-  std::string ties;
-  {
-      std::stringstream temp;
-      temp << "f1.A0=" << a0;
-      if (this->backgroundOrder() > 0)
-      {
-        temp << ",f1.A1=" << a1;
-        if (this->backgroundOrder() > 1)
-          temp << ",f1.A2=" << a2;
-      }
-      ties = temp.str();
-
-  }
+  std::string bkgdTies = this->createTies(0. ,0., a0, a1, a2, false);
   for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
+    double in_sigma = (i4 + iwidth < X.size()) ? X[i4 + iwidth] - X[i4] : 0.;// Guess sigma
+
     // a) Set up sub algorithm Fit
     IAlgorithm_sptr gfit;
     try
@@ -1087,9 +1102,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     gfit->setProperty("WorkspaceIndex", spectrum);
     gfit->setProperty("MaxIterations", 50);
 
-    // b) Guess sigma
-    double in_sigma = (i4 + iwidth < X.size()) ? X[i4 + iwidth] - X[i4] : 0.;
-
 
     // c) Set initial fitting parameters
     peakAndBackgroundFunction->setParameter("f0.Height", in_height);
@@ -1104,7 +1116,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
     gfit->setProperty("Function", peakAndBackgroundFunction);
-    gfit->setProperty("Ties", ties);
+    gfit->setProperty("Ties", bkgdTies);
 
     g_log.debug() << "Function: " << *peakAndBackgroundFunction<< "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
@@ -1239,19 +1251,25 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
   }
 
   // check the height tolerance
-  if (usePeakHeightTolerance && height > expPeakHeight*peakHeightTolerance)
+  if (m_usePeakHeightTolerance && height > expPeakHeight*peakHeightTolerance)
+  {
+    g_log.debug() << "Failed peak height tolerance test\n";
     return;
+  }
 
   // check the peak position tolerance
-  if (usePeakPositionTolerance && fabs(params[1]-expPeakPos) > peakPositionTolerance)
+  if (m_usePeakPositionTolerance && fabs(params[1]-expPeakPos) > peakPositionTolerance)
+  {
+    g_log.debug() << "Faile peak position tolerance test\n";
     return;
+  }
 
   // check for NaNs
   for (std::vector<double>::const_iterator it = params.begin(); it != params.end(); ++it)
   {
     if ((*it) != (*it))
     {
-      g_log.information() << "NaN detected in the results of peak fitting. Peak ignored.\n";
+      g_log.debug() << "NaN detected in the results of peak fitting. Peak ignored.\n";
       return;
     }
   }
@@ -1326,6 +1344,28 @@ IFitFunction_sptr FindPeaks::createFunction(const bool withPeak)
         func << "name=" << peakFunc << ";name=" << background;
         return boost::shared_ptr<IFitFunction>(API::FunctionFactory::Instance().createInitialized(func.str()));
     }
+}
+
+std::string FindPeaks::createTies(const double height, const double sigma, const double a0, const double a1, const double a2, const bool withPeak)
+{
+  std::stringstream ties;
+
+  ties << "f1.A0=" << a0;
+  int backOrder = this->backgroundOrder();
+  if (backOrder > 0)
+  {
+    ties << ",f1.A1=" << a1;
+    if (backOrder > 1)
+      ties << ",f1.A2=" << a2;
+  }
+
+  if (withPeak)
+  {
+    ties << ",f0.Height=" << height;
+    ties << ",f0.Sigma=" << sigma;
+   }
+
+  return ties.str();
 }
 
 /**
