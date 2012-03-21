@@ -224,6 +224,9 @@
           <property name="text">
            <string>Normalise Basis Vectors</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>
@@ -342,19 +345,29 @@
        <property name="text">
         <string>Take Max Recursion Depth From Input</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="recursion_layout">
        <item>
         <widget class="QLabel" name="lbl_resursion_depth">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Max Recursion Depth</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="txt_resursion_depth"/>
+        <widget class="QLineEdit" name="txt_resursion_depth">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="horizontalSpacer_2">

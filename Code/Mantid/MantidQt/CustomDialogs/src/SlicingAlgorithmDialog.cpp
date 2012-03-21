@@ -3,6 +3,10 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include <QIntValidator>
+#include <QFileDialog>
+#include <QDir>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
@@ -11,7 +15,7 @@ namespace MantidQt
   namespace CustomDialogs
   {
     DECLARE_DIALOG(SliceMDDialog);
-    DECLARE_DIALOG(BinMDDialog);
+    //DECLARE_DIALOG(BinMDDialog);
 
     /**
     Constructor
@@ -21,17 +25,67 @@ namespace MantidQt
     {
     }
 
+    /**
+    Extract the documentation from the named property and return as QString.
+    @param propertyName : Property name of property to fetch.
+    */
+    QString SlicingAlgorithmDialog::getPropertyDocumentation(const QString& propertyName)
+    {
+      return QString(this->getAlgorithmProperty(propertyName)->documentation().c_str());
+    }
+
+    /**
+    Apply documentation to widgets.
+    @param widget1 :  widget to apply tooltip to
+    @param propertyName : property to fetch the documentation from.
+    */
+    void SlicingAlgorithmDialog::applyDocToWidget(QWidget* widget, const QString& propertyName)
+    {
+      widget->setToolTip(getPropertyDocumentation(propertyName));
+    }
+
+    /**
+    Apply documentation to widgets.
+    @param widget1 : first widget
+    @param widget2 : second widget
+    @param propertyName : property to fetch the documentation from.
+    */
+    void SlicingAlgorithmDialog::applyDocToWidgets(QWidget* widget1, QWidget* widget2, const QString& propertyName)
+    {
+      applyDocToWidget(widget1, propertyName);
+      applyDocToWidget(widget2, propertyName);
+    }
+
     /// Set up the dialog layout
     void SlicingAlgorithmDialog::initLayout()
     {
       ui.setupUi(this);
       this->setWindowTitle(m_algName);
 
+      applyDocToWidgets(ui.lbl_workspace_input, ui.workspace_selector, "InputWorkspace");
+      applyDocToWidget(ui.ck_axis_aligned, "AxisAligned");
+      applyDocToWidgets(ui.lbl_workspace_output, ui.txt_output, "OutputWorkspace");
+      applyDocToWidgets(ui.lbl_output_extents, ui.txt_output_extents, "OutputExtents");
+      applyDocToWidgets(ui.lbl_output_bins, ui.txt_output_bins, "OutputBins");
+      applyDocToWidget(ui.ck_normalisebasisvectors, "NormalizeBasisVectors");
+      applyDocToWidget(ui.ck_force_orthogonal, "ForceOrthogonal");
+      applyDocToWidget(ui.ck_max_from_input, "TakeMaxRecursionDepthFromInput");
+      applyDocToWidgets(ui.lbl_resursion_depth, ui.txt_resursion_depth, "MaxRecursionDepth");
+      applyDocToWidgets(ui.lbl_output_filename, ui.txt_filename, "OutputFilename");
+      applyDocToWidgets(ui.lbl_memory, ui.txt_memory, "Memory");
+      applyDocToWidgets(ui.lbl_translation, ui.txt_translation, "Translation");
+
+      ui.txt_memory->setValidator(new QIntValidator(this));
+      ui.txt_resursion_depth->setValidator(new QIntValidator(this));
+
       connect(ui.workspace_selector,SIGNAL(activated(int)),this ,SLOT(onWorkspaceChanged()));
       connect(ui.controls, SIGNAL(accepted()), this, SLOT(accept()));
       connect(ui.controls, SIGNAL(rejected()), this, SLOT(reject()));
       connect(ui.ck_axis_aligned, SIGNAL(clicked(bool)), this, SLOT(onAxisAlignedChanged(bool)));
+      connect(ui.btn_browse, SIGNAL(clicked()), this, SLOT(onBrowse()));
+      connect(ui.ck_max_from_input, SIGNAL(clicked(bool)), this, SLOT(onMaxFromInput(bool)));
 
+      //Configure workspace selector
       ui.workspace_selector->setValidatingAlgorithm(m_algName);
       connect(ui.workspace_selector, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
       ui.workspace_selector->clear();
@@ -48,6 +102,7 @@ namespace MantidQt
         ++it;
       }
 
+      //Dynamically create the input dimensions.
       buildDimensionInputs();
     }
 
@@ -183,7 +238,7 @@ namespace MantidQt
           // Configure the label 
           QString propertyName =  propertyPrefix.copy().append(QString().number(index));
           QLabel* dimensionLabel = new QLabel(propertyName);
-          dimensionLabel->setToolTip(this->getAlgorithmProperty(propertyName)->documentation().c_str());
+          dimensionLabel->setToolTip(getPropertyDocumentation(propertyName));
           
           // Configure the default input.
           QString dimensioninfo = format(dim);
@@ -204,12 +259,40 @@ namespace MantidQt
       buildDimensionInputs();
     }
 
-    /// Event handler for the axis changed event.
+    /** 
+    Event handler for the axis changed event.
+    This event handler allows us to continually dynamically provide inputs depending upon the dimensionality.
+    */
     void SlicingAlgorithmDialog::onAxisAlignedChanged(bool)
     {
       buildDimensionInputs();
     }
 
+    void SlicingAlgorithmDialog::onMaxFromInput(bool)
+    {
+      const bool takeFromInputWorkspace = ui.ck_max_from_input->isChecked();
+      ui.txt_resursion_depth->setEnabled(!takeFromInputWorkspace);
+      ui.lbl_resursion_depth->setEnabled(!takeFromInputWorkspace);
+    }
+
+    /**
+    Handler for the onbrowse event.
+    */
+    void SlicingAlgorithmDialog::onBrowse()
+    {
+      QFileDialog dialog;
+      dialog.setDirectory(QDir::homePath());
+      dialog.setNameFilter("Nexus files (*.nxs)");
+      if (dialog.exec())
+      {
+        ui.txt_filename->setText(dialog.selectedFile());
+      }
+    }
+
+    /**
+    Pull-out the dynamic dimension inputs.
+    @return a map of propertyNames to input arguments.
+    */
     PropertyDimensionMap SlicingAlgorithmDialog::extractDimensionInputs() const
     {
       PropertyDimensionMap result;
@@ -244,20 +327,36 @@ namespace MantidQt
       this->m_algorithm->setPropertyValue("InputWorkspace", getInputWorkspaceName().toStdString());
       this->m_algorithm->setPropertyValue("OutputWorkspace", getOutputWorkspaceName().toStdString());
       this->m_algorithm->setProperty("AxisAligned", doAxisAligned());
-      if(doAxisAligned())
+
+      if(!doAxisAligned())
       {
-        PropertyDimensionMap map = extractDimensionInputs();
-        PropertyDimensionMap::const_iterator it = map.constBegin();
-        while(it != map.constEnd())
-        {
-          this->m_algorithm->setProperty(it.key().toStdString(), it.value().toStdString());
-          ++it;
-        }
+        this->m_algorithm->setPropertyValue("OutputExtents", ui.txt_output_extents->text().toStdString());
+        this->m_algorithm->setPropertyValue("Translation", ui.txt_translation->text().toStdString());
+        this->m_algorithm->setPropertyValue("OutputBins", ui.txt_output_bins->text().toStdString());
+        this->m_algorithm->setProperty("NormalizeBasisVectors", ui.ck_normalisebasisvectors->isChecked());
+        this->m_algorithm->setProperty("ForceOrthogonal", ui.ck_force_orthogonal->isChecked());
+        this->m_algorithm->setProperty("OutputFilename", ui.txt_filename->text().toStdString());
+        this->m_algorithm->setProperty("Memory", ui.txt_memory->text().toInt());
+        this->m_algorithm->setProperty("TakeMaxRecursionDepthFromInput", ui.ck_max_from_input->isChecked());
+        this->m_algorithm->setProperty("MaxRecursionDepth", ui.txt_resursion_depth->text().toStdString());
       }
 
-      this->m_algorithm->execute();
+      PropertyDimensionMap map = extractDimensionInputs();
+      PropertyDimensionMap::const_iterator it = map.constBegin();
+      while(it != map.constEnd())
+      {
+        this->m_algorithm->setProperty(it.key().toStdString(), it.value().toStdString());
+        ++it;
+      }
 
-      this->close();
+      try
+      {
+        this->m_algorithm->execute();
+      }
+      if(m_algorithm->isExecuted())
+      {
+        this->close();
+      }
     }
 
   }

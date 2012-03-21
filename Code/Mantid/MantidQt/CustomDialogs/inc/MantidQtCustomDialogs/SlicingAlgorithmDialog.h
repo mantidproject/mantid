@@ -37,12 +37,25 @@ protected slots:
 
   void onAxisAlignedChanged(bool);
 
+  void onBrowse();
+
+  void onMaxFromInput(bool);
+
   void accept();
 
 private:
 
   /// Initialize the layout
   virtual void initLayout();
+
+  /// Get the property documentation
+  QString getPropertyDocumentation(const QString& propertyName);
+
+  /// Helper to apply documentation to a widget.
+  void applyDocToWidget(QWidget* widget, const QString& propertyName);
+
+  /// Helper to apply same documentation to many widgets.
+  void applyDocToWidgets(QWidget* widget1, QWidget* widget2, const QString& propertyName);
 
   /// Determine if axis aligned or non-axis aligned is required.
   bool doAxisAligned() const;
