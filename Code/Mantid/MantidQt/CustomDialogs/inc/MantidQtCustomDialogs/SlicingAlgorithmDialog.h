@@ -16,6 +16,16 @@ namespace CustomDialogs
 
 typedef QMap<QString, QString> PropertyDimensionMap;
 
+/*
+Class SlicingAlgorithmDialog
+Abstract SlicingAlgorithm Dialog geared for MD Slicing type algorithms
+
+This custom dialog provides two advantages over the default custom generated one.
+
+1) It dynamically creates dimension input controls based on the nature of the input MD workspace
+2) It pre-populates those dimension input controls based on existing values.
+
+*/
 class SlicingAlgorithmDialog : public MantidQt::API::AlgorithmDialog
 {
   Q_OBJECT
@@ -28,8 +38,9 @@ public:
   ~SlicingAlgorithmDialog();
 
 protected:
-  /// The algorithm for processing chunks
-  Mantid::API::Algorithm_sptr m_slicingAlgorithm;
+
+  /// view
+  Ui::Dialog ui; 
 
 protected slots:
 
@@ -40,22 +51,13 @@ protected slots:
   void onBrowse();
 
   void onMaxFromInput(bool);
-
-  void accept();
-
+  
 private:
+
+  enum History{Remember, Forget};
 
   /// Initialize the layout
   virtual void initLayout();
-
-  /// Get the property documentation
-  QString getPropertyDocumentation(const QString& propertyName);
-
-  /// Helper to apply documentation to a widget.
-  void applyDocToWidget(QWidget* widget, const QString& propertyName);
-
-  /// Helper to apply same documentation to many widgets.
-  void applyDocToWidgets(QWidget* widget1, QWidget* widget2, const QString& propertyName);
 
   /// Determine if axis aligned or non-axis aligned is required.
   bool doAxisAligned() const;
@@ -70,7 +72,7 @@ private:
   void buildDimensionInputs();
 
   /// Build dimension inputs.
-  void buildDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr));
+  void buildDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
 
   /// Cleans a given layout.
   void cleanLayoutOfDimensions(QLayout* layout);
@@ -78,13 +80,14 @@ private:
   /// Clear out any exisiting dimension widgets.
   void clearExistingDimensions();
 
-  /// Extract the dimension information provided by the user.
-  PropertyDimensionMap extractDimensionInputs() const;
-
-  /// view
-  Ui::Dialog ui; 
+  /// Give base classes the opportunity to do any custom overriding.
+  virtual void customiseInitLayout() = 0;
 };
 
+/*
+Class SliceMDDialog
+Concrete SlicingAlgorithm Dialog geared for SliceMD
+*/
 class SliceMDDialog : public SlicingAlgorithmDialog
 {
     Q_OBJECT
@@ -92,8 +95,15 @@ public:
   SliceMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
   {
   }
+  SliceMDDialog::~SliceMDDialog(){}
+
+  void customiseInitLayout();
 };
 
+/*
+Class BinMDDialog
+Concrete BinMDDialog Dialog geared for BinMD
+*/
 class BinMDDialog : public SlicingAlgorithmDialog
 {
     Q_OBJECT
@@ -101,6 +111,8 @@ public:
   BinMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
   {
   }
+  BinMDDialog::~BinMDDialog(){}
+  void customiseInitLayout();
 };
 
 }
