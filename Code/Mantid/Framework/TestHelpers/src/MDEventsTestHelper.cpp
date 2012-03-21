@@ -239,9 +239,7 @@ namespace MDEventsTestHelper
           );
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
-    ws_sptr->setTo(signal, errorSquared);
-    for (size_t i=0; i<ws_sptr->getNPoints(); i++)
-      ws_sptr->setNumEventsAt(i, numEvents);
+    ws_sptr->setTo(signal, errorSquared, numEvents);
     if (!name.empty())
       AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
     return ws_sptr;
@@ -279,7 +277,7 @@ namespace MDEventsTestHelper
     Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
     ws = new Mantid::MDEvents::MDHistoWorkspace(dimensions);
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
-    ws_sptr->setTo(signal, errorSquared);
+    ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
     if (!name.empty())
       AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
     return ws_sptr;

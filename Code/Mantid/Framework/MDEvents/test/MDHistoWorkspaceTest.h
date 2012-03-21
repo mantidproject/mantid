@@ -840,21 +840,21 @@ public:
     a->setUsingMask(*mask, *c);
     checkWorkspace(a, 1.23, 3.0);
 
-    mask->setTo(1.0, 0.0);
+    mask->setTo(1.0, 0.0, 0.0);
     a->setUsingMask(*mask, *c);
     checkWorkspace(a, 4.56, 2.0);
 
     a->setUsingMask(*mask, 7.89, 11);
     checkWorkspace(a, 7.89, 11*11 );
 
-    mask->setTo(0.0, 0.0);
+    mask->setTo(0.0, 0.0, 0.0);
     a->setUsingMask(*mask, 6.66, 7.77);
     checkWorkspace(a, 7.89, 11*11 );
 
     // Now a partial mask
     mask->setSignalAt(0, 1.0);
     mask->setSignalAt(2, 1.0);
-    a->setTo(1.23, 4.56);
+    a->setTo(1.23, 4.56, 0.0);
     a->setUsingMask(*mask, 6.78, 7.89);
     TS_ASSERT_DELTA( a->getSignalAt(0), 6.78, 1e-5);
     TS_ASSERT_DELTA( a->getSignalAt(1), 1.23, 1e-5);

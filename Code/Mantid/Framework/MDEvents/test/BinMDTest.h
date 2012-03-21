@@ -149,6 +149,7 @@ public:
       {
         // Nothing rejected
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
         TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
       }
       else

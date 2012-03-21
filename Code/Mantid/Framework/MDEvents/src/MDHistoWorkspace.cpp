@@ -113,7 +113,7 @@ namespace MDEvents
 
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
-    this->setTo(nan, nan);
+    this->setTo(nan, nan, nan);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -159,13 +159,15 @@ namespace MDEvents
    *
    * @param signal :: signal value to set
    * @param errorSquared :: error (squared) value to set
+   * @param numEvents :: the number of events in each bin.
    */
-  void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared)
+  void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared, signal_t numEvents)
   {
     for (size_t i=0; i < m_length; i++)
     {
       m_signals[i] = signal;
       m_errorsSquared[i] = errorSquared;
+      m_numEvents[i] = numEvents;
       m_masks[i] = false; //Not masked by default;
     }
   }

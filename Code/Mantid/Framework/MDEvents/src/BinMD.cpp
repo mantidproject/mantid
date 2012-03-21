@@ -323,9 +323,6 @@ namespace MDEvents
   {
     BoxController_sptr bc = ws->getBoxController();
 
-    // Start with signal at 0.0
-    outWS->setTo(0.0, 0.0);
-
     // Cache some data to speed up accessing them a bit
     indexMultiplier = new size_t[m_outD];
     for (size_t d=0; d<m_outD; d++)
@@ -338,6 +335,9 @@ namespace MDEvents
     signals = outWS->getSignalArray();
     errors = outWS->getErrorSquaredArray();
     numEvents = outWS->getNumEventsArray();
+
+    // Start with signal/error/numEvents at 0.0
+    outWS->setTo(0.0, 0.0, 0.0);
 
     // The dimension (in the output workspace) along which we chunk for parallel processing
     // TODO: Find the smartest dimension to chunk against

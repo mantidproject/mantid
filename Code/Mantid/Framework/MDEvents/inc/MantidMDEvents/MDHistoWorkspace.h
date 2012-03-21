@@ -146,7 +146,7 @@ namespace MDEvents
       return m_numEvents;
     }
 
-    void setTo(signal_t signal, signal_t errorSquared);
+    void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);
 
