@@ -884,7 +884,6 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
   const MantidVec &Y = input->readY(spectrum);
 
   const double in_height = Y[i4] - in_bg0;
-//  double in_centre; // = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0]; // TODO should be const
   const double in_centre = input->isHistogramData() ? 0.5*(X[i4]+X[i4+1]) : X[i4];
 
   double mincost = 1.0E10;
@@ -974,6 +973,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   const MantidVec &Y = input->readY(spectrum);
   const MantidVec &E = input->readE(spectrum);
 
+  const double in_centre = input->isHistogramData() ? 0.5*(X[i4]+X[i4+1]) : X[i4];
+  double windowSize = 5. * fabs(X[i0] - X[i2]);
+
   // a) Construct a Workspace to fit for background
   std::vector<double> newX, newY, newE;
   for (size_t i = i_min; i <= i_max; i ++){
@@ -1029,8 +1031,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   g_log.debug() << "Background Type = " << m_backgroundType << "  Function: " << *backgroundFunction << std::endl;
 
   // d) complete fit
-  fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
-  fit->setProperty("EndX", (X[i0] + 5 * (X[i0] - X[i2])));
+  fit->setProperty("StartX", in_centre - windowSize);
+  fit->setProperty("EndX", in_centre + windowSize);
   fit->setProperty("Minimizer", "Levenberg-Marquardt");
   fit->setProperty("CostFunction", "Least squares");
   fit->setProperty("Function", backgroundFunction);
@@ -1060,11 +1062,10 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     a0 = a1 = a2 = 0;
     bkgdchi2 = -100;
   }
-  g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2 <<
-      " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
+  g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2
+                      << " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << "\n";
 
   const double in_height = Y[i4] - in_bg0;
-  const double in_centre = input->isHistogramData() ? 0.5*(X[i4]+X[i4+1]) : X[i4];
 
   // g) Looping on peak width for the best fit
   double mincost = 1.0E10;
@@ -1111,8 +1112,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     //std::string function = ss.str();
 
     // d) Complete fit
-    gfit->setProperty("StartX", (X[i4] - 5 * (X[i0] - X[i2])));
-    gfit->setProperty("EndX",   (X[i4] + 5 * (X[i0] - X[i2])));
+    gfit->setProperty("StartX", in_centre - windowSize);
+    gfit->setProperty("EndX",   in_centre + windowSize);
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
     gfit->setProperty("Function", peakAndBackgroundFunction);
@@ -1169,8 +1170,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   g_log.debug() << "(High Background) Final Fit Function: " << *peakAndBackgroundFunction << std::endl;
 
   // d) complete fit
-  lastfit->setProperty("StartX", (X[i4] - 2 * (X[i0] - X[i2])));
-  lastfit->setProperty("EndX", (X[i4] + 2 * (X[i0] - X[i2])));
+  lastfit->setProperty("StartX", in_centre - windowSize);
+  lastfit->setProperty("EndX", in_centre + windowSize);
   lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
   lastfit->setProperty("CostFunction", "Least squares");
   lastfit->setProperty("Function", peakAndBackgroundFunction);
@@ -1178,7 +1179,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   // e) Fit and get result
   lastfit->executeAsSubAlg();
 
-  this->updateFitResults(lastfit, bestparams, mincost, X[i4], in_height);
+  this->updateFitResults(lastfit, bestparams, mincost, in_centre, in_height);
 
   if (bestparams.size() > 1)
     this->addRow(spectrum, bestparams, mincost, (bestparams[1] < X.front() || bestparams[1] > X.back()));
