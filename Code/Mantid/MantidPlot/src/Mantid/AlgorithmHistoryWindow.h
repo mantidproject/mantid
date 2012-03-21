@@ -100,15 +100,6 @@ private:
   QLineEdit *m_frmwkVersnEdit;
 };
 
-class AlgHistScriptButton:public QPushButton
-{
-  Q_OBJECT
-  public:
-  AlgHistScriptButton(QWidget*w):QPushButton(w){}
-  AlgHistScriptButton(QString title,QWidget* w);
-  ~AlgHistScriptButton();
-};
-
 class AlgHistoryProperties;
 class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
 {
@@ -128,7 +119,6 @@ private:
   AlgEnvHistoryGrpBox* createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory& envHistory);
   AlgHistoryProperties * createAlgHistoryPropWindow();
   void populateAlgHistoryTreeWidget();
-  QPushButton * CreateScriptButton();
   QFileDialog* createScriptDialog(const QString& algName);
   void updateExecSummaryGrpBox(const QString& algName,const int & version,int index);
   void updateAlgHistoryProperties(QString algName,int version,int pos);
@@ -137,7 +127,8 @@ private:
 	
 private:
   const Mantid::API::WorkspaceHistory & m_algHist;
-  QPushButton *m_scriptButton;
+  QPushButton *m_scriptButtonFile;
+  QPushButton *m_scriptButtonClipboard;
   AlgHistoryTreeWidget *m_Historytree;
   AlgHistoryProperties * m_histPropWindow; 
   AlgExecSummaryGrpBox *m_execSumGrpBox ;

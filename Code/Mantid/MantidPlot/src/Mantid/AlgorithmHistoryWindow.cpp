@@ -163,25 +163,6 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
   if(m_frmworkVersionLabel){delete m_frmworkVersionLabel;m_frmworkVersionLabel=NULL;}
   if(m_frmwkVersnEdit){ delete m_frmwkVersnEdit;m_frmwkVersnEdit=NULL;}
 }
-AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(title,w)
-{
-  setGeometry (400,350,160,30);
-  //connect(this,SIGNAL(clicked()),w,SLOT(saveScriptToFile()));
-  QMenu* scriptMenu=new QMenu(this);
-  if(scriptMenu)
-  {QAction* fileAction= new QAction(" To File",this);
-    connect(fileAction,SIGNAL(triggered()),w,SLOT(writeToScriptFile()));
-    QAction* clipboardAction= new QAction(" To Clipboard",this);
-    connect(clipboardAction,SIGNAL(triggered()),w,SLOT(copytoClipboard()));
-    scriptMenu->addAction(fileAction);
-    scriptMenu->addAction(clipboardAction);
-    this->setMenu(scriptMenu);
-  }
-}
-
-AlgHistScriptButton::~AlgHistScriptButton()
-{
-}
 
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Workspace> wsptr):
@@ -222,11 +203,15 @@ MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_exe
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
   // The button at the bottom
-  m_scriptButton = CreateScriptButton();
-  if(m_scriptButton==NULL) QMessageBox::critical(this,"Mantid","Generate script Button Creation failed");
+  m_scriptButtonFile = new QPushButton("Script to File",this);
+  m_scriptButtonClipboard = new QPushButton("Script to Clipboard",this);
+  connect(m_scriptButtonFile,SIGNAL(clicked()), this, SLOT(writeToScriptFile()));
+  connect(m_scriptButtonClipboard,SIGNAL(clicked()), this, SLOT(copytoClipboard()));
+
   QHBoxLayout *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
-  buttonLayout->addWidget(m_scriptButton);
+  buttonLayout->addWidget(m_scriptButtonFile);
+  buttonLayout->addWidget(m_scriptButtonClipboard);
 
   //Main layout
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -241,12 +226,8 @@ AlgorithmHistoryWindow::~AlgorithmHistoryWindow()
   if(m_histPropWindow){ delete m_histPropWindow;m_histPropWindow=NULL;}
   if(m_execSumGrpBox){delete m_execSumGrpBox;m_execSumGrpBox=NULL;}
   if(m_envHistGrpBox){delete m_envHistGrpBox;m_envHistGrpBox=NULL;}
-  if(m_scriptButton){delete m_scriptButton;m_scriptButton=NULL;}
 }
 
-QPushButton * AlgorithmHistoryWindow::CreateScriptButton()
-{	return  (new AlgHistScriptButton("Generate Script",this));//QPushButton("Script",this);
-}
 AlgExecSummaryGrpBox* AlgorithmHistoryWindow::createExecSummaryGrpBox()
 {	
   AlgExecSummaryGrpBox *pgrpBox=new AlgExecSummaryGrpBox("Execution Summary",this);
