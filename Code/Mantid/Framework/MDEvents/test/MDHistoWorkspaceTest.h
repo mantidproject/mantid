@@ -456,9 +456,9 @@ public:
     }
     IMDWorkspace_sptr iws(ws);
     TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
-    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), MDNormalization::NoNormalization), 1.0, 1e-6);
-    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), MDNormalization::VolumeNormalization), 0.25, 1e-6);
-    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), MDNormalization::NumEventsNormalization), 0.1, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), NoNormalization), 1.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization), 0.25, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), NumEventsNormalization), 0.1, 1e-6);
   }
 
   //---------------------------------------------------------------------------------------------------
