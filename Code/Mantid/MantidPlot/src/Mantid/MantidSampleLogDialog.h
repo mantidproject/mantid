@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QTextEdit>
 #include <QLineEdit>
+#include "MantidAPI/ExperimentInfo.h"
 
 //----------------------------------
 // Forward declarations
@@ -52,7 +53,7 @@ class MantidSampleLogDialog : public QDialog
   
 public:
   //Constructor
-  MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags = 0);
+  MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags = 0, size_t experimentInfoIndex = 0);
 
 private slots:
   //Plot logs
@@ -77,6 +78,12 @@ private:
 
   //The workspace name
   QString m_wsname;
+
+  /// Index into the ExperimentInfo list.
+  size_t m_experimentInfoIndex;
+
+  /// The actual experiment info being looked at.
+  Mantid::API::ExperimentInfo_const_sptr m_ws;
 
   //Buttons to do things  
   QPushButton *buttonPlot, *buttonClose;

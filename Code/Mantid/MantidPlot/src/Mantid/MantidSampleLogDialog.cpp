@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -35,11 +36,13 @@ using namespace Mantid::Kernel;
  * @param wsname :: The name of the workspace object from which to retrieve the log files
  * @param mui :: The MantidUI area
  * @param flags :: Window flags that are passed the the QDialog constructor
+ * @param experimentInfoIndex :: optional index in the array of
+ *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
  */
-MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags)  :
-  QDialog(mui->appWindow(), flags), m_wsname(wsname), m_mantidUI(mui)
+MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags, size_t experimentInfoIndex)  :
+  QDialog(mui->appWindow(), flags), m_wsname(wsname), m_experimentInfoIndex(experimentInfoIndex), m_mantidUI(mui)
 {
-  setWindowTitle(tr("MantidPlot - " + wsname + " sample log files"));
+  setWindowTitle(tr("MantidPlot - " + wsname + " sample logs " + QString::number(m_experimentInfoIndex)));
   
   m_tree = new QTreeWidget;
   QStringList titles;
@@ -187,16 +190,12 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
 
     case numTSeries :
       // Calculate the stats
-
       // Get the workspace
-      if (!AnalysisDataService::Instance().doesExist(m_wsname.toStdString()))  return;
-      Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
-          AnalysisDataService::Instance().retrieve(m_wsname.toStdString() ));
-      if (!ws) return;
+      if (!m_ws) return;
 
       // Now the log
       Mantid::Kernel::TimeSeriesPropertyStatistics stats;
-      Mantid::Kernel::Property * logData = ws->run().getLogData(item->text(0).toStdString());
+      Mantid::Kernel::Property * logData = m_ws->run().getLogData(item->text(0).toStdString());
       // Get the stas if its a series of int or double; fail otherwise
       Mantid::Kernel::TimeSeriesProperty<double> * tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
       Mantid::Kernel::TimeSeriesProperty<int> * tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
@@ -276,6 +275,8 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 
 }
 
+
+
 //------------------------------------------------------------------------------------------------
 /**
  * Initialize everything
@@ -283,12 +284,23 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 void MantidSampleLogDialog::init()
 {
   m_tree->clear();
-  ExperimentInfo_const_sptr ws = boost::dynamic_pointer_cast<const ExperimentInfo>(m_mantidUI->getWorkspace(m_wsname));
+
+  // ------------------- Retrieve the proper ExperimentInfo workspace -------------------------------
+  IMDWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_wsname.toStdString());
   if (!ws)
+    throw std::runtime_error("Wrong type of a Workspace");
+  // Is it MatrixWorkspace, which itself is ExperimentInfo?
+  m_ws = boost::dynamic_pointer_cast<const ExperimentInfo>(ws);;
+  if (!m_ws)
   {
-      throw std::runtime_error("Wrong type of a Workspace");
+    boost::shared_ptr<const MultipleExperimentInfos> mei = boost::dynamic_pointer_cast<const MultipleExperimentInfos>(m_ws);
+    if (mei)
+      m_ws = mei->getExperimentInfo(static_cast<uint16_t>(m_experimentInfoIndex) );
   }
-  const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
+  if (!m_ws)
+    throw std::runtime_error("Wrong type of a Workspace");
+
+  const std::vector< Mantid::Kernel::Property * > & logData = m_ws->run().getLogData();
   std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
   int max_length(0);
   for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
