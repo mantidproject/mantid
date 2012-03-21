@@ -1033,7 +1033,9 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
     }
 
     //Covert the pixel ID from DAS pixel to our pixel ID
-    if (this->using_mapping_file)
+    // downstream monitor pixel for SNAP
+    if(pid >=1342177280) pid = 1179648;
+    else if (this->using_mapping_file)
     {
       PixelType unmapped_pid = pid % this->numpixel;
       pid = this->pixelmap[unmapped_pid];
