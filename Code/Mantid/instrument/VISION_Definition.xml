@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-03-16 16:10:45.753992">
+<instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-01-01 16:59:24.385032">
   <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
+    <indirect-neutronic-positions/>
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
@@ -1384,9 +1385,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="135.0"/>
           </rot>
         </rot>
+        <neutronic y="0.365857048586" x="-0.365857048586" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank1">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank2">
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="-0.365857048586" z="-0.01">
@@ -1395,9 +1402,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="135.0"/>
           </rot>
         </rot>
+        <neutronic y="0.365857048586" x="-0.365857048586" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank2">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank4">
     <component type="eightpack-inelastic">
       <location y="0.0" x="-0.5174" z="0.01">
@@ -1406,9 +1419,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
           </rot>
         </rot>
+        <neutronic y="0.0" x="-0.5174" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank4">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank5">
     <component type="eightpack-inelastic">
       <location y="0.0" x="-0.5174" z="-0.01">
@@ -1417,9 +1436,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
           </rot>
         </rot>
+        <neutronic y="0.0" x="-0.5174" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank5">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank7">
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="-0.365857048586" z="0.01">
@@ -1428,9 +1453,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="45.0"/>
           </rot>
         </rot>
+        <neutronic y="-0.365857048586" x="-0.365857048586" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank7">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank8">
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="-0.365857048586" z="-0.01">
@@ -1439,9 +1470,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="45.0"/>
           </rot>
         </rot>
+        <neutronic y="-0.365857048586" x="-0.365857048586" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank8">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank10">
     <component type="eightpack-inelastic">
       <location y="-0.5174" x="-3.16816126939e-17" z="0.01">
@@ -1450,9 +1487,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="0.0"/>
           </rot>
         </rot>
+        <neutronic y="-0.5174" x="-3.16816126939e-17" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank10">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank11">
     <component type="eightpack-inelastic">
       <location y="-0.5174" x="-3.16816126939e-17" z="-0.01">
@@ -1461,9 +1504,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="0.0"/>
           </rot>
         </rot>
+        <neutronic y="-0.5174" x="-3.16816126939e-17" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank11">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank13">
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="0.365857048586" z="0.01">
@@ -1472,9 +1521,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="-45.0"/>
           </rot>
         </rot>
+        <neutronic y="-0.365857048586" x="0.365857048586" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank13">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank14">
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="0.365857048586" z="-0.01">
@@ -1483,9 +1538,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="-45.0"/>
           </rot>
         </rot>
+        <neutronic y="-0.365857048586" x="0.365857048586" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank14">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank16">
     <component type="eightpack-inelastic">
       <location y="6.33632253879e-17" x="0.5174" z="0.01">
@@ -1494,9 +1555,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="270.0"/>
           </rot>
         </rot>
+        <neutronic y="6.33632253879e-17" x="0.5174" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank16">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank17">
     <component type="eightpack-inelastic">
       <location y="6.33632253879e-17" x="0.5174" z="-0.01">
@@ -1505,9 +1572,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="270.0"/>
           </rot>
         </rot>
+        <neutronic y="6.33632253879e-17" x="0.5174" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank17">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank19">
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="0.365857048586" z="0.01">
@@ -1516,9 +1589,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="225.0"/>
           </rot>
         </rot>
+        <neutronic y="0.365857048586" x="0.365857048586" z="0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank19">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <type name="bank20">
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="0.365857048586" z="-0.01">
@@ -1527,9 +1606,15 @@
             <rot axis-z="1" axis-x="0" axis-y="0" val="225.0"/>
           </rot>
         </rot>
+        <neutronic y="0.365857048586" x="0.365857048586" z="-0.5174"/>
       </location>
     </component>
   </type>
+  <component-link name="bank20">
+    <parameter name="Efixed">
+      <value units="meV" val="3.64"/>
+    </parameter>
+  </component-link>
   <idlist idname="inelastic">
     <id start="0" end="1023"/>
     <id start="1024" end="2047"/>
@@ -1550,14 +1635,30 @@
   <type name="eightpack-inelastic">
     <properties/>
     <component type="tube-inelastic">
-      <location x="-0.04445" name="tube1"/>
-      <location x="-0.03175" name="tube2"/>
-      <location x="-0.01905" name="tube3"/>
-      <location x="-0.00635" name="tube4"/>
-      <location x="0.00635" name="tube5"/>
-      <location x="0.01905" name="tube6"/>
-      <location x="0.03175" name="tube7"/>
-      <location x="0.04445" name="tube8"/>
+      <location x="-0.04445" name="tube1">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="-0.03175" name="tube2">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="-0.01905" name="tube3">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="-0.00635" name="tube4">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="0.00635" name="tube5">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="0.01905" name="tube6">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="0.03175" name="tube7">
+        <neutronic x="0.0"/>
+      </location>
+      <location x="0.04445" name="tube8">
+        <neutronic x="0.0"/>
+      </location>
     </component>
   </type>
   <!--ELASTIC 8-PACK-->
@@ -1578,134 +1679,390 @@
   <type name="tube-inelastic" outline="yes">
     <properties/>
     <component type="pixel-inelastic-tube">
-      <location y="-0.0803299804687" name="pixel1"/>
-      <location y="-0.0790649414062" name="pixel2"/>
-      <location y="-0.0777999023437" name="pixel3"/>
-      <location y="-0.0765348632812" name="pixel4"/>
-      <location y="-0.0752698242187" name="pixel5"/>
-      <location y="-0.0740047851562" name="pixel6"/>
-      <location y="-0.0727397460937" name="pixel7"/>
-      <location y="-0.0714747070313" name="pixel8"/>
-      <location y="-0.0702096679688" name="pixel9"/>
-      <location y="-0.0689446289062" name="pixel10"/>
-      <location y="-0.0676795898437" name="pixel11"/>
-      <location y="-0.0664145507812" name="pixel12"/>
-      <location y="-0.0651495117187" name="pixel13"/>
-      <location y="-0.0638844726562" name="pixel14"/>
-      <location y="-0.0626194335937" name="pixel15"/>
-      <location y="-0.0613543945312" name="pixel16"/>
-      <location y="-0.0600893554687" name="pixel17"/>
-      <location y="-0.0588243164062" name="pixel18"/>
-      <location y="-0.0575592773437" name="pixel19"/>
-      <location y="-0.0562942382812" name="pixel20"/>
-      <location y="-0.0550291992187" name="pixel21"/>
-      <location y="-0.0537641601562" name="pixel22"/>
-      <location y="-0.0524991210937" name="pixel23"/>
-      <location y="-0.0512340820312" name="pixel24"/>
-      <location y="-0.0499690429687" name="pixel25"/>
-      <location y="-0.0487040039062" name="pixel26"/>
-      <location y="-0.0474389648437" name="pixel27"/>
-      <location y="-0.0461739257812" name="pixel28"/>
-      <location y="-0.0449088867187" name="pixel29"/>
-      <location y="-0.0436438476562" name="pixel30"/>
-      <location y="-0.0423788085937" name="pixel31"/>
-      <location y="-0.0411137695312" name="pixel32"/>
-      <location y="-0.0398487304687" name="pixel33"/>
-      <location y="-0.0385836914062" name="pixel34"/>
-      <location y="-0.0373186523437" name="pixel35"/>
-      <location y="-0.0360536132812" name="pixel36"/>
-      <location y="-0.0347885742187" name="pixel37"/>
-      <location y="-0.0335235351562" name="pixel38"/>
-      <location y="-0.0322584960937" name="pixel39"/>
-      <location y="-0.0309934570312" name="pixel40"/>
-      <location y="-0.0297284179687" name="pixel41"/>
-      <location y="-0.0284633789062" name="pixel42"/>
-      <location y="-0.0271983398437" name="pixel43"/>
-      <location y="-0.0259333007812" name="pixel44"/>
-      <location y="-0.0246682617188" name="pixel45"/>
-      <location y="-0.0234032226563" name="pixel46"/>
-      <location y="-0.0221381835937" name="pixel47"/>
-      <location y="-0.0208731445312" name="pixel48"/>
-      <location y="-0.0196081054687" name="pixel49"/>
-      <location y="-0.0183430664062" name="pixel50"/>
-      <location y="-0.0170780273437" name="pixel51"/>
-      <location y="-0.0158129882812" name="pixel52"/>
-      <location y="-0.0145479492187" name="pixel53"/>
-      <location y="-0.0132829101562" name="pixel54"/>
-      <location y="-0.0120178710937" name="pixel55"/>
-      <location y="-0.0107528320312" name="pixel56"/>
-      <location y="-0.00948779296875" name="pixel57"/>
-      <location y="-0.00822275390625" name="pixel58"/>
-      <location y="-0.00695771484375" name="pixel59"/>
-      <location y="-0.00569267578125" name="pixel60"/>
-      <location y="-0.00442763671875" name="pixel61"/>
-      <location y="-0.00316259765625" name="pixel62"/>
-      <location y="-0.00189755859375" name="pixel63"/>
-      <location y="-0.00063251953125" name="pixel64"/>
-      <location y="0.00063251953125" name="pixel65"/>
-      <location y="0.00189755859375" name="pixel66"/>
-      <location y="0.00316259765625" name="pixel67"/>
-      <location y="0.00442763671875" name="pixel68"/>
-      <location y="0.00569267578125" name="pixel69"/>
-      <location y="0.00695771484375" name="pixel70"/>
-      <location y="0.00822275390625" name="pixel71"/>
-      <location y="0.00948779296875" name="pixel72"/>
-      <location y="0.0107528320313" name="pixel73"/>
-      <location y="0.0120178710937" name="pixel74"/>
-      <location y="0.0132829101562" name="pixel75"/>
-      <location y="0.0145479492187" name="pixel76"/>
-      <location y="0.0158129882812" name="pixel77"/>
-      <location y="0.0170780273437" name="pixel78"/>
-      <location y="0.0183430664062" name="pixel79"/>
-      <location y="0.0196081054687" name="pixel80"/>
-      <location y="0.0208731445312" name="pixel81"/>
-      <location y="0.0221381835937" name="pixel82"/>
-      <location y="0.0234032226563" name="pixel83"/>
-      <location y="0.0246682617188" name="pixel84"/>
-      <location y="0.0259333007813" name="pixel85"/>
-      <location y="0.0271983398438" name="pixel86"/>
-      <location y="0.0284633789063" name="pixel87"/>
-      <location y="0.0297284179688" name="pixel88"/>
-      <location y="0.0309934570312" name="pixel89"/>
-      <location y="0.0322584960937" name="pixel90"/>
-      <location y="0.0335235351562" name="pixel91"/>
-      <location y="0.0347885742187" name="pixel92"/>
-      <location y="0.0360536132812" name="pixel93"/>
-      <location y="0.0373186523437" name="pixel94"/>
-      <location y="0.0385836914062" name="pixel95"/>
-      <location y="0.0398487304687" name="pixel96"/>
-      <location y="0.0411137695312" name="pixel97"/>
-      <location y="0.0423788085937" name="pixel98"/>
-      <location y="0.0436438476562" name="pixel99"/>
-      <location y="0.0449088867187" name="pixel100"/>
-      <location y="0.0461739257812" name="pixel101"/>
-      <location y="0.0474389648438" name="pixel102"/>
-      <location y="0.0487040039063" name="pixel103"/>
-      <location y="0.0499690429688" name="pixel104"/>
-      <location y="0.0512340820313" name="pixel105"/>
-      <location y="0.0524991210938" name="pixel106"/>
-      <location y="0.0537641601563" name="pixel107"/>
-      <location y="0.0550291992188" name="pixel108"/>
-      <location y="0.0562942382813" name="pixel109"/>
-      <location y="0.0575592773438" name="pixel110"/>
-      <location y="0.0588243164063" name="pixel111"/>
-      <location y="0.0600893554688" name="pixel112"/>
-      <location y="0.0613543945312" name="pixel113"/>
-      <location y="0.0626194335937" name="pixel114"/>
-      <location y="0.0638844726562" name="pixel115"/>
-      <location y="0.0651495117187" name="pixel116"/>
-      <location y="0.0664145507812" name="pixel117"/>
-      <location y="0.0676795898437" name="pixel118"/>
-      <location y="0.0689446289062" name="pixel119"/>
-      <location y="0.0702096679687" name="pixel120"/>
-      <location y="0.0714747070312" name="pixel121"/>
-      <location y="0.0727397460937" name="pixel122"/>
-      <location y="0.0740047851562" name="pixel123"/>
-      <location y="0.0752698242187" name="pixel124"/>
-      <location y="0.0765348632812" name="pixel125"/>
-      <location y="0.0777999023437" name="pixel126"/>
-      <location y="0.0790649414062" name="pixel127"/>
-      <location y="0.0803299804687" name="pixel128"/>
+      <location y="-0.0803299804687" name="pixel1">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0790649414062" name="pixel2">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0777999023437" name="pixel3">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0765348632812" name="pixel4">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0752698242187" name="pixel5">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0740047851562" name="pixel6">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0727397460937" name="pixel7">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0714747070313" name="pixel8">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0702096679688" name="pixel9">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0689446289062" name="pixel10">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0676795898437" name="pixel11">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0664145507812" name="pixel12">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0651495117187" name="pixel13">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0638844726562" name="pixel14">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0626194335937" name="pixel15">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0613543945312" name="pixel16">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0600893554687" name="pixel17">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0588243164062" name="pixel18">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0575592773437" name="pixel19">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0562942382812" name="pixel20">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0550291992187" name="pixel21">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0537641601562" name="pixel22">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0524991210937" name="pixel23">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0512340820312" name="pixel24">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0499690429687" name="pixel25">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0487040039062" name="pixel26">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0474389648437" name="pixel27">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0461739257812" name="pixel28">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0449088867187" name="pixel29">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0436438476562" name="pixel30">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0423788085937" name="pixel31">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0411137695312" name="pixel32">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0398487304687" name="pixel33">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0385836914062" name="pixel34">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0373186523437" name="pixel35">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0360536132812" name="pixel36">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0347885742187" name="pixel37">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0335235351562" name="pixel38">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0322584960937" name="pixel39">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0309934570312" name="pixel40">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0297284179687" name="pixel41">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0284633789062" name="pixel42">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0271983398437" name="pixel43">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0259333007812" name="pixel44">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0246682617188" name="pixel45">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0234032226563" name="pixel46">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0221381835937" name="pixel47">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0208731445312" name="pixel48">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0196081054687" name="pixel49">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0183430664062" name="pixel50">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0170780273437" name="pixel51">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0158129882812" name="pixel52">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0145479492187" name="pixel53">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0132829101562" name="pixel54">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0120178710937" name="pixel55">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.0107528320312" name="pixel56">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00948779296875" name="pixel57">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00822275390625" name="pixel58">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00695771484375" name="pixel59">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00569267578125" name="pixel60">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00442763671875" name="pixel61">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00316259765625" name="pixel62">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00189755859375" name="pixel63">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="-0.00063251953125" name="pixel64">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00063251953125" name="pixel65">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00189755859375" name="pixel66">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00316259765625" name="pixel67">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00442763671875" name="pixel68">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00569267578125" name="pixel69">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00695771484375" name="pixel70">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00822275390625" name="pixel71">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.00948779296875" name="pixel72">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0107528320313" name="pixel73">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0120178710937" name="pixel74">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0132829101562" name="pixel75">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0145479492187" name="pixel76">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0158129882812" name="pixel77">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0170780273437" name="pixel78">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0183430664062" name="pixel79">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0196081054687" name="pixel80">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0208731445312" name="pixel81">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0221381835937" name="pixel82">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0234032226563" name="pixel83">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0246682617188" name="pixel84">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0259333007813" name="pixel85">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0271983398438" name="pixel86">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0284633789063" name="pixel87">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0297284179688" name="pixel88">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0309934570312" name="pixel89">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0322584960937" name="pixel90">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0335235351562" name="pixel91">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0347885742187" name="pixel92">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0360536132812" name="pixel93">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0373186523437" name="pixel94">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0385836914062" name="pixel95">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0398487304687" name="pixel96">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0411137695312" name="pixel97">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0423788085937" name="pixel98">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0436438476562" name="pixel99">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0449088867187" name="pixel100">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0461739257812" name="pixel101">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0474389648438" name="pixel102">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0487040039063" name="pixel103">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0499690429688" name="pixel104">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0512340820313" name="pixel105">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0524991210938" name="pixel106">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0537641601563" name="pixel107">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0550291992188" name="pixel108">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0562942382813" name="pixel109">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0575592773438" name="pixel110">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0588243164063" name="pixel111">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0600893554688" name="pixel112">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0613543945312" name="pixel113">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0626194335937" name="pixel114">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0638844726562" name="pixel115">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0651495117187" name="pixel116">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0664145507812" name="pixel117">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0676795898437" name="pixel118">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0689446289062" name="pixel119">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0702096679687" name="pixel120">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0714747070312" name="pixel121">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0727397460937" name="pixel122">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0740047851562" name="pixel123">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0752698242187" name="pixel124">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0765348632812" name="pixel125">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0777999023437" name="pixel126">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0790649414062" name="pixel127">
+        <neutronic y="0.0"/>
+      </location>
+      <location y="0.0803299804687" name="pixel128">
+        <neutronic y="0.0"/>
+      </location>
     </component>
   </type>
   <!--BACKSCATTERING LONG TUBE-->
