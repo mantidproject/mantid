@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "VISION" date = "2012-01-01T00:00:00">
+
+<component-link name = "VISION">
+
+<parameter name="deltaE-mode" type="string">
+    <value val="indirect"/>
+</parameter>
+
+<!-- These properties are neceessary for use in the Indirect CTE interface. -->
+<parameter name="analysers" type="string">
+    <value val="graphite" />
+</parameter>
+<parameter name="refl-graphite" type="string">
+    <value val="002" />
+</parameter>
+<!-- Available options are "Show" or "Hide". -->
+<parameter name="cm-1-convert-choice" type="string">
+    <value val="Show" />
+</parameter>
+<parameter name="save-aclimax-choice" type="string">
+    <value val="Show" />
+</parameter>
+  
+<!-- This parameter will be taken as a default value for the rebinning of
+        the data in DeltaE. The existence of the parameter will make rebinning
+        the default, as opposed to not rebinning.
+        This is necessary so that the spectra can be grouped.
+-->
+<parameter name="rebin-default" type="string">
+    <value val="-2.5,0.015,3,-0.005,1000" />
+</parameter>
+
+<!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.MonitorArea" >
+    <value val="5.391011e-5" />
+</parameter>
+<parameter name="Workflow.MonitorThickness" >
+    <value val="0.013" />
+</parameter>
+<parameter name="Workflow.MonitorScalingFactor">
+    <value val="1e9" />
+</parameter>
+<parameter name="Workflow.UnwrapMonitor" type="string">
+    <value val="Never" />
+</parameter>
+<parameter name="Workflow.ChopDataIfGreaterThan">
+    <value val="40000" />
+</parameter>
+<parameter name="Workflow.GroupingMethod" type="string">
+    <value val="Fixed" />
+</parameter>
+<parameter name="Workflow.FixedGrouping" type="string">
+    <value val="0-1023,1024-2047,4096-5119,5120-6143,8192-9215,9216-10239,12288-13311,13312-14335,16384-17407,17408-18431,20480-21503,21504-22527,24576-25599,25600-26623"/>
+</parameter>
+<parameter name="Workflow.Masking" type="string">
+    <value val="IdentifyNoisyDetectors" />
+</parameter>
+  
+</component-link>
+
+</parameter-file>
