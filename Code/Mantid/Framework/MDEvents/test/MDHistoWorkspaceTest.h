@@ -61,12 +61,14 @@ public:
   }
 
   /** Check that a workspace has the right signal/error*/
-  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal, double expectedErrorSquared)
+  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal, double expectedErrorSquared,
+      double expectedNumEvents=1.0)
   {
     for (size_t i=0; i < ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA( ws->getSignalAt(i), expectedSignal, 1e-5 );
       TS_ASSERT_DELTA( ws->getErrorAt(i), std::sqrt(expectedErrorSquared), 1e-5 );
+      TS_ASSERT_DELTA( ws->getNumEventsAt(i), expectedNumEvents, 1e-5 );
     }
   }
 
@@ -202,11 +204,13 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
     a->addExperimentInfo( ExperimentInfo_sptr(new ExperimentInfo()) );
+    for (size_t i=0; i<a->getNPoints(); i++)
+      a->setNumEventsAt(i, 123.);
     MDHistoWorkspace_sptr b( new MDHistoWorkspace(*a));
     TS_ASSERT_EQUALS( b->getNumDims(), a->getNumDims() );
     TS_ASSERT_EQUALS( b->getNPoints(), a->getNPoints() );
     TS_ASSERT_EQUALS( b->getNumExperimentInfo(), a->getNumExperimentInfo() );
-    checkWorkspace(b, 1.23, 3.234);
+    checkWorkspace(b, 1.23, 3.234, 123.);
   }
 
   //--------------------------------------------------------------------------------------
@@ -411,6 +415,15 @@ public:
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
+  //---------------------------------------------------------------------------------------------------
+  void test_getNumEvents()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    ws->setNumEventsAt(0, 123);
+    ws->setNumEventsAt(1, 345);
+    TS_ASSERT_DELTA( ws->getNumEventsAt(0), 123, 1e-6);
+    TS_ASSERT_DELTA( ws->getNumEventsAt(1), 345, 1e-6);
+  }
 
   //---------------------------------------------------------------------------------------------------
   void test_getSignalAtCoord()
@@ -429,6 +442,23 @@ public:
     TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02)) ) );
     TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5)) ) );
     TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02)) ) );
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  void test_getSignalAtCoord_withNormalization()
+  {
+    // 2D workspace with signal[i] = i (linear index)
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
+    for (size_t i=0; i<100; i++)
+    {
+      ws->setSignalAt(i, double(i));
+      ws->setNumEventsAt(i, 10.0);
+    }
+    IMDWorkspace_sptr iws(ws);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), MDNormalization::NoNormalization), 1.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), MDNormalization::VolumeNormalization), 0.25, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), MDNormalization::NumEventsNormalization), 0.1, 1e-6);
   }
 
   //---------------------------------------------------------------------------------------------------

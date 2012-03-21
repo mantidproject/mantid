@@ -64,12 +64,14 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
     m_errorsSquared = new signal_t[m_length];
+    m_numEvents = new signal_t[m_length];
     m_masks = new bool[m_length];
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {
       m_signals[i] = other.m_signals[i];
       m_errorsSquared[i] = other.m_errorsSquared[i];
+      m_numEvents[i] = other.m_numEvents[i];
       m_masks[i] = other.m_masks[i];
     }
   }
@@ -82,6 +84,7 @@ namespace MDEvents
   {
     delete [] m_signals;
     delete [] m_errorsSquared;
+    delete [] m_numEvents;
     delete [] indexMultiplier;
     delete [] m_vertexesArray;
     delete [] m_boxLength;
@@ -105,6 +108,7 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
     m_errorsSquared = new signal_t[m_length];
+    m_numEvents = new signal_t[m_length];
     m_masks = new bool[m_length];
 
     // Initialize them to NAN (quickly)
@@ -325,8 +329,7 @@ namespace MDEvents
       case VolumeNormalization:
         return m_signals[linearIndex] * m_inverseVolume;
       case NumEventsNormalization:
-        //TOOD: track # of events
-        return m_signals[linearIndex] * 1;
+        return m_signals[linearIndex] / m_numEvents[linearIndex];
       }
       // Should not reach here
       return m_signals[linearIndex];
@@ -567,8 +570,7 @@ namespace MDEvents
             normalizer = m_inverseVolume;
             break;
           case NumEventsNormalization:
-            // TODO: Implement when we track # of events in MDHisto.
-            normalizer = 1.0;
+            normalizer = 1.0 / m_numEvents[linearIndex];
             break;
           }
           // And add the normalized signal/error to the list too
