@@ -73,7 +73,7 @@ struct COORD_TRANSFORMER
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
-    inline bool calcYDepCoordinatese(std::vector<coord_t> &Coord,uint64_t i){
+    inline bool calcYDepCoordinatese(std::vector<coord_t> &Coord,size_t i){
         UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop

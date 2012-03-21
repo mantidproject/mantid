@@ -1,5 +1,5 @@
-#ifndef H_MDWS_SLICE
-#define H_MDWS_SLICE
+#ifndef H_MDWS_SLICEDESCR
+#define H_MDWS_SLICEDESCR
 
 #include "MantidMDEvents/MDWSDescription.h"
 
@@ -7,7 +7,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
- /***  The class responsible for building Momentums Transformation in ConvertToMDEvents algorithm
+ /***  The class responsible for building Momentums Transformation Matrix for ConvertToMDEvents algorithm
     *  from the input parameters of the algorithm and experimental parameters, retrieved from input and 
     *  (if availible) output MD workspace
     *
@@ -35,10 +35,10 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MDWSSlice
+class MDWSSliceDescr
 {
 public:
-    MDWSSlice(){};
+    MDWSSliceDescr(){};
 };
 
 }

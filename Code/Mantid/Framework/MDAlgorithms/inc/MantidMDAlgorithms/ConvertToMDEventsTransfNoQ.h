@@ -59,7 +59,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
        return true;
     }
 
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
         CONV_UNITS_FROM.updateConversion(i);
         if(pYAxis){   

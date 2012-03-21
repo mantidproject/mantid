@@ -54,7 +54,7 @@ struct UNITS_CONVERSION
     inline void     setUpConversion(IConvertToMDEventsMethods const * const pHost,const std::string &targ_units )
     {UNUSED_ARG(pHost);UNUSED_ARG(targ_units);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
-    inline void     updateConversion(uint64_t i){UNUSED_ARG(i);}
+    inline void     updateConversion(size_t i){UNUSED_ARG(i);}
     /// Convert current X variable into the units requested;
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {
@@ -84,7 +84,7 @@ struct UNITS_CONVERSION<ConvFast,Type>
       
     };
     // does nothing
-    inline void    updateConversion(const uint64_t ){}
+    inline void    updateConversion(const size_t ){}
     // convert X coordinate using power series
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {
@@ -129,7 +129,7 @@ struct UNITS_CONVERSION<ConvFromTOF,Type>
        emode     =  pHost->getEMode();
 
        };
-    inline void updateConversion(uint64_t i)
+    inline void updateConversion(size_t i)
     {
         double delta;
         pWSUnit->initialize(L1,(*pL2)[i],(*pTwoTheta)[i],emode,efix,delta);
@@ -189,7 +189,7 @@ struct UNITS_CONVERSION<ConvByTOF,Type>
        emode     =  pHost->getEMode();
     };
 
-    inline void updateConversion(uint64_t i)
+    inline void updateConversion(size_t i)
     {
         double delta;
         pWSUnit->initialize(L1,(*pL2)[i],(*pTwoTheta)[i],emode,efix,delta);

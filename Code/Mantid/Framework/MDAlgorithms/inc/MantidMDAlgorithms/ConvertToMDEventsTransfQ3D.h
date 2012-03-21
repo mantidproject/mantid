@@ -10,7 +10,7 @@ namespace MDAlgorithms
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
-  * This file defines  specializations of generic coordinate transformation templated to the Q3D case
+  * This file defines  specializations of generic coordinate transformation templated to the 3D momentum conversion case
   *
   * @date 11-10-2011
 
@@ -56,7 +56,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type,Sample>
           return true;
     }
     //
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
            UNUSED_ARG(Coord); 
            CONV_UNITS_FROM.updateConversion(i);
@@ -138,7 +138,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type,Sample>
         return true;
     }
     //
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
           UNUSED_ARG(Coord); 
           CONV_UNITS_FROM.updateConversion(i);

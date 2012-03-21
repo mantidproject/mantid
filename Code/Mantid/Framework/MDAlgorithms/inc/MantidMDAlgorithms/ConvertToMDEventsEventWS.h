@@ -28,7 +28,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** The macrodefinitions for ConvertToMDEvents function, making the conversion from  into the MD events 
+/** The macrodefinitions for ConvertToMDEvents class, making the conversion from Events WS to the MD events WS
    *
    * @date 11-10-2011
 

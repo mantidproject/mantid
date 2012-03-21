@@ -67,7 +67,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type,Sample>
          return true;
     }
     //
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
         UNUSED_ARG(Coord); 
         CONV_UNITS_FROM.updateConversion(i);
@@ -163,7 +163,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type,Sample>
         return true;
     }
     //
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
         UNUSED_ARG(Coord); 
         CONV_UNITS_FROM.updateConversion(i);

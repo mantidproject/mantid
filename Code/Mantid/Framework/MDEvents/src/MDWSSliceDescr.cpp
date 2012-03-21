@@ -1,4 +1,4 @@
-#include "MantidMDEvents/MDWSSlice.h"
+#include "MantidMDEvents/MDWSSliceDescr.h"
 
 
 namespace Mantid

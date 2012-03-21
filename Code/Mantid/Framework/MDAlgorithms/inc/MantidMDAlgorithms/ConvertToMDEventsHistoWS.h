@@ -108,7 +108,7 @@ public:
 
   
         //External loop over the spectra:
-        for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
+        for (size_t i = 0; i < nValidSpectra; ++i)
         {
             size_t iSpctr             = pDetLoc->detIDMap[i];
             int32_t det_id            = pDetLoc->det_id[i];
