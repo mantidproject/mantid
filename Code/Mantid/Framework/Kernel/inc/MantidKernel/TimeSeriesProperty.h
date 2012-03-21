@@ -182,6 +182,22 @@ private:
     // 1. Sort
     sort();
 
+    // 2. Extreme value
+    if (t <= mP[0].time())
+      return 0;
+    else if (t >= mP.back().time())
+      return (int(mP.size()-1));
+
+    // 3. Find by lower_bound()
+    typename std::vector<TimeValueUnit<TYPE> >::iterator fid;
+    TimeValueUnit<TYPE> temp(t, mP[0].value());
+    fid = std::lower_bound(mP.begin(), mP.end(), temp);
+
+    int newindex = int(fid-mP.begin());
+    if (fid->time() > t)
+      newindex --;
+
+    /* TODO Remove this section after the code is stable
     // 2. Define something
     typename std::vector<TimeValueUnit<TYPE> >::iterator ith; // head
     typename std::vector<TimeValueUnit<TYPE> >::iterator itt; // tail
@@ -243,7 +259,13 @@ private:
     if (index < 0)
       throw std::runtime_error("Index found is error!");
 
-    return index;
+    if (newindex != index)
+    {
+      throw std::runtime_error("Wrong in Flag1124!");
+    }
+    */
+
+    return newindex;
   }
 
   /*
@@ -282,6 +304,7 @@ private:
     // 2. Sort
     sort();
 
+    /* TODO  Delete this section after code is stable
     // 3. Define something
     typename std::vector<TimeValueUnit<TYPE> >::iterator ith; // head
     typename std::vector<TimeValueUnit<TYPE> >::iterator itt; // tail
@@ -349,8 +372,20 @@ private:
 
     if (index < 0)
       throw std::runtime_error("Index found is error!");
+    */
 
-    return index;
+    // 3. Construct the pair for comparison and do lower_bound()
+    TimeValueUnit<TYPE> temppair(t, mP[0].value());
+    typename std::vector<TimeValueUnit<TYPE> >::iterator fid;
+    fid = std::lower_bound((mP.begin()+istart), (mP.begin()+iend+1), temppair);
+    if (fid == mP.end())
+      throw std::runtime_error("Cannot find data");
+
+    // 4. Calcualte return value
+    Kernel::DateAndTime indextime = fid->time();
+    size_t index = size_t(fid-mP.begin());
+
+    return int(index);
   } // ENDDEF FUNCTION
 
   /*
@@ -1010,10 +1045,15 @@ public:
    */
   void addValue(const Kernel::DateAndTime &time, const TYPE value)
   {
-    m_size ++;
+
     TimeValueUnit<TYPE> newvalue(time, value);
     mP.push_back(newvalue);
-    mPropSortedFlag = false;
+
+    m_size ++;
+    if (m_size == 1 || ( mPropSortedFlag && !(*mP.rbegin() < *(mP.rbegin()+1)) ) )
+      mPropSortedFlag = false;
+    else
+      mPropSortedFlag = false;
     mFilterApplied = false;
 
     return;
@@ -1331,8 +1371,6 @@ public:
       // 3. Within boundary
       int index = this->findIndex(t);
 
-      std::cout << "DB512:  Index = " << index << "  for t = " << t << std::endl;
-
       if (index < 0 || index >= int(mP.size()))
         throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
 
@@ -1340,7 +1378,7 @@ public:
     }
 
     return value;
-  }
+  } // END-DEF getSinglevalue()
 
   //-----------------------------------------------------------------------------------------------
   /** Returns total value, added up for all times regardless of filter
@@ -1719,7 +1757,6 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Updates m_size.
-   * TODO: Warning! COULD BE VERY SLOW, since it counts each entry each time.
    */
   void countSize() const
   {
