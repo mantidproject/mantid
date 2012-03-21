@@ -211,8 +211,8 @@ void ConvertToMDEvents::exec()
     //identify if u,v are present among input parameters and use defaults if not
     std::vector<double> ut = getProperty("UProj");
     std::vector<double> vt = getProperty("VProj");
-    this->checkUVsettings(ut,vt,TWS);
-  }
+ //   this->checkUVsettings(ut,vt,TWS);
+  } // else uv ignored -> later it can be modified to set ub matrix if no given, but overcomplicate things. 
   // Collate and Analyze the requests to the job, specified by the input parameters
 
  // what dimension names requested by the user by:
@@ -223,10 +223,11 @@ void ConvertToMDEvents::exec()
     //c) other dim property;
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
     //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units be converted to hkl
-    bool convert_to_hkl                      = getProperty("QinHKL");
+    bool convert_to_hkl                       = getProperty("QinHKL");
+
 
     // Identify the algorithm to deploy on workspace. Also fills in the target workspace description
-    std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,pWSWrapper->getMaxNDim(),TWS);
+    std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim(),TWS);
 
     // set the min and max values for the dimensions from the input porperties
     TWS.dimMin = getProperty("MinValues");
@@ -236,17 +237,18 @@ void ConvertToMDEvents::exec()
 
     if(create_new_ws)
     {
+        TWS.convert_to_hkl = convert_to_hkl;
         // set up target coordinate system
-        TWS.rotMatrix = getTransfMatrix(inWS2D->name(),TWS);
+      //  TWS.rotMatrix = getTransfMatrix(inWS2D->name(),TWS);
         // identify/set the (multi)dimension's names to use
         // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
         // also (temporary) redefines transformation matrix in convert to hkl mode
-        this->buildDimensions(TWS);
+      //  this->buildDimensions(TWS);
     }
     else // user input is mainly ignored and everything is in old workspac
     {  
         // existing workspace defines target coordinate system:
-        TWS.rotMatrix = getTransfMatrix(spws,inWS2D);
+       // TWS.rotMatrix = getTransfMatrix(spws,inWS2D);
         // dimensions are already build
 
         MDEvents::MDWSDescription OLDWSD;
@@ -318,170 +320,6 @@ void ConvertToMDEvents::exec()
   // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
   inWS2D.reset();
   return;
-}
-
-
-
-
-/** The matrix to convert neutron momentums into the target coordinate system   */
-std::vector<double> ConvertToMDEvents::getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription)const
-{
-  
-    Kernel::Matrix<double> mat(3,3,true);
-    Kernel::Matrix<double> umat;
-    
-
-    bool has_lattice(true);
-    if(!TargWSDescription.pLatt.get())  has_lattice=false;
-
-    // warn about 3D case without lattice
-    if(!has_lattice && ParamParser.getQMode(TargWSDescription.AlgID)==Q3D)
-    {
-        convert_log.warning()<<
-        " Can not obtain transformation matrix from the input workspace: "<<inWsName<<
-        " as no oriented lattice has been defined. \n"
-        " Will use unit transformation matrix\n";
-    }
-    //
-    if(has_lattice){
-      if(TargWSDescription.is_uv_default){
-         // we need to set up u,v for axis caption as it is defined in workspace UB matrix;
-         TargWSDescription.u = TargWSDescription.pLatt->getuVector();
-         TargWSDescription.v = TargWSDescription.pLatt->getvVector(); 
-         umat  = TargWSDescription.pLatt->getU();
-      }else{
-         // thansform the lattice above into the Cartezian coordinate system related to projection vectors u,v;
-         umat = TargWSDescription.pLatt->setUFromVectors(TargWSDescription.u,TargWSDescription.v);
-      }
-
-      // Obtain the transformation matrix to Cartezian related to Crystal
-      mat = TargWSDescription.GoniomMatr*umat ;
-     // and this is the transformation matrix to notional
-     //mat = gon*Latt.getUB();
-      mat.Invert();
-    }
- 
-    std::vector<double> rotMat = mat.get_vector();
-    return rotMat;
-}
-/** The matrix to convert neutron momentums into the target coordinate system, if the target coordinate system is already defined by existing 
-  *   MD workspace */
-std::vector<double> ConvertToMDEvents::getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS)const
-{
-    UNUSED_ARG(spws);
-    UNUSED_ARG(inWS);  
-    throw(Kernel::Exception::NotImplementedError("Not yet implemented"));
-
-}
-
-/** Build meaningful dimension namse for different conversion modes
-  * Currently modifies Q3D mode
-  * Currently modifies the coordinate transformation matrix, if it is Q3D mode converted in hkl
-  */
-void ConvertToMDEvents::buildDimensions(MDEvents::MDWSDescription &TargWSDescription)
-{
-    // non-energy transformation modes currently do not change any units and dimension names
-    //if(TargWSDescription.emode<0)return;
-     for(size_t i=0;i<TargWSDescription.dimIDs.size();i++){
-         if(TargWSDescription.dimIDs[i].empty()){
-               TargWSDescription.dimIDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
-         }
-         if(TargWSDescription.dimNames[i].empty()){
-                TargWSDescription.dimNames[i]=TargWSDescription.dimIDs[i]; 
-         }
-
-     }
-     Q_state Q;
-     AnalMode Mode;
-     CnvrtUnits cUnits;
-     InputWSType WS;
-     this->ParamParser.getAlgoModes(TargWSDescription.AlgID,Q,Mode,cUnits,WS);
-
-    // Q3D mode needs special treatment for dimension names:
-    if(Q==Q3D){
-        std::vector<Kernel::V3D> dim_directions(3);
-        Kernel::Matrix<double> Bm(3,3,true);
-        if(TargWSDescription.pLatt.get())
-        {
-            Bm=TargWSDescription.pLatt->getB();
-        }
-        if(TargWSDescription.is_uv_default)
-        {
-            dim_directions[0]=Bm*Kernel::V3D(1,0,0);
-            dim_directions[0].normalize();
-            dim_directions[1]=Bm*Kernel::V3D(0,1,0);
-            dim_directions[1].normalize();
-            dim_directions[2]=Bm*Kernel::V3D(0,0,1);
-            dim_directions[2].normalize();
-        }else{
-            for(int i=0;i<3;i++){
-                for(int j=0;j<3;j++){
-                    Bm[i][j]*= TargWSDescription.pLatt->a(i);
-                }
-            }
-            dim_directions[0]=Bm*TargWSDescription.u;
-            Kernel::V3D vp   =Bm*TargWSDescription.v;
-            dim_directions[2]=dim_directions[0].cross_prod(vp);
-            dim_directions[2].normalize();
-            dim_directions[1]=dim_directions[2].cross_prod(dim_directions[0]);
-            dim_directions[1].normalize();
-
-        }
-
-        for(int i=0;i<3;i++)
-        {
-            TargWSDescription.dimNames[i]=MDEvents::makeAxisName(dim_directions[i],this->ParamParser.getDefaultQNames(Q3D,Mode));
-            if(TargWSDescription.convert_to_hkl){
-                // lattice wave vector
-                double cr(1);
-                if(TargWSDescription.pLatt.get()){
-                    cr=TargWSDescription.pLatt->a(i)/(2*M_PI);
-                }
-                for(int j=0;j<3;j++){
-                    TargWSDescription.rotMatrix[3*i+j]*=cr;
-                }
-                TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(1/cr,1.e-3)+" A^-1";
-            }
-
-        }
-    } 
-
-}
-
-//
-void 
-ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const
-{
-    Kernel::V3D u,v;
-//identify if u,v are present among input parameters and use defaults if not
-    bool u_default(true),v_default(true);
-    if(!ut.empty()){
-        if(ut.size()==3){ u_default =false;
-        }else{convert_log.warning() <<" u projection vector specified but its dimensions are not equal to 3, using default values [1,0,0]\n";
-        }
-    }
-    if(!vt.empty()){
-        if(vt.size()==3){ v_default  =false;
-        }else{ convert_log.warning() <<" v projection vector specified but its dimensions are not equal to 3, using default values [0,1,0]\n";
-        }
-    }
-    if(u_default){  
-        u[0] = 1;         u[1] = 0;        u[2] = 0;
-    }else{
-        u[0] = ut[0];     u[1] = ut[1];    u[2] = ut[2];
-    }
-    if(v_default){
-        v[0] = 0;         v[1] = 1;        v[2] = 0;
-    }else{
-        v[0] = vt[0];     v[1] = vt[1];    v[2] = vt[2];
-    }
-    if(u_default&&v_default){
-        TargWSDescription.is_uv_default=true;
-    }else{
-        TargWSDescription.is_uv_default=false;
-    }
-    TargWSDescription.u=u;
-    TargWSDescription.v=v;
 }
 
 /** Constructor 

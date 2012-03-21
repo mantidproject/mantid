@@ -57,8 +57,7 @@ MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
  * values vere defined and min values are smaller then mav values */
-void 
-MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
+void MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
 {
   if(this->dimMin.size()!=this->dimMax.size()||this->dimMin.size()!=this->nDims)
   {
@@ -76,7 +75,50 @@ MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
     }
   }
 }
+//
+std::vector<std::string> MDWSDescription::getDefaultDimIDQ3D(int dEMode)const
+{
+    std::vector<std::string> rez;
+     if(dEMode==0)
+     {
+          rez.resize(3);
+     }else{
+       if (dEMode==1||dEMode==2)
+       {
+            rez.resize(4);
+            rez[3]=default_dim_ID[dE_ID];
+       }else{
+            throw(std::invalid_argument("Unknown dE mode provided"));
+       }
+     }
+     rez[0]=default_dim_ID[Q1_ID];
+     rez[1]=default_dim_ID[Q2_ID];
+     rez[2]=default_dim_ID[Q3_ID];
+     return rez;
+}
 
+
+
+std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
+{
+     std::vector<std::string> rez;
+
+     if(dEMode==0){
+          rez.resize(1);
+     }else{
+         if (dEMode==1||dEMode==2){
+            rez.resize(2);
+            rez[1]=default_dim_ID[dE_ID];
+         }else{
+             throw(std::invalid_argument("Unknown dE mode provided"));
+         }
+     }
+     rez[0]=default_dim_ID[modQ_ID];
+     return rez;
+}
+
+
+/// empty constructor
 MDWSDescription::MDWSDescription(size_t nDimesnions):
 nDims(nDimesnions),
 emode(-1),
@@ -92,13 +134,23 @@ v(0,1,0),
 GoniomMatr(3,3,true),
 Wtransf(3,3,true),
 is_uv_default(true),
-detInfoLost(false)
+detInfoLost(false),
+default_dim_ID(nDefaultID)
 {
     for(size_t i=0;i<nDimesnions;i++)
     {
         dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
         dimNames[i]=dimNames[i]+boost::lexical_cast<std::string>(i);
     }
+
+ // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
+     // for modQ transformation:
+     default_dim_ID[modQ_ID]="|Q|";
+     // for Q3D transformation
+     default_dim_ID[Q1_ID]="Q1";
+     default_dim_ID[Q2_ID]="Q2";
+     default_dim_ID[Q3_ID]="Q3";
+     default_dim_ID[dE_ID]="DeltaE";
 
 }
 std::string DLLExport sprintfd(const double data, const double eps)

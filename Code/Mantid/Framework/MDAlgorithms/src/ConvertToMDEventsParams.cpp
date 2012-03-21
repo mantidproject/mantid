@@ -38,7 +38,7 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
   *@param out_dim_units [out] -- vector of units for target workspace
   *@param nQ_dims [out]       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
 */
-std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_ID,Strings &out_dim_units, 
+std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_units,Strings &out_dim_units, 
                                     int &nQ_dims, bool isPowder)const
 {
     std::string Q_MODE_ID("Unknown");
@@ -49,17 +49,14 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
     // Q_mode (one of 3 possible)  
     if(Q_mode_req.compare(Q_modes[NoQ])==0)
     { 
-        nQ_dims      = int(ws_dim_names.size());
         Q_MODE_ID    = Q_modes[NoQ];
-        out_dim_ID   = ws_dim_names;
         out_dim_units= ws_dim_units;
+        nQ_dims      = int(out_dim_units.size());
     }
     if(Q_mode_req.compare(Q_modes[modQ])==0)       
     {  // so the only one variable is availible form the workspace. 
         nQ_dims=1;      
-        out_dim_ID.resize(1);
         out_dim_units.resize(1);
-        out_dim_ID[0] = default_dim_ID[modQ_ID];
         out_dim_units[0] = native_elastic_unitID;
         Q_MODE_ID = Q_modes[modQ];
 
@@ -67,13 +64,8 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
     if((Q_mode_req.compare(Q_modes[Q3D])==0))
     {
        nQ_dims=3;
-       out_dim_ID.resize(3);       
-       out_dim_ID[0]= default_dim_ID[Q1_ID];
-       out_dim_ID[1]= default_dim_ID[Q2_ID];
-       out_dim_ID[2]= default_dim_ID[Q3_ID];
        Q_MODE_ID = Q_modes[Q3D];
        out_dim_units.assign(3,native_elastic_unitID);
-
     }
     // modQ and Q3D mode can have crystal and powder submodes
     if(Q_mode_req.compare(Q_modes[NoQ])!=0)
@@ -97,7 +89,7 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
   *@param natural_units [out] -- name of the units, the algorithm expects to work with.
 */
 std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,                                
-                                Strings &out_dim_IDs,Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const
+                                                 Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const
 {
     if(is_member(dE_modes,dE_mode_req)<0){
          convert_log.error()<<" dE-mode: "<<dE_mode_req<<" not recognized\n";
@@ -120,7 +112,6 @@ std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,co
     // inelastic modes have one additional dimension and need special units on X-axis
     if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
         ndE_dims = 1;
-        out_dim_IDs.push_back(default_dim_ID[dE_ID]);
         out_dim_units.push_back("DeltaE");
         // natural units defined in subalgorithm doing the conversion and their ID has to be defined correctly in class constructor
         natural_units = native_inelastic_unitID;
@@ -135,12 +126,12 @@ std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,co
 /** Identify the Unit conversion mode, deployed by the subalgorith 
   * 
   *@param Q_MODE_ID       -- the momentum conversion mode. Unit conversion depends on it
-  *@param UnitsToConvert2 -- the units one needs to convert ws to before deplpying Q-dE transformation. 
   *@param ws_dim_units    -- vector of input workspace dimensions units ID-s
+  *@param UnitsToConvert2 -- the units one needs to convert ws to before deploying Q-dE transformation. 
   *
   *@returns CONV_MODE_ID -- the string identifier, which says what energy mode is deployed. 
 */
-std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,const std::string &UnitsToConvert2,const std::vector<std::string> &ws_dim_units)const
+std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,const std::vector<std::string> &ws_dim_units,const std::string &UnitsToConvert2)const
 {
     std::string CONV_MODE_ID("Unknown");
     // IDENTIFY UNITS CONVERSION MODE
@@ -177,24 +168,25 @@ std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,
     return CONV_MODE_ID;
 }
 
-/** identify what kind of input workspace is provided as input argument
+/** identify what kind of input workspace is provided as input argument and if the oriented lattice is provided with this workspace
  *
  *@param inMatrixWS  a pointer to the workspace, obtained from the analysis data service
  *
  *@returns   -- the ID of the workspace of one of the supported types. Throws if can not dynamiucally cast the pointer to the workspace:
- *@returns   -- sets oriented lattice if the input workspace has one
+ *@returns modified TargWSDescription -- sets the oriented lattice and goniometer transformation if the input workspace has one
 */
 std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS,MDEvents::MDWSDescription &TargWSDescription)const
 {
-    // try to get the oriented lattice
+    // try to get the WS oriented lattice
     if(inMatrixWS->sample().hasOrientedLattice()){        
         TargWSDescription.pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(inMatrixWS->sample().getOrientedLattice()));      
     }else{
         TargWSDescription.pLatt.reset();
     }
+    // empty goniometer returns unit transformation matrix
     TargWSDescription.GoniomMatr = inMatrixWS->run().getGoniometer().getR();
    
-
+    //identify the workspace type. Only event Workspace and Matrix 2D are accepted
     const DataObjects::EventWorkspace *pWSEv= dynamic_cast<const DataObjects::EventWorkspace *>(inMatrixWS.get());
     if(pWSEv){
         return SupportedWS[EventWSType];
@@ -224,20 +216,16 @@ std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr
   * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
   * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
   *
-  * @return out_dim_IDs        -- the vector of strings, with each string identify the dimensions ID-s, derived from current workspace by the algorithm
   * @return out_dim_units      -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
   * @return algo_id            -- the string, which describes the algorithm, which should be deployed on ws.
 
 */
 std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                     Strings &out_dim_IDs,Strings &out_dim_units, MDEvents::MDWSDescription &TargWSDescription)
+                                                       Strings &out_dim_units, MDEvents::MDWSDescription &TargWSDescription)
 {
     // the key which would describe the algorithm to deploy on the matrix
     std::string algo_id;
-
-    // dimension names present in input workspace
-    std::vector<std::string> ws_dim_names;
-    // unit IS-s the input workspace dimensions have
+     // unit IS-s the input workspace dimensions have
     std::vector<std::string> ws_dim_units;
 
 
@@ -247,8 +235,7 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
         convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inMatrixWS->getName()<<std::endl;
         throw(std::invalid_argument("Input workspace has to have X-axis"));
     }else{
-        std::string Dim1Unit   = pXAxis->unit()->unitID();
-        ws_dim_names.push_back(pXAxis->title());
+        std::string Dim1Unit   = pXAxis->unit()->unitID();  
         ws_dim_units.push_back(Dim1Unit);
     }
 
@@ -257,7 +244,6 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
     API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
     if(pYAxis){
         std::string Dim2Unit = pYAxis->unit()->unitID();
-        ws_dim_names.push_back(pYAxis->title());
         ws_dim_units.push_back(Dim2Unit);
         // if this is numeric axis, then the detector's information has been lost:
         is_detector_information_lost=true;
@@ -272,24 +258,24 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
     algo_id =WS_ID;
 
 
-    // identify Q_mode; if modQ and no oriented lattice, then it is real powder, if Q3D and no lattice -- unit matrix which we will call "Powder"
+    // identify Q_mode; if modQ and no oriented lattice, then it is real powder, if Q3D and no lattice -- will use unit matrix which we will call "Powder"
     bool isPowder = false;
     if(!TargWSDescription.pLatt.get()) // No lattice
     { 
           isPowder = true;
     }
-    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_IDs,out_dim_units,nQ_dims,isPowder);  
+    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_units,out_dim_units,nQ_dims,isPowder);  
     algo_id += Q_MODE_ID;
  
 
     // identify dE mode    
-    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_IDs,out_dim_units,ndE_dims,natural_units);
-    // identify conversion mode;
+    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_units,ndE_dims,natural_units);
+    // identify unit conversion mode;
     algo_id+=DE_MODE_ID; 
-    CONV_MODE_ID=parseConvMode(Q_MODE_ID,natural_units,ws_dim_units);
+    CONV_MODE_ID=parseConvMode(Q_MODE_ID,ws_dim_units,natural_units);
     algo_id+=CONV_MODE_ID;
 
-    //the_WSalgID = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
+    //algo_id = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
 
     return algo_id;
 
@@ -372,52 +358,40 @@ void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, Q_state &
     * @param inWS           -- input workspace (2D or Events)
     * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
     * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-    * @param other_dim_names  -- vector of other dimension names requested by the algorithm
-    * @param convert_to_hkl   -- part of the procedure to convert to any uints. Currently  in Q3D mode Q dimensions can be converted to hkl
-    * @param dim_names_requested [out] -- dimension names for the target workspace
-    * @param dim_units_requested [out] -- dimension units for the target workspace
+    * @param other_dim_names  -- vector of other (orthogonal, non-Q) dimension names requested by the algorithm
+    * @param maxNdim         -- max number of dimensions a workspace allowed to have
+    *
+    * @returns    aldID           -- string, which identifies the algorithm requested
+    * @returns    TargWSDescription -- partially filled in description for target workspace, which in particular contains n-target dimensions, 
+                                      targ dim names, targ dim ID etc.
 */
 std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
-                                 const std::string &dE_mode_req,const std::vector<std::string> &other_dim_names,
-                                 bool convert_to_hkl,size_t maxNdim,
-                                 MDEvents::MDWSDescription &TargWSDescription)
+                                                   const std::string &dE_mode_req,const std::vector<std::string> &otherDimNames,
+                                                   size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription)
 {
 
-   Strings dim_IDs_requested,dim_units_requested;
-   Strings ws_dim_IDs,ws_dim_units;
+   //Strings dim_IDs_requested,dim_units_requested;
+   Strings targetWSUnits;
    std::string the_algID;
  
    // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
-   the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,ws_dim_IDs,ws_dim_units,TargWSDescription);
+   the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,targetWSUnits,TargWSDescription);
    if(the_algID.find("Unknown")!=std::string::npos){
        convert_log.error()<<" Input parameters indentify uncomplete algorithm ID: "<<the_algID<<std::endl;
        throw(std::logic_error("can not parse input parameters propertly"));
    }
 
-   // retrieve additional dimension names and dimension units, which can be derived from the workspace properties;
-   std::vector<std::string> all_add_dim_names,all_add_dim_units;
-   this->getAddDimensionNames(inWS,all_add_dim_names,all_add_dim_units);
 
-   // check if additional dimension names can satisfy the user requests:
-   std::vector<std::string> add_dim_names,add_dim_units;
-   for(size_t i=0;i<other_dim_names.size();i++){
-       int n_dim=is_member(all_add_dim_names,other_dim_names[i]);
-       if(n_dim<0){
-           convert_log.error()<<" Dimension :"<<other_dim_names[i]<<" requested but can not be derived from the input workspace\n";
-           throw(std::invalid_argument(" Undefined dimension"));
-       }
-       add_dim_names.push_back(all_add_dim_names[n_dim]);
-       add_dim_units.push_back(all_add_dim_units[n_dim]);
-   }
-   // assign output:
 
-   dim_IDs_requested   = ws_dim_IDs;
-   dim_units_requested = ws_dim_units;
-   // add additional dimensions (from properties)
-   dim_IDs_requested.insert(dim_IDs_requested.end(),add_dim_names.begin(),add_dim_names.end());
-   dim_units_requested.insert(dim_units_requested.end(),add_dim_units.begin(),add_dim_units.end());
-
-   size_t nDims      = dim_IDs_requested.size();
+    TargWSDescription.AlgID   = the_algID;
+    TargWSDescription.dimUnits=targetWSUnits;
+    this->buildMDDimDescription(inWS,the_algID,otherDimNames,TargWSDescription);
+    //TargWSDescription.dimNames       = dim_IDs_requested;
+    //TargWSDescription.dimIDs         = dim_IDs_requested;
+    //TargWSDescription.dimUnits       = dim_units_requested;
+      // set up the target workspace description;
+    size_t nDims = TargWSDescription.nDims;
+  
 
    // Sanity checks:
    Q_state QMode;
@@ -459,22 +433,9 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
         convert_log.error()<<" Algorithm with ID: "<<the_algID<<" emode: "<<emode<<" request workspace with isntrument and full detectord information attached\n"
                            <<" but the detector information on input workspace has been lost\n";
         throw(std::invalid_argument(" input workspace do not have full detector information attached to it"));
-    }
-   
+    }  
  
-    // set up the target workspace description;
-    TargWSDescription.nDims          = nDims;
     TargWSDescription.emode          = emode;
-    if(this->getSamplType(TargWSDescription.AlgID)==PowdType){
-        TargWSDescription.convert_to_hkl = false;
-    }else{
-        TargWSDescription.convert_to_hkl = convert_to_hkl;
-    }
-    TargWSDescription.dimNames       = dim_IDs_requested;
-    TargWSDescription.dimIDs         = dim_IDs_requested;
-    TargWSDescription.dimUnits       = dim_units_requested;
-    TargWSDescription.AlgID          = the_algID;
-
  
     return the_algID;
 
@@ -483,8 +444,8 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
  * TODO: Currenly logically wrong (at least for inelastic)  Specific processed properties have to be introudced
  * 
  * @param inMatrixWS -- shared pointer to input workspace for analysis
- * @param add_dim_names [out] -- the ID-s for the dimension names, which can be obtained from the workspace
- * @param add_dim_units [out] -- the Units ID-s (if any) existing dimensions
+ * @returns add_dim_names [out] -- the ID-s for the dimension names, which can be obtained from the workspace
+ * @returns add_dim_units [out] -- the Units ID-s (if any) existing dimensions
 */
 void ConvertToMDEventsParams::getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const
 {   
@@ -507,6 +468,98 @@ void ConvertToMDEventsParams::getAddDimensionNames(API::MatrixWorkspace_const_sp
 
 }
 
+/** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm
+*/
+void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,
+                              MDEvents::MDWSDescription &TargWSDescription)const
+{
+   // dimension names present in input workspace
+    Strings ws_dimNames, ws_dimIDs;
+
+    bool ws_algoDefined(false);
+    int eMode(-1);
+    //NoQ:  get target dimension names from the source workspace
+   if (getQMode(AlgoID)==NoQ)
+   {
+       TargWSDescription.nDims = 0;
+       // get the X axis of input workspace, it has to be there; if not axis throws invalid index
+        API::NumericAxis *pXAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(0));
+        if(!pXAxis ){
+            std::string ERR="Input workspace: " + inWS->getName() + " needs to have numeric X-axis";
+            convert_log.error()<<ERR<<std::endl;  throw(std::invalid_argument(ERR));
+        }else{
+            ws_dimNames.push_back(pXAxis->title());    
+            ws_dimIDs.push_back(pXAxis->title());
+            TargWSDescription.nDims = 1;
+            ws_algoDefined = true;
+        }
+        // get optional Y axis which can be used in NoQ-kind of algorithms
+        API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
+        if(pYAxis){
+            ws_dimNames.push_back(pYAxis->title());      
+            ws_dimIDs.push_back(pYAxis->title());
+            TargWSDescription.nDims = 2;
+        }
+  }else{
+     eMode = getEMode(AlgoID);
+  }
+
+  // ModQ : default dimension names
+  if (getQMode(AlgoID)==modQ)
+  {
+      ws_dimIDs  = TargWSDescription.getDefaultDimIDModQ(eMode);
+      ws_dimNames= ws_dimIDs;
+      TargWSDescription.nDims = ws_dimNames.size();
+      ws_algoDefined = true;
+  }
+  // Q3D : default dimension names
+  if (getQMode(AlgoID)==Q3D)
+  {
+      ws_dimIDs  = TargWSDescription.getDefaultDimIDQ3D(eMode);
+      ws_dimNames= ws_dimIDs;
+      TargWSDescription.nDims = ws_dimNames.size();
+      ws_algoDefined = true;
+  }
+   
+  if(!ws_algoDefined)
+  {
+     std::string ERR="Can not indentify workspace conversion algorithm for workspace: " + inWS->getName();
+     convert_log.error()<<ERR<<std::endl;  throw(std::invalid_argument(ERR));
+   
+  }
+ // retrieve additional dimension names and dimension units, which can be derived from the workspace properties;
+  Strings all_add_dim_names,all_add_dim_units;
+  this->getAddDimensionNames(inWS,all_add_dim_names,all_add_dim_units);
+
+   // check if additional dimension names can satisfy the user requests:
+   std::vector<std::string> add_dim_names,add_dim_units;
+   for(size_t i=0;i<other_dim_names.size();i++){
+       int n_dim=is_member(all_add_dim_names,other_dim_names[i]);
+       if(n_dim<0){
+           std::string ERR=" Dimension: "+other_dim_names[i]+" requested but is not defined in input workspace: " + inWS->getName();
+           convert_log.error()<<ERR<<std::endl; throw(std::invalid_argument(ERR));
+       }
+       add_dim_names.push_back(all_add_dim_names[n_dim]);
+       add_dim_units.push_back(all_add_dim_units[n_dim]);
+   }
+
+// assign output:
+   TargWSDescription.nDims+=other_dim_names.size();   
+
+   //TargWSDescription.dimUnits; <- already defined in IdentifyMatrixAlgo;
+   TargWSDescription.dimIDs = ws_dimIDs;
+   TargWSDescription.dimNames=ws_dimNames;
+
+   // add additional dimensions (from properties)
+   auto pAllDim = TargWSDescription.dimUnits.end();
+   TargWSDescription.dimUnits.insert(pAllDim,add_dim_units.begin(),add_dim_units.end());
+   pAllDim  = TargWSDescription.dimIDs.end();
+   TargWSDescription.dimIDs.insert(pAllDim,add_dim_names.begin(),add_dim_names.end());
+   pAllDim  = TargWSDescription.dimNames.end();
+   TargWSDescription.dimNames.insert(pAllDim,add_dim_names.begin(),add_dim_names.end());
+
+
+}
 
 
 /** Helper Static function to obtain current analysis mode 
@@ -595,43 +648,6 @@ double ConvertToMDEventsParams::getEi(API::MatrixWorkspace_const_sptr inWS2D)con
     return (*pProp); 
 }
 
-Strings ConvertToMDEventsParams::getDefaultQNames(Q_state Qmode,AnalMode Mode)const
-{
-    Strings rez;
-     // in noQ mode no default dimension names are availible. The dimension names shoudl be copied from the source WS
-    if(Qmode==NoQ) 
-    {
-        rez.clear();
-        return rez;
-    }
-    // 1 or 2 defauld dimension names in modQ mode
-    if(Qmode==modQ)
-    {
-        if(Mode==Elastic){
-            rez.resize(1);
-        }else{
-            rez.resize(2);
-            rez[1]=default_dim_ID[dE_ID];
-        }
-        rez[0]=default_dim_ID[modQ_ID];
-        return rez;
-    }
-    // 3 or 4 defauld dimension names in Q3D mode
-    if(Qmode==Q3D)
-    {
-        if(Mode==Elastic){
-             rez.resize(3);
-        }else{
-             rez.resize(4);
-             rez[3]=default_dim_ID[dE_ID];
-        }
-        rez[0]=default_dim_ID[Q1_ID];
-        rez[1]=default_dim_ID[Q2_ID];
-        rez[2]=default_dim_ID[Q3_ID];
-        return rez;
-    }
-    throw(std::invalid_argument("Unknown Q mode provided"));
-}
 
 /// Constructor:
 ConvertToMDEventsParams::ConvertToMDEventsParams():
@@ -643,8 +659,7 @@ SampleKind(NSampleTypes),
  /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
 native_elastic_unitID("Momentum"),// currently it is Q
 /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
-native_inelastic_unitID("DeltaE"), // currently it is energy transfer (DeltaE)
-default_dim_ID(nDefaultID)
+native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 {
      // strings to indentify possible momentum analysis modes
      Q_modes[modQ] = "|Q|";
@@ -666,15 +681,7 @@ default_dim_ID(nDefaultID)
      // possible samples
      SampleKind[CrystType] = "Cryst";
      SampleKind[PowdType] = "Powd";
-
-     // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
-     // for modQ transformation:
-     default_dim_ID[modQ_ID]="|Q|";
-     // for Q3D transformation
-     default_dim_ID[Q1_ID]="Q1";
-     default_dim_ID[Q2_ID]="Q2";
-     default_dim_ID[Q3_ID]="Q3";
-     default_dim_ID[dE_ID]="DeltaE";
+   
 
 }
 

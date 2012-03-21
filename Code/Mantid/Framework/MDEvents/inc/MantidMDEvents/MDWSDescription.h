@@ -39,9 +39,26 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+/** describes default dimensions ID currently used by multidimensional workspace
+ * 
+ *  DimensionID is the short name which used to retrieve this dimesnion from MD workspace.
+ *  The names themself are defined in constructor
+ */
+enum defaultDimID
+{
+    modQ_ID,  //< the defauld |Q| id for mod Q or powder mode
+    Q1_ID,    //< 1 of 3 dimID in Q3D mode
+    Q2_ID,    //< 2 of 3 dimID in Q3D mode
+    Q3_ID,    //< 3 of 3 dimID in Q3D mode
+    dE_ID,    //< energy transfer ID
+    nDefaultID //< ID conunter
+};
+
+
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
-  struct DLLExport MDWSDescription
-  {
+class DLLExport MDWSDescription
+{
   public:
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
@@ -84,9 +101,7 @@ namespace MDEvents
     bool detInfoLost;
 //=======================
       /// constructor
-     MDWSDescription():nDims(0),emode(-1),Ei(std::numeric_limits<double>::quiet_NaN()),GoniomMatr(3,3,true),Wtransf(3,3,true){};
-     /// mainly test constructor;
-     MDWSDescription(size_t nDimesnions);
+     MDWSDescription(size_t nDimesnions=0);
      /// function build MD Event description from existing workspace
      void build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS);
      /// compare two descriptions and select the coplimentary result.
@@ -94,13 +109,21 @@ namespace MDEvents
 
     /// helper function checks if min values are less them max values and are consistent between each other 
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
-  // default does not do any more;
+    // default does not do any more;
     MDWSDescription & operator=(const MDWSDescription &rhs);
+    //
+    std::vector<std::string> MDWSDescription::getDefaultQNames()const;
+
+    /// function returns default dimension id-s for different Q and dE modes, defined by this class
+    std::vector<std::string> getDefaultDimIDQ3D(int dEmode)const;
+    std::vector<std::string> getDefaultDimIDModQ(int dEmode)const;
   private:
       // let's hide copy constructor for the time being as defaults are incorrect and it is unclear if one is needed.
       MDWSDescription(const MDWSDescription &);
+     // the vector describes default dimension names, specified along the axis if no names are explicitly requested;
+     std::vector<std::string> default_dim_ID;
 
-  }; 
+}; 
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/
 std::string DLLExport makeAxisName(const Kernel::V3D &vector,const std::vector<std::string> &Q1Names);
 /**creates string representation of the number with accuracy, cpecified by eps*/

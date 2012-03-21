@@ -54,10 +54,8 @@ namespace MDAlgorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}  
-    // helper function to obtain some characteristics of the workspace and invoked algorithm
-   static  double      getEi(ConvertToMDEvents const *const pHost);
-   static int          getEMode(ConvertToMDEvents const *const pHost);
-//**<
+
+
   private:
     void init();
     void exec();
@@ -67,9 +65,8 @@ namespace MDAlgorithms
    Mantid::API::MatrixWorkspace_sptr inWS2D;
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
-    /// the properties of the requested target MD workpsace:
+   /// the properties of the requested target MD workpsace:
     MDEvents::MDWSDescription TWS;
-
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
    static PreprocessedDetectors det_loc;  
   /// progress reporter
@@ -86,24 +83,6 @@ namespace MDAlgorithms
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
 
-   //-> The code below should be refactored and (probably) moved elsewhere while working on ticket: #4813
-
-  /** helper function which verifies if projection vectors are specified and if their values are correct when present.
-      * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
-    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;
-
-   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
-       (C)- Busing, Levi 1967 coordinate system */
-   std::vector<double> getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription)const;
-   /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
-     defined by existing workspace */
-    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS)const; 
-
-   /// get transformation matrix currently defined for the algorithm
-   std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
-   /// construct meaningful dimension names and :
-   void buildDimensions(MDEvents::MDWSDescription &TargWSDescription);
- 
  };
 
 } // namespace Mantid

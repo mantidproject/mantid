@@ -12,7 +12,7 @@ namespace MDAlgorithms
 {
 /** Helper class describes the possible properties of the algorithm, converting a workspace to a MDEventWorkspace 
   *
-  *  It is used to convert user input and input data into the key, which corresponds to appropriate subalgorithm, 
+  *  It is used to convert user input and data from the workspace into the key, to the appropriate subalgorithm, 
   *  performing the actual conversion.
   *
   * @date 14-03-2012
@@ -87,38 +87,22 @@ namespace MDAlgorithms
       NSampleTypes
   };
 
-/** describes default dimensions ID currently used by multidimensional workspace
- * 
- *  DimensionID is the short name which used to retrieve this dimesnion from MD workspace.
- *  The names themself are defined in constructor
- */
-enum defaultDimID
-{
-    modQ_ID,  //< the defauld |Q| id for mod Q or powder mode
-    Q1_ID,    //< 1 of 3 dimID in Q3D mode
-    Q2_ID,    //< 2 of 3 dimID in Q3D mode
-    Q3_ID,    //< 3 of 3 dimID in Q3D mode
-    dE_ID,    //< energy transfer ID
-    nDefaultID //< ID conunter
-};
-
 // vectors of strings are here everywhere
 typedef  std::vector<std::string> Strings;
 
- /** the structure, which provides helper variables and varions text parameters for the algorithm */
+ /** the structure, which provides helper variables and varions text parameters to the algorithm */
 class DLLExport ConvertToMDEventsParams
 {
-
  //
     /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
     Strings Q_modes;
     /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
     Strings dE_modes;
-    /// known conversion modes ID-s       (symbolic representation of correspondent enum)
+    /// used Unit conversion modes ID-s   (symbolic representation of correspondent enum )
     Strings ConvModes;
-    /// supported input workspace types  (names of supported workspace types )
+    /// supported input workspace types  (names of supported workspace types (Matrix2D || Events ))
     Strings SupportedWS;
-    /// Supported sample types. Crystal || Powder
+    /// Supported sample types. (Crystal || Powder)
     Strings  SampleKind;
 
     /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
@@ -128,13 +112,11 @@ class DLLExport ConvertToMDEventsParams
    /**  The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
       *  Any other input workspace units have to be converted into these, and these have to correspond to actual units, defined in workspace */
     std::string natural_units;
-    // the vector describes default dimension names, specified along the axis if no names are explicitly requested;
-    Strings default_dim_ID;
  public:
 
-  /** The main purpose of this class: identifies the ID of the conversion subalgorithm to run on a workspace */
+  /** The main purpose of this class: identifies the ID of the conversion subalgorithm to run on a workspace and fills in ws description */
   std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                               const Strings &other_dim_names,bool convert_to_hkl,size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription);
+                               const Strings &other_dim_names,size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription);
   /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during subalgorithm instanciation
     * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable subalgorithm.  */
   std::string getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
@@ -155,21 +137,26 @@ class DLLExport ConvertToMDEventsParams
 
   //>---> Parts of the identifyMatrixAlg, separated for unit testing:
   /// indentify input units conversion mode
-  std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &UnitsToConvert2,const Strings &ws_dim_unit)const;
+  std::string parseConvMode(const std::string &Q_MODE_ID,const Strings &ws_dim_unit,const std::string &UnitsToConvert2)const;
   /// identify momentum transfer mode
-  std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,
+  std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_units,
                          Strings &out_dim_units, int &nQdims,bool isPowder=false)const;
    /// identify energy transfer mode
   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,                                
-                                Strings &out_dim_IDs,Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const;
+                                Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const;
  /// identify what kind of input workspace is there:
   std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS, MDEvents::MDWSDescription &TargWSDescription)const;
-  /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
-   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
+
+
   //<---< Parts of the identifyMatrixAlg;
   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
   std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                Strings &out_dim_IDs,Strings &out_dim_units,MDEvents::MDWSDescription &TargWSDescription);
+                                Strings &out_dim_units,MDEvents::MDWSDescription &TargWSDescription);
+
+  /** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm */
+  void buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,MDEvents::MDWSDescription &TargWSDescription)const;
+  /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
+   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &addDimNames,Strings &addDimUnits)const;
 
 
    /// helper function to obtain the eMode from existing algorithm ID;

@@ -25,10 +25,6 @@ class Convert2AnyTestHelper: public ConvertToMDEvents
 {
 public:
     Convert2AnyTestHelper(){};
-    //
-   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
-       this->ConvertToMDEvents::buildDimensions(TargWSDescription);
-   }
   
 
 };
@@ -50,29 +46,6 @@ public:
 static ConvertToMDEventsTest *createSuite() { return new ConvertToMDEventsTest(); }
 static void destroySuite(ConvertToMDEventsTest * suite) { delete suite; }    
 
-void testSpecialConversionTOF()
-{
-    double factor,power;
-
-    const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
-    TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
-}
-void testTOFConversionFails()
-{ 
-
-    Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
-    Kernel::Unit_sptr pWSUnit           = Kernel::UnitFactory::Instance().create("MomentumTransfer");
-    double delta;
-    double L1(10),L2(10),TwoTheta(0.1),efix(10);
-    int emode(0);
-    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
-    TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
-     
-    double X0(5);
-    double tof(0) ,k_tr(0);
-    TS_ASSERT_THROWS_NOTHING(tof  = pSourceWSUnit->singleToTOF(X0));
-    TS_ASSERT_THROWS_NOTHING(k_tr = pWSUnit->singleFromTOF(tof));
-}
 
 void testInit(){
 
@@ -169,26 +142,6 @@ void testExecQ3D()
     TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
     AnalysisDataService::Instance().remove("OutputWorkspace"); 
 }
-
-void test_buildDimNames(){
-
-    MDEvents::MDWSDescription TargWSDescription(4);
-
-    TargWSDescription.u=Kernel::V3D(1,0,0);
-    TargWSDescription.v=Kernel::V3D(0,1,0);
-    TargWSDescription.emode=1;
-    TargWSDescription.AlgID = "WS2DHistoQ3DElasticCnvNo";
-    TargWSDescription.convert_to_hkl=true;
-    TargWSDescription.rotMatrix.assign(9,0);
-
-    pAlg->buildDimNames(TargWSDescription);
-    TS_ASSERT_EQUALS("[Q1,0,0]",TargWSDescription.dimNames[0]);
-    TS_ASSERT_EQUALS("[0,Q2,0]",TargWSDescription.dimNames[1]);
-    TS_ASSERT_EQUALS("[0,0,Q3]",TargWSDescription.dimNames[2]);
-    
-
-}
-
 
 //DO NOT DISABLE THIS TEST
 void testAlgorithmProperties()
