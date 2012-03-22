@@ -240,17 +240,23 @@ void ConvertToMDEvents::exec()
         TWS.checkMinMaxNdimConsistent(convert_log);    
 
         TWS.convert_to_hkl = convert_to_hkl;
+        // check if we are working in powder mode
+        bool is_powder = ParamParser.isPowderMode(algo_id);
         // set up target coordinate system
-      //  TWS.rotMatrix = getTransfMatrix(inWS2D->name(),TWS);
+         TWS.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWS,is_powder);
         // identify/set the (multi)dimension's names to use
         // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
-        // also (temporary) redefines transformation matrix in convert to hkl mode
-      //  this->buildDimensions(TWS);
+         Q_state Q = ParamParser.getQMode(algo_id);
+         if(Q==Q3D){
+            MsliceProj.setQ3DDimensionsNames(TWS);
+         }
     }
     else // user input is mainly ignored and everything is in old workspac
     {  
+        // check if we are working in powder mode
+        bool is_powder = ParamParser.isPowderMode(algo_id);
         // existing workspace defines target coordinate system:
-        TWS.rotMatrix = MsliceProj.getTransfMatrix(spws,TWS);
+        TWS.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),spws,TWS,is_powder);
         // dimensions are already build
 
         MDEvents::MDWSDescription OLDWSD;

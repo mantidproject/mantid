@@ -42,6 +42,25 @@ namespace MDAlgorithms
         File/ change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+/** TEMPLATES INSTANTIATION: User are welcome to specialize its own specific algorithm 
+  *e.g.
+   template<> class ConvertToMDEventsWS<modQ,Elastic,ConvertNo,Centered,CrystalType>::public IConvertToMDEventsMethods
+   {
+       User specific code for workspace  processed to obtain modQ in elastic mode, without unit conversion, 
+       implementing something user defined for calculating x-coord and coord transformation, which will be invoked
+       on ws with oriented lattice by writing the templated class and 
+       Overloading the methods:
+   public:
+       size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+       void runConversion(API::Progress *);
+   private:
+      virtual size_t conversionChunk(size_t job_ID);
+   }
+*/
+
+
+
  class DLLExport IConvertToMDEventsMethods
  {
  protected:
@@ -100,6 +119,7 @@ namespace MDAlgorithms
    virtual size_t conversionChunk(size_t job_ID)=0;
 
 };
+
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
 template<InputWSType WS,Q_state Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>

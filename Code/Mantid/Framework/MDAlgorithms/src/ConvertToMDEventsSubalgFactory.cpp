@@ -39,12 +39,6 @@ ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
 }
 
 
-// TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
-//e.g.
-// template<> void ConvertToMDEvents::processQND<modQ,Elastic,ConvertNo>()
-// {
-//   User specific code for workspace  processed to obtain modQ in elastic mode, without unit conversion:
-// }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
 /** helper class to orginize metaloop instantiating various subalgorithms dealing with particular 
@@ -56,7 +50,7 @@ private:
         CONV = AlgoNum%NConvUintsStates,                        // internal loop over conversion modes, the variable changes first
         MODE = (AlgoNum/NConvUintsStates)%ANY_Mode,             // level one loop over momentum conversion mode  
         SAMPL= ((AlgoNum/NConvUintsStates)/ANY_Mode)%NSampleTypes, //level two loop over crystal or powder sample
-        WS   = (((AlgoNum/NConvUintsStates)/ANY_Mode)/NSampleTypes)%NInWSTypes //level three loop ws type;
+        WS   = (((AlgoNum/NConvUintsStates)/ANY_Mode)/NSampleTypes)%NInWSTypes //level three loop over ws type;
     
     };
   public:
@@ -73,7 +67,7 @@ private:
                  CnvrtUnits(CONV),SampleType(SAMPL)>())));
 
 /*#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+            std::cout<<" Instantiating algorithm with ID: "<<Key<<std::endl;
 #endif*/
             LOOP_ALGS<Q, AlgoNum-1>::EXEC(AlgoKey,pH);
     }
@@ -100,7 +94,7 @@ private:
          (new ConvertToMDEventsWS<InputWSType(WS),NoQ,ANY_Mode,CnvrtUnits(CONV),NSampleTypes>())));
            
 //#ifdef _DEBUG
-//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+//            std::cout<<" Instantiating algorithm with ID: "<<Key<<std::endl;
 //#endif
 
              LOOP_ALGS<NoQ,AlgoNum-1>::EXEC(AlgoKey,pH);

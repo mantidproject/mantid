@@ -164,11 +164,13 @@ class DLLExport ConvertToMDEventsParams
    /// helper function returning Q-mode from existing algorithm ID
    Q_state getQMode(const std::string &AlgID)const;
    /// helper function returning Sample mode from existing algorithm ID
-   SampleType getSamplType(const std::string &AlgID)const;
+   SampleType getSampleType(const std::string &AlgID)const;
+   /// helper function checking if algorithm supposes to work in powder mode
+   bool isPowderMode(const std::string &AlgID)const{ return (getSampleType(AlgID)==PowdType);}
+
 
    /// helper function to obtain input energy of neurtons from input workspace. Will work properly only for the workspace where this energy is defined. 
    double getEi(API::MatrixWorkspace_const_sptr inMatrixWS)const;
-
 private:
    static Mantid::Kernel::Logger& convert_log;
 

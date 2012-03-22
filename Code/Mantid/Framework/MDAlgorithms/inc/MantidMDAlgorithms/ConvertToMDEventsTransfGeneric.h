@@ -44,6 +44,8 @@ namespace MDAlgorithms
 * 
 *  Generic template defines interface to 3 functions which perform these three steps. 
 */
+
+
 template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
 struct COORD_TRANSFORMER
 {

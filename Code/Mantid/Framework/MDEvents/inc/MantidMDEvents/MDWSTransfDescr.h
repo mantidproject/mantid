@@ -47,15 +47,15 @@ public:
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
-   std::vector<double> getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription)const;
+   std::vector<double> getTransfMatrix(const std::string &inWsName, MDEvents::MDWSDescription &TargWSDescription,bool powderMode=false)const;
    /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
      defined by existing workspace */
-    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,MDEvents::MDWSDescription &TargWSDescription)const; 
+    std::vector<double> getTransfMatrix(const std::string &inWsName, API::IMDEventWorkspace_sptr spws,const MDEvents::MDWSDescription &TargWSDescription,bool powderMode=false)const; 
 
    /// get transformation matrix currently defined for the algorithm
    std::vector<double> getTransfMatrix()const{return m_TargWSDescription.rotMatrix;}
    /// construct meaningful dimension names and :
-   void buildDimensions(MDEvents::MDWSDescription &TargWSDescription);
+   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription);
 private:
     bool is_uv_default;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 

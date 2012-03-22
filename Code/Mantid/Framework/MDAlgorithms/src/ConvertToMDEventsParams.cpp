@@ -386,10 +386,7 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
     TargWSDescription.AlgID   = the_algID;
     TargWSDescription.dimUnits=targetWSUnits;
     this->buildMDDimDescription(inWS,the_algID,otherDimNames,TargWSDescription);
-    //TargWSDescription.dimNames       = dim_IDs_requested;
-    //TargWSDescription.dimIDs         = dim_IDs_requested;
-    //TargWSDescription.dimUnits       = dim_units_requested;
-      // set up the target workspace description;
+        // set up the target workspace description;
     size_t nDims = TargWSDescription.nDims;
   
 
@@ -606,7 +603,7 @@ Q_state ConvertToMDEventsParams::getQMode(const std::string &AlgID)const
    
 }
 /// helper function returning Sample mode from existing algorithm ID
-SampleType ConvertToMDEventsParams::getSamplType(const std::string &AlgID)const
+SampleType ConvertToMDEventsParams::getSampleType(const std::string &AlgID)const
 {
     // Sample mode
     SampleType Sample(NSampleTypes);
