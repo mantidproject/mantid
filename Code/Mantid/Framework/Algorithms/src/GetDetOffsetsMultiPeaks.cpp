@@ -195,9 +195,16 @@ namespace Mantid
       std::vector<double> peakPositions = getProperty("DReference");
       std::vector<double> fitWindows = generateWindows(wkspDmin, wkspDmax, peakPositions, this->getProperty("FitWindowMaxWidth"));
       g_log.information() << "windows : ";
-      for (std::vector<double>::const_iterator it = fitWindows.begin(); it != fitWindows.end(); ++it)
-        g_log.information() << *it << " ";
-      g_log.information() << "\n";
+      if (fitWindows.empty())
+      {
+        g_log.information() << "empty\n";
+      }
+      else
+      {
+        for (std::vector<double>::const_iterator it = fitWindows.begin(); it != fitWindows.end(); ++it)
+          g_log.information() << *it << " ";
+        g_log.information() << "\n";
+      }
 
       // some shortcuts for event workspaces
       EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
