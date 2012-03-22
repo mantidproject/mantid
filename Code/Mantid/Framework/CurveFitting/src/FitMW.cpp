@@ -69,16 +69,6 @@ namespace
   };
 }
 
-  // Register the class into the algorithm factory
-  DECLARE_ALGORITHM(FitMW)
-  
-  /// Sets documentation strings for this algorithm
-  void FitMW::initDocs()
-  {
-    this->setWikiSummary("Fits a function to data in a Workspace ");
-    this->setOptionalMessage("Fits a function to data in a Workspace");
-  }
-  
   using namespace Kernel;
   using API::WorkspaceProperty;
   using API::Workspace;
@@ -95,10 +85,10 @@ namespace
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>("WorkspaceIndex",0, mustBePositive),
                     "The Workspace Index to fit in the input workspace");
-    declareProperty("StartX", EMPTY_DBL(),
+    declareProperty(new PropertyWithValue<double>("StartX", EMPTY_DBL()),
       "A value of x in, or on the low x boundary of, the first bin to include in\n"
       "the fit (default lowest value of x)" );
-    declareProperty("EndX", EMPTY_DBL(),
+    declareProperty(new PropertyWithValue<double>("EndX", EMPTY_DBL()),
       "A value in, or on the high x boundary of, the last bin the fitting range\n"
       "(default the highest value of x)" );
   }
@@ -107,21 +97,21 @@ namespace
   void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain>& domain, boost::shared_ptr<API::FunctionValues>& values)
   {
     // get the function
-    m_function = getProperty("Function");
+    m_function = m_fit->getProperty("Function");
     // get the workspace 
-    API::Workspace_sptr ws = getProperty("InputWorkspace");
+    API::Workspace_sptr ws = m_fit->getProperty("InputWorkspace");
     m_matrixWorkspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
     if (!m_matrixWorkspace)
     {
       throw std::invalid_argument("InputWorkspace must be a MatrixWorkspace.");
     }
     //m_function->setWorkspace(ws);
-    int index = getProperty("WorkspaceIndex");
+    int index = m_fit->getProperty("WorkspaceIndex");
     m_workspaceIndex = static_cast<size_t>(index);
 
     const Mantid::MantidVec& X = m_matrixWorkspace->readX(m_workspaceIndex);
-    double startX = getProperty("StartX");
-    double endX = getProperty("EndX");
+    double startX = m_fit->getProperty("StartX");
+    double endX = m_fit->getProperty("EndX");
 
     if (X.empty())
     {
@@ -229,7 +219,7 @@ namespace
 
     if (foundZeroOrNegativeError)
     {
-      g_log.warning() << "Zero or negative errors are replaced with 1.0\n";
+      log().warning() << "Zero or negative errors are replaced with 1.0\n";
     }
 
   }
@@ -312,9 +302,8 @@ namespace
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
-      setPropertyValue("OutputWorkspace",baseName+"Workspace");
-      
-      setProperty("OutputWorkspace",ws);
+      m_fit->setPropertyValue("OutputWorkspace",baseName+"Workspace");
+      m_fit->setProperty("OutputWorkspace",ws);
 
   }
 

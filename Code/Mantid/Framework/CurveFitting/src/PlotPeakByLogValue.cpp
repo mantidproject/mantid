@@ -214,12 +214,12 @@ namespace Mantid
           try
           {
             // Fit the function
-            API::IAlgorithm_sptr fit = createSubAlgorithm("FitMW");
+            API::IAlgorithm_sptr fit = createSubAlgorithm("Fit");
             fit->initialize();
+            fit->setPropertyValue("Function",fun);
             fit->setProperty("InputWorkspace",data.ws);
             //fit->setPropertyValue("InputWorkspace",data.ws->getName());
             fit->setProperty("WorkspaceIndex",j);
-            fit->setPropertyValue("Function",fun);
             fit->setPropertyValue("StartX",getPropertyValue("StartX"));
             fit->setPropertyValue("EndX",getPropertyValue("EndX"));
             fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));

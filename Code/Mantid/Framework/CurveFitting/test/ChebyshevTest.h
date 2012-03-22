@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Chebyshev.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -59,15 +59,16 @@ public:
 
     AnalysisDataService::Instance().add("ChebyshevTest_ws",ws);
 
-    FitMW fit;
+    Chebyshev cheb;
+    cheb.setAttributeValue("n",3);
+
+    Fit fit;
     fit.initialize();
 
+    fit.setPropertyValue("Function",cheb.asString());
     fit.setPropertyValue("InputWorkspace","ChebyshevTest_ws");
     fit.setPropertyValue("WorkspaceIndex","0");
 
-    Chebyshev cheb;
-    cheb.setAttributeValue("n",3);
-    fit.setPropertyValue("Function",cheb.asString());
 
     fit.execute();
     IFunction::Attribute StartX = cheb.getAttribute("StartX");

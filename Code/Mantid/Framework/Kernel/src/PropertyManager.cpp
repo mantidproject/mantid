@@ -278,6 +278,7 @@ namespace Mantid
     {
       Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
       std::string errorMsg = p->setValue(value);
+      this->afterPropertySet(name);
       if ( !errorMsg.empty() ) 
       {
         errorMsg = "Invalid value for property " + p->name() + " (" +p->type() + ") \"" + value
@@ -298,6 +299,7 @@ namespace Mantid
     {
       Property *p = getPointerToPropertyOrdinal(index);   // throws runtime_error if property not in vector
       std::string errorMsg = p->setValue(value);
+      this->afterPropertySet(p->name());
       if ( !errorMsg.empty() ) 
       {
         errorMsg = "Invalid value for property " + p->name() + " (" +p->type() + ") \"" + value

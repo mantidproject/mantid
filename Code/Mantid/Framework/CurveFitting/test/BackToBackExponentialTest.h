@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/BackToBackExponential.h"
 #include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -179,7 +179,7 @@ public:
 
   void testAgainstMockData()
   {
-    FitMW alg2;
+    Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -198,9 +198,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 
-
-    alg2.setPropertyValue("InputWorkspace",wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
 
     // create function you want to fit against
     CompositeFunction_sptr fnWithBk( new CompositeFunction );
@@ -230,6 +227,8 @@ public:
     fnWithBk.addFunction(bk);
 
     alg2.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
+    alg2.setPropertyValue("InputWorkspace",wsName);
+    alg2.setPropertyValue("WorkspaceIndex","0");
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

@@ -275,18 +275,12 @@ namespace Mantid
           IAlgorithm_sptr fit_alg;
           try
           {
-            fit_alg = createSubAlgorithm("FitMW", -1, -1, false);
+            fit_alg = createSubAlgorithm("Fit", -1, -1, false);
           } catch (Exception::NotFoundError&)
           {
             g_log.error("Can't locate Fit algorithm");
             throw ;
           }
-          fit_alg->setProperty("InputWorkspace", outputW);
-          fit_alg->setProperty("WorkspaceIndex", i);
-          fit_alg->setProperty("StartX", X[TOFmin]);
-          fit_alg->setProperty("EndX", X[TOFmax]);
-          fit_alg->setProperty("MaxIterations", 5000);
-          //fit_alg->setProperty("Output", "fit");
           //Initialize Ikeda-Carpender function variables
           double Alpha0 = 1.6;
           double Alpha1 = 1.5;
@@ -301,6 +295,12 @@ namespace Mantid
             tie_str << "Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa;
             fit_alg->setProperty("Ties", tie_str.str());
           }
+          fit_alg->setProperty("InputWorkspace", outputW);
+          fit_alg->setProperty("WorkspaceIndex", i);
+          fit_alg->setProperty("StartX", X[TOFmin]);
+          fit_alg->setProperty("EndX", X[TOFmax]);
+          fit_alg->setProperty("MaxIterations", 5000);
+          //fit_alg->setProperty("Output", "fit");
           fit_alg->executeAsSubAlg();
           //MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
       

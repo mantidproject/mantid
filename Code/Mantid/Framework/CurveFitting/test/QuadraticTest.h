@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/Quadratic.h"
 
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -19,7 +19,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::CurveFitting::Quadratic;
-using Mantid::CurveFitting::FitMW;
+using Mantid::CurveFitting::Fit;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
@@ -48,7 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 
-    FitMW alg2;
+    Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 

@@ -176,17 +176,17 @@ void CalMuonDeadTime::exec()
     const double in_bg1 = 0.0;
 
     API::IAlgorithm_sptr fit;
-    fit = createSubAlgorithm("FitMW", -1, -1, true);
-
-    const int wsindex = static_cast<int>(i);
-    fit->setProperty("InputWorkspace", wsFitAgainst);
-    fit->setProperty("WorkspaceIndex", wsindex);
+    fit = createSubAlgorithm("Fit", -1, -1, true);
 
     std::stringstream ss;
     ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
     std::string function = ss.str();
 
     fit->setPropertyValue("Function", function);
+    const int wsindex = static_cast<int>(i);
+    fit->setProperty("InputWorkspace", wsFitAgainst);
+    fit->setProperty("WorkspaceIndex", wsindex);
+
     fit->executeAsSubAlg();
 
     std::string fitStatus = fit->getProperty("OutputStatus");

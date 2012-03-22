@@ -64,6 +64,7 @@ namespace Mantid
     void PropertyManagerOwner::setPropertyValue( const std::string &name, const std::string &value )
     {
         m_properties->setPropertyValue( name, value );
+        this->afterPropertySet(name);
     }
 
     /** Set the value of a property by an index
@@ -75,6 +76,7 @@ namespace Mantid
     void PropertyManagerOwner::setPropertyOrdinal( const int& index, const std::string &value )
     {
         m_properties->setPropertyOrdinal( index, value );
+        this->afterPropertySet(m_properties->getPointerToPropertyOrdinal(index)->name());
     }
 
 
@@ -191,6 +193,15 @@ namespace Mantid
       m_properties->clear();
     }
 
+    /**
+     * Override this method to perform a custom action right after a property was set.
+     * The argument is the property name. Default - do nothing.
+     * @param name :: A property name.
+     */
+    void PropertyManagerOwner::afterPropertySet(const std::string& name)
+    {
+      m_properties->afterPropertySet(name);
+    }
 
   } // namespace Kernel
 } // namespace Mantid

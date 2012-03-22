@@ -925,15 +925,12 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     try
     {
       // Fitting the candidate peaks to a Gaussian
-      fit = createSubAlgorithm("FitMW", -1, -1, true);
+      fit = createSubAlgorithm("Fit", -1, -1, true);
     } catch (Exception::NotFoundError &)
     {
       g_log.error("The StripPeaks algorithm requires the CurveFitting library");
       throw;
     }
-    fit->setProperty("InputWorkspace", input);
-    fit->setProperty("WorkspaceIndex", spectrum);
-    fit->setProperty("MaxIterations", 50);
 
     // b) Guess sigma
     const double in_sigma = (i0 + width < X.size()) ? X[i0 + width] - X[i0] : 0.;
@@ -1020,15 +1017,12 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    fit = createSubAlgorithm("FitMW", -1, -1, true);
+    fit = createSubAlgorithm("Fit", -1, -1, true);
   } catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
     throw;
   }
-  fit->setProperty("InputWorkspace", bkgdWS);
-  fit->setProperty("WorkspaceIndex", 0);
-  fit->setProperty("MaxIterations", 50);
 
   // c) Set initial fitting parameters
   IFitFunction_sptr backgroundFunction = this->createFunction(0., 0., 0., in_bg0, in_bg1, in_bg2, false);
@@ -1089,7 +1083,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     try
     {
       // Fitting the candidate peaks to a Gaussian
-      gfit = createSubAlgorithm("FitMW", -1, -1, true);
+      gfit = createSubAlgorithm("Fit", -1, -1, true);
     } catch (Exception::NotFoundError &)
     {
       g_log.error("The FindPeaks algorithm requires the CurveFitting library");
@@ -1136,15 +1130,12 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    lastfit = createSubAlgorithm("FitMW", -1, -1, true);
+    lastfit = createSubAlgorithm("Fit", -1, -1, true);
   } catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
     throw;
   }
-  lastfit->setProperty("InputWorkspace", input);
-  lastfit->setProperty("WorkspaceIndex", spectrum);
-  lastfit->setProperty("MaxIterations", 50);
 
   // c) Set initial fitting parameters
   IFitFunction_sptr peakAndBackgroundFunction = this->createFunction(bestparams[2], bestparams[0], bestparams[1],

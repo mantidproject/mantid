@@ -6,7 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/ProductFunction.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -289,10 +289,8 @@ public:
 
     AnalysisDataService::Instance().add(wsName,ws);
 
-    FitMW fit;
+    Fit fit;
     fit.initialize();
-    fit.setPropertyValue("InputWorkspace",wsName);
-    fit.setPropertyValue("WorkspaceIndex","0");
 
     f0->tie("PeakCentre","1.0");
     f0->tie("Height","3.0");
@@ -301,6 +299,8 @@ public:
     f1->setParameter("Height",h2+5.0);
     f1->tie("Sigma","0.5");
     fit.setPropertyValue("Function",prodF.asString());
+    fit.setPropertyValue("InputWorkspace",wsName);
+    fit.setPropertyValue("WorkspaceIndex","0");
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

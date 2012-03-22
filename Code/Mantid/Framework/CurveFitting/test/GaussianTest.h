@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
@@ -240,14 +240,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 	// Initialise algorithm
-    FitMW alg;
+    Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace", wsName);
-    alg.setPropertyValue("StartX","79300");
-    alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
     CompositeFunction_sptr fnWithBk( new CompositeFunction() );
@@ -273,6 +268,11 @@ public:
     fnWithBk.addFunction(fn);
 
     alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace", wsName);
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -313,14 +313,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 	// Initialise algorithm
-    FitMW alg;
+    Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace", wsName);
-    alg.setPropertyValue("StartX","79300");
-    alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
     CompositeFunction_sptr fnWithBk( new CompositeFunction() );
@@ -351,6 +346,11 @@ public:
     fnWithBk->addFunction(fn);
 
     alg.setProperty("Function",fnWithBk);
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace", wsName);
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -387,7 +387,7 @@ public:
     Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
     getMockData(y, e);
 
-    FitMW alg2;
+    Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -443,7 +443,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    FitMW alg2;
+    Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -510,14 +510,9 @@ public:
     const std::string priorRadius = ConfigService::Instance().getString("curvefitting.peakRadius");
     ConfigService::Instance().setString("curvefitting.peakRadius","5");
 
-    FitMW alg;
+    Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",wsName);
-    alg.setPropertyValue("StartX","79300");
-    alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
     CompositeFunction_sptr fnWithBk( new CompositeFunction() );
@@ -554,6 +549,11 @@ public:
 
     //alg.setPropertyValue("Function",*fnWithBk);
     alg.setProperty("Function",fnWithBk);
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace",wsName);
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
     alg.setPropertyValue("Minimizer","Simplex");
 
     // execute fit

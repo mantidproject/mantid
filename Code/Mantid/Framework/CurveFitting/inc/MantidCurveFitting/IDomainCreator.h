@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_IFIT_H_
-#define MANTID_CURVEFITTING_IFIT_H_
+#ifndef MANTID_CURVEFITTING_IDOMAINCREATOR_H_
+#define MANTID_CURVEFITTING_IDOMAINCREATOR_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -20,10 +20,12 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    New algorithm for fitting functions. The name is temporary.
+
+    An base class for domain creators for use in Fit. Implementations create function domains
+    from particular workspaces.
 
     @author Roman Tolchenov, Tessella plc
-    @date 06/12/2011
+    @date 22/03/2012
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -45,38 +47,39 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport IFit : public API::Algorithm
+    class DLLExport IDomainCreator
     {
     public:
-      /// Default constructor
-      IFit() : API::Algorithm(),m_function() {};
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Optimization";}
-
-    protected:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
-      // Overridden Algorithm methods
-      void init();
-      void exec();
+      /// Virtual destructor
+      virtual ~IDomainCreator() {};
 
       /// declare properties that specify the dataset within the workspace to fit to.
       virtual void declareDatasetProperties() {}
-      /// Create a domain from the input workspace
+      /// Create a domain and values from the input workspace. FunctionValues must be filled with data to fit to.
       virtual void createDomain(boost::shared_ptr<API::FunctionDomain>&, boost::shared_ptr<API::FunctionValues>&) = 0;
       /// Create an output workspace filled with data simulated with the fitting function
       virtual void createOutputWorkspace(
         const std::string& baseName,
         boost::shared_ptr<API::FunctionDomain> domain,
         boost::shared_ptr<API::FunctionValues> values) {}
+      virtual void initFunction();
 
-      /// Pointer to the fitting function
-      API::IFunction_sptr m_function;
-
+    protected:
+      /// Constructor.
+      /// @param fit :: Fit algorithm this creator will create domains for
+      IDomainCreator(API::Algorithm* fit):m_fit(fit){}
+      /// A friend that can create instances of this class
+      friend class Fit;
+      /// Log as the algorithm
+      Kernel::Logger& log() const;
+      /// Declare a property to the algorithm
+      void declareProperty(Kernel::Property* prop,const std::string& doc);
+      /// Pointer to the Fit algorithm
+      API::Algorithm* m_fit;
     };
 
     
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_IFIT_H_*/
+#endif /*MANTID_CURVEFITTING_IDOMAINCREATOR_H_*/

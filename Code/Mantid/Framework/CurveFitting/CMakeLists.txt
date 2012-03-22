@@ -18,7 +18,7 @@ set ( SRC_FILES
 	src/ExpDecayOsc.cpp
 	src/FlatBackground.cpp
 	src/FRConjugateGradientMinimizer.cpp
-#	src/Fit.cpp 
+	src/Fit.cpp 
 	src/Fit1D.cpp
 	src/FitMD.cpp
 	src/FitMW.cpp
@@ -29,9 +29,8 @@ set ( SRC_FILES
 	src/MuonFInteraction.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
-#	src/GenericFit.cpp
 	src/GSLFunctions.cpp
-	src/IFit.cpp
+	src/IDomainCreator.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LevenbergMarquardtMinimizer.cpp
@@ -41,7 +40,6 @@ set ( SRC_FILES
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
-#	src/MultiBG.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunction.cpp
@@ -84,7 +82,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ExpDecayOsc.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
-#	inc/MantidCurveFitting/Fit.h
+	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMD.h
 	inc/MantidCurveFitting/FitMW.h
@@ -100,7 +98,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
 	inc/MantidCurveFitting/GenericFit.h
-	inc/MantidCurveFitting/IFit.h
+	inc/MantidCurveFitting/IDomainCreator.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -111,7 +109,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MuonFInteraction.h
-#	inc/MantidCurveFitting/MultiBG.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunction.h
@@ -169,7 +166,6 @@ set ( TEST_FILES
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
 	test/MultiDomainFunctionTest.h
-#	test/MultiBGTest.h
 	test/PlotPeakByLogValueTest.h
 	test/PRConjugateGradientTest.h
 	test/ProductFunctionTest.h

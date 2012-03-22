@@ -87,6 +87,9 @@ public:
     void removeProperty(const std::string &name, const bool delproperty);
     /// Clears all properties under management
     void clear();  
+    /// Override this method to perform a custom action right after a property was set.
+    /// The argument is the property name. Default - do nothing.
+    virtual void afterPropertySet(const std::string&);
 
 public:
 

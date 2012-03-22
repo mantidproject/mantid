@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include "MantidCurveFitting/FitMD.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/UserFunctionMD.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -147,7 +147,7 @@ public:
     fun->setParameter("s",1.0);
 
     //system("pause");
-    FitMD fit;
+    Fit fit;
     fit.initialize();
 
     fit.setProperty("InputWorkspace",ws2);

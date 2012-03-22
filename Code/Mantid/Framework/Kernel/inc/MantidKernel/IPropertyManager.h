@@ -96,7 +96,9 @@ public:
     template <typename T>
     IPropertyManager* setProperty(const std::string &name, const T & value)
     {
-      return setTypedProperty(name, value, boost::is_convertible<T, boost::shared_ptr<DataItem> >());
+      setTypedProperty(name, value, boost::is_convertible<T, boost::shared_ptr<DataItem> >());
+      this->afterPropertySet(name);
+      return this;
     }
     
     /** Specialised version of setProperty template method to handle const char *
@@ -263,6 +265,9 @@ protected:
   virtual void removeProperty(const std::string &name, const bool delproperty=true) = 0;
   /// Clears all properties under management
   virtual void clear() = 0;
+  /// Override this method to perform a custom action right after a property was set.
+  /// The argument is the property name. Default - do nothing.
+  virtual void afterPropertySet(const std::string&) {}
 
   /// Utility class that enables the getProperty() method to effectively be templated on the return type
   struct MANTID_KERNEL_DLL TypedValue

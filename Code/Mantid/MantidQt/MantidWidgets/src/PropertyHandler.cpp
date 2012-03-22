@@ -1374,13 +1374,13 @@ void PropertyHandler::fit()
   {
     if (m_browser->workspaceName().empty()) return;
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FitMW");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
+    alg->setProperty("Function",m_fun);
     alg->setPropertyValue("InputWorkspace",m_browser->workspaceName());
     alg->setProperty("WorkspaceIndex",m_browser->workspaceIndex());
     alg->setProperty("StartX",m_browser->startX());
     alg->setProperty("EndX",m_browser->endX());
-    alg->setProperty("Function",m_fun);
     alg->execute();
     Mantid::API::IFunction_sptr f = alg->getProperty("Function");
     if (f != m_fun)

@@ -6,7 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Convolution.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -341,7 +341,7 @@ public:
 
   void testFit()
   {
-    FitMW fit;
+    Fit fit;
     WS_type ws = mkWS(ConvolutionExp(),1,10,24,0.13);
   }
 

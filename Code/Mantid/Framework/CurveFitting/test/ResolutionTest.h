@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Resolution.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -193,11 +193,11 @@ void tearDown()
     conv.addFunction(res);
     conv.addFunction(gauss);
 
-    FitMW fit;
+    Fit fit;
     fit.initialize();
+    fit.setPropertyValue("Function",conv.asString());
     fit.setPropertyValue("InputWorkspace","ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex","0");
-    fit.setPropertyValue("Function",conv.asString());
     fit.execute();
 
   }

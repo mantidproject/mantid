@@ -233,21 +233,21 @@ namespace Algorithms
     try
     {
       //set the subalgorithm no to log as this will be run once per spectra
-      fit_alg = createSubAlgorithm("FitMW",-1,-1,false);
+      fit_alg = createSubAlgorithm("Fit",-1,-1,false);
     } catch (Exception::NotFoundError&)
     {
       g_log.error("Can't locate Fit algorithm");
       throw ;
     }
+    std::ostringstream fun_str;
+    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=0.01,PeakCentre="<<peakLoc;
+    fit_alg->setProperty("Function",fun_str.str());
     fit_alg->setProperty("InputWorkspace",outputW);
     fit_alg->setProperty("WorkspaceIndex",0);
     fit_alg->setProperty("StartX",outputW->readX(0)[0]);
     fit_alg->setProperty("EndX",outputW->readX(0)[outputW->blocksize()]);
     fit_alg->setProperty("MaxIterations",200);
     fit_alg->setProperty("Output","fit");
-    std::ostringstream fun_str;
-    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=0.01,PeakCentre="<<peakLoc;
-    fit_alg->setProperty("Function",fun_str.str());
     fit_alg->executeAsSubAlg();
 
     if (debug) std::cout << tim << " to Fit" << std::endl;

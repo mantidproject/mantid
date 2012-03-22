@@ -5,7 +5,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -190,13 +190,13 @@ public:
 
     IFunction_sptr out;
 
-    FitMW alg;
+    Fit alg;
     alg.initialize();
 
+    alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(mfun));
     alg.setPropertyValue("InputWorkspace","mfun");
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setProperty("CreateOutput",true);
-    alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(mfun));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("mfun_Workspace");

@@ -1,10 +1,15 @@
-#ifndef MANTID_CURVEFITTING_FITMW_H_
-#define MANTID_CURVEFITTING_FITMW_H_
+#ifndef MANTID_CURVEFITTING_FIT_H_
+#define MANTID_CURVEFITTING_FIT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidCurveFitting/IDomainCreator.h"
+
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -12,9 +17,8 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
-    class FunctionDomain1D;
     class FunctionValues;
-    class MatrixWorkspace;
+    class Workspace;
   }
 
   namespace CurveFitting
@@ -45,35 +49,42 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FitMW : public IDomainCreator
+    class DLLExport Fit : public API::Algorithm
     {
     public:
-      /// declare properties that specify the dataset within the workspace to fit to.
-      virtual void declareDatasetProperties();
-      /// Create a domain from the input workspace
-      virtual void createDomain(boost::shared_ptr<API::FunctionDomain>&, boost::shared_ptr<API::FunctionValues>&);
-      void createOutputWorkspace(
-        const std::string& baseName,
-        boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::FunctionValues> values
-        );
+      /// Default constructor
+      Fit() : API::Algorithm(),m_isFunctionSet(false),m_isWorkspaceSet(false) {};
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "Fit";}
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return (1);}
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "Optimization";}
+
     protected:
-      /// Constructor
-      FitMW(API::Algorithm* fit):IDomainCreator(fit){}
-      /// A friend that can create instances of this class
-      friend class Fit;
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      // Overridden Algorithm methods
+      void init();
+      void exec();
+      /// Override this method to perform a custom action right after a property was set.
+      /// The argument is the property name. Default - do nothing.
+      virtual void afterPropertySet(const std::string& propName);
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;
-      /// The input MareixWorkspace
-      boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
-      /// The workspace index
-      size_t m_workspaceIndex;
-      size_t m_startIndex;
+      ///// Pointer 
+      //API::Workspace_const_sptr m_workspace;
+      /// Pointer to a domain creator
+      boost::scoped_ptr<IDomainCreator> m_domainCreator;
+      friend class IDomainCreator;
+      bool m_isFunctionSet;
+      bool m_isWorkspaceSet;
+
     };
 
     
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FITMW_H_*/
+#endif /*MANTID_CURVEFITTING_FIT_H_*/

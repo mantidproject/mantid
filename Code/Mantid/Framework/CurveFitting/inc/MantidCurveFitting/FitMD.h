@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IFit.h"
+#include "MantidCurveFitting/IDomainCreator.h"
 
 namespace Mantid
 {
@@ -45,28 +45,19 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FitMD : public IFit
+    class DLLExport FitMD : public IDomainCreator
     {
     public:
-      /// Default constructor
-      FitMD() : IFit() {};
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "FitMD";}
-      /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return (1);}
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Optimization";}
 
-    protected:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
-
-      /// declare properties that specify the dataset within the workspace to fit to.
-      virtual void declareDatasetProperties(){}
       /// Create a domain from the input workspace
       virtual void createDomain(boost::shared_ptr<API::FunctionDomain>&, boost::shared_ptr<API::FunctionValues>&);
+    protected:
+      /// Constructor
+      FitMD(API::Algorithm* fit):IDomainCreator(fit){}
+      /// A friend that can create instances of this class
+      friend class Fit;
 
-      /// The input MareixWorkspace
+      /// The input IMDWorkspace
       boost::shared_ptr<API::IMDWorkspace> m_IMDWorkspace;
     };
 

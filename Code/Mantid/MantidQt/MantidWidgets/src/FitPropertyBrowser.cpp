@@ -1461,19 +1461,19 @@ void FitPropertyBrowser::fit()
     }
     else
     {
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FitMW");
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
       alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
       alg->setProperty("StartX",startX());
       alg->setProperty("EndX",endX());
       alg->setPropertyValue("Output",outputName());
-      alg->setPropertyValue("Function",funStr);
       alg->setPropertyValue("Minimizer",minimizer());
       alg->setPropertyValue("CostFunction",costFunction());
       observeFinish(alg);
       alg->executeAsync();
     }
+
   }
   catch(std::exception& e)
   {

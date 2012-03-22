@@ -200,12 +200,15 @@ namespace Mantid
       try
       {
         //set the subalgorithm no to log as this will be run once per spectra
-        fit_alg = createSubAlgorithm("FitMW",-1,-1,false);
+        fit_alg = createSubAlgorithm("Fit",-1,-1,false);
       } catch (Exception::NotFoundError&)
       {
         g_log.error("Can't locate Fit algorithm");
         throw ;
       }
+      std::string fun_str = createFunctionString(peakHeight, peakLoc);
+      fit_alg->setPropertyValue("Function",fun_str);
+
       fit_alg->setProperty("InputWorkspace",inputW);
       fit_alg->setProperty<int>("WorkspaceIndex",static_cast<int>(s)); // TODO what is the right thing to do here?
       fit_alg->setProperty("StartX",Xmin);

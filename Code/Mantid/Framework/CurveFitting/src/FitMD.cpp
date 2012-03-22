@@ -29,23 +29,11 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  // Register the class into the algorithm factory
-  DECLARE_ALGORITHM(FitMD)
-  
-  /// Sets documentation strings for this algorithm
-  void FitMD::initDocs()
-  {
-    this->setWikiSummary("Fits a function to a MD Workspace");
-    this->setOptionalMessage("Fits a function to a MD Workspace");
-  }
-
   /// Create a domain from the input workspace
   void FitMD::createDomain(boost::shared_ptr<API::FunctionDomain>& domain, boost::shared_ptr<API::FunctionValues>& values)
   {
-    // get the function
-    m_function = getProperty("Function");
     // get the workspace 
-    API::Workspace_sptr ws = getProperty("InputWorkspace");
+    API::Workspace_sptr ws = m_fit->getProperty("InputWorkspace");
     m_IMDWorkspace = boost::dynamic_pointer_cast<API::IMDWorkspace>(ws);
     if (!m_IMDWorkspace)
     {

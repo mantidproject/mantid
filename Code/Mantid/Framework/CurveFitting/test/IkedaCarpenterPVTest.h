@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/IkedaCarpenterPV.h"
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
@@ -112,7 +112,7 @@ public:
   // here tries to fit an IC peak to a Gaussian mock data peak
   void testAgainstMockData()
   {
-    FitMW alg2;
+    Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -131,12 +131,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 
-    // Set general Fit parameters
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","150");
-
     // set up fitting function and pass to Fit
     IkedaCarpenterPV icpv;
     icpv.initialize();
@@ -151,6 +145,12 @@ public:
     //icpv.tie("Gamma", "1.0");
 
     alg2.setPropertyValue("Function",icpv.asString());
+    // Set general Fit parameters
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex","0");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","150");
+
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
 
@@ -51,12 +51,12 @@ public:
     fun->setParameter("Height",1.);
     fun->setParameter("Lifetime",1.0);
 
-    FitMW fit;
+    Fit fit;
     fit.initialize();
 
+    fit.setProperty("Function",fun);
     fit.setProperty("InputWorkspace",ws2);
     fit.setProperty("WorkspaceIndex",0);
-    fit.setProperty("Function",fun);
     fit.setProperty("CreateOutput",true);
 
     fit.execute();
@@ -133,12 +133,12 @@ public:
     API::AnalysisDataService::Instance().clear();
     //--------------------------------------------------//
 
-    FitMW fit1;
+    Fit fit1;
     fit1.initialize();
 
+    fit1.setProperty("Function",fun);
     fit1.setProperty("InputWorkspace",ws2);
     fit1.setProperty("WorkspaceIndex",1);
-    fit1.setProperty("Function",fun);
 
     fit1.execute();
 
@@ -171,12 +171,12 @@ public:
     fun->setParameter("Height",1.);
     fun->setParameter("Lifetime",1.);
 
-    FitMW fit;
+    Fit fit;
     fit.initialize();
 
+    fit.setProperty("Function",fun);
     fit.setProperty("InputWorkspace",ws2);
     fit.setProperty("WorkspaceIndex",0);
-    fit.setProperty("Function",fun);
 
     fit.execute();
 
@@ -185,12 +185,12 @@ public:
     TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
     TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
 
-    FitMW fit1;
+    Fit fit1;
     fit1.initialize();
 
+    fit1.setProperty("Function",fun);
     fit1.setProperty("InputWorkspace",ws2);
     fit1.setProperty("WorkspaceIndex",1);
-    fit1.setProperty("Function",fun);
 
     fit1.execute();
 
