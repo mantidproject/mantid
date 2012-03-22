@@ -75,9 +75,9 @@ void GenericDialog::initLayout()
     this->addOptionalMessage(dialog_layout);
 
   // Make the widget with all the properties
-  m_propsWidget = new AlgorithmPropertiesWidget(this);
-  dialog_layout->addWidget(m_propsWidget, 1);
-  m_propsWidget->setAlgorithm(this->getAlgorithm());
+  m_algoPropertiesWidget = new AlgorithmPropertiesWidget(this);
+  dialog_layout->addWidget(m_algoPropertiesWidget, 1);
+  m_algoPropertiesWidget->setAlgorithm(this->getAlgorithm());
 
   // Create and add the OK/Cancel/Help. buttons
   dialog_layout->addLayout(this->createDefaultButtonLayout(), 0);
@@ -87,13 +87,13 @@ void GenericDialog::initLayout()
   QStringList disabled = m_disabled;
   // Disabled the python arguments
   disabled += m_python_arguments;
-  m_propsWidget->addEnabledAndDisableLists(enabled, disabled);
+  m_algoPropertiesWidget->addEnabledAndDisableLists(enabled, disabled);
 
 
   // At this point, all the widgets have been added and are visible.
   // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-  QWidget * viewport = m_propsWidget->m_viewport;
-  //QScrollArea * scroll = m_propsWidget->m_scroll;
+  QWidget * viewport = m_algoPropertiesWidget->m_viewport;
+  //QScrollArea * scroll = m_algoPropertiesWidget->m_scroll;
   viewport->layout()->update();
   // This makes the layout minimum size = that of the widgets inside
   viewport->layout()->setSizeConstraint(QLayout::SetMinimumSize);
@@ -107,7 +107,7 @@ void GenericDialog::initLayout()
   // resize the scroll area so we don't get a scroll bar
   if ( (dialogHeight+100) < 0.8*screenHeight )
   {
-    m_propsWidget->m_scroll->setMinimumHeight(dialogHeight+10);
+    m_algoPropertiesWidget->m_scroll->setMinimumHeight(dialogHeight+10);
 
     // Find the size that the dialog WANTS to be.
     dialogHeight = this->sizeHint().height();
@@ -117,19 +117,19 @@ void GenericDialog::initLayout()
     if (dialogWidth > 640) dialogWidth = 640;
 
     // But allow the scroll area to resize smaller again
-    m_propsWidget->m_scroll->setMinimumHeight(60);
+    m_algoPropertiesWidget->m_scroll->setMinimumHeight(60);
     // But resize the dialog again to its preferred size.
     this->resize(dialogWidth, dialogHeight);
   }
 
   // Set all previous values (from history, etc.)
-  for( auto it = m_propsWidget->m_propWidgets.begin(); it != m_propsWidget->m_propWidgets.end(); it++)
+  for( auto it = m_algoPropertiesWidget->m_propWidgets.begin(); it != m_algoPropertiesWidget->m_propWidgets.end(); it++)
   {
     this->setPreviousValue(it.value(), it.key());
   }
 
   // Using the default values, hide or disable the dynamically shown properties
-  m_propsWidget->hideOrDisableProperties();
+  m_algoPropertiesWidget->hideOrDisableProperties();
 
 }
 
@@ -139,8 +139,8 @@ void GenericDialog::initLayout()
  */
 void GenericDialog::parseInput()
 {
-  auto itr = m_propsWidget->m_propWidgets.begin();
-  for(; itr != m_propsWidget->m_propWidgets.end(); itr++ )
+  auto itr = m_algoPropertiesWidget->m_propWidgets.begin();
+  for(; itr != m_algoPropertiesWidget->m_propWidgets.end(); itr++ )
   {
     // Get the value from each widget and store it
     storePropertyValue(itr.key(), itr.value()->getValue());
@@ -167,8 +167,8 @@ void GenericDialog::accept()
   else
   {
     // Highlight the validators that are in error (combined from them + whole algorithm)
-    auto itr = m_propsWidget->m_propWidgets.begin();
-    for(; itr != m_propsWidget->m_propWidgets.end(); itr++ )
+    auto itr = m_algoPropertiesWidget->m_propWidgets.begin();
+    for(; itr != m_algoPropertiesWidget->m_propWidgets.end(); itr++ )
     {
       if (m_errors.contains(itr.key()))
         itr.value()->setError( m_errors[itr.key()] );

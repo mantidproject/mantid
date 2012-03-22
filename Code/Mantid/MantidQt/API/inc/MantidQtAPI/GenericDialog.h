@@ -72,7 +72,7 @@ private:
   void parseInput();
 
   /// Widget containing all the PropertyWidgets
-  AlgorithmPropertiesWidget * m_propsWidget;
+  AlgorithmPropertiesWidget * m_algoPropertiesWidget;
 
 };
 
