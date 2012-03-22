@@ -3,14 +3,15 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 *WIKI*/
 
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
+#include "MantidMDEvents/ConvertToReflectometryQ.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -21,7 +22,7 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
@@ -71,7 +72,7 @@ namespace MDAlgorithms
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, validator),
         "An input workspace in time-of-flight");
 
-    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -79,24 +80,30 @@ namespace MDAlgorithms
    */
   void ConvertToReflectometryQ::exec()
   {
-    // -------- Input workspace -> convert to Event ------------------------------------
+
+    //TODO rebin input?
+
     MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
     
-    Mantid::API::WorkspaceFactory().Instance().create("");
+    //TODO, how to calculate max, min + number of bins? Jon Taylor thinks that there is a way to calculate these upfront.
+    const double qzmin = -50;
+    const double qxmin = -50;
+    const double qxmax = 50;
+    const double qzmax = 50;
+    const size_t nbinsx = 10;
+    const size_t nbinsz = 10;
 
-    //outWs->addDimension(new MDHistoDimension("", "", "A^(-1)")
-
+    // Fixed dimensionality
+    MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", qxmin, qxmax, nbinsx)); 
+    MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", qzmin, qzmax, nbinsz)); 
+    MDHistoWorkspace_sptr ws = MDHistoWorkspace_sptr(new MDHistoWorkspace(qxDim, qzDim));
 
     // check the input units
     if (in_ws->getAxis(0)->unit()->unitID() != "TOF")
       throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
 
-    // Try to get the output workspace
-    //IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-    //ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>,3> >( i_out );
-
+    // Calculate theta incident 
     Instrument_const_sptr instrument = in_ws->getInstrument();
-
     V3D sample = instrument->getSample()->getPos();
     V3D source = instrument->getSource()->getPos();
     V3D beamDir = (sample - source);
@@ -105,26 +112,26 @@ namespace MDAlgorithms
     double thetaIn = beamDir.angle(along);
     double thetaFinal = 0;
     
-
-    //Calculate Theta_f and Theta_i
-
     const size_t nHistograms = in_ws->getNumberHistograms();
+    //Loop through all spectra
     for(size_t index = 0; index < nHistograms; ++index)
     {
       V3D sink = in_ws->getDetector(index)->getPos();
       V3D detectorDir = (sink - sample);
       double distance = detectorDir.norm() + beamDir.norm();
-      V3D normaDetectorDir = detectorDir / detectorDir.norm();
+      V3D normalDetectorDir = detectorDir / detectorDir.norm();
       thetaFinal = detectorDir.angle(along);
 
       auto counts = in_ws->readY(index);
       auto tofs = in_ws->readX(index);
       auto errors = in_ws->readE(index);
+
       size_t nTofs = in_ws->isHistogramData() ? (tofs.size() - 1) : tofs.size();
 
       const double wavenumber_in_angstrom_times_tof_in_microsec =
           (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
 
+      //Loop through all TOF
       for(size_t tof = 0; tof < nTofs; ++tof)
       {
         //Calculate wave number
@@ -134,17 +141,38 @@ namespace MDAlgorithms
           t = (t + tofs[tof+1])/2;
         }
         double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / t;
-        double qx = wavenumber *(sin(thetaFinal) + sin(thetaIn));
-        double qz = wavenumber *(cos(thetaFinal) - cos(thetaIn));
+        //double _qx = wavenumber *(sin(thetaFinal) + sin(thetaIn));
+        //double _qz = wavenumber *(cos(thetaFinal) - cos(thetaIn));
 
-        double signal = counts[tof];
+        double _qx = wavenumber *(sin(thetaFinal) + sin(thetaIn));
+        double _qz = wavenumber *(cos(thetaFinal) - cos(thetaIn));
+
+        /// If q-max and min are known a-prori, these boundrary case truncations are not required. See top of method for comment.
+        _qx = _qx < qxmin ? qxmin : _qx;
+        _qz = _qz < qzmin ? qzmin : _qz;
+        _qx = _qx > qxmin ? qxmin : _qx;
+        _qz = _qz > qzmin ? qzmin : _qz;
+
+        //Set up for linear transformation qi -> dimension index.
+        double mx = (nbinsx / (qxmax - qxmin));
+        double mz = (nbinsz / (qzmax - qzmin));
+        double cx = (nbinsx - mx * (qxmin + qxmax))/2;
+        double cz = (nbinsz - mz * (qzmin + qzmax))/2;
+
+        size_t posIndexX = mx*_qx + cx;
+        size_t posIndexZ = mz*_qz + cz;
+
+        size_t linearindex = (posIndexX * nbinsx) + posIndexZ;
+        
         double error = errors[tof];
-
-       
-
+        
+        //Do we want to accumulate signal values, i.e will there be any overlap in Q?
+        ws->setSignalAt(linearindex, counts[tof]);
+        ws->setErrorSquaredAt(linearindex, error*error);
       }
     }
 
+    setProperty("OutputWorkspace", ws);
   }
 
 

@@ -1,12 +1,12 @@
-#ifndef MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQ_H_
-#define MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQ_H_
+#ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQ_H_
+#define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQ_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
   /** ConvertToReflectometryQ : Creates a 2D MD Histogram workspace with two axis qz and qx.

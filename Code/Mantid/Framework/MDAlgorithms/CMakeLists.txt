@@ -13,7 +13,6 @@ set ( SRC_FILES
 	src/ConvertToMDEvents.cpp
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
-	src/ConvertToReflectometryQ.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -74,7 +73,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
-	inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -127,7 +125,6 @@ set ( TEST_FILES
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
-	test/ConvertToReflectometryQTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
@@ -186,7 +183,7 @@ target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories( ../TestHelpers/inc ../DataHandling/inc ../CurveFitting/inc ../Algorithms/inc)	
+  include_directories( ../TestHelpers/inc ../DataHandling/inc ../CurveFitting/inc)	
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
@@ -195,10 +192,10 @@ if ( CXXTEST_FOUND )
                         ../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP Algorithms ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP Algorithms)
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP)
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS

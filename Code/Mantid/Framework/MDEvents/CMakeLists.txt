@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
+    src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
 	src/CoordTransformAligned.cpp
@@ -58,6 +59,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
+    inc/MantidMDEvents/ConvertToReflectometryQ.h
 	inc/MantidMDEvents/CoordTransformAffine.h
 	inc/MantidMDEvents/CoordTransformAffineParser.h
 	inc/MantidMDEvents/CoordTransformAligned.h
@@ -101,6 +103,7 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
+    test/ConvertToReflectometryQTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
 	test/CoordTransformAlignedTest.h

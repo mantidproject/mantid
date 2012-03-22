@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQTEST_H_
-#define MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQTEST_H_
+#ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
+#define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -8,10 +8,10 @@
 #include <iomanip>
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
+#include "MantidMDEvents/ConvertToReflectometryQ.h"
 
 using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
+using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
