@@ -324,6 +324,10 @@ void MuonAnalysis::runSaveGroupButton()
   QString groupingFile = QFileDialog::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
 
+  // Add extension if the groupingFile specified doesn't have one. (Solving Linux problem).
+  if (!groupingFile.endsWith(".xml"))
+    groupingFile += ".xml";
+
   if( ! groupingFile.isEmpty() )
   {
     saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
