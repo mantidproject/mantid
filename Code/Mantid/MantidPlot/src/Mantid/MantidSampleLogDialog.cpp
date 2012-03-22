@@ -63,7 +63,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   filterStatus = new QRadioButton("Status");
   filterPeriod = new QRadioButton("Period");
   filterStatusPeriod = new QRadioButton("Status + Period");
-  filterStatusPeriod->setChecked(true);
+  filterNone->setChecked(true);
 
   QVBoxLayout *vbox = new QVBoxLayout;
   vbox->addWidget(filterNone);
