@@ -390,4 +390,4 @@ class RefMReduction(PythonAlgorithm):
         
         return ws_name
                                
-mtd.registerPyAlgorithm(RefMReduction())
+#mtd.registerPyAlgorithm(RefMReduction())
