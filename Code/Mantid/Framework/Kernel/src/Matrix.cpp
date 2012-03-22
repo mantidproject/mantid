@@ -160,7 +160,7 @@ std::istream& operator>>(std::istream& is, Kernel::Matrix<T>& in)
 
 template<typename T>
 std::vector<T> 
-Matrix<T>::get_vector()const
+Matrix<T>::getVector()const
 {
   std::vector<T> rez(nx*ny);
   size_t ic(0);

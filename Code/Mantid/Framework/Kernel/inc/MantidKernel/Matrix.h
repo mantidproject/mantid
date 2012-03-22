@@ -104,9 +104,9 @@ namespace Mantid
       std::string str() const;
 
       // returns this matrix in 1D vector representation
-      std::vector<T> get_vector()const;
+      std::vector<T> getVector()const;
       // explicit conversion into the vector
-      operator std::vector<T>()const{std::vector<T> tmp=this->get_vector(); return tmp;}
+      operator std::vector<T>()const{std::vector<T> tmp=this->getVector(); return tmp;}
       //
       void setColumn(const size_t nCol,const std::vector<T> &newColumn);
       void setRow(const size_t nRow,const std::vector<T> &newRow);

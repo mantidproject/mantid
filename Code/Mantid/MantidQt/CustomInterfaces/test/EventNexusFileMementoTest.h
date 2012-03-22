@@ -107,7 +107,7 @@ public:
     TS_ASSERT_EQUALS( gon.getAxis(1).rotationaxis, V3D(1.1,2.1,3.1));
     TS_ASSERT_EQUALS( gon.getAxis(1).sense, -1);
 
-    std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();
+    std::vector<double> ub = ws->sample().getOrientedLattice().getUB().getVector();
     TS_ASSERT_EQUALS(0, ub[0]);
     TS_ASSERT_EQUALS(0, ub[1]);
     TS_ASSERT_EQUALS(2, ub[2]);

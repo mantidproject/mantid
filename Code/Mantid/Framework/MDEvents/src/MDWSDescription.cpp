@@ -129,11 +129,8 @@ dimNames(nDimesnions,"mdn"),
 dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
 convert_to_hkl(false),
-u(1,0,0),
-v(0,1,0),
 GoniomMatr(3,3,true),
 Wtransf(3,3,true),
-is_uv_default(true),
 detInfoLost(false),
 default_dim_ID(nDefaultID)
 {
@@ -175,11 +172,11 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
     this->nBins   =rhs.nBins;
 
     this->convert_to_hkl= rhs.convert_to_hkl;
-    this->u             = rhs.u;
-    this->v             = rhs.v;
+//    this->u             = rhs.u;
+//    this->v             = rhs.v;
     this->rotMatrix     = rhs.rotMatrix;
     this->AlgID         = rhs.AlgID;
-    this->is_uv_default = rhs.is_uv_default;
+//    this->is_uv_default = rhs.is_uv_default;
     this->detInfoLost   = rhs.detInfoLost;
 
     if(rhs.pLatt.get()){

@@ -77,11 +77,9 @@ class DLLExport MDWSDescription
     std::vector<std::string> dimUnits;
     /// if defined, specifies number of bins in each dimension
     std::vector<size_t> nBins;
-    /// the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in ModQ and NoQ mode and if no oriented lattice is found in input ws. 
+    /** the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in NoQ and powder mode (but used in cryst as powder) 
+       and if no oriented lattice is found in input ws. */
     bool convert_to_hkl;
-    /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
-      * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
-    Kernel::V3D u,v;
     /// the matrix to transform momentums of the workspace into target coordinate system, it is constructed from UB matix and W-matrix;
     std::vector<double> rotMatrix;  // can be Quat if not for non-orthogonal lattices
 
@@ -91,12 +89,10 @@ class DLLExport MDWSDescription
     // UB matrix components:
     /// the oriented lattice which should be picked up from source ws and be carryed out to target ws. Defined for transfromation from Matrix or Event WS
     std::auto_ptr<Geometry::OrientedLattice> pLatt;
-    // Goniometer is always present in a workspace
+    // Goniometer is always present in a workspace but can be a unit matrix
     Kernel::DblMatrix GoniomMatr;   
   /// the matrix transforming Q-coodinates in crystal cartesian coordinate system into target coodinate system. 
     Kernel::DblMatrix  Wtransf;
-    /// the indicator, informing if the uv plain has been set as a parameter. If they are not, the UB matrix from the source workspace is used uncnanged
-    bool is_uv_default;
     /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
     bool detInfoLost;
 //=======================

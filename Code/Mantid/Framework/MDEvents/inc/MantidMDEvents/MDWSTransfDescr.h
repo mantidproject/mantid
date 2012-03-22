@@ -3,6 +3,7 @@
 
 #include "MantidMDEvents/MDWSDescription.h"
 
+
 namespace Mantid
 {
 namespace MDEvents
@@ -35,27 +36,32 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MDWSTransfDescr
+class DLLExport MDWSTransfDescr
 {
 public:
     MDWSTransfDescr(){};
  
   /** helper function which verifies if projection vectors are specified and if their values are correct when present.
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
-    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;
+    void getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
    std::vector<double> getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription)const;
    /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
      defined by existing workspace */
-    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS)const; 
+    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,MDEvents::MDWSDescription &TargWSDescription)const; 
 
    /// get transformation matrix currently defined for the algorithm
    std::vector<double> getTransfMatrix()const{return m_TargWSDescription.rotMatrix;}
    /// construct meaningful dimension names and :
    void buildDimensions(MDEvents::MDWSDescription &TargWSDescription);
 private:
+    bool is_uv_default;
+    /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
+      * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
+    mutable Kernel::V3D u,v;
+
 
    MDEvents::MDWSDescription m_TargWSDescription;
 

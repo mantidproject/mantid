@@ -68,7 +68,7 @@ public:
                             -0.1165450,  0.00178145, -0.0045884,
                             -0.0273738, -0.08973560, -0.0252595 };
 
-    std::vector<double> UB_calculated = latt.getUB().get_vector();
+    std::vector<double> UB_calculated = latt.getUB().getVector();
 
     for ( size_t i = 0; i < 9; i++ )
     {

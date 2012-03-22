@@ -12,9 +12,9 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/CPUTimer.h"
+//#include "MantidKernel/System.h"
+//#include "MantidKernel/Timer.h"
+//#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -31,6 +31,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDWSTransfDescr.h"
 //
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -206,37 +207,38 @@ void ConvertToMDEvents::exec()
           create_new_ws=false;
       }
   }
-
-  if (create_new_ws){
-    //identify if u,v are present among input parameters and use defaults if not
-    std::vector<double> ut = getProperty("UProj");
-    std::vector<double> vt = getProperty("VProj");
- //   this->checkUVsettings(ut,vt,TWS);
-  } // else uv ignored -> later it can be modified to set ub matrix if no given, but overcomplicate things. 
+ 
   // Collate and Analyze the requests to the job, specified by the input parameters
-
- // what dimension names requested by the user by:
+  // what dimension names requested by the user by:
     //a) Q selector:
     std::string Q_mod_req                    = getProperty("QDimensions");
     //b) the energy exchange mode
     std::string dE_mod_req                   = getProperty("dEAnalysisMode");
     //c) other dim property;
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
-    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units be converted to hkl
+    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to hkl
     bool convert_to_hkl                       = getProperty("QinHKL");
 
 
     // Identify the algorithm to deploy on workspace. Also fills in the target workspace description
     std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim(),TWS);
 
-    // set the min and max values for the dimensions from the input porperties
-    TWS.dimMin = getProperty("MinValues");
-    TWS.dimMax = getProperty("MaxValues");
-   // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
-    TWS.checkMinMaxNdimConsistent(convert_log);    
-
+  // instanciate class, responsible for defining Mslice-type projection
+    MDEvents::MDWSTransfDescr MsliceProj;
     if(create_new_ws)
     {
+        //identify if u,v are present among input parameters and use defaults if not
+        std::vector<double> ut = getProperty("UProj");
+        std::vector<double> vt = getProperty("VProj");
+        MsliceProj.getUVsettings(ut,vt);
+       // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
+
+        // set the min and max values for the dimensions from the input porperties
+        TWS.dimMin = getProperty("MinValues");
+        TWS.dimMax = getProperty("MaxValues");
+        // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
+        TWS.checkMinMaxNdimConsistent(convert_log);    
+
         TWS.convert_to_hkl = convert_to_hkl;
         // set up target coordinate system
       //  TWS.rotMatrix = getTransfMatrix(inWS2D->name(),TWS);
@@ -248,7 +250,7 @@ void ConvertToMDEvents::exec()
     else // user input is mainly ignored and everything is in old workspac
     {  
         // existing workspace defines target coordinate system:
-       // TWS.rotMatrix = getTransfMatrix(spws,inWS2D);
+        TWS.rotMatrix = MsliceProj.getTransfMatrix(spws,TWS);
         // dimensions are already build
 
         MDEvents::MDWSDescription OLDWSD;
@@ -322,16 +324,9 @@ void ConvertToMDEvents::exec()
   return;
 }
 
-/** Constructor 
- *  picks up an instanciates all known sub-algorithms for ConvertToMDEvents
-*/
-ConvertToMDEvents::ConvertToMDEvents():
-// initiate target ws description to be not empty and have 4 dimensions (It will be redefined later, but defailt_qNames are defined only 
-// when N-dim constructor wass called
-TWS(4)
-{
- 
-}
+/** Constructor */
+ConvertToMDEvents::ConvertToMDEvents()
+{}
 
 
 } // namespace Mantid

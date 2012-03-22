@@ -156,7 +156,7 @@ public:
 
     V3D dir(1,1,1);
 
-    std::vector<double> Rot = rot.get_vector();
+    std::vector<double> Rot = rot.getVector();
     double x = Rot[0]*dir.X()+Rot[3]*dir.Y()+Rot[6]*dir.Z();
     double y = Rot[1]*dir.X()+Rot[4]*dir.Y()+Rot[7]*dir.Z();
     double z = Rot[2]*dir.X()+Rot[5]*dir.Y()+Rot[8]*dir.Z();
@@ -209,7 +209,7 @@ public:
     TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
 
 
-    std::vector<double> rotMat = U.get_vector();
+    std::vector<double> rotMat = U.getVector();
     double qx(1),qy(2),qz(3);
     V3D vc=U*V3D(qx,qy,qz);
     double Qx  = (rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);
@@ -260,7 +260,7 @@ void test_UVPerm1()
     TSM_ASSERT_EQUALS("U*v should be along the x direction",V3D(1,0,0),ex);
     TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
 
-    std::vector<double> rotMat = U.get_vector();
+    std::vector<double> rotMat = U.getVector();
     double qx(1),qy(2),qz(3);
     V3D vc=U*V3D(qx,qy,qz);
     double Qx  = (rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);

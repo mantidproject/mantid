@@ -82,7 +82,7 @@ public:
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.applyActions());
     TS_ASSERT(ws->getNumberHistograms() > 1);
-    std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();
+    std::vector<double> ub = ws->sample().getOrientedLattice().getUB().getVector();
 
     TS_ASSERT_EQUALS("12", ws->run().getLogData("A")->value());
     TS_ASSERT_THROWS_NOTHING(ws->run().getLogData("angle1")->value());

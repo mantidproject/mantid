@@ -232,7 +232,7 @@ namespace Geometry
     file->writeData("unit_cell_beta", this->beta());
     file->writeData("unit_cell_gamma", this->gamma());
     // Save the UB matrix
-    std::vector<double> ub = this->UB.get_vector();
+    std::vector<double> ub = this->UB.getVector();
     std::vector<int> dims(2,3); // 3x3 matrix
     file->writeData("orientation_matrix", ub, dims);
 

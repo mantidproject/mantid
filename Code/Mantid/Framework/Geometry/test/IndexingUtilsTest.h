@@ -173,7 +173,7 @@ public:
 
       TS_ASSERT_DELTA( error, 0.00671575, 1e-5 );
 
-      std::vector<double> UB_returned = UB.get_vector();
+      std::vector<double> UB_returned = UB.getVector();
       for ( size_t i = 0; i < 9; i++ )
       {
         TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
@@ -228,7 +228,7 @@ public:
 
       TS_ASSERT_DELTA( error, 0.000111616, 1e-5 );
 
-      std::vector<double> UB_returned = UB.get_vector();
+      std::vector<double> UB_returned = UB.getVector();
       for ( size_t i = 0; i < 9; i++ )
       {
         TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
@@ -271,7 +271,7 @@ public:
 
     TS_ASSERT_DELTA( error, 0.0102, 1e-3 );
 
-    std::vector<double> UB_returned = UB.get_vector();
+    std::vector<double> UB_returned = UB.getVector();
     for ( size_t i = 0; i < 9; i++ )
     {
       TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
@@ -344,7 +344,7 @@ public:
 
     TS_ASSERT_DELTA( error, 0.147397, 1.e-5 );
 
-    std::vector<double> UB_returned = UB.get_vector();
+    std::vector<double> UB_returned = UB.getVector();
     for ( size_t i = 0; i < 9; i++ )
     {
       TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
