@@ -39,9 +39,9 @@ namespace MDAlgorithms
 */
 
   /// known sates for algorithms, caluclating momentums
-  enum Q_state 
+  enum QMode 
   {
-       modQ,    //< calculate mod Q 
+       ModQ,    //< calculate mod Q 
        Q3D,     //< calculate 3 component of Q in fractional coordinate system.
        NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
        NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
@@ -119,10 +119,10 @@ class DLLExport ConvertToMDEventsParams
                                const Strings &other_dim_names,size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription);
   /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during subalgorithm instanciation
     * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable subalgorithm.  */
-  std::string getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
+  std::string getAlgoID(QMode Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
 
   /** auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID */
-  void  getAlgoModes(const std::string &AlgoID, Q_state &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS);
+  void  getAlgoModes(const std::string &AlgoID, QMode &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS);
 
   //----------> service and helper functions
 
@@ -131,7 +131,7 @@ class DLLExport ConvertToMDEventsParams
    /// list of all existing mode names to convert energy transfer
    Strings getDEModes()const{return dE_modes;}
    /// function returns default names for dimensions in different Q analysis modes;
-   Strings getDefaultQNames(Q_state Qmode=modQ,AnalMode=Direct)const;
+   Strings getDefaultQNames(QMode Qmode=ModQ,AnalMode=Direct)const;
     /// constructor
     ConvertToMDEventsParams(); 
 
@@ -162,7 +162,7 @@ class DLLExport ConvertToMDEventsParams
    /// helper function to obtain the eMode from existing algorithm ID;
    int getEMode(const std::string &AlgID)const;
    /// helper function returning Q-mode from existing algorithm ID
-   Q_state getQMode(const std::string &AlgID)const;
+   QMode getQMode(const std::string &AlgID)const;
    /// helper function returning Sample mode from existing algorithm ID
    SampleType getSampleType(const std::string &AlgID)const;
    /// helper function checking if algorithm supposes to work in powder mode

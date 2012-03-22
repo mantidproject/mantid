@@ -104,10 +104,10 @@ namespace API
     ///@param orig :: the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
     void setOrigin(const Mantid::Kernel::VMD & orig)
     { m_origin = orig; }
-    /// set the transformation from Qin crystal coordinate system to Q in orthogonal or real HKL coordiate system alined with arbitrary slicing plane
+    /// set the transformation from Q in crystal cartezian coordinate system to Q in orthogonal or real HKL coordiate system alined with arbitrary slicing plane
     void setWTransf(const Kernel::DblMatrix &WTransf)
     {m_Wtransf = WTransf;}
-    /// get the transformation from Qin crystal coordinate system to Q in orthogonal or real HKL coordiate system alined with arbitrary slicing plane
+    /// get the transformation from Qin crystal cartezian coordinate system to Q in orthogonal or real HKL coordiate system alined with arbitrary slicing plane
     const Kernel::DblMatrix & getWTransf()const
     { return m_Wtransf; }
   protected:

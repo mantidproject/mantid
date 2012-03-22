@@ -55,7 +55,7 @@ public:
 private:
  //--------------------------------------------------------------------------------------------------   
      /// helper class to orginize metaloop instantiating various subalgorithms 
-     template<Q_state Q,size_t N_ALGORITHMS >
+     template<QMode Q,size_t N_ALGORITHMS >
      friend class LOOP_ALGS;  
 };
 }

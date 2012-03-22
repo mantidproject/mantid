@@ -54,12 +54,12 @@ namespace MDAlgorithms
 */
 
 // Class to process event workspace by direct conversion:
-template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+template<QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
 class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state QX, AnalMode MODEX, CnvrtUnits CONVX,XCoordType XTYPE,SampleType XSample> 
+     template<QMode QX, AnalMode MODEX, CnvrtUnits CONVX,XCoordType XTYPE,SampleType XSample> 
      friend struct COORD_TRANSFORMER;
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,CONV,Centered,Sample> trn; 

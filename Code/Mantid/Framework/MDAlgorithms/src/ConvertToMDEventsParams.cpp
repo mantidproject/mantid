@@ -31,7 +31,7 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
 
 /** Identify the Momentum conversion mode requested by user
   * 
-  *@param Q_mode_req    -- What conversion algorithm user wants to deploy (Q3d, modQ, no Q)
+  *@param Q_mode_req    -- What conversion algorithm user wants to deploy (Q3d, ModQ, no Q)
   *@param ws_dim_names  -- vector of input workspace dimensions names 
   *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
   *@param out_dim_names [out] -- vector of dimension names for momentuns in target workspace
@@ -53,12 +53,12 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
         out_dim_units= ws_dim_units;
         nQ_dims      = int(out_dim_units.size());
     }
-    if(Q_mode_req.compare(Q_modes[modQ])==0)       
+    if(Q_mode_req.compare(Q_modes[ModQ])==0)       
     {  // so the only one variable is availible form the workspace. 
         nQ_dims=1;      
         out_dim_units.resize(1);
         out_dim_units[0] = native_elastic_unitID;
-        Q_MODE_ID = Q_modes[modQ];
+        Q_MODE_ID = Q_modes[ModQ];
 
     }
     if((Q_mode_req.compare(Q_modes[Q3D])==0))
@@ -67,7 +67,7 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
        Q_MODE_ID = Q_modes[Q3D];
        out_dim_units.assign(3,native_elastic_unitID);
     }
-    // modQ and Q3D mode can have crystal and powder submodes
+    // ModQ and Q3D mode can have crystal and powder submodes
     if(Q_mode_req.compare(Q_modes[NoQ])!=0)
     {
         if(isPowder){
@@ -258,7 +258,7 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
     algo_id =WS_ID;
 
 
-    // identify Q_mode; if modQ and no oriented lattice, then it is real powder, if Q3D and no lattice -- will use unit matrix which we will call "Powder"
+    // identify Q_mode; if ModQ and no oriented lattice, then it is real powder, if Q3D and no lattice -- will use unit matrix which we will call "Powder"
     bool isPowder = false;
     if(!TargWSDescription.pLatt.get()) // No lattice
     { 
@@ -284,7 +284,7 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
 /** function returns the algorithm ID as function of different integer conversion modes. 
   * This ID should coinside with the ID, obtained by identifyTheAlg method.
 */
-std::string ConvertToMDEventsParams::getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const
+std::string ConvertToMDEventsParams::getAlgoID(QMode Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const
 {
     std::string SampleK("");
     if(Sample<NSampleTypes)
@@ -303,7 +303,7 @@ std::string ConvertToMDEventsParams::getAlgoID(Q_state Q,AnalMode Mode,CnvrtUnit
  *@return Conv   -- unit conversion mode
  *@return  WS    -- processed workspace type
 */
-void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, Q_state &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS)
+void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, QMode &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS)
 {
     int i;
     // Q_mode
@@ -373,6 +373,7 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
    //Strings dim_IDs_requested,dim_units_requested;
    Strings targetWSUnits;
    std::string the_algID;
+   TargWSDescription.pLatt.reset();
  
    // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
    the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,targetWSUnits,TargWSDescription);
@@ -391,13 +392,13 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
   
 
    // Sanity checks:
-   Q_state QMode;
+   QMode QMod;
    AnalMode EMode;
    CnvrtUnits ConvU;
    InputWSType WS;
-   this->getAlgoModes(the_algID, QMode,EMode,ConvU,WS);
+   this->getAlgoModes(the_algID, QMod,EMode,ConvU,WS);
 
-   if((nDims<3)&&(QMode==Q3D))
+   if((nDims<3)&&(QMod==Q3D))
    {
         convert_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
         throw(std::logic_error("can not parse input parameters propertly"));
@@ -410,7 +411,7 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
     // get emode
     int emode;
     // if not NoQ mode, then emode should be availible
-    if (QMode!=NoQ){
+    if (QMod!=NoQ){
         emode = getEMode(the_algID);
     }else{
         emode = -1;  // no coordinate conversion
@@ -502,7 +503,7 @@ void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_s
   }
 
   // ModQ : default dimension names
-  if (getQMode(AlgoID)==modQ)
+  if (getQMode(AlgoID)==ModQ)
   {
       ws_dimIDs  = TargWSDescription.getDefaultDimIDModQ(eMode);
       ws_dimNames= ws_dimIDs;
@@ -589,13 +590,13 @@ int ConvertToMDEventsParams::getEMode(const std::string &AlgID)const
     return -1;
 }
 /// helper function returning Q-mode from existing algorithm ID
-Q_state ConvertToMDEventsParams::getQMode(const std::string &AlgID)const
+QMode ConvertToMDEventsParams::getQMode(const std::string &AlgID)const
 {
     // Q_mode
-    Q_state Q(NQStates);
+    QMode Q(NQStates);
     for(int i=0;i<NQStates;i++){
         if(AlgID.find(Q_modes[i])!=std::string::npos){
-            Q=static_cast<Q_state>(i);
+            Q=static_cast<QMode>(i);
             break;
         }
     }
@@ -659,7 +660,7 @@ native_elastic_unitID("Momentum"),// currently it is Q
 native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 {
      // strings to indentify possible momentum analysis modes
-     Q_modes[modQ] = "|Q|";
+     Q_modes[ModQ] = "|Q|";
      Q_modes[Q3D]  = "Q3D";    
      Q_modes[NoQ]  = "CopyToMD";    // no Q dimension; 
      // strings to indentify possible energy conversion modes

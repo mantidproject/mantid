@@ -462,7 +462,7 @@ void testIdentifyMatrixAlg_2()
     //
     std::vector<std::string> other_dim_names;
     TS_ASSERT_THROWS_NOTHING(params.buildMDDimDescription(ws2D,Alg_ID,other_dim_names,TWS));
-    TSM_ASSERT_EQUALS("This modQ workspace should produce 1 dimensions",1,TWS.nDims);
+    TSM_ASSERT_EQUALS("This ModQ workspace should produce 1 dimensions",1,TWS.nDims);
 
     TS_ASSERT_EQUALS(TWS.dimIDs.size(),TWS.dimNames.size());
 
@@ -498,7 +498,7 @@ void testIdentifyMatrixAlg_3()
     // Dim ID &Names
     std::vector<std::string> other_dim_names;
     TS_ASSERT_THROWS_NOTHING(params.buildMDDimDescription(ws2D,Alg_ID,other_dim_names,TWS));
-    TSM_ASSERT_EQUALS("Inelastic modQ workspace should produce 2 dimensions",2,TWS.nDims);
+    TSM_ASSERT_EQUALS("Inelastic ModQ workspace should produce 2 dimensions",2,TWS.nDims);
 
     TS_ASSERT_EQUALS(TWS.dimIDs.size(),TWS.dimNames.size());
 
@@ -535,7 +535,7 @@ void testIdentifyMatrixAlg_4()
     // Dim ID &Names
     std::vector<std::string> other_dim_names;
     TS_ASSERT_THROWS_NOTHING(params.buildMDDimDescription(ws2D,Alg_ID,other_dim_names,TWS));
-    TSM_ASSERT_EQUALS("Inelastic modQ workspace should produce 2 dimensions",2,TWS.nDims);
+    TSM_ASSERT_EQUALS("Inelastic ModQ workspace should produce 2 dimensions",2,TWS.nDims);
 
     TS_ASSERT_EQUALS(TWS.dimIDs.size(),TWS.dimNames.size());
 

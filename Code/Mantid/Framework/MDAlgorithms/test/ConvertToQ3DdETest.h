@@ -154,7 +154,7 @@ void testExecAndAdd(){
 
     pAlg->execute();
     TSM_ASSERT("Should fail as no adding to existing ws yet ",pAlg->isExecuted());
-    //TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
  
 
 }

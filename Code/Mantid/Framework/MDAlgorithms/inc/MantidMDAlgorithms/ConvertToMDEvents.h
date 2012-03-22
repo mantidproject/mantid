@@ -66,7 +66,7 @@ namespace MDAlgorithms
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
    /// the properties of the requested target MD workpsace:
-    MDEvents::MDWSDescription TWS;
+    MDEvents::MDWSDescription TWSD;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
    static PreprocessedDetectors det_loc;  
   /// progress reporter

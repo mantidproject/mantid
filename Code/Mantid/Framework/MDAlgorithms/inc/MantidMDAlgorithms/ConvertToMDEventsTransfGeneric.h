@@ -46,7 +46,7 @@ namespace MDAlgorithms
 */
 
 
-template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
+template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
 struct COORD_TRANSFORMER
 {
       

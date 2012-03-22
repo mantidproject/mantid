@@ -47,13 +47,23 @@ namespace MDEvents
  */
 enum defaultDimID
 {
-    modQ_ID,  //< the defauld |Q| id for mod Q or powder mode
+    ModQ_ID,  //< the defauld |Q| id for mod Q or powder mode
     Q1_ID,    //< 1 of 3 dimID in Q3D mode
     Q2_ID,    //< 2 of 3 dimID in Q3D mode
     Q3_ID,    //< 3 of 3 dimID in Q3D mode
     dE_ID,    //< energy transfer ID
     nDefaultID //< ID conunter
 };
+
+/// enum descrines availble momentum scalings, interpreted by this class: TODO: Reconsile this with future third 
+enum CoordScaling
+{ 
+    NoScaling, //< momentums in A^-1
+    SingleScale, //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sence
+    OrthogonalHKLScale,  //< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
+    HKLScale,            //< non-orthogonal system for non-orthogonal lattice
+    NCoordScalings
+}; 
 
 
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
@@ -79,7 +89,7 @@ class DLLExport MDWSDescription
     std::vector<size_t> nBins;
     /** the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in NoQ and powder mode (but used in cryst as powder) 
        and if no oriented lattice is found in input ws. */
-    bool convert_to_hkl;
+    CoordScaling convert_to_factor;
     /// the matrix to transform momentums of the workspace into target coordinate system, it is constructed from UB matix and W-matrix;
     std::vector<double> rotMatrix;  // can be Quat if not for non-orthogonal lattices
 
@@ -113,11 +123,17 @@ class DLLExport MDWSDescription
     /// function returns default dimension id-s for different Q and dE modes, defined by this class
     std::vector<std::string> getDefaultDimIDQ3D(int dEmode)const;
     std::vector<std::string> getDefaultDimIDModQ(int dEmode)const;
+  /// return the list of possible scalings for momentums
+   std::vector<std::string> getQScalings()const{return QScalingID;}
+   CoordScaling getQScaling(const std::string &ScID)const;
   private:
       // let's hide copy constructor for the time being as defaults are incorrect and it is unclear if one is needed.
       MDWSDescription(const MDWSDescription &);
-     // the vector describes default dimension names, specified along the axis if no names are explicitly requested;
+     /// the vector describes default dimension names, specified along the axis if no names are explicitly requested;
      std::vector<std::string> default_dim_ID;
+     ///
+     std::vector<std::string> QScalingID;
+
 
 }; 
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/

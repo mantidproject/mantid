@@ -113,7 +113,7 @@ std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
              throw(std::invalid_argument("Unknown dE mode provided"));
          }
      }
-     rez[0]=default_dim_ID[modQ_ID];
+     rez[0]=default_dim_ID[ModQ_ID];
      return rez;
 }
 
@@ -128,11 +128,13 @@ dimMax(nDimesnions,1),
 dimNames(nDimesnions,"mdn"),
 dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
-convert_to_hkl(false),
+convert_to_factor(NoScaling),
+rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error
 GoniomMatr(3,3,true),
 Wtransf(3,3,true),
 detInfoLost(false),
-default_dim_ID(nDefaultID)
+default_dim_ID(nDefaultID),
+QScalingID(NCoordScalings)
 {
     for(size_t i=0;i<nDimesnions;i++)
     {
@@ -141,13 +143,19 @@ default_dim_ID(nDefaultID)
     }
 
  // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
-     // for modQ transformation:
-     default_dim_ID[modQ_ID]="|Q|";
+     // for ModQ transformation:
+     default_dim_ID[ModQ_ID]="|Q|";
      // for Q3D transformation
      default_dim_ID[Q1_ID]="Q1";
      default_dim_ID[Q2_ID]="Q2";
      default_dim_ID[Q3_ID]="Q3";
      default_dim_ID[dE_ID]="DeltaE";
+
+    QScalingID[NoScaling]="Q in A^-1";
+    QScalingID[SingleScale]="Q in lattice units";
+    QScalingID[OrthogonalHKLScale]="Orthogonal HKL";
+    QScalingID[HKLScale]="HKL";
+
 
 }
 std::string DLLExport sprintfd(const double data, const double eps)
@@ -171,12 +179,11 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
     this->dimUnits=rhs.dimUnits;   
     this->nBins   =rhs.nBins;
 
-    this->convert_to_hkl= rhs.convert_to_hkl;
-//    this->u             = rhs.u;
-//    this->v             = rhs.v;
+    this->convert_to_factor= rhs.convert_to_factor;
+
     this->rotMatrix     = rhs.rotMatrix;
     this->AlgID         = rhs.AlgID;
-//    this->is_uv_default = rhs.is_uv_default;
+
     this->detInfoLost   = rhs.detInfoLost;
 
     if(rhs.pLatt.get()){
@@ -213,6 +220,23 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
 
     return name;
 }
+
+CoordScaling MDWSDescription::getQScaling(const std::string &ScID)const
+{
+    CoordScaling theScaling(NCoordScalings);
+    for(size_t i=0;i<NCoordScalings;i++)
+    {
+        if(QScalingID[i].find(ScID)!=std::string::npos)
+        {
+            theScaling = (CoordScaling)i;
+            break;
+        }
+    }
+    if(theScaling==NCoordScalings) throw(std::invalid_argument(" The scale with ID: "+ScID+" is unavalible"));
+
+    return theScaling;
+}
+
 
 }
 }

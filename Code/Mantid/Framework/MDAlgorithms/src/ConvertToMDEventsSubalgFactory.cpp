@@ -43,7 +43,7 @@ ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
 // AUTOINSTANSIATION OF EXISTING CODE:
 /** helper class to orginize metaloop instantiating various subalgorithms dealing with particular 
   * workspaces and implementing particular user requests */
-template<Q_state Q, size_t AlgoNum>
+template<QMode Q, size_t AlgoNum>
 class LOOP_ALGS{
 private:
     enum{
@@ -102,8 +102,8 @@ private:
 };
 
 //static_cast<size_t>(ANY_Mode*NConvUintsStates)
-/** Q3d and modQ metaloop terminator */
-template<Q_state Q >
+/** Q3d and ModQ metaloop terminator */
+template<QMode Q >
 class LOOP_ALGS<Q,0>{
   public:
       static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH)
@@ -145,7 +145,7 @@ void ConvertToMDEventsSubalgFactory::init(const ConvertToMDEventsParams &SubAlgD
     // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
         LOOP_ALGS<NoQ,NInWSTypes*NConvUintsStates>::EXEC(SubAlgDescriptor,this); 
     // MOD Q
-        LOOP_ALGS<modQ,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
+        LOOP_ALGS<ModQ,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
     // Q3D
         LOOP_ALGS<Q3D,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
     }

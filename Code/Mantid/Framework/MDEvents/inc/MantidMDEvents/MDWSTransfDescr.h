@@ -36,10 +36,11 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
 class DLLExport MDWSTransfDescr
 {
 public:
-    MDWSTransfDescr(){};
+    MDWSTransfDescr();
  
   /** helper function which verifies if projection vectors are specified and if their values are correct when present.
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
@@ -52,21 +53,24 @@ public:
      defined by existing workspace */
     std::vector<double> getTransfMatrix(const std::string &inWsName, API::IMDEventWorkspace_sptr spws,const MDEvents::MDWSDescription &TargWSDescription,bool powderMode=false)const; 
 
-   /// get transformation matrix currently defined for the algorithm
-   std::vector<double> getTransfMatrix()const{return m_TargWSDescription.rotMatrix;}
-   /// construct meaningful dimension names and :
+   /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
    void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription);
+   /// construct meaningful dimension names for ModQ case and different transformation types defined by the class;
+   void setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription);
 private:
     bool is_uv_default;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
       * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
-    mutable Kernel::V3D u,v;
-
-
-   MDEvents::MDWSDescription m_TargWSDescription;
+    mutable Kernel::V3D uProj,vProj;
 
   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& convert_log;
+
+protected: // for testing
+  /// function generates "Kind of" W transformation matrix for different Q-conversion modes;
+   Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription)const;
+   /// build orthogonal coordinate around two input vecotors u and v expressed in rlu;
+   std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const Kernel::V3D &u, const Kernel::V3D &v)const;
 
 };
 

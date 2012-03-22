@@ -45,9 +45,9 @@ namespace MDAlgorithms
 
 /** TEMPLATES INSTANTIATION: User are welcome to specialize its own specific algorithm 
   *e.g.
-   template<> class ConvertToMDEventsWS<modQ,Elastic,ConvertNo,Centered,CrystalType>::public IConvertToMDEventsMethods
+   template<> class ConvertToMDEventsWS<ModQ,Elastic,ConvertNo,Centered,CrystalType>::public IConvertToMDEventsMethods
    {
-       User specific code for workspace  processed to obtain modQ in elastic mode, without unit conversion, 
+       User specific code for workspace  processed to obtain ModQ in elastic mode, without unit conversion, 
        implementing something user defined for calculating x-coord and coord transformation, which will be invoked
        on ws with oriented lattice by writing the templated class and 
        Overloading the methods:
@@ -67,7 +67,7 @@ namespace MDAlgorithms
    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
  
-    template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
+    template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
     friend struct COORD_TRANSFORMER;
  public:
      // constructor;
@@ -122,7 +122,7 @@ namespace MDAlgorithms
 
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-template<InputWSType WS,Q_state Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+template<InputWSType WS,QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
 class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
 { 
 public:

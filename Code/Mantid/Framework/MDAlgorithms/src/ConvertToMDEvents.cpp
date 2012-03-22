@@ -12,9 +12,6 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 
 #include "MantidKernel/PhysicalConstants.h"
-//#include "MantidKernel/System.h"
-//#include "MantidKernel/Timer.h"
-//#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -101,16 +98,18 @@ ConvertToMDEvents::init()
 
      Strings Q_modes = ParamParser.getQModes();
      /// this variable describes default possible ID-s for Q-dimensions   
-     declareProperty("QDimensions",Q_modes[modQ],boost::make_shared<StringListValidator>(Q_modes),
+     declareProperty("QDimensions",Q_modes[ModQ],boost::make_shared<StringListValidator>(Q_modes),
          "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
          " (No Q analysis, or Q conversion is performed),\n"
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
-     declareProperty(new PropertyWithValue<bool>("QinHKL", true, Direction::Input),
-         " Setting this property to true will normalize three momentums obtained in Q3D mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
-         " ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
+     Strings QScales = TWSD.getQScalings();
+     declareProperty(new PropertyWithValue<bool>("QConversionScales",QScales[NoScaling], boost::make_shared<StringListValidator>(QScales), Direction::Input),
+         " This property to normalize three momentums obtained in Q3D mode correspondingly (by sinlge lattice vector,"
+         " lattice vectors 2pi/a,2pi/b and 2pi/c or by nothing)\n"
+         " currently ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
      /// this variable describes implemented modes for energy transfer analysis
           Strings dE_modes = ParamParser.getDEModes();
      declareProperty("dEAnalysisMode",dE_modes[Direct],boost::make_shared<StringListValidator>(dE_modes),
@@ -217,11 +216,11 @@ void ConvertToMDEvents::exec()
     //c) other dim property;
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
     //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to hkl
-    bool convert_to_hkl                       = getProperty("QinHKL");
+    std::string convert_to_                  = getProperty("QConversionScales");
 
 
     // Identify the algorithm to deploy on workspace. Also fills in the target workspace description
-    std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim(),TWS);
+    std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim(),TWSD);
 
   // instanciate class, responsible for defining Mslice-type projection
     MDEvents::MDWSTransfDescr MsliceProj;
@@ -234,41 +233,40 @@ void ConvertToMDEvents::exec()
        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
 
         // set the min and max values for the dimensions from the input porperties
-        TWS.dimMin = getProperty("MinValues");
-        TWS.dimMax = getProperty("MaxValues");
+        TWSD.dimMin = getProperty("MinValues");
+        TWSD.dimMax = getProperty("MaxValues");
         // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
-        TWS.checkMinMaxNdimConsistent(convert_log);    
+        TWSD.checkMinMaxNdimConsistent(convert_log);    
 
-        TWS.convert_to_hkl = convert_to_hkl;
+        TWSD.convert_to_factor = TWSD.getQScaling(convert_to_);
         // check if we are working in powder mode
         bool is_powder = ParamParser.isPowderMode(algo_id);
         // set up target coordinate system
-         TWS.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWS,is_powder);
+         TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,is_powder);
         // identify/set the (multi)dimension's names to use
         // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
-         Q_state Q = ParamParser.getQMode(algo_id);
-         if(Q==Q3D){
-            MsliceProj.setQ3DDimensionsNames(TWS);
-         }
+         QMode Q    = ParamParser.getQMode(algo_id);
+         if(Q==Q3D)  MsliceProj.setQ3DDimensionsNames(TWSD);
+         if(Q==ModQ) MsliceProj.setModQDimensionsNames(TWSD);
     }
     else // user input is mainly ignored and everything is in old workspac
     {  
         // check if we are working in powder mode
         bool is_powder = ParamParser.isPowderMode(algo_id);
         // existing workspace defines target coordinate system:
-        TWS.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),spws,TWS,is_powder);
+        TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),spws,TWSD,is_powder);
         // dimensions are already build
 
         MDEvents::MDWSDescription OLDWSD;
         OLDWSD.build_from_MDWS(spws);
         // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
-        OLDWSD.compareDescriptions(TWS);
+        OLDWSD.compareDescriptions(TWSD);
 
         throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
     }
 
     // Check what to do with detectors:  
-    if(TWS.detInfoLost)
+    if(TWSD.detInfoLost)
     { // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
          buildFakeDetectorsPositions(inWS2D,det_loc);
     }
@@ -290,10 +288,10 @@ void ConvertToMDEvents::exec()
  // create and initate new workspace
   if(create_new_ws)  
   {
-    spws = pWSWrapper->createEmptyMDWS(TWS);
+    spws = pWSWrapper->createEmptyMDWS(TWSD);
     if(!spws)
     {
-      g_log.error()<<"can not create target event workspace with :"<<TWS.nDims<<" dimensions\n";
+      g_log.error()<<"can not create target event workspace with :"<<TWSD.nDims<<" dimensions\n";
       throw(std::invalid_argument("can not create target workspace"));
     }
     // Build up the box controller
@@ -314,7 +312,7 @@ void ConvertToMDEvents::exec()
   // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
   IConvertToMDEventsMethods * algo =  subAlgFactory.getAlg(algo_id);
   // initate conversion and estimate amout of job to dl
-  size_t n_steps = algo->setUPConversion(inWS2D,det_loc,TWS, pWSWrapper);
+  size_t n_steps = algo->setUPConversion(inWS2D,det_loc,TWSD, pWSWrapper);
   // progress reporter
   pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 
@@ -327,6 +325,8 @@ void ConvertToMDEvents::exec()
   pWSWrapper->releaseWorkspace();
   // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
   inWS2D.reset();
+  // just in case to save some memory
+  TWSD.pLatt.reset();
   return;
 }
 

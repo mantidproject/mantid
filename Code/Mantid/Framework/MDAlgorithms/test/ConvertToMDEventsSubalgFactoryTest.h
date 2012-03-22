@@ -37,7 +37,7 @@ void testGetAlg()
 {
     for(int iq=0;iq<NoQ;iq++)
     {
-        Q_state q = (Q_state)iq;
+        QMode q = (QMode)iq;
         for(int im=0;im<ANY_Mode;im++){
 
             AnalMode m = (AnalMode)im;
