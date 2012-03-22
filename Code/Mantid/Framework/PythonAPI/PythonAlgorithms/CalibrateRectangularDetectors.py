@@ -60,6 +60,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="CrossCorrelation if True; minimize using many peaks if False.")
         self.declareProperty("PeakPositions", "", 
                              Description="Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
+        self.declareProperty("PeakWindowMax", 0.,
+                             Description="Maximum window around a peak to search for it. Optional.")
+        self.declareProperty("BackgroundType", "Flat", Validator=ListValidator(['Flat', 'Linear', 'Quadratic']),
+                             Description="Used only with CrossCorrelation=False")
         self.declareProperty("DetectorsPeaks", "",
                              Description="Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation.  Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
@@ -288,7 +292,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         os.system(cmd)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
-            DReference=self._peakpos, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
+            DReference=self._peakpos, FitWindowMaxWidth=self.getProperty("PeakWindowMax"), BackgroundType=self.getProperty("BackgroundType"),
+            MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
