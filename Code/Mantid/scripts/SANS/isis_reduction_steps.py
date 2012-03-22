@@ -1341,8 +1341,8 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
     
     def  __init__(self, wavelength_deps=[]):
         super(CalculateNormISIS, self).__init__(wavelength_deps)
-        #algorithm to be used to load correction files
-        self._load='Load'
+        #algorithm to be used to load pixel correction files
+        self._load='LoadRKH'
         #a parameters string to add as the last argument to the above algorithm
         self._load_params='FirstColumnValue="SpectrumNumber"'
 
