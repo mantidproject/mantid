@@ -22,10 +22,7 @@ DECLARE_ALGORITHM(BroadcastWorkspace)
 void BroadcastWorkspace::init()
 {
   // Input is optional - only the 'BroadcasterRank' process should provide an input workspace
-  if(mpi::communicator().rank())
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,PropertyMode::Optional));
-  else
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,PropertyMode::Mandatory));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,PropertyMode::Optional));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("BroadcasterRank",0, boost::make_shared<BoundedValidator<int>>(0,mpi::communicator().size()-1));
