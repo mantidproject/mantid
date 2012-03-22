@@ -873,6 +873,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
+  menu->addAction(m_showLogs);
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const
@@ -892,6 +893,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showMDPlot); // A plot of intensity vs bins
   menu->addAction(m_showListData); // Show data in table
+  menu->addAction(m_showLogs);
 }
 
 

@@ -45,7 +45,7 @@ namespace API
   ExperimentInfo_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex)
   {
     if (size_t(runIndex) >= m_expInfos.size())
-      throw std::invalid_argument("MDEventWorkspace::getExperimentInfo(): runIndex is out of range.");
+      throw std::invalid_argument("MDWorkspace::getExperimentInfo(): runIndex is out of range.");
     return m_expInfos[runIndex];
   }
 
@@ -58,7 +58,7 @@ namespace API
   ExperimentInfo_const_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const
   {
     if (size_t(runIndex) >= m_expInfos.size())
-      throw std::invalid_argument("MDEventWorkspace::getExperimentInfo(): runIndex is out of range.");
+      throw std::invalid_argument("MDWorkspace::getExperimentInfo() const: runIndex is out of range.");
     return m_expInfos[runIndex];
   }
 

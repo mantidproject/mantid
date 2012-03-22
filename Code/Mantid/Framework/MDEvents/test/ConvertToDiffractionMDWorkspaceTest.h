@@ -117,6 +117,8 @@ public:
     if (!ws) return;
     size_t npoints = ws->getNPoints();
     TS_ASSERT_LESS_THAN( 100000, npoints); // Some points are left
+    TS_ASSERT_EQUALS( ws->getNumExperimentInfo(), 1);
+    TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(0) );
 
     // Add to an existing MDEW
     for (size_t i=1; i < numTimesToAdd; i++)
@@ -136,6 +138,8 @@ public:
       if (!ws) return;
 
       TS_ASSERT_EQUALS( npoints*(i+1), ws->getNPoints()); // There are now twice as many points as before
+      TS_ASSERT_EQUALS( ws->getNumExperimentInfo(), (i+1));
+      TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(i) );
     }
 
 

@@ -10,6 +10,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include "MantidAPI/ExperimentInfo.h"
+#include <QDoubleSpinBox>
 
 //----------------------------------
 // Forward declarations
@@ -69,6 +70,8 @@ private slots:
   //Import a single item
   void importItem(QTreeWidgetItem *item);
 
+  void selectExpInfoNumber(int num);
+
 private:
   //Initialize the layout
   void init();
@@ -77,13 +80,13 @@ private:
   QTreeWidget *m_tree;
 
   //The workspace name
-  QString m_wsname;
+  std::string m_wsname;
 
   /// Index into the ExperimentInfo list.
   size_t m_experimentInfoIndex;
 
   /// The actual experiment info being looked at.
-  Mantid::API::ExperimentInfo_const_sptr m_ws;
+  Mantid::API::ExperimentInfo_const_sptr m_ei;
 
   //Buttons to do things  
   QPushButton *buttonPlot, *buttonClose;
@@ -97,6 +100,8 @@ private:
   // Testboxes with stats data
   QLineEdit  * statValues[5];
 
+  /// Widget to select the # of the experiment info to look at.
+  QSpinBox * m_spinNumber;
 
   //A pointer to the MantidUI object
   MantidUI* m_mantidUI;

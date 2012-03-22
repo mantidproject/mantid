@@ -42,7 +42,7 @@ using namespace Mantid::Kernel;
 MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags, size_t experimentInfoIndex)  :
   QDialog(mui->appWindow(), flags), m_wsname(wsname), m_experimentInfoIndex(experimentInfoIndex), m_mantidUI(mui)
 {
-  setWindowTitle(tr("MantidPlot - " + wsname + " sample logs " + QString::number(m_experimentInfoIndex)));
+  setWindowTitle(tr("MantidPlot - " + wsname + " sample logs"));
   
   m_tree = new QTreeWidget;
   QStringList titles;
@@ -86,23 +86,48 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   }
   statsBox->setLayout(statsBoxLayout);
 
-
-  QHBoxLayout *bottomButtons = new QHBoxLayout;
+  // -------------- The Import/Close buttons ------------------------
+  QHBoxLayout *topButtons = new QHBoxLayout;
   buttonPlot = new QPushButton(tr("&Import selected log"));
   buttonPlot->setAutoDefault(true);
   buttonPlot->setToolTip("Import log file as a table and construct a 1D graph if appropriate");
-  bottomButtons->addWidget(buttonPlot);
+  topButtons->addWidget(buttonPlot);
 
   buttonClose = new QPushButton(tr("Close"));
   buttonClose->setToolTip("Close dialog");
-  bottomButtons->addWidget(buttonClose);
+  topButtons->addWidget(buttonClose);
+
 
   QVBoxLayout *hbox = new QVBoxLayout;
-  hbox->addLayout(bottomButtons);
+
+  // -------------- The ExperimentInfo selector------------------------
+  boost::shared_ptr<MultipleExperimentInfos> mei = AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(m_wsname);
+  if (mei)
+  {
+    if (mei->getNumExperimentInfo() > 0)
+    {
+      QHBoxLayout * numSelectorLayout = new QHBoxLayout;
+      QLabel * lbl = new QLabel("Experiment Info #");
+      m_spinNumber = new QSpinBox;
+      m_spinNumber->setMinValue(0);
+      m_spinNumber->setMaxValue(int(mei->getNumExperimentInfo())-1);
+      m_spinNumber->setValue(int(m_experimentInfoIndex));
+      numSelectorLayout->addWidget(lbl);
+      numSelectorLayout->addWidget(m_spinNumber);
+      //Double-click imports a log file
+      connect(m_spinNumber, SIGNAL(valueChanged(int)),
+          this, SLOT(selectExpInfoNumber(int)));
+      hbox->addLayout(numSelectorLayout);
+    }
+  }
+
+  // Finish laying out the right side
+  hbox->addLayout(topButtons);
   hbox->addWidget(groupBox);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);
      
+
 
   //--- Main layout With 2 sides -----
   QHBoxLayout *mainLayout = new QHBoxLayout(this);
@@ -191,11 +216,11 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
     case numTSeries :
       // Calculate the stats
       // Get the workspace
-      if (!m_ws) return;
+      if (!m_ei) return;
 
       // Now the log
       Mantid::Kernel::TimeSeriesPropertyStatistics stats;
-      Mantid::Kernel::Property * logData = m_ws->run().getLogData(item->text(0).toStdString());
+      Mantid::Kernel::Property * logData = m_ei->run().getLogData(item->text(0).toStdString());
       // Get the stas if its a series of int or double; fail otherwise
       Mantid::Kernel::TimeSeriesProperty<double> * tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
       Mantid::Kernel::TimeSeriesProperty<int> * tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
@@ -241,7 +266,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
       if (filterStatus->isChecked()) filter = 1;
       if (filterPeriod->isChecked()) filter = 2;
       if (filterStatusPeriod->isChecked()) filter = 3;
-      m_mantidUI->importNumSeriesLog(m_wsname, item->text(0), filter);
+      m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname), item->text(0), filter);
       break;
     case stringTSeries :
       m_mantidUI->importStrSeriesLog(item->text(0),
@@ -279,31 +304,35 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 
 //------------------------------------------------------------------------------------------------
 /**
- * Initialize everything
+ * Initialize everything ub tge tree.
  */
 void MantidSampleLogDialog::init()
 {
   m_tree->clear();
 
   // ------------------- Retrieve the proper ExperimentInfo workspace -------------------------------
-  IMDWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_wsname.toStdString());
+  IMDWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_wsname);
   if (!ws)
-    throw std::runtime_error("Wrong type of a Workspace");
+    throw std::runtime_error("Wrong type of a workspace (" + m_wsname + " is not an IMDWorkspace)");
   // Is it MatrixWorkspace, which itself is ExperimentInfo?
-  m_ws = boost::dynamic_pointer_cast<const ExperimentInfo>(ws);;
-  if (!m_ws)
+  m_ei = boost::dynamic_pointer_cast<const ExperimentInfo>(ws);;
+  if (!m_ei)
   {
-    boost::shared_ptr<const MultipleExperimentInfos> mei = boost::dynamic_pointer_cast<const MultipleExperimentInfos>(m_ws);
+    boost::shared_ptr<MultipleExperimentInfos> mei = boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
     if (mei)
-      m_ws = mei->getExperimentInfo(static_cast<uint16_t>(m_experimentInfoIndex) );
+    {
+      if (m_experimentInfoIndex >= mei->getNumExperimentInfo())
+        throw std::runtime_error("ExperimentInfo requested (#" + Strings::toString(m_experimentInfoIndex) + ") is not available. There are " + Strings::toString(mei->getNumExperimentInfo()) + " in the workspace");
+      m_ei = mei->getExperimentInfo(static_cast<uint16_t>(m_experimentInfoIndex) );
+    }
   }
-  if (!m_ws)
-    throw std::runtime_error("Wrong type of a Workspace");
+  if (!m_ei)
+    throw std::runtime_error("Wrong type of a workspace (no ExperimentInfo)");
 
-  const std::vector< Mantid::Kernel::Property * > & logData = m_ws->run().getLogData();
-  std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
+  const std::vector< Mantid::Kernel::Property * > & logData = m_ei->run().getLogData();
+  auto pEnd = logData.end();
   int max_length(0);
-  for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
+  for(auto pItr = logData.begin();
        pItr != pEnd; ++pItr )
   {
     //name() contains the full path, so strip to file name
@@ -399,3 +428,14 @@ void MantidSampleLogDialog::init()
   m_tree->header()->setMovable(false);
   m_tree->setSortingEnabled(true);
 }
+
+
+/** Slot called when selecting a different experiment info number */
+void MantidSampleLogDialog::selectExpInfoNumber(int num)
+{
+  m_experimentInfoIndex=size_t(num);
+  m_tree->blockSignals(true);
+  this->init();
+  m_tree->blockSignals(false);
+}
+
