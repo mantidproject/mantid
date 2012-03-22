@@ -99,10 +99,12 @@ class DetectorBank:
         self.x_corr = 0.0 
         self._y_corr = 0.0 
         self._rot_corr = 0.0
+        #23/3/12 RKH add 2 more variables
+        self._radius_corr = 0.0
+        self._side_corr =0.0
         
         #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
         self._orientation = 'HorizontalFlipped'
-
 
     def disable_y_and_rot_corrs(self):
         """
@@ -110,6 +112,9 @@ class DetectorBank:
         """
         self._y_corr = None
         self._rot_corr = None
+        #23/3/12 RKH add 2 more variables
+        self._radius_corr = None
+        self._side_corr = None
 
     def get_y_corr(self):
         if not self._y_corr is None:
@@ -138,9 +143,42 @@ class DetectorBank:
         """
         if not self._rot_corr is None:
             self._rot_corr = value
+			
+	# 22/3/12 RKH added two new variables radius_corr, side_corr		
+    def get_radius_corr(self):
+        if not self._radius_corr is None:
+            return self._radius_corr
+        else:
+            raise NotImplementedError('radius correction is not used for this detector')
 
+    def set_radius_corr(self, value):
+        """
+            Only set the value if it isn't disabled
+            @param value: set radius_corr to this value, unless it's disabled
+        """
+        if not self._rot_corr is None:
+            self._radius_corr = value
+
+    def get_side_corr(self):
+        if not self._side_corr is None:
+            return self._side_corr
+        else:
+            raise NotImplementedError('side correction is not used for this detector')
+
+    def set_side_corr(self, value):
+        """
+            Only set the value if it isn't disabled
+            @param value: set side_corr to this value, unless it's disabled
+        """
+        if not self._side_corr is None:
+            self._side_corr = value
+
+			
     y_corr = property(get_y_corr, set_y_corr, None, None)
     rot_corr = property(get_rot_corr , set_rot_corr, None, None)
+    # 22/3/12 RKH added 2 new variables
+    radius_corr = property(get_radius_corr , set_radius_corr, None, None)
+    side_corr = property(get_side_corr , set_side_corr, None, None)
 
     def get_first_spec_num(self):
         return self._first_spec_num
@@ -622,21 +660,33 @@ class SANS2D(ISISInstrument):
 
 
         # Deal with front detector
-        
+        # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
+		# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
+		# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         self.setDetector('front-detector')
         # rotate front detector according to value in log file and correction value provided in user file
         rotateDet = (-self.FRONT_DET_ROT - self.cur_detector().rot_corr)
         RotateInstrumentComponent(ws, self.cur_detector().name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)       
         RotRadians = math.pi*(self.FRONT_DET_ROT + self.cur_detector().rot_corr)/180.
-        # x-position of rear detector is an indicator of the beam position...
-        xshift = (self.REAR_DET_X + self.other_detector().x_corr - self.FRONT_DET_X - self.cur_detector().x_corr + self.FRONT_DET_RADIUS*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
+        # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
+		# (Note that the X encoder values in NOT used for the rear detector.)
+		# The front detector is translated using the difference in X encoder values, with a correction from the user file.
+		# 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
+		# but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
+		# 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0            
+		# this inserts *(1.0-math.cos(RotRadians)) into xshift, and 
+		# - self.cur_detector().side_corr*math.sin(RotRadians) into zshift.
+		# (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
+        xshift = (self.REAR_DET_X + self.other_detector().x_corr -self.cur_detector().x_corr - self.FRONT_DET_X  -self.cur_detector().side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +self.cur_detector().radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (self.cur_detector().y_corr/1000.  - ybeam)
-        # Note don't understand the comment below
+        # Note don't understand the comment below (9/1/12 these are comments from the original python code, you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-        zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
+		# 21/3/12 RKH add .radius_corr
+        zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + (self.FRONT_DET_RADIUS +self.cur_detector().radius_corr)*(1 - math.cos(RotRadians)) - self.cur_detector().side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
         MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+        
         
         
         # deal with rear detector

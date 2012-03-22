@@ -1817,6 +1817,11 @@ class UserFile(ReductionStep):
             detector.z_corr = shift
         elif det_axis == 'ROT':
             detector.rot_corr = shift
+        # 21/3/12 RKH added 2 variables 
+        elif det_axis == 'RADIUS':
+            detector.radius_corr = shift
+        elif det_axis == 'SIDE':
+            detector.radius_side = shift
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
