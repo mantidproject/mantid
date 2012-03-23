@@ -333,9 +333,6 @@ class SNSPowderReduction2(PythonAlgorithm):
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
             mtd.deleteWorkspace('Chunks')
-        if normByCurrent:
-            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
-            wksp.getRun()['gsas_monitor'] = 1
         print "Done focussing data"
 
         return wksp
@@ -443,6 +440,9 @@ class SNSPowderReduction2(PythonAlgorithm):
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if normByCurrent:
+            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+            wksp.getRun()['gsas_monitor'] = 1
 
         return wksp
 
