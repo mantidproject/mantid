@@ -128,6 +128,17 @@ namespace MDEvents
   /// Our MDLeanEvent dimension
   typedef MDLeanEvent<3> MDE;
 
+  //----------------------------------------------------------------------------------------------
+  /** Convert one spectrum (histogram) into an event list
+   * with one event per bin, and then pass through to
+   * another method to convert to 3D q-space and add it to the MDEventWorkspace
+   *
+   * @param workspaceIndex :: index into the workspace
+   */
+  void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex)
+  {
+//    this->workspaceIndex
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Convert an event list to 3D q-space and add it to the MDEventWorkspace

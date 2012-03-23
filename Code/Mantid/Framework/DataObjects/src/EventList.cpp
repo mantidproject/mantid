@@ -138,6 +138,97 @@ namespace DataObjects
     //std::vector<TofEvent>().swap(events); //Trick to release the vector memory.
   }
 
+
+  // --------------------------------------------------------------------------
+  /** Create an EventList from a histogram. This converts bins to weighted
+   * events.
+   * Any existing events are cleared.
+   *
+   * @param spec :: ISpectrum ptr to histogram data.
+   * @param GenerateZeros :: if true, generate event(s) for empty bins
+   * @param GenerateMultipleEvents :: if true, create several evenly-spaced fake events inside the bin
+   * @param MaxEventsPerBin :: max number of events to generate in one bin, if GenerateMultipleEvents
+   */
+  void EventList::createFromHistogram(const ISpectrum * inSpec, bool GenerateZeros, bool GenerateMultipleEvents, int MaxEventsPerBin)
+  {
+    // Fresh start
+    this->clear(true);
+
+    // Cached values for later checks
+    double inf = std::numeric_limits<double>::infinity();
+    double ninf = -inf;
+
+    // Get the input histogram
+    const MantidVec & X = inSpec->readX();
+    const MantidVec & Y = inSpec->readY();
+    const MantidVec & E = inSpec->readE();
+    if (Y.size()+1 != X.size())
+      throw std::runtime_error("Expected a histogram (X vector should be 1 longer than the Y vector)");
+
+    // Copy detector IDs and spectra
+    this->copyInfoFrom( *inSpec );
+    // We need weights but have no way to set the time. So use weighted, no time
+    this->switchTo(WEIGHTED_NOTIME);
+
+    for (size_t i=0; i<X.size()-1; i++)
+    {
+      double weight = Y[i];
+      if ((weight != 0.0 || GenerateZeros)
+          && (weight == weight) /*NAN check*/
+          && (weight != inf) && (weight != ninf))
+      {
+        double error = E[i];
+        // Also check that the error is not a bad number
+        if ((error == error) /*NAN check*/
+            && (error != inf) && (error != ninf))
+        {
+          if (GenerateMultipleEvents)
+          {
+            // --------- Multiple events per bin ----------
+            double errorSquared = error * error;
+            // Find how many events to fake
+            double val = weight / E[i];
+            val *= val;
+            // Convert to int with slight rounding up. This is to avoid rounding errors
+            int numEvents = int(val + 0.2);
+            if (numEvents < 1) numEvents = 1;
+            if (numEvents > MaxEventsPerBin) numEvents = MaxEventsPerBin;
+            // Scale the weight and error for each
+            weight /= numEvents;
+            errorSquared /= numEvents;
+
+            // Spread the TOF. e.g. 2 events = 0.25, 0.75.
+            double tofStep = (X[i+1] - X[i]) / (numEvents);
+            for (size_t j=0; j<size_t(numEvents); j++)
+            {
+              double tof = X[i] + tofStep * (0.5 + double(j));
+              // Create and add the event
+              this->addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
+            }
+          }
+          else
+          {
+            // --------- Single event per bin ----------
+            // TOF = midpoint of the bin
+            double tof = (X[i] + X[i+1]) / 2.0;
+            // Error squared is carried in the event
+            double errorSquared = E[i];
+            errorSquared *= errorSquared;
+            // Create and add the event
+            this->addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
+          }
+        } // error is nont NAN or infinite
+      } // weight is non-zero, not NAN, and non-infinite
+    } // (each bin)
+
+    // Set the X binning parameters
+    this->setX( inSpec->ptrX() );
+
+    // Manually set that this is sorted by TOF, since it is. This will make it "threadSafe" in other algos.
+    this->setSortOrder( TOF_SORT );
+  }
+
+
   // --------------------------------------------------------------------------
   // --- Operators -------------------------------------------------------------------
 

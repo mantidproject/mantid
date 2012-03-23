@@ -48,8 +48,14 @@ namespace MDEvents
     template <class T>
     void convertEventList(int workspaceIndex);
 
+    void convertSpectrum(int workspaceIndex);
+
     /// The input event workspace
     DataObjects::EventWorkspace_sptr in_ws;
+
+    /// The input event workspace
+    DataObjects::EventWorkspace_sptr m_inMWS;
+
     /// The output MDEventWorkspace<3>
     MDEvents::MDEventWorkspace3Lean::sptr ws;
     /// Do we clear events on the input during loading?
