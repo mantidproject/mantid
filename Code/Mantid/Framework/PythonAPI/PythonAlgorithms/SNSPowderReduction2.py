@@ -567,8 +567,10 @@ class SNSPowderReduction2(PythonAlgorithm):
                     else:
                         canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
                                preserveEvents=preserveEvents)
-                ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-                workspacelist.append(str(canRun))
+                if HAVE_MPI:
+                    if mpi.world.rank == 0:
+                        ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                        workspacelist.append(str(canRun))
             else:
                 canRun = None
 
@@ -597,23 +599,25 @@ class SNSPowderReduction2(PythonAlgorithm):
                         else:
                             vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, (0., 0.), calib,
                                preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
-                        ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
-                        FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
-                                  Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                        try:
-                            vanDuration = vanRun.getRun().get('duration')
-                            vanDuration = vanDuration.value
-                        except:
-                            vanDuration = 1.
-                        try:
-                            vbackDuration = vnoiseRun.getRun().get('duration')
-                            vbackDuration = vbackDuration.value
-                        except:
-                            vbackDuration = 1.
-                        vnoiseRun *= (vanDuration/vbackDuration)
-                        vanRun -= vnoiseRun
-                        NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                        workspacelist.append(str(vnoiseRun))
+                        if HAVE_MPI:
+                            if mpi.world.rank == 0:
+                                ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
+                                FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
+                                          Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                                try:
+                                    vanDuration = vanRun.getRun().get('duration')
+                                    vanDuration = vanDuration.value
+                                except:
+                                    vanDuration = 1.
+                                try:
+                                    vbackDuration = vnoiseRun.getRun().get('duration')
+                                    vbackDuration = vbackDuration.value
+                                except:
+                                    vbackDuration = 1.
+                                vnoiseRun *= (vanDuration/vbackDuration)
+                                vanRun -= vnoiseRun
+                                NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                                workspacelist.append(str(vnoiseRun))
                     else:
                         vnoiseRun = None
 
@@ -630,6 +634,9 @@ class SNSPowderReduction2(PythonAlgorithm):
                                    preserveEvents=False)
                         vanRun -= vbackRun
 
+                    if HAVE_MPI:
+                        if mpi.world.rank > 0:
+                            return
                     if self.getProperty("StripVanadiumPeaks"):
                         ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                         StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
@@ -641,6 +648,9 @@ class SNSPowderReduction2(PythonAlgorithm):
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                if HAVE_MPI:
+                    if mpi.world.rank > 0:
+                        return
                 ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 workspacelist.append(str(vanRun))
             else:
