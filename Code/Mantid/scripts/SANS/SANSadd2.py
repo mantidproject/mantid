@@ -205,12 +205,14 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     LoadEventNexus(Filename=filename,OutputWorkspace=wsName, LoadMonitors=True)     
     runDetails = mtd[wsName].getRun()
     timeArray = runDetails.getLogData("proton_charge").times
-    # There should never be a time increment in the proton charge larger than say 0.5 sec
+    # There should never be a time increment in the proton charge larger than say "two weeks"
     # On SANS2D is currently run at 10 frames per second other possibly this may be increated to 5Hz
-    # (step of 0.2 sec)
+    # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
+    # but hopefully not longer than two weeks!
     for i in range(len(timeArray)-1):
+      # cal time dif in seconds
       timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
-      if timeDif > 0.5:
+      if timeDif > 172800:
           mantid.sendLogMessage('::SANS::WARNING: Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
                                 ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
           break 
