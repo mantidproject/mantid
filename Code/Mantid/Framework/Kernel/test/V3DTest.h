@@ -450,8 +450,8 @@ public:
      TS_ASSERT_DELTA(2,a1[1],1.e-3);
      TS_ASSERT_DELTA(50,a1[2],1.e-3);
 
-     V3D a2(0.2,0,2);
-     TS_ASSERT_THROWS_NOTHING(a2.toCrystallogrCoord(0.1));
+     V3D a2(0.02,0,2);
+     TS_ASSERT_THROWS_NOTHING(a2.toCrystallogrCoord(0.01));
 
      TS_ASSERT_DELTA(1,a2[0],1.e-3);
      TS_ASSERT_DELTA(0,a2[1],1.e-3);
@@ -474,23 +474,23 @@ public:
      V3D a5(-3,-0.80231,-0.6);
      TS_ASSERT_THROWS_NOTHING(a5.toCrystallogrCoord(0.1));
 
-     TS_ASSERT_DELTA(-187,a5[2],1.e-3);
-     TS_ASSERT_DELTA(-50.150,a5[1],1.e-3);
-     TS_ASSERT_DELTA(-37,a5[0],1.e-3);
+     TS_ASSERT_DELTA(-187,a5[0],1.e-1);
+     TS_ASSERT_DELTA(-50,a5[1],1.e-1);
+     TS_ASSERT_DELTA(-37,a5[2],1.e-1);
 
      V3D a6(-3,5,-6);
      TS_ASSERT_THROWS_NOTHING(a6.toCrystallogrCoord(0.001));
 
-     TS_ASSERT_DELTA(-3,a6[2],1.e-3);
+     TS_ASSERT_DELTA(-3,a6[0],1.e-3);
      TS_ASSERT_DELTA( 5,a6[1],1.e-3);
-     TS_ASSERT_DELTA(-6,a6[0],1.e-3);
+     TS_ASSERT_DELTA(-6,a6[2],1.e-3);
 
      V3D a7(-3,0.5,-6);
      TS_ASSERT_THROWS_NOTHING(a7.toCrystallogrCoord(0.001));
 
-     TS_ASSERT_DELTA(-6, a7[2],1.e-3);
+     TS_ASSERT_DELTA(-6, a7[0],1.e-3);
      TS_ASSERT_DELTA( 1, a7[1],1.e-3);
-     TS_ASSERT_DELTA(-12,a7[0],1.e-3);
+     TS_ASSERT_DELTA(-12,a7[2],1.e-3);
   }
 
 };
