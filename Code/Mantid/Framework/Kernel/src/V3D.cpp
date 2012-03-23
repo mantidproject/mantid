@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <math.h>
+#include <float.h>
 #include <vector>
 #include <cstdlib>
 
@@ -824,6 +825,40 @@ void V3D::loadNexus(::NeXus::File * file, const std::string & name)
   y = data[1];
   z = data[2];
 }
+
+/** transform vector into form, used to describe directions in crystallogaphical coodinate system 
+    as crystallographical coordinate sytem is based on 3 integers, eps is used as accuracy to convert into integers
+*/
+void V3D::toCrystallogrCoord(double eps)
+{
+    double max = (x>y)?x:y;  max=(z>max)?z:max;
+    if(abs(max)<FLT_EPSILON) throw(std::invalid_argument("vector is almost 0"));
+    if(eps<0)                 eps=-eps;
+    if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
+        
+
+    x/=max;   y/=max;  z/=max;
+
+    double ax=abs(x);
+    double ay=abs(y);
+    double az=abs(z);
+
+    if(ax<eps){x=0; ax=0;}
+    if(ay<eps){y=0; ay=0;}
+    if(az<eps){z=0; az=0;}
+
+    
+    double mult(1);
+    if(ax>0)mult/=ax;
+    if(ay>0)mult/=ay;
+    if(az>0)mult/=az;
+
+    x *=mult; y*=mult;  z*=mult;
+
+
+
+}
+
 
 
 } // Namespace Kernel
