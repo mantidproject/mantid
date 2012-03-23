@@ -848,9 +848,11 @@ void V3D::toCrystallogrCoord(double eps)
     if(az<eps){z=0; az=0;}
 
 
-    double mult;
-    if(ax>0)mult  =1/ax;
-    ax *=mult; ay*=mult;  az*=mult;
+    double mult(1);
+    if(ax>0){
+        mult  =1./ax;
+        ax *=mult; ay*=mult;  az*=mult;
+    }
     if(ay>0){
         if(ay<1){
             double aay = std::fabs(y);
