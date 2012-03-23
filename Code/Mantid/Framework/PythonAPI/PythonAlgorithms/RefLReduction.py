@@ -64,7 +64,6 @@ class RefLReduction(PythonAlgorithm):
         # Q binning for output distribution
         q_min = self.getProperty("QMin")
         q_step = self.getProperty("QStep")
-        print 'q_step'
           
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
@@ -447,8 +446,9 @@ class RefLReduction(PythonAlgorithm):
 
 #        this is where we need to apply the scaling factor
         print '-> Apply SF'
-        ws_data_scaled = wks_utility.applySF(ws_data,
-                                             slitsValuePrecision)
+#        ws_data_scaled = wks_utility.applySF(ws_data,
+#                                             slitsValuePrecision)
+        ws_data_scaled = ws_data
 
         if dMD is not None and theta is not None:
                     
