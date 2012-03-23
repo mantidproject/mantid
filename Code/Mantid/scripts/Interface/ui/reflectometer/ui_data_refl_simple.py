@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Fri Mar  9 16:00:54 2012
+# Created: Fri Mar 23 10:45:35 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,6 +49,9 @@ class Ui_Frame(object):
         self.label_10.setFont(font)
         self.label_10.setObjectName("label_10")
         self.verticalLayout_6.addWidget(self.label_10)
+        self.waiting_label = QtGui.QLabel(self.groupBox_3)
+        self.waiting_label.setObjectName("waiting_label")
+        self.verticalLayout_6.addWidget(self.waiting_label)
         self.angle_list = QtGui.QListWidget(self.groupBox_3)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -1224,8 +1227,13 @@ class Ui_Frame(object):
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_3.setTitle(QtGui.QApplication.translate("Frame", "Angle List", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_10.setText(QtGui.QApplication.translate("Frame", "List of runs to be stitched together.\n"
-"", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_10.setText(QtGui.QApplication.translate("Frame", "List of runs to be stitched together.", None, QtGui.QApplication.UnicodeUTF8))
+        self.waiting_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600; color:#aa557f;\">Finding data file:</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600; color:#aa557f;\">this may take a moment</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_btn.setToolTip(QtGui.QApplication.translate("Frame", "Remove selected item", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_btn.setText(QtGui.QApplication.translate("Frame", "Remove selected", None, QtGui.QApplication.UnicodeUTF8))
         self.instrument_group_box.setTitle(QtGui.QApplication.translate("Frame", "Instrument", None, QtGui.QApplication.UnicodeUTF8))

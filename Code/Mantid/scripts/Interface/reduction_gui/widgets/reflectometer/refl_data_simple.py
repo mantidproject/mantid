@@ -221,6 +221,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.refm_radio, QtCore.SIGNAL("clicked()"), self._ref_instrument_selected)
         self._ref_instrument_selected()
         self._summary.instrument_group_box.hide()
+        self._summary.waiting_label.hide()
         
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
@@ -756,16 +757,31 @@ class DataReflWidget(BaseWidget):
 
     def _add_data(self):
         state = self.get_editing_state()
+        in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
+            in_list = True
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
         
-        if IS_IN_MANTIDPLOT and self.short_name == "REFM":
+        # Read logs
+        if not in_list and self.short_name == "REFM":
+            self._read_logs()
+        
+        self._reset_warnings()
+
+    def _read_logs(self):
+        if IS_IN_MANTIDPLOT:
+            # Showing the waiting message
+            self._summary.waiting_label.show()
+            self._summary.update()
+            QtGui.QApplication.processEvents()
+            QtGui.QApplication.hasPendingEvents()
+            
             try:
                 run_entry = str(self._summary.data_run_number_edit.text()).strip()
                 if len(run_entry)==0 or run_entry=="0":
@@ -789,9 +805,13 @@ class DataReflWidget(BaseWidget):
                 self._detector_distance = logs["DET_DISTANCE"]
             except:
                 # Could not read in the parameters, skip.
-                pass
-        self._reset_warnings()
-
+                msg = "No data set was found for run %s\n\n" % run_entry
+                msg += "Make sure that your data directory was added to the "
+                msg += "Mantid search directories."
+                QtGui.QMessageBox.warning(self, 
+                                          "Unable to find data set", msg)
+            
+            self._summary.waiting_label.hide()
 
     def _angle_changed(self):
         if self._summary.angle_list.count()==0:
@@ -933,7 +953,10 @@ class DataReflWidget(BaseWidget):
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-            
+                                                
+        if self.short_name == "REFM":
+            self._read_logs()
+
     def get_state(self):
         """
             Returns an object with the state of the interface
