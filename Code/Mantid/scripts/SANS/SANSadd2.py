@@ -212,7 +212,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
       timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
       if timeDif > 0.5:
           mantid.sendLogMessage('::SANS::WARNING: Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
-                                ' For example at time difference of ' + str(timeDif) + " seconds has been observed.")
+                                ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
           break 
           
   path = props.getPropertyValue('FileName')
