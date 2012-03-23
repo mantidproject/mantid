@@ -189,7 +189,7 @@ namespace MantidQt
     Determine if properties relating to the dimension history have changed. 
     @return True if it has changed.
     */
-    auto SlicingAlgorithmDialog::hasDimensionHistoryChanged(const QString& propertyPrefix, QString(*format)(IMDDimension_const_sptr)) const -> HistoryChanged
+    SlicingAlgorithmDialog::HistoryChanged SlicingAlgorithmDialog::hasDimensionHistoryChanged(const QString& propertyPrefix, QString(*format)(IMDDimension_const_sptr)) const
     {
       const QString& currentWorkspaceName = getCurrentInputWorkspaceName();
       if(currentWorkspaceName.isEmpty())
