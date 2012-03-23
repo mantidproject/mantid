@@ -117,8 +117,6 @@ class DLLExport MDWSDescription
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
     // default does not do any more;
     MDWSDescription & operator=(const MDWSDescription &rhs);
-    //
-    std::vector<std::string> MDWSDescription::getDefaultQNames()const;
 
     /// function returns default dimension id-s for different Q and dE modes, defined by this class
     std::vector<std::string> getDefaultDimIDQ3D(int dEmode)const;
