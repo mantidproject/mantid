@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>346</width>
+    <width>372</width>
     <height>540</height>
    </rect>
   </property>
@@ -383,8 +383,11 @@
      </item>
      <item>
       <widget class="QPushButton" name="btn_rebuild_dimensions">
+       <property name="toolTip">
+        <string>Force the dimension inputs to be rebuilt to mirror values in the input workspace.</string>
+       </property>
        <property name="text">
-        <string>Rebuild Dimensions</string>
+        <string>Refresh Dims</string>
        </property>
       </widget>
      </item>
