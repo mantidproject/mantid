@@ -318,7 +318,6 @@ class SNSPowderReduction2(PythonAlgorithm):
             if self._info is None:
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
-            comm = mpi.world
             if HAVE_MPI:
                 alg = GatherWorkspaces(InputWorkspace=temp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
