@@ -51,10 +51,14 @@ protected slots:
   void onBrowse();
 
   void onMaxFromInput(bool);
+
+  void onRebuildDimensions();
   
 private:
 
   enum History{Remember, Forget};
+
+  enum HistoryChanged{HasChanged, HasNotChanged};
 
   /// Initialize the layout
   virtual void initLayout();
@@ -63,13 +67,16 @@ private:
   bool doAxisAligned() const;
 
   /// Gets the input workspace name provided
-  QString getInputWorkspaceName() const;
+  QString getCurrentInputWorkspaceName() const;
+
+  /// Getter for the historical input workspace name
+  QString getHistoricalInputWorkspaceName() const;
 
   /// Gets the output workspace name provided
-  QString getOutputWorkspaceName() const;
+  QString getCurrentOutputWorkspaceName() const;
 
   /// Build dimension inputs.
-  void buildDimensionInputs();
+  void buildDimensionInputs(const bool bForceForget=false);
 
   /// Build dimension inputs.
   void buildDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
@@ -79,6 +86,9 @@ private:
 
   /// Clear out any exisiting dimension widgets.
   void clearExistingDimensions();
+
+  /// Determine if the dimension history has changed.
+  HistoryChanged hasDimensionHistoryChanged(const QString& propertyPrefix, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr)) const;
 
   /// Give base classes the opportunity to do any custom overriding.
   virtual void customiseInitLayout() = 0;

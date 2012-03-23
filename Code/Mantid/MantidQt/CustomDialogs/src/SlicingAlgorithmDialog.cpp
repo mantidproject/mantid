@@ -2,6 +2,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <QIntValidator>
 #include <QFileDialog>
@@ -52,6 +53,7 @@ namespace MantidQt
       connect(ui.ck_max_from_input, SIGNAL(clicked(bool)), this, SLOT(onMaxFromInput(bool)));
       connect(ui.btn_browse, SIGNAL(clicked()), this, SLOT(onBrowse()));
       connect(ui.btn_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
+      connect(ui.btn_rebuild_dimensions, SIGNAL(clicked()), this, SLOT(onRebuildDimensions()));
 
       //Configure workspace selector
       ui.workspace_selector->setValidatingAlgorithm(m_algName);
@@ -68,6 +70,12 @@ namespace MantidQt
           ui.workspace_selector->addItem((*it).c_str());
         }
         ++it;
+      }
+      QString lastUsedInputWorkspaceName = getHistoricalInputWorkspaceName();
+      int index = ui.workspace_selector->findText(lastUsedInputWorkspaceName);
+      if( index >= 0 )
+      {
+        ui.workspace_selector->setCurrentIndex(index);
       }
 
       //Derived algorithms may use this to apply any additional ties.
@@ -154,7 +162,7 @@ namespace MantidQt
     Gets the provided input workspace name
     @return name of the input workspace
     */
-    QString SlicingAlgorithmDialog::getInputWorkspaceName() const
+    QString SlicingAlgorithmDialog::getCurrentInputWorkspaceName() const
     {
       return ui.workspace_selector->currentText();
     }
@@ -163,26 +171,69 @@ namespace MantidQt
     Gets the provided output workspace name
     @return name of the output workspace
     */
-    QString SlicingAlgorithmDialog::getOutputWorkspaceName() const
+    QString SlicingAlgorithmDialog::getCurrentOutputWorkspaceName() const
     {
       return ui.txt_output->text();
     }
 
+    /**
+    Getter for the historical input workspace name.
+    @return old input workspace name.
+    */
+    QString SlicingAlgorithmDialog::getHistoricalInputWorkspaceName() const
+    {
+      return MantidQt::API::AlgorithmInputHistory::Instance().previousInput(m_algName, "InputWorkspace");
+    }
+
+    /**
+    Determine if properties relating to the dimension history have changed. 
+    @return True if it has changed.
+    */
+    auto SlicingAlgorithmDialog::hasDimensionHistoryChanged(const QString& propertyPrefix, QString(*format)(IMDDimension_const_sptr)) const -> HistoryChanged
+    {
+      const QString& currentWorkspaceName = getCurrentInputWorkspaceName();
+      if(currentWorkspaceName.isEmpty())
+      {
+        return HasChanged; //Force a rebuild because the dialog cant find any eligable input workspaces. That's why there is an empty entry.
+      }
+
+      QString previousInputWorkspaceName = MantidQt::API::AlgorithmInputHistory::Instance().previousInput(m_algName, "InputWorkspace");
+      if(previousInputWorkspaceName != currentWorkspaceName)
+      {
+        return HasChanged; //The input workspace has been switched, so rebuilding will be necessary.
+      }
+
+      return HasNotChanged;
+    }
+
     /*
     Decide and command the type of dimension inputs to provide.
+    @bForceForget : Force the use of inputworkspace dimensions when configuring the dialog.
     */
-    void SlicingAlgorithmDialog::buildDimensionInputs()
+    void SlicingAlgorithmDialog::buildDimensionInputs(const bool bForceForget)
     {
       clearExistingDimensions();
       const bool axisAligned = doAxisAligned();
       ui.non_axis_aligned_layout->setEnabled(!axisAligned);
-      if(axisAligned)
+
+      HistoryChanged changedStatus = hasDimensionHistoryChanged("AlignedDim", formattedAlignedDimensionInput);
+      History history;
+      if(changedStatus == HasChanged ||  bForceForget)
       {
-        buildDimensionInputs("AlignedDim", this->ui.axis_aligned_layout->layout(), formattedAlignedDimensionInput, Forget);
+        history = Forget; 
       }
       else
       {
-        buildDimensionInputs("BasisVector", this->ui.non_axis_aligned_layout->layout(), formatNonAlignedDimensionInput, Remember);
+        history = Remember;
+      }
+
+      if(axisAligned)
+      {
+        buildDimensionInputs("AlignedDim", this->ui.axis_aligned_layout->layout(), formattedAlignedDimensionInput, history);
+      }
+      else
+      {
+        buildDimensionInputs("BasisVector", this->ui.non_axis_aligned_layout->layout(), formatNonAlignedDimensionInput, history);
       }
     }
 
@@ -196,7 +247,7 @@ namespace MantidQt
     */
     void SlicingAlgorithmDialog::buildDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(IMDDimension_const_sptr), History history)
     {
-      const QString& txt = getInputWorkspaceName();
+      const QString& txt = getCurrentInputWorkspaceName();
       if(!txt.isEmpty())
       {
         IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(txt.toStdString()));
@@ -212,11 +263,12 @@ namespace MantidQt
 
           // Configure the label 
           QString propertyName =  propertyPrefix.copy().append(QString().number(index));
+
           QLabel* dimensionLabel = new QLabel(propertyName);
           
           // Configure the default input.
           QString dimensioninfo = format(dim);
-          
+
           QLineEdit* txtDimension = new QLineEdit(dimensioninfo);
           tie(txtDimension, propertyName, layout, (history == Remember));
 
@@ -244,11 +296,23 @@ namespace MantidQt
       buildDimensionInputs();
     }
 
+    /**
+    Event handler for changes so that recursion depth for the ouput workspace is either taken 
+    from the input workspace or from an external field.
+    */
     void SlicingAlgorithmDialog::onMaxFromInput(bool)
     {
       const bool takeFromInputWorkspace = ui.ck_max_from_input->isChecked();
       ui.txt_resursion_depth->setEnabled(!takeFromInputWorkspace);
       ui.lbl_resursion_depth->setEnabled(!takeFromInputWorkspace);
+    }
+
+    /**
+    Event handler for the on-forced dimension rebuild event.
+    */
+    void SlicingAlgorithmDialog::onRebuildDimensions()
+    {
+      buildDimensionInputs(true);
     }
 
     /**

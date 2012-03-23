@@ -382,6 +382,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btn_rebuild_dimensions">
+       <property name="text">
+        <string>Rebuild Dimensions</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QDialogButtonBox" name="controls">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
