@@ -59,6 +59,8 @@ namespace Mantid
 
             /// overwrite IFunction base class methods
             std::string name()const{return "CobaltSpinWaveDSHO";}
+            /// This function only for use in inelastic analysis
+            virtual const std::string category() const { return "Inelastic";}
             /// sqwBroad returns the expected scattering weight for the given Q,w point
             //virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
             //        const double temp, const Kernel::Matrix<double> & ubinv) const;
