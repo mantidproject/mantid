@@ -835,7 +835,8 @@ void V3D::toCrystallogrCoord(double eps)
     if(eps<0)                 eps=-eps;
     if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
 
-  
+    // assuming eps is in 1.e-x form
+ 
     double ax=std::fabs(x);
     double ay=std::fabs(y);
     double az=std::fabs(z);
@@ -846,20 +847,20 @@ void V3D::toCrystallogrCoord(double eps)
     x /=amax;  y /=amax;  z/=amax;
     ax/=amax;  ay/=amax; az/=amax;
 
-    if(ax<eps){x=0; ax=0;}
-    if(ay<eps){y=0; ay=0;}
-    if(az<eps){z=0; az=0;}
+    if(ax<eps*0.1){x=0; ax=0;}
+    if(ay<eps*0.1){y=0; ay=0;}
+    if(az<eps*0.1){z=0; az=0;}
 
-
+    double amin(amax);
     double mult(1);
-    if(ax>0)  mult  /=ax;  
-    if(ay>0)  mult  /=ay;  
-    if(az>0)  mult  /=az; 
+    if(ax>FLT_EPSILON){  mult  /=ax;  amin=(ax<amin)?ax:amin;}
+    if(ay>FLT_EPSILON){  mult  /=ay;  amin=(ay<amin)?ay:amin;}
+    if(az>FLT_EPSILON){  mult  /=az;  amin=(az<amin)?az:amin;}
     mult  /= eps;
 
     ax*=mult; ay*=mult; az*=mult;
 
-    size_t iax=size_t(ax);   size_t iay=size_t(ay);   size_t iaz=size_t(az);
+    size_t iax=size_t(ax+0.5);   size_t iay=size_t(ay+0.5);   size_t iaz=size_t(az+0.5);
     size_t common  = boost::math::gcd(iax,iay);
     common         = boost::math::gcd(common ,iaz);
     mult/=double(common);
