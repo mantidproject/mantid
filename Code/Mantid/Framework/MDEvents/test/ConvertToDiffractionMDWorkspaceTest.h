@@ -139,7 +139,7 @@ public:
 
       TS_ASSERT_EQUALS( npoints*(i+1), ws->getNPoints()); // There are now twice as many points as before
       TS_ASSERT_EQUALS( ws->getNumExperimentInfo(), (i+1));
-      TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(i) );
+      TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(static_cast<uint16_t>(i)) );
     }
 
 
