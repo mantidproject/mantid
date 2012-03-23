@@ -62,8 +62,6 @@ class DataSets(BaseScriptElement):
         if for_automated_reduction:
             return self._automated_reduction()
         
-        #script = "a = RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
-        #script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script = "RefReduction(DataRun=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRun=%d,\n" % self.norm_file
         script += "              Instrument='REF_M',\n"
@@ -86,23 +84,18 @@ class DataSets(BaseScriptElement):
             script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
             
         if self.crop_TOF_range:
-            #script += "              TOFRange=%s,\n" % str(self.DataTofRange)
             script += "              TOFMin=%s,\n" % str(self.DataTofRange[0])
             script += "              TOFMax=%s,\n" % str(self.DataTofRange[1])
         script += "              NBins=%s,\n" % str(self.q_bins)
-        #script += "              LogScale=%s,\n" % str(self.q_log)
         
         # Scattering angle options
         if self.use_center_pixel:
             script += "              ReflectivityPixel=%s,\n" % str(self.center_pixel)
             if self.set_detector_angle:
-                #script += "              SetDetectorAngle=True\n"
                 script += "              DetectorAngle=%s\n" % str(self.detector_angle)
             if self.set_detector_angle_offset:
-                #script += "              SetDetectorAngle0=True\n"
                 script += "              DetectorAngle0=%s\n" % str(self.detector_angle_offset)
             if self.set_direct_pixel:
-                #script += "              SetDirectPixel=True\n"
                 script += "              DirectPixel=%s\n" % str(self.direct_pixel)
                 
         else:
@@ -110,17 +103,16 @@ class DataSets(BaseScriptElement):
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
-        #script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
         script += "              OutputWorkspacePrefix='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
         
         #script += "REF_RED_OUTPUT_MESSAGE += a.getPropertyValue('OutputMessage')\n" 
 
         # Save the reduced data
-        script += "ws_list = ['reflectivity_Off_Off_%s',\n" % str(self.data_files[0])
-        script += "           'reflectivity_On_Off_%s',\n" % str(self.data_files[0])
-        script += "           'reflectivity_Off_On_%s',\n" % str(self.data_files[0])
-        script += "           'reflectivity_On_On_%s']\n" % str(self.data_files[0])
+        script += "ws_list = ['reflectivity_%s-Off_Off',\n" % str(self.data_files[0])
+        script += "           'reflectivity_%s-On_Off',\n" % str(self.data_files[0])
+        script += "           'reflectivity_%s-Off_On',\n" % str(self.data_files[0])
+        script += "           'reflectivity_%s-On_On']\n" % str(self.data_files[0])
         
         script += "outdir = '%s'\n" % self.output_dir
         script += "if not os.path.isdir(outdir):\n"
@@ -145,8 +137,10 @@ class DataSets(BaseScriptElement):
         script += "peak_min_norm = estimates.getProperty('PeakMin').value\n"
         script += "peak_max_norm = estimates.getProperty('PeakMax').value\n\n"
         
-        script += "RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
-        script += "              NormalizationRunNumber=%d,\n" % self.norm_file
+        script += "RefReduction(DataRun=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script += "              NormalizationRun=%d,\n" % self.norm_file
+        script += "              Instrument='REF_M',\n"
+        script += "              PolarizedData=True,\n"
         script += "              SignalPeakPixelRange=[peak_min, peak_max],\n"
         script += "              SubtractSignalBackground=False,\n"
         script += "              PerformNormalization=%s,\n" % str(self.NormFlag)
@@ -165,7 +159,7 @@ class DataSets(BaseScriptElement):
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
-        script += "              OutputWorkspace='reflectivity_Off_Off_'+%s)\n" % str(self.data_files[0])
+        script += "              OutputWorkspacePrefix='reflectivity_'+%s)\n" % str(self.data_files[0])
 
         return script
 
