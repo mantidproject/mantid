@@ -1416,7 +1416,7 @@
       <location y="0.0" x="-0.5174" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-90.0"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
           </rot>
         </rot>
         <neutronic y="0.0" x="-0.5174" z="0.5174"/>
@@ -1433,7 +1433,7 @@
       <location y="0.0" x="-0.5174" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-90.0"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
           </rot>
         </rot>
         <neutronic y="0.0" x="-0.5174" z="-0.5174"/>
@@ -1518,7 +1518,7 @@
       <location y="-0.365857048586" x="0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-305.0"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="-315.0"/>
           </rot>
         </rot>
         <neutronic y="-0.365857048586" x="0.365857048586" z="0.5174"/>
@@ -1535,7 +1535,7 @@
       <location y="-0.365857048586" x="0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="-305.0"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="-315.0"/>
           </rot>
         </rot>
         <neutronic y="-0.365857048586" x="0.365857048586" z="-0.5174"/>
@@ -1552,7 +1552,7 @@
       <location y="6.33632253879e-17" x="0.5174" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="-90.0"/>
           </rot>
         </rot>
         <neutronic y="6.33632253879e-17" x="0.5174" z="0.5174"/>
@@ -1569,7 +1569,7 @@
       <location y="6.33632253879e-17" x="0.5174" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
           <rot axis-z="0" axis-x="1" axis-y="0" val="0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
+            <rot axis-z="1" axis-x="0" axis-y="0" val="-90.0"/>
           </rot>
         </rot>
         <neutronic y="6.33632253879e-17" x="0.5174" z="-0.5174"/>
