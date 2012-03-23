@@ -46,20 +46,22 @@ namespace MDEvents
     void exec();
 
     template <class T>
-    void convertEventList(int workspaceIndex);
+    void convertEventList(int workspaceIndex, DataObjects::EventList & el);
 
     void convertSpectrum(int workspaceIndex);
 
-    /// The input event workspace
-    DataObjects::EventWorkspace_sptr in_ws;
+    /// The input MatrixWorkspace
+    API::MatrixWorkspace_sptr m_inWS;
 
     /// The input event workspace
-    DataObjects::EventWorkspace_sptr m_inMWS;
+    DataObjects::EventWorkspace_sptr m_inEventWS;
 
     /// The output MDEventWorkspace<3>
     MDEvents::MDEventWorkspace3Lean::sptr ws;
     /// Do we clear events on the input during loading?
     bool ClearInputWorkspace;
+    /// Use the histogram representation with one event per bin
+    bool OneEventPerBin;
     /// Are we appending?
     bool Append;
     /// Perform LorentzCorrection on the fly.
