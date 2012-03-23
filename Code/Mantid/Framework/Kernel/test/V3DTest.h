@@ -438,6 +438,41 @@ public:
     TS_ASSERT_EQUALS( a, V3D(4,5,6) );
   }
 
+  void test_toCrystllographic()
+  {
+     V3D a0;
+     TS_ASSERT_THROWS(a0.toCrystallogrCoord(),std::invalid_argument);
+
+     V3D a1(0.1,0.2,5);
+     TS_ASSERT_THROWS_NOTHING(a1.toCrystallogrCoord());
+
+     TS_ASSERT_DELTA(1,a1[0],1.e-3);
+     TS_ASSERT_DELTA(2,a1[1],1.e-3);
+     TS_ASSERT_DELTA(50,a1[2],1.e-3);
+
+     V3D a2(0.02,0,2);
+     TS_ASSERT_THROWS_NOTHING(a2.toCrystallogrCoord());
+
+     TS_ASSERT_DELTA(1,a2[0],1.e-3);
+     TS_ASSERT_DELTA(0,a2[1],1.e-3);
+     TS_ASSERT_DELTA(100,a2[2],1.e-3);
+
+     V3D a3(0.02,1.54321,2);
+     TS_ASSERT_THROWS_NOTHING(a3.toCrystallogrCoord());
+
+     TS_ASSERT_DELTA(1,a3[0],1.e-3);
+     TS_ASSERT_DELTA(77.1605,a3[1],1.e-3);
+     TS_ASSERT_DELTA(100,a3[2],1.e-3);
+
+     V3D a4(-0.02,-0.80321,-3);
+     TS_ASSERT_THROWS_NOTHING(a4.toCrystallogrCoord());
+
+     TS_ASSERT_DELTA(-1,a4[0],1.e-3);
+     TS_ASSERT_DELTA(-40.160,a4[1],1.e-3);
+     TS_ASSERT_DELTA(-150,a4[2],1.e-3);
+
+  }
+
 };
 
 #endif

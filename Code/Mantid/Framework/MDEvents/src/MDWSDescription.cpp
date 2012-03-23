@@ -158,13 +158,6 @@ QScalingID(NCoordScalings)
 
 
 }
-std::string DLLExport sprintfd(const double data, const double eps)
-{
-     // truncate to eps decimal points
-     float dist = float((int(data/eps+0.5))*eps);
-     return boost::str(boost::format("%d")%dist);
-
-}
 
 MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
 {
@@ -200,9 +193,13 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
 std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &QNames)
 {
     double eps(1.e-3);
+    Kernel::V3D DirCryst(Dir);
+
+    DirCryst.toCrystallogrCoord(eps);
+
     std::string name("["),separator=",";
     for(size_t i=0;i<3;i++){
-        double dist=std::fabs(Dir[i]);
+        double dist=std::fabs(DirCryst[i]);
         if(i==2)separator="]";
         if(dist<eps){
             name+="0"+separator;
@@ -220,6 +217,14 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
 
     return name;
 }
+std::string DLLExport sprintfd(const double data, const double eps)
+{
+     // truncate to eps decimal points
+     float dist = float((int(data/eps+0.5))*eps);
+     return boost::str(boost::format("%d")%dist);
+
+}
+
 
 CoordScaling MDWSDescription::getQScaling(const std::string &ScID)const
 {

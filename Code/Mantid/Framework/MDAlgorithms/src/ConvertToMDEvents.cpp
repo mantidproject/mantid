@@ -16,24 +16,16 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 //
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceValidators.h"
-//
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDWSTransfDescr.h"
 //
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <algorithm>
-#include <float.h>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -106,7 +98,7 @@ ConvertToMDEvents::init()
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
      Strings QScales = TWSD.getQScalings();
-     declareProperty(new PropertyWithValue<bool>("QConversionScales",QScales[NoScaling], boost::make_shared<StringListValidator>(QScales), Direction::Input),
+     declareProperty("QConversionScales",QScales[MDEvents::NoScaling], boost::make_shared<StringListValidator>(QScales),
          " This property to normalize three momentums obtained in Q3D mode correspondingly (by sinlge lattice vector,"
          " lattice vectors 2pi/a,2pi/b and 2pi/c or by nothing)\n"
          " currently ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");

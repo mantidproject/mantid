@@ -20,7 +20,7 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   ConvertToMDEventsParams ConvParams;
   std::vector<std::string> QModes = ConvParams.getQModes();
   // based on noQ mode being first in the list
-  QString name1(QModes[modQ].c_str());
+  QString name1(QModes[ModQ].c_str());
   m_uiForm.combo_q_dimensions->addItem(name1);
   QString name2(QModes[Q3D].c_str());
   m_uiForm.combo_q_dimensions->addItem(name2);
