@@ -110,12 +110,21 @@ namespace Mantid
       declareProperty(new ArrayProperty<double>("DReference"),"Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
       declareProperty("FitWindowMaxWidth", 0.,
         "Optional: The maximum width of the fitting window. If this is <=0 the windows is not specified to FindPeaks" );
+
+      std::vector<std::string> peaktypes;
+      //peaktypes.push_back("BackToBackExponential");
+      peaktypes.push_back("Gaussian");
+      //peaktypes.push_back("Lorentzian");
+      declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peaktypes),
+                      "Type of peak to fit");
+
       std::vector<std::string> bkgdtypes;
       bkgdtypes.push_back("Flat");
       bkgdtypes.push_back("Linear");
       bkgdtypes.push_back("Quadratic");
       declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
           "Type of Background. The choice can be either Linear or Quadratic");
+
       declareProperty("HighBackground", true,
           "Relatively weak peak in high background");
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
@@ -211,6 +220,10 @@ namespace Mantid
       bool isEvent = false;
       if (eventW)
         isEvent = true;
+
+      // cache the peak and background function names
+      m_peakType = this->getPropertyValue("PeakFunction");
+      m_backType = this->getPropertyValue("BackgroundType");
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
@@ -422,7 +435,8 @@ namespace Mantid
       findpeaks->setProperty("PeakPositions", peakPosToFit);
       if (useFitWindows)
         findpeaks->setProperty("FitWindows", fitWindowsToUse);
-      findpeaks->setProperty<std::string>("BackgroundType", this->getPropertyValue("BackgroundType"));
+      findpeaks->setProperty<std::string>("PeakFunction", m_peakType);
+      findpeaks->setProperty<std::string>("BackgroundType", m_backType);
       findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
       findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);

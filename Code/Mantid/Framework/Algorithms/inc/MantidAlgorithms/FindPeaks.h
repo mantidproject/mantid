@@ -90,12 +90,11 @@ private:
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
-  void addRow(const int spectrum, const std::vector<double> &params, const double mincost, bool error);
-  void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestparams, double &mincost, const double expPeakPos, const double expPeakHeight);
-  void checkFitResultParameterNames(const std::vector<std::string> &paramnames);
+  void addRow(const int spectrum, const std::vector<double> &params, const std::vector<double> &paramsRaw, const double mincost, bool error);
+  void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
 
-  std::string createTies(const double height, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
-  API::IFitFunction_sptr createFunction(const bool withPeak = true);
+  std::string createTies(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
+  API::IFitFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
   int backgroundOrder();
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
@@ -112,7 +111,10 @@ private:
   int index; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool m_highBackground; ///<flag for find relatively weak peak in high background
+  bool m_rawPeaksTable; ///<flag for whether the output is the raw peak parameters or effective (centre, width, height)
+  std::size_t m_numTableParams; //<Number of parameters in the output table workspace
   bool m_searchPeakPos; ///<flag to search for peak in the window
+  std::string m_peakFuncType; //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
 
   unsigned int minGuessedPeakWidth;
