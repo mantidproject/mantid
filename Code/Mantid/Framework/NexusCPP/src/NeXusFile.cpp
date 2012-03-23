@@ -809,6 +809,18 @@ void File::getDataCoerce(vector<int> &data)
     this->getData(result);
     data.assign(result.begin(), result.end());
   }
+  else if (info.type == INT64)
+  {
+    vector<int64_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT64)
+  {
+    vector<uint64_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
   else
   {
     throw Exception("NexusFile::getDataCoerce(): Could not coerce to int.");
