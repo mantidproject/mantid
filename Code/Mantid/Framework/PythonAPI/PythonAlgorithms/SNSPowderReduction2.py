@@ -289,7 +289,6 @@ class SNSPowderReduction2(PythonAlgorithm):
             return self._loadPreNeXusData(runnumber, extension, **chunk)
 
     def _getStrategy(self, runnumber, extension):
-        import boostmpi as mpi
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
@@ -308,7 +307,6 @@ class SNSPowderReduction2(PythonAlgorithm):
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
-        import boostmpi as mpi
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = self._getStrategy(runnumber, extension)
@@ -483,7 +481,6 @@ class SNSPowderReduction2(PythonAlgorithm):
         GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
 
     def PyExec(self):
-        import boostmpi as mpi
         # get generic information
         SUFFIX = self.getProperty("Extension")
         self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile"))
