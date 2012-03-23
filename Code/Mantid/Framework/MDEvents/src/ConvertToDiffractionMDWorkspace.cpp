@@ -19,6 +19,27 @@ by multiplying its weight by L:
 Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventionally called <math>2\theta</math>).
 <math>\lambda</math> is the neutron wavelength in ''Angstroms''.
 
+==== OneEventPerBin option ====
+
+If you specify ''OneEventPerBin'', then the '''histogram''' representation of the input workspace is used,
+with one MDEvent generated for each bin of the workspace, '''including zeros'''.
+
+This can be useful in cases where the experimental coverage needs to be tracked. With one MDEvent for each
+bin, you can count which regions in Q-space have been measured. The [[SliceViewer]] has an option
+to view normalized by number of events. This means that, for example, areas with overlap from two runs
+will appear scaled down.
+
+A significant drawback to this is that the output MDEventWorkspace will be ''significantly'' larger than the
+events alone would be. It currently must be created in physical memory (it cannot yet be cached to disk).
+One way to limit the memory used is to limit the OutputExtents to a smaller region and only convert
+part of the space.
+
+Also, the [[FindPeaksMD]] algorithm may not work optimally because it depends partly on higher density of
+events causing more finely split boxes.
+
+If your input is a [[Workspace2D]] and you do NOT check ''OneEventPerBin'', then the workspace is converted
+to an [[EventWorkspace]] but with no events for empty bins.
+
 *WIKI*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
