@@ -254,7 +254,7 @@ namespace WorkspaceCreationHelper
 
     Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
-    testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Handedness::Left,"")));
+    testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
     space->setInstrument(testInst);
 
     const double pixelRadius(0.05);
