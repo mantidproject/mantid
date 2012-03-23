@@ -86,10 +86,10 @@ namespace MDEvents
     MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
     
     //TODO, how to calculate max, min + number of bins? Jon Taylor thinks that there is a way to calculate these upfront.
-    const double qzmin = -50;
-    const double qxmin = -50;
-    const double qxmax = 50;
-    const double qzmax = 50;
+    const double qzmin = -0.01;
+    const double qxmin = -0.01;
+    const double qxmax = 0.01;
+    const double qzmax = 0.01;
     const size_t nbinsx = 10;
     const size_t nbinsz = 10;
 
@@ -109,6 +109,7 @@ namespace MDEvents
     V3D beamDir = (sample - source);
     V3D normBeamDir = beamDir / beamDir.norm();
     V3D along = instrument->getReferenceFrame()->vecPointingAlongBeam();
+    V3D up = instrument->getReferenceFrame()->vecPointingUp();
     double thetaIn = beamDir.angle(along);
     double thetaFinal = 0;
     
@@ -141,17 +142,17 @@ namespace MDEvents
           t = (t + tofs[tof+1])/2;
         }
         double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / t;
-        //double _qx = wavenumber *(sin(thetaFinal) + sin(thetaIn));
-        //double _qz = wavenumber *(cos(thetaFinal) - cos(thetaIn));
-
-        double _qx = wavenumber *(sin(thetaFinal) + sin(thetaIn));
-        double _qz = wavenumber *(cos(thetaFinal) - cos(thetaIn));
+        
+        //ki - kf 
+        V3D QDir = (normBeamDir - normalDetectorDir);
+        double _qx = QDir.X() * wavenumber;
+        double _qz = QDir.Z() * wavenumber;
 
         /// If q-max and min are known a-prori, these boundrary case truncations are not required. See top of method for comment.
         _qx = _qx < qxmin ? qxmin : _qx;
         _qz = _qz < qzmin ? qzmin : _qz;
-        _qx = _qx > qxmin ? qxmin : _qx;
-        _qz = _qz > qzmin ? qzmin : _qz;
+        _qx = _qx > qxmax ? qxmax : _qx;
+        _qz = _qz > qzmax ? qzmax : _qz;
 
         //Set up for linear transformation qi -> dimension index.
         double mx = (nbinsx / (qxmax - qxmin));
@@ -159,15 +160,15 @@ namespace MDEvents
         double cx = (nbinsx - mx * (qxmin + qxmax))/2;
         double cz = (nbinsz - mz * (qzmin + qzmax))/2;
 
-        size_t posIndexX = mx*_qx + cx;
-        size_t posIndexZ = mz*_qz + cz;
+        double posIndexX = mx*_qx + cx;
+        double posIndexZ = mz*_qz + cz;
 
         size_t linearindex = (posIndexX * nbinsx) + posIndexZ;
         
         double error = errors[tof];
         
         //Do we want to accumulate signal values, i.e will there be any overlap in Q?
-        ws->setSignalAt(linearindex, counts[tof]);
+        ws->setSignalAt(linearindex, ws->getSignalAt(linearindex) + counts[tof]);
         ws->setErrorSquaredAt(linearindex, error*error);
       }
     }
