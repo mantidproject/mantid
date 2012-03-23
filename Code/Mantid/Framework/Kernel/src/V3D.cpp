@@ -831,9 +831,9 @@ void V3D::loadNexus(::NeXus::File * file, const std::string & name)
 */
 void V3D::toCrystallogrCoord(double eps)
 {
-    double ax=abs(x);
-    double ay=abs(y);
-    double az=abs(z);
+    double ax=std::fabs(x);
+    double ay=std::fabs(y);
+    double az=std::fabs(z);
 
     double amax = (ax>ay)?ax:ay;  amax=(az>amax)?az:amax;
     if(amax<FLT_EPSILON) throw(std::invalid_argument("vector is almost 0"));
@@ -848,19 +848,19 @@ void V3D::toCrystallogrCoord(double eps)
     if(az<eps){z=0; az=0;}
 
 
-    double mult(1);
-    if(ax>0)mult/=ax;
+    double mult;
+    if(ax>0)mult  =1/ax;
     ax *=mult; ay*=mult;  az*=mult;
     if(ay>0){
         if(ay<1){
-            double aay = abs(y);
+            double aay = std::fabs(y);
             mult/=aay;
             ax /=aay; ay /=aay;  az /=aay;
         }
     }
     if(az>0){
         if(az<1){
-            double aaz = abs(z);
+            double aaz = std::fabs(z);
             mult/=aaz;
         }
     }
