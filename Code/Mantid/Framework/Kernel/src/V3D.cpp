@@ -10,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include <sstream>
 #include "MantidKernel/Quat.h"
+#include <boost/math/common_factor.hpp>
 
 namespace Mantid
 {
@@ -831,14 +832,16 @@ void V3D::loadNexus(::NeXus::File * file, const std::string & name)
 */
 void V3D::toCrystallogrCoord(double eps)
 {
+    if(eps<0)                 eps=-eps;
+    if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
+
+  
     double ax=std::fabs(x);
     double ay=std::fabs(y);
     double az=std::fabs(z);
 
     double amax = (ax>ay)?ax:ay;  amax=(az>amax)?az:amax;
-    if(amax<FLT_EPSILON) throw(std::invalid_argument("vector is almost 0"));
-    if(eps<0)                 eps=-eps;
-    if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
+    if(amax<FLT_EPSILON) throw(std::invalid_argument("vector length is less then accuracy requested"));
         
     x /=amax;  y /=amax;  z/=amax;
     ax/=amax;  ay/=amax; az/=amax;
@@ -849,25 +852,20 @@ void V3D::toCrystallogrCoord(double eps)
 
 
     double mult(1);
-    if(ax>0){
-        mult  =1./ax;
-        ax *=mult; ay*=mult;  az*=mult;
-    }
-    if(ay>0){
-        if(ay<1){
-            double aay = std::fabs(y);
-            mult/=aay;
-            ax /=aay; ay /=aay;  az /=aay;
-        }
-    }
-    if(az>0){
-        if(az<1){
-            double aaz = std::fabs(z);
-            mult/=aaz;
-        }
-    }
-    x *=mult; y*=mult;  z*=mult;
+    if(ax>0)  mult  /=ax;  
+    if(ay>0)  mult  /=ay;  
+    if(az>0)  mult  /=az; 
+    mult  /= eps;
 
+    ax*=mult; ay*=mult; az*=mult;
+
+    size_t iax=size_t(ax);   size_t iay=size_t(ay);   size_t iaz=size_t(az);
+    size_t common  = boost::math::gcd(iax,iay);
+    common         = boost::math::gcd(common ,iaz);
+    mult/=double(common);
+
+    x *=mult; y*=mult;  z*=mult;
+    this->round();
 }
 
 
