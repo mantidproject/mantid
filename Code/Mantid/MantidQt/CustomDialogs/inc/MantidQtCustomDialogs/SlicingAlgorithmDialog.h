@@ -88,7 +88,7 @@ private:
   void clearExistingDimensions();
 
   /// Determine if the dimension history has changed.
-  HistoryChanged hasDimensionHistoryChanged(const QString& propertyPrefix, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr)) const;
+  HistoryChanged hasDimensionHistoryChanged() const;
 
   /// Give base classes the opportunity to do any custom overriding.
   virtual void customiseInitLayout() = 0;

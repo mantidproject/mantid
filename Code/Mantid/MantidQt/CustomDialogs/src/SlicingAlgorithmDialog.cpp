@@ -189,7 +189,7 @@ namespace MantidQt
     Determine if properties relating to the dimension history have changed. 
     @return True if it has changed.
     */
-    SlicingAlgorithmDialog::HistoryChanged SlicingAlgorithmDialog::hasDimensionHistoryChanged(const QString& propertyPrefix, QString(*format)(IMDDimension_const_sptr)) const
+    SlicingAlgorithmDialog::HistoryChanged SlicingAlgorithmDialog::hasDimensionHistoryChanged() const
     {
       const QString& currentWorkspaceName = getCurrentInputWorkspaceName();
       if(currentWorkspaceName.isEmpty())
@@ -216,7 +216,7 @@ namespace MantidQt
       const bool axisAligned = doAxisAligned();
       ui.non_axis_aligned_layout->setEnabled(!axisAligned);
 
-      HistoryChanged changedStatus = hasDimensionHistoryChanged("AlignedDim", formattedAlignedDimensionInput);
+      HistoryChanged changedStatus = hasDimensionHistoryChanged();
       History history;
       if(changedStatus == HasChanged ||  bForceForget)
       {
