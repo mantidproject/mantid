@@ -830,7 +830,7 @@ void V3D::loadNexus(::NeXus::File * file, const std::string & name)
 /** transform vector into form, used to describe directions in crystallogaphical coodinate system 
     as crystallographical coordinate sytem is based on 3 integers, eps is used as accuracy to convert into integers
 */
-void V3D::toCrystallogrCoord(double eps)
+void V3D::toMillerIndexes(double eps)
 {
     if(eps<0)                 eps=-eps;
     if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
@@ -843,30 +843,29 @@ void V3D::toCrystallogrCoord(double eps)
 
     double amax = (ax>ay)?ax:ay;  amax=(az>amax)?az:amax;
     if(amax<FLT_EPSILON) throw(std::invalid_argument("vector length is less then accuracy requested"));
-        
-    x /=amax;  y /=amax;  z/=amax;
-    ax/=amax;  ay/=amax; az/=amax;
-
-    if(ax<eps*0.1){x=0; ax=0;}
-    if(ay<eps*0.1){y=0; ay=0;}
-    if(az<eps*0.1){z=0; az=0;}
-
-    double amin(amax);
-    double mult(1);
-    if(ax>FLT_EPSILON){  mult  /=ax;  amin=(ax<amin)?ax:amin;}
-    if(ay>FLT_EPSILON){  mult  /=ay;  amin=(ay<amin)?ay:amin;}
-    if(az>FLT_EPSILON){  mult  /=az;  amin=(az<amin)?az:amin;}
-    mult  /= eps;
-
-    ax*=mult; ay*=mult; az*=mult;
+   
+    double reps=1/eps;
+    ax*=reps; ay*=reps; az*=reps;
+   
+    if(ax<1){x=0; ax=0;}
+    if(ay<1){y=0; ay=0;}
+    if(az<1){z=0; az=0;}
 
     size_t iax=size_t(ax+0.5);   size_t iay=size_t(ay+0.5);   size_t iaz=size_t(az+0.5);
-    size_t common  = boost::math::gcd(iax,iay);
-    common         = boost::math::gcd(common ,iaz);
-    mult/=double(common);
+    //size_t ireps=size_t(reps+0.5);
 
+    //double amin(amax);
+
+    // transform non-0 elements to simple fractions. The multiplier would be the production of the denominators. 
+    //size_t gax(1),gay(1),gaz(1);
+    //if(ax>0){  gax=ireps/boost::math::gcd(iax,ireps);}
+    //if(ay>0){  gay=ireps/boost::math::gcd(iay,ireps);}
+    //if(az>0){  gaz=ireps/boost::math::gcd(iaz,ireps);}
+
+    size_t div = boost::math::gcd(iax,boost::math::gcd(iay,iaz));
+    double mult=reps/double(div);
     x *=mult; y*=mult;  z*=mult;
-    this->round();
+//    this->round();
 }
 
 

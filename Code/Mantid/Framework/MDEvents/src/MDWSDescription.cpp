@@ -195,7 +195,7 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
     double eps(1.e-3);
     Kernel::V3D DirCryst(Dir);
 
-    DirCryst.toCrystallogrCoord(eps);
+    DirCryst.toMillerIndexes(eps);
 
     std::string name("["),separator=",";
     for(size_t i=0;i<3;i++){

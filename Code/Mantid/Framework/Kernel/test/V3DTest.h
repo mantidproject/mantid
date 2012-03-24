@@ -441,60 +441,60 @@ public:
   void test_toCrystllographic()
   {
      V3D a0;
-     TS_ASSERT_THROWS(a0.toCrystallogrCoord(),std::invalid_argument);
+     TS_ASSERT_THROWS(a0.toMillerIndexes(),std::invalid_argument);
 
      V3D a1(0.1,0.2,5);
-     TS_ASSERT_THROWS_NOTHING(a1.toCrystallogrCoord());
+     TS_ASSERT_THROWS_NOTHING(a1.toMillerIndexes());
 
      TS_ASSERT_DELTA(1,a1[0],1.e-3);
      TS_ASSERT_DELTA(2,a1[1],1.e-3);
      TS_ASSERT_DELTA(50,a1[2],1.e-3);
 
      V3D a2(0.02,0,2);
-     TS_ASSERT_THROWS_NOTHING(a2.toCrystallogrCoord(0.01));
+     TS_ASSERT_THROWS_NOTHING(a2.toMillerIndexes());
 
      TS_ASSERT_DELTA(1,a2[0],1.e-3);
      TS_ASSERT_DELTA(0,a2[1],1.e-3);
      TS_ASSERT_DELTA(100,a2[2],1.e-3);
 
      V3D a3(0.2,1.54321,2);
-     TS_ASSERT_THROWS_NOTHING(a3.toCrystallogrCoord(1));
+     TS_ASSERT_THROWS_NOTHING(a3.toMillerIndexes(0.1));
 
-     TS_ASSERT_DELTA(1,a3[0],1.e-1);
-     TS_ASSERT_DELTA(10,a3[1],1.e-1);
-     TS_ASSERT_DELTA(13,a3[2],1.e-1);
+     TS_ASSERT_DELTA(2,a3[0],1.e-1);
+     TS_ASSERT_DELTA(15,a3[1],1.e-1);
+     TS_ASSERT_DELTA(20,a3[2],1.e-1);
 
      V3D a4(-0.6,-0.80321,-3);
-     TS_ASSERT_THROWS_NOTHING(a4.toCrystallogrCoord(1));
+     TS_ASSERT_THROWS_NOTHING(a4.toMillerIndexes(0.1));
 
-     TS_ASSERT_DELTA(-4,a4[0],1.e-1);
-     TS_ASSERT_DELTA(-5,a4[1],1.e-1);
-     TS_ASSERT_DELTA(-19,a4[2],1.e-1);
+     TS_ASSERT_DELTA(-3,a4[0],1.e-1);
+     TS_ASSERT_DELTA(-4,a4[1],1.e-1);
+     TS_ASSERT_DELTA(-15,a4[2],1.e-1);
 
      V3D a5(-3,-0.80231,-0.6);
-     TS_ASSERT_THROWS_NOTHING(a5.toCrystallogrCoord(1));
+     TS_ASSERT_THROWS_NOTHING(a5.toMillerIndexes(0.1));
 
-     TS_ASSERT_DELTA(-19,a5[0],1.e-1);
-     TS_ASSERT_DELTA(-5,a5[1],1.e-1);
-     TS_ASSERT_DELTA(-4,a5[2],1.e-1);
+     TS_ASSERT_DELTA(-15,a5[0],1.e-1);
+     TS_ASSERT_DELTA(-4,a5[1],1.e-1);
+     TS_ASSERT_DELTA(-3,a5[2],1.e-1);
 
      V3D a6(-3,5,-6);
-     TS_ASSERT_THROWS_NOTHING(a6.toCrystallogrCoord(0.001));
+     TS_ASSERT_THROWS_NOTHING(a6.toMillerIndexes(0.001));
 
      TS_ASSERT_DELTA(-3,a6[0],1.e-3);
      TS_ASSERT_DELTA( 5,a6[1],1.e-3);
      TS_ASSERT_DELTA(-6,a6[2],1.e-3);
 
      V3D a7(-3,0.5,-6);
-     TS_ASSERT_THROWS_NOTHING(a7.toCrystallogrCoord(0.001));
+     TS_ASSERT_THROWS_NOTHING(a7.toMillerIndexes(0.001));
 
      TS_ASSERT_DELTA(-6, a7[0],1.e-3);
      TS_ASSERT_DELTA( 1, a7[1],1.e-3);
      TS_ASSERT_DELTA(-12,a7[2],1.e-3);
 
 
-     V3D a8(-3,0.333,-6);
-     TS_ASSERT_THROWS_NOTHING(a8.toCrystallogrCoord(0.1));
+     V3D a8(-3,0.3333,-6);
+     TS_ASSERT_THROWS_NOTHING(a8.toMillerIndexes(0.001));
 
      TS_ASSERT_DELTA(-9, a8[0],1.e-3);
      TS_ASSERT_DELTA( 1, a8[1],1.e-3);
