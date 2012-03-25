@@ -13,6 +13,7 @@ This algorithm uses the gsl linear regression algorithms ''gsl_fit_linear'' and 
 #include "MantidCurveFitting/Linear.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fit.h>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -48,7 +49,7 @@ void Linear::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name of the workspace that will contain the result");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",0, mustBePositive,
     "Index number of the Workspace to fit");
@@ -58,7 +59,7 @@ void Linear::init()
   declareProperty("EndX", EMPTY_DBL(),
     "An X value in the last bin to be included in the range\n"
     "(default the high X value");
-  declareProperty("FitStatus", "", new NullValidator<std::string>,
+  declareProperty("FitStatus", "", boost::make_shared<NullValidator>(),
     "Empty if the fit succeeded, otherwise contains the gsl error\n"
     "message", Direction::Output);
   declareProperty("FitIntercept", 0.0,

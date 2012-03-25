@@ -7,10 +7,10 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
 #include <sstream>
 
 using namespace Mantid;

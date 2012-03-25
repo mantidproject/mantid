@@ -72,15 +72,15 @@ namespace Mantid
 		      "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
 		      "The name of the output MaskWorkspace which will contain the result masks.");
-      BoundedValidator<double> * mustBePosDbl = new BoundedValidator<double>();
+      auto mustBePosDbl = boost::make_shared<BoundedValidator<double> >();
       mustBePosDbl->setLower(0.0);
       declareProperty("MaxTubeFramerate", -1.0, mustBePosDbl,
 		      "The maximum rate allowed for a tube in counts/us/frame.");
-      BoundedValidator<int> * mustBePosInt = new BoundedValidator<int>();
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
 		      "The number of pixels about the centre to ignore.");
-      declareProperty("NumberOfFailures", 0, new Kernel::NullValidator<int>(), 
+      declareProperty("NumberOfFailures", 0, boost::make_shared<Kernel::NullValidator>(),
 		      "An output property containing the number of masked tubes", 
 		      Direction::Output);      
     }

@@ -56,7 +56,7 @@ static void destroySuite(ConvertToMDEventsMethodsTest  * suite) { delete suite; 
 void test_TwoTransfMethods()
 {
   
-    ConvertToMDEvensHistoWS<Q3D,Direct,ConvertNo> HistoConv;
+    ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvertNo,CrystType> HistoConv;
     
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
     TestWS.emode= MDAlgorithms::Direct;
@@ -91,7 +91,7 @@ void test_buildFromEWS()
      pEventMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
      pEventMDWSWrapper->createEmptyMDWS(TestWS);
      // set up conversion just to deliver proper pointers to tof convertor
-     ConvertToMDEvensHistoWS<Q3D,Direct,ConvByTOF> tmp;
+     ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvByTOF,CrystType> tmp;
      tmp.setUPConversion(ws2D,det_loc,TestWS,pEventMDWSWrapper);
 
      // provide arguments for convertor
@@ -102,8 +102,8 @@ void test_buildFromEWS()
      if (!ws_events){
           throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
      }
-
-     ConvertToMDEvensEventWS<Q3D,Direct,ConvFromTOF> TOFConv;
+     // initate conversion from event ws
+     ConvertToMDEventsWS<EventWSType,Q3D,Direct,ConvFromTOF,CrystType> TOFConv;
   
      Mantid::API::BoxController_sptr bc=pEventMDWSWrapper->pWorkspace()->getBoxController();
      bc->setSplitThreshold(5);
@@ -206,7 +206,7 @@ ConvertToMDEventsMethodsTest ():TestWS(4){
     //pConvMethods->setUPConversion(ws2D,det_loc);
   
 }
-// function repeats convert to events algorithm which for some myteruious reasons do not work here
+// function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.
 EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsMethods &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
   
     // set up conversion to Time of flight

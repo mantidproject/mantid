@@ -7,6 +7,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/CreateMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>

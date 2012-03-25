@@ -16,6 +16,7 @@ This algorithm starts with a PeaksWorkspace containing the expected positions of
 #include "MantidMDEvents/CentroidPeaksMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/IntegratePeaksMD.h"
+#include "MantidKernel/ListValidator.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -68,7 +69,7 @@ namespace MDEvents
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "HKL",new ListValidator(propOptions),
+    declareProperty("CoordinatesToUse", "HKL",boost::make_shared<StringListValidator>(propOptions),
       "Which coordinates of the peak center do you wish to use to find the center? This should match the InputWorkspace's dimensions."
        );
 

@@ -85,7 +85,7 @@ private:
 protected: // for testing
   void checkProperties(API::MatrixWorkspace_sptr inputWorkspace);
   API::MatrixWorkspace_sptr getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace, int &spectra_num);
-  API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace,int &workspaceIndex);
   API::MatrixWorkspace_sptr extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index);
   bool setIntegrationProps();
 
@@ -95,6 +95,8 @@ protected: // for testing
   void normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                          API::MatrixWorkspace_sptr& outputWorkspace);
   void normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E);
+//
+
 private:
   /// A single spectrum workspace containing the monitor
   API::MatrixWorkspace_sptr m_monitor;
@@ -108,6 +110,43 @@ private:
  static Mantid::Kernel::Logger& g_log;
 
 };
+
+
+// the internal class to verify and modify interconnected properties affecting the different ways to normalize ws by this ws spectrum. 
+class DLLExport MonIDPropChanger: public Kernel::IPropertySettings
+{
+
+public:
+    //   properties this property depends on:                                       "InputWorkspace","MonitorSpectrum","MonitorWorkspace"
+    MonIDPropChanger(Kernel::IPropertyManager * algo,const std::string &WSProperty,const std::string &SpectrToNormByProperty,const std::string &MonitorWorkspace):
+      hostWSname(WSProperty),SpectraNum(SpectrToNormByProperty), MonitorWorkspaceProp(MonitorWorkspace),host_algo(algo),is_enabled(true){}
+  // if input to this property is enabled
+      bool isEnabled()const;
+      bool isConditionChanged()const;
+      void applyChanges(Kernel::Property *const pProp);
+
+   // interface needs it but if indeed proper clone used -- do not know. 
+   virtual IPropertySettings* clone(){return new MonIDPropChanger(host_algo,hostWSname,SpectraNum,MonitorWorkspaceProp);}
+   virtual ~MonIDPropChanger(){};
+private:
+    // the name of the property, which specifies the workspace which has to be modified
+    std::string hostWSname;
+    // the name of the property, which specifies the spectra num (from WS) to normalize by 
+    std::string SpectraNum;
+    // the name of the property, which specifies if you want to allow normalizing by any spectra.
+    std::string MonitorWorkspaceProp;
+    // the pointer to the main host algorithm.
+    Kernel::IPropertyManager * host_algo;
+
+    // the string with existing allowed monitors indexes
+    mutable std::vector<int> iExistingAllowedValues;
+      // if the monitors id input string is enabled. 
+    mutable bool is_enabled;
+    // auxiliary function to obtain list of monitor's ID-s (allowed_values) from a workspace;
+    bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)const;
+};
+
+
 
 } // namespace Algorithm
 } // namespace Mantid

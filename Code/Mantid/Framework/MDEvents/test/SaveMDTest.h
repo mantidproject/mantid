@@ -6,6 +6,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/SaveMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>

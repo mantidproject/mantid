@@ -16,6 +16,7 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include <iostream>
 #include <vector>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -40,31 +41,31 @@ using namespace DataObjects;
 
 void SANSDirectBeamScaling::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuatorTransmission", 1.0, mustBePositive, "Attenuator transmission for empty direct beam.");
-  declareProperty("AttenuatorTransmissionError", 0.0, mustBePositive->clone(), "Uncertainty in attenuator transmission.");
-  declareProperty("BeamRadius", 0.03, mustBePositive->clone(), "Radius of the beam stop [m].");
+  declareProperty("AttenuatorTransmissionError", 0.0, mustBePositive, "Uncertainty in attenuator transmission.");
+  declareProperty("BeamRadius", 0.03, mustBePositive, "Radius of the beam stop [m].");
 
   // Source aperture radius in meters
-  declareProperty("SourceApertureRadius", 0.04, mustBePositive->clone(),
+  declareProperty("SourceApertureRadius", 0.04, mustBePositive,
       "Source aperture to be used if it is not found in the instrument parameters [m].");
 
   // Sample aperture radius in meters
-  declareProperty("SampleApertureRadius", 0.008, mustBePositive->clone(),
+  declareProperty("SampleApertureRadius", 0.008, mustBePositive,
       "Sample aperture to be used if it is not found in the instrument parameters [m].");
 
   // Detector ID of the monitor
-  BoundedValidator<int> *zeroOrMore = new BoundedValidator<int>();
+  auto zeroOrMore = boost::make_shared<BoundedValidator<int> >();
   zeroOrMore->setLower(0);
   declareProperty("BeamMonitor",1,zeroOrMore,"The UDET of the incident beam monitor.");
 
-  declareProperty(new ArrayProperty<double>("ScaleFactor", new NullValidator<std::vector<double> >, Direction::Output),
+  declareProperty(new ArrayProperty<double>("ScaleFactor", boost::make_shared<NullValidator>(), Direction::Output),
       "Scale factor value and uncertainty [n/(monitor count)/(cm^2)/steradian].");
 }
 

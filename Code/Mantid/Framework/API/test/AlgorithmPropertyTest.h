@@ -67,7 +67,7 @@ private:
     const std::string category() const { return "Dummy";}    
     void init()
     {
-      declareProperty(new AlgorithmProperty("CalculateStep", new AlgorithmHasProperty("Output1")));
+      declareProperty(new AlgorithmProperty("CalculateStep", boost::make_shared<AlgorithmHasProperty>("Output1")));
     }
     void exec()
     {
@@ -91,9 +91,9 @@ public:
 
   ~AlgorithmPropertyTest()
   {
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum|1");
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("HasAlgProp|1");
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("HasAlgPropAndValidator|1");
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("HasAlgProp1", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("HasAlgPropAndValidator1", 1);
   }
 
   void test_A_Valid_Alg_String_Is_Accepted()

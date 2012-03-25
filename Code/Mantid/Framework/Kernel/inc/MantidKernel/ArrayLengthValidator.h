@@ -1,16 +1,15 @@
 #ifndef MANTID_KERNEL_ARRAYLENGTHVALIDATOR_H_
 #define MANTID_KERNEL_ARRAYLENGTHVALIDATOR_H_
 
-#include "MantidKernel/IValidator.h"
+#include "MantidKernel/TypedValidator.h"
 #include <vector>
-
 
 namespace Mantid
 {
 namespace Kernel
 {
 
-  /** ArrayLenghtValidator : Validate lenghth of an array property
+  /** ArrayLenghtValidator : Validate length of an array property
     
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -33,7 +32,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
   template <typename TYPE>
-  class MANTID_KERNEL_DLL ArrayLengthValidator: public IValidator<std::vector<TYPE> >
+  class MANTID_KERNEL_DLL ArrayLengthValidator: public TypedValidator<std::vector<TYPE> >
   {
   public:
     ArrayLengthValidator();
@@ -41,9 +40,7 @@ namespace Kernel
     ArrayLengthValidator(const size_t lenmin, const size_t lenmax);
     virtual ~ArrayLengthValidator();
 
-    IValidator<std::vector<TYPE> >* clone() const;
-
-    std::string isValid(const std::vector<TYPE> &value) const;
+    IValidator_sptr clone() const;
 
     /// Return if it has a length
     bool hasLength() const;

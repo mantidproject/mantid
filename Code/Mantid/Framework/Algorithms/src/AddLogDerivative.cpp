@@ -62,10 +62,10 @@ namespace Algorithms
   void AddLogDerivative::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::InOut), "An input/output workspace. The new log will be added to it.");
-    declareProperty("LogName", "", new MandatoryValidator<std::string>,
+    declareProperty("LogName", "", boost::make_shared<MandatoryValidator<std::string> >(),
       "The name that will identify the log entry to perform a derivative.\n"
       "This log must be a numerical series (double).");
-    declareProperty("Derivative", 1, new BoundedValidator<int>(1, 10),
+    declareProperty("Derivative", 1, boost::make_shared<BoundedValidator<int>>(1, 10),
       "How many derivatives to perform. Default 1.");
     declareProperty("NewLogName", "",
       "Name of the newly created log. If not specified, the string '_derivativeN' will be appended to the original name");

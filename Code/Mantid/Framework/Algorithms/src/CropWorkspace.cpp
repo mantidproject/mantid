@@ -20,6 +20,7 @@ a copy of the input one.
 #include "MantidKernel/VectorHelper.h"
 #include <iostream>
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace 
 {
@@ -70,14 +71,14 @@ void CropWorkspace::init()
     "(default: workspace min)");
   declareProperty("XMax", EMPTY_DBL(),
     "An X value that is in the highest X value bin to be retained (default: max X)");
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex",0, mustBePositive,
     "The index number of the first entry in the Workspace that will be loaded\n"
     "(default: first entry in the Workspace)");
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
     "The index number of the last entry in the Workspace to be loaded\n"
     "(default: last entry in the Workspace)");
 }

@@ -51,13 +51,13 @@ namespace Mantid
     DECLARE_ALGORITHM(MonteCarloAbsorption)
 
     using API::WorkspaceProperty;
-    using API::CompositeWorkspaceValidator;
     using API::WorkspaceUnitValidator;
     using API::InstrumentValidator;
     using API::MatrixWorkspace_sptr;
     using API::WorkspaceFactory;
     using API::Progress;
     using namespace Geometry;
+    using Kernel::CompositeValidator;
     using Kernel::V3D;
     using Kernel::Direction;
 
@@ -95,23 +95,23 @@ namespace Mantid
     void MonteCarloAbsorption::init()
     {
       // The input workspace must have an instrument and units of wavelength
-      CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
-      wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
-      wsValidator->add(new InstrumentValidator<>());
+      auto wsValidator = boost::make_shared<CompositeValidator>();
+      wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+      wsValidator->add<InstrumentValidator>();
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
           wsValidator),
           "The X values for the input workspace must be in units of wavelength");
       declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
           "Output workspace name");
-      Kernel::BoundedValidator<int> *positiveInt = new Kernel::BoundedValidator<int> ();
+      auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int> >();
       positiveInt->setLower(1);
       declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
           "The number of wavelength points for which a simulation is\n"
           "performed (default: all points)");
-      declareProperty("EventsPerPoint", 300, positiveInt->clone(),
+      declareProperty("EventsPerPoint", 300, positiveInt,
           "The number of events to simulate per wavelength point used.");
-      declareProperty("SeedValue", 123456789, positiveInt->clone(), 
+      declareProperty("SeedValue", 123456789, positiveInt,
           "A seed for the random number generator");
 
     }

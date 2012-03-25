@@ -5,7 +5,6 @@
 #include <set>
 #include <sstream>
 
-#include "std_operator_definitions.h"
 #include "MantidPythonAPI/BoostPython_Silent.h"
 
 namespace Mantid

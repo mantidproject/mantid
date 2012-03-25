@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -70,19 +71,19 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT( !alg.hasPostProcessing() );
 
-    TSM_ASSERT_THROWS_ANYTHING("No OutputWorkspace",  alg.validateInputs() );
+    TSM_ASSERT("No OutputWorkspace",  !alg.validateInputs()["OutputWorkspace"].empty() );
     alg.setPropertyValue("OutputWorkspace", "out_ws");
-    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+    TSM_ASSERT("Is OK now",  alg.validateInputs().empty() );
 
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingScript", "Pause(1)") );
     TS_ASSERT( alg.hasPostProcessing() );
 
-    TSM_ASSERT_THROWS_ANYTHING("No AccumulationWorkspace",  alg.validateInputs() );
+    TSM_ASSERT("No AccumulationWorkspace",  !alg.validateInputs()["AccumulationWorkspace"].empty() );
     alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
-    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+    TSM_ASSERT("Is OK now",  alg.validateInputs().empty() );
 
     alg.setPropertyValue("AccumulationWorkspace", "out_ws");
-    TSM_ASSERT_THROWS_ANYTHING("AccumulationWorkspace == OutputWorkspace",  alg.validateInputs() );
+    TSM_ASSERT("AccumulationWorkspace == OutputWorkspace",  !alg.validateInputs()["AccumulationWorkspace"].empty() );
   }
 
   /** Test creating the processing algorithm.
@@ -101,10 +102,6 @@ public:
         prefix = "Post";
       std::cout << prefix << "Processing algo" << std::endl;
 
-      Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
-      AnalysisDataService::Instance().addOrReplace("first", ws);
-      AnalysisDataService::Instance().remove("second");
-
       LiveDataAlgorithmImpl alg;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
@@ -113,22 +110,15 @@ public:
       procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
-      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingAlgorithm", "RenameWorkspace") );
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingAlgorithm", "Rebin") );
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingProperties",
-          "InputWorkspace=first;OutputWorkspace=second") );
+          "Params=0,100,1000") );
 
       procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);
       TS_ASSERT( procAlg->isInitialized() );
-      TS_ASSERT_EQUALS( procAlg->getPropertyValue("InputWorkspace"), "first" );
-      TS_ASSERT_EQUALS( procAlg->getPropertyValue("OutputWorkspace"), "second" );
+      TS_ASSERT_EQUALS( procAlg->getPropertyValue("Params"), "0,100,1000" );
 
-      // Just so the ADS gets updated properly.
-      procAlg->setChild(false);
-      // Run the algorithm and check that it was done correctly
-      procAlg->execute();
-      TS_ASSERT( !AnalysisDataService::Instance().doesExist("first") );
-      TS_ASSERT( AnalysisDataService::Instance().doesExist("second") );
     }
   }
 

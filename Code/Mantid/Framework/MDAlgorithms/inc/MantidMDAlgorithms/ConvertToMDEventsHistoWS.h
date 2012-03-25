@@ -18,13 +18,15 @@
 
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** The templated class to transform matrix workspace into MDEvent workspace
+/** The templated class to transform matrix workspace into MDEvent workspace when matrix workspace is ragged
    *
    * @date 11-10-2011
 
@@ -53,16 +55,16 @@ namespace MDAlgorithms
 #define SPLIT_LEVEL  2048
 
 //-----------------------------------------------
-// Method to process histohram workspace
-template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ConvertToMDEvensHistoWS: public IConvertToMDEventsMethods 
+// Method to process rugged Histogram workspace
+template<QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+class ConvertToMDEventsWS<Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state QX, AnalMode MODEX,CnvrtUnits CONVX,  XCoordType Type> 
+     template<QMode XQ,AnalMode XMODE,CnvrtUnits XCONV,XCoordType Type,SampleType XSample>
      friend struct COORD_TRANSFORMER;
-     // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
+  // the instanciation of the class which does the transformation itself
+     COORD_TRANSFORMER<Q,MODE,CONV,Histogram,Sample> trn; 
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:
@@ -70,7 +72,6 @@ public:
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
-
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
         trn.setUpTransf(this); 
 
@@ -107,7 +108,7 @@ public:
 
   
         //External loop over the spectra:
-        for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
+        for (size_t i = 0; i < nValidSpectra; ++i)
         {
             size_t iSpctr             = pDetLoc->detIDMap[i];
             int32_t det_id            = pDetLoc->det_id[i];

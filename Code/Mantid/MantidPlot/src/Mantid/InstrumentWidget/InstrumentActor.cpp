@@ -5,6 +5,7 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -12,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <QSettings>
 #include <QMessageBox>
@@ -139,14 +141,29 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
 
 Instrument_const_sptr InstrumentActor::getInstrument() const
 {
-  // First see if there is a 'physical' instrument available. Use it if there is.
-  Instrument_const_sptr retval = m_workspace->getInstrument()->getPhysicalInstrument();
-  if ( ! retval )
-  {
-    // Otherwise get hold of the 'main' instrument and use that
-    retval = m_workspace->getInstrument();
-  }
-  return retval;
+    Instrument_const_sptr retval;
+
+    // Look to see if we have set the property in the properties file
+    // to define our 'default' view
+    std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
+
+    if ( boost::iequals("Default", view) || boost::iequals("Physical", view))
+    {      
+        // First see if there is a 'physical' instrument available. Use it if there is.
+        retval = m_workspace->getInstrument()->getPhysicalInstrument();
+    }
+    else if (boost::iequals("Neutronic", view))
+    {
+        retval = m_workspace->getInstrument();
+    }
+
+    if ( ! retval )
+    {
+        // Otherwise get hold of the 'main' instrument and use that
+        retval = m_workspace->getInstrument();
+    }
+
+    return retval;
 }
 
 const MantidColorMap& InstrumentActor::getColorMap() const

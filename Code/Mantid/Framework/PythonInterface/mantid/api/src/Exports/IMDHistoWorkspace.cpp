@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 
 using Mantid::API::IMDHistoWorkspace;
@@ -13,7 +13,7 @@ using namespace boost::python;
 
 void export_IMDHistoWorkspace()
 {
-  register_ptr_to_python<IMDHistoWorkspace_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(IMDHistoWorkspace);
 
   // EventWorkspace class
   class_< IMDHistoWorkspace, bases<IMDWorkspace,MultipleExperimentInfos>, boost::noncopyable >("IMDHistoWorkspace", no_init)

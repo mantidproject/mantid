@@ -51,7 +51,7 @@ namespace API
   ) : PropertyWithValue<std::vector<std::vector<std::string> > >(
         name, 
         std::vector<std::vector<std::string> >(), 
-        new MultiFileValidator(exts), 
+        boost::make_shared<MultiFileValidator>(exts), 
         Direction::Input),
       m_exts(exts),
       m_parser()
@@ -146,17 +146,6 @@ namespace API
 
     // Now re-set the value using the full paths found.
     return PropertyWithValue<std::vector<std::vector<std::string> > >::setValue(fullFileNames);
-  }
-
-  /**
-   * Set a property value via a DataItem
-   * @param data :: A shared pointer to a data item
-   * @return "" if the assignment was successful or a user level description of the problem
-  */
-  std::string MultipleFileProperty::setValue(const boost::shared_ptr<Kernel::DataItem> data )
-  {
-    // Implemented this method for documentation reasons. Just calls base class method.
-    return PropertyWithValue<std::vector<std::vector<std::string> > >::setValue(data);
   }
 
   /**

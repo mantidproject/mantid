@@ -31,10 +31,10 @@ DECLARE_ALGORITHM(ChopData)
 
 void ChopData::init()
 {
-  CompositeWorkspaceValidator<> *wsVal = new CompositeWorkspaceValidator<>;
-  wsVal->add(new WorkspaceUnitValidator<>("TOF"));
-  wsVal->add(new HistogramValidator<>);
-  wsVal->add(new SpectraAxisValidator<>);
+  auto wsVal = boost::make_shared<CompositeValidator>();
+  wsVal->add<WorkspaceUnitValidator>("TOF");
+  wsVal->add<HistogramValidator>();
+  wsVal->add<SpectraAxisValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsVal),
     "Name of the input workspace to be split.");
   declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace", "", Direction::Output),

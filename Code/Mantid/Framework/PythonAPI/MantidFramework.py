@@ -543,6 +543,15 @@ class WorkspaceProxy(ProxyObject):
         """
         super(WorkspaceProxy, self).__init__(obj)
         self.__factory = factory
+        
+    def __iter__(self):
+        """
+        Pass on to iterator if this is a table
+        """
+        if hasattr(self._getHeldObject(), '__iter__'):
+            return self._getHeldObject().__iter__()
+        else:
+            raise AttributeError('Object does not support iteration')
 
     def __getitem__(self, index):
         """
@@ -1930,7 +1939,44 @@ def _cppListValidator(prop_type, options):
 # Startup code
 ########################################################################################
 
- 
+#------------------------------------------------------------------------------
+# TableWorkspace Operations
+#------------------------------------------------------------------------------
+def attach_tableworkspaceiterator():
+    """Attaches the iterator code to a table workspace."""
+    def __iter_method(self):
+        class ITableWorkspaceIter:
+            def __init__(self, wksp):
+                self.__wksp = wksp
+                self.__pos = 0
+                self.__max = wksp.getRowCount()
+            def next(self):
+                if self.__pos + 1 > self.__max:
+                    raise StopIteration
+                self.__pos += 1
+                return self.__wksp.row(self.__pos-1)
+        return ITableWorkspaceIter(self)
+    setattr(ITableWorkspace, "__iter__", __iter_method)
+    
+def attach_workspacegroupiterator():
+    """Attaches the iterator code to a workspace group."""
+    def __iter_method(self):
+        class WorkspaceGroupIter:
+            def __init__(self, wksp):
+                self.__members = wksp.getNames()
+                self.__pos = 0
+                self.__max = wksp.size()
+            def next(self):
+                if self.__pos + 1 > self.__max:
+                    raise StopIteration
+                self.__pos += 1
+                return mtd[self.__members[self.__pos-1]]
+        return WorkspaceGroupIter(self)
+    setattr(WorkspaceGroup, "__iter__", __iter_method)
+##############################################################################
+attach_tableworkspaceiterator()
+attach_workspacegroupiterator()
+
 def FrameworkSingleton():
     try:
         getattr(__main__, '__mantid__')

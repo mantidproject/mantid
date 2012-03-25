@@ -364,25 +364,30 @@ namespace Mantid
     }
 
     //-----------------------------------------------------------------------------------------------
-    /**
-    * Return the property manager serialized as a string.
-    * The format is propName=value,propName=value,propName=value
-    * @param withDefaultValues :: If true then the value of default parameters will be included
-    * @returns A serialized version of the manager
-    */
-    std::string PropertyManager::asString(bool withDefaultValues) const
+    /** Return the property manager serialized as a string.
+     *
+     * The format is propName=value,propName=value,propName=value
+     * @param withDefaultValues :: If true then the value of default parameters will be included
+     * @param separator :: character to separate property/value pairs. Default comma.
+     * @returns A serialized version of the manager
+     */
+    std::string PropertyManager::asString(bool withDefaultValues, char separator) const
     {
       std::ostringstream writer;
       const size_t count = propertyCount();
+      size_t numAdded = 0;
       for( size_t i = 0; i < count; ++i )
       {
         Property *p = getPointerToPropertyOrdinal((int)i);
         if( withDefaultValues || !(p->isDefault()) )
         {
-          writer << p->name() << "=" << p->value() << ",";
+          if (numAdded > 0)
+            writer << separator;
+          writer << p->name() << "=" << p->value();
+          numAdded++;
         }
       }
-      return boost::algorithm::trim_right_copy_if(writer.str(), std::bind2nd(std::equal_to<char>(), ','));
+      return writer.str();
     }
 
     //-----------------------------------------------------------------------------------------------

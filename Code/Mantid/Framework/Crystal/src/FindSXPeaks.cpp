@@ -19,6 +19,7 @@ Notable points:
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/Peak.h"
 
 using namespace Mantid::DataObjects;
@@ -28,9 +29,6 @@ namespace Mantid
 {
   namespace Crystal
   {
-    double SXPeak::mN=1.67492729e-27;
-    double SXPeak::hbar=1.054571628e-34;
-
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(FindSXPeaks)
 
@@ -49,19 +47,17 @@ namespace Mantid
      */
     void FindSXPeaks::init()
     {
-      declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>),
+      declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()),
           "The name of the Workspace2D to take as input");
       declareProperty("RangeLower",EMPTY_DBL(),
           "The X value to search from (default 0)");
       declareProperty("RangeUpper",EMPTY_DBL(),
           "The X value to search to (default FindSXPeaks)");
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("StartWorkspaceIndex",0, mustBePositive,
           "Start spectrum number (default 0)");
-      // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-      // pointer to each property.
-      declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
+      declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive,
           "End spectrum number  (default FindSXPeaks)");
       declareProperty("SignalBackground",10.0, "Multiplication factor for the signal background");
       declareProperty("Resolution",0.01,"Tolerance needed to avoid peak duplication in number of pixels");

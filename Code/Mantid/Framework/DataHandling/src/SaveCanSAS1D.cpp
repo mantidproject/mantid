@@ -14,6 +14,7 @@ Workspace group members and appended workspaces are stored in separate SASentry 
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Run.h"
 #include <boost/shared_ptr.hpp>
 
@@ -50,7 +51,7 @@ SaveCanSAS1D::~SaveCanSAS1D()
 void SaveCanSAS1D::init()
 {
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
-      new API::WorkspaceUnitValidator<>("MomentumTransfer")),
+                                               boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save, ".xml"),
       "The name of the xml file to save");
@@ -67,8 +68,8 @@ void SaveCanSAS1D::init()
   radiation_source.push_back("x-ray");
   radiation_source.push_back("muon");
   radiation_source.push_back("electron");
-  declareProperty("RadiationSource", "Spallation Neutron Source", new Kernel::ListValidator(
-      radiation_source));
+  declareProperty("RadiationSource", "Spallation Neutron Source", 
+                  boost::make_shared<Kernel::StringListValidator>(radiation_source));
   declareProperty("Append", false, "If true the output file is not overwritten but appended to"); 
   declareProperty("Process", "", "Text to append to Process section");
 }

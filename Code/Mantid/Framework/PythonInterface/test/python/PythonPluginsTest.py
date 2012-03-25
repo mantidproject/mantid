@@ -48,11 +48,11 @@ class PythonPluginsTest(unittest.TestCase):
         # Has the name appear in the module dictionary
         self.assertTrue(expected_name in sys.modules)     
         # Do we have the registered algorithm
-        algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
+        algs = AlgorithmFactory.getRegisteredAlgorithms(True)
         self.assertTrue(expected_name in algs)
         # Can it be created?
         try:
-            test_alg = AlgorithmManager.Instance().createUnmanaged(expected_name)
+            test_alg = AlgorithmManager.createUnmanaged(expected_name)
             self.assertEquals(expected_name, test_alg.name())
             self.assertEquals(1, test_alg.version())
         except RuntimeError, exc:

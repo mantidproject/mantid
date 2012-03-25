@@ -4,6 +4,8 @@
 #include "Shape2D.h"
 #include "MantidAPI/IPeak.h"
 
+class PeakOverlay;
+
 /**
  * Shape representing a peak marker on un unwrapped surface.
  * A marker consists of a symbol marking location of a peak
@@ -20,7 +22,8 @@ public:
     QColor color;
     int size;
   };
-  PeakMarker2D(const QPointF& centre,Style style = Style());
+  //PeakMarker2D(PeakOverlay& peakOverlay, const QPointF& centre,Style style = Style());
+  PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, Style style = Style());
   /* --- Implemented Shape2D virtual methods --- */
   virtual Shape2D* clone()const{return new PeakMarker2D(*this);}
   virtual bool selectAt(const QPointF& p)const;
@@ -36,11 +39,12 @@ public:
   Symbol getSymbol()const{return m_symbol;}
   void setSymbol(Symbol s){m_symbol=s;}
   void setPeak(const Mantid::API::IPeak& peak, int row = -1);
+  const Mantid::API::IPeak& getPeak() const;
   double getH()const{return m_h;}
   double getK()const{return m_k;}
   double getL()const{return m_l;}
   int getDetectorID()const{return m_detID;}
-  double getTOF()const{return m_tof;}
+  //double getTOF()const{return m_tof;}
   int getRow()const{return m_row;}
   /// Get label's area on the screen
   const QRectF& getLabelRect()const{return m_labelRect;}
@@ -57,12 +61,13 @@ protected:
   void drawSquare(QPainter& painter)const;
 private:
 
+  PeakOverlay& m_peakOverlay; ///< Parent PeakOverlay
   int m_markerSize;
   static const int g_defaultMarkerSize;
   Symbol m_symbol; ///< Shape of the marker
   double m_h, m_k, m_l; ///< Peak's h,k,l
   int m_detID;
-  double m_tof;
+  //double m_tof;
   QString m_label;
   mutable QRectF m_labelRect; ///< label's area on the screen
   int m_row; ///< peaks row number in PeaksWorkspace

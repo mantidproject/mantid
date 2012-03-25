@@ -6,6 +6,7 @@
 #include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "ICatTestHelper.h"
 
 using namespace Mantid;

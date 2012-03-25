@@ -78,7 +78,7 @@ namespace Mantid
      */
     void CreateCalFileByNames::init()
     {
-      declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input, new InstrumentValidator<>),
+      declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>()),
         "A workspace that contains a reference to the instrument of interest.\n"
         "You can use LoadEmptyInstrument if you do not have any data files to load.");
       declareProperty(new FileProperty("GroupingFileName","",FileProperty::Save, ".cal"),

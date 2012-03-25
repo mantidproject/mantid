@@ -36,9 +36,9 @@ private:
       // Parse Extract metadata. Including data locations.
       parseMetadata();
     }
-    virtual void addEvents(MDEventWorkspace4* ws) { return LoadSQW::addEvents(ws); };
-    virtual void addDimensions(MDEventWorkspace4* ws) { return LoadSQW::addDimensions(ws); };
-    virtual void addLattice(MDEventWorkspace4* ws) { return LoadSQW::addLattice(ws); };
+    virtual void addEvents(MDEventWorkspace4* ws) { LoadSQW::addEvents(ws); };
+    virtual void addDimensions(MDEventWorkspace4* ws) { LoadSQW::addDimensions(ws); };
+    virtual void addLattice(MDEventWorkspace4* ws) { LoadSQW::addLattice(ws); };
   };
 
 public:

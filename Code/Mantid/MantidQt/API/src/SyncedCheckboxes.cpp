@@ -52,6 +52,28 @@ namespace API
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Enable or disable both the menu and the checkboxes
+   *
+   * @param val :: true for Enabled
+   */
+  void SyncedCheckboxes::setEnabled(bool val)
+  {
+    m_menu->setEnabled(val);
+    m_button->setEnabled(val);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the visibility of both the menu and the checkboxes
+   *
+   * @param val :: true for visible
+   */
+  void SyncedCheckboxes::setVisible(bool val)
+  {
+    m_menu->setVisible(val);
+    m_button->setVisible(val);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Slot called when the menu is toggled */
   void SyncedCheckboxes::on_menu_toggled(bool val)
   {

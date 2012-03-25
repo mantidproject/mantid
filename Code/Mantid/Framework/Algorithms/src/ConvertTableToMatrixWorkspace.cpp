@@ -11,6 +11,7 @@ If ColumnE is not set the E vector will be filled with 1s. The type of the colum
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
@@ -39,8 +40,8 @@ void ConvertTableToMatrixWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<API::ITableWorkspace>("InputWorkspace","",Direction::Input), "An input TableWorkspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output Workspace2D.");
-  declareProperty("ColumnX","", new MandatoryValidator<std::string>(),"The column name for the X vector.");
-  declareProperty("ColumnY","", new MandatoryValidator<std::string>(),"The column name for the Y vector.");
+  declareProperty("ColumnX","", boost::make_shared<MandatoryValidator<std::string>>(),"The column name for the X vector.");
+  declareProperty("ColumnY","", boost::make_shared<MandatoryValidator<std::string>>(),"The column name for the Y vector.");
   declareProperty("ColumnE","","The column name for the E vector (optional).");
 }
 

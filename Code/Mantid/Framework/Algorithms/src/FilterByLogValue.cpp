@@ -48,6 +48,8 @@ pulses:
 
 #include <fstream>
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -88,6 +90,7 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
+  using namespace Mantid::Kernel;
   declareProperty(
     new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::InOut),
     "An input event workspace" );
@@ -104,7 +107,7 @@ void FilterByLogValue::init()
 
   declareProperty("MaximumValue", 0.0, "Maximum log value for which to keep events.");
 
-  BoundedValidator<double> *min = new BoundedValidator<double>();
+  auto min = boost::make_shared<BoundedValidator<double> >();
   min->setLower(0.0);
   declareProperty("TimeTolerance", 0.0, min,
     "Tolerance, in seconds, for the event times to keep. A good value is 1/2 your measurement interval. \n"
@@ -114,7 +117,7 @@ void FilterByLogValue::init()
   std::vector<std::string> types(2);
   types.push_back("Centre");
   types.push_back("Left");
-  declareProperty("LogBoundary", "Centre", new Mantid::Kernel::ListValidator(types),
+  declareProperty("LogBoundary", "Centre", boost::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
 
 

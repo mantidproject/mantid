@@ -1,4 +1,6 @@
 #include "MantidKernel/Unit.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -8,7 +10,7 @@ using namespace boost::python;
 
 void export_Unit()
 {
-  register_ptr_to_python<Unit_sptr>();
+  REGISTER_SHARED_PTR_TO_PYTHON(Unit);
 
   class_<Unit,boost::noncopyable>("Unit", no_init)
     .def("caption", &Unit::caption, "Return the full name of the unit")

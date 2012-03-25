@@ -450,6 +450,10 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
+  // Disallow line mode if you are using a matrix workspace
+  bool matrix = bool(boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
+  m_syncLineMode->setEnabled(!matrix);
+
   // Emit the signal that we changed the workspace
   emit workspaceChanged();
 

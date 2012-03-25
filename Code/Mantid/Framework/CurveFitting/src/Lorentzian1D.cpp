@@ -8,6 +8,7 @@
 #include "MantidCurveFitting/Lorentzian1D.h"
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -34,7 +35,7 @@ void Lorentzian1D::declareParameters()
   declareProperty("Height", 0.0, "Peak height (may be refined to a negative value to fit a dipped curve)", Direction::InOut);
   declareProperty("PeakCentre",0.0,  "Centre of peak (default 0)", Direction::InOut);
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(std::numeric_limits<double>::min());
 
   declareProperty("HWHM",1.0, positiveDouble, "half-width at half-maximum (default 1)", Direction::InOut);

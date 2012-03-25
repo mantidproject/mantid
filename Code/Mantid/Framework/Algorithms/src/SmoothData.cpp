@@ -10,6 +10,7 @@ one or more points lying symmetrically either side of it. The statistical error 
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SmoothData.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -39,7 +40,7 @@ void SmoothData::init()
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<int> *min = new BoundedValidator<int>();
+  auto min = boost::make_shared<BoundedValidator<int> >();
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty("NPoints", 3, min,

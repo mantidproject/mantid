@@ -248,6 +248,8 @@ void SANSAddFiles::runPythonAddFiles()
   QString lowMem = m_SANSForm->loadSeparateEntries->isChecked()?"True":"False";
   code_torun += ", lowMem="+lowMem;
 
+  if ( m_SANSForm->takeBinningFromMonitors->isChecked() == false )
+    code_torun += ", binning='" + m_SANSForm->eventToHistBinning->text() + "'";
   code_torun += ")\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << std::endl;

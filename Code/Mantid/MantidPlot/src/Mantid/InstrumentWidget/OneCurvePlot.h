@@ -21,11 +21,11 @@ class OneCurvePlot: public QwtPlot
 public:
   OneCurvePlot(QWidget* parent);
   ~OneCurvePlot();
-  void setData(const double* x,const double* y,int dataSize);
+  void setData(const double* x,const double* y,int dataSize,const std::string& xUnits = "");
   void setLabel(const QString& label);
   QString label()const{return m_label;}
   void setYAxisLabelRotation(double degrees);
-  void addPeakLabel(PeakLabel*);
+  void addPeakLabel(const PeakMarker2D*);
   void clearPeakLabels();
   bool hasCurve()const;
   void store();
@@ -36,6 +36,7 @@ public:
   void recalcXAxisDivs();
   void recalcYAxisDivs();
   bool isYLogScale()const;
+  const std::string& getXUnits() const {return m_xUnits;}
 public slots:
   void setXScale(double from, double to);
   void setYScale(double from, double to);
@@ -62,17 +63,22 @@ private:
   QMap<QString,QwtPlotCurve*> m_stored; ///< stored curves
   QList<QColor> m_colors; ///< colors for stored curves
   int m_colorIndex;
+  std::string m_xUnits;
 };
 
 class PeakLabel: public QwtPlotItem
 {
 public:
-  PeakLabel(const PeakMarker2D* m):m_marker(m){}
+  PeakLabel(const PeakMarker2D* m, const OneCurvePlot* plot):
+      m_marker(m),
+      m_plot(plot)
+      {}
   void draw(QPainter *painter, 
         const QwtScaleMap &xMap, const QwtScaleMap &yMap,
         const QRect &canvasRect) const;
 private:
   const PeakMarker2D* m_marker;
+  const OneCurvePlot* m_plot;
 };
 
 #endif /*ONECURVEPLOT_H_*/

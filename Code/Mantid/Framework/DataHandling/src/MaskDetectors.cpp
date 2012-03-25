@@ -66,14 +66,15 @@ void MaskDetectors::init()
     "A comma separated list or array containing the workspace indices\n"
     "to mask" );
   declareProperty(
-    new WorkspaceProperty<>("MaskedWorkspace","",Direction::Input, true),
+    new WorkspaceProperty<>("MaskedWorkspace","",Direction::Input, PropertyMode::Optional),
     "If given, the masking from this workspace will be copied.");
-  BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+
+  auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
   mustBePosInt->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
           "The index number of the first workspace index to include in the calculation\n"
           "(default 0)" );
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
           "The index number of the last workspace index to include in the calculation\n"
           "(default the last histogram)" );
 }

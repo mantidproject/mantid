@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='ASCII'?>
 <instrument valid-to="2100-01-31 23:59:59" name="HYSPEC" valid-from="2011-07-20 17:02:48.437294">
   <!--Created by Andrei Savici-->
+  <!-- Monitor 2 distance changed (SIC 22-MAR-2012)-->
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
@@ -36,7 +37,7 @@
       </location>
       <location name="monitor2">
         <parameter name="z">
-          <logfile eq="-0.001*value-1.585" id="msd"/>
+          <logfile eq="-0.001*value-1.59643" id="msd"/>
         </parameter>
       </location>
       <location z="-0.200" name="monitor3"/>

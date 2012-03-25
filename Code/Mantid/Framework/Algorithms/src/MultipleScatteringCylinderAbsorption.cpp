@@ -54,8 +54,8 @@ using std::vector;
                  2.0,0.0,0.0,0.0,0.0,0.0,
                  3.104279270,0.0,0.0,0.0,0.0,0.0 };
 
-  static const double  H_ES  = 6.62606876e-27;               // h in erg seconds
-  static const double  MN_KG = Mantid::PhysicalConstants::NeutronMass;  // mass of neutron(kg)
+  static const double  H_ES  = PhysicalConstants::h * 1e7;     // h in erg seconds
+  static const double  MN_KG = PhysicalConstants::NeutronMass;  // mass of neutron(kg)
   static const double  ANGST_PER_US_PER_M = H_ES/MN_KG/1000.;
 
 /**
@@ -64,7 +64,7 @@ using std::vector;
 void MultipleScatteringCylinderAbsorption::init()
 {
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
-                  "",Direction::Input, new InstrumentValidator<>), "The name of the input workspace.");
+                  "",Direction::Input, boost::make_shared<InstrumentValidator>()), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
 

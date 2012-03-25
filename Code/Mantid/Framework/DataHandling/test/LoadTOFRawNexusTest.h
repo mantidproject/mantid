@@ -58,7 +58,7 @@ public:
     );
     TS_ASSERT(ws); if (!ws) return;
     TS_ASSERT_EQUALS(ws->blocksize(), 501);
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "REF");
+    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "REF_L");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 77824);
 
     ISpectrum * spec = ws->getSpectrum(27955);

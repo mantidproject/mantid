@@ -6,10 +6,13 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include <cstdarg>
+#include <napi.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -19,6 +22,21 @@ namespace Mantid
 {
 namespace API
 {
+
+  /** This is a function called every time NeXuS raises an error.
+   * This swallows the errors and outputs nothing.
+   *
+   * @param data :: data passed in NXMSetError (will be NULL)
+   * @param text :: text of the error.
+   */
+  void NexusErrorFunction(void *data, char *text)
+  {
+    UNUSED_ARG(data);
+    UNUSED_ARG(text);
+    // Do nothing.
+  }
+
+
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 #ifdef MPI_BUILD
@@ -45,6 +63,10 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   {
     Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
   }
+
+  // Disable reporting errors from Nexus (they clutter up the output).
+  NXMSetError(NULL, NexusErrorFunction);
+
   g_log.debug() << "FrameworkManager created." << std::endl;
 }
 

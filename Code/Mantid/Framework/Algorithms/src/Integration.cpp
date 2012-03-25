@@ -24,6 +24,7 @@ If an [[EventWorkspace]] is used as the input, the output will be a [[MatrixWork
 #include <cmath>
 
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -51,17 +52,16 @@ using namespace DataObjects;
  */
 void Integration::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("RangeLower",EMPTY_DBL());
   declareProperty("RangeUpper",EMPTY_DBL());
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive);
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive->clone());
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive);
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
 }
 

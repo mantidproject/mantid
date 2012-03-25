@@ -51,6 +51,8 @@ namespace DataHandling
     Mantid::API::ILiveListener_sptr getLiveListener();
     void setLiveListener(Mantid::API::ILiveListener_sptr listener);
 
+    virtual std::map<std::string, std::string> validateInputs();
+
   protected:
     void initProps();
 
@@ -59,8 +61,6 @@ namespace DataHandling
     Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
 
     bool hasPostProcessing() const;
-
-    void validateInputs();
 
     /// Live listener
     Mantid::API::ILiveListener_sptr m_listener;

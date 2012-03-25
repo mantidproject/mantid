@@ -41,15 +41,15 @@ namespace API
       m_parent = parent;
     }
 
-//    // Create the validator label (that red star)
-//    m_validLbl = new QLabel("*");
-//    QPalette pal = m_validLbl->palette();
-//    pal.setColor(QPalette::WindowText, Qt::darkRed);
-//    m_validLbl->setPalette(pal);
-//    // Start off hidden
-//    m_validLbl->setVisible(false);
-//    // Put it in the 4th column.
-//    m_gridLayout->addWidget(m_validLbl, m_row, 4);
+    // Create the validator label (that red star)
+    m_validLbl = new QLabel("*");
+    QPalette pal = m_validLbl->palette();
+    pal.setColor(QPalette::WindowText, Qt::darkRed);
+    m_validLbl->setPalette(pal);
+    // Start off hidden
+    m_validLbl->setVisible(false);
+    // Put it in the 4th column.
+    m_gridLayout->addWidget(m_validLbl, m_row, 4);
 
     /// Save the documentation tooltip
     m_doc = QString::fromStdString(prop->documentation());
@@ -100,12 +100,53 @@ namespace API
     }
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Externally set an error string to display in the validator
+   *
+   * @param error :: string to show in the star, empty means no error
+   */
+  void PropertyWidget::setError(const QString & error)
+  {
+    m_error = error.trimmed();
+
+    // Show the invalid star if there was an error
+    if (m_error.isEmpty())
+      m_validLbl->setVisible(false);
+    else
+    {
+      m_validLbl->setVisible(true);
+      m_validLbl->setToolTip(m_error);
+    }
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Slot called when the value of the property had been changed.
-   * Called by all sub-classes.
+   * This performs validation of the value and shows/hides that validator
+   * star.
+   *
+   * It then emits a signal that the value of the property was changed.
    * */
   void PropertyWidget::valueChangedSlot()
   {
+    // Try to set the value
+    QString value = this->getValue().trimmed();
+    // Use the default if empty
+    if( value.isEmpty() )
+      value = QString::fromStdString(m_prop->getDefault());
+
+    std::string error("");
+    try
+    {
+      error = m_prop->setValue(value.toStdString());
+    }
+    catch(std::exception & err_details)
+    {
+      error = err_details.what();
+    }
+    this->setError(QString::fromStdString(error).trimmed());
+
     // This will be caught by the GenericDialog.
     emit valueChanged( QString::fromStdString(m_prop->name()) ) ;
   }

@@ -50,7 +50,7 @@ private:
     
     void init()
     { 
-      Mantid::Kernel::BoundedValidator<int> * lower = new Mantid::Kernel::BoundedValidator<int>();
+      auto lower = boost::make_shared<Mantid::Kernel::BoundedValidator<int> >();
       lower->setLower(0);
       declareProperty("OutputValue",-1, lower);
     }

@@ -1,10 +1,15 @@
 #include "MantidDataHandling/LiveDataAlgorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "boost/tokenizer.hpp"
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using boost::tokenizer;
 
 namespace Mantid
 {
@@ -33,8 +38,9 @@ namespace DataHandling
    */
   void LiveDataAlgorithm::initProps()
   {
-
-    declareProperty(new PropertyWithValue<std::string>("Instrument","",Direction::Input),
+    // Options for the Instrument = all the listeners that are registered.
+    std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
+    declareProperty(new PropertyWithValue<std::string>("Instrument","", boost::make_shared<StringListValidator>(listeners)),
         "Name of the instrument to monitor.");
 
     declareProperty(new PropertyWithValue<std::string>("StartTime","",Direction::Input),
@@ -56,11 +62,17 @@ namespace DataHandling
     propOptions.push_back("Add");
     propOptions.push_back("Replace");
     propOptions.push_back("Append");
-    declareProperty("AccumulationMethod", "Add", new ListValidator(propOptions),
+    declareProperty("AccumulationMethod", "Add", boost::make_shared<StringListValidator>(propOptions),
         "Method to use for accumulating each chunk of live data.\n"
         " - Add: the processed chunk will be summed to the previous outpu (default).\n"
         " - Replace: the processed chunk will replace the previous output.\n"
         " - Append: the spectra of the chunk will be appended to the output workspace, increasing its size.");
+
+    declareProperty("PreserveEvents", false,
+        "Preserve events after performing the Processing step. Default False.\n"
+        "This only applies if the ProcessingAlgorithm produces an EventWorkspace.\n"
+        "It is strongly recommended to keep this unchecked, because preserving events\n"
+        "may cause significant slowdowns when the run becomes large!");
 
     declareProperty(new PropertyWithValue<std::string>("PostProcessingAlgorithm","",Direction::Input),
         "Name of the algorithm that will be run to process the accumulated data.\n"
@@ -74,18 +86,18 @@ namespace DataHandling
         "Not currently supported, but reserved for future use.");
 
     declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
-        true /* optional */, false /* no locking */),
+                                                     PropertyMode::Optional, LockMode::NoLock),
         "Optional, unless performing PostProcessing:\n"
         " Give the name of the intermediate, accumulation workspace.\n"
         " This is the workspace after accumulation but before post-processing steps.");
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output,
-        false /* not optional */, false /* no locking */),
-        "Name of the processed output workspace.");
+                                                     PropertyMode::Mandatory, LockMode::NoLock),
+                    "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
-        "The time stamp of the last event, frame or pulse recorded.\n"
-        "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
+                    "The time stamp of the last event, frame or pulse recorded.\n"
+                    "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
   }
 
 
@@ -189,8 +201,45 @@ namespace DataHandling
 
       // Create the UNMANAGED algorithm
       IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
+
       // ...and pass it the properties
-      alg->setProperties(props);
+      boost::char_separator<char> sep(";");
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+      tokenizer propPairs(props, sep);
+      // Iterate over the properties
+      for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
+      {
+        // Pair of the type "
+        std::string pair = *it;
+
+        size_t n = pair.find('=');
+        if (n == std::string::npos)
+        {
+          // Do nothing
+        }
+        else
+        {
+          // Normal "PropertyName=value" string.
+          std::string propName = "";
+          std::string value = "";
+
+          // Extract the value string
+          if (n < pair.size()-1)
+          {
+            propName = pair.substr(0, n);
+            value = pair.substr(n+1, pair.size()-n-1);
+          }
+          else
+          {
+            // String is "PropertyName="
+            propName = pair.substr(0, n);
+            value = "";
+          }
+          // Skip some of the properties when setting
+          if ((propName != "InputWorkspace") && (propName != "OutputWorkspace"))
+            alg->setPropertyValue(propName,value);
+        }
+      }
 
       // Warn if someone put both values.
       if (!script.empty())
@@ -210,27 +259,52 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Perform validation of the inputs.
-   * This should be called before starting the listener to give fast feedback
-   * to the user that they did something wrong.
-   *
-   * @throw std::invalid_argument if there is a problem.
-   */
-  void LiveDataAlgorithm::validateInputs()
+  /** Validate the properties together */
+  std::map<std::string, std::string> LiveDataAlgorithm::validateInputs()
   {
+    std::map<std::string, std::string> out;
     if (this->getPropertyValue("OutputWorkspace").empty())
-      throw std::invalid_argument("Must specify the OutputWorkspace.");
+      out["OutputWorkspace"] = "Must specify the OutputWorkspace.";
 
     // Validate inputs
     if (this->hasPostProcessing())
     {
       if (this->getPropertyValue("AccumulationWorkspace").empty())
-        throw std::invalid_argument("Must specify the AccumulationWorkspace parameter if using PostProcessing.");
+        out["AccumulationWorkspace"] = "Must specify the AccumulationWorkspace parameter if using PostProcessing.";
 
       if (this->getPropertyValue("AccumulationWorkspace") == this->getPropertyValue("OutputWorkspace"))
-        throw std::invalid_argument("The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.");
+        out["AccumulationWorkspace"] = "The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.";
     }
+
+    // For StartLiveData and MonitorLiveData, make sure another thread is not already using these names
+    if (this->name() != "LoadLiveData")
+    {
+      /** Validate that the workspace names chosen are not in use already */
+      std::string outName = this->getPropertyValue("OutputWorkspace");
+      std::string accumName = this->getPropertyValue("AccumulationWorkspace");
+
+      // Check that no other MonitorLiveData thread is running with the same settings
+      auto it = AlgorithmManager::Instance().algorithms().begin();
+      for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
+      {
+        IAlgorithm_sptr alg = *it;
+        // MonitorLiveData thread that is running, except THIS one.
+        if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
+            && alg->isRunning())
+        {
+          if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
+            out["AccumulationWorkspace"] += "Another MonitorLiveData thread is running with the same AccumulationWorkspace.\n"
+                "Please specify a different AccumulationWorkspace name.";
+          if (alg->getPropertyValue("OutputWorkspace") == outName)
+            out["OutputWorkspace"] += "Another MonitorLiveData thread is running with the same OutputWorkspace.\n"
+                "Please specify a different OutputWorkspace name.";
+        }
+      }
+    }
+
+    return out;
   }
+
 
 } // namespace Mantid
 } // namespace DataHandling

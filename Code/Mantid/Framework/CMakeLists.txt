@@ -44,18 +44,25 @@ endif ()
 # Only available on Linux (specifically RedHat), and for a framework-only build
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
-  # Create the variable because it needs to exist later even if it's left empty
-  set ( MPI_LIBRARIES )
   if ( MPI_BUILD )
     # This finds OpenMPI on rhel6 (assuming it's installed, of course)
     find_package ( MPI REQUIRED )
+    # The FindMPI module doesn't seem to respect the REQUIRED specifier (as of CMake 2.8.7)
+    if ( NOT MPI_FOUND )
+      message ( SEND_ERROR "MPI_BUILD flag is ON, but MPI could not be found" )
+    endif ()
     # Set things up to use the OpenMPI 'wrapper' compilers
-    INCLUDE(CMakeForceCompiler)
-    CMAKE_FORCE_C_COMPILER(mpicc "MPI C Compiler")
-    CMAKE_FORCE_CXX_COMPILER(mpicxx "MPI C++ Compiler")
+    if ( MPI_CXX_COMPILER )
+      set ( CMAKE_C_COMPILER ${MPI_C_COMPILER} )
+      set ( CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER} )
+    else ()
+      # Handle older FindMPI.cmake
+      set ( CMAKE_C_COMPILER ${MPI_COMPILER} )
+      set ( CMAKE_CXX_COMPILER ${MPI_COMPILER} )
+    endif ()
     include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
   
-    set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where openmpi winds up on rhel6
+    set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where (boost-)openmpi winds up on rhel6
     find_package ( Boost REQUIRED mpi serialization )
     include_directories( ${Boost_INCLUDE_DIRS} )
     
@@ -69,7 +76,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
     # Framework dependencies
     set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,nexus,gsl,glibc,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
     set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
-    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
     set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},boost-openmpi,boost-openmpi-python" )
     include ( CPack )
   endif ( MPI_BUILD )
@@ -80,8 +87,8 @@ endif ()
 ###########################################################################
 
 # Might just as well link everything to Boost & Poco (found in CommonSetup)
-# TCMalloc & MPI variables will be empty if not using
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI_LIBRARIES} )
+# TCMalloc variable will be empty if not using
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go

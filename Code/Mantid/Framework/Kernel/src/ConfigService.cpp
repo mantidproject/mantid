@@ -1584,7 +1584,7 @@ const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instr
     try
     {
       g_log.debug() << "Looking for " << instrumentName << " at " << defaultFacility << "." << std::endl;
-      return getFacility(defaultFacility).Instrument(instrumentName);
+      return getFacility(defaultFacility).instrument(instrumentName);
     }
     catch (Exception::NotFoundError &)
     {
@@ -1600,7 +1600,7 @@ const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instr
     try
     {
       g_log.debug() << "Looking for " << instrumentName << " at " << (**it).name() << "." << std::endl;
-      return (**it).Instrument(instrumentName);
+      return (**it).instrument(instrumentName);
     }
     catch (Exception::NotFoundError &)
     {

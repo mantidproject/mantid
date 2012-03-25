@@ -50,6 +50,8 @@ namespace API
     SyncedCheckboxes(QAction * menu, QAbstractButton * button, bool checked = false);
     virtual ~SyncedCheckboxes();
     void toggle(bool val);
+    void setEnabled(bool val);
+    void setVisible(bool val);
     
   signals:
     /// Signal emitted when the check box is toggled

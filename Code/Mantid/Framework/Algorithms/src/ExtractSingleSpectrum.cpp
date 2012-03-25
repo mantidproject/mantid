@@ -10,6 +10,7 @@ Extracts a single spectrum from a [[Workspace2D]] and stores it in a new workspa
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -35,7 +36,7 @@ void ExtractSingleSpectrum::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);  
   declareProperty("WorkspaceIndex",-1,mustBePositive);
 }

@@ -42,6 +42,7 @@ off by default.
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
@@ -97,21 +98,21 @@ namespace DataHandling
         "path");
 
     // Declare optional parameters (title now optional, was mandatory)
-    declareProperty("Title", "", new NullValidator<std::string>,
+    declareProperty("Title", "", boost::make_shared<NullValidator>(),
         "A title to describe the saved workspace");
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
 
     declareProperty("WorkspaceIndexMin", 0, mustBePositive,
         "Index number of first spectrum to write, only for single\n"
         "period data.");
-    declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+    declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
         "Index of last spectrum to write, only for single period\n"
         "data.");
     declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
         "List of spectrum numbers to read, only for single period\n"
         "data.");
-    //declareProperty("EntryNumber", 0, mustBePositive);
+
     declareProperty("Append",false,"Determines whether .nxs file needs to be\n"
         "over written or appended");
 

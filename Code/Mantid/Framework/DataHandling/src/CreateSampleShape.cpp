@@ -11,6 +11,7 @@ Creates a shape object that defines the sample and sets the sample for the given
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -39,7 +40,7 @@ namespace DataHandling
     declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "The workspace with which to associate the sample ");
-    declareProperty("ShapeXML","",new MandatoryValidator<std::string>(),
+    declareProperty("ShapeXML","", boost::make_shared<MandatoryValidator<std::string> >(),
         "The XML that describes the shape" );
   }
 

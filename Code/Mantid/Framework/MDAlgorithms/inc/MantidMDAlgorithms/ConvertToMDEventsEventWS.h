@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/Algorithm.h" 
+#include <vector>
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -18,14 +19,16 @@
 
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
-#include <vector>
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
+
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** The macrodefinitions for ConvertToMDEvents function, making the conversion from  into the MD events 
+/** The macrodefinitions for ConvertToMDEvents class, making the conversion from Events WS to the MD events WS
    *
    * @date 11-10-2011
 
@@ -51,19 +54,19 @@ namespace MDAlgorithms
 */
 
 // Class to process event workspace by direct conversion:
-template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods 
+template<QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state QX, AnalMode MODEX, CnvrtUnits CONVX,XCoordType XTYPE> 
+     template<QMode QX, AnalMode MODEX, CnvrtUnits CONVX,XCoordType XTYPE,SampleType XSample> 
      friend struct COORD_TRANSFORMER;
      // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,CONV,Centered> trn; 
+     COORD_TRANSFORMER<Q,MODE,CONV,Centered,Sample> trn; 
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates
-    std::vector<coord_t> Coord;
+     std::vector<coord_t> Coord;
  public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)

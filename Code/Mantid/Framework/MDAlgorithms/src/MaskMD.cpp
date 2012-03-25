@@ -24,8 +24,8 @@ latter 6 {+1,+2,+1,+2,+1,+2} relate to the last {X,Y,Z}. Applying this maksing w
 #include "MantidMDAlgorithms/MaskMD.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
 
 using namespace Mantid::Kernel;
@@ -97,13 +97,13 @@ namespace MDAlgorithms
   {
     declareProperty(new PropertyWithValue<bool>("ClearExistingMasks", "1", Direction::Input), "Clears any existing masks before applying the provided masking.");
     declareProperty(new WorkspaceProperty<IMDWorkspace>("Workspace","",Direction::InOut), "An input/output workspace.");
-    declareProperty(new ArrayProperty<std::string>("Dimensions",new MandatoryValidator<std::vector<std::string> >,Direction::Input),
+    declareProperty(new ArrayProperty<std::string>("Dimensions",boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),Direction::Input),
           "Dimension ids/names all comma separated.\n"
           "According to the dimensionality of the workspace, these names will be grouped,\n"
           "so the number of entries must be n*(number of dimensions in the workspace)."
           );
 
-    declareProperty(new ArrayProperty<double>("Extents",new MandatoryValidator<std::vector<double> >,Direction::Input),
+    declareProperty(new ArrayProperty<double>("Extents",boost::make_shared<MandatoryValidator<std::vector<double>>>(),Direction::Input),
       "Extents {min, max} corresponding to each of the dimensions specified, according to the order those identifies have been specified." );
   }
 

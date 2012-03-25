@@ -32,7 +32,7 @@ namespace Mantid
     /// Initialisation methods
     void CatalogGetDataSets::init()
     {
-      BoundedValidator<int64_t>* mustBePositive = new BoundedValidator<int64_t>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int64_t> >();
       mustBePositive->setLower(0);
       declareProperty<int64_t>("InvestigationId",-1,mustBePositive,"Id of the selected investigation");
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),

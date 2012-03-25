@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "VISION" date = "2012-01-01T00:00:00">
+
+<component-link name = "VISION">
+
+<parameter name="analysis-type" type="string">
+    <value val="diffraction" />
+</parameter>
+
+<!-- Backscattering Diffraction -->
+<parameter name="spectra-min">
+    <value val="26624" />
+</parameter>
+
+<parameter name="spectra-max">
+    <value val="47103" />
+</parameter>
+
+<!-- 90 detectors -->
+<!--
+    <id start="2048" end="4095"/>
+    <id start="6144" end="8191"/>
+    <id start="10240" end="12287"/>
+    <id start="14336" end="16383"/>
+    <id start="18432" end="20479"/>
+    <id start="22528" end="24575"/>
+-->
+
+<parameter name="Workflow.Diffraction.Correction" type="string">
+    <value val="Monitor" />
+</parameter>
+
+<parameter name="Workflow.MonitorScalingFactor">
+    <value val="1" />
+</parameter>
+
+<!-- These two properties being set to invalid values (-1) will signal to the
+    reducer that it is not to correct for monitor efficiency.
+    -->
+<parameter name="Workflow.MonitorArea">
+    <value val="-1" />
+</parameter>
+<parameter name="Workflow.MonitorThickness">
+    <value val="-1" />
+</parameter>
+
+</component-link>
+
+</parameter-file>

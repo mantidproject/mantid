@@ -12,6 +12,7 @@ The result is stored as a new workspace containing a single spectra.
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -39,19 +40,19 @@ using namespace DataObjects;
 void SumSpectra::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new CommonBinsValidator<>),
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<CommonBinsValidator>()),
                             "The workspace containing the spectra to be summed" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex",0, mustBePositive,
     "The first Workspace index to be included in the summing (default 0)" );
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive,
     "The last Workspace index to be included in the summing (default\n"
     "highest index)" );
 

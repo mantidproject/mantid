@@ -24,6 +24,7 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -65,17 +66,23 @@ namespace Mantid
     static double gsl_costFunction(const gsl_vector *v, void *params)
     {
       double *p = (double *)params;
-      std::vector<double> peakPosToFit, peakPosFitted;
       size_t n = static_cast<size_t>(p[0]);
+      std::vector<double> peakPosToFit(n);
+      std::vector<double> peakPosFitted(n);
+      std::vector<double> chisq(n);
       double minD = p[1];
       double maxD = p[2];
       for (size_t i = 0; i < n; i++)
       {
-        peakPosToFit.push_back(p[i+3]);
+        peakPosToFit[i] = p[i+3];
       }
       for (size_t i = 0; i < n; i++)
       {
-        peakPosFitted.push_back(p[i+n+3]);
+        peakPosFitted[i] = p[i+n+3];
+      }
+      for (size_t i = 0; i < n; i++)
+      {
+        chisq[i] = p[i+2*n+3];
       }
     
       double offset = gsl_vector_get(v, 0);
@@ -86,7 +93,7 @@ namespace Mantid
         //See formula in AlignDetectors
         double offsetAD = offset*peakPosToFit[i]/(1.+offset);
         if(peakPosFitted[i] > minD && peakPosFitted[i] < maxD)
-          errsum += std::fabs(peakPosToFit[i]-(peakPosFitted[i]+offsetAD));
+          errsum += std::fabs(peakPosToFit[i]-(peakPosFitted[i]+offsetAD))/chisq[i];
       }
       return errsum;
     }
@@ -98,10 +105,19 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-          new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
+          boost::make_shared<WorkspaceUnitValidator>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
       declareProperty(new ArrayProperty<double>("DReference"),"Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
-
+      declareProperty("FitWindowMaxWidth", 0.,
+        "Optional: The maximum width of the fitting window. If this is <=0 the windows is not specified to FindPeaks" );
+      std::vector<std::string> bkgdtypes;
+      bkgdtypes.push_back("Flat");
+      bkgdtypes.push_back("Linear");
+      bkgdtypes.push_back("Quadratic");
+      declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
+          "Type of Background. The choice can be either Linear or Quadratic");
+      declareProperty("HighBackground", true,
+          "Relatively weak peak in high background");
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
@@ -113,6 +129,47 @@ namespace Mantid
       gsl_set_error_handler_off();
     }
 
+    /**
+     * The windows should be half of the distance between the peaks of maxWidth, whichever is smaller.
+     * @param dmin The minimum d-spacing for the workspace
+     * @param dmax The maximum d-spacing for the workspace
+     * @param peaks The list of peaks to generate windows for
+     * @param maxWidth The maximum width of a window
+     * @return The list of windows for each peak
+     */
+    std::vector<double> generateWindows(const double dmin, const double dmax,
+                                        const std::vector<double> &peaks, const double maxWidth)
+    {
+      if (maxWidth <= 0.)
+      {
+        return std::vector<double>(); // empty vector because this is turned off
+      }
+
+      std::size_t numPeaks = peaks.size();
+      std::vector<double> windows(2*numPeaks);
+      double widthLeft;
+      double widthRight;
+      for (std::size_t i = 0; i < numPeaks; i++)
+      {
+        if (i == 0)
+          widthLeft = peaks[i] - dmin;
+        else
+          widthLeft = .5 * (peaks[i] - peaks[i-1]);
+        if (i + 1 == numPeaks)
+          widthRight = dmax - peaks[i];
+        else
+          widthRight = .5 * (peaks[i+1] - peaks[i]);
+
+        widthLeft  = std::min(widthLeft, maxWidth);
+        widthRight = std::min(widthRight, maxWidth);
+
+        windows[2*i]   = peaks[i] - widthLeft;
+        windows[2*i+1] = peaks[i] + widthRight;
+      }
+
+      return windows;
+    }
+
     //-----------------------------------------------------------------------------------------
     /** Executes the algorithm
      *
@@ -120,15 +177,34 @@ namespace Mantid
      */
     void GetDetOffsetsMultiPeaks::exec()
     {
-      inputW=getProperty("InputWorkspace");
-      maxOffset=getProperty("MaxOffset");
+      const double BAD_OFFSET(1000.); // mark things that didn't work with this
+
+      MatrixWorkspace_sptr inputW=getProperty("InputWorkspace");
+      double maxOffset=getProperty("MaxOffset");
       int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+      // determine min/max d-spacing of the workspace
+      double wkspDmin, wkspDmax;
+      inputW->getXMinMax(wkspDmin, wkspDmax);
       // Create the output MaskWorkspace
       MatrixWorkspace_sptr maskWS(new SpecialWorkspace2D(inputW->getInstrument()));
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
+      // the peak positions and where to fit
+      std::vector<double> peakPositions = getProperty("DReference");
+      std::vector<double> fitWindows = generateWindows(wkspDmin, wkspDmax, peakPositions, this->getProperty("FitWindowMaxWidth"));
+      g_log.information() << "windows : ";
+      if (fitWindows.empty())
+      {
+        g_log.information() << "empty\n";
+      }
+      else
+      {
+        for (std::vector<double>::const_iterator it = fitWindows.begin(); it != fitWindows.end(); ++it)
+          g_log.information() << *it << " ";
+        g_log.information() << "\n";
+      }
 
       // some shortcuts for event workspaces
       EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
@@ -148,7 +224,7 @@ namespace Mantid
         if ((isEvent) && (eventW->getEventList(wi).empty()))
         {
           // dead detector will be masked
-          offset = 1000.;
+          offset = BAD_OFFSET;
         }
         else {
           const MantidVec& Y = inputW->readY(wi);
@@ -158,20 +234,20 @@ namespace Mantid
           if (sumY < 1.e-30)
           {
             // Dead detector will be masked
-            offset=1000.;
+            offset=BAD_OFFSET;
           }
         }
         if (offset < 10.)
         {
           // Fit the peak
-          MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
-          std::string peakPositions = getProperty("DReference");
-          std::vector<double> peakPosToFit, peakPosFitted;
+          std::vector<double> peakPosToFit, peakPosFitted, chisq;
           size_t nparams;
           double minD, maxD;
-          fitSpectra(wi, inputW, peakPositions, nparams, minD, maxD, peakPosToFit, peakPosFitted);
+          fitSpectra(wi, inputW, peakPositions, fitWindows, nparams, minD, maxD, peakPosToFit, peakPosFitted, chisq);
+          if (nparams > 0)
+          {
           //double * params = new double[2*nparams+1];
-          double params[103];
+          double params[153];
           if(nparams > 50) nparams = 50;
           params[0] = static_cast<double>(nparams);
           params[1] = minD;
@@ -183,6 +259,10 @@ namespace Mantid
           for (size_t i = 0; i < nparams; i++)
           {
             params[i+3+nparams] = peakPosFitted[i];
+          }
+          for (size_t i = 0; i < nparams; i++)
+          {
+            params[i+3+2*nparams] = chisq[i];
           }
     
           const gsl_multimin_fminimizer_type *T =
@@ -240,6 +320,11 @@ namespace Mantid
           gsl_vector_free(ss);
           gsl_multimin_fminimizer_free (s);
           //delete [] params;
+          }
+          else
+          {
+              offset = BAD_OFFSET;
+          }
         }
         double mask=0.0;
         if (std::abs(offset) > maxOffset)
@@ -303,19 +388,30 @@ namespace Mantid
     *  @return The calculated offset value
     */
 
-    void GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, MatrixWorkspace_sptr inputW, const std::string &peakPositions, size_t &nparams, double &minD, double &maxD, std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted)
+    void GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions,
+                                             const std::vector<double> &fitWindows, size_t &nparams, double &minD, double &maxD,
+                                             std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
+                                             std::vector<double> &chisq)
     {
       const MantidVec & X = inputW->readX(s);
       minD = X.front();
       maxD = X.back();
-      std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
-      for (int i = 0; i < static_cast<int>(peakPos.size()); ++i)
+      bool useFitWindows = (!fitWindows.empty());
+      std::vector<double> fitWindowsToUse;
+      for (int i = 0; i < static_cast<int>(peakPositions.size()); ++i)
       {
-        if((peakPos[i] > minD) && (peakPos[i] < maxD))
-          peakPosToFit.push_back(peakPos[i]);
+        if((peakPositions[i] > minD) && (peakPositions[i] < maxD))
+        {
+          peakPosToFit.push_back(peakPositions[i]);
+          if (useFitWindows)
+          {
+            fitWindowsToUse.push_back(std::max(fitWindows[2*i], minD));
+            fitWindowsToUse.push_back(std::min(fitWindows[2*i+1], maxD));
+          }
+        }
       }
 
-      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2, false);
+      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks", -1, -1, false);
       findpeaks->setProperty("InputWorkspace", inputW);
       findpeaks->setProperty<int>("FWHM",7);
       findpeaks->setProperty<int>("Tolerance",4);
@@ -324,19 +420,33 @@ namespace Mantid
   
       //Get the specified peak positions, which is optional
       findpeaks->setProperty("PeakPositions", peakPosToFit);
-      findpeaks->setProperty<std::string>("BackgroundType", "Linear");
-      findpeaks->setProperty<bool>("HighBackground", true);
+      if (useFitWindows)
+        findpeaks->setProperty("FitWindows", fitWindowsToUse);
+      findpeaks->setProperty<std::string>("BackgroundType", this->getPropertyValue("BackgroundType"));
+      findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
       findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
+      std::vector<size_t> banned;
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
+        double centre = peakslist->getRef<double>("centre",i);
+        if (centre <= minD || centre >= maxD)
+        {
+            banned.push_back(i);
+            continue;
+        }
+        double chi2 = peakslist->getRef<double>("chi2",i);
+
         // Get references to the data
-        peakPosFitted.push_back(peakslist->getRef<double>("centre",i));
+        peakPosFitted.push_back(centre);
+        chisq.push_back(chi2);
       }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
       nparams = peakPosFitted.size();
-      peakPos.clear();
       return;
     }
 

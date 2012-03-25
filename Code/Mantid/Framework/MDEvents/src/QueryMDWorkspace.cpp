@@ -19,6 +19,7 @@ The table workspace can be used as a basis for plotting within MantidPlot.
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -63,7 +64,7 @@ namespace MDEvents
 
     declareProperty("LimitRows", true, "Limit the report output to a maximum number of rows");
 
-    declareProperty(new PropertyWithValue<int>("MaximumRows", 100000, new BoundedValidator<int>(), Direction::Input), "The number of neighbours to utilise. Defaults to 100000.");
+    declareProperty(new PropertyWithValue<int>("MaximumRows", 100000, boost::make_shared<BoundedValidator<int>>(), Direction::Input), "The number of neighbours to utilise. Defaults to 100000.");
     setPropertySettings("MaximumRows", new EnabledWhenProperty(this, "LimitRows", IS_DEFAULT));
   }
 

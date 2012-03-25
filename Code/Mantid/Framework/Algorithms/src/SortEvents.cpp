@@ -17,6 +17,7 @@ In an [[EventWorkspace]], event binning is performed on the fly. The algorithm f
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -54,7 +55,7 @@ namespace Mantid
       propOptions.push_back("X Value");
       propOptions.push_back("Pulse Time");
       propOptions.push_back("Pulse Time + TOF");
-      declareProperty("SortBy", "X Value",new ListValidator(propOptions),
+      declareProperty("SortBy", "X Value",boost::make_shared<StringListValidator>(propOptions),
         "How to sort the events:\n"
         "  X Value: the x-position of the event in each pixel (typically Time of Flight).\n"
         "  Pulse Time: the wall-clock time of the pulse that produced the event.");

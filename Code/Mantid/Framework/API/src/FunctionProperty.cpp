@@ -15,7 +15,7 @@ namespace API
     Kernel::PropertyWithValue <boost::shared_ptr<IFitFunction> >( 
       name, 
       boost::shared_ptr<IFitFunction>( ),
-      new Kernel::NullValidator< boost::shared_ptr<IFitFunction> >,
+      boost::make_shared<Kernel::NullValidator>(),
       Kernel::Direction::InOut
       )
   {

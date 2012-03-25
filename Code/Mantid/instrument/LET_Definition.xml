@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="LET" valid-from   ="1900-01-31 23:59:59"
                        valid-to     ="2100-01-31 23:59:59"
-		       last-modified="2009-08-14 00:00:00">
+		       last-modified="2012-03-13 00:00:00">
  
    <defaults>
      <length unit="meter"/>
@@ -113,73 +113,73 @@
  
 <type name="door01">
  <component type="LETdoor">
-<location  x="  1.8805    " z="  2.9519    "> <facing x="0" y="0" z="0"/> </location>
+<location  x="  -1.8805    " z="  2.9519    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door02">
  <component type="LETdoor">
-<location  x="  1.0525    " z="  3.3380    "> <facing x="0" y="0" z="0"/> </location>
+<location  x="  -1.0525    " z="  3.3380    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door03">
  <component type="LETdoor">
-<location  x=" 0.15267    " z="  3.4967    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" -0.15267    " z="  3.4967    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door04">
  <component type="LETdoor">
-<location  x="-0.75754    " z="  3.4170    "> <facing x="0" y="0" z="0"/> </location>
+<location  x="0.75754    " z="  3.4170    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door05">
  <component type="LETdoor">
-<location  x=" -1.6161    " z="  3.1045    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 1.6161    " z="  3.1045    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door06">
  <component type="LETdoor">
-<location  x=" -2.3646    " z="  2.5805    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 2.3646    " z="  2.5805    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door07">
  <component type="LETdoor">
-<location  x=" -2.9519    " z="  1.8805    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 2.9519    " z="  1.8805    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door08">
  <component type="LETdoor">
-<location  x=" -3.3380    " z="  1.0525    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 3.3380    " z="  1.0525    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door09">
  <component type="LETdoor">
-<location  x=" -3.4967    " z=" 0.15267    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 3.4967    " z=" 0.15267    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door10">
  <component type="LETdoor">
-<location  x=" -3.4170    " z="-0.75754    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 3.4170    " z="-0.75754    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door11">
  <component type="LETdoor">
-<location  x=" -3.1045    " z=" -1.6161    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 3.1045    " z=" -1.6161    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
 <type name="door12">
  <component type="LETdoor">
-<location  x=" -2.5805    " z=" -2.3646    "> <facing x="0" y="0" z="0"/> </location>
+<location  x=" 2.5805    " z=" -2.3646    "> <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  
@@ -187,38 +187,38 @@
  <type name="LETdoor">
  <properties />
  <component type="LETtube" outline="yes">
-<location  x="   0.393024    " z="  -0.221369E-01" name="tube1" />
-<location  x="   0.367765    " z="  -0.193752E-01" name="tube2" />
-<location  x="   0.342486    " z="  -0.167970E-01" name="tube3" />
-<location  x="   0.317189    " z="  -0.144023E-01" name="tube4" />
-<location  x="   0.291876    " z="  -0.121914E-01" name="tube5" />
-<location  x="   0.266547    " z="  -0.101643E-01" name="tube6" />
-<location  x="   0.241204    " z="  -0.832121E-02" name="tube7" />
-<location  x="   0.215848    " z="  -0.666210E-02" name="tube8" />
-<location  x="   0.190481    " z="  -0.518712E-02" name="tube9" />
-<location  x="   0.165104    " z="  -0.389635E-02" name="tube10" />
-<location  x="   0.139718    " z="  -0.278984E-02" name="tube11" />
-<location  x="   0.114325    " z="  -0.186766E-02" name="tube12" />
-<location  x="   0.889254E-01" z="  -0.112986E-02" name="tube13" />
-<location  x="   0.635215E-01" z="  -0.576474E-03" name="tube14" />
-<location  x="   0.381142E-01" z="  -0.207534E-03" name="tube15" />
-<location  x="   0.127050E-01" z="  -0.230596E-04" name="tube16" />
-<location  x="  -0.127050E-01" z="  -0.230596E-04" name="tube17" />
-<location  x="  -0.381142E-01" z="  -0.207534E-03" name="tube18" />
-<location  x="  -0.635215E-01" z="  -0.576474E-03" name="tube19" />
-<location  x="  -0.889254E-01" z="  -0.112986E-02" name="tube20" />
-<location  x="  -0.114325    " z="  -0.186766E-02" name="tube21" />
-<location  x="  -0.139718    " z="  -0.278984E-02" name="tube22" />
-<location  x="  -0.165104    " z="  -0.389635E-02" name="tube23" />
-<location  x="  -0.190481    " z="  -0.518712E-02" name="tube24" />
-<location  x="  -0.215848    " z="  -0.666210E-02" name="tube25" />
-<location  x="  -0.241204    " z="  -0.832121E-02" name="tube26" />
-<location  x="  -0.266547    " z="  -0.101643E-01" name="tube27" />
-<location  x="  -0.291876    " z="  -0.121914E-01" name="tube28" />
-<location  x="  -0.317189    " z="  -0.144023E-01" name="tube29" />
-<location  x="  -0.342486    " z="  -0.167970E-01" name="tube30" />
-<location  x="  -0.367765    " z="  -0.193752E-01" name="tube31" />
-<location  x="  -0.393024    " z="  -0.221369E-01" name="tube32" />
+<location  x="   -0.393024    " z="  -0.221369E-01" name="tube1" />
+<location  x="   -0.367765    " z="  -0.193752E-01" name="tube2" />
+<location  x="   -0.342486    " z="  -0.167970E-01" name="tube3" />
+<location  x="   -0.317189    " z="  -0.144023E-01" name="tube4" />
+<location  x="   -0.291876    " z="  -0.121914E-01" name="tube5" />
+<location  x="   -0.266547    " z="  -0.101643E-01" name="tube6" />
+<location  x="   -0.241204    " z="  -0.832121E-02" name="tube7" />
+<location  x="   -0.215848    " z="  -0.666210E-02" name="tube8" />
+<location  x="   -0.190481    " z="  -0.518712E-02" name="tube9" />
+<location  x="   -0.165104    " z="  -0.389635E-02" name="tube10" />
+<location  x="   -0.139718    " z="  -0.278984E-02" name="tube11" />
+<location  x="   -0.114325    " z="  -0.186766E-02" name="tube12" />
+<location  x="   -0.889254E-01" z="  -0.112986E-02" name="tube13" />
+<location  x="   -0.635215E-01" z="  -0.576474E-03" name="tube14" />
+<location  x="   -0.381142E-01" z="  -0.207534E-03" name="tube15" />
+<location  x="   -0.127050E-01" z="  -0.230596E-04" name="tube16" />
+<location  x="  0.127050E-01" z="  -0.230596E-04" name="tube17" />
+<location  x="  0.381142E-01" z="  -0.207534E-03" name="tube18" />
+<location  x="  0.635215E-01" z="  -0.576474E-03" name="tube19" />
+<location  x="  0.889254E-01" z="  -0.112986E-02" name="tube20" />
+<location  x="  0.114325    " z="  -0.186766E-02" name="tube21" />
+<location  x="  0.139718    " z="  -0.278984E-02" name="tube22" />
+<location  x="  0.165104    " z="  -0.389635E-02" name="tube23" />
+<location  x="  0.190481    " z="  -0.518712E-02" name="tube24" />
+<location  x="  0.215848    " z="  -0.666210E-02" name="tube25" />
+<location  x="  0.241204    " z="  -0.832121E-02" name="tube26" />
+<location  x="  0.266547    " z="  -0.101643E-01" name="tube27" />
+<location  x="  0.291876    " z="  -0.121914E-01" name="tube28" />
+<location  x="  0.317189    " z="  -0.144023E-01" name="tube29" />
+<location  x="  0.342486    " z="  -0.167970E-01" name="tube30" />
+<location  x="  0.367765    " z="  -0.193752E-01" name="tube31" />
+<location  x="  0.393024    " z="  -0.221369E-01" name="tube32" />
  </component>
  </type>
  

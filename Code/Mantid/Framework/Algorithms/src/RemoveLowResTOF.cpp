@@ -9,6 +9,7 @@
 #include <limits>
 #include <map>
 #include <math.h>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -60,11 +61,11 @@ const string RemoveLowResTOF::category() const
 
 void RemoveLowResTOF::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new RawCountValidator<>);
-  wsValidator->add(new InstrumentValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("TOF");
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<RawCountValidator>();
+  wsValidator->add<InstrumentValidator>();
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A workspace with x values in units of TOF and y values in counts" );
@@ -72,18 +73,14 @@ void RemoveLowResTOF::init()
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<double> *validator = new BoundedValidator<double>;
+  auto validator = boost::make_shared<BoundedValidator<double> >();
   validator->setLower(0.01);
   declareProperty("ReferenceDIFC", 0.0, validator,
     "The DIFC value for the reference" );
 
-  validator = new BoundedValidator<double>;
-  validator->setLower(0.01);
   declareProperty("K", 3.22, validator,
                   "Some arbitrary number whose default is 3.22 for reasons that I don't understand" );
 
-  validator = new BoundedValidator<double>;
-  validator->setLower(0.0);
   declareProperty("Tmin", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used." );
 }

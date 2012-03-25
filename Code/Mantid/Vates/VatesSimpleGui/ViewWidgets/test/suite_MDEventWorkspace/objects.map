@@ -71,9 +71,12 @@
 :Workspaces_HeaderViewItem	{container=':WorkspaceTree_QHeaderView' text='Workspaces' type='HeaderViewItem'}
 :_QGraphicsItem	{acceptDrops='no' container=':splitter_2_QGraphicsView' enabled='yes' focusable='no' lineColor='#000000' movable='yes' selectable='yes' toolTip='Slice1' type='QGraphicsItem' userType='1' visible='yes'}
 :_QGraphicsItem_2	{acceptDrops='no' container=':splitter_2_QGraphicsView_2' enabled='yes' focusable='no' lineColor='#000000' movable='yes' selectable='yes' toolTip='Slice2' type='QGraphicsItem' userType='1' visible='yes'}
+:_QItemSelectionModel	{occurrence='31' type='QItemSelectionModel' unnamed='1'}
 :_QListView	{type='QListView' unnamed='1' visible='1'}
 :_QMenu	{type='QMenu' unnamed='1' visible='1'}
 :_QMessageBox	{type='QMessageBox' unnamed='1' visible='1'}
+:_pqPipelineModel	{type='pqPipelineModel' unnamed='1'}
+:_pqPipelineModelSelectionAdaptor	{type='pqPipelineModelSelectionAdaptor' unnamed='1'}
 :fileNameEdit_QLineEdit	{buddy=':MantidPlot - Open a script from a file.File name:_QLabel' name='fileNameEdit' type='QLineEdit' visible='1'}
 :frame.stackedWidget_QStackedWidget	{container=':splitter.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
 :frame.stackedWidget_QStackedWidget_2	{container=':MantidPlot - Open a script from a file.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
@@ -82,9 +85,11 @@
 :qt_tabwidget_stackedwidget_ScriptEditor	{container=':MantidPlot: Python Window.qt_tabwidget_stackedwidget_QStackedWidget' type='ScriptEditor' unnamed='1' visible='1'}
 :renderFrame.Viewport_pqQVTKWidget	{container=':splitter_2.renderFrame_QFrame' name='Viewport' type='pqQVTKWidget' visible='1'}
 :splitter.frame_QFrame	{container=':Open file.splitter_QSplitter' name='frame' type='QFrame' visible='1'}
+:splitter.pipelineBrowser_pqPipelineBrowserWidget	{container=':splitter_2.splitter_QSplitter' name='pipelineBrowser' type='pqPipelineBrowserWidget' visible='1'}
 :splitter.qt_tabwidget_stackedwidget_QStackedWidget	{container=':splitter_2.splitter_QSplitter' name='qt_tabwidget_stackedwidget' type='QStackedWidget' visible='1'}
 :splitter.sidebar_QSidebar	{container=':Open file.splitter_QSplitter' name='sidebar' type='QSidebar' visible='1'}
 :splitter_2.Cut_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' name='cutButton' text='Cut' type='QPushButton' visible='1'}
+:splitter_2.OK_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' text='OK' type='QPushButton' unnamed='1' visible='1'}
 :splitter_2.Rebin_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' name='rebinButton' text='Rebin' type='QPushButton' visible='1'}
 :splitter_2.StandardView_Mantid::Vates::SimpleGui::StandardView	{container=':Vates Simple Interface.splitter_2_QSplitter' name='StandardView' type='Mantid::Vates::SimpleGui::StandardView' visible='1' windowTitle='StandardView'}
 :splitter_2.qt_splithandle__QSplitterHandle	{container=':Vates Simple Interface.splitter_2_QSplitter' name='qt_splithandle_' occurrence='2' type='QSplitterHandle' visible='1'}

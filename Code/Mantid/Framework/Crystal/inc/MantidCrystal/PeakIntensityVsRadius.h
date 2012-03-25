@@ -47,6 +47,7 @@ namespace Crystal
     virtual void initDocs();
     void init();
     void exec();
+    std::map<std::string, std::string> validateInputs();
 
 
   };

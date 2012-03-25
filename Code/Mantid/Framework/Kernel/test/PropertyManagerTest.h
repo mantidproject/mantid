@@ -102,7 +102,7 @@ public:
   void testdeclareProperty_double()
   {
     PropertyManagerHelper mgr;
-    BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
+    boost::shared_ptr<BoundedValidator<double> > v = boost::make_shared<BoundedValidator<double> >(1,5);
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, v) );
     // Note that some versions of boost::lexical_cast > 1.34 give a string such as
     // 9.9900000000000002 rather than 9.99. Converting back to a double however does
@@ -117,7 +117,7 @@ public:
   void testdeclareProperty_string()
   {
     PropertyManagerHelper mgr;
-    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator<std::string>, "hello") );
+    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", boost::make_shared<MandatoryValidator<std::string> >(), "hello") );
     TS_ASSERT_EQUALS( mgr.getPropertyValue("myProp"), "theValue" );
     Property *p = NULL;
     TS_ASSERT_THROWS_NOTHING( p = mgr.getProperty("myProp") );
@@ -187,7 +187,7 @@ public:
   {
     TS_ASSERT( manager->validateProperties() );
     PropertyManagerHelper mgr;
-    mgr.declareProperty("someProp","", new MandatoryValidator<std::string>);
+    mgr.declareProperty("someProp","", boost::make_shared<MandatoryValidator<std::string> >());
     TS_ASSERT( ! mgr.validateProperties() );
   }
 
@@ -288,7 +288,19 @@ public:
     TS_ASSERT_EQUALS(mgr.propertyCount(), 3);
     TS_ASSERT_THROWS_NOTHING(mgr.clear());
     TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
+  }
 
+  void test_asString()
+  {
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 10));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", 15));
+    TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(), "");
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "Prop1=10,Prop2=15");
+    TSM_ASSERT_EQUALS("Different separator", mgr.asString(true, ';'), "Prop1=10;Prop2=15");
+    mgr.setProperty("Prop1", 123);
+    mgr.setProperty("Prop2", 456);
+    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false, ';'), "Prop1=123;Prop2=456");
   }
 
   //-----------------------------------------------------------------------------------------------------------

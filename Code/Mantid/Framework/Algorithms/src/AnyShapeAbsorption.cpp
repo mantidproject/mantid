@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -30,7 +31,7 @@ AnyShapeAbsorption::AnyShapeAbsorption() : AbsorptionCorrection(), m_cubeSide(0.
 
 void AnyShapeAbsorption::defineProperties()
 {
-  BoundedValidator<double> *moreThanZero = new BoundedValidator<double> ();
+  auto moreThanZero = boost::make_shared<BoundedValidator<double> >();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, 
     "The size of one side of an integration element cube in mm");

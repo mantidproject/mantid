@@ -61,12 +61,14 @@ public:
   }
 
   /** Check that a workspace has the right signal/error*/
-  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal, double expectedErrorSquared)
+  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal, double expectedErrorSquared,
+      double expectedNumEvents=1.0)
   {
     for (size_t i=0; i < ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA( ws->getSignalAt(i), expectedSignal, 1e-5 );
       TS_ASSERT_DELTA( ws->getErrorAt(i), std::sqrt(expectedErrorSquared), 1e-5 );
+      TS_ASSERT_DELTA( ws->getNumEventsAt(i), expectedNumEvents, 1e-5 );
     }
   }
 
@@ -202,11 +204,13 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
     a->addExperimentInfo( ExperimentInfo_sptr(new ExperimentInfo()) );
+    for (size_t i=0; i<a->getNPoints(); i++)
+      a->setNumEventsAt(i, 123.);
     MDHistoWorkspace_sptr b( new MDHistoWorkspace(*a));
     TS_ASSERT_EQUALS( b->getNumDims(), a->getNumDims() );
     TS_ASSERT_EQUALS( b->getNPoints(), a->getNPoints() );
     TS_ASSERT_EQUALS( b->getNumExperimentInfo(), a->getNumExperimentInfo() );
-    checkWorkspace(b, 1.23, 3.234);
+    checkWorkspace(b, 1.23, 3.234, 123.);
   }
 
   //--------------------------------------------------------------------------------------
@@ -411,6 +415,15 @@ public:
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
+  //---------------------------------------------------------------------------------------------------
+  void test_getNumEvents()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    ws->setNumEventsAt(0, 123);
+    ws->setNumEventsAt(1, 345);
+    TS_ASSERT_DELTA( ws->getNumEventsAt(0), 123, 1e-6);
+    TS_ASSERT_DELTA( ws->getNumEventsAt(1), 345, 1e-6);
+  }
 
   //---------------------------------------------------------------------------------------------------
   void test_getSignalAtCoord()
@@ -429,6 +442,23 @@ public:
     TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02)) ) );
     TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5)) ) );
     TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02)) ) );
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  void test_getSignalAtCoord_withNormalization()
+  {
+    // 2D workspace with signal[i] = i (linear index)
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
+    for (size_t i=0; i<100; i++)
+    {
+      ws->setSignalAt(i, double(i));
+      ws->setNumEventsAt(i, 10.0);
+    }
+    IMDWorkspace_sptr iws(ws);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), NoNormalization), 1.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization), 0.25, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(3.5, 0.5), NumEventsNormalization), 0.1, 1e-6);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -585,14 +615,14 @@ public:
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
     MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
     *a += *b;
-    checkWorkspace(a, 5.0, 6.0);
+    checkWorkspace(a, 5.0, 6.0, 2.0);
   }
 
   void test_plus_scalar()
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
     a->add(3.0, sqrt(3.5));
-    checkWorkspace(a, 5.0, 6.0);
+    checkWorkspace(a, 5.0, 6.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -601,23 +631,23 @@ public:
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
     MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
     *a -= *b;
-    checkWorkspace(a, 1.0, 6.0);
+    checkWorkspace(a, 1.0, 6.0, 2.0);
   }
 
   void test_minus_scalar()
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
     a->subtract(2.0, sqrt(3.5));
-    checkWorkspace(a, 1.0, 6.0);
+    checkWorkspace(a, 1.0, 6.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_times_ws()
   {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
-    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/, "", 2.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/, "", 3.0);
     *a *= *b;
-    checkWorkspace(a, 6.0, 36. * (.5 + 1./3.));
+    checkWorkspace(a, 6.0, 36. * (.5 + 1./3.), 2.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -625,12 +655,12 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
     a->multiply(3.0, sqrt(3.0));
-    checkWorkspace(a, 6.0, 36. * (.5 + 1./3.));
+    checkWorkspace(a, 6.0, 36. * (.5 + 1./3.), 1.0);
     // Scalar without error
     MDHistoWorkspace_sptr d = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
     WorkspaceSingleValue e(3.0, 0);
     d->multiply(3.0, 0);
-    checkWorkspace(d, 6.0, 9 * 2.0);
+    checkWorkspace(d, 6.0, 9 * 2.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -647,7 +677,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
     a->divide(2.0, sqrt(2.0));
-    checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1./3.));
+    checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1./3.), 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -655,7 +685,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.0);
     a->exp();
-    checkWorkspace(a, std::exp(2.0), std::exp(2.0)*std::exp(2.0) * 3.0 );
+    checkWorkspace(a, std::exp(2.0), std::exp(2.0)*std::exp(2.0) * 3.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -663,7 +693,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.71828, 2, 5, 10.0, 3.0);
     a->log();
-    checkWorkspace(a, 1.0, 3.0/(2.71828*2.71828));
+    checkWorkspace(a, 1.0, 3.0/(2.71828*2.71828), 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -671,7 +701,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(10.0, 2, 5, 10.0, 3.0);
     a->log10();
-    checkWorkspace(a, 1.0, 0.1886117 * 3./100.);
+    checkWorkspace(a, 1.0, 0.1886117 * 3./100., 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -679,7 +709,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.0);
     a->power(2.);
-    checkWorkspace(a, 4.0, 16*4*3./4.);
+    checkWorkspace(a, 4.0, 16*4*3./4., 1.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -810,21 +840,21 @@ public:
     a->setUsingMask(*mask, *c);
     checkWorkspace(a, 1.23, 3.0);
 
-    mask->setTo(1.0, 0.0);
+    mask->setTo(1.0, 0.0, 0.0);
     a->setUsingMask(*mask, *c);
     checkWorkspace(a, 4.56, 2.0);
 
     a->setUsingMask(*mask, 7.89, 11);
     checkWorkspace(a, 7.89, 11*11 );
 
-    mask->setTo(0.0, 0.0);
+    mask->setTo(0.0, 0.0, 0.0);
     a->setUsingMask(*mask, 6.66, 7.77);
     checkWorkspace(a, 7.89, 11*11 );
 
     // Now a partial mask
     mask->setSignalAt(0, 1.0);
     mask->setSignalAt(2, 1.0);
-    a->setTo(1.23, 4.56);
+    a->setTo(1.23, 4.56, 0.0);
     a->setUsingMask(*mask, 6.78, 7.89);
     TS_ASSERT_DELTA( a->getSignalAt(0), 6.78, 1e-5);
     TS_ASSERT_DELTA( a->getSignalAt(1), 1.23, 1e-5);

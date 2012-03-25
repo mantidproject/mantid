@@ -58,9 +58,9 @@ DiffractionFocussing2::~DiffractionFocussing2()
 void DiffractionFocussing2::init()
 {
 
-  API::CompositeWorkspaceValidator<MatrixWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<MatrixWorkspace>;
-  // wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
-  wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  // wsValidator->add<wsValidator->add>("dSpacing");
+  wsValidator->add<API::RawCountValidator>();
   declareProperty(
     new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A 2D workspace with X values of d-spacing/Q-spacing" );
@@ -70,7 +70,7 @@ void DiffractionFocussing2::init()
   declareProperty(new FileProperty("GroupingFileName", "", FileProperty::OptionalLoad, ".cal"),
       "Optional: The name of the CalFile with grouping data." );
 
-  declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace", "", Direction::Input, true),
+  declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use instead of a grouping file." );
 
   declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"

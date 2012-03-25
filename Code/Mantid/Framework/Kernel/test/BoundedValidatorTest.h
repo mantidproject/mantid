@@ -22,32 +22,17 @@ public:
 
   void testClone()
   {
-    IValidator<int> *v = new BoundedValidator<int>;
-    IValidator<int> *vv = v->clone();
-    TS_ASSERT_DIFFERS( v, vv )
-    BoundedValidator<int> &bv = dynamic_cast<BoundedValidator<int>&>(*v);
-    BoundedValidator<int> *bvv;
-    TS_ASSERT( bvv = dynamic_cast<BoundedValidator<int>*>(vv) )
-    TS_ASSERT_EQUALS( bv.hasLower(), bvv->hasLower() )
-    TS_ASSERT_EQUALS( bv.hasUpper(), bvv->hasUpper() )
-    TS_ASSERT_EQUALS( bv.lower(), bvv->lower() )
-    TS_ASSERT_EQUALS( bv.upper(), bvv->upper() )
-    delete v;
-    delete vv;
+    boost::shared_ptr<BoundedValidator<int> > bv = boost::make_shared<BoundedValidator<int> >(1,10);
+    IValidator_sptr vv = bv->clone();
+    TS_ASSERT_DIFFERS( bv, vv );
+    boost::shared_ptr<BoundedValidator<int> > bvv;
+    TS_ASSERT( bvv =  boost::dynamic_pointer_cast<BoundedValidator<int> >(vv) );
+    TS_ASSERT_EQUALS( bv->hasLower(), bvv->hasLower() )
+    TS_ASSERT_EQUALS( bv->hasUpper(), bvv->hasUpper() )
+    TS_ASSERT_EQUALS( bv->lower(), bvv->lower() )
+    TS_ASSERT_EQUALS( bv->upper(), bvv->upper() )
   }
 
-  void testCast()
-  {
-    BoundedValidator<int> *v = new BoundedValidator<int>;
-    TS_ASSERT( dynamic_cast<IValidator<int>*>(v) )
-    BoundedValidator<double> *vv = new BoundedValidator<double>;
-    TS_ASSERT( dynamic_cast<IValidator<double>*>(vv) )
-    BoundedValidator<std::string> *vvv = new BoundedValidator<std::string>;
-    TS_ASSERT( dynamic_cast<IValidator<std::string>*>(vvv) )
-    delete v,
-    delete vv;
-    delete vvv;
-  }
 
   void testIntClear()
   {
@@ -173,7 +158,7 @@ public:
 		  start + "0.9" + lessThan + "1" + end);
 	  TS_ASSERT_EQUALS(pd.isValid(-1.0),
 		  start + "-1" + lessThan + "1" + end);
-	  TS_ASSERT_EQUALS(pd.isValid(10), "");
+	  TS_ASSERT_EQUALS(pd.isValid(10.0), "");
 	  TS_ASSERT_EQUALS(pd.isValid(10.1), "");
 	  pd.clearLower();
 	  TS_ASSERT_EQUALS(pd.isValid(-2.0), "");

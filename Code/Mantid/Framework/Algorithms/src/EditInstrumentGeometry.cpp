@@ -15,6 +15,7 @@ This algorithm edits the diffractomer detectors' parameters
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -59,14 +60,13 @@ namespace Algorithms
         "Workspace to edit the detector information");
     declareProperty("InstrumentName", "GenericPowder", "Name of the instrument. ");
     declareProperty("PrimaryFlightPath", -1.0);
-    declareProperty(new ArrayProperty<int32_t>("SpectrumIDs", new MandatoryValidator<std::vector<int32_t> >),
+    declareProperty(new ArrayProperty<int32_t>("SpectrumIDs", boost::make_shared<MandatoryValidator<std::vector<int32_t>>>()),
         "Spectrum IDs (note that it is not detector ID or workspace indices).");
-    declareProperty(new ArrayProperty<double>("L2", new MandatoryValidator<std::vector<double> >),
-        "Seconary flight (L2) paths for each detector");
-    declareProperty(new ArrayProperty<double>("Polar", new MandatoryValidator<std::vector<double> >),
-        "Polar angles (two thetas) for detectors");
-    declareProperty(new ArrayProperty<double>("Azimuthal", new MandatoryValidator<std::vector<double> >),
-        "Azimuthal angles (out-of-plain) for detectors");
+
+    auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
+    declareProperty(new ArrayProperty<double>("L2", required), "Seconary flight (L2) paths for each detector");
+    declareProperty(new ArrayProperty<double>("Polar", required), "Polar angles (two thetas) for detectors");
+    declareProperty(new ArrayProperty<double>("Azimuthal", required), "Azimuthal angles (out-of-plain) for detectors");
     declareProperty("NewInstrument", false, "Add detectors information from scratch");
   }
 

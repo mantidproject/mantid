@@ -4,6 +4,7 @@ set ( SRC_FILES src/BroadcastWorkspace.cpp
 
 set ( INC_FILES inc/MantidMPIAlgorithms/BroadcastWorkspace.h
                 inc/MantidMPIAlgorithms/GatherWorkspaces.h
+                inc/MantidMPIAlgorithms/MPISerialization.h
 )
 
 set ( TEST_FILES test/BroadcastWorkspaceTest.h

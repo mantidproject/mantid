@@ -129,9 +129,6 @@ protected:
   // constructor
   friend class InterfaceManagerImpl;
   
-  /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm*);
-  
   /// Get the algorithm pointer
   Mantid::API::IAlgorithm* getAlgorithm() const;
 
@@ -152,7 +149,7 @@ protected:
   bool setPropertyValues(const QStringList & skipList = QStringList());
   bool setPropertyValue(const QString pName, bool validateOthers);
 
-  virtual void hideOrDisableProperties();
+  void showValidators();
   //@}
 
   /** @name Dialog information */
@@ -176,7 +173,7 @@ protected:
   /** @name Helper functions */
   //@{
   ///Tie a widget to a property
-  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout,
+  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout=NULL,
       bool readHistory = true);
 
   ///Untie a widget to a property
@@ -218,22 +215,28 @@ protected slots:
   /// Help button clicked;
   virtual void helpClicked();
 
-private:
+protected:
 
   /// Parse out the input from the dialog
   void parse();
-  /// Set a list of suggested values  
-  void setPresetValues(const QHash<QString,QString> & presetValues);
-  /// Set comma-separated-list of enabled parameter names
-  void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
   /// Test if the given name's widget has been explicity asked to be enabled
   bool requestedToKeepEnabled(const QString& propName) const;
+  /// Set a value based on any old input that we have
+  void setPreviousValue(QWidget *widget, const QString & property);
+
+/// The following methods were made public for testing in GenericDialogDemo.cpp
+public:
+  /// Set the algorithm associated with this dialog
+  void setAlgorithm(Mantid::API::IAlgorithm*);
+  /// Set a list of suggested values  
+  void setPresetValues(const QHash<QString,QString> & presetValues);
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
   /// Set an optional message to be displayed at the top of the dialog
   void setOptionalMessage(const QString & message);
-  /// Set a value based on any old input that we have
-  void setPreviousValue(QWidget *widget, const QString & property);
+  /// Set comma-separated-list of enabled parameter names
+  void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
+
 protected:
 
   /** @name Member variables. */

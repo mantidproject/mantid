@@ -71,9 +71,11 @@
 :_QGraphicsScene	{type='QGraphicsScene' unnamed='1'}
 :_QGraphicsScene_2	{occurrence='2' type='QGraphicsScene' unnamed='1'}
 :_QGraphicsScene_3	{occurrence='3' type='QGraphicsScene' unnamed='1'}
+:_QItemSelectionModel	{occurrence='13' type='QItemSelectionModel' unnamed='1'}
 :_QMenuBar	{type='QMenuBar' unnamed='1' visible='1' window=':_VsgMainWindow'}
 :_QVTKInteractorAdapter	{occurrence='2' type='QVTKInteractorAdapter' unnamed='1'}
 :_VsgMainWindow	{type='VsgMainWindow' unnamed='1' visible='1'}
+:_pqPipelineModel	{type='pqPipelineModel' unnamed='1'}
 :mainRenderFrame.Viewport_pqQVTKWidget	{container=':splitter_2.mainRenderFrame_QFrame' name='Viewport' type='pqQVTKWidget' visible='1'}
 :multiSliceButton_QPushButton	{name='multiSliceButton' type='QPushButton' visible='1' window=':_VsgMainWindow'}
 :objectInspector.Apply_QPushButton	{container=':qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget' name='Accept' text='Apply' type='QPushButton' visible='1'}

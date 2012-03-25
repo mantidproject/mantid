@@ -10,6 +10,7 @@
 #include <Poco/File.h>
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;
@@ -56,7 +57,9 @@ public:
     if ( !offsets.isInitialized() ) offsets.initialize();
     TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace",WS) );
     std::string outputWS("offsetsped");
+    std::string maskWS("masksped");
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step","0.02"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","1.00"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin","-20"));
@@ -71,6 +74,11 @@ public:
     TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
+
+    MatrixWorkspace_const_sptr mask;
+    TS_ASSERT_THROWS_NOTHING( mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS) );
+    if (!mask) return;
+    TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
   }
 
 
@@ -93,7 +101,9 @@ public:
     if ( !offsets.isInitialized() ) offsets.initialize();
     TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace",WS) );
     std::string outputWS("offsetsped");
+    std::string maskWS("masksped");
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step","0.02"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","1.00"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin","-20"));
@@ -109,6 +119,12 @@ public:
     TS_ASSERT_EQUALS( output->getValue(1), output->getValue(3));
 
     AnalysisDataService::Instance().remove(outputWS);
+
+    MatrixWorkspace_const_sptr mask;
+    TS_ASSERT_THROWS_NOTHING( mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS) );
+    if (!mask) return;
+    TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
+
   }
 
 

@@ -6,7 +6,8 @@
 #include "MantidAlgorithms/SphericalAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
- 
+#include "MantidAPI/FrameworkManager.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;

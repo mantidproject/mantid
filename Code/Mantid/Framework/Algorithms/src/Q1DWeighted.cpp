@@ -22,6 +22,7 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidDataObjects/Histogram1D.h"
 #include <iostream>
 #include <vector>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -46,25 +47,25 @@ using namespace DataObjects;
 
 void Q1DWeighted::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new InstrumentValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<InstrumentValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator));
+  declareProperty(new ArrayProperty<double>("OutputBinning", boost::make_shared<RebinParamsValidator>()));
 
-  BoundedValidator<int> *positiveInt = new BoundedValidator<int>();
+  auto positiveInt = boost::make_shared<BoundedValidator<int> >();
   positiveInt->setLower(0);
   declareProperty("NPixelDivision", 1, positiveInt,
       "Number of sub-pixels used for each detector pixel in each direction."
       "The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
   declareProperty("PixelSizeX", 5.15, positiveDouble,
       "Pixel size in the X direction (mm).");
-  declareProperty("PixelSizeY", 5.15, positiveDouble->clone(),
+  declareProperty("PixelSizeY", 5.15, positiveDouble,
       "Pixel size in the Y direction (mm).");
   declareProperty("ErrorWeighting", false,
       "Choose whether each pixel contribution will be weighted by 1/error^2.");

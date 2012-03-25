@@ -1,0 +1,3200 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument name="BioSANS" valid-from   ="2012-02-01 00:00:00"
+                           valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2012-03-23 15:02:05">
+  <!---->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness axis="right"/>
+    </reference-frame>
+  </defaults>
+  <!--SOURCE AND SAMPLE POSITION-->
+  <component type="moderator">
+    <location z="-13.601"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--MONITORS-->
+  <component type="monitor1" idlist="monitor1">
+    <location z="-10.5" mark-as="monitor" />
+  </component>
+  <type name="monitor1" is="detector" />
+ 
+  <component type="timer1" idlist="timer1">
+    <location z="-10.5" mark-as="monitor" />
+  </component>
+  <type name="timer1" is="detector" />
+  
+  <component type="detector1" name="detector1" idlist="detector1">
+    <location/>
+  </component>
+  <type name="detector1">
+    <component type="tube0">
+      <location/>
+    </component>
+    <component type="tube1">
+      <location/>
+    </component>
+    <component type="tube2">
+      <location/>
+    </component>
+    <component type="tube3">
+      <location/>
+    </component>
+    <component type="tube4">
+      <location/>
+    </component>
+    <component type="tube5">
+      <location/>
+    </component>
+    <component type="tube6">
+      <location/>
+    </component>
+    <component type="tube7">
+      <location/>
+    </component>
+    <component type="tube8">
+      <location/>
+    </component>
+    <component type="tube9">
+      <location/>
+    </component>
+    <component type="tube10">
+      <location/>
+    </component>
+    <component type="tube11">
+      <location/>
+    </component>
+    <component type="tube12">
+      <location/>
+    </component>
+    <component type="tube13">
+      <location/>
+    </component>
+    <component type="tube14">
+      <location/>
+    </component>
+    <component type="tube15">
+      <location/>
+    </component>
+    <component type="tube16">
+      <location/>
+    </component>
+    <component type="tube17">
+      <location/>
+    </component>
+    <component type="tube18">
+      <location/>
+    </component>
+    <component type="tube19">
+      <location/>
+    </component>
+    <component type="tube20">
+      <location/>
+    </component>
+    <component type="tube21">
+      <location/>
+    </component>
+    <component type="tube22">
+      <location/>
+    </component>
+    <component type="tube23">
+      <location/>
+    </component>
+    <component type="tube24">
+      <location/>
+    </component>
+    <component type="tube25">
+      <location/>
+    </component>
+    <component type="tube26">
+      <location/>
+    </component>
+    <component type="tube27">
+      <location/>
+    </component>
+    <component type="tube28">
+      <location/>
+    </component>
+    <component type="tube29">
+      <location/>
+    </component>
+    <component type="tube30">
+      <location/>
+    </component>
+    <component type="tube31">
+      <location/>
+    </component>
+    <component type="tube32">
+      <location/>
+    </component>
+    <component type="tube33">
+      <location/>
+    </component>
+    <component type="tube34">
+      <location/>
+    </component>
+    <component type="tube35">
+      <location/>
+    </component>
+    <component type="tube36">
+      <location/>
+    </component>
+    <component type="tube37">
+      <location/>
+    </component>
+    <component type="tube38">
+      <location/>
+    </component>
+    <component type="tube39">
+      <location/>
+    </component>
+    <component type="tube40">
+      <location/>
+    </component>
+    <component type="tube41">
+      <location/>
+    </component>
+    <component type="tube42">
+      <location/>
+    </component>
+    <component type="tube43">
+      <location/>
+    </component>
+    <component type="tube44">
+      <location/>
+    </component>
+    <component type="tube45">
+      <location/>
+    </component>
+    <component type="tube46">
+      <location/>
+    </component>
+    <component type="tube47">
+      <location/>
+    </component>
+    <component type="tube48">
+      <location/>
+    </component>
+    <component type="tube49">
+      <location/>
+    </component>
+    <component type="tube50">
+      <location/>
+    </component>
+    <component type="tube51">
+      <location/>
+    </component>
+    <component type="tube52">
+      <location/>
+    </component>
+    <component type="tube53">
+      <location/>
+    </component>
+    <component type="tube54">
+      <location/>
+    </component>
+    <component type="tube55">
+      <location/>
+    </component>
+    <component type="tube56">
+      <location/>
+    </component>
+    <component type="tube57">
+      <location/>
+    </component>
+    <component type="tube58">
+      <location/>
+    </component>
+    <component type="tube59">
+      <location/>
+    </component>
+    <component type="tube60">
+      <location/>
+    </component>
+    <component type="tube61">
+      <location/>
+    </component>
+    <component type="tube62">
+      <location/>
+    </component>
+    <component type="tube63">
+      <location/>
+    </component>
+    <component type="tube64">
+      <location/>
+    </component>
+    <component type="tube65">
+      <location/>
+    </component>
+    <component type="tube66">
+      <location/>
+    </component>
+    <component type="tube67">
+      <location/>
+    </component>
+    <component type="tube68">
+      <location/>
+    </component>
+    <component type="tube69">
+      <location/>
+    </component>
+    <component type="tube70">
+      <location/>
+    </component>
+    <component type="tube71">
+      <location/>
+    </component>
+    <component type="tube72">
+      <location/>
+    </component>
+    <component type="tube73">
+      <location/>
+    </component>
+    <component type="tube74">
+      <location/>
+    </component>
+    <component type="tube75">
+      <location/>
+    </component>
+    <component type="tube76">
+      <location/>
+    </component>
+    <component type="tube77">
+      <location/>
+    </component>
+    <component type="tube78">
+      <location/>
+    </component>
+    <component type="tube79">
+      <location/>
+    </component>
+    <component type="tube80">
+      <location/>
+    </component>
+    <component type="tube81">
+      <location/>
+    </component>
+    <component type="tube82">
+      <location/>
+    </component>
+    <component type="tube83">
+      <location/>
+    </component>
+    <component type="tube84">
+      <location/>
+    </component>
+    <component type="tube85">
+      <location/>
+    </component>
+    <component type="tube86">
+      <location/>
+    </component>
+    <component type="tube87">
+      <location/>
+    </component>
+    <component type="tube88">
+      <location/>
+    </component>
+    <component type="tube89">
+      <location/>
+    </component>
+    <component type="tube90">
+      <location/>
+    </component>
+    <component type="tube91">
+      <location/>
+    </component>
+    <component type="tube92">
+      <location/>
+    </component>
+    <component type="tube93">
+      <location/>
+    </component>
+    <component type="tube94">
+      <location/>
+    </component>
+    <component type="tube95">
+      <location/>
+    </component>
+    <component type="tube96">
+      <location/>
+    </component>
+    <component type="tube97">
+      <location/>
+    </component>
+    <component type="tube98">
+      <location/>
+    </component>
+    <component type="tube99">
+      <location/>
+    </component>
+    <component type="tube100">
+      <location/>
+    </component>
+    <component type="tube101">
+      <location/>
+    </component>
+    <component type="tube102">
+      <location/>
+    </component>
+    <component type="tube103">
+      <location/>
+    </component>
+    <component type="tube104">
+      <location/>
+    </component>
+    <component type="tube105">
+      <location/>
+    </component>
+    <component type="tube106">
+      <location/>
+    </component>
+    <component type="tube107">
+      <location/>
+    </component>
+    <component type="tube108">
+      <location/>
+    </component>
+    <component type="tube109">
+      <location/>
+    </component>
+    <component type="tube110">
+      <location/>
+    </component>
+    <component type="tube111">
+      <location/>
+    </component>
+    <component type="tube112">
+      <location/>
+    </component>
+    <component type="tube113">
+      <location/>
+    </component>
+    <component type="tube114">
+      <location/>
+    </component>
+    <component type="tube115">
+      <location/>
+    </component>
+    <component type="tube116">
+      <location/>
+    </component>
+    <component type="tube117">
+      <location/>
+    </component>
+    <component type="tube118">
+      <location/>
+    </component>
+    <component type="tube119">
+      <location/>
+    </component>
+    <component type="tube120">
+      <location/>
+    </component>
+    <component type="tube121">
+      <location/>
+    </component>
+    <component type="tube122">
+      <location/>
+    </component>
+    <component type="tube123">
+      <location/>
+    </component>
+    <component type="tube124">
+      <location/>
+    </component>
+    <component type="tube125">
+      <location/>
+    </component>
+    <component type="tube126">
+      <location/>
+    </component>
+    <component type="tube127">
+      <location/>
+    </component>
+    <component type="tube128">
+      <location/>
+    </component>
+    <component type="tube129">
+      <location/>
+    </component>
+    <component type="tube130">
+      <location/>
+    </component>
+    <component type="tube131">
+      <location/>
+    </component>
+    <component type="tube132">
+      <location/>
+    </component>
+    <component type="tube133">
+      <location/>
+    </component>
+    <component type="tube134">
+      <location/>
+    </component>
+    <component type="tube135">
+      <location/>
+    </component>
+    <component type="tube136">
+      <location/>
+    </component>
+    <component type="tube137">
+      <location/>
+    </component>
+    <component type="tube138">
+      <location/>
+    </component>
+    <component type="tube139">
+      <location/>
+    </component>
+    <component type="tube140">
+      <location/>
+    </component>
+    <component type="tube141">
+      <location/>
+    </component>
+    <component type="tube142">
+      <location/>
+    </component>
+    <component type="tube143">
+      <location/>
+    </component>
+    <component type="tube144">
+      <location/>
+    </component>
+    <component type="tube145">
+      <location/>
+    </component>
+    <component type="tube146">
+      <location/>
+    </component>
+    <component type="tube147">
+      <location/>
+    </component>
+    <component type="tube148">
+      <location/>
+    </component>
+    <component type="tube149">
+      <location/>
+    </component>
+    <component type="tube150">
+      <location/>
+    </component>
+    <component type="tube151">
+      <location/>
+    </component>
+    <component type="tube152">
+      <location/>
+    </component>
+    <component type="tube153">
+      <location/>
+    </component>
+    <component type="tube154">
+      <location/>
+    </component>
+    <component type="tube155">
+      <location/>
+    </component>
+    <component type="tube156">
+      <location/>
+    </component>
+    <component type="tube157">
+      <location/>
+    </component>
+    <component type="tube158">
+      <location/>
+    </component>
+    <component type="tube159">
+      <location/>
+    </component>
+    <component type="tube160">
+      <location/>
+    </component>
+    <component type="tube161">
+      <location/>
+    </component>
+    <component type="tube162">
+      <location/>
+    </component>
+    <component type="tube163">
+      <location/>
+    </component>
+    <component type="tube164">
+      <location/>
+    </component>
+    <component type="tube165">
+      <location/>
+    </component>
+    <component type="tube166">
+      <location/>
+    </component>
+    <component type="tube167">
+      <location/>
+    </component>
+    <component type="tube168">
+      <location/>
+    </component>
+    <component type="tube169">
+      <location/>
+    </component>
+    <component type="tube170">
+      <location/>
+    </component>
+    <component type="tube171">
+      <location/>
+    </component>
+    <component type="tube172">
+      <location/>
+    </component>
+    <component type="tube173">
+      <location/>
+    </component>
+    <component type="tube174">
+      <location/>
+    </component>
+    <component type="tube175">
+      <location/>
+    </component>
+    <component type="tube176">
+      <location/>
+    </component>
+    <component type="tube177">
+      <location/>
+    </component>
+    <component type="tube178">
+      <location/>
+    </component>
+    <component type="tube179">
+      <location/>
+    </component>
+    <component type="tube180">
+      <location/>
+    </component>
+    <component type="tube181">
+      <location/>
+    </component>
+    <component type="tube182">
+      <location/>
+    </component>
+    <component type="tube183">
+      <location/>
+    </component>
+    <component type="tube184">
+      <location/>
+    </component>
+    <component type="tube185">
+      <location/>
+    </component>
+    <component type="tube186">
+      <location/>
+    </component>
+    <component type="tube187">
+      <location/>
+    </component>
+    <component type="tube188">
+      <location/>
+    </component>
+    <component type="tube189">
+      <location/>
+    </component>
+    <component type="tube190">
+      <location/>
+    </component>
+    <component type="tube191">
+      <location/>
+    </component>
+  </type>
+  <type name="tube" outline="yes">
+    <properties/>
+    <component type="pixel">
+      <location y="-0.54825" name="pixel1"/>
+      <location y="-0.54395" name="pixel2"/>
+      <location y="-0.53965" name="pixel3"/>
+      <location y="-0.53535" name="pixel4"/>
+      <location y="-0.53105" name="pixel5"/>
+      <location y="-0.52675" name="pixel6"/>
+      <location y="-0.52245" name="pixel7"/>
+      <location y="-0.51815" name="pixel8"/>
+      <location y="-0.51385" name="pixel9"/>
+      <location y="-0.50955" name="pixel10"/>
+      <location y="-0.50525" name="pixel11"/>
+      <location y="-0.50095" name="pixel12"/>
+      <location y="-0.49665" name="pixel13"/>
+      <location y="-0.49235" name="pixel14"/>
+      <location y="-0.48805" name="pixel15"/>
+      <location y="-0.48375" name="pixel16"/>
+      <location y="-0.47945" name="pixel17"/>
+      <location y="-0.47515" name="pixel18"/>
+      <location y="-0.47085" name="pixel19"/>
+      <location y="-0.46655" name="pixel20"/>
+      <location y="-0.46225" name="pixel21"/>
+      <location y="-0.45795" name="pixel22"/>
+      <location y="-0.45365" name="pixel23"/>
+      <location y="-0.44935" name="pixel24"/>
+      <location y="-0.44505" name="pixel25"/>
+      <location y="-0.44075" name="pixel26"/>
+      <location y="-0.43645" name="pixel27"/>
+      <location y="-0.43215" name="pixel28"/>
+      <location y="-0.42785" name="pixel29"/>
+      <location y="-0.42355" name="pixel30"/>
+      <location y="-0.41925" name="pixel31"/>
+      <location y="-0.41495" name="pixel32"/>
+      <location y="-0.41065" name="pixel33"/>
+      <location y="-0.40635" name="pixel34"/>
+      <location y="-0.40205" name="pixel35"/>
+      <location y="-0.39775" name="pixel36"/>
+      <location y="-0.39345" name="pixel37"/>
+      <location y="-0.38915" name="pixel38"/>
+      <location y="-0.38485" name="pixel39"/>
+      <location y="-0.38055" name="pixel40"/>
+      <location y="-0.37625" name="pixel41"/>
+      <location y="-0.37195" name="pixel42"/>
+      <location y="-0.36765" name="pixel43"/>
+      <location y="-0.36335" name="pixel44"/>
+      <location y="-0.35905" name="pixel45"/>
+      <location y="-0.35475" name="pixel46"/>
+      <location y="-0.35045" name="pixel47"/>
+      <location y="-0.34615" name="pixel48"/>
+      <location y="-0.34185" name="pixel49"/>
+      <location y="-0.33755" name="pixel50"/>
+      <location y="-0.33325" name="pixel51"/>
+      <location y="-0.32895" name="pixel52"/>
+      <location y="-0.32465" name="pixel53"/>
+      <location y="-0.32035" name="pixel54"/>
+      <location y="-0.31605" name="pixel55"/>
+      <location y="-0.31175" name="pixel56"/>
+      <location y="-0.30745" name="pixel57"/>
+      <location y="-0.30315" name="pixel58"/>
+      <location y="-0.29885" name="pixel59"/>
+      <location y="-0.29455" name="pixel60"/>
+      <location y="-0.29025" name="pixel61"/>
+      <location y="-0.28595" name="pixel62"/>
+      <location y="-0.28165" name="pixel63"/>
+      <location y="-0.27735" name="pixel64"/>
+      <location y="-0.27305" name="pixel65"/>
+      <location y="-0.26875" name="pixel66"/>
+      <location y="-0.26445" name="pixel67"/>
+      <location y="-0.26015" name="pixel68"/>
+      <location y="-0.25585" name="pixel69"/>
+      <location y="-0.25155" name="pixel70"/>
+      <location y="-0.24725" name="pixel71"/>
+      <location y="-0.24295" name="pixel72"/>
+      <location y="-0.23865" name="pixel73"/>
+      <location y="-0.23435" name="pixel74"/>
+      <location y="-0.23005" name="pixel75"/>
+      <location y="-0.22575" name="pixel76"/>
+      <location y="-0.22145" name="pixel77"/>
+      <location y="-0.21715" name="pixel78"/>
+      <location y="-0.21285" name="pixel79"/>
+      <location y="-0.20855" name="pixel80"/>
+      <location y="-0.20425" name="pixel81"/>
+      <location y="-0.19995" name="pixel82"/>
+      <location y="-0.19565" name="pixel83"/>
+      <location y="-0.19135" name="pixel84"/>
+      <location y="-0.18705" name="pixel85"/>
+      <location y="-0.18275" name="pixel86"/>
+      <location y="-0.17845" name="pixel87"/>
+      <location y="-0.17415" name="pixel88"/>
+      <location y="-0.16985" name="pixel89"/>
+      <location y="-0.16555" name="pixel90"/>
+      <location y="-0.16125" name="pixel91"/>
+      <location y="-0.15695" name="pixel92"/>
+      <location y="-0.15265" name="pixel93"/>
+      <location y="-0.14835" name="pixel94"/>
+      <location y="-0.14405" name="pixel95"/>
+      <location y="-0.13975" name="pixel96"/>
+      <location y="-0.13545" name="pixel97"/>
+      <location y="-0.13115" name="pixel98"/>
+      <location y="-0.12685" name="pixel99"/>
+      <location y="-0.12255" name="pixel100"/>
+      <location y="-0.11825" name="pixel101"/>
+      <location y="-0.11395" name="pixel102"/>
+      <location y="-0.10965" name="pixel103"/>
+      <location y="-0.10535" name="pixel104"/>
+      <location y="-0.10105" name="pixel105"/>
+      <location y="-0.09675" name="pixel106"/>
+      <location y="-0.09245" name="pixel107"/>
+      <location y="-0.08815" name="pixel108"/>
+      <location y="-0.08385" name="pixel109"/>
+      <location y="-0.07955" name="pixel110"/>
+      <location y="-0.07525" name="pixel111"/>
+      <location y="-0.07095" name="pixel112"/>
+      <location y="-0.06665" name="pixel113"/>
+      <location y="-0.06235" name="pixel114"/>
+      <location y="-0.05805" name="pixel115"/>
+      <location y="-0.05375" name="pixel116"/>
+      <location y="-0.04945" name="pixel117"/>
+      <location y="-0.04515" name="pixel118"/>
+      <location y="-0.04085" name="pixel119"/>
+      <location y="-0.03655" name="pixel120"/>
+      <location y="-0.03225" name="pixel121"/>
+      <location y="-0.02795" name="pixel122"/>
+      <location y="-0.02365" name="pixel123"/>
+      <location y="-0.01935" name="pixel124"/>
+      <location y="-0.01505" name="pixel125"/>
+      <location y="-0.01075" name="pixel126"/>
+      <location y="-0.00645" name="pixel127"/>
+      <location y="-0.00215" name="pixel128"/>
+      <location y="0.00215" name="pixel129"/>
+      <location y="0.00645" name="pixel130"/>
+      <location y="0.01075" name="pixel131"/>
+      <location y="0.01505" name="pixel132"/>
+      <location y="0.01935" name="pixel133"/>
+      <location y="0.02365" name="pixel134"/>
+      <location y="0.02795" name="pixel135"/>
+      <location y="0.03225" name="pixel136"/>
+      <location y="0.03655" name="pixel137"/>
+      <location y="0.04085" name="pixel138"/>
+      <location y="0.04515" name="pixel139"/>
+      <location y="0.04945" name="pixel140"/>
+      <location y="0.05375" name="pixel141"/>
+      <location y="0.05805" name="pixel142"/>
+      <location y="0.06235" name="pixel143"/>
+      <location y="0.06665" name="pixel144"/>
+      <location y="0.07095" name="pixel145"/>
+      <location y="0.07525" name="pixel146"/>
+      <location y="0.07955" name="pixel147"/>
+      <location y="0.08385" name="pixel148"/>
+      <location y="0.08815" name="pixel149"/>
+      <location y="0.09245" name="pixel150"/>
+      <location y="0.09675" name="pixel151"/>
+      <location y="0.10105" name="pixel152"/>
+      <location y="0.10535" name="pixel153"/>
+      <location y="0.10965" name="pixel154"/>
+      <location y="0.11395" name="pixel155"/>
+      <location y="0.11825" name="pixel156"/>
+      <location y="0.12255" name="pixel157"/>
+      <location y="0.12685" name="pixel158"/>
+      <location y="0.13115" name="pixel159"/>
+      <location y="0.13545" name="pixel160"/>
+      <location y="0.13975" name="pixel161"/>
+      <location y="0.14405" name="pixel162"/>
+      <location y="0.14835" name="pixel163"/>
+      <location y="0.15265" name="pixel164"/>
+      <location y="0.15695" name="pixel165"/>
+      <location y="0.16125" name="pixel166"/>
+      <location y="0.16555" name="pixel167"/>
+      <location y="0.16985" name="pixel168"/>
+      <location y="0.17415" name="pixel169"/>
+      <location y="0.17845" name="pixel170"/>
+      <location y="0.18275" name="pixel171"/>
+      <location y="0.18705" name="pixel172"/>
+      <location y="0.19135" name="pixel173"/>
+      <location y="0.19565" name="pixel174"/>
+      <location y="0.19995" name="pixel175"/>
+      <location y="0.20425" name="pixel176"/>
+      <location y="0.20855" name="pixel177"/>
+      <location y="0.21285" name="pixel178"/>
+      <location y="0.21715" name="pixel179"/>
+      <location y="0.22145" name="pixel180"/>
+      <location y="0.22575" name="pixel181"/>
+      <location y="0.23005" name="pixel182"/>
+      <location y="0.23435" name="pixel183"/>
+      <location y="0.23865" name="pixel184"/>
+      <location y="0.24295" name="pixel185"/>
+      <location y="0.24725" name="pixel186"/>
+      <location y="0.25155" name="pixel187"/>
+      <location y="0.25585" name="pixel188"/>
+      <location y="0.26015" name="pixel189"/>
+      <location y="0.26445" name="pixel190"/>
+      <location y="0.26875" name="pixel191"/>
+      <location y="0.27305" name="pixel192"/>
+      <location y="0.27735" name="pixel193"/>
+      <location y="0.28165" name="pixel194"/>
+      <location y="0.28595" name="pixel195"/>
+      <location y="0.29025" name="pixel196"/>
+      <location y="0.29455" name="pixel197"/>
+      <location y="0.29885" name="pixel198"/>
+      <location y="0.30315" name="pixel199"/>
+      <location y="0.30745" name="pixel200"/>
+      <location y="0.31175" name="pixel201"/>
+      <location y="0.31605" name="pixel202"/>
+      <location y="0.32035" name="pixel203"/>
+      <location y="0.32465" name="pixel204"/>
+      <location y="0.32895" name="pixel205"/>
+      <location y="0.33325" name="pixel206"/>
+      <location y="0.33755" name="pixel207"/>
+      <location y="0.34185" name="pixel208"/>
+      <location y="0.34615" name="pixel209"/>
+      <location y="0.35045" name="pixel210"/>
+      <location y="0.35475" name="pixel211"/>
+      <location y="0.35905" name="pixel212"/>
+      <location y="0.36335" name="pixel213"/>
+      <location y="0.36765" name="pixel214"/>
+      <location y="0.37195" name="pixel215"/>
+      <location y="0.37625" name="pixel216"/>
+      <location y="0.38055" name="pixel217"/>
+      <location y="0.38485" name="pixel218"/>
+      <location y="0.38915" name="pixel219"/>
+      <location y="0.39345" name="pixel220"/>
+      <location y="0.39775" name="pixel221"/>
+      <location y="0.40205" name="pixel222"/>
+      <location y="0.40635" name="pixel223"/>
+      <location y="0.41065" name="pixel224"/>
+      <location y="0.41495" name="pixel225"/>
+      <location y="0.41925" name="pixel226"/>
+      <location y="0.42355" name="pixel227"/>
+      <location y="0.42785" name="pixel228"/>
+      <location y="0.43215" name="pixel229"/>
+      <location y="0.43645" name="pixel230"/>
+      <location y="0.44075" name="pixel231"/>
+      <location y="0.44505" name="pixel232"/>
+      <location y="0.44935" name="pixel233"/>
+      <location y="0.45365" name="pixel234"/>
+      <location y="0.45795" name="pixel235"/>
+      <location y="0.46225" name="pixel236"/>
+      <location y="0.46655" name="pixel237"/>
+      <location y="0.47085" name="pixel238"/>
+      <location y="0.47515" name="pixel239"/>
+      <location y="0.47945" name="pixel240"/>
+      <location y="0.48375" name="pixel241"/>
+      <location y="0.48805" name="pixel242"/>
+      <location y="0.49235" name="pixel243"/>
+      <location y="0.49665" name="pixel244"/>
+      <location y="0.50095" name="pixel245"/>
+      <location y="0.50525" name="pixel246"/>
+      <location y="0.50955" name="pixel247"/>
+      <location y="0.51385" name="pixel248"/>
+      <location y="0.51815" name="pixel249"/>
+      <location y="0.52245" name="pixel250"/>
+      <location y="0.52675" name="pixel251"/>
+      <location y="0.53105" name="pixel252"/>
+      <location y="0.53535" name="pixel253"/>
+      <location y="0.53965" name="pixel254"/>
+      <location y="0.54395" name="pixel255"/>
+      <location y="0.54825" name="pixel256"/>
+    </component>
+  </type>
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="1.0" x="0.0" z="0.0"/>
+      <radius val="0.00275"/>
+      <height val="0.0043"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <type name="tube0">
+    <component type="tube">
+      <location y="0" x="-0.52525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube1">
+    <component type="tube">
+      <location y="0" x="-0.51975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube2">
+    <component type="tube">
+      <location y="0" x="-0.51425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube3">
+    <component type="tube">
+      <location y="0" x="-0.50875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube4">
+    <component type="tube">
+      <location y="0" x="-0.50325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube5">
+    <component type="tube">
+      <location y="0" x="-0.49775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube6">
+    <component type="tube">
+      <location y="0" x="-0.49225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube7">
+    <component type="tube">
+      <location y="0" x="-0.48675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube8">
+    <component type="tube">
+      <location y="0" x="-0.48125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube9">
+    <component type="tube">
+      <location y="0" x="-0.47575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube10">
+    <component type="tube">
+      <location y="0" x="-0.47025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube11">
+    <component type="tube">
+      <location y="0" x="-0.46475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube12">
+    <component type="tube">
+      <location y="0" x="-0.45925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube13">
+    <component type="tube">
+      <location y="0" x="-0.45375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube14">
+    <component type="tube">
+      <location y="0" x="-0.44825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube15">
+    <component type="tube">
+      <location y="0" x="-0.44275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube16">
+    <component type="tube">
+      <location y="0" x="-0.43725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube17">
+    <component type="tube">
+      <location y="0" x="-0.43175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube18">
+    <component type="tube">
+      <location y="0" x="-0.42625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube19">
+    <component type="tube">
+      <location y="0" x="-0.42075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube20">
+    <component type="tube">
+      <location y="0" x="-0.41525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube21">
+    <component type="tube">
+      <location y="0" x="-0.40975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube22">
+    <component type="tube">
+      <location y="0" x="-0.40425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube23">
+    <component type="tube">
+      <location y="0" x="-0.39875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube24">
+    <component type="tube">
+      <location y="0" x="-0.39325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube25">
+    <component type="tube">
+      <location y="0" x="-0.38775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube26">
+    <component type="tube">
+      <location y="0" x="-0.38225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube27">
+    <component type="tube">
+      <location y="0" x="-0.37675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube28">
+    <component type="tube">
+      <location y="0" x="-0.37125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube29">
+    <component type="tube">
+      <location y="0" x="-0.36575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube30">
+    <component type="tube">
+      <location y="0" x="-0.36025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube31">
+    <component type="tube">
+      <location y="0" x="-0.35475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube32">
+    <component type="tube">
+      <location y="0" x="-0.34925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube33">
+    <component type="tube">
+      <location y="0" x="-0.34375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube34">
+    <component type="tube">
+      <location y="0" x="-0.33825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube35">
+    <component type="tube">
+      <location y="0" x="-0.33275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube36">
+    <component type="tube">
+      <location y="0" x="-0.32725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube37">
+    <component type="tube">
+      <location y="0" x="-0.32175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube38">
+    <component type="tube">
+      <location y="0" x="-0.31625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube39">
+    <component type="tube">
+      <location y="0" x="-0.31075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube40">
+    <component type="tube">
+      <location y="0" x="-0.30525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube41">
+    <component type="tube">
+      <location y="0" x="-0.29975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube42">
+    <component type="tube">
+      <location y="0" x="-0.29425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube43">
+    <component type="tube">
+      <location y="0" x="-0.28875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube44">
+    <component type="tube">
+      <location y="0" x="-0.28325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube45">
+    <component type="tube">
+      <location y="0" x="-0.27775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube46">
+    <component type="tube">
+      <location y="0" x="-0.27225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube47">
+    <component type="tube">
+      <location y="0" x="-0.26675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube48">
+    <component type="tube">
+      <location y="0" x="-0.26125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube49">
+    <component type="tube">
+      <location y="0" x="-0.25575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube50">
+    <component type="tube">
+      <location y="0" x="-0.25025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube51">
+    <component type="tube">
+      <location y="0" x="-0.24475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube52">
+    <component type="tube">
+      <location y="0" x="-0.23925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube53">
+    <component type="tube">
+      <location y="0" x="-0.23375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube54">
+    <component type="tube">
+      <location y="0" x="-0.22825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube55">
+    <component type="tube">
+      <location y="0" x="-0.22275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube56">
+    <component type="tube">
+      <location y="0" x="-0.21725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube57">
+    <component type="tube">
+      <location y="0" x="-0.21175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube58">
+    <component type="tube">
+      <location y="0" x="-0.20625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube59">
+    <component type="tube">
+      <location y="0" x="-0.20075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube60">
+    <component type="tube">
+      <location y="0" x="-0.19525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube61">
+    <component type="tube">
+      <location y="0" x="-0.18975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube62">
+    <component type="tube">
+      <location y="0" x="-0.18425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube63">
+    <component type="tube">
+      <location y="0" x="-0.17875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube64">
+    <component type="tube">
+      <location y="0" x="-0.17325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube65">
+    <component type="tube">
+      <location y="0" x="-0.16775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube66">
+    <component type="tube">
+      <location y="0" x="-0.16225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube67">
+    <component type="tube">
+      <location y="0" x="-0.15675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube68">
+    <component type="tube">
+      <location y="0" x="-0.15125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube69">
+    <component type="tube">
+      <location y="0" x="-0.14575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube70">
+    <component type="tube">
+      <location y="0" x="-0.14025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube71">
+    <component type="tube">
+      <location y="0" x="-0.13475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube72">
+    <component type="tube">
+      <location y="0" x="-0.12925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube73">
+    <component type="tube">
+      <location y="0" x="-0.12375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube74">
+    <component type="tube">
+      <location y="0" x="-0.11825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube75">
+    <component type="tube">
+      <location y="0" x="-0.11275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube76">
+    <component type="tube">
+      <location y="0" x="-0.10725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube77">
+    <component type="tube">
+      <location y="0" x="-0.10175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube78">
+    <component type="tube">
+      <location y="0" x="-0.09625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube79">
+    <component type="tube">
+      <location y="0" x="-0.09075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube80">
+    <component type="tube">
+      <location y="0" x="-0.08525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube81">
+    <component type="tube">
+      <location y="0" x="-0.07975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube82">
+    <component type="tube">
+      <location y="0" x="-0.07425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube83">
+    <component type="tube">
+      <location y="0" x="-0.06875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube84">
+    <component type="tube">
+      <location y="0" x="-0.06325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube85">
+    <component type="tube">
+      <location y="0" x="-0.05775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube86">
+    <component type="tube">
+      <location y="0" x="-0.05225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube87">
+    <component type="tube">
+      <location y="0" x="-0.04675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube88">
+    <component type="tube">
+      <location y="0" x="-0.04125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube89">
+    <component type="tube">
+      <location y="0" x="-0.03575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube90">
+    <component type="tube">
+      <location y="0" x="-0.03025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube91">
+    <component type="tube">
+      <location y="0" x="-0.02475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube92">
+    <component type="tube">
+      <location y="0" x="-0.01925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube93">
+    <component type="tube">
+      <location y="0" x="-0.01375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube94">
+    <component type="tube">
+      <location y="0" x="-0.00825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube95">
+    <component type="tube">
+      <location y="0" x="-0.00275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube96">
+    <component type="tube">
+      <location y="0" x="0.00275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube97">
+    <component type="tube">
+      <location y="0" x="0.00825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube98">
+    <component type="tube">
+      <location y="0" x="0.01375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube99">
+    <component type="tube">
+      <location y="0" x="0.01925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube100">
+    <component type="tube">
+      <location y="0" x="0.02475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube101">
+    <component type="tube">
+      <location y="0" x="0.03025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube102">
+    <component type="tube">
+      <location y="0" x="0.03575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube103">
+    <component type="tube">
+      <location y="0" x="0.04125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube104">
+    <component type="tube">
+      <location y="0" x="0.04675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube105">
+    <component type="tube">
+      <location y="0" x="0.05225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube106">
+    <component type="tube">
+      <location y="0" x="0.05775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube107">
+    <component type="tube">
+      <location y="0" x="0.06325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube108">
+    <component type="tube">
+      <location y="0" x="0.06875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube109">
+    <component type="tube">
+      <location y="0" x="0.07425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube110">
+    <component type="tube">
+      <location y="0" x="0.07975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube111">
+    <component type="tube">
+      <location y="0" x="0.08525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube112">
+    <component type="tube">
+      <location y="0" x="0.09075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube113">
+    <component type="tube">
+      <location y="0" x="0.09625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube114">
+    <component type="tube">
+      <location y="0" x="0.10175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube115">
+    <component type="tube">
+      <location y="0" x="0.10725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube116">
+    <component type="tube">
+      <location y="0" x="0.11275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube117">
+    <component type="tube">
+      <location y="0" x="0.11825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube118">
+    <component type="tube">
+      <location y="0" x="0.12375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube119">
+    <component type="tube">
+      <location y="0" x="0.12925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube120">
+    <component type="tube">
+      <location y="0" x="0.13475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube121">
+    <component type="tube">
+      <location y="0" x="0.14025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube122">
+    <component type="tube">
+      <location y="0" x="0.14575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube123">
+    <component type="tube">
+      <location y="0" x="0.15125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube124">
+    <component type="tube">
+      <location y="0" x="0.15675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube125">
+    <component type="tube">
+      <location y="0" x="0.16225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube126">
+    <component type="tube">
+      <location y="0" x="0.16775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube127">
+    <component type="tube">
+      <location y="0" x="0.17325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube128">
+    <component type="tube">
+      <location y="0" x="0.17875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube129">
+    <component type="tube">
+      <location y="0" x="0.18425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube130">
+    <component type="tube">
+      <location y="0" x="0.18975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube131">
+    <component type="tube">
+      <location y="0" x="0.19525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube132">
+    <component type="tube">
+      <location y="0" x="0.20075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube133">
+    <component type="tube">
+      <location y="0" x="0.20625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube134">
+    <component type="tube">
+      <location y="0" x="0.21175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube135">
+    <component type="tube">
+      <location y="0" x="0.21725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube136">
+    <component type="tube">
+      <location y="0" x="0.22275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube137">
+    <component type="tube">
+      <location y="0" x="0.22825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube138">
+    <component type="tube">
+      <location y="0" x="0.23375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube139">
+    <component type="tube">
+      <location y="0" x="0.23925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube140">
+    <component type="tube">
+      <location y="0" x="0.24475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube141">
+    <component type="tube">
+      <location y="0" x="0.25025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube142">
+    <component type="tube">
+      <location y="0" x="0.25575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube143">
+    <component type="tube">
+      <location y="0" x="0.26125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube144">
+    <component type="tube">
+      <location y="0" x="0.26675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube145">
+    <component type="tube">
+      <location y="0" x="0.27225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube146">
+    <component type="tube">
+      <location y="0" x="0.27775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube147">
+    <component type="tube">
+      <location y="0" x="0.28325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube148">
+    <component type="tube">
+      <location y="0" x="0.28875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube149">
+    <component type="tube">
+      <location y="0" x="0.29425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube150">
+    <component type="tube">
+      <location y="0" x="0.29975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube151">
+    <component type="tube">
+      <location y="0" x="0.30525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube152">
+    <component type="tube">
+      <location y="0" x="0.31075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube153">
+    <component type="tube">
+      <location y="0" x="0.31625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube154">
+    <component type="tube">
+      <location y="0" x="0.32175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube155">
+    <component type="tube">
+      <location y="0" x="0.32725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube156">
+    <component type="tube">
+      <location y="0" x="0.33275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube157">
+    <component type="tube">
+      <location y="0" x="0.33825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube158">
+    <component type="tube">
+      <location y="0" x="0.34375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube159">
+    <component type="tube">
+      <location y="0" x="0.34925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube160">
+    <component type="tube">
+      <location y="0" x="0.35475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube161">
+    <component type="tube">
+      <location y="0" x="0.36025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube162">
+    <component type="tube">
+      <location y="0" x="0.36575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube163">
+    <component type="tube">
+      <location y="0" x="0.37125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube164">
+    <component type="tube">
+      <location y="0" x="0.37675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube165">
+    <component type="tube">
+      <location y="0" x="0.38225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube166">
+    <component type="tube">
+      <location y="0" x="0.38775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube167">
+    <component type="tube">
+      <location y="0" x="0.39325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube168">
+    <component type="tube">
+      <location y="0" x="0.39875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube169">
+    <component type="tube">
+      <location y="0" x="0.40425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube170">
+    <component type="tube">
+      <location y="0" x="0.40975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube171">
+    <component type="tube">
+      <location y="0" x="0.41525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube172">
+    <component type="tube">
+      <location y="0" x="0.42075" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube173">
+    <component type="tube">
+      <location y="0" x="0.42625" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube174">
+    <component type="tube">
+      <location y="0" x="0.43175" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube175">
+    <component type="tube">
+      <location y="0" x="0.43725" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube176">
+    <component type="tube">
+      <location y="0" x="0.44275" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube177">
+    <component type="tube">
+      <location y="0" x="0.44825" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube178">
+    <component type="tube">
+      <location y="0" x="0.45375" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube179">
+    <component type="tube">
+      <location y="0" x="0.45925" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube180">
+    <component type="tube">
+      <location y="0" x="0.46475" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube181">
+    <component type="tube">
+      <location y="0" x="0.47025" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube182">
+    <component type="tube">
+      <location y="0" x="0.47575" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube183">
+    <component type="tube">
+      <location y="0" x="0.48125" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube184">
+    <component type="tube">
+      <location y="0" x="0.48675" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube185">
+    <component type="tube">
+      <location y="0" x="0.49225" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube186">
+    <component type="tube">
+      <location y="0" x="0.49775" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube187">
+    <component type="tube">
+      <location y="0" x="0.50325" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube188">
+    <component type="tube">
+      <location y="0" x="0.50875" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube189">
+    <component type="tube">
+      <location y="0" x="0.51425" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube190">
+    <component type="tube">
+      <location y="0" x="0.51975" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  <type name="tube191">
+    <component type="tube">
+      <location y="0" x="0.52525" z="0">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="0">
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+  </type>
+  
+  <idlist idname="detector1">
+        <id start="1000000" step="1000" end="1255000" />
+    <id start="1000001" step="1000" end="1255001" />
+    <id start="1000002" step="1000" end="1255002" />
+    <id start="1000003" step="1000" end="1255003" />
+    <id start="1000004" step="1000" end="1255004" />
+    <id start="1000005" step="1000" end="1255005" />
+    <id start="1000006" step="1000" end="1255006" />
+    <id start="1000007" step="1000" end="1255007" />
+    <id start="1000008" step="1000" end="1255008" />
+    <id start="1000009" step="1000" end="1255009" />
+    <id start="1000010" step="1000" end="1255010" />
+    <id start="1000011" step="1000" end="1255011" />
+    <id start="1000012" step="1000" end="1255012" />
+    <id start="1000013" step="1000" end="1255013" />
+    <id start="1000014" step="1000" end="1255014" />
+    <id start="1000015" step="1000" end="1255015" />
+    <id start="1000016" step="1000" end="1255016" />
+    <id start="1000017" step="1000" end="1255017" />
+    <id start="1000018" step="1000" end="1255018" />
+    <id start="1000019" step="1000" end="1255019" />
+    <id start="1000020" step="1000" end="1255020" />
+    <id start="1000021" step="1000" end="1255021" />
+    <id start="1000022" step="1000" end="1255022" />
+    <id start="1000023" step="1000" end="1255023" />
+    <id start="1000024" step="1000" end="1255024" />
+    <id start="1000025" step="1000" end="1255025" />
+    <id start="1000026" step="1000" end="1255026" />
+    <id start="1000027" step="1000" end="1255027" />
+    <id start="1000028" step="1000" end="1255028" />
+    <id start="1000029" step="1000" end="1255029" />
+    <id start="1000030" step="1000" end="1255030" />
+    <id start="1000031" step="1000" end="1255031" />
+    <id start="1000032" step="1000" end="1255032" />
+    <id start="1000033" step="1000" end="1255033" />
+    <id start="1000034" step="1000" end="1255034" />
+    <id start="1000035" step="1000" end="1255035" />
+    <id start="1000036" step="1000" end="1255036" />
+    <id start="1000037" step="1000" end="1255037" />
+    <id start="1000038" step="1000" end="1255038" />
+    <id start="1000039" step="1000" end="1255039" />
+    <id start="1000040" step="1000" end="1255040" />
+    <id start="1000041" step="1000" end="1255041" />
+    <id start="1000042" step="1000" end="1255042" />
+    <id start="1000043" step="1000" end="1255043" />
+    <id start="1000044" step="1000" end="1255044" />
+    <id start="1000045" step="1000" end="1255045" />
+    <id start="1000046" step="1000" end="1255046" />
+    <id start="1000047" step="1000" end="1255047" />
+    <id start="1000048" step="1000" end="1255048" />
+    <id start="1000049" step="1000" end="1255049" />
+    <id start="1000050" step="1000" end="1255050" />
+    <id start="1000051" step="1000" end="1255051" />
+    <id start="1000052" step="1000" end="1255052" />
+    <id start="1000053" step="1000" end="1255053" />
+    <id start="1000054" step="1000" end="1255054" />
+    <id start="1000055" step="1000" end="1255055" />
+    <id start="1000056" step="1000" end="1255056" />
+    <id start="1000057" step="1000" end="1255057" />
+    <id start="1000058" step="1000" end="1255058" />
+    <id start="1000059" step="1000" end="1255059" />
+    <id start="1000060" step="1000" end="1255060" />
+    <id start="1000061" step="1000" end="1255061" />
+    <id start="1000062" step="1000" end="1255062" />
+    <id start="1000063" step="1000" end="1255063" />
+    <id start="1000064" step="1000" end="1255064" />
+    <id start="1000065" step="1000" end="1255065" />
+    <id start="1000066" step="1000" end="1255066" />
+    <id start="1000067" step="1000" end="1255067" />
+    <id start="1000068" step="1000" end="1255068" />
+    <id start="1000069" step="1000" end="1255069" />
+    <id start="1000070" step="1000" end="1255070" />
+    <id start="1000071" step="1000" end="1255071" />
+    <id start="1000072" step="1000" end="1255072" />
+    <id start="1000073" step="1000" end="1255073" />
+    <id start="1000074" step="1000" end="1255074" />
+    <id start="1000075" step="1000" end="1255075" />
+    <id start="1000076" step="1000" end="1255076" />
+    <id start="1000077" step="1000" end="1255077" />
+    <id start="1000078" step="1000" end="1255078" />
+    <id start="1000079" step="1000" end="1255079" />
+    <id start="1000080" step="1000" end="1255080" />
+    <id start="1000081" step="1000" end="1255081" />
+    <id start="1000082" step="1000" end="1255082" />
+    <id start="1000083" step="1000" end="1255083" />
+    <id start="1000084" step="1000" end="1255084" />
+    <id start="1000085" step="1000" end="1255085" />
+    <id start="1000086" step="1000" end="1255086" />
+    <id start="1000087" step="1000" end="1255087" />
+    <id start="1000088" step="1000" end="1255088" />
+    <id start="1000089" step="1000" end="1255089" />
+    <id start="1000090" step="1000" end="1255090" />
+    <id start="1000091" step="1000" end="1255091" />
+    <id start="1000092" step="1000" end="1255092" />
+    <id start="1000093" step="1000" end="1255093" />
+    <id start="1000094" step="1000" end="1255094" />
+    <id start="1000095" step="1000" end="1255095" />
+    <id start="1000096" step="1000" end="1255096" />
+    <id start="1000097" step="1000" end="1255097" />
+    <id start="1000098" step="1000" end="1255098" />
+    <id start="1000099" step="1000" end="1255099" />
+    <id start="1000100" step="1000" end="1255100" />
+    <id start="1000101" step="1000" end="1255101" />
+    <id start="1000102" step="1000" end="1255102" />
+    <id start="1000103" step="1000" end="1255103" />
+    <id start="1000104" step="1000" end="1255104" />
+    <id start="1000105" step="1000" end="1255105" />
+    <id start="1000106" step="1000" end="1255106" />
+    <id start="1000107" step="1000" end="1255107" />
+    <id start="1000108" step="1000" end="1255108" />
+    <id start="1000109" step="1000" end="1255109" />
+    <id start="1000110" step="1000" end="1255110" />
+    <id start="1000111" step="1000" end="1255111" />
+    <id start="1000112" step="1000" end="1255112" />
+    <id start="1000113" step="1000" end="1255113" />
+    <id start="1000114" step="1000" end="1255114" />
+    <id start="1000115" step="1000" end="1255115" />
+    <id start="1000116" step="1000" end="1255116" />
+    <id start="1000117" step="1000" end="1255117" />
+    <id start="1000118" step="1000" end="1255118" />
+    <id start="1000119" step="1000" end="1255119" />
+    <id start="1000120" step="1000" end="1255120" />
+    <id start="1000121" step="1000" end="1255121" />
+    <id start="1000122" step="1000" end="1255122" />
+    <id start="1000123" step="1000" end="1255123" />
+    <id start="1000124" step="1000" end="1255124" />
+    <id start="1000125" step="1000" end="1255125" />
+    <id start="1000126" step="1000" end="1255126" />
+    <id start="1000127" step="1000" end="1255127" />
+    <id start="1000128" step="1000" end="1255128" />
+    <id start="1000129" step="1000" end="1255129" />
+    <id start="1000130" step="1000" end="1255130" />
+    <id start="1000131" step="1000" end="1255131" />
+    <id start="1000132" step="1000" end="1255132" />
+    <id start="1000133" step="1000" end="1255133" />
+    <id start="1000134" step="1000" end="1255134" />
+    <id start="1000135" step="1000" end="1255135" />
+    <id start="1000136" step="1000" end="1255136" />
+    <id start="1000137" step="1000" end="1255137" />
+    <id start="1000138" step="1000" end="1255138" />
+    <id start="1000139" step="1000" end="1255139" />
+    <id start="1000140" step="1000" end="1255140" />
+    <id start="1000141" step="1000" end="1255141" />
+    <id start="1000142" step="1000" end="1255142" />
+    <id start="1000143" step="1000" end="1255143" />
+    <id start="1000144" step="1000" end="1255144" />
+    <id start="1000145" step="1000" end="1255145" />
+    <id start="1000146" step="1000" end="1255146" />
+    <id start="1000147" step="1000" end="1255147" />
+    <id start="1000148" step="1000" end="1255148" />
+    <id start="1000149" step="1000" end="1255149" />
+    <id start="1000150" step="1000" end="1255150" />
+    <id start="1000151" step="1000" end="1255151" />
+    <id start="1000152" step="1000" end="1255152" />
+    <id start="1000153" step="1000" end="1255153" />
+    <id start="1000154" step="1000" end="1255154" />
+    <id start="1000155" step="1000" end="1255155" />
+    <id start="1000156" step="1000" end="1255156" />
+    <id start="1000157" step="1000" end="1255157" />
+    <id start="1000158" step="1000" end="1255158" />
+    <id start="1000159" step="1000" end="1255159" />
+    <id start="1000160" step="1000" end="1255160" />
+    <id start="1000161" step="1000" end="1255161" />
+    <id start="1000162" step="1000" end="1255162" />
+    <id start="1000163" step="1000" end="1255163" />
+    <id start="1000164" step="1000" end="1255164" />
+    <id start="1000165" step="1000" end="1255165" />
+    <id start="1000166" step="1000" end="1255166" />
+    <id start="1000167" step="1000" end="1255167" />
+    <id start="1000168" step="1000" end="1255168" />
+    <id start="1000169" step="1000" end="1255169" />
+    <id start="1000170" step="1000" end="1255170" />
+    <id start="1000171" step="1000" end="1255171" />
+    <id start="1000172" step="1000" end="1255172" />
+    <id start="1000173" step="1000" end="1255173" />
+    <id start="1000174" step="1000" end="1255174" />
+    <id start="1000175" step="1000" end="1255175" />
+    <id start="1000176" step="1000" end="1255176" />
+    <id start="1000177" step="1000" end="1255177" />
+    <id start="1000178" step="1000" end="1255178" />
+    <id start="1000179" step="1000" end="1255179" />
+    <id start="1000180" step="1000" end="1255180" />
+    <id start="1000181" step="1000" end="1255181" />
+    <id start="1000182" step="1000" end="1255182" />
+    <id start="1000183" step="1000" end="1255183" />
+    <id start="1000184" step="1000" end="1255184" />
+    <id start="1000185" step="1000" end="1255185" />
+    <id start="1000186" step="1000" end="1255186" />
+    <id start="1000187" step="1000" end="1255187" />
+    <id start="1000188" step="1000" end="1255188" />
+    <id start="1000189" step="1000" end="1255189" />
+    <id start="1000190" step="1000" end="1255190" />
+    <id start="1000191" step="1000" end="1255191" />
+  </idlist>   
+  
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+  <idlist idname="timer1">
+    <id val="2" />  
+  </idlist>
+</instrument>

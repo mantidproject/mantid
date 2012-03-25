@@ -8,7 +8,7 @@
 #include <QLabel>
 #include <QtCore/qstring.h>
 #include <qpushbutton.h>
-
+#include "DllOption.h"
 
 namespace MantidQt
 {
@@ -40,7 +40,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PropertyWidget : public QWidget
+  class EXPORT_OPT_MANTIDQT_API PropertyWidget : public QWidget
   {
     Q_OBJECT
 
@@ -70,6 +70,12 @@ namespace API
     {return m_row; }
 
     void addReplaceWSButton();
+
+    /// @return the property in the widget
+    Mantid::Kernel::Property * getProperty()
+    { return m_prop; }
+
+    void setError(const QString & error);
 
   public slots:
     void replaceWSButtonClicked();
@@ -107,6 +113,9 @@ namespace API
 
     /// All contained widgets
     QVector<QWidget*> m_widgets;
+
+    /// Error message received when trying to set the value
+    QString m_error;
   };
 
 

@@ -76,6 +76,7 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     m_v_max(-DBL_MAX),
     m_height_max(0),
     m_width_max(0),
+    m_u_correction(0),
     m_flippedView(false),
     m_startPeakShapes(false)
 {
@@ -90,10 +91,6 @@ void UnwrappedSurface::init()
   // the actor calls this->callback for each detector
   m_unwrappedDetectors.clear();
   m_assemblies.clear();
-  m_u_min =  DBL_MAX;
-  m_u_max = -DBL_MAX;
-  m_v_min =  DBL_MAX;
-  m_v_max = -DBL_MAX;
 
   size_t ndet = m_instrActor->ndetectors();
   m_unwrappedDetectors.resize(ndet);
@@ -110,7 +107,7 @@ void UnwrappedSurface::init()
   {
     Mantid::Kernel::V3D pos = m_instrActor->getDetPos(0) - m_pos;
     double z = pos.scalar_prod(m_zaxis);
-    if (z == 0.0)
+    if (z == 0.0 || fabs(z) == pos.norm())
     {
       // find the shortest projection of m_zaxis and direct m_xaxis along it
       bool isY = false;
@@ -138,6 +135,10 @@ void UnwrappedSurface::init()
     m_yaxis = m_zaxis.cross_prod(m_xaxis);
   }
 
+  // give some valid values to u bounds in case some code checks
+  // on u to be within them
+  m_u_min = -DBL_MAX;
+  m_u_max =  DBL_MAX;
 
   // For each detector in the order of actors
   PRAGMA_OMP( parallel for )
@@ -181,8 +182,11 @@ void UnwrappedSurface::init()
     } // is a real detectord
   } // for each detector in pick order
 
-
   // Now find the overall edges in U and V coords.
+  m_u_min =  DBL_MAX;
+  m_u_max = -DBL_MAX;
+  m_v_min =  DBL_MAX;
+  m_v_max = -DBL_MAX;
   for(size_t i=0;i<m_unwrappedDetectors.size();++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
@@ -705,8 +709,34 @@ void UnwrappedSurface::findAndCorrectUGap()
         u -= period;
       }
     }
-    //m_u_min += du;
+    m_u_correction += du;
+    if (m_u_correction > m_u_max)
+    {
+      m_u_correction -= period;
+    }
   }
+}
+
+/**
+ * Apply a correction to u value of a projected point due to 
+ * change of u-scale by findAndCorrectUGap()
+ * @param u :: u-coordinate to be corrected
+ * @return :: Corrected u-coordinate.
+ */
+double UnwrappedSurface::applyUCorrection(double u)const
+{
+  double period = uPeriod();
+  if (period == 0.0) return u;
+  u += m_u_correction;
+  if (u < m_u_min)
+  {
+    u += period;
+  }
+  if (u > m_u_max)
+  {
+    u -= period;
+  }
+  return u;
 }
 
 void UnwrappedSurface::changeColorMap()
@@ -818,7 +848,7 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
     this->project(u,v,uscale,vscale, pos);
 
     // Create a peak marker at this position
-    PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(u,v)),style);
+    PeakMarker2D* r = new PeakMarker2D(peakShapes,u,v,style);
     r->setPeak(peak,i);
     peakShapes.addMarker(r);
   }

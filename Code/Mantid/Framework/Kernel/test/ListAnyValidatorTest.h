@@ -77,8 +77,8 @@ public:
 
   void testClone()
   {
-    IValidator<int> *v = new ListAnyValidator<int>();
-    IValidator<int> *vv = v->clone();
+    IValidator_sptr v = new ListAnyValidator<int>();
+    IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS( v, vv )
     TS_ASSERT( dynamic_cast<ListAnyValidator<int> *>(vv) )
     delete v;
@@ -87,9 +87,9 @@ public:
 
   void testCast()
   {
-    IValidator<int> *v = new ListAnyValidator<int>();
-    TS_ASSERT( dynamic_cast<IValidator<int>*>(v) )
-    TS_ASSERT( ! dynamic_cast<IValidator<double>*>(v) )
+    IValidator_sptr v = new ListAnyValidator<int>();
+    TS_ASSERT( dynamic_cast<IValidator_sptr >(v) )
+    TS_ASSERT( ! dynamic_cast<IValidator_sptr >(v) )
     delete v;
   }
 

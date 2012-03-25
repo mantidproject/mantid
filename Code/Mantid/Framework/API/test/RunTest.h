@@ -28,7 +28,7 @@ namespace
     std::string getDefault() const { return "getDefault() is not implemented in this class"; }
     std::string value() const { return "Nothing"; }
     std::string setValue( const std::string& ) { return ""; }
-    std::string setValue(const boost::shared_ptr<DataItem> ) {return "";}
+    std::string setDataItem(const boost::shared_ptr<DataItem>) { return ""; } 
     Property& operator+=( Property const * ) { return *this; }
   };
 }

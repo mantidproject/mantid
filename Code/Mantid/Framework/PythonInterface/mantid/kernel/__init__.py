@@ -15,15 +15,7 @@ clib = _os.path.join(_os.path.dirname(__file__), '_kernel.so')
 flags = _dlopen.setup_dlopen(clib, ['libMantidKernel']) # Ensure the library is open with the correct flags
 from _kernel import *
 dlopen.restore_flags(flags)
+###############################################################################
 
 from validators import *
-###############################################################################
-# Make the singleton objects available as named variables 
-###############################################################################
-config = ConfigService.Instance()
-
-###############################################################################
-# Set up a general Python logger. Others can be created as they are required
-# if a user wishes to be more specific
-###############################################################################
-logger = Logger.get("Python")
+from _aliases import *

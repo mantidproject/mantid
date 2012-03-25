@@ -13,9 +13,10 @@ namespace Kernel
  * Default constructor
  */
 template <typename TYPE>
-ArrayBoundedValidator<TYPE>::ArrayBoundedValidator() : IValidator<std::vector<TYPE> >()
+ArrayBoundedValidator<TYPE>::ArrayBoundedValidator() : 
+  TypedValidator<std::vector<TYPE> >(),
+  boundVal(boost::make_shared<BoundedValidator<TYPE> >())
 {
-  this->boundVal = new BoundedValidator<TYPE>();
 }
 
 /**
@@ -23,9 +24,10 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator() : IValidator<std::vector<TY
  * @param abv :: the ArrayBoundedValidator to copy
  */
 template <typename TYPE>
-ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv) : IValidator<std::vector<TYPE> >()
+ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv) 
+  : TypedValidator<std::vector<TYPE> >()
 {
-  this->boundVal = dynamic_cast<BoundedValidator<TYPE> *>(abv.boundVal->clone());
+  this->boundVal = boost::dynamic_pointer_cast<BoundedValidator<TYPE> >(abv.boundVal->clone());
 }
 
 /**
@@ -34,9 +36,10 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const ArrayBoundedValidator<T
  * @param upperBound :: the upper bound value to validate
  */
 template <typename TYPE>
-ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound) : IValidator<std::vector<TYPE> >()
+ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound) 
+  : TypedValidator<std::vector<TYPE> >(),
+    boundVal(boost::make_shared<BoundedValidator<TYPE> >(lowerBound, upperBound))
 {
-  this->boundVal = new BoundedValidator<TYPE>(lowerBound, upperBound);
 }
 
 /**
@@ -46,7 +49,7 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const TYPE lowerBound, const 
 template <typename TYPE>
 ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(BoundedValidator<TYPE> &bv)
 {
-  this->boundVal = dynamic_cast<BoundedValidator<TYPE> *>(bv.clone());
+  this->boundVal = boost::dynamic_pointer_cast<BoundedValidator<TYPE> >(bv.clone());
 }
 
 /**
@@ -55,10 +58,6 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(BoundedValidator<TYPE> &bv)
 template <typename TYPE>
 ArrayBoundedValidator<TYPE>::~ArrayBoundedValidator()
 {
-  if (this->boundVal)
-  {
-    delete this->boundVal;
-  }
 }
 
 /**
@@ -66,9 +65,9 @@ ArrayBoundedValidator<TYPE>::~ArrayBoundedValidator()
  * @return the cloned object
  */
 template <typename TYPE>
-IValidator<std::vector<TYPE> >* ArrayBoundedValidator<TYPE>::clone() const
+IValidator_sptr ArrayBoundedValidator<TYPE>::clone() const
 {
-  return new ArrayBoundedValidator<TYPE>(*this);
+  return boost::make_shared<ArrayBoundedValidator<TYPE> >(*this);
 }
 
 /**
@@ -76,22 +75,9 @@ IValidator<std::vector<TYPE> >* ArrayBoundedValidator<TYPE>::clone() const
  * @return a pointer to the stored BoundedValidator
  */
 template <typename TYPE>
-BoundedValidator<TYPE>* ArrayBoundedValidator<TYPE>::getValidator() const
+boost::shared_ptr<BoundedValidator<TYPE> > ArrayBoundedValidator<TYPE>::getValidator() const
 {
   return this->boundVal;
-}
-
-/**
- * Function to check the validity of the array elements
- * @param value :: the array to be checked
- * @return a listing of the indicies that fail the bounds checks
- */
-template <typename TYPE>
-std::string
-ArrayBoundedValidator<TYPE>::isValid( const std::vector<TYPE> &value ) const
-{
-  std::string failure = this->checkValidity(value);
-  return failure;
 }
 
 /**

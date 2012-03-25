@@ -11,6 +11,8 @@ set ( SRC_FILES
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
+	src/ConvertToMDEventsParams.cpp
+	src/ConvertToMDEventsSubalgFactory.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -21,6 +23,7 @@ set ( SRC_FILES
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
 	src/LogarithmMD.cpp
+	src/MagneticFormFactor.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -60,11 +63,15 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsEventWSAutoRebin.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -76,6 +83,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MagneticFormFactor.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -112,6 +120,8 @@ set ( TEST_FILES
 	test/ConvertToDetectorFaceMDTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsMethodsTest.h
+	test/ConvertToMDEventsParamsTest.h
+	test/ConvertToMDEventsSubalgFactoryTest.h
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
@@ -123,6 +133,7 @@ set ( TEST_FILES
 	test/InvalidParameterTest.h
 	test/LessThanMDTest.h
 	test/LogarithmMDTest.h
+	test/MagneticFormFactorTest.h
 	test/MaskMDTest.h
 	test/MergeMDFilesTest.h
 	test/MergeMDTest.h
@@ -137,6 +148,7 @@ set ( TEST_FILES
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
+	test/SimulateResolutionTest.h
 	test/TobyFitSimulateTest.h
 	test/TransformMDTest.h
 	test/UnaryOperationMDTest.h
@@ -171,7 +183,7 @@ target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories( ../TestHelpers/inc ../DataHandling/inc ../CurveFitting/inc )	
+  include_directories( ../TestHelpers/inc ../DataHandling/inc ../CurveFitting/inc)	
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 

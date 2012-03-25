@@ -5,6 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include <boost/mpi.hpp>
+
+namespace mpi = boost::mpi;
 
 namespace Mantid
 {
@@ -60,11 +64,50 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MPI"; }
+  /// Sum for boostmpi MantidVec
+  struct vplus
+        : public std::binary_function<MantidVec, MantidVec, MantidVec>
+  {       // functor for operator+
+        MantidVec operator()(const MantidVec& _Left, const MantidVec& _Right) const
+        {       // apply operator+ to operands
+                MantidVec v(_Left.size());
+                std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), std::plus<double>());
+                return (v);
+        }
+
+  };
+   /// Sum for error for boostmpi MantidVec
+  struct eplus : public std::binary_function<MantidVec, MantidVec, MantidVec>
+  {       // functor for operator+
+        MantidVec operator()(const MantidVec& _Left, const MantidVec& _Right) const
+        {       // apply operator+ to operands
+                MantidVec v(_Left.size());
+                std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), SumGaussError<double>());
+                return (v);
+        }
+  };
+
 
 private:
   void init();
   void exec();
-  //void execEvent(); TODO: Make event-aware? (might lead to transmission of too much data)
+  //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
+  template <class T> struct SumGaussError: public std::binary_function<T,T,T>
+  {
+    SumGaussError(){}
+    /// Sums the arguments in quadrature
+    inline T operator()(const T& l, const T& r) const
+    {
+      return std::sqrt(l*l+r*r);
+    }
+  };
+
+  void execEvent();
+  DataObjects::EventWorkspace_const_sptr eventW;
+  std::size_t totalSpec;
+  int hist;
+  std::size_t numBins;
+  mpi::communicator included;
 
 };
 

@@ -9,6 +9,9 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/WriteLock.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+#include <map>
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
@@ -92,11 +95,11 @@ public:
   void init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
-    declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, true));
-    declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, true));
+    declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
+    declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
     declareProperty(new WorkspaceProperty<>("OutputWorkspace1","",Direction::Output));
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, true));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, PropertyMode::Optional));
   }
   void exec()
   {
@@ -130,14 +133,41 @@ public:
   const std::string category() const { return "Cat;Leopard;Mink";}
   void init()
   {
-    declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, true, false));
-    declareProperty(new WorkspaceProperty<>("NonLockingOutputWorkspace","",Direction::Output, true, false));
+    declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, PropertyMode::Optional, LockMode::NoLock));
+    declareProperty(new WorkspaceProperty<>("NonLockingOutputWorkspace","",Direction::Output, PropertyMode::Optional, LockMode::NoLock));
   }
   void exec()
   {
   }
 };
 DECLARE_ALGORITHM(WorkspaceAlgorithm2)
+
+class AlgorithmWithValidateInputs : public Algorithm
+{
+public:
+  AlgorithmWithValidateInputs() : Algorithm() {}
+  virtual ~AlgorithmWithValidateInputs() {}
+  const std::string name() const { return "WorkspaceAlgorithm2";}
+  int version() const  { return 1;}
+  const std::string category() const { return "Cat;Leopard;Mink";}
+  void init()
+  {
+    declareProperty("PropertyA", 12);
+    declareProperty("PropertyB", 12);
+  }
+  void exec()
+  {  }
+  std::map<std::string, std::string> validateInputs()
+  {
+    std::map<std::string, std::string> out;
+    int A = getProperty("PropertyA");
+    int B = getProperty("PropertyB");
+    if (B < A)
+      out["PropertyB"] = "B must be >= A!";
+    return out;
+  }
+};
+DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
 
 
 class AlgorithmTest : public CxxTest::TestSuite
@@ -159,8 +189,8 @@ public:
 
   ~AlgorithmTest()
   {
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm|1");
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm|2");
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm2", 1);
   }
   
   void testAlgorithm()
@@ -259,6 +289,21 @@ public:
     TS_ASSERT( ! vec.empty() )
     TS_ASSERT( vec.size() == 2 )
     TS_ASSERT( ! vec[0]->name().compare("prop1") )
+  }
+
+  /** The check in validateInputs() makes the algo throw if there is anything wrong */
+  void test_validateInputs_makesAlgorithmFail()
+  {
+    AlgorithmWithValidateInputs alg;
+    alg.initialize();
+    alg.setProperty("PropertyA", 12);
+    alg.setProperty("PropertyB", 5);
+    TS_ASSERT_THROWS_ANYTHING( alg.execute() );
+    TS_ASSERT( !alg.isExecuted() );
+
+    alg.setProperty("PropertyB", 15);
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
   }
 
   void testStringization()

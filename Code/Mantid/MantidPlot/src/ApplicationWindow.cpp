@@ -6052,6 +6052,9 @@ bool ApplicationWindow::saveProject(bool compress)
     savingTimerId=startTimer(autoSaveTime*60000);
   } else
     savingTimerId=0;
+  
+  // Back-up file to be removed because file has successfully saved.
+  QFile::remove(projectname + "~");
 
   QApplication::restoreOverrideCursor();
   return true;
@@ -9374,6 +9377,7 @@ void ApplicationWindow::newProject()
   mantidUI->saveProject(saved);
   clearLogInfo();
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
+  projectname = "untitled";
 }
 
 void ApplicationWindow::savedProject()

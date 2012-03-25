@@ -10,7 +10,7 @@ namespace
 {
   /// A macro for generating exports for each type
   #define EXPORT_BOUNDEDVALIDATOR(ElementType) \
-    class_<BoundedValidator<ElementType>, bases<IValidator<ElementType> >, \
+    class_<BoundedValidator<ElementType>, bases<IValidator>, \
            boost::noncopyable>("BoundedValidator_"#ElementType) \
       .def(init<ElementType,ElementType>()) \
       .def("setLower", &BoundedValidator<ElementType>::setLower, "Set the lower bound") \

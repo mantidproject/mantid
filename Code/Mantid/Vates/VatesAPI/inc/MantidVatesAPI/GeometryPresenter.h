@@ -55,6 +55,7 @@ namespace Mantid
       virtual ~GeometryPresenter() {}
       virtual void acceptView(GeometryView*)=0;
       virtual void setModified() = 0;
+      virtual void setDimensionModeChanged() = 0;
     };
   }
 }

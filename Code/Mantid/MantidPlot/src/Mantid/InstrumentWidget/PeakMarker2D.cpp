@@ -1,4 +1,5 @@
 #include "PeakMarker2D.h"
+#include "PeakOverlay.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -19,7 +20,8 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
  * @param centre :: Centre of the marker. Represents the peak position.
  * @param style :: marker symbol style
  */
-PeakMarker2D::PeakMarker2D(const QPointF& centre,Style style):
+PeakMarker2D::PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, Style style):
+m_peakOverlay(peakOverlay),
 m_symbol(style.symbol),
 m_row(-1)
 {
@@ -32,6 +34,7 @@ m_row(-1)
   {
     m_markerSize = g_defaultMarkerSize;
   }
+  const QPointF& centre = peakOverlay.realToUntransformed(QPointF(u,v));
   m_boundingRect = QRectF(centre - QPointF((qreal)m_markerSize/2,(qreal)m_markerSize/2), 
                           QSizeF((qreal)m_markerSize,(qreal)m_markerSize));
   setScalable(false);
@@ -116,6 +119,14 @@ void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak, int row)
   m_l = peak.getL();
   m_label = QString("%1 %2 %3").arg(QString::number(m_h,'g',2),QString::number(m_k,'g',2),QString::number(m_l,'g',2));
   m_detID = peak.getDetectorID();
-  m_tof = peak.getTOF();
+  //m_tof = peak.getTOF();
   m_row = row;
+}
+
+/**
+ * Return reference to the peak.
+ */
+const Mantid::API::IPeak& PeakMarker2D::getPeak() const
+{
+  return m_peakOverlay.getPeak(m_row);
 }

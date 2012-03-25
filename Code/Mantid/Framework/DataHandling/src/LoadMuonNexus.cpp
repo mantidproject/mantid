@@ -54,6 +54,8 @@ The subalgorithms used by LoadMuonNexus are:
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <Poco/Path.h>
 #include <limits>
@@ -102,13 +104,13 @@ namespace Mantid
         "generated for each period");
 
 
-      BoundedValidator<int64_t> *mustBePositive = new BoundedValidator<int64_t>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int64_t> >();
       mustBePositive->setLower(0);
       declareProperty( "SpectrumMin",(int64_t)0, mustBePositive,
         "Index number of the first spectrum to read, only used if\n"
         "spectrum_max is set and only for single period data\n"
         "(default 0)" );
-      declareProperty( "SpectrumMax",(int64_t)EMPTY_INT(), mustBePositive->clone(),
+      declareProperty( "SpectrumMax",(int64_t)EMPTY_INT(), mustBePositive,
         "Index of last spectrum to read, only for single period data\n"
         "(default the last spectrum)");
 
@@ -120,20 +122,21 @@ namespace Mantid
         "together based on the groupings in the NeXus file, only\n"
         "for single period data (default no)");
 
-      declareProperty("EntryNumber", (int64_t)0, mustBePositive->clone(),
+      declareProperty("EntryNumber", (int64_t)0, mustBePositive,
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
 
       std::vector<std::string> FieldOptions;
       FieldOptions.push_back("Transverse");
       FieldOptions.push_back("Longitudinal");
-      declareProperty("MainFieldDirection","Transverse",new ListValidator(FieldOptions),
+      declareProperty("MainFieldDirection","Transverse", boost::make_shared<StringListValidator>(FieldOptions),
         "Output the main field direction if specified in Nexus file (default Transverse)", Direction::Output);
 
       declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
       declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)", Direction::Output);
       
       std::vector<double> defaultDeadTimes;
-      declareProperty("DeadTimes", defaultDeadTimes, "The name of the vector in which to store the list of deadtimes for each spectrum", Direction::Output);
+      declareProperty("DeadTimes", defaultDeadTimes, 
+                      "The name of the vector in which to store the list of deadtimes for each spectrum", Direction::Output);
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating

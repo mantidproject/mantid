@@ -7,7 +7,9 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Property.h"
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::Geometry::Instrument;
@@ -220,10 +222,10 @@ public:
     norm3.initialize();
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorSpectrum","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspaceIndex","0") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") )
     TS_ASSERT_THROWS_NOTHING( norm3.execute() )
-    TS_ASSERT( ! norm3.isExecuted() )
+    TS_ASSERT(  norm3.isExecuted() )
   }
 
   void testSeparateWorkspaceWithRebin()
@@ -236,6 +238,100 @@ public:
     TS_ASSERT_THROWS_NOTHING( norm4.execute() )
     TS_ASSERT( norm4.isExecuted() )
   }
+
+  void testMonIDPropChangerEnabled()
+  {
+    NormaliseToMonitor norm5;
+    norm5.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("InputWorkspace","normMon"));
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("OutputWorkspace","normMon5"));
+
+    std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(&norm5,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+
+    // property is enabled but the conditions have not changed;
+    TS_ASSERT(pID->isEnabled());
+    // workspace has monitors so the condition has changed
+    TS_ASSERT(pID->isConditionChanged());
+
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorWorkspace","monWS"));
+    // monitor ws disables this property;
+    TS_ASSERT(!pID->isEnabled());
+    // but no changes to condition for disabled property
+    TS_ASSERT(!pID->isConditionChanged());
+
+    // no mon ws should enable it again
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorWorkspace",""));
+    TS_ASSERT(pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+
+    // and MonitorSpectrum disable: 
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","1"));
+    TS_ASSERT(!pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+    // and enable:
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","-1"));
+    TS_ASSERT(pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+    // and disable: 
+    TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","10"));
+    TS_ASSERT(!pID->isEnabled());
+    TS_ASSERT(!pID->isConditionChanged());
+
+  }
+  void testIsConditionChanged(){
+        NormaliseToMonitor norm6;
+        norm6.initialize();
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","normMon"));
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("OutputWorkspace","normMon6"));
+        std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(&norm6,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+        // first time in a row the condition has changed as it shluld read the monitors from the workspace
+        TS_ASSERT(pID->isConditionChanged());
+        // and second time the monitons should be the same so no changes
+        TS_ASSERT(!pID->isConditionChanged());
+
+  }
+   void testAlgoConditionChanged(){
+        NormaliseToMonitor norm6;
+        norm6.initialize();
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","normMon"));
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("OutputWorkspace","normMon6"));
+
+        
+        Property* monSpec = norm6.getProperty("MonitorID");
+        // this function is usually called by GUI when senning input workspace. It should read monitors and report the condition changed
+        TS_ASSERT(monSpec->isConditionChanged());
+        // this funciton is called by gui when the above is true. It should not throw and change the validator
+        IPropertySettings *pSett;
+        TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
+        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(monSpec));
+        // it should return the list of allowed monitor ID-s
+        std::set<std::string> monitors = monSpec->allowedValues();
+        TS_ASSERT_EQUALS(1,monitors.size());
+        TS_ASSERT_EQUALS("0",*(monitors.begin()));
+
+        // now deal with ws without monitors
+       // create ws without monitors. 
+        MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+        boost::shared_ptr<Instrument> instr(new Instrument);
+        input->setInstrument(instr);
+        AnalysisDataService::Instance().add("someWS",input);
+
+        TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","someWS"));
+        // this function is usually called by GUI when setting an input workspace. It should read monitors and report the condition changed
+        TS_ASSERT(monSpec->isConditionChanged());
+        // this funciton is called by gui when the above is true. It should not throw and change the validator  
+        TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
+        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(monSpec));
+        // it should return the list of allowed monitor ID-s
+        monitors = monSpec->allowedValues();
+        TS_ASSERT(monitors.empty());
+
+
+
+   }
+  
+
 };
 
 #endif /*NORMALISETOMONITORTEST_H_*/

@@ -86,6 +86,7 @@ namespace Mantid
       virtual const std::string getWikiDescription() const { return m_WikiDescription; }
 
       void initialize();
+      std::map<std::string, std::string> validateInputs();
       bool execute();
       void executeAsSubAlg() { throw std::runtime_error("Not implemented."); }
       Poco::ActiveResult<bool> executeAsync();

@@ -125,7 +125,7 @@ namespace MantidWidgets
       m_currentFacility = &(mantidSettings.getFacility(name.toStdString()));
     }
 
-    const std::vector<InstrumentInfo> & instruments = m_currentFacility->Instruments();
+    const std::vector<InstrumentInfo> & instruments = m_currentFacility->instruments();
     std::vector<InstrumentInfo>::const_iterator iend = instruments.end();
     std::set<std::string> alphabetizedNames;
     for( std::vector<InstrumentInfo>::const_iterator itr = instruments.begin(); itr != iend; ++itr )
@@ -136,7 +136,7 @@ namespace MantidWidgets
     for( std::set<std::string>::const_iterator itr = alphabetizedNames.begin(); itr != namesEnd; ++itr )
     {
       QString name = QString::fromStdString(*itr);
-      std::string prefix = m_currentFacility->Instrument(*itr).shortName();
+      std::string prefix = m_currentFacility->instrument(*itr).shortName();
       QString shortName = QString::fromStdString(prefix);
       this->addItem(name, QVariant(shortName));
     }
@@ -145,7 +145,7 @@ namespace MantidWidgets
     QString defaultName;
     try
     {
-      defaultName = QString::fromStdString(m_currentFacility->Instrument().name());
+      defaultName = QString::fromStdString(m_currentFacility->instrument().name());
     }
     catch( Exception::NotFoundError &)
     {
@@ -194,7 +194,7 @@ namespace MantidWidgets
     QStringListIterator techItr(techniques);
     while( techItr.hasNext() )
     {
-      const std::vector<InstrumentInfo> instruments = facility.Instruments(techItr.next().toStdString());
+      const std::vector<InstrumentInfo> instruments = facility.instruments(techItr.next().toStdString());
       const size_t nInstrs = instruments.size();
       for( size_t i = 0; i < nInstrs; ++i )
       {

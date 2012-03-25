@@ -53,18 +53,14 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
 MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr& parent,
     size_t NVectors, size_t XLength, size_t YLength) const
 {
-
-  // Flag to indicate whether this workspace is the same size as the parent
-  bool differentSize = true;
-  if ( YLength == size_t(-1) ) differentSize = false;
-
-  // If the size parameters have not been specified, get them from the parent
-  if ( !differentSize )
+  bool differentSize(true);
+  // Use the parent sizes if new ones are not specified
+  if(NVectors == size_t(-1)) NVectors = parent->getNumberHistograms();
+  if(XLength == size_t(-1)) XLength = parent->dataX(0).size();
+  if(YLength == size_t(-1))
   {
-    // Find out the size of the parent
-    XLength = parent->dataX(0).size();
+    differentSize = false;
     YLength = parent->blocksize();
-    NVectors = parent->getNumberHistograms();
   }
 
   // If the parent is an EventWorkspace, we want it to spawn a Workspace2D (or managed variant) as a child
@@ -141,19 +137,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
         delete child->m_axes[i];
         // Call the 'different length' clone variant
         child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength,child.get());
-//        if (parent->getAxis(i)->isNumeric())
-//        {
-//          Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(newAxisLength);
-//          child->replaceAxis(i, newAxis);
-//          child->getAxis(i)->unit() = parent->getAxis(i)->unit();
-//        }
-//        if (parent->getAxis(i)->isText())
-//        {
-//          Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(newAxisLength);
-//          child->replaceAxis(i, newAxis);
-//        }
       }
-//      child->getAxis(i)->title() = parent->getAxis(i)->title();
     }
   }
 

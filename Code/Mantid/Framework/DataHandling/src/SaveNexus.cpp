@@ -40,6 +40,7 @@ Only floating point logs are stored and loaded at present.
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -94,9 +95,10 @@ void SaveNexus::init()
   // spectrum_min, spectrum_max - range of "spectra" numbers to write
   // spectrum_list            list of spectra values to write
   //
-  declareProperty("Title", "", new NullValidator<std::string> ,
+  declareProperty("Title", "", boost::make_shared<NullValidator>() ,
       "A title to describe the saved workspace");
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
+  
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   // declareProperty("EntryNumber", Mantid::EMPTY_INT(), mustBePositive,
   //  "(Not implemented yet) The index number of the workspace within the Nexus file\n"
@@ -104,7 +106,7 @@ void SaveNexus::init()
   declareProperty("WorkspaceIndexMin", 0, mustBePositive,
       "Number of first WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented");
-  declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
       "Number of last WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented.");
   declareProperty(new ArrayProperty<int> ("WorkspaceIndexList"),

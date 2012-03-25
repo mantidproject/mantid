@@ -82,6 +82,7 @@ set ( TEST_PY_FILES
   test/python/ConfigServiceTest.py
   test/python/CreateWorkspaceTest.py
   test/python/ExperimentInfoTest.py
+  test/python/FacilityInfoTest.py
   test/python/FilePropertyTest.py
   test/python/FileFinderTest.py
   test/python/FrameworkManagerTest.py
@@ -89,6 +90,7 @@ set ( TEST_PY_FILES
   test/python/IEventWorkspaceTest.py
   test/python/ImportModuleTest.py
   test/python/IPeaksWorkspaceTest.py
+  test/python/InstrumentInfoTest.py
   test/python/InstrumentTest.py
   test/python/ITableWorkspaceTest.py
   test/python/LoggerTest.py
@@ -107,9 +109,12 @@ set ( TEST_PY_FILES
   test/python/QuatTest.py
   test/python/V3DTest.py
   test/python/UnitCellTest.py
+  test/python/WorkspaceFactoryTest.py
   test/python/WorkspaceTest.py
   test/python/WorkspaceGroupTest.py
   test/python/WorkspacePropertiesTest.py
+  test/python/WorkspaceValidatorsTest.py
+  
 )
 
 set ( PYTEST_HELPERS test/python/testhelpers.py )

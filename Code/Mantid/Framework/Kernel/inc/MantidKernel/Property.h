@@ -150,7 +150,7 @@ public:
   /// Set the value of the property via a string.  If the value is unacceptable the value is not changed but a string is returned
   virtual std::string setValue(const std::string&) = 0;
   /// Set the value of the property via a DataItem pointer.  If the value is unacceptable the value is not changed but a string is returned
-  virtual std::string setValue(const boost::shared_ptr<DataItem>) = 0;
+  virtual std::string setDataItem(const boost::shared_ptr<DataItem>) = 0;
   /// Get the default value for the property which is the value the property was initialised with
   virtual std::string getDefault() const = 0;
 

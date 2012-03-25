@@ -23,6 +23,8 @@ Example of use in Python for create a simple histogram workspace, automatically 
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -61,9 +63,11 @@ void CreateWorkspace::init()
   
   declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "Name to be given to the created workspace.");
-  declareProperty(new ArrayProperty<double>("DataX", new MandatoryValidator<std::vector<double> >),
+
+  auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
+  declareProperty(new ArrayProperty<double>("DataX", required),
     "X-axis data values for workspace.");
-  declareProperty(new ArrayProperty<double>("DataY", new MandatoryValidator<std::vector<double> >),
+  declareProperty(new ArrayProperty<double>("DataY", required),
     "Y-axis data values for workspace (measures).");
   declareProperty(new ArrayProperty<double>("DataE"),
     "Error values for workspace. Optional.");
@@ -71,7 +75,7 @@ void CreateWorkspace::init()
     "Number of spectra to divide data into.");
   declareProperty("UnitX","", "The unit to assign to the XAxis");
   
-  declareProperty("VerticalAxisUnit","SpectraNumber",new ListValidator(unitOptions),
+  declareProperty("VerticalAxisUnit","SpectraNumber",boost::make_shared<StringListValidator>(unitOptions),
       "The unit to assign to the second Axis (leave blank for default Spectra number)");
   declareProperty(new ArrayProperty<std::string>("VerticalAxisValues"),
     "Values for the VerticalAxis.");

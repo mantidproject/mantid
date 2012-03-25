@@ -168,9 +168,9 @@ namespace Mantid
     * @param withDefaultValues :: If true then the value of default parameters will be included
     * @returns A stringized version of the manager
     */
-    std::string PropertyManagerOwner::asString(bool withDefaultValues) const
+    std::string PropertyManagerOwner::asString(bool withDefaultValues, char separator) const
     {
-      return m_properties->asString(withDefaultValues);
+      return m_properties->asString(withDefaultValues, separator);
     }
 
     /** 

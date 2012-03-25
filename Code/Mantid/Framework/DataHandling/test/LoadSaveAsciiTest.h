@@ -5,6 +5,7 @@
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <Poco/File.h>
 
 using namespace Mantid::API;

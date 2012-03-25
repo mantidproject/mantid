@@ -7,6 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <Poco/File.h>
 

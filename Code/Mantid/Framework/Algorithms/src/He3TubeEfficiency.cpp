@@ -73,29 +73,32 @@ He3TubeEfficiency::~He3TubeEfficiency()
  */
 void He3TubeEfficiency::init()
 {
-  API::CompositeWorkspaceValidator<> *wsValidator = new API::CompositeWorkspaceValidator<>;
-  wsValidator->add(new API::WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new API::HistogramValidator<>);
-  wsValidator->add(new API::InstrumentValidator<>);
+  using namespace Mantid::Kernel;
+
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<API::WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<API::HistogramValidator>();
+  wsValidator->add<API::InstrumentValidator>();
   this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
       "", Kernel::Direction::Input, wsValidator), "Name of the input workspace");
   this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
       "", Kernel::Direction::Output),
       "Name of the output workspace, can be the same as the input" );
-  Kernel::BoundedValidator<double> *mustBePositive = new Kernel::BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   this->declareProperty(new Kernel::PropertyWithValue<double>("ScaleFactor",
       1.0, mustBePositive), "Constant factor with which to scale the calculated"
       "detector efficiency. Same factor applies to all efficiencies.");
 
-  Kernel::ArrayBoundedValidator<double> *mustBePosArr = new Kernel::ArrayBoundedValidator<double>(*mustBePositive);
+  auto mustBePosArr = boost::make_shared<Kernel::ArrayBoundedValidator<double> >();
+  mustBePosArr->setLower(0.0);
   this->declareProperty(new Kernel::ArrayProperty<double>("TubePressure", mustBePosArr),
       "Provide overriding the default tube pressure. The pressure must "
       "be specified in atm.");
-  this->declareProperty(new Kernel::ArrayProperty<double>("TubeThickness", mustBePosArr->clone()),
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubeThickness", mustBePosArr),
       "Provide overriding the default tube thickness. The thickness must "
       "be specified in metres.");
-  this->declareProperty(new Kernel::ArrayProperty<double>("TubeTemperature", mustBePosArr->clone()),
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubeTemperature", mustBePosArr),
       "Provide overriding the default tube temperature. The temperature must "
       "be specified in Kelvin.");
 }

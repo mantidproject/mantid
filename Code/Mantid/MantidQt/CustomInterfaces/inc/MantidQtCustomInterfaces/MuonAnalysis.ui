@@ -1495,7 +1495,7 @@
           <item row="0" column="0">
            <widget class="QTableWidget" name="valueTable">
             <property name="rowCount">
-             <number>100</number>
+             <number>0</number>
             </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>390</number>
@@ -1507,108 +1507,8 @@
              <bool>true</bool>
             </attribute>
             <attribute name="verticalHeaderStretchLastSection">
-             <bool>true</bool>
+             <bool>false</bool>
             </attribute>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
             <column>
              <property name="text">
               <string>Log Value</string>
@@ -1619,166 +1519,6 @@
               <string>Include</string>
              </property>
             </column>
-            <item row="0" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="1" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="2" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="3" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="4" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="5" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="6" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="7" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="8" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="9" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="10" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="11" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="12" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="13" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="14" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="15" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="16" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="17" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="18" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="19" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -1826,7 +1566,7 @@
           <item row="0" column="0">
            <widget class="QTableWidget" name="fittingResultsTable">
             <property name="rowCount">
-             <number>50</number>
+             <number>0</number>
             </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>390</number>
@@ -1844,58 +1584,8 @@
              <bool>true</bool>
             </attribute>
             <attribute name="verticalHeaderStretchLastSection">
-             <bool>true</bool>
+             <bool>false</bool>
             </attribute>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
-            <row/>
             <column>
              <property name="text">
               <string>Fit Table Name</string>
@@ -1909,118 +1599,6 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </column>
-            <item row="0" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="1" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="2" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="3" column="1">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="4" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="5" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="6" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="7" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="8" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="9" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="10" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="11" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="12" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="13" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="14" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="15" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="16" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="17" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="18" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
-            <item row="19" column="1">
-             <property name="textAlignment">
-              <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>

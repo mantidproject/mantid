@@ -13,6 +13,7 @@ Iterates over the input workspace evaluating the test for each single value spec
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>
 #include <iomanip>
+#include "MantidKernel/ListValidator.h"
 
 
 namespace Mantid
@@ -47,12 +48,13 @@ MaskDetectorsIf::~MaskDetectorsIf()
  */
 void MaskDetectorsIf::init()
 {
+  using namespace Mantid::Kernel;
 	declareProperty(new API::WorkspaceProperty<>("InputWorkspace","",Direction::Input),
 			 "A 1D Workspace that contains values to select against " );
 	std::vector<std::string> select_mode(2);
 	  select_mode[0] = "SelectIf";
 	  select_mode[1] = "DeselectIf";
-	  declareProperty("Mode", "SelectIf", new Kernel::ListValidator(select_mode),
+	  declareProperty("Mode", "SelectIf", boost::make_shared<StringListValidator>(select_mode),
 	    "Mode to select or deselect detectors based on comparison with values" );
 	std::vector<std::string> select_operator(6);
 	  select_operator[0] = "Equal";
@@ -61,7 +63,7 @@ void MaskDetectorsIf::init()
 	  select_operator[3] = "GreaterEqual";
 	  select_operator[4] = "Less";
 	  select_operator[5] = "LessEqual";
-	  declareProperty("Operator", "Equal", new Kernel::ListValidator(select_operator),
+	  declareProperty("Operator", "Equal", boost::make_shared<StringListValidator>(select_operator),
 	  	    "Unary operator to compare to given values" );
 	  declareProperty("Value",0.0);
 	  declareProperty(new API::FileProperty("InputCalFile","", API::FileProperty::Load, ".cal"),

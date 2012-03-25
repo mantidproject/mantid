@@ -105,6 +105,7 @@ protected:
   void calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect);
   void cacheAllAssemblies();
   void findAndCorrectUGap();
+  double applyUCorrection(double u)const;
   void createPeakShapes(const QRect& viewport)const;
 
   const InstrumentActor* m_instrActor;
@@ -114,6 +115,7 @@ protected:
   double m_v_max;                      ///< Maximum v
   double m_height_max;  ///< Maximum detector height
   double m_width_max;   ///< Maximum detector width
+  double m_u_correction;///< Correction to u calculated by project() after findAndCorrectUGap()
 
   /// Info needed to draw detectors onto unwrapped image
   std::vector<UnwrappedDetector> m_unwrappedDetectors;

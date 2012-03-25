@@ -18,6 +18,8 @@ The [[Integration]] algorithm is used to sum up each spectrum between XMin & XMa
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumRowColumn.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -48,17 +50,17 @@ void SumRowColumn::init()
   std::vector<std::string> orientation;
   orientation.push_back("D_H");
   orientation.push_back("D_V");
-  declareProperty("Orientation","",new ListValidator(orientation));
+  declareProperty("Orientation","",boost::make_shared<StringListValidator>(orientation));
 
   // This is the range to select - the whole lot by default
   declareProperty("XMin",EMPTY_DBL());
   declareProperty("XMax",EMPTY_DBL());
 
   // For selecting a column range - the whole lot by default
-  BoundedValidator<int>* mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("HOverVMin",EMPTY_INT(),mustBePositive);
-  declareProperty("HOverVMax",EMPTY_INT(),mustBePositive->clone());
+  declareProperty("HOverVMax",EMPTY_INT(),mustBePositive);
 }
 
 void SumRowColumn::exec()

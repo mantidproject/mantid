@@ -37,17 +37,16 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE>
-class DLLExport NullValidator : public IValidator<TYPE>
+class DLLExport NullValidator : public IValidator
 {
 public:
-  IValidator<TYPE>* clone() const { return new NullValidator(*this); }
+  IValidator_sptr clone() const { return boost::make_shared<NullValidator>(*this); }
 
 private:
   /** Always returns valid, that is ""
    *  @returns an empty string
    */
-   std::string checkValidity( const TYPE &) const { return ""; }
+   std::string check(const boost::any &) const { return ""; }
 };
 
 } // namespace Kernel

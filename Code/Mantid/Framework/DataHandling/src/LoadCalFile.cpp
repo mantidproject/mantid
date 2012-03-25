@@ -77,7 +77,7 @@ namespace DataHandling
   {
     std::string grpName("Specify the Instrument");
 
-    alg->declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, true),
+    alg->declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An input workspace with the instrument we want to use.");
 
     alg->declareProperty(new PropertyWithValue<std::string>("InstrumentName","",Direction::Input),

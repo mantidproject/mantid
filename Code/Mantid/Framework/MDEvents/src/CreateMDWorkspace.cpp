@@ -25,6 +25,7 @@ You can create a file-backed MDEventWorkspace by specifying the Filename and Mem
 #include "MantidKernel/Memory.h"
 #include <math.h>
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -69,7 +70,7 @@ namespace MDEvents
     std::vector<std::string> propOptions;
     propOptions.push_back("MDEvent");
     propOptions.push_back("MDLeanEvent");
-    declareProperty("EventType", "MDLeanEvent",new ListValidator(propOptions),
+    declareProperty("EventType", "MDLeanEvent",boost::make_shared<StringListValidator>(propOptions),
       "Which underlying data type will event take.");
 
     declareProperty(

@@ -98,6 +98,20 @@ double ScaleTransformation::invXForm(double p, double p1, double p2, double s1, 
 
 double ScaleTransformation::xForm(double s, double s1, double s2, double p1, double p2) const
 {
+  double maxScreenCoord = 1e4;
+  if ((d_engine->type() != ScaleTransformation::Linear) && s <= 0.0){
+          if (p1 < p2){
+                  if (d_engine->testAttribute(QwtScaleEngine::Inverted))
+                          return maxScreenCoord;
+                  return -DBL_MAX;
+          }
+
+          if (d_engine->testAttribute(QwtScaleEngine::Inverted))
+                  return -DBL_MAX;
+
+          return maxScreenCoord;
+  }
+
 	if (!d_engine->hasBreak()){
 		QwtScaleTransformation *tr = new QwtScaleTransformation (d_engine->type());
 		double res = tr->xForm(s, s1, s2, p1, p2);

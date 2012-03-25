@@ -8,11 +8,15 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmProxy.h"
 
 using namespace Mantid::Kernel;
 using Mantid::API::IWorkspaceProperty;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::FrameworkManager;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmProxy;
 
 namespace MantidQt
 {
@@ -25,54 +29,10 @@ namespace API
    */
   AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget * parent)
   : QWidget(parent),
-    m_algoName("")
+    m_algoName(""),
+    m_algo(NULL), m_deleteAlgo(false),
+    m_inputHistory(NULL)
   {
-//    // Create a m_scroll area for the (rare) occasion when an algorithm has
-//    // so many properties it won't fit on the screen
-//    Qm_scrollArea *m_scroll = new Qm_scrollArea(this);
-//
-//    QWidget *viewport = new QWidget(this);
-//    // Put everything in a vertical box and put it inside the m_scroll area
-//    QVBoxLayout *mainLay = new QVBoxLayout();
-//    viewport->setLayout(mainLay);
-//
-//    // Add a layout for QDialog
-//    QVBoxLayout *dialog_layout = new QVBoxLayout();
-//    setLayout(dialog_layout);
-//    m_inputGrid = new QGridLayout;
-//
-//    // -------------- Layout the grid -------------------
-//    this->initLayout();
-//
-//    //The property boxes
-//    mainLay->addLayout(m_inputGrid);
-//
-//    // Add a stretchy item to allow the properties grid to be top-aligned
-//    mainLay->addStretch(1);
-//
-//    dialog_layout->addWidget(m_scroll); // add m_scroll to the QDialog's layout
-//
-//    m_scroll->setHorizontalm_scrollBarPolicy(Qt::m_scrollBarAlwaysOff);
-//    m_scroll->setVerticalm_scrollBarPolicy(Qt::m_scrollBarAsNeeded);
-//    m_scroll->setWidget(viewport);
-//    m_scroll->setWidgetResizable(true);
-//    m_scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
-//
-//    // At this point, all the widgets have been added and are visible.
-//    // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-//    viewport->setMinimumHeight( viewport->height() + 10 );
-//
-//    const int screenHeight = QApplication::desktop()->height();
-//    const int dialogHeight = viewport->height();
-//    // If the thing won't end up too big compared to the screen height,
-//    // resize the m_scroll area so we don't get a m_scroll bar
-//    if ( (dialogHeight+100) < 0.8*screenHeight )
-//    {
-//      m_scroll->setFixedHeight(viewport->height()+10);
-//    }
-//
-//    dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
-
     // Create the grid layout that will have all the widgets
     m_inputGrid = new QGridLayout;
 
@@ -111,38 +71,85 @@ namespace API
    */
   AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget()
   {
+    if (m_deleteAlgo) delete m_algo;
   }
   
-
-  Mantid::API::IAlgorithm * AlgorithmPropertiesWidget::getAlgorithm()
+  //----------------------------------------------------------------------------------------------
+  /** Sets the AlgorithmInputHistoryImpl object holding all histories.
+   * This object does NOT take ownership
+   *
+   * @param inputHistory :: AlgorithmInputHistoryImpl ptr
+   */
+  void AlgorithmPropertiesWidget::setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory)
   {
-    return m_algo.get();
+    m_inputHistory = inputHistory;
   }
 
+  //----------------------------------------------------------------------------------------------
+  ///@return the algorithm being viewed
+  Mantid::API::IAlgorithm * AlgorithmPropertiesWidget::getAlgorithm()
+  {
+    return m_algo;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Directly set the algorithm to view. Sets the name to match
+   *
+   * @param algo :: IAlgorithm bare ptr */
+  void AlgorithmPropertiesWidget::setAlgorithm(Mantid::API::IAlgorithm * algo)
+  {
+    if (!algo) return;
+    saveInput();
+    if (m_deleteAlgo) delete m_algo;
+    m_algo = algo;
+    m_algoName = QString::fromStdString(m_algo->name());
+    this->initLayout();
+    // Caller should replace this value as needed
+    m_deleteAlgo = false;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  ///@return the name of the algorithm being displayed
   QString AlgorithmPropertiesWidget::getAlgorithmName() const
   {
     return m_algoName;
   }
 
+  /** Set the algorithm to view using its name
+   *
+   * @param algo :: IAlgorithm bare ptr */
   void AlgorithmPropertiesWidget::setAlgorithmName(QString name)
   {
     FrameworkManager::Instance();
     m_algoName = name;
     try
     {
-      m_algo = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
-      m_algo->initialize();
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
+      AlgorithmProxy * algProxy = new AlgorithmProxy(alg);
+      algProxy->initialize();
+
+      // Set the algorithm ptr. This will redo the layout
+      this->setAlgorithm(algProxy);
+
+      // Take ownership of the pointer
+      m_deleteAlgo = true;
     }
     catch (std::runtime_error & )
     {
-      m_algo.reset();
     }
-    this->initLayout();
   }
 
 
+  //---------------------------------------------------------------------------------------------------------------
+  /** Sets the properties to force as enabled/disabled */
+  void AlgorithmPropertiesWidget::addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled)
+  {
+    this->m_enabled = enabled;
+    this->m_disabled = disabled;
+  }
 
   //---------------------------------------------------------------------------------------------------------------
+  /** @return true if the workspace has an input workspace */
   bool haveInputWS(const std::vector<Property*> & prop_list)
   {
     // For the few algorithms (mainly loading) that do not have input workspaces, we do not
@@ -163,9 +170,7 @@ namespace API
 
 
 
-  //----------------------------------
-  // Protected member functions
-  //----------------------------------
+  //---------------------------------------------------------------------------------------------------------------
   /**
   * Create the layout for this dialog.
   */
@@ -248,9 +253,25 @@ namespace API
         // Create the appropriate widget at this row in the grid.
         PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
 
-        m_propWidgets.push_back(widget);
+        // Set the previous input value, if any
+        if (m_inputHistory)
+        {
+          QString oldValue = m_inputHistory->previousInput(m_algoName, propName);
+          // Empty string if not found. This means use the default.
+          if (!oldValue.isEmpty())
+          {
+            prop->setValue(oldValue.toStdString());
+            widget->setValue(oldValue);
+          }
+        }
 
-        //TODO: Connect and TIE the widget (this is in GenericDialog.cpp)
+        m_propWidgets[propName] = widget;
+
+        // Whenever the value changes in the widget, this fires propertyChanged()
+        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+
+        // For clicking the "Replace Workspace" button (if any)
+        connect(widget, SIGNAL( replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
 
         // Only show the "Replace Workspace" button if the algorithm has an input workspace.
         if (hasInputWS)
@@ -262,6 +283,161 @@ namespace API
     } // (there are properties)
   }
 
+
+
+  //--------------------------------------------------------------------------------------
+  /** SLOT to be called whenever a property's value has just been changed
+   * and the widget has lost focus/value has been changed.
+   * @param pName :: name of the property that was changed
+   */
+  void AlgorithmPropertiesWidget::propertyChanged(const QString & pName)
+  {
+    UNUSED_ARG(pName);
+    //PropertyWidget * widget = m_propWidgets[pName];
+    this->hideOrDisableProperties();
+  }
+
+
+  //-------------------------------------------------------------------------------------------------
+  /** A slot to handle the replace workspace button click
+   *
+   * @param propName :: the property for which we clicked "Replace Workspace"
+   */
+  void AlgorithmPropertiesWidget::replaceWSClicked(const QString & propName)
+  {
+    if (m_propWidgets.contains(propName))
+    {
+      PropertyWidget * propWidget = m_propWidgets[propName];
+      if (propWidget)
+      {
+        // Find the name to put in the spot
+        QString wsName("");
+        for (auto it = m_propWidgets.begin(); it != m_propWidgets.end(); it++)
+        {
+          // Only look at workspace properties
+          PropertyWidget* otherWidget = it.value();
+          Property * prop = it.value()->getProperty();
+          IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+          if (otherWidget && wsProp)
+          {
+            if (prop->direction() == Direction::Input)
+            {
+              // Input workspace property. Get the text typed in.
+              wsName = otherWidget->getValue();
+              break;
+            }
+          }
+        }
+
+        if (!wsName.isEmpty())
+          propWidget->setValue(wsName);
+      }
+    }
+
+  }
+
+
+  //-------------------------------------------------------------------------------------------------
+  /** Check if the control should be enabled for this property
+   * @param propName :: The name of the property
+   */
+  bool AlgorithmPropertiesWidget::isWidgetEnabled(Property * property, const QString & propName) const
+  {
+    // To avoid errors
+    if( propName.isEmpty() ) return true;
+    if (!property) return true;
+
+    // Keep things enabled if requested
+    if( m_enabled.contains(propName) ) return true;
+
+    /** The control is disabled if
+    *   (1) It is contained in the disabled list or
+    *   (2) A user passed a value into the dialog
+    */
+    if(m_disabled.contains(propName))
+    {
+      return false;
+    }
+    else
+    {
+      // Rely on the property to determine if it is enabled.
+      return property->isEnabled();
+    }
+
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  /** Go through all the properties, and check their validators to determine
+   * whether they should be made disabled/invisible.
+   * It also shows/hids the validators.
+   * All properties' values should be set already, otherwise the validators
+   * will be running on old data.
+   */
+  void AlgorithmPropertiesWidget::hideOrDisableProperties()
+  {
+    for( auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr )
+    {
+      PropertyWidget * widget = pitr.value();
+      Mantid::Kernel::Property *prop = widget->getProperty();
+      QString propName = pitr.key();
+
+      // Set the enabled and visible flags based on what the validators say. Default is always true.
+      bool visible = prop->isVisible();
+      // Dynamically check if the widget should be enabled.
+      bool enabled = this->isWidgetEnabled(prop, propName);
+
+      // Dynamic PropertySettings objects allow a property to change validators.
+      // This removes the old widget and creates a new one instead.
+      if (prop->isConditionChanged())
+      {
+        prop->getSettings()->applyChanges(prop);
+
+        // Delete the old widget
+        int row = widget->getGridRow();
+        QGridLayout * layout = widget->getGridLayout();
+        widget->deleteLater();
+
+        // Create the appropriate widget at this row in the grid.
+        widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+
+        // Whenever the value changes in the widget, this fires propertyChanged()
+        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+      }
+
+      // Show/hide the validator label (that red star)
+      QString error = "";
+      if (m_errors.contains(propName)) error = m_errors[propName];
+      // Always show controls that are in error
+      if (error.length() != 0)
+        visible = true;
+
+      // Hide/disable the widget
+      widget->setEnabled( enabled );
+      widget->setVisible( visible );
+    } // for each property
+
+    this->repaint(true);
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  /** When closing or changing algorithm, this saves the input
+   * history to QSettings
+   */
+  void AlgorithmPropertiesWidget::saveInput()
+  {
+    if (m_inputHistory)
+    {
+      for( auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr )
+      {
+        PropertyWidget * widget = pitr.value();
+        QString propName = pitr.key();
+        QString value = widget->getValue();
+//        Mantid::Kernel::Property *prop = widget->getProperty();
+//        if (!prop || prop->remember())
+        m_inputHistory->storeNewValue(m_algoName, QPair<QString, QString>(propName, value));
+      }
+    }
+  }
 
 } // namespace Mantid
 } // namespace API

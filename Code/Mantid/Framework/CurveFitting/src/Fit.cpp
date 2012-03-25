@@ -145,6 +145,8 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
 #include <numeric>
 #include <cmath>
 #include <iomanip>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -182,7 +184,7 @@ namespace CurveFitting
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>("WorkspaceIndex",0, mustBePositive),
                     "The Workspace Index to fit in the input workspace");
@@ -198,7 +200,7 @@ namespace CurveFitting
     declareProperty("Ties","","Math expressions that tie parameters to other parameters or to constants" );
     declareProperty("Constraints","","List of constraints" );
 
-    declareProperty("MaxIterations", 500, mustBePositive->clone(),
+    declareProperty("MaxIterations", 500, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
     declareProperty("OutputStatus","", Direction::Output);
     declareProperty("OutputChi2overDoF",0.0, Direction::Output);
@@ -210,11 +212,11 @@ namespace CurveFitting
 
     std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
 
-    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
+    declareProperty("Minimizer","Levenberg-Marquardt",boost::make_shared<StringListValidator>(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
-    declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
+    declareProperty("CostFunction","Least squares",boost::make_shared<StringListValidator>(costFuncOptions),
       "The cost function to be used for the fit, default is Least squares", Direction::InOut);
   }
 
@@ -267,9 +269,10 @@ namespace CurveFitting
     if (fit->existsProperty("Parameters"))
     {
       // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
-      declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
-      declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
-      declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
+      auto allowedNull = boost::make_shared<NullValidator>();
+      declareProperty(new ArrayProperty<double> ("Parameters", allowedNull,Direction::Output));
+      declareProperty(new ArrayProperty<double> ("Errors", allowedNull,Direction::Output));
+      declareProperty(new ArrayProperty<std::string> ("ParameterNames", allowedNull,Direction::Output));
       std::vector<double> params = fit->getProperty("Parameters");
       errors = fit->getProperty("Errors");
       std::vector<std::string> parNames = fit->getProperty("ParameterNames");

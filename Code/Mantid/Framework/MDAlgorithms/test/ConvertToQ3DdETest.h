@@ -26,17 +26,6 @@ class ConvertTo3DdETestHelper: public ConvertToMDEvents
 {
 public:
     ConvertTo3DdETestHelper(){};
-   // private (PROTECTED) methods, exposed for testing:
-   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDWSDescription &TargWSDescription, 
-                                       bool is_powder=false)const{
-       return ConvertToMDEvents::getTransfMatrix(inWS2D,TargWSDescription,is_powder);
-   }
-   /// construct meaningful dimension names:
-   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
-        ConvertToMDEvents::buildDimNames(TargWSDescription);
-   }
-
- 
 };
 
 // Test is transformed from ConvetToQ3DdE but actually tests some aspects of ConvertToMDEvents algorithm. 
@@ -65,28 +54,6 @@ void testExecThrow(){
 }
 
 
-//TODO:  this check has to be implemented !!!!
-void t__tWithExistingLatticeTrowsLowEnergy(){
-    // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
-    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
-    // add workspace energy
-     ws2D->mutableRun().addProperty("Ei",2.,"meV",true);
-
-    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
-
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Inelastic"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50.,-50,10"));
-
-
-
-    pAlg->execute();
-    TSM_ASSERT("Should be not-successful as input energy was lower then obtained",!pAlg->isExecuted());
-
-}
 void testExecFailsOnNewWorkspaceNoLimits(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
     // add workspace energy
@@ -112,7 +79,7 @@ void testExecFailsOnNewWorkspaceNoMaxLimits(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -131,7 +98,7 @@ void testExecFailsLimits_MinGeMax(){
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
  
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -152,7 +119,7 @@ void testExecFine(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -176,7 +143,7 @@ void testExecAndAdd(){
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -187,50 +154,13 @@ void testExecAndAdd(){
 
     pAlg->execute();
     TSM_ASSERT("Should fail as no adding to existing ws yet ",pAlg->isExecuted());
-    //TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
  
 
 }
 
-void testTransfMat1()
-{
-     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
-     OrientedLattice * latt = new OrientedLattice(10.4165,3.4165,10.4165, 90., 90., 90.);
-     V3D u(1,0,0);
-     V3D v(0,0,1);
-     Kernel::Matrix<double> U0=latt->setUFromVectors(u,v);
-     std::vector<double> rot0=U0.get_vector();
-     ws2D->mutableSample().setOrientedLattice(latt);
 
-     MDWSDescription TWS(4);
-     TWS.convert_to_hkl=false;
-     TWS.is_uv_default=true;
-     TWS.emode=1;
-     // get transformation matrix from oriented lattice. 
-     std::vector<double> rot=pAlg->getTransfMatrix(ws2D,TWS);
-  
-     for(int i=0;i<9;i++){
-        TS_ASSERT_DELTA(rot0[i],rot[i],1.e-6);
-     }
-     Kernel::Matrix<double> rez(rot);
-     V3D ez = rez*u;
-     ez.normalize();
-     V3D ex = rez*v;
-     ex.normalize();
-     TS_ASSERT_EQUALS(V3D(0,0,1),ez);
-     TS_ASSERT_EQUALS(V3D(1,0,0),ex);
-
-     // to allow recalculate axis names specific for Q3D mode
-     TWS.AlgID="QhQkQl";
-     pAlg->buildDimNames(TWS);
-     TS_ASSERT_EQUALS("[Qh,0,0]",TWS.dimNames[0]);
-     TS_ASSERT_EQUALS("[0,Qk,0]",TWS.dimNames[1]);
-     TS_ASSERT_EQUALS("[0,0,Ql]",TWS.dimNames[2]);
- 
-
-}
-
-// COMPARISON WITH HORACE:  --->
+// COMPARISON WITH HORACE:  --->    DISABLED
 void xtestTransfMat1()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
@@ -386,6 +316,28 @@ void t__tResult(){
 
 
 // COMPARISON WITH HORACE: END  <---
+//TODO:  this check has to be implemented !!!!
+void t__tWithExistingLatticeTrowsLowEnergy(){
+    // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+    // add workspace energy
+     ws2D->mutableRun().addProperty("Ei",2.,"meV",true);
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Inelastic"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50.,-50,10"));
+
+
+
+    pAlg->execute();
+    TSM_ASSERT("Should be not-successful as input energy was lower then obtained",!pAlg->isExecuted());
+
+}
 
 
 

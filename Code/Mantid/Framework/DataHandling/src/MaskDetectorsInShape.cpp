@@ -15,6 +15,7 @@ MaskDetectorsInShape runs the following algorithms as child algorithms:
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -40,7 +41,7 @@ void MaskDetectorsInShape::init()
 {
   declareProperty(new WorkspaceProperty<> ("Workspace", "", Direction::InOut),
       "Name of the input workspace");
-  declareProperty("ShapeXML", "", new MandatoryValidator<std::string> (),
+  declareProperty("ShapeXML", "", boost::make_shared<MandatoryValidator<std::string> >(),
       "XML definition of the user defined shape");
   declareProperty("IncludeMonitors", false,
       "Whether to include monitors if they are contained in the shape (default false)");

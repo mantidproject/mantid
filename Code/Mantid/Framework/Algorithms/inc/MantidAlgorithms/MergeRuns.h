@@ -77,6 +77,7 @@ private:
   typedef std::vector< std::pair<int, int> >  AdditionTable;
 
   // Methods called by exec()
+  using Mantid::API::Algorithm::validateInputs;
   std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces);
   bool validateInputsForEventWorkspaces(const std::vector<std::string>& inputWorkspaces);
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const;

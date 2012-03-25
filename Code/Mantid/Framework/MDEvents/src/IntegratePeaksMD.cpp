@@ -20,10 +20,10 @@ Integration is performed by summing the weights of each MDEvent within the provi
 * A sphere of radius '''PeakRadius''' is integrated around the center of each peak.
 ** This gives the summed intensity <math>I_{peak}</math> and the summed squared error <math>\sigma I_{peak}^2</math>.
 ** The volume of integration is <math>V_{peak}</math>.
-* If '''BackgroundRadius''' is specified, then a shell, with radius r where '''BackgroundStartRadius''' < r < '''BackgroundRadius''', is integrated.
+* If '''BackgroundOuterRadius''' is specified, then a shell, with radius r where '''BackgroundInnerRadius''' < r < '''BackgroundOuterRadius''', is integrated.
 ** This gives the summed intensity <math>I_{shell}</math> and the summed squared error <math>\sigma I_{shell}^2</math>.
 ** The volume of integration is <math>V_{shell}</math>.
-** '''BackgroundStartRadius''' allows you to give some space between the peak and the background area.
+** '''BackgroundInnerRadius''' allows you to give some space between the peak and the background area.
 
 ==== Background Subtraction ====
 
@@ -43,9 +43,9 @@ with the errors summed in quadrature:
 
 <math>\sigma I_{corr}^2 = \sigma I_{peak}^2 + \sigma I_{bg}^2 </math>
 
-=== If BackgroundStartRadius is Omitted ===
+=== If BackgroundInnerRadius is Omitted ===
 
-If BackgroundStartRadius is left blank, then '''BackgroundStartRadius''' = '''PeakRadius''', and the integration is as follows:
+If BackgroundInnerRadius is left blank, then '''BackgroundInnerRadius''' = '''PeakRadius''', and the integration is as follows:
 
 [[File:IntegratePeaksMD_graph2.png]]
 
@@ -60,7 +60,7 @@ FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
 
 # Perform the peak integration, in-place in the 'peaks' workspace.
 IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
-    PeakRadius=0.12, BackgroundRadius=0.2, BackgroundStartRadius=0.16,
+    PeakRadius=0.12, BackgroundOuterRadius=0.2, BackgroundInnerRadius=0.16,
     OutputWorkspace='peaks')
 </source>
 
@@ -71,6 +71,7 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/IntegratePeaksMD.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -121,21 +122,21 @@ namespace MDEvents
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "Q (lab frame)",new ListValidator(propOptions),
+    declareProperty("CoordinatesToUse", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
       "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
        );
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to integrate (in the same units as the workspace).");
 
-    declareProperty(new PropertyWithValue<double>("BackgroundRadius",0.0,Direction::Input),
-        "End radius to use to evaluate the background of the peak.\n"
-        "The signal density around the peak (BackgroundStartRadius < r < BackgroundRadius) is used to estimate the background under the peak.\n"
-        "If smaller than PeakRadius, no background measurement is done." );
+    declareProperty(new PropertyWithValue<double>("BackgroundInnerRadius",0.0,Direction::Input),
+        "Inner radius to use to evaluate the background of the peak.\n"
+        "If smaller than PeakRadius, then we assume BackgroundInnerRadius = PeakRadius." );
 
-    declareProperty(new PropertyWithValue<double>("BackgroundStartRadius",0.0,Direction::Input),
-        "Start radius to use to evaluate the background of the peak.\n"
-        "If smaller than PeakRadius, then we assume BackgroundStartRadius = PeakRadius." );
+    declareProperty(new PropertyWithValue<double>("BackgroundOuterRadius",0.0,Direction::Input),
+        "Outer radius to use to evaluate the background of the peak.\n"
+        "The signal density around the peak (BackgroundInnerRadius < r < BackgroundOuterRadius) is used to estimate the background under the peak.\n"
+        "If smaller than PeakRadius, no background measurement is done." );
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
         "A PeaksWorkspace containing the peaks to integrate.");
@@ -171,11 +172,11 @@ namespace MDEvents
     /// Radius to use around peaks
     double PeakRadius = getProperty("PeakRadius");
     /// Background (end) radius
-    double BackgroundRadius = getProperty("BackgroundRadius");
+    double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
-    double BackgroundStartRadius = getProperty("BackgroundStartRadius");
-    if (BackgroundStartRadius < PeakRadius)
-      BackgroundStartRadius = PeakRadius;
+    double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    if (BackgroundInnerRadius < PeakRadius)
+      BackgroundInnerRadius = PeakRadius;
 
     // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
@@ -211,37 +212,37 @@ namespace MDEvents
       // Integrate around the background radius
       signal_t bgSignal = 0;
       signal_t bgErrorSquared = 0;
-      if (BackgroundRadius > PeakRadius)
+      if (BackgroundOuterRadius > PeakRadius)
       {
-        // Get the total signal inside "BackgroundRadius"
-        ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundRadius*BackgroundRadius), bgSignal, bgErrorSquared);
+        // Get the total signal inside "BackgroundOuterRadius"
+        ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
 
-        // Evaluate the signal inside "BackgroundStartRadius"
+        // Evaluate the signal inside "BackgroundInnerRadius"
         signal_t interiorSignal = 0;
         signal_t interiorErrorSquared = 0;
 
         // Integrate this 3rd radius, if needed
-        if (BackgroundStartRadius != PeakRadius)
-          ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundStartRadius*BackgroundStartRadius), interiorSignal, interiorErrorSquared);
+        if (BackgroundInnerRadius != PeakRadius)
+          ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
         else
         {
-          // PeakRadius == BackgroundStartRadius, so use the previous value
+          // PeakRadius == BackgroundInnerRadius, so use the previous value
           interiorSignal = signal;
           interiorErrorSquared = errorSquared;
         }
 
-        // Subtract the peak part to get the intensity in the shell (BackgroundStartRadius < r < BackgroundRadius)
+        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
         bgSignal -= interiorSignal;
         // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
         bgErrorSquared -= interiorErrorSquared;
 
-        // Relative volume of peak vs the BackgroundRadius sphere
-        double ratio = (PeakRadius / BackgroundRadius);
+        // Relative volume of peak vs the BackgroundOuterRadius sphere
+        double ratio = (PeakRadius / BackgroundOuterRadius);
         double peakVolume = ratio * ratio * ratio;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundStartRadius / BackgroundRadius);
-        // Volume of the bg shell, relative to the volume of the BackgroundRadius sphere
+        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
         double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
 
         // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume

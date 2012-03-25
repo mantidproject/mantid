@@ -11,6 +11,9 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -40,40 +43,40 @@ CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader()
 
 void CalculateTransmissionBeamSpreader::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
-  wsValidator->add(new CommonBinsValidator<>);
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<CommonBinsValidator>();
+  wsValidator->add<HistogramValidator>();
   
   declareProperty(new WorkspaceProperty<>("SampleSpreaderRunWorkspace","",Direction::Input,wsValidator),
       "The workspace containing the sample beam-spreader run");
-  declareProperty(new WorkspaceProperty<>("DirectSpreaderRunWorkspace","",Direction::Input,wsValidator->clone()),
+  declareProperty(new WorkspaceProperty<>("DirectSpreaderRunWorkspace","",Direction::Input,wsValidator),
       "The workspace containing the direct beam-spreader run");
-  declareProperty(new WorkspaceProperty<>("SampleScatterRunWorkspace","",Direction::Input,wsValidator->clone()),
+  declareProperty(new WorkspaceProperty<>("SampleScatterRunWorkspace","",Direction::Input,wsValidator),
       "The workspace containing the sample scattering run");
-  declareProperty(new WorkspaceProperty<>("DirectScatterRunWorkspace","",Direction::Input,wsValidator->clone()),
+  declareProperty(new WorkspaceProperty<>("DirectScatterRunWorkspace","",Direction::Input,wsValidator),
       "The workspace containing the direct beam scattering run");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "The fitted transmission correction");
 
-  BoundedValidator<int> *zeroOrMore = new BoundedValidator<int>();
+  auto zeroOrMore = boost::make_shared<BoundedValidator<int> >();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
   declareProperty("IncidentBeamMonitor",2,zeroOrMore,"The UDET of the incident beam monitor");
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);  
 
   declareProperty("SpreaderTransmissionValue",1.0,mustBePositive,"Transmission coefficient of the beam spreader");
-  declareProperty("SpreaderTransmissionError",0.0,mustBePositive->clone(),"Uncertainty on the transmission coefficient of the beam spreader");
+  declareProperty("SpreaderTransmissionError",0.0,mustBePositive,"Uncertainty on the transmission coefficient of the beam spreader");
 
-  declareProperty("MinWavelength",2.2,mustBePositive->clone(),"The minimum wavelength for the fit");
-  declareProperty("MaxWavelength",10.0,mustBePositive->clone(),"The maximum wavelength for the fit");
+  declareProperty("MinWavelength",2.2,mustBePositive,"The minimum wavelength for the fit");
+  declareProperty("MaxWavelength",10.0,mustBePositive,"The maximum wavelength for the fit");
 
   std::vector<std::string> options(2);
   options[0] = "Linear";
   options[1] = "Log";
-  declareProperty("FitMethod","Log",new ListValidator(options),
+  declareProperty("FitMethod","Log",boost::make_shared<StringListValidator>(options),
     "Whether to fit directly to the transmission curve (Linear) or to the log of it (Log)");
 
   declareProperty("OutputUnfittedData",false);

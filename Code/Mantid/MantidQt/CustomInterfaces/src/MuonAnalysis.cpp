@@ -107,7 +107,6 @@ void MuonAnalysis::initLayout()
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
 
   m_optionTab->initLayout();
-  m_resultTableTab->initLayout();
   m_fitDataTab->init();
 
   // connect guess alpha
@@ -324,6 +323,10 @@ void MuonAnalysis::runSaveGroupButton()
   filter += ";;AllFiles (*.*)";
   QString groupingFile = QFileDialog::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
+
+  // Add extension if the groupingFile specified doesn't have one. (Solving Linux problem).
+  if (!groupingFile.endsWith(".xml"))
+    groupingFile += ".xml";
 
   if( ! groupingFile.isEmpty() )
   {

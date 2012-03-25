@@ -60,11 +60,11 @@ namespace
 void export_AlgorithmFactory()
 {
 
-  class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactory", no_init)
-      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
+  class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)
+      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
+      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
         "Returns a reference to the AlgorithmFactory singleton")
       .staticmethod("Instance")
-      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
     ;
 
 }
@@ -77,8 +77,10 @@ namespace
   void registerAlgorithm(boost::python::object obj)
   {
     using Mantid::PythonInterface::PythonObjectInstantiator;
+    using Mantid::Kernel::AbstractInstantiator;
     using Mantid::PythonInterface::AlgorithmWrapper;
     using Mantid::API::Algorithm;
+    using Mantid::API::IAlgorithm_sptr;
     static PyObject * const pyAlgClass = (PyObject*)converter::registered<AlgorithmWrapper>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
@@ -95,7 +97,8 @@ namespace
       throw std::invalid_argument("Cannot register an algorithm that does not derive from PythonAlgorithm.");
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
-    AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType));
+    // Takes ownership of instantiator and replaces any existing algorithm
+    AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), true);
   }
 }
 

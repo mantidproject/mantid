@@ -33,9 +33,9 @@ using namespace API;
 
 void ConvertToDistribution::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new RawCountValidator<>);
+  auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<RawCountValidator>();
   declareProperty(
     new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut,wsValidator),
     "The name of the workspace to convert" );

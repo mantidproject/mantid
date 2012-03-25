@@ -34,7 +34,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadDetectorsGroupingFile : public API::Algorithm
+  class DLLExport LoadDetectorsGroupingFile: public API::Algorithm
   {
   public:
     LoadDetectorsGroupingFile();
@@ -97,6 +97,73 @@ namespace DataHandling
 
   };
 
+
+  class DLLExport LoadGroupXMLFile
+  {
+  public:
+    LoadGroupXMLFile();
+    ~LoadGroupXMLFile();
+
+    void loadXMLFile(std::string xmlfilename);
+    void setDefaultStartingGroupID(int startgroupid)
+    {
+      mStartGroupID = startgroupid;
+    }
+    void getDetectorIDs(std::vector<detid_t>& detids);
+    void getSpectrumIDs(std::vector<specid_t>& specids);
+
+    std::string getInstrumentName()
+    {
+      return mInstrumentName;
+    }
+    bool isGivenInstrumentName()
+    {
+      return mUserGiveInstrument;
+    }
+
+    /// Data structures to store XML to Group/Detector conversion map
+    std::map<int, std::vector<std::string> > getGroupComponentsMap()
+    {
+      return mGroupComponentsMap;
+    }
+    std::map<int, std::vector<detid_t> > getGroupDetectorsMap()
+    {
+      return  mGroupDetectorsMap;
+    }
+    std::map<int, std::vector<int> > getGroupSpectraMap()
+    {
+      return mGroupSpectraMap;
+    }
+
+  private:
+    /// Instrument name
+    std::string mInstrumentName;
+    /// User-define instrument name
+    bool mUserGiveInstrument;
+    /// XML document loaded
+    Poco::XML::Document* pDoc;
+    /// Root element of the parsed XML
+    Poco::XML::Element* pRootElem;
+    /// Data structures to store XML to Group/Detector conversion map
+    std::map<int, std::vector<std::string> > mGroupComponentsMap;
+    std::map<int, std::vector<detid_t> > mGroupDetectorsMap;
+    std::map<int, std::vector<int> > mGroupSpectraMap;
+    int mStartGroupID;
+
+    /// Initialize XML parser
+    void initializeXMLParser(const std::string & filename);
+    /// Parse XML
+    void parseXML();
+    /// Convert detector ID combination string to vector of detectors
+    void parseDetectorIDs(std::string inputstring, std::vector<detid_t>& detids);
+    /// Convert spectrum IDs combintation string to vector of spectrum ids
+    void parseSpectrumIDs(std::string inputstring, std::vector<int>& specids);
+    /// Get attribute value from an XML node
+    static std::string getAttributeValueByName(Poco::XML::Node* pNode, std::string attributename, bool& found);
+    /// Split and convert string
+    void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
+
+  };
 
 } // namespace DataHandling
 } // namespace Mantid

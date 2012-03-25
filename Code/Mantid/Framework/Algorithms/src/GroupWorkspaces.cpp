@@ -24,7 +24,7 @@ using namespace API;
 void GroupWorkspaces::init()
 {
 
-  declareProperty(new ArrayProperty<std::string> ("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >()),
+  declareProperty(new ArrayProperty<std::string> ("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Name of the Input Workspaces to Group");
   declareProperty(new WorkspaceProperty<WorkspaceGroup> ("OutputWorkspace", "", Direction::Output),
       "Name of the workspace to be created as the output of grouping ");

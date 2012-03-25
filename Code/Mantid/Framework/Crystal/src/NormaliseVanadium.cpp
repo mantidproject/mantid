@@ -8,6 +8,7 @@
 #include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
@@ -37,15 +38,15 @@ NormaliseVanadium::NormaliseVanadium() : API::Algorithm()
 void NormaliseVanadium::init()
 {
   // The input workspace must have an instrument and units of wavelength
-  CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
-  //wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
-  wsValidator->add(new InstrumentValidator<>());
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,wsValidator),
     "The X values for the input workspace must be in units of wavelength or TOF");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", 1.0, mustBePositive,
     "Divide by vanadium at this wavelength");

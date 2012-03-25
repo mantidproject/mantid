@@ -1341,8 +1341,8 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
     
     def  __init__(self, wavelength_deps=[]):
         super(CalculateNormISIS, self).__init__(wavelength_deps)
-        #algorithm to be used to load correction files
-        self._load='Load'
+        #algorithm to be used to load pixel correction files
+        self._load='LoadRKH'
         #a parameters string to add as the last argument to the above algorithm
         self._load_params='FirstColumnValue="SpectrumNumber"'
 
@@ -1817,6 +1817,11 @@ class UserFile(ReductionStep):
             detector.z_corr = shift
         elif det_axis == 'ROT':
             detector.rot_corr = shift
+        # 21/3/12 RKH added 2 variables 
+        elif det_axis == 'RADIUS':
+            detector.radius_corr = shift
+        elif det_axis == 'SIDE':
+            detector.radius_side = shift
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
@@ -1845,7 +1850,6 @@ class UserFile(ReductionStep):
             # check first if what to turn of a background for a specific
             # monitor using 'BACK/M2/OFF'.
             parts = arguments.split('/OFF')
-            print parts
             if len(parts) == 2:
                 # set specific monitor to OFF
                 reducer.inst.set_TOFs(None, None, int(parts[0]))

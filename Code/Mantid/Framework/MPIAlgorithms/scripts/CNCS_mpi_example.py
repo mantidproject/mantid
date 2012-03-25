@@ -7,16 +7,16 @@
 #############################################################################################
 
 from MantidFramework import * 
-from mpi4py import MPI
+import boostmpi as mpi
 mtd.initialise()
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
+comm = mpi.world
+rank = comm.rank
 size = comm.size
 
 print "Running on rank %d of %d" % (rank, size)
 
-eventfile="/ccs/home/8oz/Code/Mantid/Test/AutoTestData/CNCS_7860_event.nxs"
+eventfile="../../../../../Test/AutoTestData/CNCS_7860_event.nxs"
 wksp="partial"
 binning="40e3, 100, 70e3"
 

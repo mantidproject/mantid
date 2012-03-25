@@ -22,7 +22,6 @@ nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
 *WIKI*/
 #include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -30,6 +29,7 @@ nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
 #include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <cstdio>
 
@@ -85,7 +85,7 @@ namespace Crystal
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
           "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(1);
 
     this->declareProperty(

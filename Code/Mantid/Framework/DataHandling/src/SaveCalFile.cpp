@@ -64,13 +64,13 @@ namespace DataHandling
    */
   void SaveCalFile::init()
   {
-    declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An GroupingWorkspace workspace giving the grouping info.");
 
-    declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
 
-    declareProperty(new WorkspaceProperty<>("MaskWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An Workspace workspace giving which detectors are masked.");
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".cal"),

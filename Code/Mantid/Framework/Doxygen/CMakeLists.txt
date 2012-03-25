@@ -14,10 +14,10 @@ if(DOXYGEN_FOUND)
   if ( LATEX_EXECUTABLE )
     find_program (DVIPS_EXECUTABLE dvips )
     if ( NOT DVIPS_EXECUTABLE )
-      message ( status " dvips not found...no equations generated. doxygen will complain" )
+      message ( STATUS "dvips not found...no equations generated. doxygen will complain" )
     endif ( NOT DVIPS_EXECUTABLE )
   else ( LATEX_EXECUTABLE )
-    message ( status " latex not found...no equations generated. doxygen will complain" )
+    message ( STATUS "latex not found...no equations generated. doxygen will complain" )
   endif ( LATEX_EXECUTABLE )
 
   # to use qtcreator help go to Tools->Options->Help->Documentation->Add 

@@ -52,19 +52,19 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
         "The workspace name to use as input" );
       //Declare optional properties
-      BoundedValidator<double> * mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("Xminimum", 0.0, mustBePositive,
         "No bin that contains x values lower than this will be saved (default\n"
         "0)" );
-      declareProperty("Xmaximum", 0.0, mustBePositive->clone(),
+      declareProperty("Xmaximum", 0.0, mustBePositive,
         "No bin that contains x values higher than this will saved (default\n"
         "the highest x value)" );
     }
 
     /**
     * Executes the algorithm.
-    * Saves the workspace specified by the user to tje VTK XML format
+    * Saves the workspace specified by the user to the VTK XML format
     */
     void SaveVTK::exec()
     {

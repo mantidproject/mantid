@@ -15,6 +15,7 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -39,29 +40,30 @@ using namespace DataObjects;
 
 void TOFSANSResolution::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::InOut, new WorkspaceUnitValidator<Workspace2D>("MomentumTransfer")),
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::InOut,
+                                                     boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("ReducedWorkspace","",Direction::Input, wsValidator),
       "I(Q) workspace");
-  declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator));
+  declareProperty(new ArrayProperty<double>("OutputBinning", boost::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
   declareProperty("MaxWavelength", EMPTY_DBL(), "Maximum wavelength to use.");
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
   declareProperty("PixelSizeX", 5.15, positiveDouble,
       "Pixel size in the X direction (mm).");
-  declareProperty("PixelSizeY", 5.15, positiveDouble->clone(),
+  declareProperty("PixelSizeY", 5.15, positiveDouble,
       "Pixel size in the Y direction (mm).");
-  declareProperty("SampleApertureRadius", 5.0, positiveDouble->clone(),
+  declareProperty("SampleApertureRadius", 5.0, positiveDouble,
       "Sample aperture radius (mm).");
-  declareProperty("SourceApertureRadius", 10.0, positiveDouble->clone(),
+  declareProperty("SourceApertureRadius", 10.0, positiveDouble,
       "Source aperture radius (mm).");
-  declareProperty("DeltaT", 250.0, positiveDouble->clone(),
+  declareProperty("DeltaT", 250.0, positiveDouble,
       "TOF spread (microsec).");
 }
 

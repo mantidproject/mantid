@@ -24,6 +24,7 @@ If the GroupNames parameter is given, the names of banks matching the comma-sepa
 #include <queue>
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -67,7 +68,7 @@ namespace Algorithms
    */
   void CreateGroupingWorkspace::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An input workspace with the instrument we want to use.");
 
     declareProperty(new PropertyWithValue<std::string>("InstrumentName","",Direction::Input),
@@ -90,7 +91,7 @@ namespace Algorithms
     grouping.push_back("Group");
     grouping.push_back("Column");
     grouping.push_back("bank");
-    declareProperty("GroupDetectorsBy", "", new ListValidator(grouping),
+    declareProperty("GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
         "Only used if GroupNames is empty: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks");
 
 

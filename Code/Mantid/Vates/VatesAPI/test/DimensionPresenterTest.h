@@ -33,6 +33,7 @@ private:
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
     MOCK_CONST_METHOD0(getVisDimensionName, std::string());
     MOCK_CONST_METHOD1(displayError, void(std::string));
+    MOCK_METHOD1(setViewMode, void(Mantid::VATES::BinDisplay));
     ~MockDimensionView(){};
   };
 
@@ -45,6 +46,7 @@ private:
     MOCK_CONST_METHOD0(getGeometryXML, std::string());
     MOCK_METHOD1(acceptView, void(GeometryView*));
     MOCK_METHOD0(setModified, void());
+    MOCK_METHOD0(setDimensionModeChanged, void());
     MOCK_CONST_METHOD0(getMappings, GeometryPresenter::MappingType());
     ~MockGeometryPresenter(){}
   };

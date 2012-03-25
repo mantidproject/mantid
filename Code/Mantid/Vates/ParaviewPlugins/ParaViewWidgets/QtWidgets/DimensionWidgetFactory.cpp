@@ -15,5 +15,7 @@ Factory Method.
 */
 Mantid::VATES::DimensionView* DimensionWidgetFactory::create() const
 {
-  return new DimensionWidget(m_binDisplay);
+  DimensionWidget* widget = new DimensionWidget;
+  widget->initalizeViewMode(m_binDisplay);
+  return widget;
 }

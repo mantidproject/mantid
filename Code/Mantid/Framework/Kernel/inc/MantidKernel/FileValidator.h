@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "IValidator.h"
+#include "MantidKernel/TypedValidator.h"
 #include <vector>
 
 namespace Mantid
@@ -39,14 +39,14 @@ bool has_ending(const std::string &value, const std::string & ending);
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL FileValidator : public IValidator<std::string>
+class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string>
 {
 public:
   FileValidator();
   explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true);
   virtual ~FileValidator();
   virtual std::set<std::string> allowedValues() const;
-  virtual IValidator<std::string>* clone() const;
+  IValidator_sptr clone() const;
 
 protected:
   /// The list of permitted extensions

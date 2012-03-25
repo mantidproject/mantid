@@ -65,8 +65,8 @@ namespace Algorithms
    */
   void ApplyDetailedBalance::init()
   {
-    CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-    wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
+    auto wsValidator = boost::make_shared<CompositeValidator>();
+    wsValidator->add<WorkspaceUnitValidator>("DeltaE");
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator), "An input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
     declareProperty(new PropertyWithValue<string>("Temperature","",Direction::Input),"SampleLog variable name that contains the temperature, or a number");

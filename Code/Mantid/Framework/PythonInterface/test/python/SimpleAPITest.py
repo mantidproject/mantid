@@ -15,7 +15,7 @@ class SimpleAPITest(unittest.TestCase):
         # Check that the module has at least the same number
         # of attributes as unique algorithms
         module_dict = dir(simpleapi)
-        all_algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
+        all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
         self.assertTrue( len(module_dict) > len(all_algs) )
         
     def test_alg_has_expected_doc_string(self):

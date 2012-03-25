@@ -15,20 +15,16 @@ class ArrayBoundedValidatorTest : public CxxTest::TestSuite
 public:
   void testDoubleClone()
   {
-    IValidator<vector<double> > *vd = new ArrayBoundedValidator<double>();
-    IValidator<vector<double> > *vvd = vd->clone();
+    IValidator_sptr vd(new ArrayBoundedValidator<double>());
+    IValidator_sptr vvd = vd->clone();
     TS_ASSERT_DIFFERS( vd, vvd );
-    delete vd;
-    delete vvd;
   }
 
   void testIntClone()
   {
-    ArrayBoundedValidator<int> *vi = new ArrayBoundedValidator<int>;
-    IValidator<vector<int> > *vvi = vi->clone();
+    IValidator_sptr vi(new ArrayBoundedValidator<int>);
+    IValidator_sptr vvi = vi->clone();
     TS_ASSERT_DIFFERS( vi, vvi );
-    delete vi;
-    delete vvi;
   }
 
   void testDoubleParamConstructor()

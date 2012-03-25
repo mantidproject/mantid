@@ -210,6 +210,12 @@ class StitcherWidget(BaseWidget):
             return
 
     def _apply(self):
+        try:
+            self._scale_data_sets()
+        except:
+            mtd.sendLogMessage("Could not scale data")
+            
+    def _scale_data_sets(self):
         """
             Perform auto-scaling
         """
@@ -286,7 +292,7 @@ class StitcherWidget(BaseWidget):
                 plot_name = '%s: %s' % (self._graph, pol)
                 g = _qti.app.graph(plot_name)
                 if g is not None:
-                    return
+                    continue
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(plot_name)
                 l=g.activeLayer()

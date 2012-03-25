@@ -59,7 +59,7 @@ namespace Mantid
           "A workspace containing the masked spectra as zeroes and ones.");
 
       declareProperty(
-          new ArrayProperty<detid_t>("DetectorList",new NullValidator<std::vector<detid_t> >, Direction::Output),
+          new ArrayProperty<detid_t>("DetectorList", boost::make_shared<NullValidator>(), Direction::Output),
           "A comma separated list or array containing a list of masked detector ID's" );
     }
 

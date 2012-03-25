@@ -12,6 +12,7 @@ set ( SRC_FILES
         src/HFIRDarkCurrentSubtraction.cpp
         src/SetupHFIRReduction.cpp
         src/RefRoi.cpp
+        src/RefReduction.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -31,6 +32,7 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
         inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
         inc/MantidWorkflowAlgorithms/RefRoi.h
+        inc/MantidWorkflowAlgorithms/RefReduction.h
 )
               
 set ( TEST_FILES

@@ -363,22 +363,28 @@ def recordSettings(a, b, error_a, error_b, name, instance):
     error_b.append(instance.error_b)
     name.append(instance.numerator + '/' + instance.denominator)
 
-def outputFittingParameters(a, b, error_a, error_b, S1H, S2H, output_file_name):
+def outputFittingParameters(a, b, error_a, error_b, 
+                            S1H, S2H, 
+                            S1W, S2W, 
+                            output_file_name):
     """
     Create an ascii file of the various fittings parameters
     y=a+bx
     1st column: S1H value
     2nd column: S2H value
-    3rd column: a
-    4th column: b
-    5th column: error_a
-    6th column: error_b
+    3rd column: S1W value
+    4rd column: S2W value
+    5rd column: a
+    6th column: b
+    7th column: error_a
+    8th column: error_b
     """
     _content = ['#y=a+bx\n', '#\n',
-                '#S1H S2H a b error_a error_b\n', '#\n']
+                '#S1H S2H S1W S2W a b error_a error_b\n', '#\n']
     sz = len(a)
     for i in range(sz):
         _line = str(S1H[i]) + ' ' + str(S2H[i]) + ' '
+        _line = str(S1W[i]) + ' ' + str(S2W[i]) + ' '
         _line += str(a[i]) + ' '
         _line += str(b[i]) + ' '
         _line += str(error_a[i]) + ' '
@@ -423,7 +429,7 @@ def getLambdaValue(mt):
     
 def getSh(mt, top_tag, bottom_tag):
     """
-        returns the height and units of the given slit#
+        returns the height and units of the given slits
     """
     mt_run = mt.getRun()
     st = mt_run.getProperty(top_tag).value
@@ -450,9 +456,44 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
-def getSlitsValueAndLambda(full_list_runs, S1H, S2H, lambdaRequest):
+def getSw(mt, left_tag, rigth_tag):
     """
-    Retrieve the S1H, S2H and lambda requested values
+        returns the width and units of the given slits
+    """
+    mt_run = mt.getRun()
+    sl = mt_run.getProperty(left_tag).value
+    sr = mt_run.getProperty(right_tag).value
+    sw = float(sl[0]) - float(sr[0])
+    units = mt_run.getProperty(left_tag).units
+    return sw, units
+
+def getS1w(mt=None):
+    """    
+        returns the width and units of the slit #1 
+    """
+    if mt != None:
+        _w, units = getSw(mt, 's1l', 's1r') 
+        return _w, units
+    return None, ''
+    
+def getS2w(mt=None):
+    """    
+        returns the width and units of the slit #2 
+    """
+    if mt != None:
+        _w, units = getSh(mt, 's2l', 's2r') 
+        return _w, units
+    return None, None
+
+def getSlitsValueAndLambda(full_list_runs, 
+                           S1H, S2H, 
+                           S1W, S2W, lambdaRequest):
+    """
+    Retrieve the S1H (slit 1 height), 
+                 S2H (slit 2 height), 
+                 S1W (slit 1 width), 
+                 S2W (slit 2 width) and 
+                 lambda requested values
     """
     _nbr_files = len(full_list_runs)
     for i in range(_nbr_files):
@@ -465,6 +506,11 @@ def getSlitsValueAndLambda(full_list_runs, S1H, S2H, lambdaRequest):
         _s2h_value, _s2h_units = getS2h(mt1)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
+        
+        _s1w_value, _s1w_units = getS1w(mt1)
+        _s2w_value, _s2w_units = getS2w(mt1)
+        S1W[i] = _s1w_value
+        S2W[i] = _s2w_value
         
         _lambda_value = getLambdaValue(mt1)
         lambdaRequest[i] = _lambda_value
@@ -602,8 +648,10 @@ def calculate(string_runs=None,
     #retrieve the lambdaRequest value (Angstrom)
     S1H = {}
     S2H = {}
+    S1W = {}
+    S2W = {}
     lambdaRequest = {}
-    getSlitsValueAndLambda(list_runs, S1H, S2H, lambdaRequest)
+    getSlitsValueAndLambda(list_runs, S1H, S2H, S1W, S2W, lambdaRequest)
 
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
@@ -630,6 +678,9 @@ def calculate(string_runs=None,
 
         finalS1H = []
         finalS2H = []
+        
+        finalS1W = []
+        finalS2W = []
 
         #array of True/False flags that will allow us
         #to escale the calculation on the first attenuator
@@ -679,6 +730,10 @@ def calculate(string_runs=None,
             finalS1H.append(S1H[index_numerator])
             finalS2H.append(S2H[index_numerator])
 
+            #record S1W and S2W
+            finalS1W.append(S1W[index_numerator])
+            finalS2W.append(S2W[index_numerator])
+
         #output the fitting parameters in an ascii
         if (output_path is None):
             output_path = '/home/j35/Desktop/'
@@ -689,7 +744,10 @@ def calculate(string_runs=None,
         output_ext = '.txt'
         output_file = output_path + '/' + output_pre + output_ext        
         
-        outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file)
+        outputFittingParameters(a, b, error_a, error_b, 
+                                finalS1H, finalS2H, 
+                                finalS1W, finalS2W, 
+                                output_file)
 
     else:
         """

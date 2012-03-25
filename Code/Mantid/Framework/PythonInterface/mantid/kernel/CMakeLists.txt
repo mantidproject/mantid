@@ -23,6 +23,8 @@ set ( EXPORT_FILES
   src/Exports/BoundedValidator.cpp
   src/Exports/TimeSeriesProperty.cpp
   src/Exports/DateAndTime.cpp
+  src/Exports/InstrumentInfo.cpp
+  src/Exports/FacilityInfo.cpp
 )  
 
 set ( SRC_FILES
@@ -50,6 +52,8 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
+  ${HEADER_DIR}/kernel/Environment/CallStack.h
+  ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Policies/upcast_returned_value.h
@@ -60,15 +64,16 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/UpcastRegistry.h
-  ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
-  ${HEADER_DIR}/kernel/Environment/CallStack.h
+  ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
+  ${HEADER_DIR}/kernel/SharedPtrToPythonMacro.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
+  ${HEADER_DIR}/kernel/TypedValidatorExportMacro.h
 )
 
 set ( PY_FILES 
   __init__.py
+  _aliases.py
   dlopen.py
   funcreturns.py
   plugins.py

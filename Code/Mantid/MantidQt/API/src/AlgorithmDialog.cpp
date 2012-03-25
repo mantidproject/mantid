@@ -25,9 +25,13 @@
 #include <QSignalMapper>
 #include "MantidQtAPI/FilePropertyWidget.h"
 #include "MantidQtAPI/PropertyWidgetFactory.h"
+#include <qcheckbox.h>
+#include <QtGui>
+#include "MantidKernel/DateAndTime.h"
 
 using namespace MantidQt::API;
 using Mantid::API::IAlgorithm;
+using Mantid::Kernel::DateAndTime;
 
 //------------------------------------------------------
 // Public member functions
@@ -248,8 +252,8 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
 
 
 //-------------------------------------------------------------------------------------------------
-/** To be overridden in GenericDialog (only) */
-void AlgorithmDialog::hideOrDisableProperties()
+/** Show the validators for all the properties */
+void AlgorithmDialog::showValidators()
 {
   // Do nothing for non-generic algorithm dialogs
   QStringList::const_iterator pend = m_algProperties.end();
@@ -304,10 +308,7 @@ bool AlgorithmDialog::setPropertyValue(const QString pName, bool validateOthers)
 
   // Go through all the other properties' validators
   if (validateOthers)
-  {
-    //std::cout << "setPropertyValue(" << pName.toStdString() << ") calling hideOrDisableProperties\n";
-    this->hideOrDisableProperties();
-  }
+    this->showValidators();
 
 
   // Prop was valid if the error string is empty
@@ -343,8 +344,27 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
     }
   }
 
+  // Do additional validation on the WHOLE set of properties
+  std::map<std::string, std::string> errs = m_algorithm->validateInputs();
+  for (auto it = errs.begin(); it != errs.end(); it++)
+  {
+    const QString pName = QString::fromStdString(it->first);
+    const QString value = QString::fromStdString(it->second);
+    if (m_errors.contains(pName))
+    {
+      if (!m_errors[pName].isEmpty())
+        m_errors[pName] += "\n";
+      m_errors[pName] += value;
+    }
+    else
+      m_errors[pName] = value;
+    // There is at least one whole-algo error
+    allValid = false;
+  }
+
+
   // OK all the values have been set once. Time to look for which should be enabled
-  this->hideOrDisableProperties();
+  this->showValidators();
 
   return allValid;
 }
@@ -381,7 +401,7 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay)
   inputMessage->setText(getOptionalMessage());
   QHBoxLayout *msgArea = new QHBoxLayout;
   msgArea->addWidget(inputMessage);
-  mainLay->addLayout(msgArea);
+  mainLay->addLayout(msgArea, 0);
 }
 
 
@@ -831,16 +851,18 @@ QString AlgorithmDialog::getValue(QWidget *widget)
   {
     return textfield->text().trimmed();
   }
-  else if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
+  else if( QAbstractButton *checker = qobject_cast<QAbstractButton*>(widget) )
   {
-    if( checker->checkState() == Qt::Checked )
-    {
+    if(checker->isChecked())
       return QString("1");
-    }
     else
-    {
       return QString("0");
-    }
+  }
+  else if( QDateTimeEdit *dateEdit = qobject_cast<QDateTimeEdit*>(widget) )
+  {
+    // String in ISO8601 format /* add toUTC() to go from local time */
+    QString value = dateEdit->dateTime().toString(Qt::ISODate);
+    return value;
   }
   else if( MantidWidget *mtd_widget = qobject_cast<MantidWidget*>(widget) )
   {
@@ -901,20 +923,23 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString & propName
     }
     return;
   }
-  if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
+  if( QAbstractButton *checker = qobject_cast<QAbstractButton*>(widget) )
   {
     if( value.isEmpty() && dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(property) )
-    {
       value = QString::fromStdString(property->value());
-    }
-    if( value == "0" )
-    {
-      checker->setCheckState(Qt::Unchecked);
-    }
-    else
-    {
-      checker->setCheckState(Qt::Checked);
-    }
+    checker->setChecked(value != "0");
+    return;
+  }
+  if( QDateTimeEdit *dateEdit = qobject_cast<QDateTimeEdit*>(widget) )
+  {
+    // String in ISO8601 format
+    DateAndTime t = DateAndTime::getCurrentTime();
+    try
+    { t.setFromISO8601(value.toStdString()); }
+    catch (std::exception &)
+    { }
+    dateEdit->setDate( QDate(t.year(), t.month(), t.day()) );
+    dateEdit->setTime( QTime(t.hour(), t.minute(), t.second(), 0) );
     return;
   }
 

@@ -34,16 +34,16 @@ std::set<std::string> DirectoryValidator::allowedValues() const
  * Clone the validator
  * @returns A pointer to a new validator with the same properties as this one
  */
-IValidator<std::string>* DirectoryValidator::clone() const
+IValidator_sptr DirectoryValidator::clone() const
 { 
-  return new DirectoryValidator(*this);
+  return boost::make_shared<DirectoryValidator>(*this);
 }
 
 /** If m_fullTest=true if checks that the files exists, otherwise just that path syntax looks valid
  *  @param value :: file name
  *  @returns An error message to display to users or an empty string on no error
  */
-std::string DirectoryValidator::checkValidity(const std::string &value) const
+std::string DirectoryValidator::checkValidity(const std::string& value) const
 {
   // Check if the path is syntactically valid
   if( !Poco::Path().tryParse(value) )

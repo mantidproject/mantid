@@ -48,6 +48,7 @@ The detector offset file created by this algorithm are in the form created by th
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <fstream>
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -102,7 +103,7 @@ void DspacemaptoCal::init()
   propOptions.push_back("POWGEN");
   propOptions.push_back("VULCAN-ASCII");
   propOptions.push_back("VULCAN-Binary");
-  declareProperty("FileType", "POWGEN", new ListValidator(propOptions),
+  declareProperty("FileType", "POWGEN", boost::make_shared<StringListValidator>(propOptions),
     "The type of file being read.");
 
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, ".cal"),

@@ -22,7 +22,6 @@ nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
 *WIKI*/
 #include "MantidCrystal/SelectCellOfType.h"
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -30,6 +29,7 @@ nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
 #include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <cstdio>
 
@@ -94,7 +94,7 @@ namespace Crystal
     type_list.push_back( ReducedCell::TRICLINIC() );
 
     declareProperty("CellType", type_list[0],
-                     new Kernel::ListValidator(type_list),
+                    boost::make_shared<Kernel::StringListValidator>(type_list),
                     "The conventional cell type to use");
 
     std::vector< std::string > centering_list;
@@ -105,7 +105,7 @@ namespace Crystal
     centering_list.push_back( ReducedCell::R_CENTERED() );
 
     declareProperty("Centering", centering_list[3],
-                     new Kernel::ListValidator(centering_list),
+                    boost::make_shared<Kernel::StringListValidator>(centering_list),
                     "The centering for the conventional cell");
 
     this->declareProperty( "Apply", false, "Update UB and re-index the peaks");

@@ -1,9 +1,9 @@
 #ifndef H_ICONVERT_TO_MDEVENTS_METHODS
 #define H_ICONVERT_TO_MDEVENTS_METHODS
 
-#include <vector>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
@@ -12,6 +12,8 @@
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -41,49 +43,31 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-  /// known sates for algorithms, caluclating momentums
-  enum Q_state{
-       modQ,    //< calculate mod Q
-       Q3D,     //< calculate 3 component of Q in fractional coordinate system.
-       NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
-       NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
-   };
-  /**  known analysis modes, arranged according to emodes 
-    *  It is importent to assign enums proper numbers, as direct correspondence between enums and their emodes 
-    *  used by the external units conversion algorithms and this algorithm, so the agreement should be the stame     */
-  enum AnalMode{  
-      Elastic = 0,  //< int emode = 0; Elastic analysis
-      Direct  = 1,  //< emode=1; Direct inelastic analysis mode
-      Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
-      ANY_Mode      //< couples with NoQ, means just copying existing data (may be doing units conversion), also used to terminate AnalMode algorithms initiation metaloop
-  };
-  /** enum describes if there is need to convert workspace units and different unit conversion modes 
-   * this modes are identified by algorithm from workpace parameters and user input.   */
-  enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
-  {
-      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvFast , //< the input workspace has different units from the requested and fast conversion is possible
-      ConvByTOF,   //< conversion possible via TOF
-      ConvFromTOF,  //< Input workspace units are the TOF 
-      NConvUintsStates // number of various recognized unit conversion modes used to terminate CnvrtUnits algorithms initiation metalooop.
-  };
-  enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
-  {
-      Workspace2DType, //< 2D matirix workspace
-      EventWSType,     //< Event worskapce
-      NInWSTypes
-  };
-// way to treat the X-coorinate in the workspace:
-    enum XCoordType
-    {
-        Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
-        Centered   // typical for events
-    };
- 
- 
+/** TEMPLATES INSTANTIATION: User are welcome to specialize its own specific algorithm 
+  *e.g.
+   template<> class ConvertToMDEventsWS<ModQ,Elastic,ConvertNo,Centered,CrystalType>::public IConvertToMDEventsMethods
+   {
+       User specific code for workspace  processed to obtain ModQ in elastic mode, without unit conversion, 
+       implementing something user defined for calculating x-coord and coord transformation, which will be invoked
+       on ws with oriented lattice by writing the templated class and 
+       Overloading the methods:
+   public:
+       size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+       void runConversion(API::Progress *);
+   private:
+      virtual size_t conversionChunk(size_t job_ID);
+   }
+*/
+
+
+
  class DLLExport IConvertToMDEventsMethods
  {
-    template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
+ protected:
+   /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
+    /// presumably will be completely inlined
+ 
+    template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
     friend struct COORD_TRANSFORMER;
  public:
      // constructor;
@@ -135,6 +119,30 @@ namespace MDAlgorithms
    virtual size_t conversionChunk(size_t job_ID)=0;
 
 };
+
+
+/// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
+template<InputWSType WS,QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
+{ 
+public:
+    ConvertToMDEventsWS(){};
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+    {
+        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
+    }
+
+    void runConversion(API::Progress *)
+    {
+        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
+    }
+private:
+    virtual size_t conversionChunk(size_t job_ID)
+    {
+        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
+    }
+};
+
 
  
 

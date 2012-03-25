@@ -25,7 +25,7 @@ class CreateWorkspaceTest(unittest.TestCase):
             self.assertEquals(wksp.readX(0)[index], x[index])
         # Last X value
         self.assertEquals(wksp.readX(0)[len(x)-1], x[len(x)-1])
-        AnalysisDataService.Instance().remove("wksp")
+        AnalysisDataService.remove("wksp")
 
     def test_create_with_2D_numpy_array(self):
         x = np.array([1.,2.,3.,4.])
@@ -44,7 +44,7 @@ class CreateWorkspaceTest(unittest.TestCase):
             # Last X value
             self.assertEquals(wksp.readX(i)[len(x)-1], x[len(x)-1])
         
-        AnalysisDataService.Instance().remove("wksp")
+        AnalysisDataService.remove("wksp")
         
     def test_with_data_from_other_workspace(self):
         wsname = 'LOQ'
@@ -67,7 +67,7 @@ class CreateWorkspaceTest(unittest.TestCase):
             # Last X value
             self.assertEquals(wksp.readX(i)[len(x)-1], loq.readX(i)[len(x)-1])
 
-        AnalysisDataService.Instance().remove("wksp")
+        AnalysisDataService.remove("wksp")
 
     def test_create_with_numerical_vertical_axis_values(self):
         data = [1.,2.,3.]

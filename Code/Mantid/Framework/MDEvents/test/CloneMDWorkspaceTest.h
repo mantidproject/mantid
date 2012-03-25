@@ -183,7 +183,7 @@ public:
           MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, 50)),
           MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, 100))  );
     Mantid::MDEvents::MDHistoWorkspace_sptr ws1(ws);
-    ws1->setTo(1.234, 5.678);
+    ws1->setTo(1.234, 5.678, 1.0);
     do_test_MDHisto(ws1);
   }
 

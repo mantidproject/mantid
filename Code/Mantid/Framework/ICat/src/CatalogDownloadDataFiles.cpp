@@ -59,8 +59,10 @@ namespace Mantid
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
-      declareProperty( new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(),new NullValidator<std::vector<std::string> >,
-          Direction::Output),"A list of containing  locations of files downloaded from data server");
+      declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
+                                                     boost::make_shared<NullValidator>(),
+                                                     Direction::Output),
+                      "A list of containing  locations of files downloaded from data server");
     }
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()

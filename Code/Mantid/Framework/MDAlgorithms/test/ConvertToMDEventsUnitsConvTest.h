@@ -52,6 +52,31 @@ static ConvertToMDEventsUnitsConvTest *createSuite() {
 }
 static void destroySuite(ConvertToMDEventsUnitsConvTest  * suite) { delete suite; }    
 
+void testSpecialConversionTOF()
+{
+    double factor,power;
+
+    const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
+    TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
+}
+void testTOFConversionFails()
+{ 
+
+    Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
+    Kernel::Unit_sptr pWSUnit           = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    double delta;
+    double L1(10),L2(10),TwoTheta(0.1),efix(10);
+    int emode(0);
+    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
+    TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
+     
+    double X0(5);
+    double tof(0) ,k_tr(0);
+    TS_ASSERT_THROWS_NOTHING(tof  = pSourceWSUnit->singleToTOF(X0));
+    TS_ASSERT_THROWS_NOTHING(k_tr = pWSUnit->singleFromTOF(tof));
+}
+
+
 void testSetUp_and_PreprocessDetectors()
 {
     pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
@@ -64,7 +89,7 @@ void testSetUp_and_PreprocessDetectors()
 
 void testConvertFastFromInelasticWS()
 {
-    UNITS_CONVERSION<ConvFast,Histohram> Conv;
+    UNITS_CONVERSION<ConvFast,Histogram> Conv;
     TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(pConvMethods.get(),"DeltaE_inWavenumber"));
 
      const MantidVec& X        = ws2D->readX(0);

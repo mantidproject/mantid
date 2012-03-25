@@ -4,12 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/PropertyWithValue.h"
 #include <vector>
 #include <map>
-
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Matrix.h"
-
 
 namespace Mantid
 {
@@ -22,6 +19,7 @@ namespace Kernel
 //----------------------------------------------------------------------
 class Logger;
 class DataItem;
+template<typename T> class Matrix;
 
 /** @class IPropertyManager IPropertyManager.h Kernel/IPropertyManager.h
 
@@ -90,61 +88,43 @@ public:
     virtual const std::vector< Property*>& getProperties() const = 0;
 
     /** Templated method to set the value of a PropertyWithValue
-    *  @param name :: The name of the property (case insensitive)
-    *  @param value :: The value to assign to the property
-    *  @throw Exception::NotFoundError If the named property is unknown
-    *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
-    */
+     *  @param name :: The name of the property (case insensitive)
+     *  @param value :: The value to assign to the property
+     *  @throw Exception::NotFoundError If the named property is unknown
+     *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
+     */
     template <typename T>
     IPropertyManager* setProperty(const std::string &name, const T & value)
     {
       return setTypedProperty(name, value, boost::is_convertible<T, boost::shared_ptr<DataItem> >());
     }
-
-    template<typename T>
-    IPropertyManager* setTypedProperty(const std::string &name, const T & value, const boost::false_type &)
-    {
-      PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
-      if (prop)
-      {
-        *prop = value;
-      }
-      else
-      {
-        throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
-      }
-      return this;
-    }
-
-    template<typename T>
-    IPropertyManager* setTypedProperty(const std::string &name, const T & value, const boost::true_type &)
-    {
-      // T is convertible to DataItem_sptr
-      boost::shared_ptr<DataItem> data = boost::static_pointer_cast<DataItem>(value);
-      std::string error = getPointerToProperty(name)->setValue(data);
-      if( !error.empty() )
-      {
-        throw std::invalid_argument(error);
-      }
-      return this;
-    }
-
-    /// Specialised version of setProperty template method
+    
+    /** Specialised version of setProperty template method to handle const char *
+    *  @param name :: The name of the property (case insensitive)
+    *  @param value :: The value to assign to the property
+    *  @throw Exception::NotFoundError If the named property is unknown
+    *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
+    */
     IPropertyManager* setProperty(const std::string &name, const char* value)
     {
-        this->setPropertyValue(name, std::string(value));
-        return this;
+      this->setPropertyValue(name, std::string(value));
+      return this;
     }
 
-    /// Further specialised version of setProperty template method.  Needed to explicitly handle std::string - const char * is not enough.
+    /** Specialised version of setProperty template method to handle std::string
+    *  @param name :: The name of the property (case insensitive)
+    *  @param value :: The value to assign to the property
+    *  @throw Exception::NotFoundError If the named property is unknown
+    *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
+    */
     IPropertyManager* setProperty(const std::string &name, const std::string & value)
     {
-        this->setPropertyValue(name, value);
-        return this;
+      this->setPropertyValue(name, value);
+      return this;
     }
 
     /// Return the property manager serialized as a string.
-    virtual std::string asString(bool withDefaultValues = false) const = 0;
+    virtual std::string asString(bool withDefaultValues = false, char separator=',') const = 0;
 
     /** Give settings to a property to determine when it gets enabled/hidden
      * @param name :: property name
@@ -169,7 +149,7 @@ protected:
     /** Add a property of the template type to the list of managed properties
     *  @param name :: The name to assign to the property
     *  @param value :: The initial value to assign to the property
-    *  @param validator :: Pointer to the (optional) validator. Ownership will be taken over.
+    *  @param validator :: Pointer to the (optional) validator.
     *  @param doc :: The (optional) documentation string
     *  @param direction :: The (optional) direction of the property, in, out or inout
     *  @throw Exception::ExistsError if a property with the given name already exists
@@ -177,7 +157,8 @@ protected:
     */
     template <typename T>
     void declareProperty(const std::string &name, T value,
-      IValidator<T> *validator = new NullValidator<T>, const std::string &doc="", const unsigned int direction = Direction::Input)
+                         IValidator_sptr validator = IValidator_sptr(new NullValidator),
+                         const std::string &doc="", const unsigned int direction = Direction::Input)
     {
         Property *p = new PropertyWithValue<T>(name, value, validator, direction);
         declareProperty(p, doc);
@@ -195,7 +176,7 @@ protected:
     void declareProperty(const std::string &name, T value, const std::string &doc,
       const unsigned int direction = Direction::Input)
     {
-      Property *p = new PropertyWithValue<T>(name, value, new NullValidator<T>, direction);
+      Property *p = new PropertyWithValue<T>(name, value, boost::make_shared<NullValidator>(), direction);
       declareProperty(p, doc);
     }
 
@@ -209,8 +190,8 @@ protected:
     template <typename T>
     void declareProperty(const std::string &name, T value, const unsigned int direction)
     {
-        Property *p = new PropertyWithValue<T>(name, value, new NullValidator<T>, direction);
-        declareProperty(p);
+      Property *p = new PropertyWithValue<T>(name, value, boost::make_shared<NullValidator>(), direction);
+      declareProperty(p);
     }
 
     /** Specialised version of declareProperty template method to prevent the creation of a
@@ -225,7 +206,8 @@ protected:
     *  @throw std::invalid_argument  if the name argument is empty
     */
     void declareProperty( const std::string &name, const char* value,
-      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="", const unsigned int direction = Direction::Input )
+                          IValidator_sptr validator = IValidator_sptr(new NullValidator), 
+                          const std::string &doc="", const unsigned int direction = Direction::Input )
     {
         // Simply call templated method, converting character array to a string
         declareProperty(name, std::string(value), validator, doc, direction);
@@ -243,7 +225,8 @@ protected:
     *  @throw std::invalid_argument  if the name argument is empty
     */
     void declareProperty( const std::string &name, const char* value,
-      const std::string &doc, IValidator<std::string> *validator = new NullValidator<std::string>, const unsigned int direction = Direction::Input )
+                          const std::string &doc, IValidator_sptr validator = IValidator_sptr(new NullValidator), 
+                          const unsigned int direction = Direction::Input )
     {
         // Simply call templated method, converting character array to a string
         declareProperty(name, std::string(value), validator, doc, direction);
@@ -258,7 +241,7 @@ protected:
    */
     void declareProperty(const std::string &name, const char* value, const unsigned int direction)
     {
-      declareProperty(name, std::string(value), new NullValidator<std::string>, "", direction);
+      declareProperty(name, std::string(value), boost::make_shared<NullValidator>(), "", direction);
     }
 
 
@@ -334,6 +317,49 @@ public:
   virtual TypedValue getProperty(const std::string &name) const = 0;
   /// Get a pointer to property by name
   virtual Property* getPointerToProperty(const std::string &name) const = 0;
+
+private:
+  /**
+   * Set a property value that is not convertible to a DataItem_sptr
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
+   */
+  template<typename T>
+  IPropertyManager* setTypedProperty(const std::string &name, const T & value, const boost::false_type &)
+  {
+    PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
+    if (prop)
+    {
+      *prop = value;
+    }
+    else
+    {
+      throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
+    }
+    return this;
+  }
+  /**
+   * Set a property value that is convertible to a DataItem_sptr
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
+   */
+  template<typename T>
+  IPropertyManager* setTypedProperty(const std::string &name, const T & value, const boost::true_type &)
+  {
+    // T is convertible to DataItem_sptr
+    boost::shared_ptr<DataItem> data = boost::static_pointer_cast<DataItem>(value);
+    std::string error = getPointerToProperty(name)->setDataItem(data);
+    if( !error.empty() )
+    {
+      throw std::invalid_argument(error);
+    }
+    return this;
+  }
+  
 
 };
 

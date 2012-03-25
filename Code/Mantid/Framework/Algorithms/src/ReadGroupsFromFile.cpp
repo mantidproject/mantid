@@ -32,6 +32,7 @@ The instrumentView is the best way to visualize the grouping using the "show Ins
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -75,7 +76,8 @@ namespace Algorithms
   {
 
     // The name of the instrument
-    declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InstrumentWorkspace", "", Direction::Input, new InstrumentValidator<>),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InstrumentWorkspace", "", Direction::Input,
+                                                            boost::make_shared<InstrumentValidator>()),
       "A workspace that contains a reference to the instrument of interest.\n"
       "You can use LoadEmptyInstrument if you do not have any data files to load.");
 
@@ -89,7 +91,7 @@ namespace Algorithms
     std::vector<std::string> select;
     select.push_back("True");
     select.push_back("False");
-    declareProperty("ShowUnselected", "True", new ListValidator(select),
+    declareProperty("ShowUnselected", "True", boost::make_shared<StringListValidator>(select),
         "Whether to show detectors that are not in any group (default yes)" );
     // The output workspace (2D) that will contain the group information
     declareProperty(

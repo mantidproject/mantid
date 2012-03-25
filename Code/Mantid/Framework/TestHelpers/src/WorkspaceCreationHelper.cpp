@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -253,6 +254,7 @@ namespace WorkspaceCreationHelper
 
     Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
+    testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
     space->setInstrument(testInst);
 
     const double pixelRadius(0.05);

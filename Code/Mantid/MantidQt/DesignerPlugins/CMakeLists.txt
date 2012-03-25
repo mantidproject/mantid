@@ -43,7 +43,7 @@ set_target_properties ( DesignerPlugins PROPERTIES OUTPUT_NAME ${LIB_NAME} )
 set_target_properties( DesignerPlugins PROPERTIES EXCLUDE_FROM_ALL TRUE )
 
 # Set the library dependencies
-target_link_libraries ( DesignerPlugins MantidWidgets MantidQtSliceViewer ${QT_LIBRARIES} )
+target_link_libraries ( DesignerPlugins MantidWidgets MantidQtSliceViewer MantidQtAPI ${QT_LIBRARIES} )
 
 # Clean up
 set ( LIB_NAME )

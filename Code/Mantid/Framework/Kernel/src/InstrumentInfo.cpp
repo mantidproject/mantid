@@ -128,5 +128,20 @@ namespace Mantid
       return *m_facility;
     }
 
+    //-------------------------------------------------------------------------
+    // Non-member functions
+    //-------------------------------------------------------------------------
+    /**
+     * Prints the instrument name to the stream
+     * @param buffer :: A reference to an output stream
+     * @param instrumentDescriptor :: A reference to an InstrumentInfo object
+     * @return A reference to the stream written to
+     */
+    std::ostream & operator<<(std::ostream & buffer, const InstrumentInfo & instrumentDescriptor)
+    {
+      buffer << instrumentDescriptor.name();
+      return buffer;
+    }
+
   } // namespace Kernel
 } // namespace Mantid

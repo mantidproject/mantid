@@ -15,16 +15,6 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 *WIKI*/
 
 #include "MantidDataHandling/LoadEventPreNexus.h"
-#include <algorithm>
-#include <sstream>
-#include <stdexcept>
-#include <functional>
-#include <iostream>
-#include <set>
-#include <vector>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <boost/timer.hpp>
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -43,7 +33,20 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/MemoryManager.h"
+
+#include <algorithm>
+#include <sstream>
+#include <stdexcept>
+#include <functional>
+#include <iostream>
+#include <set>
+#include <vector>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <boost/timer.hpp>
 
 namespace Mantid
 {
@@ -177,15 +180,11 @@ void LoadEventPreNexus::init()
   declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
       "A list of individual spectra (pixel IDs) to read, specified as e.g. 10:20. Only used if set.");
 
-  // how many events to process
-//  declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
-//      "Number of events to read from the file.");
-
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
@@ -195,7 +194,7 @@ void LoadEventPreNexus::init()
   propOptions.push_back("Auto");
   propOptions.push_back("Serial");
   propOptions.push_back("Parallel");
-  declareProperty("UseParallelProcessing", "Auto",new ListValidator(propOptions),
+  declareProperty("UseParallelProcessing", "Auto", boost::make_shared<StringListValidator>(propOptions),
       "Use multiple cores for loading the data?\n"
       "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
       "  Serial: Use a single core.\n"

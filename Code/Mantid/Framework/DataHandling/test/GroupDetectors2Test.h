@@ -3,6 +3,7 @@
 
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"

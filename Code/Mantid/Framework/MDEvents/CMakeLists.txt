@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
+    src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
 	src/CoordTransformAligned.cpp
@@ -31,6 +32,7 @@ set ( SRC_FILES
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
 	src/MDWSDescription.cpp
+	src/MDWSTransfDescr.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/SaveMD.cpp
@@ -57,6 +59,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
+    inc/MantidMDEvents/ConvertToReflectometryQ.h
 	inc/MantidMDEvents/CoordTransformAffine.h
 	inc/MantidMDEvents/CoordTransformAffineParser.h
 	inc/MantidMDEvents/CoordTransformAligned.h
@@ -82,6 +85,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MDWSDescription.h
+	inc/MantidMDEvents/MDWSTransfDescr.h	
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/SaveMD.h
@@ -99,6 +103,7 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
+    test/ConvertToReflectometryQTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
 	test/CoordTransformAlignedTest.h
@@ -124,6 +129,7 @@ set ( TEST_FILES
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
 	test/MDWSDescriptionTest.h
+	test/MDWSTransfDescrTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/SaveMDTest.h

@@ -14,7 +14,6 @@ See also: [[MergeMDFiles]], for merging when system memory is too small to keep 
 *WIKI*/
 
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -22,6 +21,7 @@ See also: [[MergeMDFiles]], for merging when system memory is too small to keep 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -78,7 +78,7 @@ namespace MDAlgorithms
   {
     // declare arbitrary number of input m_workspaces as a list of strings at the moment
     declareProperty(
-      new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >),
+      new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input MDWorkspaces as a comma-separated list" );
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),

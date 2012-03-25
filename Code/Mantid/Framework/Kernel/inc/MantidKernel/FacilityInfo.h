@@ -29,10 +29,7 @@ namespace Kernel
 
 /** A class that holds information about a facility.
 
-    @author Roman Tolchenov, Tessella plc
-    @date 20/07/2010
-
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -55,47 +52,59 @@ namespace Kernel
 class MANTID_KERNEL_DLL FacilityInfo
 {
 public:
-  FacilityInfo(const Poco::XML::Element* elem);
-
-  const std::string getDelimiter() const;
+  explicit FacilityInfo(const Poco::XML::Element* elem);
 
   /// Return the name of the facility
-  const std::string name()const{return m_name;}
-  /// Returns default zero padding for this facility
-  int zeroPadding()const{return m_zeroPadding;}
-  /// Returns the default delimiter between instrument name and run number
-  const std::string delimiter() const {return m_delimiter;}
-  /// Returns a list of file extensions
-  const std::vector<std::string> extensions()const{return m_extensions;}
-  /// Returns the preferred file extension
-  const std::string preferredExtension()const{return m_extensions.front();}
-  /// Return the soap endpoint name
-  const std::string& getSoapEndPoint() const{return m_soapEndPoint;}
-  /// Return the archive search interface names
-  const std::vector<std::string>& archiveSearch()const{return m_archiveSearch;}
-  /// Returns a list of instruments of this facility
-  const std::vector<InstrumentInfo>& Instruments()const{return m_instruments;}
-  /// Returns a list of instruments of given technique
-  std::vector<InstrumentInfo> Instruments(const std::string& tech)const;
-  /// Returns instruments with given name
-  const InstrumentInfo & Instrument(const std::string& iName = "")const;
+  const std::string & name() const { return m_name; }
 
-  ///returns the catalog name
-  const std::string  catalogName()const {return m_catalogName;}
+  /// Returns default zero padding for this facility
+  int zeroPadding() const { return m_zeroPadding; }
+  /// Returns the default delimiter between instrument name and run number
+  const std::string & delimiter() const { return m_delimiter; }
+  /// Returns a list of file extensions
+  const std::vector<std::string> extensions() const { return m_extensions; }
+  /// Returns the preferred file extension
+  const std::string & preferredExtension()const { return m_extensions.front(); }
+
+  /// Return the soap endpoint name
+  const std::string & getSoapEndPoint() const { return m_soapEndPoint; }
+  /// Returns the catalog name
+  const std::string & catalogName()const {return m_catalogName;}
+  /// Return the archive search interface names
+  const std::vector<std::string> & archiveSearch() const { return m_archiveSearch; }
+
+  /// Returns the name of the default live listener
+  const std::string & liveListener() const { return m_liveListener; }
+
+  /// Returns a list of instruments of this facility
+  const std::vector<InstrumentInfo> & instruments() const { return m_instruments; }
+  /// Returns a list of instruments of given technique
+  std::vector<InstrumentInfo> instruments(const std::string& tech) const;
+  /// Returns instruments with given name
+  const InstrumentInfo & instrument(const std::string& iName = "") const;
+
 private:
-  ///Default constructor
-  FacilityInfo();
+  void fillZeroPadding(const Poco::XML::Element* elem);
+  void fillDelimiter(const Poco::XML::Element* elem);
+  void fillExtensions(const Poco::XML::Element* elem);
+  void fillSoapEndPoint(const Poco::XML::Element* elem);
+  void fillArchiveNames(const Poco::XML::Element* elem);
+  void fillCatalogName(const Poco::XML::Element* elem);
+  void fillInstruments(const Poco::XML::Element* elem);
+  void fillLiveListener(const Poco::XML::Element* elem);
+
   /// Add new extension
   void addExtension(const std::string& ext);
 
   const std::string m_name;                    ///< facility name
   int m_zeroPadding;                           ///< default zero padding for this facility
-  std::string m_delimiter;               ///  default delimiter between instrument name and run number
+  std::string m_delimiter;                     ///< default delimiter between instrument name and run number
   std::vector<std::string> m_extensions;       ///< file extensions in order of preference
   std::string m_soapEndPoint;                  ///< names of the soap end point
-  std::vector<std::string> m_archiveSearch;       ///< names of the archive search interface
+  std::vector<std::string> m_archiveSearch;    ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
-  std::string m_catalogName;                   ///< name of the catalog system of this facilty
+  std::string m_catalogName;                   ///< name of the catalog system of this facility
+  std::string m_liveListener;                  ///< name of the default live listener
   static Logger& g_log;                        ///< logger
 };
 

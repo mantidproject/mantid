@@ -19,6 +19,27 @@ by multiplying its weight by L:
 Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventionally called <math>2\theta</math>).
 <math>\lambda</math> is the neutron wavelength in ''Angstroms''.
 
+==== OneEventPerBin option ====
+
+If you specify ''OneEventPerBin'', then the '''histogram''' representation of the input workspace is used,
+with one MDEvent generated for each bin of the workspace, '''including zeros'''.
+
+This can be useful in cases where the experimental coverage needs to be tracked. With one MDEvent for each
+bin, you can count which regions in Q-space have been measured. The [[SliceViewer]] has an option
+to view normalized by number of events. This means that, for example, areas with overlap from two runs
+will appear scaled down.
+
+A significant drawback to this is that the output MDEventWorkspace will be ''significantly'' larger than the
+events alone would be. It currently must be created in physical memory (it cannot yet be cached to disk).
+One way to limit the memory used is to limit the OutputExtents to a smaller region and only convert
+part of the space.
+
+Also, the [[FindPeaksMD]] algorithm may not work optimally because it depends partly on higher density of
+events causing more finely split boxes.
+
+If your input is a [[Workspace2D]] and you do NOT check ''OneEventPerBin'', then the workspace is converted
+to an [[EventWorkspace]] but with no events for empty bins.
+
 *WIKI*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -39,6 +60,7 @@ Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventio
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -85,7 +107,7 @@ namespace MDEvents
   void ConvertToDiffractionMDWorkspace::init()
   {
     // Input units must be TOF
-    API::WorkspaceUnitValidator<MatrixWorkspace>* validator = new API::WorkspaceUnitValidator<MatrixWorkspace>("TOF");
+    auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, validator),
         "An input workspace in time-of-flight. If you specify a Workspace2D, it gets converted to "
         "an EventWorkspace using ConvertToEventWorkspace.");
@@ -97,11 +119,16 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input),
         "Clear the events from the input workspace during conversion, to save memory.");
 
+    declareProperty(new PropertyWithValue<bool>("OneEventPerBin", false, Direction::Input),
+        "Use the histogram representation (event for event workspaces).\n"
+        "One MDEvent will be created for each histogram bin (even empty ones).\n"
+        "Warning! This can use signficantly more memory!");
+
     std::vector<std::string> propOptions;
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("OutputDimensions", "Q (lab frame)",new ListValidator(propOptions),
+    declareProperty("OutputDimensions", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  Q (sample frame): Wave-vector change of the lattice in the frame of the sample (taking out goniometer rotation).\n"
@@ -127,21 +154,65 @@ namespace MDEvents
   /// Our MDLeanEvent dimension
   typedef MDLeanEvent<3> MDE;
 
+  //----------------------------------------------------------------------------------------------
+  /** Convert one spectrum to MDEvents.
+   * Depending on options, it uses the histogram view or the
+   * pure event view.
+   * Then another method converts to 3D q-space and adds it to the MDEventWorkspace
+   *
+   * @param workspaceIndex :: index into the workspace
+   */
+  void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex)
+  {
+    if (m_inEventWS && !OneEventPerBin)
+    {
+      // ---------- Convert events directly -------------------------
+      EventList & el = m_inEventWS->getEventList(workspaceIndex);
+
+      // Call the right templated function
+      switch (el.getEventType())
+      {
+      case TOF:
+        this->convertEventList<TofEvent>(workspaceIndex, el);
+        break;
+      case WEIGHTED:
+        this->convertEventList<WeightedEvent>(workspaceIndex, el);
+        break;
+      case WEIGHTED_NOTIME:
+        this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
+        break;
+      default:
+        throw std::runtime_error("EventList had an unexpected data type!");
+      }
+    }
+    else
+    {
+      // ----- Use the Histogram representation ------------
+      // Construct a new event list
+      EventList el;
+
+      // Create the events using the bins
+      const ISpectrum * inSpec = m_inWS->getSpectrum(workspaceIndex);
+      el.createFromHistogram(inSpec, true /* Generate zeros */, false /* no multiple events */, 1);
+
+      // Perform the conversion on this temporary event list
+      this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
+    }
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
    *
    * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
-   * @param workspaceIndex :: index into the workspace
+   * @param el :: reference to the event list
    */
   template <class T>
-  void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex)
+  void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex, EventList & el)
   {
-    EventList & el = in_ws->getEventList(workspaceIndex);
     size_t numEvents = el.getNumberEvents();
 
     // Get the position of the detector there.
-    std::set<detid_t>& detectors = el.getDetectorIDs();
+    const std::set<detid_t>& detectors = el.getDetectorIDs();
     if (detectors.size() > 0)
     {
       // The 3D MDEvents that will be added into the MDEventWorkspce
@@ -153,7 +224,7 @@ namespace MDEvents
       IDetector_const_sptr det;
       try
       {
-        det = in_ws->getDetector(workspaceIndex);
+        det = m_inWS->getDetector(workspaceIndex);
       }
       catch (Exception::NotFoundError &)
       {
@@ -265,13 +336,17 @@ namespace MDEvents
     Append = getProperty("Append");
     std::string OutputDimensions = getPropertyValue("OutputDimensions");
     LorentzCorrection = getProperty("LorentzCorrection");
+    OneEventPerBin = getProperty("OneEventPerBin");
 
     // -------- Input workspace -> convert to Event ------------------------------------
-    MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
-    Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
-    in_ws = boost::dynamic_pointer_cast<EventWorkspace>(inMatrixWS);
-    if (!in_ws)
+    m_inWS = getProperty("InputWorkspace");
+    Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
+    m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
+
+    if (!m_inEventWS && !OneEventPerBin)
     {
+      // We DONT want 1 event per bin, but we didn't give an EventWorkspace
+      // So we need to convert to event workspace.
       if (inWS2D)
       {
         // Convert from 2D to Event
@@ -280,8 +355,8 @@ namespace MDEvents
         alg->setProperty("GenerateMultipleEvents", false); // One event per bin by default
         alg->setPropertyValue("OutputWorkspace", getPropertyValue("InputWorkspace") + "_event");
         alg->executeAsSubAlg();
-        in_ws = alg->getProperty("OutputWorkspace");
-        if (!alg->isExecuted() || !in_ws)
+        m_inWS = alg->getProperty("OutputWorkspace");
+        if (!alg->isExecuted() || !m_inWS)
           throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
       }
       else
@@ -290,7 +365,7 @@ namespace MDEvents
 
 
     // check the input units
-    if (in_ws->getAxis(0)->unit()->unitID() != "TOF")
+    if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
       throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
 
     // Try to get the output workspace
@@ -307,7 +382,7 @@ namespace MDEvents
     if (OutputDimensions == "Q (sample frame)")
     {
       // Set the matrix based on goniometer angles
-      mat = in_ws->mutableRun().getGoniometerMatrix();
+      mat = m_inWS->mutableRun().getGoniometerMatrix();
       // But we need to invert it, since we want to get the Q in the sample frame.
       mat.Invert();
       // Names
@@ -318,8 +393,8 @@ namespace MDEvents
     else if (OutputDimensions == "HKL")
     {
       // Set the matrix based on UB etc.
-      Kernel::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
-      Kernel::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
+      Kernel::Matrix<double> ub = m_inWS->mutableSample().getOrientedLattice().getUB();
+      Kernel::Matrix<double> gon = m_inWS->mutableRun().getGoniometerMatrix();
       // As per Busing and Levy 1967, q_lab_frame = 2pi * Goniometer * UB * HKL
       // Therefore, HKL = (2*pi * Goniometer * UB)^-1 * q_lab_frame
       mat = gon * ub;
@@ -388,28 +463,34 @@ namespace MDEvents
       throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
 
     // Copy ExperimentInfo (instrument, run, sample) to the output WS
-    ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());
+    ExperimentInfo_sptr ei(m_inWS->cloneExperimentInfo());
     uint16_t runIndex = ws->addExperimentInfo(ei);
     UNUSED_ARG(runIndex);
 
 
     // ------------------- Cache values that are common for all ---------------------------
     // Extract some parameters global to the instrument
-    in_ws->getInstrument()->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
+    m_inWS->getInstrument()->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
     beamline_norm = beamline.norm();
     beamDir = beamline / beamline.norm();
 
     //To get all the detector ID's
-    in_ws->getInstrument()->getDetectors(allDetectors);
+    m_inWS->getInstrument()->getDetectors(allDetectors);
 
-    size_t totalCost = in_ws->getNumberEvents();
-    prog = new Progress(this, 0, 1.0, totalCost);
+    // Estimate the number of events in the final workspace
+    size_t totalEvents = m_inWS->size();
+    if (m_inEventWS && !OneEventPerBin)
+      totalEvents = m_inEventWS->getNumberEvents();
+    prog = new Progress(this, 0, 1.0, totalEvents);
 //    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
 //    if (DODEBUG) prog->setNotifyStep(1);
 
+    // Is the addition of events thread-safe?
+    bool MultiThreadedAdding = m_inWS->threadSafe();
+
     // Create the thread pool that will run all of these.
     ThreadScheduler * ts = new ThreadSchedulerLargestCost();
-    ThreadPool tp(ts);
+    ThreadPool tp(ts, 0);
 
     // To track when to split up boxes
     this->failedDetectorLookupCount = 0;
@@ -417,34 +498,29 @@ namespace MDEvents
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
     if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 
-    for (size_t wi=0; wi < in_ws->getNumberHistograms(); wi++)
+    for (size_t wi=0; wi < m_inWS->getNumberHistograms(); wi++)
     {
-      // Equivalent of: this->convertEventList(wi);
-      EventList & el = in_ws->getEventList(wi);
+      // Get an idea of how many events we'll be adding
+      size_t eventsAdding = m_inWS->blocksize();
+      if (m_inEventWS && !OneEventPerBin)
+        eventsAdding = m_inEventWS->getEventList(wi).getNumberEvents();
 
-      // We want to bind to the right templated function, so we have to know the type of TofEvent contained in the EventList.
-      boost::function<void ()> func;
-      switch (el.getEventType())
+      if (MultiThreadedAdding)
       {
-      case TOF:
-        func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
-        break;
-      case WEIGHTED:
-        func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<WeightedEvent>, &*this, static_cast<int>(wi));
-        break;
-      case WEIGHTED_NOTIME:
-        func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<WeightedEventNoTime>, &*this, static_cast<int>(wi));
-        break;
-      default:
-        throw std::runtime_error("EventList had an unexpected data type!");
+        // Equivalent to calling "this->convertSpectrum(wi)"
+        boost::function<void ()> func = boost::bind(&ConvertToDiffractionMDWorkspace::convertSpectrum, &*this, static_cast<int>(wi));
+        // Give this task to the scheduler
+        double cost = static_cast<double>(eventsAdding);
+        ts->push( new FunctionTask( func, cost) );
+      }
+      else
+      {
+        // Not thread-safe. Just add right now
+        this->convertSpectrum(static_cast<int>(wi));
       }
 
-      // Give this task to the scheduler
-      double cost = double(el.getNumberEvents());
-      ts->push( new FunctionTask( func, cost) );
-
       // Keep a running total of how many events we've added
-      eventsAdded += el.getNumberEvents();
+      eventsAdded += eventsAdding;
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
         if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
@@ -468,13 +544,9 @@ namespace MDEvents
     if (this->failedDetectorLookupCount > 0)
     {
       if (this->failedDetectorLookupCount == 1)
-      {
         g_log.warning()<<"Unable to find a detector for " << this->failedDetectorLookupCount << " spectrum. It has been skipped." << std::endl;
-      }
       else
-      {
         g_log.warning()<<"Unable to find detectors for " << this->failedDetectorLookupCount << " spectra. They have been skipped." << std::endl;
-      }
     }
 
     if (DODEBUG) std::cout << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";

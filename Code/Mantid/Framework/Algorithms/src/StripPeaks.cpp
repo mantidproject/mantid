@@ -12,6 +12,8 @@ The [[FindPeaks]] algorithm is used to identify the peaks in the data.
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -42,13 +44,13 @@ void StripPeaks::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<int> *min = new BoundedValidator<int>();
+  auto min = boost::make_shared<BoundedValidator<int> >();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty("FWHM", 7, min,
     "Estimated number of points covered by the fwhm of a peak (default 7)" );
   // The tolerance allowed in meeting the conditions
-  declareProperty("Tolerance",4,min->clone(),
+  declareProperty("Tolerance",4,min,
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
   
@@ -61,13 +63,13 @@ void StripPeaks::init()
   std::vector<std::string> bkgdtypes;
   bkgdtypes.push_back("Linear");
   bkgdtypes.push_back("Quadratic");
-  declareProperty("BackgroundType", "Linear", new ListValidator(bkgdtypes),
+  declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. The choice can be either Linear or Quadratic");
 
   declareProperty("HighBackground", true,
       "Peaks are relatively weak comparing to the background");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
     "If set, peaks will only be removed from this spectrum (otherwise from all)");   

@@ -12,6 +12,8 @@ There are two output workspaces.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -34,11 +36,11 @@ using namespace API;
 
 void ElasticWindow::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new WorkspaceUnitValidator<>("DeltaE")));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<WorkspaceUnitValidator>("DeltaE")));
   declareProperty(new WorkspaceProperty<>("OutputInQ","",Direction::Output));
   declareProperty(new WorkspaceProperty<>("OutputInQSquared","",Direction::Output));
-  declareProperty("Range1Start", EMPTY_DBL(), new MandatoryValidator<double>());
-  declareProperty("Range1End", EMPTY_DBL(), new MandatoryValidator<double>());
+  declareProperty("Range1Start", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >());
+  declareProperty("Range1End", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >());
   declareProperty("Range2Start", EMPTY_DBL(), Direction::Input);
   declareProperty("Range2End", EMPTY_DBL(), Direction::Input);
 }

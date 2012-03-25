@@ -140,7 +140,13 @@ namespace MDEvents
       return m_errorsSquared;
     }
 
-    void setTo(signal_t signal, signal_t errorSquared);
+    /** @return the direct pointer to the array of the number of events. For speed */
+    signal_t * getNumEventsArray()
+    {
+      return m_numEvents;
+    }
+
+    void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);
 
@@ -162,6 +168,19 @@ namespace MDEvents
     {
       m_errorsSquared[index] = value;
     }
+
+    /// Sets the number of contributing events in the bin at the specified index.
+    void setNumEventsAt(size_t index, signal_t value)
+    {
+      m_numEvents[index] = value;
+    }
+
+    /// Returns the number of contributing events from the bin at the specified index.
+    signal_t getNumEventsAt(size_t index)
+    {
+      return m_numEvents[index];
+    }
+
 
 
     /// Get the error of the signal at the specified index.
@@ -219,8 +238,6 @@ namespace MDEvents
     {
       return m_signals[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
     }
-
-
 
 
     /// Get the signal at the specified index, normalized by cell volume
@@ -370,6 +387,9 @@ namespace MDEvents
     /// Linear array of errors for each bin
     signal_t * m_errorsSquared;
 
+    /// Number of contributing events for each bin.
+    signal_t * m_numEvents;
+
     /// Length of the m_signals / m_errorsSquared arrays.
     size_t m_length;
 
@@ -393,7 +413,7 @@ namespace MDEvents
     /// Max index into each dimension
     size_t * m_indexMax;
 
-    protected:
+  protected:
   
     /// Linear array of masks for each bin
     bool * m_masks;

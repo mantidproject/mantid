@@ -11,6 +11,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -160,7 +161,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
     AnalysisDataService::Instance().remove(inWSName);
   }
-  
+
 
   /// Workspace with infinity or NAN = don't create events there.
   void test_with_nan_and_inf()
@@ -210,6 +211,42 @@ public:
     // Only 1 bin had a valid weight/error, so it should have 1 event
     TS_ASSERT_EQUALS( outWS->getNumberEvents(), 1);
   }
+
+
+
+  /// Create events for zero-weight bins
+  void test_GenerateZeros()
+  {
+    // Create the input
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+
+    // Clear the vector
+    inWS->dataY(0).assign(10, 0.0);
+
+    // Name of the output workspace.
+    std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");
+
+    ConvertToEventWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GenerateMultipleEvents", true) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GenerateZeros", true) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    EventWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING( outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName) );
+    TS_ASSERT(outWS);
+    if (!outWS) return;
+
+    // Every bin is created, even though they were zeros
+    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 10);
+  }
+
+
 
 };
 

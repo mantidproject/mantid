@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
@@ -24,6 +25,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/Text.h>
+#include "Poco/RegularExpression.h"
+#include "Poco/NumberParser.h"
 #include <boost/shared_array.hpp>
 #include <iostream>
 //-----------------------------------------------------------------------
@@ -121,11 +124,11 @@ namespace Mantid
 
       // Optionally, we can specify the wavelength and wavelength spread and overwrite
       // the value in the data file (used when the data file is not populated)
-      Kernel::BoundedValidator<double> *mustBePositive = new Kernel::BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared< Kernel::BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
           "Wavelength value to use when loading the data file (Angstrom).");
-      declareProperty("WavelengthSpread", 0.1, mustBePositive->clone(),
+      declareProperty("WavelengthSpread", 0.1, mustBePositive,
         "Wavelength spread to use when loading the data file (default 0.0)" );
 
     }
@@ -174,13 +177,6 @@ namespace Mantid
       // Read sample thickness
       double sample_thickness = 0;
       from_element<double>(sample_thickness, sasEntryElem, "Sample_Thickness", fileName);
-
-      // Read in the detector dimensions
-      int numberXPixels = 0;
-      from_element<int>(numberXPixels, sasEntryElem, "Number_of_X_Pixels", fileName);
-
-      int numberYPixels = 0;
-      from_element<int>(numberYPixels, sasEntryElem, "Number_of_Y_Pixels", fileName);
 
       double source_apert = 0.0;
       from_element<double>(source_apert, sasEntryElem, "source_aperture_size", fileName);
@@ -262,6 +258,27 @@ namespace Mantid
       element = sasDataElem->getChildElement("Detector");
       throwException(element, "Detector", fileName);
       std::string data_str = element->innerText();
+
+      // Read in the detector dimensions from the Detector tag
+      int numberXPixels = 0;
+      int numberYPixels = 0;
+      std::string data_type = element->getAttribute("type");
+      Poco::RegularExpression re_sig("([0-9]+),([0-9]+)");
+      Poco::RegularExpression::MatchVec match;
+      re_sig.match(data_type, 0, match);
+      if (match.size()==3)
+      {
+        std::string num_str = data_type.substr(match[1].offset, match[1].length);
+        Poco::NumberParser::tryParse(num_str, numberXPixels);
+        num_str = data_type.substr(match[2].offset, match[2].length);
+        Poco::NumberParser::tryParse(num_str, numberYPixels);
+      }
+      if (numberXPixels==0 || numberYPixels==0)
+        g_log.notice() << "Could not read in the number of pixels!" << std::endl;
+
+      // We no longer read from the meta data because that data is wrong
+      //from_element<int>(numberXPixels, sasEntryElem, "Number_of_X_Pixels", fileName);
+      //from_element<int>(numberYPixels, sasEntryElem, "Number_of_Y_Pixels", fileName);
 
       // Store sample-detector distance
       declareProperty("SampleDetectorDistance", distance, Kernel::Direction::Output);
@@ -349,6 +366,7 @@ namespace Mantid
       ws->mutableRun().addProperty("timer", countingTime, "sec", true);
       ws->mutableRun().addProperty("monitor", monitorCounts, "", true);
       ws->mutableRun().addProperty("start_time", start_time, "", true);
+      ws->mutableRun().addProperty("run_start", start_time, "", true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");

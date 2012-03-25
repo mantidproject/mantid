@@ -1,9 +1,8 @@
 #ifndef MANTID_KERNEL_COMPOSITEVALIDATOR_H_
 #define MANTID_KERNEL_COMPOSITEVALIDATOR_H_
     
-#include "MantidKernel/System.h"
 #include "MantidKernel/IValidator.h"
-#include <vector>
+#include <list>
 #include <set>
 
 
@@ -39,105 +38,35 @@ namespace Kernel
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  template <typename TYPE>
-  class DLLExport CompositeValidator : public Kernel::IValidator<TYPE>
+  class DLLExport CompositeValidator : public IValidator
   {
   public:
-    CompositeValidator() {}
+    /// Default constructor
+    CompositeValidator();
+    /// Destructor
+    ~CompositeValidator();
 
-    virtual ~CompositeValidator()
-    {
-      for (unsigned int i=0; i < m_children.size(); ++i)
-      {
-        delete m_children[i];
-      }
-      m_children.clear();
-    }
-
-    // IValidator methods
     ///Gets the type of the validator
     std::string getType() const { return "composite"; }
-    /** returns allowed values as intersection of non-empty sets of allowed values for child validators; 
-     *
-     * not very consistent but reasonable as non-list validators often return empty sets of allowed values;
-     * primary purpose -- return only one set of values from single list validator placed within a composite validator;   */
-    std::set<std::string> allowedValues() const 
-    {
-      std::set<std::string>      elem_unique;
-      std::multiset<std::string> elem_all;
-      // how many validators return non-empty list of allowed values
-      int n_combinations(0);
-      for (unsigned int i=0; i < m_children.size(); ++i)
-      {
-         std::set<std::string> subs = m_children[i]->allowedValues();
-         if ( subs.empty())continue;
-           elem_unique.insert(subs.begin(),subs.end());
-           elem_all.insert(subs.begin(),subs.end());
-           n_combinations++;
-      }
- 
+    /// Return the instersection of allowed values from children
+    std::set<std::string> allowedValues() const;
+    /// Clones this and the children into a new Validator
+    IValidator_sptr clone() const;
+    /// Adds a validator to the group of validators to check
+    void add(IValidator_sptr child);
+    /// Add a validator based on a template type. Useful for validators that need no arguments
+    template <typename T> void add() { this->add(boost::make_shared<T>()); }
+    /// Add a validator based on the first template type with the second as an argument.
+    /// The argument is used to feed into the validator constructor
+    template <typename T, typename U> void add(const U & arg) { this->add(boost::make_shared<T>(arg)); }
 
-      // empty or single set of allowed values
-      if(n_combinations<2)return elem_unique;
-      // there is more then one combination and we have to identify its union;   
-      for(std::set<std::string>::const_iterator its=elem_unique.begin();its!=elem_unique.end();its++){
-          std::multiset<std::string>::iterator im = elem_all.find(*its);
-          elem_all.erase(im);
-      }
-      std::set<std::string> rez;
-      for(std::multiset<std::string>::const_iterator im=elem_all.begin();im!=elem_all.end();im++){
-          rez.insert(*im);
-      }
-      return rez;
-       
-    }
-    // ------------------------------------------------------------------------------------
-    Kernel::IValidator<TYPE>* clone() const
-    {
-      CompositeValidator<TYPE>* copy = new CompositeValidator<TYPE>();
-      for (unsigned int i=0; i < m_children.size(); ++i)
-      {
-        copy->add( m_children[i]->clone() );
-      }
-      return copy;
-    }
-
-    // ------------------------------------------------------------------------------------
-    /** Adds a validator to the group of validators to check
-     *  @param child :: A pointer to the validator to add
-     */
-    void add(Kernel::IValidator<TYPE>* child)
-    {
-      m_children.push_back(child);
-    }
-
-     virtual void modify_validator(IValidator<TYPE> *pNewValidator)
-     {
-         UNUSED_ARG(pNewValidator);
-     }
   private:
     /// Private Copy constructor: NO DIRECT COPY ALLOWED
     CompositeValidator(const CompositeValidator&);
-
-    /** Checks the value of all child validators. Fails if any child fails.
-     *  @param value :: The workspace to test
-     *  @return A user level description of the first problem it finds otherwise ""
-     */
-    std::string checkValidity( const TYPE & value ) const
-    {
-      //Go though all the validators
-      for (unsigned int i=0; i < m_children.size(); ++i)
-      {
-        std::string error = m_children[i]->isValid(value);
-        //exit on the first error, to avoid passing doing more tests on invalid objects that could fail
-        if (error != "") return error;
-      }
-      //there were no errors
-      return "";
-    }
-
+    /// Verify the value with the child validators
+    std::string check( const boost::any& value ) const;
     /// A container for the child validators
-    std::vector<Kernel::IValidator<TYPE>*> m_children;
+    std::list<IValidator_sptr> m_children;
   };
 
 

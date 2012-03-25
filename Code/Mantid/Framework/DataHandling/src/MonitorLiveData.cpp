@@ -76,29 +76,6 @@ namespace DataHandling
    */
   void MonitorLiveData::exec()
   {
-    this->validateInputs();
-
-    std::string outName = this->getPropertyValue("OutputWorkspace");
-    std::string accumName = this->getPropertyValue("AccumulationWorkspace");
-
-    // Check that no other MonitorLiveData thread is running with the same settings
-    auto it = AlgorithmManager::Instance().algorithms().begin();
-    for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
-    {
-      IAlgorithm_sptr alg = *it;
-      // MonitorLiveData thread that is running, except THIS one.
-      if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
-          && alg->isRunning())
-      {
-        if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
-          throw std::runtime_error("Another MonitorLiveData thread is running with the same AccumulationWorkspace. "
-              "Please specify a different AccumulationWorkspace name.");
-        if (alg->getPropertyValue("OutputWorkspace") == outName)
-          throw std::runtime_error("Another MonitorLiveData thread is running with the same OutputWorkspace. "
-              "Please specify a different OutputWorkspace name.");
-      }
-    }
-
     double UpdateEvery = getProperty("UpdateEvery");
     if (UpdateEvery <= 0)
       throw std::runtime_error("UpdateEvery must be > 0");
@@ -122,7 +99,8 @@ namespace DataHandling
       Poco::Thread::sleep(50);
 
       DateAndTime now = DateAndTime::getCurrentTime();
-      double seconds = DateAndTime::secondsFromDuration( now - lastTime );
+      double seconds;
+      seconds = DateAndTime::secondsFromDuration( now - lastTime );
       if (seconds > UpdateEvery)
       {
         lastTime = now;
@@ -152,6 +130,11 @@ namespace DataHandling
         //progress( double(chunk % 100)*0.01, "chunk " + Strings::toString(chunk));
         progress( 0.0, "Live Data " + Strings::toString(chunk));
       }
+
+      // This is the time to process a single chunk. Is it too long?
+      seconds = DateAndTime::secondsFromDuration( now - lastTime );
+      if (seconds > UpdateEvery)
+        g_log.warning() << "Cannot process live data as quickly as requested: requested every " << UpdateEvery << " seconds but it takes " << seconds << " seconds!" << std::endl;
     }
   }
 

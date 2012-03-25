@@ -101,6 +101,8 @@ The algorithm will ignore masked detectors if this flag is set.
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -133,7 +135,7 @@ void SmoothNeighbours::initDocs()
 void SmoothNeighbours::init()
 {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, boost::make_shared<InstrumentValidator>()),
                             "The workspace containing the spectra to be averaged." );
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
@@ -142,18 +144,18 @@ void SmoothNeighbours::init()
   std::vector<std::string> radiusPropOptions;
   radiusPropOptions.push_back("Meters");
     radiusPropOptions.push_back("NumberOfPixels");
-    declareProperty("RadiusUnits", "Meters",new ListValidator(radiusPropOptions),
+    declareProperty("RadiusUnits", "Meters",boost::make_shared<StringListValidator>(radiusPropOptions),
       "Units used to specify the radius?\n"
       "  Meters : Radius is in meters.\n"
       "  NumberOfPixels : Radius is in terms of the number of pixels."
        );
 
   //Unsigned double
-  BoundedValidator<double> *mustBePositiveDouble = new BoundedValidator<double>();
+  auto mustBePositiveDouble = boost::make_shared<BoundedValidator<double> >();
   mustBePositiveDouble->setLower(0.0);
 
   //Unsigned int.
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0); 
 
   declareProperty("Radius", 0.0, mustBePositiveDouble,
@@ -170,7 +172,7 @@ void SmoothNeighbours::init()
     propOptions.push_back("Linear");
     propOptions.push_back("Parabolic");
     propOptions.push_back("Gaussian");
-    declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
+    declareProperty("WeightedSum", "Flat",boost::make_shared<StringListValidator>(propOptions),
       "What sort of Weighting scheme to use?\n"
       "  Flat: Effectively no-weighting, all weights are 1.\n"
       "  Linear: Linear weighting 1 - r/R from origin.\n"
@@ -178,21 +180,18 @@ void SmoothNeighbours::init()
       "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
        );
 
-  declareProperty("Sigma", 0.5, mustBePositiveDouble->clone(), "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+  declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
   setPropertySettings("Sigma", new EnabledWhenProperty(this, "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
-
-  declareProperty("AdjX", 1, mustBePositive->clone(),
+  declareProperty("AdjX", 1, mustBePositive,
     "The number of X (horizontal) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
   setPropertySettings("AdjX", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
 
-  declareProperty("AdjY", 1, mustBePositive->clone(),
+  declareProperty("AdjY", 1, mustBePositive,
     "The number of Y (vertical) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
   setPropertySettings("AdjY", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
 
-  declareProperty("ZeroEdgePixels", 0, mustBePositive->clone(),
+  declareProperty("ZeroEdgePixels", 0, mustBePositive,
     "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
   setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
 
@@ -533,19 +532,6 @@ void SmoothNeighbours::exec()
 {
   // Get the input workspace
   inWS = getProperty("InputWorkspace");
-
-  
-
-  /*
-  As a temporary measure, use with managed workspaces is disabled see #4471
-  */
-  std::string typeName = typeid(*inWS.get()).name();
-  std::cout << "type name: " << typeName << std::endl;
-  boost::regex query("^(.*)managed(.*)$",boost::regex::icase);
-  if (boost::regex_match(typeName, query))
-  {
-    throw std::invalid_argument("SmoothNeighbours algorithm cannot be used with Managed Workspaces");
-  }
 
   // Retrieve the optional properties
   double enteredRadius = getProperty("Radius");

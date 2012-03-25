@@ -3,13 +3,12 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
+#include "MantidVatesAPI/DimensionView.h"
 
 namespace Mantid
 {
   namespace VATES
   {
-    //Forward declarations.
-    class DimensionView;
 
     /** @class DimensionPresenter
 
@@ -57,6 +56,7 @@ namespace Mantid
       GeometryPresenter::MappingType getMappings() const;
       void setMapping(std::string mapping);
       std::string getMapping() const;
+      void setViewMode(BinDisplay mode);
     private:
       void commonSetup();
       DimensionPresenter(const DimensionPresenter&);

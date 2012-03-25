@@ -104,6 +104,8 @@ namespace Mantid
       double normalize();            // Vec3D::makeUnit
       double norm() const;
       double norm2() const;
+      /// transform vector into form, used to describe directions in crystallogaphical coodinate system
+      double   toMillerIndexes(double eps=1.e-3);
       // Scalar product
       double scalar_prod(const V3D&) const;
       // Cross product

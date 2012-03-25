@@ -29,9 +29,13 @@ The units currently available to this algorithm are listed [[Unit Factory|here]]
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <cfloat>
 #include <iostream>
 #include <limits>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -51,6 +55,8 @@ void ConvertUnits::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using boost::function;
+using boost::bind;
 
 /// Default constructor
 ConvertUnits::ConvertUnits() : Algorithm(), m_numberOfSpectra(0), m_inputEvents(false)
@@ -65,25 +71,25 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>);
-  wsValidator->add(new HistogramValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>();
+  wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "Name of the input workspace");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace, can be the same as the input" );
 
   // Extract the current contents of the UnitFactory to be the allowed values of the Target property
-  declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()),
+  declareProperty("Target","",boost::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
     "The name of the units to convert to (must be one of those registered in\n"
     "the Unit Factory)");
   std::vector<std::string> propOptions;
   propOptions.push_back("Elastic");
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
-  declareProperty("EMode","Elastic",new ListValidator(propOptions),
+  declareProperty("EMode","Elastic",boost::make_shared<StringListValidator>(propOptions),
     "The energy mode (default: elastic)");
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed",EMPTY_DBL(),mustBePositive,
     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect) . Must be\n"
@@ -278,7 +284,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
 
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
-  CommonBinsValidator<> sameBins;
+  CommonBinsValidator sameBins;
   bool commonBoundaries = false;
   if ( sameBins.isValid(outputWS) == "" )
   {
@@ -439,9 +445,13 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     efixedProp = 0.0;
   }
 
+  std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
+  bool bUseSignedVersion = parameters.size() > 0 && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+  function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
+
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int64_t i = 0; i < numberOfSpectra_i; ++i)
+    for (int64_t i = 0; i < numberOfSpectra_i; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
@@ -458,7 +468,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
       {
         l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
-        twoTheta = outputWS->detectorTwoTheta(det);
+        twoTheta = thetaFunction(det);
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode==2) // indirect
         {

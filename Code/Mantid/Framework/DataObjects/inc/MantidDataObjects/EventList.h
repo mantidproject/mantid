@@ -126,7 +126,13 @@ public:
 
   EventList(const std::vector<TofEvent> &events);
 
+  EventList(const std::vector<WeightedEvent> &events);
+
+  EventList(const std::vector<WeightedEventNoTime> &events);
+
   virtual ~EventList();
+
+  void createFromHistogram(const ISpectrum * spec, bool GenerateZeros, bool GenerateMultipleEvents, int MaxEventsPerBin);
 
   EventList& operator=(const EventList&);
 

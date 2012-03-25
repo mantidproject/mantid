@@ -104,10 +104,12 @@ namespace Geometry
   }
 
   /** Sets the U matrix
-    @param newU :: the new U matrix*/
-  void OrientedLattice::setU(const DblMatrix& newU)
+    @param newU :: the new U matrix
+    @param force :: If true, do not check that U matrix is valid
+    */
+  void OrientedLattice::setU(const DblMatrix& newU, const bool force)
   {
-    if (newU.isRotation()==true)
+    if (force || newU.isRotation())
     {
       U=newU;
       UB=U*getB();
@@ -230,7 +232,7 @@ namespace Geometry
     file->writeData("unit_cell_beta", this->beta());
     file->writeData("unit_cell_gamma", this->gamma());
     // Save the UB matrix
-    std::vector<double> ub = this->UB.get_vector();
+    std::vector<double> ub = this->UB.getVector();
     std::vector<int> dims(2,3); // 3x3 matrix
     file->writeData("orientation_matrix", ub, dims);
 

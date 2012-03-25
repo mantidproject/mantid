@@ -18,10 +18,10 @@ The input workspace must have units of Momentum Transfer ('DeltaE') and contain 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
-
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -64,10 +64,10 @@ namespace Mantid
           exts),
           "The name of the NXSPE file to write, as a full or relative path");
 
-      CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<> ;
-      wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
-      wsValidator->add(new API::CommonBinsValidator<>);
-      wsValidator->add(new API::HistogramValidator<>);
+      auto wsValidator = boost::make_shared<CompositeValidator>() ;
+      wsValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
+      wsValidator->add<API::CommonBinsValidator>();
+      wsValidator->add<API::HistogramValidator>();
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
           "", Direction::Input, wsValidator),
@@ -76,9 +76,8 @@ namespace Mantid
       // if the value is not set, one should better have it invalid, e.g. NaN
       declareProperty("Efixed",SaveNXSPE::MASK_FLAG,
           "Value of the fixed energy to write into NXSPE file.");
-      // if the value is not set, one should better have it invalid, e.g. NaN
-      NullValidator<double> *numberValidator = new NullValidator<double> ();
-      declareProperty("Psi", SaveNXSPE::MASK_FLAG, numberValidator,
+
+      declareProperty("Psi", SaveNXSPE::MASK_FLAG, boost::make_shared<NullValidator>(),
           "Value of PSI to write into NXSPE file.");
 
       declareProperty("KiOverKfScaling", true,

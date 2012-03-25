@@ -112,8 +112,6 @@ namespace DataHandling
    */
   void StartLiveData::exec()
   {
-    this->validateInputs();
-
     // Validate the inputs
     bool FromNow = getProperty("FromNow");
     bool FromStartOfRun = getProperty("FromStartOfRun");

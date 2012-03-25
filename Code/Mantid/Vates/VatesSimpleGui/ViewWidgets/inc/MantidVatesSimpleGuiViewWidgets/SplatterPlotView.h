@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
+#include <QList>
 #include <QPointer>
 
 class QWidget;
@@ -94,7 +95,11 @@ protected slots:
 private:
   Q_DISABLE_COPY(SplatterPlotView)
 
-  QPointer<pqPipelineSource> peaksSource; ///< A peaks source
+  /// Destroy all peak sources.
+  void destroyPeakSources();
+
+  bool noOverlay; ///< Flag to respond to overlay situation correctly
+  QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
   QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
   QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
   QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
@@ -102,8 +107,8 @@ private:
   QPointer<pqRenderView> view; ///< The main view area
 };
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid
 
 #endif // SPLATTERPLOTVIEW_H_

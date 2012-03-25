@@ -8,6 +8,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cmath>
 #include <Poco/Path.h>
 
@@ -45,12 +46,12 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace in which to store the imported instrument" );
       
-      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("DetectorValue",1.0, mustBePositive,
         "This value affects the colour of the detectors in the instrument\n"
         "display window (default 1)" );
-      declareProperty("MonitorValue",2.0, mustBePositive->clone(),
+      declareProperty("MonitorValue",2.0, mustBePositive,
         "This value affects the colour of the monitors in the instrument\n"
         "display window (default 2)");
 

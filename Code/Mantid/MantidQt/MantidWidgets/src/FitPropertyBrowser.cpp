@@ -9,6 +9,7 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
@@ -1443,7 +1444,6 @@ void FitPropertyBrowser::populateWorkspaceNames()
   std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
   {
-    std::cout << "\n\n" << (*it) << "\n";
     tmp<<QString::fromStdString(*it);
   }
 

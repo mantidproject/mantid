@@ -142,59 +142,6 @@ typedef std::map<specid_t, std::vector<size_t> > storage_map;
 typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
 #endif
 
-
-  /**
-  * This class implements the Poco SAX ContentHandler class for reading of detector grouping files.
-  * @author Michael Whitty, ISIS
-  * @date 16/03/2011
-  * For an explanation of the ContentHandler class, please see http://www.appinf.com/docs/poco/Poco.XML.ContentHandler.html
-  */
-  class GroupXmlReader : public Poco::XML::ContentHandler
-  {
-  public:
-
-    /// Constructor
-    GroupXmlReader();
-    /// Signals start of XML document
-    void startDocument();  
-    /// Signals start of element
-    void startElement(const Poco::XML::XMLString &, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&, const Poco::XML::Attributes& attr);
-    /// Signals end of element
-    void endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&);
-    /// Used to return information to the GroupDetectors algorithm
-    void getItems(storage_map & map, std::vector<int64_t> & unused);
-    /// Provides some information that is needed for the process to work
-    void setMaps(spec2index_map spec, detid2index_map * det, std::vector<int64_t> & unused);
-
-    // These functions must be present as they are abstract in the base class. They are not used them here.
-    void setDocumentLocator(const Poco::XML::Locator*) {} ///< Not used
-    void endDocument() {} ///< Not used
-    void characters(const Poco::XML::XMLChar [], int, int) {} ///< Not used
-    void ignorableWhitespace(const Poco::XML::XMLChar [], int, int) {} ///< Not used
-    void processingInstruction(const Poco::XML::XMLString&, const Poco::XML::XMLString&) {} ///< Not used
-    void startPrefixMapping(const Poco::XML::XMLString&, const Poco::XML::XMLString&) {} ///< Not used
-    void endPrefixMapping(const Poco::XML::XMLString&) {} ///< Not used
-    void skippedEntity(const Poco::XML::XMLString&) {} ///< Not used
-
-  private:
-    /// Populates the group list
-    void getIDNumbers(const Poco::XML::Attributes& attr);
-    /// map of groups
-    storage_map m_groups;
-    /// group currently being read from file
-    std::vector<size_t> m_currentGroup;
-    /// whether reading spectra numbers or detector ids
-    bool m_specNo;
-    /// whether currently inside a group element
-    bool m_inGroup;
-    /// map of spectra number to workspace index
-    spec2index_map m_specnTOwi;
-    /// map of detector id to workspace index
-    detid2index_map * m_detidTOwi;
-    /// vector where value represent whether the workspace index corresponding to that position in the vector has been used
-    std::vector<int64_t> m_unused;
-  };
-
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;
   /// stores lists of spectra indexes to group, although we never do an index search on it

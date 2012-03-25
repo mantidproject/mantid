@@ -33,10 +33,7 @@ class FacilityInfo;
 
 /** A class that holds information about an instrument.
 
-    @author Roman Tolchenov, Tessella plc
-    @date 21/07/2010
-
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2012 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -79,10 +76,13 @@ private:
   std::string m_name;                      ///< instrument name
   std::string m_shortName;                 ///< instrument short name
   int m_zeroPadding;                       ///< default zero padding for this facility
-  std::string m_delimiter;                 ///  default delimiter between instrument name and run number
+  std::string m_delimiter;                 ///< default delimiter between instrument name and run number
   std::set<std::string> m_technique;       ///< list of techniques the instrument can do
   static Logger& g_log;                    ///< logger
 };
+
+/// Allow this object to be printed to a stream
+MANTID_KERNEL_DLL std::ostream & operator<<(std::ostream & buffer, const InstrumentInfo & instrumentDescriptor);
 
 } // namespace Kernel
 } // namespace Mantid

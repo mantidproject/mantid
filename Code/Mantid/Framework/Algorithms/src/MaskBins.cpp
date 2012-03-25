@@ -15,6 +15,7 @@ At present, although the zeroing of data will obviously be 'seen' by all downstr
 #include <sstream>
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -44,15 +45,15 @@ MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but MandatoryValidator is already taken!
-  BoundedValidator<double> *required = new BoundedValidator<double>();
+  auto required = boost::make_shared<BoundedValidator<double> >();
   required->setUpper(std::numeric_limits<double>::max()*0.99);
   declareProperty("XMin",std::numeric_limits<double>::max(),required);
-  declareProperty("XMax",std::numeric_limits<double>::max(),required->clone());
+  declareProperty("XMax",std::numeric_limits<double>::max(),required);
 
   // which pixels to load
   this->declareProperty(new ArrayProperty<int>("SpectraList"),

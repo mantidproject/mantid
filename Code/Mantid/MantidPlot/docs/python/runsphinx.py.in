@@ -3,7 +3,7 @@
    arguments
 """
 
-__requires__ = 'Sphinx==1.1.2'
+__requires__ = 'Sphinx==1.0.7'
 import sys
 import os
 from pkg_resources import load_entry_point
@@ -16,6 +16,6 @@ argv = [mantidplot,'-b', builder, src_dir, output_dir]
 
 if __name__ == '__main__':
     sys.exit(
-      load_entry_point('Sphinx==1.1.2', 'console_scripts', 'sphinx-build')(argv)
+      load_entry_point('Sphinx==1.0.7', 'console_scripts', 'sphinx-build')(argv)
     )
 

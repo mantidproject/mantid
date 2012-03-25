@@ -12,6 +12,7 @@ SplineBackground uses GSL b-spline and fitting functions to fit a spectrum. Mask
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_statistics.h>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -38,7 +39,7 @@ void SplineBackground::init()
     "",Direction::Input), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
     "",Direction::Output), "The name of the output workspace.");
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum number to use.");
   declareProperty("NCoeff",10,"The number of spline coefficients.");

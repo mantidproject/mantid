@@ -20,7 +20,8 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
     this->dimIDs.resize(nDims);
     this->dimUnits.resize(nDims);   
     this->nBins.resize(nDims);
-    for(size_t i=0;i<nDims;i++){
+    for(size_t i=0;i<nDims;i++)
+    {
         const Geometry::IMDDimension *pDim = pWS->getDimension(i).get();
         dimMin[i]  = pDim->getMinimum();
         dimMax[i]  = pDim->getMaximum();
@@ -29,13 +30,34 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
         dimUnits[i]= pDim->getUnits();   
         nBins[i]   = pDim->getNBins();
     }
+    uint16_t num_experiments = pWS->getNumExperimentInfo();   
+    // target ws does not have experiment info, so this can be only powder.
+    if (num_experiments==0)
+    {
+        return;
+    }else{
+        this->Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
+    }
 
+
+}
+/**function compares old workspace description with the new workspace description, defined by the algorithm properties and 
+ * selects/changes the properties which can be changed through input parameters given that target MD workspace exist   
+ *
+ * @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm parameters
+ *
+ * @returns NewMDWorkspaceD -- modified md workspace description, which is compartible with existing MD workspace
+ *
+*/
+void  
+MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
+{
+    UNUSED_ARG(NewMDWorkspaceD);
 }
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
  * values vere defined and min values are smaller then mav values */
-void 
-MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
+void MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
 {
   if(this->dimMin.size()!=this->dimMax.size()||this->dimMin.size()!=this->nDims)
   {
@@ -53,7 +75,50 @@ MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
     }
   }
 }
+//
+std::vector<std::string> MDWSDescription::getDefaultDimIDQ3D(int dEMode)const
+{
+    std::vector<std::string> rez;
+     if(dEMode==0)
+     {
+          rez.resize(3);
+     }else{
+       if (dEMode==1||dEMode==2)
+       {
+            rez.resize(4);
+            rez[3]=default_dim_ID[dE_ID];
+       }else{
+            throw(std::invalid_argument("Unknown dE mode provided"));
+       }
+     }
+     rez[0]=default_dim_ID[Q1_ID];
+     rez[1]=default_dim_ID[Q2_ID];
+     rez[2]=default_dim_ID[Q3_ID];
+     return rez;
+}
 
+
+
+std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
+{
+     std::vector<std::string> rez;
+
+     if(dEMode==0){
+          rez.resize(1);
+     }else{
+         if (dEMode==1||dEMode==2){
+            rez.resize(2);
+            rez[1]=default_dim_ID[dE_ID];
+         }else{
+             throw(std::invalid_argument("Unknown dE mode provided"));
+         }
+     }
+     rez[0]=default_dim_ID[ModQ_ID];
+     return rez;
+}
+
+
+/// empty constructor
 MDWSDescription::MDWSDescription(size_t nDimesnions):
 nDims(nDimesnions),
 emode(-1),
@@ -63,35 +128,78 @@ dimMax(nDimesnions,1),
 dimNames(nDimesnions,"mdn"),
 dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
-convert_to_hkl(false),
-u(1,0,0),
-v(0,1,0),
-is_uv_default(true),
-defailtQNames(3),
-detInfoLost(false)
+convert_to_factor(NoScaling),
+rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error
+GoniomMatr(3,3,true),
+Wtransf(3,3,true),
+detInfoLost(false),
+default_dim_ID(nDefaultID),
+QScalingID(NCoordScalings)
 {
-    for(size_t i=0;i<nDimesnions;i++){
-        dimIDs[i]= dimIDs[i]+boost::lexical_cast<std::string>(i);
+    for(size_t i=0;i<nDimesnions;i++)
+    {
+        dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
+        dimNames[i]=dimNames[i]+boost::lexical_cast<std::string>(i);
     }
-    defailtQNames[0]="Qh";
-    defailtQNames[1]="Qk";
-    defailtQNames[2]="Ql";
+
+ // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
+     // for ModQ transformation:
+     default_dim_ID[ModQ_ID]="|Q|";
+     // for Q3D transformation
+     default_dim_ID[Q1_ID]="Q1";
+     default_dim_ID[Q2_ID]="Q2";
+     default_dim_ID[Q3_ID]="Q3";
+     default_dim_ID[dE_ID]="DeltaE";
+
+    QScalingID[NoScaling]="Q in A^-1";
+    QScalingID[SingleScale]="Q in lattice units";
+    QScalingID[OrthogonalHKLScale]="Orthogonal HKL";
+    QScalingID[HKLScale]="HKL";
+
 
 }
-std::string DLLExport sprintfd(const double data, const double eps)
+
+MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
 {
-     // truncate to eps decimal points
-     float dist = float((int(data/eps+0.5))*eps);
-     return boost::str(boost::format("%d")%dist);
+    this->nDims = rhs.nDims;
+    this->emode = rhs.emode;
+    this->Ei    = rhs.Ei;
+    // prepare all arrays:
+    this->dimMin = rhs.dimMin;
+    this->dimMax = rhs.dimMax;
+    this->dimNames=rhs.dimNames;
+    this->dimIDs  =rhs.dimIDs;
+    this->dimUnits=rhs.dimUnits;   
+    this->nBins   =rhs.nBins;
+
+    this->convert_to_factor= rhs.convert_to_factor;
+
+    this->rotMatrix     = rhs.rotMatrix;
+    this->AlgID         = rhs.AlgID;
+
+    this->detInfoLost   = rhs.detInfoLost;
+
+    if(rhs.pLatt.get()){
+        this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(*(rhs.pLatt)));
+    }
+    this->Wtransf    = rhs.Wtransf;
+    this->GoniomMatr = rhs.GoniomMatr;
+
+    return *this;
 
 }
+
 
 std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &QNames)
 {
     double eps(1.e-3);
+    Kernel::V3D DirCryst(Dir);
+
+   // DirCryst.toMillerIndexes(eps);
+
     std::string name("["),separator=",";
     for(size_t i=0;i<3;i++){
-        double dist=std::fabs(Dir[i]);
+        double dist=std::fabs(DirCryst[i]);
         if(i==2)separator="]";
         if(dist<eps){
             name+="0"+separator;
@@ -109,6 +217,31 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
 
     return name;
 }
+std::string DLLExport sprintfd(const double data, const double eps)
+{
+     // truncate to eps decimal points
+     float dist = float((int(data/eps+0.5))*eps);
+     return boost::str(boost::format("%d")%dist);
+
+}
+
+
+CoordScaling MDWSDescription::getQScaling(const std::string &ScID)const
+{
+    CoordScaling theScaling(NCoordScalings);
+    for(size_t i=0;i<NCoordScalings;i++)
+    {
+        if(QScalingID[i].find(ScID)!=std::string::npos)
+        {
+            theScaling = (CoordScaling)i;
+            break;
+        }
+    }
+    if(theScaling==NCoordScalings) throw(std::invalid_argument(" The scale with ID: "+ScID+" is unavalible"));
+
+    return theScaling;
+}
+
 
 }
 }

@@ -4,6 +4,7 @@
 #include "ProjectionSurface.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/Logger.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -383,6 +384,11 @@ void InstrumentWindowMaskTab::clearMask()
   m_instrumentDisplay->update();
 }
 
+/*
+ * parameters
+ * @exclude:  if true, the detectors listed will not be masked
+ *            if false, the detectors listed will be masked
+ */
 Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool exclude)
 {
   m_instrumentDisplay->repaint(); // to refresh the pick image
@@ -393,8 +399,18 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
 
   size_t wsSize = outputWS->getNumberHistograms();
 
+  if (exclude)
+  {
+    outputWS->setTitle("MaskWorkspaceExcludeDetectors");
+  }
+  else
+  {
+    outputWS->setTitle("MaskWorkspaceIncludeDetectors");
+  }
+
   QList<int> dets;
   m_instrumentDisplay->getSurface()->getMaskedDetectors(dets);
+
   if (!dets.isEmpty())
   {
     if (exclude)
@@ -409,11 +425,14 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
         }
         if (id > 0 && dets.contains(id))
         {
-          outputWS->dataY(i)[0] = 1.0;
+          // Not mask
+          outputWS->dataY(i)[0] = 0.0;
         }
         else
         {
+          // Mask the detector
           outputWS->maskWorkspaceIndex(i);
+          outputWS->dataY(i)[0] = 1.0;
         }
       }
     }
@@ -421,19 +440,23 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
     {
       for(size_t i = 0; i < wsSize; ++i)
       {
-        outputWS->dataY(i)[0] = 1.0;
+        // Not mask
+        outputWS->dataY(i)[0] = 0.0;
       }
       foreach(int id,dets)
       {
         try {
+          // Mask the detector
           size_t wi = m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id);
           outputWS->maskWorkspaceIndex(wi);
+          outputWS->dataY(wi)[0] = 1.0;
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           continue; // Detector doesn't have a workspace index relating to it
         }
       }
     }
   }
+
   return outputWS;
 }
 
@@ -463,6 +486,7 @@ void InstrumentWindowMaskTab::saveMaskToWorkspace(bool exclude)
   m_pointer->setChecked(true);
   setActivity();
   Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(exclude);
+
   if (outputWS)
   {
     clearMask();

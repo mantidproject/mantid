@@ -15,6 +15,7 @@ namespace Mantid
   namespace VATES
   {
 
+    /// Comparitor to find integrated dimensions.
      struct FindIntegrated : public std::unary_function <IMDDimension_sptr, bool>
     {
       bool operator ()(const IMDDimension_sptr obj) const
@@ -58,7 +59,8 @@ namespace Mantid
       Z_AXIS("Z-AXIS"),
       T_AXIS("T-AXIS"),
       m_dimensions(source.getAllDimensions()), 
-      m_source(source)
+      m_source(source),
+      m_binDisplayMode(Simple)
     {
 
     }
@@ -419,6 +421,26 @@ namespace Mantid
     void SynchronisingGeometryPresenter::setModified()
     {
       m_view->raiseModified();
+    }
+
+    /**
+    Setter to indicate changes to the display mode.
+    */
+    void SynchronisingGeometryPresenter::setDimensionModeChanged()
+    {
+      //Get the actual requested display mode.
+      BinDisplay temp = m_view->getBinDisplayMode();
+      if(temp != m_binDisplayMode)
+      {
+        m_binDisplayMode = temp;
+        VecDimPresenter_sptr::iterator it = m_dimPresenters.begin();
+        while(it != m_dimPresenters.end())
+        {
+          //Delegate the work of applying the changes to each DimensionPresenter.
+          (*it)->setViewMode(m_binDisplayMode);
+          ++it;
+        }
+      }
     }
 
     /**

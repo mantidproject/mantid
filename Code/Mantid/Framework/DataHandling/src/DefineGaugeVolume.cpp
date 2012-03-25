@@ -15,6 +15,7 @@ Internally, this works by attaching the XML string (after validating it) to a pr
 #include "MantidDataHandling/DefineGaugeVolume.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -41,7 +42,7 @@ void DefineGaugeVolume::init()
 {
   declareProperty(new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut),
     "The workspace with which to associate the defined gauge volume");
-  declareProperty("ShapeXML","",new Kernel::MandatoryValidator<std::string>(),
+  declareProperty("ShapeXML","",boost::make_shared<Kernel::MandatoryValidator<std::string> >(),
     "The XML that describes the shape of the gauge volume" );
 }
 

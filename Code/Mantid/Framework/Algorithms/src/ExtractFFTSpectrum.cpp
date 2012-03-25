@@ -9,6 +9,7 @@
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -32,7 +33,7 @@ using namespace API;
 void ExtractFFTSpectrum::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The input workspace.");
-  declareProperty("FFTPart", 2, new BoundedValidator<int>(0,5));
+  declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0,5));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The output workspace.");
 }
 

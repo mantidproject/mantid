@@ -41,16 +41,16 @@ using namespace DataObjects;
 
 void EQSANSDarkCurrentSubtraction::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
 
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputDarkCurrentWorkspace","", Direction::Output, true));
+  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputDarkCurrentWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage","",Direction::Output);
 
 }

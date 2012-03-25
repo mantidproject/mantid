@@ -4,11 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/TypedValidator.h"
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#include "MantidKernel/IValidator.h"
 
 namespace Mantid
 {
@@ -42,11 +42,11 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template< class TYPE >
-class DLLExport BoundedValidator : public IValidator<TYPE>
+class DLLExport BoundedValidator : public TypedValidator<TYPE>
 {
 public:
   /// No-arg Constructor
-  BoundedValidator() : IValidator<TYPE>(),
+  BoundedValidator() :  TypedValidator<TYPE>(),
     m_hasLowerBound( false), 
     m_hasUpperBound( false), 
     m_lowerBound(TYPE() ), 
@@ -58,7 +58,8 @@ public:
    * @param lowerBound :: The lower bounding value
    * @param upperBound :: The upper bounding value
    */
-  BoundedValidator(const TYPE lowerBound, const TYPE upperBound) :
+  BoundedValidator(const TYPE lowerBound, const TYPE upperBound)
+  : TypedValidator<TYPE>(),
     m_hasLowerBound( true), 
     m_hasUpperBound( true), 
     m_lowerBound(lowerBound), 
@@ -100,8 +101,9 @@ public:
     clearLower(); 
     clearUpper(); 
   }
-	
-  IValidator<TYPE>* clone() const { return new BoundedValidator(*this); }
+  
+  /// Clone the current state
+  IValidator_sptr clone() const { return boost::make_shared<BoundedValidator>(*this); }
 
 private:
   // Data and Function Members for This Class Implementation.

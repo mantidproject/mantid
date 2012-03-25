@@ -4,6 +4,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidVatesAPI/DimensionView.h"
 
 namespace Mantid
 {
@@ -68,6 +69,8 @@ namespace Mantid
 
       void setModified();
 
+      void setDimensionModeChanged();
+
       //Constant reference name for an X-AXIS
       const std::string X_AXIS;
       //Constant reference name for an Y-AXIS
@@ -115,8 +118,10 @@ namespace Mantid
       Mantid::Geometry::MDGeometryXMLParser m_source; 
       /// The View with which the presenter will be bound.
       GeometryView* m_view;
-      //Map containing pairs of visdimensionnames to dimension presenters.
+      /// Map containing pairs of visdimensionnames to dimension presenters.
       MappingType m_mapping;
+      /// Current bin display mode 
+      BinDisplay m_binDisplayMode;
     protected:
 
       virtual void dimensionCollapsed(DimensionPresenter* pDimensionPresenter);

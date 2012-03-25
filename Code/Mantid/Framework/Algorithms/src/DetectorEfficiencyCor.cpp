@@ -23,6 +23,7 @@ Note: it is not possible to use this [[algorithm]] to correct for the detector e
 #include <algorithm>
 #include <functional>
 #include <cmath>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -97,17 +98,17 @@ DetectorEfficiencyCor::DetectorEfficiencyCor() :
  */
 void DetectorEfficiencyCor::init()
 {
-  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
-  val->add(new WorkspaceUnitValidator<>("DeltaE"));
-  val->add(new HistogramValidator<>);
-  val->add(new InstrumentValidator<>);
+  auto val = boost::make_shared<CompositeValidator>();
+  val->add<WorkspaceUnitValidator>("DeltaE");
+  val->add<HistogramValidator>();
+  val->add<InstrumentValidator>();
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
     "The workspace to correct for detector efficiency");
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "The name of the workspace in which to store the result" );
-  BoundedValidator<double> *checkEi = new BoundedValidator<double>();
+  auto checkEi = boost::make_shared<BoundedValidator<double> >();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
     "The energy kinetic the neutrons have before they hit the sample (meV)" );

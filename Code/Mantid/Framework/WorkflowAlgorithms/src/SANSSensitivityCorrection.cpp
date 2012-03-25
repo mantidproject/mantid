@@ -20,6 +20,7 @@
 #include "Poco/String.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidNexus/NexusFileIO.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -51,19 +52,19 @@ void SANSSensitivityCorrection::init()
   declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
       "The name of the input file to load as dark current.");
 
-  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
   declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
       "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble->clone(),
+  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
 
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (optional: otherwise sample beam center is used)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (optional: otherwise sample beam center is used)");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputSensitivityWorkspace","", Direction::Output, true));
+  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputSensitivityWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage","",Direction::Output);
 
 }

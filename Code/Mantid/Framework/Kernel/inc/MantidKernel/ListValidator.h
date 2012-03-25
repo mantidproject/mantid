@@ -4,14 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ListAnyValidator.h"
+#include "MantidKernel/TypedValidator.h"
+#include <boost/lexical_cast.hpp>
+#include <vector>
 
 namespace Mantid
 {
 namespace Kernel
 {
 /** ListValidator is a validator that requires the value of a property to be one of a defined list
-    of possibilities. At present, this validator is only available for properties of type std::string
+    of possibilities. The default type is std::string
 
     @author Russell Taylor, Tessella Support Services plc
     @date 18/06/2008
@@ -36,43 +38,61 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-class  ListValidator : public ListAnyValidator<std::string>
+template<typename TYPE>
+class ListValidator : public TypedValidator<TYPE>
 {
 public:
   /// Default constructor. Sets up an empty list of valid values.
-  ListValidator():ListAnyValidator<std::string>()
+  ListValidator() : TypedValidator<TYPE>()
   {}
 
   /** Constructor
    *  @param values :: A set of values consisting of the valid values     */
-  explicit ListValidator(const std::set<std::string>& values):
-        ListAnyValidator<std::string>(values)
-  {}
+  explicit ListValidator(const std::set<TYPE>& values)
+    : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end())
+  {
+  }
 
   /** Constructor
    *  @param values :: A vector of the valid values     */
-  explicit ListValidator(const std::vector<std::string>& values):
-        ListAnyValidator<std::string>(values)
-  {}
-
-  // overload this function to keep python happy (temporary?)
-  void addAllowedValue(const std::string &value)
+  explicit ListValidator(const std::vector<TYPE>& values):
+    TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end())
   {
-    ListAnyValidator<std::string>::addAllowedValue(value);
+  }
+  /// Destructor
+  virtual ~ListValidator(){};
+  /// Clone the validator
+  IValidator_sptr clone() const{ return boost::make_shared<ListValidator<TYPE> >(*this); }
+  /**
+   * Returns the set of allowed values currently defined
+   * @returns A set of allowed values that this validator will currently allow
+   */
+  std::set<std::string> allowedValues() const
+  {
+    /// The interface requires strings
+    std::set<std::string> allowedStrings;
+    auto cend = m_allowedValues.end();
+    for(auto cit = m_allowedValues.begin(); cit != cend; ++cit)
+    {
+      allowedStrings.insert(boost::lexical_cast<std::string>(*cit));
+    }
+    return allowedStrings;
   }
 
-  virtual ~ListValidator(){};
-
-  virtual IValidator<std::string>* clone() const { return new ListValidator(*this); }
-
-  
-protected:
+  /**
+   * Add value to the list of allowable values
+   * @param value :: A value of the templated type
+   */
+  void addAllowedValue(const TYPE &value)
+  {
+    m_allowedValues.insert(value);
+  }
+private:
   /** Checks if the string passed is in the list
    *  @param value :: The value to test
    *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
    */
-  std::string checkValidity(const std::string &value) const
+  std::string checkValidity(const TYPE & value) const
   {
     if ( m_allowedValues.count(value) )
     {
@@ -80,12 +100,33 @@ protected:
     }
     else
     {
-      if ( value.empty() ) return "Select a value";
-      else return "The value \"" + value + "\" is not in the list of allowed values";
+      if ( isEmpty(value) ) return "Select a value";
+      std::ostringstream os;
+      os << "The value \"" << value << "\" is not in the list of allowed values";
+      return os.str();
     }
   }
 
+  /**
+   * Is the value considered empty.
+   * @param value :: The value to check
+   * @return True if it is considered empty
+   */
+  template<typename T>
+  bool isEmpty(const T & value) const{ UNUSED_ARG(value) return false; }
+  /**
+   * Is the value considered empty. Specialized string version to use empty
+   * @param value :: The value to check
+   * @return True if it is considered empty
+   */
+  bool isEmpty(const std::string & value) const { return value.empty(); }
+
+  /// The set of valid values
+  std::set<TYPE> m_allowedValues;
 };
+
+/// ListValidator<std::string> is used heavily
+typedef ListValidator<std::string> StringListValidator;
 
 } // namespace Kernel
 } // namespace Mantid

@@ -6,6 +6,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include <algorithm>
@@ -48,9 +49,10 @@ LoadDetectorInfo::LoadDetectorInfo()
 void LoadDetectorInfo::init()
 {
   // Declare required input parameters for algorithm
-  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
-  val->add(new WorkspaceUnitValidator<>("TOF"));
-  val->add(new HistogramValidator<>);
+  auto val = boost::make_shared<CompositeValidator>();
+  val->add<WorkspaceUnitValidator>("TOF");
+  val->add<HistogramValidator>();
+
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,val),
     "The name of the workspace to that the detector information will be loaded into" );
   std::vector<std::string> exts;

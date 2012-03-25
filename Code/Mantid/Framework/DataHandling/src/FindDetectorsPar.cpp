@@ -73,9 +73,9 @@ FindDetectorsPar::~FindDetectorsPar(){};
 
 void FindDetectorsPar::init()
 {
-    CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<> ;
-      wsValidator->add(new API::InstrumentValidator<>);
-      wsValidator->add(new API::CommonBinsValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>() ;
+  wsValidator->add<API::InstrumentValidator>();
+  wsValidator->add<API::CommonBinsValidator>();
   // input workspace
   declareProperty(
      new WorkspaceProperty<>("InputWorkspace","", Direction::Input,wsValidator),

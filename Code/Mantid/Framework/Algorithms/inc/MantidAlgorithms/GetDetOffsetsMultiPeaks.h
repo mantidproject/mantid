@@ -54,7 +54,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
-  void fitSpectra(const int64_t s, API::MatrixWorkspace_sptr inputW, const std::string &peakPositions, size_t &nparams, double &minD, double &maxD, std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted);
+  void fitSpectra(const int64_t s, API::MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions, const std::vector<double> &fitWindows, size_t &nparams,
+                  double &minD, double &maxD,
+                  std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -62,15 +64,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  /// Read in all the input parameters
-  void retrieveProperties();
-  
-  
-  API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
-  DataObjects::OffsetsWorkspace_sptr outputW; ///< A pointer to the output workspace
-  double maxOffset;   ///< The maximum absolute value of offsets
-  double dreference;  ///< The expected peak position in d-spacing (?)
-  int64_t nspec;          ///< The number of spectra in the input workspace
 };
 
 } // namespace Algorithm

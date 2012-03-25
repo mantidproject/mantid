@@ -6,6 +6,7 @@
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 

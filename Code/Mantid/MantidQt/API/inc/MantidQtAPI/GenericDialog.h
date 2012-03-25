@@ -10,6 +10,7 @@
 #include <QtCore/qvariant.h>
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Property.h"
+#include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 
 //----------------------------------
 // Forward declarations
@@ -62,25 +63,17 @@ public:
   // Destructor
   virtual ~GenericDialog();
 
+protected slots:
+  virtual void accept();
+
 private:
   virtual void initLayout();
 
-  void hideOrDisableProperties();
+  void parseInput();
 
-private slots:
+  /// Widget containing all the PropertyWidgets
+  AlgorithmPropertiesWidget * m_algoPropertiesWidget;
 
-  /// Any property changed
-  void propertyChanged(const QString & pName);
-
-  /// Replace WS button was clicked
-  void replaceWSClicked(const QString & propName);
-
-private:
-    /// The grid widget containing the input boxes
-  QGridLayout *m_inputGrid;
-
-  /// The current grid widget for sub-boxes
-  QGridLayout *m_currentGrid;
 };
 
 }

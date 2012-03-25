@@ -67,8 +67,6 @@ public:
   bool isOptional() const;
   ///Overridden setValue method
   virtual std::string setValue(const std::string & propValue);
-  /// Set a value via a data pointer
-  virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem>);
   /// Returns the main file extension that's used 
   std::string getDefaultExt() const {return m_defaultExt;}
 

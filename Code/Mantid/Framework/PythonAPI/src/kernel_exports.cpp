@@ -204,17 +204,11 @@ namespace PythonAPI
   
   void export_validators()
   {
-#define EXPORT_IVALIDATOR(type,suffix)				\
-    class_<Kernel::IValidator<type>, boost::noncopyable >("IValidator_"#suffix, no_init);
-    
-    EXPORT_IVALIDATOR(int,int);
-    EXPORT_IVALIDATOR(double,dbl);
-    EXPORT_IVALIDATOR(std::string,int);
-#undef EXPORT_IVALIDATOR
+    class_<Kernel::IValidator, boost::noncopyable >("IValidator", no_init);
 
     // Bounded validators
 #define EXPORT_BOUNDEDVALIDATOR(type,suffix)\
-    class_<Kernel::BoundedValidator<type>, bases<Kernel::IValidator<type> > >("BoundedValidator_"#suffix) \
+    class_<Kernel::BoundedValidator<type>, bases<Kernel::IValidator> >("BoundedValidator_"#suffix) \
       .def(init<type,type>())\
       .def("setLower", (void (Kernel::BoundedValidator<type>::*)(const type& value))&Kernel::BoundedValidator<type>::setLower )\
       .def("setUpper", (void (Kernel::BoundedValidator<type>::*)(const type& value))&Kernel::BoundedValidator<type>::setUpper )\
@@ -224,15 +218,8 @@ namespace PythonAPI
     EXPORT_BOUNDEDVALIDATOR(int,int);
 #undef EXPORT_BOUNDEDVALIDATOR      
 
-#define EXPORT_IVALIDATOR_V(type,suffix)        \
-    class_<Kernel::IValidator<std::vector<type> >, boost::noncopyable >("IValidator_"#suffix, no_init);
-
-    EXPORT_IVALIDATOR_V(int,int);
-    EXPORT_IVALIDATOR_V(double,dbl);
-#undef EXPORT_IVALIDATOR_V
-
 #define EXPORT_ARRAYBOUNDEDVALIDATOR(type,suffix) \
-    class_<Kernel::ArrayBoundedValidator<type>, bases<Kernel::IValidator<std::vector<type> > > >("ArrayBoundedValidator_"#suffix) \
+    class_<Kernel::ArrayBoundedValidator<type>, bases<Kernel::IValidator> >("ArrayBoundedValidator_"#suffix) \
       .def("setLower", (void (Kernel::ArrayBoundedValidator<type>::*)(const type& value))&Kernel::ArrayBoundedValidator<type>::setLower )\
       .def("setUpper", (void (Kernel::ArrayBoundedValidator<type>::*)(const type& value))&Kernel::ArrayBoundedValidator<type>::setUpper )\
       ;
@@ -243,7 +230,7 @@ namespace PythonAPI
 
     // Mandatory validators
 #define EXPORT_MANDATORYVALIDATOR(type,suffix)\
-    class_<Kernel::MandatoryValidator<type>, bases<Kernel::IValidator<type> > >("MandatoryValidator_"#suffix); \
+    class_<Kernel::MandatoryValidator<type>, bases<Kernel::IValidator> >("MandatoryValidator_"#suffix); \
       
     EXPORT_MANDATORYVALIDATOR(int,int);
     EXPORT_MANDATORYVALIDATOR(double,dbl);
@@ -251,8 +238,8 @@ namespace PythonAPI
 #undef EXPORT_MANDATORYVALIDATOR
 
     //List validator
-    class_<Kernel::ListValidator, bases<Kernel::IValidator<std::string> > >("ListValidator_str", init<std::vector<std::string> >())
-      .def("addAllowedValue", &Kernel::ListValidator::addAllowedValue)
+    class_<Kernel::StringListValidator, bases<Kernel::IValidator> >("ListValidator_str", init<std::vector<std::string> >())
+      .def("addAllowedValue", &Kernel::StringListValidator::addAllowedValue)
       ;
   }
 
@@ -283,18 +270,18 @@ namespace PythonAPI
       ;
    }
 
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FacilityInfo_instrumentOverloads, Mantid::Kernel::FacilityInfo::Instrument, 0, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FacilityInfo_instrumentOverloads, Mantid::Kernel::FacilityInfo::instrument, 0, 1)
 
   void export_facilityinfo()
   {
     class_<FacilityInfo>("FacilityInfo",no_init)
-      .def("name", &FacilityInfo::name)
+      .def("name", &FacilityInfo::name, return_value_policy<copy_const_reference>())
       .def("zeroPadding", &FacilityInfo::zeroPadding)
       .def("extensions", &FacilityInfo::extensions)
-      .def("preferredExt", &FacilityInfo::preferredExtension)
-      .def("instrument", &FacilityInfo::Instrument, FacilityInfo_instrumentOverloads()[return_value_policy<copy_const_reference>()])
-      .def("instruments", (const std::vector<InstrumentInfo>& (FacilityInfo::*)() const)&FacilityInfo::Instruments, return_value_policy<copy_const_reference>())
-      .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const)&FacilityInfo::Instruments)
+      .def("preferredExt", &FacilityInfo::preferredExtension, return_value_policy<copy_const_reference>())
+      .def("instrument", &FacilityInfo::instrument, FacilityInfo_instrumentOverloads()[return_value_policy<copy_const_reference>()])
+      .def("instruments", (const std::vector<InstrumentInfo>& (FacilityInfo::*)() const)&FacilityInfo::instruments, return_value_policy<copy_const_reference>())
+      .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const)&FacilityInfo::instruments)
       ;
   }
 

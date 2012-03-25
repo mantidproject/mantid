@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

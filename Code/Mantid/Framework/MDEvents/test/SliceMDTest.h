@@ -8,6 +8,7 @@
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/SliceMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -23,6 +24,17 @@ class SliceMDTest : public CxxTest::TestSuite
 
 private:
 
+  /// Helper method to verify the existance of a given property name on the algorithm
+  void doTestPropertyExistance(const std::string& propertyName)
+  {
+    SliceMD alg;
+    alg.initialize();
+
+    Mantid::Kernel::Property *QDimProperty;
+    TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken SlicingAlgorithmDialog. Fix SlicingAlgorithmDialog!", QDimProperty = alg.getProperty(propertyName));
+  }
+
+  /// Helper method to test application of the recusion depth
   void doTestRecursionDepth(const bool bTakeDepthFromInput, const int maxDepth = 0)
   {
     SliceMD alg;
@@ -78,6 +90,33 @@ public:
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
+  }
+
+    //DO NOT DISABLE THIS TEST
+  void testAlgorithmProperties()
+  {
+    /*
+    This unit test is designed to flag up changes here. If property values and names here do need to be changed, 
+    1) They must also be updated in SlicingAlgorithmDialog.cpp. 
+    2) It should then be confirmed that that the SliceMD dialog still works in MantidPlot (run SliceMD)!
+    3) Finally this unit test should be updated so that the tests pass.
+    */
+    doTestPropertyExistance("InputWorkspace");
+    doTestPropertyExistance("AxisAligned");
+    doTestPropertyExistance("OutputWorkspace");
+    doTestPropertyExistance("OutputExtents");
+    doTestPropertyExistance("OutputBins");
+    doTestPropertyExistance("NormalizeBasisVectors");
+    doTestPropertyExistance("ForceOrthogonal");
+    doTestPropertyExistance("Translation");
+    doTestPropertyExistance("AlignedDim0");
+    doTestPropertyExistance("AlignedDim1");
+    doTestPropertyExistance("BasisVector0");
+    doTestPropertyExistance("BasisVector1");
+    doTestPropertyExistance("MaxRecursionDepth");
+    doTestPropertyExistance("TakeMaxRecursionDepthFromInput");
+    doTestPropertyExistance("Memory");
+    doTestPropertyExistance("OutputFilename");
   }
   
 

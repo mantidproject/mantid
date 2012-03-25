@@ -1,5 +1,5 @@
 set ( SRC_FILES
-	src/ANN_complete.cpp
+    src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
 	src/ArrayProperty.cpp
@@ -35,7 +35,6 @@ set ( SRC_FILES
 	src/LogParser.cpp
 	src/Logger.cpp
 	src/MagneticIon.cpp
-	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Matrix.cpp
@@ -136,7 +135,6 @@ set ( INC_FILES
 	inc/MantidKernel/Interpolation.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
-	inc/MantidKernel/ListAnyValidator.h
 	inc/MantidKernel/ListValidator.h
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
@@ -183,6 +181,7 @@ set ( INC_FILES
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
+	inc/MantidKernel/TypedValidator.h
 	inc/MantidKernel/Unit.h
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UserStringParser.h
@@ -226,7 +225,7 @@ set ( TEST_FILES
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
 	test/InterpolationTest.h
-	test/ListAnyValidatorTest.h
+	test/IValidatorTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
 	test/LogParserTest.h
@@ -267,6 +266,7 @@ set ( TEST_FILES
 	test/TimeSeriesPropertyTest.h
 	test/TimeSplitterTest.h
 	test/TimerTest.h
+	test/TypedValidatorTest.h
 	test/UnitFactoryTest.h
 	test/UnitTest.h
 	test/UserStringParserTest.h

@@ -16,11 +16,11 @@ While this algorithm will occasionally work for as few as four peaks, it works q
 
 *WIKI*/
 #include "MantidCrystal/FindUBUsingFFT.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cstdio>
 
 namespace Mantid
@@ -74,20 +74,13 @@ namespace Crystal
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
           "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
 
     // use negative values, force user to input all parameters
-    this->declareProperty(new PropertyWithValue<double>( "MinD",-1.0,
-          mustBePositive,Direction::Input),
-          "Lower Bound on Lattice Parameters a, b, c");
-
-    this->declareProperty(new PropertyWithValue<double>( "MaxD",-1.0,
-          mustBePositive->clone(),Direction::Input),
-          "Upper Bound on Lattice Parameters a, b, c");
-
-    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
-         mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");
+    this->declareProperty("MinD",-1.0, mustBePositive, "Lower Bound on Lattice Parameters a, b, c");
+    this->declareProperty("MaxD",-1.0, mustBePositive, "Upper Bound on Lattice Parameters a, b, c");
+    this->declareProperty("Tolerance",0.15, mustBePositive, "Indexing Tolerance (0.15)");
   }
 
   //--------------------------------------------------------------------------

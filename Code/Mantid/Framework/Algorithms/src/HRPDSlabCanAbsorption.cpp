@@ -19,6 +19,8 @@ The [[FlatPlateAbsorption]] algorithm is used to calculate the correction due to
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -45,16 +47,16 @@ void HRPDSlabCanAbsorption::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("SampleAttenuationXSection", -1.0, mustBePositive,
     "The attenuation cross-section for the sample material in barns");
-  declareProperty("SampleScatteringXSection", -1.0, mustBePositive->clone(),
+  declareProperty("SampleScatteringXSection", -1.0, mustBePositive,
     "The scattering cross-section for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
+  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
     "The number density of the sample in number per cubic angstrom");
 
-  BoundedValidator<int64_t> *positiveInt = new BoundedValidator<int64_t> ();
+  auto positiveInt = boost::make_shared<BoundedValidator<int64_t> >();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", int64_t(EMPTY_INT()), positiveInt,
     "The number of wavelength points for which the numerical integral is\n"
@@ -63,7 +65,7 @@ void HRPDSlabCanAbsorption::init()
   std::vector<std::string> exp_options;
   exp_options.push_back("Normal");
   exp_options.push_back("FastApprox");
-  declareProperty("ExpMethod", "Normal", new ListValidator(exp_options),
+  declareProperty("ExpMethod", "Normal", boost::make_shared<StringListValidator>(exp_options),
     "Select the method to use to calculate exponentials, normal or a\n"
     "fast approximation (default: Normal)" );
 
@@ -72,9 +74,9 @@ void HRPDSlabCanAbsorption::init()
   thicknesses[1] = "0.5";
   thicknesses[2] = "1.0";
   thicknesses[3] = "1.5";
-  declareProperty("Thickness", "", new ListValidator(thicknesses));
+  declareProperty("Thickness", "", boost::make_shared<StringListValidator>(thicknesses));
   
-  BoundedValidator<double> *moreThanZero = new BoundedValidator<double> ();
+  auto moreThanZero = boost::make_shared<BoundedValidator<double> >();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, 
     "The size of one side of an integration element cube in mm");

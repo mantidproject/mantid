@@ -22,6 +22,8 @@ The resulting workspace will have common X binning for all spectra.
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include <fstream>
 
 #include <boost/tokenizer.hpp>
@@ -415,14 +417,15 @@ namespace Mantid
         m_separatorIndex.insert(std::pair<std::string,std::string>(option, spacers[i][1]));
         sepOptions.push_back(option);
       }
-      declareProperty("Separator", "Automatic", new ListValidator(sepOptions),
+      declareProperty("Separator", "Automatic", boost::make_shared<StringListValidator>(sepOptions),
         "The column separator character (default: Automatic selection)");
 
       std::vector<std::string> units = UnitFactory::Instance().getKeys();
       units.insert(units.begin(),"Dimensionless");
-      declareProperty("Unit","Energy",new Kernel::ListValidator(units),
+      declareProperty("Unit","Energy", boost::make_shared<StringListValidator>(units),
         "The unit to assign to the X axis (default: Energy)");
-      BoundedValidator<int> * mustBePosInt = new BoundedValidator<int>();
+
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,
         "If set, this number of lines from the top of the file are ignored.");

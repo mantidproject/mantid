@@ -57,8 +57,7 @@ class MuonAnalysisResultTableTab : public QWidget
 {
  Q_OBJECT
 public:
-  MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm), m_numLogsdisplayed(0) {}
-  void initLayout();
+  MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm);
   void populateTables(const QStringList& wsList);
 
 private slots:

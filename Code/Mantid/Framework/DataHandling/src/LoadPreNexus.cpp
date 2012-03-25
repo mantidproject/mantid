@@ -17,9 +17,13 @@ Workflow algorithm to load all of the preNeXus files.
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -119,11 +123,11 @@ namespace DataHandling
     // copied (by hand) from LoadEventPreNexus2
     declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
         "File containing the pixel mapping (DAS pixels to pixel IDs) file (typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found automatically if not specified.");
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(1);
     declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
         "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-    declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+    declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
         "If loading the file by sections ('chunks'), this is the total number of sections.");
     // TotalChunks is only meaningful if ChunkNumber is set
     // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
@@ -132,7 +136,7 @@ namespace DataHandling
     propOptions.push_back("Auto");
     propOptions.push_back("Serial");
     propOptions.push_back("Parallel");
-    declareProperty("UseParallelProcessing", "Auto",new ListValidator(propOptions),
+    declareProperty("UseParallelProcessing", "Auto", boost::make_shared<StringListValidator>(propOptions),
         "Use multiple cores for loading the data?\n"
         "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
         "  Serial: Use a single core.\n"

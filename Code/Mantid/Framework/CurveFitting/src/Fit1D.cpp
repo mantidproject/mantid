@@ -17,6 +17,7 @@
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
 #include <boost/tokenizer.hpp>
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -242,7 +243,7 @@ void Fit1D::init()
 {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",0, mustBePositive,
     "The Workspace to fit, uses the workspace numbering of the spectra (default 0)");
@@ -266,7 +267,7 @@ void Fit1D::init()
   }
 
   declareProperty("Fix","","A list of comma separated parameter names which should be fixed in the fit");
-  declareProperty("MaxIterations", 500, mustBePositive->clone(),
+  declareProperty("MaxIterations", 500, mustBePositive,
     "Stop after this number of iterations if a good fit is not found" );
   declareProperty("OutputStatus","", Direction::Output);
   declareProperty("OutputChi2overDoF",0.0, Direction::Output);

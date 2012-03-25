@@ -9,6 +9,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/MandatoryValidator.h"
+
 
 #define HUGEVALUE 1.0E10
 
@@ -54,10 +56,10 @@ namespace Algorithms
    */
   void BlendSq::init()
   {
-    declareProperty(new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >), "The names of the input workspaces as a comma-separated list" ); 
+    declareProperty(new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()), "The names of the input workspaces as a comma-separated list" );
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace for blended S(Q).");
-    declareProperty(new ArrayProperty<double>("RangeOfLowerBounds", new MandatoryValidator<std::vector<double> >), "The lower bounds of each bank.");
-    declareProperty(new ArrayProperty<double>("RangeOfUpperBounds", new MandatoryValidator<std::vector<double> >), "The upper bounds of each bank.");
+    declareProperty(new ArrayProperty<double>("RangeOfLowerBounds", boost::make_shared<MandatoryValidator<std::vector<double>>>() ), "The lower bounds of each bank.");
+    declareProperty(new ArrayProperty<double>("RangeOfUpperBounds", boost::make_shared<MandatoryValidator<std::vector<double>>>()), "The upper bounds of each bank.");
     declareProperty("DeltaQ", 0.02);
   }
 

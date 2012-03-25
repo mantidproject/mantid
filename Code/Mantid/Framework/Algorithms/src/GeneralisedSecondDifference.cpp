@@ -17,6 +17,7 @@ described by M.A. Mariscotti., Nuclear Instruments and Methods 50, 309 (1967). G
 
 
 #include "MantidAlgorithms/GeneralisedSecondDifference.h"
+#include "MantidKernel/BoundedValidator.h"
 
 
 
@@ -59,16 +60,16 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the algorithm");
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
-      declareProperty("M",0,mustBePositive->clone(),
+      declareProperty("M",0,mustBePositive,
         "The number of points for averaging, i.e. summing will be done in the\n"
         "range [y(i-m),y(i+m)]");
       declareProperty("Z",0,mustBePositive,
         "The number of iteration steps in the averaging procedure" );
-      declareProperty("WorkspaceIndexMin",0,mustBePositive->clone(),
+      declareProperty("WorkspaceIndexMin",0,mustBePositive,
         "Lower bound of the spectrum range (default 0)");
-      declareProperty("WorkspaceIndexMax",0,mustBePositive->clone(),
+      declareProperty("WorkspaceIndexMax",0,mustBePositive,
         "Upper bound of the spectrum range (default workspace max)");
      }
 

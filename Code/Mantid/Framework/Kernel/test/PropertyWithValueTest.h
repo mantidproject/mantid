@@ -124,29 +124,6 @@ public:
 
 
  public:
-  void test_Setting_With_DataItemPtr_Succeeds_When_Object_Is_Convertible_To_Property_Type()
-  {
-    PropertyWithValue<DataItem_sptr> *dataProp = new PropertyWithValue<DataItem_sptr>("DataProp", DataItem_sptr());
-    DataItem_sptr item(new DataObjectOne);
-    TS_ASSERT_EQUALS(dataProp->setValue(item), std::string());
-    delete dataProp;
-
-    typedef boost::shared_ptr<DataObjectOne> DataObjectOne_sptr;
-    PropertyWithValue<DataItem_sptr> *otherDataProp = new PropertyWithValue<DataItem_sptr>("DataProp", DataItem_sptr());
-    TS_ASSERT_EQUALS(otherDataProp->setValue(item), std::string());
-    delete otherDataProp;
-  }
-
-  void test_Setting_With_DataItemPtr_Fails_When_Object_Is_Not_Convertible_To_Property_Type()
-  {
-    typedef boost::shared_ptr<DataObjectOne> DataObjectOne_sptr;
-    // Declare property as pointing to DataObjectOne_sptr
-    PropertyWithValue<DataObjectOne_sptr> *dataProp = new PropertyWithValue<DataObjectOne_sptr>("DataProp", DataObjectOne_sptr());
-    typedef boost::shared_ptr<DataObjectTwo> DataObjectTwo_sptr;
-    // Value is of type DataObjectOne_sptr
-    DataObjectTwo_sptr item(new DataObjectTwo);
-    TS_ASSERT_DIFFERS(dataProp->setValue(item), std::string());
-  }
 
   void testGetDefault()
   {
@@ -391,7 +368,7 @@ public:
 
   void testMandatoryValidator()
   {
-    PropertyWithValue<std::string> p("test", "", new MandatoryValidator<std::string>());
+    PropertyWithValue<std::string> p("test", "", boost::make_shared<MandatoryValidator<std::string> >());
     TS_ASSERT_EQUALS( p.isValid(), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS( p.setValue("I'm here"), "" );
     TS_ASSERT_EQUALS(p.isValid(), "" );
@@ -406,7 +383,7 @@ public:
       lessThan(" is < the lower bound (");
 
     //int tests
-    PropertyWithValue<int> pi("test", 11, new BoundedValidator<int>(1,10));
+    PropertyWithValue<int> pi("test", 11, boost::make_shared<BoundedValidator<int> >(1,10));
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS( pi.setValue("0"), start + "0" + lessThan + "1" + end );
     TS_ASSERT_EQUALS(pi.value(),"11");
@@ -423,7 +400,7 @@ public:
     TS_ASSERT_EQUALS( errorMsg.find("Could not set property test. Can not convert \"\" to ",0), 0);
   
     //double tests
-    PropertyWithValue<double> pd("test", 11.0, new BoundedValidator<double>(1.0,10.0));
+    PropertyWithValue<double> pd("test", 11.0, boost::make_shared<BoundedValidator<double> >(1.0,10.0));
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS( pd.setValue("0.9"), start + "0.9" + lessThan + "1" + end );
     TS_ASSERT_EQUALS(pd.value(),"11");
@@ -437,7 +414,7 @@ public:
     TS_ASSERT_EQUALS(pd.isValid(), "");
 
     //string tests
-    PropertyWithValue<std::string> ps("test", "", new BoundedValidator<std::string>("B","T"));
+    PropertyWithValue<std::string> ps("test", "", boost::make_shared<BoundedValidator<std::string> >("B","T"));
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
     TS_ASSERT_EQUALS( ps.setValue("AZ"), start + "AZ" + lessThan + "B" + end );
     TS_ASSERT_EQUALS(ps.value(),"");
@@ -451,7 +428,7 @@ public:
     TS_ASSERT_EQUALS(ps.isValid(), "");
 
     //int64 tests
-    PropertyWithValue<long long> pl("test", 987987987987LL, new BoundedValidator<long long>(0,789789789789LL));
+    PropertyWithValue<long long> pl("test", 987987987987LL, boost::make_shared<BoundedValidator<long long> >(0,789789789789LL));
     TS_ASSERT_EQUALS( pl.isValid(), start + "987987987987" + greaterThan + "789789789789" + end);
     TS_ASSERT_EQUALS( pl.setValue("-1"), start + "-1" + lessThan + "0" + end );
     TS_ASSERT_EQUALS( pl.value(),"987987987987");
@@ -469,11 +446,11 @@ public:
       end("' is not in the list of allowed values");
 
     std::vector<std::string> empt, vec;
-    PropertyWithValue<std::string> empty("test","", new ListValidator(empt));
+    PropertyWithValue<std::string> empty("test","", boost::make_shared<StringListValidator>(empt));
     TS_ASSERT_EQUALS( empty.isValid(), "Select a value" );
     vec.push_back("one");
     vec.push_back("two");
-    PropertyWithValue<std::string> p("test","", new ListValidator(vec));
+    PropertyWithValue<std::string> p("test","", boost::make_shared<StringListValidator>(vec));
     TS_ASSERT_EQUALS( p.isValid(), "Select a value" );
     TS_ASSERT_EQUALS( p.setValue("one"), "" );
     TS_ASSERT_EQUALS( p.isValid(), "" );

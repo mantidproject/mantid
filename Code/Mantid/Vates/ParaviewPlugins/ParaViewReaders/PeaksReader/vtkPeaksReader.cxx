@@ -15,6 +15,7 @@
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <vtkPVGlyphFilter.h>
 

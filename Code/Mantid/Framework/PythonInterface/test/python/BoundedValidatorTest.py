@@ -5,10 +5,10 @@ from mantid import BoundedValidator
 class BoundedValidatorTest(object):
 
     def test_construction_does_not_raise_error_when_both_are_floats(self):
-        testhelpers.assert_raises_nothing(self, BoundedValidator, 1.0, 2.0)
+        testhelpers.assertRaisesNothing(self, BoundedValidator, 1.0, 2.0)
 
     def test_construction_does_not_raise_error_when_both_are_ints(self):
-        testhelpers.assert_raises_nothing(self, BoundedValidator, 1, 20)
+        testhelpers.assertRaisesNothing(self, BoundedValidator, 1, 20)
 
     def test_construction_raises_error_when_called_with_no_params(self):
         self.assertRaises(TypeError, BoundedValidator())

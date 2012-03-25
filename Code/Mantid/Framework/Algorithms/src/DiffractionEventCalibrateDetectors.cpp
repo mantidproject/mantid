@@ -43,6 +43,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -269,7 +270,7 @@ namespace Algorithms
   void DiffractionEventCalibrateDetectors::init()
   {
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<EventWorkspace>),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input, boost::make_shared<InstrumentValidator>()),
                             "The workspace containing the geometry to be calibrated." );
 
     declareProperty("Params", "",
@@ -278,11 +279,11 @@ namespace Algorithms
         "Use bin boundaries close to peak you wish to maximize.\n"
         "Negative width values indicate logarithmic binning.");
 
-    BoundedValidator<int>* mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     declareProperty("MaxIterations", 10, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
 
-    BoundedValidator<double>* dblmustBePositive = new BoundedValidator<double>();
+    auto dblmustBePositive = boost::make_shared<BoundedValidator<double> >();
     declareProperty("LocationOfPeakToOptimize", 2.0308, dblmustBePositive,
       "Optimize this location of peak by moving detectors" );
 

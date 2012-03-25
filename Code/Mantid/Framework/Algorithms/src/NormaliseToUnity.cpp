@@ -11,6 +11,7 @@ NormaliseToUnity uses [[Integration]] to sum up all the X bins, then sums up the
 #include "MantidAlgorithms/NormaliseToUnity.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/Progress.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -37,21 +38,21 @@ using namespace API;
  */
 void NormaliseToUnity::init()
 {
-  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new CommonBinsValidator<>);
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<HistogramValidator>();
+  wsValidator->add<CommonBinsValidator>();
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("RangeLower",EMPTY_DBL());
   declareProperty("RangeUpper",EMPTY_DBL());
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive->clone());
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive);
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
   declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the sum (default: yes)");
 }

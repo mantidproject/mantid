@@ -61,12 +61,12 @@ namespace Mantid
       declareProperty("LowThreshold", 0.0,
           "Spectra whose total number of counts are equal to or below this value\n"
           "will be marked bad (default 0)" );
-      BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
                       "The index number of the first spectrum to include in the calculation\n"
                       "(default 0)" );
-      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
                       "The index number of the last spectrum to include in the calculation\n"
                       "(default the last histogram)" );
       declareProperty("RangeLower", EMPTY_DBL(),

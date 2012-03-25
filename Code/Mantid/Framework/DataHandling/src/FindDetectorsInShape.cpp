@@ -11,7 +11,7 @@ The algorithm places the user defined geometric shape within the virtual instrum
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
+#include "MantidKernel/MandatoryValidator.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -50,7 +50,7 @@ namespace Mantid
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("Workspace","",Direction::Input),
           "Name of the input workspace" );
-      declareProperty("ShapeXML", "", new MandatoryValidator<std::string>(),
+      declareProperty("ShapeXML", "", boost::make_shared<MandatoryValidator<std::string> >(),
           "The XML definition of the shape");
       declareProperty("IncludeMonitors", false,
           "Whether monitors should be included if they are contained in the\n"

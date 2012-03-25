@@ -475,6 +475,10 @@ namespace API
   *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
   *  then is the part of a filename that identifies the IDF valid at a given date.
   *
+  *  If several IDF files are valid at the given date the file with the most recent from
+  *  date is selected. If no such files are found the file with the latest from date is 
+  *  selected.
+  *
   *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
   *  @param date :: ISO 8601 date
   *  @return full path of IDF
@@ -491,8 +495,10 @@ namespace API
     Poco::RegularExpression regex(instrument+"_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
     Poco::DirectoryIterator end_iter;
     DateAndTime d(date);
-    std::string mostRecentIDF; // store most recent IDF which is returned if no match for the date found
-    DateAndTime refDate("1900-01-31 23:59:59"); // used to help determine the most recent IDF
+    bool foundGoodFile = false; // True if we have found a matching file (valid at the given date)
+    std::string mostRecentIDF; // store most recently starting matching IDF if found, else most recently starting IDF.
+    DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most recently starting IDF, if none match 
+    DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine the most recently starting matching IDF 
     for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
     {
       if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
@@ -514,17 +520,21 @@ namespace API
 
         if ( from <= d && d <= to )
         {
-          return dir_itr->path();
+          if( from > refDateGoodFile ) 
+          { // We'd found a matching file more recently starting than any other matching file found
+            foundGoodFile = true;
+            refDateGoodFile = from;
+            mostRecentIDF = dir_itr->path();
+          }
         }
-        if ( to > refDate )
-        {
-          refDate = to;
+        if ( !foundGoodFile && ( from > refDate ) )
+        {  // Use most recently starting file, in case we don't find a matching file.
+          refDate = from;
           mostRecentIDF = dir_itr->path();
         }
       }
     }
 
-    // No date match found return most recent
     return mostRecentIDF;
   }
 
@@ -550,19 +560,21 @@ namespace API
    */
   void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File * file) const
   {
+    Instrument_const_sptr instrument = getInstrument();
+
     // Start with instrument info (name, file, full XML text)
     file->makeGroup("instrument", "NXinstrument", true);
     file->putAttr("version", 1);
-    file->writeData("name", getInstrument()->getName() );
+    file->writeData("name", instrument->getName() );
 
     // XML contents of instrument, as a NX note
     file->makeGroup("instrument_xml", "NXnote", true);
-    file->writeData("data", getInstrument()->getXmlText() );
+    file->writeData("data", instrument->getXmlText() );
     file->writeData("type", "text/xml"); // mimetype
     file->writeData("description", "XML contents of the instrument IDF file.");
     file->closeGroup();
 
-    file->writeData("instrument_source", Poco::Path(getInstrument()->getFilename()).getFileName());
+    file->writeData("instrument_source", Poco::Path(instrument->getFilename()).getFileName());
 
     // Now the parameter map, as a NXnote
     const Geometry::ParameterMap& params = constInstrumentParameters();
@@ -575,8 +587,8 @@ namespace API
     // Add physical detector and monitor data
     std::vector<detid_t> detectorIDs;
     std::vector<detid_t> detmonIDs;
-    detectorIDs = getInstrument()->getDetectorIDs( true );
-    detmonIDs = getInstrument()->getDetectorIDs( false );
+    detectorIDs = instrument->getDetectorIDs( true );
+    detmonIDs = instrument->getDetectorIDs( false );
     if( detmonIDs.size() > 0 )
     {
       // Add detectors group
@@ -587,7 +599,7 @@ namespace API
 
       // Create Monitor IDs vector
       std::vector<IDetector_const_sptr> detmons;
-      detmons = getInstrument()->getDetectors( detmonIDs );
+      detmons = instrument->getDetectors( detmonIDs );
       std::vector<detid_t> monitorIDs;
       for (size_t i=0; i < detmonIDs.size(); i++) 
       {
@@ -614,12 +626,14 @@ namespace API
   */
   void ExperimentInfo::saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const
   { 
+    Instrument_const_sptr instrument = getInstrument();
+
     size_t nDets = detIDs.size();
     if( nDets == 0) return;
     std::vector<IDetector_const_sptr> detectors;
-    detectors = getInstrument()->getDetectors( detIDs );
+    detectors = instrument->getDetectors( detIDs );
 
-    Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
     Kernel::V3D sample_pos;
     if(sample) sample_pos = sample->getPos();
 
@@ -721,7 +735,7 @@ namespace API
       // Use the instrument name to find the file
       try
       {
-        std::string filename = this->getInstrumentFilename(instrumentName, getWorkspaceStartDate() );
+        std::string filename = getInstrumentFilename(instrumentName, getWorkspaceStartDate() );
         // And now load the contents
         instrumentFilename = filename;
         instrumentXml = Strings::loadFile(filename);

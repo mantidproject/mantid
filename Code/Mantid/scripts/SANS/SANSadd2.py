@@ -3,7 +3,7 @@ from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'), lowMem=False):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'), lowMem=False, binning='Monitors'):
   #check if there is at least one file in the list
   if len(runs) < 1 : return
 
@@ -19,22 +19,49 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     period = 1
   else:
     period = _NO_INDIVIDUAL_PERIODS
-
+  
   userEntry = runs[0] 
   
   while(True):
+      
+    isFirstDataSetEvent = False
     #we need to catch all exceptions to ensure that a dialog box is raised with the error
     try :
-      lastPath, lastFile, logFile, num_periods = _loadWS(
+      lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
         userEntry, defType, inst, 'AddFilesSumTempory', rawTypes, period)
-
+      
+      # if event data prevent loop over periods makes no sense
+      if isFirstDataSetEvent:
+          period = _NO_INDIVIDUAL_PERIODS    
+          
+      if inst.upper() != 'SANS2D' and isFirstDataSetEvent:      
+        error = 'Adding event data not supported for ' + inst + ' for now'
+        print error
+        mantid.sendLogMessage(error)
+        if mantid.workspaceExists('AddFilesSumTempory') : mantid.deleteWorkspace('AddFilesSumTempory')
+        if mantid.workspaceExists('AddFilesSumTempory_monitors') : mantid.deleteWorkspace('AddFilesSumTempory_monitors')        
+        return "" 
+  
       for i in range(len(runs)-1):
         userEntry = runs[i+1]
-        lastPath, lastFile, logFile, dummy = _loadWS(
+        lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(
           userEntry, defType, inst,'AddFilesNewTempory', rawTypes, period)
-        Plus('AddFilesSumTempory', 'AddFilesNewTempory', 'AddFilesSumTempory')
-        mantid.deleteWorkspace("AddFilesNewTempory")
+                  
+        if isDataSetEvent != isFirstDataSetEvent:
+            error = 'Datasets added must be either ALL histogram data or ALL event data'
+            print error
+            mantid.sendLogMessage(error)
+            if mantid.workspaceExists('AddFilesSumTempory')  : mantid.deleteWorkspace('AddFilesSumTempory')
+            if mantid.workspaceExists('AddFilesNewTempory')  : mantid.deleteWorkspace('AddFilesNewTempory')
+            return ""
         
+        Plus('AddFilesSumTempory', 'AddFilesNewTempory', 'AddFilesSumTempory')
+        if isFirstDataSetEvent:
+            Plus('AddFilesSumTempory_monitors', 'AddFilesNewTempory_monitors', 'AddFilesSumTempory_monitors')
+        mantid.deleteWorkspace("AddFilesNewTempory")
+        if isFirstDataSetEvent:
+            mantid.deleteWorkspace("AddFilesNewTempory_monitors")      
+              
     except ValueError, reason:
       error = 'Error opening file ' + userEntry+': ' + reason.message
       print error
@@ -49,6 +76,56 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
       if mantid.workspaceExists('AddFilesNewTempory') : mantid.deleteWorkspace("AddFilesNewTempory")
       return ""
 
+    # in case of event file force it into a histogram workspace
+    if isFirstDataSetEvent:
+        wsInMonitor = mtd['AddFilesSumTempory_monitors']
+        if binning == 'Monitors':
+            monX = wsInMonitor.dataX(i)
+            binning = str(monX[0])
+            binGap = monX[1] - monX[0]
+            binning = binning + "," + str(binGap)
+            for j in range(2,len(monX)):
+                nextBinGap = monX[j] - monX[j-1]
+                if nextBinGap != binGap:
+                    binGap = nextBinGap
+                    binning = binning + "," + str(monX[j-1]) + "," + str(binGap)    
+            binning = binning + "," + str(monX[len(monX)-1])
+            
+        mantid.sendLogMessage(binning)        
+        Rebin('AddFilesSumTempory','AddFilesSumTempory_Rebin', binning, PreserveEvents=False)
+        
+        filename, ext = _makeFilename(runs[0], defType, inst)
+        LoadNexus(filename, OutputWorkspace='AddFilesSumTempory')
+        # User may have selected a binning which is different from the default
+        Rebin('AddFilesSumTempory','AddFilesSumTempory', binning)
+        # For now the monitor binning must be the same as the detector binning
+        # since otherwise both cannot exist in the same output histogram file
+        Rebin('AddFilesSumTempory_monitors','AddFilesSumTempory_monitors', binning)
+        
+        wsInMonitor = mtd['AddFilesSumTempory_monitors']
+        wsOut = mtd['AddFilesSumTempory']    
+        wsInDetector = mtd['AddFilesSumTempory_Rebin']
+        for i in range(4):
+            outY = wsOut.dataY(i)
+            outE = wsOut.dataE(i)
+            monitorY = wsInMonitor.readY(i)
+            monitorE = wsInMonitor.readE(i)            
+            for j in range(len(outY)):
+                outY[j] = monitorY[j]
+                outE[j] = monitorE[j]
+                
+                
+        for i in range(4, 73732):
+            outY = wsOut.dataY(i+4)
+            outE = wsOut.dataE(i+4)            
+            detectorY = wsInDetector.readY(i)
+            detectorE = wsInDetector.readE(i)            
+            for j in range(len(outY)):
+                outY[j] = detectorY[j]   
+                outE[j] = detectorE[j]                         
+                       
+        if mantid.workspaceExists('AddFilesSumTempory_Rebin') : mantid.deleteWorkspace('AddFilesSumTempory_Rebin')
+
     lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
     outFile = lastFile+'-add.'+'nxs'
@@ -61,6 +138,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
       sav = SaveNexusProcessed("AddFilesSumTempory", outFile, Append=True)
      
     mantid.deleteWorkspace("AddFilesSumTempory")
+    if isFirstDataSetEvent:
+            mantid.deleteWorkspace("AddFilesSumTempory_monitors")
   
     if period == num_periods:
       break
@@ -91,13 +170,23 @@ def _can_load_periods(runs, defType, rawTypes):
   #no raw files were found, assume we can specify the period number for each
   return True
 
-def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
+
+def _makeFilename(entry, ext, inst) :
+  """
+    If entry not already a valid filename make it into one
+  """     
   try :
     runNum = int(entry)                          #the user entered something that translates to a run number, convert it to a file 
     filename=inst+_padZero(runNum, inst)+ext
   except ValueError :                            #we don't have a run number, assume it's a valid filename
     filename = entry
     dummy, ext = os.path.splitext(filename)
+    
+  return filename, ext    
+
+def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
+    
+  filename, ext = _makeFilename(entry, ext, inst)
 
   mantid.sendLogMessage('reading file:   '+filename)
 
@@ -107,6 +196,27 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
   else:
       props = Load(Filename=filename,OutputWorkspace=wsName)
 
+  isDataSetEvent = False
+  wsDataSet = mtd[wsName]
+  if hasattr(wsDataSet, 'getNumberEvents'):
+      isDataSetEvent = True
+         
+  if isDataSetEvent:
+    LoadEventNexus(Filename=filename,OutputWorkspace=wsName, LoadMonitors=True)     
+    runDetails = mtd[wsName].getRun()
+    timeArray = runDetails.getLogData("proton_charge").times
+    # There should never be a time increment in the proton charge larger than say "two weeks"
+    # On SANS2D is currently run at 10 frames per second other possibly this may be increated to 5Hz
+    # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
+    # but hopefully not longer than two weeks!
+    for i in range(len(timeArray)-1):
+      # cal time dif in seconds
+      timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
+      if timeDif > 172800:
+          mantid.sendLogMessage('::SANS::WARNING: Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+                                ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
+          break 
+          
   path = props.getPropertyValue('FileName')
   path, fName = os.path.split(path)
   if path.find('/') == -1:
@@ -128,7 +238,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     #assume the run file didn't support multi-period data and so there is only one period
     numPeriods = 1
   
-  return path, fName, logFile, numPeriods
+  return path, fName, logFile, numPeriods, isDataSetEvent
 
 def _padZero(runNum, inst='SANS2D'):
   if inst.upper() == 'SANS2D' : numDigits = 8

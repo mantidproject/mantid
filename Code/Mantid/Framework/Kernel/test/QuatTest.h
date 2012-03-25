@@ -334,7 +334,7 @@ public:
 	 Test.setQuat(Rot);
 
 	 std::vector<double> rez = Test.getRotation();
-	 std::vector<double> rot = Rot.get_vector();
+	 std::vector<double> rot = Rot.getVector();
 	 TSM_ASSERT_EQUALS("This operation should return rotation matrix",rot,rez);
 
  }
@@ -367,7 +367,7 @@ public:
 
 			   Test.setQuat(Rot);
 			   rez = Test.getRotation();
-		       rot = Rot.get_vector();
+		       rot = Rot.getVector();
 			   for(int ii=0;ii<9;ii++){
 					TSM_ASSERT_DELTA("This operation should return initial rotation matrix",rot[ii],rez[ii],1e-4);
 			   }

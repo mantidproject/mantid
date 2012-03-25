@@ -1,5 +1,4 @@
 #include "MantidVatesAPI/DimensionPresenter.h"
-#include "MantidVatesAPI/DimensionView.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 
 namespace Mantid
@@ -210,6 +209,15 @@ namespace Mantid
     std::string DimensionPresenter::getMapping() const
     {
       return m_mapping;
+    }
+
+    /**
+    Setter for the bin display mode.
+    @mode : Bin display mode.
+    */
+    void DimensionPresenter::setViewMode(BinDisplay mode)
+    {
+      this->m_view->setViewMode(mode);
     }
 
   }

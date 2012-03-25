@@ -104,8 +104,12 @@ namespace API
     ///@param orig :: the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
     void setOrigin(const Mantid::Kernel::VMD & orig)
     { m_origin = orig; }
-
-
+    /// set the transformation from Q in crystal cartezian coordinate system to Q in orthogonal or real HKL coordiate system alined with arbitrary slicing plane
+    void setWTransf(const Kernel::DblMatrix &WTransf)
+    {m_Wtransf = WTransf;}
+    /// get the transformation from Qin crystal cartezian coordinate system to Q in orthogonal or real HKL coordiate system alined with arbitrary slicing plane
+    const Kernel::DblMatrix & getWTransf()const
+    { return m_Wtransf; }
   protected:
 
     /// Function called when observer objects recieves a notification
@@ -116,9 +120,6 @@ namespace API
 
     /// Pointer to the original workspace(s), if this workspace is a coordinate transformation from an original workspace.
     std::vector<boost::shared_ptr<Workspace> > m_originalWorkspaces;
-
-    /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
-    std::vector<Mantid::Kernel::VMD> m_basisVectors;
 
     /// Vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
     Mantid::Kernel::VMD m_origin;
@@ -134,6 +135,12 @@ namespace API
 
     /// Set to True when the m_delete_observer is observing workspace deletions.
     bool m_observingDelete;
+
+    /** the matrix which transforms momentums from orthogonal Q-system to Orthogonal HKL or non-orthogonal HKL system alighned WRT to arbitrary coordinate system requested
+       See the UB matrix formalizm, pg 7 for further details on implementation. Small variation here is that in also includes either B-matrix or orthogonal B-matrix */
+    Kernel::DblMatrix m_Wtransf;  // TODO: should be reconciled with the vectors below and be either always synchroneous or only one set remains
+    /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
+    std::vector<Mantid::Kernel::VMD> m_basisVectors;
 
 
   };

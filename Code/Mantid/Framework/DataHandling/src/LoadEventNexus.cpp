@@ -36,9 +36,11 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 #include "MantidAPI/SpectraAxis.h"
+
 
 #include <fstream>
 #include <sstream>
@@ -277,15 +279,17 @@ public:
       double tof = static_cast<double>( event_time_of_flight[i] );
       if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
       {
-        //The event TOF passes the filter.
-        TofEvent event(tof, pulsetime);
-
         // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
         detid_t detId = event_id[i];
         if (detId <= alg->eventid_max)
         {
           // We have cached the vector of events for this detector ID
-          alg->eventVectors[detId]->push_back( event );
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+      // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+          alg->eventVectors[detId]->emplace_back( tof, pulsetime );
+#else
+          alg->eventVectors[detId]->push_back( TofEvent(tof, pulsetime) );
+#endif
 
           //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
@@ -931,11 +935,12 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
       "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
       "This specified the tolerance to use (in microseconds) when compressing.");
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation

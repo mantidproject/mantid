@@ -1,14 +1,17 @@
 #ifndef MANTID_API_ALGORITHMPROPERTIESWIDGET_H_
 #define MANTID_API_ALGORITHMPROPERTIESWIDGET_H_
 
-#include "MantidKernel/System.h"
-#include <QtGui/qwidget.h>
-#include <qgridlayout.h>
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidQtAPI/PropertyWidget.h"
-#include "MantidAPI/Algorithm.h"
-#include <QtGui>
 #include "DllOption.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/PropertyWidget.h"
+#include <qgridlayout.h>
+#include <QtCore/qvariant.h>
+#include <QtGui/qwidget.h>
+#include <QtGui>
 
 
 namespace MantidQt
@@ -52,25 +55,24 @@ namespace API
     AlgorithmPropertiesWidget(QWidget * parent = NULL);
     virtual ~AlgorithmPropertiesWidget();
     
+    void setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory);
+
     void initLayout();
 
     Mantid::API::IAlgorithm * getAlgorithm();
+    void setAlgorithm(Mantid::API::IAlgorithm * algo);
 
     QString getAlgorithmName() const;
     void setAlgorithmName(QString name);
 
-  private:
-    /// Chosen algorithm name
-    QString m_algoName;
+    void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
 
-    /// Shared pointer to the algorithm to view
-    Mantid::API::Algorithm_sptr m_algo;
+    void hideOrDisableProperties();
 
-    /// The grid widget containing the input boxes
-    QGridLayout *m_inputGrid;
+    void saveInput();
 
-    /// The current grid widget for sub-boxes
-    QGridLayout *m_currentGrid;
+    /// Each dynamically created PropertyWidget
+    QHash<QString, PropertyWidget*> m_propWidgets;
 
     /// Viewport containing the grid of property widgets
     QWidget * m_viewport;
@@ -78,8 +80,44 @@ namespace API
     /// Scroll area containing the viewport
     QScrollArea * m_scroll;
 
-    /// Each dynamically created PropertyWidget
-    QVector<PropertyWidget*> m_propWidgets;
+  public slots:
+    /// Any property changed
+    void propertyChanged(const QString & pName);
+
+    /// Replace WS button was clicked
+    void replaceWSClicked(const QString & propName);
+
+  private:
+
+    bool isWidgetEnabled(Mantid::Kernel::Property * property, const QString & propName) const;
+
+    /// Chosen algorithm name
+    QString m_algoName;
+
+    /// Pointer to the algorithm to view
+    Mantid::API::IAlgorithm * m_algo;
+
+    /// The grid widget containing the input boxes
+    QGridLayout *m_inputGrid;
+
+    /// The current grid widget for sub-boxes
+    QGridLayout *m_currentGrid;
+
+    /// We own the m_algo pointer and need to delete it.
+    bool m_deleteAlgo;
+
+    /// A map where key = property name; value = the error for this property (i.e. it is not valid).
+    QHash<QString, QString> m_errors;
+
+    /// A list of property names that are FORCED to stay enabled.
+    QStringList m_enabled;
+
+    /// A list of property names that are FORCED to stay disabled.
+    /// e.g. when callid AlgorithmNameDialog()
+    QStringList m_disabled;
+
+    /// History of inputs to the algorithm
+    MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
 
   };
 

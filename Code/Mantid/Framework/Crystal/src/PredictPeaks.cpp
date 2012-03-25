@@ -107,11 +107,11 @@ namespace Crystal
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_refConds.size(); ++i)
       propOptions.push_back( m_refConds[i]->getName() );
-    declareProperty("ReflectionCondition", "Primitive",new ListValidator(propOptions),
+    declareProperty("ReflectionCondition", "Primitive",boost::make_shared<StringListValidator>(propOptions),
       "Which reflection condition applies to this crystal, reducing the number of expected HKL peaks?");
 
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, true),
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict. \n"
         "The WavelengthMin/Max and Min/MaxDSpacing parameters are unused if this is specified.");
 

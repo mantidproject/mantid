@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Property.h"
 
 using namespace Mantid::API;
@@ -123,8 +124,8 @@ public:
     IAlgorithm_sptr lastAlg = history.lastAlgorithm();
     TS_ASSERT_EQUALS(lastAlg->name(), "SimpleSum2");
         
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum|1");
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum2|1");
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum1",1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum2",1);
 
   }
 

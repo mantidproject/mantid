@@ -4,16 +4,21 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmHistory.h"
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MemoryManager.h"
 
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -22,8 +27,7 @@
 #include <Poco/StringTokenizer.h>
 
 #include <iomanip>
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MemoryManager.h"
+#include <map>
 
 using namespace Mantid::Kernel;
 
@@ -251,6 +255,20 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------
+    /** Perform validation of ALL the input properties of the algorithm.
+     * This is to be overridden by specific algorithms.
+     * It will be called in dialogs after parsing all inputs and setting the
+     * properties, but BEFORE executing.
+     *
+     * @return a map where: Key = string name of the the property;
+                Value = string describing the problem with the property.
+     */
+    std::map<std::string, std::string> Algorithm::validateInputs()
+    {
+      return std::map<std::string, std::string>();
+    }
+
+    //---------------------------------------------------------------------------------------------
     /** Go through the properties and cache the input/output
      * workspace properties for later use.
      */
@@ -438,7 +456,18 @@ namespace Mantid
            m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
            throw std::runtime_error("Some invalid Properties found");
         }
+      }
 
+      // ----- Perform validation of the whole set of properties -------------
+      std::map<std::string, std::string> errors = this->validateInputs();
+      if (!errors.empty())
+      {
+        // Log each issue
+        for (auto it = errors.begin(); it != errors.end(); it++)
+          g_log.error() << "Invalid value for " << it->first << ": " << it->second;
+        // Throw because something was invalid
+        m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+        throw std::runtime_error("Some invalid Properties found");
       }
 
       // ----- Check for processing groups -------------
@@ -1057,13 +1086,15 @@ namespace Mantid
       // Go through each entry in the input group(s)
       for (size_t entry=0; entry<m_groupSize; entry++)
       {
-        // Create a new instance of the algorithm
-        IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
+        // Create a new instance of the algorithm, unmanaged so that it does not get deleted prematurely
+        Algorithm_sptr alg_sptr = API::AlgorithmManager::Instance().createUnmanaged(this->name(), this->version());
+        IAlgorithm* alg = alg_sptr.get();
         if(!alg)
         {
           g_log.error()<<"CreateAlgorithm failed for "<<this->name()<<"("<<this->version()<<")"<<std::endl;
           throw std::runtime_error("Algorithm creation failed.");
         }
+        alg->initialize();
 
         // Set all non-workspace properties
         this->copyNonWorkspaceProperties(alg, int(entry)+1);

@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -36,9 +37,9 @@ namespace MDEvents
    */
   void BoxControllerSettingsAlgorithm::initBoxControllerProps(const std::string & SplitInto, int SplitThreshold, int MaxRecursionDepth)
   {
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
-    BoundedValidator<int> *mustBeMoreThen1 = new BoundedValidator<int> ();
+    auto mustBeMoreThen1 = boost::make_shared<BoundedValidator<int> >();
     mustBeMoreThen1->setLower(1);
 
 

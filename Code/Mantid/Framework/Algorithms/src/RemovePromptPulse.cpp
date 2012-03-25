@@ -7,6 +7,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using std::string;
 namespace Mantid
@@ -63,15 +64,14 @@ namespace Algorithms
    */
   void RemovePromptPulse::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new WorkspaceUnitValidator<>("TOF")), "An input workspace.");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
+        boost::make_shared<WorkspaceUnitValidator>("TOF")), "An input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
 
-    BoundedValidator<double> *validator = new BoundedValidator<double>;
+    auto validator = boost::make_shared<BoundedValidator<double> >();
     validator->setLower(0.0);
     declareProperty("Width", Mantid::EMPTY_DBL(), validator,
                     "The width of the time of flight (in microseconds) to remove from the data." );
-    validator = new BoundedValidator<double>;
-    validator->setLower(0.0);
     declareProperty("Frequency", Mantid::EMPTY_DBL(), validator,
                     "The frequency of the source (in Hz) used to calculate the minimum time of flight to filter." );
   }

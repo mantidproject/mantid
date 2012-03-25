@@ -180,7 +180,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
             
     def test_operators_with_workspaces_in_ADS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='a',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        ads = AnalysisDataService.Instance()
+        ads = AnalysisDataService
         A = ads['a']
         run_algorithm('CreateWorkspace', OutputWorkspace='b', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         B = ads['b']
@@ -232,8 +232,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_history_access(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='raw',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         run_algorithm('Rebin', InputWorkspace='raw', Params=[1.,0.5,3.],OutputWorkspace='raw')
-        ads = AnalysisDataService.Instance()
-        raw = ads['raw']
+        raw = AnalysisDataService['raw']
         history = raw.getHistory()
         last = history.lastAlgorithm()
         self.assertEquals(last.name(), "Rebin")
@@ -241,15 +240,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
         first = history[0]
         self.assertEquals(first.name(), "CreateWorkspace")
         self.assertEquals(first.getPropertyValue("OutputWorkspace"), "raw")
-        ads.remove('raw')
+        AnalysisDataService.remove('raw')
 
     def test_setTitle(self):        
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        ads = AnalysisDataService.Instance()
-        ws1 = ads['ws1']
+        ws1 = AnalysisDataService['ws1']
         title = 'test_title'
         ws1.setTitle(title)
         self.assertEquals(title, ws1.getTitle())
+        AnalysisDataService.remove(ws1.getName())
 
 if __name__ == '__main__':
     unittest.main()

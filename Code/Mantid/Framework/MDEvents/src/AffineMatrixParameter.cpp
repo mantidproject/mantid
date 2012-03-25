@@ -83,7 +83,7 @@ namespace Mantid
     */
     std::string AffineMatrixParameter::toXMLString() const
     {
-      std::vector<coord_t> elements = this->affineMatrix.get_vector();
+      std::vector<coord_t> elements = this->affineMatrix.getVector();
       const size_t size = elements.size();
       std::string parameterValue;
 

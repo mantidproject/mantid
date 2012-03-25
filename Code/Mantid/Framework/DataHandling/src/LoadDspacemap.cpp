@@ -23,6 +23,7 @@ The resulting workspace can then be used with, e.g. [[AlignDetectors]] to perfor
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -79,7 +80,7 @@ namespace DataHandling
     propOptions.push_back("POWGEN");
     propOptions.push_back("VULCAN-ASCII");
     propOptions.push_back("VULCAN-Binary");
-    declareProperty("FileType", "POWGEN", new ListValidator(propOptions),
+    declareProperty("FileType", "POWGEN", boost::make_shared<StringListValidator>(propOptions),
       "The type of file being read.");
 
     declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),

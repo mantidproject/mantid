@@ -12,6 +12,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -60,7 +61,7 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input),
         "An input PeaksWorkspace.");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("ScalePeaks", 1.0, mustBePositive,
       "Multiply FSQ and sig(FSQ) by scaleFactor");

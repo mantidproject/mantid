@@ -14,6 +14,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/cow_ptr.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

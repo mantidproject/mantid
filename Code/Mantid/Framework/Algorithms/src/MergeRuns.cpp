@@ -25,7 +25,7 @@ The [[Rebin]] algorithm is used, if neccessary, to put all the input workspaces 
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <boost/make_shared.hpp>
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -62,7 +62,7 @@ void MergeRuns::init()
 {
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(
-    new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string>>),
+    new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
     "The names of the input workspaces as a comma-separated list" );
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace" );

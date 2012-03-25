@@ -72,6 +72,7 @@ private:
 
   static void getMinMax(Mantid::API::MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max);
 
+  using Mantid::API::Algorithm::validateInputs;
   void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const;
   void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, API::MatrixWorkspace_sptr output);

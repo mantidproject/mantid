@@ -11,11 +11,13 @@ Base class for other algorithms.
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace Mantid::DataObjects;
+using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace Mantid
 {
@@ -162,6 +164,15 @@ namespace MDAlgorithms
           throw std::invalid_argument("Cannot perform " + this->name() + " on MDHistoWorkspace's with a different number of dimensions.");
         if (m_out_histo->getNPoints() != m_operand_histo->getNPoints())
           throw std::invalid_argument("Cannot perform " + this->name() + " on MDHistoWorkspace's with a different number of points.");
+
+        // Check that the dimensions span the same size, warn if they don't
+        for (size_t d=0; d<m_out_histo->getNumDims(); d++)
+        {
+          IMDDimension_const_sptr dimA = m_out_histo->getDimension(0);
+          IMDDimension_const_sptr dimB = m_operand_histo->getDimension(0);
+          if (dimA->getMinimum() != dimB->getMinimum() || dimA->getMaximum() != dimB->getMaximum())
+            g_log.warning() << "Dimension " << d << " (" << dimA->getName() << ") has different extents in the two MDHistoWorkspaces. The operation may not make sense!" << std::endl;
+        }
         this->execHistoHisto(m_out_histo, m_operand_histo);
       }
       else if (m_operand_scalar)

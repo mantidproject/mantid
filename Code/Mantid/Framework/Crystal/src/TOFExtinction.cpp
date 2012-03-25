@@ -31,6 +31,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -92,7 +93,7 @@ namespace Crystal
     corrOptions.push_back("Type I&II Gaussian" );
     corrOptions.push_back("Type I&II Lorentzian" );
     corrOptions.push_back( "None, Scaling Only" );
-    declareProperty("ExtinctionCorrectionType", corrOptions[0],new ListValidator(corrOptions),
+    declareProperty("ExtinctionCorrectionType", corrOptions[0], boost::make_shared<StringListValidator>(corrOptions),
       "Select the type of extinction correction.");
 
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");

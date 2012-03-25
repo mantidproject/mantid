@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <math.h>
+#include <float.h>
 #include <vector>
 #include <cstdlib>
 
@@ -9,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include <sstream>
 #include "MantidKernel/Quat.h"
+#include <boost/math/common_factor.hpp>
 
 namespace Mantid
 {
@@ -824,6 +826,59 @@ void V3D::loadNexus(::NeXus::File * file, const std::string & name)
   y = data[1];
   z = data[2];
 }
+
+/** transform vector into form, used to describe directions in crystallogaphical coodinate system, assuming that 
+  * the vector describes perpendicular to a crystallogaphic plain or is close to such plain. 
+  *
+  *  As crystallographical coordinate sytem is based on 3 integers, eps is used as accuracy to convert into integers
+*/
+#define DINT(x)    std::fabs((x)-double(size_t((x)+0.5)))
+double nearInt(double val,double eps,double mult)
+{
+   if(val>0){
+        if(val<1){
+            mult/=val;
+        }else{
+            if(DINT(val)>eps){
+                mult *=(double(size_t(val/eps)+1)*eps/val);
+            }
+        }
+    }
+    return mult; 
+}
+double V3D::toMillerIndexes(double eps)
+{
+    if(eps<0)                 eps=-eps;
+    if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
+
+    // assuming eps is in 1.e-x form
+ 
+    double ax=std::fabs(x);
+    double ay=std::fabs(y);
+    double az=std::fabs(z);
+
+    double amax = (ax>ay)?ax:ay;  amax=(az>amax)?az:amax;
+    if(amax<FLT_EPSILON) throw(std::invalid_argument("vector length is less then accuracy requested"));
+ 
+   
+    if(ax<eps){x=0; ax=0;}
+    if(ay<eps){y=0; ay=0;}
+    if(az<eps){z=0; az=0;}
+
+    double mult(1);
+    mult = nearInt(ax,eps,mult);
+    mult = nearInt(ay,eps,mult);
+    mult = nearInt(az,eps,mult);
+
+    size_t iax=size_t(ax*mult/eps+0.5);   size_t iay=size_t(ay*mult/eps+0.5);   size_t iaz=size_t(az*mult/eps+0.5);
+
+    size_t div = boost::math::gcd(iax,boost::math::gcd(iay,iaz));
+    mult /=(double(div)*eps);
+    x *=mult; y*=mult;  z*=mult;
+
+    return mult;
+}
+
 
 
 } // Namespace Kernel

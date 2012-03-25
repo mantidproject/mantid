@@ -9,6 +9,7 @@ else()
   cmake_minimum_required ( VERSION 2.8 )
 endif ()
 
+
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 
@@ -23,16 +24,44 @@ find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUI
 include ( UseSystemQt4 )
 
 ###########################################################################
-# Set paths to Third_Party for Windows and Mac builds
+# Set paths to Third_Party for Windows builds
 ###########################################################################
-if ( NOT THIRD_PARTY )
-  set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
-  if ( WIN32 )
-    include ( WindowsSetup )
-  elseif ( APPLE )
-    include ( DarwinSetup )
-  endif ()
-endif ()
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
+	if ( NOT THIRD_PARTY )
+  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+	endif ()
+	# Print out were we think we are looking for 3rd party stuff
+	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
+
+	# Check that the 3rd party directory exists.
+	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
+        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
+	endif()
+	
+	include ( WindowsSetup )
+	
+ENDIF()
+
+###########################################################################
+# Set paths to Third_Party for Mac builds
+###########################################################################
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
+
+	if ( NOT THIRD_PARTY )
+  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+	endif ()
+
+	# Print out were we think we are looking for 3rd party stuff
+	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
+
+	# Check that the 3rd party directory exists.
+	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
+        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
+	endif()
+
+    include ( DarwinSetup )	
+    
+ENDIF()
 
 ###########################################################################
 # Call our setup script

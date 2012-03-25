@@ -4,6 +4,7 @@
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
 #include <boost/mpi.hpp>
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace mpi = boost::mpi;
 
@@ -21,10 +22,10 @@ DECLARE_ALGORITHM(BroadcastWorkspace)
 void BroadcastWorkspace::init()
 {
   // Input is optional - only the 'BroadcasterRank' process should provide an input workspace
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,true));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,PropertyMode::Optional));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  declareProperty("BroadcasterRank",0,new BoundedValidator<int>(0,mpi::communicator().size()-1));
+  declareProperty("BroadcasterRank",0, boost::make_shared<BoundedValidator<int>>(0,mpi::communicator().size()-1));
 }
 
 void BroadcastWorkspace::exec()

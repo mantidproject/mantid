@@ -45,6 +45,8 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
 #include <sstream>
@@ -244,11 +246,11 @@ void LoadEventPreNexus2::init()
   declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
       "A list of individual spectra (pixel IDs) to read, specified as e.g. 10:20. Only used if set.");
 
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
@@ -258,7 +260,7 @@ void LoadEventPreNexus2::init()
   propOptions.push_back("Auto");
   propOptions.push_back("Serial");
   propOptions.push_back("Parallel");
-  declareProperty("UseParallelProcessing", "Auto",new ListValidator(propOptions),
+  declareProperty("UseParallelProcessing", "Auto", boost::make_shared<StringListValidator>(propOptions),
       "Use multiple cores for loading the data?\n"
       "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
       "  Serial: Use a single core.\n"
@@ -1031,7 +1033,9 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
     }
 
     //Covert the pixel ID from DAS pixel to our pixel ID
-    if (this->using_mapping_file)
+    // downstream monitor pixel for SNAP
+    if(pid >=1342177280) pid = 1179648;
+    else if (this->using_mapping_file)
     {
       PixelType unmapped_pid = pid % this->numpixel;
       pid = this->pixelmap[unmapped_pid];
@@ -1084,9 +1088,6 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
     double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
 
     if (!iswrongdetid){
-      // a) Regular events
-      TofEvent event(tof, pulsetime);
-
       //Find the overall max/min tof
       if (tof < local_shortest_tof)
         local_shortest_tof = tof;
@@ -1098,7 +1099,12 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
       // This is equivalent to workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
       // But should be faster as a bunch of these calls were cached.
-      arrayOfVectors[pid]->push_back(event);
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+      // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+      arrayOfVectors[pid]->emplace_back( tof, pulsetime );
+#else
+      arrayOfVectors[pid]->push_back(TofEvent(tof, pulsetime));
+#endif
 
       // TODO work with period
       local_num_good_events++;

@@ -33,6 +33,8 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include <numeric>
 #include <cmath>
 #include <iomanip>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -75,7 +77,7 @@ namespace CurveFitting
 
     declareProperty(new API::FunctionProperty("Function"));
 
-    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
@@ -89,11 +91,11 @@ namespace CurveFitting
 
     std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
 
-    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
+    declareProperty("Minimizer","Levenberg-Marquardt",boost::make_shared<StringListValidator>(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
-    declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
+    declareProperty("CostFunction","Least squares",boost::make_shared<StringListValidator>(costFuncOptions),
       "The cost function to be used for the fit, default is Least squares", Direction::InOut);
   }
 
@@ -401,9 +403,10 @@ namespace CurveFitting
       gsl_matrix_free(covar);
 
     // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
-    declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
-    declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
-    declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
+    auto allowedNull = boost::make_shared<NullValidator>();
+    declareProperty(new ArrayProperty<double> ("Parameters", allowedNull,Direction::Output));
+    declareProperty(new ArrayProperty<double> ("Errors", allowedNull,Direction::Output));
+    declareProperty(new ArrayProperty<std::string> ("ParameterNames", allowedNull,Direction::Output));
     std::vector<double> params,errors;
     std::vector<std::string> parNames;
 

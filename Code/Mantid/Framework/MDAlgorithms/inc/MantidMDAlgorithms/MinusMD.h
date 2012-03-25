@@ -52,6 +52,9 @@ namespace MDAlgorithms
     /// Check the inputs and throw if the algorithm cannot be run
     void checkInputs();
 
+    template<typename MDE, size_t nd>
+    void doMinus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+
     /// Run the algorithm with an MDEventWorkspace as output
     void execEvent();
 

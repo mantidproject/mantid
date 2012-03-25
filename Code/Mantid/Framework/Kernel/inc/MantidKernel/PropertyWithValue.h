@@ -7,10 +7,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/CompositeValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Poco/StringTokenizer.h>
@@ -257,11 +254,12 @@ public:
   /** Constructor
    *  @param name :: The name to assign to the property
    *  @param defaultValue :: Is stored initial default value of the property
-   *  @param validator :: The validator to use for this property (this class will take ownership of the validator)
+   *  @param validator :: The validator to use for this property
    *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
-  PropertyWithValue( const std::string &name, const TYPE& defaultValue, IValidator<TYPE> *validator = new NullValidator<TYPE>,
-      const unsigned int direction = Direction::Input) :
+  PropertyWithValue( const std::string &name, const TYPE& defaultValue, 
+                     IValidator_sptr validator = IValidator_sptr(new NullValidator),
+                     const unsigned int direction = Direction::Input) :
     Property( name, typeid( TYPE ), direction ),
     m_value( defaultValue ),
     m_initialValue( defaultValue ),
@@ -278,7 +276,7 @@ public:
     Property( name, typeid( TYPE ), direction ),
     m_value( defaultValue ),
     m_initialValue( defaultValue ),
-    m_validator( new NullValidator<TYPE> )
+    m_validator( boost::make_shared<NullValidator>())
   {
   }
    
@@ -298,7 +296,6 @@ public:
   /// Virtual destructor
   virtual ~PropertyWithValue()
   {
-    delete m_validator;
   }
 
   /** Get the value of the property as a string
@@ -352,22 +349,19 @@ public:
    * @param data :: A shared pointer to a data item
    * @return "" if the assignment was successful or a user level description of the problem
    */
-  virtual std::string setValue(const boost::shared_ptr<DataItem> data)
+  virtual std::string setDataItem(const boost::shared_ptr<DataItem> data)
   {
     // Pass of the helper function that is able to distinguish whether
     // the TYPE of the PropertyWithValue can be converted to a shared_ptr<DataItem>
     return setTypedValue(data, boost::is_convertible<TYPE, boost::shared_ptr<DataItem> >());
   }
 
+
   ///Copy assignment operator assigns only the value and the validator not the name, default (initial) value, etc.
   PropertyWithValue& operator=( const PropertyWithValue& right )
   {
     if ( &right == this ) return *this;
-    // Chain the base class assignment operator for clarity (although it does nothing)
-    //Property::operator=( right );
     m_value = right.m_value;
-    // Delete the existing validator
-    delete m_validator;
     m_validator = right.m_validator->clone();
     return *this;
   }
@@ -463,42 +457,16 @@ public:
   {
     return m_validator->allowedValues();
   }
-  /** function modyfies validator e.g. replaces it by the new one if the old and new validator types are equivalent.
-    *
-    * if existing validator is a composite validator, it looks through all memeber validators and replaces the first, 
-    * which has the same type as the new. 
-    * if the validator types are different, a composite validator consising of old and new validator is created
-    *@param *pNewValidator -- new validator
-    *@param just_replace   -- if set to true, the old validator is just replaced by the new one regardless of their types. 
+
+  /**
+   * Replace the current validator with the given one
+   * @param newValidator :: A replacement validator
    */
-  virtual void modify_validator(IValidator<TYPE> *pNewValidator,bool just_replace=false)
+  virtual void replaceValidator(IValidator_sptr newValidator)
   {
-      // temporary
-      UNUSED_ARG(just_replace);
-      if(!pNewValidator)return;
-      //
-    //  if(just_replace){
-          delete m_validator;
-          m_validator = pNewValidator;
-          return;
-    //  }
-      //// need to build composite validator, combining new and old validators 
-      //CompositeValidator<TYPE> *compo_val  = dynamic_cast<CompositeValidator<TYPE>* >(m_validator);
-      //if(compo_val ){
-      //    compo_val->modify_validator(pNewValidator);
-      //    return;
-      //}
-      //// the validator is just replacement for the old one;
-      //if(typeid(m_validator)==typeid(pNewValidator)){
-      //    delete m_validator;
-      //    m_validator = pNewValidator;
-      //}else{ // build composite validator
-      //    CompositeValidator<TYPE> *new_val = new CompositeValidator<TYPE>();
-      //    new_val->add(m_validator);
-      //    new_val->add(pNewValidator);
-      //    m_validator = new_val;
-      //}
+    m_validator = newValidator;
   }
+
 protected:
   /// The value of the property
   TYPE m_value;
@@ -529,26 +497,26 @@ private:
     }
     else
     {
-      msg = "Invalid DataItem. The object type (" + std::string(typeid(value).name()) + ") does not match the declared type of the property (" + std::string(this->type()) + ").";
+      msg = "Invalid DataItem. The object type (" + std::string(typeid(value).name()) 
+        + ") does not match the declared type of the property (" + std::string(this->type()) + ").";
     }
-    return msg;
-  }
+        return msg;
+    }
 
   /**
    * Helper function for setValue(DataItem_sptr). Uses boost type traits to ensure
    * it is only used if U is NOT a type that is convertible to boost::shared_ptr<DataItem>
    * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
    */
-  template<typename U>
-  std::string setTypedValue(const U & value, const boost::false_type &)
-  {
-    UNUSED_ARG(value);
-    return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
-  }
-
+    template<typename U>
+    std::string setTypedValue(const U & value, const boost::false_type &)
+    {
+      UNUSED_ARG(value);
+      return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
+    }
 
   /// Visitor validator class
-  IValidator<TYPE> *m_validator;
+  IValidator_sptr m_validator;
 
   /// Static reference to the logger class
   static Logger& g_log;
@@ -556,22 +524,6 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
-
-
-//
-////==============================================================================================
-//// Specialization of the Template
-//template <typename TYPE>
-//class PropertyWithValue< std::vector<TYPE> >
-//{
-//PropertyWithValue& operator+=( const PropertyWithValue& right )
-//{
-//  //m_value.push_back(12);
-//  //m_value += right.m_value;
-//  return *this;
-//}
-//};
-
 
 
 template <typename TYPE>

@@ -74,6 +74,7 @@ In this example the fitting function is a*exp(-(x-c)^2*s). The parameter ''s'' i
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction1D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include <boost/tokenizer.hpp>
 
 namespace Mantid
@@ -123,7 +124,7 @@ double* UserFunction1D::AddVariable(const char *varName, void *palg)
  */
 void UserFunction1D::declareAdditionalProperties()
 {
-    declareProperty("Function","",new MandatoryValidator<std::string>,"The fit function");
+    declareProperty("Function","",boost::make_shared<MandatoryValidator<std::string> >(),"The fit function");
     declareProperty("InitialParameters","","The comma separated list of initial values of the fit parameters in the form varName=value");
 }
 

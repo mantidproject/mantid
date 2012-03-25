@@ -306,7 +306,7 @@ public:
     for ( size_t i = 0; i < FeSi_list.size(); i++ )
       for ( size_t j = 0; j < 9; j++ )
       {
-        std::vector<double> entry_list = FeSi_list[i].get_vector();
+        std::vector<double> entry_list = FeSi_list[i].getVector();
         TS_ASSERT_DELTA( entry_list[j], FeSi[i][j], 1.0e-4 );
       }
   }

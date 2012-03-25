@@ -1,4 +1,5 @@
 #include "MantidPythonInterface/api/WorkspacePropertyMacro.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 void export_MatrixWorkspaceProperty()
 {

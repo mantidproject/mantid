@@ -10,6 +10,7 @@ Renames a workspace to a different name in the data service. If the same name is
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RenameWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid

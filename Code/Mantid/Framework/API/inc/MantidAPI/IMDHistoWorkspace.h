@@ -47,7 +47,7 @@ namespace API
     virtual coord_t getInverseVolume() const = 0;
     virtual signal_t * getSignalArray() = 0;
     virtual signal_t * getErrorSquaredArray() = 0;
-    virtual void setTo(signal_t signal, signal_t errorSquared) = 0;
+    virtual void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents) = 0;
     virtual Mantid::Kernel::VMD getCenter(size_t linearIndex) const = 0;
     virtual void setSignalAt(size_t index, signal_t value) = 0;
     virtual void setErrorSquaredAt(size_t index, signal_t value) = 0;

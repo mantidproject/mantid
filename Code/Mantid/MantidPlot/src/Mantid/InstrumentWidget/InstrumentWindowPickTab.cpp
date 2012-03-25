@@ -365,7 +365,8 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     }
     else
     {
-      xUnits = "Time of flight";
+      xUnits = QString::fromStdString(instrActor->getWorkspace()->getAxis(0)->unit()->caption());
+      //xUnits = "Time of flight";
     }
     text += "X units: " + xUnits + '\n';
     m_selectionInfoDisplay->setText(text);
@@ -517,14 +518,28 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
   if (instrActor->wholeRange())
   {
     imin = 0;
-    imax = x.size() - 1;
+    imax = x.size();
   }
   else
   {
     Mantid::MantidVec::const_iterator x_begin = std::lower_bound(x.begin(),x.end(),instrActor->minBinValue());
-    Mantid::MantidVec::const_iterator x_end = std::lower_bound(x.begin(),x.end(),instrActor->maxBinValue());
+    Mantid::MantidVec::const_iterator x_end = std::upper_bound(x.begin(),x.end(),instrActor->maxBinValue());
     imin = static_cast<size_t>(x_begin - x.begin());
-    imax = static_cast<size_t>(x_end - x.begin()) - 1;
+    imax = static_cast<size_t>(x_end - x.begin());
+    if (imax <= imin)
+    {
+      if (x_begin == x.end())
+      {
+        --x_begin;
+        x_end = x.end();
+      }
+      else
+      {
+        x_end = x_begin + 1;
+      }
+      imin = static_cast<size_t>(x_begin - x.begin());
+      imax = static_cast<size_t>(x_end - x.begin());
+    }
   }
 }
 
@@ -540,7 +555,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
 
   m_plot->clearPeakLabels();
   // set the data 
-  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
@@ -550,7 +565,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
     QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
     foreach(PeakMarker2D* marker,markers)
     {
-      m_plot->addPeakLabel(new PeakLabel(marker));
+      m_plot->addPeakLabel(marker);
     }
   }
 }
@@ -604,7 +619,7 @@ void InstrumentWindowPickTab::plotTubeSums(int detid)
   Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Sum"; 
-  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel(label);
 }
 
@@ -670,6 +685,8 @@ void InstrumentWindowPickTab::setSelectionType()
   */
 void InstrumentWindowPickTab::addPeak(double x,double y)
 {
+  using namespace Mantid::PhysicalConstants;
+
   UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
   Mantid::API::IPeaksWorkspace_sptr tw;
@@ -677,9 +694,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
   try
   {
-    const double mN =   1.67492729e-27;
-    const double hbar = 1.054571628e-34;
-
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
     Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
     // This does need to get the instrument from the workspace as it's doing calculations
@@ -751,8 +765,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       tof = xdata[0];
     }
 
-    double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
-    //knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
+    double knorm=NeutronMass*(l1 + l2)/(h_bar*tof*1e-6)/1e10;
     Qx *= knorm;
     Qy *= knorm;
     Qz *= knorm;

@@ -937,9 +937,10 @@ class CalculateNorm(object):
         super(CalculateNorm, self).__init__()
         self._wave_steps = wavelength_deps
         self._wave_adjs = []
+        # if this attribute is set a pixel correction file is read
         self._pixel_file = ''
 
-        #algorithm to be used to load correction files
+        #algorithm to be used to load pixel correction files
         self._load='Load'
         #a parameters string to add as the last argument to the above algorithm
         self._load_params=''
@@ -998,10 +999,14 @@ class CalculateNorm(object):
                         ConvertToDistribution(self.TMP_WORKSPACE_NAME)
                 Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
 
+        # read pixel correction file
+        # note the python code below is an attempt to emulate function overloading
+        # If a derived class overwrite self._load and self._load_params then 
+        # a custom specific loading can be achieved 
         pixel_adj = ''
         if self._pixel_file:
             pixel_adj = self.PIXEL_CORR_NAME
-            load_com = 'Load("'+self._pixel_file+'","'+pixel_adj+'"'
+            load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
             if self._load_params:
                 load_com  += ','+self._load_params
             load_com += ')'
