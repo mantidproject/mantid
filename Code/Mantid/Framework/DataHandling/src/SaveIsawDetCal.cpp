@@ -16,6 +16,8 @@ Other names will fail or create an invalid .DetCal file.
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
 #include <fstream>
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -66,6 +68,8 @@ namespace DataHandling
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
         "Path to an ISAW-style .detcal file to save.");
+
+    declareProperty( "TimeOffset",0.0,"Offsets to be applied to times");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -76,6 +80,7 @@ namespace DataHandling
     std::string filename = getPropertyValue("Filename");
     MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
 
+    double T0= getProperty("TimeOffset");
     std::ofstream out;
     out.open( filename.c_str());
 
@@ -90,7 +95,7 @@ namespace DataHandling
     out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
     out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
     // Time offset of 0.00 for now
-    out << "0.000" <<  std::endl;
+    out <<std::setw( 12 ) <<  std::setprecision( 4) << T0 <<  std::endl;
 
     out <<  "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ"
         <<  std::endl;

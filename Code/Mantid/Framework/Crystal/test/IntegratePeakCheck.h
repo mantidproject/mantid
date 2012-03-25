@@ -40,6 +40,7 @@
 #include <cstdlib>
 
 #include <map>
+#include "../../Kernel/inc/MantidKernel/Quat.h"
 using namespace Mantid;
 using namespace DataObjects;
 using namespace Geometry;
@@ -198,6 +199,54 @@ public:
     double wavelength = x[0];
 
     Peak peak(instP, pixelp->getID(), wavelength);
+
+// --------------- testing for nearest neighborhood -----------------------------------------
+    std::cout<<"----------------------------------------------"<<std::endl;
+    std::cout<< "        Neighbors  "<< std::endl;
+    detid2index_map * detid_to_wi_map = wsPtr->getDetectorIDToWorkspaceIndexMap( false );
+    Mantid::detid2index_map::iterator it;
+
+    it = (*detid_to_wi_map).find( pixelp->getID() );
+    size_t wsIndx = it->second;
+    double CellHeight = bankR->ysize()/bankR->ypixels();
+    double CellWidth = bankR->xsize()/bankR->xpixels();
+    double neighborRadius = 1.5*MaxPeakRCSpan*max<double>(CellHeight,CellWidth);
+    double Nneighbors =(1.5*MaxPeakRCSpan)*(1.5*MaxPeakRCSpan)*3.1415;//*5 gets more
+
+    specid_t CentDetspec = wsPtr->getSpectrum( wsIndx)->getSpectrumNo();
+    wsPtr->buildNearestNeighbours(true);
+    wsPtr->getNeighboursExact(CentDetspec,Nneighbors,true );
+    std::map< specid_t, Kernel::V3D > neighbors  = wsPtr->getNeighbours( CentDetspec, neighborRadius, true);
+    int kk=0;
+    std::cout<< "nearest neighbors from (r,c)=(22,27). Radius-dist/pixels ="<<neighborRadius<<"/"<<
+                 (1.5*MaxPeakRCSpan)<<std::endl;
+    for( map< specid_t, Kernel::V3D>::iterator nn=neighbors.begin();nn!=neighbors.end();nn++)
+    {
+       Kernel::V3D pixPos = (*nn).second;
+       pixPos +=pixelp->getPos();
+       Kernel::V3D center = bankR->getPos();
+       double ROW = bankR->ypixels()/2;
+       double COL = bankR->xpixels()/2;
+       Kernel::V3D xvec(1,0,0);
+       Kernel::V3D yvec(0,1,0);
+       Kernel::Quat Rot = bankR->getRotation();
+       Rot.rotate(xvec);
+       Rot.rotate(yvec);
+       double row = ROW + (pixPos - center).scalar_prod(yvec) / CellHeight;
+       double col = COL + (pixPos - center).scalar_prod(xvec) / CellWidth;
+
+       kk++;
+       std::cout<<"("<<row<<","<<col<<")";;
+       if( kk++%10==0)std::cout<<std::endl;
+    }
+
+    std::cout<<std::endl<<"----------------------------------------------"<<std::endl;
+    delete detid_to_wi_map;
+
+
+
+
+//-------------------- end testing for nearest neighborhood ---------------------------
 
     //Now set up data in workspace2D
     double dQ = 0;
