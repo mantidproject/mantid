@@ -460,23 +460,23 @@ public:
      V3D a3(0.2,1.54321,2);
      TS_ASSERT_THROWS_NOTHING(a3.toMillerIndexes(0.1));
 
-     TS_ASSERT_DELTA(2,a3[0],1.e-1);
-     TS_ASSERT_DELTA(15,a3[1],1.e-1);
-     TS_ASSERT_DELTA(20,a3[2],1.e-1);
+     TS_ASSERT_DELTA(5.18,a3[0],1.e-1);
+     TS_ASSERT_DELTA(40,a3[1],1.e-1);
+     TS_ASSERT_DELTA(51.84,a3[2],1.e-1);
 
      V3D a4(-0.6,-0.80321,-3);
-     TS_ASSERT_THROWS_NOTHING(a4.toMillerIndexes(0.1));
+     TS_ASSERT_THROWS_NOTHING(a4.toMillerIndexes(0.001));
 
-     TS_ASSERT_DELTA(-3,a4[0],1.e-1);
-     TS_ASSERT_DELTA(-4,a4[1],1.e-1);
-     TS_ASSERT_DELTA(-15,a4[2],1.e-1);
+     TS_ASSERT_DELTA(-1245,a4[0],1.e-1);
+     TS_ASSERT_DELTA(-1666.6,a4[1],1.e-1);
+     TS_ASSERT_DELTA(-6225,a4[2],1.e-1);
 
-     V3D a5(-3,-0.80231,-0.6);
+     V3D a5(-3,-0.80321,-0.6);
      TS_ASSERT_THROWS_NOTHING(a5.toMillerIndexes(0.1));
 
-     TS_ASSERT_DELTA(-15,a5[0],1.e-1);
-     TS_ASSERT_DELTA(-4,a5[1],1.e-1);
-     TS_ASSERT_DELTA(-3,a5[2],1.e-1);
+     TS_ASSERT_DELTA(-62.25,a5[0],1.e-1);
+     TS_ASSERT_DELTA(-16.66,a5[1],1.e-1);
+     TS_ASSERT_DELTA(-12.45,a5[2],1.e-1);
 
      V3D a6(-3,5,-6);
      TS_ASSERT_THROWS_NOTHING(a6.toMillerIndexes(0.001));
@@ -494,11 +494,21 @@ public:
 
 
      V3D a8(-3,0.3333,-6);
-     TS_ASSERT_THROWS_NOTHING(a8.toMillerIndexes(0.001));
+     TS_ASSERT_THROWS_NOTHING(a8.toMillerIndexes(0.1));
 
-     TS_ASSERT_DELTA(-9, a8[0],1.e-3);
-     TS_ASSERT_DELTA( 1, a8[1],1.e-3);
-     TS_ASSERT_DELTA(-18,a8[2],1.e-3);
+     TS_ASSERT_DELTA(-9, a8[0],1.e-2);
+     TS_ASSERT_DELTA( 1, a8[1],1.e-2);
+     TS_ASSERT_DELTA(-18,a8[2],1.e-2);
+
+ /*    V3D a9(-3,5,-6);
+     a9.normalize();
+     TS_ASSERT_THROWS_NOTHING(a9.toMillerIndexes(0.1));
+
+     TS_ASSERT_DELTA(-3,a9[0],1.e-3);
+     TS_ASSERT_DELTA( 5,a9[1],1.e-3);
+     TS_ASSERT_DELTA(-6,a9[2],1.e-3);*/
+
+
   }
 
 };

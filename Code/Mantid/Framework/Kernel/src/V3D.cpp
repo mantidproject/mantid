@@ -827,10 +827,26 @@ void V3D::loadNexus(::NeXus::File * file, const std::string & name)
   z = data[2];
 }
 
-/** transform vector into form, used to describe directions in crystallogaphical coodinate system 
-    as crystallographical coordinate sytem is based on 3 integers, eps is used as accuracy to convert into integers
+/** transform vector into form, used to describe directions in crystallogaphical coodinate system, assuming that 
+  * the vector describes perpendicular to a crystallogaphic plain or is close to such plain. 
+  *
+  *  As crystallographical coordinate sytem is based on 3 integers, eps is used as accuracy to convert into integers
 */
-void V3D::toMillerIndexes(double eps)
+#define DINT(x)    std::fabs((x)-size_t((x)+0.5))
+double nearInt(double val,double eps,double mult)
+{
+   if(val>0){
+        if(val<1){
+            mult/=val;
+        }else{
+            if(DINT(val)>eps){
+                mult *=(double(size_t(val/eps)+1)*eps/val);
+            }
+        }
+    }
+    return mult; 
+}
+double V3D::toMillerIndexes(double eps)
 {
     if(eps<0)                 eps=-eps;
     if(eps<FLT_EPSILON)       eps=FLT_EPSILON;
@@ -843,29 +859,24 @@ void V3D::toMillerIndexes(double eps)
 
     double amax = (ax>ay)?ax:ay;  amax=(az>amax)?az:amax;
     if(amax<FLT_EPSILON) throw(std::invalid_argument("vector length is less then accuracy requested"));
+ 
    
-    double reps=1/eps;
-    ax*=reps; ay*=reps; az*=reps;
-   
-    if(ax<1){x=0; ax=0;}
-    if(ay<1){y=0; ay=0;}
-    if(az<1){z=0; az=0;}
+    if(ax<eps){x=0; ax=0;}
+    if(ay<eps){y=0; ay=0;}
+    if(az<eps){z=0; az=0;}
 
-    size_t iax=size_t(ax+0.5);   size_t iay=size_t(ay+0.5);   size_t iaz=size_t(az+0.5);
-    //size_t ireps=size_t(reps+0.5);
+    double mult(1);
+    mult = nearInt(ax,eps,mult);
+    mult = nearInt(ay,eps,mult);
+    mult = nearInt(az,eps,mult);
 
-    //double amin(amax);
-
-    // transform non-0 elements to simple fractions. The multiplier would be the production of the denominators. 
-    //size_t gax(1),gay(1),gaz(1);
-    //if(ax>0){  gax=ireps/boost::math::gcd(iax,ireps);}
-    //if(ay>0){  gay=ireps/boost::math::gcd(iay,ireps);}
-    //if(az>0){  gaz=ireps/boost::math::gcd(iaz,ireps);}
+    size_t iax=size_t(ax*mult/eps+0.5);   size_t iay=size_t(ay*mult/eps+0.5);   size_t iaz=size_t(az*mult/eps+0.5);
 
     size_t div = boost::math::gcd(iax,boost::math::gcd(iay,iaz));
-    double mult=reps/double(div);
+    mult /=(double(div)*eps);
     x *=mult; y*=mult;  z*=mult;
-//    this->round();
+
+    return mult;
 }
 
 

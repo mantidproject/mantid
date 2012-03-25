@@ -30,19 +30,19 @@ public:
       TS_ASSERT_EQUALS("[Q1,0,0]",name);
 
       TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.99,-1.001),Names));
-      TS_ASSERT_EQUALS("[-1011Q1,1001Q2,-1012Q3]",name);
+      TS_ASSERT_EQUALS("[-Q1,0.99Q2,-Q3]",name);
 
       TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.9999,-1.001),Names));
-      TS_ASSERT_EQUALS("[-1001Q1,1001Q2,-1002Q3]",name);
+      TS_ASSERT_EQUALS("[-Q1,Q2,-Q3]",name);
 
       TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.999,-1.01),Names));
-      TS_ASSERT_EQUALS("[-1011Q1,1010Q2,-1021Q3]",name);
+      TS_ASSERT_EQUALS("[-Q1,0.999Q2,-1.01Q3]",name);
 
       TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(2.01,0.9,-1.01),Names));
-      TS_ASSERT_EQUALS("[4445Q1,1990Q2,-2233Q3]",name);
+      TS_ASSERT_EQUALS("[2.01Q1,0.9Q2,-1.01Q3]",name);
 
       TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(0.2,0.9,-1),Names));
-      TS_ASSERT_EQUALS("[1111Q1,5000Q2,-5556Q3]",name);
+      TS_ASSERT_EQUALS("[0.2Q1,0.9Q2,-Q3]",name);
 
 
   }

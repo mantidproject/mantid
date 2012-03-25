@@ -76,25 +76,7 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
 }
 
 
-std::vector<Kernel::V3D>  MDWSTransfDescr::buildOrtho3D(const Kernel::DblMatrix &BM,const Kernel::V3D &u, const Kernel::V3D &v)const
-{
-    std::vector<Kernel::V3D> dim_directions(3);
-    dim_directions[0]=BM*u;
-    Kernel::V3D vp   =BM*v;
-    dim_directions[2]=dim_directions[0].cross_prod(vp);
-    if(dim_directions[2].norm2()<FLT_EPSILON)
-    {
-        throw(std::invalid_argument("two input vecores u and v can not be parallel"));
-    }
-    dim_directions[0].normalize();
-    dim_directions[2].normalize();
 
-    dim_directions[1]= dim_directions[2].cross_prod(dim_directions[0]);
-    dim_directions[1].normalize();
-    
-
-    return dim_directions;
-}
 
 
 Kernel::DblMatrix MDWSTransfDescr::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription)const
@@ -198,8 +180,12 @@ void MDWSTransfDescr::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDes
             dim_names[0]="Qh";
             dim_names[1]="Qk";
             dim_names[2]="Ql";
-
-            dim_directions = this->buildOrtho3D(Bm,uProj,vProj);
+            // this is highly questionable approach
+            std::vector<Kernel::V3D> uv(2);
+            uv[0]=uProj;
+            uv[1]=vProj;
+            dim_directions = Kernel::V3D::makeVectorsOrthogonal(uv);
+                //this->buildOrtho3D(Bm,uProj,vProj);
         }
 
         // axis names:
