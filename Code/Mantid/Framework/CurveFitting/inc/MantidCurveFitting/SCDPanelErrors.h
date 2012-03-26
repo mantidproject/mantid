@@ -1,30 +1,15 @@
 #ifndef MANTID_CURVEFITTING_SCDPANELERRORS_H_
-#define MANTID_CURVEFITTING_CURVEFITTING_SCDPANELERRORS_H_
+#define MANTID_CURVEFITTING_SCDPANELERRORS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
+#include "MantidCurveFitting/DllConfig.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/IFitFunction.h"
-#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidAPI/Jacobian.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/IPeak.h"
-#include "MantidDataObjects/Peak.h"
-#include <math.h>
-#include "MantidKernel/Matrix.h"
-
-using namespace Mantid::API;
-using  namespace  Mantid::Geometry;
-using  namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -100,7 +85,7 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
 
-  class SCDPanelErrors:  public API::ParamFunction, public API::IFunctionMW
+  class DLLExport SCDPanelErrors :  public API::ParamFunction, public API::IFunctionMW
   {
   public:
 
@@ -146,7 +131,7 @@ namespace CurveFitting
     */
    void updateParams(  boost::shared_ptr<const Geometry::ParameterMap>  &  pmapSv,
                          boost::shared_ptr<Geometry::ParameterMap>  & pmap,
-                         boost::shared_ptr<const IComponent> const component)const;
+                         boost::shared_ptr<const Geometry::IComponent> const component)const;
 
    /**
     * Given the derivative of Qrot wrt to some parameter, this calculates the final derivative
@@ -164,8 +149,8 @@ namespace CurveFitting
     *
     * @return The derivative of the Error in Qrot
     */
-   Matrix<double> CalcDiffDerivFromdQ( Matrix<double>DerivQ, Matrix<double>Mhkl, Matrix<double>MhklT,
-                                    Matrix<double>InvhklThkl,Matrix<double>UB );
+   Kernel::Matrix<double> CalcDiffDerivFromdQ( Kernel::Matrix<double>DerivQ, Kernel::Matrix<double>Mhkl, Kernel::Matrix<double>MhklT,
+                                    Kernel::Matrix<double>InvhklThkl,Kernel::Matrix<double>UB );
 
 
 
@@ -441,7 +426,7 @@ namespace CurveFitting
      * @param instrNew -The new instrument
      * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
      */
-    Peak  createNewPeak( Peak peak_old, Geometry::Instrument_sptr instrNew)const;
+    DataObjects::Peak  createNewPeak( DataObjects::Peak peak_old, Geometry::Instrument_sptr instrNew)const;
 
 
     boost::shared_ptr< DataObjects::PeaksWorkspace> peaks;

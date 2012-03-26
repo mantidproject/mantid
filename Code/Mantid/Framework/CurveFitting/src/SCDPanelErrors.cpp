@@ -4,33 +4,11 @@
  *  Created on: Feb 27, 2012
  *      Author: ruth
  */
-#include <boost/algorithm/string.hpp>
 #include "MantidCurveFitting/SCDPanelErrors.h"
-#include <stdio.h>
-#include <math.h>
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidKernel/Quat.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Unit.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
-#include "MantidDataObjects/Peak.h"
 
 using namespace Mantid::API;
 using namespace std;
