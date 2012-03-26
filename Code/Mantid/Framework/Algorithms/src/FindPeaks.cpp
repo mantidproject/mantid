@@ -1164,6 +1164,14 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     this->addRow(spectrum, bestparams, bestRawParams, mincost, true);
 } // END-FUNCTION
 
+/**
+ * Add a row to the output table workspace.
+ * @param spectrum number
+ * @param params The effective peak/background parameters
+ * @param rawParams The raw peak/background parameters
+ * @param mincost Chi2 value for this set of parameters
+ * @param error Whether or not the fit ended in an error.
+ */
 void FindPeaks::addRow(const int spectrum, const std::vector<double> &params, const std::vector<double> &rawParams, const double mincost, bool error)
 {
   API::TableRow t = m_peaks->appendRow();
@@ -1246,7 +1254,7 @@ void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> 
   if (peakFunc)
   {
     effParams[0] = peakFunc->centre();
-    if (peakFuncType.compare("Gaussian") == 0)
+    if (peakFuncType.compare("Gaussian") == 0) // TODO stupid hack because "width" is FWHM rather than sigma
       effParams[1] = peakFunc->getParameter(2);
     else
       effParams[1] = peakFunc->width();
@@ -1370,6 +1378,16 @@ IFitFunction_sptr FindPeaks::createFunction(const double height, const double ce
     return boost::shared_ptr<IFitFunction>(fitFunc);
 }
 
+/**
+ * Generate a list of ties for the fit.
+ * @param height The height of the peak.
+ * @param centre The centre of the peak.
+ * @param sigma The sigma/width of the peak. Depeding on function type.
+ * @param a0 Constant part of background polynomial.
+ * @param a1 Linear part of background polynomial.
+ * @param a2 Quadratic part of background polynomial.
+ * @param withPeak Whether or not to tie the peak parameters.
+ */
 std::string FindPeaks::createTies(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak)
 {
   UNUSED_ARG(centre);
