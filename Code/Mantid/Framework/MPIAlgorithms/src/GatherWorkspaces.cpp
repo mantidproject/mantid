@@ -19,6 +19,7 @@ Gathers workspaces from all processors of MPI run.  Add or append workspaces to 
 
 namespace mpi = boost::mpi;
 
+
 namespace Mantid
 {
 namespace MPIAlgorithms
@@ -27,6 +28,42 @@ namespace MPIAlgorithms
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+
+// Anonymous namespace for locally-used functors
+namespace {
+  /// Sum for boostmpi MantidVec
+  struct vplus : public std::binary_function<MantidVec, MantidVec, MantidVec>
+  {       // functor for operator+
+    MantidVec operator()(const MantidVec& _Left, const MantidVec& _Right) const
+    {       // apply operator+ to operands
+      MantidVec v(_Left.size());
+      std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), std::plus<double>());
+      return (v);
+    }
+  };
+
+  /// Functor used for computing the sum of the square values of a vector
+  template <class T> struct SumGaussError: public std::binary_function<T,T,T>
+  {
+    SumGaussError(){}
+    /// Sums the arguments in quadrature
+    inline T operator()(const T& l, const T& r) const
+    {
+      return std::sqrt(l*l+r*r);
+    }
+  };
+
+  /// Sum for error for boostmpi MantidVec
+  struct eplus : public std::binary_function<MantidVec, MantidVec, MantidVec>
+  {       // functor for operator+
+    MantidVec operator()(const MantidVec& _Left, const MantidVec& _Right) const
+    {       // apply operator+ to operands
+      MantidVec v(_Left.size());
+      std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), SumGaussError<double>());
+      return (v);
+    }
+  };
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GatherWorkspaces)
