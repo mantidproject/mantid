@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+Gathers workspaces from all processors of MPI run.  Add or append workspaces to processor 0.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -40,8 +47,8 @@ void GatherWorkspaces::init()
   //propOptions.push_back("Replace");
   propOptions.push_back("Append");
   declareProperty("AccumulationMethod", "Append", boost::make_shared<StringListValidator>(propOptions),
-        "Method to use for accumulating each chunk of live data.\n"
-        " - Add: the processed chunk will be summed to the previous outpu (default).\n"
+        "Method to use for accumulating each chunk from mpi processorss.\n"
+        " - Add: the processed chunk will be summed to the previous output (default).\n"
         //" - Replace: the processed chunk will replace the previous output.\n"
         " - Append: the spectra of the chunk will be appended to the output workspace, increasing its size.");
 
