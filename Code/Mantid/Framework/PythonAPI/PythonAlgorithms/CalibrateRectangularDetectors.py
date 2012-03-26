@@ -62,7 +62,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              Description="Maximum window around a peak to search for it. Optional.")
-        self.declareProperty("PeakFunction", "Gaussian", Validator=ListValidator(["Gaussian"]),
+        self.declareProperty("PeakFunction", "Gaussian", Validator=ListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
                              Description="Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", Validator=ListValidator(['Flat', 'Linear', 'Quadratic']),
                              Description="Used only with CrossCorrelation=False")
