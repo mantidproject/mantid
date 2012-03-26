@@ -122,6 +122,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
   findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
   findpeaks->setProperty<double>("PeakHeightTolerance", 5);
+  findpeaks->setProperty<bool>("RawPeakParameters", true);
 
   findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");
@@ -162,9 +163,9 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
     MantidVec &Y = outputWS->dataY(peakslist->getRef<int>("spectrum",i));
     // Get back the gaussian parameters
-    const double height = peakslist->getRef<double>("height",i);
-    const double centre = peakslist->getRef<double>("centre",i);
-    const double width = peakslist->getRef<double>("width",i);
+    const double height = peakslist->getRef<double>("f0.Height",i);
+    const double centre = peakslist->getRef<double>("f0.PeakCentre",i);
+    const double width = peakslist->getRef<double>("f0.Sigma",i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
     if ( height < 0 ) {
