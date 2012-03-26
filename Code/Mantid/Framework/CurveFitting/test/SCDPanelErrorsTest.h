@@ -132,11 +132,12 @@ public:
 
     //-------------------------Test the derivative --------------------------------
     boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
+   /*//The numerical derivatives take too long to calculate 14 sec's
     calib.functionDerivMW(Jac.get(), xVals, (size_t) N);
 
     size_t nData = N;
-    double * out0 = new double[nData];
-    double * out1 = new double[nData];
+    double * out0 = new double[ N ];
+    double * out1 = new double[ N ];
     double compRes[N];
 
     int params[20] =
@@ -174,7 +175,7 @@ public:
 
     delete[] out0;
     delete[] out1;
-
+  */
   }
   ;
 
