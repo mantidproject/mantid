@@ -167,7 +167,7 @@ public:
 
     TS_ASSERT_DELTA( pk->height(), 13.99 ,1);
     TS_ASSERT_DELTA( pk->centre(), 48.229 ,1);
-    TS_ASSERT_DELTA( pk->width(), 0.4816 ,0.01);
+    TS_ASSERT_DELTA( pk->fwhm(), 0.4816 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("I"), 374.93, 1);
     TS_ASSERT_DELTA( out->getParameter("Alpha0"), 1.597107 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("Alpha1"), 1.496805 ,0.001);

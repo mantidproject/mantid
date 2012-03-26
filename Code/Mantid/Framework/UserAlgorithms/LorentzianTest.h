@@ -90,10 +90,10 @@ namespace Mantid
       // I.e. replace the below 6 lines of code with the above 6 lines
       virtual double centre()const {return getParameter("PeakCentre");}
       virtual double height()const {return getParameter("Height");}
-      virtual double width()const {return 2*getParameter("HWHM");}
+      virtual double fwhm()const {return 2*getParameter("HWHM");}
       virtual void setCentre(const double c) {setParameter("PeakCentre",c);}
       virtual void setHeight(const double h) {setParameter("Height",h);}
-      virtual void setWidth(const double w) {setParameter("HWHM",w/2.0);}
+      virtual void setFwhm(const double w) {setParameter("HWHM",w/2.0);}
 
 
       // ** MODIFY THIS **

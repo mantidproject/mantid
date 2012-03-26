@@ -78,9 +78,9 @@ public:
   /// Set height of the current peak
   void setHeight(double value);
   /// Width of the current peak
-  double width()const;
+  double fwhm()const;
   /// Set width of the current peak
-  void setWidth(double value);
+  void setFwhm(double value);
   /// Get count
   int count()const;
   /// Is the current function a peak?

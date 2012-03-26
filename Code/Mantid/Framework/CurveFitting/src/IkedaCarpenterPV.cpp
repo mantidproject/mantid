@@ -65,7 +65,7 @@ double IkedaCarpenterPV::height()const
   return h0;
 };
 
-double IkedaCarpenterPV::width()const 
+double IkedaCarpenterPV::fwhm()const
 {
   double sigmaSquared = getParameter("SigmaSquared");
   double gamma = getParameter("Gamma");
@@ -89,7 +89,7 @@ double IkedaCarpenterPV::width()const
   return sqrt(8.0*M_LN2*sigmaSquared)+gamma;
 };
 
-void IkedaCarpenterPV::setWidth(const double w) 
+void IkedaCarpenterPV::setFwhm(const double w)
 {
   setParameter("SigmaSquared", w*w/(32.0*M_LN2));  // used 4.0 * 8.0 = 32.0
   setParameter("Gamma", w/2.0);

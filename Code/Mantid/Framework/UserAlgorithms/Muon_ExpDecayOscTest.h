@@ -49,10 +49,10 @@ namespace Mantid
 
       virtual double centre()const {return getParameter("lambda");}
       virtual double height()const {return getParameter("A");}
-      virtual double width()const {return 1/getParameter("frequency");}
+      virtual double fwhm()const {return 1/getParameter("frequency");}
       virtual void setCentre(const double c) {setParameter("lambda",c);}
       virtual void setHeight(const double h) {setParameter("A",h);}
-      virtual void setWidth(const double w) {setParameter("frequency",1/w);}
+      virtual void setFwhm(const double w) {setParameter("frequency",1/w);}
 
 
       /// Here specify name of function as it will appear

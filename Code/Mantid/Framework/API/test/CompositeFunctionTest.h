@@ -138,7 +138,7 @@ public:
     return getParameter(1);
   }
 
-  double width()const
+  double fwhm()const
   {
     return getParameter(2);
   }
@@ -152,7 +152,7 @@ public:
     setParameter(1,h);
   }
 
-  void setWidth(const double w)
+  void setFwhm(const double w)
   {
     setParameter(2,w);
   }

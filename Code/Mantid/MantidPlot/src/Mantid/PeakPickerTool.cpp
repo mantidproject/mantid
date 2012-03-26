@@ -120,7 +120,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
       Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(cf->getFunction(i));
       if (pf)
       {
-        m_width = pf->width();
+        m_width = pf->fwhm();
         if (m_width != 0.) break;
       }
     }
@@ -352,7 +352,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
         int ic = xMap.transform(c);
         if (peak == m_fitPropertyBrowser->currentHandler())
         {// draw current peak
-          double width = peak->width();
+          double width = peak->fwhm();
           QPen pen;
           pen.setColor(QColor(255,0,0));
           pen.setStyle(Qt::DashLine);
@@ -408,12 +408,12 @@ void PeakPickerTool::addPeak(double c,double h)
   MantidQt::MantidWidgets::PropertyHandler* handler = m_fitPropertyBrowser->addFunction(fnName);
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
-  double width = handler->width();
+  double width = handler->fwhm();
   if (width == 0)
   {
-    handler->setWidth(m_width);
+    handler->setFwhm(m_width);
   }
-  if (handler->width() > 0.)
+  if (handler->fwhm() > 0.)
   {
     handler->calcBase();
   }
@@ -441,14 +441,14 @@ double PeakPickerTool::centre()const
 double PeakPickerTool::width()const
 {
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
-  return h? h->width(): 0;
+  return h? h->fwhm(): 0;
 }
 
 // Return the height of the currently selected peak
 double PeakPickerTool::height()const
 {
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
-  return h? h->width(): 0;
+  return h? h->fwhm(): 0;
 }
 
 // Change the width of the currently selected peak
@@ -457,7 +457,7 @@ void PeakPickerTool::setWidth(double x)
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   if (!h || !h->pfun()) return;
   m_width = x;
-  h->setWidth(x);
+  h->setFwhm(x);
   double height = h->height() + h->base();
   h->calcBase();
   h->setHeight(height);
@@ -484,7 +484,7 @@ bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   if (!h) return false;
   double c = h->centre();
-  double w = h->width()/2;
+  double w = h->fwhm()/2;
   return (fabs(x - c - w) <= dx) || (fabs(x - c + w) <= dx);
 }
 

@@ -49,10 +49,10 @@ namespace Mantid
       /// overwrite IPeakFunction base class methods
       virtual double centre()const;
       virtual double height()const;
-      virtual double width()const;
+      virtual double fwhm()const;
       virtual void setCentre(const double c);
       virtual void setHeight(const double h);
-      virtual void setWidth(const double w);
+      virtual void setFwhm(const double w);
 
       /// overwrite IFunction base class methods
       std::string name()const{return "IkedaCarpenterPV";}

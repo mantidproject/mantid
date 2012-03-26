@@ -1214,7 +1214,6 @@ void FindPeaks::addRow(const int spectrum, const std::vector<double> &params, co
  * @param effParams This will always be centre, width, height, backA0, backA1, backA2 reguarless of how many
  * parameters the function actually has.
  * @param rawParams The actual parameters of the fit function.
- * @param peakFuncType Since this is a static method.
  */
 void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> &effParams, std::vector<double> &rawParams, const std::string & peakFuncType)
 {
@@ -1257,7 +1256,7 @@ void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> 
     if (peakFuncType.compare("Gaussian") == 0) // TODO stupid hack because "width" is FWHM rather than sigma
       effParams[1] = peakFunc->getParameter(2);
     else
-      effParams[1] = peakFunc->width();
+      effParams[1] = peakFunc->fwhm();
     effParams[2] = peakFunc->height();
   }
   if (backFunc)
@@ -1369,7 +1368,7 @@ IFitFunction_sptr FindPeaks::createFunction(const double height, const double ce
     IPeakFunction *peakFunc = dynamic_cast<IPeakFunction *>(tempPeakFunc);
     peakFunc->setHeight(height);
     peakFunc->setCentre(centre);
-    peakFunc->setWidth(sigma);
+    peakFunc->setFwhm(sigma);
 
     // put the two together and return
     CompositeFunctionMW* fitFunc = new  CompositeFunctionMW();

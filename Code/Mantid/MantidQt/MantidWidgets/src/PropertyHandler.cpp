@@ -878,7 +878,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
       {
         pf->setCentre(m_pf->centre());
         pf->setHeight(m_pf->height());
-        pf->setWidth(m_pf->width());
+        pf->setFwhm(m_pf->fwhm());
       }
     }
 
@@ -1151,11 +1151,11 @@ void PropertyHandler::setCentre(const double& c)
   }
 }
 
-void PropertyHandler::setWidth(const double& w)
+void PropertyHandler::setFwhm(const double& w)
 {
   if (m_pf)
   {
-    m_pf->setWidth(w);
+    m_pf->setFwhm(w);
   }
 }
 
@@ -1177,11 +1177,11 @@ double PropertyHandler::centre()const
   return (m_browser->endX() + m_browser->startX())/2;
 }
 
-double PropertyHandler::width()const
+double PropertyHandler::fwhm()const
 {
   if (m_pf)
   {
-    return m_pf->width();
+    return m_pf->fwhm();
   }
   return 0;
 }

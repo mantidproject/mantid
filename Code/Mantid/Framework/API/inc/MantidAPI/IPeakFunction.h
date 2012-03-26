@@ -42,10 +42,10 @@ public:
   /// Constructor
   IPeakFunction();
   /// Returns the peak FWHM
-  virtual double width()const = 0;
+  virtual double fwhm()const = 0;
 
   /// Sets the parameters such that FWHM = w
-  virtual void setWidth(const double w) = 0;
+  virtual void setFwhm(const double w) = 0;
 
   /// General implementation of the method for all peaks. 
   void functionMW(double* out, const double* xValues, const size_t nData)const;
