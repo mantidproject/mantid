@@ -105,6 +105,7 @@ private:
   void execEvent();
   DataObjects::EventWorkspace_const_sptr eventW;
   std::size_t totalSpec;
+  std::size_t sumSpec;
   int hist;
   std::size_t numBins;
   mpi::communicator included;

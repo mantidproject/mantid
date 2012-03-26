@@ -89,7 +89,7 @@ void GatherWorkspaces::exec()
   std::string accum = this->getPropertyValue("AccumulationMethod");
   // Get the total number of spectra in the combined inputs
   totalSpec = inputWorkspace->getNumberHistograms();
-  size_t sumSpec = totalSpec;
+  sumSpec = totalSpec;
   if (accum == "Append")
   {  
     reduce(included, totalSpec, sumSpec, std::plus<std::size_t>(), 0);
@@ -194,7 +194,7 @@ void GatherWorkspaces::execEvent()
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
     outputWorkspace =
-    boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", totalSpec,numBins+hist,numBins));
+    boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", sumSpec,numBins+hist,numBins));
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(eventW, outputWorkspace, true);
     setProperty("OutputWorkspace",outputWorkspace);
