@@ -109,8 +109,6 @@ namespace DataHandling
     {
       mStartGroupID = startgroupid;
     }
-    void getDetectorIDs(std::vector<detid_t>& detids);
-    void getSpectrumIDs(std::vector<specid_t>& specids);
 
     std::string getInstrumentName()
     {
