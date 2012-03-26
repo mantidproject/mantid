@@ -261,6 +261,7 @@ class DirectEnergyConversion(object):
             ei_value = ei_guess
             if (self.instr_name == "HYSPEC"):
                 Tzero=25.0 + 85.0 / (1+math.pow((ei_value/27.0),4.0))
+                self.log("Determined T0 of %s for HYSPEC" % str(Tzero))
             if (Tzero is None):
                 tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
             else:
@@ -290,7 +291,7 @@ class DirectEnergyConversion(object):
                 self.log("Error in GetEi. Using entered values.")
                 #monitor_ws.getRun()['Ei'] = ei_value
                 ei_value = ei_guess
-		AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
+                AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
                 ei_calc = None
                 TzeroCalculated = Tzero
                 
