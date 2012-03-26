@@ -89,8 +89,8 @@ public:
 
     const int N = (int) ws->dataX(0).size();
 
-    double out[N];
-    double xVals[N];
+    std::vector<double> out(N);
+    std::vector<double> xVals(N);
 
     MantidVec xdata = ws->dataX(0);
 
@@ -119,7 +119,7 @@ public:
     //calib.setParameter("Xoffset",1.0);
     //calib.setParameter("Yrot",90);
 
-    calib.functionMW(out, xVals, (size_t) N);
+    calib.functionMW(out.data(), xVals.data(), (size_t) N);
 
     double d = .00001;
     TS_ASSERT_DELTA(out[0], -0.00396681, d);
