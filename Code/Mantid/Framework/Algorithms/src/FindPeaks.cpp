@@ -1200,7 +1200,14 @@ void FindPeaks::addRow(const int spectrum, const std::vector<double> &params, co
   }
 }
 
-// TODO have two sets of params: one effective, one raw
+/**
+ * Get the parameter lists as appropriate using the supplied function abstraction.
+ * @param compositeFunc The function to get information from.
+ * @param effParams This will always be centre, width, height, backA0, backA1, backA2 reguarless of how many
+ * parameters the function actually has.
+ * @param rawParams The actual parameters of the fit function.
+ * @param peakFuncType Since this is a static method.
+ */
 void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> &effParams, std::vector<double> &rawParams, const std::string & peakFuncType)
 {
   // clear out old parameters
