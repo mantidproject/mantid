@@ -204,15 +204,22 @@ void GatherWorkspaces::execEvent()
   {
     if ( included.rank() == 0 )
     {
-      outputWorkspace->dataX(wi) = eventW->readX(wi);
+      // How do we accumulate the data?
+      std::string accum = this->getPropertyValue("AccumulationMethod");
       std::vector<Mantid::DataObjects::EventList> out_values;
       gather(included, eventW->getEventList(wi), out_values, 0);
-      for (int n = 0; n < included.size(); n++)
-        outputWorkspace->getOrAddEventList(wi) += out_values[n];
-      const ISpectrum * inSpec = eventW->getSpectrum(wi);
-      ISpectrum * outSpec = outputWorkspace->getSpectrum(wi);
-      outSpec->clearDetectorIDs();
-      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+      for (int i = 0; i < included.size(); i++)
+      {
+        size_t index = wi; // accum == "Add"
+        if (accum == "Append")
+          index = wi + i * totalSpec;
+        outputWorkspace->dataX(index) = eventW->readX(wi);
+        outputWorkspace->getOrAddEventList(index) += out_values[i];
+        const ISpectrum * inSpec = eventW->getSpectrum(wi);
+        ISpectrum * outSpec = outputWorkspace->getSpectrum(index);
+        outSpec->clearDetectorIDs();
+        outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+      }
     }
     else
     {
