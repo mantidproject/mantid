@@ -112,9 +112,9 @@ namespace Mantid
         "Optional: The maximum width of the fitting window. If this is <=0 the windows is not specified to FindPeaks" );
 
       std::vector<std::string> peaktypes;
-      //peaktypes.push_back("BackToBackExponential");
+      peaktypes.push_back("BackToBackExponential");
       peaktypes.push_back("Gaussian");
-      //peaktypes.push_back("Lorentzian");
+      peaktypes.push_back("Lorentzian");
       declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peaktypes),
                       "Type of peak to fit");
 
