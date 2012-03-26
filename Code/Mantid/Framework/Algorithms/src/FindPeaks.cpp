@@ -1215,7 +1215,7 @@ void FindPeaks::addRow(const int spectrum, const std::vector<double> &params, co
  * parameters the function actually has.
  * @param rawParams The actual parameters of the fit function.
  */
-void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> &effParams, std::vector<double> &rawParams, const std::string & peakFuncType)
+void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> &effParams, std::vector<double> &rawParams)
 {
   // clear out old parameters
   effParams.clear();
@@ -1253,10 +1253,7 @@ void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> 
   if (peakFunc)
   {
     effParams[0] = peakFunc->centre();
-    if (peakFuncType.compare("Gaussian") == 0) // TODO stupid hack because "width" is FWHM rather than sigma
-      effParams[1] = peakFunc->getParameter(2);
-    else
-      effParams[1] = peakFunc->fwhm();
+    effParams[1] = peakFunc->fwhm();
     effParams[2] = peakFunc->height();
   }
   if (backFunc)
@@ -1291,7 +1288,7 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
 
   // get out the parameter names
   std::vector<double> tempEffectiveParams, tempRawParams;
-  getComponentFunctions(fitAlg->getProperty("Function"), tempEffectiveParams, tempRawParams, m_peakFuncType);
+  getComponentFunctions(fitAlg->getProperty("Function"), tempEffectiveParams, tempRawParams);
 
   // check the height
   double height = tempEffectiveParams[2];
