@@ -81,7 +81,7 @@ protected:
     
     QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
     
-    // Maps item pointers from m_tree to their associated RemoteAlg objects
+    // Maps item pointers from m_algList to their associated RemoteAlg objects
     QHash <QListWidgetItem *, RemoteAlg> m_algorithmHash;  
 
     friend class MantidUI;
