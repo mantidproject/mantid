@@ -61,6 +61,7 @@ void EQSANSLoad::init()
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
   declareProperty("LowTOFCut", 0.0, Direction::Input);
   declareProperty("HighTOFCut", 0.0, Direction::Input);
+  declareProperty("WavelengthStep", 0.1, Direction::Input);
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
@@ -570,8 +571,10 @@ void EQSANSLoad::exec()
 
   // Rebin so all the wavelength bins are aligned
   const bool preserveEvents = getProperty("PreserveEvents");
-  std::string params = Poco::NumberFormatter::format(wl_min, 2)
-      + ",0.1," + Poco::NumberFormatter::format(wl_combined_max, 2);
+  const double wl_step = getProperty("WavelengthStep");
+  std::string params = Poco::NumberFormatter::format(wl_min, 2) + ","
+		  + Poco::NumberFormatter::format(wl_step, 2) + ","
+		  + Poco::NumberFormatter::format(wl_combined_max, 2);
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   if (preserveEvents) rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
