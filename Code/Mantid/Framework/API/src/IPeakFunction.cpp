@@ -74,7 +74,7 @@ IPeakFunction::IPeakFunction()
 void IPeakFunction::functionMW(double* out, const double* xValues, const size_t nData)const
 {
   double c = this->centre();
-  double dx = fabs(s_peakRadius*this->width());
+  double dx = fabs(s_peakRadius*this->fwhm());
   int i0 = -1;
   int n = 0;
   for(size_t i = 0; i < nData; ++i)
@@ -106,7 +106,7 @@ void IPeakFunction::functionMW(double* out, const double* xValues, const size_t 
 void IPeakFunction::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   double c = this->centre();
-  double dx = fabs(s_peakRadius*this->width());
+  double dx = fabs(s_peakRadius*this->fwhm());
   int i0 = -1;
   int n = 0;
   for(size_t i = 0; i < nData; ++i)

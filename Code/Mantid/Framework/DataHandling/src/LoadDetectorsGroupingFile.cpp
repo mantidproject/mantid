@@ -395,15 +395,6 @@ namespace DataHandling
 
     return;
   }
-  void LoadGroupXMLFile::getDetectorIDs(std::vector<detid_t>& detids)
-  {
-    return;
-  }
-  void LoadGroupXMLFile::getSpectrumIDs(std::vector<specid_t>& specids)
-  {
-    return;
-  }
-
 
   /*
    * Initalize Poco XML Parser

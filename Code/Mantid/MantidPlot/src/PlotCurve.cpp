@@ -185,6 +185,7 @@ void PlotCurve::aboutToBeDeleted()
 
 void PlotCurve::drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
 {
+  p->translate(d_x_offset,-d_y_offset); // For waterfall plots (will be zero otherwise)
   if(d_side_lines)
     drawSideLines(p, xMap, yMap, from, to);
   QwtPlotCurve::drawCurve(p, style, xMap, yMap, from, to);
@@ -212,6 +213,9 @@ void PlotCurve::setSkipSymbolsCount(int count)
 void PlotCurve::drawSymbols(QPainter *painter, const QwtSymbol &symbol, const QwtScaleMap &xMap,
     const QwtScaleMap &yMap, int from, int to) const
 {
+  painter->translate(d_x_offset,-d_y_offset);  // For waterfall plots (will be zero otherwise)
+                                               // Don't really know why you'd want symbols on a waterfall plot, but just in case...
+
   if (d_skip_symbols < 2)
   {
     QwtPlotCurve::drawSymbols(painter, symbol, xMap, yMap, from, to);
@@ -269,8 +273,6 @@ void PlotCurve::computeWaterfallOffsets()
   Plot *plot = (Plot *)this->plot();
   Graph *g = (Graph *)plot->parent();
 
-  int xAxis = QwtPlot::xBottom;
-
   // reset the offsets
   d_x_offset = 0.0;
   d_y_offset = 0.0;
@@ -279,23 +281,18 @@ void PlotCurve::computeWaterfallOffsets()
     int index = g->curveIndex(this);
     int curves = g->curves();//Count();
     PlotCurve *c = dynamic_cast<PlotCurve*>(g->curve(0));
+    // Get the minimum value of the first curve in this plot
+    double ymin = c->minYValue();
     if (index > 0 && c){
-      double xmin = c->minXValue();
-      double dx = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
-      //double dx = index*g->waterfallXOffset()*0.01*g->canvas()->width()/(double)(curves - 1);
-      d_x_offset = plot->invTransform(xAxis, plot->transform(xAxis, xmin) + (int)dx) - xmin;
-
-      double ymin = c->minYValue();
-      double dy = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);
-      //double dy = index*g->waterfallYOffset()*0.01*g->canvas()->height()/(double)(curves - 1);
-      d_y_offset = ymin - plot->invTransform(yAxis(), plot->transform(yAxis(), ymin) + (int)dy);
+      d_x_offset = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
+      d_y_offset = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);
 
       setZ(-index);
-      setBaseline(d_y_offset);
+      setBaseline(ymin-d_y_offset); // Fill down to minimum value of first curve
 
     } else {
       setZ(0);
-      setBaseline(0.0);
+      setBaseline(ymin); // This is for when 'fill under curve' is turn on
     }
     if (g->grid())
       g->grid()->setZ(-g->curves()/*Count()*/ - 1);
@@ -509,11 +506,6 @@ void DataCurve::loadData()
   {
     // Calculate the offsets
     computeWaterfallOffsets();
-    // Apply them to each data point
-    for (int i = 0; i < size; i++){
-      X[i] = X[i] + d_x_offset;
-      Y[i] = Y[i] + d_y_offset;
-    }
   }
   // End re-jigged waterfall offset code
 

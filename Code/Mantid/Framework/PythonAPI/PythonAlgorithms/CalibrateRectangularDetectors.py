@@ -41,6 +41,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("Background", [0], Validator=ArrayBoundedValidator(Lower=0))
         extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              Validator=ListValidator(extensions))
@@ -62,6 +63,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              Description="Maximum window around a peak to search for it. Optional.")
+        self.declareProperty("PeakFunction", "Gaussian", Validator=ListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
+                             Description="Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", Validator=ListValidator(['Flat', 'Linear', 'Quadratic']),
                              Description="Used only with CrossCorrelation=False")
         self.declareProperty("DetectorsPeaks", "",
@@ -294,6 +297,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
             DReference=self._peakpos, FitWindowMaxWidth=self.getProperty("PeakWindowMax"), BackgroundType=self.getProperty("BackgroundType"),
             MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
+        if self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
+                SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
+                                 AdjX=self._xpixelbin, AdjY=self._ypixelbin)
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
@@ -378,13 +384,22 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._outDir = self.getProperty("OutputDirectory")+"/"
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
+        backRuns = self.getProperty("Background")
+        if len(samRuns) != len(backRuns):
+            if (len(backRuns) == 1 and backRuns[0] == 0) or (len(backRuns) <= 0):
+                backRuns = [0]*len(samRuns)
+            else:
+                raise RuntimeError("Number of samples and backgrounds must match (%d!=%d)" % (len(samRuns), len(backRuns)))
         lcinst = str(self._instrument)
         calib = self._outDir+lcinst+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
-        for samNum in samRuns:
+        for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
+            if (backNum > 0):
+                backRun = self._loadData(backNum, SUFFIX, filterWall)
+                samRun -= backRun
             if str(self._instrument) == "SNAP":
             	alg = CloneWorkspace(samRun, "tmp")
         	origRun = alg['OutputWorkspace']

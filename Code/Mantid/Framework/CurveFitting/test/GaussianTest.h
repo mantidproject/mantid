@@ -333,7 +333,7 @@ public:
     gaus.initialize();
     gaus.setCentre(11.2);
     gaus.setHeight(100.7);
-    gaus.setWidth(2.2);
+    gaus.setFwhm(2.2);
 
     alg2.setPropertyValue("Function",gaus.asString());
 
@@ -360,7 +360,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8035 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
-    TS_ASSERT_DELTA( pk->width(), 2.6237 ,0.0001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6237 ,0.0001);
 
     // check its categories
     const std::vector<std::string> categories = out->categories();
@@ -393,7 +393,7 @@ public:
     gaus.initialize();
     gaus.setCentre(11.2);
     gaus.setHeight(100.7);
-    gaus.setWidth(2.2);
+    gaus.setFwhm(2.2);
 
     alg2.setPropertyValue("Function",gaus.asString());
 
@@ -421,7 +421,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->width(), 2.6240 ,0.001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -451,7 +451,7 @@ public:
     gaus.initialize();
     gaus.setCentre(11.2);
     gaus.setHeight(100.7);
-    gaus.setWidth(2.2);
+    gaus.setFwhm(2.2);
 
     alg2.setPropertyValue("Function",gaus.asString());
     std::cerr << gaus.asString() << std::endl;
@@ -480,7 +480,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.05);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->width(), 2.6240 ,0.001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
     std::cerr << pk->height() << std::endl;
 
     AnalysisDataService::Instance().remove(wsName);
@@ -511,7 +511,7 @@ public:
     gaus.initialize();
     gaus.setCentre(11.2);
     gaus.setHeight(100.7);
-    gaus.setWidth(2.2);
+    gaus.setFwhm(2.2);
 
     alg2.setPropertyValue("Function",gaus.asString());
 
@@ -539,7 +539,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.7995 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->width(), 2.6240 ,0.001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -569,7 +569,7 @@ public:
     gaus->initialize();
     gaus->setCentre(11.2);
     gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    gaus->setFwhm(2.2);
 
     alg2.setPropertyValue("Function",gaus->asString());
 
@@ -598,7 +598,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.7857 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->width(), 2.6240 ,0.001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -628,7 +628,7 @@ public:
     gaus.initialize();
     gaus.setCentre(11.2);
     gaus.setHeight(100.7);
-    gaus.setWidth(2.2);
+    gaus.setFwhm(2.2);
 
     alg2.setPropertyValue("Function",gaus.asString());
 
@@ -656,7 +656,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
     TS_ASSERT_DELTA( pk->height(), 97.8111 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->width(), 2.6240 ,0.001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
   }

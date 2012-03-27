@@ -355,7 +355,8 @@ namespace MDEvents
         alg->setProperty("GenerateMultipleEvents", false); // One event per bin by default
         alg->setPropertyValue("OutputWorkspace", getPropertyValue("InputWorkspace") + "_event");
         alg->executeAsSubAlg();
-        m_inWS = alg->getProperty("OutputWorkspace");
+        EventWorkspace_sptr eventWS = alg->getProperty("OutputWorkspace");
+        m_inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(eventWS);
         if (!alg->isExecuted() || !m_inWS)
           throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
       }

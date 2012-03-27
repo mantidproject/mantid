@@ -512,14 +512,14 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             return
         
         parts = details.split('/')
-        # A spectrum mask or mask range applied to both detectors
-        if len(parts) == 1:
+        # A spectrum mask or mask spectra range with H and V commands
+        if len(parts) == 1:     # Command is to type MASK something
             #by default only the rear detector is masked
             self.add_mask_string(details[4:].lstrip(), detect='rear')
-        elif len(parts) == 2:
-            type = parts[1]
+        elif len(parts) == 2:   # Command is to type MASK/ something
+            type = parts[1]   # this is the part of the command following /
             detname = type.split()
-            if type == 'CLEAR':
+            if type == 'CLEAR':    # Command is specifically MASK/CLEAR
                 self.spec_mask_r = ''
                 self.spec_mask_f = ''
             elif type.startswith('T'):
@@ -571,6 +571,8 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         '''
             Convert a mask string to a spectra list
             6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
+            
+            @param maskstring Is a comma separated list of mask commands for masking spectra using the e.g. the h, s and v commands
         '''
         #Compile spectra ID list
         if maskstring == '':
@@ -606,7 +608,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                     speclist += detector.spectrum_block(low2, low,nstrips, 'all')+ ','
                 else:
                     print "error in mask, ignored:  " + x
-            elif '>' in x:
+            elif '>' in x:  # Commands: MASK Ssp1>Ssp2, MASK Hn1>Hn2 and MASK Vn1>Vn2
                 pieces = x.split('>')
                 low = int(pieces[0].lstrip('hvs'))
                 upp = int(pieces[1].lstrip('hvs'))
@@ -623,7 +625,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 speclist += detector.spectrum_block(int(x.lstrip('h')), 0,1, 'all') + ','
             elif 'v' in x:
                 speclist += detector.spectrum_block(0,int(x.lstrip('v')), 'all', 1) + ','
-            elif 's' in x:
+            elif 's' in x:   # Command MASK Ssp. Although note commands of type MASK Ssp1>Ssp2 handled above
                 speclist += x.lstrip('s') + ','
             elif x == '':
                 #empty entries are allowed

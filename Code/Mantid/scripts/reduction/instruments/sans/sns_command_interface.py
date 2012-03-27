@@ -63,6 +63,9 @@ def UseConfigTOFTailsCutoff(use_config=True):
 def UseConfigMask(use_config=True):
     ReductionSingleton().get_data_loader().use_config_mask(use_config)
     
+def SetWavelengthStep(step=0.1):
+    ReductionSingleton().get_data_loader().set_wavelength_step(step)
+    
 def UseConfig(use_config=True):
     ReductionSingleton().get_data_loader().use_config(use_config)
     

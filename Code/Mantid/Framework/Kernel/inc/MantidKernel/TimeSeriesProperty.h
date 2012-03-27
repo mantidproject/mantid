@@ -243,8 +243,7 @@ private:
     if (fid == mP.end())
       throw std::runtime_error("Cannot find data");
 
-    // 4. Calcualte return value
-    Kernel::DateAndTime indextime = fid->time();
+    // 4. Calculate return value
     size_t index = size_t(fid-mP.begin());
 
     return int(index);
@@ -1232,6 +1231,49 @@ public:
     {
       // 3. Within boundary
       int index = this->findIndex(t);
+
+      if (index < 0 || index >= int(mP.size()))
+        throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
+
+      value = mP[static_cast<size_t>(index)].value();
+    }
+
+    return value;
+  } // END-DEF getSinglevalue()
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the value at a particular time
+   *  @param t :: time
+   *  @return Value at time \a t
+   */
+  TYPE getSingleValue(const DateAndTime& t, int& index) const
+  {
+    if (mP.size() == 0)
+      throw std::runtime_error("Property is empty.  Cannot return any value");
+
+    // 1. Get sorted
+    sort();
+
+    // 2.
+    TYPE value;
+    if (t < mP[0].time())
+    {
+      // 1. Out side of lower bound
+      value = mP[0].value();
+      index = 0;
+    }
+    else if (t >= mP.back().time())
+    {
+      // 2. Out side of upper bound
+      value = mP.back().value();
+      index = int(mP.size())-1;
+    }
+    else
+    {
+      // 3. Within boundary
+      index = this->findIndex(t);
 
       if (index < 0 || index >= int(mP.size()))
         throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");

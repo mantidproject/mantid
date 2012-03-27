@@ -64,6 +64,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  std::string m_backType;
+  std::string m_peakType;
 };
 
 } // namespace Algorithm

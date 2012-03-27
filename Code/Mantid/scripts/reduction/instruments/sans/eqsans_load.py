@@ -27,6 +27,9 @@ class LoadRun(ReductionStep):
         self._low_TOF_cut = 0
         self._high_TOF_cut = 0
         
+        # Wavelength step
+        self._wavelength_step = None
+        
         # TOF flight path correction
         self._correct_for_flight_path = False
         
@@ -57,8 +60,14 @@ class LoadRun(ReductionStep):
         loader._correct_for_flight_path = self._correct_for_flight_path
         loader._use_config_mask = self._use_config_mask
         loader._use_config = self._use_config
+        loader._wavelength_step = self._wavelength_step
         return loader
 
+    def set_wavelength_step(self, step):
+        if step is not None and type(step) != int and type(step) != float:
+            raise RuntimeError, "LoadRun._wavelength_step expects a float: %s" % str(step)
+        self._wavelength_step = step
+        
     def set_sample_detector_distance(self, distance):
         # Check that the distance given is either None of a float
         if distance is not None and type(distance) != int and type(distance) != float:
@@ -163,6 +172,7 @@ class LoadRun(ReductionStep):
                        UseConfigTOFCuts=self._use_config_cutoff,
                        LowTOFCut=self._low_TOF_cut,
                        HighTOFCut=self._high_TOF_cut,
+                       WavelengthStep=self._wavelength_step,
                        UseConfigMask=self._use_config_mask,
                        UseConfig=self._use_config,
                        CorrectForFlightPath=self._correct_for_flight_path,

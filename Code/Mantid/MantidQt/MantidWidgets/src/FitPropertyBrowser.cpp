@@ -1204,11 +1204,11 @@ void FitPropertyBrowser::setHeight(double value)
 }
 
 // Width of the current peak
-double FitPropertyBrowser::width()const
+double FitPropertyBrowser::fwhm()const
 {
   if (m_currentHandler && m_currentHandler->pfun())
   {
-    return m_currentHandler->pfun()->width();
+    return m_currentHandler->pfun()->fwhm();
   }
   return 0;
 }
@@ -1216,11 +1216,11 @@ double FitPropertyBrowser::width()const
 /** Set width of the current peak
  * @param value :: The new width value
  */
-void FitPropertyBrowser::setWidth(double value)
+void FitPropertyBrowser::setFwhm(double value)
 {
   if (m_currentHandler)
   {
-    m_currentHandler->setWidth(value);
+    m_currentHandler->setFwhm(value);
   }
 }
 
@@ -2430,7 +2430,7 @@ void FitPropertyBrowser::findPeaks()
       if (!f) break;
       f->setMatrixWorkspace(inputWS,workspaceIndex());
       f->setCentre(centre[i]);
-      f->setWidth(width[i]);
+      f->setFwhm(width[i]);
       f->setHeight(height[i]);
       addFunction(f->asString());
       delete f;

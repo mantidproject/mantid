@@ -66,6 +66,31 @@ public:
     TS_ASSERT_EQUALS( inWS->getInstrument()->baseInstrument(), outWS->getInstrument()->baseInstrument() );
   }
 
+  void testEvents()
+  {
+    MPIAlgorithms::GatherWorkspaces gatherer;
+    TS_ASSERT_THROWS_NOTHING( gatherer.initialize() );
+    // Create a small workspace
+    DataObjects::EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1,5, true);
+
+    TS_ASSERT_THROWS_NOTHING( gatherer.setProperty("InputWorkspace",inWS) );
+    TS_ASSERT_THROWS_NOTHING( gatherer.setProperty("PreserveEvents",true) );
+    gatherer.setChild(true); // Make a child algorithm to keep the result out of the ADS
+
+    TS_ASSERT( gatherer.execute() );
+    API::MatrixWorkspace_const_sptr outWS = gatherer.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS( inWS->size(), outWS->size() );
+    for (int i=0; i < 5; ++i)
+    {
+      TS_ASSERT_EQUALS( inWS->readX(0)[i], outWS->readX(0)[i] );
+      TS_ASSERT_EQUALS( inWS->readY(0)[i], outWS->readY(0)[i] );
+      TS_ASSERT_EQUALS( inWS->readE(0)[i], outWS->readE(0)[i] );
+      //TODO: Check spectrum numbers and detector IDs are copied correctly (perhaps?)
+    }
+
+    TS_ASSERT_EQUALS( inWS->getInstrument()->baseInstrument(), outWS->getInstrument()->baseInstrument() );
+  }
+
   // TODO: Work out a way of testing under MPI because absent that the test is not very interesting
 };
 

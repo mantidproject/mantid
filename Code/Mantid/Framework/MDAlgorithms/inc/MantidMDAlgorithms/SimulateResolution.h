@@ -14,6 +14,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidMDAlgorithms/MagneticFormFactor.h"
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_qrng.h>
+
 namespace Mantid
 {
     namespace MDAlgorithms
@@ -21,15 +24,14 @@ namespace Mantid
 
         /**
         Semi-abstract class for fitting with instrument resolution function.
-        This class implements the MC simulation of the resolution function.
-        A function defining the scattering S(Q,W) is required in an inherited
-        class to form the real fit function.
+        This class implements the MC/Sobol simulation of the resolution function.
+        A function defining the scattering S(Q,W) is required in a subclass
+        to provide the real fit function.
         This function will be invoked from the fitting process to return the expected signal for
         a given set of model parameters at each of the physical detectors within the instrument.
         In the MDWorkspaces there may be data from multiple runs and the runIndex of the data point
         is used to identify which case is being used.
-
-        @date 07/04/2011
+1
 
         Copyright &copy; 2007-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -71,9 +73,6 @@ namespace Mantid
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
             virtual double functionMD(Mantid::API::IMDIterator& r) const;
-            /// This will be over ridden by the user's SQW function TODO argument list is not general enough
-            //virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
-            //        const double temp, const Kernel::DblMatrix & ubinv) const=0;
             /// This is the new more general interface to the user scattering function which can takes different arguments
             /// depending on the sharp/broad setting.
             virtual void userSqw(const std::vector<double> & params, const std::vector<double> & qE, std::vector<double> & result) const=0;
@@ -82,7 +81,8 @@ namespace Mantid
             /// This will be over ridden by the user's getParam function
             virtual void getParams() const = 0;
 
-            /** Perform the convolution calculation for one pixel
+            /** Perform the convolution calculation for one pixel. May implement other methods
+             * besides MC.
              *
              * @param e :: MDEvent that corresponds to a pixel in a named detector/run
              * @param error :: the error estimate of the calculated scattering
@@ -90,7 +90,7 @@ namespace Mantid
              */
             double sqwConvolution(const Mantid::API::IMDIterator& it, size_t & event,  double & error) const;
 
-            /** Perform the convolution calculation for one pixel using MonteCarlo method
+            /** Perform the convolution calculation for one pixel using MonteCarlo/Sobol method
              *
              * @param e :: MDEvent that corresponds to a pixel in a named detector/run
              * @param error :: the error estimate of the calculated scattering
@@ -98,26 +98,21 @@ namespace Mantid
              */
             double sqwConvolutionMC(const Mantid::API::IMDIterator& it, size_t & event, double & error) const;
 
-            /// Pointer to the run parameters for each run which may be included in a cut
-            boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData;
-
-            /// Set magnetic form factor
+            /// Set magnetic form factor, function can be access in use SQW
             void setMagneticForm(const int atomicNo, const int ionisation);
 
             /// Find magnetic form factor at q^2 point
             double magneticForm(const double qSquared) const;
-
             /// For MC integration return next point in space
-            void getNextPoint(std::vector<double>&, int) const;
+            void getNextPoint(std::vector<double>&) const;
             /// Initialise random number generators
-            void initRandomNumbers();
+            void initRandom();
+            /// Initialise particular random method, sobol or random
+            void initRandom(const bool methodSobol);
             /// Reset random number generators
             void resetRandomNumbers();
             /// A pointer to the random number generator
             Kernel::RandomNumberGenerator *m_randGen;
-            /// Sample S(Q,eps) function from tobyfit
-            double sqwBroad601(const std::vector<double> &, const std::vector<double> & ,
-                        const double, const Kernel::Matrix<double> & );
             /// function to evaluate y/(1-exp(-y)) including y=0 and large -ve y
             double pop(const double) const;
             /// function to calculate bose factor
@@ -126,11 +121,6 @@ namespace Mantid
             double formTable(const double) const;
             /// Sample_area_table is lookup function for moderator parameters
             double sampleAreaTable( const double ) const;
-            /// convert 2 uniform random values to two gaussian distribution values
-            void gasdev2d( const double, const double, double &, double &) const;
-            /// tridev function from tf - maps a uniform distribution to triangular form?
-            double tridev(const double) const;
-            void monteCarloSampleVolume( const double, const double, const double, double &, double &, double & ) const;
             /// function to build bmatrix
             void bMatrix(const double, const double, const double, const double, const double,
                   const double, const double, const double,
@@ -139,29 +129,25 @@ namespace Mantid
             /// function to build matrices dMat and dinvMat
             void dMatrix(const double , const double , Kernel::Matrix<double> & ,
                                         Kernel::Matrix<double> & );
-            /// Energy resoultion function for moderator and chopper from TF
-            double enResModChop(const double , const double , const double , const double ,
-                  const double , const double , const double );
             /// generate a random scaled vector in the selected space of up to 13 dimensions
-            void mcYVec(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run,
+            void mcYVec(const double ranvec[], const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run,
                   std::vector<double> & yVec, double & eta2, double & eta3 ) const;
             /// map from Yvec values to dQ/dE values
-            void mcMapYtoQEVec(const std::vector<double> & yVec,const std::vector<double> & qE,std::vector<double> & perturbQE) const;
+            void mcMapYtoQEVec(const std::vector<double> & yVec,const std::vector<double> & qE,const double eta2, const double eta3,
+                               std::vector<double> & perturbQE) const;
             /// get transform matrices, vectors for reciprocal space
             int rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                        std::vector<double> & arlu, std::vector<double> & angrlu,
                        Kernel::Matrix<double> & dMat );
         private:
-            /// Pointer to the run parameter objects, yet to be defined
-            boost::shared_ptr<MDAlgorithms::RunParam> m_runData;
+            /// Pointers to the run data for each run
+            std::vector< boost::shared_ptr<MDAlgorithms::RunParam> > m_runData;
             /// Pointer to the group of input MDWorkspaces
             API::WorkspaceGroup_sptr m_mdWorkspaces;
             boost::shared_ptr<MagneticFormFactor> m_magForm;
 
             /// The default seed for MT random numbers
             int m_randSeed;
-            /// Flag for random number method - may change to enum to allow for several methods
-            bool m_sobol;
             /// Cached Sample Bounding box size for current detector/instrument, assuming cuboid sample
             std::vector<double> m_sampleBB;
             std::vector<double> m_detectorBB;
@@ -182,6 +168,8 @@ namespace Mantid
             int m_run;
             /// Flags for MC integration options
             std::vector<bool> m_mcOptVec;
+            /// Random variables per model
+            std::vector<int> m_mcVarCount;
             /// Names for the options within the Monte Carlo vector
             enum McOptions
             {
@@ -195,12 +183,23 @@ namespace Mantid
                 mcDetectorTimeBin = 7,
                 mcMosaic          = 8
             };
-            // Only one method now but may be more added later
+            /// Number of dimensions in use in MC method
+            size_t m_randSize;
+            /// Integration method names - only one method now but may be more added later
             enum IntegrationMethod
             {
                mcIntegration = 0
             };
             IntegrationMethod m_integrationMethod;
+            // random number generator
+            enum RandomMethod
+            {
+               sobol = 0,
+               mTwister = 1
+            };
+            RandomMethod m_random;
+            // GSL Sobol random number state information
+            gsl_qrng *m_qRvec;
             int m_event;
         };
 

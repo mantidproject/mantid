@@ -111,7 +111,7 @@ public:
     fn->initialize();
     fn->setCentre(11.2);
     fn->setHeight(100.7);
-    fn->setWidth(2.2);
+    fn->setFwhm(2.2);
 
     fnWithBk.addFunction(fn);
     fnWithBk.addFunction(bk);
@@ -141,7 +141,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
     TS_ASSERT_DELTA( pk->height(), 100.6900 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.1994 ,0.0001);
-    TS_ASSERT_DELTA( pk->width(), 2.1988 ,0.0001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.1988 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0000 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0007 ,0.0001);
 
@@ -174,7 +174,7 @@ public:
     fn.initialize();
     fn.setCentre(11.2);
     fn.setHeight(100.7);
-    fn.setWidth(2.2);
+    fn.setFwhm(2.2);
 
     // add constraint to function
     BoundaryConstraint* bc = new BoundaryConstraint(&fn,"PeakCentre",11.3, 12.0);
@@ -207,7 +207,7 @@ public:
 
     TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->width(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.1999 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -248,7 +248,7 @@ public:
     fn->initialize();
     fn->setCentre(11.2);
     fn->setHeight(100.7);
-    fn->setWidth(2.2);
+    fn->setFwhm(2.2);
 
     // add constraint to function
     BoundaryConstraint* bc = new BoundaryConstraint(fn,"PeakCentre",11.3, 12.0);
@@ -282,7 +282,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
     TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->width(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.1999 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 

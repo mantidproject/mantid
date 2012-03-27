@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+Gathers workspaces from all processors of MPI run.  Add or append workspaces to processor 0.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,6 +19,7 @@
 
 namespace mpi = boost::mpi;
 
+
 namespace Mantid
 {
 namespace MPIAlgorithms
@@ -20,6 +28,42 @@ namespace MPIAlgorithms
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+
+// Anonymous namespace for locally-used functors
+namespace {
+  /// Sum for boostmpi MantidVec
+  struct vplus : public std::binary_function<MantidVec, MantidVec, MantidVec>
+  {       // functor for operator+
+    MantidVec operator()(const MantidVec& _Left, const MantidVec& _Right) const
+    {       // apply operator+ to operands
+      MantidVec v(_Left.size());
+      std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), std::plus<double>());
+      return (v);
+    }
+  };
+
+  /// Functor used for computing the sum of the square values of a vector
+  template <class T> struct SumGaussError: public std::binary_function<T,T,T>
+  {
+    SumGaussError(){}
+    /// Sums the arguments in quadrature
+    inline T operator()(const T& l, const T& r) const
+    {
+      return std::sqrt(l*l+r*r);
+    }
+  };
+
+  /// Sum for error for boostmpi MantidVec
+  struct eplus : public std::binary_function<MantidVec, MantidVec, MantidVec>
+  {       // functor for operator+
+    MantidVec operator()(const MantidVec& _Left, const MantidVec& _Right) const
+    {       // apply operator+ to operands
+      MantidVec v(_Left.size());
+      std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), SumGaussError<double>());
+      return (v);
+    }
+  };
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GatherWorkspaces)
@@ -40,8 +84,8 @@ void GatherWorkspaces::init()
   //propOptions.push_back("Replace");
   propOptions.push_back("Append");
   declareProperty("AccumulationMethod", "Append", boost::make_shared<StringListValidator>(propOptions),
-        "Method to use for accumulating each chunk of live data.\n"
-        " - Add: the processed chunk will be summed to the previous outpu (default).\n"
+        "Method to use for accumulating each chunk from mpi processorss.\n"
+        " - Add: the processed chunk will be summed to the previous output (default).\n"
         //" - Replace: the processed chunk will replace the previous output.\n"
         " - Append: the spectra of the chunk will be appended to the output workspace, increasing its size.");
 
@@ -89,7 +133,7 @@ void GatherWorkspaces::exec()
   std::string accum = this->getPropertyValue("AccumulationMethod");
   // Get the total number of spectra in the combined inputs
   totalSpec = inputWorkspace->getNumberHistograms();
-  size_t sumSpec = totalSpec;
+  sumSpec = totalSpec;
   if (accum == "Append")
   {  
     reduce(included, totalSpec, sumSpec, std::plus<std::size_t>(), 0);
@@ -194,7 +238,7 @@ void GatherWorkspaces::execEvent()
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
     outputWorkspace =
-    boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", totalSpec,numBins+hist,numBins));
+    boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", sumSpec,numBins+hist,numBins));
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(eventW, outputWorkspace, true);
     setProperty("OutputWorkspace",outputWorkspace);

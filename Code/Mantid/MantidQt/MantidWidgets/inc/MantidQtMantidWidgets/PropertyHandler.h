@@ -142,14 +142,14 @@ public:
 
   void setHeight(const double& h);
   void setCentre(const double& c);
-  void setWidth(const double& w);
+  void setFwhm(const double& w);
   void setBase(const double& b){m_base = b;}
   void calcBase();//< caclulate baseline from workspace data
   void calcBaseAll();//< calc baseline for all peaks in the function
 
   double height()const;
   double centre()const;
-  double width()const;
+  double fwhm()const;
   double base()const{return m_base;}
 
   void addTie(const QString& tieStr);

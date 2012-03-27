@@ -170,10 +170,6 @@ void MantidMatrixCurve::loadData()
   // This should only be called for waterfall plots
   // Calculate the offsets...
   computeWaterfallOffsets();
-  MantidQwtMatrixWorkspaceData * data = mantidData();
-  // ...and apply them
-  data->applyOffsets(d_x_offset,d_y_offset);
-  invalidateBoundingRect();
 }
 
 void MantidMatrixCurve::setData(const QwtData &data)
@@ -201,6 +197,8 @@ void MantidMatrixCurve::draw(QPainter *p,
     {
       throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
     }
+    p->translate(d_x_offset,-d_y_offset); // For waterfall plots (will be zero otherwise)
+                                          // Don't really know why you'd want errors on a waterfall plot, but just in case...
     doDraw(p,xMap,yMap,rect,d);
   }
 }

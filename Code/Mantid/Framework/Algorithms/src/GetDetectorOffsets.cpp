@@ -242,7 +242,7 @@ namespace Mantid
       peak->setHeight(peakHeight);
       peak->setCentre(peakLoc);
       const double sigma(10.0);
-      peak->setWidth(2.0*std::sqrt(2.0*std::log(2.0))*sigma);
+      peak->setFwhm(2.0*std::sqrt(2.0*std::log(2.0))*sigma);
 
       CompositeFunctionMW* fitFunc = new CompositeFunctionMW(); //Takes ownership of the functions
       fitFunc->addFunction(background);

@@ -206,7 +206,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     runDetails = mtd[wsName].getRun()
     timeArray = runDetails.getLogData("proton_charge").times
     # There should never be a time increment in the proton charge larger than say "two weeks"
-    # On SANS2D is currently run at 10 frames per second other possibly this may be increated to 5Hz
+    # SANS2D currently is run at 10 frames per second. This may be increated to 5Hz
     # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
     # but hopefully not longer than two weeks!
     for i in range(len(timeArray)-1):
