@@ -61,7 +61,7 @@ namespace DataHandling
    */
   void SaveIsawDetCal::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "An input workspace.");
 
     std::vector<std::string> exts;
     exts.push_back(".DetCal");
@@ -78,7 +78,10 @@ namespace DataHandling
   void SaveIsawDetCal::exec()
   {
     std::string filename = getPropertyValue("Filename");
-    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+   // MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+
+    Workspace_sptr ws1 = getProperty("InputWorkspace");
+    ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
     double T0= getProperty("TimeOffset");
     std::ofstream out;

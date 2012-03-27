@@ -117,6 +117,7 @@ namespace DataHandling
     declareProperty(new API::FileProperty("Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"), 
                     "The input filename of the second ISAW DetCal file (West banks for SNAP) ");
 
+    declareProperty( "TimeOffset",0.0,"Time Offset",Direction::Output);
   }
 
 
@@ -207,6 +208,7 @@ namespace DataHandling
       {
         double mL1, mT0;
         std::stringstream(line) >> count >> mL1 >> mT0;
+        setProperty("TimeOffset", mT0);
         // Convert from cm to m
         center(0.0, 0.0, -0.01 * mL1,"moderator", inname);
         //mT0 and time of flight are both in microsec

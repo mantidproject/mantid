@@ -349,7 +349,7 @@ namespace Mantid
         throw logic_error("Cannot clone instrument");
       }
       std::vector<std::string> bankNames;
-      boost::split(bankNames, BankNames, boost::is_any_of(","));
+      boost::split(bankNames, BankNames, boost::is_any_of("/"));
 
       //Set new settings in the instrument
       vector<string>::iterator it;
@@ -636,11 +636,11 @@ namespace Mantid
       g_log.debug() << "      chi Squared=" << chiSq << std::endl;
 
       //Get values for test program. TODO eliminate
-      g_log.debug() << "  out[even]=";
-      for (size_t i = 0; i < min<size_t> (nData, 30); i++)
-        g_log.debug() << out[i] << "  ";
+     // g_log.debug() << "  out[even]=";
+   //   for (size_t i = 0; i < min<size_t> (nData, 30); i++)
+    //    g_log.debug() << out[i] << "  ";
 
-      g_log.debug() << std::endl;
+    //  g_log.debug() << std::endl;
 
     }
 
