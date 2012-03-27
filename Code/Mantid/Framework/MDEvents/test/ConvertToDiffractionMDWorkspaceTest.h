@@ -169,8 +169,7 @@ public:
     do_test_MINITOPAZ(TOF, 2);
   }
 
-  /// FIXME: this fails on Ubuntu, sometimes?
-  void xtest_MINITOPAZ_OneEventPerBin()
+  void test_MINITOPAZ_OneEventPerBin()
   {
     do_test_MINITOPAZ(TOF, 1, true);
   }

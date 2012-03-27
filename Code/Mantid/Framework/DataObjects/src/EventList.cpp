@@ -160,8 +160,10 @@ namespace DataObjects
 
     // Get the input histogram
     const MantidVec & X = inSpec->readX();
-    const MantidVec & Y = inSpec->readY();
-    const MantidVec & E = inSpec->readE();
+    // To be more thread-safe, we are getting a COPY of the vectors.
+    // This is probably because the MRU can drop off, deleting the vector while we are using it.
+    MantidVec Y = inSpec->readY();
+    MantidVec E = inSpec->readE();
     if (Y.size()+1 != X.size())
       throw std::runtime_error("Expected a histogram (X vector should be 1 longer than the Y vector)");
 
