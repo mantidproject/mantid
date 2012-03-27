@@ -4,6 +4,7 @@
 #include "MantidMDAlgorithms/RunParam.h"
 #include "MantidAPI/IMDWorkspace.h"
 
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
@@ -36,7 +37,7 @@ namespace Mantid
 
         m_ei(ei), m_psi(psi), m_elo(elo),m_ehi(ehi),
         m_de(de), m_x0(x0), m_xa(xa), m_x1(x1),
-        m_wa(wa), m_ha(ha), m_s1(s1), m_s2(s2),
+        m_s1(s1), m_s2(s2),
         m_s3(s3), m_s4(s4), m_s5(s5), m_thetam(thetam),
         m_modModel(modModel),
         m_tjit(tjit),
@@ -48,13 +49,19 @@ namespace Mantid
         m_dpsi(dpsi), m_xh(xh), m_xk(xk),
         m_xl(xl), m_yh(yh), m_yk(yk),
         m_yl(yl), m_sx(sx), m_sy(sy),
-        m_sz(sz), m_isam(isam), m_temp(temp),
-        m_eta(eta)
+        m_sz(sz), m_isam(isam), m_temp(temp)
     {
+      setAa(aa);
+      setBb(bb);
+      setCc(cc);
       setHz(hz);
       setPslit(pslit);
       setRadius(radius);
       setRho(rho);
+      setWa(wa);
+      setHa(ha);
+      setEta(eta);
+      setTauChopperSignal();
     };
 
     RunParam::~RunParam()
@@ -130,9 +137,13 @@ namespace Mantid
     void RunParam::setX1(const double val)
     {m_x1=val;}
     void RunParam::setWa(const double val)
-    {m_wa=val;}
+    {
+      m_wa=val*mmTom; // mm to metres
+    }
     void RunParam::setHa(const double val)
-    {m_ha=val;}
+    {
+      m_ha=val*mmTom; // mm to metres
+    }
     void RunParam::setS1(const double val)
     {m_s1=val; m_moderatorChange=true;}
     void RunParam::setS2(const double val)
@@ -149,18 +160,18 @@ namespace Mantid
     {m_modModel=val; m_moderatorChange=true;}
     /// set pslit of chopper - input mm, internel m
     void RunParam::setPslit(const double val)
-    {m_pslit=val*mmTom;}
+    {m_pslit=val*mmTom; }
     /// set radius of curvature of chopper - input mm, internel m
     void RunParam::setRadius(const double val)
-    {m_radius=val*mmTom;}
+    {m_radius=val*mmTom;m_chopChange=true;}
     /// set rho of chopper - input mm, internel m
     void RunParam::setRho(const double val)
-    {m_rho=val*mmTom;}
+    {m_rho=val*mmTom;m_chopChange=true;}
     /// Set frequency of chopper, internally use angular velocity
     void RunParam::setHz(const double val)
-    {m_hz=val; m_angVel=val*2.*M_PI;}
+    {m_hz=val; m_angVel=val*2.*M_PI;m_chopChange=true;}
     void RunParam::setTjit(const double val)
-    {m_tjit=val;}
+    {m_tjit=val;m_chopChange=true;}
     void RunParam::setAs(const double val)
     {m_as=val;}
     void RunParam::setBs(const double val)
@@ -168,11 +179,11 @@ namespace Mantid
     void RunParam::setCs(const double val)
     {m_cs=val;}
     void RunParam::setAa(const double val)
-    {m_aa=val;}
+    {m_aa=val*M_PI/180.;}
     void RunParam::setBb(const double val)
-    {m_bb=val;}
+    {m_bb=val*M_PI/180.;}
     void RunParam::setCc(const double val)
-    {m_cc=val;}
+    {m_cc=val*M_PI/180.;}
     void RunParam::setUh(const double val)
     {m_uh=val;}
     void RunParam::setUk(const double val)
@@ -216,15 +227,71 @@ namespace Mantid
     void RunParam::setTemp(const double val)
     {m_temp=val;}
     void RunParam::setEta(const double val)
-    {m_eta=val;}
-
-    // Aperture function
-    void RunParam::getAperturePoint(double & pW, double & pH, const double ran1, const double ran2) const
     {
+      m_eta=val;
+      m_eta_sig = m_eta*(M_PI/180.)/(sqrt(log(256.0))); // Degrees FWHH -> std dev in radians
+    }
+    void RunParam::setRunLatticeMatrices( const boost::shared_ptr<Mantid::Geometry::OrientedLattice> lattice)
+    {
+      m_as=lattice->a1();
+      m_bs=lattice->a2();
+      m_cs=lattice->a3();
+      m_aa=lattice->alpha1();
+      m_bb=lattice->alpha2();
+      m_cc=lattice->alpha3();
+    }
+
+    void RunParam::setTransforms()
+    {
+      // determine the transformation matrices for this run:
+      // m_sampleLab - transform from sample coords to lab coords
+      // m_uBinv     - transform from scattering plane to r.l.u.
+      // yet to implement
+    }
+
+    // Set Tau for chopper according to model
+    void RunParam::setTauChopperSignal()
+    {
+      m_tauChopperSignal = sqrt( tChopVariance() );
+      m_tauChopperEffective = sqrt(6.)*m_tauChopperSignal; // FWHH of triangle with same variance as true distribution
+    }
+
+    double RunParam::getTauChopperSignal() const
+    {
+      return(m_tauChopperSignal);
+    }
+
+    // Aperture - select random point, assumes rectangle
+    void RunParam::getAperturePoint( const double ran1, const double ran2, double & pW, double & pH) const
+    {
+      // default to rectangular shape
       pW = m_wa * (ran1 - 0.5);
       pH = m_ha * (ran2 - 0.5);
     }
 
+    // select random point within sample, only cuboid model at present
+    void RunParam::getSamplePoint(const double ranvar1, const double ranvar2, const double ranvar3, double & px, double & py, double & pz) const
+    {
+      if(m_isam == 1 )
+      {
+        // default shape is block
+        px = m_sx * (ranvar1-0.5) ;
+        py = m_sy * (ranvar2-0.5) ;
+        pz = m_sz * (ranvar3-0.5) ;
+      }
+      else
+      {
+        px = 0.; py = 0.; pz = 0. ;
+      }
+    }
+
+    // get Mosaic values of crystal assuming 2D Gaussian distribution
+    void RunParam::getEta23( const double ranvar1, const double ranvar2, double & eta2, double & eta3) const
+    {
+       gasdev2d(ranvar1, ranvar2, eta2, eta3);
+       eta2 = m_eta_sig * eta2;
+       eta3 = m_eta_sig * eta3;
+    }
     /*
      * Sample the the chopper time distribution
      */
@@ -233,7 +300,7 @@ namespace Mantid
       return ( m_dtChopEff * tridev(ranvar) );
     }
     /*
-     *
+     * Get a value for the chopper jitter assuming a triangluar distribution
      */
     double RunParam::chopperJitter(const double ranvar) const
     {
@@ -241,13 +308,27 @@ namespace Mantid
     }
 
     /**
-    * tridev function from tobyfit
+    * tridev function from tobyfit - map a uniform random variable [0:1] to a triangular distribution [-1:1]
+    * with peak at zero.
     */
     double RunParam::tridev(const double a) const
     {
         return( (a>0.5)? (1.0-sqrt(fabs(1.0-2.0*fabs(a-0.5)))):( -1.+sqrt( fabs(1.0-2.0*fabs(a-0.5) ) ) ) );
     }
+    /**
+    * gausdev function from tobyfit - take two uniform random values in [0:1] and map to two Gaussian distributed
+    * values with mean zero and variance one.
+    */
+    void RunParam::gasdev2d(const double ran1, const double ran2, double & gaus1, double & gaus2) const
+    {
+         const double fac=sqrt(-2.*log(std::max(ran1,1e-20)));
+         gaus1=fac*cos(2.*M_PI*ran2);
+         gaus2=fac*sin(2.*M_PI*ran2);
+    }
 
+    /*
+     * Use tchop to estimate chopper time variance
+     */
     double RunParam::tChopVariance() const
     {
       return( tChop(m_pslit, m_radius, m_rho, m_angVel, m_ei));
@@ -333,6 +414,49 @@ namespace Mantid
     // Moderator related functions
 
     /*
+    */
+    double RunParam::getTauModeratorSignal() const
+    {
+       return( 1.e-6*sqrt(3.*m_s1*m_s1+m_s3*(2.-m_s3)*m_s2*m_s2) );
+    }
+
+    /*
+    */
+    double RunParam::getTauModeratorMean() const
+    {
+       return( 1.e-6*(3.*m_s1 + m_s3*m_s2) );
+    }
+
+    /*
+    */
+    double RunParam::getTauModeratorAverageUs() const
+    {
+       return( 3.*m_s1 + m_s3*m_s2 );
+    }
+
+    /*
+     * Simple energy resolution model only based on moderator and chopper
+     * @param eps energy tramsfer (meV)
+     * @param x2 sample - detector distance (m)
+     * @return std deviation of energy resolution (meV)
+     */
+    double RunParam::energyResolutionModChop(const double eps, const double x2 ) const
+    {
+       if(m_ei<0. || m_ei<eps )
+         throw std::runtime_error("Energy range problem in energyResolutionModChop");
+       const double f = 1./2.0721418;
+       const double wi = sqrt(m_ei*f);
+       const double wf = sqrt((m_ei-eps)*f);
+       const double veli = 629.62237*wi;
+       const double tim = m_x0/veli;
+       const double wf2wi3 = (wf/wi)*(wf/wi)*(wf/wi);
+       const double tmp1 = (getTauModeratorSignal()/tim)*(1.+m_x1/x2*wf2wi3);
+       const double tmp2 = (getTauChopperSignal()/tim)*(1.+(m_x0+m_x1)/x2*wf2wi3);
+       const double tmp = tmp1*tmp1+tmp2*tmp2;
+       return ( 2.*m_ei*sqrt(tmp) );
+    }
+
+    /*
      * This takes a random variable [0,1] and returns a value for the departure time from the moderator surface.
      * The Model used depends on internal settings, though only one currently implemented.
      */
@@ -349,7 +473,7 @@ namespace Mantid
     }
 
     /*
-     * This should take a random variable [0:1] and use a tabe lookup to return the function value
+     * This should take a random variable [0:1] and use a table lookup to return the function value
      * At present it just calls the function which is way too expensive. TODO add lookup table
      */
     double RunParam::moderatorTimeLookUp( const double randomVar) const
