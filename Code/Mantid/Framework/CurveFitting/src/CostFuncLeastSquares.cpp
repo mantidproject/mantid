@@ -5,6 +5,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/FunctionValues.h"
 
 namespace
 {
@@ -30,12 +31,18 @@ double CostFuncLeastSquares::val() const
 
   auto compDomain = boost::dynamic_pointer_cast<API::CompositeDomain>(m_domain);
 
+  auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
+  if (!simpleValues)
+  {
+    throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+  }
+
   //if (compDomain)
   //{
   //}
   //else
   {
-    addVal(m_domain,m_values);
+    addVal(m_domain,simpleValues);
   }
 
   // add penalty
@@ -55,14 +62,14 @@ double CostFuncLeastSquares::val() const
 
 void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)const
 {
-  m_function->function(*m_domain,*m_values);
+  m_function->function(*m_domain,*values);
   size_t ny = m_values->size();
 
   double retVal = 0.0;
 
   for (size_t i = 0; i < ny; i++)
   {
-    double val = ( m_values->getCalculated(i) - m_values->getFitData(i) ) * m_values->getFitWeight(i);
+    double val = ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
     retVal += val * val;
   }
   
@@ -141,12 +148,18 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 
   auto compDomain = boost::dynamic_pointer_cast<API::CompositeDomain>(m_domain);
 
+  auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
+  if (!simpleValues)
+  {
+    throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+  }
+
   //if (compDomain)
   //{
   //}
   //else
   {
-    addValDerivHessian(m_domain,m_values,evalFunction,evalDeriv,evalHessian);
+    addValDerivHessian(m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
   }
 
   // Add constraints penaly
@@ -240,9 +253,9 @@ void CostFuncLeastSquares::addValDerivHessian(
     double d = m_der.get(iActiveP);
     for(size_t i = 0; i < ny; ++i)
     {
-      double calc = m_values->getCalculated(i);
-      double obs = m_values->getFitData(i);
-      double w = m_values->getFitWeight(i);
+      double calc = values->getCalculated(i);
+      double obs = values->getFitData(i);
+      double w = values->getFitWeight(i);
       double y = ( calc - obs ) * w;
       d += y * jacobian.get(i,ip) * w;
       if (iActiveP == 0 && evalFunction)
@@ -275,7 +288,7 @@ void CostFuncLeastSquares::addValDerivHessian(
       double d = m_hessian.get(i1,i2);
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
-        double w = m_values->getFitWeight(k);
+        double w = values->getFitWeight(k);
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
       m_hessian.set(i1,i2,d);

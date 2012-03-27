@@ -38,8 +38,12 @@ namespace CurveFitting
     }
     p->function->applyTies();
 
-    API::FunctionValues& values = *p->costFunction->getValues();
-    p->function->function (*p->costFunction->getDomain(),values);
+    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(p->costFunction->getValues());
+    if (!values)
+    {
+      throw std::invalid_argument("FunctionValues expected");
+    }
+    p->function->function (*p->costFunction->getDomain(),*values);
 
     // Add penalty
     double penalty = 0.;
@@ -52,16 +56,16 @@ namespace CurveFitting
       }
     }
 
-    size_t n = values.size() - 1;
+    size_t n = values->size() - 1;
     // add penalty to first and last point and every 10th point in between
     if ( penalty != 0.0 )
     {
-      values.addToCalculated(0,penalty);
-      values.addToCalculated(n,penalty);
+      values->addToCalculated(0,penalty);
+      values->addToCalculated(n,penalty);
 
       for (size_t i = 9; i < n; i+=10)
       {
-        values.addToCalculated(i,penalty);
+        values->addToCalculated(i,penalty);
       }
     }
 
@@ -71,7 +75,7 @@ namespace CurveFitting
     for (size_t i = 0; i<p->n; i++)
     {
       f->data[i] = 
-      ( values.getCalculated(i) - values.getFitData(i) ) * values.getFitWeight(i);
+      ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
       //std::cerr << values.getCalculated(i) << ' ' << values.getFitData(i) << ' ' << values.getFitWeight(i) << std::endl;
     }
 
@@ -138,11 +142,15 @@ namespace CurveFitting
 
     // functionDeriv() return derivatives of calculated data values. Need to convert this values into
     // derivatives of calculated-observed devided by error values used by GSL
-    API::FunctionValues& values = *p->costFunction->getValues();
+    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(p->costFunction->getValues());
+    if (!values)
+    {
+      throw std::invalid_argument("FunctionValues expected");
+    }
     for (size_t iY = 0; iY < p->n; iY++) 
       for (size_t iP = 0; iP < p->p; iP++) 
       {
-        J->data[iY*p->p + iP] *= values.getFitWeight(iY);
+        J->data[iY*p->p + iP] *= values->getFitWeight(iY);
         //std::cerr << iY << ' ' << iP << ' ' << J->data[iY*p->p + iP] << std::endl;
       }
 

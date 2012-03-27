@@ -475,6 +475,23 @@ protected:
 
 private:
   /**
+   * Set the value of the property via a reference to another property.  
+   * If the value is unacceptable the value is not changed but a string is returned.
+   * The value is only accepted if the other property has the same type as this
+   * @param right :: A reference to a property.
+   */
+  virtual std::string setValue( const Property& right )
+  {
+    auto prop = dynamic_cast<const PropertyWithValue<TYPE>*>(&right);
+    if ( !prop )
+    {
+      return "Could not set value: properties have different type.";
+    }
+    m_value = prop->m_value;
+    return "";
+  }
+
+  /**
    * Helper function for setValue(DataItem_sptr). Uses boost type traits to ensure
    * it is only used if U is a type that is convertible to boost::shared_ptr<DataItem>
    * @param value :: A object of type convertible to boost::shared_ptr<DataItem>

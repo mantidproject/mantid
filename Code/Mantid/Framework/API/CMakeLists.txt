@@ -150,6 +150,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunctionMW.h
+	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h

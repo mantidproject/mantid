@@ -39,6 +39,26 @@ namespace API
     m_calculated.resize(domain.size());
   }
 
+  /**
+   * Expand to a new size. Preserve old values. Do not contract.
+   * @param n :: A new size, must be greater than the current size.
+   */
+  void FunctionValues::expand(size_t n)
+  {
+    if (n < size())
+    {
+      throw std::invalid_argument("Cannot make FunctionValues smaller");
+    }
+    m_calculated.resize(n);
+    if (!m_data.empty())
+    {
+      m_data.resize(n);
+    }
+    if (!m_weights.empty())
+    {
+      m_weights.resize(n);
+    }
+  }
 
   /// set all calculated values to same number
   void FunctionValues::setCalculated(double value)
@@ -59,33 +79,6 @@ namespace API
     throw std::out_of_range("FunctionValue index out of range.");
   }
 
-  /** Add other calculated values.
-   *  @param values :: Some other values to be added to this calculated values.
-   */
-  FunctionValues& FunctionValues::operator+=(const FunctionValues& values)
-  {
-    if (values.size() != size())
-    {
-      throw std::runtime_error("Cannot add function values: different sizes.");
-    }
-    std::transform(m_calculated.begin(),m_calculated.end(),values.m_calculated.begin(),m_calculated.begin(),
-      std::plus<double>());
-    return *this;
-  }
-
-  /** Multiply this calculated values by others.
-   *  @param values :: Some other values to be added to this calculated values.
-   */
-  FunctionValues& FunctionValues::operator*=(const FunctionValues& values)
-  {
-    if (values.size() != size())
-    {
-      throw std::runtime_error("Cannot multiply function values: different sizes.");
-    }
-    std::transform(m_calculated.begin(),m_calculated.end(),values.m_calculated.begin(),m_calculated.begin(),
-      std::multiplies<double>());
-    return *this;
-  }
 
   /// Set all calculated values to zero
   void FunctionValues::zeroCalculated()
@@ -94,21 +87,26 @@ namespace API
   }
 
   /**
-   * Add values starting at index i.
+   * Copy calculated values to a buffer
+   * @param to :: Pointer to the buffer
    */
-  void FunctionValues::addToCalculated(size_t i, const FunctionValues& values)
+  void FunctionValues::copyTo(double* to) const
   {
-    if (i + values.size() > size())
-    {
-      throw std::runtime_error("Cannot add function values: different sizes.");
-    }
-    std::transform(
-      m_calculated.begin() + i,
-      m_calculated.begin() + i + values.size(),
-      values.m_calculated.begin(),
-      m_calculated.begin() + i,
-      std::plus<double>()
-    );
+    std::copy(m_calculated.begin(),m_calculated.end(),to);
+  }
+
+  /// Add calculated values to values in a buffer and save result to the buffer
+  /// @param to :: Pointer to the buffer, it must be large enough
+  void FunctionValues::add(double* to) const
+  {
+    std::transform(m_calculated.begin(),m_calculated.end(),to,to,std::plus<double>());
+  }
+
+  /// Multiply calculated values by values in a buffer and save result to the buffer
+  /// @param to :: Pointer to the buffer, it must be large enough
+  void FunctionValues::multiply(double* to) const
+  {
+    std::transform(m_calculated.begin(),m_calculated.end(),to,to,std::multiplies<double>());
   }
 
   /**

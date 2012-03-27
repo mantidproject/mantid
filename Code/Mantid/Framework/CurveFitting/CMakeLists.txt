@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
+	src/MultiDomainCreator.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunction.cpp
@@ -69,6 +70,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
+	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 #	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
@@ -109,6 +111,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MuonFInteraction.h
+	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunction.h

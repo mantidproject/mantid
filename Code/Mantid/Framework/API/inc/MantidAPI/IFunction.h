@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"

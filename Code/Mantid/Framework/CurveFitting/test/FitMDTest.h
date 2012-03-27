@@ -150,8 +150,8 @@ public:
     Fit fit;
     fit.initialize();
 
-    fit.setProperty("InputWorkspace",ws2);
     fit.setProperty("Function",fun);
+    fit.setProperty("InputWorkspace",ws2);
     fit.setProperty("CreateOutput",true);
     fit.setPropertyValue("Minimizer","Levenberg-MarquardtMD");
 

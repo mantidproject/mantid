@@ -9,6 +9,7 @@
 #include "MantidCurveFitting/ExpDecay.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <sstream>
 
@@ -133,7 +134,9 @@ public:
     API::AnalysisDataService::Instance().clear();
     //--------------------------------------------------//
 
-    Fit fit1;
+    //Fit fit1;
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm& fit1 = *alg;
     fit1.initialize();
 
     fit1.setProperty("Function",fun);

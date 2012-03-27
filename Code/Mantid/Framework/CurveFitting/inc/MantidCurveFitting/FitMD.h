@@ -13,7 +13,7 @@ namespace Mantid
   {
     class FunctionDomain;
     class FunctionDomainMD;
-    class FunctionValues;
+    class IFunctionValues;
     class IMDWorkspace;
   }
 
@@ -50,7 +50,10 @@ namespace Mantid
     public:
 
       /// Create a domain from the input workspace
-      virtual void createDomain(boost::shared_ptr<API::FunctionDomain>&, boost::shared_ptr<API::FunctionValues>&);
+      virtual void createDomain(
+        const std::string& workspacePropetyName,
+        boost::shared_ptr<API::FunctionDomain>&, 
+        boost::shared_ptr<API::IFunctionValues>&, size_t i0);
     protected:
       /// Constructor
       FitMD(API::Algorithm* fit):IDomainCreator(fit){}

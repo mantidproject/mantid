@@ -59,7 +59,7 @@ size_t CostFuncFitting::nParams()const
  *  also contains the data to fit to and the fitting weights (reciprocal errors).
  */
 void CostFuncFitting::setFittingFunction(API::IFunction_sptr function, 
-  API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)
+  API::FunctionDomain_sptr domain, API::IFunctionValues_sptr values)
 {
   if (domain->size() != values->size())
   {

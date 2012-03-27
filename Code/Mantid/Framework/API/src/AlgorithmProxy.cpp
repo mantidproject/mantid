@@ -198,6 +198,18 @@ namespace Mantid
       m_alg.reset();
     }
 
+    /**
+     * Do something after a property was set
+     * @param name :: The name of the property
+     */
+    void AlgorithmProxy::afterPropertySet(const std::string& name)
+    {
+      createConcreteAlg(true);
+      m_alg->getPointerToProperty(name)->setValue(*this->getPointerToProperty(name));
+      m_alg->afterPropertySet(name);
+      copyPropertiesFrom(*m_alg);
+      m_alg.reset();
+    }
 
     //----------------------------------------------------------------------
     // Private methods

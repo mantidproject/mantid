@@ -27,10 +27,11 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/IFunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/MultiDomainFunction.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
@@ -64,19 +65,33 @@ namespace CurveFitting
   {
     if (propName == "Function")
     {
-      m_isFunctionSet = true;
+      setFunction();
     }
-    if (propName == "InputWorkspace")
+    if (propName.size() >= 14 && propName.substr(0,14) == "InputWorkspace")
     {
-      m_isWorkspaceSet = true;
+      if (getPointerToProperty("Function")->isDefault())
+      {
+        throw std::invalid_argument("Function must be set before InputWorkspace");
+      }
+      addWorkspace(propName);
     }
+  }
 
+  void Fit::setFunction()
+  {
+    // get the function
+    m_function = getProperty("Function");
+    auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
+    if (mdf)
+    {
+    }
+  }
+
+  void Fit::addWorkspace(const std::string& workspaceNameProperty, bool addProperties)
+  {
     // Create the creator
-    if (!m_domainCreator && m_isFunctionSet && m_isWorkspaceSet)
+    if (!m_domainCreator)
     {
-      // get the function
-      m_function = getProperty("Function");
-
       // get the workspace 
       API::Workspace_const_sptr ws = getProperty("InputWorkspace");
       //m_function->setWorkspace(ws);
@@ -94,20 +109,17 @@ namespace CurveFitting
       {// don't know what to do with this workspace
         throw std::invalid_argument("Unsupported workspace type" + ws->id());
       }
-      m_domainCreator->declareDatasetProperties();
+      m_domainCreator->declareDatasetProperties("",addProperties);
     }
-
   }
 
   /** Initialisation method
   */
   void Fit::init()
   {
-    declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Kernel::Direction::Input), "Name of the input Workspace");
-
-    //declareDatasetProperties();
-
     declareProperty(new API::FunctionProperty("Function"),"Parameters defining the fitting function and its initial values");
+
+    declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Kernel::Direction::Input), "Name of the input Workspace");
 
     auto mustBePositive = new Kernel::BoundedValidator<int>();
     mustBePositive->setLower(0);
@@ -152,20 +164,26 @@ namespace CurveFitting
   */
   void Fit::exec()
   {
-
-    // Try to retrieve optional properties
-    const int maxIterations = getProperty("MaxIterations");
+    // this is to make it work with AlgorithmProxy
+    if (!m_domainCreator)
+    {
+      setFunction();
+      addWorkspace("InputWorkspace",false);
+    }
 
     // do something with the function which may depend on workspace
     m_domainCreator->initFunction();
 
     API::FunctionDomain_sptr domain;
-    API::FunctionValues_sptr values;
-    m_domainCreator->createDomain(domain,values);
+    API::IFunctionValues_sptr values;
+    m_domainCreator->createDomain("InputWorkspace",domain,values);
 
     // get the minimizer
     std::string minimizerName = getPropertyValue("Minimizer");
     IFuncMinimizer_sptr minimizer = FuncMinimizerFactory::Instance().create(minimizerName);
+
+    // Try to retrieve optional properties
+    const int maxIterations = getProperty("MaxIterations");
 
     // get the cost function which must be a CostFuncFitting
     boost::shared_ptr<CostFuncFitting> costFunc = boost::dynamic_pointer_cast<CostFuncFitting>(

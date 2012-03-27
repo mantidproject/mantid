@@ -401,6 +401,7 @@ public slots:
   void manageMantidWorkspaces();
 
 
+
   //Python related functions
   InstrumentWindow* getInstrumentView(const QString & wsName, int tab = -1);
 

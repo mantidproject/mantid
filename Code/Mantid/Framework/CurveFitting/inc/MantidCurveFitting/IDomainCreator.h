@@ -13,7 +13,7 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
-    class FunctionValues;
+    class IFunctionValues;
     class Workspace;
   }
 
@@ -54,14 +54,23 @@ namespace Mantid
       virtual ~IDomainCreator() {};
 
       /// declare properties that specify the dataset within the workspace to fit to.
-      virtual void declareDatasetProperties() {}
+      /// @param suffix :: A suffix to give to all new properties.
+      /// @param addProp :: If false don't actually declare new properties but do other stuff if needed
+      virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true) {}
       /// Create a domain and values from the input workspace. FunctionValues must be filled with data to fit to.
-      virtual void createDomain(boost::shared_ptr<API::FunctionDomain>&, boost::shared_ptr<API::FunctionValues>&) = 0;
+      /// @param workspacePropetyName :: A name of a workspace property. Domain will be created for this workspace.
+      /// @param domain :: Shared pointer to hold the created domain
+      /// @param values :: Shared pointer to hold the created values with set fitting data and weights
+      virtual void createDomain(
+        const std::string& workspacePropetyName,
+        boost::shared_ptr<API::FunctionDomain>& domain, 
+        boost::shared_ptr<API::IFunctionValues>& values,
+        size_t i0 = 0) = 0;
       /// Create an output workspace filled with data simulated with the fitting function
       virtual void createOutputWorkspace(
         const std::string& baseName,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::FunctionValues> values) {}
+        boost::shared_ptr<API::IFunctionValues> values) {}
       virtual void initFunction();
 
     protected:

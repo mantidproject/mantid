@@ -1756,6 +1756,25 @@ public:
     return out;
   }
 
+private:
+
+  /**
+   * Set the value of the property via a reference to another property.  
+   * If the value is unacceptable the value is not changed but a string is returned.
+   * The value is only accepted if the other property has the same type as this
+   * @param right :: A reference to a property.
+   */
+  virtual std::string setValue( const Property& right )
+  {
+    auto prop = dynamic_cast<const TimeSeriesProperty*>(&right);
+    if ( !prop )
+    {
+      return "Could not set value: properties have different type.";
+    }
+    m_propertySeries = prop->m_propertySeries;
+    m_size = prop->m_size;
+    return "";
+  }
 
   /// Static reference to the logger class
   static Logger& g_log;

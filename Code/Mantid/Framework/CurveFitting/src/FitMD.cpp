@@ -19,7 +19,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomainMD.h"
-#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 
 #include <algorithm>
@@ -30,10 +30,13 @@ namespace CurveFitting
 {
 
   /// Create a domain from the input workspace
-  void FitMD::createDomain(boost::shared_ptr<API::FunctionDomain>& domain, boost::shared_ptr<API::FunctionValues>& values)
+  void FitMD::createDomain(
+    const std::string& workspacePropetyName,
+    boost::shared_ptr<API::FunctionDomain>& domain, 
+    boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
     // get the workspace 
-    API::Workspace_sptr ws = m_fit->getProperty("InputWorkspace");
+    API::Workspace_sptr ws = m_fit->getProperty(workspacePropetyName);
     m_IMDWorkspace = boost::dynamic_pointer_cast<API::IMDWorkspace>(ws);
     if (!m_IMDWorkspace)
     {
@@ -42,7 +45,8 @@ namespace CurveFitting
 
     API::FunctionDomainMD* dmd = new API::FunctionDomainMD(m_IMDWorkspace);
     domain.reset(dmd);
-    values.reset(new API::FunctionValues(*domain));
+    auto values = new API::FunctionValues(*domain);
+    ivalues.reset(values);
 
     auto iter = dmd->getNextIterator();
     size_t i = 0;

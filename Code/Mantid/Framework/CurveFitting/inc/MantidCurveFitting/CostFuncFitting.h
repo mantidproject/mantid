@@ -56,7 +56,7 @@ public:
 
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function, 
-    API::FunctionDomain_sptr domain, API::FunctionValues_sptr values);
+    API::FunctionDomain_sptr domain, API::IFunctionValues_sptr values);
 
   /// Get fitting function.
   virtual API::IFunction_sptr getFittingFunction(){return m_function;}
@@ -70,7 +70,7 @@ public:
   /// Calculate fitting errors
   virtual void calFittingErrors(const GSLMatrix& covar);
   API::FunctionDomain_sptr getDomain() const {return m_domain;}
-  API::FunctionValues_sptr getValues() const {return m_values;}
+  API::IFunctionValues_sptr getValues() const {return m_values;}
 
 protected:
 
@@ -86,7 +86,7 @@ protected:
   
   API::IFunction_sptr m_function;
   API::FunctionDomain_sptr m_domain;
-  API::FunctionValues_sptr m_values;
+  API::IFunctionValues_sptr m_values;
   std::vector<size_t> m_indexMap;
 
   mutable bool m_dirtyVal;

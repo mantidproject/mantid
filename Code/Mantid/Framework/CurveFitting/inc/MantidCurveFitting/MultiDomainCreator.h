@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_FITMW_H_
-#define MANTID_CURVEFITTING_FITMW_H_
+#ifndef MANTID_CURVEFITTING_MULTIDOMAINCREATOR_H_
+#define MANTID_CURVEFITTING_MULTIDOMAINCREATOR_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,14 +8,6 @@
 
 namespace Mantid
 {
-
-  namespace API
-  {
-    class FunctionDomain;
-    class FunctionDomain1D;
-    class IFunctionValues;
-    class MatrixWorkspace;
-  }
 
   namespace CurveFitting
   {
@@ -45,47 +37,29 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FitMW : public IDomainCreator
+    class DLLExport MultiDomainCreator : IDomainCreator
     {
-    public:
-      /// declare properties that specify the dataset within the workspace to fit to.
-      virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);
+      /// A friend that can create instances of this class
+      friend class Fit;
+      /// Constructor
+      MultiDomainCreator(API::Algorithm* fit):IDomainCreator(fit){}
+
       /// Create a domain from the input workspace
       virtual void createDomain(
         const std::string& workspacePropetyName,
         boost::shared_ptr<API::FunctionDomain>& domain, 
-        boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
-      void createOutputWorkspace(
-        const std::string& baseName,
-        boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> values
-        );
-    protected:
-      /// Constructor
-      FitMW(API::Algorithm* fit):IDomainCreator(fit){}
-      /// A friend that can create instances of this class
-      friend class Fit;
+        boost::shared_ptr<API::IFunctionValues>& values, size_t i0);
 
-      /// Store workspace property name
-      std::string m_workspacePropertyName;
-      /// Store workspace index property name
-      std::string m_workspaceIndexPropertyName;
-      /// Store startX property name
-      std::string m_startXPropertyName;
-      /// Store endX property name
-      std::string m_endXPropertyName;
+      void addCreator(const std::string& workspacePropetyName,IDomainCreator* creator);
 
-      /// Pointer to the fitting function
-      API::IFunction_sptr m_function;
-      /// The input MareixWorkspace
-      boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
-      /// The workspace index
-      size_t m_workspaceIndex;
-      size_t m_startIndex;
+      /// Vector of creators.
+      std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
+      /// Workspace property names
+      std::vector<std::string> m_workspacePropertyNames;
     };
 
     
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FITMW_H_*/
+#endif /*MANTID_CURVEFITTING_MULTIDOMAINCREATOR_H_*/

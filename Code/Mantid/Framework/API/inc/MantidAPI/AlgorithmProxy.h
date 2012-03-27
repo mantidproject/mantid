@@ -103,6 +103,8 @@ namespace Mantid
       //@{
       /// Set the property value
       void setPropertyValue(const std::string& name, const std::string &value);
+      /// Do something after a property was set
+      void afterPropertySet(const std::string&);
       //@}
 
       void cancel() const;

@@ -17,7 +17,7 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
-    class FunctionValues;
+    class IFunctionValues;
     class Workspace;
   }
 
@@ -53,7 +53,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Fit() : API::Algorithm(),m_isFunctionSet(false),m_isWorkspaceSet(false) {};
+      Fit() : API::Algorithm(),m_workspaceCount(0) {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
       /// Algorithm's version for identification overriding a virtual method
@@ -70,6 +70,8 @@ namespace Mantid
       /// Override this method to perform a custom action right after a property was set.
       /// The argument is the property name. Default - do nothing.
       virtual void afterPropertySet(const std::string& propName);
+      void setFunction();
+      void addWorkspace(const std::string& workspaceNameProperty, bool addProperties = true);
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;
@@ -78,8 +80,7 @@ namespace Mantid
       /// Pointer to a domain creator
       boost::scoped_ptr<IDomainCreator> m_domainCreator;
       friend class IDomainCreator;
-      bool m_isFunctionSet;
-      bool m_isWorkspaceSet;
+      size_t m_workspaceCount;
 
     };
 
