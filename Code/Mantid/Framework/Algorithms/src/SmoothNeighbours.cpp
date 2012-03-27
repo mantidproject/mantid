@@ -93,6 +93,7 @@ The algorithm will ignore masked detectors if this flag is set.
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IComponent.h"
@@ -585,7 +586,15 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
   MatrixWorkspace_sptr outWS;
   //Make a brand new Workspace2D
+  if (boost::dynamic_pointer_cast<OffsetsWorkspace>(ws))
+  {
+    g_log.information() << "Creating new OffsetsWorkspace\n";
+    outWS = MatrixWorkspace_sptr(new OffsetsWorkspace(ws->getInstrument()));
+  }
+  else
+  {
   outWS = boost::dynamic_pointer_cast<MatrixWorkspace>( API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra, YLength+1, YLength));
+  }
   this->setProperty("OutputWorkspace", outWS);
   //Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
