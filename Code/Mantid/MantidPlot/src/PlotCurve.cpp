@@ -279,23 +279,22 @@ void PlotCurve::computeWaterfallOffsets()
     int index = g->curveIndex(this);
     int curves = g->curves();//Count();
     PlotCurve *c = dynamic_cast<PlotCurve*>(g->curve(0));
+    // Get the minimum value of the first curve in this plot
+    double ymin = c->minYValue();
     if (index > 0 && c){
       double xmin = c->minXValue();
       double dx = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
-      //double dx = index*g->waterfallXOffset()*0.01*g->canvas()->width()/(double)(curves - 1);
       d_x_offset = plot->invTransform(xAxis, plot->transform(xAxis, xmin) + (int)dx) - xmin;
 
-      double ymin = c->minYValue();
       double dy = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);
-      //double dy = index*g->waterfallYOffset()*0.01*g->canvas()->height()/(double)(curves - 1);
       d_y_offset = ymin - plot->invTransform(yAxis(), plot->transform(yAxis(), ymin) + (int)dy);
 
       setZ(-index);
-      setBaseline(d_y_offset);
+      setBaseline(ymin); // Fill down to minimum value of first curve
 
     } else {
       setZ(0);
-      setBaseline(0.0);
+      setBaseline(ymin); // This is for when 'fill under curve' is turn on
     }
     if (g->grid())
       g->grid()->setZ(-g->curves()/*Count()*/ - 1);
