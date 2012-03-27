@@ -1541,15 +1541,15 @@ void MultiLayer::showWaterfallOffsetDialog()
   connect(yOffsetBox, SIGNAL(valueChanged(int)), active_graph, SLOT(setWaterfallYOffset(int)));
   connect(xOffsetBox, SIGNAL(valueChanged(int)), active_graph, SLOT(setWaterfallXOffset(int)));
 
-  QPushButton *applyBtn = new QPushButton(tr("&Apply"));
-  connect(applyBtn, SIGNAL(clicked()), this, SLOT(updateWaterfalls()));
+  //QPushButton *applyBtn = new QPushButton(tr("&Apply"));
+  //connect(applyBtn, SIGNAL(clicked()), this, SLOT(updateWaterfalls()));
 
   QPushButton *closeBtn = new QPushButton(tr("&Close"));
   connect(closeBtn, SIGNAL(clicked()), offsetDialog, SLOT(reject()));
 
   QHBoxLayout *hl2 = new QHBoxLayout();
   hl2->addStretch();
-  hl2->addWidget(applyBtn);
+  //hl2->addWidget(applyBtn);
   hl2->addWidget(closeBtn);
 
   QVBoxLayout *vl = new QVBoxLayout(offsetDialog);
