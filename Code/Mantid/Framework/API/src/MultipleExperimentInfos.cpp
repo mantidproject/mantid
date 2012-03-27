@@ -67,10 +67,13 @@ namespace API
    *
    * @param ei :: shared ptr to the ExperimentInfo class to add
    * @return the runIndex at which it was added
+   * @throw std::runtime_error if you reach the limit of 65536 entries.
    */
   uint16_t MultipleExperimentInfos::addExperimentInfo(ExperimentInfo_sptr ei)
   {
     m_expInfos.push_back(ei);
+    if (m_expInfos.size() >= static_cast<size_t>(std::numeric_limits<uint16_t>::max()))
+      throw std::runtime_error("MDWorkspace: Reached the capacity for the number of ExperimentInfos of 65536.");
     return uint16_t(m_expInfos.size()-1);
   }
 
