@@ -484,7 +484,7 @@ namespace Crystal
         if( !first)
           oss1<<",";
         first = false;
-        oss1<<prefix<<"detWidthScale"<<fixed<<1.0;
+        oss1<<prefix<<"detWidthScale="<<fixed<<1.0;
       }
 
       if(!use_PanelHeight)
@@ -492,15 +492,15 @@ namespace Crystal
         if( !first)
           oss1<<",";
         first = false;
-        oss1<<prefix<<"detHeight="<<fixed<<1.0;
+        oss1<<prefix<<"detHeightScale="<<fixed<<1.0;
       }
 
-      if(!use_PanelPosition)
+    if(!use_PanelPosition)
       {
         if( !first)
           oss1<<",";
         first = false;
-        oss1<<prefix<<"Xoffset="<<0.0<<","<<","<<prefix<<"Yoffset="<<0.0<<","<<","<<prefix<<"Zoffset="<<0.0;
+        oss1<<prefix<<"Xoffset="<<0.0<<","<<prefix<<"Yoffset="<<0.0<<","<<prefix<<"Zoffset="<<0.0;
       }
 
       if(! use_PanelOrientation )
@@ -512,9 +512,6 @@ namespace Crystal
       }
 
       TiesArgument +=oss1.str();
-
-
-
       //--------------- set Constraints Property  -------------------------------
 
       ostringstream oss2 (ostringstream::out);
