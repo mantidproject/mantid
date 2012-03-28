@@ -39,11 +39,11 @@ def DarkCurrent(datafile):
                                                      OutputWorkspace=None,
                                                      ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
 
-def TotalChargeNormalization(normalize_to_beam=True):
-    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToBeam=normalize_to_beam)
+def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
+    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToBeam=normalize_to_beam, BeamSpectrumFile=beam_file)
 
-def MonitorNormalization():
-    TotalChargeNormalization()
+def MonitorNormalization(normalize_to_beam=True, beam_file=''):
+    TotalChargeNormalization(normalize_to_beam=normalize_to_beam, beam_file=beam_file)
       
 def BeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
     raise RuntimeError, "Transmission measurement using the beam stop hole is no longer supported" 
