@@ -42,6 +42,12 @@ namespace DataHandling
     return true; // For the time being at least
   }
 
+  ILiveListener::RunStatus FakeEventDataListener::runStatus()
+  {
+    // Always in a run - could be changed to do something more elaborate if needed for testing
+    return RunStatus::Running;
+  }
+
   void FakeEventDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time for now at least
   {
     // Set up the workspace buffer (probably won't know its dimensions before this point)

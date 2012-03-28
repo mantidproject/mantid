@@ -33,13 +33,19 @@ public:
     TS_ASSERT( listener->buffersEvents() )
     TS_ASSERT( listener->isConnected() )
 
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::RunStatus::None )
+
     TS_ASSERT_THROWS_NOTHING( listener->start(0) );
+
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::RunStatus::Begin )
 
     MatrixWorkspace_const_sptr buffer;
     TS_ASSERT_THROWS_NOTHING( buffer = listener->extractData())
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS( buffer.use_count(), 1 )
     TS_ASSERT_EQUALS( buffer->getNumberHistograms(), 77824 )
+
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::RunStatus::Running )
 
     MatrixWorkspace_const_sptr buffer2;
     // Call extractData again
@@ -49,6 +55,8 @@ public:
     // Check it's a different workspace to last time
     TS_ASSERT_DIFFERS( buffer.get(), buffer2.get() )
     TS_ASSERT_EQUALS( buffer2->getNumberHistograms(), 77824 )
+
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::RunStatus::End )
 
     // Calling it again will throw as it's the end of the file
     TS_ASSERT_THROWS( listener->extractData(), std::runtime_error )

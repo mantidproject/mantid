@@ -39,6 +39,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( fakel->start(0) )
   }
 
+  void testRunStatus()
+  {
+    TS_ASSERT_EQUALS( fakel->runStatus(), ILiveListener::RunStatus::Running )
+  }
+
   void testExtractData()
   {
     using namespace Mantid::DataObjects;

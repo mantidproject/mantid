@@ -49,6 +49,7 @@ namespace Mantid
       boost::shared_ptr<API::MatrixWorkspace> extractData();
 
       bool isConnected();
+      ILiveListener::RunStatus runStatus();
 
     private:
       void generateEvents(Poco::Timer&);

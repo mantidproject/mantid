@@ -51,6 +51,18 @@ namespace DataHandling
     return true; // For the time being at least
   }
 
+  ILiveListener::RunStatus FileEventDataListener::runStatus()
+  {
+    // Say we're outside a run if this is called before start is
+    if ( m_nextChunk == 1 ) return ILiveListener::RunStatus::None;
+    // This means the first chunk is being/has just been loaded
+    else if ( m_nextChunk == 2 ) return ILiveListener::RunStatus::Begin;
+    // This means we've read the whole file
+    else if ( m_chunkload == NULL ) return ILiveListener::RunStatus::End;
+    // Otherwise we're in the run
+    else return ILiveListener::RunStatus::Running;
+  }
+
   void FileEventDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time
   {
     // Kick off loading the first chunk (which will include loading the instrument etc.)

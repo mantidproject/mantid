@@ -55,6 +55,7 @@ namespace Mantid
       boost::shared_ptr<API::MatrixWorkspace> extractData();
 
       bool isConnected();
+      ILiveListener::RunStatus runStatus();
 
     private:
       const std::string m_filename;   ///< The file to read
