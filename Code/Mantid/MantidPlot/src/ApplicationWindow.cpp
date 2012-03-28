@@ -17134,10 +17134,7 @@ void ApplicationWindow::showGraphs()
   foreach (MdiSubWindow *w, windows) 
   {
     if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
       activateWindow(w);
-    }
   }
 }
 
