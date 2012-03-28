@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/SaveIsawPeaks.cpp
 	src/SaveIsawUB.cpp
 	src/SavePeaksFile.cpp
+	src/SCDCalibratePanels.cpp
 	src/SetGoniometer.cpp
 	src/SetUB.cpp
 	src/SortHKL.cpp
@@ -62,6 +63,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SavePeaksFile.h
+	inc/MantidCrystal/SCDCalibratePanels.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetUB.h
 	inc/MantidCrystal/SortHKL.h
