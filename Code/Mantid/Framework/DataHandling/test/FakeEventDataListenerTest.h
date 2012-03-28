@@ -41,7 +41,7 @@ public:
 
   void testRunStatus()
   {
-    TS_ASSERT_EQUALS( fakel->runStatus(), ILiveListener::RunStatus::Running )
+    TS_ASSERT_EQUALS( fakel->runStatus(), ILiveListener::Running )
   }
 
   void testExtractData()
