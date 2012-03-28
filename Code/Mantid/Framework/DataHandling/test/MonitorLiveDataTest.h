@@ -182,13 +182,18 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
     ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
 
-    IAlgorithm_sptr alg1 = makeAlgo("fake1", "", "Add", "Restart", "0.25");
+    IAlgorithm_sptr alg1 = makeAlgo("fake1", "", "Add", "Restart", "0.15");
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 7)) return;
 
     // The workspace was reset after 4 additions, and then got 3 more
     EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
     TS_ASSERT_EQUALS( ws->getNumberEvents(), 3*200);
+
+    // Cancel the algo before exiting test (avoids segfault)
+    alg1->cancel();
+    Poco::Thread::sleep(500);
+
   }
 
 
