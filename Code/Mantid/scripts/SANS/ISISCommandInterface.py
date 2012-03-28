@@ -124,7 +124,7 @@ def Mask(details):
         @param details: a string that specifies masking as it would appear in a mask file 
     """ 
     _printMessage('Mask("' + details + '")')
-    ReductionSingleton().mask.parse_instruction(details)
+    ReductionSingleton().mask.parse_instruction(ReductionSingleton().instrument.name(),details)
     
 def MaskFile(file_name):
     """

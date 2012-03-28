@@ -1193,12 +1193,20 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
     {
       if ( type != "Arm" )
       {
-        exec_script += "/REAR " + details;
+        // whether it is front or rear bank is inferred from the spectrum number
+        if ( type == "Spectrum" )
+          exec_script += " " + details;
+        else
+          exec_script += "/REAR " + details;
       }
     }
     else
     {
-      exec_script += "/FRONT " + details;
+      // whether it is front or rear bank is inferred from the spectrum number
+      if ( type == "Spectrum" )
+        exec_script += " " + details;
+      else
+        exec_script += "/FRONT " + details;
     }
     exec_script += "')\n";
   }
