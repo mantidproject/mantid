@@ -294,12 +294,14 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
                    
     def test_setColorScaleAutoFull(self):
         sv = self.sv
+        sv.setNormalization(1) # Make sure volume normalization is set
         sv.setColorScaleAutoFull()
         self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
         self.assertAlmostEqual(sv.getColorScaleMax(), 540.0, 3)
                    
     def test_setColorScaleAutoSlice(self):
         sv = self.sv
+        sv.setNormalization(1) # Make sure volume normalization is set
         sv.setColorScaleAutoSlice()
         self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
         self.assertAlmostEqual(sv.getColorScaleMax(), 81.0, 3)
