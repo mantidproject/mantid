@@ -715,7 +715,7 @@ namespace Crystal
     {
 
       filebuf fb;
-      fb.open (XmlFileName,ios::out);
+      fb.open (XmlFileName.c_str(),ios::out);
       ostream os(&fb);
       os << oss3.str();
       fb.close();
