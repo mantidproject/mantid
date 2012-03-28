@@ -47,6 +47,33 @@ ENDIF()
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
 
+  execute_process(
+      COMMAND /usr/bin/sw_vers -productVersion
+      OUTPUT_VARIABLE OSX_VERSION
+      RESULT_VARIABLE OSX_VERSION_STATUS
+  )
+  
+  # Strip off any /CR or /LF
+  string(STRIP ${OSX_VERSION} OSX_VERSION)
+
+  if (OSX_VERSION VERSION_LESS 10.6)
+    message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard).")
+  endif()
+
+  if (OSX_VERSION VERSION_GREATER 10.6 OR OSX_VERSION VERSION_EQUAL 10.6)
+    set ( OSX_CODENAME "Snow Leopard" )
+  endif()
+
+  if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
+    set ( OSX_CODENAME "Lion")
+  endif()
+
+  if (OSX_VERSION VERSION_GREATER 10.8 OR OSX_VERSION VERSION_EQUAL 10.8)
+    set ( OSX_CODENAME "Mountain Lion")
+  endif()
+
+  message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
+
 	if ( NOT THIRD_PARTY )
   		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
 	endif ()
