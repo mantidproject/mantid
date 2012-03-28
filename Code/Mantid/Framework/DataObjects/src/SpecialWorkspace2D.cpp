@@ -211,12 +211,12 @@ namespace DataObjects
     return;
   }
 
-  /** And operator
+  /** AND operator
    *
    */
   void SpecialWorkspace2D::binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws){
 
-    for (size_t i = 0; i < this->getNumberHistograms(); i ++){
+    for (size_t i = 0; i < this->getNumberHistograms(); i++){
       double y1 = this->dataY(i)[0];
       double y2 = ws->dataY(i)[0];
 
@@ -230,70 +230,85 @@ namespace DataObjects
     return;
   }
 
-  /** Or operator
+  /** OR operator
    *
    */
-  void SpecialWorkspace2D::binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws){
+  void SpecialWorkspace2D::binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws)
+  {
 
-    for (size_t i = 0; i < this->getNumberHistograms(); i ++){
-      double y1 = this->dataY(i)[0];
-      double y2 = ws->dataY(i)[0];
+      for (size_t i = 0; i < this->getNumberHistograms(); i++)
+      {
+          double y1 = this->dataY(i)[0];
+          double y2 = ws->dataY(i)[0];
 
-      double max = y1;
-      if (y2 > y1){
-        max = y2;
-      }
-      this->dataY(i)[0] = max;
+          double max = y1;
+          if (y2 > y1)
+          {
+              max = y2;
+          }
+          this->dataY(i)[0] = max;
 
-      /*
+          /*
       if (y1 < 1.0E-10 && y2 < 1.0E-10){
         this->dataY(i)[0] = 0.0;
       } else {
         this->dataY(i)[0] += y2;
       }
       */
-    }
+      }
 
-    return;
+      return;
   }
 
   /** Excluded Or operator
    *
    */
-  void SpecialWorkspace2D::binaryXOR(boost::shared_ptr<const SpecialWorkspace2D> ws){
+  void SpecialWorkspace2D::binaryXOR(boost::shared_ptr<const SpecialWorkspace2D> ws)
+  {
 
-    for (size_t i = 0; i < this->getNumberHistograms(); i ++){
-      double y1 = this->dataY(i)[0];
-      double y2 = ws->dataY(i)[0];
-      if (y1 < 1.0E-10 && y2 < 1.0E-10){
-        this->dataY(i)[0] = 0.0;
-      } else if (y1 > 1.0E-10 && y2 > 1.0E-10){
-        this->dataY(i)[0] = 0.0;
-      }else {
-        this->dataY(i)[0] = 1.0;
+      for (size_t i = 0; i < this->getNumberHistograms(); i++)
+      {
+          double y1 = this->dataY(i)[0];
+          double y2 = ws->dataY(i)[0];
+          if (y1 < 1.0E-10 && y2 < 1.0E-10)
+          {
+              this->dataY(i)[0] = 0.0;
+          }
+          else if (y1 > 1.0E-10 && y2 > 1.0E-10)
+          {
+              this->dataY(i)[0] = 0.0;
+          }
+          else
+          {
+              this->dataY(i)[0] = 1.0;
+          }
+
       }
 
-    }
-
-    return;
+      return;
   }
 
 
-  /** Excluded Or operator
-   *
+  /**
+   *  NOT operator
    */
-  void SpecialWorkspace2D::binaryNOT(){
+  void SpecialWorkspace2D::binaryNOT()
+  {
 
-    for (size_t i = 0; i < this->getNumberHistograms(); i ++){
-      double y1 = this->dataY(i)[0];
-      if (y1 < 1.0E-10){
-        this->dataY(i)[0] = 1.0;
-      }else {
-        this->dataY(i)[0] = 0.0;
+      for (size_t i = 0; i < this->getNumberHistograms(); i++)
+      {
+          double y1 = this->dataY(i)[0];
+          if (y1 < 1.0E-10)
+          {
+              this->dataY(i)[0] = 1.0;
+          }
+          else
+          {
+              this->dataY(i)[0] = 0.0;
+          }
       }
-    }
 
-    return;
+      return;
   }
 
   //----------------------------------------------------------------------------------------------
