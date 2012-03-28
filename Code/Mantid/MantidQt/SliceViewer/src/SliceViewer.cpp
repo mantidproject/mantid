@@ -154,6 +154,14 @@ void SliceViewer::loadSettings()
   m_colorBar->setLog(scaleType);
   // Last saved image file
   m_lastSavedFile = settings.value("LastSavedImagePath", "").toString();
+
+  bool transparentZeros = settings.value("TransparentZeros", 1).toInt();
+  this->setTransparentZeros(transparentZeros);
+
+  int norm = settings.value("Normalization", 1).toInt();
+  Mantid::API::MDNormalization normaliz = static_cast<Mantid::API::MDNormalization>(norm);
+  this->setNormalization(normaliz);
+
   settings.endGroup();
 }
 
@@ -166,6 +174,8 @@ void SliceViewer::saveSettings()
   settings.setValue("ColormapFile", m_currentColorMapFile);
   settings.setValue("LogColorScale", (int)m_colorBar->getLog() );
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
+  settings.setValue("TransparentZeros", m_actionTransparentZeros->isChecked());
+  settings.setValue("Normalization", static_cast<int>(this->getNormalization()));
   settings.endGroup();
 }
 
@@ -632,8 +642,38 @@ void SliceViewer::changeNormalization()
   else
     normalization = Mantid::API::NoNormalization;
 
-  m_data->setNormalization(normalization);
+  this->setNormalization(normalization);
+}
+
+
+//------------------------------------------------------------------------------------
+/** Set the normalization mode for viewing the data
+ *
+ * @param norm :: MDNormalization enum. 0=none; 1=volume; 2=# of events
+ */
+void SliceViewer::setNormalization(Mantid::API::MDNormalization norm)
+{
+  m_actionNormalizeNone->blockSignals(true);
+  m_actionNormalizeVolume->blockSignals(true);
+  m_actionNormalizeNumEvents->blockSignals(true);
+
+  m_actionNormalizeNone->setChecked(norm == Mantid::API::NoNormalization);
+  m_actionNormalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
+  m_actionNormalizeNumEvents->setChecked(norm == Mantid::API::NumEventsNormalization);
+
+  m_actionNormalizeNone->blockSignals(false);
+  m_actionNormalizeVolume->blockSignals(false);
+  m_actionNormalizeNumEvents->blockSignals(false);
+
+  m_data->setNormalization(norm);
   this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/** @return the current normalization */
+Mantid::API::MDNormalization SliceViewer::getNormalization() const
+{
+  return m_data->getNormalization();
 }
 
 //------------------------------------------------------------------------------------
