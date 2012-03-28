@@ -188,7 +188,7 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
 
     _y_axis = zeros((maxY, len(_tof_axis) - 1))
     _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
-    
+
     x_size = toXpixel - fromXpixel + 1 
     x_range = arange(x_size) + fromXpixel
     

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -53,6 +54,9 @@ namespace MDEvents
     void init();
     /// Run the algorithm
     void exec();
+
+    template<typename MDE, size_t nd>
+    void getBoxData(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
   };
 
 

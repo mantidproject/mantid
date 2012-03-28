@@ -226,9 +226,6 @@ private:
   /// Delete ranged workspaces.
   void deleteRangedWorkspaces();
 
-  /// Delete all the open graphs.
-  void deleteGraphs();
-
   /// Get group workspace name
   QString getGroupName();
 

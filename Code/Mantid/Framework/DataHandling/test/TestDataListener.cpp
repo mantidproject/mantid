@@ -20,7 +20,8 @@ namespace DataHandling
 
   /// Constructor
   TestDataListener::TestDataListener() : ILiveListener(),
-      m_buffer(), m_rand(new Kernel::MersenneTwister)
+      m_buffer(), m_rand(new Kernel::MersenneTwister),
+      m_changeStatusAfter(0), m_newStatus(ILiveListener::EndRun)
   {
     // Set up the first workspace buffer
     this->createEmptyWorkspace();
@@ -32,6 +33,16 @@ namespace DataHandling
     m_dataReset = false;
     if ( ! ConfigService::Instance().getValue("testdatalistener.reset_after",m_resetAfter) )
       m_resetAfter = 0;
+    if ( ! ConfigService::Instance().getValue("testdatalistener.m_changeStatusAfter",m_changeStatusAfter) )
+      m_changeStatusAfter = 0;
+    int temp = 0;
+    if ( ! ConfigService::Instance().getValue("testdatalistener.m_newStatus",temp) )
+    {
+      if (temp==0) m_newStatus = ILiveListener::NoRun;
+      if (temp==1) m_newStatus = ILiveListener::BeginRun;
+      if (temp==2) m_newStatus = ILiveListener::Running;
+      if (temp==4) m_newStatus = ILiveListener::EndRun;
+    }
   }
     
   /// Destructor
@@ -49,6 +60,18 @@ namespace DataHandling
   bool TestDataListener::isConnected()
   {
     return true; // For the time being at least
+  }
+
+  ILiveListener::RunStatus TestDataListener::runStatus()
+  {
+    // For testing
+    if (m_changeStatusAfter > 0 && m_timesCalled == m_changeStatusAfter)
+    {
+      return m_newStatus;
+    }
+    else
+      // In a run by default
+      return Running;
   }
 
   void TestDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time

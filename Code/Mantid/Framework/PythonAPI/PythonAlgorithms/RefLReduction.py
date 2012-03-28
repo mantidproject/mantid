@@ -231,8 +231,7 @@ class RefLReduction(PythonAlgorithm):
 #                                              maxX=maxX,
 #                                              maxY=maxY)     
 
-        ws_data = "_DataWks"
-        ws_transposed = '_TransposedID'
+        ws_data = '_' + ws_name + '_DataWks'
         if subtract_data_bck:
 
             print '-> substract background'
@@ -279,7 +278,7 @@ class RefLReduction(PythonAlgorithm):
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
                                      OutputWorkspace=ws_histo_data)
             
-            ws_data_bck = "_DataBckWks"
+            ws_data_bck = '_' + ws_name + '_DataBckWks'
             ws_data_bck_1 = ws_data_bck + "_1"
             RefRoi(InputWorkspace=ws_histo_data,
                    OutputWorkspace=ws_data_bck_1,
@@ -313,7 +312,7 @@ class RefLReduction(PythonAlgorithm):
                              WorkspaceToMatch=ws_histo_data, 
                              OutputWorkspace=ws_data_bck_1_rebin)
 
-            ws_data_bck_2_rebin = ws_data_bck_1 + '_rebin'
+            ws_data_bck_2_rebin = ws_data_bck_2 + '_rebin'
             RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
                              WorkspaceToMatch=ws_histo_data, 
                              OutputWorkspace=ws_data_bck_2_rebin)
@@ -329,6 +328,14 @@ class RefLReduction(PythonAlgorithm):
             Minus(LHSWorkspace=ws_histo_data, 
                   RHSWorkspace=ws_data_bck+'_scale', 
                   OutputWorkspace=ws_data)
+
+            mtd.deleteWorkspace(ws_data_bck)
+            mtd.deleteWorkspace(ws_data_bck+'_scale')
+            mtd.deleteWorkspace(ws_data_bck_1_rebin)
+            mtd.deleteWorkspace(ws_data_bck_2_rebin)
+            mtd.deleteWorkspace(ws_data_bck_1)
+            mtd.deleteWorkspace(ws_data_bck_2)
+            mtd.deleteWorkspace(ws_histo_data)
 
 #            WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
 
@@ -362,19 +369,25 @@ class RefLReduction(PythonAlgorithm):
 
         else:        
         
-            ws_integrated_data = "_IntegratedDataWks"
-            print '-> keep only range of pixel of interest'
-            wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
-                                                  ws_integrated_data,
-                                                  fromXpixel=Xrange[0],
-                                                  toXpixel=Xrange[1],
-                                                  fromYpixel=BackfromYpixel,
-                                                  toYpixel=BacktoYpixel,
-                                                  maxX=maxX,
-                                                  maxY=maxY)     
+#            ws_integrated_data = "_IntegratedDataWks"
+#            print '-> keep only range of pixel of interest'
+#            wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
+#                                                  ws_integrated_data,
+#                                                  fromXpixel=Xrange[0],
+#                                                  toXpixel=Xrange[1],
+#                                                  fromYpixel=BackfromYpixel,
+#                                                  toYpixel=BacktoYpixel,
+#                                                  maxX=maxX,
+#                                                  maxY=maxY)     
+#
+#            ConvertToHistogram(InputWorkspace=ws_integrated_data,
+#                               OutputWorkspace=ws_data)
 
-            ConvertToHistogram(InputWorkspace=ws_integrated_data,
-                               OutputWorkspace=ws_data)
+            ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
+                                     OutputWorkspace=ws_data)
+
+            mtd.deleteWorkspace(ws_histo_data)
+
                 
         if (NormFlag):
 
@@ -405,31 +418,31 @@ class RefLReduction(PythonAlgorithm):
                           TOFsteps, 
                           TOFrange[1]])
  
-            # Keep only range of TOF of interest
-            CropWorkspace(InputWorkspace=ws_norm_histo_data, 
-                          OutputWorkspace=ws_norm_histo_data, 
-                          XMin=TOFrange[0], XMax=TOFrange[1])
+#            # Keep only range of TOF of interest
+#            CropWorkspace(InputWorkspace=ws_norm_histo_data, 
+#                          OutputWorkspace=ws_norm_histo_data, 
+#                          XMin=TOFrange[0], XMax=TOFrange[1])
     
             # Normalized by Current (proton charge)
             print '-> normalized by current direct beam'
             NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, 
                                OutputWorkspace=ws_norm_histo_data)
 
-            #Create a new event workspace of only the range of pixel of interest 
-            #background range (along the y-axis) and of only the pixel
-            #of interest along the x-axis (to avoid the frame effect)
-            ws_integrated_data = "_IntegratedNormWks"
-            wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
-                                                  ws_integrated_data,
-                                                  fromXpixel=normXrange[0],
-                                                  toXpixel=normXrange[1],
-                                                  fromYpixel=BackfromYpixel,
-                                                  toYpixel=BacktoYpixel,
-                                                  maxX=maxX,
-                                                  maxY=maxY)
+#            #Create a new event workspace of only the range of pixel of interest 
+#            #background range (along the y-axis) and of only the pixel
+#            #of interest along the x-axis (to avoid the frame effect)
+#            ws_integrated_data = "_IntegratedNormWks"
+#            wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
+#                                                  ws_integrated_data,
+#                                                  fromXpixel=normXrange[0],
+#                                                  toXpixel=normXrange[1],
+#                                                  fromYpixel=BackfromYpixel,
+#                                                  toYpixel=BacktoYpixel,
+#                                                  maxX=maxX,
+#                                                  maxY=maxY)
 
-            ws_data_bck = "_NormBckWks"
-            ws_norm_rebinned = "_NormRebinnedWks"
+            ws_data_bck = '_' + ws_name + '_NormBckWks'
+            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
             if subtract_norm_bck:
                 
                 print '-> substract background to direct beam'
@@ -509,70 +522,94 @@ class RefLReduction(PythonAlgorithm):
                 ConvertToMatrixWorkspace(InputWorkspace=ws_norm_histo_data,
                                          OutputWorkspace=ws_norm_histo_data)
             
-                ws_data_bck = "_DataBckWks"
-                ws_data_bck_1 = ws_data_bck + "_1"
+                ws_norm_bck = '_' + ws_name + '_NormBckWks'
+                ws_norm_bck_1 = ws_norm_bck + "_1"
                 RefRoi(InputWorkspace=ws_norm_histo_data,
-                       OutputWorkspace=ws_data_bck_1,
+                       OutputWorkspace=ws_norm_bck_1,
                        NXPixel=maxX,
                        NYPixel=maxY,
                        ConvertToQ=False,
                        IntegrateY=False,
                        SumPixels=True,
-                       XPixelMin=Xrange[0],
-                       XPixelMax=Xrange[1],
-                       YPixelMin=BackfromYpixel,
-                       YPixelMax=data_peak[0]-1,
+                       XPixelMin=normXrange[0],
+                       XPixelMax=normXrange[1],
+                       YPixelMin=norm_back[0],
+                       YPixelMax=norm_peak[0]-1,
                        NormalizeSum=True)
                            
-                ws_data_bck_2 = ws_data_bck + "_2"
+                ws_norm_bck_2 = ws_norm_bck + "_2"
                 RefRoi(InputWorkspace=ws_norm_histo_data,
-                       OutputWorkspace=ws_data_bck_2,
+                       OutputWorkspace=ws_norm_bck_2,
                        NXPixel=maxX,
                        NYPixel=maxY,
                        ConvertToQ=False,
                        IntegrateY=False,
                        SumPixels=True,
-                       XPixelMin=Xrange[0],
-                       XPixelMax=Xrange[1],
-                       YPixelMin=data_peak[1]+1,
-                       YPixelMax=BacktoYpixel,
+                       XPixelMin=normXrange[0],
+                       XPixelMax=normXrange[1],
+                       YPixelMin=norm_peak[1]+1,
+                       YPixelMax=norm_back[1],
                        NormalizeSum=True)
             
-                ws_data_bck_1_rebin = ws_data_bck_1 + '_rebin'
-                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
+                ws_norm_bck_1_rebin = ws_norm_bck_1 + '_rebin'
+                RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_1, 
                                  WorkspaceToMatch=ws_norm_histo_data, 
-                                 OutputWorkspace=ws_data_bck_1_rebin)
+                                 OutputWorkspace=ws_norm_bck_1_rebin)
 
-                ws_data_bck_2_rebin = ws_data_bck_1 + '_rebin'
-                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
+                ws_norm_bck_2_rebin = ws_norm_bck_2 + '_rebin'
+                RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_2, 
                                  WorkspaceToMatch=ws_norm_histo_data, 
-                                 OutputWorkspace=ws_data_bck_2_rebin)
+                                 OutputWorkspace=ws_norm_bck_2_rebin)
 
-                Plus(RHSWorkspace=ws_data_bck_1_rebin,
-                     LHSWorkspace=ws_data_bck_2_rebin,
-                     OutputWorkspace=ws_data_bck)
-                Scale(InputWorkspace=ws_data_bck,
-                      OutputWorkspace=ws_data_bck+'_scale',
+                Plus(RHSWorkspace=ws_norm_bck_1_rebin,
+                     LHSWorkspace=ws_norm_bck_2_rebin,
+                     OutputWorkspace=ws_norm_bck)
+                Scale(InputWorkspace=ws_norm_bck,
+                      OutputWorkspace=ws_norm_bck+'_scale',
                       Factor=0.5,
                       Operation="Multiply")
 
                 Minus(LHSWorkspace=ws_norm_histo_data, 
-                      RHSWorkspace=ws_data_bck+'_scale', 
+                      RHSWorkspace=ws_norm_bck+'_scale', 
                       OutputWorkspace=ws_norm_rebinned)
 
+                wks_utility.createIntegratedWorkspace(mtd[ws_norm_rebinned], 
+                                                      ws_norm_rebinned,
+                                                      fromXpixel=normXrange[0],
+                                                      toXpixel=normXrange[1],
+                                                      fromYpixel=BackfromYpixel,
+                                                      toYpixel=BacktoYpixel,
+                                                      maxX=maxX,
+                                                      maxY=maxY)
+
+                mtd.deleteWorkspace(ws_norm_bck+'_scale')
+                mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+                mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+                mtd.deleteWorkspace(ws_norm_bck_1)
+                mtd.deleteWorkspace(ws_norm_bck_2)
+                mtd.deleteWorkspace(ws_norm_histo_data)
 
             else:
             
-            
-            
-            
-            
+                #Create a new event workspace of only the range of pixel of interest 
+                #background range (along the y-axis) and of only the pixel
+                #of interest along the x-axis (to avoid the frame effect)
+                ws_integrated_data = '_' + ws_name + '_IntegratedNormWks'
+                wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
+                                                      ws_integrated_data,
+                                                      fromXpixel=normXrange[0],
+                                                      toXpixel=normXrange[1],
+                                                      fromYpixel=BackfromYpixel,
+                                                      toYpixel=BacktoYpixel,
+                                                      maxX=maxX,
+                                                      maxY=maxY)
             
                 RebinToWorkspace(WorkspaceToRebin=ws_integrated_data,
                                  WorkspaceToMatch=ws_data,
                                  OutputWorkspace=ws_norm_rebinned)
 
-
+                mtd.deleteWorkspace(ws_integrated_data)
+                
             #Normalization    
             print '-> Sum spectra'       
             SumSpectra(InputWorkspace=ws_norm_rebinned, 
@@ -596,11 +633,11 @@ class RefLReduction(PythonAlgorithm):
 #        print '-> Apply SF'
 #        ws_data_scaled = wks_utility.applySF(ws_data,
 #                                             slitsValuePrecision)
-        ws_data_scaled = ws_data  #REMOVE_ME
+        ws_data_scaled = ws_data   #REMOVE_ME
 
         if dMD is not None and theta is not None:
                     
-            _tof_axis = mtd[ws_histo_data].readX(0)
+            _tof_axis = mtd[ws_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
             sz_tof = numpy.shape(_tof_axis)[0]
             _q_axis = zeros(sz_tof-1)
@@ -612,21 +649,20 @@ class RefLReduction(PythonAlgorithm):
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
         
-#        ws_integrated_data = "_IntegratedDataWks"
-#        print '-> keep only range of pixel of interest'
-#        print 'ws_data_scaled: '
-#        print ws_data_scaled
-#        wks_utility.createIntegratedWorkspace(mtd[ws_data_scaled], 
-#                                              ws_integrated_data,
-#                                              fromXpixel=Xrange[0],
-#                                              toXpixel=Xrange[1],
-#                                              fromYpixel=BackfromYpixel,
-#                                              toYpixel=BacktoYpixel,
-#                                              maxX=maxX,
-#                                              maxY=maxY)     
+        ws_integrated_data = '_' + ws_name + '_IntegratedDataWks'
+        print '-> keep only range of pixel of interest'
+        wks_utility.createIntegratedWorkspace(mtd[ws_data_scaled], 
+                                              ws_integrated_data,
+                                              fromXpixel=Xrange[0],
+                                              toXpixel=Xrange[1],
+                                              fromYpixel=BackfromYpixel,
+                                              toYpixel=BacktoYpixel,
+                                              maxX=maxX,
+                                              maxY=maxY)     
 
-        ws_integrated_data = ws_data_scaled
-
+        
+#        mtd.deleteWorkspace(ws_data_scaled)
+#        mtd.deleteWorkspace(ws_data)
         ws_data_Q = ws_data + '_Q'
         print '-> convert to Q'
 #        wks_utility.convertWorkspaceToQ(ws_data_scaled,
@@ -641,6 +677,7 @@ class RefLReduction(PythonAlgorithm):
                                         geo_correction=False,
                                         q_binning=[q_min,q_step,q_max])
 
+        print '-> replace special values'
         mt = mtd[ws_data_Q]
         ReplaceSpecialValues(InputWorkspace=ws_data_Q, 
                              NaNValue=0, 
@@ -651,46 +688,62 @@ class RefLReduction(PythonAlgorithm):
 
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
-#        if mtd.workspaceExists(output_ws):
-#            mtd.deleteWorkspace(output_ws)
+        if mtd.workspaceExists(output_ws):
+            mtd.deleteWorkspace(output_ws)
             
+        print '-> sum spectra'    
         SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
 
         #keep only none zero values
-        mt = mtd[output_ws]
-        sz = shape(mt.readY(0)[:])[0]
-        data_x = []
-        data_y = []
-        data_y_error = []
-        for i in range(sz):
-            _y = mt.readY(0)[i]
-#            print '_y={0:3f} at i={1:2d}'.format(_y, i)
-            if _y != 0.:
-                data_x.append(mt.readX(0)[i])
-                data_y.append(_y)
-                data_y_error.append(mt.readE(0)[i])
+        try:
+            print '-> keep only non-zeros values'
+            mt = mtd[output_ws]
+            sz = shape(mt.readY(0)[:])[0]
+            data_x = []
+            data_y = []
+            data_y_error = []
+            for i in range(sz):
+                _y = mt.readY(0)[i]
+                #print '_y={0:3f} at i={1:2d}'.format(_y, i)
+                if _y != 0.:
+                    data_x.append(mt.readX(0)[i])
+                    data_y.append(_y)
+                    data_y_error.append(mt.readE(0)[i])
         
-        #if at least one non zero value found
-        if data_x != []:
-            CreateWorkspace(OutputWorkspace=output_ws,
-                            DataX=data_x,
-                            DataY=data_y,
-                            DataE=data_y_error,
-                            Nspec=1,
-                            UnitX="MomentumTransfer")
+            #if at least one non zero value found
+            if data_x != []:
+                print '-> cleanup data (remove 0s)'
+                CreateWorkspace(OutputWorkspace=output_ws,
+                                DataX=data_x,
+                                DataY=data_y,
+                                DataE=data_y_error,
+                                Nspec=1,
+                                UnitX="MomentumTransfer")
+        except:
+            pass
 
         #removing first and last Q points (edge effect) 
         mt=mtd[output_ws]
         x_axis = mt.readX(0)[:]
-        qmin = x_axis[1]
-        qmax = x_axis[-2]
-        CropWorkspace(InputWorkspace=output_ws,
-                      OutputWorkspace=output_ws,
-                      XMin=qmin, XMax=qmax)
+        if (len(x_axis) > 2):
+            print '-> remove first and last point (edge effet)'
+            qmin = x_axis[1]
+            qmax = x_axis[-2]
+            CropWorkspace(InputWorkspace=output_ws,
+                          OutputWorkspace=output_ws,
+                          XMin=qmin, XMax=qmax)
 
          #space
-        print
         self.setProperty("OutputWorkspace", mtd[output_ws])
         
-
+        #cleanup all workspace used
+        print '-> Cleaning useless workspaces'
+        mtd.deleteWorkspace(ws_event_data)
+        mtd.deleteWorkspace(ws_data_Q)
+        mtd.deleteWorkspace(ws_data)
+        mtd.deleteWorkspace(ws_norm_event_data)
+        
+        print
+        
+        
 mtd.registerPyAlgorithm(RefLReduction())

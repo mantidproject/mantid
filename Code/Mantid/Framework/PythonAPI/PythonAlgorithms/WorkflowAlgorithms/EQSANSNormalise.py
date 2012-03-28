@@ -70,20 +70,30 @@ class EQSANSNormalise(PythonAlgorithm):
         # Input workspace
         self.declareWorkspaceProperty("InputWorkspace", "", Direction=Direction.InOut, Description="Workspace to be normalised")
         self.declareProperty("NormaliseToBeam", True, Description="If true, the data will also be normalise by the beam profile")
+        self.declareProperty("BeamSpectrumFile", "", Direction=Direction.Input)
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
     def PyExec(self):
         workspace = self.getPropertyValue("InputWorkspace")
         normalize_to_beam = self.getProperty("NormaliseToBeam")
-        flux_data_path = None
+        
         if normalize_to_beam:
-            flux_files = find_file(filename="bl6_flux_at_sample", data_dir=None)
-            if len(flux_files)>0:
-                flux_data_path = flux_files[0]
-                mantid.sendLogMessage("Using beam flux file: %s" % flux_data_path)
+            flux_data_path = None
+            # If a spectrum file was supplied, check if it's a valid file path
+            beam_spectrum_file = self.getProperty("BeamSpectrumFile").strip()
+            if len(beam_spectrum_file):
+                if os.path.isfile(beam_spectrum_file):
+                    flux_data_path = beam_spectrum_file 
+                else:
+                    mtd.sendLogMessage("EQSANSNormalise: %s is not a file" % beam_spectrum_file)
             else:
-                mantid.sendLogMessage("Could not find beam flux file!")
-                
+                flux_files = find_file(filename="bl6_flux_at_sample", data_dir=None)
+                if len(flux_files)>0:
+                    flux_data_path = flux_files[0]
+                    mantid.sendLogMessage("Using beam flux file: %s" % flux_data_path)
+                else:
+                    mantid.sendLogMessage("Could not find beam flux file!")
+                    
             if flux_data_path is not None:
                 beam_flux_ws = "__beam_flux"
                 LoadAscii(flux_data_path, beam_flux_ws, Separator="Tab", Unit="Wavelength")

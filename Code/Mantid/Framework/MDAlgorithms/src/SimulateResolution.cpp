@@ -64,6 +64,10 @@ namespace Mantid
     {
       getParams();
 
+      // Is runData setup?
+      if(m_runData.empty())
+        throw std::runtime_error("FunctionMD has no runData to extract properties from");
+
       double fgSignal = 0.;
       double fgError = 0.;
       // loop over each MDPoint in current MDBox

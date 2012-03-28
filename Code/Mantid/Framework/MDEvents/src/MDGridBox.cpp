@@ -368,6 +368,8 @@ namespace MDEvents
     nPoints = 0;
     this->m_signal = 0;
     this->m_errorSquared = 0;
+    this->m_totalWeight = 0;
+
 #ifdef MDBOX_TRACK_CENTROID
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] = 0;
@@ -390,6 +392,7 @@ namespace MDEvents
         nPoints += ibox->getNPoints();
         this->m_signal += ibox->getSignal();
         this->m_errorSquared += ibox->getErrorSquared();
+        this->m_totalWeight += ibox->getTotalWeight();
 
 #ifdef MDBOX_TRACK_CENTROID
         // And track the centroid

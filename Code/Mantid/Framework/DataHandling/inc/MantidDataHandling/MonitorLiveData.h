@@ -50,6 +50,9 @@ namespace DataHandling
     void init();
     void exec();
 
+  public:
+    /// Latest chunk number loaded
+    size_t m_chunkNumber;
 
   };
 

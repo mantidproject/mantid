@@ -501,9 +501,29 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self.min_radius = float(min)/1000.
         self.max_radius = float(max)/1000.
 
-    def parse_instruction(self, details):
+    def _whichBank(self, instName, specNo):
+        """
+            Return either 'rear' or 'front' depending on which bank the spectrum number belong to
+            
+            @param instName Instrument name. Used for MASK Ssp command to tell what bank it refer to
+            @param specNo Spectrum number
+        """        
+        bank = 'rear'
+
+        if instName.upper() == 'LOQ':
+            if 16387 <= specNo <= 17784: 
+                bank = 'front'
+        if instName.upper() == 'SANS2D':
+            if 36873 <= specNo <= 73736: 
+                bank = 'front'
+                
+        return bank
+
+    def parse_instruction(self, instName, details):
         """
             Parse an instruction line from an ISIS mask file
+            @param instName Instrument name. Used for MASK Ssp command to tell what bank it refer to
+            @param details Line to parse
         """
         details = details.lstrip()
         details = details.upper()
@@ -514,11 +534,29 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         parts = details.split('/')
         # A spectrum mask or mask spectra range with H and V commands
         if len(parts) == 1:     # Command is to type MASK something
-            #by default only the rear detector is masked
-            self.add_mask_string(details[4:].lstrip(), detect='rear')
+            argToMask = details[4:].lstrip().upper()
+            bank = 'rear'
+            # special case for MASK Ssp where try to infer the bank the spectrum number belong to
+            if 'S' in argToMask:
+                if '>' in argToMask:
+                    pieces = argToMask.split('>')
+                    low = int(pieces[0].lstrip('S'))
+                    upp = int(pieces[1].lstrip('S'))
+                    bankLow = self._whichBank(instName, low)
+                    bankUpp = self._whichBank(instName, upp)
+                    if bankLow != bankUpp:
+                        _issueWarning('The spectra in Mask command: ' + details + 
+                                      ' belong to two different banks. Default to use bank ' +
+                                      bankLow)
+                    bank = bankLow
+                else:
+                    bank = self._whichBank(instName, int(argToMask.lstrip('S')))
+               
+            #Default to the rear detector if not MASK Ssp command
+            self.add_mask_string(argToMask, detect=bank)
         elif len(parts) == 2:   # Command is to type MASK/ something
             type = parts[1]   # this is the part of the command following /
-            detname = type.split()
+            typeSplit = type.split()  # used for command such as MASK/REAR Hn and MASK/Line w a 
             if type == 'CLEAR':    # Command is specifically MASK/CLEAR
                 self.spec_mask_r = ''
                 self.spec_mask_f = ''
@@ -528,13 +566,23 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 else:
                     bin_range = type[1:].lstrip()
                 self.time_mask += ';' + bin_range
-            elif len(detname) == 2:
-                self.add_mask_string(mask_string=detname[1],detect=detname[0])
+            elif len(typeSplit) == 2:
+                # Commands such as MASK/REAR Hn, where typeSplit[0] then equal 'REAR'
+                if 'S' in typeSplit[1].upper():
+                    _issueWarning('MASK command of type ' + details + 
+                                  ' deprecated. Please use instead MASK Ssp1[>Ssp2]')   
+                if 'REAR' != typeSplit[0].upper() and instName == 'LOQ':
+                    _issueWarning('MASK command of type ' + details + 
+                                  ' can, until otherwise requested, only be used for the REAR (default) Main detector of LOQ. ' +
+                                  'Default to the Main detector of LOQ for this mask command')                     
+                    self.add_mask_string(mask_string=typeSplit[1],detect='rear')
+                else:
+                    self.add_mask_string(mask_string=typeSplit[1],detect=typeSplit[0])                    
             elif type.startswith('LINE'):
-                if len(detname) != 3:
+                if len(typeSplit) != 3:
                     _issueWarning('Unrecognized line masking command "' + details + '" syntax is MASK/LINE width angle')
-                self.arm_width = float(detname[1])
-                self.arm_angle = float(detname[2])                                               
+                self.arm_width = float(typeSplit[1])
+                self.arm_angle = float(typeSplit[2])                                               
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -560,7 +608,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
              _issueWarning('Unrecognized masking line "' + details + '"')
 
     def add_mask_string(self, mask_string, detect):
-        if detect.upper() == 'FRONT':
+        if detect.upper() == 'FRONT' or detect.upper() == 'HAB':
             self.spec_mask_f += ',' + mask_string
         elif detect.upper() == 'REAR':
             self.spec_mask_r += ',' + mask_string
@@ -1561,7 +1609,7 @@ class UserFile(ReductionStep):
             if len(upper_line[5:].strip().split()) == 4:
                 _issueInfo('Box masks can only be defined using the V and H syntax, not "mask x1 y1 x2 y2"')
             else:
-                reducer.mask.parse_instruction(upper_line)
+                reducer.mask.parse_instruction(reducer.instrument.name(), upper_line)
         
         elif upper_line.startswith('SET CENTRE'):
             values = upper_line.split()
@@ -1955,8 +2003,8 @@ class UserFile(ReductionStep):
             raise RuntimeError('User settings file not compatible with the selected instrument '+reducer.instrument.name())
 
     def _restore_defaults(self, reducer):
-        reducer.mask.parse_instruction('MASK/CLEAR')
-        reducer.mask.parse_instruction('MASK/CLEAR/TIME')
+        reducer.mask.parse_instruction(reducer.instrument.name(), 'MASK/CLEAR')
+        reducer.mask.parse_instruction(reducer.instrument.name(), 'MASK/CLEAR/TIME')
 
         reducer.CENT_FIND_RMIN = reducer.CENT_FIND_RMAX
         reducer.QXY = None

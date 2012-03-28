@@ -71,6 +71,9 @@ void StartLiveDataDialog::initLayout()
   tie(ui.chkPreserveEvents, "PreserveEvents");
   chkPreserveEventsToggled();
 
+  tie(ui.cmbEndRunBehavior, "EndRunBehavior");
+  fillAndSetComboBox("EndRunBehavior", ui.cmbEndRunBehavior);
+
   tie(ui.editAccumulationWorkspace, "AccumulationWorkspace", ui.gridLayout);
   tie(ui.editOutputWorkspace, "OutputWorkspace", ui.gridLayout);
 

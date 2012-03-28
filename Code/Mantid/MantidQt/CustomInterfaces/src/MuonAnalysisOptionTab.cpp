@@ -344,6 +344,8 @@ void MuonAnalysisOptionTab::hideGraphsChanged(bool state)
   group.setValue("hiddenGraphs", state);
   if (state)
     emit settingsTabUpdatePlot();
+  else
+    emit notHidingGraphs();
 }
 
 

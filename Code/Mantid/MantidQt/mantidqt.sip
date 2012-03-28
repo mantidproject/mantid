@@ -61,6 +61,25 @@
 };
 
 
+namespace Mantid
+{
+namespace API
+{
+
+
+enum MDNormalization
+{
+//%TypeHeaderCode
+//#include "../Framework/API/inc/MantidAPI/IMDWorkspace.h"
+//%End
+  NoNormalization,
+  VolumeNormalization,
+  NumEventsNormalization
+};
+
+}; // end namespace
+}; // end namespace
+
 
 namespace MantidQt
 {
@@ -919,6 +938,26 @@ void SliceViewer::setTransparentZeros(bool transparent)
     Args:
         transparent :: true if you want zeros to be transparent.
    
+%End
+
+  void setNormalization(Mantid::API::MDNormalization norm);
+%Docstring
+void SliceViewer::setNormalization(Mantid::API::MDNormalization norm)
+---------------------------------------------------------------------
+    Set the normalization mode for viewing the data
+   
+    Args:
+        norm :: MDNormalization enum. 0=none; 1=volume; 2=# of events
+   
+%End
+
+  Mantid::API::MDNormalization getNormalization() const;
+%Docstring
+Mantid::API::MDNormalization SliceViewer::getNormalization()
+------------------------------------------------------------
+    
+    Returns:
+        the current normalization 
 %End
 
 

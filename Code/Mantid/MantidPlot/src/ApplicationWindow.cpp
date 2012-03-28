@@ -17000,6 +17000,10 @@ else
       connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
       // Closes the active graph
       connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
+      // Hides the graph
+      connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
+      // Shows the graph
+      connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
       //If the fitting is requested then run the peak picker tool in runConnectFitting
       connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
           SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
@@ -17079,6 +17083,12 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
   } 
 }
 
+
+/**
+* Close a given graph
+*
+* @params wsName :: The name of the graph to delete.
+*/
 void ApplicationWindow::closeGraph(const QString & wsName)
 {
   QList<MdiSubWindow *> windows = windowsList();
@@ -17097,6 +17107,40 @@ void ApplicationWindow::closeGraph(const QString & wsName)
   }
 }
 
+
+/**
+* 
+*/
+void ApplicationWindow::hideGraphs(const QString & exception)
+{
+  QList<MdiSubWindow *> windows = windowsList();
+  foreach (MdiSubWindow *w, windows) 
+  {
+    if (w->isA("MultiLayer"))
+    {
+      if (w->objectName() != exception)
+      {
+        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
+        plot->setconfirmcloseFlag(false);
+        w->setHidden();
+      }
+    }
+  }
+}
+
+void ApplicationWindow::showGraphs()
+{
+  QList<MdiSubWindow *> windows = windowsList();
+  foreach (MdiSubWindow *w, windows) 
+  {
+    if (w->isA("MultiLayer"))
+      activateWindow(w);
+  }
+}
+
+/**
+* Run Python Script
+*/
 bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool redirect)
 {
   if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;

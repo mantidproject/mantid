@@ -23,6 +23,7 @@ public:
   MOCK_METHOD1(start, void(Mantid::Kernel::DateAndTime));
   MOCK_METHOD0(extractData, boost::shared_ptr<MatrixWorkspace>());
   MOCK_METHOD0(isConnected, bool());
+  MOCK_METHOD0(runStatus, RunStatus());
 };
 
 class ILiveListenerTest : public CxxTest::TestSuite

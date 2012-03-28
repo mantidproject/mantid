@@ -638,7 +638,7 @@ def start():
     if len(sys.argv) > 1: bin_folder = sys.argv[1]
     
     source_folder = ""
-    if len(sys.argv) > 2: source_folder = sys.argv[1]
+    if len(sys.argv) > 2: source_folder = sys.argv[2]
     
     if bin_folder == "--help":
         print """TestViewer.py [BINFOLDER] [SOURCEFOLDER]

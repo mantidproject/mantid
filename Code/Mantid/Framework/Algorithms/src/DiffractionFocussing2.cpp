@@ -424,9 +424,10 @@ void DiffractionFocussing2::execEvent()
       //chunkEL.reserve(numEventsInChunk);
 
       // process the chunk
-      for (int wi=wiChunk*chunkSize; wi < max; wi++)
+      for (int i=wiChunk*chunkSize; i < max; i++)
       {
         // Accumulate the chunk
+        size_t wi = indices[i];
         chunkEL += m_eventW->getEventList(wi);
       }
 

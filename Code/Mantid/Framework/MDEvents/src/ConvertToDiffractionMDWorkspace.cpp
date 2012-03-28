@@ -210,15 +210,12 @@ namespace MDEvents
   void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex, EventList & el)
   {
     size_t numEvents = el.getNumberEvents();
+    IMDBox<MDLeanEvent<3>,3> * box = ws->getBox();
 
     // Get the position of the detector there.
     const std::set<detid_t>& detectors = el.getDetectorIDs();
     if (detectors.size() > 0)
     {
-      // The 3D MDEvents that will be added into the MDEventWorkspce
-      std::vector<MDE> out_events;
-      out_events.reserve( el.getNumberEvents() );
-
       // Get the detector (might be a detectorGroup for multiple detectors)
       // or might return an exception if the detector is not in the instrument definition
       IDetector_const_sptr det;
@@ -290,18 +287,23 @@ namespace MDEvents
         // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
         coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
 
+        // Check that the event is within bounds
+        if (center[0] < m_extentsMin[0] || center[0] >= m_extentsMax[0]) continue;
+        if (center[1] < m_extentsMin[1] || center[1] >= m_extentsMax[1]) continue;
+        if (center[2] < m_extentsMin[2] || center[2] >= m_extentsMax[2]) continue;
+
         if (LorentzCorrection)
         {
           //double lambda = 1.0/wavenumber;
           // (sin(theta))^2 / wavelength^4
           float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber );
           // Push the MDLeanEvent but correct the weight.
-          out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
+          box->addEvent( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
         }
         else
         {
           // Push the MDLeanEvent with the same weight
-          out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
+          box->addEvent( MDE(float(it->weight()), float(it->errorSquared()), center) );
         }
       }
 
@@ -315,9 +317,6 @@ namespace MDEvents
         // For Linux with tcmalloc, make sure memory goes back, if you've cleared 200 Megs
         MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, (size_t)2e8);
       }
-
-      // Add them to the MDEW
-      ws->addEvents(out_events);
     }
     prog->reportIncrement(numEvents, "Adding Events");
   }
@@ -343,6 +342,10 @@ namespace MDEvents
     Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
     m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
 
+    // check the input units
+    if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
+      throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
+
     if (!m_inEventWS && !OneEventPerBin)
     {
       // We DONT want 1 event per bin, but we didn't give an EventWorkspace
@@ -364,10 +367,6 @@ namespace MDEvents
         throw std::invalid_argument("InputWorkspace must be either an EventWorkspace or a Workspace2D (which will get converted to events).");
     }
 
-
-    // check the input units
-    if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
-      throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
@@ -462,6 +461,15 @@ namespace MDEvents
     BoxController_sptr bc = ws->getBoxController();
     if (!bc)
       throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
+
+    // Cache the extents for speed.
+    m_extentsMin = new coord_t[3];
+    m_extentsMax = new coord_t[3];
+    for (size_t d=0; d<3; d++)
+    {
+      m_extentsMin[d] = ws->getDimension(d)->getMinimum();
+      m_extentsMax[d] = ws->getDimension(d)->getMaximum();
+    }
 
     // Copy ExperimentInfo (instrument, run, sample) to the output WS
     ExperimentInfo_sptr ei(m_inWS->cloneExperimentInfo());
@@ -583,6 +591,10 @@ namespace MDEvents
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+
+    // Clean up
+    delete [] m_extentsMin;
+    delete [] m_extentsMax;
   }
 
 

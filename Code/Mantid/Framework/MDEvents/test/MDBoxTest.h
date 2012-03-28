@@ -107,6 +107,9 @@ public:
     // Did it keep a running total of the signal and error?
     TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
+    // Weight of 1.0 per event.
+    TS_ASSERT_EQUALS( b.getTotalWeight(), 1.0);
+
   }
   /** Adding events in unsafe way also works */
   void test_addEventUnsafe()

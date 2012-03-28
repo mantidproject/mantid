@@ -61,6 +61,25 @@
 };
 
 
+namespace Mantid
+{
+namespace API
+{
+
+
+enum MDNormalization
+{
+//%TypeHeaderCode
+//#include "../Framework/API/inc/MantidAPI/IMDWorkspace.h"
+//%End
+  NoNormalization,
+  VolumeNormalization,
+  NumEventsNormalization
+};
+
+}; // end namespace
+}; // end namespace
+
 
 namespace MantidQt
 {
@@ -235,6 +254,8 @@ public:
   void setColorScaleAutoSlice() ;
   void setColorMapBackground(int r, int g, int b);
   void setTransparentZeros(bool transparent);
+  void setNormalization(Mantid::API::MDNormalization norm);
+  Mantid::API::MDNormalization getNormalization() const;
 
 
 };

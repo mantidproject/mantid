@@ -398,6 +398,8 @@ namespace MDEvents
         this->m_errorSquared += static_cast<signal_t>(event.getErrorSquared());
       }
     }
+    /// TODO #4734: sum the individual weights of each event?
+    this->m_totalWeight = static_cast<double>(this->getNPoints());
 #endif
   }
 

@@ -79,7 +79,6 @@ namespace Mantid
        *    - the returned workspace is for the caller to do with as they wish.
        *  IF THIS METHOD IS CALLED BEFORE start() THEN THE RESULTS ARE UNDEFINED!!!
        *  @return A pointer to the workspace containing the buffered data.
-       *  TODO: Consider whether there should be a default implementation of this method
        */
       virtual boost::shared_ptr<MatrixWorkspace> extractData() = 0;
 
@@ -100,7 +99,17 @@ namespace Mantid
        */
       virtual bool dataReset();
 
-      // TODO: Probably some flag(s) relating to run start/stop/change
+      /** The possible run statuses (initial list taken from SNS SMS protocol)
+       *  None    : No current run
+       *  Begin   : A new run has begun since the last call to extractData
+       *  Running : We are in a run
+       *  End     : The run has ended since the last call to extractData
+       */
+      enum RunStatus { NoRun = 0, BeginRun = 1, Running = 2, EndRun = 4};
+      /** Gets the current run status of the listened-to data stream
+       *  @return A value of the RunStatus enumeration indicating the present status
+       */
+      virtual ILiveListener::RunStatus runStatus() = 0;
 
       /// Constructor.
       ILiveListener();

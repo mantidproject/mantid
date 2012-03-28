@@ -25,13 +25,15 @@ class SANSMaskCommandsTest(unittest.TestCase):
         """
             Checks the ISIS specfic mask command for spectra numbers
         """
-        spec_nums1 = 7341
-        spec_nums2 = 17341
+        spec_nums1 = 7341   # pixel in main detector bank
+        spec_nums2 = 17341  # this refer to a pixel on LOQ HAB detector
 
         # flags some whole spectra for masking
         ISIS.Mask('mask S'+str(spec_nums1))
         ISIS.Mask('MASK S'+str(spec_nums2))
 
+        # this will apply the masking on the detector bank setup for 
+        # reduction, which in this case is the Main detector bank
         ISIS.ReductionSingleton().mask.execute(ISIS.ReductionSingleton(), self.test_ws_name)
 
         #sanity check the unmasked, most pixels should start at 1, check a random number
@@ -39,7 +41,8 @@ class SANSMaskCommandsTest(unittest.TestCase):
 
         # Spectrum number is one more than workspace index
         self.assertEqual(self.test_ws.readY(spec_nums1-1)[0], 0)
-        self.assertEqual(self.test_ws.readY(spec_nums2-1)[0], 0)
+        # This pixel has not been masked because it is on the HAB detector
+        self.assertEqual(self.test_ws.readY(spec_nums2-1)[0], 1.0)
         
     def test_masking_timebins(self):
         """

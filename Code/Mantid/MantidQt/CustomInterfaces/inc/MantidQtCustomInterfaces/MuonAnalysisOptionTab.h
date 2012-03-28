@@ -88,6 +88,9 @@ signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
 
+  /// Tell Muon interface to show the muon graphs
+  void notHidingGraphs();
+
 
 private:
   /// The Muon Analysis UI file.

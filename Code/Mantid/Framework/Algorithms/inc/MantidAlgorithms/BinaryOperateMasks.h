@@ -10,11 +10,8 @@ namespace Algorithms
 {
 
   /** BinaryOperateMasks : TODO: DESCRIPTION
-    
-    @author
-    @date 2011-10-05
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

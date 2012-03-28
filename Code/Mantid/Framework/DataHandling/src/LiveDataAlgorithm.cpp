@@ -85,6 +85,17 @@ namespace DataHandling
     declareProperty(new PropertyWithValue<std::string>("PostProcessingScript","",Direction::Input),
         "Not currently supported, but reserved for future use.");
 
+    std::vector<std::string> runOptions;
+    runOptions.push_back("Restart");
+    runOptions.push_back("Stop");
+    runOptions.push_back("Rename");
+    declareProperty("EndRunBehavior", "Restart", boost::make_shared<StringListValidator>(runOptions),
+        "What to do when a run ends?\n"
+        " - Restart: the accumulated data from the previous run is discarded.\n"
+        " - Stop: live data monitoring ends.\n"
+        " - Rename: the previous workspaces are renamed, and monitoring continues with cleared ones.");
+
+
     declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
                                                      PropertyMode::Optional, LockMode::NoLock),
         "Optional, unless performing PostProcessing:\n"

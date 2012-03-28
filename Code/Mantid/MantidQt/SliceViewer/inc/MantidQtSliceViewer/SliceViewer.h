@@ -78,6 +78,8 @@ public:
   void setXYCenter(double x, double y);
   void openFromXML(const QString & xml);
   void toggleLineMode(bool);
+  void setNormalization(Mantid::API::MDNormalization norm);
+  Mantid::API::MDNormalization getNormalization() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

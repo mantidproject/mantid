@@ -173,6 +173,14 @@ public:
     TS_ASSERT_DELTA( box.getError(), sqrt(456.0), 1e-4);
   }
 
+  void test_getTotalWeight()
+  {
+    IMDBoxTester<MDLeanEvent<3>,3> box;
+    TS_ASSERT_EQUALS( box.getTotalWeight(), 0.0);
+    box.setTotalWeight(123.0);
+    TS_ASSERT_EQUALS( box.getTotalWeight(), 123.0);
+  }
+
   void test_get_and_set_depth()
   {
     IMDBoxTester<MDLeanEvent<3>,3> b;

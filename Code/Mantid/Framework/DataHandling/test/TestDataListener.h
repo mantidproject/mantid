@@ -30,6 +30,7 @@ namespace Mantid
       boost::shared_ptr<API::MatrixWorkspace> extractData();
 
       bool isConnected();
+      ILiveListener::RunStatus runStatus();
 
     private:
       DataObjects::EventWorkspace_sptr m_buffer;
@@ -42,6 +43,12 @@ namespace Mantid
 
       /// For testing: set the reset flag after this many calls to extractData()
       int m_resetAfter;
+
+      /// For testing: set the status flag to m_newStatus after this many calls to extractData()
+      int m_changeStatusAfter;
+
+      /// For testing: set the status flag to this after m_changeStatusAfter calls to extractData()
+      ILiveListener::RunStatus m_newStatus;
 
     };
 
