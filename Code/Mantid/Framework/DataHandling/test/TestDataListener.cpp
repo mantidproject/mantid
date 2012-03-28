@@ -54,7 +54,7 @@ namespace DataHandling
   ILiveListener::RunStatus TestDataListener::runStatus()
   {
     // Always in a run - could be changed to do something more elaborate if needed for testing
-    return RunStatus::Running;
+    return Running;
   }
 
   void TestDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time
