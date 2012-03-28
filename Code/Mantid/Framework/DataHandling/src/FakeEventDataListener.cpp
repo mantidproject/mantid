@@ -4,6 +4,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/WriteLock.h"
+#include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,9 +20,11 @@ namespace DataHandling
       m_buffer(), m_rand(new Kernel::MersenneTwister), m_timer(), m_callbackloop(1)
   {
     if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.datarate",m_datarate) )
-    {
       m_datarate = 200; // Default data rate. Low so that our lowest-powered buildserver can cope.
-    }
+    // For auto-ending and restarting runs
+    if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.endrunevery",m_endRunEvery) )
+      m_endRunEvery = 0;
+    std::cout << "m_endRunEvery is " << m_endRunEvery << std::endl;
   }
     
   /// Destructor
@@ -44,8 +47,15 @@ namespace DataHandling
 
   ILiveListener::RunStatus FakeEventDataListener::runStatus()
   {
-    // Always in a run - could be changed to do something more elaborate if needed for testing
-    return Running;
+    if (m_endRunEvery > 0 && DateAndTime::getCurrentTime() > m_nextEndRunTime)
+    {
+      // End a run once every m_endRunEvery seconds
+      m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
+      return EndRun;
+    }
+    else
+      // Never end a run
+      return Running;
   }
 
   void FakeEventDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time for now at least
@@ -68,6 +78,9 @@ namespace DataHandling
     // Using a Poco::Timer here. Probably a real listener will want to use a Poco::Activity or ActiveMethod.
     m_timer.setPeriodicInterval( (m_datarate > 2000 ? 1 : 2000/m_datarate) );
     m_timer.start(Poco::TimerCallback<FakeEventDataListener>(*this,&FakeEventDataListener::generateEvents));
+
+    // When we are past this time, end the run.
+    m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
 
     return;
   }

@@ -9,6 +9,7 @@
 #include "MantidKernel/RandomNumberGenerator.h"
 #include <Poco/Timer.h>
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
@@ -59,6 +60,10 @@ namespace Mantid
       Poco::Timer m_timer; ///< Used to call the event-generating function on a schedule
       int m_datarate;     ///< The data rate to (attempt to) generate in events/sec
       int m_callbackloop; ///< Number of times to loop within each generateEvents() call
+      double m_endRunEvery; ///< Make a new run every N seconds
+
+      /// Date and time of the next time to end the run
+      Mantid::Kernel::DateAndTime m_nextEndRunTime;
 
       /// Mutex to exclude generateEvents() and extractData().
       Kernel::Mutex m_mutex;
