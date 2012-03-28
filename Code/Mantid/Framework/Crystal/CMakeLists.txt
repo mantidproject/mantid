@@ -99,6 +99,7 @@ set ( TEST_FILES
 	test/SavePeaksFileTest.h
 	test/SetGoniometerTest.h
 	test/SetUBTest.h
+	test/SortHKLTest.h
 )
 
 if(UNITY_BUILD)

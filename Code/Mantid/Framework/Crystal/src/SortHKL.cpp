@@ -61,7 +61,7 @@ namespace Crystal
    */
   void SortHKL::init()
   {
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::InOut),
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input),
         "An input PeaksWorkspace with an instrument.");
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_pointGroups.size(); ++i)
@@ -82,8 +82,9 @@ namespace Crystal
 
     PeaksWorkspace_sptr InPeaksW = getProperty("InputWorkspace");
     // HKL will be overwritten by equivalent HKL but never seen by user
-    PeaksWorkspace_sptr peaksW = InPeaksW->clone();
-    peaksW->setName("PeaksByEquivalentHKL");
+    PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
+    if (peaksW != InPeaksW)
+      peaksW = InPeaksW->clone();
     
     //Use the primitive by default
     PointGroup_sptr pointGroup(new PointGroupLaue1());
@@ -115,7 +116,6 @@ namespace Crystal
     criteria.push_back( std::pair<std::string, bool>("H", true) );
     criteria.push_back( std::pair<std::string, bool>("K", true) );
     criteria.push_back( std::pair<std::string, bool>("L", true) );
-    InPeaksW->sort(criteria);
     peaksW->sort(criteria);
 
     std::vector<double> data, sig2;
@@ -192,7 +192,7 @@ namespace Crystal
     {
       peaks[i].resetHKL();
     }
-    setProperty<PeaksWorkspace_sptr>("OutputWorkspace", peaksW);
+    setProperty("OutputWorkspace", peaksW);
     setProperty("OutputChi2", Chisq);
 
   }
