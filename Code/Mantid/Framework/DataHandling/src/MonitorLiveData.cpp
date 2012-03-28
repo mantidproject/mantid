@@ -87,7 +87,11 @@ namespace DataHandling
     // Since StartLiveData _just_ called it, use the current time.
     DateAndTime lastTime = DateAndTime::getCurrentTime();
 
-    size_t chunk = 0;
+    m_chunkNumber = 0;
+    std::string AccumulationWorkspace = this->getPropertyValue("AccumulationWorkspace");
+    std::string OutputWorkspace = this->getPropertyValue("OutputWorkspace");
+
+    std::string NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 
     // Keep going until you get cancelled
     while (true)
@@ -104,7 +108,7 @@ namespace DataHandling
       if (seconds > UpdateEvery)
       {
         lastTime = now;
-        g_log.notice() << "Loading live data chunk " << chunk << " at " << now.toFormattedString("%H:%M:%S") << std::endl;
+        g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at " << now.toFormattedString("%H:%M:%S") << std::endl;
 
         // Time to run LoadLiveData again
         Algorithm_sptr alg = createSubAlgorithm("LoadLiveData");
@@ -122,21 +126,59 @@ namespace DataHandling
         loadAlg->copyPropertyValuesFrom(*this);
         // Give the listener directly to LoadLiveData (don't re-create it)
         loadAlg->setLiveListener(listener);
+        // Override the AccumulationMethod when a run ends.
+        loadAlg->setPropertyValue("AccumulationMethod", NextAccumulationMethod);
 
         // Run the LoadLiveData
         loadAlg->executeAsSubAlg();
 
-        chunk++;
+        NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
+
+        // Did we just hit the end of a run?
+        if (listener->runStatus() == ILiveListener::EndRun)
+        {
+          g_log.notice() << "Run ended.";
+          std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
+          if (EndRunBehavior == "Stop")
+          {
+            g_log.notice() << " Stopping live data monitoring." << std::endl;
+            break;
+          }
+          else if (EndRunBehavior == "Restart")
+          {
+            g_log.notice() << " Clearing existing workspace.";
+            NextAccumulationMethod = "Replace";
+          }
+          else if (EndRunBehavior == "Rename")
+          {
+            g_log.notice() << " Renaming existing workspace.";
+            NextAccumulationMethod = "Replace";
+            //TODO
+          }
+          g_log.notice() << std::endl;
+        }
+
+        m_chunkNumber++;
         //progress( double(chunk % 100)*0.01, "chunk " + Strings::toString(chunk));
-        progress( 0.0, "Live Data " + Strings::toString(chunk));
+        progress( 0.0, "Live Data " + Strings::toString(m_chunkNumber));
       }
 
       // This is the time to process a single chunk. Is it too long?
       seconds = DateAndTime::secondsFromDuration( now - lastTime );
       if (seconds > UpdateEvery)
         g_log.warning() << "Cannot process live data as quickly as requested: requested every " << UpdateEvery << " seconds but it takes " << seconds << " seconds!" << std::endl;
+    } // loop until aborted
+
+    // Set the outputs (only applicable when EndRunBehavior is "Stop")
+    Workspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<Workspace>(OutputWorkspace);
+    this->setProperty("OutputWorkspace", OutputWS);
+    if (!AccumulationWorkspace.empty())
+    {
+      Workspace_sptr AccumulationWS = AnalysisDataService::Instance().retrieveWS<Workspace>(AccumulationWorkspace);
+      this->setProperty("AccumulationWorkspace", AccumulationWS);
     }
-  }
+
+  } // exec()
 
 
 
