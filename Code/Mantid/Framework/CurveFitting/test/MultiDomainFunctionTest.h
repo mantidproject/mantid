@@ -9,6 +9,9 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/Fit.h"
+
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
@@ -130,6 +133,78 @@ public:
     TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("B"),2,1e-8);
     TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("A"),2,1e-8);
     TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("B"),3,1e-8);
+  }
+
+  void test_Fit_algorithm()
+  {
+    const double A0 = 0, A1 = 1, A2 = 2;
+    const double B0 = 1, B1 = 2, B2 = 3;
+
+    MatrixWorkspace_sptr ws1(new WorkspaceTester);
+    ws1->initialize(1,10,10);
+    {
+      Mantid::MantidVec& x = ws1->dataX(0);
+      Mantid::MantidVec& y = ws1->dataY(0);
+      Mantid::MantidVec& e = ws1->dataE(0);
+      for(size_t i = 0; i < ws1->blocksize(); ++i)
+      {
+        x[i] =  0.1 * i;
+        y[i] =  A0 + A1 + A2 + (B0 + B1 + B2) * x[i];
+      }
+    }
+
+    MatrixWorkspace_sptr ws2(new WorkspaceTester);
+    ws2->initialize(1,10,10);
+    {
+      Mantid::MantidVec& x = ws2->dataX(0);
+      Mantid::MantidVec& y = ws2->dataY(0);
+      Mantid::MantidVec& e = ws2->dataE(0);
+      for(size_t i = 0; i < ws2->blocksize(); ++i)
+      {
+        x[i] = 1 + 0.1 * i;
+        y[i] = A0 + A1 + (B0 + B1) * x[i];
+      }
+    }
+
+    MatrixWorkspace_sptr ws3(new WorkspaceTester);
+    ws3->initialize(1,10,10);
+    {
+      Mantid::MantidVec& x = ws3->dataX(0);
+      Mantid::MantidVec& y = ws3->dataY(0);
+      Mantid::MantidVec& e = ws3->dataE(0);
+      for(size_t i = 0; i < ws3->blocksize(); ++i)
+      {
+        x[i] = 2 + 0.1 * i;
+        y[i] = A0 + A2 + (B0 + B2) * x[i];
+      }
+    }
+
+    multi->getFunction(0)->setParameter("A",0);
+    multi->getFunction(0)->setParameter("B",0);
+    multi->getFunction(1)->setParameter("A",0);
+    multi->getFunction(1)->setParameter("B",0);
+    multi->getFunction(2)->setParameter("A",0);
+    multi->getFunction(2)->setParameter("B",0);
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(multi));
+    fit.setProperty("InputWorkspace",ws1);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("InputWorkspace_1",ws2);
+    fit.setProperty("WorkspaceIndex_1",0);
+    fit.setProperty("InputWorkspace_2",ws3);
+    fit.setProperty("WorkspaceIndex_2",0);
+    fit.execute();
+
+    IFunction_sptr fun = fit.getProperty("Function");
+    TS_ASSERT_DELTA(fun->getParameter("f0.A"),0,1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f0.B"),1,1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f1.A"),1,1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f1.B"),2,1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f2.A"),2,1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f2.B"),3,1e-8);
+
   }
 
 private:

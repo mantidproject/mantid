@@ -37,7 +37,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MultiDomainCreator : IDomainCreator
+    class DLLExport MultiDomainCreator : public IDomainCreator
     {
       /// A friend that can create instances of this class
       friend class Fit;
@@ -46,7 +46,7 @@ namespace Mantid
 
       /// Create a domain from the input workspace
       virtual void createDomain(
-        const std::string& workspacePropetyName,
+        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values, size_t i0);
 

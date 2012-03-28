@@ -105,11 +105,15 @@ namespace
 
   /// Create a domain from the input workspace
   void FitMW::createDomain(
-    const std::string& workspacePropetyName,
+    const std::vector<std::string>& workspacePropetyNames,
     boost::shared_ptr<API::FunctionDomain>& domain, 
     boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
-    m_workspacePropertyName = workspacePropetyName;
+    if (workspacePropetyNames.empty())
+    {
+      throw std::runtime_error("Cannot create FunctionDomain1D: no workspace given");
+    }
+    m_workspacePropertyName = workspacePropetyNames[0];
     // get the function
     m_function = m_fit->getProperty("Function");
     // get the workspace 
@@ -222,7 +226,7 @@ namespace
 
     // set the data to fit to
     m_startIndex = static_cast<size_t>( from - X.begin() );
-    size_t n = values->size();
+    size_t n = domain->size();
     size_t ito = m_startIndex + n;
     const Mantid::MantidVec& Y = m_matrixWorkspace->readY( m_workspaceIndex );
     const Mantid::MantidVec& E = m_matrixWorkspace->readE( m_workspaceIndex );

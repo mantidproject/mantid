@@ -52,7 +52,7 @@ namespace Mantid
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);
       /// Create a domain from the input workspace
       virtual void createDomain(
-        const std::string& workspacePropetyName,
+        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
       void createOutputWorkspace(

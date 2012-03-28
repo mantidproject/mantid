@@ -51,7 +51,7 @@ namespace Mantid
 
       /// Create a domain from the input workspace
       virtual void createDomain(
-        const std::string& workspacePropetyName,
+        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>&, 
         boost::shared_ptr<API::IFunctionValues>&, size_t i0);
     protected:

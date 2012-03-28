@@ -62,7 +62,7 @@ namespace Mantid
       /// @param domain :: Shared pointer to hold the created domain
       /// @param values :: Shared pointer to hold the created values with set fitting data and weights
       virtual void createDomain(
-        const std::string& workspacePropetyName,
+        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values,
         size_t i0 = 0) = 0;

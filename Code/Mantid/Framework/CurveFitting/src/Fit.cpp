@@ -21,6 +21,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/FitMD.h"
+#include "MantidCurveFitting/MultiDomainCreator.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -84,34 +85,116 @@ namespace CurveFitting
     auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (mdf)
     {
+      for(size_t i = 1; i < mdf->nFunctions(); ++i)
+      {
+        declareProperty(
+          new API::WorkspaceProperty<API::Workspace>("InputWorkspace_"+boost::lexical_cast<std::string>(i),"",Kernel::Direction::Input), 
+          "Name of the input Workspace");
+      }
     }
   }
 
-  void Fit::addWorkspace(const std::string& workspaceNameProperty, bool addProperties)
+  void Fit::addWorkspace(const std::string& workspacePropertyName, bool addProperties)
   {
-    // Create the creator
+    // get the workspace 
+    API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
+    //m_function->setWorkspace(ws);
+    const size_t n = std::string("InputWorkspace").size();
+    const std::string suffix = (workspacePropertyName.size() > n)? workspacePropertyName.substr(n) : "";
+
+    API::IFunction_sptr fun = getProperty("Function");
+    IDomainCreator* creator = nullptr;
+
+    if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
+        !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
+    {
+      creator = new FitMW(this);
+    }
+    else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
+    {
+      creator = new FitMD(this);
+    }
+    else
+    {// don't know what to do with this workspace
+      throw std::invalid_argument("Unsupported workspace type" + ws->id());
+    }
+    creator->declareDatasetProperties(suffix,addProperties);
+    m_workspacePropertyNames.push_back(workspacePropertyName);
+
     if (!m_domainCreator)
     {
-      // get the workspace 
-      API::Workspace_const_sptr ws = getProperty("InputWorkspace");
-      //m_function->setWorkspace(ws);
-
-      if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
-          !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
+      if (boost::dynamic_pointer_cast<API::MultiDomainFunction>(fun))
       {
-        m_domainCreator.reset(new FitMW(this));
-      }
-      else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
-      {
-        m_domainCreator.reset(new FitMD(this));
+        auto multiCreator = new MultiDomainCreator(this);
+        multiCreator->addCreator(workspacePropertyName,creator);
+        m_domainCreator.reset(multiCreator);
       }
       else
-      {// don't know what to do with this workspace
-        throw std::invalid_argument("Unsupported workspace type" + ws->id());
+      {
+        m_domainCreator.reset(creator);
       }
-      m_domainCreator->declareDatasetProperties("",addProperties);
+    }
+    else
+    {
+      boost::shared_ptr<MultiDomainCreator> multiCreator = boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+      //MultiDomainCreator* multiCreator = dynamic_cast<MultiDomainCreator*>(m_domainCreator.get());
+      if (!multiCreator)
+      {
+        throw std::runtime_error(std::string("MultiDomainCreator expected, found ") + typeid(*m_domainCreator.get()).name());
+      }
+      multiCreator->addCreator(workspacePropertyName,creator);
+    }
+
+  }
+
+  /**
+   * Collect all input workspace property names in the m_workspacePropertyNames vector
+   */
+  void Fit::addWorkspaces()
+  {
+    auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
+    if (multiFun)
+    {
+      m_domainCreator.reset(new MultiDomainCreator(this));
+    }
+    auto props = getProperties();
+    for(auto prop = props.begin(); prop != props.end(); ++prop)
+    {
+      if ((**prop).direction() == Kernel::Direction::Input && dynamic_cast<API::IWorkspaceProperty*>(*prop))
+      {
+        const std::string workspacePropertyName = (**prop).name();
+        API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
+        IDomainCreator* creator = nullptr;
+        if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
+            !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
+        {
+          creator = new FitMW(this);
+        }
+        else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
+        {
+          creator = new FitMD(this);
+        }
+        else
+        {// don't know what to do with this workspace
+          throw std::invalid_argument("Unsupported workspace type" + ws->id());
+        }
+        const size_t n = std::string("InputWorkspace").size();
+        const std::string suffix = (workspacePropertyName.size() > n)? workspacePropertyName.substr(n) : "";
+        creator->declareDatasetProperties(suffix,false);
+        m_workspacePropertyNames.push_back(workspacePropertyName);
+        if (!m_domainCreator)
+        {
+          m_domainCreator.reset(creator);
+        }
+        auto multiCreator = boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+        if (multiCreator)
+        {
+          multiCreator->addCreator(workspacePropertyName,creator);
+        }
+      }
     }
   }
+
 
   /** Initialisation method
   */
@@ -168,7 +251,7 @@ namespace CurveFitting
     if (!m_domainCreator)
     {
       setFunction();
-      addWorkspace("InputWorkspace",false);
+      addWorkspaces();
     }
 
     // do something with the function which may depend on workspace
@@ -176,7 +259,7 @@ namespace CurveFitting
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;
-    m_domainCreator->createDomain("InputWorkspace",domain,values);
+    m_domainCreator->createDomain(m_workspacePropertyNames,domain,values);
 
     // get the minimizer
     std::string minimizerName = getPropertyValue("Minimizer");

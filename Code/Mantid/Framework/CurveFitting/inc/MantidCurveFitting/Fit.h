@@ -9,8 +9,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidCurveFitting/IDomainCreator.h"
 
-#include <boost/scoped_ptr.hpp>
-
 namespace Mantid
 {
 
@@ -53,7 +51,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Fit() : API::Algorithm(),m_workspaceCount(0) {};
+      Fit() : API::Algorithm() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
       /// Algorithm's version for identification overriding a virtual method
@@ -72,15 +70,16 @@ namespace Mantid
       virtual void afterPropertySet(const std::string& propName);
       void setFunction();
       void addWorkspace(const std::string& workspaceNameProperty, bool addProperties = true);
+      void addWorkspaces();
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;
       ///// Pointer 
       //API::Workspace_const_sptr m_workspace;
       /// Pointer to a domain creator
-      boost::scoped_ptr<IDomainCreator> m_domainCreator;
+      boost::shared_ptr<IDomainCreator> m_domainCreator;
       friend class IDomainCreator;
-      size_t m_workspaceCount;
+      std::vector<std::string> m_workspacePropertyNames;
 
     };
 
