@@ -56,9 +56,6 @@ class RefLReduction(PythonAlgorithm):
         data_peak = self.getProperty("SignalPeakPixelRange")
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
-        print 'data_back is'
-        print data_back
-
         # TOF range to consider
         TOFrange = self.getProperty("TOFRange") #microS
         # Steps for TOF rebin
@@ -234,8 +231,7 @@ class RefLReduction(PythonAlgorithm):
 #                                              maxX=maxX,
 #                                              maxY=maxY)     
 
-        ws_data = "_DataWks"
-        ws_transposed = '_TransposedID'
+        ws_data = '_' + ws_name + '_DataWks'
         if subtract_data_bck:
 
             print '-> substract background'
@@ -282,7 +278,7 @@ class RefLReduction(PythonAlgorithm):
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
                                      OutputWorkspace=ws_histo_data)
             
-            ws_data_bck = "_DataBckWks"
+            ws_data_bck = '_' + ws_name + '_DataBckWks'
             ws_data_bck_1 = ws_data_bck + "_1"
             RefRoi(InputWorkspace=ws_histo_data,
                    OutputWorkspace=ws_data_bck_1,
@@ -445,8 +441,8 @@ class RefLReduction(PythonAlgorithm):
 #                                                  maxX=maxX,
 #                                                  maxY=maxY)
 
-            ws_data_bck = "_NormBckWks"
-            ws_norm_rebinned = "_NormRebinnedWks"
+            ws_data_bck = '_' + ws_name + '_NormBckWks'
+            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
             if subtract_norm_bck:
                 
                 print '-> substract background to direct beam'
@@ -526,7 +522,7 @@ class RefLReduction(PythonAlgorithm):
                 ConvertToMatrixWorkspace(InputWorkspace=ws_norm_histo_data,
                                          OutputWorkspace=ws_norm_histo_data)
             
-                ws_norm_bck = "_NormBckWks"
+                ws_norm_bck = '_' + ws_name + '_NormBckWks'
                 ws_norm_bck_1 = ws_norm_bck + "_1"
                 RefRoi(InputWorkspace=ws_norm_histo_data,
                        OutputWorkspace=ws_norm_bck_1,
@@ -598,7 +594,7 @@ class RefLReduction(PythonAlgorithm):
                 #Create a new event workspace of only the range of pixel of interest 
                 #background range (along the y-axis) and of only the pixel
                 #of interest along the x-axis (to avoid the frame effect)
-                ws_integrated_data = "_IntegratedNormWks"
+                ws_integrated_data = '_' + ws_name + '_IntegratedNormWks'
                 wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
                                                       ws_integrated_data,
                                                       fromXpixel=normXrange[0],
@@ -623,7 +619,7 @@ class RefLReduction(PythonAlgorithm):
             print '-> Divide data by direct beam'
             Divide(LHSWorkspace=ws_data,
                    RHSWorkspace=ws_norm_rebinned,
-                   OutputWorkspace=ws_data+'_tmp')
+                   OutputWorkspace=ws_data)
 
         #This is where I need to move from TOF to Q (not before that)
         #now we can convert to Q
@@ -637,11 +633,11 @@ class RefLReduction(PythonAlgorithm):
 #        print '-> Apply SF'
 #        ws_data_scaled = wks_utility.applySF(ws_data,
 #                                             slitsValuePrecision)
-        ws_data_scaled = ws_data+'_tmp'  #REMOVE_ME
+        ws_data_scaled = ws_data   #REMOVE_ME
 
         if dMD is not None and theta is not None:
                     
-            _tof_axis = mtd[ws_data+'_tmp'].readX(0)
+            _tof_axis = mtd[ws_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
             sz_tof = numpy.shape(_tof_axis)[0]
             _q_axis = zeros(sz_tof-1)
@@ -653,7 +649,7 @@ class RefLReduction(PythonAlgorithm):
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
         
-        ws_integrated_data = "_IntegratedDataWks"
+        ws_integrated_data = '_' + ws_name + '_IntegratedDataWks'
         print '-> keep only range of pixel of interest'
         wks_utility.createIntegratedWorkspace(mtd[ws_data_scaled], 
                                               ws_integrated_data,
@@ -669,7 +665,6 @@ class RefLReduction(PythonAlgorithm):
 #        mtd.deleteWorkspace(ws_data)
         ws_data_Q = ws_data + '_Q'
         print '-> convert to Q'
-        
 #        wks_utility.convertWorkspaceToQ(ws_data_scaled,
         wks_utility.convertWorkspaceToQ(ws_integrated_data,
                                         ws_data_Q,
@@ -693,8 +688,8 @@ class RefLReduction(PythonAlgorithm):
 
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
-#        if mtd.workspaceExists(output_ws):
-#            mtd.deleteWorkspace(output_ws)
+        if mtd.workspaceExists(output_ws):
+            mtd.deleteWorkspace(output_ws)
             
         print '-> sum spectra'    
         SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
@@ -738,12 +733,17 @@ class RefLReduction(PythonAlgorithm):
                           OutputWorkspace=output_ws,
                           XMin=qmin, XMax=qmax)
 
-#        mtd.deleteWorkspace(ws_event_data)
-#        mtd.deleteWorkspace(ws_data_Q)
-
          #space
-        print
         self.setProperty("OutputWorkspace", mtd[output_ws])
         
-
+        #cleanup all workspace used
+        print '-> Cleaning useless workspaces'
+        mtd.deleteWorkspace(ws_event_data)
+        mtd.deleteWorkspace(ws_data_Q)
+        mtd.deleteWorkspace(ws_data)
+        mtd.deleteWorkspace(ws_norm_event_data)
+        
+        print
+        
+        
 mtd.registerPyAlgorithm(RefLReduction())
