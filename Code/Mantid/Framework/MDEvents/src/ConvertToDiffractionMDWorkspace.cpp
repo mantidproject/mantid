@@ -343,6 +343,10 @@ namespace MDEvents
     Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
     m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
 
+    // check the input units
+    if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
+      throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
+
     if (!m_inEventWS && !OneEventPerBin)
     {
       // We DONT want 1 event per bin, but we didn't give an EventWorkspace
@@ -364,10 +368,6 @@ namespace MDEvents
         throw std::invalid_argument("InputWorkspace must be either an EventWorkspace or a Workspace2D (which will get converted to events).");
     }
 
-
-    // check the input units
-    if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
-      throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
