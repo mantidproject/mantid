@@ -109,6 +109,9 @@ void MuonAnalysis::initLayout()
   m_optionTab->initLayout();
   m_fitDataTab->init();
 
+  // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
+  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SLOT (showMuonGraphs()));
+
   // connect guess alpha
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked()));
 
@@ -1351,20 +1354,6 @@ void MuonAnalysis::deleteRangedWorkspaces()
 
 
 /**
-* Delete all the open graphs that are associated with the muon fit property browser.
-*/
-void MuonAnalysis::deleteGraphs()
-{
-  QStringList names(m_uiForm.fitBrowser->getWorkspaceNames() );
-
-  for (int i=0; i<names.size(); ++i)
-  {
-    emit closeGraph(names[i] + "-1");
-  }
-}
-
-
-/**
 * Create a table of dead times and apply them to the data.
 *
 * @params deadTimes :: a vector of all the dead times starting at spectrum 1.
@@ -1947,9 +1936,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
   m_updating = true;
 
-  if (m_uiForm.hideGraphs->isChecked() )
-    deleteGraphs();
-
   QString plotTypeTitle("");
   if (plotType == "Asymmetry")
   {
@@ -1978,6 +1964,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     
     // curve plot label
     QString titleLabel = cropWS;
+
+    if (m_uiForm.hideGraphs->isChecked() )
+      emit hideGraphs(titleLabel + "-1"); //exception is the new graph
 
     // Find out whether raw file has been created yet
     bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
@@ -2101,9 +2090,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
   m_updating = true;
 
-  if (m_uiForm.hideGraphs->isChecked() )
-    deleteGraphs();
-
   QString plotTypeTitle("");
   if (plotType == "Asymmetry")
   {
@@ -2133,6 +2119,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     // curve plot label
     QString titleLabel = cropWS;
+
+    if (m_uiForm.hideGraphs->isChecked() )
+      emit hideGraphs(titleLabel + "-1"); //exception is the new graph
 
     // Find out whether raw file has been created yet
     bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
@@ -3020,6 +3009,20 @@ void MuonAnalysis::loadFittings()
 
 
 /**
+*
+*/
+void MuonAnalysis::showMuonGraphs()
+{
+  QStringList names(m_uiForm.fitBrowser->getWorkspaceNames() );
+
+  for (int i=0; i<names.size(); ++i)
+  {
+    emit showGraph(names[i] + "-1");
+  }
+}
+
+
+/**
 *   Check to see if the appending option is true when the previous button has been pressed and acts accordingly
 */
 void MuonAnalysis::checkAppendingPreviousRun()
@@ -3301,7 +3304,6 @@ void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));

@@ -1188,6 +1188,9 @@ private:
   /// Delete a plot with a given workspace name
   void closeGraph(const QString & wsName);
 
+  /// Hide all graphs apart from the exception (default to no exception)
+  void hideGraphs(const QString & exception = "");
+
   // TODO: a lot of this stuff should be private
 public:
   //! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.

@@ -164,6 +164,9 @@ private slots:
   /// Change to the dead time file, make sure graph is updated next time it is plotted.
   void deadTimeFileSelected();
 
+  /// Open up the muon graphs that are hidden.
+  void showMuonGraphs();
+
 
 private:
   /// Initialize the layout
@@ -225,9 +228,6 @@ private:
 
   /// Delete ranged workspaces.
   void deleteRangedWorkspaces();
-
-  /// Delete all the open graphs.
-  void deleteGraphs();
 
   /// Get group workspace name
   QString getGroupName();

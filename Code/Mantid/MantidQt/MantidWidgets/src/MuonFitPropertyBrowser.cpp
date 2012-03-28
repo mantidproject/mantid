@@ -395,7 +395,7 @@ void MuonFitPropertyBrowser::workspaceChange(const QString& wsName)
 bool MuonFitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
   QString workspaceName(QString::fromStdString(ws->name() ) );
-  if (workspaceName.contains("_Raw") )
+  if ( (workspaceName.contains("_Raw") ) || (workspaceName.contains("MuonAnalysis") ) )
     return false;
 
   if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0)
