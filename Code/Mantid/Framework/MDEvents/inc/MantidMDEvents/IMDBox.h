@@ -309,6 +309,15 @@ namespace MDEvents
     }
 
     //-----------------------------------------------------------------------------------------------
+    /** Returns the total weight of all events within. Typically this is
+     * equal to the number of events (weight of 1 per event)
+     */
+    virtual signal_t getTotalWeight() const
+    {
+      return m_totalWeight;
+    }
+
+    //-----------------------------------------------------------------------------------------------
     /** Sets the integrated signal from all points within  (mostly used for testing)
      * @param signal :: new Signal amount.
      */
@@ -324,6 +333,15 @@ namespace MDEvents
     virtual void setErrorSquared(const signal_t ErrorSquared)
     {
       m_errorSquared = ErrorSquared;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Sets the total weight from all points within  (mostly used for testing)
+     * @param total :: new weight amount.
+     */
+    virtual void setTotalWeight(const signal_t total)
+    {
+      m_totalWeight = total;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -413,6 +431,10 @@ namespace MDEvents
     /** Cached total error (squared) from all points within.
     * Set when refreshCache() is called. */
     mutable signal_t m_errorSquared;
+
+    /** Cached total weight of all events
+     * Set when refreshCache() is called. */
+    mutable signal_t m_totalWeight;
 
     /// Inverse of the volume of the cell, to be used for normalized signal.
     coord_t m_inverseVolume;

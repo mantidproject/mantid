@@ -16,7 +16,7 @@ namespace MDEvents
    */
   TMDE(
   IMDBox)::IMDBox()
-    : m_signal(0.0), m_errorSquared(0.0),
+    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(1.0),
       m_depth(0),
       m_parent(NULL)
@@ -34,7 +34,7 @@ namespace MDEvents
    */
   TMDE(
   IMDBox)::IMDBox(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
-    : m_signal(0.0), m_errorSquared(0.0),
+    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(1.0),
       m_depth(0),
       m_parent(NULL)
@@ -59,7 +59,7 @@ namespace MDEvents
   TMDE(
   IMDBox)::IMDBox(const IMDBox<MDE,nd> & box)
   : ISaveable(box),
-    m_signal(box.m_signal), m_errorSquared(box.m_errorSquared),
+    m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
     m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
     m_parent(box.m_parent)
   {
