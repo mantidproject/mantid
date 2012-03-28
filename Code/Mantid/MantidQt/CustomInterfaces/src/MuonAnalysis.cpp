@@ -110,7 +110,7 @@ void MuonAnalysis::initLayout()
   m_fitDataTab->init();
 
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
-  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SLOT (showMuonGraphs()));
+  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
 
   // connect guess alpha
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked()));
@@ -3005,20 +3005,6 @@ void MuonAnalysis::loadFittings()
   m_uiForm.fitBrowser->setWindowTitle("Fit Function");
   // Make sure that the window can't be moved or closed within the tab.
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
-}
-
-
-/**
-*
-*/
-void MuonAnalysis::showMuonGraphs()
-{
-  QStringList names(m_uiForm.fitBrowser->getWorkspaceNames() );
-
-  for (int i=0; i<names.size(); ++i)
-  {
-    emit showGraph(names[i] + "-1");
-  }
 }
 
 

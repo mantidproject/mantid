@@ -121,8 +121,8 @@ signals:
   void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
 
   void closeGraph(const QString & wsName);
-  void hideGraphs(const QString & wsName);
-  void showGraph(const QString & wsName);
+  void hideGraphs(const QString & exception = ""); // wsName
+  void showGraphs();
 
   void hideToolbars();
   void showToolbars();
