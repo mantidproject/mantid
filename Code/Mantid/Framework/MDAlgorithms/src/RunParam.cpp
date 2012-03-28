@@ -427,11 +427,9 @@ namespace Mantid
        return( 1.e-6*(3.*m_s1 + m_s3*m_s2) );
     }
 
-    /*
-    */
     double RunParam::getTauModeratorAverageUs() const
     {
-       return( 3.*m_s1 + m_s3*m_s2 );
+      return( 3.*m_s1+m_s3*m_s2);
     }
 
     /*
@@ -466,8 +464,7 @@ namespace Mantid
       {
         double xTemp = moderatorTimeLookUp(randomVar);
         if(xTemp>0.999) xTemp=0.999;
-        const double modTimeAve=3.*m_s1+m_s3*m_s2;
-        return( 1.e-6*modTimeAve*(xTemp/(1.-xTemp)-1.0));
+        return( 1.e-6*getTauModeratorAverageUs()*(xTemp/(1.-xTemp)-1.0));
       }
       return(0.);
     }

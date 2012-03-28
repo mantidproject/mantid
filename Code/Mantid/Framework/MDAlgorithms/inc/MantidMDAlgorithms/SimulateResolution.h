@@ -84,7 +84,8 @@ namespace Mantid
             /** Perform the convolution calculation for one pixel. May implement other methods
              * besides MC.
              *
-             * @param e :: MDEvent that corresponds to a pixel in a named detector/run
+             * @param it :: iterator that contains event to be simulated
+             * @param event :: MDEvent that corresponds to a pixel in a named detector/run
              * @param error :: the error estimate of the calculated scattering
              * @return :: the calculated scattering value for this pixel given the SQW model
              */
@@ -92,7 +93,8 @@ namespace Mantid
 
             /** Perform the convolution calculation for one pixel using MonteCarlo/Sobol method
              *
-             * @param e :: MDEvent that corresponds to a pixel in a named detector/run
+             * @param it :: iterator that contains event to be simulated
+             * @param event :: MDEvent that corresponds to a pixel in a named detector/run
              * @param error :: the error estimate of the calculated scattering
              * @return :: the calculated scattering value for this pixel given the SQW model
              */

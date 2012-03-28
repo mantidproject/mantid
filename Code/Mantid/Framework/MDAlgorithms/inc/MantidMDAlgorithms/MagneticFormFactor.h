@@ -54,7 +54,7 @@ namespace Mantid
             /// change the form factor to be used and recompute table
             /// @param atomicNo - scattering element
             /// @param ionisation - ionisation of element
-            /// @tableSize - number of points to use in lookup table
+            /// @param tableSize - number of points to use in lookup table
             void setFormFactor(const int atomicNo, const int ionisation, const int tableSize);
             /// Magnetic form for given Q Squared value (direct calculation)
             /// @param qSqu - momentum squared

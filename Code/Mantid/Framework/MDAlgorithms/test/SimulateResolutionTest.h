@@ -362,10 +362,17 @@ public:
     const double thetam=0.55850536063818546;
     const double angvel=3769.9111843077517;
     fn->wrap_bMatrix(wi,wf,x0,xa,x1,x2,thetam,angvel,sMat,dMat,bMat);
-    // check random values are in range 0-1
+    // check selected values with same from tobyfit
     TS_ASSERT_DELTA( bMat[0][0], 13447.663441293, 1e-3 );
     TS_ASSERT_DELTA( bMat[0][3], -13447.663441293, 1e-3 );
     TS_ASSERT_DELTA( bMat[3][0], -2387.196362925, 1e-3 );
+    TS_ASSERT_DELTA( bMat[5][0], -0.0, 1e-3 );
+    TS_ASSERT_DELTA( bMat[3][1],  0.206156088081, 1e-6 );
+    TS_ASSERT_DELTA( bMat[2][2], -1.467269697008, 1e-6 );
+    TS_ASSERT_DELTA( bMat[3][3],  15077.02966058, 1e-3 );
+    TS_ASSERT_DELTA( bMat[3][4], -0.328109492982, 1e-6 );
+    TS_ASSERT_DELTA( bMat[0][5],  0.175706947063, 1e-6 );
+    TS_ASSERT_DELTA( bMat[5][6],  1.583161468528, 1e-6 );
   }
 
   void testSqwConvoutionMC()

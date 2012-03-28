@@ -234,16 +234,20 @@ namespace Mantid
 
       //double moderatorSampleVolumeTable();
       /*
+       * Standard deviation of the moderator signal based on the given model in seconds
        */
       double getTauModeratorSignal() const;
 
       /*
-       */
-      double getTauModeratorMean() const;
-
-      /*
+       * Get the average delay of the moderator in us, based on the moderator model.
+       * Used to scale line shape delay in mcYVec, maybe removed.
        */
       double getTauModeratorAverageUs() const;
+
+      /*
+       * Moderator time only used in old TF convolution models, not the Monte Carlo method
+       */
+      double getTauModeratorMean() const;
 
       /*
        * Simple energy resolution only based on moderator and chopper
