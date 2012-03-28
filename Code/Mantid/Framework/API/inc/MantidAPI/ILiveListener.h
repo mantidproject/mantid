@@ -105,7 +105,7 @@ namespace Mantid
        *  Running : We are in a run
        *  End     : The run has ended since the last call to extractData
        */
-      enum RunStatus { None = 0, Begin = 1, Running = 2, End = 4};
+      enum RunStatus { NoRun = 0, BeginRun = 1, Running = 2, EndRun = 4};
       /** Gets the current run status of the listened-to data stream
        *  @return A value of the RunStatus enumeration indicating the present status
        */

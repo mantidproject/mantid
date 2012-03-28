@@ -54,11 +54,11 @@ namespace DataHandling
   ILiveListener::RunStatus FileEventDataListener::runStatus()
   {
     // Say we're outside a run if this is called before start is
-    if ( m_nextChunk == 1 ) return None;
+    if ( m_nextChunk == 1 ) return NoRun;
     // This means the first chunk is being/has just been loaded
-    else if ( m_nextChunk == 2 ) return Begin;
+    else if ( m_nextChunk == 2 ) return BeginRun;
     // This means we've read the whole file
-    else if ( m_chunkload == NULL ) return End;
+    else if ( m_chunkload == NULL ) return EndRun;
     // Otherwise we're in the run
     else return Running;
   }

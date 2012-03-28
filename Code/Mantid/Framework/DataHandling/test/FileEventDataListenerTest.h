@@ -33,11 +33,11 @@ public:
     TS_ASSERT( listener->buffersEvents() )
     TS_ASSERT( listener->isConnected() )
 
-    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::None )
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::NoRun )
 
     TS_ASSERT_THROWS_NOTHING( listener->start(0) );
 
-    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::Begin )
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::BeginRun )
 
     MatrixWorkspace_const_sptr buffer;
     TS_ASSERT_THROWS_NOTHING( buffer = listener->extractData())
@@ -56,7 +56,7 @@ public:
     TS_ASSERT_DIFFERS( buffer.get(), buffer2.get() )
     TS_ASSERT_EQUALS( buffer2->getNumberHistograms(), 77824 )
 
-    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::End )
+    TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::EndRun )
 
     // Calling it again will throw as it's the end of the file
     TS_ASSERT_THROWS( listener->extractData(), std::runtime_error )
