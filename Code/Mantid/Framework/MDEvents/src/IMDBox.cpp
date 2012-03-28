@@ -105,7 +105,7 @@ namespace MDEvents
       bool badEvent = false;
       for (size_t d=0; d<nd; d++)
       {
-        double x = it->getCenter(d);
+        coord_t x = it->getCenter(d);
         if ((x < this->extents[d].min) || (x >= this->extents[d].max))
         {
           badEvent = true;

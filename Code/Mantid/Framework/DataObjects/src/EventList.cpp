@@ -171,6 +171,8 @@ namespace DataObjects
     this->copyInfoFrom( *inSpec );
     // We need weights but have no way to set the time. So use weighted, no time
     this->switchTo(WEIGHTED_NOTIME);
+    if (GenerateZeros)
+      this->weightedEventsNoTime.reserve(Y.size());
 
     for (size_t i=0; i<X.size()-1; i++)
     {
@@ -205,7 +207,8 @@ namespace DataObjects
             {
               double tof = X[i] + tofStep * (0.5 + double(j));
               // Create and add the event
-              this->addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
+              // TODO: try emplace_back() here.
+              weightedEventsNoTime.push_back( WeightedEventNoTime(tof, weight, errorSquared) );
             }
           }
           else
@@ -217,7 +220,7 @@ namespace DataObjects
             double errorSquared = E[i];
             errorSquared *= errorSquared;
             // Create and add the event
-            this->addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
+            weightedEventsNoTime.push_back( WeightedEventNoTime(tof, weight, errorSquared) );
           }
         } // error is nont NAN or infinite
       } // weight is non-zero, not NAN, and non-infinite

@@ -85,6 +85,11 @@ namespace MDEvents
     /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
     Kernel::Matrix<double> mat;
 
+    /// Minimum extents of the workspace. Cached for speed
+    coord_t * m_extentsMin;
+    /// Maximum extents of the workspace. Cached for speed
+    coord_t * m_extentsMax;
+
 
   };
 
