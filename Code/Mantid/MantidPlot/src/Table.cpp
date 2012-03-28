@@ -308,12 +308,12 @@ void Table::cellEdited(int row, int col)
     d_table->setText(row, col, locale().toString(res, f, precision));
   else
   {
-    Script *script = scriptingEnv()->newScript(d_table->text(row,col),this,QString("<%1_%2_%3>").arg(objectName()).arg(row+1).arg(col+1), false);
+    Script *script = scriptingEnv()->newScript(QString("<%1_%2_%3>").arg(objectName()).arg(row+1).arg(col+1), this, Script::NonInteractive);
     connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
 
     script->setInt(row+1, "i");
     script->setInt(col+1, "j");
-    QVariant ret = script->eval();
+    QVariant ret = script->evaluate(d_table->text(row,col));
     if(ret.type()==QVariant::Int || ret.type()==QVariant::UInt || ret.type()==QVariant::LongLong || ret.type()==QVariant::ULongLong)
       d_table->setText(row, col, ret.toString());
     else if(ret.canCast(QVariant::Double))
@@ -561,7 +561,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  muParserScript *mup = new muParserScript(scriptingEnv(), cmd, this,  QString("<%1>").arg(colName(col)));
+  muParserScript *mup = new muParserScript(scriptingEnv(), QString("<%1>").arg(colName(col)), this, true);
   connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
   connect(mup, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 
@@ -570,9 +570,9 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
   mup->defineVariable("sr", startRow + 1.0);
   mup->defineVariable("er", endRow + 1.0);
 
-  if (!mup->compile()){
-    QApplication::restoreOverrideCursor();
-    return false;
+  if (!mup->compile(cmd)){
+      QApplication::restoreOverrideCursor();
+      return false;
   }
 
   QLocale loc = locale();
@@ -589,7 +589,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
     QVariant ret;
     for (int i = startRow; i <= endRow; i++){
       *r = i + 1.0;
-      ret = mup->eval();
+      ret = mup->evaluate(cmd);
       if(ret.type() == QVariant::Double) {
         d_table->setText(i, col, loc.toString(ret.toDouble(), f, prec));
       } else if(ret.canConvert(QVariant::String))
@@ -638,13 +638,13 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  Script *colscript = scriptingEnv()->newScript(cmd, this, QString("<%1>").arg(colName(col)), false);
+  Script *colscript = scriptingEnv()->newScript(QString("<%1>").arg(colName(col)), this, Script::NonInteractive);
   connect(colscript, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
   connect(colscript, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 
-  if (!colscript->compile()){
-    QApplication::restoreOverrideCursor();
-    return false;
+  if (!colscript->compile(cmd)){
+      QApplication::restoreOverrideCursor();
+      return false;
   }
 
   QLocale loc = locale();
@@ -658,7 +658,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
   QVariant ret;
   for (int i = startRow; i <= endRow; i++){
     colscript->setDouble(i + 1.0, "i");
-    ret = colscript->eval();
+    ret = colscript->evaluate(cmd);
     if(ret.type() == QVariant::Double)
       d_table->setText(i, col, loc.toString(ret.toDouble(), f, prec));
     else if(ret.canConvert(QVariant::String))

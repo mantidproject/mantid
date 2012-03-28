@@ -53,9 +53,6 @@
 // so this is necessary
 extern "C" void init_qti();
 
-// Language name
-const char* PythonScripting::langName = "Python";
-
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
 { 
@@ -64,8 +61,8 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-  : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
-    m_sys(NULL), refresh_allowed(0), mainThreadState(NULL)
+  : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
+    m_sys(NULL), refresh_allowed(0), m_mainThreadState(NULL)
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
@@ -97,9 +94,34 @@ PythonScripting::~PythonScripting()
   shutdown();
 }
 
+/**
+ * Create a new script object that can execute code within this environment
+ *
+ * @param name :: A identifier of the script, mainly used in error messages
+ * @param interact :: Whether the script is interactive defined by @see Script::InteractionType
+ * @param context :: An object that identifies the current context of the script (NULL is allowed)
+ * @return
+ */
+Script *PythonScripting::newScript(const QString &name, QObject * context,
+                                   const Script::InteractionType interact) const
+{
+  return new PythonScript(const_cast<PythonScripting*>(this), name, interact, context);
+}
+
+/**
+ * Returns a pointer to a new PythonThreadState object that creates
+ * a new thread context on construction. Note that this also locks the
+ * GIL
+ * @return
+ */
+QSharedPointer<PythonThreadState> PythonScripting::createPythonThread() const
+{
+  return QSharedPointer<PythonThreadState>(new PythonThreadState(m_mainThreadState));
+}
+
 bool PythonScripting::isRunning() const
 {
-  return (m_is_running || d_parent->mantidUI->runningAlgCount() > 0 );
+  return (m_is_running );
 }
 
 /**
@@ -120,7 +142,7 @@ bool PythonScripting::start()
     if( Py_IsInitialized() ) return true;
     Py_Initialize();
     PyEval_InitThreads();
-    mainThreadState = PyThreadState_Get();
+    m_mainThreadState = PyThreadState_Get();
 
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *pymodule = PyImport_AddModule("__main__");
@@ -217,7 +239,7 @@ void PythonScripting::shutdown()
 {
   // release the lock
   PyEval_AcquireLock();
-  PyThreadState_Swap(mainThreadState);
+  PyThreadState_Swap(m_mainThreadState);
   Py_XDECREF(m_math);
   Py_Finalize();
 }

@@ -31,6 +31,7 @@
  ***************************************************************************/
 #include "MatrixValuesDialog.h"
 #include "MatrixCommand.h"
+#include "MantidQtMantidWidgets/ScriptEditor.h"
 
 #include <QLayout>
 #include <QSpinBox>
@@ -99,7 +100,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 
 	QHBoxLayout *hbox3 = new QHBoxLayout();
 
-	commands = new ScriptEdit( scriptingEnv());
+	commands = new ScriptEditor(this,false, scriptingEnv()->createCodeLexer());
 	commands->setFocus();
 	hbox3->addWidget(commands);
 
@@ -178,7 +179,6 @@ void MatrixValuesDialog::setMatrix(Matrix* m)
 
 	matrix = m;
 	commands->setText(m->formula());
-	commands->setContext(m);
 
     endCol->setValue(m->numCols());
     endRow->setValue(m->numRows());
@@ -204,7 +204,7 @@ void MatrixValuesDialog::insertExplain(int index)
 
 void MatrixValuesDialog::insertFunction()
 {
-	commands->insertFunction(functions->currentText());
+  QMessageBox::warning(this, "MantidPlot", "Deprecated functionality");
 }
 
 void MatrixValuesDialog::addCell()

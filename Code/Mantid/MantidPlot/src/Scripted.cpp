@@ -8,10 +8,9 @@
  * Constructor
  * @param env :: A pointer to a scripting environment
  */
-Scripted::Scripted(ScriptingEnv *env)
+Scripted::Scripted(ScriptingEnv *env) :  m_scriptEnv(env)
 {
-  env->incref();
-  m_scriptEnv = env;
+  m_scriptEnv->incref();
 }
 
 /**

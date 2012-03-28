@@ -31,7 +31,7 @@
  ***************************************************************************/
 #include "SetColValuesDialog.h"
 #include "Table.h"
-#include "ScriptEdit.h"
+#include "MantidQtMantidWidgets/ScriptEditor.h"
 
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
@@ -44,6 +44,7 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include <QTextCursor>
+#include <QMessageBox>
 #ifdef SCRIPTING_PYTHON
 #include <QCheckBox>
 #endif
@@ -116,7 +117,7 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags 
 	hbox2->addWidget(explain);
 	hbox2->addWidget(gb);
 
-	commands = new ScriptEdit( scriptingEnv());
+	commands = new ScriptEditor(this, false, scriptingEnv()->createCodeLexer());
 
 	QVBoxLayout *vbox2 = new QVBoxLayout();
 	btnApply = new QPushButton(tr( "&Apply" ));
@@ -243,7 +244,7 @@ void SetColValuesDialog::insertExplain(int index)
 
 void SetColValuesDialog::insertFunction()
 {
-  commands->insertFunction(functions->currentText());
+  QMessageBox::warning(this, "", "Deprepcated functionality");
 }
 
 void SetColValuesDialog::insertCol()
@@ -280,5 +281,4 @@ void SetColValuesDialog::setTable(Table* w)
 	}
 
 	updateColumn(w->selectedColumn());
-	commands->setContext(w);
 }

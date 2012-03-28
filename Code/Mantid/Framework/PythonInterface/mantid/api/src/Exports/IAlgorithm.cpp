@@ -164,6 +164,21 @@ namespace
     return buffer.str();
   }
 
+  /**
+   * Releases the GIL, executes the calling algorithm object and re-acquires the GIL.
+   * As an algorithm is a potentially time-consuming operation, this allows other threads
+   * to execute python code while this thread is executing C code
+   * @param self :: A reference to the calling object
+   */
+  bool executeWhileReleasingGIL(IAlgorithm & self)
+  {
+    bool result(false);
+    Py_BEGIN_ALLOW_THREADS;
+    result = self.execute();
+    Py_END_ALLOW_THREADS;
+    return result;
+  }
+
 }
 
 void export_ialgorithm()
@@ -195,7 +210,7 @@ void export_ialgorithm()
         "are NOT stored in the Analysis Data Service but must be retrieved from the property.")
     .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
-    .def("execute", &IAlgorithm::execute, "Runs the algorithm")
+    .def("execute", &executeWhileReleasingGIL, "Runs the algorithm and returns whether it has been successful")
     // Special methods
     .def("__str__", &IAlgorithm::toString)
     ;

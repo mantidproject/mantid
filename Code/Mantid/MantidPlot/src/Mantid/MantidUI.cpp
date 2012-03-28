@@ -72,6 +72,7 @@ using MantidQt::SliceViewer::SliceViewerWindow;
 namespace MantidException = Mantid::Kernel::Exception;
 
 Q_DECLARE_METATYPE(Graph::CurveType);
+Q_DECLARE_METATYPE(MultiLayer*);
 
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -95,6 +96,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
     //Register std::string as well as we use it alot
     qRegisterMetaType<std::string>();
     qRegisterMetaType<Graph::CurveType>();
+    qRegisterMetaType<MultiLayer*>();
   }
 
   m_exploreMantid = new MantidDockWidget(this,aw);
@@ -1058,25 +1060,6 @@ bool MantidUI::drop(QDropEvent* e)
   }
 
   return false;
-}
-
-/** 
-* Run the named algorithm asynchronously 
-*/ 
-bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name) 
-{ 
-  bool result(false);
-  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name); 
-
-  if( !alg ) 
-  { 
-    return false; 
-  } 
-  Py_BEGIN_ALLOW_THREADS
-  result = executeAlgorithmAsync(alg, true);
-  Py_END_ALLOW_THREADS
-
-  return result;
 }
 
 /**

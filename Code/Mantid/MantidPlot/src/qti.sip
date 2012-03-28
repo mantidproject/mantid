@@ -1298,10 +1298,8 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
-  void convertToWaterfall(MultiLayer*);
 
+  void convertToWaterfall(MultiLayer*);
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
@@ -1317,7 +1315,6 @@ public:
 
   // Algorithm-related methods
   void setIsRunning(bool);
-  bool runAlgorithmAsync_PyCallback(const QString &);  	
   bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
 private:
@@ -1340,6 +1337,9 @@ public:
   
   MultiLayer * plotSpectraList(const QStringList& wsNames, const QList<int>& spectrumList,
                                bool errs = true, Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+  
 private:
   ThreadAdapter(const MantidUI &);
 };

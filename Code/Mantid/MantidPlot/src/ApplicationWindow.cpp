@@ -83,7 +83,7 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "ScriptManagerWidget.h"
+#include "CommandLineInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
 #include "MultiPeakFit.h"
@@ -451,7 +451,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new ScriptManagerWidget(scriptingEnv(), m_interpreterDock,true);
+  m_scriptInterpreter = new CommandLineInterpreter(m_interpreterDock);
+  m_scriptInterpreter->setup(*scriptingEnv());
   delete m_interpreterDock->widget();
   m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;
@@ -8414,7 +8415,6 @@ void ApplicationWindow::pasteSelection()
 {  
   if (m_interpreterDock->hasFocus())
   {
-    
     m_scriptInterpreter->paste();
     return;
   }
@@ -11120,7 +11120,7 @@ void ApplicationWindow::openScriptWindow(const QStringList &list)
   showScriptWindow();
   if(!scriptingWindow) 
     return;
-  scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->scriptingLanguage() + " Window");
+  scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
   QString s=list[0];
   QStringList scriptnames=s.split("\t");
   int count=scriptnames.size();
@@ -16192,19 +16192,6 @@ void ApplicationWindow::saveScriptWindowGeometry()
 
 void ApplicationWindow::showScriptInterpreter()
 {
-  if( !m_interpreterDock )
-  {
-    m_interpreterDock = new QDockWidget(this);
-    m_interpreterDock->setObjectName("interpreterDock");
-    m_interpreterDock->setWindowTitle("Script Interpreter");
-    addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
-
-    m_scriptInterpreter = new ScriptManagerWidget(scriptingEnv(), m_interpreterDock,true);
-    m_interpreterDock->setWidget(m_scriptInterpreter);
-    m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    
-  }
   if( m_interpreterDock->isVisible() )
   {
     m_interpreterDock->hide();
@@ -17154,30 +17141,25 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool r
   if( m_iface_script == NULL )
   {
     setScriptingLanguage("Python");
-    m_iface_script = scriptingEnv()->newScript("",this, "",false, false);
-    m_iface_script->setLineOffset(0);
-    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
-    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 
-        SLOT(scriptPrint(const QString &)));
+    m_iface_script = scriptingEnv()->newScript("<Interface>", NULL, Script::NonInteractive);
+
   }
-  m_iface_script->setCode(code);
   if( !quiet )
   {
     // Output a message to say we've started
     scriptPrint("Script execution started.", false, true);
   }
-  const bool cachedEmit = m_iface_script->emitErrors();
-  if (!redirect)
-  {
-    m_iface_script->redirectStdOut(false);
-    // The redirect option was introduced for IPython, where was also don't want errors to go to the console window
-    m_iface_script->setEmitErrors(false);
-  }
-  bool success = m_iface_script->exec();
-  if (!redirect)
+  if(redirect)
   {
     m_iface_script->redirectStdOut(true);
-    m_iface_script->setEmitErrors(cachedEmit);
+    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
+    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
+            SLOT(scriptPrint(const QString &)));
+  }
+  bool success = m_iface_script->execute(code);
+  if (redirect)
+  {
+    m_iface_script->redirectStdOut(false);
   }
   if(success && !quiet)
   {

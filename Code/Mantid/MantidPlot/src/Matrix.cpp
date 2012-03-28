@@ -462,7 +462,7 @@ bool Matrix::canCalculate(bool useMuParser)
     return false;
 
   if (useMuParser){
-    muParserScript *mup = new muParserScript(scriptingEnv(), formula_str, this, QString("<%1>").arg(objectName()), false);
+    muParserScript *mup = new muParserScript(scriptingEnv(),QString("<%1>").arg(objectName()), this, false);
     connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&, const QString&,int)));
 
     double *ri = mup->defineVariable("i");
@@ -472,7 +472,7 @@ bool Matrix::canCalculate(bool useMuParser)
     double *x = mup->defineVariable("x");
     double *y = mup->defineVariable("y");
 
-    if (!mup->compile())
+    if (!mup->compile(formula_str))
       return false;
 
     double r = 1.0;
@@ -482,16 +482,14 @@ bool Matrix::canCalculate(bool useMuParser)
     if (codeLines == 1 && gsl_isnan(mup->evalSingleLine()))
       return false;
     else if (codeLines > 1){
-      QVariant res = mup->eval();
+      QVariant res = mup->evaluate(formula_str);
       if (!res.canConvert(QVariant::Double))
         return false;
     }
   } else {
-    Script *script = scriptingEnv()->newScript(formula_str, this, QString("<%1>").arg(objectName()), false);
+    Script *script = scriptingEnv()->newScript(QString("<%1>").arg(objectName()),this, Script::NonInteractive);
     connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
     connect(script, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
-    if (!script->compile())
-      return false;
 
     double r = 1.0;
     script->setDouble(r, "i");
@@ -504,7 +502,7 @@ bool Matrix::canCalculate(bool useMuParser)
     double y = 1.0;
     script->setDouble(y, "y");
 
-    QVariant res = script->eval();
+    QVariant res = script->evaluate(formula_str);
     if (!res.canConvert(QVariant::Double))
       return false;
   }

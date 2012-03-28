@@ -5,6 +5,27 @@
 #include <QCoreApplication>
 #include <QThread>
 
+#define BEGIN_THREAD_CHECK(ReturnType, DefaultValue) \
+  ReturnType result(DefaultValue);\
+  if( QThread::currentThread() != QCoreApplication::instance()->thread() )\
+  {
+
+#define END_THREAD_CHECK(ReturnType) \
+   if(!methodSuccess)\
+   {\
+     throw std::runtime_error("Error invoking method from separate thread.");\
+   }\
+   result = qobject_cast<ReturnType>(m_lastWidget);\
+   m_lastWidget = NULL;\
+  }
+
+#define DO_GUI_THREAD_CALL(GuiFunctionCall) \
+  else\
+  {\
+    m_lastWidget = static_cast<QWidget*>(GuiFunctionCall);\
+  }\
+  return result;
+
 /**
  * Contructor
  * @param appWindow :: A reference to the ApplicationWindow
@@ -22,27 +43,32 @@ ThreadAdapter::ThreadAdapter(ApplicationWindow & appWindow, MantidUI & mantidUI)
 MultiLayer * ThreadAdapter::plotSpectraList(const QStringList& wsNames, const QList<int>& spectrumList,
                                             bool errs, Graph::CurveType style)
 {
-  if( QThread::currentThread() != QCoreApplication::instance()->thread() )
-  {
-    bool methodSuccess = QMetaObject::invokeMethod(this, "plotSpectraListGUIThread", Qt::BlockingQueuedConnection,
-                                            Q_ARG(const QStringList&, wsNames), Q_ARG(const QList<int>&, spectrumList),
-                                            Q_ARG(bool, errs), Q_ARG(Graph::CurveType, style));
-    if(!methodSuccess)
-    {
-      throw std::runtime_error("Error invoking plotSpectraList from separate thread.");
-    }
-    MultiLayer *result = qobject_cast<MultiLayer*>(m_lastWidget);
-    m_lastWidget = NULL;
-    return result;
-    }
-  else
-  {
-    return m_mantidUI.plotSpectraList(wsNames, spectrumList, errs, style);
-  }
+  BEGIN_THREAD_CHECK(MultiLayer*, NULL)
+  bool methodSuccess = QMetaObject::invokeMethod(this, "plotSpectraList", Qt::BlockingQueuedConnection,
+                                                 Q_ARG(const QStringList&, wsNames), Q_ARG(const QList<int>&, spectrumList),
+                                                 Q_ARG(bool, errs), Q_ARG(Graph::CurveType, style));
+  END_THREAD_CHECK(MultiLayer*)
+  DO_GUI_THREAD_CALL(m_mantidUI.plotSpectraList(wsNames, spectrumList, errs, style))
 }
 
-void ThreadAdapter::plotSpectraListGUIThread(const QStringList& wsNames, const QList<int>& spectrumList,
-                                             bool errs, Graph::CurveType style)
+MultiLayer* ThreadAdapter::plotBin(const QString& wsName,int index,bool errs, Graph::CurveType style)
 {
-  m_lastWidget = static_cast<QWidget*>(m_mantidUI.plotSpectraList(wsNames, spectrumList, errs, style));
+  BEGIN_THREAD_CHECK(MultiLayer*, NULL)
+  bool methodSuccess = QMetaObject::invokeMethod(this, "plotBin", Qt::BlockingQueuedConnection,
+                                                 Q_ARG(const QString&, wsName), Q_ARG(int, index),
+                                                 Q_ARG(bool, errs), Q_ARG(Graph::CurveType, style));
+  END_THREAD_CHECK(MultiLayer*)
+  DO_GUI_THREAD_CALL(m_mantidUI.plotBin(wsName, index, errs, style))
 }
+
+MultiLayer* ThreadAdapter::mergePlots(MultiLayer *plotOne, MultiLayer *plotTwo)
+{
+  BEGIN_THREAD_CHECK(MultiLayer*, NULL)
+  bool methodSuccess = QMetaObject::invokeMethod(this, "plotBin", Qt::BlockingQueuedConnection,
+                                                 Q_ARG(MultiLayer*, plotOne), Q_ARG(MultiLayer*, plotTwo));
+  END_THREAD_CHECK(MultiLayer*)
+  DO_GUI_THREAD_CALL(m_mantidUI.mergePlots(plotOne, plotTwo))
+}
+
+//void convertToWaterfall(MultiLayer *simplePlot);
+

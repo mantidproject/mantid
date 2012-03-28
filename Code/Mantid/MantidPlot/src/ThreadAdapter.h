@@ -7,10 +7,11 @@
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
+class QWidget;
 class ApplicationWindow;
 class MantidUI;
-class QWidget;
-
+class MantidMatrix;
+class Table;
 
 /**
  * An object that ensures all function calls that occur end up on the
@@ -38,13 +39,32 @@ public:
   /// Construct with an ApplicationWindow & MantidUI instance
   explicit ThreadAdapter(ApplicationWindow & appWindow, MantidUI & mantidUI);
 
+public slots:
   //-------------------------- Plotting -------------------------------------------------------
-
   MultiLayer * plotSpectraList(const QStringList& wsNames, const QList<int>& spectrumList,
                                bool errs = true, Graph::CurveType style = Graph::Unspecified);
-private slots:
-  void plotSpectraListGUIThread(const QStringList& wsNames, const QList<int>& spectrumList,
-                                bool errs, Graph::CurveType style);
+  MultiLayer* plotBin(const QString& wsName,int index,bool errs = false,
+                      Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* mergePlots(MultiLayer *plotOne, MultiLayer *plotTwo);
+//  void convertToWaterfall(MultiLayer *simplePlot);
+
+  //-------------------------- Instrument view ------------------------------------------------
+  //  InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
+  //%MethodCode
+  //  sipRes = sipCpp->getInstrumentView(*a0,a1);
+  //  sipRes->hide();
+  //%End
+
+  //-------------------------- Mantid Matrices -------------------------------------------------
+  // Methods relating to creating or getting handles to GUI objects
+//  MantidMatrix* getMantidMatrix(const QString &);
+//  MantidMatrix* importMatrixWorkspace(const QString& wsName, int lower=-1, int upper=-1,
+//                                      bool showDlg=false, bool makeVisible=false);
+//
+//  //-------------------------- Tables ----------------------------------------------------------
+//  Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName,
+//                                    QList<int> indexList, bool errs=true, bool binCentres=false);
+//  Table* importTableWorkspace(const QString&, bool = false, bool = false);
 
 
 private:

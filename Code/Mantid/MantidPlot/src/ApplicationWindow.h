@@ -106,7 +106,7 @@ class FitPropertyBrowser;
 //Mantid
 class MantidUI;
 class ScriptingWindow;
-class ScriptManagerWidget;
+class CommandLineInterpreter;
 
 /**
 * \brief QtiPlot's main window.
@@ -1361,7 +1361,7 @@ private:
   QDockWidget *consoleWindow;
   QTextEdit *console;
   QDockWidget *m_interpreterDock;
-  ScriptManagerWidget *m_scriptInterpreter;
+  CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
   QToolBar *fileTools, *plotTools, *tableTools, *columnTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;

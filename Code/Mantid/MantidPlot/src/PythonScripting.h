@@ -32,6 +32,8 @@
 #include "PythonScript.h"
 #include "ScriptingEnv.h"
 
+#include <QSharedPointer>
+
 class QObject;
 class QString;
 
@@ -56,22 +58,25 @@ public:
   void flush() {}
   /// 'Fake' method needed for IPython import
   void set_parent(PyObject*) {}
+
+  /// Create a new script object that can execute code within this enviroment
+  virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const;
+  /// Creates a new PythonThreadState object
+  QSharedPointer<PythonThreadState> createPythonThread() const;
+
   /// Create a new code lexer for Python
   QsciLexer * createCodeLexer() const;
   // Python supports progress monitoring
   virtual bool supportsProgressReporting() const { return true; }
+
   /// Return a string represenation of the given object
   QString toString(PyObject *object, bool decref = false);
   //Convert a Python list object to a Qt QStringList
   QStringList toStringList(PyObject *py_seq);
-  /// Create a new script object that can execute code within this enviroment
-  Script *newScript(const QString &code, QObject *context = NULL, const QString &name="<input>",
-        bool interactive = true, bool reportProgress = false)
-  {
-    return new PythonScript(this, code, context, name, interactive, reportProgress);
-  }
+
   ///Return a list of file extensions for Python
   const QStringList fileExtensions() const;
+
   /// Set a reference to a QObject in the given dictionary
   bool setQObject(QObject*, const char*, PyObject *dict);
   /// Set a reference to a QObject in the global dictionary
@@ -82,6 +87,7 @@ public:
   /// Set a reference to a double in the global dictionary
   bool setDouble(double, const char*);
   bool setDouble(double, const char*, PyObject *dict);
+
   /// Return a list of mathematical functions define by qtiplot
   const QStringList mathFunctions() const;
   /// Return a doc string for the given function
@@ -90,11 +96,7 @@ public:
   PyObject *globalDict() { return m_globals; }
   /// Return the sys dictionary for this environment
   PyObject *sysDict() { return m_sys; }
-  /// The language name
-  static const char * langName;
 
-  PyThreadState *mainThreadState;
-             
 public slots:
   /// Refresh Python algorithms state
   virtual void refreshAlgorithms(bool force = false);
@@ -120,25 +122,8 @@ private:
   PyObject *m_sys;
   /// Refresh protection
   int refresh_allowed;
-
-};
-
-//-----------------------------------------------------------------------------
-// Small struct to deal with acquiring/releasing GIL in an more OO way
-//-----------------------------------------------------------------------------
-struct GILHolder
-{
-  GILHolder() : m_state(PyGILState_Ensure())
-  {}
-
-  ~GILHolder()
-  {
-    PyGILState_Release(m_state);
-  }
-
-private:
-  /// Current GIL state
-  PyGILState_STATE m_state;
+  /// Pointer to the main threads state
+  PyThreadState *m_mainThreadState;
 };
 
 #endif

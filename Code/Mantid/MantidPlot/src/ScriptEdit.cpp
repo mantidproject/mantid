@@ -319,7 +319,7 @@ void ScriptEdit::evaluate()
   if( code.isEmpty() ) return;
  
   myScript->setCode(code);
-  QVariant res = myScript->eval();
+  QVariant res = myScript->evaluate();
 
   if (res.isValid())
     if (!res.isNull() && res.canConvert(QVariant::String)){

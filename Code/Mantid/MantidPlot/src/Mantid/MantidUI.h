@@ -195,8 +195,6 @@ public:
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
 
-  bool runAlgorithmAsync_PyCallback(const QString & algName);
-
 public:
   // Create a 1d graph form specified spectra in a MatrixWorkspace
   MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);

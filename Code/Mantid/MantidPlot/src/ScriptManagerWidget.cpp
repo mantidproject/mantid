@@ -2,11 +2,12 @@
 // Includes
 //-----------------------------------------------------
 #include "ApplicationWindow.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
-#include "Script.h"
+#include "ScriptFileInterpreter.h"
+
 #include "ScriptingEnv.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptManagerWidget.h"
+
 // Qt
 #include <QPoint>
 #include <QAction>
@@ -40,49 +41,38 @@
 /**
  * Constructor
  */
-ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode, bool capturePrint)
-  : QTabWidget(parent), Scripted(env), m_last_dir(""), m_script_runners(),
-    m_cursor_pos(), m_findrep_dlg(NULL), 
-    m_interpreter_mode(interpreter_mode), m_recentScriptList(), m_capturePrint(capturePrint)
+ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
+  : QTabWidget(parent), Scripted(env), m_last_dir(""),
+    m_cursor_pos(), m_interpreter_mode(false), m_recentScriptList()
 {
   //Create actions for this widget
   initActions();
-
-  // Execution state change
-  connect(this, SIGNAL(ScriptIsActive(bool)), this, SLOT(setScriptIsRunning(bool)));
   
   // Start with a blank tab
   newTab();
-  QString group;
-  if( interpreter_mode )
+  if( m_interpreter_mode )
   {
-    tabBar()->hide();
-    setContextMenuPolicy(Qt::NoContextMenu);
-    ScriptEditor *editor = currentEditor();
-   
-    connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
-    connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor, 
-	    SLOT(displayOutput(const QString&,bool)));
-     connect(editor, SIGNAL(compile(const QString&)), this, SLOT(compile(const QString &)));
-      connect(editor, SIGNAL(executeMultiLine()), this, SLOT(executeMultiLine()));
-    group = "ScriptInterpreter";
+//    tabBar()->hide();
+//    setContextMenuPolicy(Qt::NoContextMenu);
+//    ScriptEditor *editor = currentEditor();
+//
+//    connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
+//    connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor,
+//	    SLOT(displayOutput(const QString&,bool)));
+//     connect(editor, SIGNAL(compile(const QString&)), this, SLOT(compile(const QString &)));
+//      connect(editor, SIGNAL(executeMultiLine()), this, SLOT(executeMultiLine()));
  
-  }
-  else
-  {
-    group = "ScriptWindow";
   }
   
   // Settings
   QSettings settings;
-  settings.beginGroup(group);
+  settings.beginGroup("ScriptWindow");
   m_toggle_folding->setChecked(settings.value("CodeFolding", true).toBool());
   m_toggle_completion->setChecked(settings.value("CodeCompletion", true).toBool());
   m_toggle_calltips->setChecked(settings.value("CallTips", true).toBool());
   settings.endGroup();
 
-  setFocusPolicy(Qt::StrongFocus);
-  setFocus();
+  connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged(int)));
 }
 
 /**
@@ -90,19 +80,6 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, boo
  */
 ScriptManagerWidget::~ScriptManagerWidget()
 {
-  if( m_findrep_dlg )
-  {
-    delete m_findrep_dlg;
-  }
-  
-  QList<ScriptEditor*> script_keys = m_script_runners.uniqueKeys();
-  QListIterator<ScriptEditor*> iter(script_keys);
-  while( iter.hasNext() )
-  {
-    Script *code = m_script_runners.take(iter.next());
-    delete code;
-  }
-
 }
 
 /**
@@ -110,16 +87,7 @@ ScriptManagerWidget::~ScriptManagerWidget()
  */
 void ScriptManagerWidget::saveSettings()
 {
-  QString group;
-  if( m_interpreter_mode )
-  {
-    group = "ScriptInterpreter";
-  }
-  else
-  {
-    group = "ScriptWindow";
-  }
-    
+  QString group("ScriptWindow");
   QSettings settings;
   settings.beginGroup(group);
   settings.setValue("/CodeFolding", m_toggle_folding->isChecked());
@@ -128,68 +96,70 @@ void ScriptManagerWidget::saveSettings()
   settings.endGroup();
 }
 
-/**
- * Ask whether we should save and then perform the correct action
- * @index The tab index
- */
-void ScriptManagerWidget::askSave(int index)
+/// @return The current interpreter
+ScriptFileInterpreter * ScriptManagerWidget::currentInterpreter()
 {
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
-  if( !editor || !editor->isModified() ) return;
-  // Check we the editor can be seen
-  this->show();
-  this->raise();
-  QMessageBox msg_box(this);
-  msg_box.setModal(true);
-  msg_box.setWindowTitle("MantidPlot");
-  msg_box.setText(tr("The current script has been modified."));
-  msg_box.setInformativeText(tr("Save changes?"));
-  msg_box.addButton(QMessageBox::Save);
-  QPushButton *saveAsButton = msg_box.addButton("Save As...", QMessageBox::AcceptRole);
-  msg_box.addButton(QMessageBox::Discard);
-  int ret = msg_box.exec();
-  if( msg_box.clickedButton() == saveAsButton )
-  {
-    saveAs(index);
-  }
-  else if( ret == QMessageBox::Save )
-  {
-    save(index);
-  }
-  else 
-  { 
-    editor->setModified(false);
-  }
+  return interpreterAt(currentIndex());
 }
 
-/**
- * Opens a script
- * @param filename :: An filename to use 
- * @param ok :: Indicate if the file read went ok
- * @returns The contents of the script
- */
-QString ScriptManagerWidget::readScript(const QString& filename, bool *ok)
+/// @return Interpreter at given index
+ScriptFileInterpreter * ScriptManagerWidget::interpreterAt(int index)
 {
-  QFile file(filename);
-  QString script_txt;
-  if( !file.open(QIODevice::ReadOnly|QIODevice::Text) )
+  return qobject_cast<ScriptFileInterpreter*>(widget(index));
+}
+
+// ----------------------- Menus --------------------------------------------
+/**
+ *  Add the required entries for the file menu in this context
+ * @param fileMenu A pointer to the menu object to fill
+ */
+void ScriptManagerWidget::populateFileMenu(QMenu &fileMenu)
+{
+  fileMenu.addAction(m_new_tab);
+  fileMenu.addAction(m_open_curtab);
+  fileMenu.addAction(m_open_newtab);
+
+  fileMenu.insertSeparator();
+
+  if( count() > 0)
   {
-    QMessageBox::critical(this, tr("MantidPlot - File error"), 
-			  tr("Could not open file \"%1\" for reading.").arg(filename));
-    *ok = false;
-    return script_txt;
+    ScriptFileInterpreter *current = currentInterpreter();
+    current->populateFileMenu(fileMenu);
   }
-  
-  QTextStream reader(&file);
-  reader.setEncoding(QTextStream::UnicodeUTF8);
-  while( !reader.atEnd() )
+
+  fileMenu.insertSeparator();
+  fileMenu.addMenu(m_recent_scripts);
+  updateRecentScriptList();
+
+  if( count() > 0)
   {
-    // Read line trims off line endings automatically and we'll simply use '\n' throughout 
-    script_txt.append(reader.readLine() + "\n");
+    fileMenu.insertSeparator();
+    fileMenu.addAction(m_close_tab);
   }
-  file.close();
-  *ok = true;
-  return script_txt;
+}
+/**
+ *  Add the required entries for the edit menu in this context
+ * @param editMenu A pointer to the menu object to fill
+ */
+void ScriptManagerWidget::populateEditMenu(QMenu &editMenu)
+{
+  if( count() > 0 )
+  {
+    ScriptFileInterpreter *current = currentInterpreter();
+    current->populateEditMenu(editMenu);
+  }
+}
+/**
+ *  Add the required entries for the execute menu in this context
+ * @param editMenu A pointer to the menu object to fill
+ */
+void ScriptManagerWidget::populateExecMenu(QMenu &execMenu)
+{
+  if( count() > 0 )
+  {
+    ScriptFileInterpreter *current = currentInterpreter();
+    current->populateExecMenu(execMenu);
+  }
 }
 
 /**
@@ -200,144 +170,16 @@ bool ScriptManagerWidget::isScriptRunning()
   return scriptingEnv()->isRunning();
 }
 
-/**
- * Return the current editor
- */
-ScriptEditor* ScriptManagerWidget::currentEditor() const
-{
-  if( count() == 0 ) return NULL;
-  return qobject_cast<ScriptEditor*>(currentWidget());
-}
 
-/**
- * Return the current runner
- */
-Script* ScriptManagerWidget::currentRunner() const
-{
-  if( count() == 0 ) return NULL;
-  ScriptEditor *editor = currentEditor();
-  Script *runner(NULL);
-  if (m_script_runners.contains(editor))
-  {
-    runner = m_script_runners.value(editor);
-  }
-  else
-  {
-    // This should never happen but if it does the situation should still be recoverable
-    QMessageBox::critical(const_cast<ScriptManagerWidget*>(this),"MantidPlot","Error accessing Python. Please save your work, close all tabs and reopen script.");
-  }
-  return runner;
-}
-
-/**
- * Undo action for the current editor
- */
-QAction* ScriptManagerWidget::undoAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->undoAction();
-  }
-  else return NULL;
-}
-/**
- * Redo action for the current editor
- */
-QAction* ScriptManagerWidget::redoAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->redoAction();
-  }
-  else return NULL;
-}
-
-/**
- * Cut action for the current editor
- */
-QAction* ScriptManagerWidget::cutAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->cutAction();
-  }
-  else return NULL;
-}
-
-/** 
- * Copy action for the current editor
- */
-QAction* ScriptManagerWidget::copyAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->copyAction();
-  }
-  else return NULL;
-}
-
-/**
- * Paste action for the current editor
- */
-QAction* ScriptManagerWidget::pasteAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->pasteAction();
-  }
-  else return NULL;
-}
-
-/**
- * Print action for the current editor
- */
-QAction* ScriptManagerWidget::printAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->printAction();
-  }
-  else return NULL;
-}
-
-/**
- * Print action for the current editor
- */
-QAction* ScriptManagerWidget::zoomInAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->zoomInAction();
-  }
-  else return NULL;
-}
-
-/**
- * Print action for the current editor
- */
-QAction* ScriptManagerWidget::zoomOutAction() const
-{
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    return editor->zoomOutAction();
-  }
-  else return NULL;
-}
 /// copy method
 void ScriptManagerWidget::copy()
 {
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    editor->copy();
-  }
+  QMessageBox::warning(this, "", "Copy not implemented");
 }
   ///paste method
 void ScriptManagerWidget::paste()
 {
-  if( ScriptEditor *editor = currentEditor() )
-  {
-    editor->paste();
-  }
+  QMessageBox::warning(this, "", "Paste not implemented");
   
 }
 //-------------------------------------------
@@ -348,43 +190,47 @@ void ScriptManagerWidget::paste()
  * @param index :: The index to give the new tab. If this is invalid the tab is simply appended
  * @param filename :: An optional filename
  */
-ScriptEditor* ScriptManagerWidget::newTab(int index, const QString & filename)
+void ScriptManagerWidget::newTab(int index, const QString & filename)
 {
-  ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode, scriptingEnv()->createCodeLexer());
-  editor->setFileName(filename);
-  if( !m_interpreter_mode )
-  {
-    connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
-  }
-  editor->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
-	  this, SLOT(editorContextMenu(const QPoint&)));
-  QString tab_title;
+  QString tabTitle;
   if( filename.isEmpty() )
   {
-    tab_title = "New script";
+    tabTitle = "New script";
   }
   else
   {
-    tab_title = QFileInfo(filename).fileName();
+    tabTitle = QFileInfo(filename).fileName();
   }
-  index = insertTab(index, editor, tab_title);
+//  if( m_interpreter_mode )
+//  {
+//    ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode, scriptingEnv()->createCodeLexer());
+//    editor->setFileName(filename);
+//    editor->setContextMenuPolicy(Qt::CustomContextMenu);
+//    connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)),
+//      this, SLOT(editorContextMenu(const QPoint&)));
+//    index = insertTab(index, editor, tabTitle);
+//
+//    // Store a script runner
+//    Script * runner = createScriptRunner(editor);
+//    m_script_runners.insert(editor, runner);
+//
+//    // Completion etc
+//    setCodeCompletionBehaviour(editor, m_toggle_completion->isChecked());
+//    setCallTipsBehaviour(editor, m_toggle_calltips->isChecked());
+//    setCodeFoldingBehaviour(editor, m_toggle_folding->isChecked());
+//    // Set the current editor to focus
+//    setFocusProxy(editor);
+//    editor->setFocus();
+//    editor->setCursorPosition(0,0);
+//    return editor;
+//  }
+  ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this);
+  scriptRunner->setup(*scriptingEnv(), filename);
+  connect(scriptRunner, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+  index = insertTab(index, scriptRunner, tabTitle);
   setCurrentIndex(index);
-
-  // Store a script runner
-  Script * runner = createScriptRunner(editor);
-  m_script_runners.insert(editor, runner);
-
-  // Completion etc
-  setCodeCompletionBehaviour(editor, m_toggle_completion->isChecked());
-  setCallTipsBehaviour(editor, m_toggle_calltips->isChecked());
-  setCodeFoldingBehaviour(editor, m_toggle_folding->isChecked());
-  // Set the current editor to focus
-  setFocusProxy(editor);
-  editor->setFocus();
-  editor->setCursorPosition(0,0);
+  scriptRunner->setFocus();
   m_last_active_tab = index;
-  return editor;
 }
 
 /**
@@ -393,7 +239,6 @@ ScriptEditor* ScriptManagerWidget::newTab(int index, const QString & filename)
  */
 void ScriptManagerWidget::openInCurrentTab(const QString & filename)
 {
-  // Redirect work
   open(false, filename);
 }
 
@@ -403,54 +248,7 @@ void ScriptManagerWidget::openInCurrentTab(const QString & filename)
  */
 void ScriptManagerWidget::openInNewTab(const QString & filename)
 {
-  // Redirect work
   open(true, filename);
-}
-
-/**
- * Save script under a different file name
- * @param The :: index of the tab to save
- */
-QString ScriptManagerWidget::saveAs(int index)
-{
-  QString filter = scriptingEnv()->fileFilter();
-  filter += tr("Text") + " (*.txt *.TXT);;";
-  filter += tr("All Files")+" (*)";
-  QString selected_filter;
-  QString file_to_save = QFileDialog::getSaveFileName(this, tr("MantidPlot - Save script"), 
-						      m_last_dir, filter, &selected_filter);
-  if( file_to_save.isEmpty() ) return QString();
-
-  // Set last directory
-  m_last_dir = QFileInfo(file_to_save).absolutePath();
-  if( index == -1 ) index = currentIndex();
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
-  editor->setFileName(file_to_save);
-  doSave(editor);
-  return file_to_save;
-}
-
-/**
- * Save the tab text given by the index
- * @param The :: index of the tab to save
- */
-void ScriptManagerWidget::save(int index)
-{
-  if( index == -1 ) index = currentIndex();    
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
-  if( editor && editor->isModified() )
-  {
-    QString filename = editor->fileName();
-    //Open dialog if necessary
-    if( filename.isEmpty() )
-    {
-      saveAs(index);
-    }
-    else
-    {
-      doSave(editor);
-    }
-  }
 }
 
 /**
@@ -472,61 +270,41 @@ void ScriptManagerWidget::closeAllTabs()
 */
 QString ScriptManagerWidget::saveToString()
 {
-	QString fileNames;
-	fileNames="<scriptwindow>\n";
-	fileNames+="ScriptNames\t";
-	 int ntabs = count();
-	 //get the number of tabs and append  the script file name for each tab
-	 //to a string
-	 for( int index = 0; index < ntabs; ++index )
+  QString fileNames;
+  fileNames="<scriptwindow>\n";
+  fileNames+="ScriptNames\t";
+  int ntabs = count();
+  //get the number of tabs and append  the script file name for each tab
+  //to a string
+  for( int index = 0; index < ntabs; ++index )
+  {
+    ScriptFileInterpreter *interpreter = interpreterAt(index);
+    QString s = interpreter->filename();
+    if(!s.isEmpty())
     {
-      ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-      QString s = editor->fileName();
-	  if(!s.isEmpty())
-	  {fileNames+=s;
-	   fileNames+="\t";
-	  }
-	 }
-	 fileNames+="\n</scriptwindow>\n";
-	return fileNames;
+      fileNames+=s;
+      fileNames+="\t";
+    }
+  }
+  fileNames+="\n</scriptwindow>\n";
+  return fileNames;
 }
 /**
  * Execute the highlighted code from the current tab
  */
-void ScriptManagerWidget::execute()
+void ScriptManagerWidget::executeAll()
 {
-  if( isScriptRunning() ) return;
-  //Current editor
-  ScriptEditor *editor = currentEditor();
-  if( !editor ) return;
-
-  QString code = editor->selectedText();
-  if( code.isEmpty() )
-  {
-    executeAll();
-    return;
-  }
-  int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
-  //Qscintilla function
-  editor->getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
-  runScriptCode(code, lineFrom);
+  ScriptFileInterpreter *currentTab = qobject_cast<ScriptFileInterpreter*>(widget(currentIndex()));
+  currentTab->executeAll();
 }
 
 /**
  * Execute the whole script
  */
-void ScriptManagerWidget::executeAll()
+void ScriptManagerWidget::executeSelection()
 {
-  if( isScriptRunning() ) return;
-  //Current editor
-  ScriptEditor *editor = currentEditor();
-  if( !editor ) return;
-
-  QString script_txt = editor->text();
-  if( script_txt.isEmpty() ) return;
-  
-  //Run the code
-  runScriptCode(script_txt, 0);
+  ScriptFileInterpreter *currentTab = qobject_cast<ScriptFileInterpreter*>(widget(currentIndex()));
+  currentTab->executeSelection();
 }
 
 /**
@@ -543,16 +321,16 @@ void ScriptManagerWidget::evaluate()
  */
 void ScriptManagerWidget::executeInterpreter(const QString & code)
 {
-  if( isScriptRunning() ) return;
-  ScriptEditor *editor = currentEditor();
-  if( !editor ) return;
-  
-  int lineno,index;
-  editor->getCursorPosition(&lineno, &index);
-  runScriptCode(code,lineno);
-  
-  editor->newInputLine();
-  setFocus();  
+//  if( isScriptRunning() ) return;
+//  ScriptEditor *editor = currentEditor();
+//  if( !editor ) return;
+//
+//  int lineno,index;
+//  editor->getCursorPosition(&lineno, &index);
+//  runScriptCode(code,lineno);
+//
+//  editor->newInputLine();
+//  setFocus();
 }
 
 /** 
@@ -560,64 +338,19 @@ void ScriptManagerWidget::executeInterpreter(const QString & code)
  */
 void ScriptManagerWidget::executeMultiLine()
 {
-  ScriptEditor *editor = currentEditor();
-  if(!editor)
-  {
-    return;
-  }
-  int lineno,index;
-  editor->getCursorPosition(&lineno, &index);
-  runMultiLineCode(lineno);
-  editor->append("\n");
-  int marker_handle= editor->markerDefine(QsciScintilla::ThreeRightArrows);
-  editor->setMarkerHandle(marker_handle);
-  editor->newInputLine();
-  setFocus(); 
-}
-
-/**
- * Run a piece of code in the current environment
- * @param code :: The chunk of code to execute
- * @param line_offset :: If this is a chunk of code from an editor, give offset from the start
- */
-bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_offset)
-{
-  if( isScriptRunning() ) return false;
-
-  Script * runner = currentRunner();
-  if( !runner ) return false;
-  runner->setLineOffset(line_offset);
-  ScriptEditor *editor = currentEditor();
-  if( editor ) 
-  {
-    connect(runner, SIGNAL(currentLineChanged(int, bool)), editor, SLOT(updateMarker(int, bool)));
-  }
-  runner->setCode(code);
-  QString filename = "<input>";
-  if( editor && !editor->fileName().isEmpty() )
-  {
-    filename = editor->fileName();
-  }
-  runner->setName(filename);
-  emit ScriptIsActive(true);
-
-  if( !m_interpreter_mode ) 
-  {
-    displayOutput("Script execution started.", true);
-  }
-
-  bool success = runner->exec();
-  emit ScriptIsActive(false);
-  if( !m_interpreter_mode && success )
-  {
-    displayOutput("Script execution completed successfully.", true);
-  }
-  if( editor )
-  {
-    disconnect(runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	       SLOT(updateMarker(int, bool)));
-  }
-  return success;
+//  ScriptEditor *editor = currentEditor();
+//  if(!editor)
+//  {
+//    return;
+//  }
+//  int lineno,index;
+//  editor->getCursorPosition(&lineno, &index);
+//  runMultiLineCode(lineno);
+//  editor->append("\n");
+//  int marker_handle= editor->markerDefine(QsciScintilla::ThreeRightArrows);
+//  editor->setMarkerHandle(marker_handle);
+//  editor->newInputLine();
+//  setFocus();
 }
 
 /**
@@ -626,29 +359,29 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
  */
 void ScriptManagerWidget::compile(const QString & code)
 {
-  ScriptEditor *editor = currentEditor();
-  if(!editor)
-  {
-    return ;
-  }// Get the correct script runner
-  Script * runner = currentRunner();
-  int lineno,index;
-  editor->getCursorPosition(&lineno, &index);
-  runner->setLineOffset(lineno);
-  runner->setCode(code);
-  emit ScriptIsActive(true);
-   
-  bool success = runner->compile(true);
-  emit ScriptIsActive(false);
- 
-  if(success)
-  {
-    editor->setCompilationStatus(true);
-  }
-  else
-  { 
-    editor->setCompilationStatus(false);
-  }
+//  ScriptEditor *editor = currentEditor();
+//  if(!editor)
+//  {
+//    return ;
+//  }// Get the correct script runner
+//  Script * runner = currentRunner();
+//  int lineno,index;
+//  editor->getCursorPosition(&lineno, &index);
+//  runner->setLineOffset(lineno);
+//  runner->setCode(code);
+//  emit ScriptIsActive(true);
+//
+//  bool success = runner->compile(true);
+//  emit ScriptIsActive(false);
+//
+//  if(success)
+//  {
+//    editor->setCompilationStatus(true);
+//  }
+//  else
+//  {
+//    editor->setCompilationStatus(false);
+//  }
  
 }
 /**Run the multi line code set to runner
@@ -657,34 +390,15 @@ void ScriptManagerWidget::compile(const QString & code)
  */
 bool ScriptManagerWidget::runMultiLineCode(int line_offset)
 {
-  // Get the correct script runner
-  Script * runner = currentRunner();
-  emit ScriptIsActive(true);
-  runner->setLineOffset(line_offset);
-  bool success = runner->exec();
-  emit ScriptIsActive(false);
-  return success;
-}
-/** 
- * Display an output message
- * @param msg :: The message string
- * @param timestamp :: Whether to display a timestamp
- */
-void ScriptManagerWidget::displayOutput(const QString & msg, bool timestamp)
-{  
-  //Forward to helper
-  emit MessageToPrint(msg, false, timestamp);
-}
-
-/**
- * Display an error message
- * @param msg :: The message string
- * @param timestamp :: Whether to display a timestamp
- */
-void ScriptManagerWidget::displayError(const QString & msg, bool timestamp)
-{ 
-  //Forward to helper
-  emit MessageToPrint(msg, true, timestamp);
+//  // Get the correct script runner
+//  Script * runner = currentRunner();
+//  emit ScriptIsActive(true);
+//
+//  runner->setLineOffset(line_offset);
+//  bool success = runner->exec();
+//
+//  emit ScriptIsActive(false);
+//  return success;
 }
 
 /**
@@ -694,15 +408,17 @@ void ScriptManagerWidget::displayError(const QString & msg, bool timestamp)
 void ScriptManagerWidget::showFindDialog(bool replace)
 {
   if( count() == 0 ) return;
-  if( !m_findrep_dlg )
-  {
-    m_findrep_dlg = new FindReplaceDialog(this, replace, this);
-    connect(this, SIGNAL(currentChanged(int)), m_findrep_dlg, SLOT(resetSearchFlag()));
-  }
-  if( !m_findrep_dlg->isVisible() )
-  {
-    m_findrep_dlg->show();
-  }
+//  if( !m_findrep_dlg )
+//  {
+//    m_findrep_dlg = new FindReplaceDialog(this, replace, this);
+//    connect(this, SIGNAL(currentChanged(int)), m_findrep_dlg, SLOT(resetSearchFlag()));
+//  }
+//  if( !m_findrep_dlg->isVisible() )
+//  {
+//    m_findrep_dlg->show();
+//  }
+
+  QMessageBox::information(this, "MantidPlot", "Find not implemented");
 }
 
 
@@ -714,44 +430,43 @@ void ScriptManagerWidget::showFindDialog(bool replace)
  */
 void ScriptManagerWidget::editorContextMenu(const QPoint &)
 {
-  QMenu context(this);
-
-  if( !m_interpreter_mode ) 
-  {
-    //File actions
-    context.addAction(m_open_curtab);
-    context.addAction(m_save);
-    context.addAction(printAction());
-    
-    
-    
-    context.insertSeparator();
-    
-    //Evaluate and execute
-    context.addAction(m_exec);
-    context.addAction(m_exec_all);
-    if( scriptingEnv()->supportsEvaluation() )
-    {
-      context.addAction(m_eval);
-    }
-  }
-   
-  // Edit actions
-   context.insertSeparator();
-   context.addAction(copyAction());
-   context.addAction(cutAction());
-   context.addAction(pasteAction());
- 
-   context.insertSeparator();
-
-   context.addAction(zoomInAction());
-   context.addAction(zoomOutAction());
-
-   context.insertSeparator();
-
-  context.addAction(m_toggle_completion);
-  context.addAction(m_toggle_calltips);
-  context.exec(QCursor::pos());
+//  QMenu context(this);
+//
+//  if( !m_interpreter_mode )
+//  {
+//    //File actions
+//    context.addAction(m_open_curtab);
+//    context.addAction(m_save);
+//    context.addAction(printAction());
+//
+//
+//    context.insertSeparator();
+//
+//    //Evaluate and execute
+//    context.addAction(m_exec);
+//    context.addAction(m_exec_all);
+//    if( scriptingEnv()->supportsEvaluation() )
+//    {
+//      context.addAction(m_eval);
+//    }
+//  }
+//
+//  // Edit actions
+//   context.insertSeparator();
+//   context.addAction(copyAction());
+//   context.addAction(cutAction());
+//   context.addAction(pasteAction());
+//
+//   context.insertSeparator();
+//
+//   context.addAction(zoomInAction());
+//   context.addAction(zoomOutAction());
+//
+//   context.insertSeparator();
+//
+//  context.addAction(m_toggle_completion);
+//  context.addAction(m_toggle_calltips);
+//  context.exec(QCursor::pos());
 }
 
 /**
@@ -759,9 +474,13 @@ void ScriptManagerWidget::editorContextMenu(const QPoint &)
  */
 int ScriptManagerWidget::closeCurrentTab()
 {
-  int index = currentIndex();
-  closeTabAtIndex(index);
-  return index;
+  if( count() > 0 )
+  {
+    int index = currentIndex();
+    closeTabAtIndex(index);
+    return index;
+  }
+  return -1;
 }
 
 /**
@@ -774,14 +493,30 @@ void ScriptManagerWidget::closeClickedTab()
 }
 
 /**
- * Mark the current tab as changed
+ * Mark the current tab as changed. The signal is disconnected
+ * from the emitting widget so that multiple calls are not performed
  */
 void ScriptManagerWidget::markCurrentAsChanged()
 {
   int index = currentIndex();
   setTabText(index, tabText(index) + "*");
-  //Disconnect signal so that this doesn't get run in the future
-  disconnect( currentEditor(), SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+  // Disconnect signal so that this doesn't get run in the future
+  ScriptFileInterpreter *currentWidget = qobject_cast<ScriptFileInterpreter*>(widget(index));
+  disconnect(currentWidget, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+}
+
+/**
+ * The current selection has changed
+ * @param index The index of the new selection
+ */
+void ScriptManagerWidget::tabSelectionChanged(int index)
+{
+  if( count() > 0 )
+  {
+    ScriptFileInterpreter *currentWidget = qobject_cast<ScriptFileInterpreter*>(widget(index));
+    setFocusProxy(currentWidget);
+    currentWidget->setFocus();
+  }
 }
 
 /**
@@ -790,10 +525,6 @@ void ScriptManagerWidget::markCurrentAsChanged()
  */
 void ScriptManagerWidget::setScriptIsRunning(bool running)
 {
-  // Enable/disable execute actions
-  m_exec->setEnabled(!running);
-  m_exec_all->setEnabled(!running);
-  if( scriptingEnv()->supportsEvaluation() ) m_eval->setEnabled(!running);
 }
 
 /**
@@ -805,10 +536,7 @@ void ScriptManagerWidget::toggleProgressArrow(bool state)
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-    if( editor ) editor->setMarkerState(state);
-    Script *script = m_script_runners.value(editor);
-    if( script ) script->reportProgress(state);
+    QMessageBox::warning(this, "", "Implement progress arrow");
   }
 }
 
@@ -821,10 +549,7 @@ void ScriptManagerWidget::toggleCodeFolding(bool state)
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    if( ScriptEditor *editor = qobject_cast<ScriptEditor*>(this->widget(index)) )
-    { 
-      setCodeFoldingBehaviour(editor, state);
-    }
+    QMessageBox::warning(this, "", "Implement code folding");
   }
 }
 /**
@@ -836,10 +561,7 @@ void ScriptManagerWidget::toggleCodeCompletion(bool state)
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    if( ScriptEditor *editor = qobject_cast<ScriptEditor*>(this->widget(index)) )
-    {
-      setCodeCompletionBehaviour(editor, state);
-    }
+    QMessageBox::warning(this, "", "Implement code completion");
   }
 }
 
@@ -852,10 +574,7 @@ void ScriptManagerWidget::toggleCallTips(bool state)
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    if( ScriptEditor *editor = qobject_cast<ScriptEditor*>(this->widget(index)) )
-    {
-      setCallTipsBehaviour(editor, state);
-    }
+    QMessageBox::warning(this, "", "Implement call tips");
   }
 }
 
@@ -880,14 +599,8 @@ void ScriptManagerWidget::initActions()
   m_open_newtab = new QAction(tr("&Open in New Tab"), this);
   m_open_newtab->setShortcut(tr("Ctrl+Shift+O"));
   connect(m_open_newtab, SIGNAL(activated()), this, SLOT(openInNewTab()));
-  //Save a script
-  m_save = new QAction(tr("&Save"), this);
-  m_save->setShortcut(tr("Ctrl+S"));
-  connect(m_save, SIGNAL(activated()), this , SLOT(save()));
-  //Save a script under a new file name
-  m_saveas = new QAction(tr("&Save As"), this);
-  connect(m_saveas, SIGNAL(activated()), this , SLOT(saveAs()));
-  m_saveas->setShortcut(tr("Ctrl+Shift+S"));
+
+
   //Close the current tab
   m_close_tab = new QAction(tr("&Close Tab"), this);
   m_close_tab->setShortcut(tr("Ctrl+W"));
@@ -901,18 +614,6 @@ void ScriptManagerWidget::initActions()
   m_find = new QAction(tr("&Find/Replace"), this);
   m_find->setShortcut(tr("Ctrl+F"));
   connect(m_find, SIGNAL(activated()), this, SLOT(showFindDialog()));
-
-  // **Execute** actions
-  m_exec = new QAction(tr("E&xecute"), this);
-  m_exec->setShortcut(tr("Ctrl+Return"));
-  connect(m_exec, SIGNAL(activated()), this, SLOT(execute()));
-  m_exec_all = new QAction(tr("Execute &All"), this);
-  m_exec_all->setShortcut(tr("Ctrl+Shift+Return"));
-  connect(m_exec_all, SIGNAL(activated()), this, SLOT(executeAll()));
-  m_eval = new QAction(tr("&Evaluate Expression"), this);
-  m_eval->setShortcut( tr("Ctrl+E") );
-  connect(m_eval, SIGNAL(activated()), this, SLOT(evaluate()));
-  m_eval->setEnabled(scriptingEnv()->supportsEvaluation());
 
   // Toggle the progress arrow
   m_toggle_progress = new QAction(tr("Show &Progress Marker"), this);
@@ -989,14 +690,7 @@ void ScriptManagerWidget::customEvent(QEvent *event)
     // This handles reference counting of the scripting environment
     Scripted::scriptingChangeEvent(sce);
 
-    // Update the code lexers for each tab
-    int ntabs = count();
-    for( int index = 0; index < ntabs; ++index )
-    {
-      ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-      editor->setLexer(scriptingEnv()->createCodeLexer());
-      m_script_runners[editor] = createScriptRunner(editor);
-    }
+    QMessageBox::warning(this, "", "Implement script changing");
   }
 }
 
@@ -1007,87 +701,32 @@ void ScriptManagerWidget::customEvent(QEvent *event)
  */
 void ScriptManagerWidget::open(bool newtab, const QString & filename)
 {
-  if( !newtab ) askSave(currentIndex());
-  QString file_to_open = filename;
-  if( filename.isEmpty() )
+  QString fileToOpen = filename;
+  if( fileToOpen.isEmpty() )
   {
     QString filter = scriptingEnv()->fileFilter();
     filter += tr("Text") + " (*.txt *.TXT);;";
     filter += tr("All Files")+" (*)";
-    file_to_open = QFileDialog::getOpenFileName(this, tr("MantidPlot - Open a script from a file"), 
-						m_last_dir, filter);
-    if( file_to_open.isEmpty() ) 
+    fileToOpen = QFileDialog::getOpenFileName(this, tr("MantidPlot - Open a script from a file"),
+        m_last_dir, filter);
+    if( fileToOpen.isEmpty() )
     {
       return;
     }
   }
   /// remove the file name from script list
-  m_recentScriptList.remove(file_to_open); 
+  m_recentScriptList.remove(fileToOpen);
   //add the script file to recent scripts list 
-  m_recentScriptList.push_front(file_to_open); 
+  m_recentScriptList.push_front(fileToOpen);
   //update the recent scripts menu 
   updateRecentScriptList();
  
   //Save last directory
-  m_last_dir = QFileInfo(file_to_open).absolutePath();
-  
-  bool ok(false);
-  QString script_txt = readScript(file_to_open, &ok);
-  if( !ok ) return;
+  m_last_dir = QFileInfo(fileToOpen).absolutePath();
 
   int index(-1);
-  if( !newtab )
-  {
-    // This asks about saving again but since it's already taken care of
-    // then it'll be quick
-    index = closeCurrentTab();
-  }
-  
-  ScriptEditor *editor = newTab(index, file_to_open);
-  editor->blockSignals(true);
-  editor->append(script_txt);
-  editor->update();
-  editor->blockSignals(false);
-
-  editor->setCursorPosition(0,0);
-  
-  // Set last directory
-  m_last_dir = QFileInfo(file_to_open).absolutePath();
-}
-
-/**
- * Create and return a new Script object, connecting up the relevant signals.
- * @param An :: optional ScriptEditor object
- */
-Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
-{
-  QString filename("");
-  if( editor ) filename = editor->fileName();
-  Script *script = scriptingEnv()->newScript("", this, filename, true,
-                                             m_toggle_progress->isChecked());
-  if( m_capturePrint )
-  {
-    // Connect the signals that print output and error messages to the formatting functions
-    connect(script, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
-    connect(script, SIGNAL(error(const QString &, const QString&, int)), this,
-            SLOT(displayError(const QString &)));
-  }
-  else
-  {
-    script->redirectStdOut(false);
-  }
-  if( editor )
-  {
-    connect(script, SIGNAL(keywordsChanged(const QStringList&)), editor, 
-      SLOT(updateCompletionAPI(const QStringList &)));
-    /// Initialize the auto complete by evaluating some completely trivial code
-    if( !scriptingEnv()->isRunning() )
-    {
-      script->setCode("1");
-      script->exec();
-    }
-  }
-  return script;
+  if( !newtab ) index = closeCurrentTab();
+  newTab(index, fileToOpen);
 }
 
 /**
@@ -1096,24 +735,8 @@ Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
  */ 
 void ScriptManagerWidget::closeTabAtIndex(int index)
 {
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
-  if( !editor ) return;
-  //Check if we need to save
-  askSave(index);
-  editor->disconnect();
-  // Remove the path from the script runner
-  Script *runner = m_script_runners.take(editor);
-  runner->disconnect();
-  //Get the widget attached to the tab first as this is not deleted
-  //when remove is called
-  editor->deleteLater();
-  runner->deleteLater();
-
-  //  If we are removing the final tab, close the find replace dialog if it exists and is visible
-  if( m_findrep_dlg && m_findrep_dlg->isVisible() && count() == 1 )
-  {
-    m_findrep_dlg->close();
-  }
+  ScriptFileInterpreter *interpreter = qobject_cast<ScriptFileInterpreter*>(widget(index));
+  interpreter->prepareToClose();
   removeTab(index);
 }
 
@@ -1129,85 +752,73 @@ void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
   closeTabAtIndex(index);
 }
 
-/** Writes the file to disk
- *  @param The :: editor tab to be saved
- */
-void ScriptManagerWidget::doSave(ScriptEditor * editor)
-{
-  QString filename = editor->fileName();
-  editor->saveScript(filename);
-  setTabText(currentIndex(), QFileInfo(filename).fileName());
-  editor->setModified(false);
-  connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
-}
-
-/** 
- * Set auto complete behaviour for the given editor
- * @param editor :: The editor widget to set the behaviour on
- * @param state :: The state required
- */
-void ScriptManagerWidget::setCodeCompletionBehaviour(ScriptEditor *editor, bool state)
-{
-  QsciScintilla::AutoCompletionSource api_source;
-  int threshold(-1);
-  if( state )
-  {
-    api_source = QsciScintilla::AcsAPIs;
-    threshold = 2;
-  }
-  else
-  {
-    api_source = QsciScintilla::AcsNone;
-    threshold = -1;
-  }
-  
-  editor->setAutoCompletionThreshold(threshold);  // threshold characters before autocomplete kicks in
-  editor->setAutoCompletionSource(api_source);
-}
-
-/** 
- * Set call tips behaviour for the given editor
- * @param editor :: The editor widget to set the behaviour on
- * @param state :: The state required
- */
-void ScriptManagerWidget::setCallTipsBehaviour(ScriptEditor *editor, bool state)
-{
-  QsciScintilla::CallTipsStyle tip_style;
-  int nvisible(-1);
-  if( state )
-  {
-    tip_style = QsciScintilla::CallTipsNoAutoCompletionContext;
-    nvisible = 0; // This actually makes all of them visible at the same time
-  }
-  else
-  {
-    tip_style = QsciScintilla::CallTipsNone;
-    nvisible = -1;
-  }
-
-  editor->setCallTipsVisible(nvisible);
-  editor->setCallTipsStyle(tip_style);
-}
-
-/** 
- * Set code folding behaviour for the given editor
- * @param editor :: The editor widget to set the behaviour on
- * @param state :: The state required
- */
-void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool state)
-{
-  QsciScintilla::FoldStyle fold_option;
-  if( state && !m_interpreter_mode )
-  {
-    fold_option = QsciScintilla::BoxedTreeFoldStyle;
-  }
-  else
-  {
-    fold_option = QsciScintilla::NoFoldStyle;
-  }
-  
-  editor->setFolding(fold_option);
-}
+///**
+// * Set auto complete behaviour for the given editor
+// * @param editor :: The editor widget to set the behaviour on
+// * @param state :: The state required
+// */
+//void ScriptManagerWidget::setCodeCompletionBehaviour(ScriptEditor *editor, bool state)
+//{
+//  QsciScintilla::AutoCompletionSource api_source;
+//  int threshold(-1);
+//  if( state )
+//  {
+//    api_source = QsciScintilla::AcsAPIs;
+//    threshold = 2;
+//  }
+//  else
+//  {
+//    api_source = QsciScintilla::AcsNone;
+//    threshold = -1;
+//  }
+//
+//  editor->setAutoCompletionThreshold(threshold);  // threshold characters before autocomplete kicks in
+//  editor->setAutoCompletionSource(api_source);
+//}
+//
+///**
+// * Set call tips behaviour for the given editor
+// * @param editor :: The editor widget to set the behaviour on
+// * @param state :: The state required
+// */
+//void ScriptManagerWidget::setCallTipsBehaviour(ScriptEditor *editor, bool state)
+//{
+//  QsciScintilla::CallTipsStyle tip_style;
+//  int nvisible(-1);
+//  if( state )
+//  {
+//    tip_style = QsciScintilla::CallTipsNoAutoCompletionContext;
+//    nvisible = 0; // This actually makes all of them visible at the same time
+//  }
+//  else
+//  {
+//    tip_style = QsciScintilla::CallTipsNone;
+//    nvisible = -1;
+//  }
+//
+//  editor->setCallTipsVisible(nvisible);
+//  editor->setCallTipsStyle(tip_style);
+//}
+//
+///**
+// * Set code folding behaviour for the given editor
+// * @param editor :: The editor widget to set the behaviour on
+// * @param state :: The state required
+// */
+//void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool state)
+//{
+//  QsciScintilla::FoldStyle fold_option;
+//  if( state && !m_interpreter_mode )
+//  {
+//    fold_option = QsciScintilla::BoxedTreeFoldStyle;
+//  }
+//  else
+//  {
+//    fold_option = QsciScintilla::NoFoldStyle;
+//  }
+//
+//  editor->setFolding(fold_option);
+//}
 
 /** 
  * open the selected script from the File->Recent Scripts  in a new tab
@@ -1215,7 +826,7 @@ void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool sta
  */
 void ScriptManagerWidget::openRecentScript(int index)
 {
-  QString scriptname=m_recent_scripts->text(index);
+  QString scriptname = m_recent_scripts->text(index);
   scriptname.remove(0,3);
   scriptname.trimmed();
   openInNewTab(scriptname); 
@@ -1235,7 +846,9 @@ void ScriptManagerWidget::updateRecentScriptList()
 
   m_recent_scripts->clear();
   for (int i = 0; i<m_recentScriptList.size(); i++ )
+  {
     m_recent_scripts->insertItem("&" + QString::number(i+1) + " " + m_recentScriptList[i]);
+  }
 
 }
 
@@ -1256,6 +869,7 @@ void ScriptManagerWidget::setRecentScripts(const QStringList& rslist)
 {
   m_recentScriptList=rslist;
 }
+
 //***************************************************************************
 //
 // FindReplaceDialog class
@@ -1264,257 +878,257 @@ void ScriptManagerWidget::setRecentScripts(const QStringList& rslist)
 //------------------------------------------------------
 // Public member functions
 //------------------------------------------------------
-/**
- * Constructor
- */
-FindReplaceDialog::FindReplaceDialog(ScriptManagerWidget *manager, bool replace, QWidget* parent, Qt::WFlags fl )
-  : QDialog( parent, fl ), m_manager(manager), m_find_inprogress(false)
-{
-  setWindowTitle (tr("MantidPlot") + " - " + tr("Find"));
-  setSizeGripEnabled( true );
-
-  QGroupBox *gb1 = new QGroupBox();
-  QGridLayout *topLayout = new QGridLayout(gb1);
-
-  topLayout->addWidget( new QLabel(tr( "Find" )), 0, 0);
-  boxFind = new QComboBox();
-  boxFind->setEditable(true);
-  boxFind->setDuplicatesEnabled(false);
-  boxFind->setInsertPolicy( QComboBox::InsertAtTop );
-  boxFind->setAutoCompletion(true);
-  boxFind->setMaxCount ( 10 );
-  boxFind->setMaxVisibleItems ( 10 );
-  boxFind->setMinimumWidth(250);
-  boxFind->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-  connect(boxFind, SIGNAL(editTextChanged(const QString &)), this, SLOT(resetSearchFlag()));
-
-  ScriptEditor *editor = m_manager->currentEditor();
-  if( editor->hasSelectedText() )
-  {
-    QString text = editor->selectedText();
-    boxFind->setEditText(text);
-    boxFind->addItem(text);
-  }
-
-  topLayout->addWidget(boxFind, 0, 1);
-
-  if( replace )
-  {
-    setWindowTitle (tr("MantidPlot") + " - " + tr("Find and Replace"));
-    topLayout->addWidget(new QLabel(tr( "Replace with" )), 1, 0);
-    boxReplace = new QComboBox();
-    boxReplace->setEditable(true);
-    boxReplace->setDuplicatesEnabled(false);
-    boxReplace->setInsertPolicy( QComboBox::InsertAtTop );
-    boxReplace->setAutoCompletion(true);
-    boxReplace->setMaxCount ( 10 );
-    boxReplace->setMaxVisibleItems ( 10 );
-    boxReplace->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-    topLayout->addWidget( boxReplace, 1, 1);
-    topLayout->setColumnStretch(1, 10);
-  }
-
-  QGroupBox *gb2 = new QGroupBox();
-  QGridLayout * bottomLayout = new QGridLayout(gb2);
-  QButtonGroup *find_options = new QButtonGroup(this);
-  find_options->setExclusive(false);
-
-  boxCaseSensitive = new QCheckBox(tr("&Match case"));
-  boxCaseSensitive->setChecked(false);
-  bottomLayout->addWidget( boxCaseSensitive, 0, 0);
-  find_options->addButton(boxCaseSensitive);
-
-  boxWholeWords = new QCheckBox(tr("&Whole word"));
-  boxWholeWords->setChecked(false);
-  bottomLayout->addWidget(boxWholeWords, 1, 0);
-  find_options->addButton(boxWholeWords);
-
-  boxRegex = new QCheckBox(tr("&Regular expression"));
-  boxRegex->setChecked(false);
-  bottomLayout->addWidget(boxRegex, 2, 0);
-  find_options->addButton(boxRegex);
- 
-  boxSearchBackwards = new QCheckBox(tr("&Search backwards"));
-  boxSearchBackwards->setChecked(false);
-  bottomLayout->addWidget(boxSearchBackwards, 0, 1);
-  find_options->addButton(boxSearchBackwards);
-
-  boxWrapAround = new QCheckBox(tr("&Wrap around"));
-  boxWrapAround->setChecked(true);
-  bottomLayout->addWidget(boxWrapAround, 1, 1);
-  find_options->addButton(boxWrapAround);
-
-  connect(find_options, SIGNAL(buttonClicked(int)), this, SLOT(resetSearchFlag()));
-
-  QVBoxLayout *vb1 = new QVBoxLayout();
-  vb1->addWidget(gb1);
-  vb1->addWidget(gb2);
-
-  QVBoxLayout *vb2 = new QVBoxLayout();
-
-  buttonNext = new QPushButton(tr("&Next"));
-  buttonNext->setShortcut(tr("Ctrl+F"));
-  buttonNext->setDefault(true);
-  vb2->addWidget(buttonNext);
-
-  if( replace )
-  {
-    buttonReplace = new QPushButton(tr("&Replace"));
-    connect(buttonReplace, SIGNAL(clicked()), this, SLOT(replace()));
-    vb2->addWidget(buttonReplace);
-
-    buttonReplaceAll = new QPushButton(tr("Replace &all"));
-    connect(buttonReplaceAll, SIGNAL(clicked()), this, SLOT(replaceAll()));
-    vb2->addWidget(buttonReplaceAll);
-  }
-
-  buttonCancel = new QPushButton(tr("&Close"));
-  vb2->addWidget(buttonCancel);
-  vb2->addStretch();
-
-  QHBoxLayout *hb = new QHBoxLayout(this);
-  hb->addLayout(vb1);
-  hb->addLayout(vb2);
-
-  connect(buttonNext, SIGNAL(clicked()), this, SLOT(findClicked()));
-  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
-}
-
-//------------------------------------------------------
-// Protected slot member functions
-//------------------------------------------------------
-/**
- * Find the current search term
- * @param backwards :: If true then the search procedes backwards from the cursor's current position
- * @returns A boolean indicating success/failure
- */
-bool FindReplaceDialog::find(bool backwards)
-{
-  QString searchString = boxFind->currentText();
-  if (searchString.isEmpty()){
-    QMessageBox::warning(this, tr("Empty Search Field"),
-			 tr("The search field is empty. Please enter some text and try again."));
-    boxFind->setFocus();
-    return false;
-  }
-
-  if(boxFind->findText(searchString) == -1)
-  {
-    boxFind->addItem(searchString);
-  }
-
-  if( m_find_inprogress )
-  {
-    m_find_inprogress = m_manager->currentEditor()->findNext();
-  }
-  else
-  {
-    bool cs = boxCaseSensitive->isChecked();
-    bool whole = boxWholeWords->isChecked();
-    bool wrap = boxWrapAround->isChecked();
-    bool regex = boxRegex->isChecked();
-    m_find_inprogress = m_manager->currentEditor()->findFirst(searchString, regex, cs, whole, wrap, !backwards);
-  }
-  return m_find_inprogress;
-}
-
-/**
- * Replace the next occurrence of the search term with the replacement text
- */
-void FindReplaceDialog::replace()
-{
-  QString searchString = boxFind->currentText();
-  if (searchString.isEmpty()){
-    QMessageBox::warning(this, tr("Empty Search Field"),
-			 tr("The search field is empty. Please enter some text and try again."));
-    boxFind->setFocus();
-    return;
-  }
-
-  if (!m_manager->currentEditor()->hasSelectedText() || m_manager->currentEditor()->selectedText() != searchString){
-    find();//find and select next match
-    return;
-  }
-
-  QString replaceString = boxReplace->currentText();
-  m_manager->currentEditor()->replace(replaceString);
-  find();//find and select next match
-
-  if(boxReplace->findText(replaceString) == -1)
-    boxReplace->addItem(replaceString);
-}
-
-/**
- * Replace all occurrences of the current search term with the replacement text
- */
-void FindReplaceDialog::replaceAll()
-{
-  QString searchString = boxFind->currentText();
-  if (searchString.isEmpty()){
-    QMessageBox::warning(this, tr("Empty Search Field"),
-			 tr("The search field is empty. Please enter some text and try again."));
-    boxFind->setFocus();
-    return;
-  }
-
-  if(boxFind->findText(searchString) == -1)
-  {
-    boxFind->addItem (searchString);
-  }
-
-  QString replaceString = boxReplace->currentText();
-  if(boxReplace->findText(replaceString) == -1)
-  {
-    boxReplace->addItem(replaceString);
-  }
-
-  ScriptEditor *editor =  m_manager->currentEditor();
-  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
-  bool regex = boxRegex->isChecked();
-  bool cs = boxCaseSensitive->isChecked();
-  bool whole = boxWholeWords->isChecked();
-  bool wrap = boxWrapAround->isChecked();
-  bool backward = boxSearchBackwards->isChecked();
-  // Mark this as a set of actions that can be undone as one
-  editor->beginUndoAction();
-  bool found = editor->findFirst(searchString, regex, cs, whole, wrap, !backward, 0, 0);
-  // If find first fails then there is nothing to replace
-  if( !found )
-  {
-    QMessageBox::information(this, "MantidPlot - Find and Replace", "No matches found in current document.");
-  }
-
-  while( found )
-  {
-    editor->replace(replaceString);
-    editor->getCursorPosition(&prevLine, &prevIndex);
-    found = editor->findNext();
-    editor->getCursorPosition(&line, &index);
-    if( line < prevLine || ( line == prevLine && index <= prevIndex ) )
-    {
-      break;
-    }
-  }
-  editor->endUndoAction();
-}
-
-/**
- * Find button clicked slot
- */
-void FindReplaceDialog::findClicked()
-{
-  // Forward to worker function
-  find(boxSearchBackwards->isChecked());
-}
-
-/**
- * Flip the in-progress flag
- */
-void FindReplaceDialog::resetSearchFlag()
-{
-  if( ScriptEditor *editor = m_manager->currentEditor() )
-  {
-    m_find_inprogress = false;
-    editor->setSelection(-1, -1, -1, -1);
-  }
-}
+///**
+// * Constructor
+// */
+//FindReplaceDialog::FindReplaceDialog(ScriptManagerWidget *manager, bool replace, QWidget* parent, Qt::WFlags fl )
+//  : QDialog( parent, fl ), m_manager(manager), m_find_inprogress(false)
+//{
+//  setWindowTitle (tr("MantidPlot") + " - " + tr("Find"));
+//  setSizeGripEnabled( true );
+//
+//  QGroupBox *gb1 = new QGroupBox();
+//  QGridLayout *topLayout = new QGridLayout(gb1);
+//
+//  topLayout->addWidget( new QLabel(tr( "Find" )), 0, 0);
+//  boxFind = new QComboBox();
+//  boxFind->setEditable(true);
+//  boxFind->setDuplicatesEnabled(false);
+//  boxFind->setInsertPolicy( QComboBox::InsertAtTop );
+//  boxFind->setAutoCompletion(true);
+//  boxFind->setMaxCount ( 10 );
+//  boxFind->setMaxVisibleItems ( 10 );
+//  boxFind->setMinimumWidth(250);
+//  boxFind->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+//  connect(boxFind, SIGNAL(editTextChanged(const QString &)), this, SLOT(resetSearchFlag()));
+//
+//  ScriptEditor *editor = m_manager->currentEditor();
+//  if( editor->hasSelectedText() )
+//  {
+//    QString text = editor->selectedText();
+//    boxFind->setEditText(text);
+//    boxFind->addItem(text);
+//  }
+//
+//  topLayout->addWidget(boxFind, 0, 1);
+//
+//  if( replace )
+//  {
+//    setWindowTitle (tr("MantidPlot") + " - " + tr("Find and Replace"));
+//    topLayout->addWidget(new QLabel(tr( "Replace with" )), 1, 0);
+//    boxReplace = new QComboBox();
+//    boxReplace->setEditable(true);
+//    boxReplace->setDuplicatesEnabled(false);
+//    boxReplace->setInsertPolicy( QComboBox::InsertAtTop );
+//    boxReplace->setAutoCompletion(true);
+//    boxReplace->setMaxCount ( 10 );
+//    boxReplace->setMaxVisibleItems ( 10 );
+//    boxReplace->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+//    topLayout->addWidget( boxReplace, 1, 1);
+//    topLayout->setColumnStretch(1, 10);
+//  }
+//
+//  QGroupBox *gb2 = new QGroupBox();
+//  QGridLayout * bottomLayout = new QGridLayout(gb2);
+//  QButtonGroup *find_options = new QButtonGroup(this);
+//  find_options->setExclusive(false);
+//
+//  boxCaseSensitive = new QCheckBox(tr("&Match case"));
+//  boxCaseSensitive->setChecked(false);
+//  bottomLayout->addWidget( boxCaseSensitive, 0, 0);
+//  find_options->addButton(boxCaseSensitive);
+//
+//  boxWholeWords = new QCheckBox(tr("&Whole word"));
+//  boxWholeWords->setChecked(false);
+//  bottomLayout->addWidget(boxWholeWords, 1, 0);
+//  find_options->addButton(boxWholeWords);
+//
+//  boxRegex = new QCheckBox(tr("&Regular expression"));
+//  boxRegex->setChecked(false);
+//  bottomLayout->addWidget(boxRegex, 2, 0);
+//  find_options->addButton(boxRegex);
+//
+//  boxSearchBackwards = new QCheckBox(tr("&Search backwards"));
+//  boxSearchBackwards->setChecked(false);
+//  bottomLayout->addWidget(boxSearchBackwards, 0, 1);
+//  find_options->addButton(boxSearchBackwards);
+//
+//  boxWrapAround = new QCheckBox(tr("&Wrap around"));
+//  boxWrapAround->setChecked(true);
+//  bottomLayout->addWidget(boxWrapAround, 1, 1);
+//  find_options->addButton(boxWrapAround);
+//
+//  connect(find_options, SIGNAL(buttonClicked(int)), this, SLOT(resetSearchFlag()));
+//
+//  QVBoxLayout *vb1 = new QVBoxLayout();
+//  vb1->addWidget(gb1);
+//  vb1->addWidget(gb2);
+//
+//  QVBoxLayout *vb2 = new QVBoxLayout();
+//
+//  buttonNext = new QPushButton(tr("&Next"));
+//  buttonNext->setShortcut(tr("Ctrl+F"));
+//  buttonNext->setDefault(true);
+//  vb2->addWidget(buttonNext);
+//
+//  if( replace )
+//  {
+//    buttonReplace = new QPushButton(tr("&Replace"));
+//    connect(buttonReplace, SIGNAL(clicked()), this, SLOT(replace()));
+//    vb2->addWidget(buttonReplace);
+//
+//    buttonReplaceAll = new QPushButton(tr("Replace &all"));
+//    connect(buttonReplaceAll, SIGNAL(clicked()), this, SLOT(replaceAll()));
+//    vb2->addWidget(buttonReplaceAll);
+//  }
+//
+//  buttonCancel = new QPushButton(tr("&Close"));
+//  vb2->addWidget(buttonCancel);
+//  vb2->addStretch();
+//
+//  QHBoxLayout *hb = new QHBoxLayout(this);
+//  hb->addLayout(vb1);
+//  hb->addLayout(vb2);
+//
+//  connect(buttonNext, SIGNAL(clicked()), this, SLOT(findClicked()));
+//  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
+//}
+//
+////------------------------------------------------------
+//// Protected slot member functions
+////------------------------------------------------------
+///**
+// * Find the current search term
+// * @param backwards :: If true then the search procedes backwards from the cursor's current position
+// * @returns A boolean indicating success/failure
+// */
+//bool FindReplaceDialog::find(bool backwards)
+//{
+//  QString searchString = boxFind->currentText();
+//  if (searchString.isEmpty()){
+//    QMessageBox::warning(this, tr("Empty Search Field"),
+//			 tr("The search field is empty. Please enter some text and try again."));
+//    boxFind->setFocus();
+//    return false;
+//  }
+//
+//  if(boxFind->findText(searchString) == -1)
+//  {
+//    boxFind->addItem(searchString);
+//  }
+//
+//  if( m_find_inprogress )
+//  {
+//    m_find_inprogress = m_manager->currentEditor()->findNext();
+//  }
+//  else
+//  {
+//    bool cs = boxCaseSensitive->isChecked();
+//    bool whole = boxWholeWords->isChecked();
+//    bool wrap = boxWrapAround->isChecked();
+//    bool regex = boxRegex->isChecked();
+//    m_find_inprogress = m_manager->currentEditor()->findFirst(searchString, regex, cs, whole, wrap, !backwards);
+//  }
+//  return m_find_inprogress;
+//}
+//
+///**
+// * Replace the next occurrence of the search term with the replacement text
+// */
+//void FindReplaceDialog::replace()
+//{
+//  QString searchString = boxFind->currentText();
+//  if (searchString.isEmpty()){
+//    QMessageBox::warning(this, tr("Empty Search Field"),
+//			 tr("The search field is empty. Please enter some text and try again."));
+//    boxFind->setFocus();
+//    return;
+//  }
+//
+//  if (!m_manager->currentEditor()->hasSelectedText() || m_manager->currentEditor()->selectedText() != searchString){
+//    find();//find and select next match
+//    return;
+//  }
+//
+//  QString replaceString = boxReplace->currentText();
+//  m_manager->currentEditor()->replace(replaceString);
+//  find();//find and select next match
+//
+//  if(boxReplace->findText(replaceString) == -1)
+//    boxReplace->addItem(replaceString);
+//}
+//
+///**
+// * Replace all occurrences of the current search term with the replacement text
+// */
+//void FindReplaceDialog::replaceAll()
+//{
+//  QString searchString = boxFind->currentText();
+//  if (searchString.isEmpty()){
+//    QMessageBox::warning(this, tr("Empty Search Field"),
+//			 tr("The search field is empty. Please enter some text and try again."));
+//    boxFind->setFocus();
+//    return;
+//  }
+//
+//  if(boxFind->findText(searchString) == -1)
+//  {
+//    boxFind->addItem (searchString);
+//  }
+//
+//  QString replaceString = boxReplace->currentText();
+//  if(boxReplace->findText(replaceString) == -1)
+//  {
+//    boxReplace->addItem(replaceString);
+//  }
+//
+//  ScriptEditor *editor =  m_manager->currentEditor();
+//  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
+//  bool regex = boxRegex->isChecked();
+//  bool cs = boxCaseSensitive->isChecked();
+//  bool whole = boxWholeWords->isChecked();
+//  bool wrap = boxWrapAround->isChecked();
+//  bool backward = boxSearchBackwards->isChecked();
+//  // Mark this as a set of actions that can be undone as one
+//  editor->beginUndoAction();
+//  bool found = editor->findFirst(searchString, regex, cs, whole, wrap, !backward, 0, 0);
+//  // If find first fails then there is nothing to replace
+//  if( !found )
+//  {
+//    QMessageBox::information(this, "MantidPlot - Find and Replace", "No matches found in current document.");
+//  }
+//
+//  while( found )
+//  {
+//    editor->replace(replaceString);
+//    editor->getCursorPosition(&prevLine, &prevIndex);
+//    found = editor->findNext();
+//    editor->getCursorPosition(&line, &index);
+//    if( line < prevLine || ( line == prevLine && index <= prevIndex ) )
+//    {
+//      break;
+//    }
+//  }
+//  editor->endUndoAction();
+//}
+//
+///**
+// * Find button clicked slot
+// */
+//void FindReplaceDialog::findClicked()
+//{
+//  // Forward to worker function
+//  find(boxSearchBackwards->isChecked());
+//}
+//
+///**
+// * Flip the in-progress flag
+// */
+//void FindReplaceDialog::resetSearchFlag()
+//{
+//  if( ScriptEditor *editor = m_manager->currentEditor() )
+//  {
+//    m_find_inprogress = false;
+//    editor->setSelection(-1, -1, -1, -1);
+//  }
+//}

@@ -6,9 +6,13 @@
 // Qt
 #include <QApplication>
 #include <QFile>
+#include <QFileInfo>
+#include <QFileDialog>
+
 #include <QTextStream>
 #include <QMessageBox>
 #include <QAction>
+#include <QMenu>
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QKeyEvent>
@@ -126,50 +130,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   m_compiled(false),
   m_zoomLevel(0)
 {
-  // Undo action
-  m_undo = new QAction(tr("&Undo"), this);
-  m_undo->setShortcut(tr("Ctrl+Z"));
-  connect(m_undo, SIGNAL(activated()), this, SLOT(undo()));
-  connect(this, SIGNAL(undoAvailable(bool)), m_undo, SLOT(setEnabled(bool)));
-  // Redo action
-  m_redo = new QAction(tr("&Redo"), this);
-  m_redo->setShortcut(tr("Ctrl+Y"));
-  connect(m_redo, SIGNAL(activated()), this, SLOT(redo()));
-  connect(this, SIGNAL(redoAvailable(bool)), m_redo, SLOT(setEnabled(bool)));
-
-  //Cut
-  m_cut = new QAction(tr("C&ut"), this);
-  m_cut->setShortcut(tr("Ctrl+X"));
-  connect(m_cut, SIGNAL(activated()), this, SLOT(cut()));
-  connect(this, SIGNAL(copyAvailable(bool)), m_cut, SLOT(setEnabled(bool)));
-
-  //Copy
-  m_copy = new QAction(tr("&Copy"), this);
-  m_copy->setShortcut(tr("Ctrl+C"));
-  connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
-  connect(this, SIGNAL(copyAvailable(bool)), m_copy, SLOT(setEnabled(bool)));
-
-  //Paste
-  m_paste = new QAction(tr("&Paste"), this);
-  m_paste->setShortcut(tr("Ctrl+V"));
-  connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
-
-  //Print
-  m_print = new QAction(tr("&Print script"), this);
-  m_print->setShortcut(tr("Ctrl+P"));
-  connect(m_print, SIGNAL(activated()), this, SLOT(print()));
-
-  m_zoomIn = new QAction(("Increase font size"), this);
-  // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
-  // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
-  // it doesn't seem to work for me
-  m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
-  m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
-  connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
-
-  m_zoomOut = new QAction(("Decrease font size"), this);
-  m_zoomOut->setShortcut(QKeySequence::ZoomOut);
-  connect(m_zoomOut, SIGNAL(activated()),this,SLOT(zoomOut()));
+  initActions();
 
   //Syntax highlighting and code completion
   setLexer(codelexer);
@@ -223,7 +184,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     //Update the editor
     update();
   }
-  
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 /**
@@ -241,6 +202,33 @@ ScriptEditor::~ScriptEditor()
     delete current;
   }
 }
+
+/**
+ * Add actions applicable to file menu
+ * @param fileMenu
+ */
+void ScriptEditor::populateFileMenu(QMenu &fileMenu)
+{
+  fileMenu.addAction(m_save);
+  fileMenu.addAction(m_saveAs);
+  fileMenu.addAction(m_print);
+}
+/**
+ * Add actions applicable to an edit menu
+ * @param editMenu
+ */
+void ScriptEditor::populateEditMenu(QMenu &editMenu)
+{
+  editMenu.addAction(m_undo);
+  editMenu.addAction(m_redo);
+  editMenu.addAction(m_cut);
+  editMenu.addAction(m_copy);
+  editMenu.addAction(m_paste);
+
+//  editMenu.insertSeparator();
+//  editMenu.addAction(m_find);
+}
+
 
 /**
  * Set a new code lexer for this object. Note that this clears all auto complete information
@@ -289,21 +277,50 @@ QSize ScriptEditor::sizeHint() const
 }
 
 /**
+ * Save the script, opening a dialog to ask for the filename
+ */
+void ScriptEditor::saveAs()
+{
+  QString selectedFilter;
+  QString filter = "Scripts (*.py *.PY);;All Files (*)";
+  QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",filter, &selectedFilter);
+
+  if( filename.isEmpty() ) return;
+  if( QFileInfo(filename).suffix().isEmpty() )
+  {
+    QString ext = selectedFilter.section('(',1).section(' ', 0, 0);
+    ext.remove(0,1);
+    if( ext != ")" ) filename += ext;
+  }
+  saveScript(filename);
+}
+
+/// Save to the current filename, opening a dialog if blank
+void ScriptEditor::saveToCurrentFile()
+{
+  QString filename = fileName();
+  if(filename.isEmpty())
+  {
+    saveAs();
+    return;
+  }
+  else
+  {
+    saveScript(filename);
+  }
+}
+
+/**
  * Save the text to the given filename
  * @param filename :: The filename to use
  */
 bool ScriptEditor::saveScript(const QString & filename)
 {
-  if( filename.isEmpty() )
-  {
-    return false;
-  }
-  
   QFile file(filename);
   if( !file.open(QIODevice::WriteOnly) )
   {
     QMessageBox::critical(this, tr("MantidPlot - File error"), 
-			  tr("Could not open file \"%1\" for writing.").arg(filename));
+        tr("Could not open file \"%1\" for writing.").arg(filename));
     return false;
   }
 
@@ -313,6 +330,8 @@ bool ScriptEditor::saveScript(const QString & filename)
   writer << text();
   QApplication::restoreOverrideCursor();
   file.close();
+
+  setModified(false);
 
   return true;
 }
@@ -771,6 +790,60 @@ void ScriptEditor::zoomOut(int level)
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
+/**
+ * Create actions
+ */
+void ScriptEditor::initActions()
+{
+  m_save = new QAction(tr("&Save"), this);
+  m_save->setShortcut(tr("Ctrl+S"));
+  connect(m_save, SIGNAL(activated()), this , SLOT(saveToCurrentFile()));
+  //Save a script under a new file name
+  m_saveAs = new QAction(tr("&Save As"), this);
+  connect(m_saveAs, SIGNAL(activated()), this , SLOT(saveAs()));
+  m_saveAs->setShortcut(tr("Ctrl+Shift+S"));
+
+  m_undo = new QAction(tr("&Undo"), this);
+  m_undo->setShortcut(tr("Ctrl+Z"));
+  connect(m_undo, SIGNAL(activated()), this, SLOT(undo()));
+  connect(this, SIGNAL(undoAvailable(bool)), m_undo, SLOT(setEnabled(bool)));
+
+  m_redo = new QAction(tr("&Redo"), this);
+  m_redo->setShortcut(tr("Ctrl+Y"));
+  connect(m_redo, SIGNAL(activated()), this, SLOT(redo()));
+  connect(this, SIGNAL(redoAvailable(bool)), m_redo, SLOT(setEnabled(bool)));
+
+  m_cut = new QAction(tr("C&ut"), this);
+  m_cut->setShortcut(tr("Ctrl+X"));
+  connect(m_cut, SIGNAL(activated()), this, SLOT(cut()));
+  connect(this, SIGNAL(copyAvailable(bool)), m_cut, SLOT(setEnabled(bool)));
+
+  m_copy = new QAction(tr("&Copy"), this);
+  m_copy->setShortcut(tr("Ctrl+C"));
+  connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
+  connect(this, SIGNAL(copyAvailable(bool)), m_copy, SLOT(setEnabled(bool)));
+
+  m_paste = new QAction(tr("&Paste"), this);
+  m_paste->setShortcut(tr("Ctrl+V"));
+  connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
+
+  m_print = new QAction(tr("&Print script"), this);
+  m_print->setShortcut(tr("Ctrl+P"));
+  connect(m_print, SIGNAL(activated()), this, SLOT(print()));
+
+  m_zoomIn = new QAction(("Increase font size"), this);
+  // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
+  // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
+  // it doesn't seem to work for me
+  m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
+  m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
+  connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
+
+  m_zoomOut = new QAction(("Decrease font size"), this);
+  m_zoomOut->setShortcut(QKeySequence::ZoomOut);
+  connect(m_zoomOut, SIGNAL(activated()),this,SLOT(zoomOut()));
+
+}
 
 /// Settings group
 /**
@@ -812,13 +885,6 @@ void ScriptEditor::writeSettings()
 void ScriptEditor::executeCodeAtLine(int lineno)
 {
   QString cmd = text(lineno).remove('\r').remove('\n');
-  // I was seeing strange behaviour with the first line marker disappearing after
-  // entering some text, removing it and retyping then pressing enter
-  if( cmd.isEmpty() )
-  {
-    return;
-  }
-
   m_history.add(cmd);
   if( lineno == 0 ) markerAdd(lineno, m_marker_handle); 
   m_need_newline = true;
@@ -828,7 +894,7 @@ void ScriptEditor::executeCodeAtLine(int lineno)
 /**
   *compiles multi line code and if end of multi line executes the code
   *@param line :: number of line
-  *@param multiCmd :: text to inpterpret
+  *@param multiCmd :: text to interpret
 */
 void ScriptEditor::interpretMultiLineCode(const int line,const QString & multiCmd)
 {   

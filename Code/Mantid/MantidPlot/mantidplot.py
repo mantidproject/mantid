@@ -8,7 +8,6 @@ try:
 except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
-
 import mantidplotpy.proxies as proxies
 
 from PyQt4 import QtCore, QtGui
@@ -17,6 +16,7 @@ from PyQt4.QtCore import Qt
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python
 from _qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
+from _qti import ThreadAdapter
 
 #-------------------------- Mantid Python access functions----------------
 # Grab a few Mantid things so that we can recognise workspace variables
@@ -34,6 +34,22 @@ def _get_analysis_data_service():
     else:
         import MantidFramework
         return MantidFramework.mtd
+    
+#-------------------------- MantidPlot Threaded Access -------------------
+def threadsafe_call(func_name, *args):
+    """
+        Calls the given function with the given arguments
+        by passing it through the ThreadAdapter. This
+        ensures that the calls to the GUI functions
+        happen on the correct thread
+    """
+    adapter = ThreadAdapter(_qti.app, _qti.app.mantidUI)
+    try:
+        callable = getattr(adapter, func_name)
+    except AttributeError:
+        raise AttributeError("ThreadAdaptor has not been updated for %s. "
+                             "Cannot perform call as it would be dangerous")
+    return callable(*args)
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -184,12 +200,16 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
-    if len(workspace_names) > 0 and len(index_list) > 0:
-        return __tryPlot(workspace_names, index_list, error_bars, type)
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given to plot")
+    if len(index_list) == 0:
+        raise ValueError("No indices given to plot")
+    graph = proxies.Graph(threadsafe_call('plotSpectraList', workspace_names, index_list, error_bars, type))
+    if graph._getHeldObject() == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
     else:
-        return None
+        return graph
     
-
 #-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
@@ -208,7 +228,7 @@ def plotBin(source, indices, error_bars = False, type = 0):
     Returns:
         A handle to the created Graph widget.
     """
-    return __doPlotting(source,indices,error_bars,type)
+    return __doBinPlot(source,indices,error_bars,type)
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
@@ -387,7 +407,7 @@ def matrixToTable(matrix, conversionType=_qti.app.Direct):
 
 def mergePlots(graph1,graph2):
     """Combine two graphs into a single plot"""
-    return proxies.Graph(_qti.app.mantidUI.mergePlots(graph1._getHeldObject(),graph2._getHeldObject()))
+    return proxies.Graph(threadsafe_call('mergePlots',graph1._getHeldObject(),graph2._getHeldObject()))
 
 def convertToWaterfall(graph):
     """Convert a graph (containing a number of plotted spectra) to a waterfall plot"""
@@ -662,12 +682,15 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     
     return svw
 
+#=============================================================================
+# Helper methods
+#=============================================================================
 
-    
-    
-    
-#-----------------------------------------------------------------------------
 def __getWorkspaceIndices(source):
+    """
+        Returns a list of workspace indices from a source.
+        The source can be a list, a tuple, an int or a string.
+    """
     index_list = []
     if isinstance(source,list) or isinstance(source,tuple):
         for i in source:
@@ -687,53 +710,53 @@ def __getWorkspaceIndices(source):
         raise TypeError('Incorrect type passed as index argument "' + str(source) + '"')
     return index_list
 
-# Try plotting, raising an error if no plot object is created
-def __tryPlot(workspace_names, indices, error_bars, type):
-    adapter = _qti.ThreadAdapter(_qti.app, _qti.app.mantidUI)
-    graph = proxies.Graph(adapter.plotSpectraList(workspace_names, indices, error_bars, type))
-    if graph._getHeldObject() == None:
-        raise RuntimeError("Cannot create graph, see log for details.")
-    else:
-        return graph
-        
+#-----------------------------------------------------------------------------
 
-# Refactored functions for common code
-def __doPlotting(source, indices, error_bars,type):
+def __doBinPlot(source, indices, error_bars,type):
+    """
+       Runs plotBin in the manner most suited to the input
+       
+       If the source is a list/tuple then a plot of all of the 
+       bins merged together is created.
+       If the source is a single str or workspace then a single
+       bin plot is produced
+    """
     if isinstance(source, list) or isinstance(source, tuple):
-        return __PlotList(source, indices, error_bars,type)
+        return __plotBinList(source, indices, error_bars,type)
     elif isinstance(source, str) or hasattr(source, 'getName'):
-        return __PlotSingle(source, indices, error_bars,type)
+        return __plotBinSingle(source, indices, error_bars,type)
     else:
         raise TypeError("Source is not a workspace name or a workspace variable")
     
-def __PlotSingle(workspace, indices, error_bars,type):
+def __plotBinSingle(workspace, indices, error_bars,type):
     if isinstance(indices, list) or isinstance(indices, tuple):
         master_graph = __CallPlotFunction(workspace, indices[0], error_bars,type)
         for index in indices[1:]:
             mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
         return master_graph
     else:
-        return __CallPlotFunction(workspace, indices, error_bars,type)
+        return __callPlotBin(workspace, indices, error_bars,type)
     
-def __PlotList(workspace_list, indices, error_bars,type):
+def __plotBinList(workspace_list, indices, error_bars,type):
     if isinstance(indices, list) or isinstance(indices, tuple):
-        master_graph = __CallPlotFunction(workspace_list[0], indices[0], error_bars,type)
+        master_graph = __callPlotBin(workspace_list[0], indices[0], error_bars,type)
         start = 1
         for workspace in workspace_list:
             for index in indices[start:]:
-                mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
+                mergePlots(master_graph, __callPlotBin(workspace, index, error_bars,type))
                 start = 0
                 
         return master_graph
     else:
-        master_graph = __CallPlotFunction(workspace_list[0], indices, error_bars,type)
+        master_graph = __callPlotBin(workspace_list[0], indices, error_bars,type)
         for workspace in workspace_list[1:]:
             mergePlots(master_graph, __CallPlotFunction(workspace, indices, error_bars,type))
         return master_graph
 
-def __CallPlotFunction(workspace, index, error_bars,type):
+def __callPlotBin(workspace, index, error_bars,type):
     if isinstance(workspace, str):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    return proxies.Graph(_qti.app.mantidUI.plotBin(wkspname, index, error_bars,type))
+    return proxies.Graph(threadsafe_call('plotBin',wkspname, index, error_bars,type))
+#------------------------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 // Forward declarations
 //----------------------------------
 class QAction;
+class QMenu;
 class QKeyEvent;
 class QMouseEvent;
 class QsciAPIs;
@@ -82,6 +83,12 @@ public:
   ScriptEditor(QWidget* parent = 0, bool interpreter_mode = false, QsciLexer* lexer = NULL);
   ///Destructor
   ~ScriptEditor();
+
+  /// Add actions applicable to an edit menu
+  void populateFileMenu(QMenu &fileMenu);
+  /// Add actions applicable to an edit menu
+  void populateEditMenu(QMenu &editMenu);
+
   // Set a new code lexer for this object
   void setLexer(QsciLexer *);
   // Size hint
@@ -90,8 +97,6 @@ public:
   using QsciScintilla::setText;
   /// Set the text on a given line number
   void setText(int lineno, const QString& text,int index=0);
-  /// Save a the text to the given filename
-  bool saveScript(const QString & filename);
   ///Capture key presses
   void keyPressEvent(QKeyEvent* event);
   /// Set whether or not the current line(where the cursor is located) is editable
@@ -114,52 +119,10 @@ public:
     m_filename = filename;
   }
   
-  /// Undo action for this editor
-  inline QAction* undoAction() const
-  {
-    return m_undo;
-  }
-  /// Redo action for this editor
-  inline QAction* redoAction() const
-  {
-    return m_redo;
-  }
-
-  /// Cut action for this editor
-  inline QAction* cutAction() const
-  {
-    return m_cut;
-  }
-  /// Copy action for this editor
-  inline QAction* copyAction() const
-  {
-    return m_copy;
-  }
-  /// Paste action for this editor
-  inline QAction* pasteAction() const
-  {
-    return m_paste;
-  }
-
-  /// Zoom in action for this editor
-  inline QAction* zoomInAction() const
-  {
-    return m_zoomIn;
-  }
-  /// Zoom out action for this editor
-  inline QAction* zoomOutAction() const
-  {
-    return m_zoomOut;
-  }
 
   /// Override so that ctrl + mouse wheel will zoom in and out
   void wheelEvent( QWheelEvent * e );
 
-  /// Print action for this editor
-  inline QAction* printAction() const
-  {
-    return m_print;
-  } 
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs * scintillaAPI() const
   {
@@ -196,6 +159,13 @@ public:
   }
   
 public slots:
+  /// Save the script, opening a dialog
+  void saveAs();
+  /// Save to the current filename, opening a dialog if blank
+  void saveToCurrentFile();
+  /// Save a the text to the given filename
+  bool saveScript(const QString & filename);
+
   /// Update the editor
   void update();
   /// Set the marker state
@@ -232,6 +202,9 @@ signals:
   void executeMultiLine();
 
 private:
+  /// Create actions
+  void initActions();
+
   /// Settings group
   QString settingsGroup() const;
   /// Read settings from persistent store
@@ -263,6 +236,8 @@ private:
   /// The file name associated with this editor
   QString m_filename;
 
+  /// Saving actions
+  QAction *m_save, *m_saveAs;
   /// Each editor needs its own undo/redo etc
   QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
   /// Zoom in/out actions

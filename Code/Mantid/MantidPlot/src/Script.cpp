@@ -26,59 +26,29 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "ScriptingEnv.h"
 #include "Script.h"
-
-#include <QMessageBox>
+#include "ScriptingEnv.h"
 #include <QRegExp>
 
-Script::Script(ScriptingEnv *env, const QString &code, QObject *context, 
-	       const QString &name, bool interactive, bool reportProgress)
-  : Env(env), Code(code), Name(name), m_interactive(interactive),
-    m_report_progress(reportProgress), compiled(notCompiled),
-    m_line_offset(-1), m_redirectOutput(true)
-{ 
-  Env->incref(); 
-  Context = context; 
-  EmitErrors=true; 
+Script::Script(ScriptingEnv *env, const QString &name,
+               const InteractionType interact, QObject * context)
+  : QObject(), m_env(env), m_name(name), m_interactMode(interact), m_context(context),
+    m_redirectOutput(true)
+{
+  m_env->incref();
 }
 
 Script::~Script()
 {
-  Env->decref();
+  m_env->decref();
 }
 
-void Script::addCode(const QString &code) 
-{ 
-  Code.append(normaliseLineEndings(code));
-  compiled = notCompiled; 
-  emit codeChanged(); 
-}
-
-void Script::setCode(const QString &code) 
+/**
+ * @return True if the script is running
+ */
+bool Script::scriptIsRunning()
 {
-  Code = normaliseLineEndings(code);
-  compiled = notCompiled; 
-  emit codeChanged();
-}
-
-
-bool Script::compile(bool)
-{
-  emit_error("Script::compile called!", 0);
-  return false;
-}
-
-QVariant Script::eval()
-{
-  emit_error("Script::eval called!",0);
-  return QVariant();
-}
-
-bool Script::exec()
-{
-  emit_error("Script::exec called!",0);
-  return false;
+  return m_env->isRunning();
 }
 
 /**

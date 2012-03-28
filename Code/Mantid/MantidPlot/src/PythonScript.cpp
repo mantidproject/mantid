@@ -33,86 +33,64 @@
 
 #include "PythonScript.h"
 #include "PythonScripting.h"
-#include "ApplicationWindow.h"
 
-#include <QObject>
 #include <QVariant>
 #include <QMessageBox>
-#include <QFileInfo>
+#include <QtConcurrentRun>
+
 #include <iostream>
 #include <stdexcept>
 
-#include <QtConcurrentRun>
 
-namespace
-{
-  // Keep a reference to the current PyCode filename object for the line tracing.
-  // The tracing function is a static member function so this variable needs to be global
-  // so it's kept in an anonymous namespace to keep it at this file scope.
-  PyObject* ROOT_CODE_OBJECT = NULL;
-  PythonScript *CURRENT_SCRIPT_OBJECT = NULL;
-
-  static int _trace_callback(PyObject *, _frame *frame, int what, PyObject *)
-  {
-    // If we are in the main code and this is a line number event
-    if( ROOT_CODE_OBJECT && CURRENT_SCRIPT_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
-      && what == PyTrace_LINE )
-    {
-      CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
-    }
-    // I don't care about the return value
-    return 0;
-  }
-
-  /**
-   * Sets a pointer to null when its destructor is run
-   */
-  struct ScriptNullifier
-  {
-    ScriptNullifier(PythonScript *script) :
-      m_script(script)
-    {}
-
-    ~ScriptNullifier()
-    {
-      m_script = NULL;
-    }
-  private:
-    PythonScript *m_script;
-  };
-
-}
+//namespace
+//{
+//  // Keep a reference to the current PyCode filename object for the line tracing.
+//  // The tracing function is a static member function so this variable needs to be global
+//  // so it's kept in an anonymous namespace to keep it at this file scope.
+//  PyObject* ROOT_CODE_OBJECT = NULL;
+//  PythonScript *CURRENT_SCRIPT_OBJECT = NULL;
+//
+//  static int _trace_callback(PyObject *, _frame *frame, int what, PyObject *)
+//  {
+//    // If we are in the main code and this is a line number event
+//    if( ROOT_CODE_OBJECT && CURRENT_SCRIPT_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
+//      && what == PyTrace_LINE )
+//    {
+//      CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
+//    }
+//    // I don't care about the return value
+//    return 0;
+//  }
+//
+//  /**
+//   * Sets a pointer to null when its destructor is run
+//   */
+//  struct ScriptNullifier
+//  {
+//    ScriptNullifier(PythonScript *script) :
+//      m_script(script)
+//    {}
+//
+//    ~ScriptNullifier()
+//    {
+//      m_script = NULL;
+//    }
+//  private:
+//    PythonScript *m_script;
+//  };
+//
+//}
 
 /**
  * Constructor
  */
-PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
-         const QString &name, bool interactive, bool reportProgress)
-  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(NULL),
+PythonScript::PythonScript(PythonScripting *env, const QString &name, const InteractionType interact,
+                           QObject * context)
+  : Script(env, name, interact, context), m_pythonEnv(env), localDict(NULL),
     stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false),
-    m_workspaceHandles()
+    m_pathHolder(name), m_workspaceHandles()
 {
-  ROOT_CODE_OBJECT = NULL;
-  CURRENT_SCRIPT_OBJECT = this;
-
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  if( QFileInfo(Name).exists() )
-  {
-    QString scriptPath = QFileInfo(Name).absoluteFilePath();
-    // Make sure the __file__ variable is set
-    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
-  }
-  setQObject(Context, "self");
-  updatePath(Name, true);
-
-  // Observe ADS updates
-  if( false ) // Disabled as it causes random crashes in different places on different systems
-  {
-    observeAdd();
-    observePostDelete();
-    observeADSClear();
-  }
+  initialize(name, context);
 }
 
 /**
@@ -120,149 +98,67 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
  */
 PythonScript::~PythonScript()
 {
+  GlobalInterpreterLock pythonLock;
   observeAdd(false);
   observeAfterReplace(false);
   observePostDelete(false);
   observeADSClear(false);
 
   this->disconnect();
-  updatePath(Name, false);
-  Py_XDECREF(PyCode);
   Py_XDECREF(localDict);
 }
 
 /**
- * Compile the code
+ * Compile the code returning true if successful, false otherwise
+ * @param code
+ * @return True if success, false otherwise
  */
-bool PythonScript::compile(bool for_eval)
+bool PythonScript::compile(const QString & code)
 {
-  // Support for the convenient col() and cell() functions.
-  // This can't be done anywhere else, because we need access to the local
-  // variables self, i and j.
-  if( Context )
+  PyObject *codeObject = compileToByteCode(code, false);
+  if(codeObject)
   {
-    if( Context->inherits("Table") ) 
-    {
-      // A bit of a hack, but we need either IndexError or len() from __builtins__.
-      PyDict_SetItemString(localDict, "__builtins__",
-         PyDict_GetItemString(env()->globalDict(), "__builtins__"));
-      PyObject *ret = PyRun_String(
-           "def col(c,*arg):\n"
-           "\ttry: return self.cell(c,arg[0])\n"
-           "\texcept(IndexError): return self.cell(c,i)\n"
-           "def cell(c,r):\n"
-           "\treturn self.cell(c,r)\n"
-           "def tablecol(t,c):\n"
-           "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
-           "def _meth_table_col_(t,c):\n"
-           "\treturn t.cell(c,i)\n"
-           "self.__class__.col = _meth_table_col_",
-           Py_file_input, localDict, localDict);
-      if (ret)
-  Py_DECREF(ret);
-      else
-  PyErr_Print();
-    } 
-    else if(Context->inherits("Matrix")) 
-    {
-      // A bit of a hack, but we need either IndexError or len() from __builtins__.
-      PyDict_SetItemString(localDict, "__builtins__",
-         PyDict_GetItemString(env()->globalDict(), "__builtins__"));
-      PyObject *ret = PyRun_String(
-           "def cell(*arg):\n"
-           "\ttry: return self.cell(arg[0],arg[1])\n"
-           "\texcept(IndexError): return self.cell(i,j)\n",
-           Py_file_input, localDict, localDict);
-      if (ret)
-  Py_DECREF(ret);
-      else
-  PyErr_Print();
-    }
+    return true;
   }
-  bool success(false);
-  Py_XDECREF(PyCode);
-  // Simplest case: Code is a single expression
-  PyCode = Py_CompileString(Code, Name, Py_file_input);
-  
-  if( PyCode )
-  {
-    success = true;
-  }
-  else if (for_eval) 
-  {
-    // Code contains statements (or errors) and we want to get a return
-    // value from it.
-    // So we wrap the code into a function definition,
-    // execute that (as Py_file_input) and store the function object in PyCode.
-    // See http://mail.python.org/pipermail/python-list/2001-June/046940.html
-    // for why there isn't an easier way to do this in Python.
-    PyErr_Clear(); // silently ignore errors
-    PyObject *key(NULL), *value(NULL);
-    Py_ssize_t i(0);
-    QString signature = "";
-    while(PyDict_Next(localDict, &i, &key, &value))
-    {
-      signature.append(PyString_AsString(key)).append(",");
-    }
-    signature.truncate(signature.length()-1);
-    QString fdef = "def __doit__("+signature+"):\n";
-    fdef.append(Code);
-    fdef.replace('\n',"\n\t");
-    PyCode = Py_CompileString(fdef, Name, Py_file_input);
-    if( PyCode )
-    {
-      PyObject *tmp = PyDict_New();
-      Py_XDECREF(PyEval_EvalCode((PyCodeObject*)PyCode, localDict, tmp));
-      Py_DECREF(PyCode);
-      PyCode = PyDict_GetItemString(tmp,"__doit__");
-      Py_XINCREF(PyCode);
-      Py_DECREF(tmp);
-    }
-    success = (PyCode != NULL);
-  } 
-  else 
-  {
-    // Code contains statements (or errors), but we do not need to get
-    // a return value.
-    PyErr_Clear(); // silently ignore errors
-    PyCode = Py_CompileString(Code, Name, Py_file_input);
-    success = (PyCode != NULL);
-  }
-  
-  if(!success )
-  {
-    compiled = compileErr;
-    emit_error(constructErrorMsg(), 0);
-  } 
   else
   {
-    compiled = isCompiled;
+    return false;
   }
-  return success;
 }
 
-QVariant PythonScript::eval()
-{  
-  if (!isFunction) compiled = notCompiled;
-  if (compiled != isCompiled && !compile(true))
-    return QVariant();
-  
+/**
+ * Evaluate the code and return the value
+ * @return
+ */
+QVariant PythonScript::evaluate(const QString & code)
+{
+  PyObject *compiledCode = this->compileToByteCode(code, true);
+  if(!compiledCode)
+  {
+    return QVariant("");
+  }
   PyObject *pyret;
   beginStdoutRedirect();
-  if (PyCallable_Check(PyCode)){
+  if (PyCallable_Check(compiledCode)){
     PyObject *empty_tuple = PyTuple_New(0);
-    pyret = PyObject_Call(PyCode, empty_tuple, localDict);
+    pyret = PyObject_Call(compiledCode, empty_tuple, localDict);
     Py_DECREF(empty_tuple);
-  } else
-    pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
+  }
+  else
+  {
+    pyret = PyEval_EvalCode((PyCodeObject*)compiledCode, localDict, localDict);
+  }
   endStdoutRedirect();
-  if (!pyret){
-    if (PyErr_ExceptionMatches(PyExc_ValueError) ||
-  PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){        
+  if (!pyret)
+  {
+    if (PyErr_ExceptionMatches(PyExc_ValueError) || PyErr_ExceptionMatches(PyExc_ZeroDivisionError))
+    {
       PyErr_Clear(); // silently ignore errors
-      return  QVariant("");
-    } else {
-      emit_error(constructErrorMsg(), 0);
+      return QVariant("");
+    }
+    else
+    {
+      emit error(constructErrorMsg(), name(), 0);
       return QVariant();
     }
   }
@@ -270,87 +166,145 @@ QVariant PythonScript::eval()
   QVariant qret = QVariant();
   /* None */
   if (pyret == Py_None)
+  {
     qret = QVariant("");
+  }
   /* numeric types */
   else if (PyFloat_Check(pyret))
+  {
     qret = QVariant(PyFloat_AS_DOUBLE(pyret));
+  }
   else if (PyInt_Check(pyret))
+  {
     qret = QVariant((qlonglong)PyInt_AS_LONG(pyret));
+  }
   else if (PyLong_Check(pyret))
+  {
     qret = QVariant((qlonglong)PyLong_AsLongLong(pyret));
-  else if (PyNumber_Check(pyret)){
+  }
+  else if (PyNumber_Check(pyret))
+  {
     PyObject *number = PyNumber_Float(pyret);
-    if (number){
+    if (number)
+    {
       qret = QVariant(PyFloat_AS_DOUBLE(number));
       Py_DECREF(number);
     }
-    /* bool */
-  } else if (PyBool_Check(pyret))
+  }
+  /* bool */
+  else if (PyBool_Check(pyret))
+  {
     qret = QVariant(pyret==Py_True, 0);
+  }
   // could handle advanced types (such as PyList->QValueList) here if needed
   /* fallback: try to convert to (unicode) string */
-  if(!qret.isValid()) {
+  if(!qret.isValid())
+  {
     PyObject *pystring = PyObject_Unicode(pyret);
-    if (pystring) {
+    if (pystring)
+    {
       PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
       Py_DECREF(pystring);
-      if (asUTF8) {
-  qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
-  Py_DECREF(asUTF8);
-      } else if ((pystring = PyObject_Str(pyret))) {
-  qret = QVariant(QString(PyString_AS_STRING(pystring)));
-  Py_DECREF(pystring);
+      if (asUTF8)
+      {
+        qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
+        Py_DECREF(asUTF8);
+      }
+      else if ((pystring = PyObject_Str(pyret)))
+      {
+        qret = QVariant(QString(PyString_AS_STRING(pystring)));
+        Py_DECREF(pystring);
       }
     }
   }
   
   Py_DECREF(pyret);
-  if (PyErr_Occurred()){
-    if (PyErr_ExceptionMatches(PyExc_ValueError) ||
-  PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){
+  if (PyErr_Occurred())
+  {
+    if (PyErr_ExceptionMatches(PyExc_ValueError) || PyErr_ExceptionMatches(PyExc_ZeroDivisionError))
+    {
       PyErr_Clear(); // silently ignore errors
       return  QVariant("");
-  } else {
-      emit_error(constructErrorMsg(), 0);
-  return QVariant();
     }
-  } else
-    return qret;
-}
-
-namespace
-{
-  bool execScript(PyThreadState *mainThreadState, const QString & code)
-  {
-    PyEval_AcquireLock();
-    // get a reference to the PyInterpreterState
-    PyInterpreterState * mainInterpreterState = mainThreadState->interp;
-    // create a thread state object for this thread
-    PyThreadState * myThreadState = PyThreadState_New(mainInterpreterState);
-    PyThreadState_Swap(myThreadState);
-
-    PyRun_SimpleString(code.toAscii());
-    if(PyErr_Occurred())
+    else
     {
-      PyErr_Clear();
-      return false;
+      emit error(constructErrorMsg(), name(), 0);
     }
-    // free the lock
-    PyThreadState_Swap(mainThreadState);
-    PyThreadState_Clear(myThreadState);
-    PyThreadState_Delete(myThreadState);
-    PyEval_ReleaseLock();
-    return true;
+    return QVariant();
   }
+  return qret;
 }
 
-bool PythonScript::exec()
-{
-  const QString myCode = Code;
-  QtConcurrent::run(execScript, env()->mainThreadState, myCode);
-  //PyRun_SimpleString(myCode.toAscii());
+//    void execScript(const QString & code)
+//    {
+//      PyEval_AcquireLock();
+//      // get a reference to the PyInterpreterState
+//      PyInterpreterState * mainInterpreterState = mainThreadState->interp;
+//      // create a thread state object for this thread
+//      PyThreadState * myThreadState = PyThreadState_New(mainInterpreterState);
+//      PyThreadState_Swap(myThreadState);
+//      try
+//      {
+//        PyRun_SimpleString(code.toAscii());
+//      }
+//      catch(...)
+//      {
+//        PyThreadState_Swap(myThreadState);
+//      }
+//      if(PyErr_Occurred())
+//      {
+//        PyErr_Clear();
+//        return false;
+//      }
+//      // free the lock
+//      PyThreadState_Swap(mainThreadState);
+//      PyThreadState_Clear(myThreadState);
+//      PyThreadState_Delete(myThreadState);
+//      PyEval_ReleaseLock();
+//      return true;
+//    }
+//}
 
-  return true;
+//class PythonCodeRunner : public QRunnable
+//{
+//
+//public:
+//  PythonCodeRunner(const QString & script):
+//    QRunnable(), m_script(script)
+//  {}
+//public:
+//  void run()
+//  {
+//    if( QThread::currentThread() != QCoreApplication::instance()->thread())
+//    {
+//      std::cerr << "Separate thread " << QThread::currentThread() << ". Python threadstate " << PyThreadState_Get() << "\n";
+//    }
+//    PyRun_SimpleString(m_script.toAscii());
+//    if(PyErr_Occurred())
+//    {
+//      PyErr_Clear();
+//    }
+//  }
+//private:
+//  QString m_script;
+//};
+
+bool PythonScript::execute(const QString & code)
+{
+  bool success(false);
+  beginStdoutRedirect();
+  emit started("Script execution started.");
+  QSharedPointer<PythonThreadState> pythonThreadState =  pythonEnv()->createPythonThread();
+  PyObject * result = PyRun_String(code.toAscii(), Py_file_input, localDict, localDict);
+  if(result)
+  {
+    emit finished("Script execution finished.");
+    success = true;
+  }
+  emit error(constructErrorMsg(), name(), 0);
+  endStdoutRedirect();
+  return success;
+
 //  // Cannot have two things executing at the same time
 //  if( env()->isRunning() ) return false;
 //
@@ -415,26 +369,9 @@ bool PythonScript::exec()
 //  return false;
 }
 
-/**
- * Update the current environment with the script's path
- */
-void PythonScript::updatePath(const QString & filename, bool append)
+QFuture<bool> PythonScript::executeAsync(const QString & code)
 {
-  if( filename.isEmpty() ) return;
-  QString scriptPath = QFileInfo(filename).absolutePath();
-  QString pyCode;
-  if( append )
-  {
-    pyCode = "if r'%1' not in sys.path:\n"
-      "    sys.path.append(r'%1')";
-  }
-  else
-  {
-    pyCode = "if r'%1' in sys.path:\n"
-      "    sys.path.remove(r'%1')";
-  }
-  pyCode = pyCode.arg(scriptPath);
-  PyRun_SimpleString(pyCode.toAscii());
+  return QtConcurrent::run(this, &PythonScript::execute, code);
 }
 
 /**
@@ -444,68 +381,68 @@ void PythonScript::updatePath(const QString & filename, bool append)
  */
 PyObject* PythonScript::executeScript(PyObject* return_tuple)
 {
-  // Before requested code is executed we want to "uninstall" the modules 
-  // containing Python algorithms so that a fresh import reloads them
-  //
-  env()->refreshAlgorithms(true);
-
-  PyObject* pyret(NULL);
-  //If an exception is thrown the thread state needs resetting so we need to save it
-  PyThreadState *saved_tstate = PyThreadState_GET();
-  try
-  {
-    if( return_tuple )
-    {
-      pyret = PyObject_Call(PyCode, return_tuple,localDict);
-    }
-    else
-    {
-      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
-    }
-  }
-  // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
-  // be repeated here 
-  catch(const std::bad_alloc&)
-  {
-    PyThreadState_Swap(saved_tstate);// VERY VERY important. Bad things happen if this state is not reset after a throw
-    pyret = NULL;
-    PyErr_NoMemory();
-  }
-  catch(const std::out_of_range& x)
-  {
-    PyThreadState_Swap(saved_tstate);
-    pyret = NULL;
-    PyErr_SetString(PyExc_IndexError, x.what());
-  }
-  catch(const std::invalid_argument& x)
-  {
-    PyThreadState_Swap(saved_tstate);
-    pyret = NULL;
-    PyErr_SetString(PyExc_ValueError, x.what());
-  }
-  catch(const std::exception& x)
-  {
-    PyThreadState_Swap(saved_tstate);
-    pyret = NULL;
-    PyErr_SetString(PyExc_RuntimeError, x.what());
-  }
-  catch(...)
-  {
-    PyThreadState_Swap(saved_tstate);
-    pyret = NULL;
-    PyErr_SetString(PyExc_RuntimeError, "unidentifiable C++ exception");
-  }
-  
-  // If we stole a reference, return it
-  if( return_tuple )
-  {
-    Py_DECREF(return_tuple);
-  }
-  if( m_interactive && pyret )
-  {
-    emit keywordsChanged(createAutoCompleteList());
-  }
-  return pyret;
+//  // Before requested code is executed we want to "uninstall" the modules
+//  // containing Python algorithms so that a fresh import reloads them
+//  //
+//  pythonEnv()->refreshAlgorithms(true);
+//
+//  PyObject* pyret(NULL);
+//  //If an exception is thrown the thread state needs resetting so we need to save it
+//  PyThreadState *saved_tstate = PyThreadState_GET();
+//  try
+//  {
+//    if( return_tuple )
+//    {
+//      pyret = PyObject_Call(PyCode, return_tuple,localDict);
+//    }
+//    else
+//    {
+//      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
+//    }
+//  }
+//  // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
+//  // be repeated here
+//  catch(const std::bad_alloc&)
+//  {
+//    PyThreadState_Swap(saved_tstate);// VERY VERY important. Bad things happen if this state is not reset after a throw
+//    pyret = NULL;
+//    PyErr_NoMemory();
+//  }
+//  catch(const std::out_of_range& x)
+//  {
+//    PyThreadState_Swap(saved_tstate);
+//    pyret = NULL;
+//    PyErr_SetString(PyExc_IndexError, x.what());
+//  }
+//  catch(const std::invalid_argument& x)
+//  {
+//    PyThreadState_Swap(saved_tstate);
+//    pyret = NULL;
+//    PyErr_SetString(PyExc_ValueError, x.what());
+//  }
+//  catch(const std::exception& x)
+//  {
+//    PyThreadState_Swap(saved_tstate);
+//    pyret = NULL;
+//    PyErr_SetString(PyExc_RuntimeError, x.what());
+//  }
+//  catch(...)
+//  {
+//    PyThreadState_Swap(saved_tstate);
+//    pyret = NULL;
+//    PyErr_SetString(PyExc_RuntimeError, "unidentifiable C++ exception");
+//  }
+//
+//  // If we stole a reference, return it
+//  if( return_tuple )
+//  {
+//    Py_DECREF(return_tuple);
+//  }
+//  if( m_interactive && pyret )
+//  {
+//    emit keywordsChanged(createAutoCompleteList());
+//  }
+//  return pyret;
 }
 
 QString PythonScript::constructErrorMsg()
@@ -543,7 +480,7 @@ QString PythonScript::constructErrorMsg()
   QString exception_details("");
   if( PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) )
   {
-    msg_lineno = env()->toString(PyObject_GetAttrString(value, "lineno"),true).toInt();
+    msg_lineno = pythonEnv()->toString(PyObject_GetAttrString(value, "lineno"),true).toInt();
     if( traceback )
     {
       marker_lineno = endtrace_line;
@@ -555,7 +492,7 @@ QString PythonScript::constructErrorMsg()
     }
 
     message = "SyntaxError";
-    QString except_value(env()->toString(value));
+    QString except_value(pythonEnv()->toString(value));
     exception_details = except_value.section('(',0,0);
     filename = except_value.section('(',1).section(',',0,0);
   }
@@ -579,21 +516,12 @@ QString PythonScript::constructErrorMsg()
     {
       msg_lineno = endtrace_line;
     }
-    message = env()->toString(exception).section('.',1).remove("'>");
-    exception_details = env()->toString(value) + QString(' ');
+    message = pythonEnv()->toString(exception).section('.',1).remove("'>");
+    exception_details = pythonEnv()->toString(value) + QString(' ');
   }
-  if( filename.isEmpty() && getLineOffset() >= 0 ) 
-  {
-    
-    msg_lineno += getLineOffset();
-  }
-  if( getLineOffset() >= 0 && marker_lineno >= 0 )
-  {
-    marker_lineno += getLineOffset();
-    message += " on line " + QString::number(marker_lineno);
-  }
-  
+  message += " on line " + QString::number(marker_lineno);
   message += ": \"" + exception_details.trimmed() + "\" ";
+
   if( marker_lineno >=0 
       && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) 
       && !filename.isEmpty() 
@@ -604,10 +532,7 @@ QString PythonScript::constructErrorMsg()
       + "' at line " + QString::number(msg_lineno);
   }
   
-  if( reportProgress() )
-  {
-    emit currentLineChanged(marker_lineno, false);
-  }
+  emit currentLineChanged(marker_lineno, false);
 
   // We're responsible for the reference count of these objects
   Py_XDECREF(traceback);
@@ -620,11 +545,9 @@ QString PythonScript::constructErrorMsg()
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
-  if (localDict) // Avoid segfault for un-initialized object
+  if (localDict)
   {
-    if (!PyDict_Contains(localDict, PyString_FromString(name)))
-      compiled = notCompiled;
-    return env()->setQObject(val, name, localDict);
+    return pythonEnv()->setQObject(val, name, localDict);
   }
   else
     return false;
@@ -632,25 +555,40 @@ bool PythonScript::setQObject(QObject *val, const char *name)
 
 bool PythonScript::setInt(int val, const char *name)
 {
-
-  if (!PyDict_Contains(localDict, PyString_FromString(name)))
-    compiled = notCompiled;
-  return env()->setInt(val, name, localDict);
+  return pythonEnv()->setInt(val, name, localDict);
 }
 
 bool PythonScript::setDouble(double val, const char *name)
 {
-
-  if (!PyDict_Contains(localDict, PyString_FromString(name)))
-    compiled = notCompiled;
-  return env()->setDouble(val, name, localDict);
+  return pythonEnv()->setDouble(val, name, localDict);
 }
 
 void PythonScript::setContext(QObject *context)
 {
   Script::setContext(context);
-  setQObject(Context, "self");
+  setQObject(context, "self");
 }
+
+/**
+ * Sets the context for the script and if name points to a file then
+ * sets the __file__ variable
+ * @param name A string identifier for the script
+ * @param context A QObject defining the context
+ */
+void PythonScript::initialize(const QString & name, QObject *context)
+{
+  GlobalInterpreterLock pythonlock;
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  if( QFileInfo(name).exists() )
+  {
+    QString scriptPath = QFileInfo(name).absoluteFilePath();
+    // Make sure the __file__ variable is set
+    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
+  }
+  setContext(context);
+}
+
 
 /**
  * Create a list autocomplete keywords
@@ -675,7 +613,7 @@ QStringList PythonScript::createAutoCompleteList() const
     return keyword_list;
   }
 
-  keyword_list = env()->toStringList(keywords);
+  keyword_list = pythonEnv()->toStringList(keywords);
   Py_DECREF(keywords);
   Py_DECREF(method);
   return keyword_list;
@@ -684,11 +622,6 @@ QStringList PythonScript::createAutoCompleteList() const
 //-------------------------------------------------------
 // Private
 //-------------------------------------------------------
-PythonScripting * PythonScript::env() const
-{ 
-  //Env is protected in the base class
-  return static_cast<PythonScripting*>(Env); 
-}
 
 
 /**
@@ -696,12 +629,12 @@ PythonScripting * PythonScript::env() const
  */
 void PythonScript::beginStdoutRedirect()
 {
-  stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
+  stdoutSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stdout");
   Py_XINCREF(stdoutSave);
-  stderrSave = PyDict_GetItemString(env()->sysDict(), "stderr");
+  stderrSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stderr");
   Py_XINCREF(stderrSave);
-  env()->setQObject(this, "stdout", env()->sysDict());
-  env()->setQObject(this, "stderr", env()->sysDict());
+  pythonEnv()->setQObject(this, "stdout", pythonEnv()->sysDict());
+  pythonEnv()->setQObject(this, "stderr", pythonEnv()->sysDict());
 }
 
 /**
@@ -710,12 +643,115 @@ void PythonScript::beginStdoutRedirect()
  */
 void PythonScript::endStdoutRedirect()
 {
-
-
-  PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
+  PyDict_SetItemString(pythonEnv()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);
-  PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);
+  PyDict_SetItemString(pythonEnv()->sysDict(), "stderr", stderrSave);
   Py_XDECREF(stderrSave);
+}
+
+/**
+ * Compile the code
+ */
+PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
+{
+  // Support for the convenient col() and cell() functions.
+  // This can't be done anywhere else, because we need access to the local
+  // variables self, i and j.
+  if( context() )
+  {
+    if( context()->inherits("Table") )
+    {
+      // A bit of a hack, but we need either IndexError or len() from __builtins__.
+      PyDict_SetItemString(localDict, "__builtins__",
+          PyDict_GetItemString(pythonEnv()->globalDict(), "__builtins__"));
+      PyObject *ret = PyRun_String(
+          "def col(c,*arg):\n"
+          "\ttry: return self.cell(c,arg[0])\n"
+          "\texcept(IndexError): return self.cell(c,i)\n"
+          "def cell(c,r):\n"
+          "\treturn self.cell(c,r)\n"
+          "def tablecol(t,c):\n"
+          "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
+          "def _meth_table_col_(t,c):\n"
+          "\treturn t.cell(c,i)\n"
+          "self.__class__.col = _meth_table_col_",
+          Py_file_input, localDict, localDict);
+      if (ret)
+        Py_DECREF(ret);
+      else
+        PyErr_Print();
+    }
+    else if(context()->inherits("Matrix"))
+    {
+      // A bit of a hack, but we need either IndexError or len() from __builtins__.
+      PyDict_SetItemString(localDict, "__builtins__",
+          PyDict_GetItemString(pythonEnv()->globalDict(), "__builtins__"));
+      PyObject *ret = PyRun_String(
+          "def cell(*arg):\n"
+          "\ttry: return self.cell(arg[0],arg[1])\n"
+          "\texcept(IndexError): return self.cell(i,j)\n",
+          Py_file_input, localDict, localDict);
+      if (ret)
+        Py_DECREF(ret);
+      else
+        PyErr_Print();
+    }
+  }
+  bool success(false);
+  // Simplest case: Code is a single expression
+  PyObject *compiledCode = Py_CompileString(code, nameAsCStr(), Py_file_input);
+
+  if( compiledCode )
+  {
+    success = true;
+  }
+  else if (for_eval)
+  {
+    // Code contains statements (or errors) and we want to get a return
+    // value from it.
+    // So we wrap the code into a function definition,
+    // execute that (as Py_file_input) and store the function object in PyCode.
+    // See http://mail.python.org/pipermail/python-list/2001-June/046940.html
+    // for why there isn't an easier way to do this in Python.
+    PyErr_Clear(); // silently ignore errors
+    PyObject *key(NULL), *value(NULL);
+    Py_ssize_t i(0);
+    QString signature = "";
+    while(PyDict_Next(localDict, &i, &key, &value))
+    {
+      signature.append(PyString_AsString(key)).append(",");
+    }
+    signature.truncate(signature.length()-1);
+    QString fdef = "def __doit__("+signature+"):\n";
+    fdef.append(code);
+    fdef.replace('\n',"\n\t");
+    compiledCode = Py_CompileString(fdef, nameAsCStr(), Py_file_input);
+    if( compiledCode )
+    {
+      PyObject *tmp = PyDict_New();
+      Py_XDECREF(PyEval_EvalCode((PyCodeObject*)compiledCode, localDict, tmp));
+      Py_DECREF(compiledCode);
+      compiledCode = PyDict_GetItemString(tmp,"__doit__");
+      Py_XINCREF(compiledCode);
+      Py_DECREF(tmp);
+    }
+    success = (compiledCode != NULL);
+  }
+  else
+  {
+    // Code contains statements (or errors), but we do not need to get
+    // a return value.
+    PyErr_Clear(); // silently ignore errors
+    compiledCode = Py_CompileString(code, nameAsCStr(), Py_file_input);
+    success = (compiledCode != NULL);
+  }
+
+  if(!success)
+  {
+    emit error(constructErrorMsg(), name(), 0);
+    compiledCode = NULL;
+  }
+  return compiledCode;
 }
 
 /**

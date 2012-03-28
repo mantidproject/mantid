@@ -47,14 +47,10 @@ class QtProxyObject(QtCore.QObject):
             QtCore.QObject.connect( self.__obj, QtCore.SIGNAL("destroyed()"),
                                     self._heldObjectDestroyed)
 
-    def __del__(self):
-        # Disconnect the signal or you get a segfault on quitting MantidPlot
-        if self.__obj is not None:
-            QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
-
     def _heldObjectDestroyed(self):
         """Slot called when the held object is destroyed.
         Sets it to None, preventing segfaults """
+        QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
         self._kill_object()
 
     def __getattr__(self, attr):
