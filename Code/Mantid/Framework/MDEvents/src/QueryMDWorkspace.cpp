@@ -20,6 +20,8 @@ The table workspace can be used as a basis for plotting within MantidPlot.
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "../inc/MantidMDEvents/MDEventWorkspace.h"
+#include "../inc/MantidMDEvents/MDEventFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -66,8 +68,84 @@ namespace MDEvents
 
     declareProperty(new PropertyWithValue<int>("MaximumRows", 100000, boost::make_shared<BoundedValidator<int>>(), Direction::Input), "The number of neighbours to utilise. Defaults to 100000.");
     setPropertySettings("MaximumRows", new EnabledWhenProperty(this, "LimitRows", IS_DEFAULT));
+
+    declareProperty(new WorkspaceProperty<ITableWorkspace>("BoxDataTable","",Direction::Output, Mantid::API::PropertyMode::Optional),
+        "Optional output data table with MDEventWorkspace-specific box data.");
+
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Make a table of box data
+   * @param ws ::  MDEventWorkspace being added to
+   */
+  template<typename MDE, size_t nd>
+  void QueryMDWorkspace::getBoxData(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    if (this->getPropertyValue("BoxDataTable").empty())
+      return;
+
+    ITableWorkspace_sptr output = WorkspaceFactory::Instance().createTable();
+    output->addColumn("int", "RecursionDepth");
+    output->addColumn("int", "NumBoxes");
+    output->addColumn("int", "NumWithEvents");
+    output->addColumn("double", "PctWithEvents");
+    output->addColumn("int", "TotalEvents");
+    output->addColumn("double", "AvgEventsPer");
+    output->addColumn("double", "TotalWeight");
+    output->addColumn("double", "TotalSignal");
+    output->addColumn("double", "TotalErrorSquared");
+    for (size_t d=0; d<nd; d++)
+      output->addColumn("double", "Dim" + Strings::toString(d));
+
+    size_t depth=ws->getBoxController()->getMaxDepth()+1;
+    std::vector<int> NumBoxes(depth, 0);
+    std::vector<int> NumWithEvents(depth, 0);
+    std::vector<int> TotalEvents(depth, 0);
+    std::vector<double> TotalWeight(depth, 0);
+    std::vector<double> TotalSignal(depth, 0);
+    std::vector<double> TotalErrorSquared(depth, 0);
+    std::vector<std::vector<double>> Dims(depth, std::vector<double>(nd,0.0) );
+
+    std::vector<IMDBox<MDE,nd> *> boxes;
+    ws->getBox()->getBoxes(boxes, depth, true);
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      IMDBox<MDE,nd> * box = boxes[i];
+      size_t d = box->getDepth();
+      NumBoxes[d] += 1;
+      if (box->getNPoints() > 0)
+        NumWithEvents[d] += 1;
+      TotalEvents[d] += static_cast<int>(box->getNPoints());
+      TotalWeight[d] += box->getTotalWeight();
+      TotalSignal[d] += box->getSignal();
+      TotalErrorSquared[d] += box->getErrorSquared();
+      for (size_t dim=0; dim<nd; dim++)
+        Dims[d][dim] = double(box->getExtents(dim).max - box->getExtents(dim).min);
+    }
+
+    int rowCounter = 0;
+    for (size_t d=0; d<depth; d++)
+    {
+      int col = 0;
+      output->appendRow();
+      output->cell<int>(rowCounter, col++) = int(d);
+      output->cell<int>(rowCounter, col++) = NumBoxes[d];
+      output->cell<int>(rowCounter, col++) = NumWithEvents[d];
+      output->cell<double>(rowCounter, col++) = 100.0 * double(NumWithEvents[d]) / double(NumBoxes[d]);
+      output->cell<int>(rowCounter, col++) = TotalEvents[d];
+      output->cell<double>(rowCounter, col++) = double(TotalEvents[d]) / double(NumBoxes[d]);
+      output->cell<double>(rowCounter, col++) = TotalWeight[d];
+      output->cell<double>(rowCounter, col++) = TotalSignal[d];
+      output->cell<double>(rowCounter, col++) = TotalErrorSquared[d];
+      for (size_t dim=0; dim<nd; dim++)
+        output->cell<double>(rowCounter, col++) = Dims[d][dim];
+      rowCounter++;
+    }
+
+    setProperty("BoxDataTable", output);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /// Run the algorithm
   void QueryMDWorkspace::exec()
   {
@@ -109,6 +187,11 @@ namespace MDEvents
     }
     setProperty("OutputWorkspace", output);
     delete it;
+
+    //
+    IMDEventWorkspace_sptr mdew;
+    CALL_MDEVENT_FUNCTION(this->getBoxData, input);
+
   }
 
 

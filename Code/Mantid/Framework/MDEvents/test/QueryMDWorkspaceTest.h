@@ -49,6 +49,18 @@ public:
     TSM_ASSERT("Did not execute", query.isExecuted());
   }
 
+  void testExecution_BoxData()
+  {
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    QueryMDWorkspace query;
+    query.initialize();
+    query.setProperty("InputWorkspace", in_ws);
+    query.setPropertyValue("OutputWorkspace", "QueryWS");
+    query.setPropertyValue("BoxDataTable", "QueryWS_box");
+    query.execute();
+    TSM_ASSERT("Did not execute", query.isExecuted());
+  }
+
   void testTableGenerated()
   {
     MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
