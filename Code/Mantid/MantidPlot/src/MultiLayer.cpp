@@ -1527,13 +1527,13 @@ void MultiLayer::showWaterfallOffsetDialog()
 
   hl1->addWidget(new QLabel(tr("Total Y Offset (%)")), 0, 0);
   QSpinBox *yOffsetBox = new QSpinBox();
-  yOffsetBox->setRange(-INT_MAX, INT_MAX);
+  yOffsetBox->setRange(0, INT_MAX);
   yOffsetBox->setValue(active_graph->waterfallYOffset());
   hl1->addWidget(yOffsetBox, 0, 1);
 
   hl1->addWidget(new QLabel(tr("Total X Offset (%)")), 1, 0);
   QSpinBox *xOffsetBox = new QSpinBox();
-  xOffsetBox->setRange(-INT_MAX, INT_MAX);
+  xOffsetBox->setRange(0, INT_MAX);
   xOffsetBox->setValue(active_graph->waterfallXOffset());
   hl1->addWidget(xOffsetBox, 1, 1);
   hl1->setRowStretch(2, 1);

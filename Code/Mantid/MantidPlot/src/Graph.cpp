@@ -5872,7 +5872,7 @@ void Graph::setWaterfallXOffset(int offset)
   if (offset == d_waterfall_offset_x)
     return;
 
-  d_waterfall_offset_x = offset;
+  if ( offset >= 0 ) d_waterfall_offset_x = offset;
   updateDataCurves();
   emit modifiedGraph();
 }
@@ -5882,15 +5882,15 @@ void Graph::setWaterfallYOffset(int offset)
   if (offset == d_waterfall_offset_y)
     return;
 
-  d_waterfall_offset_y = offset;
+  if ( offset >= 0 ) d_waterfall_offset_y = offset;
   updateDataCurves();
   emit modifiedGraph();
 }
 
 void Graph::setWaterfallOffset(int x, int y, bool update)
 {
-  d_waterfall_offset_x = x;
-  d_waterfall_offset_y = y;
+  if ( x >= 0 ) d_waterfall_offset_x = x;
+  if ( y >= 0 ) d_waterfall_offset_y = y;
 
   if (update){
     updateDataCurves();
