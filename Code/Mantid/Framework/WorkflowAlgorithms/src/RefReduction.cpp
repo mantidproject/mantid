@@ -36,7 +36,7 @@ const std::string RefReduction::PolStateNone("entry");
 
 const int RefReduction::NX_PIXELS(304);
 const int RefReduction::NY_PIXELS(256);
-const double RefReduction::PIXEL_SIZE(0.007);
+const double RefReduction::PIXEL_SIZE(0.0007);
 
 /// Sets documentation strings for this algorithm
 void RefReduction::initDocs()
@@ -526,7 +526,7 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace)
     ref_pix = (peakRange[0] + peakRange[1])/2.0;
   }
 
-  double theta = (dangle-dangle0)*M_PI/180.0/2.0\
+  double theta = (dangle-dangle0)*M_PI/180.0/2.0
       + ((direct_beam_pix-ref_pix)*PIXEL_SIZE)/ (2.0*det_distance);
 
   return theta*180.0/M_PI;
