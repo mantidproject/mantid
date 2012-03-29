@@ -611,7 +611,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # make sure there are no negative values - gsas hates them
             if self.getProperty("PushDataPositive") != "None":
                 addMin = (self.getProperty("PushDataPositive") == "AddMinimum")
-                ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=False, ResetValue=0.)
+                ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=addMin, ResetValue=0.)
 
             # write out the files
             self._save(samRun, info, normalized)
