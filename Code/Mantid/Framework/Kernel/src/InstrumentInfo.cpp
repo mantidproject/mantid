@@ -83,7 +83,7 @@ namespace Mantid
     }
 
     /**
-    * Equality operator. Two objects are considered equal if their names, short names and zero padding are the same.
+    * Equality operator. Two objects are considered equal if their names and short names are the same.
     * @param rhs :: The object to compare this with
     * @returns True if the objects are considered equal, false otherwise
     */
@@ -122,7 +122,7 @@ namespace Mantid
       return m_technique;
     }
 
-    // Return the facility
+    /// Return the facility
     const FacilityInfo& InstrumentInfo::facility() const
     {
       return *m_facility;

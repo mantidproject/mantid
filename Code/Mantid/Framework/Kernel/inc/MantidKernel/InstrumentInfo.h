@@ -71,6 +71,7 @@ public:
   /// Return list of techniques
   const std::set<std::string>& techniques() const;
   const FacilityInfo& facility() const;
+
 private:
   const FacilityInfo* m_facility;          ///< facility
   std::string m_name;                      ///< instrument name

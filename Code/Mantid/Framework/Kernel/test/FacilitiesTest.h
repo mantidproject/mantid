@@ -87,13 +87,15 @@ public:
     TS_ASSERT( fac->instruments("Nonsense").empty() );
     TS_ASSERT_EQUALS( fac->instrument("AnInst").name(), "AnInst" );
     TS_ASSERT_THROWS( fac->instrument("NoInst"), Exception::NotFoundError );
+
+    delete fac;
   }
 
   void testFacilities()
   {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
-      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" delimiter=\"%\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
       "    <archive>"
       "      <archiveSearch plugin=\"ADataSearch\" />"
       "      <archiveSearch plugin=\"BDataSearch\" />"
@@ -114,6 +116,7 @@ public:
 
     TS_ASSERT_EQUALS(fac->name(),"ISIS");
     TS_ASSERT_EQUALS(fac->zeroPadding(),5);
+    TS_ASSERT_EQUALS(fac->delimiter(), "%");
     const std::vector<std::string> exts = fac->extensions();
     TS_ASSERT_EQUALS(exts.size(), 10); // Automatically get the upper case versions as well
     TS_ASSERT_EQUALS(exts[0],".nxs");

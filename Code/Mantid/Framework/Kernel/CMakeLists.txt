@@ -224,6 +224,7 @@ set ( TEST_FILES
 	test/GlobTest.h
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
+	test/InstrumentInfoTest.h
 	test/InterpolationTest.h
 	test/IValidatorTest.h
 	test/ListValidatorTest.h
