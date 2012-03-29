@@ -87,8 +87,8 @@ void RefReduction::init()
   declareProperty("TOFMax", EMPTY_DBL());
 
   declareProperty("Theta", EMPTY_DBL());
-  declareProperty("NBins", 40);
-  //declareProperty("LogScale", true);
+  declareProperty("TOFStep", 400.0);
+  declareProperty("NBins", EMPTY_INT());
 
   declareProperty("ReflectivityPixel", EMPTY_DBL());
   declareProperty("DetectorAngle", EMPTY_DBL());
@@ -430,7 +430,6 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   // Crop TOF as needed and set binning
   double tofMin = getProperty("TOFMin");
   double tofMax = getProperty("TOFMax");
-  const int nBins = getProperty("NBins");
   if (isEmpty(tofMin) || isEmpty(tofMax))
   {
     const MantidVec& x = rawWS->readX(0);
@@ -438,9 +437,16 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
     if (isEmpty(tofMax)) tofMax = *std::max_element(x.begin(), x.end());
   }
 
+  int nBins = getProperty("NBins");
+  double tofStep = getProperty("TOFStep");
+  if (!isEmpty(nBins))
+    tofStep = (tofMax-tofMin)/nBins;
+  else
+    nBins = (int)floor( (tofMax-tofMin)/tofStep );
+
   std::vector<double> params;
   params.push_back(tofMin);
-  params.push_back((tofMax-tofMin)/nBins);
+  params.push_back(tofStep);
   params.push_back(tofMax);
 
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.25, 0.3);

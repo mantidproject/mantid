@@ -13,6 +13,7 @@ class DataSets(BaseScriptElement):
     DataBackgroundRoi = [115, 137, 123, 137]
     DataTofRange = [10700., 24500.]
     crop_TOF_range = True
+    TOFstep = 400.0
     
     data_x_range_flag = False
     data_x_range = [115, 210]
@@ -37,8 +38,7 @@ class DataSets(BaseScriptElement):
     
     # scattering angle
     theta = 0.0
-    center_pixel = 220
-    use_center_pixel = False
+    use_center_pixel = True
     
     # Sample log overwrites
     set_detector_angle = False
@@ -86,11 +86,12 @@ class DataSets(BaseScriptElement):
         if self.crop_TOF_range:
             script += "              TOFMin=%s,\n" % str(self.DataTofRange[0])
             script += "              TOFMax=%s,\n" % str(self.DataTofRange[1])
-        script += "              NBins=%s,\n" % str(self.q_bins)
+            script += "              TOFStep=%s,\n" % str(self.TOFstep)
+        else:
+            script += "              NBins=%s,\n" % str(self.q_bins)
         
         # Scattering angle options
         if self.use_center_pixel:
-            script += "              ReflectivityPixel=%s,\n" % str(self.center_pixel)
             if self.set_detector_angle:
                 script += "              DetectorAngle=%s\n" % str(self.detector_angle)
             if self.set_detector_angle_offset:
@@ -155,8 +156,6 @@ class DataSets(BaseScriptElement):
         if self.norm_x_range_flag:
             script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
             
-        script += "              ReflectivityPixel=ref_pixel,\n"
-            
         # The output should be slightly different if we are generating
         # a script for the automated reduction
         script += "              OutputWorkspacePrefix='reflectivity_'+%s)\n" % str(self.data_files[0])
@@ -184,6 +183,7 @@ class DataSets(BaseScriptElement):
         xml += "<crop_tof>%s</crop_tof>\n" % str(self.crop_TOF_range)
         xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
         xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
+        xml += "<tof_step>%s</tof_step>\n" % str(self.TOFstep)
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
         xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.data_x_range[0])
         xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.data_x_range[1])
@@ -209,7 +209,6 @@ class DataSets(BaseScriptElement):
         
         # Scattering angle
         xml += "<theta>%s</theta>\n" % str(self.theta)
-        xml += "<center_pixel>%s</center_pixel>\n" % str(self.center_pixel)
         xml += "<use_center_pixel>%s</use_center_pixel>\n" % str(self.use_center_pixel)
         
         # Sample log overwrites
@@ -272,11 +271,13 @@ class DataSets(BaseScriptElement):
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
 
         #from TOF and to TOF
-        self.crop_TOF_range = BaseScriptElement.getBoolElement(instrument_dom, "crop_tof",
-                                                               default=DataSets.crop_TOF_range)
+        #self.crop_TOF_range = BaseScriptElement.getBoolElement(instrument_dom, "crop_tof",
+        #                                                       default=DataSets.crop_TOF_range)
         self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
                              BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range")]
-
+        self.TOFstep = BaseScriptElement.getFloatElement(instrument_dom, "tof_step",
+                                                         default = DataSets.TOFstep)
+        
         self.data_files = BaseScriptElement.getIntList(instrument_dom, "data_sets")
             
         #with or without norm 
@@ -306,10 +307,9 @@ class DataSets(BaseScriptElement):
     
         # scattering angle
         self.theta = BaseScriptElement.getFloatElement(instrument_dom, "theta", default=DataSets.theta)
-        self.center_pixel = BaseScriptElement.getFloatElement(instrument_dom, "center_pixel", default=DataSets.center_pixel)
-        self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                 "use_center_pixel",
-                                                                 default=DataSets.use_center_pixel)
+        #self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom,
+        #                                                         "use_center_pixel",
+        #                                                         default=DataSets.use_center_pixel)
         
         # Sample log overwrites
         self.set_detector_angle = BaseScriptElement.getBoolElement(instrument_dom,
@@ -343,6 +343,7 @@ class DataSets(BaseScriptElement):
         self.DataBackgroundRoi = DataSets.DataBackgroundRoi
         self.DataPeakPixels = DataSets.DataPeakPixels
         self.DataTofRange = DataSets.DataTofRange
+        self.TOFstep = DataSets.TOFstep
         self.crop_TOF_range = DataSets.crop_TOF_range
         self.data_files = DataSets.data_files
         
@@ -364,7 +365,6 @@ class DataSets(BaseScriptElement):
         
         # Scattering angle
         self.theta = DataSets.theta
-        self.center_pixel = DataSets.center_pixel
         self.use_center_pixel = DataSets.use_center_pixel
         
         # Sample log overwrites
