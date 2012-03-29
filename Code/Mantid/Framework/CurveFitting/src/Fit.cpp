@@ -85,12 +85,23 @@ namespace CurveFitting
     auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (mdf)
     {
+      m_workspacePropertyNames.resize(mdf->nFunctions());
+      m_workspacePropertyNames[0] = "InputWorkspace";
       for(size_t i = 1; i < mdf->nFunctions(); ++i)
       {
-        declareProperty(
-          new API::WorkspaceProperty<API::Workspace>("InputWorkspace_"+boost::lexical_cast<std::string>(i),"",Kernel::Direction::Input), 
-          "Name of the input Workspace");
+        std::string workspacePropertyName = "InputWorkspace_"+boost::lexical_cast<std::string>(i);
+        m_workspacePropertyNames[i] = workspacePropertyName;
+        if (!existsProperty(workspacePropertyName))
+        {
+          declareProperty(
+            new API::WorkspaceProperty<API::Workspace>(workspacePropertyName,"",Kernel::Direction::Input), 
+            "Name of the input Workspace");
+        }
       }
+    }
+    else
+    {
+      m_workspacePropertyNames.resize(1,"InputWorkspace");
     }
   }
 
@@ -101,6 +112,7 @@ namespace CurveFitting
     //m_function->setWorkspace(ws);
     const size_t n = std::string("InputWorkspace").size();
     const std::string suffix = (workspacePropertyName.size() > n)? workspacePropertyName.substr(n) : "";
+    const size_t index = suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
 
     API::IFunction_sptr fun = getProperty("Function");
     IDomainCreator* creator = nullptr;
@@ -118,20 +130,25 @@ namespace CurveFitting
     {// don't know what to do with this workspace
       throw std::invalid_argument("Unsupported workspace type" + ws->id());
     }
-    creator->declareDatasetProperties(suffix,addProperties);
-    m_workspacePropertyNames.push_back(workspacePropertyName);
 
     if (!m_domainCreator)
     {
-      if (boost::dynamic_pointer_cast<API::MultiDomainFunction>(fun))
+      if (m_workspacePropertyNames.empty())
       {
-        auto multiCreator = new MultiDomainCreator(this);
-        multiCreator->addCreator(workspacePropertyName,creator);
+        setFunction();
+      }
+      auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(fun);
+      if (multiFun)
+      {
+        auto multiCreator = new MultiDomainCreator(this,m_workspacePropertyNames.size());
+        multiCreator->setCreator(index,workspacePropertyName,creator);
         m_domainCreator.reset(multiCreator);
+        creator->declareDatasetProperties(suffix,addProperties);
       }
       else
       {
         m_domainCreator.reset(creator);
+        creator->declareDatasetProperties(suffix,addProperties);
       }
     }
     else
@@ -142,7 +159,11 @@ namespace CurveFitting
       {
         throw std::runtime_error(std::string("MultiDomainCreator expected, found ") + typeid(*m_domainCreator.get()).name());
       }
-      multiCreator->addCreator(workspacePropertyName,creator);
+      if (!multiCreator->hasCreator(index))
+      {
+        creator->declareDatasetProperties(suffix,addProperties);
+      }
+      multiCreator->setCreator(index,workspacePropertyName,creator);
     }
 
   }
@@ -155,7 +176,7 @@ namespace CurveFitting
     auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (multiFun)
     {
-      m_domainCreator.reset(new MultiDomainCreator(this));
+      m_domainCreator.reset(new MultiDomainCreator(this,m_workspacePropertyNames.size()));
     }
     auto props = getProperties();
     for(auto prop = props.begin(); prop != props.end(); ++prop)
@@ -180,6 +201,7 @@ namespace CurveFitting
         }
         const size_t n = std::string("InputWorkspace").size();
         const std::string suffix = (workspacePropertyName.size() > n)? workspacePropertyName.substr(n) : "";
+        const size_t index = suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
         creator->declareDatasetProperties(suffix,false);
         m_workspacePropertyNames.push_back(workspacePropertyName);
         if (!m_domainCreator)
@@ -189,7 +211,7 @@ namespace CurveFitting
         auto multiCreator = boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
         if (multiCreator)
         {
-          multiCreator->addCreator(workspacePropertyName,creator);
+          multiCreator->setCreator(index,workspacePropertyName,creator);
         }
       }
     }

@@ -7,6 +7,7 @@
 #include "MantidAPI/JointDomain.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/Fit.h"
@@ -59,6 +60,7 @@ class MultiDomainFunctionTest : public CxxTest::TestSuite
 public:
   MultiDomainFunctionTest()
   {
+    FrameworkManager::Instance();
     multi = boost::make_shared<MultiDomainFunction>();
     multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
     multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
@@ -78,6 +80,47 @@ public:
     domain->addDomain(boost::make_shared<FunctionDomain1D>(1,2,10));
     domain->addDomain(boost::make_shared<FunctionDomain1D>(2,3,11));
 
+    const double A0 = 0, A1 = 1, A2 = 2;
+    const double B0 = 1, B1 = 2, B2 = 3;
+
+    ws1.reset(new WorkspaceTester);
+    ws1->initialize(1,10,10);
+    {
+      Mantid::MantidVec& x = ws1->dataX(0);
+      Mantid::MantidVec& y = ws1->dataY(0);
+      Mantid::MantidVec& e = ws1->dataE(0);
+      for(size_t i = 0; i < ws1->blocksize(); ++i)
+      {
+        x[i] =  0.1 * i;
+        y[i] =  A0 + A1 + A2 + (B0 + B1 + B2) * x[i];
+      }
+    }
+
+    ws2.reset(new WorkspaceTester);
+    ws2->initialize(1,10,10);
+    {
+      Mantid::MantidVec& x = ws2->dataX(0);
+      Mantid::MantidVec& y = ws2->dataY(0);
+      Mantid::MantidVec& e = ws2->dataE(0);
+      for(size_t i = 0; i < ws2->blocksize(); ++i)
+      {
+        x[i] = 1 + 0.1 * i;
+        y[i] = A0 + A1 + (B0 + B1) * x[i];
+      }
+    }
+
+    ws3.reset(new WorkspaceTester);
+    ws3->initialize(1,10,10);
+    {
+      Mantid::MantidVec& x = ws3->dataX(0);
+      Mantid::MantidVec& y = ws3->dataY(0);
+      Mantid::MantidVec& e = ws3->dataE(0);
+      for(size_t i = 0; i < ws3->blocksize(); ++i)
+      {
+        x[i] = 2 + 0.1 * i;
+        y[i] = A0 + A2 + (B0 + B2) * x[i];
+      }
+    }
   }
 
   void test_fit()
@@ -137,47 +180,6 @@ public:
 
   void test_Fit_algorithm()
   {
-    const double A0 = 0, A1 = 1, A2 = 2;
-    const double B0 = 1, B1 = 2, B2 = 3;
-
-    MatrixWorkspace_sptr ws1(new WorkspaceTester);
-    ws1->initialize(1,10,10);
-    {
-      Mantid::MantidVec& x = ws1->dataX(0);
-      Mantid::MantidVec& y = ws1->dataY(0);
-      Mantid::MantidVec& e = ws1->dataE(0);
-      for(size_t i = 0; i < ws1->blocksize(); ++i)
-      {
-        x[i] =  0.1 * i;
-        y[i] =  A0 + A1 + A2 + (B0 + B1 + B2) * x[i];
-      }
-    }
-
-    MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(1,10,10);
-    {
-      Mantid::MantidVec& x = ws2->dataX(0);
-      Mantid::MantidVec& y = ws2->dataY(0);
-      Mantid::MantidVec& e = ws2->dataE(0);
-      for(size_t i = 0; i < ws2->blocksize(); ++i)
-      {
-        x[i] = 1 + 0.1 * i;
-        y[i] = A0 + A1 + (B0 + B1) * x[i];
-      }
-    }
-
-    MatrixWorkspace_sptr ws3(new WorkspaceTester);
-    ws3->initialize(1,10,10);
-    {
-      Mantid::MantidVec& x = ws3->dataX(0);
-      Mantid::MantidVec& y = ws3->dataY(0);
-      Mantid::MantidVec& e = ws3->dataE(0);
-      for(size_t i = 0; i < ws3->blocksize(); ++i)
-      {
-        x[i] = 2 + 0.1 * i;
-        y[i] = A0 + A2 + (B0 + B2) * x[i];
-      }
-    }
 
     multi->getFunction(0)->setParameter("A",0);
     multi->getFunction(0)->setParameter("B",0);
@@ -207,9 +209,25 @@ public:
 
   }
 
+  void test_Fit_resetting_properties()
+  {
+    system("pause");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm& fit = *alg;
+    fit.initialize();
+    fit.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(multi));
+    fit.setProperty("InputWorkspace",ws1);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("InputWorkspace",ws2);
+    fit.setProperty("WorkspaceIndex",1);
+    fit.setProperty("InputWorkspace_1",ws2);
+    fit.setProperty("InputWorkspace_1",ws1);
+  }
+
 private:
   boost::shared_ptr<MultiDomainFunction> multi;
   boost::shared_ptr<JointDomain> domain;
+  MatrixWorkspace_sptr ws1,ws2,ws3;
 };
 
 #endif /*MULTIDOMAINFUNCTIONTEST_H_*/

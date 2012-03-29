@@ -88,7 +88,7 @@ namespace
     m_startXPropertyName = "StartX" + suffix;
     m_endXPropertyName = "EndX" + suffix;
 
-    if (addProp)
+    if (addProp && !m_fit->existsProperty(m_workspaceIndexPropertyName))
     {
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);

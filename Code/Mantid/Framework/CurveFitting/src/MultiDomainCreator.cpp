@@ -9,10 +9,15 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  void MultiDomainCreator::addCreator(const std::string& workspacePropetyName,IDomainCreator* creator)
+  void MultiDomainCreator::setCreator(size_t i, const std::string& workspacePropetyName,IDomainCreator* creator)
   {
-    m_workspacePropertyNames.push_back(workspacePropetyName);
-    m_creators.push_back(boost::shared_ptr<IDomainCreator>(creator));
+    m_workspacePropertyNames[i] = workspacePropetyName;
+    m_creators[i] = boost::shared_ptr<IDomainCreator>(creator);
+  }
+
+  bool MultiDomainCreator::hasCreator(size_t i) const
+  {
+    return static_cast<bool>(m_creators[i]);
   }
 
   /// Create a domain from the input workspace
@@ -31,6 +36,10 @@ namespace CurveFitting
     i0 = 0;
     for(auto c = m_creators.begin(); c != m_creators.end(); ++c)
     {
+      if (!(*c))
+      {
+        throw std::runtime_error("Missing domain creator");
+      }
       auto i = static_cast<size_t>(c - m_creators.begin());
       API::FunctionDomain_sptr domain;
       (**c).createDomain(std::vector<std::string>(1,workspacePropetyNames[i]),domain,values,i0);

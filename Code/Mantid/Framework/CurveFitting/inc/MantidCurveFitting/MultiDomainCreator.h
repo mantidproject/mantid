@@ -42,7 +42,12 @@ namespace Mantid
       /// A friend that can create instances of this class
       friend class Fit;
       /// Constructor
-      MultiDomainCreator(API::Algorithm* fit):IDomainCreator(fit){}
+      MultiDomainCreator(API::Algorithm* fit, size_t n):
+      IDomainCreator(fit),
+      m_creators(n),
+      m_workspacePropertyNames(n)
+      {
+      }
 
       /// Create a domain from the input workspace
       virtual void createDomain(
@@ -50,7 +55,8 @@ namespace Mantid
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values, size_t i0);
 
-      void addCreator(const std::string& workspacePropetyName,IDomainCreator* creator);
+      void setCreator(size_t i, const std::string& workspacePropetyName,IDomainCreator* creator);
+      bool hasCreator(size_t i) const;
 
       /// Vector of creators.
       std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
