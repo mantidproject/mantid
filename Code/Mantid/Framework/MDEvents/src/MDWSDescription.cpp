@@ -138,8 +138,8 @@ dimIDs(nDimesnions,"mdn_"),
 dimUnits(nDimesnions,"Momentum"),
 convert_to_factor(NoScaling),
 rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error
-GoniomMatr(3,3,true),
 Wtransf(3,3,true),
+GoniomMatr(3,3,true),
 detInfoLost(false),
 default_dim_ID(nDefaultID),
 QScalingID(NCoordScalings)
