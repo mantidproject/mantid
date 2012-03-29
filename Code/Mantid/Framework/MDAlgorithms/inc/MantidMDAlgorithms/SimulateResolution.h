@@ -53,7 +53,7 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
-        // This class will  define the "function" method used by GenericFit but will not define the
+        // This class will  define the "function" method used by Fit but will not define the
         // actual sqwBroad or sqwSharp functions that define the real model
         class DLLExport SimulateResolution : public API::ParamFunction, public API::IFunctionMD
         {

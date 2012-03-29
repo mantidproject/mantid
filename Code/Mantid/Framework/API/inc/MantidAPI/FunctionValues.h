@@ -77,18 +77,30 @@ public:
   /// Add other calculated values
   FunctionValues& operator+=(const FunctionValues& values)
   {
+    if (size() != values.size())
+    {
+      throw std::runtime_error("Cannot add values: sizes do not match");
+    }
     values.add(getPointerToCalculated(0));
     return *this;
   }
   /// Multiply by other calculated values
   FunctionValues& operator*=(const FunctionValues& values)
   {
+    if (size() != values.size())
+    {
+      throw std::runtime_error("Cannot multiply values: sizes do not match");
+    }
     values.multiply(getPointerToCalculated(0));
     return *this;
   }
   /// Add other calculated values to these values starting with i.
   void addToCalculated(size_t i, const FunctionValues& values)
   {
+    if (i + size() < values.size())
+    {
+      throw std::runtime_error("Cannot add values: sizes do not match");
+    }
     values.add(getPointerToCalculated(i));
   }
 
