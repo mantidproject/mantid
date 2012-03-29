@@ -71,6 +71,7 @@ namespace Mantid
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
       DataObjects::SpecialWorkspace2D* maskWS = new DataObjects::SpecialWorkspace2D();
       maskWS->initialize(nHist, 1, 1);
@@ -150,6 +151,11 @@ namespace Mantid
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
+
+
+      // Clear all the "masked" bits on the output masked workspace
+      Geometry::ParameterMap & pmap = outputWS->instrumentParameters();
+      pmap.clearParametersByName("masked");
 
       g_log.information() << detectorList.size() << " spectra are masked\n";
       setProperty("OutputWorkspace", outputWS);
