@@ -48,32 +48,7 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
     std::vector<double> rotMat = mat.getVector();
     return rotMat;
 }
-/** The matrix to convert neutron momentums into the target coordinate system, if the target coordinate system is already defined by existing 
-  *   MD workspace */
-std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName, API::IMDEventWorkspace_sptr spws,const MDEvents::MDWSDescription &TargWSDescription,bool powderMode)const
-{
 
-   bool has_lattice(true);
-   if(!TargWSDescription.pLatt.get())  has_lattice=false;
-
-   if(!powderMode && (!has_lattice))
-   {   // warn about 3D case without lattice
-        convert_log.warning()<<
-        " Can not obtain transformation matrix from the input workspace: "<<inWsName<<
-        " as no oriented lattice has been defined. \n"
-        " Will use unit transformation matrix\n";
-   }
-
-   Kernel::DblMatrix  umat(3,3,true);
-   if(has_lattice) umat  = TargWSDescription.pLatt->getU();
-
-   Kernel::DblMatrix mat    = TargWSDescription.GoniomMatr*umat*spws->getWTransf();
-
-   mat.Invert();
-
-   return mat.getVector();
-
-}
 
 
 

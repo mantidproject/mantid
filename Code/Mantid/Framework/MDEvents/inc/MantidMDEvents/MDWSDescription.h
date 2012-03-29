@@ -55,13 +55,13 @@ enum defaultDimID
     nDefaultID //< ID conunter
 };
 
-/// enum descrines availble momentum scalings, interpreted by this class: TODO: Reconsile this with future third 
+/// enum descrines availble momentum scalings, interpreted by this class: TODO: Reconsile this with future third projection parameter
 enum CoordScaling
 { 
     NoScaling, //< momentums in A^-1
     SingleScale, //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sence
-    OrthogonalHKLScale,  //< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
-    HKLScale,            //< non-orthogonal system for non-orthogonal lattice
+    OrthogonalHKLScale,  //< each momentum component divided by appropriate lattice parameter; equivalent to hkl for reclenear lattice
+    HKLScale,            //< non-orthogonal system for non-reclenear lattice
     NCoordScalings
 }; 
 
@@ -73,7 +73,7 @@ class DLLExport MDWSDescription
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
     size_t nDims;
-    /// conversion mode (see its description below)
+    /// conversion mode 0,1,2 (-1 --undef) (see units conversion for its definision/description)
     int emode;
     /// energy of incident neutrons, relevant in inelastic mode
     double Ei; 
@@ -85,10 +85,10 @@ class DLLExport MDWSDescription
     std::vector<std::string> dimIDs;
     /// the units of target workspace dimensions and properties of input MD workspace dimensions
     std::vector<std::string> dimUnits;
-    /// if defined, specifies number of bins in each dimension
+    /// if defined, specifies number of bins split in each dimension
     std::vector<size_t> nBins;
     /** the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in NoQ and powder mode (but used in cryst as powder) 
-       and if no oriented lattice is found in input ws. */
+       and if no oriented lattice is found in input ws.  Powder mode usage may be reconsiled later, though */
     CoordScaling convert_to_factor;
     /// the matrix to transform momentums of the workspace into target coordinate system, it is constructed from UB matix and W-matrix;
     std::vector<double> rotMatrix;  // can be Quat if not for non-orthogonal lattices
@@ -96,13 +96,13 @@ class DLLExport MDWSDescription
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
 
+    // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
+    Kernel::DblMatrix Wtransf; 
     // UB matrix components:
     /// the oriented lattice which should be picked up from source ws and be carryed out to target ws. Defined for transfromation from Matrix or Event WS
     std::auto_ptr<Geometry::OrientedLattice> pLatt;
     // Goniometer is always present in a workspace but can be a unit matrix
     Kernel::DblMatrix GoniomMatr;   
-  /// the matrix transforming Q-coodinates in crystal cartesian coordinate system into target coodinate system. 
-    Kernel::DblMatrix  Wtransf;
     /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
     bool detInfoLost;
 //=======================

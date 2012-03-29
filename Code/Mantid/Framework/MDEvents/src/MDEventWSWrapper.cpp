@@ -33,10 +33,14 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
     workspace->setWTransf(WSD.Wtransf);
     return workspace;
 }
-
+/// set up existing workspace pointer as input for the class
+void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS)
+{
+    workspace    = spWS;
+    n_dimensions = workspace->getNumDims();
+}
 /// method adds the data to the workspace which was initiated before;
-void  
-MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size)const
+void  MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size)const
 {
     if(data_size==0)return;
 

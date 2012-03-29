@@ -30,14 +30,16 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
         dimUnits[i]= pDim->getUnits();   
         nBins[i]   = pDim->getNBins();
     }
-    uint16_t num_experiments = pWS->getNumExperimentInfo();   
-    // target ws does not have experiment info, so this can be only powder.
-    if (num_experiments==0)
-    {
-        return;
-    }else{
-        this->Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
-    }
+    this->Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
+    // unnecessary?
+    //uint16_t num_experiments = pWS->getNumExperimentInfo();   
+    //// target ws does not have experiment info, so this can be only powder. W-transf currently can be only unit matix
+    //if (num_experiments==0)
+    //{
+    //    return;
+    //}else{
+
+    //}
 
 
 }
@@ -52,7 +54,13 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 void  
 MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
 {
-    UNUSED_ARG(NewMDWorkspaceD);
+    if(this->nDims != NewMDWorkspaceD.nDims)
+    {
+        std::string ERR = "Dimension numebrs are inconsistent: this workspace has "+boost::lexical_cast<std::string>(this->nDims)+" dimensions and target one: "+
+                           boost::lexical_cast<std::string>(NewMDWorkspaceD.nDims);
+         throw(std::invalid_argument(ERR)); 
+    }
+    //TODO: More thoroogh checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace and Q3d+dE ws
 }
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 

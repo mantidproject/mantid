@@ -245,16 +245,17 @@ void ConvertToMDEvents::exec()
     {  
         // check if we are working in powder mode
         bool is_powder = ParamParser.isPowderMode(algo_id);
-        // existing workspace defines target coordinate system:
-        TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),spws,TWSD,is_powder);
-        // dimensions are already build
-
-        MDEvents::MDWSDescription OLDWSD;
-        OLDWSD.build_from_MDWS(spws);
+        // dimensions are already build 
+       // MDEvents::MDWSDescription OLDWSD;
+        TWSD.build_from_MDWS(spws);
         // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
-        OLDWSD.compareDescriptions(TWSD);
-
-        throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
+         // check inconsistencies
+        //OLDWSD.compareDescriptions(TWSD);
+        // currently upper operator simplified -- 
+        //TWSD =OLDWSD;
+       // set up target coordinate system
+        TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,is_powder);
+    
     }
 
     // Check what to do with detectors:  
@@ -297,6 +298,8 @@ void ConvertToMDEvents::exec()
     int maxDepth = this->getProperty("MaxRecursionDepth");
     if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
     spws->setMinRecursionDepth(size_t(minDepth));  
+  }else{
+      pWSWrapper->setMDWS(spws);
   }
 
   //DO THE JOB:

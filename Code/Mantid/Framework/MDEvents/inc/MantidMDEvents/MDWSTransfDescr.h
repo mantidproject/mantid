@@ -49,10 +49,7 @@ public:
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
    std::vector<double> getTransfMatrix(const std::string &inWsName, MDEvents::MDWSDescription &TargWSDescription,bool powderMode=false)const;
-   /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
-     defined by existing workspace */
-    std::vector<double> getTransfMatrix(const std::string &inWsName, API::IMDEventWorkspace_sptr spws,const MDEvents::MDWSDescription &TargWSDescription,bool powderMode=false)const; 
-
+  
    /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
    void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription);
    /// construct meaningful dimension names for ModQ case and different transformation types defined by the class;

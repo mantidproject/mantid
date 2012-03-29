@@ -11,7 +11,7 @@ namespace MDEvents
 {
   /**  The class which wraps MD Events factory and allow to work with a N-dimensional templated MDEvent workspace like usuall class with n-dimension as a parameter
     *   
-    *   Introduced to decrease code bloat in methods and algorithms, which use MDEvents write interface and run-time defined number of dimensions
+    *   Introduced to decrease code bloat and increase efficiency of methods and algorithms, which use MDEvents write interface and run-time defined number of dimensions
     
     @date 2011-28-12
 
@@ -71,6 +71,7 @@ public:
     void refreshCentroid(){
         (this->*(mdCalCentroid[n_dimensions]))();
     };
+    void setMDWS(API::IMDEventWorkspace_sptr spWS);
 private:
    /// maximal nuber of dimensions, currently supported by the class;
    static const size_t MAX_N_DIM=8;
