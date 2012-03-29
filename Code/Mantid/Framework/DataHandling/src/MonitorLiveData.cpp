@@ -16,6 +16,7 @@ For details on the way to specify the data processing steps, see: [[LoadLiveData
 #include "MantidDataHandling/LoadLiveData.h"
 #include <Poco/Thread.h>
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -69,6 +70,37 @@ namespace DataHandling
         "Frequency of updates, in seconds. Default 60.");
 
     this->initProps();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Clone a workspace, if there is enough memory available */
+  void MonitorLiveData::doClone(const std::string & originalName, const std::string & newName)
+  {
+    if (AnalysisDataService::Instance().doesExist(originalName))
+    {
+      Workspace_sptr original = AnalysisDataService::Instance().retrieveWS<Workspace>(originalName);
+      if (original)
+      {
+        size_t bytesUsed = original->getMemorySize();
+        size_t bytesAvail = MemoryManager::Instance().getMemoryInfo().availMemory * size_t(1024);
+        std::cout << "Bytes available " << bytesAvail << std::endl;
+        std::cout << "Bytes used      " << bytesUsed << std::endl;
+        // Give a buffer of 3 times the size of the workspace
+        if (bytesUsed < size_t(3)*bytesAvail)
+        {
+          Algorithm_sptr cloner = createSubAlgorithm("CloneWorkspace", 0, 0, false);
+          cloner->setPropertyValue("InputWorkspace", originalName);
+          cloner->setPropertyValue("OutputWorkspace", newName);
+          cloner->setAlwaysStoreInADS(true); // We must force the ADS to be updated
+          cloner->executeAsSubAlg();
+        }
+        else
+        {
+          g_log.warning() << "Not enough spare memory to clone " << originalName <<
+              ". Workspace will be reset." << std::endl;
+        }
+      }
+    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -137,7 +169,13 @@ namespace DataHandling
         // Did we just hit the end of a run?
         if (listener->runStatus() == ILiveListener::EndRun)
         {
-          g_log.notice() << "Run ended.";
+          // Find the run number, if that is possible.
+          int runNumber = 0;
+          MatrixWorkspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OutputWorkspace);
+          if (OutputWS)
+            runNumber = OutputWS->getRunNumber();
+
+          g_log.notice() << "Run #" << runNumber << " ended.";
           std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
           if (EndRunBehavior == "Stop")
           {
@@ -153,7 +191,12 @@ namespace DataHandling
           {
             g_log.notice() << " Renaming existing workspace.";
             NextAccumulationMethod = "Replace";
-            //TODO
+
+            // Now we clone the existing workspaces
+            std::string postFix = "_" + Strings::toString(runNumber);
+            doClone(OutputWorkspace, OutputWorkspace + postFix);
+            if (!AccumulationWorkspace.empty())
+              doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
           }
           g_log.notice() << std::endl;
         }

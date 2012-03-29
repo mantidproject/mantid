@@ -17,14 +17,14 @@ namespace DataHandling
 
   /// Constructor
   FakeEventDataListener::FakeEventDataListener() : ILiveListener(),
-      m_buffer(), m_rand(new Kernel::MersenneTwister), m_timer(), m_callbackloop(1)
+      m_buffer(), m_rand(new Kernel::MersenneTwister), m_timer(), m_callbackloop(1),
+      m_runNumber(1)
   {
     if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.datarate",m_datarate) )
       m_datarate = 200; // Default data rate. Low so that our lowest-powered buildserver can cope.
     // For auto-ending and restarting runs
     if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.endrunevery",m_endRunEvery) )
       m_endRunEvery = 0;
-    std::cout << "m_endRunEvery is " << m_endRunEvery << std::endl;
   }
     
   /// Destructor
@@ -51,6 +51,7 @@ namespace DataHandling
     {
       // End a run once every m_endRunEvery seconds
       m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
+      m_runNumber++;
       return EndRun;
     }
     else
@@ -82,6 +83,7 @@ namespace DataHandling
     // When we are past this time, end the run.
     m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
 
+
     return;
   }
 
@@ -108,6 +110,9 @@ namespace DataHandling
     // will wait for generateEvents() to finish before swapping
     Mutex::ScopedLock _lock(m_mutex);
     std::swap(m_buffer,temp);
+
+    // Add a run number
+    temp->mutableRun().addLogData(new PropertyWithValue<int>("run_number", m_runNumber));
 
     return temp;
   }

@@ -198,6 +198,32 @@ public:
   }
 
 
+  //--------------------------------------------------------------------------------------------
+  /** Keep the old accumulated data when a run ends if EndRunBehavior="Rename" */
+  void test_EndRunBehavior_Rename()
+  {
+    // Will reset after the 2nd call to extract data
+    ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
+    ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
+
+    IAlgorithm_sptr alg1 = makeAlgo("fake1", "", "Add", "Rename", "0.15");
+    // Run this algorithm until that chunk #
+    if (!runAlgoUntilChunk(alg1, 7)) return;
+
+    // The first workspace got cloned to a new name
+    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1_0");
+    TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
+
+    // And this is the current run
+    EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
+    TS_ASSERT_EQUALS( ws2->getNumberEvents(), 3*200);
+
+    // Cancel the algo before exiting test (avoids segfault)
+    alg1->cancel();
+    Poco::Thread::sleep(500);
+  }
+
+
 };
 
 

@@ -65,6 +65,9 @@ namespace Mantid
       /// Date and time of the next time to end the run
       Mantid::Kernel::DateAndTime m_nextEndRunTime;
 
+      /// Fake run number to give
+      int m_runNumber;
+
       /// Mutex to exclude generateEvents() and extractData().
       Kernel::Mutex m_mutex;
     };

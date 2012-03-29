@@ -49,6 +49,7 @@ namespace DataHandling
     virtual void initDocs();
     void init();
     void exec();
+    void doClone(const std::string & originalName, const std::string & newName);
 
   public:
     /// Latest chunk number loaded
