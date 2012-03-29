@@ -113,6 +113,6 @@ class EQSANSNormalise(PythonAlgorithm):
         
         Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
         
-        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, flux_data_path)) 
+        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, str(flux_data_path))) 
 
 mtd.registerPyAlgorithm(EQSANSNormalise())
