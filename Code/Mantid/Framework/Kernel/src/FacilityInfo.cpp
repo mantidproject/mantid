@@ -43,8 +43,8 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillSoapEndPoint(elem);
   fillArchiveNames(elem);
   fillCatalogName(elem);
-  fillInstruments(elem);
   fillLiveListener(elem);
+  fillInstruments(elem); // Make sure this is last as it picks up some defaults that are set above
 }
 
 /// Called from constructor to fill zero padding field
@@ -196,7 +196,7 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element* elem)
   }
 }
 
-/// Called from constructor to fill instrument list
+/// Called from constructor to fill live listener name
 void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
 {
   // Get the first livedata element (will be NULL if there's none)

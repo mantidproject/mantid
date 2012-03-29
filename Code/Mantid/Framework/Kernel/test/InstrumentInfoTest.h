@@ -39,6 +39,8 @@ public:
     TS_ASSERT_EQUALS( inst.shortName(), "AnInst" );
     TS_ASSERT_EQUALS( inst.zeroPadding(), 0 );
     TS_ASSERT( inst.delimiter().empty() );
+    TS_ASSERT( inst.liveListener().empty() );
+    TS_ASSERT( inst.liveDataAddress().empty() );
     TS_ASSERT_EQUALS( inst.techniques().size(), 1);
     TS_ASSERT_EQUALS( *inst.techniques().begin(), "Measuring Stuff" );
     TS_ASSERT_EQUALS( &inst.facility(), fac );
@@ -51,7 +53,9 @@ public:
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
       "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" FileExtensions=\".xyz\">"
+      "    <livedata listener=\"I'm listening\" />"
       "    <instrument name=\"AnInst\">"
+      "      <livedata address=\"127.0.0.1:99\" />"
       "      <technique>Measuring Stuff</technique>"
       "    </instrument>"
       "  </facility>"
@@ -64,6 +68,7 @@ public:
 
     TS_ASSERT_EQUALS( inst.zeroPadding(), 99 );
     TS_ASSERT_EQUALS( inst.delimiter(), "!" );
+    TS_ASSERT_EQUALS( inst.liveListener(), "I'm listening" );
 
     delete fac;
   }
@@ -73,7 +78,9 @@ public:
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
       "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" FileExtensions=\".xyz\">"
+      "    <livedata listener=\"I'm listening\" />"
       "    <instrument name=\"AnInst\" zeropadding=\"66\" delimiter=\"?\" >"
+      "      <livedata listener=\"pardon\" />"
       "      <technique>Measuring Stuff</technique>"
       "    </instrument>"
       "  </facility>"
@@ -86,6 +93,7 @@ public:
 
     TS_ASSERT_EQUALS( inst.zeroPadding(), 66 );
     TS_ASSERT_EQUALS( inst.delimiter(), "?" );
+    TS_ASSERT_EQUALS( inst.liveListener(), "pardon" );
 
     delete fac;
   }
@@ -94,9 +102,10 @@ public:
   {
     const std::string instStr =
       "<instrument name=\"MyInst\" shortname=\"mine\" zeropadding=\"8\" delimiter=\":\" >"
-                                "  <technique>Measuring Stuff</technique>"
-                                "  <technique>Doing Stuff</technique>"
-                                "</instrument>";
+      "  <livedata listener=\"AListener\" address=\"myinst.facility.gov:99\" />"
+      "  <technique>Measuring Stuff</technique>"
+      "  <technique>Doing Stuff</technique>"
+      "</instrument>";
 
     FacilityInfo * fac;
     TS_ASSERT_THROWS_NOTHING( fac = createInstInfoInMinimalFacility(instStr) );
@@ -107,6 +116,8 @@ public:
     TS_ASSERT_EQUALS( inst.shortName(), "mine" );
     TS_ASSERT_EQUALS( inst.zeroPadding(), 8 );
     TS_ASSERT_EQUALS( inst.delimiter(), ":" );
+    TS_ASSERT_EQUALS( inst.liveListener(), "AListener" );
+    TS_ASSERT_EQUALS( inst.liveDataAddress(), "myinst.facility.gov:99" );
     auto techniques = inst.techniques();
     auto tech_it = techniques.begin();
     TS_ASSERT_EQUALS( techniques.size(), 2);
@@ -127,6 +138,7 @@ public:
                                 "  <technique>Measuring Stuff</technique>"
                                 "</instrument>"
                                 "<instrument name=\"AnInst\" shortname=\"inst\">"
+                                "  <livedata listener=\"AListener\" address=\"127.0.0.1:99\" />"
                                 "  <technique>Doing Stuff</technique>"
                                 "</instrument>"
                                 "<instrument name=\"AnInst\" shortname=\"inst\" zeropadding=\"8\" delimiter=\":\">"

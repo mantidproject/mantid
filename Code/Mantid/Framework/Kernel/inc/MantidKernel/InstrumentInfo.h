@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
-
 #include <set>
 #include <string>
 
@@ -57,7 +56,7 @@ class MANTID_KERNEL_DLL InstrumentInfo
 {
 public:
   /// Constructor
-  InstrumentInfo(FacilityInfo* f,const Poco::XML::Element* elem);
+  InstrumentInfo(const FacilityInfo* f,const Poco::XML::Element* elem);
   /// Equality operator
   bool operator==(const InstrumentInfo & rhs) const;
   /// Return the name of the instrument
@@ -68,18 +67,28 @@ public:
   int zeroPadding() const;
   /// Returns the default delimiter between instrument name and run number
   std::string delimiter() const;
+  /// Returns the name of the live listener
+  const std::string & liveListener() const;
+  /// Returns an object representing the host & port to connect to for a live data stream
+  const std::string & liveDataAddress() const;
   /// Return list of techniques
   const std::set<std::string>& techniques() const;
+  /// The facility to which this instrument belongs
   const FacilityInfo& facility() const;
 
 private:
-  const FacilityInfo* m_facility;          ///< facility
-  std::string m_name;                      ///< instrument name
-  std::string m_shortName;                 ///< instrument short name
-  int m_zeroPadding;                       ///< default zero padding for this facility
-  std::string m_delimiter;                 ///< default delimiter between instrument name and run number
-  std::set<std::string> m_technique;       ///< list of techniques the instrument can do
-  static Logger& g_log;                    ///< logger
+  void fillTechniques(const Poco::XML::Element* elem);
+  void fillLiveData(const Poco::XML::Element* elem);
+
+  const FacilityInfo* m_facility;          ///< Facility
+  std::string m_name;                      ///< Instrument name
+  std::string m_shortName;                 ///< Instrument short name
+  int m_zeroPadding;                       ///< Zero padding
+  std::string m_delimiter;                 ///< Delimiter between instrument name and run number
+  std::string m_liveListener;              ///< Name of the live listener class
+  std::string m_liveDataAddress;           ///< Host & port for live data connection
+  std::set<std::string> m_technique;       ///< List of techniques the instrument can do
+  static Logger& g_log;                    ///< Logger
 };
 
 /// Allow this object to be printed to a stream
