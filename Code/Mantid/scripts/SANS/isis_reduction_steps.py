@@ -527,9 +527,21 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         """
         details = details.lstrip()
         details = details.upper()
-        if not details.startswith('MASK'):
+        if not details.startswith('MASK') and not details.startswith('L/PHI'):
             _issueWarning('Ignoring malformed mask line ' + details)
             return
+        
+        if 'L/PHI' in details:
+            phiParts = details.split() 
+            if len(phiParts) == 3: 
+                mirror = phiParts[0] != 'L/PHI/NOMIRROR' 
+                phiMin = phiParts[1] 
+                phiMax = phiParts[2] 
+                self.set_phi_limit(float(phiMin), float(phiMax), mirror)
+                return
+            else: 
+                _issueWarning('Unrecognized L/PHI masking line command "' + details + '"')    
+                return
         
         parts = details.split('/')
         # A spectrum mask or mask spectra range with H and V commands
@@ -693,6 +705,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         '''
             Mask the detector bank such that only the region specified in the
             phi range is left unmasked
+            Purpose of this method is to populate self._lim_phi_xml 
         '''
         # convert all angles to be between 0 and 360
         while phimax > 360 : phimax -= 360

@@ -192,6 +192,12 @@ void SANSRunWindow::initLayout()
     m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
+  // connect up phi masking on analysis tab to be in sync with info on masking tab 
+  connect(m_uiForm.mirror_phi, SIGNAL(clicked()), this, SLOT(phiMaskingChanged())); 
+  connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
+  connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
+  connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
+
   readSettings();
 }
 /** Ssetup the controls for the Analysis Tab on this form
@@ -782,15 +788,15 @@ bool SANSRunWindow::loadUserFile()
   {
     m_uiForm.detbank_sel->setCurrentIndex(index);
   }
-
-  //Masking table
-  updateMaskTable();
  
   // Phi values 
   m_uiForm.phi_min->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_min"));
   m_uiForm.phi_max->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_max"));
+
+  //Masking table
+  updateMaskTable();
 
   if ( runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_mirror").trimmed() == "True" )
@@ -960,6 +966,24 @@ void SANSRunWindow::updateMaskTable()
       m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
     }
   }
+
+  // add phi masking to table 
+  QString phiMin = m_uiForm.phi_min->text(); 
+  QString phiMax = m_uiForm.phi_max->text(); 
+  int row = m_uiForm.mask_table->rowCount(); 
+  m_uiForm.mask_table->insertRow(row); 
+  m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("Phi")); 
+  m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(m_uiForm.detbank_sel->currentText())); 
+  if ( m_uiForm.mirror_phi->isChecked() ) 
+  { 
+    m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("L/PHI " + phiMin + " " + phiMax));   
+  }    
+  else 
+  { 
+    m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("L/PHI/NOMIRROR " + phiMin + " " + phiMax));    
+  }       
+
+
 }
 
 /**
@@ -1140,8 +1164,8 @@ bool SANSRunWindow::isUserFileLoaded() const
 /**
  * Create the mask strings for spectra and times
  * @param exec_script Create userfile type execution script
- * @param importCommand
- * @param mType
+ * @param importCommand This may e.g. be mask.parse_instruction
+ * @param mType This parameter appears to take values PixelMask or TimeMask
  */
 void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& importCommand, enum MaskType mType)
 {  
@@ -1175,7 +1199,15 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
       }
 
     }
-    //Details are in the third column
+
+    // 'special' case for phi masking since it uses the L command instead of the MASK command  
+    if ( m_uiForm.mask_table->item(row, 0)->text() == "Phi" ) 
+    { 
+
+      exec_script += importCommand + "('" + m_uiForm.mask_table->item(row, 2)->text() 
+         + "')\n"; 
+    } 
+    
     temp = importCommand + "('MASK";
     exec_script += temp;
     QString type = m_uiForm.mask_table->item(row, 0)->text();
@@ -1854,8 +1886,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   }
   exec_reduce += "i.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +
     m_uiForm.qy_dqy->text().trimmed() + ",'"
-    + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString()+"')\n" +
-    "i.SetPhiLimit(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
+    + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString()+"')\n";
+  exec_reduce += "i.SetPhiLimit(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
   if ( m_uiForm.mirror_phi->isChecked() )
   {
     exec_reduce += ", True";
@@ -2370,7 +2402,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
 {
   QString analysis_script;
   addUserMaskStrings(analysis_script,"i.Mask",DefaultMask);
-  analysis_script += "\ni.DisplayMask()";//analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
+  analysis_script += "\ni.DisplayMask()";
 
   m_uiForm.showMaskBtn->setEnabled(false);
   m_uiForm.showMaskBtn->setText("Working...");
@@ -3127,6 +3159,22 @@ void SANSRunWindow::issueWarning(const QString & title, const QString & info)
   g_log.warning() << "::SANS::warning" << title.toStdString() << ": " << info.toStdString() << std::endl;
   QMessageBox::warning(this, title, info);
 }
+
+/** Slot when phi masking changed in GUI
+*/
+void SANSRunWindow::phiMaskingChanged() 
+{ 
+  updateMaskTable(); 
+} 
+
+/** Slot when phi masking changed in GUI
+    @param i unused argument required for combobox signal/slot
+*/
+void SANSRunWindow::phiMaskingChanged(int i) 
+{ 
+  Q_UNUSED(i);
+  updateMaskTable(); 
+}  
 
 } //namespace CustomInterfaces
 
