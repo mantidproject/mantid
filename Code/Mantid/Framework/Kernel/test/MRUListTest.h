@@ -84,8 +84,22 @@ public:
     // Test out the clear method.
     m.clear();
     TS_ASSERT_EQUALS( m.size(), 0 );
+  }
+
+  /** Access the MRU list in parallel */
+  void test_threadSafety()
+  {
+    MRUList<MyTestClass> m(100);
+    PRAGMA_OMP( parallel for )
+    for (int i=0; i<1000; i++)
+    {
+      m.insert( new MyTestClass(size_t(i), i) );
+      m.find(size_t(i));
+    }
+    TS_ASSERT_EQUALS(m.size(), 100);
 
   }
+
 
 };
 
