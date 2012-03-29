@@ -451,8 +451,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new CommandLineInterpreter(m_interpreterDock);
-  m_scriptInterpreter->setup(*scriptingEnv());
+  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
   delete m_interpreterDock->widget();
   m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;

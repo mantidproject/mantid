@@ -77,6 +77,9 @@ class Script : public QObject
   bool redirectStdOut() const { return m_redirectOutput; }
   void redirectStdOut(bool on) { m_redirectOutput = on; }
 
+  // Does the code compile to a complete statement, i.e no more input is required
+  virtual bool compilesToCompleteStatement(const QString & code) const = 0;
+
   // Is anything running
   bool scriptIsRunning();
 

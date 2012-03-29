@@ -109,6 +109,40 @@ PythonScript::~PythonScript()
 }
 
 /**
+ * @param code A lump of python code
+ * @return True if the code forms a complete statment
+ */
+bool PythonScript::compilesToCompleteStatement(const QString & code) const
+{
+  bool result(false);
+  PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
+  if( PyObject *exception = PyErr_Occurred() )
+  {
+    // Certain exceptions still mean the code is complete
+    if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) ||
+       PyErr_GivenExceptionMatches(exception, PyExc_OverflowError) ||
+       PyErr_GivenExceptionMatches(exception, PyExc_ValueError) ||
+       PyErr_GivenExceptionMatches(exception, PyExc_TypeError) ||
+       PyErr_GivenExceptionMatches(exception, PyExc_MemoryError))
+    {
+      result = true;
+    }
+    else
+    {
+      result = false;
+    }
+    PyErr_Clear();
+  }
+  else
+  {
+    result = true;
+  }
+  Py_XDECREF(compiledCode);
+  return result;
+}
+
+
+/**
  * Compile the code returning true if successful, false otherwise
  * @param code
  * @return True if success, false otherwise
@@ -291,9 +325,9 @@ QVariant PythonScript::evaluate(const QString & code)
 
 bool PythonScript::execute(const QString & code)
 {
-  bool success(false);
   beginStdoutRedirect();
   emit started("Script execution started.");
+  bool success(false);
   QSharedPointer<PythonThreadState> pythonThreadState =  pythonEnv()->createPythonThread();
   PyObject * result = PyRun_String(code.toAscii(), Py_file_input, localDict, localDict);
   if(result)
@@ -301,7 +335,10 @@ bool PythonScript::execute(const QString & code)
     emit finished("Script execution finished.");
     success = true;
   }
-  emit error(constructErrorMsg(), name(), 0);
+  else
+  {
+    emit error(constructErrorMsg(), name(), 0);
+  }
   endStdoutRedirect();
   return success;
 
@@ -538,6 +575,8 @@ QString PythonScript::constructErrorMsg()
   Py_XDECREF(traceback);
   Py_XDECREF(value);
   Py_XDECREF(exception);
+
+  PyErr_Clear();
 
   return message + QString("\n");
 }

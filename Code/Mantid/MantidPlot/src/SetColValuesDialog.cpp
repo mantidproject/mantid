@@ -117,7 +117,7 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags 
 	hbox2->addWidget(explain);
 	hbox2->addWidget(gb);
 
-	commands = new ScriptEditor(this, false, scriptingEnv()->createCodeLexer());
+	commands = new ScriptEditor(this, scriptingEnv()->createCodeLexer());
 
 	QVBoxLayout *vbox2 = new QVBoxLayout();
 	btnApply = new QPushButton(tr( "&Apply" ));

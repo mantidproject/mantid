@@ -79,6 +79,9 @@ public:
   void populateEditMenu(QMenu &editMenu);
   /// Add the required entries for the execute menu in this context
   void populateExecMenu(QMenu &execMenu);
+  /// Add the required entries for a Window menu in this context
+  void populateWindowMenu(QMenu &windowMenu);
+
 
   /// Is a script running in the environment
   bool isScriptRunning();
@@ -97,12 +100,6 @@ public:
   /// paste implementation
   void paste();
 
-signals:
-  ///A message is ready to be printed
-  void MessageToPrint(const QString & msg, bool error, bool timestamp = false);
-  ///A script has changed execution state
-  void ScriptIsActive(bool running);
-
 public slots:
   /// Create a new tab for script editing with the text within the file imported and insert it at the index
   void newTab(int index = -1, const QString & filename = "");
@@ -115,9 +112,6 @@ public slots:
   /// Show the find dialog
   void showFindDialog(bool replace = true);
 
-  /// compile the code
-  void compile(const QString &);
-
   /** @name Execute members.*/
   //@{
   /// Execute
@@ -126,12 +120,6 @@ public slots:
   void executeSelection();
   /// Evaluate
   void evaluate();
-  ///Execute an interpreter line
-  void executeInterpreter(const QString & code);
-  //@}
-
-  /// run mutli line code
-  bool runMultiLineCode(int line_offset);
 
 private slots:
   /// Context menu handler
@@ -154,8 +142,6 @@ private slots:
   void toggleCodeCompletion(bool on);
   /// Toggle call tips
   void toggleCallTips(bool on);
-  ///execute multi line code
-  void executeMultiLine();
   /// open recent scripts
   void openRecentScript(int index);
 

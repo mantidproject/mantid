@@ -163,6 +163,19 @@ void ScriptManagerWidget::populateExecMenu(QMenu &execMenu)
 }
 
 /**
+ * Add the required entries for a Window menu in this context
+ */
+void ScriptManagerWidget::populateWindowMenu(QMenu &windowMenu)
+{
+  if( count() > 0 )
+  {
+    windowMenu.insertSeparator();
+    ScriptFileInterpreter *current = currentInterpreter();
+    current->populateWindowMenu(windowMenu);
+    }
+}
+
+/**
  * Is a script running in the environment
  */
 bool ScriptManagerWidget::isScriptRunning()
@@ -315,91 +328,6 @@ void ScriptManagerWidget::evaluate()
   QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented yet.");
 }
 
-/** 
- * Execute an interpreter line
- * @param code :: The chunk of code to execute
- */
-void ScriptManagerWidget::executeInterpreter(const QString & code)
-{
-//  if( isScriptRunning() ) return;
-//  ScriptEditor *editor = currentEditor();
-//  if( !editor ) return;
-//
-//  int lineno,index;
-//  editor->getCursorPosition(&lineno, &index);
-//  runScriptCode(code,lineno);
-//
-//  editor->newInputLine();
-//  setFocus();
-}
-
-/** 
- * Execute multi line code
- */
-void ScriptManagerWidget::executeMultiLine()
-{
-//  ScriptEditor *editor = currentEditor();
-//  if(!editor)
-//  {
-//    return;
-//  }
-//  int lineno,index;
-//  editor->getCursorPosition(&lineno, &index);
-//  runMultiLineCode(lineno);
-//  editor->append("\n");
-//  int marker_handle= editor->markerDefine(QsciScintilla::ThreeRightArrows);
-//  editor->setMarkerHandle(marker_handle);
-//  editor->newInputLine();
-//  setFocus();
-}
-
-/**
- * Compile a piece of code in the current environment
- * @param code :: the code to compile
- */
-void ScriptManagerWidget::compile(const QString & code)
-{
-//  ScriptEditor *editor = currentEditor();
-//  if(!editor)
-//  {
-//    return ;
-//  }// Get the correct script runner
-//  Script * runner = currentRunner();
-//  int lineno,index;
-//  editor->getCursorPosition(&lineno, &index);
-//  runner->setLineOffset(lineno);
-//  runner->setCode(code);
-//  emit ScriptIsActive(true);
-//
-//  bool success = runner->compile(true);
-//  emit ScriptIsActive(false);
-//
-//  if(success)
-//  {
-//    editor->setCompilationStatus(true);
-//  }
-//  else
-//  {
-//    editor->setCompilationStatus(false);
-//  }
- 
-}
-/**Run the multi line code set to runner
- * @param line_offset :: offset of the line
- * @returns true if executed successfully
- */
-bool ScriptManagerWidget::runMultiLineCode(int line_offset)
-{
-//  // Get the correct script runner
-//  Script * runner = currentRunner();
-//  emit ScriptIsActive(true);
-//
-//  runner->setLineOffset(line_offset);
-//  bool success = runner->exec();
-//
-//  emit ScriptIsActive(false);
-//  return success;
-}
 
 /**
  * Show the find dialog

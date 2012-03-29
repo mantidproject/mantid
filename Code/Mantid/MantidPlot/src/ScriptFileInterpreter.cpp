@@ -15,7 +15,7 @@
  * @param parent :: The parent widget
  */
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
-  : QWidget(parent), m_editor(new ScriptEditor(this,false,NULL)),
+  : QWidget(parent), m_editor(new ScriptEditor(this, NULL)),
     m_messages(new ScriptOutputDisplay), m_runner(),
     m_execAll(NULL), m_execSelect(NULL)
 {
@@ -126,6 +126,16 @@ void ScriptFileInterpreter::populateExecMenu(QMenu &execMenu)
   execMenu.addAction(m_execSelect);
   execMenu.addAction(m_execAll);
 }
+
+/**
+ * Fill a window menu
+ * @param windowMenu
+ */
+void ScriptFileInterpreter::populateWindowMenu(QMenu &windowMenu)
+{
+  m_editor->populateWindowMenu(windowMenu);
+}
+
 
 /**
  * Execute the whole script in the editor. This is always asynchronous

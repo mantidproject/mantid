@@ -38,6 +38,20 @@
 //
 //***************************************************************************
 /**
+ * Add a block of lines to the store
+ * @param block
+ */
+void CommandHistory::addCode(QString block)
+{
+  QStringList lines = block.split("\n");
+  QStringListIterator iter(lines);
+  while(iter.hasNext())
+  {
+    this->add(iter.next());
+  }
+}
+
+/**
  * Add a command to the store. 
  */
 void CommandHistory::add(QString cmd)
@@ -121,70 +135,28 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * Constructor
  * @param parent :: The parent widget (can be NULL)
  */
-ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *codelexer) : 
-  QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
-  m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL),m_previousKey(0),
-  m_bmulti_line(false),
-  m_multi_line_count(0),
-  m_originalIndent(0),
-  m_compiled(false),
-  m_zoomLevel(0)
+ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
+  QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
+  m_completer(NULL),m_previousKey(0),  m_zoomLevel(0)
 {
   initActions();
-
   //Syntax highlighting and code completion
   setLexer(codelexer);
-
   readSettings();
 
-  if( interpreter_mode )
-  {
-    m_marker_handle = markerDefine(QsciScintilla::ThreeRightArrows);
-    setMarginLineNumbers(1,false);
-    //Editor properties
-    setAutoIndent(false); 
-    markerAdd(0, m_marker_handle); 
-    setMarginWidth(1, 14);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    // Need to disable some default key bindings that Scintilla provides as they don't really
-    // fit here
-    remapWindowEditingKeys();
-    QShortcut *shortcut = new QShortcut(m_paste->shortcut(), this);
-    connect(shortcut, SIGNAL(activated()), this, SLOT(paste()));
-   
-    // Use a fixed width font
-    QFont f("Courier");
-    f.setFixedPitch(true);
-    f.setPointSize(10);
-    if( codelexer )
-    {
-      codelexer->setFont(f);
-    }
-    else
-    {
-      setFont(f);
-    }
-    if(m_zoomLevel > 0) zoomIn(m_zoomLevel);
-    else if(m_zoomLevel < 0) zoomOut(-1*m_zoomLevel);
-  }
-  else
-  {
 #ifdef __APPLE__
-    // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-    if( m_zoomLevel == 0 ) m_zoomLevel = 4;
+  // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
+  if( m_zoomLevel == 0 ) m_zoomLevel = 4;
 #endif
 
-    zoomIn(m_zoomLevel);
-    m_marker_handle = markerDefine(QsciScintilla::RightArrow);
-    setMarginLineNumbers(1,true);
-    //Editor properties
-    setAutoIndent(true);
-    // Update for a text change
-    connect(this, SIGNAL(textChanged()), this, SLOT(update()));
-    //Update the editor
-    update();
-  }
+  zoomIn(m_zoomLevel);
+  setMarginLineNumbers(1,true);
+  //Editor properties
+  setAutoIndent(true);
   setFocusPolicy(Qt::StrongFocus);
+
+  emit undoAvailable(isUndoAvailable());
+  emit redoAvailable(isRedoAvailable());
 }
 
 /**
@@ -229,6 +201,16 @@ void ScriptEditor::populateEditMenu(QMenu &editMenu)
 //  editMenu.addAction(m_find);
 }
 
+/**
+ *  Add actions applicable to a window menu
+ * @param windowMenu
+ */
+void ScriptEditor::populateWindowMenu(QMenu &windowMenu)
+{
+  windowMenu.addAction(m_zoomIn);
+  windowMenu.addAction(m_zoomOut);
+}
+
 
 /**
  * Set a new code lexer for this object. Note that this clears all auto complete information
@@ -266,14 +248,7 @@ void ScriptEditor::setLexer(QsciLexer *codelexer)
  */
 QSize ScriptEditor::sizeHint() const
 {
-  if( m_interpreter_mode )
-  {
-    return QSize(0,50);
-  }
-  else
-  {
-    return QSize(600, 500);
-  }
+  return QSize(600, 500);
 }
 
 /**
@@ -354,202 +329,16 @@ void ScriptEditor::setText(int lineno, const QString& txt,int index)
 }
 
 /** 
- * Capture key presses and if in interpeter mode use Up and Down arrow keys to search the
- * command history
+ * Capture key presses. Enter/Return executes the code or asks for more input if necessary.
+ * Up/Down search the command history
  * @event A pointer to the QKeyPressEvent object
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
-  if( isListActive() || !m_interpreter_mode )
-  {
-    forwardKeyPressToBase(event);
-    return;
-  }
-  int key = event->key();
-    
-  // Check if we have flagged to mark the line as read only
-  if( m_read_only ) 
-  {
-  // if control or Ctrl+C or Ctrl+X  pressed
-    if(key==Qt::Key_Control || isCtrlCPressed(m_previousKey,key )|| isCtrlXPressed(m_previousKey,key ) )
-    { 
-      forwardKeyPressToBase(event);
-       m_previousKey=key;
-      return;
-    }
-   ///set the cursor at the current input line
-    setCursorPosition(lines() - 1, length()-1);
-    /// now set the editing state of the current line 
-    setEditingState(lines() - 1);
-  }
-  m_previousKey=key;
-    
-  bool handled(false);
-  int last_line = lines() - 1;
- 
-  if( key == Qt::Key_Return || key == Qt::Key_Enter )
-  { 
-    //if multi line started
-    if(isStartOfMultiLine())
-    {              
-      ++m_multi_line_count;
-      m_bmulti_line=true; 
-     // add the command to history
-      m_history.add(text(last_line)); 
-      //define a marker with three dots
-      m_marker_handle = markerDefine(QsciScintilla::ThreeDots);
-      m_need_newline=true;
-      newInputLine();
-      //append the multiline command
-      m_multiCmd+=text(last_line);
-      if(m_multi_line_count==1)
-      {
-        m_originalIndent=indentation(last_line);
-      }
-      
-      return;
-    }
-    if(isMultiLineStatement())
-    {
-       //append the multiline command
-      m_multiCmd+=text(last_line);
-      m_history.add(text(last_line));
-      m_multiCmd+="\n";
-      //interpret the command
-      interpretMultiLineCode(last_line,m_multiCmd);
-      return;
-    }
-    else
-    { 
-      //at this point the command is single line command
-      executeCodeAtLine(last_line);
-      handled = true;
-     }
-       
-  }
-  else if( key == Qt::Key_Up )
-  {
-   
-    if( m_history.hasPrevious() )
-    {
-      QString cmd = m_history.getPrevious();
-      setText(last_line, cmd);
-    }
-    handled = true;
-  }
-  else if( key == Qt::Key_Down )
-  {
-    if( m_history.hasNext() )
-    {
-      QString cmd = m_history.getNext();
-      setText(last_line, cmd);
-    }
-    handled = true;
-  }
-  //At the start of a line we don't want to go back to the previous
-  else if( key == Qt::Key_Left || key == Qt::Key_Backspace )
-  {
-    int index(-1), dummy(-1);
-    getCursorPosition(&dummy, &index);
-    if( index == 0 ) handled = true;
-  }
-  else
-  {
-  }
-  
-  if( handled ) return;
+  // Avoids a bug in QScintilla
   forwardKeyPressToBase(event);
-  return;
 }
 
-/**
- * reset multi line parameters
- */
-void ScriptEditor::resetMultiLineParams()
-{
-  m_multi_line_count=0;
-  m_bmulti_line=false;
-  m_multiCmd="";
-}
-
-/**
- * returns true if it's start of multi line
- */
-bool ScriptEditor::isStartOfMultiLine()
-{
-   return (text(lines() - 1).remove('\r').remove('\n').endsWith(":")?true:false);
-}
-
-/**
- * returns true if it's  multi line statement
- */
-bool ScriptEditor::isMultiLineStatement()
-{
- return (m_bmulti_line?true:false);
- 
-}
-
-/**
- *if it's end end of multi line
- *@param lineNum :: number of the line to check
- *@returns true if it's end of multi line
- */
-bool ScriptEditor::isEndOfMultiLine(int lineNum)
-{
-  if(!getMultiLineStatus())
-  {
-    return false;
-  }
-  int indent=indentation(lineNum);
- 
-  bool bstart_space=text(lineNum).startsWith(' ');
-  return (((indent==m_originalIndent)&& !bstart_space)?true:false);
-
-}
-/**
- * checks the shortcut key for copy pressed
- * @param prevKey :: -code corresponding to the previous key 
- * @param curKey :: -code corresponding to the current key 
- * @returns bool returns true if the keys pressed are Ctrl+C
- */
-bool ScriptEditor::isCtrlCPressed(const int prevKey,const int curKey)
-{
-   return ((curKey==Qt::Key_C  && prevKey==Qt::Key_Control )?true:false);
-}
-
-/**
- * checks the shortcut key for cut pressed
- * @param prevKey :: -code corresponding to the previous key 
- * @param curKey :: -code corresponding to the current key 
- * @returns bool returns true if the keys pressed are Ctrl+X
- */
-bool ScriptEditor::isCtrlXPressed(const int prevKey,const int curKey)
-{
-   return ((curKey==Qt::Key_X  && prevKey==Qt::Key_Control )?true:false);
-}
-
-/**
- * Set whether or not the current line(where the cursor is located) is editable
- */
-void ScriptEditor::setEditingState(int line)
-{
-  m_read_only = (line != lines() - 1);
-}
-
-/**
- * Capture mouse click events to prevent moving the cursor to unwanted places
- */
-void ScriptEditor::mousePressEvent(QMouseEvent *event)
-{  
-  QsciScintilla::mousePressEvent(event);
-  if( m_interpreter_mode )
-  {
-    int line(-1), dummy(-1);
-    getCursorPosition(&line, &dummy);
-    setEditingState(line);
-    
-  }
-}
 
 /** Ctrl + Rotating the mouse wheel will increase/decrease the font size
  *
@@ -573,25 +362,6 @@ void ScriptEditor::wheelEvent( QWheelEvent * e )
   }
 }
 
-/**
-* Create a new input line
-*/
-void ScriptEditor::newInputLine()
-{
-  int cursorline = lines();
-  // Work out if we need a new line or not
-  if( !text().endsWith('\n') )
-  {
-    append("\n");
-  }
-  else
-  {    
-    cursorline -= 1;
-  }
-  markerAdd(cursorline, m_marker_handle);
-  setCursorPosition(cursorline, 0);
-}
-
 //-----------------------------------------------
 // Public slots
 //-----------------------------------------------
@@ -600,8 +370,6 @@ void ScriptEditor::newInputLine()
  */
 void ScriptEditor::update()
 {
-  emit undoAvailable(isUndoAvailable());
-  emit redoAvailable(isRedoAvailable());
   int width = 38;
   int ntens = static_cast<int>(std::log10(static_cast<double>(lines())));
   if( ntens > 1 )
@@ -619,8 +387,8 @@ void ScriptEditor::setMarkerState(bool enabled)
 {
   if( enabled )
   {
-    setMarkerBackgroundColor(QColor("gray"), m_marker_handle);
-    markerAdd(0, m_marker_handle);
+    setMarkerBackgroundColor(QColor("gray"), m_progressArrowKey);
+    markerAdd(0, m_progressArrowKey);
   }
   else
   {
@@ -637,23 +405,18 @@ void ScriptEditor::updateMarker(int lineno, bool success)
 {
   if( success )
   {
-    setMarkerBackgroundColor(g_success_colour, m_marker_handle);
+    setMarkerBackgroundColor(g_success_colour, m_progressArrowKey);
   }
   else
   {
-    setMarkerBackgroundColor(g_error_colour, m_marker_handle);
+    setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
   }
-
-  // Clear the previous markers
-  if( !m_interpreter_mode )
-  {
-    markerDeleteAll();
-  }
+  markerDeleteAll();
   // Check the lineno actually exists, -1 means delete
   if( lineno < 0 || lineno > this->lines() ) return;
 
   ensureLineVisible(lineno);
-  markerAdd(lineno - 1, m_marker_handle);
+  markerAdd(lineno - 1, m_progressArrowKey);
 }
 
 /**
@@ -685,68 +448,6 @@ void ScriptEditor::print()
   }
   QTextDocument document(text());
   document.print(&printer);
-}
-
-/**
- * Display the output from a script that has been run in interpeter mode
- * @param msg :: The output string
- * @param error :: If this is an error
- */
-void ScriptEditor::displayOutput(const QString& msg, bool error)
-{
-  if( m_need_newline )
-  { 
-    append("\n");      
-    m_need_newline = false;
-  }
-  if( !error )
-  {
-    append(msg);
-  }
-  else
-  {
-    append("\"" + msg.trimmed() + "\"");
-  }
-}
-
-/// Overrride the paste command when in interpreter mode
-void ScriptEditor::paste()
-{
-  if( m_interpreter_mode )
-  {
-    // Check if we have flagged to mark the line as read only
-    if( m_read_only ) 
-    {
-      ///set the cursor at the current input line
-      setCursorPosition(lines() - 1,length()+1);
-      /// now set the editing state of the current line 
-      setEditingState(lines() - 1);
-    }
-    QString txt = QApplication::clipboard()->text();
-    if( txt.isEmpty() )
-    {
-      return;
-    }
-    // Split by line and send each line that requires executing separately to the console
-    QStringList code_lines = txt.split('\n');
-    QStringListIterator itr(code_lines);
-    while( itr.hasNext() )
-    {
-      int line_index = this->lines() - 1;
-      QString txt = itr.next();
-      this->setText(line_index, txt.remove('\r').remove('\n'),length()-1);
-       setCursorPosition(line_index,length()+1);
-      //if there are lines ahead of this line ( multilines) then execute the line
-      if(itr.hasNext())
-      {
-        executeCodeAtLine(line_index);
-      }
-    }
-  }
-  else
-  {
-    QsciScintilla::paste();
-  }
 }
 
 /**
@@ -852,8 +553,7 @@ void ScriptEditor::initActions()
  */
 QString ScriptEditor::settingsGroup() const
 {
-  if( m_interpreter_mode ) return "/ScriptInterpreter";
-  else return "/ScriptWindow";
+  return "/ScriptWindow";
 }
 
 /**
@@ -879,79 +579,6 @@ void ScriptEditor::writeSettings()
 }
 
 /**
-* Execute a line of code
-* @param lineno :: The line number of the code to execute
-*/
-void ScriptEditor::executeCodeAtLine(int lineno)
-{
-  QString cmd = text(lineno).remove('\r').remove('\n');
-  m_history.add(cmd);
-  if( lineno == 0 ) markerAdd(lineno, m_marker_handle); 
-  m_need_newline = true;
-  emit executeLine(cmd);
-}
-
-/**
-  *compiles multi line code and if end of multi line executes the code
-  *@param line :: number of line
-  *@param multiCmd :: text to interpret
-*/
-void ScriptEditor::interpretMultiLineCode(const int line,const QString & multiCmd)
-{   
-  emit compile(multiCmd);
-  bool success=getCompilationStatus();
-  if(success)
-  {
-    if(isEndOfMultiLine(line))
-    {        
-      executeMultiLineCode();
-      resetMultiLineParams();
-    }
-    else
-    {      
-      m_marker_handle=markerDefine(QsciScintilla::ThreeDots);
-      newInputLine();
-    }
-  }
-  else
-  {
-    m_marker_handle=markerDefine(QsciScintilla::ThreeRightArrows);
-    m_need_newline=true;
-    newInputLine();
-    resetMultiLineParams();
-  }
-  
-}
-
-/**executes multine line code
-*/
-void ScriptEditor::executeMultiLineCode()
-{ 
-  emit executeMultiLine();
-}
-/**
- * Disable several default key bindings, such as Ctrl+A, that Scintilla provides.
- */
-void ScriptEditor::remapWindowEditingKeys()
-{
-  //Select all 
-  int keyDef = 'A' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Undo
-  keyDef = 'Z' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //  Other key combination
-  keyDef = SCK_BACK + (SCMOD_ALT << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Redo
-  keyDef = 'Y' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Paste
-  keyDef = 'V' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-}
-
-/**
  * Forward the QKeyEvent to the QsciScintilla base class. 
  * Under Gnome on Linux with Qscintilla versions < 2.4.2 there is a bug with the autocomplete
  * box that means the editor loses focus as soon as it the box appears. This functions
@@ -959,9 +586,7 @@ void ScriptEditor::remapWindowEditingKeys()
  */
 void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
 {
-   // Handle event
-
-  //dodgy hack to get around a bug in QScitilla
+  // Hack to get around a bug in QScitilla
   //If you pressed ( after typing in a autocomplete command the calltip does not appear, you have to delete the ( and type it again
   //This does that for you!
   if (event->text()=="(")
@@ -971,8 +596,8 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
     QsciScintilla::keyPressEvent(bracketEvent);
     QsciScintilla::keyPressEvent(backspEvent);
 
-    delete (backspEvent);
-    delete (bracketEvent);
+    delete backspEvent;
+    delete bracketEvent;
   }
   
 

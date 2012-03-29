@@ -44,6 +44,8 @@ public:
   void populateEditMenu(QMenu &editMenu);
   /// Fill exec menu
   void populateExecMenu(QMenu &execMenu);
+  /// Fill a window menu
+  void populateWindowMenu(QMenu &windowMenu);
 
 public slots:
   /// Execute the whole script.

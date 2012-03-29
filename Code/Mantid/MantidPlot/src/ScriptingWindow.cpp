@@ -202,28 +202,9 @@ void ScriptingWindow::execMenuAboutToShow()
 void ScriptingWindow::windowMenuAboutToShow()
 {
   m_window_menu->clear();
-
-//  m_window_menu->addAction(m_always_on_top);
-//  m_window_menu->addAction(m_hide);
-//
-//  if( m_manager->count() > 0 )
-//  {
-//    m_window_menu->insertSeparator();
-//    m_window_menu->addAction(m_manager->zoomInAction());
-//    m_window_menu->addAction(m_manager->zoomOutAction());
-//    m_window_menu->insertSeparator();
-//
-//    //Toggle progress
-//    m_window_menu->addAction(m_manager->m_toggle_progress);
-//
-//    m_window_menu->insertSeparator();
-//    //Toggle folding
-//    m_window_menu->addAction(m_manager->m_toggle_folding);
-//    //Toggle code completion
-//    m_window_menu->addAction(m_manager->m_toggle_completion);
-//    //Toggle call tips
-//    m_window_menu->addAction(m_manager->m_toggle_calltips);
-//  }
+  m_window_menu->addAction(m_always_on_top);
+  m_window_menu->addAction(m_hide);
+  m_manager->populateWindowMenu(*m_window_menu);
 }
 
 /**
@@ -273,6 +254,8 @@ void ScriptingWindow::initMenus()
 
   //************* Window menu *************
   m_window_menu = menuBar()->addMenu(tr("&Window"));
+  connect(m_window_menu, SIGNAL(aboutToShow()), this, SLOT(windowMenuAboutToShow()));
+
   initWindowActions();
 }
 

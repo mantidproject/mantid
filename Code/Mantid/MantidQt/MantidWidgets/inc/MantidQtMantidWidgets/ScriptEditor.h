@@ -25,7 +25,9 @@ class QsciAPIs;
 struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CommandHistory
 {
   ///Default constructor
-  CommandHistory() : m_commands(), m_hist_maxsize(100), m_current(0) {}
+  CommandHistory() : m_commands(), m_hist_maxsize(1000), m_current(0) {}
+  /// Add a block of lines
+  void addCode(QString block);
   /// Add a command. 
   void add(QString command);
   /// Is there a previous command
@@ -80,7 +82,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ScriptEditor : public QsciScintilla
 
 public:
   /// Constructor
-  ScriptEditor(QWidget* parent = 0, bool interpreter_mode = false, QsciLexer* lexer = NULL);
+  ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL);
   ///Destructor
   ~ScriptEditor();
 
@@ -88,6 +90,8 @@ public:
   void populateFileMenu(QMenu &fileMenu);
   /// Add actions applicable to an edit menu
   void populateEditMenu(QMenu &editMenu);
+  /// Add actions applicable to a window menu
+  void populateWindowMenu(QMenu &windowMenu);
 
   // Set a new code lexer for this object
   void setLexer(QsciLexer *);
@@ -99,12 +103,6 @@ public:
   void setText(int lineno, const QString& text,int index=0);
   ///Capture key presses
   void keyPressEvent(QKeyEvent* event);
-  /// Set whether or not the current line(where the cursor is located) is editable
-  void setEditingState(int line);
-  ///Capture mouse clicks to prevent moving the cursor to unwanted places
-  void mousePressEvent(QMouseEvent *event);
-  /// Create a new input line
-  void newInputLine();
   /// The current filename
   inline QString fileName() const
   {
@@ -128,35 +126,6 @@ public:
   {
     return m_completer;
   }
-  ///set the marker handle to marker_handle
-  void setMarkerHandle(int marker_handle)
-  { 
-    m_marker_handle= marker_handle;
-  }
-  /// this returns true if the code to be interpreted is multine line
-  bool getMultiLineStatus()
-  {
-    return m_bmulti_line;
-  }
-  /// sets true if the line is multine line
-  void setMultiLineStatus(bool b_multi_line)
-  {
-    m_bmulti_line=b_multi_line;
-  }
-  
-  /// reset the multiline params
-  void resetMultiLineParams();
- 
-  /// sets the code compilation status
-  void setCompilationStatus(bool status)
-  {
-    m_compiled=status;
-  }
- /// get teh compilation status
-  bool getCompilationStatus()
-  {
-    return m_compiled;
-  }
   
 public slots:
   /// Save the script, opening a dialog
@@ -176,10 +145,7 @@ public slots:
   void updateCompletionAPI(const QStringList & keywords);
   /// Print the text within the widget
   void print();
-  ///Display the output from a script that has been run in interpeter mode
-  void displayOutput(const QString& msg, bool error);
-  /// Overrride the paste command when in interpreter mode
-  void paste();
+  
   /// Override the zoomIn slot
   virtual void zoomIn();
   /// Override the zoomIn slot
@@ -194,12 +160,6 @@ signals:
   void undoAvailable(bool);
   /// Inform observers that redo information is available
   void redoAvailable(bool);
-  /// Notify manager that there is code to execute (only used in interpreter mode)
-  void executeLine(const QString&);
-  /// signal script manager that there is code to compile(only used in multine line interpreter mode processing)
-  void compile(const QString&);
-  /// signal script manager that there is code to execute(only used in multine line interpreter mode processing)
-  void executeMultiLine();
 
 private:
   /// Create actions
@@ -211,28 +171,9 @@ private:
   void readSettings();
   /// Write settings from persistent store
   void writeSettings();
-  ///Execute the code at a given line
-  void executeCodeAtLine(int line);
-  /// Disable window editing keys when we are in interpreter mode
-  void remapWindowEditingKeys();
   /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug in QsciScintilla
   void forwardKeyPressToBase(QKeyEvent *event);
-    ///this method checks the shortcut key for the copy command (Ctrl+C) pressed
-  bool isCtrlCPressed(const int prevKey,const int curKey);
-  /// this method checks the short cut key for the command cut(Ctrl+X) is pressed
-  bool isCtrlXPressed(const int prevKey,const int curKey);
-  
-  /// if it's start of multi line
-  bool isStartOfMultiLine();
-  /// if it's multiline statement
-  bool isMultiLineStatement();
-  ///if it's end of multi line
-  bool isEndOfMultiLine(int lineNum);
 
-  /// interpret multi line
-  void interpretMultiLineCode(const int last_line,const QString & multiCmd);
-  ///execute multi line
-  void executeMultiLineCode();
   /// The file name associated with this editor
   QString m_filename;
 
@@ -243,15 +184,7 @@ private:
   /// Zoom in/out actions
   QAction *m_zoomIn,*m_zoomOut;
   /// The margin marker 
-  int m_marker_handle;
-  /// Flag that we are in interpreter mode
-  bool m_interpreter_mode;
-  //Store a command history, only used in interpreter mode
-  CommandHistory m_history;
-  /// Flag whether editing is possible (only used in interpreter mode)
-  bool m_read_only;
-  /// Flag to indicate we need a new line in the output((only used in interpreter mode)
-  bool m_need_newline;
+  int m_progressArrowKey;
   /// A pointer to a QsciAPI object that handles the code completion
   QsciAPIs *m_completer;
   /// The colour of the marker for a success state
@@ -260,16 +193,6 @@ private:
   static QColor g_error_colour;
   /// previous key
   int m_previousKey;
-  ///boolean flag used for multiline processing
-  bool m_bmulti_line;
-  //count used to implment multi lines
-  int  m_multi_line_count;
-  /// multi line code
-  QString m_multiCmd;
-  ///original indent of multi line start
-  int m_originalIndent;
- /// boolean used used for compilation status
-  bool m_compiled;
   /// How many times the zoom level is changed
   int m_zoomLevel;
  

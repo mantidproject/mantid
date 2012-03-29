@@ -61,6 +61,8 @@ public:
   /// 'Fake' method needed for IPython import
   inline void flush()
   {}
+  /// Is the given code complete
+  bool compilesToCompleteStatement(const QString & code) const;
  
 public slots:
   /// Compile the code, returning true if it was successful, false otherwise

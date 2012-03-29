@@ -100,7 +100,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 
 	QHBoxLayout *hbox3 = new QHBoxLayout();
 
-	commands = new ScriptEditor(this,false, scriptingEnv()->createCodeLexer());
+	commands = new ScriptEditor(this, scriptingEnv()->createCodeLexer());
 	commands->setFocus();
 	hbox3->addWidget(commands);
 

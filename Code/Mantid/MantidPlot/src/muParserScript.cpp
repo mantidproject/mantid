@@ -501,7 +501,7 @@ bool muParserScript::execute(const QString & code)
 /**
  * Execute the script in a seprate thread
  */
-QFuture<bool> muParserScript::executeAsync(const QString &code)
+QFuture<bool> muParserScript::executeAsync(const QString &)
 {
   throw std::runtime_error("muParser does not support asynchronous execution");
 }
