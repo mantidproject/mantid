@@ -84,7 +84,7 @@ namespace DataHandling
         size_t bytesUsed = original->getMemorySize();
         size_t bytesAvail = MemoryManager::Instance().getMemoryInfo().availMemory * size_t(1024);
         // Give a buffer of 3 times the size of the workspace
-        if (bytesUsed < size_t(3)*bytesAvail)
+        if (size_t(3)*bytesUsed < bytesAvail)
         {
           Algorithm_sptr cloner = createSubAlgorithm("CloneWorkspace", 0, 0, false);
           cloner->setPropertyValue("InputWorkspace", originalName);
@@ -94,6 +94,7 @@ namespace DataHandling
         }
         else
         {
+          std::cout << "Not cloning\n";
           g_log.warning() << "Not enough spare memory to clone " << originalName <<
               ". Workspace will be reset." << std::endl;
         }
@@ -173,21 +174,21 @@ namespace DataHandling
           if (OutputWS)
             runNumber = OutputWS->getRunNumber();
 
-          g_log.notice() << "Run #" << runNumber << " ended.";
+          g_log.notice();
           std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
           if (EndRunBehavior == "Stop")
           {
-            g_log.notice() << " Stopping live data monitoring." << std::endl;
+            g_log.notice() << "Run #" << runNumber << " ended. Stopping live data monitoring." << std::endl;
             break;
           }
           else if (EndRunBehavior == "Restart")
           {
-            g_log.notice() << " Clearing existing workspace.";
+            g_log.notice() << "Run #" << runNumber << " ended. Clearing existing workspace." << std::endl;
             NextAccumulationMethod = "Replace";
           }
           else if (EndRunBehavior == "Rename")
           {
-            g_log.notice() << " Renaming existing workspace.";
+            g_log.notice() << "Run #" << runNumber << " ended. Renaming existing workspace." << std::endl;
             NextAccumulationMethod = "Replace";
 
             // Now we clone the existing workspaces
@@ -196,7 +197,6 @@ namespace DataHandling
             if (!AccumulationWorkspace.empty())
               doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
           }
-          g_log.notice() << std::endl;
         }
 
         m_chunkNumber++;
