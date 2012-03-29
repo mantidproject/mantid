@@ -19,7 +19,76 @@ using namespace Mantid::Kernel;
 
 class FacilitiesTest : public CxxTest::TestSuite
 {
-public: 
+public:
+  void test_throws_on_missing_facility_name()
+  {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility zeropadding=\"5\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+      "  </facility>"
+      "</facilities>";
+
+    TS_ASSERT_THROWS( getFacility(xmlStr), std::runtime_error );
+  }
+
+  void test_throws_if_no_file_extensions()
+  {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility name=\"MyFacility\">"
+      "  </facility>"
+      "</facilities>";
+
+    TS_ASSERT_THROWS( getFacility(xmlStr), std::runtime_error );
+  }
+
+  void test_throws_if_no_instruments()
+  {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
+      "  </facility>"
+      "</facilities>";
+
+    FacilityInfo* fac;
+    TS_ASSERT_THROWS( fac = getFacility(xmlStr), std::runtime_error );
+  }
+
+  void test_minimal()
+  {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
+      "    <instrument name=\"AnInst\">"
+      "      <technique>Measuring Stuff</technique>"
+      "    </instrument>"
+      "  </facility>"
+      "</facilities>";
+
+    FacilityInfo* fac;
+    TS_ASSERT_THROWS_NOTHING( fac = getFacility(xmlStr) );
+
+    // Check that the few required things are set and that everything else has its default value
+    TS_ASSERT_EQUALS( fac->name(),"MyFacility" );
+    TS_ASSERT_EQUALS( fac->zeroPadding(), 0 );
+    TS_ASSERT( fac->delimiter().empty() )
+    const std::vector<std::string> exts = fac->extensions();
+    TS_ASSERT_EQUALS( fac->extensions().size(), 2 ); // Automatically get the upper case versions as well
+    TS_ASSERT_EQUALS( fac->extensions()[0],".xyz" );
+    TS_ASSERT_EQUALS( fac->extensions()[1],".XYZ" );
+    TS_ASSERT_EQUALS( fac->preferredExtension(), ".xyz" );
+    TS_ASSERT( fac->getSoapEndPoint().empty() );
+    TS_ASSERT( fac->catalogName().empty() );
+    TS_ASSERT( fac->archiveSearch().empty() );
+    TS_ASSERT( fac->liveListener().empty() );
+    TS_ASSERT_EQUALS( fac->instruments().size(), 1 );
+    TS_ASSERT_EQUALS( fac->instruments().front().name(), "AnInst" );
+    TS_ASSERT_EQUALS( fac->instruments("Measuring Stuff").front().name(), "AnInst" );
+    TS_ASSERT( fac->instruments("Nonsense").empty() );
+    TS_ASSERT_EQUALS( fac->instrument("AnInst").name(), "AnInst" );
+    TS_ASSERT_THROWS( fac->instrument("NoInst"), Exception::NotFoundError );
+  }
+
   void testFacilities()
   {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -63,7 +132,7 @@ public:
     TS_ASSERT_EQUALS(instrums.size(),2);
 
     TS_ASSERT_THROWS_NOTHING(fac->instrument("HRPD"));
-    InstrumentInfo instr = fac->instrument("HRPD");
+    InstrumentInfo instr = fac->instrument("HRP"); // Tests getting by short name
     TS_ASSERT_EQUALS(instr.name(),"HRPD");
     TS_ASSERT_EQUALS(instr.shortName(),"HRP");
     TS_ASSERT_EQUALS(instr.zeroPadding(),5);
@@ -148,11 +217,11 @@ private:
   FacilityInfo* getFacility(const std::string& xmlStr)const
   {
     Poco::XML::DOMParser parser;
-    Poco::XML::Document* pDoc = parser.parseString(xmlStr);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(xmlStr);
     TS_ASSERT(pDoc);
 
     Poco::XML::Element* pRootElem = pDoc->documentElement();
-    Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
+    Poco::AutoPtr<Poco::XML::NodeList> pNL_facility = pRootElem->getElementsByTagName("facility");
     size_t n = pNL_facility->length();
 
     TS_ASSERT(n > 0);
@@ -161,8 +230,6 @@ private:
     TS_ASSERT(elem);
 
     FacilityInfo * facility = new FacilityInfo(elem);
-    pNL_facility->release();
-    pDoc->release();
 
     return facility;
   }

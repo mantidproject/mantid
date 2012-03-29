@@ -81,7 +81,7 @@ public:
   /// Returns a list of instruments of given technique
   std::vector<InstrumentInfo> instruments(const std::string& tech) const;
   /// Returns instruments with given name
-  const InstrumentInfo & instrument(const std::string& iName = "") const;
+  const InstrumentInfo & instrument(std::string iName = "") const;
 
 private:
   void fillZeroPadding(const Poco::XML::Element* elem);

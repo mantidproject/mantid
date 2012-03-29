@@ -9,7 +9,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/StringTokenizer.h>
-
+#include <boost/algorithm/string.hpp>
 #include <algorithm>
 #include <iostream>
 
@@ -214,28 +214,22 @@ void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
   * @return the instrument information object
   * @throw NotFoundError if iName was not found
   */
-const InstrumentInfo & FacilityInfo::instrument(const std::string& iName)const
+const InstrumentInfo & FacilityInfo::instrument(std::string iName)const
 {
-  std::string iname;
   if (iName.empty())
   {
-    iname = ConfigService::Instance().getString("default.instrument");
-    g_log.debug() << "Blank instrument specified, using default instrument of " << iname << "." << std::endl;
-    if (iname.empty())
+    iName = ConfigService::Instance().getString("default.instrument");
+    g_log.debug() << "Blank instrument specified, using default instrument of " << iName << "." << std::endl;
+    if (iName.empty())
     {
       return m_instruments.front();
     }
   }
-  else
-  {
-    iname = iName;
-  }
-  // All of our instrument names are upper case
-  std::transform(iname.begin(), iname.end(), iname.begin(), toupper);
+
   std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();
   for(;it != m_instruments.end(); ++it)
   {
-    if (it->name() == iname)
+    if ( boost::iequals( it->name(), iName) ) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as " << it->name() << " at " << name() << "." << std::endl;
       return *it;
@@ -245,14 +239,15 @@ const InstrumentInfo & FacilityInfo::instrument(const std::string& iName)const
   // if unsuccessful try shortname
   for(it = m_instruments.begin(); it != m_instruments.end(); ++it)
   {
-    if (it->shortName() == iname)
+    if ( boost::iequals( it->shortName(), iName) ) // Case-insensitive search
     {
       g_log.debug() << "Instrument '" << iName << "' found as " << it->name() << " at " << name() << "." << std::endl;
       return *it;
     }
   }
+
   g_log.debug("Instrument "+iName+" not found in facility "+name());
-  throw Exception::NotFoundError("FacilityInfo",iname);
+  throw Exception::NotFoundError("FacilityInfo",iName);
 }
 
 /**
