@@ -528,8 +528,8 @@ public:
     mem1=mem2;
 
     //Yes, our eventworkspace MRU is full
-    TS_ASSERT_EQUALS( ew->MRUSize(), 50);
-    TS_ASSERT_EQUALS( ew2->MRUSize(), 50);
+    TS_ASSERT_EQUALS( ew->MRUSize(), 100);
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 100);
     Kernel::cow_ptr<MantidVec> axis;
     MantidVec& xRef = axis.access();
     xRef.resize(10);

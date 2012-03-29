@@ -165,7 +165,10 @@ namespace DataObjects
     MantidVec Y = inSpec->readY();
     MantidVec E = inSpec->readE();
     if (Y.size()+1 != X.size())
+    {
+      std::cout << "X.size() " << X.size() << " Y.size() " << Y.size() << std::endl;
       throw std::runtime_error("Expected a histogram (X vector should be 1 longer than the Y vector)");
+    }
 
     // Copy detector IDs and spectra
     this->copyInfoFrom( *inSpec );
@@ -1491,13 +1494,9 @@ namespace DataObjects
   {
     if (!mru) throw std::runtime_error("EventList::constDataY() called with no MRU set. This is not allowed.");
 
-    // This is the thread number from which this function was called.
-    int thread = PARALLEL_THREAD_NUMBER;
-    mru->ensureEnoughBuffersY(thread);
-
     //Is the data in the mrulist?
     MantidVecWithMarker * yData;
-    yData = mru->findY(thread, this->m_specNo);
+    yData = mru->findY(this->m_specNo);
 
     if (yData == NULL)
     {
@@ -1505,7 +1504,6 @@ namespace DataObjects
       yData = new MantidVecWithMarker(this->m_specNo);
 
       // prepare to update the uncertainties
-      mru->ensureEnoughBuffersE(thread);
       MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo);
 
       // see if E should be calculated;
@@ -1515,10 +1513,10 @@ namespace DataObjects
       this->generateHistogram( *refX, yData->m_data, eData->m_data, skipErrors);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * yOldData = mru->insertY(thread, yData);
+      MantidVecWithMarker * yOldData = mru->insertY(yData);
       if (!skipErrors)
       {
-        MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
+        MantidVecWithMarker * eOldData = mru->insertE(eData);
         if (eOldData)
           delete eOldData;
       }
@@ -1540,13 +1538,9 @@ namespace DataObjects
   {
     if (!mru) throw std::runtime_error("EventList::constDataE() called with no MRU set. This is not allowed.");
 
-    // This is the thread number from which this function was called.
-    int thread = PARALLEL_THREAD_NUMBER;
-    mru->ensureEnoughBuffersE(thread);
-
     //Is the data in the mrulist?
     MantidVecWithMarker * eData;
-    eData = mru->findE(thread, this->m_specNo);
+    eData = mru->findE(this->m_specNo);
 
     if (eData == NULL)
     {
@@ -1558,7 +1552,7 @@ namespace DataObjects
       this->generateHistogram(*refX, Y_ignored, eData->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
+      MantidVecWithMarker * eOldData = mru->insertE(eData);
 
       //And clear up the memory of the old one, if it is dropping out.
       if (eOldData)

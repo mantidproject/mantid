@@ -111,21 +111,16 @@ namespace DataObjects
   public:
     // Typedef for a Most-Recently-Used list of Data objects.
     typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
-    // Typedef for a vector of MRUlists.
-    typedef std::vector< mru_list * > mru_lists;
 
     EventWorkspaceMRU();
     ~EventWorkspaceMRU();
 
-    void ensureEnoughBuffersY(size_t thread_num) const;
-    void ensureEnoughBuffersE(size_t thread_num) const;
-
     void clear();
 
-    MantidVecWithMarker * findY(size_t thread_num, size_t index);
-    MantidVecWithMarker * findE(size_t thread_num, size_t index);
-    MantidVecWithMarker * insertY(size_t thread_num, MantidVecWithMarker * data);
-    MantidVecWithMarker * insertE(size_t thread_num, MantidVecWithMarker * data);
+    MantidVecWithMarker * findY(size_t index);
+    MantidVecWithMarker * findE(size_t index);
+    MantidVecWithMarker * insertY(MantidVecWithMarker * data);
+    MantidVecWithMarker * insertE(MantidVecWithMarker * data);
 
     void deleteIndex(size_t index);
 
@@ -133,14 +128,14 @@ namespace DataObjects
      * Only used in tests. It only returns the 0-th MRU list size.
      * @return :: number of entries in the MRU list. */
     size_t MRUSize() const
-    { return this->m_bufferedDataY[0]->size(); }
+    { return this->m_bufferedDataY.size(); }
 
   protected:
     /// The most-recently-used list of dataY histograms
-    mutable mru_lists m_bufferedDataY;
+    mutable mru_list m_bufferedDataY;
 
     /// The most-recently-used list of dataE histograms
-    mutable mru_lists m_bufferedDataE;
+    mutable mru_list m_bufferedDataE;
 
   };
 

@@ -171,7 +171,8 @@ public:
 
   void test_MINITOPAZ_OneEventPerBin()
   {
-    do_test_MINITOPAZ(TOF, 1, true);
+    for (size_t i=0; i<1; i++)
+      do_test_MINITOPAZ(TOF, 1, true);
   }
 
 
