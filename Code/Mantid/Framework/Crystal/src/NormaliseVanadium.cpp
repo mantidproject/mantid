@@ -88,10 +88,10 @@ void NormaliseVanadium::exec()
 
     // Copy over bin boundaries
     const ISpectrum * inSpec = m_inputWS->getSpectrum(i);
+    inSpec->lockData(); // for MRU-related thread safety
 
     const MantidVec& Xin = inSpec->readX();
     correctionFactors->dataX(i) = Xin;
-    // For thread-safety (due to MRU dropping off items) these need to be copies (not references); at least until we get a better system
     const MantidVec & Yin = inSpec->readY();
     const MantidVec & Ein = inSpec->readE();
 
@@ -149,6 +149,7 @@ void NormaliseVanadium::exec()
 
     }
 
+    inSpec->unlockData();
 
     prog.report();
 

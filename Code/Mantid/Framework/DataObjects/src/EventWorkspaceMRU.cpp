@@ -31,6 +31,8 @@ namespace DataObjects
   {
     m_bufferedDataY.clear();
     m_bufferedDataE.clear();
+    Mutex::ScopedLock _lock(this->m_toDeleteMutex);
+    //FIXME: don't clear the locked ones!
     for (size_t i=0; i<m_markersToDelete.size(); i++)
       if (!m_markersToDelete[i]->m_locked)
         delete m_markersToDelete[i];
@@ -73,7 +75,10 @@ namespace DataObjects
     if (oldData)
     {
       if (oldData->m_locked)
+      {
+        Mutex::ScopedLock _lock(this->m_toDeleteMutex);
         m_markersToDelete.push_back(oldData);
+      }
       else
         delete oldData;
     }
@@ -92,7 +97,10 @@ namespace DataObjects
     if (oldData)
     {
       if (oldData->m_locked)
+      {
+        Mutex::ScopedLock _lock(this->m_toDeleteMutex);
         m_markersToDelete.push_back(oldData);
+      }
       else
         delete oldData;
     }

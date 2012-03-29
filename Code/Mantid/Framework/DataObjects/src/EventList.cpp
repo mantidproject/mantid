@@ -878,11 +878,6 @@ namespace DataObjects
   void EventList::unlockData() const
   {
     m_lockedMRU = false;
-    if (!mru) return;
-    MantidVecWithMarker * dataY = mru->findY(this->m_specNo);
-    if (dataY) dataY->m_locked = false;
-    MantidVecWithMarker * dataE = mru->findE(this->m_specNo);
-    if (dataE) dataE->m_locked = false;
   }
 
 
@@ -1525,12 +1520,10 @@ namespace DataObjects
     if (yData == NULL)
     {
       //Create the MRU object
-      yData = new MantidVecWithMarker(this->m_specNo);
-      yData->m_locked = this->m_lockedMRU;
+      yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
       // prepare to update the uncertainties
-      MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo);
-      eData->m_locked = this->m_lockedMRU;
+      MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
       // see if E should be calculated;
       bool skipErrors = (eventType == TOF);
@@ -1566,8 +1559,7 @@ namespace DataObjects
     if (eData == NULL)
     {
       //Create the MRU object
-      eData = new MantidVecWithMarker(this->m_specNo);
-      eData->m_locked = this->m_lockedMRU;
+      eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
       //Now use that to get E -- Y values are generated from another function
       MantidVec Y_ignored;
