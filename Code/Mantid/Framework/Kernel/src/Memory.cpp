@@ -205,13 +205,19 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
     long int totPages = sysconf(_SC_PHYS_PAGES);
     long int avPages = sysconf(_SC_AVPHYS_PAGES);
     long int pageSize = sysconf(_SC_PAGESIZE);
+    if (totPages < 0) totPages = 0;
+    if (avPages < 0) totPages = 0;
+    if (pageSize < 1) pageSize = 1;
     sys_avail = avPages / 1024 * pageSize;
     sys_avail = totPages / 1024 * pageSize;
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
   const int unusedReserved = mallinfo().fordblks/1024;
-  //g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+  // unusedReserved can sometimes be negative, which wen added to a low sys_avail will overflow the unsigned int.
+  if (unusedReserved < 0) unusedReserved = 0;
+  // g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
+
 #elif __APPLE__
   // Get the total RAM of the system
   uint64_t totalmem;
