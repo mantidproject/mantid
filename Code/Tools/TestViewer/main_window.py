@@ -541,7 +541,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
             self.labelTestType.setText("Single Test Results:") 
         else:
             raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
-        self.labelTestName.setText( res.get_fullname() ) 
+        self.labelTestName.setText( res.get_fullname() )
+        self.labelTestName.hide() 
         self.textResults.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' 
                                   + res.get_results_text() )
 
