@@ -76,9 +76,9 @@ class EQSANSNormalise(PythonAlgorithm):
     def PyExec(self):
         workspace = self.getPropertyValue("InputWorkspace")
         normalize_to_beam = self.getProperty("NormaliseToBeam")
-        
+        flux_data_path = None
+       
         if normalize_to_beam:
-            flux_data_path = None
             # If a spectrum file was supplied, check if it's a valid file path
             beam_spectrum_file = self.getProperty("BeamSpectrumFile").strip()
             if len(beam_spectrum_file):
