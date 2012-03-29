@@ -863,6 +863,30 @@ namespace DataObjects
   }
 
 
+  // ---------------------------------------------------------
+  /** Lock access to the data so that it does not get deleted while reading.
+   * Call this BEFORE readY() and readE().
+   */
+  void EventList::lockData() const
+  {
+    m_lockedMRU = true;
+  }
+
+  /** Unlock access to the data so that it can again get deleted.
+   * Call this once you are done with using the Y or E data.
+   */
+  void EventList::unlockData() const
+  {
+    m_lockedMRU = false;
+    if (!mru) return;
+    MantidVecWithMarker * dataY = mru->findY(this->m_specNo);
+    if (dataY) dataY->m_locked = false;
+    MantidVecWithMarker * dataE = mru->findE(this->m_specNo);
+    if (dataE) dataE->m_locked = false;
+  }
+
+
+
   // ==============================================================================================
   // --- Sorting functions -----------------------------------------------------
   // ==============================================================================================
@@ -1502,9 +1526,11 @@ namespace DataObjects
     {
       //Create the MRU object
       yData = new MantidVecWithMarker(this->m_specNo);
+      yData->m_locked = this->m_lockedMRU;
 
       // prepare to update the uncertainties
       MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo);
+      eData->m_locked = this->m_lockedMRU;
 
       // see if E should be calculated;
       bool skipErrors = (eventType == TOF);
@@ -1513,18 +1539,13 @@ namespace DataObjects
       this->generateHistogram( *refX, yData->m_data, eData->m_data, skipErrors);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * yOldData = mru->insertY(yData);
+      mru->insertY(yData);
       if (!skipErrors)
       {
-        MantidVecWithMarker * eOldData = mru->insertE(eData);
-        if (eOldData)
-          delete eOldData;
+        mru->insertE(eData);
       }
       else delete eData; // Need to clear up this memory if it wasn't put into MRU
 
-      //And clear up the memory of the old one, if it is dropping out.
-      if (yOldData)
-        delete yOldData;
     }
     return yData->m_data;
   }
@@ -1546,17 +1567,14 @@ namespace DataObjects
     {
       //Create the MRU object
       eData = new MantidVecWithMarker(this->m_specNo);
+      eData->m_locked = this->m_lockedMRU;
 
       //Now use that to get E -- Y values are generated from another function
       MantidVec Y_ignored;
       this->generateHistogram(*refX, Y_ignored, eData->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * eOldData = mru->insertE(eData);
-
-      //And clear up the memory of the old one, if it is dropping out.
-      if (eOldData)
-        delete eOldData;
+      mru->insertE(eData);
     }
     return eData->m_data;
   }

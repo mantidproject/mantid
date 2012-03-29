@@ -29,7 +29,7 @@ namespace DataObjects
      * @param the_index :: unique index into the workspace of this data
      */
     MantidVecWithMarker(const size_t the_index)
-    : m_index(the_index)
+    : m_index(the_index), m_locked(false)
     {
     }
 
@@ -78,6 +78,9 @@ namespace DataObjects
     {
       m_index = the_index;
     }
+
+    /// Locked: can't be deleted
+    bool m_locked;
   };
 
 
@@ -119,8 +122,8 @@ namespace DataObjects
 
     MantidVecWithMarker * findY(size_t index);
     MantidVecWithMarker * findE(size_t index);
-    MantidVecWithMarker * insertY(MantidVecWithMarker * data);
-    MantidVecWithMarker * insertE(MantidVecWithMarker * data);
+    void insertY(MantidVecWithMarker * data);
+    void insertE(MantidVecWithMarker * data);
 
     void deleteIndex(size_t index);
 
@@ -136,6 +139,9 @@ namespace DataObjects
 
     /// The most-recently-used list of dataE histograms
     mutable mru_list m_bufferedDataE;
+
+    /// These markers will be deleted when they are NOT locked
+    mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
 
   };
 

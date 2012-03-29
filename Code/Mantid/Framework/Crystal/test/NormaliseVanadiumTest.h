@@ -26,6 +26,11 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 
+class NormaliseVanadiumImpl : public NormaliseVanadium
+{
+public:
+  virtual void exec() { NormaliseVanadium::exec(); };
+};
 
 class NormaliseVanadiumTest : public CxxTest::TestSuite
 {
@@ -148,13 +153,14 @@ public:
     EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
     inputW->getAxis(0)->setUnit("Wavelength");
 
-    NormaliseVanadium alg;
+    NormaliseVanadiumImpl alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setProperty("InputWorkspace", inputW);
     alg.setProperty("OutputWorkspace", "TOPAZ");
     alg.setProperty("Wavelength", 1.0);
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    alg.exec();
+    //TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 
     MatrixWorkspace_sptr ws;
@@ -168,7 +174,8 @@ public:
 
   void test_MINITOPAZ()
   {
-    do_test_MINITOPAZ();
+    for (int i=0; i<1; i++)
+      do_test_MINITOPAZ();
   }
 
 

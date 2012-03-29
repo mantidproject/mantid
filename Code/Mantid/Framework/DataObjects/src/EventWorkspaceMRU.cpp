@@ -31,6 +31,10 @@ namespace DataObjects
   {
     m_bufferedDataY.clear();
     m_bufferedDataE.clear();
+    for (size_t i=0; i<m_markersToDelete.size(); i++)
+      if (!m_markersToDelete[i]->m_locked)
+        delete m_markersToDelete[i];
+    m_markersToDelete.clear();
   }
 
   //---------------------------------------------------------------------------
@@ -62,9 +66,17 @@ namespace DataObjects
    * @param data :: the new data
    * @return a MantidVecWithMarker * that needs to be deleted, or NULL if nothing needs to be deleted.
    */
-  MantidVecWithMarker * EventWorkspaceMRU::insertY(MantidVecWithMarker * data)
+  void EventWorkspaceMRU::insertY(MantidVecWithMarker * data)
   {
-    return m_bufferedDataY.insert(data);
+    MantidVecWithMarker * oldData = m_bufferedDataY.insert(data);
+    //And clear up the memory of the old one, if it is dropping out.
+    if (oldData)
+    {
+      if (oldData->m_locked)
+        m_markersToDelete.push_back(oldData);
+      else
+        delete oldData;
+    }
   }
 
   /** Insert a new histogram into the MRU
@@ -73,9 +85,17 @@ namespace DataObjects
    * @param data :: the new data
    * @return a MantidVecWithMarker * that needs to be deleted, or NULL if nothing needs to be deleted.
    */
-  MantidVecWithMarker * EventWorkspaceMRU::insertE(MantidVecWithMarker * data)
+  void EventWorkspaceMRU::insertE(MantidVecWithMarker * data)
   {
-    return m_bufferedDataE.insert(data);
+    MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);
+    //And clear up the memory of the old one, if it is dropping out.
+    if (oldData)
+    {
+      if (oldData->m_locked)
+        m_markersToDelete.push_back(oldData);
+      else
+        delete oldData;
+    }
   }
 
 

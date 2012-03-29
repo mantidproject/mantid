@@ -218,6 +218,9 @@ public:
   void clear(const bool removeDetIDs=true);
   void clearUnused();
 
+  void lockData() const;
+  void unlockData() const;
+
   void setMRU(EventWorkspaceMRU * newMRU);
 
   EventWorkspaceMRU * getMRU();
@@ -400,6 +403,9 @@ private:
 
   /// Mutex that is locked while sorting an event list
   mutable Mantid::Kernel::Mutex m_sortMutex;
+
+  /// Lock out deletion of items in the MRU
+  mutable bool m_lockedMRU;
 
   template<class T>
   static typename std::vector<T>::const_iterator findFirstEvent(const std::vector<T> & events, const double seek_tof);

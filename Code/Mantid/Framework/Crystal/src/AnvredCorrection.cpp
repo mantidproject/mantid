@@ -183,8 +183,9 @@ void AnvredCorrection::exec()
     // Copy over bin boundaries
     const MantidVec& Xin = m_inputWS->readX(i);
     correctionFactors->dataX(i) = Xin;
-    const MantidVec& Yin = m_inputWS->readY(i);
-    const MantidVec& Ein = m_inputWS->readE(i);
+    // For thread-safety (due to MRU dropping off items) these need to by copies (not references); at least until we get a better system
+    MantidVec Yin(m_inputWS->readY(i));
+    MantidVec Ein(m_inputWS->readE(i));
 
     // Get detector position
     IDetector_const_sptr det;

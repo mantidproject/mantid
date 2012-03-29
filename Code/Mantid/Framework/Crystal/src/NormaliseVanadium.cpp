@@ -80,17 +80,20 @@ void NormaliseVanadium::exec()
   PARALLEL_FOR2(m_inputWS,correctionFactors)
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
-    PARALLEL_START_INTERUPT_REGION
+//    PARALLEL_START_INTERUPT_REGION //FIXME: Restore
 
     // Get a reference to the Y's in the output WS for storing the factors
     MantidVec& Y = correctionFactors->dataY(i);
     MantidVec& E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
-    const MantidVec& Xin = m_inputWS->readX(i);
+    const ISpectrum * inSpec = m_inputWS->getSpectrum(i);
+
+    const MantidVec& Xin = inSpec->readX();
     correctionFactors->dataX(i) = Xin;
-    const MantidVec& Yin = m_inputWS->readY(i);
-    const MantidVec& Ein = m_inputWS->readE(i);
+    // For thread-safety (due to MRU dropping off items) these need to be copies (not references); at least until we get a better system
+    const MantidVec & Yin = inSpec->readY();
+    const MantidVec & Ein = inSpec->readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -149,9 +152,9 @@ void NormaliseVanadium::exec()
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+//    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+//  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", correctionFactors);
 

@@ -65,7 +65,7 @@ protected:
 
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
 
-private:
+protected:
   /// Initialisation code
   void init();
   /// Execution code
