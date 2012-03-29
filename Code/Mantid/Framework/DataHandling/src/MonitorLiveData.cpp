@@ -83,8 +83,6 @@ namespace DataHandling
       {
         size_t bytesUsed = original->getMemorySize();
         size_t bytesAvail = MemoryManager::Instance().getMemoryInfo().availMemory * size_t(1024);
-        std::cout << "Bytes available " << bytesAvail << std::endl;
-        std::cout << "Bytes used      " << bytesUsed << std::endl;
         // Give a buffer of 3 times the size of the workspace
         if (bytesUsed < size_t(3)*bytesAvail)
         {
