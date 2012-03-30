@@ -46,7 +46,7 @@ namespace DataObjects
    */
   void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const
   {
-    Mutex::ScopedLock _lock(m_changeMruListsMutex);
+    Mutex::ScopedLock _lock(m_changeMruListsMutexE);
     if (m_bufferedDataE.size() <= thread_num)
     {
       m_bufferedDataE.resize(thread_num+1, NULL);
@@ -65,7 +65,7 @@ namespace DataObjects
    */
   void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const
   {
-    Mutex::ScopedLock _lock(m_changeMruListsMutex);
+    Mutex::ScopedLock _lock(m_changeMruListsMutexY);
     if (m_bufferedDataY.size() <= thread_num)
     {
       m_bufferedDataY.resize(thread_num+1, NULL);
@@ -114,9 +114,8 @@ namespace DataObjects
    */
   MantidVecWithMarker * EventWorkspaceMRU::findY(size_t thread_num, size_t index)
   {
-    MantidVecWithMarker * out;
-    out = m_bufferedDataY[thread_num]->find(index);
-    return out;
+    Mutex::ScopedLock _lock(m_changeMruListsMutexY);
+    return m_bufferedDataY[thread_num]->find(index);
   }
 
   /** Find a Y histogram in the MRU
@@ -127,9 +126,8 @@ namespace DataObjects
    */
   MantidVecWithMarker * EventWorkspaceMRU::findE(size_t thread_num, size_t index)
   {
-    MantidVecWithMarker * out;
-    out = m_bufferedDataE[thread_num]->find(index);
-    return out;
+    Mutex::ScopedLock _lock(m_changeMruListsMutexE);
+    return m_bufferedDataE[thread_num]->find(index);
   }
 
   /** Insert a new histogram into the MRU
@@ -140,6 +138,7 @@ namespace DataObjects
    */
   void EventWorkspaceMRU::insertY(size_t thread_num, MantidVecWithMarker * data)
   {
+    Mutex::ScopedLock _lock(m_changeMruListsMutexY);
     MantidVecWithMarker * oldData = m_bufferedDataY[thread_num]->insert(data);
     //And clear up the memory of the old one, if it is dropping out.
     if (oldData)
@@ -162,6 +161,7 @@ namespace DataObjects
    */
   void EventWorkspaceMRU::insertE(size_t thread_num, MantidVecWithMarker * data)
   {
+    Mutex::ScopedLock _lock(m_changeMruListsMutexE);
     MantidVecWithMarker * oldData = m_bufferedDataE[thread_num]->insert(data);
     //And clear up the memory of the old one, if it is dropping out.
     if (oldData)
@@ -183,10 +183,11 @@ namespace DataObjects
    */
   void EventWorkspaceMRU::deleteIndex(size_t index)
   {
-    Mutex::ScopedLock _lock(m_changeMruListsMutex);
+    Mutex::ScopedLock _lock1(m_changeMruListsMutexE);
     for (size_t i=0; i < m_bufferedDataE.size(); i++)
       if (m_bufferedDataE[i])
         m_bufferedDataE[i]->deleteIndex(index);
+    Mutex::ScopedLock _lock2(m_changeMruListsMutexY);
     for (size_t i=0; i < m_bufferedDataY.size(); i++)
       if (m_bufferedDataY[i])
         m_bufferedDataY[i]->deleteIndex(index);

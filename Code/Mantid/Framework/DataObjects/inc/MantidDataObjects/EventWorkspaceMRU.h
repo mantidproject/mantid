@@ -145,7 +145,8 @@ namespace DataObjects
     Mutex m_toDeleteMutex;
 
     /// Mutex when adding entries in the MRU list
-    mutable Mutex m_changeMruListsMutex;
+    mutable Mutex m_changeMruListsMutexE;
+    mutable Mutex m_changeMruListsMutexY;
 
   };
 
