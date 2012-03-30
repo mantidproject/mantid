@@ -259,10 +259,9 @@ namespace Mantid
       {
         std::vector<size_t> hists=indexmap.at(i);
         double median=medianvec.at(i);
-        const size_t nhist = hists.size();
 
         PARALLEL_FOR1(countsWS)
-        for(size_t j = 0; j < nhist; ++j)
+        for(int j = 0; j < static_cast<int>(hists.size()); ++j)
         {
           const double value = countsWS->readY(hists.at(j))[0];
           if ((value == 0.) && checkForMask)
@@ -328,7 +327,7 @@ namespace Mantid
       }
 
       PARALLEL_FOR2(countsWS, maskWS)
-      for (size_t j=0;j<indexmap.size();++j)
+      for (int j=0;j<static_cast<int>(indexmap.size());++j)
       {
         std::vector<size_t> hists=indexmap.at(j);
         double median=medianvec.at(j);

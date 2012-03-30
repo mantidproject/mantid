@@ -477,10 +477,9 @@ namespace Mantid
     std::vector<double> DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input, bool excludeZeroes, std::vector<std::vector<size_t> > indexmap)
     {
       std::vector<double> medianvec;
-      size_t j;
       g_log.debug("Calculating the median count rate of the spectra");
 
-      for (j=0;  j< indexmap.size(); ++j)
+      for (size_t j=0;  j< indexmap.size(); ++j)
       {
         std::vector<double> medianInput;
         std::vector<size_t> hists=indexmap.at(j);
@@ -497,7 +496,7 @@ namespace Mantid
         }
 
         PARALLEL_FOR1(input)
-        for (size_t i = 0; i<hists.size(); ++i)
+        for (int i = 0; i<static_cast<int>(hists.size()); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
 
