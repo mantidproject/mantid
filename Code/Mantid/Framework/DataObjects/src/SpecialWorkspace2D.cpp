@@ -134,7 +134,7 @@ namespace DataObjects
    * @return the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */
-  void SpecialWorkspace2D::setValue(const detid_t detectorID, double value)
+  void SpecialWorkspace2D::setValue(const detid_t detectorID, double value, const double error)
   {
     std::map<detid_t,size_t>::iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end()){
@@ -144,6 +144,7 @@ namespace DataObjects
     else
     {
       this->dataY(it->second)[0] = value;
+      this->dataE(it->second)[0] = error;
     }
   }
 

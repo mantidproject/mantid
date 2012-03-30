@@ -46,7 +46,7 @@ namespace DataObjects
     double getValue(const detid_t detectorID) const;
     double getValue(const detid_t detectorID, const double defaultValue) const;
 
-    void setValue(const detid_t detectorID, const double value);
+    void setValue(const detid_t detectorID, const double value, const double error=0.);
 
     detid_t getDetectorID(const std::size_t workspaceIndex) const;
 
