@@ -1017,11 +1017,6 @@ class DataReflWidget(BaseWidget):
         roi1_to = int(self._summary.norm_background_to_pixel1.text())
         m.NormBackgroundRoi = [roi1_from, roi1_to]
         
-        #m.q_min = float(self._summary.q_min_edit.text())
-        #m.q_step = float(self._summary.q_step_edit.text())
-        #if self._summary.log_scale_chk.isChecked():
-        #    m.q_step = -m.q_step
-
         if hasattr(m, "set_detector_angle"):
             m.set_detector_angle = self._summary.det_angle_check.isChecked()
             m.detector_angle = util._check_and_get_float_line_edit(self._summary.det_angle_edit)

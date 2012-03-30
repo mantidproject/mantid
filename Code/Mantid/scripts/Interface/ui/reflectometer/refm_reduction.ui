@@ -1154,7 +1154,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>Counts vs PIxel</string>
+                       <string>Counts vs Pixel</string>
                       </property>
                      </widget>
                     </item>
