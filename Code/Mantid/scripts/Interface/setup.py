@@ -16,6 +16,7 @@ try:
     #os.system("pyuic4 -o ui/reflectometer/ui_data_refl.py ui/reflectometer/data_refl.ui")
     os.system("pyuic4 -o ui/reflectometer/ui_data_refl_simple.py ui/reflectometer/data_refl_simple.ui")
     os.system("pyuic4 -o ui/reflectometer/ui_refm_reduction.py ui/reflectometer/refm_reduction.ui")
+    os.system("pyuic4 -o ui/reflectometer/ui_refl_stitching.py ui/reflectometer/refl_stitching.ui")
     #os.system("pyuic4 -o ui/reflectometer/ui_merging_reflm.py ui/reflectometer/merging_refl.ui")
     #os.system("pyuic4 -o ui/reflectometer/ui_merging_reflm.py ui/reflectometer/merging_refm.ui")
     #os.system("pyuic4 -o ui/reflectometer/ui_norm_refl.py ui/reflectometer/norm_refl.ui")
