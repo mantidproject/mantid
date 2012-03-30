@@ -134,6 +134,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
           "An output workspace containing the mask.");
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
+      declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
       //Disable default gsl error handler (which is to call abort!)
       gsl_set_error_handler_off();
     }
@@ -224,6 +225,8 @@ namespace Mantid
       // cache the peak and background function names
       m_peakType = this->getPropertyValue("PeakFunction");
       m_backType = this->getPropertyValue("BackgroundType");
+      // the maximum allowable chisq value for an individual peak fit
+      m_maxChiSq = this->getProperty("MaxChiSq");
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
@@ -233,6 +236,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
+        double fitSum = 0.0;
         // checks for dead detectors
         if ((isEvent) && (eventW->getEventList(wi).empty()))
         {
@@ -329,6 +333,7 @@ namespace Mantid
             " Minimize Sum = " << s->fval << 
             " Offset   = " << gsl_vector_get (s->x, 0) << "  \n";
           offset = gsl_vector_get (s->x, 0);
+          fitSum = s->fval;
           gsl_vector_free(x);
           gsl_vector_free(ss);
           gsl_multimin_fminimizer_free (s);
@@ -356,7 +361,7 @@ namespace Mantid
           std::set<detid_t>::iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
-            outputW->setValue(*it, offset);
+            outputW->setValue(*it, offset, fitSum);
             if (mask == 1.)
             {
               // Being masked
@@ -452,6 +457,11 @@ namespace Mantid
             continue;
         }
         double chi2 = peakslist->getRef<double>("chi2",i);
+        if (chi2 > m_maxChiSq)
+        {
+          banned.push_back(i);
+          continue;
+        }
 
         // Get references to the data
         peakPosFitted.push_back(centre);

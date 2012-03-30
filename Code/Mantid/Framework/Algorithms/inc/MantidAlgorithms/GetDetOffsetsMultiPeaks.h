@@ -66,6 +66,7 @@ private:
   void exec();
   std::string m_backType;
   std::string m_peakType;
+  double m_maxChiSq;
 };
 
 } // namespace Algorithm
