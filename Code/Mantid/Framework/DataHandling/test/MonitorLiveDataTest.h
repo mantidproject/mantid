@@ -187,14 +187,14 @@ public:
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 7)) return;
 
+    // Cancel the algo before exiting test (avoids segfault)
+    alg1->cancel();
+
     // The workspace was reset after 4 additions, and then got 3 more
     EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
     TS_ASSERT_EQUALS( ws->getNumberEvents(), 3*200);
 
-    // Cancel the algo before exiting test (avoids segfault)
-    alg1->cancel();
     Poco::Thread::sleep(500);
-
   }
 
 
@@ -210,6 +210,9 @@ public:
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 7)) return;
 
+    // Cancel the algo before exiting test (avoids segfault)
+    alg1->cancel();
+
     // The first workspace got cloned to a new name
     EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1_0");
     TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
@@ -218,8 +221,6 @@ public:
     EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
     TS_ASSERT_EQUALS( ws2->getNumberEvents(), 3*200);
 
-    // Cancel the algo before exiting test (avoids segfault)
-    alg1->cancel();
     Poco::Thread::sleep(500);
   }
 
