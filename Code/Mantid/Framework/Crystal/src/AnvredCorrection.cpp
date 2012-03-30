@@ -181,11 +181,13 @@ void AnvredCorrection::exec()
     MantidVec& E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
-    const MantidVec& Xin = m_inputWS->readX(i);
+    const ISpectrum * inSpec = m_inputWS->getSpectrum(i);
+    inSpec->lockData(); // for MRU-related thread safety
+
+    const MantidVec& Xin = inSpec->readX();
     correctionFactors->dataX(i) = Xin;
-    // For thread-safety (due to MRU dropping off items) these need to by copies (not references); at least until we get a better system
-    MantidVec Yin(m_inputWS->readY(i));
-    MantidVec Ein(m_inputWS->readE(i));
+    const MantidVec & Yin = inSpec->readY();
+    const MantidVec & Ein = inSpec->readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -233,6 +235,7 @@ void AnvredCorrection::exec()
 
     }
 
+    inSpec->unlockData();
 
     prog.report();
 
