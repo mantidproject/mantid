@@ -147,8 +147,6 @@ namespace Kernel
      */
     void deleteIndex(const size_t index)
     {
-      Mutex::ScopedLock _lock(m_mutex);
-
       using namespace boost::multi_index;
       typename ordered_item_list::iterator it;
       bool found_nothing;
@@ -156,9 +154,7 @@ namespace Kernel
       found_nothing = (it == il.get<1>().end());
       if (!found_nothing)
       {
-        // This deletes the object
-        delete *it;
-        // This erases it from the list
+        // TODO: ERASE IT HERE
         il.get<1>().erase(it);
       }
 
