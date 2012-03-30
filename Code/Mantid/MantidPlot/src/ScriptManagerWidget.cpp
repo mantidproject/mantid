@@ -50,19 +50,6 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
   
   // Start with a blank tab
   newTab();
-  if( m_interpreter_mode )
-  {
-//    tabBar()->hide();
-//    setContextMenuPolicy(Qt::NoContextMenu);
-//    ScriptEditor *editor = currentEditor();
-//
-//    connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
-//    connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor,
-//	    SLOT(displayOutput(const QString&,bool)));
-//     connect(editor, SIGNAL(compile(const QString&)), this, SLOT(compile(const QString &)));
-//      connect(editor, SIGNAL(executeMultiLine()), this, SLOT(executeMultiLine()));
- 
-  }
   
   // Settings
   QSettings settings;

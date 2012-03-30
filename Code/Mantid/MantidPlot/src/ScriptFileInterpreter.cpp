@@ -218,6 +218,7 @@ void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, cons
   connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_messages, SLOT(displayError(const QString &)));
 }
 
 /**

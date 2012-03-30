@@ -169,6 +169,9 @@ void ScriptOutputDisplay::saveToFile(const QString & filename)
  */
 void ScriptOutputDisplay::prepareForNewMessage(const MessageType msgType)
 {
+  // Ensure the cursor is in the correct position. This affects the font unfortunately
+  moveCursor(QTextCursor::End);
+  resetFont();
   if(msgType == ScriptOutputDisplay::Error)
   {
     setTextColor(Qt::red);
@@ -177,9 +180,6 @@ void ScriptOutputDisplay::prepareForNewMessage(const MessageType msgType)
   {
     setTextColor(Qt::black);
   }
-  // Ensure the cursor is in the correct position. This affects the font unfortunately
-  moveCursor(QTextCursor::End);
-  resetFont();
 }
 
 /**
