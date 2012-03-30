@@ -27,7 +27,7 @@ void StaticKuboToyabe::functionMW(double* out, const double* xValues, const size
   const double& G = getParameter("Delta"); 
 
 
-  for (int i = 0; i < nData; i++) {  
+  for (size_t i = 0; i < nData; i++) {
     out[i] = A*(exp(-pow(G*xValues[i],2)/2)*(1-pow(G*xValues[i],2))*2.0/3 + 1.0/3); 
   } 
 

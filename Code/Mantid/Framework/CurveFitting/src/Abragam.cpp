@@ -33,7 +33,7 @@ void Abragam::functionMW(double* out, const double* xValues, const size_t nData)
   const double& sig = getParameter("Sigma");   
   const double& t = getParameter("Tau"); 
 
-  for (int i = 0; i < nData; i++) { 
+  for (size_t i = 0; i < nData; i++) {
     double A1=A*cos(w*xValues[i]+phi); 
     double A2=-(sig*sig*t*t)*(exp(-xValues[i]/t)-1+(xValues[i]/t)); 
     double A3=exp(A2); 
