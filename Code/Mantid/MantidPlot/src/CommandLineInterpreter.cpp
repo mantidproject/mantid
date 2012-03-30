@@ -2,11 +2,11 @@
 #include "ScriptingEnv.h"
 
 #include <QKeyEvent>
+#include <QMenu>
 #include <QApplication>
 #include <QClipboard>
-#include <Qsci/qscilexer.h>
 
-#include <iostream>
+#include <Qsci/qscilexer.h>
 
 //-----------------------------------------------------------------------------
 // InputSplitter class
@@ -207,40 +207,25 @@ bool InputSplitter::finalCharIsColon(const QString & str) const
  * Construct an object with the given parent
  */
 CommandLineInterpreter::CommandLineInterpreter(const ScriptingEnv & environ, QWidget *parent)
-  : ScriptEditor(parent,NULL), m_runner(), m_history(), m_inputmode(ReadWrite),
+  : ScriptEditor(parent,environ.createCodeLexer()), m_runner(), m_history(),
     m_inputBuffer(),m_status(Waiting),
     m_promptKey(markerDefine(QsciScintilla::ThreeRightArrows)),
-    m_continuationKey(markerDefine(QsciScintilla::ThreeDots))
+    m_continuationKey(markerDefine(QsciScintilla::ThreeDots)),
+    m_pastedText(), m_pasteQueue()
 {
-  setup(environ);
+  setupEnvironment(environ);
+  setupMargin();
+  setupIndentation();
+  setupFont();
 
-  markerAdd(0, m_promptKey);
-  setMarginLineNumbers(1,false);
-
-  setAutoIndent(false);
-  setIndentationsUseTabs(false);
-  setTabWidth(4);
-
-  setMarginWidth(1, 14);
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+          this, SLOT(showContextMenu(const QPoint &)));
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   // Need to disable some default key bindings that Scintilla provides as they don't really
   // fit here
   remapWindowEditingKeys();
-
-  // Use a fixed width font
-  QFont f("Courier");
-  f.setFixedPitch(true);
-  f.setPointSize(10);
-  if( lexer() )
-  {
-    lexer()->setFont(f);
-  }
-  else
-  {
-    setFont(f);
-  }
 }
-
 
 /**
  * Persist the current settings to the store
@@ -255,35 +240,68 @@ void CommandLineInterpreter::saveSettings() const
  */
 void CommandLineInterpreter::paste()
 {
-//  // Check if we have flagged to mark the line as read only
-//  if( m_inputmode == ReadOnly )
-//  {
-//    ///set the cursor at the current input line
-//    setCursorPosition(lastLineIndex(),length()+1);
-//    /// now set the editing state of the current line
-//    setEditingState(lastLineIndex());
-//  }
-//  QString txt = QApplication::clipboard()->text();
-//  if( txt.isEmpty() )
-//  {
-//    return;
-//  }
-//  // Split by line and send each line that requires executing separately to the console
-//  QStringList code_lines = txt.split('\n');
-//  QStringListIterator itr(code_lines);
-//  while( itr.hasNext() )
-//  {
-//    int line_index = this->lines() - 1;
-//    QString txt = itr.next();
-//    this->setText(line_index, txt.remove('\r').remove('\n'),length()-1);
-//    setCursorPosition(line_index,length()+1);
-//    //if there are lines ahead of this line ( multilines) then execute the line
-//    if(itr.hasNext())
-//    {
-//      executeCodeAtLine(line_index);
-//    }
-//  }
+  const QClipboard *clipboard = QApplication::clipboard();
+  m_pastedText = clipboard->text();
+  if(m_pastedText.isEmpty()) return;
+
+  const int lastLineIndex = indexOfLastLine();
+  if(indexOfCursorLine() != lastLineIndex)
+  {
+    moveCursorToEnd();
+  }
+
+  int dummy(-1), offset(0);
+  getCursorPosition(&dummy, &offset);
+
+  if(containsNewlines(m_pastedText))
+  {
+    processPastedCodeWithNewlines(offset);
+  }
+  else
+  {
+    // If no newlines just insert the text at the current position
+    setText(lastLineIndex,m_pastedText,offset);
+  }
 }
+
+/**
+ * Copies the selected code and if the cursor is on the current
+ * input line then removes the text
+ */
+void CommandLineInterpreter::cut()
+{
+  if(indexOfCursorLine() == indexOfLastLine())
+  {
+    cut();
+  }
+  else
+  {
+    copy();
+  }
+}
+
+
+/**
+ * Display the context menu
+ * @param clickPoint The point in widget coordinates where the mouse was clicked
+ */
+void CommandLineInterpreter::showContextMenu(const QPoint & clickPoint)
+{
+  QMenu context;
+  context.addAction(copyAction());
+  context.addAction(cutAction());
+  context.addAction(pasteAction());
+
+  context.addSeparator();
+  context.addAction(saveAsAction());
+
+  context.addSeparator();
+  context.addAction(zoomInAction());
+  context.addAction(zoomOutAction());
+
+  context.exec(this->mapToGlobal(clickPoint));
+}
+
 
 /**
  * Write the output to the interpreter
@@ -311,27 +329,107 @@ void CommandLineInterpreter::displayError(const QString & messages)
 void CommandLineInterpreter::insertInputPrompt()
 {
   append("\n");
-  markerAdd(lastLineIndex(), m_promptKey);
-  setCursorPosition(lastLineIndex(), 0);
+  markerAdd(indexOfLastLine(), m_promptKey);
+  moveCursorToStartOfLastLine();
+}
+
+/**
+ * Flag that code is executing
+ */
+void CommandLineInterpreter::setStatusToExecuting()
+{
+  m_status = Executing;
+}
+
+/**
+ * Flag that code is waiting
+ */
+void CommandLineInterpreter::setStatusToWaiting()
+{
+  m_status = Waiting;
+}
+
+/**
+ * Process the next line in the paste queue
+ */
+void CommandLineInterpreter::processNextPastedLine()
+{
+  QString nextLine = m_pasteQueue.readLine();
+  if(m_pasteQueue.atEnd())
+  {
+    disconnect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(processNextPastedLine()));
+    disconnect(this, SIGNAL(moreInputRequired()), this, SLOT(processNextPastedLine()));
+  }
+  simulateUserInput(nextLine);
 }
 
 /**
  * Setup with a scripting environment
  * @param environ A reference to a scripting environment
  */
-void CommandLineInterpreter::setup(const ScriptingEnv & environ)
+void CommandLineInterpreter::setupEnvironment(const ScriptingEnv & environ)
 {
   m_runner = QSharedPointer<Script>(environ.newScript("<commandline>",this,Script::Interactive));
+  connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setStatusToExecuting()));
   connect(m_runner.data(), SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(insertInputPrompt()));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(setStatusToWaiting()));
+
   /// Order here is important so that the error signal reaches the widget first
   connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)),
           this, SLOT(displayError(const QString &)));
   connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)), this, SLOT(insertInputPrompt()));
+  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setStatusToWaiting()));
 
-  setLexer(environ.createCodeLexer());
   m_inputBuffer = QSharedPointer<InputSplitter>(new InputSplitter(m_runner));
+}
 
+/**
+ * Setup the margin to have no line numbers and a reasonable width
+ */
+void CommandLineInterpreter::setupMargin()
+{
+  markerAdd(0, m_promptKey);
+  setMarginLineNumbers(1,false);
+  setMarginWidth(1, 14);
+}
+
+/**
+ *  Set the indentation policy to no autoindent, spaces for tabs
+ *  and tab width = 4
+ */
+void CommandLineInterpreter::setupIndentation()
+{
+  setAutoIndent(false);
+  setIndentationsUseTabs(false);
+  setTabWidth(4);
+}
+
+/**
+ *  Set the fonts used to be fixed width
+ */
+void CommandLineInterpreter::setupFont()
+{
+  // Use a fixed width font
+  QFont f("Courier");
+  f.setFixedPitch(true);
+  f.setPointSize(10);
+  if(lexer())
+  {
+    lexer()->setFont(f);
+  }
+  else
+  {
+    setFont(f);
+  }
+}
+
+/**
+ * Removes unwanted actions that base class provides
+ */
+void CommandLineInterpreter::removeUnwantedActions()
+{
+  removeAction(saveAction());
 }
 
 /**
@@ -339,21 +437,69 @@ void CommandLineInterpreter::setup(const ScriptingEnv & environ)
  */
 void CommandLineInterpreter::remapWindowEditingKeys()
 {
-  //Select all
-  int keyDef = 'A' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Undo
-  keyDef = 'Z' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //  Other key combination
-  keyDef = SCK_BACK + (SCMOD_ALT << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Redo
-  keyDef = 'Y' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Paste
-  keyDef = 'V' + (SCMOD_CTRL << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  SendScintilla(SCI_SETUNDOCOLLECTION, false);
+}
+
+/**
+ * @return The index of the line that the cursor is currently sitting on
+ */
+int CommandLineInterpreter::indexOfCursorLine() const
+{
+  int lineIndex(-1), offset(-1);
+  getCursorPosition(&lineIndex, &offset);
+  return lineIndex;
+}
+
+
+/// Set the cursor position to the start of the current input line
+void CommandLineInterpreter::moveCursorToStartOfLastLine()
+{
+  setCursorPosition(indexOfLastLine(), 0);
+}
+
+/**
+ * Moves the cursor to after the last character in the input
+ */
+void CommandLineInterpreter::moveCursorToEnd()
+{
+  setCursorPosition(indexOfLastLine(), length()+1);
+}
+
+/**
+ * Does the text contain any newline characters
+ * @return True if the text contains any newline characters, false otherwise
+ */
+bool CommandLineInterpreter::containsNewlines(const QString & text) const
+{
+  static QRegExp newlinesExp("[(\n)(\r\n)(\r)]+");
+  return text.contains(newlinesExp);
+}
+
+/**
+ * Paste and interpret multi-line code as we go
+ * @param offset A starting offset on the current line
+ */
+void CommandLineInterpreter::processPastedCodeWithNewlines(const int offset)
+{
+  m_pasteQueue.setString(&m_pastedText, QIODevice::ReadOnly);
+  QString firstLine = m_pasteQueue.readLine();
+  // Execute the first line and connect the finished signal to a function to process the next line.
+  // This chains the processing together while avoiding blocking the GUI
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(processNextPastedLine()));
+  connect(this, SIGNAL(moreInputRequired()), this, SLOT(processNextPastedLine()));
+  simulateUserInput(firstLine, offset);
+}
+
+/**
+ * Simulates user input by setting a line of text and generating a return key press
+ * @param text A line of text to set
+ * @param offset An offset of where to insert the text on the input line
+ */
+void CommandLineInterpreter::simulateUserInput(QString & text, const int offset)
+{
+  setText(indexOfLastLine(), text, offset);
+  QKeyEvent enterKeyEvent(QEvent::KeyPress, Qt::Key_Enter, Qt::NoModifier);
+  this->keyPressEvent(&enterKeyEvent);
 }
 
 /**
@@ -362,81 +508,52 @@ void CommandLineInterpreter::remapWindowEditingKeys()
  */
 void CommandLineInterpreter::keyPressEvent(QKeyEvent* event)
 {
-  if(handleKeyPress(event->key()))
+  if(handleKeyPress(event))
   {
-    return;
+    event->accept();
   }
   else
   {
+    moveCursorToEnd();
     ScriptEditor::keyPressEvent(event);
   }
-  //int key = event->key();
-//  // Check if we have flagged to mark the line as read only
-//  if( m_inputmode == ReadOnly )
-//  {
-//  // if control or Ctrl+C or Ctrl+X  pressed
-//    if(key==Qt::Key_Control || isCtrlCPressed(m_previousKey,key )|| isCtrlXPressed(m_previousKey,key ) )
-//    {
-//      forwardKeyPressToBase(event);
-//       m_previousKey=key;
-//      return;
-//    }
-//   ///set the cursor at the current input line
-//    setCursorPosition(lines() - 1, length()-1);
-//    /// now set the editing state of the current line
-//    setEditingState(lines() - 1);
-//  }
-//  m_previousKey=key;
-//
-//  bool handled(false);
-//  int last_line = lines() - 1;
-//
-//  if( key == Qt::Key_Return || key == Qt::Key_Enter )
-//  {
-//
-//  }
-//  else if( key == Qt::Key_Up )
-//  {
-//
-//    if( m_history.hasPrevious() )
-//    {
-//      QString cmd = m_history.getPrevious();
-//      setText(last_line, cmd);
-//    }
-//    handled = true;
-//  }
-//  else if( key == Qt::Key_Down )
-//  {
-//    if( m_history.hasNext() )
-//    {
-//      QString cmd = m_history.getNext();
-//      setText(last_line, cmd);
-//    }
-//    handled = true;
-//  }
-//  //At the start of a line we don't want to go back to the previous
-//  else if( key == Qt::Key_Left || key == Qt::Key_Backspace )
-//  {
-//    int index(-1), dummy(-1);
-//    getCursorPosition(&dummy, &index);
-//    if( index == 0 ) handled = true;
-//  }
-//  else
-//  {
-//  }
-//
-//  if( handled ) return;
-//  forwardKeyPressToBase(event);
-//  return;
+
 }
 
-bool CommandLineInterpreter::handleKeyPress(const int key)
+bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
 {
+  if(isExecuting())
+  {
+    return true;
+  }
+
+  const int key = event->key();
   bool handled(false);
-  if(key == Qt::Key_Return || key == Qt::Key_Enter)
+  if(event->matches(QKeySequence::Copy))
+  {
+    handled = true;
+    copy();
+  }
+  else if(event->matches(QKeySequence::Paste))
+  {
+    handled = true;
+    paste();
+  }
+  else if(event->matches(QKeySequence::Cut))
+  {
+    handled = true;
+    cut();
+  }
+  else if(key == Qt::Key_Return || key == Qt::Key_Enter)
   {
     handled = true;
     handleReturnKeyPress();
+  }
+  else if(key == Qt::Key_Left || key == Qt::Key_Backspace)
+  {
+    int index(-1), dummy(-1);
+    getCursorPosition(&dummy, &index);
+    if(index == 0) handled = true;
   }
   else if (key == Qt::Key_Up)
   {
@@ -457,11 +574,16 @@ bool CommandLineInterpreter::handleKeyPress(const int key)
  */
 void CommandLineInterpreter::handleUpKeyPress()
 {
-  if( m_history.hasPrevious() )
+  if(indexOfCursorLine() != indexOfLastLine())
+  {
+    moveCursorToEnd();
+  }
+  else if( m_history.hasPrevious() )
   {
     QString cmd = m_history.getPrevious();
-    setText(lastLineIndex(), cmd);
+    setText(indexOfLastLine(), cmd);
   }
+  else{}
 }
 
 /**
@@ -469,11 +591,16 @@ void CommandLineInterpreter::handleUpKeyPress()
  */
 void CommandLineInterpreter::handleDownKeyPress()
 {
-  if( m_history.hasNext() )
+  if(indexOfCursorLine() != indexOfLastLine())
+  {
+    moveCursorToEnd();
+  }
+  else if(m_history.hasNext())
   {
     QString cmd = m_history.getNext();
-    setText(lastLineIndex(), cmd);
+    setText(indexOfLastLine(), cmd);
   }
+  else {}
 }
 
 /**
@@ -481,6 +608,7 @@ void CommandLineInterpreter::handleDownKeyPress()
  */
 void CommandLineInterpreter::handleReturnKeyPress()
 {
+  moveCursorToEnd();
   tryExecute();
 }
 
@@ -490,11 +618,12 @@ void CommandLineInterpreter::handleReturnKeyPress()
  */
 void CommandLineInterpreter::tryExecute()
 {
-  m_inputBuffer->push(text(lines() - 1));
+  m_inputBuffer->push(text(indexOfLastLine()));
   const bool needMore = m_inputBuffer->pushCanAcceptMore();
   if(needMore)
   {
     insertContinuationPrompt();
+    emit moreInputRequired();
   }
   else
   {
@@ -535,7 +664,7 @@ void CommandLineInterpreter::insertContinuationPrompt()
     this->indent(index);
   }
   markerAdd(index, m_continuationKey);
-  setCursorPosition(lines() - 1,length()+1);
+  moveCursorToEnd();
 }
 
 /**
@@ -544,45 +673,32 @@ void CommandLineInterpreter::insertContinuationPrompt()
 void CommandLineInterpreter::mousePressEvent(QMouseEvent *event)
 {
   ScriptEditor::mousePressEvent(event);
-  int line(-1), dummy(-1);
-  getCursorPosition(&line, &dummy);
-  setEditingState(line);
 }
 
 /**
- * Set whether or not the current line(where the cursor is located) is editable
+ * Capture mouse click events to prevent moving the cursor to unwanted places
  */
-void CommandLineInterpreter::setEditingState(int line)
+void CommandLineInterpreter::mouseReleaseEvent(QMouseEvent *event)
 {
-  if(line != lines() - 1)
+  ScriptEditor::mouseReleaseEvent(event);
+}
+
+/**
+ * Writes all of the lines to a file with the output commented out. The device
+ * is left open
+ * @param device
+ */
+void CommandLineInterpreter::writeToDevice(QIODevice & device) const
+{
+  const int nlines(lines());
+  for(int i = 0; i < nlines; ++i)
   {
-    m_inputmode = ReadOnly;
+    unsigned markerMask = markersAtLine(i);
+    if(markerMask == 0)
+    {
+      device.write("# Output: ");
+    }
+    device.writeBlock(text(i).toAscii());
   }
-  else
-  {
-    m_inputmode = ReadWrite;
-  }
-}
-
-/**
- * checks the shortcut key for copy pressed
- * @param prevKey :: -code corresponding to the previous key
- * @param curKey :: -code corresponding to the current key
- * @returns bool returns true if the keys pressed are Ctrl+C
- */
-bool CommandLineInterpreter::isCtrlCPressed(const int prevKey,const int curKey)
-{
-   return ((curKey==Qt::Key_C  && prevKey==Qt::Key_Control )?true:false);
-}
-
-/**
- * checks the shortcut key for cut pressed
- * @param prevKey :: -code corresponding to the previous key
- * @param curKey :: -code corresponding to the current key
- * @returns bool returns true if the keys pressed are Ctrl+X
- */
-bool CommandLineInterpreter::isCtrlXPressed(const int prevKey,const int curKey)
-{
-   return ((curKey==Qt::Key_X  && prevKey==Qt::Key_Control )?true:false);
 }
 

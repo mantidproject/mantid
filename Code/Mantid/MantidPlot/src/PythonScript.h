@@ -147,8 +147,6 @@ private:
   // --------------------------- Script compilation/execution  -----------------------------------
   /// Compile to bytecode
   PyObject * compileToByteCode(const QString &, bool for_eval=true);
-  /// Perform a call to the Python eval function with the necessary wrapping
-  PyObject* executeScript(PyObject* return_tuple);  
   /// Create a list of keywords for the code completion API
   QStringList createAutoCompleteList() const;
 

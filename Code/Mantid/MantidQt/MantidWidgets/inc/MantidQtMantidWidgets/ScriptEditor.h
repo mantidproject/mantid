@@ -161,6 +161,62 @@ signals:
   /// Inform observers that redo information is available
   void redoAvailable(bool);
 
+protected:
+  /// Save action for this editor
+  inline QAction* saveAction() const
+  {
+    return m_save;
+  }
+  /// SaveAs action for this editor
+  inline QAction* saveAsAction() const
+  {
+    return m_saveAs;
+  }
+
+  /// Undo action for this editor
+  inline QAction* undoAction() const
+  {
+    return m_undo;
+  }
+  /// Redo action for this editor
+  inline QAction* redoAction() const
+  {
+    return m_redo;
+  }
+  /// Cut action for this editor
+  inline QAction* cutAction() const
+  {
+    return m_cut;
+  }
+  /// Copy action for this editor
+  inline QAction* copyAction() const
+  {
+    return m_copy;
+  }
+  /// Paste action for this editor
+  inline QAction* pasteAction() const
+  {
+    return m_paste;
+  }
+
+  /// Zoom in action for this editor
+  inline QAction* zoomInAction() const
+  {
+    return m_zoomIn;
+  }
+  /// Zoom out action for this editor
+  inline QAction* zoomOutAction() const
+  {
+    return m_zoomOut;
+  }
+  /// Print action for this editor
+  inline QAction* printAction() const
+  {
+    return m_print;
+  }
+  /// Write to the given device
+  virtual void writeToDevice(QIODevice & device) const;
+
 private:
   /// Create actions
   void initActions();

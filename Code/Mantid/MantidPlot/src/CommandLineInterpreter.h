@@ -3,6 +3,7 @@
 
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 #include <QRegExp>
+#include <QTextStream>
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -71,39 +72,79 @@ public:
   /// Persist to store
   void saveSettings() const;
 
+  /// Is any code executing
+  inline bool isExecuting() const { return m_status == Executing; }
+
 public slots:
   /// Paste needs to execute lines as it goes
   void paste();
+  /// Cut can only edit text on the current input line
+  void cut();
 
 private slots:
+  /// Custom context menu
+  void showContextMenu(const QPoint &);
   /// Write output
   void displayOutput(const QString & messages);
   /// Write error
   void displayError(const QString & messages);
   /// Inserts a input prompt
   void insertInputPrompt();
+  /// Flag that code is executing
+  void setStatusToExecuting();
+  /// Flag that code is waiting
+  void setStatusToWaiting();
+  /// Process next line in paste queue
+  void processNextPastedLine();
+
+signals:
+  /// Indicates that more input is required
+  void moreInputRequired();
 
 private:
   Q_DISABLE_COPY(CommandLineInterpreter);
+  /// Hide these members
+  using ScriptEditor::populateFileMenu;
+  using ScriptEditor::populateEditMenu;
+  using ScriptEditor::populateWindowMenu;
 
-  /// Enumerate input mode
-  enum InputMode { ReadWrite, ReadOnly };
   /// Status
   enum Status { Waiting, Executing };
 
   /// Setup with the scripting environment
-  void setup(const ScriptingEnv & environ);
+  void setupEnvironment(const ScriptingEnv & environ);
+  /// Setup the margin
+  void setupMargin();
+  /// Set the indentation policy
+  void setupIndentation();
+  /// Set the fonts used
+  void setupFont();
+  /// Removes unwanted actions that base class provides
+  void removeUnwantedActions();
   /// Disable window editing keys
   void remapWindowEditingKeys();
 
+  /// Returns the index of line the cursor is currently on
+  int indexOfCursorLine() const;
   /// Returns the index of the last line
   /// @returns An index of the final line in the editor
-  inline int lastLineIndex() const { return lines() - 1; }
+  inline int indexOfLastLine() const { return lines() - 1; }
+  /// Set the cursor position to the start of the current input line
+  void moveCursorToStartOfLastLine();
+  /// Set the cursor position to after the last character in the editor
+  void moveCursorToEnd();
+  /// Does the text contain newlines
+  bool containsNewlines(const QString & text) const;
+
+  /// Paste and execute multi-line code
+  void processPastedCodeWithNewlines(const int offset);
+  /// Sets text and generates a return key press
+  void simulateUserInput(QString & text, const int offset = 0);
 
   /// Intercept key presses
   void keyPressEvent(QKeyEvent* event);
   /// Attempt to handle the given key event
-  bool handleKeyPress(const int key);
+  bool handleKeyPress(QKeyEvent* event);
   /// Handles a history request
   void handleUpKeyPress();
   /// Handles a history request
@@ -116,28 +157,24 @@ private:
   void execute();
   /// Inserts a continuation prompt
   void insertContinuationPrompt();
-
   /// Capture mouse clicks to prevent moving the cursor to unwanted places
   void mousePressEvent(QMouseEvent *event);
-  /// Set whether or not the current line(where the cursor is located) is editable
-  void setEditingState(int line);
+  /// Capture mouse releases to prevent moving the cursor to unwanted places
+  void mouseReleaseEvent(QMouseEvent *event);
 
-  ///this method checks the shortcut key for the copy command (Ctrl+C) pressed
-  bool isCtrlCPressed(const int prevKey,const int curKey);
-  /// this method checks the short cut key for the command cut(Ctrl+X) is pressed
-  bool isCtrlXPressed(const int prevKey,const int curKey);
-
+  /// Write to the given device, commenting output lines
+  virtual void writeToDevice(QIODevice & device) const;
 
   QSharedPointer<Script> m_runner;
   CommandHistory m_history;
-  InputMode m_inputmode;
-
   QSharedPointer<InputSplitter> m_inputBuffer;
   Status m_status;
 
-
   int m_promptKey;
   int m_continuationKey;
+
+  QString m_pastedText;
+  QTextStream m_pasteQueue;
 };
 
 #endif /* COMMANDLINEINTERPRETER_H_ */

@@ -269,67 +269,15 @@ QVariant PythonScript::evaluate(const QString & code)
   return qret;
 }
 
-//    void execScript(const QString & code)
-//    {
-//      PyEval_AcquireLock();
-//      // get a reference to the PyInterpreterState
-//      PyInterpreterState * mainInterpreterState = mainThreadState->interp;
-//      // create a thread state object for this thread
-//      PyThreadState * myThreadState = PyThreadState_New(mainInterpreterState);
-//      PyThreadState_Swap(myThreadState);
-//      try
-//      {
-//        PyRun_SimpleString(code.toAscii());
-//      }
-//      catch(...)
-//      {
-//        PyThreadState_Swap(myThreadState);
-//      }
-//      if(PyErr_Occurred())
-//      {
-//        PyErr_Clear();
-//        return false;
-//      }
-//      // free the lock
-//      PyThreadState_Swap(mainThreadState);
-//      PyThreadState_Clear(myThreadState);
-//      PyThreadState_Delete(myThreadState);
-//      PyEval_ReleaseLock();
-//      return true;
-//    }
-//}
-
-//class PythonCodeRunner : public QRunnable
-//{
-//
-//public:
-//  PythonCodeRunner(const QString & script):
-//    QRunnable(), m_script(script)
-//  {}
-//public:
-//  void run()
-//  {
-//    if( QThread::currentThread() != QCoreApplication::instance()->thread())
-//    {
-//      std::cerr << "Separate thread " << QThread::currentThread() << ". Python threadstate " << PyThreadState_Get() << "\n";
-//    }
-//    PyRun_SimpleString(m_script.toAscii());
-//    if(PyErr_Occurred())
-//    {
-//      PyErr_Clear();
-//    }
-//  }
-//private:
-//  QString m_script;
-//};
-
 bool PythonScript::execute(const QString & code)
 {
-  beginStdoutRedirect();
+
   emit started("Script execution started.");
   bool success(false);
   QSharedPointer<PythonThreadState> pythonThreadState =  pythonEnv()->createPythonThread();
+  beginStdoutRedirect();
   PyObject * result = PyRun_String(code.toAscii(), Py_file_input, localDict, localDict);
+  endStdoutRedirect();
   if(result)
   {
     emit finished("Script execution finished.");
@@ -339,147 +287,12 @@ bool PythonScript::execute(const QString & code)
   {
     emit error(constructErrorMsg(), name(), 0);
   }
-  endStdoutRedirect();
   return success;
-
-//  // Cannot have two things executing at the same time
-//  if( env()->isRunning() ) return false;
-//
-//  CURRENT_SCRIPT_OBJECT = this;
-//  ScriptNullifier nullifier(CURRENT_SCRIPT_OBJECT); // Ensure the current code object reference is nullified after execution
-
-//  // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
-//  GILHolder gil;
-
-//  env()->setIsRunning(true);
-//
-//  if (isFunction) compiled = notCompiled;
-//  if (compiled != Script::isCompiled && !compile(false))
-//  {
-//    env()->setIsRunning(false);
-//    return false;
-//  }
-//  // Redirect the output, if required
-//  if ( redirectStdOut() ) beginStdoutRedirect();
-//
-//  if( reportProgress() )
-//  {
-//    // This stores the address of the main file that is being executed so that
-//    // we can track line numbers from the main code only
-//    ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
-//    CURRENT_SCRIPT_OBJECT = this;
-//    PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
-//  }
-//  else
-//  {
-//    ROOT_CODE_OBJECT = NULL;
-//    CURRENT_SCRIPT_OBJECT = NULL;
-//    PyEval_SetTrace(NULL, NULL);
-//  }
-//
-//  PyObject *pyret(NULL), *empty_tuple(NULL);
-//  if( PyCallable_Check(PyCode) )
-//  {
-//    empty_tuple = PyTuple_New(0);
-//    if (!empty_tuple)
-//    {
-//      emit_error(constructErrorMsg(), 0);
-//      env()->setIsRunning(false);
-//      return false;
-//    }
-//  }
-//  /// Return value is non-NULL if everything succeeded
-//  pyret = executeScript(empty_tuple);
-//  // Restore output
-//  if ( redirectStdOut() ) endStdoutRedirect();
-//  /// Disable trace
-//  PyEval_SetTrace(NULL, NULL);
-//
-//  if( pyret )
-//  {
-//    Py_DECREF(pyret);
-//    env()->setIsRunning(false);
-//    return true;
-//  }
-//  emit_error(constructErrorMsg(), 0);
-//  env()->setIsRunning(false);
-//  return false;
 }
 
 QFuture<bool> PythonScript::executeAsync(const QString & code)
 {
   return QtConcurrent::run(this, &PythonScript::execute, code);
-}
-
-/**
- * Perform the appropriate call to a Python eval command.
- * @param return_tuple :: If this is a valid pointer then the code object is called rather than executed and the return values are placed into this tuple
- * @returns A pointer to an object indicating the success/failure of the code execution
- */
-PyObject* PythonScript::executeScript(PyObject* return_tuple)
-{
-//  // Before requested code is executed we want to "uninstall" the modules
-//  // containing Python algorithms so that a fresh import reloads them
-//  //
-//  pythonEnv()->refreshAlgorithms(true);
-//
-//  PyObject* pyret(NULL);
-//  //If an exception is thrown the thread state needs resetting so we need to save it
-//  PyThreadState *saved_tstate = PyThreadState_GET();
-//  try
-//  {
-//    if( return_tuple )
-//    {
-//      pyret = PyObject_Call(PyCode, return_tuple,localDict);
-//    }
-//    else
-//    {
-//      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
-//    }
-//  }
-//  // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
-//  // be repeated here
-//  catch(const std::bad_alloc&)
-//  {
-//    PyThreadState_Swap(saved_tstate);// VERY VERY important. Bad things happen if this state is not reset after a throw
-//    pyret = NULL;
-//    PyErr_NoMemory();
-//  }
-//  catch(const std::out_of_range& x)
-//  {
-//    PyThreadState_Swap(saved_tstate);
-//    pyret = NULL;
-//    PyErr_SetString(PyExc_IndexError, x.what());
-//  }
-//  catch(const std::invalid_argument& x)
-//  {
-//    PyThreadState_Swap(saved_tstate);
-//    pyret = NULL;
-//    PyErr_SetString(PyExc_ValueError, x.what());
-//  }
-//  catch(const std::exception& x)
-//  {
-//    PyThreadState_Swap(saved_tstate);
-//    pyret = NULL;
-//    PyErr_SetString(PyExc_RuntimeError, x.what());
-//  }
-//  catch(...)
-//  {
-//    PyThreadState_Swap(saved_tstate);
-//    pyret = NULL;
-//    PyErr_SetString(PyExc_RuntimeError, "unidentifiable C++ exception");
-//  }
-//
-//  // If we stole a reference, return it
-//  if( return_tuple )
-//  {
-//    Py_DECREF(return_tuple);
-//  }
-//  if( m_interactive && pyret )
-//  {
-//    emit keywordsChanged(createAutoCompleteList());
-//  }
-//  return pyret;
 }
 
 QString PythonScript::constructErrorMsg()

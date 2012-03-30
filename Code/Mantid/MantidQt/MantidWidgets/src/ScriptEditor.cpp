@@ -299,12 +299,7 @@ bool ScriptEditor::saveScript(const QString & filename)
     return false;
   }
 
-  QTextStream writer(&file);
-  writer.setEncoding(QTextStream::UnicodeUTF8);
-  QApplication::setOverrideCursor(Qt::WaitCursor);
-  writer << text();
-  QApplication::restoreOverrideCursor();
-  file.close();
+  writeToDevice(file);
 
   setModified(false);
 
@@ -488,6 +483,14 @@ void ScriptEditor::zoomOut(int level)
   QsciScintilla::zoomOut(level);
 }
 
+/**
+ * Write to the given device
+ */
+void ScriptEditor::writeToDevice(QIODevice & device) const
+{
+  this->write(&device);
+}
+
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
@@ -497,39 +500,43 @@ void ScriptEditor::zoomOut(int level)
 void ScriptEditor::initActions()
 {
   m_save = new QAction(tr("&Save"), this);
-  m_save->setShortcut(tr("Ctrl+S"));
+  m_save->setShortcut(QKeySequence::Save);
   connect(m_save, SIGNAL(activated()), this , SLOT(saveToCurrentFile()));
   //Save a script under a new file name
   m_saveAs = new QAction(tr("&Save As"), this);
   connect(m_saveAs, SIGNAL(activated()), this , SLOT(saveAs()));
   m_saveAs->setShortcut(tr("Ctrl+Shift+S"));
+  m_saveAs->setShortcutContext(Qt::WidgetShortcut);
 
   m_undo = new QAction(tr("&Undo"), this);
-  m_undo->setShortcut(tr("Ctrl+Z"));
+  //m_undo->setShortcut(QKeySequence::Undo);
   connect(m_undo, SIGNAL(activated()), this, SLOT(undo()));
   connect(this, SIGNAL(undoAvailable(bool)), m_undo, SLOT(setEnabled(bool)));
 
   m_redo = new QAction(tr("&Redo"), this);
-  m_redo->setShortcut(tr("Ctrl+Y"));
+  //m_redo->setShortcut(QKeySequence::Redo);
   connect(m_redo, SIGNAL(activated()), this, SLOT(redo()));
   connect(this, SIGNAL(redoAvailable(bool)), m_redo, SLOT(setEnabled(bool)));
 
   m_cut = new QAction(tr("C&ut"), this);
-  m_cut->setShortcut(tr("Ctrl+X"));
+  //m_cut->setShortcut(QKeySequence::Cut);
   connect(m_cut, SIGNAL(activated()), this, SLOT(cut()));
   connect(this, SIGNAL(copyAvailable(bool)), m_cut, SLOT(setEnabled(bool)));
 
   m_copy = new QAction(tr("&Copy"), this);
-  m_copy->setShortcut(tr("Ctrl+C"));
+  //m_copy->setShortcut(QKeySequence::Copy);
+  //m_copy->setShortcutContext(Qt::WidgetShortcut);
   connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
   connect(this, SIGNAL(copyAvailable(bool)), m_copy, SLOT(setEnabled(bool)));
 
   m_paste = new QAction(tr("&Paste"), this);
-  m_paste->setShortcut(tr("Ctrl+V"));
+  //m_paste->setShortcut(QKeySequence::Paste);
+  //m_paste->setShortcutContext(Qt::WidgetShortcut);
   connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
 
   m_print = new QAction(tr("&Print script"), this);
-  m_print->setShortcut(tr("Ctrl+P"));
+  m_print->setShortcut(QKeySequence::Print);
+  m_print->setShortcutContext(Qt::WidgetShortcut);
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
 
   m_zoomIn = new QAction(("Increase font size"), this);
