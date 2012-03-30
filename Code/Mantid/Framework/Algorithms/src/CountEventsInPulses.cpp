@@ -324,7 +324,7 @@ namespace Algorithms
 
     // #pragma omp parallel for firstprivate(currindex, dobinsearch)
 
-    PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(currindex, dobinsearch)
+    //PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(currindex, dobinsearch)
     for (int ie = 0; ie < static_cast<int>(numevents); ie ++)
     {
       PARALLEL_START_INTERUPT_REGION
@@ -477,7 +477,7 @@ namespace Algorithms
     double tofminall = 1.0E20;
     double tofmaxall = -1;
 
-    PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(tofmin, tofmax)
+    //PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(tofmin, tofmax)
     for (int iws = 0; iws < static_cast<int>(inpWS->getNumberHistograms()); iws++)
     {
       DataObjects::EventList realevents = inpWS->getEventList(iws);
