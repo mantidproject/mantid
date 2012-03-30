@@ -116,7 +116,8 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         data_stitching.RangeSelector.connect(ws_list, callback,
                                              range_min=range_min,
                                              range_max=range_max,
-                                             x_title=x_title)
+                                             x_title=x_title,
+                                             log_scale=True)
 
     # Estimate peak limits
     ws_output = ws_base+'_all'

@@ -25,7 +25,8 @@ class RangeSelector(object):
                                 self._call_back)
             
         def connect(self, ws, call_back, xmin=None, xmax=None, 
-                    range_min=None, range_max=None, x_title=None):
+                    range_min=None, range_max=None, x_title=None,
+                    log_scale=False):
             self._call_back = call_back
             _qti.app.connect(_qti.app.mantidUI,
                              QtCore.SIGNAL("x_range_update(double,double)"),
@@ -43,6 +44,8 @@ class RangeSelector(object):
                 title = " "
             l.setTitle(" ")
             l.setCurveTitle(0, title)
+            if log_scale:
+                l.logYlinX()
             if x_title is not None:
                 l.setXTitle(x_title)
             if xmin is not None and xmax is not None:
@@ -55,14 +58,15 @@ class RangeSelector(object):
     
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,
-                range_min=None, range_max=None, x_title=None):
+                range_min=None, range_max=None, x_title=None,
+                log_scale=False):
         if RangeSelector.__instance is not None:
             RangeSelector.__instance.disconnect()
         else:
             RangeSelector.__instance = RangeSelector._Selector()
         RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax,
                                          range_min=range_min, range_max=range_max,
-                                         x_title=x_title)            
+                                         x_title=x_title, log_scale=log_scale)            
     
 class DataSet(object):
     """
