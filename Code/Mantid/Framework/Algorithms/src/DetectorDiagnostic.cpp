@@ -385,6 +385,86 @@ namespace Mantid
       return outputWS;
     }
 
+
+    std::vector<std::vector<size_t> > DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS)
+    {
+      std::vector<std::vector<size_t> > mymap;
+      std::vector<size_t> single;
+
+      for(size_t i=0;i < countsWS->getNumberHistograms();i++)
+      {
+        single.push_back(i);
+      }
+      mymap.push_back(single);
+      return mymap;
+    }
+    /** This function will check how to group spectra when calculating median
+      *
+      *
+      */
+    std::vector<std::vector<size_t> > DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS)
+    {
+      std::multimap<Mantid::Geometry::ComponentID,size_t> mymap;
+
+      Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
+      if (m_parents==0)
+      {
+        return makeInstrumentMap(countsWS);
+      }
+      if (!instrument)
+      {
+        g_log.warning("Workspace has no instrument. LevelsUP is ignored");
+        return makeInstrumentMap(countsWS);
+      }
+
+      //check if not grouped. If grouped, it will throw
+      try
+      {
+        detid2index_map *d2i=countsWS->getDetectorIDToWorkspaceIndexMap(true);
+        d2i->clear();
+      }
+      catch(...)
+      {
+        throw std::runtime_error("Median detector test: not able to create detector to spectra map. Try with LevelUp=0.");
+      }
+
+
+      for(size_t i=0;i < countsWS->getNumberHistograms();i++)
+      {
+        detid_t d=(*((countsWS->getSpectrum(i))->getDetectorIDs().begin()));
+        std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent> > anc=instrument->getDetector(d)->getAncestors();
+        //std::vector<boost::shared_ptr<const IComponent> > anc=(*(countsWS->getSpectrum(i)->getDetectorIDs().begin()))->getAncestors();
+        if (anc.size()<static_cast<size_t>(m_parents))
+        {
+          g_log.warning("Too many levels up. Will ignore LevelsUp");
+          m_parents=0;
+          return makeInstrumentMap(countsWS);
+        }
+        mymap.insert(std::pair<Mantid::Geometry::ComponentID,size_t>(anc[m_parents-1]->getComponentID(),i));
+      }
+
+      std::vector<std::vector<size_t> > speclist;
+      std::vector<size_t>  speclistsingle;
+
+      std::multimap<Mantid::Geometry::ComponentID,size_t>::iterator m_it, s_it;
+
+      for (m_it = mymap.begin();  m_it != mymap.end();  m_it = s_it)
+      {
+        Mantid::Geometry::ComponentID theKey = (*m_it).first;
+
+        std::pair<std::multimap<Mantid::Geometry::ComponentID,size_t>::iterator,std::multimap<Mantid::Geometry::ComponentID,size_t>::iterator> keyRange = mymap.equal_range(theKey);
+
+        // Iterate over all map elements with key == theKey
+        speclistsingle.clear();
+        for (s_it = keyRange.first;  s_it != keyRange.second;  ++s_it)
+        {
+          speclistsingle.push_back( (*s_it).second );
+        }
+        speclist.push_back(speclistsingle);
+      }
+
+      return speclist;
+    }
     /** 
      *  Fnds the median of values in single bin histograms rejecting spectra from masked
      *  detectors and the results of divide by zero (infinite and NaN).  
@@ -394,68 +474,76 @@ namespace Mantid
      * @return The median value of the histograms in the workspace that was passed to it
      * @throw out_of_range if a value is negative
      */
-    double DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input, bool excludeZeroes)
+    std::vector<double> DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input, bool excludeZeroes, std::vector<std::vector<size_t> > indexmap)
     {
+      std::vector<double> medianvec;
+      size_t j;
       g_log.debug("Calculating the median count rate of the spectra");
 
-      std::vector<double> medianInput;
-      const int nhists = static_cast<int>(input->getNumberHistograms());
-      // The maximum possible length is that of workspace length
-      medianInput.reserve(nhists);
-
-      bool checkForMask = false;
-      Geometry::Instrument_const_sptr instrument = input->getInstrument();
-      if (instrument != NULL)
+      for (j=0;  j< indexmap.size(); ++j)
       {
-        checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
-      }
+        std::vector<double> medianInput;
+        std::vector<size_t> hists=indexmap.at(j);
 
-      PARALLEL_FOR1(input)
-      for (int i = 0; i < nhists; ++i)
-      {
-        PARALLEL_START_INTERUPT_REGION
+        const int nhists = static_cast<int>(hists.size());
+        // The maximum possible length is that of workspace length
+        medianInput.reserve(nhists);
 
-        if (checkForMask) {
-          const std::set<detid_t>& detids = input->getSpectrum(i)->getDetectorIDs();
-          if (instrument->isDetectorMasked(detids))
+        bool checkForMask = false;
+        Geometry::Instrument_const_sptr instrument = input->getInstrument();
+        if (instrument != NULL)
+        {
+          checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+        }
+
+        PARALLEL_FOR1(input)
+        for (size_t i = 0; i<hists.size(); ++i)
+        {
+          PARALLEL_START_INTERUPT_REGION
+
+          if (checkForMask) {
+            const std::set<detid_t>& detids = input->getSpectrum(hists[i])->getDetectorIDs();
+            if (instrument->isDetectorMasked(detids))
+              continue;
+            if (instrument->isMonitor(detids))
+              continue;
+          }
+
+          const double yValue = input->readY(hists[i])[0];
+          if ( yValue  < 0.0 )
+          {
+            throw std::out_of_range("Negative number of counts found, could be corrupted raw counts or solid angle data");
+          }
+          if( boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
+              (excludeZeroes && yValue < DBL_EPSILON)) // NaNs/Infs
+          {
             continue;
-          if (instrument->isMonitor(detids))
-            continue;
+          }
+          // Now we have a good value
+          PARALLEL_CRITICAL(DetectorDiagnostic_median_d)
+          {
+            medianInput.push_back(yValue);
+          }
+
+          PARALLEL_END_INTERUPT_REGION
+        }
+        PARALLEL_CHECK_INTERUPT_REGION
+
+        if(medianInput.empty()){
+            throw std::out_of_range(" no single valid histohrams identified in the workspace");
         }
 
-        const double yValue = input->readY(i)[0];
-        if ( yValue  < 0.0 )
+        // We need a sorted array to calculate the median
+        std::sort(medianInput.begin(), medianInput.end());
+        double median = gsl_stats_median_from_sorted_data( &medianInput[0], 1, medianInput.size() );
+
+        if ( median < 0 || median > DBL_MAX/10.0 )
         {
-          throw std::out_of_range("Negative number of counts found, could be corrupted raw counts or solid angle data");
+          throw std::out_of_range("The calculated value for the median was either negative or unreliably large");
         }
-        if( boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            (excludeZeroes && yValue < DBL_EPSILON)) // NaNs/Infs
-        {
-          continue;
-        }
-        // Now we have a good value
-        PARALLEL_CRITICAL(DetectorDiagnostic_median_d)
-        {
-          medianInput.push_back(yValue);
-        }
-
-        PARALLEL_END_INTERUPT_REGION
+        medianvec.push_back(median);
       }
-      PARALLEL_CHECK_INTERUPT_REGION
-
-      if(medianInput.empty()){
-          throw std::out_of_range(" no single valid histohrams identified in the workspace");
-      }
-
-      // We need a sorted array to calculate the median
-      std::sort(medianInput.begin(), medianInput.end());
-      double median = gsl_stats_median_from_sorted_data( &medianInput[0], 1, medianInput.size() );
-
-      if ( median < 0 || median > DBL_MAX/10.0 )
-      {
-        throw std::out_of_range("The calculated value for the median was either negative or unreliably large");
-      }
-      return median;
+      return medianvec;
     }
 
     /** 
