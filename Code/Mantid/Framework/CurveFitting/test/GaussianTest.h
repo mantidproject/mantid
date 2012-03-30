@@ -264,8 +264,8 @@ public:
 	  bc->setPenaltyFactor(1000.001);
 	  fn->addConstraint(bc);
 
-    fnWithBk.addFunction(bk);
-    fnWithBk.addFunction(fn);
+    fnWithBk->addFunction(bk);
+    fnWithBk->addFunction(fn);
 
     alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
     // Set which spectrum to fit against and initial starting values
@@ -398,7 +398,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus->asString());
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D) );
@@ -423,7 +423,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
     TS_ASSERT_DELTA( pk->height(), 97.9728 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2194 ,0.0001);
-    TS_ASSERT_DELTA( pk->width(), 2.6181 ,0.0001);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.6181 ,0.0001);
   }
 
 
@@ -454,7 +454,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus->asString());
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);

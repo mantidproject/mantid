@@ -31,7 +31,7 @@ public:
     FlatBackground *bkgd = new FlatBackground();
     bkgd->initialize();
     bkgd->setParameter("A0", expValue);
-    bkgd->functionMW(yValues.data(), NULL, numPoints); // don't need x-values
+    bkgd->function1D(yValues.data(), NULL, numPoints); // don't need x-values
     delete bkgd;
 
     for (std::size_t i = 0; i < numPoints; i++)

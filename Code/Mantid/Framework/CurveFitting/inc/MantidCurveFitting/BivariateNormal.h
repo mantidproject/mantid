@@ -5,7 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
@@ -74,7 +76,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-   class  DLLExport  BivariateNormal: public UserFunction
+   class  DLLExport  BivariateNormal: public API::ParamFunction, public virtual API::IFunction1D, public virtual API::IFunctionMW
    {
    public:
       BivariateNormal();

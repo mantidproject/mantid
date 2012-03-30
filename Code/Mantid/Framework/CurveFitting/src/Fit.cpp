@@ -33,11 +33,14 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_errno.h>
@@ -226,7 +229,7 @@ namespace CurveFitting
 
     declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Kernel::Direction::Input), "Name of the input Workspace");
 
-    auto mustBePositive = new Kernel::BoundedValidator<int>();
+    auto mustBePositive = boost::shared_ptr< Kernel::BoundedValidator<int> >( new Kernel::BoundedValidator<int>() );
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
@@ -238,7 +241,8 @@ namespace CurveFitting
 
     std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
 
-    declareProperty("Minimizer","Levenberg-Marquardt",new Kernel::ListValidator(minimizerOptions),
+    declareProperty("Minimizer","Levenberg-Marquardt",
+      Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Kernel::Direction::InOut);
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
@@ -254,7 +258,8 @@ namespace CurveFitting
       }
     }
     std::remove_if(costFuncOptions.begin(),costFuncOptions.end(),[](std::string& str)->bool{return str.empty();});
-    declareProperty("CostFunction","Least squares",new Kernel::ListValidator(costFuncOptions),
+    declareProperty("CostFunction","Least squares",
+      Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(costFuncOptions)),
       "The cost function to be used for the fit, default is Least squares", Kernel::Direction::InOut);
     declareProperty("CreateOutput", false,
       "Set to true to create output workspaces with the results of the fit"

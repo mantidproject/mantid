@@ -38,7 +38,7 @@ m_upperBound(upperBound)
   reset(fun,fun->parameterIndex(paramName));
 }
 
-BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound) :
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound) :
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true),

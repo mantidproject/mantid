@@ -206,8 +206,8 @@ namespace Mantid
         g_log.error("Can't locate Fit algorithm");
         throw ;
       }
-      std::string fun_str = createFunctionString(peakHeight, peakLoc);
-      fit_alg->setPropertyValue("Function",fun_str);
+      auto fun = createFunction(peakHeight, peakLoc);
+      fit_alg->setProperty("Function",fun);
 
       fit_alg->setProperty("InputWorkspace",inputW);
       fit_alg->setProperty<int>("WorkspaceIndex",static_cast<int>(s)); // TODO what is the right thing to do here?
@@ -215,7 +215,7 @@ namespace Mantid
       fit_alg->setProperty("EndX",Xmax);
       fit_alg->setProperty("MaxIterations",100);
 
-      IFitFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
+      IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
       
       fit_alg->setProperty("Function",fun_ptr);
       fit_alg->executeAsSubAlg();
@@ -236,7 +236,7 @@ namespace Mantid
      * @param peakHeight :: The height of the peak
      * @param peakLoc :: The location of the peak
      */
-    IFitFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc)
+    IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc)
     {
       FunctionFactoryImpl & creator = FunctionFactory::Instance();
       auto background = creator.createFunction("LinearBackground");
@@ -247,11 +247,11 @@ namespace Mantid
       const double sigma(10.0);
       peak->setFwhm(2.0*std::sqrt(2.0*std::log(2.0))*sigma);
 
-      CompositeFunctionMW* fitFunc = new CompositeFunctionMW(); //Takes ownership of the functions
+      CompositeFunction* fitFunc = new CompositeFunction(); //Takes ownership of the functions
       fitFunc->addFunction(background);
       fitFunc->addFunction(peak);
 
-      return boost::shared_ptr<IFitFunction>(fitFunc);
+      return boost::shared_ptr<IFunction>(fitFunc);
     }
 
 

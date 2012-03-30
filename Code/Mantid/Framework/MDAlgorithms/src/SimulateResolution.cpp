@@ -60,7 +60,7 @@ namespace Mantid
       m_mdWorkspaces = wsGroup;
     }
 
-    double SimulateResolution::functionMD(Mantid::API::IMDIterator& it) const
+    double SimulateResolution::functionMD(const Mantid::API::IMDIterator& it) const
     {
       getParams();
 

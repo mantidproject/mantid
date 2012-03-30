@@ -9,6 +9,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <sstream>
 
@@ -44,6 +45,7 @@ public:
   virtual coord_t getInnerPosition(size_t index, size_t dimension) const {return 0;}
   virtual signal_t getInnerSignal(size_t index) const {return 0;}
   virtual signal_t getInnerError(size_t index) const {return 0;}
+  virtual bool getIsMasked() const {return false;}
 };
 
 class IMDWorkspaceTester: public WorkspaceTester

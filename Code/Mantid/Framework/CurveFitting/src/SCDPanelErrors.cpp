@@ -6,6 +6,7 @@
  */
 #include "MantidCurveFitting/SCDPanelErrors.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -36,7 +37,7 @@ namespace Mantid
 
 
     SCDPanelErrors::SCDPanelErrors() :
-      API::ParamFunction(), IFunctionMW()
+      API::ParamFunction(), IFunction1D()
     {
       NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
@@ -74,7 +75,7 @@ namespace Mantid
 
     SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::string& Component_name,
         double ax, double bx, double cx, double alphax, double betax, double gammax, double tolerance1) :
-      API::ParamFunction(), IFunctionMW()
+      API::ParamFunction(), IFunction1D()
     {
 
       peaks = pwk;
@@ -497,7 +498,7 @@ namespace Mantid
 
 
 
-    void SCDPanelErrors::functionMW(double *out, const double *xValues, const size_t nData) const
+    void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const
     {
 
       int StartX = startX;
@@ -668,7 +669,7 @@ namespace Mantid
 
 
 
-    void SCDPanelErrors::functionDerivMW(Jacobian *out, const double *xValues, const size_t nData)
+    void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
 
       if (nData <= 0)

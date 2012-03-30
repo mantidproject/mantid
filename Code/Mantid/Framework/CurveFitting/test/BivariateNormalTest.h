@@ -135,7 +135,7 @@ public:
       ws->setData(2,yvals);
 
 
-      NormalFit.setWorkspace(ws, std::string("StartX=0,EndX=30,WorkspaceIndex=0"), true );
+      //NormalFit.setWorkspace(ws, std::string("StartX=0,EndX=30,WorkspaceIndex=0"), true );
 
 
       NormalFit.setParameter("Background", 0.05, true);
@@ -147,10 +147,10 @@ public:
       NormalFit.setParameter("SSrc", 2.243584414, true);
 
 
-      NormalFit.setAttribute("CalcVariances", IFitFunction::Attribute(1));
+      NormalFit.setAttributeValue("CalcVariances", 1);
 
       double out[nCells];
-      NormalFit.functionMW(out, xx, nCells);
+      NormalFit.function1D(out, xx, nCells);
 
 
       for( int i=0; i< nCells; i++)
@@ -172,7 +172,7 @@ public:
 
       Jacob Jac(7, nCells);
 
-      NormalFit.functionDerivMW(&Jac, xx, nCells);
+      NormalFit.functionDeriv1D(&Jac, xx, nCells);
 
     /*  for( int i=0; i< nCells; i+=6)//points
       {

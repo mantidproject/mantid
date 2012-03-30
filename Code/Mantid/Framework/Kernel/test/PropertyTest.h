@@ -15,6 +15,7 @@ public:
   Property* clone() { return new PropertyHelper(*this); }
   std::string value() const { return "Nothing"; }
   std::string setValue( const std::string&) { return ""; }
+  std::string setValue( const Property& right ) { return ""; }
   std::string setDataItem( const boost::shared_ptr<DataItem> ) { return ""; }
   bool isDefault() const { return true; }
   std::string getDefault() const { return "Is not implemented in this class, should be overriden"; }

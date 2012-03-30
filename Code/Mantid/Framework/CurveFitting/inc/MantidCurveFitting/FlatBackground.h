@@ -41,8 +41,8 @@ namespace CurveFitting
     virtual ~FlatBackground();
 
     std::string name() const;
-    virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
-    virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+    virtual void function1D(double* out, const double* xValues, const size_t nData)const;
+    virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
   private:
     void init();

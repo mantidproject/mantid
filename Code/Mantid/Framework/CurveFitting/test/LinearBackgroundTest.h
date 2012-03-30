@@ -55,7 +55,7 @@ public:
     IFunction_sptr linB( new LinearBackground() );
     linB->initialize();
 
-    linB.setParameter("A0",1.0);
+    linB->setParameter("A0",1.0);
 
     //alg2.setFunction(linB);
     alg2.setProperty("Function",linB);

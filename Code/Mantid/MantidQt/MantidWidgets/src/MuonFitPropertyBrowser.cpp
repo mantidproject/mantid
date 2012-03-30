@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
+#include "MantidAPI/FunctionFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -24,7 +25,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -209,7 +210,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
+    auto f = Mantid::API::FunctionFactory::Instance().createFitFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
     for (size_t j=0; j<categories.size(); ++j)
@@ -263,32 +264,32 @@ void MuonFitPropertyBrowser::fit()
     std::string funStr;
     if (m_compositeFunction->name() == "MultiBG")
     {
-      std::string ties;
-      Mantid::API::Expression funExpr;
-      funExpr.parse(m_compositeFunction->asString());
-      funExpr.toList(";");
-      for(size_t i = 0; i < funExpr.size(); ++i)
-      {
-        const Mantid::API::Expression& e = funExpr[i];
-        if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
-        {
-          ties = e[0].name() + "=(" + e[1].str() + ")";
-        }
-      }
-      funStr = "composite=MultiBG;";
-      for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
-      {
-        Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(m_compositeFunction->getFunction(i));
-        if (!f) continue;
-        funStr += f->asString();
-        if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
-        {
-          funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
-            boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
-        }
-        funStr += ";";
-      }
-      funStr += ties;
+      //std::string ties;
+      //Mantid::API::Expression funExpr;
+      //funExpr.parse(m_compositeFunction->asString());
+      //funExpr.toList(";");
+      //for(size_t i = 0; i < funExpr.size(); ++i)
+      //{
+      //  const Mantid::API::Expression& e = funExpr[i];
+      //  if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
+      //  {
+      //    ties = e[0].name() + "=(" + e[1].str() + ")";
+      //  }
+      //}
+      //funStr = "composite=MultiBG;";
+      //for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
+      //{
+      //  auto f = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(m_compositeFunction->getFunction(i));
+      //  if (!f) continue;
+      //  funStr += f->asString();
+      //  if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
+      //  {
+      //    funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
+      //      boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
+      //  }
+      //  funStr += ";";
+      //}
+      //funStr += ties;
     }
     else if (m_compositeFunction->nFunctions() > 1)
     {

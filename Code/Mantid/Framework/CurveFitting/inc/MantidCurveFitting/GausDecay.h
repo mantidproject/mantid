@@ -54,7 +54,7 @@ namespace Mantid
     protected:
       virtual void setActiveParameter(size_t i,double value);
       virtual void function1D(double* out, const double* xValues, const size_t nData)const;
-      virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
+      virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// overwrite IFunction base class method that declares function parameters 
       virtual void init(); 

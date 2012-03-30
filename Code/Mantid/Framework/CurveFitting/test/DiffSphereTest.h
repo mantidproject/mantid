@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/Convolution.h"
 #include <boost/math/special_functions/bessel.hpp>
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -141,7 +142,7 @@ public:
     //set the resolution function
     double h = 3.0;  // height
     double a = 1.3;  // 1/(2*sigma^2)
-    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
+    auto res = IFunction_sptr( new DiffSphereTest_Gauss() );
     res->setParameter("c",0);
     res->setParameter("h",h);
     res->setParameter("s",a);
@@ -149,7 +150,7 @@ public:
 
     //set the "structure factor"
     double H=1.5, R=2.6, Q=0.7;
-    ElasticDiffSphere* eds = new ElasticDiffSphere();
+    auto eds = IFunction_sptr( new ElasticDiffSphere() );
     eds->setParameter("Height",H);
     eds->setParameter("Radius",R);
     eds->setParameter("Q",Q);
@@ -162,7 +163,7 @@ public:
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
 
     //convolve. The result must be the resolution multiplied by factor H*hf);
-    conv.functionMW(out,w,N);
+    conv.function1D(out,w,N);
     double hpf = pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2); // height pre-factor
     for(int i=0;i<N;i++){
       TS_ASSERT_DELTA(out[i],H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
@@ -219,7 +220,7 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.001,0.001);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("Radius"), 2.66 ,0.05);
     TS_ASSERT_DELTA( out->getParameter("Diffusion"), 1.45 ,0.05);
     TS_ASSERT_DELTA( out->getParameter("Q"), 0.7 ,0.001);
@@ -237,7 +238,7 @@ public:
     ds->setParameter("f1.Radius",R);
     ds->setParameter("f1.Diffusion",D);
 
-    InelasticDiffSphere* ids = dynamic_cast<InelasticDiffSphere*>(ds->getFunction(1));
+    auto ids = boost::dynamic_pointer_cast<InelasticDiffSphere>(ds->getFunction(1));
     TS_ASSERT_EQUALS(ids->getParameter("Intensity"),I);
     TS_ASSERT_EQUALS(ids->getParameter("Q"),Q);
     TS_ASSERT_EQUALS(ids->getParameter("Radius"),R);
@@ -245,7 +246,7 @@ public:
 
     ds->applyTies();
 
-    ElasticDiffSphere* eds = dynamic_cast<ElasticDiffSphere*>(ds->getFunction(0));
+    auto eds = boost::dynamic_pointer_cast<ElasticDiffSphere>(ds->getFunction(0));
     TS_ASSERT_EQUALS(eds->getParameter("Height"),I);
     TS_ASSERT_EQUALS(eds->getParameter("Q"),Q);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"),R);
@@ -260,7 +261,7 @@ public:
     //set the resolution function
     double h = 3.0;  // height
     double a = 1.3;  // 1/(2*sigma^2)
-    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
+    auto res = IFunction_sptr( new DiffSphereTest_Gauss() );
     res->setParameter("c",0);
     res->setParameter("h",h);
     res->setParameter("s",a);
@@ -268,7 +269,7 @@ public:
 
     //set the structure factor
     double I=2.9, Q=0.7, R=2.3, D=0.45;
-    DiffSphere* ds = new DiffSphere();
+    auto ds = IFunction_sptr( new DiffSphere() );
     ds->setParameter("f1.Intensity",I);
     ds->setParameter("f1.Q",Q);
     ds->setParameter("f1.Radius",R);
@@ -284,7 +285,7 @@ public:
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
 
     //obtain the set of values from the convolution and store in array 'in'
-    conv.functionMW(in,w,N);
+    conv.function1D(in,w,N);
 
     //Initialize now the parameters to some other values.
     ds->setParameter("f0.Height",1.0);

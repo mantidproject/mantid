@@ -313,7 +313,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(Mantid::API::IFitFunction* f)const;
+  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f)const;
 
   /// Create a double property and set some settings
   QtProperty* addDoubleProperty(const QString& name)const;
@@ -340,7 +340,7 @@ protected:
   QtProperty *m_rawData;
 
   /// A copy of the edited function
-  Mantid::API::CompositeFunction* m_compositeFunction;
+  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
   QtTreePropertyBrowser* m_browser;
 

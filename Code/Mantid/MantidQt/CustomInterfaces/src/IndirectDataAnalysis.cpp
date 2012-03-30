@@ -2178,7 +2178,7 @@ void IndirectDataAnalysis::confitSequential()
     bg = "FitL";
   }
 
-  Mantid::API::CompositeFunction* func = confitCreateFunction();
+  Mantid::API::CompositeFunction_sptr func = confitCreateFunction();
   std::string function = std::string(func->asString());
   QString stX = m_cfProp["StartX"]->valueText();
   QString enX = m_cfProp["EndX"]->valueText();

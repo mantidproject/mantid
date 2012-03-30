@@ -66,7 +66,7 @@ namespace Mantid
       BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound);
 
       /// Constructor with lower boundary argument
-      BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound);
+      BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound);
 
       /// Destructor
       virtual ~BoundaryConstraint() {}

@@ -109,7 +109,7 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0, 1.0);
 
     // test the output from fit is what you expect
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.9);
     TS_ASSERT_DELTA( out->getParameter("Sigma"), 0.35 ,0.005);
     TS_ASSERT_DELTA( out->getParameter("Frequency"), 1/8.0 ,0.01);  // Period of 8

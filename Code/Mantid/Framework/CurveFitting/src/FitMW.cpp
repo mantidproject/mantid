@@ -32,6 +32,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_errno.h>
@@ -90,7 +91,7 @@ namespace
 
     if (addProp && !m_fit->existsProperty(m_workspaceIndexPropertyName))
     {
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      auto mustBePositive = boost::shared_ptr< BoundedValidator<int> >( new BoundedValidator<int>() );
       mustBePositive->setLower(0);
       declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName,0, mustBePositive),
                       "The Workspace Index to fit in the input workspace");

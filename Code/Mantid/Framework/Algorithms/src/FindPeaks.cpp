@@ -20,7 +20,6 @@ FindPeaks uses the [[SmoothData]] algorithm to, well, smooth the data - a necess
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -250,9 +249,6 @@ void FindPeaks::exec()
   m_peakFuncType = getPropertyValue("PeakFunction");
   m_backgroundType = getPropertyValue("BackgroundType");
 
-  // c.5) Create functions
-  createFunctions(backgroundtype);
-
   // d) Choice of fitting approach
   m_highBackground = getProperty("HighBackground");
 
@@ -262,7 +258,7 @@ void FindPeaks::exec()
   m_peaks->addColumn("int","spectrum");
   if (m_rawPeaksTable)
   {
-    IFitFunction_sptr temp = this->createFunction(0., 0., 0., 0., 0., 0., true);
+    IFunction_sptr temp = this->createFunction(0., 0., 0., 0., 0., 0., true);
 
     m_numTableParams = temp->nParams();
     for (std::size_t i = 0; i < m_numTableParams; i++)
@@ -934,8 +930,8 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
 
     // b) Guess sigma
     const double in_sigma = (i0 + width < X.size()) ? X[i0 + width] - X[i0] : 0.;
-    IFitFunction_sptr fitFunction = this->createFunction(in_height, in_centre, in_sigma, in_bg0, in_bg1, in_bg2, true);
-    g_log.debug() << "  Function: " << *fitFunction << "; Background Type = " << m_backgroundType << std::endl;
+    IFunction_sptr fitFunction = this->createFunction(in_height, in_centre, in_sigma, in_bg0, in_bg1, in_bg2, true);
+    g_log.debug() << "  Function: " << fitFunction->asString() << "; Background Type = " << m_backgroundType << std::endl;
 
     // d) complete fit
     double windowSize = 5. * fabs(X[i0] - X[i2]);
@@ -1025,15 +1021,15 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   }
 
   // c) Set initial fitting parameters
-  IFitFunction_sptr backgroundFunction = this->createFunction(0., 0., 0., in_bg0, in_bg1, in_bg2, false);
-  g_log.debug() << "Background Type = " << m_backgroundType << "  Function: " << *backgroundFunction << std::endl;
+  IFunction_sptr backgroundFunction = this->createFunction(0., 0., 0., in_bg0, in_bg1, in_bg2, false);
+  g_log.debug() << "Background Type = " << m_backgroundType << "  Function: " << backgroundFunction->asString() << std::endl;
 
   // d) complete fit
+  fit->setProperty("Function", backgroundFunction);
   fit->setProperty("StartX", in_centre - windowSize);
   fit->setProperty("EndX", in_centre + windowSize);
   fit->setProperty("Minimizer", "Levenberg-Marquardt");
   fit->setProperty("CostFunction", "Least squares");
-  fit->setProperty("Function", backgroundFunction);
 
   // e) Fit and get result of fitting background
   fit->executeAsSubAlg();
@@ -1047,12 +1043,12 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   double bkgdchi2;
   if (fitStatus.compare("success") == 0){
-    a0 = params[0];
+    a0 = backgroundFunction->getParameter(0);//params[0];
     if (this->backgroundOrder() > 0)
     {
-      a1 = params[1];
+      a1 = backgroundFunction->getParameter(1);//params[1];
       if (this->backgroundOrder() > 1){
-        a2 = params[2];
+        a2 = backgroundFunction->getParameter(2);//params[2];
       }
     }
     bkgdchi2 = fit->getProperty("OutputChi2overDoF");
@@ -1094,17 +1090,17 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     gfit->setProperty("MaxIterations", 50);
 
     // c) Set initial fitting parameters
-    IFitFunction_sptr peakAndBackgroundFunction = this->createFunction(in_height, in_centre, in_sigma, a0, a1, a2, true);
+    IFunction_sptr peakAndBackgroundFunction = this->createFunction(in_height, in_centre, in_sigma, a0, a1, a2, true);
 
     // d) Complete fit
+    gfit->setProperty("Function", peakAndBackgroundFunction);
     gfit->setProperty("StartX", in_centre - windowSize);
     gfit->setProperty("EndX",   in_centre + windowSize);
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
-    gfit->setProperty("Function", peakAndBackgroundFunction);
     gfit->setProperty("Ties", bkgdTies);
 
-    g_log.debug() << "Function: " << *peakAndBackgroundFunction<< "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
+    g_log.debug() << "Function: " << peakAndBackgroundFunction->asString() << "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
@@ -1138,16 +1134,16 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   }
 
   // c) Set initial fitting parameters
-  IFitFunction_sptr peakAndBackgroundFunction = this->createFunction(bestparams[2], bestparams[0], bestparams[1],
+  IFunction_sptr peakAndBackgroundFunction = this->createFunction(bestparams[2], bestparams[0], bestparams[1],
                                                                      bestparams[3], bestparams[4], bestparams[5], true);
-  g_log.debug() << "(High Background) Final Fit Function: " << *peakAndBackgroundFunction << std::endl;
+  g_log.debug() << "(High Background) Final Fit Function: " << peakAndBackgroundFunction->asString() << std::endl;
 
   // d) complete fit
+  lastfit->setProperty("Function", peakAndBackgroundFunction);
   lastfit->setProperty("StartX", in_centre - windowSize);
   lastfit->setProperty("EndX", in_centre + windowSize);
   lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
   lastfit->setProperty("CostFunction", "Least squares");
-  lastfit->setProperty("Function", peakAndBackgroundFunction);
 
   // e) Fit and get result
   lastfit->executeAsSubAlg();
@@ -1211,7 +1207,7 @@ void FindPeaks::addRow(const int spectrum, const std::vector<double> &params, co
  * parameters the function actually has.
  * @param rawParams The actual parameters of the fit function.
  */
-void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> &effParams, std::vector<double> &rawParams)
+void getComponentFunctions(IFunction_sptr compositeFunc, std::vector<double> &effParams, std::vector<double> &rawParams)
 {
   // clear out old parameters
   effParams.clear();
@@ -1231,18 +1227,18 @@ void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> 
 
   // get the effective peak parameters
   effParams.resize(6);
-  IPeakFunction * peakFunc = NULL;
-  IFitFunction * backFunc = NULL;
+  boost::shared_ptr<IPeakFunction> peakFunc;
+  IFunction_sptr backFunc;
   for (std::size_t i = 0; i < composite->nFunctions(); i++)
   {
-    IFunction * func = composite->getFunction(i);
-    if (dynamic_cast<IPeakFunction *>(func))
+    auto func = composite->getFunction(i);
+    if (dynamic_cast<IPeakFunction *>(func.get()))
     {
-      peakFunc = dynamic_cast<IPeakFunction *>(func);
+      peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(func);
     }
-    else if (dynamic_cast<IFitFunction *>(func))
+    else if (dynamic_cast<IFunction *>(func.get()))
     {
-      backFunc = dynamic_cast<IFitFunction *>(func);
+      backFunc = boost::dynamic_pointer_cast<IFunction>(func);
     }
     // else fall through
   }
@@ -1336,10 +1332,10 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
  * @param withPeak If this is set to false then return only a background function.
  * @return The requested function to fit.
  */
-IFitFunction_sptr FindPeaks::createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak)
+IFunction_sptr FindPeaks::createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak)
 {
     // setup the background
-    IFitFunction *background =
+    auto background =
         API::FunctionFactory::Instance().createFunction(m_backgroundType + "Background");
     int order = this->backgroundOrder();
     background->setParameter("A0", a0);
@@ -1353,21 +1349,21 @@ IFitFunction_sptr FindPeaks::createFunction(const double height, const double ce
     // just return the background if there is no need for a peak
     if (!withPeak)
     {
-      return boost::shared_ptr<IFitFunction>(background);
+      return background;
     }
 
     // setup the peak
-    IFitFunction *tempPeakFunc = API::FunctionFactory::Instance().createFunction(m_peakFuncType);
-    IPeakFunction *peakFunc = dynamic_cast<IPeakFunction *>(tempPeakFunc);
+    auto tempPeakFunc = API::FunctionFactory::Instance().createFunction(m_peakFuncType);
+    auto peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(tempPeakFunc);
     peakFunc->setHeight(height);
     peakFunc->setCentre(centre);
     peakFunc->setFwhm(sigma);
 
     // put the two together and return
-    CompositeFunctionMW* fitFunc = new  CompositeFunctionMW();
+    CompositeFunction* fitFunc = new  CompositeFunction();
     fitFunc->addFunction(peakFunc);
     fitFunc->addFunction(background);
-    return boost::shared_ptr<IFitFunction>(fitFunc);
+    return boost::shared_ptr<IFunction>(fitFunc);
 }
 
 /**
@@ -1415,36 +1411,6 @@ int FindPeaks::backgroundOrder()
   else
     return 0;
 }
-
-/**
- * Create the functions for fitting.
- * @param backgroundtype :: Type of the function to fit the background.
- */
-void FindPeaks::createFunctions(const std::string& backgroundtype)
-{
-  m_peakFunction = API::FunctionFactory::Instance().createFunction("Gaussian");
-  if (backgroundtype.compare("Linear") == 0)
-  {
-    m_backgroundFunction = API::FunctionFactory::Instance().createFunction("LinearBackground");
-    m_peakAndBackgroundFunction = API::FunctionFactory::Instance().createInitialized("name=Gaussian;name=LinearBackground");
-    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
-    //    << bestsigma << ";name=LinearBackground,A0=" << a0 << ",A1=" << a1;
-  }
-  else if (backgroundtype.compare("Quadratic") == 0)
-  {
-    m_backgroundFunction = API::FunctionFactory::Instance().createFunction("QuadraticBackground");
-    m_peakAndBackgroundFunction = API::FunctionFactory::Instance().createInitialized("name=Gaussian;name=QuadraticBackground");
-    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
-    //    << bestsigma << ";name=QuadraticBackground,A0=" << a0 << ",A1=" << a1 << ",A2=" << a2;
-  }
-  else
-  {
-    g_log.error() << "Background type " << backgroundtype << " is not supported in FindPeak.cpp!"
-        << std::endl;
-    throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
-  }
-}
-
 
 } // namespace Algorithms
 } // namespace Mantid

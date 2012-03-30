@@ -48,7 +48,7 @@ DECLARE_FUNCTION(BivariateNormal)
 
 Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
-BivariateNormal::BivariateNormal() : UserFunction(), expVals(NULL),
+BivariateNormal::BivariateNormal() : API::IFunction1D(), expVals(NULL),
         BackConstraint(NULL), MeanxConstraint(NULL), MeanyConstraint(NULL), IntensityConstraint(NULL)
 {
   LastParams[IVXX] = -1;

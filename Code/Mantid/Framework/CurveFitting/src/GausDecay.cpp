@@ -49,7 +49,7 @@ void GausDecay::functionDeriv1D(Jacobian* out, const double* xValues, const size
 
 void GausDecay::setActiveParameter(size_t i,double value)
 {
-  size_t j = indexOfActive(i);
+  size_t j = i;
 
   if (parameterName(j) == "Sigma") 
     setParameter(j,fabs(value),false);  // Make sigma positive

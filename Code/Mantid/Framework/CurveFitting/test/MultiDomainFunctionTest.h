@@ -8,6 +8,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/Fit.h"

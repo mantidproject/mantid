@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 //
 #include "MantidMDAlgorithms/SimulateResolution.h"
-#include "MantidAPI/CompositeFunctionMD.h"
-#include "MantidCurveFitting/GenericFit.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -385,7 +385,7 @@ public:
     // returns the sum of point contributions, not average.
     // As the number of points in a cell varies 1 to 4 this must be taken into
     // account if comparing the fit to the cell data.
-    GenericFit alg1;
+    Fit alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     TS_ASSERT( alg1.isInitialized() );
 
@@ -396,10 +396,10 @@ public:
     TestSimulateResolution* fn = new TestSimulateResolution();
     fn->initialize();
 
+    alg1.setPropertyValue("Function",fn->asString());
+
     // Set which spectrum to fit against and initial starting values
     alg1.setPropertyValue("InputWorkspace", wsName);
-
-    alg1.setPropertyValue("Function",fn->asString());
 
     // execute fit NOT YET WORKING
 

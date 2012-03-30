@@ -111,7 +111,7 @@ protected:
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui)
 :QDockWidget("Fit Function",parent),
 m_logValue(NULL),
-m_compositeFunction(0),
+m_compositeFunction(),
 m_changeSlotsEnabled(false),
 m_guessOutputName(true),
 m_currentHandler(0),
@@ -497,7 +497,6 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString& item)
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
-  if (m_compositeFunction) delete m_compositeFunction;
 }
 
 /// Get handler to the root composite function
@@ -1319,8 +1318,7 @@ void FitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
-      Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
+    auto f = Mantid::API::FunctionFactory::Instance().createFitFunction(fnName);
     m_registeredFunctions << qfnName;
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
@@ -2514,7 +2512,6 @@ void FitPropertyBrowser::findPeaks()
       f->setFwhm(width[i]);
       f->setHeight(height[i]);
       addFunction(f->asString());
-      delete f;
     }
   }
   catch(...)

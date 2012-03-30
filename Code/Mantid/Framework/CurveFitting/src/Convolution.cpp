@@ -104,7 +104,7 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
     if (!fun)
     {
       delete [] xr;
-      throw std::runtime_error("Convolution can work only with IFunctionMW");
+      throw std::runtime_error("Convolution can work only with IFunction1D");
     }
     fun->function1D(m_resolution,xr,nData);
 
@@ -171,7 +171,7 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
   }
   else if (dynamic_cast<DeltaFunction*>(getFunction(1).get()))
   {// single delta function - return scaled reslution
-    DeltaFunction* df = dynamic_cast<DeltaFunction*>(getFunction(1));
+    auto df = boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1));
     resolution->function1D(out,xValues,nData);
     std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),df->getParameter("Height")*df->HeightPrefactor()));
     //TODO: shouldn't we free wavetable and workspace here?

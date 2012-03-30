@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
@@ -85,7 +85,7 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
 
-  class DLLExport SCDPanelErrors :  public API::ParamFunction, public API::IFunctionMW
+  class DLLExport SCDPanelErrors :  public API::ParamFunction, public API::IFunction1D
   {
   public:
 
@@ -118,9 +118,9 @@ namespace CurveFitting
 
     virtual const std::string category() const { return "Calibrate";}
 
-    void functionMW  (double *out, const double *xValues, const size_t nData)const ;
+    void function1D  (double *out, const double *xValues, const size_t nData)const ;
 
-   void functionDerivMW (API::Jacobian *out, const double *xValues, const size_t nData);
+   void functionDeriv1D (API::Jacobian *out, const double *xValues, const size_t nData);
 
    /**
     * Copies some of the information from pmapSv to pmap

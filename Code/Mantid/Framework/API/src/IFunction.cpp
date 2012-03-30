@@ -57,9 +57,7 @@ namespace API
  */
 void IFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
-  UNUSED_ARG(domain);
-  UNUSED_ARG(jacobian);
-  throw ("No derivative IFunction provided");
+  calNumericalDeriv(domain, jacobian);
 }
 
 /**

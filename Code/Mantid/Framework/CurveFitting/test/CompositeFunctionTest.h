@@ -158,9 +158,9 @@ public:
     boost::shared_ptr<CurveFittingGauss> g2( new CurveFittingGauss() );
     boost::shared_ptr<CurveFittingLinear> bk( new CurveFittingLinear() );
 
-    mfun.addFunction(bk);
-    mfun.addFunction(g1);
-    mfun.addFunction(g2);
+    mfun->addFunction(bk);
+    mfun->addFunction(g1);
+    mfun->addFunction(g2);
 
     bk->setParameter("a",0.8);
     //bk->setParameter("b",0.1);
@@ -175,14 +175,14 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(),8);
 
-    TS_ASSERT_EQUALS(mfun.getParameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun.getParameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun.getParameter(2),3.1);
-    TS_ASSERT_EQUALS(mfun.getParameter(3),1.1);
-    TS_ASSERT_EQUALS(mfun.getParameter(4),1.0);
-    TS_ASSERT_EQUALS(mfun.getParameter(5),7.1);
-    TS_ASSERT_EQUALS(mfun.getParameter(6),1.1);
-    TS_ASSERT_EQUALS(mfun.getParameter(7),1.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),7.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),1.0);
 
     WS_type ws = mkWS(1,0,10,0.1);
     addNoise(ws,0.1);

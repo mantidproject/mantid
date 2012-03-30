@@ -143,9 +143,6 @@ protected:
   /// Nonvirtual member which removes all declared parameters
   void clearAllParameters();
 
-  size_t indexOfActive(size_t i)const;
-  size_t activeIndex(size_t i)const;
-
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
   std::vector<bool> m_isFixed;

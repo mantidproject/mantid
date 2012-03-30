@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Abragam.h"
+#include "MantidAPI//FunctionFactory.h"
 #include <cmath>
 
 
@@ -25,7 +26,7 @@ void Abragam::init()
 }
 
 
-void Abragam::functionMW(double* out, const double* xValues, const size_t nData)const
+void Abragam::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const double& A = getParameter("A"); 
   const double& w = getParameter("Omega"); 
@@ -43,14 +44,14 @@ void Abragam::functionMW(double* out, const double* xValues, const size_t nData)
 
 }
 
-void Abragam::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void Abragam::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
 {
-  calNumericalDeriv(out, xValues, nData);
+  calNumericalDeriv(domain,jacobian);
 }
 
 void Abragam::setActiveParameter(size_t i,double value)
 {
-  size_t j = indexOfActive(i);
+  size_t j = i;
 
   if (parameterName(j) == "Sigma"  ) 
     setParameter(j,fabs(value),false);  // Make sigma positive

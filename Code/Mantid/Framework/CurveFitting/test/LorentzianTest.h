@@ -97,7 +97,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunction();
+    CompositeFunction fnWithBk;
 
     IFunction_sptr bk( new LinearBackground() );
     bk->initialize();
@@ -110,13 +110,13 @@ public:
     fn->initialize();
     fn->setCentre(11.2);
     fn->setHeight(100.1);
-    fn->setWidth(2.2);
+    fn->setFwhm(2.2);
 
     fnWithBk.addFunction(fn);
     fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);    
-    alg2.setPropertyValue("Function",fnWithBk->asString());
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -142,7 +142,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
     TS_ASSERT_DELTA( pk->height(), 100.6879 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 11.1995 ,0.01);
-    TS_ASSERT_DELTA( pk->width(), 2.1984 ,0.01);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.1984 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0030 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0008 ,0.01);
 
@@ -183,7 +183,7 @@ public:
 
     //void setFunction(API::IFunction* fun);
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",fn->asString());
+    alg2.setPropertyValue("Function",fn.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -208,7 +208,7 @@ public:
 
     TS_ASSERT_DELTA( pk->height(), 100.7 ,0.1);
     TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.1);
-    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.1);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.2 ,0.1);
 
     AnalysisDataService::Instance().clear();
   }
@@ -255,8 +255,8 @@ public:
     BoundaryConstraint* bc = new BoundaryConstraint(fn.get(),"PeakCentre",11.3, 12.0);
     fn->addConstraint(bc);
 
-    fnWithBk.addFunction(fn);
-    fnWithBk.addFunction(bk);
+    fnWithBk->addFunction(fn);
+    fnWithBk->addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
     alg2.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
@@ -283,7 +283,7 @@ public:
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
     TS_ASSERT_DELTA( pk->height(), 100.7 ,0.1);
     TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.1);
-    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.1);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.2 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 

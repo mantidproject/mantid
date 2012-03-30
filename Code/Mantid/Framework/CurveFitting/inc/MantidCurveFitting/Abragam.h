@@ -8,6 +8,7 @@
 //#include "MantidAPI/IPeakFunction.h"
 
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 
 namespace Mantid
 {
@@ -40,7 +41,7 @@ namespace Mantid
      Code Documentation is available at: <http://doxygen.mantidproject.org> 
      */ 
 
-    class DLLExport Abragam : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport Abragam : public virtual API::ParamFunction, public virtual API::IFunctionMW, public virtual API::IFunction1D
     {
     public:
 
@@ -52,9 +53,9 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       virtual const std::string category() const { return "Muon";}
+      virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
     protected:
-      virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
-      virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      virtual void function1D(double* out, const double* xValues, const size_t nData)const;
       virtual void setActiveParameter(size_t i,double value);
 
       /// overwrite IFunction base class method that declares function parameters 

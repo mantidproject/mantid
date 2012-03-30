@@ -189,11 +189,7 @@ public:
 
     TS_ASSERT_EQUALS(prodF.parameterLocalName(0),"a");
 
-<<<<<<< HEAD:Code/Mantid/Framework/CurveFitting/test/ProductFunctionMWTest.h
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(prodF.asString());
-=======
     IFunction_sptr fun = FunctionFactory::Instance().createInitialized(prodF.asString());
->>>>>>> Re #4158. Returned the old Levenberg-Marquardt minimizer.:Code/Mantid/Framework/CurveFitting/test/ProductFunctionTest.h
     TS_ASSERT(fun);
 
     ProductFunction* prodF1 = dynamic_cast<ProductFunction*>(fun.get());
@@ -328,7 +324,7 @@ public:
  
   void testForCategories()
   {
-    ProductFunctionMW forCat;
+    ProductFunction forCat;
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "General" );

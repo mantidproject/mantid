@@ -3,18 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/DeltaFunction.h"
-#include <cmath>
-#include <algorithm>
-#include <functional>
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/IConstraint.h"
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_real.h>
-#include <gsl/gsl_fft_halfcomplex.h>
-
-#include <sstream>
 
 namespace Mantid
 {
@@ -36,16 +24,6 @@ void ProductFunction::function(const API::FunctionDomain& domain, API::FunctionV
     getFunction( iFun )->function(domain,tmp);
     values *= tmp;
   }
-}
-
-/**
- * Derivatives of function with respect to active parameters
- * @param domain :: Function domain to get the arguments from.
- * @param jacobian :: A Jacobian to store the derivatives.
- */
-void ProductFunction::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
-{
-  this->calNumericalDeriv(domain,jacobian);
 }
 
 } // namespace CurveFitting

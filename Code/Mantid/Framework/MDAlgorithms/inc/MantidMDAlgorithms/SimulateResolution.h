@@ -72,7 +72,7 @@ namespace Mantid
 
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
-            virtual double functionMD(Mantid::API::IMDIterator& r) const;
+            virtual double functionMD(const Mantid::API::IMDIterator& r) const;
             /// This is the new more general interface to the user scattering function which can takes different arguments
             /// depending on the sharp/broad setting.
             virtual void userSqw(const std::vector<double> & params, const std::vector<double> & qE, std::vector<double> & result) const=0;

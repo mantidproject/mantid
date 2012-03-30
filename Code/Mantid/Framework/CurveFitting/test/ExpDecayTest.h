@@ -83,7 +83,7 @@ public:
     fn.initialize();
 
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",fn->asString());
+    alg2.setPropertyValue("Function",fn.asString());
 
 
     // Set which spectrum to fit against and initial starting values

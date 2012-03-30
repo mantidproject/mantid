@@ -1771,8 +1771,12 @@ private:
     {
       return "Could not set value: properties have different type.";
     }
-    m_propertySeries = prop->m_propertySeries;
+    mP = prop->mP;
     m_size = prop->m_size;
+    mPropSortedFlag = prop->mPropSortedFlag;
+    mFilter = prop->mFilter;
+    mFilterQuickRef = prop->mFilterQuickRef;
+    mFilterApplied = prop->mFilterApplied;
     return "";
   }
 

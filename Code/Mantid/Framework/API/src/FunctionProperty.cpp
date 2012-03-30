@@ -15,7 +15,7 @@ namespace API
     Kernel::PropertyWithValue <boost::shared_ptr<IFunction> >( 
       name, 
       boost::shared_ptr<IFunction>( ),
-      new Kernel::NullValidator< boost::shared_ptr<IFunction> >,
+      Kernel::IValidator_sptr(new Kernel::NullValidator()),
       Kernel::Direction::InOut
       )
   {
