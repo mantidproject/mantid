@@ -369,7 +369,7 @@ void CommandLineInterpreter::processNextPastedLine()
  */
 void CommandLineInterpreter::setupEnvironment(const ScriptingEnv & environ)
 {
-  m_runner = QSharedPointer<Script>(environ.newScript("<commandline>",this,Script::Interactive));
+  m_runner = QSharedPointer<Script>(environ.newScript("__main__",this,Script::Interactive));
   connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setStatusToExecuting()));
   connect(m_runner.data(), SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(insertInputPrompt()));
