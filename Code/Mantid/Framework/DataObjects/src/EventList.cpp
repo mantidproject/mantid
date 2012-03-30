@@ -158,12 +158,13 @@ namespace DataObjects
     double inf = std::numeric_limits<double>::infinity();
     double ninf = -inf;
 
+    // For thread safety
+    inSpec->lockData();
+
     // Get the input histogram
     const MantidVec & X = inSpec->readX();
-    // To be more thread-safe, we are getting a COPY of the vectors.
-    // This is probably because the MRU can drop off, deleting the vector while we are using it.
-    MantidVec Y = inSpec->readY();
-    MantidVec E = inSpec->readE();
+    const MantidVec & Y = inSpec->readY();
+    const MantidVec & E = inSpec->readE();
     if (Y.size()+1 != X.size())
     {
       std::cout << "X.size() " << X.size() << " Y.size() " << Y.size() << std::endl;
@@ -234,6 +235,8 @@ namespace DataObjects
 
     // Manually set that this is sorted by TOF, since it is. This will make it "threadSafe" in other algos.
     this->setSortOrder( TOF_SORT );
+
+    inSpec->unlockData();
   }
 
 
