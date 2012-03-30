@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_stitching.ui'
 #
-# Created: Thu Mar 29 16:55:29 2012
+# Created: Fri Mar 30 16:23:19 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -182,7 +182,7 @@ class Ui_Frame(object):
 "points to\n"
 "skip", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_to_one_chk.setText(QtGui.QApplication.translate("Frame", "Scale to unity", None, QtGui.QApplication.UnicodeUTF8))
-        self.max_q_unity_label.setText(QtGui.QApplication.translate("Frame", "Spectular ridge from", None, QtGui.QApplication.UnicodeUTF8))
+        self.max_q_unity_label.setText(QtGui.QApplication.translate("Frame", "Critical edge from", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("Frame", "1/Å  to  ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("Frame", "1/Å  ", None, QtGui.QApplication.UnicodeUTF8))
         self.pick_unity_range_btn.setText(QtGui.QApplication.translate("Frame", "Pick range", None, QtGui.QApplication.UnicodeUTF8))

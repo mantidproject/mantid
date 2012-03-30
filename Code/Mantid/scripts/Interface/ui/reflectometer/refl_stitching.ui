@@ -283,7 +283,7 @@ skip</string>
              <item>
               <widget class="QLabel" name="max_q_unity_label">
                <property name="text">
-                <string>Spectular ridge from</string>
+                <string>Critical edge from</string>
                </property>
               </widget>
              </item>
