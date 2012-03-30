@@ -1110,20 +1110,23 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
-    gfit->executeAsSubAlg();
-
-    std::vector<double> params = gfit->getProperty("Parameters");
-    std::vector<std::string> paramnames = gfit->getProperty("ParameterNames");
-
-    this->updateFitResults(gfit, bestparams, bestRawParams, mincost, X[i4], in_height);
+    try
+    {
+      gfit->executeAsSubAlg();
+      this->updateFitResults(gfit, bestparams, bestRawParams, mincost, X[i4], in_height);
+    }
+    catch(...)
+    {
+      // let it drop on the floor
+      // TODO Fit algorithm shouldn't throw exceptions  - trac ticket #5030
+    }
   } // ENDFOR
 
   // check to see if the last one went through
   if (bestparams.empty())
   {
-      API::TableRow t = m_peaks->appendRow();
-      t << spectrum << 0. << 0. << 0. << 0. << 0. << 0. << 1.e10;
-      return;
+    this->addRow(spectrum, bestparams, bestRawParams, mincost, false);
+    return;
   }
 
   // h) Fit again with everything altogether
