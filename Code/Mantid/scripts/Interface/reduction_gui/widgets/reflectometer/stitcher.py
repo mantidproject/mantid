@@ -317,6 +317,7 @@ class StitcherWidget(BaseWidget):
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(plot_name)
                 l=g.activeLayer()
+                l.logYlinX()
                 if self._settings.instrument_name == "REFL":
                     l.setTitle("Reflectivity")
                 else:
