@@ -1045,7 +1045,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   std::vector<double> params = fit->getProperty("Parameters");
   std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
 
-  double a0, a1, a2 = 0.;
+  double a0(0.0), a1(0.0), a2(0.0);
 
   double bkgdchi2;
   if (fitStatus.compare("success") == 0){
@@ -1235,8 +1235,8 @@ void getComponentFunctions(IFitFunction_sptr compositeFunc, std::vector<double> 
 
   // get the effective peak parameters
   effParams.resize(6);
-  IPeakFunction * peakFunc;
-  IFitFunction * backFunc;
+  IPeakFunction * peakFunc = NULL;
+  IFitFunction * backFunc = NULL;
   for (std::size_t i = 0; i < composite->nFunctions(); i++)
   {
     IFunction * func = composite->getFunction(i);
