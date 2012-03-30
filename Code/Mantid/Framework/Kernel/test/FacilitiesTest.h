@@ -50,8 +50,7 @@ public:
       "  </facility>"
       "</facilities>";
 
-    FacilityInfo* fac;
-    TS_ASSERT_THROWS( fac = getFacility(xmlStr), std::runtime_error );
+    TS_ASSERT_THROWS( getFacility(xmlStr), std::runtime_error );
   }
 
   void test_minimal()
@@ -65,7 +64,7 @@ public:
       "  </facility>"
       "</facilities>";
 
-    FacilityInfo* fac;
+    FacilityInfo* fac = NULL;
     TS_ASSERT_THROWS_NOTHING( fac = getFacility(xmlStr) );
 
     // Check that the few required things are set and that everything else has its default value
