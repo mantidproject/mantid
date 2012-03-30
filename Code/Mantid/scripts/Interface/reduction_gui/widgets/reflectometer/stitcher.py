@@ -185,6 +185,7 @@ class StitcherWidget(BaseWidget):
         self.connect(self._content.pick_unity_range_btn, QtCore.SIGNAL("clicked()"), self._pick_specular_ridge)        
         self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
         self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
+        self._content.min_q_unity_edit.setText("0.00")
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
         
