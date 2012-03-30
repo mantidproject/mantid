@@ -624,9 +624,11 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       double weight = it->second;
       double weightSquared = weight * weight;
 
-      const MantidVec & inY = ws->readY(inWI);
-      const MantidVec & inE = ws->readE(inWI);
-      const MantidVec & inX = ws->readX(inWI);
+      const ISpectrum * inSpec = ws->getSpectrum(inWI);
+      inSpec->lockData();
+      const MantidVec & inY = inSpec->readY();
+      const MantidVec & inE = inSpec->readE();
+      const MantidVec & inX = inSpec->readX();
 
       for (size_t i=0; i<YLength; i++)
       {
@@ -644,6 +646,8 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       {
         outX[YLength] = inX[YLength];
       }
+
+      inSpec->unlockData();
     } //(each neighbour)
 
     // Now un-square the error, since we summed it in quadrature
