@@ -13,7 +13,7 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
@@ -33,9 +33,6 @@ namespace Mantid
       this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
     }
     
-    using DataObjects::SpecialWorkspace2D;
-    using DataObjects::SpecialWorkspace2D_const_sptr;
-    using DataObjects::SpecialWorkspace2D_sptr;
     using Kernel::Direction;
     using Geometry::IDetector_const_sptr;
     using namespace API;
@@ -73,7 +70,7 @@ namespace Mantid
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
 
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      DataObjects::SpecialWorkspace2D* maskWS = new DataObjects::SpecialWorkspace2D();
+      DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace();
       maskWS->initialize(nHist, 1, 1);
       MatrixWorkspace_sptr outputWS(maskWS);
       WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
@@ -81,10 +78,10 @@ namespace Mantid
 
       bool inputWSIsSpecial(false);
       {
-        SpecialWorkspace2D_const_sptr temp = boost::dynamic_pointer_cast<const SpecialWorkspace2D>(inputWS);
+        DataObjects::MaskWorkspace_const_sptr temp = boost::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
         if (temp)
           inputWSIsSpecial = true;
-        g_log.notice() << "Input workspace is special\n";
+        g_log.notice() << "Input workspace is a MaskWorkspace.\n";
       }
 
       Progress prog(this,0.0,1.0,nHist);
