@@ -153,7 +153,7 @@ set ( TEST_FILES
 	test/FitMWTest.h
 	test/FRConjugateGradientTest.h
 	test/FuncMinimizerFactoryTest.h
-	test/FunctionFactoryTest.h
+	test/FunctionFactoryConstraintTest.h
 	test/Gaussian1DTest.h
 	test/GausDecayTest.h
 	test/GaussianTest.h
