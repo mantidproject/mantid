@@ -17109,7 +17109,9 @@ void ApplicationWindow::closeGraph(const QString & wsName)
 
 
 /**
-* 
+* Hide all the graphs apart from the exception. Default not to have exception.
+*
+* @params exception :: The workspace not to be hidden. Default is no exception ("").
 */
 void ApplicationWindow::hideGraphs(const QString & exception)
 {
@@ -17128,6 +17130,10 @@ void ApplicationWindow::hideGraphs(const QString & exception)
   }
 }
 
+
+/**
+* Show all the graphs that are hidden
+*/
 void ApplicationWindow::showGraphs()
 {
   QList<MdiSubWindow *> windows = windowsList();

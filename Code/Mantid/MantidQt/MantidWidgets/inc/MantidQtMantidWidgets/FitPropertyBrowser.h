@@ -29,6 +29,7 @@ class QComboBox;
 class QSignalMapper;
 class QMenu;
 class QAction;
+class QTreeWidget;
 
 namespace Mantid
 {
@@ -276,6 +277,8 @@ private slots:
   void saveFunction();
   void loadFunction();
   void loadFunctionFromString();
+  void acceptFit();
+  void closeFit();
 
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
@@ -375,7 +378,6 @@ protected:
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
 
-
 private:
   /// load and save function
   void loadFunction(const QString& funcString);
@@ -431,6 +433,11 @@ private:
 
   /// To display a tip text
   QLabel* m_tip;
+
+  // The widget for choosing the fit function.
+  QDialog* m_fitSelector;
+  // The tree widget containing the fit functions.
+  QTreeWidget* m_fitTree;
   
   /// String property managers for special case attributes such as Filename or Formula
   /// <attribute_name,string_manager>

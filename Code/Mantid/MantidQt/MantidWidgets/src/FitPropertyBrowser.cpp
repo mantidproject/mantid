@@ -60,6 +60,7 @@
 #include <QClipboard>
 #include <QSignalMapper>
 #include <QMetaMethod>
+#include <QTreeWidget>
 
 #include <algorithm>
 
@@ -521,15 +522,83 @@ void FitPropertyBrowser::addFunction()
   if ( !cf ) return;
   int i = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
   bool ok = false;
-  QString fnName = 
-    QInputDialog::getItem(this, "MantidPlot - Fit", "Select function type", m_registeredFunctions,i,false,&ok);
-  if (ok)
+  
+  // Declare new widget for picking fit functions
+  m_fitSelector = new QDialog();
+  m_fitSelector->setModal(true);
+  //QTreeWidget *m_fitTree = new QTreeWidget();
+  m_fitTree = new QTreeWidget;
+
+  // Add functions to each of the categories. If it appears in more than one category then add to both
+  // Store in a map. Key = category. Value = vector of fit functions belonging to that category.
+  std::map<std::string, std::vector<std::string> > categories;
+  for (int i=0; i<m_registeredFunctions.size(); ++i)
   {
-    PropertyHandler* h = getHandler()->findHandler(cf);
-    h->addFunction(fnName.toStdString());
+    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(Mantid::API::FunctionFactory::Instance().createFitFunction(m_registeredFunctions[i].toStdString()));
+    std::vector<std::string> tempCategories = f->categories();
+    for (int j=0; j<tempCategories.size(); ++j)
+    {
+      categories[tempCategories[j] ].push_back(m_registeredFunctions[i].toStdString());
+    }
   }
-  emit functionChanged();
+  
+  // Construct the QTreeWidget based on the map information of categories and their respective fit functions.
+  std::map<std::string, std::vector<std::string> >::const_iterator sItr = categories.end();
+  for (std::map<std::string, std::vector<std::string> >::const_iterator itr = categories.begin(); itr != sItr; ++itr)
+  {
+    QTreeWidgetItem *category = new QTreeWidgetItem(m_fitTree);
+    category->setText(0, QString::fromStdString(itr->first) );
+    
+    std::vector<std::string>::const_iterator fitItrEnd = itr->second.end();
+    for (std::vector<std::string>::const_iterator fitItrBegin = itr->second.begin(); fitItrBegin != fitItrEnd; ++fitItrBegin)
+    {
+      QTreeWidgetItem *fit = new QTreeWidgetItem(category);
+      int num(std::distance(itr->second.begin(), fitItrBegin));
+      fit->setText(0, QString::fromStdString(fitItrBegin[0]) );      
+    }
+  }
+
+  //Set the layout of the widget.
+  m_fitTree->setToolTip("Select a function type and press OK.");
+  m_fitTree->setHeaderLabel("Fit - Select function type");
+  QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+  connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptFit()));
+  connect(buttonBox, SIGNAL(rejected()), this, SLOT(closeFit()));
+  connect(m_fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(acceptFit()));
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(m_fitTree);
+  layout->addWidget(buttonBox);
+  m_fitSelector->setLayout(layout);
+  m_fitSelector->show();
 }
+
+
+void FitPropertyBrowser::acceptFit()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  const Mantid::API::CompositeFunction* cf = getHandler()->findCompositeFunction(ci);
+  if ( !cf )
+    return;
+
+  QList<QTreeWidgetItem*> items(m_fitTree->selectedItems() );
+  if (items.size() != 1)
+    return;
+  
+  if (items[0]->parent() == NULL)
+    return;
+
+  PropertyHandler* h = getHandler()->findHandler(cf);
+  h->addFunction(items[0]->text(0).toStdString());
+  emit functionChanged();
+
+  closeFit();
+}
+
+void FitPropertyBrowser::closeFit()
+{
+  m_fitSelector->close();
+}
+
 
 /// Create CompositeFunction
 void FitPropertyBrowser::createCompositeFunction(const QString& str)
