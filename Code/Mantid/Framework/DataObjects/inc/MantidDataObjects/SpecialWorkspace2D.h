@@ -35,7 +35,7 @@ namespace DataObjects
   {
   public:
     SpecialWorkspace2D();
-    SpecialWorkspace2D(Geometry::Instrument_const_sptr inst);
+    SpecialWorkspace2D(Geometry::Instrument_const_sptr inst, const bool includeMonitors=false);
     ~SpecialWorkspace2D();
     
     /** Gets the name of the workspace type

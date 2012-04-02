@@ -28,21 +28,25 @@ namespace DataObjects
   /** Constructor, building from an instrument
    *
    * @param inst :: input instrument that is the base for this workspace
+   * @param includeMonitors :: If false the monitors are not included
    * @return created SpecialWorkspace2D
    */
-  SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst)
+  SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst, const bool includeMonitors)
   {
     // Get all the detectors IDs
-    detectorIDs = inst->getDetectorIDs(true /*no monitors*/);
+    detectorIDs = inst->getDetectorIDs(!includeMonitors);
 
     // Init the Workspace2D with one spectrum per detector, in the same order.
     this->init(int(detectorIDs.size()), 1, 1);
+
+    g_log.debug() << "Creating workspace from instrument " << inst->name() << " with "
+                  << detectorIDs.size() " detectors." <<std::endl;
 
     // Copy the instrument
     this->setInstrument( inst );
     
     // Initialize the spectra-det-map, 1:1 between spectrum number and det ID
-    this->MatrixWorkspace::rebuildSpectraMapping(false /*no monitors*/);
+    this->MatrixWorkspace::rebuildSpectraMapping(includeMonitors);
 
     // Make the mapping, which will be used for speed later.
     detID_to_WI.clear();
@@ -55,9 +59,8 @@ namespace DataObjects
         detID_to_WI[detID] = int(wi);
       }
     }
-
-
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -160,7 +163,6 @@ namespace DataObjects
       throw std::invalid_argument("SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
     return detectorIDs[workspaceIndex];
   }
-
 
   //--------------------------------------------------------------------------------------------
   /** Return the result of operator &
