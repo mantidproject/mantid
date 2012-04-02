@@ -56,6 +56,8 @@ namespace Algorithms
     timeunit.push_back("microsecond");
     this->declareProperty("Unit", "second", boost::make_shared<Kernel::StringListValidator>(timeunit),
         "Unit of time in output Workspace2D.");
+    this->declareProperty("Parallel", true,
+        "Make the code work in parallel");
 
     this->declareProperty("PreserveEvents", false,
         "Option to preserve the events in the output workspace.");
@@ -109,7 +111,14 @@ namespace Algorithms
     double stddev = sqrt(dt2/static_cast<double>(mTimesInSecond.size())-mPulseLength*mPulseLength);
     g_log.notice() << "Delta T = " << mPulseLength << "  standard deviation = " << stddev << std::endl;
 
-    // 3. Count!
+    // 3. Setup for parallelization
+    bool useparallel = this->getProperty("Parallel");
+    int nummaxcores = 1;
+    if (useparallel)
+      nummaxcores = PARALLEL_GET_MAX_THREADS;
+    PARALLEL_SET_NUM_THREADS(nummaxcores)
+
+    // 4. Count!
     bool preserveevents = this->getProperty("PreserveEvents");
     if (!preserveevents)
     {
@@ -320,11 +329,9 @@ namespace Algorithms
 
     size_t numevents = events.getNumberEvents();
     size_t counts = 0;
-    // PARALLEL_FOR_NO_WSP_CHECK()
 
-    // #pragma omp parallel for firstprivate(currindex, dobinsearch)
 
-    //PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(currindex, dobinsearch)
+    PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(currindex, dobinsearch)
     for (int ie = 0; ie < static_cast<int>(numevents); ie ++)
     {
       PARALLEL_START_INTERUPT_REGION
@@ -477,7 +484,7 @@ namespace Algorithms
     double tofminall = 1.0E20;
     double tofmaxall = -1;
 
-    //PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(tofmin, tofmax)
+    PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(tofmin, tofmax)
     for (int iws = 0; iws < static_cast<int>(inpWS->getNumberHistograms()); iws++)
     {
       DataObjects::EventList realevents = inpWS->getEventList(iws);

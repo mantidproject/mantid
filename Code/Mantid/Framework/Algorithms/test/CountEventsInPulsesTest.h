@@ -57,6 +57,7 @@ public:
     count.setProperty("PulsesPerBin", 1);
     count.setProperty("SumSpectra", false);
     count.setProperty("Unit", "microsecond");
+    count.setProperty("Parallel", false);
     count.setProperty("PreserveEvents", false);
 
     TS_ASSERT_THROWS_NOTHING(count.execute());
@@ -103,6 +104,7 @@ public:
     count.setProperty("PulsesPerBin", 5);
     count.setProperty("SumSpectra", false);
     count.setProperty("Unit", "microsecond");
+    count.setProperty("Parallel", false);
     count.setProperty("PreserveEvents", false);
 
     TS_ASSERT_THROWS_NOTHING(count.execute());
@@ -156,6 +158,7 @@ public:
     count.setProperty("PulsesPerBin", 1);
     count.setProperty("SumSpectra", true);
     count.setProperty("Unit", "microsecond");
+    count.setProperty("Parallel", false);
     count.setProperty("PreserveEvents", false);
 
     TS_ASSERT_THROWS_NOTHING(count.execute());
@@ -200,6 +203,7 @@ public:
     count.setProperty("PulsesPerBin", 1);
     count.setProperty("SumSpectra", false);
     count.setProperty("Unit", "microsecond");
+    count.setProperty("Parallel", false);
     count.setProperty("PreserveEvents", true);
 
     TS_ASSERT_THROWS_NOTHING(count.execute());

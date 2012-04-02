@@ -54,7 +54,7 @@ typedef Poco::FastMutex Mutex;
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable) \
   PRAGMA(omp parallel for firstprivate(variable) )
 
-#define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(variable1, variable2) \
+#define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2) \
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
@@ -167,7 +167,7 @@ typedef Poco::FastMutex Mutex;
 #define PARALLEL_FOR_IF(condition)
 #define PARALLEL_FOR_NO_WSP_CHECK()
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)
-#define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(variable1, variable2)
+#define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)
 #define PARALLEL_FOR1(workspace1)
 #define PARALLEL_FOR2(workspace1, workspace2)
 #define PARALLEL_FOR3(workspace1, workspace2, workspace3)
