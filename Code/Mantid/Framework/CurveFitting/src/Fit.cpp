@@ -118,7 +118,7 @@ namespace CurveFitting
     const size_t index = suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
 
     API::IFunction_sptr fun = getProperty("Function");
-    IDomainCreator* creator = nullptr;
+    IDomainCreator* creator = NULL;
 
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
@@ -188,7 +188,7 @@ namespace CurveFitting
       {
         const std::string workspacePropertyName = (**prop).name();
         API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
-        IDomainCreator* creator = nullptr;
+        IDomainCreator* creator = NULL;
         if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
             !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
         {
