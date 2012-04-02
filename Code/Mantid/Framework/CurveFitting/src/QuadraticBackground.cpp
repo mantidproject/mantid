@@ -1,4 +1,5 @@
 #include "MantidCurveFitting/QuadraticBackground.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
@@ -38,7 +39,7 @@ DECLARE_FUNCTION(QuadraticBackground)
   /*
    *
    */
-  void QuadraticBackground::functionMW(double* out, const double* xValues, const size_t nData)const
+  void QuadraticBackground::function1D(double* out, const double* xValues, const size_t nData)const
   {
       const double& a0 = getParameter("A0");
       const double& a1 = getParameter("A1");
@@ -49,7 +50,7 @@ DECLARE_FUNCTION(QuadraticBackground)
       }
   }
 
-  void QuadraticBackground::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData)
+  void QuadraticBackground::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
   {
       for (size_t i = 0; i < nData; i++) {
           out->set(i, 0, 1);

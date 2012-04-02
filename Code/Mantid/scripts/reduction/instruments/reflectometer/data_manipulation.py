@@ -40,72 +40,75 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                  high_res = True, instrument="REFL"):
     basename = os.path.basename(file_path)
     ws_base = "__%s" % basename
-    ws_output_base = "Counts vs Y pixel"
+    ws_output_base = "Counts vs Y pixel - %s" % basename
     x_title = "Y pixel"
     if is_pixel_y is False:
-        ws_output_base = "Counts vs X pixel"
+        ws_output_base = "Counts vs X pixel - %s" % basename
         x_title = "X pixel"
         
     ws_list = []
     
     def _load_entry(entry, ws, title=""):
-        if not mtd.workspaceExists(ws):
-            LoadEventNexus(Filename=file_path, OutputWorkspace=ws,
-                           NXentryName=entry)
-            if mtd[ws].getNumberEvents()==0:
-                mtd.deleteWorkspace(ws)
-                return
-            
         # 1D plot
         ws_output = "%s %s" % (ws_output_base, title)
-
-        instr_dir = mtd.getSettings().getInstrumentDirectory()
-        if is_pixel_y:
-            grouping_file = os.path.join(instr_dir, "Grouping",
-                                         "REFL_Detector_Grouping_Sum_X.xml")
-            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
-                           MapFile=grouping_file)
+        if mtd.workspaceExists(ws_output):
+            ws_list.append(ws_output)
         else:
-            grouping_file = os.path.join(instr_dir, "Grouping",
-                                         "REFL_Detector_Grouping_Sum_Y.xml")
-            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
-                           MapFile=grouping_file)
+            if not mtd.workspaceExists(ws):
+                LoadEventNexus(Filename=file_path, OutputWorkspace=ws,
+                               NXentryName=entry)
+                
+            if mtd[ws].getNumberEvents()==0:
+                #mtd.deleteWorkspace(ws)
+                return
+    
+            instr_dir = mtd.getSettings().getInstrumentDirectory()
+            if is_pixel_y:
+                grouping_file = os.path.join(instr_dir, "Grouping",
+                                             "REFL_Detector_Grouping_Sum_X.xml")
+                GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
+                               MapFile=grouping_file)
+            else:
+                grouping_file = os.path.join(instr_dir, "Grouping",
+                                             "REFL_Detector_Grouping_Sum_Y.xml")
+                GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
+                               MapFile=grouping_file)
+                
+            Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
             
-        Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
-        
-        # The Y pixel numbers start at 1 from the perspective of the users
-        # They also read in reversed order
-        if False and is_pixel_y:
-            x=mtd[ws_output].dataX(0)
-            y_reversed=mtd[ws_output].dataY(0)
-            y=[i for i in y_reversed]
-            for i in range(len(x)):
-                x[i] += 1
-                y_reversed[i] = y[len(y)-1-i]
+            # The Y pixel numbers start at 1 from the perspective of the users
+            # They also read in reversed order
+            if False and is_pixel_y:
+                x=mtd[ws_output].dataX(0)
+                y_reversed=mtd[ws_output].dataY(0)
+                y=[i for i in y_reversed]
+                for i in range(len(x)):
+                    x[i] += 1
+                    y_reversed[i] = y[len(y)-1-i]
+                
+            # Copy over the units
+            units = mtd[ws_output].getAxis(0).getUnit().name()
+            mtd[ws_output].getAxis(0).setUnit(units)
             
-        # Copy over the units
-        units = mtd[ws_output].getAxis(0).getUnit().name()
-        mtd[ws_output].getAxis(0).setUnit(units)
-        
-        ws_list.append(ws_output)
-            
-        # 2D plot
-        output_2d = ws_output+'_2D'
-        Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="0,200,200000")
-        if is_pixel_y:
-            grouping_file = os.path.join(instr_dir, "Grouping",
-                                         "REFL_Detector_Grouping_Sum_X.xml")
-            GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
-                           MapFile=grouping_file)
-        else:
-            grouping_file = os.path.join(instr_dir, "Grouping",
-                                         "REFL_Detector_Grouping_Sum_Y.xml")
-            GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
-                           MapFile=grouping_file)
+            ws_list.append(ws_output)
+                
+            # 2D plot
+            output_2d = ws_output+'_2D'
+            Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="0,200,200000")
+            if is_pixel_y:
+                grouping_file = os.path.join(instr_dir, "Grouping",
+                                             "REFL_Detector_Grouping_Sum_X.xml")
+                GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
+                               MapFile=grouping_file)
+            else:
+                grouping_file = os.path.join(instr_dir, "Grouping",
+                                             "REFL_Detector_Grouping_Sum_Y.xml")
+                GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
+                               MapFile=grouping_file)
             
     if instrument=="REFM":
         for p in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
-            ws = '%s_%s'%(ws_base,p)
+            ws = '%s - %s'%(ws_base,p)
             _load_entry("entry-%s" % p, ws, p)        
     else:
         _load_entry("entry", ws_base)
@@ -116,7 +119,8 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         data_stitching.RangeSelector.connect(ws_list, callback,
                                              range_min=range_min,
                                              range_max=range_max,
-                                             x_title=x_title)
+                                             x_title=x_title,
+                                             log_scale=True)
 
     # Estimate peak limits
     ws_output = ws_base+'_all'
@@ -157,41 +161,41 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     return mean-2*sigma, mean+2*sigma
     
 def get_logs(instrument, run):
-    f = FileFinder.findRuns("%s%s" % (instrument, run))
-    if len(f)>0:
-        basename = os.path.basename(f[0])
-        ws = "__%s" % basename
-        if instrument=="REFM":
-            ws = '%s_%s'%(ws, 'Off_Off')
-            
-        if not mtd.workspaceExists(ws):
+    sangle = 0
+    dangle = 0
+    dangle0 = 0
+    direct_beam_pix = 0
+    det_distance = 2.562
+
+    ws = "__%s_metadata" % run
+    if instrument=="REFM":
+        ws = '%s_%s'%(ws, 'Off_Off')
+        
+    if not mtd.workspaceExists(ws):
+        f = FileFinder.findRuns("%s%s" % (instrument, run))
+        if len(f)>0:
             LoadEventNexus(Filename=f[0], OutputWorkspace=ws, 
                            NXentryName='entry-Off_Off', MetaDataOnly=True)
-        
-        sangle = 0
+
+    if mtd.workspaceExists(ws):
         if mtd[ws].getRun().hasProperty("SANGLE"):
             sangle = mtd[ws].getRun().getProperty("SANGLE").value[0]
             
-        dangle = 0
         if mtd[ws].getRun().hasProperty("DANGLE"):
             dangle = mtd[ws].getRun().getProperty("DANGLE").value[0]
             
-        dangle0 = 0
         if mtd[ws].getRun().hasProperty("DANGLE0"):
             dangle0 = mtd[ws].getRun().getProperty("DANGLE0").value[0]
             
-        direct_beam_pix = 0
         if mtd[ws].getRun().hasProperty("DIRPIX"):
             direct_beam_pix = mtd[ws].getRun().getProperty("DIRPIX").value[0]
         
-        det_distance = 2.562
         if mtd[ws].getRun().hasProperty("SampleDetDis"):
             det_distance = mtd[ws].getRun().getProperty("SampleDetDis").value[0]/1000.0
 
-        return {"SANGLE":sangle,
-                "DANGLE":dangle,
-                "DANGLE0":dangle0,
-                "DIRPIX":direct_beam_pix,
-                "DET_DISTANCE":det_distance}
- 
-    
+    return {"SANGLE":sangle,
+            "DANGLE":dangle,
+            "DANGLE0":dangle0,
+            "DIRPIX":direct_beam_pix,
+            "DET_DISTANCE":det_distance}
+

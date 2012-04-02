@@ -57,12 +57,8 @@ namespace Algorithms
     this->declareProperty("Unit", "second", boost::make_shared<Kernel::StringListValidator>(timeunit),
         "Unit of time in output Workspace2D.");
 
-    std::vector<std::string> outputtype;
-    outputtype.push_back("EventWorkspace");
-    outputtype.push_back("Workspace2D");
-    this->declareProperty("OutputWorkspaceType", "Workspace2D",
-        boost::make_shared<Kernel::StringListValidator>(outputtype),
-        "Type of output workspace.");
+    this->declareProperty("PreserveEvents", false,
+        "Option to preserve the events in the output workspace.");
 
     return;
   }
@@ -97,7 +93,6 @@ namespace Algorithms
     mTimesInSecond = protonchargelog->timesAsVectorSeconds();
     mTimes = protonchargelog->timesAsVector();
 
-    /*** FIXME Delete this part after verifying that times apart by 60Hz ***/
     double dt1 = 0.0;
     double dt2 = 0.0;
     for (size_t i = 1; i < mTimesInSecond.size(); i ++)
@@ -114,22 +109,15 @@ namespace Algorithms
     double stddev = sqrt(dt2/static_cast<double>(mTimesInSecond.size())-mPulseLength*mPulseLength);
     g_log.notice() << "Delta T = " << mPulseLength << "  standard deviation = " << stddev << std::endl;
 
-    /***********************************************************************/
-
     // 3. Count!
-    std::string outputwstype = this->getProperty("OutputWorkspaceType");
-    if (outputwstype.compare("Workspace2D")==0)
+    bool preserveevents = this->getProperty("PreserveEvents");
+    if (!preserveevents)
     {
       this->countInWorkspace2D();
     }
-    else if (outputwstype.compare("EventWorkspace")==0)
-    {
-      this->countInEventWorkspace();
-    }
     else
     {
-      g_log.error() << "Output workspace of type " << outputwstype << " is not supported!" << std::endl;
-      throw std::invalid_argument("OutputWorkspaceType is not supported.");
+      this->countInEventWorkspace();
     }
 
     return;
@@ -154,8 +142,10 @@ namespace Algorithms
 
     // 3. Rebin on pulses/bin
     double binstep = mPulseLength*static_cast<double>(mBinSize)*1.0E6;
+    double t0 = mTimesInSecond[0]*1.0E6 + binstep*0.5;
+    double tf = mTimesInSecond.back()*1.0E6 - binstep*0.5;
     std::stringstream ss;
-    ss << binstep;
+    ss << t0 << "," << binstep << ", " << tf;
     std::string rebinpar = ss.str();
 
     IAlgorithm_sptr rebin = createSubAlgorithm("Rebin");
@@ -180,7 +170,7 @@ namespace Algorithms
     // 3. Create and set output Workspace
     DataObjects::Workspace2D_sptr outWS = DataObjects::Workspace2D_sptr(new DataObjects::Workspace2D);
     size_t outsize = mTimesInSecond.size()/mBinSize;
-    if (mTimesInSecond.size()/mBinSize != 0)
+    if (mTimesInSecond.size()%mBinSize != 0)
       outsize ++;
 
     if (mSumSpectra)
@@ -271,10 +261,6 @@ namespace Algorithms
       DataObjects::WeightedEvent event = events.getEvent(ie);
       Kernel::DateAndTime pulsetime = event.pulseTime();
 
-      /*** TODO:  If method 1 renders a very slow performance, then try to use 2
-      tindex = (pulsetime.totalNanoseconds()-mTimes[0].totalNanoseconds())/mBinSize;
-       ***/
-
       // a) Do limited linear search
       if (!dobinsearch)
       {
@@ -338,7 +324,7 @@ namespace Algorithms
 
     // #pragma omp parallel for firstprivate(currindex, dobinsearch)
 
-    PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(currindex, dobinsearch)
+    //PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(currindex, dobinsearch)
     for (int ie = 0; ie < static_cast<int>(numevents); ie ++)
     {
       PARALLEL_START_INTERUPT_REGION
@@ -491,7 +477,7 @@ namespace Algorithms
     double tofminall = 1.0E20;
     double tofmaxall = -1;
 
-    PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(tofmin, tofmax)
+    //PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE2(tofmin, tofmax)
     for (int iws = 0; iws < static_cast<int>(inpWS->getNumberHistograms()); iws++)
     {
       DataObjects::EventList realevents = inpWS->getEventList(iws);

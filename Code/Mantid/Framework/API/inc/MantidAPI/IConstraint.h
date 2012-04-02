@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
 namespace Mantid
@@ -49,7 +49,7 @@ public:
   virtual ~IConstraint() {}
 
   /// Initialize the constraint from an expression
-  virtual void initialize(IFitFunction* fun, const Expression& expr) = 0;
+  virtual void initialize(IFunction* fun, const Expression& expr) = 0;
 
   /// Returns a penalty number which is bigger than or equal to zero
   /// If zero it means that the constraint is not penalized. If larger
@@ -59,6 +59,9 @@ public:
 
   /// Returns the derivative of the penalty for each active parameter
   virtual double checkDeriv() = 0;
+
+  /// Returns the derivative of the penalty for each active parameter
+  virtual double checkDeriv2() = 0;
 
   /// Set the parameters of IFitFunction to satisfy constraint. For example
   /// for a BoundaryConstraint this if param value less than lower boundary

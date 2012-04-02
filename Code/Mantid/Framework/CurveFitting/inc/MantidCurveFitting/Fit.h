@@ -5,34 +5,27 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFitFunction.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFuncIgnorePosPeaks.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidCurveFitting/IDomainCreator.h"
 
 namespace Mantid
 {
+
+  namespace API
+  {
+    class FunctionDomain;
+    class IFunctionValues;
+    class Workspace;
+  }
+
   namespace CurveFitting
   {
     /**
-    Abstract base class for fitting functions.
+    New algorithm for fitting functions. The name is temporary.
 
-    Properties common for all fitting functions:
-    <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-
-    <LI> SpectrumNumber - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
-    <LI> StartX - Lowest value of x data array </LI>
-    <LI> EndX - Highest value of x data array </LI>
-
-    <LI> Function - 
-
-    <LI> MaxIterations - The spectrum to fit (default 500)</LI>
-    <LI> OutputStatus - whether the fit was successful. Direction::Output</LI>
-    <LI> OutputChi2overDoF - returns how good the fit was (default 0.0). Direction::Output</LI>
-    </UL>
-
-    @author Anders Markvardsen, ISIS, RAL
-    @date 15/5/2009
+    @author Roman Tolchenov, Tessella plc
+    @date 06/12/2011
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -59,8 +52,6 @@ namespace Mantid
     public:
       /// Default constructor
       Fit() : API::Algorithm() {};
-      /// Destructor
-      virtual ~Fit();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
       /// Algorithm's version for identification overriding a virtual method
@@ -74,14 +65,22 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+      /// Override this method to perform a custom action right after a property was set.
+      /// The argument is the property name. Default - do nothing.
+      virtual void afterPropertySet(const std::string& propName);
+      void setFunction();
+      void addWorkspace(const std::string& workspaceNameProperty, bool addProperties = true);
+      void addWorkspaces();
 
-      // Process input parameters and create the fitting function.
-      void processParameters();
+      /// Pointer to the fitting function
+      API::IFunction_sptr m_function;
+      ///// Pointer 
+      //API::Workspace_const_sptr m_workspace;
+      /// Pointer to a domain creator
+      boost::shared_ptr<IDomainCreator> m_domainCreator;
+      friend class IDomainCreator;
+      std::vector<std::string> m_workspacePropertyNames;
 
-      /// Function initialization string
-      boost::shared_ptr<API::IFitFunction> m_function;
-
-      friend struct FitData1;
     };
 
     

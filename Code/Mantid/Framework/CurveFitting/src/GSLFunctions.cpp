@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidAPI/ICostFunction.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IConstraint.h"
 
 
 namespace Mantid
@@ -23,16 +23,61 @@ namespace CurveFitting
 
     struct GSL_FitData *p = (struct GSL_FitData *)params;
 
-    if (x->data) p->function->updateActive(x->data);
-    p->function->function (f->data);
-    p->function->addPenalty(f->data);
+    // update function parameters
+    if (x->data)
+    {
+      size_t ia = 0;
+      for(size_t i = 0; i < p->function->nParams(); ++i)
+      {
+        if (p->function->isActive(i))
+        {
+          p->function->setActiveParameter(i,x->data[ia]);
+          ++ia;
+        }
+      }
+    }
+    p->function->applyTies();
+
+    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(p->costFunction->getValues());
+    if (!values)
+    {
+      throw std::invalid_argument("FunctionValues expected");
+    }
+    p->function->function (*p->costFunction->getDomain(),*values);
+
+    // Add penalty
+    double penalty = 0.;
+    for(size_t i=0;i<p->function->nParams();++i)
+    {
+      API::IConstraint* c = p->function->getConstraint(i);
+      if (c)
+      {
+        penalty += c->checkDeriv();
+      }
+    }
+
+    size_t n = values->size() - 1;
+    // add penalty to first and last point and every 10th point in between
+    if ( penalty != 0.0 )
+    {
+      values->addToCalculated(0,penalty);
+      values->addToCalculated(n,penalty);
+
+      for (size_t i = 9; i < n; i+=10)
+      {
+        values->addToCalculated(i,penalty);
+      }
+    }
 
     // function() return calculated data values. Need to convert this values into
     // calculated-observed devided by error values used by GSL
 
     for (size_t i = 0; i<p->n; i++)
+    {
       f->data[i] = 
-      ( f->data[i] - p->Y[i] ) * p->sqrtWeightData[i];
+      ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
+      //std::cerr << values.getCalculated(i) << ' ' << values.getFitData(i) << ' ' << values.getFitWeight(i) << std::endl;
+    }
 
     return GSL_SUCCESS;
   }
@@ -49,16 +94,65 @@ namespace CurveFitting
 
     p->J.setJ(J);
 
-    if (x->data) p->function->updateActive(x->data);
-    p->function->functionDeriv (&p->J);
-    p->function->addPenaltyDeriv(&p->J);
+    // update function parameters
+    if (x->data)
+    {
+      size_t ia = 0;
+      for(size_t i = 0; i < p->function->nParams(); ++i)
+      {
+        if (p->function->isActive(i))
+        {
+          p->function->setActiveParameter(i,x->data[ia]);
+          ++ia;
+        }
+      }
+    }
+    p->function->applyTies();
+
+    // calculate the Jacobian
+    p->function->functionDeriv (*p->costFunction->getDomain(),p->J);
+    
+    //p->function->addPenaltyDeriv(&p->J);
+    // add penalty
+    size_t n = p->costFunction->getDomain()->size() - 1;
+    size_t ia = 0;
+    for(size_t i=0;i<p->function->nParams();++i)
+    {  
+      if ( !p->function->isActive(i) ) continue;
+      API::IConstraint* c = p->function->getConstraint(i);
+      if (c)
+      {
+        double penalty = c->checkDeriv2();
+        if ( penalty != 0.0 )
+        {
+          double deriv = p->J.get(0,ia);
+          p->J.set(0,ia,deriv + penalty);
+          deriv = p->J.get(n,ia);
+          p->J.set(n,ia,deriv+penalty);
+
+          for (size_t j = 9; j < n; j+=10)
+          {
+            deriv = p->J.get(j,ia);
+            p->J.set(j,ia,deriv+penalty);
+          }
+        }
+      } // if (c)
+      ++ia;
+    }
 
     // functionDeriv() return derivatives of calculated data values. Need to convert this values into
     // derivatives of calculated-observed devided by error values used by GSL
-
+    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(p->costFunction->getValues());
+    if (!values)
+    {
+      throw std::invalid_argument("FunctionValues expected");
+    }
     for (size_t iY = 0; iY < p->n; iY++) 
       for (size_t iP = 0; iP < p->p; iP++) 
-        J->data[iY*p->p + iP] *= p->sqrtWeightData[iY];
+      {
+        J->data[iY*p->p + iP] *= values->getFitWeight(iY);
+        //std::cerr << iY << ' ' << iP << ' ' << J->data[iY*p->p + iP] << std::endl;
+      }
 
     return GSL_SUCCESS;
   }
@@ -77,76 +171,24 @@ namespace CurveFitting
       return GSL_SUCCESS;
   }
 
-
-
-  /** Calculating least-squared cost function from fitting function
-  *
-  * @param x :: Input function arguments
-  * @param params :: Input data
-  * @return Value of least squared cost function
-  */
-  double gsl_costFunction(const gsl_vector * x, void *params)
-  {
-
-    struct GSL_FitData *p = (struct GSL_FitData *)params;
-    double * l_holdCalculatedData = p->holdCalculatedData;
-
-    // calculate yCal and store in l_holdCalculatedData
-    if (x->data) p->function->updateActive(x->data);
-    p->function->function (l_holdCalculatedData);
-    p->function->addPenalty(l_holdCalculatedData);
-
-    return p->costFunc->val(p->Y, p->sqrtWeightData, l_holdCalculatedData, p->n);
-  }
-
-  /** Calculating derivatives of least-squared cost function
-  *
-  * @param x :: Input function arguments
-  * @param params :: Input data
-  * @param df :: Derivatives cost function
-  */
-  void gsl_costFunction_df(const gsl_vector * x, void *params, gsl_vector *df)
-  {
-
-    struct GSL_FitData *p = (struct GSL_FitData *)params;
-    double * l_holdCalculatedData = p->holdCalculatedData;
-
-    if (x->data) p->function->updateActive(x->data);
-    p->function->function (l_holdCalculatedData);
-    p->function->addPenalty(l_holdCalculatedData);
-    p->J.setJ(p->holdCalculatedJacobian);
-    p->function->functionDeriv (&p->J);
-    p->function->addPenaltyDeriv(&p->J);
-
-    p->costFunc->deriv(p->Y, p->sqrtWeightData, l_holdCalculatedData, 
-                     p->holdCalculatedJacobian->data, df->data, p->p, p->n);
-  }
-
-  /** Return both derivatives and function value of least-squared cost function. This function is
-  *   required by the GSL none least squares multidimensional fitting framework
-  *
-  * @param x :: Input function arguments
-  * @param params :: Input data
-  * @param f :: cost function value
-  * @param df :: Derivatives of cost function
-  */
-  void gsl_costFunction_fdf(const gsl_vector * x, void *params, double *f, gsl_vector *df)
-  {
-    *f = gsl_costFunction(x, params);
-    gsl_costFunction_df(x, params, df); 
-  }
-
   /**
    * Constructor. Creates declared -> active index map
    * @param fun :: Pointer to the Fit algorithm
    * @param cf :: ICostFunction
    */
-  GSL_FitData::GSL_FitData(API::IFitFunction* fun,API::ICostFunction* cf):
-  function(fun),costFunc(cf)
+  GSL_FitData::GSL_FitData(boost::shared_ptr<CostFuncLeastSquares>  cf):
+  function(cf->getFittingFunction()),costFunction(cf)
   {
-    p = fun->nActive();
-    n = fun->dataSize(); 
-    Y = fun->getData();
+    gsl_set_error_handler_off();
+    // number of active parameters
+    p = 0;
+    for(size_t i = 0; i < function->nParams(); ++i)
+    {
+      if (function->isActive(i)) ++p;
+    }
+
+    // number of fitting data
+    n = cf->getValues()->size();
 
     bool functionFixed = false;
     if (p == 0)
@@ -155,9 +197,7 @@ namespace CurveFitting
       functionFixed = true;
     }
 
-    sqrtWeightData = fun->getWeights();
-    holdCalculatedData = new double[n];
-    holdCalculatedJacobian =  gsl_matrix_alloc (n, p);
+    //holdCalculatedJacobian =  gsl_matrix_alloc (n, p);
     
     initFuncParams = gsl_vector_alloc(p);
 
@@ -167,16 +207,21 @@ namespace CurveFitting
     }
     else
     {
-      for (size_t i = 0; i < p; i++)
+      size_t ia = 0;
+      for(size_t i=0;i<function->nParams();++i)
       {
-        gsl_vector_set(initFuncParams, i, fun->activeParameter(static_cast<int>(i)));
+        if (function->isActive(i))
+        {
+          gsl_vector_set(initFuncParams, ia, function->activeParameter(i));
+          ++ia;
+        }
       }
     }
 
     int j = 0;
-    for(size_t i=0;i<fun->nParams();++i)
+    for(size_t i=0;i<function->nParams();++i)
     {
-      if (fun->isActive(i))
+      if (function->isActive(i))
       {
         J.m_index.push_back(j);
         j++;
@@ -188,10 +233,8 @@ namespace CurveFitting
 
   GSL_FitData::~GSL_FitData()
   {
-    delete[] holdCalculatedData;
-    gsl_matrix_free(holdCalculatedJacobian);
+    //gsl_matrix_free(holdCalculatedJacobian);
     gsl_vector_free(initFuncParams);
-    delete costFunc;
   }
 
 } // namespace CurveFitting

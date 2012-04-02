@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/Resolution.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -18,7 +19,7 @@ using namespace API;
 
 DECLARE_FUNCTION(Resolution)
 
-void Resolution::functionMW(double* out, const double* xValues, const size_t nData)const
+void Resolution::function1D(double* out, const double* xValues, const size_t nData)const
 {
   if (nData == 0) return;
 
@@ -76,7 +77,7 @@ std::vector<std::string> Resolution::getAttributeNames()const
  * @param attName :: The attribute name
  * @param value :: The new value
  */
-void Resolution::setAttribute(const std::string& attName,const IFitFunction::Attribute& value)
+void Resolution::setAttribute(const std::string& attName,const IFunction::Attribute& value)
 {
   if (attName == "FileName")
   {
@@ -96,7 +97,7 @@ void Resolution::setAttribute(const std::string& attName,const IFitFunction::Att
   }
   else
   {
-    IFitFunction::setAttribute(attName,value);
+    IFunction::setAttribute(attName,value);
   }
 }
 

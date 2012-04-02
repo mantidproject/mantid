@@ -117,7 +117,7 @@ public:
     if (it != _map.end())
       return it->second->createInstance();
     else
-      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.\n", className);
+      throw Exception::NotFoundError("DynamicFactory: "+ className + " is not registered.\n", className);
   }
 
   /// Creates a new instance of the class with the given name, which
@@ -133,7 +133,7 @@ public:
     if (it != _map.end())
       return it->second->createUnwrappedInstance();
     else
-      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.\n", className);
+      throw Exception::NotFoundError("DynamicFactory: "+ className + " is not registered.\n", className);
   }
   
   /// Registers the instantiator for the given class with the DynamicFactory.

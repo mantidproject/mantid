@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Quadratic.h"
+#include "MantidAPI/FunctionFactory.h"
 
 namespace Mantid
 {
@@ -29,7 +30,7 @@ void Quadratic::init()
  * @param xValues :: Array of double x values
  * @param nData :: Array of integer data
  */
-void Quadratic::functionMW(double* out, const double* xValues, const size_t nData)const
+void Quadratic::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& a0 = getParameter("A0");
     const double& a1 = getParameter("A1");
@@ -47,7 +48,7 @@ void Quadratic::functionMW(double* out, const double* xValues, const size_t nDat
  * @param xValues :: Array of double x values
  * @param nData :: Array of integer data
  */
-void Quadratic::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void Quadratic::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     for (size_t i = 0; i < nData; i++) {
         out->set(i,0, 1);

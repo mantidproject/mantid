@@ -6,6 +6,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lambda/lambda.hpp>
 #include <boost/lexical_cast.hpp>

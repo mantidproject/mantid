@@ -4,10 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IFuncMinimizer.h"
-#include "MantidCurveFitting/GSLFunctions.h"
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_multifit_nlin.h>
+#include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/DerivMinimizer.h"
 
 namespace Mantid
 {
@@ -39,41 +37,18 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FRConjugateGradientMinimizer : public IFuncMinimizer
+class DLLExport FRConjugateGradientMinimizer : public DerivMinimizer
 {
 public:
-  /// constructor and destructor
-  ~FRConjugateGradientMinimizer();
-  FRConjugateGradientMinimizer(): m_name("Conjugate gradient (Fletcher-Reeves imp.)") {}
+  /// Constructor.
+  FRConjugateGradientMinimizer():DerivMinimizer()  {}
+  /// Name of the minimizer.
+  std::string name() const {return "Conjugate gradient (Fletcher-Reeves imp.)";}
 
-  /// Overloading base class methods
-  std::string name()const;
-  int iterate();
-  int hasConverged();
-  double costFunctionVal();
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
-  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction);
+protected:
 
-  void initialize(API::IFitFunction* function, const std::string& costFunction);
-
-private:
-  /// name of this minimizer
-  const std::string m_name;
-
-  /// pointer to the GSL solver doing the work
-  gsl_multimin_fdfminimizer *m_gslSolver;
-
-  /// passed information about the derivative etc of fitting function
-  /// rather than the derivative etc of cost function
-  /// used for calculating covariance matrix
-  gsl_multifit_function_fdf m_gslLeastSquaresContainer;
-
-  /// GSL data container
-  GSL_FitData *m_data;
-
-  /// GSL container
-  gsl_multimin_function_fdf m_gslMultiminContainer;
+  /// Return a concrete type to initialize m_gslSolver with
+  virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType();
 
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

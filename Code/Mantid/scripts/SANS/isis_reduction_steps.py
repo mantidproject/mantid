@@ -665,7 +665,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
                     xdim=abs(upp-low)+1
                     ydim=abs(upp2-low2)+1
-                    speclist += detector.spectrum_block(low2, low,nstrips, 'all')+ ','
+                    speclist += detector.spectrum_block(low2, low,ydim, xdim)+ ','                      
                 else:
                     print "error in mask, ignored:  " + x
             elif '>' in x:  # Commands: MASK Ssp1>Ssp2, MASK Hn1>Hn2 and MASK Vn1>Vn2

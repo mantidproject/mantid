@@ -103,11 +103,11 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
+    //double dummy = alg2.getProperty("OutputChi2overDoF");
     // TS_ASSERT_DELTA( dummy, 0.000001,0.000001);
 
     // test the output from fit is what you expect
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     //TS_ASSERT_DELTA( out->getParameter("A"), 0.3 ,0.001);
     //TS_ASSERT_DELTA( out->getParameter("Omega"), 0.4 ,0.001);
    // TS_ASSERT_DELTA( out->getParameter("Phi"), M_PI/4.0 ,0.01);  // 45 degrees

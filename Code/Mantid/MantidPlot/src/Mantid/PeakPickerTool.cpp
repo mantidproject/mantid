@@ -65,8 +65,8 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
                   this,SLOT(algorithmFinished(const QString&)));
   connect(m_fitPropertyBrowser,SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
   connect(m_fitPropertyBrowser,SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
-  connect(m_fitPropertyBrowser,SIGNAL(parameterChanged(const Mantid::API::IFitFunction*)),
-                  this,SLOT(parameterChanged(const Mantid::API::IFitFunction*)));
+  connect(m_fitPropertyBrowser,SIGNAL(parameterChanged(const Mantid::API::IFunction*)),
+                  this,SLOT(parameterChanged(const Mantid::API::IFunction*)));
   connect(m_fitPropertyBrowser,SIGNAL(plotGuess()),this,SLOT(plotGuess()));
   connect(m_fitPropertyBrowser,SIGNAL(plotCurrentGuess()),this,SLOT(plotCurrentGuess()));
   connect(m_fitPropertyBrowser,SIGNAL(removeGuess()),this,SLOT(removeGuess()));
@@ -80,7 +80,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(this,SIGNAL(isOn(bool)),m_fitPropertyBrowser,SLOT(setPeakToolOn(bool)));
   emit isOn(true);
 
-  Mantid::API::CompositeFunction* cf = m_fitPropertyBrowser->compositeFunction();
+  auto cf = m_fitPropertyBrowser->compositeFunction();
   if (m_fitPropertyBrowser->count() == 0 || (m_fitPropertyBrowser->count() == 1 && m_fitPropertyBrowser->isAutoBack()))
   {
     m_init = true;
@@ -117,7 +117,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
     m_changingXMax = false;
     for(size_t i=0;i<cf->nFunctions();i++)
     {
-      Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(cf->getFunction(i));
+      auto pf = dynamic_cast<Mantid::API::IPeakFunction*>(cf->getFunction(i).get());
       if (pf)
       {
         m_width = pf->fwhm();
@@ -616,7 +616,7 @@ void PeakPickerTool::endXChanged(double eX)
  * Slot. Called in response to parameterChanged signal from FitBrowser
  * @param f :: The pointer to the function with the changed parameter
  */
-void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
+void PeakPickerTool::parameterChanged(const Mantid::API::IFunction* f)
 {
   MantidQt::MantidWidgets::PropertyHandler* theHandler = m_fitPropertyBrowser->getHandler();
   MantidQt::MantidWidgets::PropertyHandler* h = theHandler->findHandler(f);
@@ -640,7 +640,7 @@ void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler* h) const
       fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
       if (fc)
       {
-        if (fc->getIFitFunctionIdentifier() == h->ifun())
+        if (fc->getIFunctionIdentifier() == h->ifun().get())
         {
           indexForFC = i;
           break;
@@ -903,7 +903,7 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
     {
       fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
       if (fc)
-        if (fc->getIFitFunctionIdentifier() == h->ifun())
+        if (fc->getIFunctionIdentifier() == h->ifun().get())
         {
           alreadyPlotted = true;
           break;
@@ -914,7 +914,7 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
     if (!alreadyPlotted)
     {
       fc = new FunctionCurve(
-        h->ifun(), QString::fromStdString(m_fitPropertyBrowser->workspaceName()),
+        h->ifun().get(), QString::fromStdString(m_fitPropertyBrowser->workspaceName()),
         //QString::fromStdString(m_fitPropertyBrowser->groupMember()),//m_browser->workspaceName()),
         m_fitPropertyBrowser->workspaceIndex(),
         h->functionName());
@@ -953,7 +953,7 @@ void PeakPickerTool::removePlot(MantidQt::MantidWidgets::PropertyHandler* h)
     fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
     if (fc)
     {
-      if (fc->getIFitFunctionIdentifier() == h->ifun())
+      if (fc->getIFunctionIdentifier() == h->ifun().get())
       {
         indexForFC = i;
         break;

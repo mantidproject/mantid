@@ -1,15 +1,15 @@
-#ifndef FUNCTIONFACTORYTEST_H_
-#define FUNCTIONFACTORYTEST_H_
+#ifndef FunctionFactoryConstraintTest_H_
+#define FunctionFactoryConstraintTest_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/Expression.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidKernel/System.h"
@@ -19,23 +19,23 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class FunctionFactoryTest_FunctA: public ParamFunction, public IFunctionMW
+class FunctionFactoryConstraintTest_FunctA: public ParamFunction, public IFunction1D
 {
   int m_attr;
 public:
-  FunctionFactoryTest_FunctA()
+  FunctionFactoryConstraintTest_FunctA()
   {
     declareParameter("a0");
     declareParameter("a1");
   }
-  std::string name()const{return "FunctionFactoryTest_FunctA";}
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  std::string name()const{return "FunctionFactoryConstraintTest_FunctA";}
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
@@ -75,24 +75,24 @@ public:
   }
 };
 
-class FunctionFactoryTest_FunctB: public ParamFunction, public IFunctionMW
+class FunctionFactoryConstraintTest_FunctB: public ParamFunction, public IFunction1D
 {
 public:
-  FunctionFactoryTest_FunctB()
+  FunctionFactoryConstraintTest_FunctB()
   {
     declareParameter("b0");
     declareParameter("b1");
   }
 
-  std::string name()const{return "FunctionFactoryTest_FunctB";}
+  std::string name()const{return "FunctionFactoryConstraintTest_FunctB";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
@@ -100,26 +100,14 @@ public:
   }
 };
 
-class FunctionFactoryTest_CompFunctA: public CompositeFunctionMW
+class FunctionFactoryConstraintTest_CompFunctA: public CompositeFunction
 {
   std::string m_attr;
 public:
-  FunctionFactoryTest_CompFunctA(){}
+  FunctionFactoryConstraintTest_CompFunctA(){}
 
-  std::string name()const{return "FunctionFactoryTest_CompFunctA";}
+  std::string name()const{return "FunctionFactoryConstraintTest_CompFunctA";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
-  {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
-  {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
   bool hasAttribute(const std::string& attName)const
   {
     if (attName == "attr") return true;
@@ -137,211 +125,38 @@ public:
   }
 };
 
-class FunctionFactoryTest_CompFunctB: public CompositeFunctionMW
+class FunctionFactoryConstraintTest_CompFunctB: public CompositeFunction
 {
 public:
-  FunctionFactoryTest_CompFunctB(){}
+  FunctionFactoryConstraintTest_CompFunctB(){}
 
-  std::string name()const{return "FunctionFactoryTest_CompFunctB";}
+  std::string name()const{return "FunctionFactoryConstraintTest_CompFunctB";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
-  {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
-  {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
 };
 
-DECLARE_FUNCTION(FunctionFactoryTest_FunctA);
-DECLARE_FUNCTION(FunctionFactoryTest_FunctB);
-DECLARE_FUNCTION(FunctionFactoryTest_CompFunctA);
-DECLARE_FUNCTION(FunctionFactoryTest_CompFunctB);
+DECLARE_FUNCTION(FunctionFactoryConstraintTest_FunctA);
+DECLARE_FUNCTION(FunctionFactoryConstraintTest_FunctB);
+DECLARE_FUNCTION(FunctionFactoryConstraintTest_CompFunctA);
+DECLARE_FUNCTION(FunctionFactoryConstraintTest_CompFunctB);
 
-class FunctionFactoryTest : public CxxTest::TestSuite
+class FunctionFactoryConstraintTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FunctionFactoryTest *createSuite() { return new FunctionFactoryTest(); }
-  static void destroySuite( FunctionFactoryTest *suite ) { delete suite; }
+  static FunctionFactoryConstraintTest *createSuite() { return new FunctionFactoryConstraintTest(); }
+  static void destroySuite( FunctionFactoryConstraintTest *suite ) { delete suite; }
 
-  FunctionFactoryTest()
+  FunctionFactoryConstraintTest()
   {
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void testCreateFunction()
-  {
-    IFitFunction* funa = FunctionFactory::Instance().createFunction("FunctionFactoryTest_FunctA");
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
 
-    IFitFunction* funb = FunctionFactory::Instance().createFunction("FunctionFactoryTest_FunctB");
-    TS_ASSERT(funb);
-    TS_ASSERT_EQUALS(funb->parameterName(0),"b0");
-    TS_ASSERT_EQUALS(funb->parameterName(1),"b1");
-    TS_ASSERT_EQUALS(funb->nParams(),2);
-    delete funa;
-    delete funb;
-  }
-
-  void testCreateSimpleDefault()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
-    delete funa;
-  }
-
-  void testCreateSimple()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-    delete funa;
-  }
-
-  void testCreateSimpleWithAttribute()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,attr=\"3\",at_0=0.1,at_1=1.1,at_2=2.1";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"at_0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"at_1");
-    TS_ASSERT_EQUALS(funa->parameterName(2),"at_2");
-    TS_ASSERT_EQUALS(funa->nParams(),3);
-    TS_ASSERT_EQUALS(funa->getParameter(0),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter(1),1.1);
-    TS_ASSERT_EQUALS(funa->getParameter(2),2.1);
-    delete funa;
-  }
-
-  void testCreateComposite()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
-
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(fun);
-    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
-    TS_ASSERT(cf);
-    TS_ASSERT_EQUALS(cf->nParams(),4);
-    TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
-    TS_ASSERT_EQUALS(cf->parameterName(1),"f0.a1");
-    TS_ASSERT_EQUALS(cf->parameterName(2),"f1.b0");
-    TS_ASSERT_EQUALS(cf->parameterName(3),"f1.b1");
-    TS_ASSERT_EQUALS(cf->getParameter(0),0.1);
-    TS_ASSERT_EQUALS(cf->getParameter(1),1.1);
-    TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
-    TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
-    delete fun;
-  }
-
-  void testCreateComposite1()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
-
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(fun);
-    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
-    TS_ASSERT(cf);
-    TS_ASSERT_EQUALS(cf->nParams(),4);
-    TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
-    TS_ASSERT_EQUALS(cf->parameterName(1),"f0.a1");
-    TS_ASSERT_EQUALS(cf->parameterName(2),"f1.b0");
-    TS_ASSERT_EQUALS(cf->parameterName(3),"f1.b1");
-    TS_ASSERT_EQUALS(cf->getParameter(0),0.);
-    TS_ASSERT_EQUALS(cf->getParameter(1),0.);
-    TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
-    TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
-    delete fun;
-  }
-
-  void testCreateComposite2()
-  {
-    std::string fnString = "composite=FunctionFactoryTest_CompFunctB;";
-    fnString += "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
-
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(fun);
-    FunctionFactoryTest_CompFunctB* cf = dynamic_cast<FunctionFactoryTest_CompFunctB*>(fun);
-    TS_ASSERT(cf);
-    TS_ASSERT_EQUALS(cf->nParams(),4);
-    TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
-    TS_ASSERT_EQUALS(cf->parameterName(1),"f0.a1");
-    TS_ASSERT_EQUALS(cf->parameterName(2),"f1.b0");
-    TS_ASSERT_EQUALS(cf->parameterName(3),"f1.b1");
-    TS_ASSERT_EQUALS(cf->getParameter(0),0.);
-    TS_ASSERT_EQUALS(cf->getParameter(1),0.);
-    TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
-    TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
-    TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctB");
-    delete fun;
-  }
-
-  void testCreateComposite3()
-  {
-    std::string fnString = "composite=FunctionFactoryTest_CompFunctA,attr = \"hello\";";
-    fnString += "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2";
-
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(fun);
-    FunctionFactoryTest_CompFunctA* cf = dynamic_cast<FunctionFactoryTest_CompFunctA*>(fun);
-    TS_ASSERT(cf);
-    TS_ASSERT_EQUALS(cf->nParams(),4);
-    TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
-    TS_ASSERT_EQUALS(cf->parameterName(1),"f0.a1");
-    TS_ASSERT_EQUALS(cf->parameterName(2),"f1.b0");
-    TS_ASSERT_EQUALS(cf->parameterName(3),"f1.b1");
-    TS_ASSERT_EQUALS(cf->getParameter(0),0.);
-    TS_ASSERT_EQUALS(cf->getParameter(1),0.);
-    TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
-    TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
-    TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
-    TS_ASSERT(fun->hasAttribute("attr"));
-    TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
-    delete fun;
-  }
-
-  void testCreateCompositeNested()
-  {
-    std::string fnString = "(composite=FunctionFactoryTest_CompFunctA,attr = hello;";
-    fnString += "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2);";
-    fnString += "(composite=FunctionFactoryTest_CompFunctB;";
-    fnString += "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;name=FunctionFactoryTest_FunctA)";
-
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(fun);
-
-    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
-    TS_ASSERT(cf);
-    TS_ASSERT_EQUALS(cf->nFunctions(),2);
-    TS_ASSERT_EQUALS(cf->getFunction(0)->name(),"FunctionFactoryTest_CompFunctA");
-    TS_ASSERT_EQUALS(cf->getFunction(1)->name(),"FunctionFactoryTest_CompFunctB");
-    TS_ASSERT_EQUALS(dynamic_cast<CompositeFunction*>(cf->getFunction(0))->nFunctions(),2);
-    TS_ASSERT_EQUALS(dynamic_cast<CompositeFunction*>(cf->getFunction(1))->nFunctions(),2);
-    delete fun;
-  }
-  
   void testCreateWithConstraint1()
   {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,constraint=0<a0<0.2";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,constraint=0<a0<0.2";
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -354,19 +169,18 @@ public:
     TS_ASSERT_EQUALS(c->check(),0);
 
     funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c->check(),800);
+    TS_ASSERT_EQUALS(c->check(),640);
 
     funa->setParameter("a0",-1);
     TS_ASSERT_EQUALS(c->check(),1000);
-    delete funa;
 
   }
 
   void testCreateWithConstraint2()
   {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,"
+    std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,"
       "constraints=(0<a0<0.2,a1>10)";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -379,31 +193,29 @@ public:
     TS_ASSERT_EQUALS(c0->check(),0);
 
     funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c0->check(),800);
+    TS_ASSERT_EQUALS(c0->check(),640);
 
     funa->setParameter("a0",-1);
     TS_ASSERT_EQUALS(c0->check(),1000);
 
     IConstraint* c1 = funa->getConstraint(1);
     TS_ASSERT(c1);
-    TS_ASSERT_EQUALS(c1->check(),8900);
+    TS_ASSERT_EQUALS(c1->check(),79210);
 
     funa->setParameter("a1",11);
     TS_ASSERT_EQUALS(c1->check(),0);
-
-    delete funa;
 
   }
 
   void testCreateCompositeWithConstraints()
   {
-    std::string fnString = "composite=FunctionFactoryTest_CompFunctA,attr = \"hello\";"
-      "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2,"
+    std::string fnString = "composite=FunctionFactoryConstraintTest_CompFunctA,attr = \"hello\";"
+      "name=FunctionFactoryConstraintTest_FunctA;name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2,"
       "constraints=(b0<1,b1>1)";
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
-    FunctionFactoryTest_CompFunctA* cf = dynamic_cast<FunctionFactoryTest_CompFunctA*>(fun);
+    FunctionFactoryConstraintTest_CompFunctA* cf = dynamic_cast<FunctionFactoryConstraintTest_CompFunctA*>(fun.get());
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(cf->nParams(),4);
     TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
@@ -414,7 +226,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(1),0.);
     TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
-    TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
+    TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryConstraintTest_CompFunctA");
     TS_ASSERT(fun->hasAttribute("attr"));
     TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
 
@@ -428,20 +240,18 @@ public:
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b1",0.5);
-    TS_ASSERT_EQUALS(c->check(),500);
-
-    delete fun;
+    TS_ASSERT_EQUALS(c->check(),250);
   }
 
   void testCreateCompositeWithConstraints1()
   {
-    std::string fnString = "composite=FunctionFactoryTest_CompFunctA,attr = \"hello\";"
-      "name=FunctionFactoryTest_FunctA;name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;"
+    std::string fnString = "composite=FunctionFactoryConstraintTest_CompFunctA,attr = \"hello\";"
+      "name=FunctionFactoryConstraintTest_FunctA;name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2;"
       "constraints=(f0.a0<1,f1.b1>1)";
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
-    FunctionFactoryTest_CompFunctA* cf = dynamic_cast<FunctionFactoryTest_CompFunctA*>(fun);
+    FunctionFactoryConstraintTest_CompFunctA* cf = dynamic_cast<FunctionFactoryConstraintTest_CompFunctA*>(fun.get());
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(cf->nParams(),4);
     TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
@@ -452,7 +262,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(1),0.);
     TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
-    TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
+    TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryConstraintTest_CompFunctA");
     TS_ASSERT(fun->hasAttribute("attr"));
     TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
 
@@ -466,15 +276,13 @@ public:
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b1",0.5);
-    TS_ASSERT_EQUALS(c->check(),500);
-
-    delete fun;
+    TS_ASSERT_EQUALS(c->check(),250);
   }
 
   void testCreateWithTies()
   {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -483,15 +291,12 @@ public:
 
     TS_ASSERT_DELTA(funa->getParameter("a0"),1.21,0.0001);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    delete funa;
-
   }
 
   void testCreateWithTies1()
   {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -500,15 +305,12 @@ public:
 
     TS_ASSERT_EQUALS(funa->getParameter("a0"),4);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
-
-    delete funa;
-
   }
 
   void testCreateWithTies2()
   {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
-    IFitFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -517,18 +319,15 @@ public:
 
     TS_ASSERT_EQUALS(funa->getParameter("a0"),2);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
-
-    delete funa;
-
   }
 
   void testCreateCompositeWithTies()
   {
     std::string fnString = 
-      "name=FunctionFactoryTest_FunctA,ties=(a0=a1=14);"
-      "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties=(f1.b0=f0.a0+f0.a1)";
+      "name=FunctionFactoryConstraintTest_FunctA,ties=(a0=a1=14);"
+      "name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2;ties=(f1.b0=f0.a0+f0.a1)";
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->getParameter(0),0.);
     TS_ASSERT_EQUALS(fun->getParameter(1),0.);
@@ -542,7 +341,7 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter(2),28.);
     TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
 
-    IFitFunction* fun1 = FunctionFactory::Instance().createInitialized(fun->asString());
+    IFunction_sptr fun1 = FunctionFactory::Instance().createInitialized(fun->asString());
 
     fun1->setParameter(0,0.);
     fun1->setParameter(1,0.);
@@ -561,66 +360,8 @@ public:
     TS_ASSERT_EQUALS(fun1->getParameter(2),28.);
     TS_ASSERT_EQUALS(fun1->getParameter(3),789);
 
-    delete fun;
-    delete fun1;
-  }
-
-
-  void testCreateFitFunction_creates_old_IFitFunction()
-  {
-    IFitFunction *gauss = FunctionFactory::Instance().createFitFunction("Gaussian(PeakCentre=17.4e-2,Height=10,Sigma=0.33)");
-    TS_ASSERT(gauss);
-    TS_ASSERT(dynamic_cast<IFitFunction*>(gauss));
-
-    TS_ASSERT_EQUALS(gauss->name(),"Gaussian");
-    TS_ASSERT_EQUALS(gauss->getParameter("PeakCentre"),0.174);
-    TS_ASSERT_EQUALS(gauss->getParameter("Height"),10);
-    TS_ASSERT_EQUALS(gauss->getParameter("Sigma"),0.33);
-  }
-
-  void xtest_All_Function_Name_Retrieval()
-  {
-    // Should be all of them
-    // TODO: Should this be 35 or 36?
-    doFunctionNameTest<IFitFunction>(37, "", "");
-  }
-
-  void xtest_PeakFunction_Name_Retrieval()
-  {
-    // Check peak types
-    doFunctionNameTest<IPeakFunction>(13, "LinearBackground", 
-                                      "Found a background function in the peak function list");
-  }
-  
-  void xtest_BackgroundFunction_Name_Retrieval()
-  {
-    // Check background types
-    doFunctionNameTest<IBackgroundFunction>(4, "Gaussian", 
-                                            "Found a peak function in the background function list");
-  }
-
-
-private:
-
-  template<typename TYPE>
-  void doFunctionNameTest(const size_t nexpected, const std::string & excludedName,
-                          const std::string & error)
-  {
-    std::vector<std::string> names = FunctionFactory::Instance().getFunctionNames<TYPE>();
-    // Due to the other tests and the fact that the function is a singleton
-    TS_ASSERT_EQUALS(names.size(), nexpected); 
-    if( excludedName.empty() == false )
-    {
-      for( size_t i = 0; i < names.size(); ++i )
-      {
-        if( names[i] == excludedName ) 
-        {
-          TS_FAIL(error);
-        }
-      }
-    }
   }
 
 };
 
-#endif /*FUNCTIONFACTORYTEST_H_*/
+#endif /*FunctionFactoryConstraintTest_H_*/

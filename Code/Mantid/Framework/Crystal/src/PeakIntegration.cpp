@@ -281,12 +281,6 @@ namespace Mantid
             g_log.error("Can't locate Fit algorithm");
             throw ;
           }
-          fit_alg->setProperty("InputWorkspace", outputW);
-          fit_alg->setProperty("WorkspaceIndex", i);
-          fit_alg->setProperty("StartX", X[TOFmin]);
-          fit_alg->setProperty("EndX", X[TOFmax]);
-          fit_alg->setProperty("MaxIterations", 5000);
-          //fit_alg->setProperty("Output", "fit");
           //Initialize Ikeda-Carpender function variables
           double Alpha0 = 1.6;
           double Alpha1 = 1.5;
@@ -301,6 +295,12 @@ namespace Mantid
             tie_str << "Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa;
             fit_alg->setProperty("Ties", tie_str.str());
           }
+          fit_alg->setProperty("InputWorkspace", outputW);
+          fit_alg->setProperty("WorkspaceIndex", i);
+          fit_alg->setProperty("StartX", X[TOFmin]);
+          fit_alg->setProperty("EndX", X[TOFmax]);
+          fit_alg->setProperty("MaxIterations", 5000);
+          //fit_alg->setProperty("Output", "fit");
           fit_alg->executeAsSubAlg();
           //MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
       
@@ -319,8 +319,8 @@ namespace Mantid
           //setProperty("OutputWorkspace", ws);
       
           //Evaluate fit at points
-          IFitFunction *out = FunctionFactory::Instance().createInitialized(funct);
-          IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+          IFunction_sptr out = FunctionFactory::Instance().createInitialized(funct);
+          IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
           double *x = new double[n];
           double *y = new double[n];
           //double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
@@ -329,8 +329,8 @@ namespace Mantid
             x[iTOF] = X[TOFmin+iTOF];
             //x[iTOF] = X[TOFmin]+iTOF*dx;
           }
-          pk->setMatrixWorkspace(outputW, i);
-          pk->functionMW(y,x,n);
+          //pk->setMatrixWorkspace(outputW, i);
+          pk->function1D(y,x,n);
       
           //Calculate intensity
           for (iTOF = 0; iTOF < n; iTOF++) if ( !boost::math::isnan(y[iTOF]) && !boost::math::isinf(y[iTOF]))I+= y[iTOF];

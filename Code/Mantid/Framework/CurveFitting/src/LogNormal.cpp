@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LogNormal.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -22,7 +23,7 @@ LogNormal::LogNormal()
 }
 
 
-void LogNormal::functionMW(double* out, const double* xValues, const size_t nData)const
+void LogNormal::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Location");
@@ -43,7 +44,7 @@ void LogNormal::functionMW(double* out, const double* xValues, const size_t nDat
     }
 }
 
-void LogNormal::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void LogNormal::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Location");

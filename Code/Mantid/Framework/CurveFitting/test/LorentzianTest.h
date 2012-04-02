@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Lorentzian.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
@@ -97,20 +97,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // create function you want to fit against
-    CompositeFunctionMW fnWithBk;
+    CompositeFunction fnWithBk;
 
-    LinearBackground *bk = new LinearBackground();
+    IFunction_sptr bk( new LinearBackground() );
     bk->initialize();
 
     bk->setParameter("A0",0.0);
     bk->setParameter("A1",0.0);
-    bk->removeActive(1);  
 
     // set up Lorentzian fitting function
-    Lorentzian* fn = new Lorentzian();
+    boost::shared_ptr<Lorentzian> fn( new Lorentzian() );
     fn->initialize();
     fn->setCentre(11.2);
-    fn->setHeight(100.7);
+    fn->setHeight(100.1);
     fn->setFwhm(2.2);
 
     fnWithBk.addFunction(fn);
@@ -127,25 +126,27 @@ public:
     alg2.setPropertyValue("EndX","20");
 
     // execute fit
-   TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( alg2.execute() )
-    )
+      )
 
-    TS_ASSERT( alg2.isExecuted() );
+      TS_ASSERT( alg2.isExecuted() );
+
+    TS_ASSERT_EQUALS( alg2.getPropertyValue("OutputStatus"), "success" );
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
+    TS_ASSERT_DELTA( dummy, 0.00,0.001);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
-    TS_ASSERT_DELTA( pk->height(), 100.6900 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.1994 ,0.0001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.1988 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0000 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0007 ,0.0001);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
+    TS_ASSERT_DELTA( pk->height(), 100.6879 ,0.01);
+    TS_ASSERT_DELTA( pk->centre(), 11.1995 ,0.01);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.1984 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0030 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0008 ,0.01);
 
-    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().clear();
 
   }
 
@@ -202,14 +203,14 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.08,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
 
-    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.1);
+    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.1);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.2 ,0.1);
 
-    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().clear();
   }
 
   void testAgainstMockDataWithConstraintAndConstBackground()
@@ -233,32 +234,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // create function you want to fit against
-    CompositeFunctionMW fnWithBk;
+    CompositeFunction_sptr fnWithBk( new CompositeFunction() );
 
-    LinearBackground *bk = new LinearBackground();
+    boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
     bk->initialize();
 
     bk->setParameter("A0",0.0);
     bk->setParameter("A1",0.0);
     //bk->removeActive(0);  
-    bk->removeActive(1);
+    bk->fix(1);
 
     // set up Lorentzian fitting function
-    Lorentzian* fn = new Lorentzian();
+    boost::shared_ptr<Lorentzian> fn( new Lorentzian() ); 
     fn->initialize();
     fn->setCentre(11.2);
     fn->setHeight(100.7);
     fn->setFwhm(2.2);
 
     // add constraint to function
-    BoundaryConstraint* bc = new BoundaryConstraint(fn,"PeakCentre",11.3, 12.0);
+    BoundaryConstraint* bc = new BoundaryConstraint(fn.get(),"PeakCentre",11.3, 12.0);
     fn->addConstraint(bc);
 
-    fnWithBk.addFunction(fn);
-    fnWithBk.addFunction(bk);
+    fnWithBk->addFunction(fn);
+    fnWithBk->addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
-    alg2.setPropertyValue("Function",fnWithBk.asString());
+    alg2.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
 
 
     // Set which spectrum to fit against and initial starting values
@@ -276,17 +277,17 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.09,0.01);
+    TS_ASSERT_DELTA( dummy, 0.08,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
-    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.1999 ,0.0001);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
+    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.1);
+    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.1);
+    TS_ASSERT_DELTA( pk->fwhm(), 2.2 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 
-    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().clear();
 
   }
 

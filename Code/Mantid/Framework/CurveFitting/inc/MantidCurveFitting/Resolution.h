@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 
@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Resolution : public API::ParamFunction, public API::IFunctionMW
+class DLLExport Resolution : public API::ParamFunction, public API::IFunction1D
 {
 public:
   /// Constructor
@@ -50,9 +50,9 @@ public:
   /// overwrite IFunction base class methods
   std::string name()const{return "Resolution";}
   virtual const std::string category() const { return "General";}
-  void functionMW(double* out, const double* xValues, const size_t nData)const;
+  void function1D(double* out, const double* xValues, const size_t nData)const;
   ///  function derivatives
-  void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
   {
     (void) out; (void) xValues; (void) nData; //Avoid compiler warning
   }
@@ -62,13 +62,13 @@ public:
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames()const;
   /// Return a value of attribute attName
-  IFitFunction::Attribute getAttribute(const std::string& attName)const
+  IFunction::Attribute getAttribute(const std::string& attName)const
   {
     UNUSED_ARG(attName);
-    return IFitFunction::Attribute(m_fileName, true);
+    return IFunction::Attribute(m_fileName, true);
   }
   /// Set a value to attribute attName
-  void setAttribute(const std::string& attName,const IFitFunction::Attribute& value);
+  void setAttribute(const std::string& attName,const IFunction::Attribute& value);
   /// Check if attribute attName exists
   bool hasAttribute(const std::string& attName)const{return attName == "FileName";}
 

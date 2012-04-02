@@ -85,7 +85,7 @@ public:
     banks.push_back(std::string("bank26"));
 
     DataObjects::Workspace2D_sptr ws = SCDPanelErrors::calcWorkspace(Peakws, banks, .12);
-    calib.setWorkspace(ws, false);
+    calib.setWorkspace(ws);
 
     const int N = (int) ws->dataX(0).size();
 
@@ -119,7 +119,7 @@ public:
     //calib.setParameter("Xoffset",1.0);
     //calib.setParameter("Yrot",90);
 
-    calib.functionMW(out.data(), xVals.data(), (size_t) N);
+    calib.function1D(out.data(), xVals.data(), (size_t) N);
 
     double d = .00001;
     TS_ASSERT_DELTA(out[0], -0.00396681, d);

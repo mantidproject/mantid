@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ExpDecayMuon.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -21,7 +22,7 @@ void ExpDecayMuon::init()
 }
 
 
-void ExpDecayMuon::functionMW(double* out, const double* xValues, const size_t nData)const
+void ExpDecayMuon::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& gA0 = getParameter("A");
     const double& gs = getParameter("Lambda");
@@ -32,7 +33,7 @@ void ExpDecayMuon::functionMW(double* out, const double* xValues, const size_t n
     }
 }
 
-void ExpDecayMuon::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void ExpDecayMuon::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& gA0 = getParameter("A");
     const double& gs = getParameter("Lambda");

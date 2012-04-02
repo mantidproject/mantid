@@ -29,12 +29,13 @@ class QComboBox;
 class QSignalMapper;
 class QMenu;
 class QAction;
+class QTreeWidget;
 
 namespace Mantid
 {
   namespace API
   {
-    class IFitFunction;
+    class IFunction;
     class IPeakFunction;
     class CompositeFunction;
     class Workspace;
@@ -90,14 +91,14 @@ public:
   /// Set new current function
   void setCurrentFunction(PropertyHandler* h)const;
   /// Get the current function
-  const Mantid::API::IFitFunction* theFunction()const;
+  boost::shared_ptr<const Mantid::API::IFunction> theFunction()const;
   /// Update the function parameters
   void updateParameters();
 
   /// Create a new function
   PropertyHandler* addFunction(const std::string& fnName);
   /// Get Composite Function
-  Mantid::API::CompositeFunction* compositeFunction()const{return m_compositeFunction;}
+  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
   /// Get the default function type
   std::string defaultFunctionType()const;
   /// Set the default function type
@@ -111,6 +112,8 @@ public:
   /// Set the default background type
   void setDefaultBackgroundType(const std::string& fnType);
 
+  /// Get the workspace
+  boost::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
   /// Get the input workspace name
   std::string workspaceName()const;
   /// Set the input workspace name
@@ -172,7 +175,7 @@ public:
   QString getConstraintsString()const;
 
   // send parameterChanged signal
-  void sendParameterChanged(const Mantid::API::IFitFunction* f){emit parameterChanged(f);}
+  void sendParameterChanged(const Mantid::API::IFunction* f){emit parameterChanged(f);}
 
   /// Creates and adds the autobackground
   void addAutoBackground();
@@ -226,7 +229,7 @@ signals:
   void startXChanged(double);
   void endXChanged(double);
   void xRangeChanged(double, double);
-  void parameterChanged(const Mantid::API::IFitFunction*);
+  void parameterChanged(const Mantid::API::IFunction*);
   void functionCleared();
   void plotGuess();
   void plotCurrentGuess();
@@ -276,6 +279,8 @@ private slots:
   void saveFunction();
   void loadFunction();
   void loadFunctionFromString();
+  void acceptFit();
+  void closeFit();
 
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
@@ -308,7 +313,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(Mantid::API::IFitFunction* f)const;
+  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f)const;
 
   /// Create a double property and set some settings
   QtProperty* addDoubleProperty(const QString& name)const;
@@ -335,7 +340,7 @@ protected:
   QtProperty *m_rawData;
 
   /// A copy of the edited function
-  Mantid::API::CompositeFunction* m_compositeFunction;
+  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
   QtTreePropertyBrowser* m_browser;
 
@@ -375,7 +380,6 @@ protected:
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
 
-
 private:
   /// load and save function
   void loadFunction(const QString& funcString);
@@ -403,7 +407,7 @@ private:
   /// Check that the properties match the function
   void checkFunction();
 
-  void setCurrentFunction(const Mantid::API::IFitFunction* f)const;
+  void setCurrentFunction(boost::shared_ptr<const Mantid::API::IFunction> f)const;
 
   /// Sets the new workspace to the current one
   virtual void workspaceChange(const QString& wsName);
@@ -431,6 +435,11 @@ private:
 
   /// To display a tip text
   QLabel* m_tip;
+
+  // The widget for choosing the fit function.
+  QDialog* m_fitSelector;
+  // The tree widget containing the fit functions.
+  QTreeWidget* m_fitTree;
   
   /// String property managers for special case attributes such as Filename or Formula
   /// <attribute_name,string_manager>

@@ -5,10 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/IFuncMinimizer.h"
-#include "MantidCurveFitting/GSLFunctions.h"
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_multifit_nlin.h>
+#include "MantidCurveFitting/DerivMinimizer.h"
 
 namespace Mantid
 {
@@ -40,43 +37,21 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport BFGS_Minimizer : public IFuncMinimizer
+class DLLExport BFGS_Minimizer : public DerivMinimizer
 {
 public:
-  /// constructor and destructor
-  ~BFGS_Minimizer();
-  BFGS_Minimizer(): m_name("BFGS") {}
+  /// Constructor.
+  BFGS_Minimizer():DerivMinimizer()  {}
+  /// Name of the minimizer.
+  std::string name() const {return "BFGS_Minimizer";}
 
-  /// Overloading base class methods
-  std::string name()const;
-  int iterate();
-  int hasConverged();
-  double costFunctionVal();
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
-  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction);
-  void initialize(API::IFitFunction* function, const std::string& costFunction);
+protected:
 
-private:
-  /// name of this minimizer
-  const std::string m_name;
+  /// Return a concrete type to initialize m_gslSolver with
+  virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType();
 
-  /// pointer to the GSL solver doing the work
-  gsl_multimin_fdfminimizer *m_gslSolver;
-
-  /// passed information about the derivative etc of fitting function
-  /// rather than the derivative etc of cost function
-  /// used for calculating covariance matrix
-  gsl_multifit_function_fdf m_gslLeastSquaresContainer;
-
-  /// GSL data container
-  GSL_FitData *m_data;
-
-  /// GSL container
-  gsl_multimin_function_fdf m_gslMultiminContainer;
-
-        /// Static reference to the logger class
-        static Kernel::Logger& g_log;
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 };
 
 

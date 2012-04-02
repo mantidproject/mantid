@@ -1164,12 +1164,12 @@ void ConfigDialog::initCurveFittingTab()
   for( size_t i = 0; i < nfuncs; ++i )
   {
     std::string name = allfunctions[i];
-    Mantid::API::IFitFunction* function = function_creator.createFunction(name);
-    if( dynamic_cast<Mantid::API::IBackgroundFunction*>(function) )
+    auto function = function_creator.createFunction(name);
+    if( dynamic_cast<Mantid::API::IBackgroundFunction*>(function.get()) )
     {
       backgroundFunctions->addItem(QString::fromStdString(name));
     }
-    if( dynamic_cast<Mantid::API::IPeakFunction*>(function) )
+    if( dynamic_cast<Mantid::API::IPeakFunction*>(function.get()) )
     {
       defaultPeakShape->addItem(QString::fromStdString(name));
     }

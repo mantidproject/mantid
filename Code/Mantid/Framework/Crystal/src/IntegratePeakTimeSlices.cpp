@@ -44,7 +44,7 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -573,12 +573,6 @@ namespace Mantid
 
                 fit_alg = createSubAlgorithm("Fit");
 
-                fit_alg->setProperty("InputWorkspace", Data);
-                fit_alg->setProperty("WorkspaceIndex", 0);
-                fit_alg->setProperty("StartX", 0.0);
-                fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
-                fit_alg->setProperty("MaxIterations", 5000);
-
                 std::string fun_str = CalculateFunctionProperty_Fit();
 
                 std::string SSS("   Fit string ");
@@ -586,6 +580,12 @@ namespace Mantid
                 g_log.debug(SSS);
 
                 fit_alg->setPropertyValue("Function", fun_str);
+
+                fit_alg->setProperty("InputWorkspace", Data);
+                fit_alg->setProperty("WorkspaceIndex", 0);
+                fit_alg->setProperty("StartX", 0.0);
+                fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
+                fit_alg->setProperty("MaxIterations", 5000);
 
                 std::string tie = getProperty("Ties");
                 if( tie.length() > (size_t)0)

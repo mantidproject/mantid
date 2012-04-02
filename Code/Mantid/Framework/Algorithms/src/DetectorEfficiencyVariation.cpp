@@ -129,7 +129,7 @@ namespace Mantid
         g_log.error() << "The two white beam workspaces size must match.";
         throw;
       }
-      double average = calculateMedian(countRatio, false); // Include zeroes
+      double average = calculateMedian(countRatio, false,makeInstrumentMap(countRatio)).at(0); // Include zeroes
       g_log.notice() << name() << ": The median of the ratio of the integrated counts is: " 
                      << average << std::endl;
       // 

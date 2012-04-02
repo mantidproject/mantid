@@ -5,7 +5,6 @@ import os
 import time
 import sys
 from functools import partial
-from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -31,12 +30,12 @@ class DataReflWidget(BaseWidget):
     """
     ## Widget name
     name = "Data"      
-    instrument_name = 'REF_L'
-    short_name = 'REFL'
+    instrument_name = 'REF_M'
+    short_name = 'REFM'
     peak_pixel_range = []
     background_pixel_range = []
 
-    def __init__(self, parent=None, state=None, settings=None, name="REFL", data_proxy=None):      
+    def __init__(self, parent=None, state=None, settings=None, name="REFM", data_proxy=None):      
         super(DataReflWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
         class SummaryFrame(QtGui.QFrame, ui.reflectometer.ui_refm_reduction.Ui_Frame):
@@ -57,10 +56,7 @@ class DataReflWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            if self.instrument_name == "REF_L":
-                self.set_state(DataSeries(data_class=REFLDataSets))
-            else:
-                self.set_state(DataSeries(data_class=REFMDataSets))
+            self.set_state(DataSeries(data_class=REFMDataSets))
 
     def initialize_content(self):
         self._summary.edited_warning_label.hide()
@@ -108,7 +104,6 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.norm_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_clicked)
         self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
-        self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
@@ -141,10 +136,6 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.norm_x_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.norm_x_max_edit)
         self.connect(self._summary.norm_x_max_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
-        #call_back = partial(self._edit_event, ctrl=self._summary.q_min_edit)
-        #self.connect(self._summary.q_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
-        #call_back = partial(self._edit_event, ctrl=self._summary.q_step_edit)
-        #self.connect(self._summary.q_step_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.tof_bin_width_edit)
         self.connect(self._summary.tof_bin_width_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.angle_offset_edit)
@@ -164,8 +155,6 @@ class DataReflWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
         self._run_number_first_edit = True
-        #call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
-        #self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
         
         call_back = partial(self._edit_event, ctrl=self._summary.det_angle_edit)
         self.connect(self._summary.det_angle_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
@@ -208,15 +197,7 @@ class DataReflWidget(BaseWidget):
         self._det_angle_offset_chk_changed()
         self._direct_pixel_chk_changed()
         
-        # Get instrument selection
-        if self.short_name == "REFL": 
-            self._summary.refl_radio.setChecked(True)
-        else:
-            self._summary.refm_radio.setChecked(True)
-        self.connect(self._summary.refl_radio, QtCore.SIGNAL("clicked()"), self._ref_instrument_selected)
-        self.connect(self._summary.refm_radio, QtCore.SIGNAL("clicked()"), self._ref_instrument_selected)
         self._ref_instrument_selected()
-        self._summary.instrument_group_box.hide()
         self._summary.waiting_label.hide()
         
         # If we do not have access to /SNS, don't display the automated reduction options
@@ -268,7 +249,6 @@ class DataReflWidget(BaseWidget):
         util.set_edited(self._summary.data_low_res_range_switch, False)
         util.set_edited(self._summary.norm_low_res_range_switch, False)
         util.set_edited(self._summary.norm_switch, False)
-        util.set_edited(self._summary.tof_range_switch, False)
         util.set_edited(self._summary.q_min_edit, False)
         util.set_edited(self._summary.q_step_edit, False)
         util.set_edited(self._summary.det_angle_check, False)
@@ -327,57 +307,26 @@ class DataReflWidget(BaseWidget):
         self._summary.angle_edit.setText(scattering_angle_str.strip())
      
     def _ref_instrument_selected(self):
-        if self._summary.refl_radio.isChecked():
-            self.instrument_name = "REF_L"
-            self._summary.center_pix_edit.hide()
-            self._summary.angle_edit.hide()
-            self._summary.angle_unit_label.hide()
-            self._summary.angle_offset_label.show()
-            self._summary.angle_offset_edit.show()
-            self._summary.angle_offset_pm_label.show()
-            self._summary.angle_offset_error_edit.show()
-            self._summary.angle_offset_unit_label.show()
-            self._summary.det_angle_offset_check.hide()
-            self._summary.det_angle_offset_edit.hide()
-            self._summary.det_angle_offset_unit_label.hide()
-            self._summary.det_angle_check.hide()
-            self._summary.det_angle_edit.hide()
-            self._summary.det_angle_unit_label.hide()
-            self._summary.direct_pixel_check.hide()
-            self._summary.direct_pixel_edit.hide()
-            self._summary.q_bins_label.hide()
-            self._summary.tof_bin_width_label.hide()
-            self._summary.tof_bin_width_unit_label.hide()
-            self._summary.tof_bin_width_edit.hide()
-            
-            
-            # Output directory
-            self._summary.outdir_label.hide()
-            self._summary.outdir_edit.hide()
-            self._summary.outdir_browse_button.hide()
-        else:
-            self.instrument_name = "REF_M"
-            self._summary.center_pix_edit.show()
-            self._summary.center_pix_edit.setEnabled(False)
-            self._summary.angle_edit.setEnabled(False)
-            self._summary.angle_edit.show()
-            self._summary.angle_unit_label.show()
-            self._summary.angle_offset_label.hide()
-            self._summary.angle_offset_edit.hide()
-            self._summary.angle_offset_pm_label.hide()
-            self._summary.angle_offset_error_edit.hide()
-            self._summary.angle_offset_unit_label.hide()  
-            self._summary.q_bins_label.hide()
-            self._summary.q_step_edit.hide()
-            self._summary.q_step_label.hide()
-            self._summary.q_step_unit_label.hide()
-            self._summary.q_min_edit.hide()
-            self._summary.q_min_label.hide()
-            self._summary.q_min_unit_label.hide() 
-            self._summary.tof_range_switch.hide()
-            
-            #TODO: allow log binning
-            self._summary.log_scale_chk.hide()
+        self.instrument_name = "REF_M"
+        self._summary.center_pix_edit.show()
+        self._summary.center_pix_edit.setEnabled(False)
+        self._summary.angle_edit.setEnabled(False)
+        self._summary.angle_edit.show()
+        self._summary.angle_unit_label.show()
+        self._summary.angle_offset_label.hide()
+        self._summary.angle_offset_edit.hide()
+        self._summary.angle_offset_pm_label.hide()
+        self._summary.angle_offset_error_edit.hide()
+        self._summary.angle_offset_unit_label.hide()  
+        self._summary.q_bins_label.hide()
+        self._summary.q_step_edit.hide()
+        self._summary.q_step_label.hide()
+        self._summary.q_step_unit_label.hide()
+        self._summary.q_min_edit.hide()
+        self._summary.q_min_label.hide()
+        self._summary.q_min_unit_label.hide() 
+        #TODO: allow log binning
+        self._summary.log_scale_chk.hide()
                  
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
@@ -588,20 +537,6 @@ class DataReflWidget(BaseWidget):
         
         self._edit_event(None, self._summary.norm_switch)
 
-    def _tof_range_clicked(self, is_checked):
-        """
-            This is reached by the TOF range switch
-        """
-        self._summary.tof_min_label.setEnabled(is_checked)
-        self._summary.data_from_tof.setEnabled(is_checked)
-        self._summary.tof_min_label2.setEnabled(is_checked)
-        self._summary.tof_max_label.setEnabled(is_checked)
-        self._summary.data_to_tof.setEnabled(is_checked)
-        self._summary.tof_max_label2.setEnabled(is_checked)
-        #self._summary.plot_tof_btn.setEnabled(is_checked)
-        
-        self._edit_event(None, self._summary.tof_range_switch)
-
     def _plot_count_vs_y(self, is_peak=True):
         """
             Plot counts as a function of high-resolution pixels
@@ -730,9 +665,7 @@ class DataReflWidget(BaseWidget):
             item_widget.setData(QtCore.Qt.UserRole, state)
         
         # Read logs
-        if not in_list and self.short_name == "REFM":
-            self._read_logs()
-        
+        self._read_logs()
         self._reset_warnings()
 
     def _read_logs(self):
@@ -858,11 +791,7 @@ class DataReflWidget(BaseWidget):
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
         
-        if hasattr(state, "TOFstep"):
-            self._summary.tof_bin_width_edit.setText(str(state.TOFstep))
-        else:
-            self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
-            self._tof_range_clicked(state.crop_TOF_range)
+        self._summary.tof_bin_width_edit.setText(str(state.TOFstep))
         
         if hasattr(state, "set_detector_angle"):
             self._summary.det_angle_check.setChecked(state.set_detector_angle)
@@ -912,9 +841,8 @@ class DataReflWidget(BaseWidget):
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
                                                 
-        if self.short_name == "REFM":
-            self._read_logs()
-            self._update_scattering_angle()
+        self._read_logs()
+        self._update_scattering_angle()
 
     def get_state(self):
         """
@@ -927,12 +855,7 @@ class DataReflWidget(BaseWidget):
         # Common Q binning
         q_min = float(self._summary.q_min_edit.text())
         q_step = float(self._summary.q_step_edit.text())
-        q_bins = 0
-        if self.instrument_name == "REF_L":
-            if self._summary.log_scale_chk.isChecked():
-                q_step = -q_step
-        else:
-            q_bins = int(math.ceil(float(self._summary.q_step_edit.text())))
+        q_bins = int(math.ceil(float(self._summary.q_step_edit.text())))
             
         # Angle offset
         if hasattr(m, "angle_offset"):
@@ -963,10 +886,7 @@ class DataReflWidget(BaseWidget):
         return state
     
     def get_editing_state(self):
-        if self.instrument_name == "REF_L":
-            m = REFLDataSets()
-        else:
-            m = REFMDataSets()
+        m = REFMDataSets()
         
         #Peak from/to pixels
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
@@ -993,10 +913,7 @@ class DataReflWidget(BaseWidget):
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
         
-        if hasattr(m, "TOFstep"):
-            m.TOFstep = float(self._summary.tof_bin_width_edit.text())
-        else:
-            m.crop_TOF_range = self._summary.tof_range_switch.isChecked()
+        m.TOFstep = float(self._summary.tof_bin_width_edit.text())
     
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]
@@ -1017,11 +934,6 @@ class DataReflWidget(BaseWidget):
         roi1_to = int(self._summary.norm_background_to_pixel1.text())
         m.NormBackgroundRoi = [roi1_from, roi1_to]
         
-        #m.q_min = float(self._summary.q_min_edit.text())
-        #m.q_step = float(self._summary.q_step_edit.text())
-        #if self._summary.log_scale_chk.isChecked():
-        #    m.q_step = -m.q_step
-
         if hasattr(m, "set_detector_angle"):
             m.set_detector_angle = self._summary.det_angle_check.isChecked()
             m.detector_angle = util._check_and_get_float_line_edit(self._summary.det_angle_edit)
@@ -1030,8 +942,4 @@ class DataReflWidget(BaseWidget):
             m.set_direct_pixel = self._summary.direct_pixel_check.isChecked()
             m.direct_pixel = util._check_and_get_float_line_edit(self._summary.direct_pixel_edit)
 
-        ##
-        # Add here states that are data file dependent
-        ##
-          
         return m

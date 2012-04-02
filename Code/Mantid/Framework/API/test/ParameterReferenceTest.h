@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 
-class ParameterReferenceTest_Fun: public ParamFunction, public IFunctionMW
+class ParameterReferenceTest_Fun: public ParamFunction, public IFunction1D
 {
 public:
   ParameterReferenceTest_Fun()
@@ -21,7 +21,7 @@ public:
     declareParameter("c");
   }
   std::string name()const{return "ParameterReferenceTest_Fun";}
-  void functionMW(double*, const double*, const size_t)const
+  void function1D(double*, const double*, const size_t)const
   {
   }
 };
@@ -46,16 +46,16 @@ public:
 
   void testComposite()
   {
-    CompositeFunctionMW* cf = new CompositeFunctionMW;
-    ParameterReferenceTest_Fun* f0 = new ParameterReferenceTest_Fun;
+    CompositeFunction* cf = new CompositeFunction;
+    IFunction_sptr f0 = IFunction_sptr(new ParameterReferenceTest_Fun);
 
-    CompositeFunctionMW* f1 = new CompositeFunctionMW;
+    CompositeFunction_sptr f1 = CompositeFunction_sptr(new CompositeFunction);
 
-    ParameterReferenceTest_Fun* f1_0 = new ParameterReferenceTest_Fun;
-    ParameterReferenceTest_Fun* f1_1 = new ParameterReferenceTest_Fun;
-    CompositeFunctionMW* f1_2 = new CompositeFunctionMW;
-    ParameterReferenceTest_Fun* f1_2_0 = new ParameterReferenceTest_Fun;
-    ParameterReferenceTest_Fun* f1_2_1 = new ParameterReferenceTest_Fun;
+    IFunction_sptr f1_0 = IFunction_sptr(new ParameterReferenceTest_Fun);
+    IFunction_sptr f1_1 = IFunction_sptr(new ParameterReferenceTest_Fun);
+    CompositeFunction_sptr f1_2 = CompositeFunction_sptr(new CompositeFunction);
+    IFunction_sptr f1_2_0 = IFunction_sptr(new ParameterReferenceTest_Fun);
+    IFunction_sptr f1_2_1 = IFunction_sptr(new ParameterReferenceTest_Fun);
 
     f1_2->addFunction(f1_2_0);
     f1_2->addFunction(f1_2_1);
@@ -83,7 +83,7 @@ public:
     ParameterReference r10(cf,10);
     ParameterReference r11(cf,11);
 
-    ParameterReference r12(f1_2_1,1);
+    ParameterReference r12(f1_2_1.get(),1);
 
     TS_ASSERT_EQUALS(cf->getParameterIndex(r12),13);
     TS_ASSERT_EQUALS(f1->getParameterIndex(r12),10);
@@ -93,35 +93,34 @@ public:
     TS_ASSERT_EQUALS(cf->getContainingFunction(r12),f1);
     TS_ASSERT_EQUALS(f1->getContainingFunction(r12),f1_2);
     TS_ASSERT_EQUALS(f1_2->getContainingFunction(r12),f1_2_1);
-    TS_ASSERT_EQUALS(f1_2_1->getContainingFunction(r12),f1_2_1);
 
-    TS_ASSERT_EQUALS(r0.getFunction(),f0);
-    TS_ASSERT_EQUALS(r1.getFunction(),f0);
-    TS_ASSERT_EQUALS(r2.getFunction(),f0);
+    TS_ASSERT_EQUALS(r0.getFunction(),f0.get());
+    TS_ASSERT_EQUALS(r1.getFunction(),f0.get());
+    TS_ASSERT_EQUALS(r2.getFunction(),f0.get());
 
     TS_ASSERT_EQUALS(r0.getIndex(),0);
     TS_ASSERT_EQUALS(r1.getIndex(),1);
     TS_ASSERT_EQUALS(r2.getIndex(),2);
 
-    TS_ASSERT_EQUALS(r3.getFunction(),f1_0);
-    TS_ASSERT_EQUALS(r4.getFunction(),f1_0);
-    TS_ASSERT_EQUALS(r5.getFunction(),f1_0);
+    TS_ASSERT_EQUALS(r3.getFunction(),f1_0.get());
+    TS_ASSERT_EQUALS(r4.getFunction(),f1_0.get());
+    TS_ASSERT_EQUALS(r5.getFunction(),f1_0.get());
 
     TS_ASSERT_EQUALS(r3.getIndex(),0);
     TS_ASSERT_EQUALS(r4.getIndex(),1);
     TS_ASSERT_EQUALS(r5.getIndex(),2);
 
-    TS_ASSERT_EQUALS(r6.getFunction(),f1_1);
-    TS_ASSERT_EQUALS(r7.getFunction(),f1_1);
-    TS_ASSERT_EQUALS(r8.getFunction(),f1_1);
+    TS_ASSERT_EQUALS(r6.getFunction(),f1_1.get());
+    TS_ASSERT_EQUALS(r7.getFunction(),f1_1.get());
+    TS_ASSERT_EQUALS(r8.getFunction(),f1_1.get());
 
     TS_ASSERT_EQUALS(r6.getIndex(),0);
     TS_ASSERT_EQUALS(r7.getIndex(),1);
     TS_ASSERT_EQUALS(r8.getIndex(),2);
 
-    TS_ASSERT_EQUALS(r9.getFunction(),f1_2_0);
-    TS_ASSERT_EQUALS(r10.getFunction(),f1_2_0);
-    TS_ASSERT_EQUALS(r11.getFunction(),f1_2_0);
+    TS_ASSERT_EQUALS(r9.getFunction(),f1_2_0.get());
+    TS_ASSERT_EQUALS(r10.getFunction(),f1_2_0.get());
+    TS_ASSERT_EQUALS(r11.getFunction(),f1_2_0.get());
 
     TS_ASSERT_EQUALS(r9.getIndex(),0);
     TS_ASSERT_EQUALS(r10.getIndex(),1);

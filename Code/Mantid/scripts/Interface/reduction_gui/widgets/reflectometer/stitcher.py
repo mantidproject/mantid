@@ -182,8 +182,10 @@ class StitcherWidget(BaseWidget):
             Initialize the content of the frame
         """
         # Apply and save buttons
+        self.connect(self._content.pick_unity_range_btn, QtCore.SIGNAL("clicked()"), self._pick_specular_ridge)        
         self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
         self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
+        self._content.min_q_unity_edit.setText("0.00")
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
         
@@ -215,11 +217,30 @@ class StitcherWidget(BaseWidget):
         except:
             mtd.sendLogMessage("Could not scale data")
             
+    def _pick_specular_ridge(self):
+        from LargeScaleStructures import data_stitching
+        refID = 0
+        if len(self._workspace_list)==0:
+            return
+        
+        for i in range(len(self._workspace_list)):
+            item = self._workspace_list[i]
+            if item.is_selected():
+                refID = i
+        
+        def call_back(xmin, xmax):
+            self._content.min_q_unity_edit.setText("%-g" % xmin)
+            self._content.max_q_unity_edit.setText("%-g" % xmax)
+                
+        if mtd.workspaceExists(self._workspace_list[refID].name):
+            data_stitching.RangeSelector.connect([self._workspace_list[refID].name], call_back)
+            
     def _scale_data_sets(self):
         """
             Perform auto-scaling
         """
         scale_to_unity = self._content.scale_to_one_chk.isChecked()
+        min_q_unity = float(self._content.min_q_unity_edit.text())
         max_q_unity = float(self._content.max_q_unity_edit.text())
         
         s = Stitcher()
@@ -242,7 +263,7 @@ class StitcherWidget(BaseWidget):
                 refID = i
                 
                 if scale_to_unity:
-                    scale = data.scale_to_unity(xmin, min(xmax,max_q_unity))
+                    scale = data.scale_to_unity(max(xmin,min_q_unity), min(xmax,max_q_unity))
                     data.set_scale(scale)
                     item.set_scale(scale)
             
@@ -296,6 +317,7 @@ class StitcherWidget(BaseWidget):
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(plot_name)
                 l=g.activeLayer()
+                l.logYlinX()
                 if self._settings.instrument_name == "REFL":
                     l.setTitle("Reflectivity")
                 else:

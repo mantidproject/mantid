@@ -52,13 +52,13 @@ public:
 
 
     // set up fitting function
-    LinearBackground linB;
-    linB.initialize();
+    IFunction_sptr linB( new LinearBackground() );
+    linB->initialize();
 
-    linB.setParameter("A0",1.0);
+    linB->setParameter("A0",1.0);
 
     //alg2.setFunction(linB);
-    alg2.setPropertyValue("Function",linB.asString());
+    alg2.setProperty("Function",linB);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -76,7 +76,7 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
 
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA( out->getParameter("A0"),0.0, 0.01);
     TS_ASSERT_DELTA( out->getParameter("A1"),1.0, 0.0003);
 

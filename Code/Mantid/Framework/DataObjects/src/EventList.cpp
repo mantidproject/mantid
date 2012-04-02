@@ -158,12 +158,13 @@ namespace DataObjects
     double inf = std::numeric_limits<double>::infinity();
     double ninf = -inf;
 
+    // For thread safety
+    inSpec->lockData();
+
     // Get the input histogram
     const MantidVec & X = inSpec->readX();
-    // To be more thread-safe, we are getting a COPY of the vectors.
-    // This is probably because the MRU can drop off, deleting the vector while we are using it.
-    MantidVec Y = inSpec->readY();
-    MantidVec E = inSpec->readE();
+    const MantidVec & Y = inSpec->readY();
+    const MantidVec & E = inSpec->readE();
     if (Y.size()+1 != X.size())
       throw std::runtime_error("Expected a histogram (X vector should be 1 longer than the Y vector)");
 
@@ -231,6 +232,8 @@ namespace DataObjects
 
     // Manually set that this is sorted by TOF, since it is. This will make it "threadSafe" in other algos.
     this->setSortOrder( TOF_SORT );
+
+    inSpec->unlockData();
   }
 
 
@@ -858,6 +861,25 @@ namespace DataObjects
   {
     this->events.reserve(num);
   }
+
+
+  // ---------------------------------------------------------
+  /** Lock access to the data so that it does not get deleted while reading.
+   * Call this BEFORE readY() and readE().
+   */
+  void EventList::lockData() const
+  {
+    m_lockedMRU = true;
+  }
+
+  /** Unlock access to the data so that it can again get deleted.
+   * Call this once you are done with using the Y or E data.
+   */
+  void EventList::unlockData() const
+  {
+    m_lockedMRU = false;
+  }
+
 
 
   // ==============================================================================================
@@ -1502,11 +1524,11 @@ namespace DataObjects
     if (yData == NULL)
     {
       //Create the MRU object
-      yData = new MantidVecWithMarker(this->m_specNo);
+      yData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
       // prepare to update the uncertainties
+      MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
       mru->ensureEnoughBuffersE(thread);
-      MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo);
 
       // see if E should be calculated;
       bool skipErrors = (eventType == TOF);
@@ -1515,18 +1537,13 @@ namespace DataObjects
       this->generateHistogram( *refX, yData->m_data, eData->m_data, skipErrors);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * yOldData = mru->insertY(thread, yData);
+      mru->insertY(thread, yData);
       if (!skipErrors)
       {
-        MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
-        if (eOldData)
-          delete eOldData;
+        mru->insertE(thread, eData);
       }
       else delete eData; // Need to clear up this memory if it wasn't put into MRU
 
-      //And clear up the memory of the old one, if it is dropping out.
-      if (yOldData)
-        delete yOldData;
     }
     return yData->m_data;
   }
@@ -1551,18 +1568,14 @@ namespace DataObjects
     if (eData == NULL)
     {
       //Create the MRU object
-      eData = new MantidVecWithMarker(this->m_specNo);
+      eData = new MantidVecWithMarker(this->m_specNo, this->m_lockedMRU);
 
       //Now use that to get E -- Y values are generated from another function
       MantidVec Y_ignored;
       this->generateHistogram(*refX, Y_ignored, eData->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
-
-      //And clear up the memory of the old one, if it is dropping out.
-      if (eOldData)
-        delete eOldData;
+      mru->insertE(thread, eData);
     }
     return eData->m_data;
   }

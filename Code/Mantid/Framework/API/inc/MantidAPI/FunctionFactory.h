@@ -9,6 +9,8 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid
 {
         
@@ -26,7 +28,7 @@ namespace API
 //----------------------------------------------------------------------
 // More forward declarations
 //----------------------------------------------------------------------
-  class IFitFunction;
+  class IFunction;
   class CompositeFunction;
   class Expression;
 
@@ -60,20 +62,20 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class MANTID_API_DLL FunctionFactoryImpl : public Kernel::DynamicFactory<IFitFunction>
+  class MANTID_API_DLL FunctionFactoryImpl : public Kernel::DynamicFactory<IFunction>
   {
   public:
     /**Creates an instance of a function
      * @param type :: The function's type
      * @return A pointer to the created function
      */
-    IFitFunction* createFunction(const std::string& type) const;
+    boost::shared_ptr<IFunction> createFunction(const std::string& type) const;
 
     ///Creates an instance of a function
-    IFitFunction* createInitialized(const std::string& input) const;
+    boost::shared_ptr<IFunction> createInitialized(const std::string& input) const;
 
     ///Creates an instance of a function
-    IFitFunction* createFitFunction(const std::string& input) const;
+    boost::shared_ptr<IFunction> createFitFunction(const std::string& input) const;
 
     /// Query available functions based on the template type
     template<typename FunctionType>
@@ -92,26 +94,32 @@ namespace API
     virtual ~FunctionFactoryImpl();
 
     /// These methods shouldn't be used to create functions
-    using Kernel::DynamicFactory<IFitFunction>::create;
-    using Kernel::DynamicFactory<IFitFunction>::createUnwrapped;
+    using Kernel::DynamicFactory<IFunction>::create;
+    using Kernel::DynamicFactory<IFunction>::createUnwrapped;
 
     /// Create a simple function
-    IFitFunction* createSimple(const Expression& expr)const;
+    boost::shared_ptr<IFunction> createSimple(
+      const Expression& expr, 
+      std::map<std::string,std::string>& parentAttributes
+      )const;
     /// Create a composite function
-    CompositeFunction* createComposite(const Expression& expr)const;
+    boost::shared_ptr<CompositeFunction> createComposite(
+      const Expression& expr, 
+      std::map<std::string,std::string>& parentAttributes
+      )const;
     ///Creates an instance of a function
-    IFitFunction* createFitFunction(const Expression& expr) const;
+    boost::shared_ptr<IFunction> createFitFunction(const Expression& expr) const;
 
     /// Throw an exception
     void inputError(const std::string& str="")const;
     /// Add constraints to the created function
-    void addConstraints(IFitFunction* fun,const Expression& expr)const;
+    void addConstraints(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add a single constraint to the created function
-    void addConstraint(IFitFunction* fun,const Expression& expr)const;
+    void addConstraint(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add ties to the created function
-    void addTies(IFitFunction* fun,const Expression& expr)const;
+    void addTies(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add a tie to the created function
-    void addTie(IFitFunction* fun,const Expression& expr)const;
+    void addTie(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
 
     ///static reference to the logger class
     Kernel::Logger& g_log;
@@ -132,12 +140,11 @@ namespace API
     for( std::vector<std::string>::const_iterator it = names.begin(); 
          it != names.end(); ++it )
     {
-      IFitFunction *func = this->createFitFunction(*it);
-      if( dynamic_cast<FunctionType*>(func) )
+      boost::shared_ptr<IFunction> func = this->createFitFunction(*it);
+      if ( func && dynamic_cast<FunctionType*>(func.get()) )
       {
         typeNames.push_back(*it);
       }
-      delete func;
     }
     return typeNames;
   }
@@ -150,5 +157,15 @@ namespace API
         
 } // namespace API
 } // namespace Mantid
+
+/**
+ * Macro for declaring a new type of function to be used with the FunctionFactory
+ */
+#define DECLARE_FUNCTION(classname) \
+        namespace { \
+        Mantid::Kernel::RegistrationHelper register_function_##classname( \
+  ((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)) \
+        , 0)); \
+        }
 
 #endif /*MANTID_API_FUNCTIONFACTORY_H_*/

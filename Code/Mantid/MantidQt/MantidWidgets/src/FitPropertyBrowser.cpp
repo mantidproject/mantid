@@ -7,7 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -60,6 +60,7 @@
 #include <QClipboard>
 #include <QSignalMapper>
 #include <QMetaMethod>
+#include <QTreeWidget>
 
 #include <algorithm>
 
@@ -110,7 +111,7 @@ protected:
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui)
 :QDockWidget("Fit Function",parent),
 m_logValue(NULL),
-m_compositeFunction(0),
+m_compositeFunction(),
 m_changeSlotsEnabled(false),
 m_guessOutputName(true),
 m_currentHandler(0),
@@ -132,7 +133,7 @@ m_mantidui(mantidui)
   }
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not loaded
-  boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
+  boost::shared_ptr<Mantid::API::IFunction> f = boost::shared_ptr<Mantid::API::IFunction>(
     Mantid::API::FunctionFactory::Instance().createFitFunction("Gaussian"));
   if (m_autoBgName.toLower() == "none")
   {
@@ -202,11 +203,12 @@ void FitPropertyBrowser::init()
                << "Simplex"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
-               << "BFGS";
+               << "BFGS"
+                << "Levenberg-MarquardtMD";
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares"
-                  << "Ignore positive peaks";
+  m_costFunctions << "Least squares";
+                  //<< "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
@@ -495,7 +497,6 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString& item)
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
-  if (m_compositeFunction) delete m_compositeFunction;
 }
 
 /// Get handler to the root composite function
@@ -517,19 +518,87 @@ void FitPropertyBrowser::addFunction()
 {
   QtBrowserItem * ci = m_browser->currentItem();
   // Find the function which has ci as its top browser item 
-  const Mantid::API::CompositeFunction* cf = getHandler()->findCompositeFunction(ci);
+  auto cf = getHandler()->findCompositeFunction(ci);
   if ( !cf ) return;
   int i = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
   bool ok = false;
-  QString fnName = 
-    QInputDialog::getItem(this, "MantidPlot - Fit", "Select function type", m_registeredFunctions,i,false,&ok);
-  if (ok)
+  
+  // Declare new widget for picking fit functions
+  m_fitSelector = new QDialog();
+  m_fitSelector->setModal(true);
+  //QTreeWidget *m_fitTree = new QTreeWidget();
+  m_fitTree = new QTreeWidget;
+
+  // Add functions to each of the categories. If it appears in more than one category then add to both
+  // Store in a map. Key = category. Value = vector of fit functions belonging to that category.
+  std::map<std::string, std::vector<std::string> > categories;
+  for (int i=0; i<m_registeredFunctions.size(); ++i)
   {
-    PropertyHandler* h = getHandler()->findHandler(cf);
-    h->addFunction(fnName.toStdString());
+    boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().createFitFunction(m_registeredFunctions[i].toStdString());
+    std::vector<std::string> tempCategories = f->categories();
+    for (int j=0; j<tempCategories.size(); ++j)
+    {
+      categories[tempCategories[j] ].push_back(m_registeredFunctions[i].toStdString());
+    }
   }
-  emit functionChanged();
+  
+  // Construct the QTreeWidget based on the map information of categories and their respective fit functions.
+  std::map<std::string, std::vector<std::string> >::const_iterator sItr = categories.end();
+  for (std::map<std::string, std::vector<std::string> >::const_iterator itr = categories.begin(); itr != sItr; ++itr)
+  {
+    QTreeWidgetItem *category = new QTreeWidgetItem(m_fitTree);
+    category->setText(0, QString::fromStdString(itr->first) );
+    
+    std::vector<std::string>::const_iterator fitItrEnd = itr->second.end();
+    for (std::vector<std::string>::const_iterator fitItrBegin = itr->second.begin(); fitItrBegin != fitItrEnd; ++fitItrBegin)
+    {
+      QTreeWidgetItem *fit = new QTreeWidgetItem(category);
+      int num(std::distance(itr->second.begin(), fitItrBegin));
+      fit->setText(0, QString::fromStdString(fitItrBegin[0]) );      
+    }
+  }
+
+  //Set the layout of the widget.
+  m_fitTree->setToolTip("Select a function type and press OK.");
+  m_fitTree->setHeaderLabel("Fit - Select function type");
+  QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+  connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptFit()));
+  connect(buttonBox, SIGNAL(rejected()), this, SLOT(closeFit()));
+  connect(m_fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(acceptFit()));
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(m_fitTree);
+  layout->addWidget(buttonBox);
+  m_fitSelector->setLayout(layout);
+  m_fitSelector->show();
 }
+
+
+void FitPropertyBrowser::acceptFit()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  boost::shared_ptr<const Mantid::API::CompositeFunction> cf = getHandler()->findCompositeFunction(ci);
+  if ( !cf )
+    return;
+
+  QList<QTreeWidgetItem*> items(m_fitTree->selectedItems() );
+  if (items.size() != 1)
+    return;
+  
+  if (items[0]->parent() == NULL)
+    return;
+
+  PropertyHandler* h = getHandler()->findHandler(cf);
+  h->addFunction(items[0]->text(0).toStdString());
+  emit functionChanged();
+
+  closeFit();
+}
+
+void FitPropertyBrowser::closeFit()
+{
+  m_fitSelector->close();
+}
+
 
 /// Create CompositeFunction
 void FitPropertyBrowser::createCompositeFunction(const QString& str)
@@ -537,25 +606,24 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
  if (m_compositeFunction)
   {
     emit functionRemoved();
-    delete m_compositeFunction;
     m_autoBackground = NULL;
   }
   if (str.isEmpty())
   {
-    m_compositeFunction = new Mantid::API::CompositeFunctionMW();
+    m_compositeFunction.reset( new Mantid::API::CompositeFunction );
   }
   else
   {
-    Mantid::API::IFitFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
+    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
     if (!f)
     {
       createCompositeFunction();
       return;
     }
-    Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f);
-    if (!cf || (cf->name() != "CompositeFunctionMW" && cf->name() != "MultiBG"))
+    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
+    if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG"))
     {
-      m_compositeFunction = new Mantid::API::CompositeFunctionMW();
+      m_compositeFunction.reset( new Mantid::API::CompositeFunction );
       m_compositeFunction->addFunction(f);
     }
     else
@@ -565,7 +633,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
   }
   setWorkspace(m_compositeFunction);
 
-  PropertyHandler* h = new PropertyHandler(m_compositeFunction,NULL,this);
+  PropertyHandler* h = new PropertyHandler(m_compositeFunction,Mantid::API::CompositeFunction_sptr(),this);
   m_compositeFunction->setHandler(h);
   setCurrentFunction(h);
 
@@ -869,6 +937,19 @@ void FitPropertyBrowser::setDefaultBackgroundType(const std::string& fnType)
   setDefaultFunctionType(fnType);
 }
 
+boost::shared_ptr<Mantid::API::Workspace> FitPropertyBrowser::getWorkspace() const
+{
+  std::string wsName = workspaceName();
+  if (wsName.empty()) return boost::shared_ptr<Mantid::API::Workspace>();
+  try
+  {
+    return Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+  }
+  catch(...)
+  {
+    return boost::shared_ptr<Mantid::API::Workspace>();
+  }
+}
 
 /// Get the input workspace name
 std::string FitPropertyBrowser::workspaceName()const
@@ -971,10 +1052,10 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       PropertyHandler* h = getHandler()->findHandler(prop);
       if (!h) return;
       //if (!h->parentHandler()) return;
-      Mantid::API::IFitFunction* f = h->changeType(prop);
+      auto f = h->changeType(prop);
       if (!h->parentHandler())
       {
-        m_compositeFunction = dynamic_cast<Mantid::API::CompositeFunction*>(f);
+        m_compositeFunction = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
       }
       if (f) setCurrentFunction(f);
       emit functionChanged();
@@ -1133,7 +1214,7 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
 
     QString str = m_stringManager->value(prop);
     Mantid::API::ParameterTie* tie = 
-      new Mantid::API::ParameterTie(compositeFunction(),parName.toStdString());
+      new Mantid::API::ParameterTie(compositeFunction().get(),parName.toStdString());
     try
     {
       tie->set(str.toStdString());
@@ -1237,8 +1318,7 @@ void FitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
-      Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
+    auto f = Mantid::API::FunctionFactory::Instance().createFitFunction(fnName);
     m_registeredFunctions << qfnName;
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
@@ -1286,7 +1366,7 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler* h)const
 /** Set new current function
  * @param f :: New current function
  */
-void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFitFunction* f)const
+void FitPropertyBrowser::setCurrentFunction(Mantid::API::IFunction_const_sptr f)const
 {
   setCurrentFunction(getHandler()->findHandler(f));
 }
@@ -1316,32 +1396,33 @@ void FitPropertyBrowser::fit()
     std::string funStr;
     if (m_compositeFunction->name() == "MultiBG")
     {
-      std::string ties;
-      Mantid::API::Expression funExpr;
-      funExpr.parse(m_compositeFunction->asString());
-      funExpr.toList(";");
-      for(size_t i = 0; i < funExpr.size(); ++i)
-      {
-        const Mantid::API::Expression& e = funExpr[i];
-        if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
-        {
-          ties = e[0].name() + "=(" + e[1].str() + ")";
-        }
-      }
-      funStr = "composite=MultiBG;";
-      for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
-      {
-        Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(m_compositeFunction->getFunction(i));
-        if (!f) continue;
-        funStr += f->asString();
-        if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
-        {
-          funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
-            boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
-        }
-        funStr += ";";
-      }
-      funStr += ties;
+      //std::string ties;
+      //Mantid::API::Expression funExpr;
+      //funExpr.parse(*m_compositeFunction);
+      //funExpr.toList(";");
+      //for(size_t i = 0; i < funExpr.size(); ++i)
+      //{
+      //  const Mantid::API::Expression& e = funExpr[i];
+      //  if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
+      //  {
+      //    ties = e[0].name() + "=(" + e[1].str() + ")";
+      //  }
+      //}
+      //funStr = "composite=MultiBG;";
+      //for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
+      //{
+      //  Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(m_compositeFunction->getFunction(i));
+      //  if (!f) continue;
+      //  funStr += f->asString();
+      //  if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
+      //  {
+      //    funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
+      //      boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
+      //  }
+      //  funStr += ";";
+      //}
+      //funStr += ties;
+      funStr = "";
     }
     else if (m_compositeFunction->nFunctions() > 1)
     {
@@ -1364,34 +1445,35 @@ void FitPropertyBrowser::fit()
     {
       Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
     }
-    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
-    {
-      QMap<QString,QString> algParams;
-      algParams["InputWorkspace"] = QString::fromStdString(wsName);
-      algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
-      algParams["StartX"] = QString::number(startX());
-      algParams["EndX"] = QString::number(endX());
-      algParams["Output"] = QString::fromStdString(outputName());
-      algParams["Function"] = QString::fromStdString(funStr);
-      algParams["Minimizer"] = QString::fromStdString(minimizer());
-      algParams["CostFunction"] = QString::fromStdString(costFunction());
-      emit executeFit("Fit",algParams,this);
-    }
-    else
-    {
+    //if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+    //{
+    //  QMap<QString,QString> algParams;
+    //  algParams["InputWorkspace"] = QString::fromStdString(wsName);
+    //  algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
+    //  algParams["StartX"] = QString::number(startX());
+    //  algParams["EndX"] = QString::number(endX());
+    //  algParams["Output"] = QString::fromStdString(outputName());
+    //  algParams["Function"] = QString::fromStdString(funStr);
+    //  algParams["Minimizer"] = QString::fromStdString(minimizer());
+    //  algParams["CostFunction"] = QString::fromStdString(costFunction());
+    //  emit executeFit("Fit",algParams,this);
+    //}
+    //else
+    //{
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
+      alg->setPropertyValue("Function",funStr);
       alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
       alg->setProperty("StartX",startX());
       alg->setProperty("EndX",endX());
       alg->setPropertyValue("Output",outputName());
-      alg->setPropertyValue("Function",funStr);
       alg->setPropertyValue("Minimizer",minimizer());
       alg->setPropertyValue("CostFunction",costFunction());
       observeFinish(alg);
       alg->executeAsync();
-    }
+    //}
+
   }
   catch(std::exception& e)
   {
@@ -1734,7 +1816,7 @@ void FitPropertyBrowser::addTie()
   if (!h) return;
   if (!h->isParameter(paramProp)) return;
 
-  const Mantid::API::IFitFunction* f = h->function();
+  auto f = h->function();
   if (!f) return;
 
   bool ok = false;
@@ -1767,16 +1849,13 @@ void FitPropertyBrowser::addTieToFunction()
   int iPar = -1;
   for(size_t i=0;i<m_compositeFunction->nParams();i++)
   {
-    Mantid::API::ParameterReference ref(m_compositeFunction,i);
-    Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(ref.getFunction());
-    if (!fun)
-    {
-      throw std::runtime_error("IFitFunction expected but func function of another type");
-    }
+    Mantid::API::ParameterReference ref(m_compositeFunction.get(),i);
+    Mantid::API::IFunction* fun = ref.getFunction();
+
     // Pick out parameters with the same name as the one we're tying from
     if ( fun->parameterName(static_cast<int>(ref.getIndex())) == parName )
     {
-      if ( iPar == -1 && fun == h->function() ) // If this is the 'tied from' parameter, remember it
+      if ( iPar == -1 && fun == h->function().get() ) // If this is the 'tied from' parameter, remember it
       {
         iPar = (int)i;
       }
@@ -2102,9 +2181,9 @@ QString FitPropertyBrowser::getStringPropertyValue(QtProperty* prop)const
     return QString("");
 }
 
-const Mantid::API::IFitFunction* FitPropertyBrowser::theFunction()const
+Mantid::API::IFunction_const_sptr FitPropertyBrowser::theFunction()const
 {
-  return dynamic_cast<Mantid::API::CompositeFunction*>(m_compositeFunction);
+  return m_compositeFunction;
 }
 
 void FitPropertyBrowser::checkFunction()
@@ -2206,20 +2285,22 @@ void FitPropertyBrowser::reset()
   createCompositeFunction(str);
 }
 
-void FitPropertyBrowser::setWorkspace(Mantid::API::IFitFunction* f)const
+void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction_sptr f)const
 {
   std::string wsName = workspaceName();
   if (!wsName.empty())
   {
     try
     {
-      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-      if (ws)
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+      auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      if (mws)
       {
-        QString slice = "WorkspaceIndex="+QString::number(workspaceIndex())+
-          ",StartX="+QString::number(startX())+",EndX="+QString::number(endX());
-        f->setWorkspace(ws,slice.toStdString(),true);
+        f->setMatrixWorkspace(mws,workspaceIndex(),startX(),endX());
+      }
+      else
+      {
+        f->setWorkspace(ws);
       }
     }
     catch(...){}
@@ -2295,7 +2376,7 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)
     QStringList nameList = aName.split(' ');
     if (nameList.isEmpty()) return;
     QString name = nameList[0];
-    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
+    boost::shared_ptr<Mantid::API::IFunction> f = boost::shared_ptr<Mantid::API::IFunction>(
       Mantid::API::FunctionFactory::Instance().createFitFunction(name.toStdString()));
     m_auto_back = true;
     m_autoBgName = name;
@@ -2424,16 +2505,15 @@ void FitPropertyBrowser::findPeaks()
     for(size_t i=0; i<centre.size(); ++i)
     {
       if (centre[i] < startX() || centre[i] > endX()) continue;
-      Mantid::API::IPeakFunction* f = dynamic_cast<Mantid::API::IPeakFunction*>(
+      auto f = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
         Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType())
         );
       if (!f) break;
-      f->setMatrixWorkspace(inputWS,workspaceIndex());
+      f->setMatrixWorkspace(inputWS,workspaceIndex(),startX(),endX());
       f->setCentre(centre[i]);
       f->setFwhm(width[i]);
       f->setHeight(height[i]);
       addFunction(f->asString());
-      delete f;
     }
   }
   catch(...)
@@ -2557,11 +2637,7 @@ void FitPropertyBrowser::setupMultifit()
       Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
     if (mws)
     {
-      Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(m_compositeFunction->getFunction(0));
-      if (!fun)
-      {
-        throw std::runtime_error("IFitFunction expected but func function of another type");
-      }
+      auto fun = m_compositeFunction->getFunction(0);
       QString fun1Ini = QString::fromStdString(fun->asString());
       QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace="+wsName+",WSParam=(WorkspaceIndex=0);";
       QString tieStr;
@@ -2599,10 +2675,10 @@ void FitPropertyBrowser::processMultiBGResults()
 
   // check if member functions are the same
   QStringList parNames;
-  Mantid::API::IFitFunction* fun0 = dynamic_cast<Mantid::API::IFitFunction*>(compositeFunction()->getFunction(0));
+  auto fun0 = compositeFunction()->getFunction(0);
   if (!fun0)
   {
-    throw std::runtime_error("IFitFunction expected but func function of another type");
+    throw std::runtime_error("IFunction expected but func function of another type");
   }
   for(size_t i = 0; i < fun0->nParams(); ++i)
   {
@@ -2611,10 +2687,10 @@ void FitPropertyBrowser::processMultiBGResults()
 
   for(size_t i = 1; i < compositeFunction()->nFunctions(); ++i)
   {
-    Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(compositeFunction()->getFunction(i));
+    auto fun = compositeFunction()->getFunction(i);
     if (!fun)
     {
-      throw std::runtime_error("IFitFunction expected but func function of another type");
+      throw std::runtime_error("IFunction expected but func function of another type");
     }
     for(size_t j = 0; j < fun->nParams(); ++j)
     {
@@ -2639,17 +2715,17 @@ void FitPropertyBrowser::processMultiBGResults()
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for(size_t i = 0; i < compositeFunction()->nFunctions(); ++i)
   {
-    Mantid::API::TableRow row = table->appendRow();
-    row << int(i);
-    Mantid::API::IFunctionMW* fun = dynamic_cast<Mantid::API::IFunctionMW*>(compositeFunction()->getFunction(i));
-    for(size_t j = 0; j < fun->nParams(); ++j)
-    {
-      row << fun->getParameter(j);
-    }
-    size_t wi = fun->getWorkspaceIndex();
-    Mantid::API::MatrixWorkspace_sptr mws = fun->createCalculatedWorkspace(fun->getMatrixWorkspace(),wi);
-    worspaceNames[i] = workspaceName()+"_"+QString::number(wi).toStdString()+"_Workspace";
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(worspaceNames[i],mws);
+    //Mantid::API::TableRow row = table->appendRow();
+    //row << int(i);
+    //Mantid::API::IFunctionMW* fun = dynamic_cast<Mantid::API::IFunctionMW*>(compositeFunction()->getFunction(i));
+    //for(size_t j = 0; j < fun->nParams(); ++j)
+    //{
+    //  row << fun->getParameter(j);
+    //}
+    //size_t wi = fun->getWorkspaceIndex();
+    //Mantid::API::MatrixWorkspace_sptr mws = fun->createCalculatedWorkspace(fun->getMatrixWorkspace(),wi);
+    //worspaceNames[i] = workspaceName()+"_"+QString::number(wi).toStdString()+"_Workspace";
+    //Mantid::API::AnalysisDataService::Instance().addOrReplace(worspaceNames[i],mws);
   }
 
   // Save the table

@@ -6,9 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <string>
@@ -26,6 +31,7 @@ namespace API
 // Forward declaration
 //----------------------------------------------------------------------
 class Workspace;
+class MatrixWorkspace;
 class ParameterTie;
 class IConstraint;
 class ParameterReference;
@@ -173,6 +179,8 @@ public:
   class MANTID_API_DLL Attribute
   {
   public:
+    /// Create empty string attribute
+    explicit Attribute():m_data(""), m_quoteValue(false) {}
     /// Create string attribute
     explicit Attribute(const std::string& str, bool quoteValue=false):m_data(str), m_quoteValue(quoteValue) {}
     /// Create int attribute
@@ -225,11 +233,11 @@ public:
   virtual std::string name()const = 0;
   /// Writes itself into a string
   virtual std::string asString()const;
-  /// Set the workspace. Make 
+  /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) = 0;
-  /// Get the workspace
-  //virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
+  /// Set matrix workspace
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
@@ -246,10 +254,12 @@ public:
 
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(FunctionDomain& domain)const = 0;
+  virtual void function(const FunctionDomain& domain, FunctionValues& values)const = 0;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(FunctionDomain& domain, Jacobian& jacobian);
+  virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
+  /** @name Function parameters */
+  //@{
   /// Set i-th parameter
   virtual void setParameter(size_t, const double& value, bool explicitlySet = true) = 0;
   /// Set i-th parameter description
@@ -272,44 +282,43 @@ public:
   virtual std::string parameterDescription(size_t i)const = 0;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(size_t i)const = 0;
+  /// Get the fitting error for a parameter
+  virtual double getError(size_t i) const = 0;
+  /// Set the fitting error for a parameter
+  virtual void setError(size_t i, double err) = 0;
 
-  /// Number of active (in terms of fitting) parameters
-  virtual size_t nActive()const = 0;
+  /// Check if a declared parameter i is fixed
+  virtual bool isFixed(size_t i)const = 0;
+  /// Removes a declared parameter i from the list of active
+  virtual void fix(size_t i) = 0;
+  /// Restores a declared parameter i to the active status
+  virtual void unfix(size_t i) = 0;
+
+  /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
+  virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
+  /// Return a vector with all parameter names
+  std::vector<std::string> getParameterNames() const ;
+  //@}
+
+  /** @name Active parameters */
+  //@{
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
   virtual double activeParameter(size_t i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
   virtual void setActiveParameter(size_t i, double value);
-  /// Update parameters after a fitting iteration
-  virtual void updateActive(const double* in);
-  /// Returns "global" index of active parameter i
-  virtual size_t indexOfActive(size_t i)const = 0;
   /// Returns the name of active parameter i
-  virtual std::string nameOfActive(size_t i)const = 0;
+  virtual std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(size_t i)const = 0;
+  virtual std::string descriptionOfActive(size_t i)const;
+  /// Check if an active parameter i is actually active
+  virtual bool isActive(size_t i)const {return !isFixed(i);}
+  //@}
 
-  /// Check if a declared parameter i is active
-  virtual bool isActive(size_t i)const = 0;
-  /// Get active index for a declared parameter i
-  virtual size_t activeIndex(size_t i)const = 0;
-  /// Removes a declared parameter i from the list of active
-  virtual void removeActive(size_t i) = 0;
-  /// Restores a declared parameter i to the active status
-  virtual void restoreActive(size_t i) = 0;
-
-  /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
-  virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
-  /// Get a function containing the parameter refered to by the reference. In case of a simple function
-  /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
-  /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
-  /// @param ref :: The Parameter reference
-  /// @return A pointer to the containing function
-  virtual IFunction* getContainingFunction(const ParameterReference& ref)const = 0;
-  /// The same as the method above but the argument is a function
-  virtual IFunction* getContainingFunction(const IFunction* fun) = 0;
 
   /// Tie a parameter to other parameters (or a constant)
-  virtual ParameterTie* tie(const std::string& parName,const std::string& expr);
+  virtual ParameterTie* tie(const std::string& parName, const std::string& expr);
+  /// Add several ties
+  virtual void addTies(const std::string& ties);
   /// Apply the ties
   virtual void applyTies() = 0;
   /// Removes the tie off a parameter
@@ -321,16 +330,15 @@ public:
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(size_t i)const = 0;
 
+
+  /// Add a list of conatraints from a string
+  virtual void addConstraints(const std::string& str);
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
   /// Get constraint of i-th parameter
   virtual IConstraint* getConstraint(size_t i)const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
-  /// Add a penalty to the output if some parameters do not satisfy constraints.
-  //virtual void addPenalty(FunctionDomain& domain)const; //?
-  /// Modify the derivatives to correct for a penalty
-  //virtual void addPenaltyDeriv(FunctionDomain& domain, Jacobian& jacobian)const;
 
   /// Set the parameters of the function to satisfy the constraints of
   /// of the function. For example
@@ -355,6 +363,11 @@ public:
   }
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string& attName)const { (void)attName; return false;}
+  template<typename T>
+  void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
+
+  /// Calculate numerical derivatives
+  void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
 
   /// Set a function handler
   void setHandler(FunctionHandler* handler);
@@ -368,19 +381,60 @@ protected:
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
 
+  /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
+  double convertValue(double value, Kernel::Unit_sptr& inUnit, 
+                      boost::shared_ptr<const MatrixWorkspace> ws,
+                      size_t wsIndex)const;
+
+  void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+    boost::shared_ptr<const MatrixWorkspace> ws,
+    size_t wsIndex) const;
+  
   /// Create an instance of a tie without actually tying it to anything
-  virtual ParameterTie* createTie(const std::string& parName);
+  //virtual ParameterTie* createTie(const std::string& parName);
   /// Add a new tie
   virtual void addTie(ParameterTie* tie) = 0;
 
   friend class ParameterTie;
   friend class CompositeFunction;
 
+  /// Values storage for numeric derivatives
+  FunctionValues m_minusStep;
+  /// Values storage for numeric derivatives
+  FunctionValues m_plusStep;
+
   /// Pointer to a function handler
   FunctionHandler* m_handler;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+};
+
+///shared pointer to the function base class
+typedef boost::shared_ptr<IFunction> IFunction_sptr;
+///shared pointer to the function base class (const version)
+typedef boost::shared_ptr<const IFunction> IFunction_const_sptr;
+
+/**
+ * Classes inherited from FunctionHandler will handle the function.
+ * The intended purpose is to help with displaying nested composite
+ * functions in a tree view. This way a display handler shows only
+ * single function and there is no need to duplicate the function tree
+ * structure.
+ */
+class FunctionHandler
+{
+public:
+  /// Constructor
+  FunctionHandler(IFunction_sptr fun):m_fun(fun){}
+  /// Virtual destructor
+  virtual ~FunctionHandler(){}
+  /// abstract init method. It is called after setting handler to the function
+  virtual void init() = 0;
+  /// Return the handled function
+  IFunction_sptr function()const{return m_fun;}
+protected:
+  IFunction_sptr m_fun;///< pointer to the handled function
 };
 
 } // namespace API

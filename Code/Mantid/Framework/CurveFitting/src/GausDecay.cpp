@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GausDecay.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 
@@ -22,7 +23,7 @@ void GausDecay::init()
 }
 
 
-void GausDecay::functionMW(double* out, const double* xValues, const size_t nData)const
+void GausDecay::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const double& A = getParameter("A"); 
   const double& G = getParameter("Sigma");  
@@ -33,7 +34,7 @@ void GausDecay::functionMW(double* out, const double* xValues, const size_t nDat
   } 
 }
 
-void GausDecay::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void GausDecay::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
   const double& A = getParameter("A"); 
   const double& G = getParameter("Sigma");  
@@ -48,7 +49,7 @@ void GausDecay::functionDerivMW(Jacobian* out, const double* xValues, const size
 
 void GausDecay::setActiveParameter(size_t i,double value)
 {
-  size_t j = indexOfActive(i);
+  size_t j = i;
 
   if (parameterName(j) == "Sigma") 
     setParameter(j,fabs(value),false);  // Make sigma positive

@@ -8,7 +8,8 @@
 #include "MantidCurveFitting/DeltaFunction.h"
 #include "MantidCurveFitting/Convolution.h"
 
-
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -116,7 +117,7 @@ public:
     //set the resolution function
     double h = 3.0;  // height
     double a = 1.3;  // 1/(2*sigma^2)
-    DeltaFunctionTest_Gauss* res = new DeltaFunctionTest_Gauss();
+    auto res = IFunction_sptr( new DeltaFunctionTest_Gauss() );
     res->setParameter("c",0);
     res->setParameter("h",h);
     res->setParameter("s",a);
@@ -124,7 +125,7 @@ public:
 
     //set the "structure factor"
     double H=1.5, p1=2.6, p2=0.7;
-    DeltaFunctionTest_Delta* eds = new DeltaFunctionTest_Delta();
+    auto eds = IFunction_sptr( new DeltaFunctionTest_Delta() );
     eds->setParameter("Height",H);
     eds->setParameter("p1",p1);
     eds->setParameter("p2",p2);
@@ -132,14 +133,16 @@ public:
 
     //set up some frequency values centered around zero
     const int N = 117;
-    double w[N],out[N],w0,dw = 0.13;
+    double w[N],w0,dw = 0.13;
     w0=-dw*int(N/2);
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
 
+    FunctionDomain1DView wView(&w[0],N);
+    FunctionValues out(wView);
     //convolve. The result must be the resolution multiplied by factor H*p1*p2);
-    conv.functionMW(out,w,N);
+    conv.function(wView,out);
     for(int i=0;i<N;i++){
-      TS_ASSERT_DELTA(out[i],H*p1*p2*h*exp(-w[i]*w[i]*a),1e-10);
+      TS_ASSERT_DELTA(out.getCalculated(i),H*p1*p2*h*exp(-w[i]*w[i]*a),1e-10);
     }
   }
 

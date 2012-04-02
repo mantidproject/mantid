@@ -12,10 +12,10 @@ namespace API
   *  @param name :: The name to assign to the property
   */
   FunctionProperty::FunctionProperty( const std::string &name ) :
-    Kernel::PropertyWithValue <boost::shared_ptr<IFitFunction> >( 
+    Kernel::PropertyWithValue <boost::shared_ptr<IFunction> >( 
       name, 
-      boost::shared_ptr<IFitFunction>( ),
-      boost::make_shared<Kernel::NullValidator>(),
+      boost::shared_ptr<IFunction>( ),
+      Kernel::IValidator_sptr(new Kernel::NullValidator()),
       Kernel::Direction::InOut
       )
   {
@@ -23,7 +23,7 @@ namespace API
 
   /// Copy constructor
   FunctionProperty::FunctionProperty( const FunctionProperty& right ) :
-  Kernel::PropertyWithValue< boost::shared_ptr<IFitFunction> >( right )
+  Kernel::PropertyWithValue< boost::shared_ptr<IFunction> >( right )
   {    
   }
 
@@ -31,7 +31,7 @@ namespace API
   FunctionProperty& FunctionProperty::operator=( const FunctionProperty& right )
   {
     if ( &right == this ) return *this;
-    Kernel::PropertyWithValue< boost::shared_ptr<IFitFunction> >::operator=( right );
+    Kernel::PropertyWithValue< boost::shared_ptr<IFunction> >::operator=( right );
     return *this;
   }
 
@@ -39,9 +39,9 @@ namespace API
     * @param value :: The value to set to
     * @return assigned PropertyWithValue
     */
-  boost::shared_ptr<IFitFunction>& FunctionProperty::operator=( const boost::shared_ptr<IFitFunction>& value )
+  boost::shared_ptr<IFunction>& FunctionProperty::operator=( const boost::shared_ptr<IFunction>& value )
   {
-    return Kernel::PropertyWithValue< boost::shared_ptr<IFitFunction> >::operator=( value );
+    return Kernel::PropertyWithValue< boost::shared_ptr<IFunction> >::operator=( value );
   }
 
   //--------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ namespace API
     std::string error = "";
     try
     {
-      m_value = boost::shared_ptr<IFitFunction>(FunctionFactory::Instance().createInitialized(value));
+      m_value = boost::shared_ptr<IFunction>(FunctionFactory::Instance().createInitialized(value));
       m_definition = value;
     }
     catch(std::exception& e)
@@ -107,14 +107,14 @@ namespace API
   */
   bool FunctionProperty::isDefault() const
   {
-    return  m_value == boost::shared_ptr<IFitFunction>();
+    return  m_value == boost::shared_ptr<IFunction>();
   }
 
   /// Create a history record
   /// @return A populated PropertyHistory for this class
   const Kernel::PropertyHistory FunctionProperty::createHistory() const
   {
-    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<IFitFunction> >::direction());
+    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<IFunction> >::direction());
   }
 
 } // namespace API

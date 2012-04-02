@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/MuonFInteraction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -23,7 +24,7 @@ void MuonFInteraction::init()
 }
 
 
-void MuonFInteraction::functionMW(double* out, const double* xValues, const size_t nData)const
+void MuonFInteraction::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const double& lambda = getParameter("Lambda");
   const double& omega = getParameter("Omega");
@@ -40,12 +41,6 @@ void MuonFInteraction::functionMW(double* out, const double* xValues, const size
     out[i] = A1*(3+A2+A3+A4);
   }
 }
-
-void MuonFInteraction::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
-{
-  calNumericalDeriv(out, xValues, nData);
-}
-
 
 } // namespace CurveFitting
 } // namespace Mantid

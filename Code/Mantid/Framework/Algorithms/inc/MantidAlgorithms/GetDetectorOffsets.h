@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_GETDETECTOROFFSETS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 
@@ -58,7 +59,7 @@ private:
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
   double fitSpectra(const int64_t s);
   /// Create a function string from the given parameters and the algorithm inputs
-  API::IFitFunction_sptr createFunction(const double peakHeight, const double peakLoc);
+  API::IFunction_sptr createFunction(const double peakHeight, const double peakLoc);
   /// Read in all the input parameters
   void retrieveProperties();
   

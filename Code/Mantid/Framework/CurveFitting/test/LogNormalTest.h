@@ -103,8 +103,7 @@
 		 * 	Example: Location = \integral dz G(z) z = \integral dx LN(x) z = \integral dx LN(x) ln(x),		 *
  		 *  */
 
-		//alg2.setFunction(fn);
-		alg2.setPropertyValue("Function",fn.asString());
+    alg2.setPropertyValue("Function",fn.asString());
 
 
 		// Set which spectrum to fit against and initial starting values
@@ -124,7 +123,7 @@
 		double dummy = alg2.getProperty("OutputChi2overDoF");
 		TS_ASSERT_DELTA( dummy, 0.001,0.001);
 
-		IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+		IFunction_sptr out = alg2.getProperty("Function");
 		//golden standard y(x) = 100.0 / x * exp( -(log(x)-2.2)^2/(2*0.25^2) )
 		TS_ASSERT_DELTA( out->getParameter("Height"), 100.0 ,0.1);
 		TS_ASSERT_DELTA( out->getParameter("Location"), 2.2 ,0.1);

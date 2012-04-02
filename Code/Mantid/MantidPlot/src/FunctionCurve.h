@@ -35,7 +35,7 @@ namespace Mantid
 {
   namespace API
   {
-    class IFitFunction;
+    class IFunction;
   }
 }
 
@@ -47,7 +47,7 @@ public:
 
 	FunctionCurve(const FunctionType& t, const QString& name = QString());
 	FunctionCurve(const QString& name = QString());
-  FunctionCurve(const Mantid::API::IFitFunction* fun, 
+  FunctionCurve(const Mantid::API::IFunction* fun, 
     const QString& wsName, int wsIndex = 0, const QString& name = QString());
 	FunctionCurve(const FunctionCurve& c);
   ~FunctionCurve();
@@ -83,17 +83,17 @@ public:
   /// No error bars on this curve: Always return an empty list.
   QList<ErrorBarSettings *> errorBarSettingsList() const {return QList<ErrorBarSettings*>();}
 
-  /// returns identifier where this curve plots a IFitFunction
-  const Mantid::API::IFitFunction* getIFitFunctionIdentifier() const {return m_identifier;};
+  /// returns identifier where this curve plots a IFunction
+  const Mantid::API::IFunction* getIFunctionIdentifier() const {return m_identifier;};
 private:
 	FunctionType d_function_type;
 	QString d_variable;
 	QStringList d_formulas;
 	double d_from, d_to;
   
-  /// Used to identify which IFitFunction it is plotting
-  /// Equal null where the curve is not plotting an IFitFunction
-  const Mantid::API::IFitFunction* m_identifier;
+  /// Used to identify which IFunction it is plotting
+  /// Equal null where the curve is not plotting an IFunction
+  const Mantid::API::IFunction* m_identifier;
 };
 
 #endif

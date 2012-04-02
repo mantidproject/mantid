@@ -3,6 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <fstream>
@@ -47,7 +48,7 @@ DECLARE_FUNCTION(BivariateNormal)
 
 Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
-BivariateNormal::BivariateNormal() : UserFunction(), expVals(NULL),
+BivariateNormal::BivariateNormal() : API::IFunction1D(), expVals(NULL),
         BackConstraint(NULL), MeanxConstraint(NULL), MeanyConstraint(NULL), IntensityConstraint(NULL)
 {
   LastParams[IVXX] = -1;
@@ -60,7 +61,7 @@ BivariateNormal::~BivariateNormal()
 
 // overwrite IFunction base class methods
 
- void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData) const
+ void BivariateNormal::function1D(double *out, const double *xValues, const size_t nData) const
  {
 
    UNUSED_ARG(xValues);
@@ -121,7 +122,7 @@ BivariateNormal::~BivariateNormal()
 
 
 
-void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues, const size_t nData)
+void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData)
 {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);

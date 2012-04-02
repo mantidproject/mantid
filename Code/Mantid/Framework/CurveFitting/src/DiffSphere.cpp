@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DiffSphere.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 #include <boost/math/special_functions/bessel.hpp>
 #include "MantidAPI/ParameterTie.h"
@@ -166,7 +167,7 @@ std::vector<double> InelasticDiffSphere::LorentzianCoefficients(double a)const{
 } // end of LorentzianCoefficients
 
 
-void InelasticDiffSphere::functionMW(double* out, const double* xValues, const size_t nData)const{
+void InelasticDiffSphere::function1D(double* out, const double* xValues, const size_t nData)const{
   const double& I = getParameter("Intensity");
   const double& R = getParameter("Radius");
   const double& D = getParameter("Diffusion");
@@ -192,14 +193,14 @@ void InelasticDiffSphere::functionMW(double* out, const double* xValues, const s
 /* calNumericalDeriv requires evaluation of four extra functionMW. We can avoid by requiring
  *  the 'Simplex' algorithm, which does not require derivative
  *  */
-void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
-  calNumericalDeriv(out, xValues, nData);
-}
+//void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
+//  calNumericalDeriv(out, xValues, nData);
+//}
 
 DiffSphere::DiffSphere(){
-  m_elastic = dynamic_cast<ElasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
+  m_elastic = boost::dynamic_pointer_cast<ElasticDiffSphere>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   addFunction( m_elastic );
-  m_inelastic = dynamic_cast<InelasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
+  m_inelastic = boost::dynamic_pointer_cast<InelasticDiffSphere>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   addFunction( m_inelastic );
   //Set the ties between Elastic and Inelastic parameters
   API::ParameterTie* tie_H=new API::ParameterTie(this,"f0.Height");

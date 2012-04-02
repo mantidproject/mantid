@@ -117,6 +117,10 @@ namespace API
 
     void setSpectrumNo(specid_t num);
 
+    // ---------------------------------------------------------
+    virtual void lockData() const;
+    virtual void unlockData() const;
+
 
   protected:
     /// The spectrum number of this spectrum
@@ -130,7 +134,6 @@ namespace API
 
     /// Copy-on-write pointer to the Dx (X error) vector.
     MantidVecPtr refDx;
-
 
   };
 

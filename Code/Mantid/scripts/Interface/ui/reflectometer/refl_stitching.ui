@@ -283,7 +283,30 @@ skip</string>
              <item>
               <widget class="QLabel" name="max_q_unity_label">
                <property name="text">
-                <string>Max Q where R=1:</string>
+                <string>Critical edge from</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="min_q_unity_edit">
+               <property name="minimumSize">
+                <size>
+                 <width>80</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>1/Å  to  </string>
                </property>
               </widget>
              </item>
@@ -304,9 +327,16 @@ skip</string>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_6">
+              <widget class="QLabel" name="label_7">
                <property name="text">
-                <string>1/Å</string>
+                <string>1/Å  </string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pick_unity_range_btn">
+               <property name="text">
+                <string>Pick range</string>
                </property>
               </widget>
              </item>

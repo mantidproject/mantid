@@ -5,7 +5,10 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -763,13 +766,13 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
   return valid;
 }
 
-Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::furyfitCreateFunction(bool tie)
+Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::furyfitCreateFunction(bool tie)
 {
-  Mantid::API::CompositeFunctionMW* result = new Mantid::API::CompositeFunctionMW();
+  Mantid::API::CompositeFunction_sptr result( new Mantid::API::CompositeFunction );
   QString fname;
   const int fitType = m_uiForm.furyfit_cbFitType->currentIndex();
 
-  Mantid::API::IFitFunction* func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
+  Mantid::API::IFunction_sptr func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
   func->setParameter("A0", m_ffDblMng->value(m_ffProp["BackgroundA0"]));
   result->addFunction(func);
   result->tie("f0.A1", "0");
@@ -792,15 +795,15 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::furyfitCreateFunction(bo
   return result;
 }
 
-Mantid::API::IFitFunction* IndirectDataAnalysis::furyfitCreateUserFunction(const QString & name, bool tie)
+Mantid::API::IFunction_sptr IndirectDataAnalysis::furyfitCreateUserFunction(const QString & name, bool tie)
 {
-  Mantid::API::IFitFunction* result = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");  
+  Mantid::API::IFunction_sptr result = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");  
   std::string formula;
 
   if ( name.startsWith("Exp") ) { formula = "Intensity*exp(-(x/Tau))"; }
   else { formula = "Intensity*exp(-(x/Tau)^Beta)"; }
 
-  Mantid::API::IFitFunction::Attribute att(formula);  
+  Mantid::API::IFunction::Attribute att(formula);  
   result->setAttribute("Formula", att);
 
   result->setParameter("Intensity", m_ffDblMng->value(m_ffProp[name+".Intensity"]));
@@ -826,17 +829,17 @@ Mantid::API::IFitFunction* IndirectDataAnalysis::furyfitCreateUserFunction(const
   return result;
 }
 
-Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(bool tie)
+Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(bool tie)
 {
-  Mantid::API::CompositeFunctionMW* conv = dynamic_cast<Mantid::API::CompositeFunctionMW*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
-  Mantid::API::CompositeFunctionMW* result = new Mantid::API::CompositeFunctionMW();
-  Mantid::API::CompositeFunctionMW* comp;
+  auto conv = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
+  Mantid::API::CompositeFunction_sptr result( new Mantid::API::CompositeFunction );
+  Mantid::API::CompositeFunction_sptr comp;
 
   bool singleFunction = false;
 
   if ( m_uiForm.confit_cbFitType->currentText() == "Two Lorentzians" )
   {
-    comp = new Mantid::API::CompositeFunctionMW();
+    comp.reset( new Mantid::API::CompositeFunction );
   }
   else
   {
@@ -858,7 +861,7 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
   // - - - - - - Lorentzian 1 (yes/no)
   // - - - - - - Lorentzian 2 (yes/no)
 
-  Mantid::API::IFitFunction* func;
+  Mantid::API::IFunction_sptr func;
 
   // Background
   func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
@@ -889,7 +892,7 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
   func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
   index = conv->addFunction(func);
   std::string resfilename = m_uiForm.confit_resInput->getFirstFilename().toStdString();
-  Mantid::API::IFitFunction::Attribute attr(resfilename);
+  Mantid::API::IFunction::Attribute attr(resfilename);
   func->setAttribute("FileName", attr);
 
   // Delta Function
@@ -984,7 +987,7 @@ QtProperty* IndirectDataAnalysis::createStretchedExp(const QString & name)
   return prop;
 }
 
-void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Mantid::API::IFitFunction* comp, QtProperty* group, size_t index, bool tie)
+void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, size_t index, bool tie)
 {
   // Get subproperties of group and apply them as parameters on the function object
   QList<QtProperty*> props = group->subProperties();
@@ -1499,7 +1502,7 @@ void IndirectDataAnalysis::furyUpdateRS(QtProperty* prop, double val)
 void IndirectDataAnalysis::furyfitRun()
 {
   // First create the function
-  Mantid::API::CompositeFunctionMW* function = furyfitCreateFunction();
+  auto function = furyfitCreateFunction();
 
   m_uiForm.furyfit_ckPlotGuess->setChecked(false);
   
@@ -1756,7 +1759,7 @@ void IndirectDataAnalysis::furyfitSequential()
     return;
   }
 
-  Mantid::API::CompositeFunction* func = furyfitCreateFunction();
+  Mantid::API::CompositeFunction_sptr func = furyfitCreateFunction();
 
   // Function Ties
   func->tie("f0.A1", "0");
@@ -1797,15 +1800,14 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
     return;
   }
 
-  Mantid::API::CompositeFunctionMW* function = furyfitCreateFunction(true);
+  Mantid::API::CompositeFunction_sptr function = furyfitCreateFunction(true);
 
   // Create the double* array from the input workspace
   const size_t binIndxLow = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["StartX"]));
   const size_t binIndxHigh = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
-  double* inputXData = new double[nData];
-  double* outputData = new double[nData];
+  std::vector<double> inputXData(nData);
 
   const Mantid::MantidVec& XValues = m_ffInputWS->readX(0);
 
@@ -1819,7 +1821,9 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
       inputXData[i] = XValues[binIndxLow+i];
   }
 
-  function->functionMW(outputData, inputXData, nData);
+  Mantid::API::FunctionDomain1DVector domain(inputXData);
+  Mantid::API::FunctionValues outputData(domain);
+  function->function(domain, outputData);
 
   QVector<double> dataX;
   QVector<double> dataY;
@@ -1827,7 +1831,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   for ( size_t i = 0; i < nData; i++ )
   {
     dataX.append(inputXData[i]);
-    dataY.append(outputData[i]);
+    dataY.append(outputData.getCalculated(i));
   }
 
   // Create the curve
@@ -1864,7 +1868,7 @@ void IndirectDataAnalysis::confitRun()
 
   m_uiForm.confit_ckPlotGuess->setChecked(false);
 
-  Mantid::API::CompositeFunction* function = confitCreateFunction();
+  Mantid::API::CompositeFunction_sptr function = confitCreateFunction();
 
   // get output name
   QString ftype = "";
@@ -2095,7 +2099,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
     return;
   }
 
-  Mantid::API::CompositeFunctionMW* function = confitCreateFunction(true);
+  Mantid::API::CompositeFunction_sptr function = confitCreateFunction(true);
 
   if ( m_cfInputWS == NULL )
   {
@@ -2108,8 +2112,8 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
   const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));
   const size_t nData = binIndexHigh - binIndexLow;
 
-  double* inputXData = new double[nData];
-  double* outputData = new double[nData];
+  std::vector<double> inputXData(nData);
+  //double* outputData = new double[nData];
 
   const Mantid::MantidVec& XValues = m_cfInputWS->readX(0);
   const bool isHistogram = m_cfInputWS->isHistogramData();
@@ -2126,14 +2130,16 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
     }
   }
 
-  function->functionMW(outputData, inputXData, nData);
+  Mantid::API::FunctionDomain1DVector domain(inputXData);
+  Mantid::API::FunctionValues outputData(domain);
+  function->function(domain, outputData);
 
   QVector<double> dataX, dataY;
 
   for ( size_t i = 0; i < nData; i++ )
   {
     dataX.append(inputXData[i]);
-    dataY.append(outputData[i]);
+    dataY.append(outputData.getCalculated(i));
   }
 
   if ( m_cfCalcCurve != NULL )
@@ -2172,7 +2178,7 @@ void IndirectDataAnalysis::confitSequential()
     bg = "FitL";
   }
 
-  Mantid::API::CompositeFunction* func = confitCreateFunction();
+  Mantid::API::CompositeFunction_sptr func = confitCreateFunction();
   std::string function = std::string(func->asString());
   QString stX = m_cfProp["StartX"]->valueText();
   QString enX = m_cfProp["EndX"]->valueText();

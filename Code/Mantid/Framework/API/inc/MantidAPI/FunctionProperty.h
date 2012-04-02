@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -45,7 +45,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
-    class MANTID_API_DLL FunctionProperty : public Kernel::PropertyWithValue< boost::shared_ptr<IFitFunction> >
+    class MANTID_API_DLL FunctionProperty : public Kernel::PropertyWithValue< boost::shared_ptr<IFunction> >
     {
     public:
       /// Constructor.
@@ -58,7 +58,7 @@ namespace Mantid
       FunctionProperty& operator=( const FunctionProperty& right );
 
       /// Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
-      virtual boost::shared_ptr<IFitFunction>& operator=( const boost::shared_ptr<IFitFunction>& value );
+      virtual boost::shared_ptr<IFunction>& operator=( const boost::shared_ptr<IFunction>& value );
 
       ///Add the value of another property
       virtual FunctionProperty& operator+=( Kernel::Property const * );

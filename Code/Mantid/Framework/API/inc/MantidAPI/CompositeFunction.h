@@ -4,15 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
+
 #include <boost/shared_array.hpp>
+#include <map>
 
 namespace Mantid
 {
 namespace API
 {
-  class MatrixWorkspace;
 /** A composite function.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -38,11 +39,11 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL CompositeFunction : public virtual IFitFunction
+class MANTID_API_DLL CompositeFunction : public virtual IFunction
 {
 public:
   /// Default constructor
-  CompositeFunction():m_nActive(0),m_nParams(0){}
+  CompositeFunction():/*m_nActive(0),*/m_nParams(0){}
   /// Copy contructor
   CompositeFunction(const CompositeFunction&);
   ///Assignment operator
@@ -52,8 +53,15 @@ public:
 
               /* Overriden methods */
 
+  /// Returns the function's name
+  virtual std::string name()const {return "CompositeFunction";}
   /// Writes itself into a string
   std::string asString()const;
+  /// Function you want to fit to. 
+  /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  virtual void function(const FunctionDomain& domain, FunctionValues& values)const;
+  /// Derivatives of function with respect to active parameters
+  virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
   /// Set i-th parameter
   void setParameter(size_t, const double& value, bool explicitlySet = true);
@@ -77,37 +85,35 @@ public:
   std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
   bool isExplicitlySet(size_t i)const;
+  /// Get the fitting error for a parameter
+  virtual double getError(size_t i) const;
+  /// Set the fitting error for a parameter
+  virtual void setError(size_t i, double err);
 
-  /// Number of active (in terms of fitting) parameters
-  size_t nActive()const;
+  /// Check if a parameter is active
+  bool isFixed(size_t i)const;
+  /// Removes a parameter from the list of active
+  void fix(size_t i);
+  /// Restores a declared parameter i to the active status
+  void unfix(size_t i);
+
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
   double activeParameter(size_t i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
   void setActiveParameter(size_t i, double value);
   /// Update parameters after a fitting iteration
   void updateActive(const double* in);
-  /// Returns "global" index of active parameter i
-  size_t indexOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i)const;
-
-  /// Check if a parameter is active
+  /// Check if an active parameter i is actually active
   bool isActive(size_t i)const;
-  /// Get active index for a declared parameter i
-  size_t activeIndex(size_t i)const;
-  /// Removes a parameter from the list of active
-  void removeActive(size_t i);
-  /// Restores a declared parameter i to the active status
-  void restoreActive(size_t i);
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const ParameterReference& ref)const;
-  /// Get the containing function
-  IFunction* getContainingFunction(const IFunction* fun);
+  IFunction_sptr getContainingFunction(const ParameterReference& ref)const;
 
   /// Apply the ties
   void applyTies();
@@ -128,31 +134,51 @@ public:
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 
-
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
-  virtual size_t addFunction(IFunction* f);
+  virtual size_t addFunction(IFunction_sptr f);
   /// Returns the pointer to i-th function
-  IFunction* getFunction(std::size_t i)const;
+  IFunction_sptr getFunction(std::size_t i)const;
   /// Number of functions
   std::size_t nFunctions()const{return m_functions.size();}
   /// Remove a function
-  void removeFunction(size_t i, bool del=true);
+  void removeFunction(size_t i);
   /// Replace a function
-  void replaceFunction(size_t i,IFunction* f);
+  void replaceFunction(size_t i,IFunction_sptr f);
   /// Replace a function
-  void replaceFunctionPtr(const IFunction* f_old,IFunction* f_new);
+  void replaceFunctionPtr(const IFunction_sptr f_old,IFunction_sptr f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i)const;
   /// Get the function index
-  std::size_t functionIndexActive(std::size_t i)const;
+  //std::size_t functionIndexActive(std::size_t i)const;
   /// Returns the index of parameter i as it declared in its function
   size_t parameterLocalIndex(size_t i)const;
   /// Returns the name of parameter i as it declared in its function
   std::string parameterLocalName(size_t i)const;
   /// Check the function.
   void checkFunction();
+
+  /// Returns the number of attributes associated with the function
+  virtual size_t nLocalAttributes()const {return 0;}
+  /// Returns a list of attribute names
+  virtual std::vector<std::string> getLocalAttributeNames()const {return std::vector<std::string>();}
+  /// Return a value of attribute attName
+  virtual Attribute getLocalAttribute(size_t i, const std::string& attName)const
+  {
+    (void)i;
+    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
+  }
+  /// Set a value to attribute attName
+  virtual void setLocalAttribute(size_t i, const std::string& attName,const Attribute& )
+  {
+    (void)i;
+    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
+  }
+  /// Check if attribute attName exists
+  virtual bool hasLocalAttribute(const std::string&)const {return false;}
+  template<typename T>
+  void setLocalAttributeValue(size_t i, const std::string& attName,const T& value){setLocalAttribute(i,attName,Attribute(value));}
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -163,7 +189,6 @@ protected:
   virtual void addTie(ParameterTie* tie);
 
   size_t paramOffset(size_t i)const{return m_paramOffsets[i];}
-  size_t activeOffset(size_t i)const{return m_activeOffsets[i];}
 
 private:
 
@@ -171,40 +196,43 @@ private:
   static void parseName(const std::string& varName,size_t& index, std::string& name);
 
   /// Pointers to the included funtions
-  std::vector<IFunction*> m_functions;
-  /// Individual function parameter offsets (function index in m_functions)
-  /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
-  std::vector<size_t> m_activeOffsets;
+  std::vector<IFunction_sptr> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<size_t> m_paramOffsets;
   /// Keeps the function index for each declared parameter  (parameter declared index)
   std::vector<size_t> m_IFunction;
-  /// Keeps the function index for each active parameter (parameter active index)
-  std::vector<size_t> m_IFunctionActive;
-  /// Number of active parameters
-  size_t m_nActive;
   /// Total number of parameters
   size_t m_nParams;
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
-
 };
+
+///shared pointer to the composite function base class
+typedef boost::shared_ptr<CompositeFunction> CompositeFunction_sptr;
+///shared pointer to the composite function base class (const version)
+typedef boost::shared_ptr<const CompositeFunction> CompositeFunction_const_sptr;
 
 /** A Jacobian for individual functions
  */
 class PartialJacobian: public Jacobian
 {
   Jacobian* m_J;  ///< pointer to the overall Jacobian
-  size_t m_iP0;      ///< offset in the overall Jacobian for a particular function
-  size_t m_iaP0;      ///< offset in the active Jacobian for a particular function
+  size_t m_iY0;      ///< fitting data index offset in the overall Jacobian for a particular function
+  size_t m_iP0;      ///< parameter index offset in the overall Jacobian for a particular function
 public:
   /** Constructor
    * @param J :: A pointer to the overall Jacobian
    * @param iP0 :: The parameter index (declared) offset for a particular function
-   * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
-  PartialJacobian(Jacobian* J,size_t iP0, size_t iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
+  PartialJacobian(Jacobian* J,size_t iP0):m_J(J),m_iY0(0),m_iP0(iP0)//,m_iaP0(iap0)
+  {}
+  /** Constructor
+   * @param J :: A pointer to the overall Jacobian
+   * @param iY0 :: The data index offset for a particular function
+   * @param iP0 :: The parameter index offset for a particular function
+   */
+  PartialJacobian(Jacobian* J,size_t iY0,size_t iP0):m_J(J),m_iY0(iY0),m_iP0(iP0)
   {}
   /**
    * Overridden Jacobian::set(...).
@@ -214,7 +242,7 @@ public:
    */
   void set(size_t iY, size_t iP, double value)
   {
-      m_J->set(iY,m_iP0 + iP,value);
+      m_J->set(m_iY0 + iY,m_iP0 + iP,value);
   }
   /**
    * Overridden Jacobian::get(...).
@@ -223,17 +251,18 @@ public:
    */
   double get(size_t iY, size_t iP)
   {
-      return m_J->get(iY,m_iP0 + iP);
+      return m_J->get(m_iY0 + iY,m_iP0 + iP);
   }
  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value :: Value to add
-  *   @param iActiveP :: The index of an active parameter.
+  *   @param iP :: The index of an active parameter.
   */
-  virtual void addNumberToColumn(const double& value, const size_t& iActiveP) 
+  virtual void addNumberToColumn(const double& value, const size_t& iP) 
   {
-    m_J->addNumberToColumn(value,m_iaP0+iActiveP);
+    m_J->addNumberToColumn(value,m_iP0+iP);
   }
 };
+
 
 } // namespace API
 } // namespace Mantid

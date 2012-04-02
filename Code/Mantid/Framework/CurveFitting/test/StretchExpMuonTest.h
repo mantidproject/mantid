@@ -112,7 +112,7 @@
 		double dummy = alg2.getProperty("OutputChi2overDoF");
 		TS_ASSERT_DELTA( dummy, 0.001,0.001);
 
-		IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+		auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
 		//golden standard y(x)=2*exp(-(x/4)^0.5)
 		//allow for a 1% error in Amplitude and Decay rate, and 10% error in the Stretching exponent
 		TS_ASSERT_DELTA( out->getParameter("A"), 2.0 ,0.02);

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ExpDecay.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -21,7 +22,7 @@ ExpDecay::ExpDecay()
 }
 
 
-void ExpDecay::functionMW(double* out, const double* xValues, const size_t nData)const
+void ExpDecay::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");
@@ -32,7 +33,7 @@ void ExpDecay::functionMW(double* out, const double* xValues, const size_t nData
     }
 }
 
-void ExpDecay::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void ExpDecay::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");

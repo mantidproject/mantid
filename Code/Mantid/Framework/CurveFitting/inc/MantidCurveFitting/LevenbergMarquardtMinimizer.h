@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include <gsl/gsl_multifit_nlin.h>
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 //#include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 
@@ -45,21 +45,23 @@ class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(): m_name("Levenberg-Marquardt") {}
+  LevenbergMarquardtMinimizer(){}
 
   /// Overloading base class methods
-  std::string name()const;
-  int iterate();
-  int hasConverged();
-  double costFunctionVal();
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
-  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, API::IFitFunction* fit, const std::string& costFunction);
-  void initialize(API::IFitFunction* fit, const std::string& costFunction);
+  /// Name of the minimizer.
+  std::string name() const {return "Levenberg-Marquardt";}
+
+  /// Initialize minimizer, i.e. pass a function to minimize.
+  virtual void initialize(API::ICostFunction_sptr function);
+  /// Do one iteration.
+  virtual bool iterate();
+  /// Return current value of the cost function
+  virtual double costFunctionVal();
+
 
 private:
-  /// name of this minimizer
-  const std::string m_name;
+  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
+  int hasConverged();
 
   /// GSL data container
   GSL_FitData *m_data;
@@ -71,7 +73,7 @@ private:
   gsl_multifit_fdfsolver *m_gslSolver;
 
   /// Stored to access IFunction interface in iterate()
-  API::IFitFunction* m_function;
+  API::IFunction_sptr m_function;
 
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

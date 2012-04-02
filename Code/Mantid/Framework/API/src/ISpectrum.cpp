@@ -218,6 +218,22 @@ namespace API
   }
 
 
+  // ---------------------------------------------------------
+  /** Lock access to the data so that it does not get deleted while reading.
+   * Does nothing unless overridden.
+   */
+  void ISpectrum::lockData() const
+  {
+  }
+
+  /** Unlock access to the data so that it can again get deleted.
+   * Does nothing unless overridden.
+   */
+  void ISpectrum::unlockData() const
+  {
+  }
+
+
 } // namespace Mantid
 } // namespace API
 

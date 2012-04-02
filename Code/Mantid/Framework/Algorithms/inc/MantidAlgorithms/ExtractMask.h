@@ -13,10 +13,10 @@ namespace Mantid
     /**
       Extract the masking from a given workspace.
 
-      The output workspce is a MatrixWorkspace with a single X bin where:
+      The output workspce is a MaskWorkspace with a single X bin where:
       <UL>
-      <LI>0 = masked;</LI>
-      <LI>1 = unmasked.</LI>
+      <LI>1 = masked;</LI>
+      <LI>0 = unmasked.</LI>
       </UL>
 
       The spectra containing 0 are also marked as masked and the instrument 
@@ -27,11 +27,8 @@ namespace Mantid
       <LI> InputWorkspace  - The name of the input workspace. </LI>
       <LI> OutputWorkspace - The name of the output mask workspace </LI>
       </UL>
-      
-      @author Martyn Gigg, Tessella plc
-      @date 15/11/2010
-      
-      Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+           
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
       
       This file is part of Mantid.
       

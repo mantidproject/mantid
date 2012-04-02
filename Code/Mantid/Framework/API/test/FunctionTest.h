@@ -2,7 +2,7 @@
 #define IFUNCTIONTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
@@ -78,7 +78,7 @@ private:
   size_t m_blocksize;
 };
 
-class IFT_Funct: public ParamFunction, public IFunctionMW
+class IFT_Funct: public ParamFunction, public IFunction1D
 {
 public:
   IFT_Funct()
@@ -91,7 +91,7 @@ public:
 
   std::string name()const{return "IFT_Funct";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
@@ -103,7 +103,7 @@ public:
       out[i] = c0 + x*(c1 + x*(c2 + x*c3));
     }
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     for(size_t i=0;i<nData;i++)
     {
@@ -135,7 +135,6 @@ public:
     TS_ASSERT_EQUALS(f.parameterDescription(0),"this is the famous c0 blah...");
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),4);
 
     TS_ASSERT_EQUALS(f.getParameter(0),1.0);
     TS_ASSERT_EQUALS(f.getParameter(1),1.1);
@@ -171,24 +170,14 @@ public:
     TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
     TS_ASSERT_EQUALS(f.nameOfActive(3),"c3");
 
-    TS_ASSERT_EQUALS(f.indexOfActive(0),0);
-    TS_ASSERT_EQUALS(f.indexOfActive(1),1);
-    TS_ASSERT_EQUALS(f.indexOfActive(2),2);
-    TS_ASSERT_EQUALS(f.indexOfActive(3),3);
-
-    TS_ASSERT(   f.isActive(0));
-    TS_ASSERT(   f.isActive(1));
-    TS_ASSERT(   f.isActive(2));
-    TS_ASSERT(   f.isActive(3));
-
-    TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_EQUALS(f.activeIndex(1),1);
-    TS_ASSERT_EQUALS(f.activeIndex(2),2);
-    TS_ASSERT_EQUALS(f.activeIndex(3),3);
+    TS_ASSERT( ! f.isFixed(0));
+    TS_ASSERT( ! f.isFixed(1));
+    TS_ASSERT( ! f.isFixed(2));
+    TS_ASSERT( ! f.isFixed(3));
 
   }
 
-  void testRemoveActive()
+  void testFix()
   {
     IFT_Funct f;
 
@@ -197,34 +186,30 @@ public:
     f.setParameter("c2",1.2);
     f.setParameter("c3",1.3);
 
-    f.removeActive(1);
-    f.removeActive(3);
+    f.fix(1);
+    f.fix(3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),1.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),1.2);
+    TS_ASSERT_EQUALS(f.activeParameter(2),1.2);
 
     TS_ASSERT_EQUALS(f.nameOfActive(0),"c0");
-    TS_ASSERT_EQUALS(f.nameOfActive(1),"c2");
+    TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
 
-    TS_ASSERT_EQUALS(f.indexOfActive(0),0);
-    TS_ASSERT_EQUALS(f.indexOfActive(1),2);
+    TS_ASSERT( ! f.isFixed(0));
+    TS_ASSERT(   f.isFixed(1));
+    TS_ASSERT( ! f.isFixed(2));
+    TS_ASSERT(   f.isFixed(3));
 
-    TS_ASSERT(   f.isActive(0));
-    TS_ASSERT( ! f.isActive(1));
-    TS_ASSERT(   f.isActive(2));
-    TS_ASSERT( ! f.isActive(3));
-
-    TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(f.activeIndex(2),1);
-    TS_ASSERT_THROWS(f.activeIndex(3),std::invalid_argument);
+    TS_ASSERT_THROWS(double d = f.activeParameter(1),std::runtime_error);
+    TS_ASSERT_THROWS(double d = f.activeParameter(3),std::runtime_error);
+    TS_ASSERT_THROWS(f.setActiveParameter(1,0),std::runtime_error);
+    TS_ASSERT_THROWS(f.setActiveParameter(3,0),std::runtime_error);
 
   }
 
-  void testRestoreActive()
+  void testUnfix()
   {
     IFT_Funct f;
 
@@ -233,35 +218,25 @@ public:
     f.setParameter("c2",1.2);
     f.setParameter("c3",1.3);
 
-    f.removeActive(1);
-    f.removeActive(3);
+    f.fix(1);
+    f.fix(3);
 
-    f.restoreActive(3);
+    f.unfix(3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),3);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),1.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),1.2);
-    TS_ASSERT_EQUALS(f.activeParameter(2),1.3);
+    TS_ASSERT_EQUALS(f.activeParameter(2),1.2);
+    TS_ASSERT_EQUALS(f.activeParameter(3),1.3);
 
     TS_ASSERT_EQUALS(f.nameOfActive(0),"c0");
-    TS_ASSERT_EQUALS(f.nameOfActive(1),"c2");
-    TS_ASSERT_EQUALS(f.nameOfActive(2),"c3");
+    TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
+    TS_ASSERT_EQUALS(f.nameOfActive(3),"c3");
 
-    TS_ASSERT_EQUALS(f.indexOfActive(0),0);
-    TS_ASSERT_EQUALS(f.indexOfActive(1),2);
-    TS_ASSERT_EQUALS(f.indexOfActive(2),3);
-
-    TS_ASSERT(   f.isActive(0));
-    TS_ASSERT( ! f.isActive(1));
-    TS_ASSERT(   f.isActive(2));
-    TS_ASSERT(   f.isActive(3));
-
-    TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(f.activeIndex(2),1);
-    TS_ASSERT_EQUALS(f.activeIndex(3),2);
+    TS_ASSERT( ! f.isFixed(0));
+    TS_ASSERT(   f.isFixed(1));
+    TS_ASSERT( ! f.isFixed(2));
+    TS_ASSERT( ! f.isFixed(3));
 
   }
 
@@ -274,17 +249,16 @@ public:
     f.setParameter("c2",1.2);
     f.setParameter("c3",1.3);
 
-    f.removeActive(1);
-    f.removeActive(3);
+    f.fix(1);
+    f.fix(3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     f.setActiveParameter(0,2.0);
-    f.setActiveParameter(1,2.1);
+    f.setActiveParameter(2,2.1);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),2.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),2.1);
+    TS_ASSERT_EQUALS(f.activeParameter(2),2.1);
 
     TS_ASSERT_EQUALS(f.getParameter(0),2.0);
     TS_ASSERT_EQUALS(f.getParameter(1),1.1);
@@ -311,26 +285,22 @@ public:
     f.tie("c3","0");
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),1.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),1.2);
+    TS_ASSERT_EQUALS(f.activeParameter(2),1.2);
 
     TS_ASSERT_EQUALS(f.nameOfActive(0),"c0");
-    TS_ASSERT_EQUALS(f.nameOfActive(1),"c2");
+    TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
 
-    TS_ASSERT_EQUALS(f.indexOfActive(0),0);
-    TS_ASSERT_EQUALS(f.indexOfActive(1),2);
+    TS_ASSERT( ! f.isFixed(0));
+    TS_ASSERT(   f.isFixed(1));
+    TS_ASSERT( ! f.isFixed(2));
+    TS_ASSERT(   f.isFixed(3));
 
     TS_ASSERT(   f.isActive(0));
     TS_ASSERT( ! f.isActive(1));
     TS_ASSERT(   f.isActive(2));
     TS_ASSERT( ! f.isActive(3));
-
-    TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(f.activeIndex(2),1);
-    TS_ASSERT_THROWS(f.activeIndex(3),std::invalid_argument);
 
   }
 
@@ -349,7 +319,6 @@ public:
     f.applyTies();
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -373,7 +342,6 @@ public:
     f.applyTies();
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -385,23 +353,15 @@ public:
 
     f.applyTies();
 
-    TS_ASSERT_EQUALS(f.nActive(),3);
-
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
     TS_ASSERT_EQUALS(f.getParameter("c2"),1.2);
     TS_ASSERT_EQUALS(f.getParameter("c3"),3.3);
 
-    TS_ASSERT(   f.isActive(0));
-    TS_ASSERT( ! f.isActive(1));
-    TS_ASSERT(   f.isActive(2));
-    TS_ASSERT(   f.isActive(3));
-
-    TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(f.activeIndex(2),1);
-    TS_ASSERT_EQUALS(f.activeIndex(3),2);
-
+    TS_ASSERT( ! f.isFixed(0));
+    TS_ASSERT(   f.isFixed(1));
+    TS_ASSERT( ! f.isFixed(2));
+    TS_ASSERT( ! f.isFixed(3));
   }
 
   void testClearTies()
@@ -419,7 +379,6 @@ public:
     f.applyTies();
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -432,48 +391,15 @@ public:
 
     f.applyTies();
 
-    TS_ASSERT_EQUALS(f.nActive(),4);
-
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),3.1);
     TS_ASSERT_EQUALS(f.getParameter("c2"),1.2);
     TS_ASSERT_EQUALS(f.getParameter("c3"),3.3);
 
-    TS_ASSERT(   f.isActive(0));
-    TS_ASSERT(   f.isActive(1));
-    TS_ASSERT(   f.isActive(2));
-    TS_ASSERT(   f.isActive(3));
-
-    TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_EQUALS(f.activeIndex(1),1);
-    TS_ASSERT_EQUALS(f.activeIndex(2),2);
-    TS_ASSERT_EQUALS(f.activeIndex(3),3);
-
-  }
-
-  void testUpdateActive()
-  {
-    IFT_Funct f;
-
-    f.setParameter("c0",1.0);
-    f.setParameter("c1",1.1);
-    f.setParameter("c2",1.2);
-    f.setParameter("c3",1.3);
-
-    f.tie("c1","c0+4");
-    f.tie("c3","c2/2");
-
-    double in[] = {6.,22.2};
-
-    f.updateActive(in);
-
-    TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
-
-    TS_ASSERT_EQUALS(f.getParameter("c0"),6.0);
-    TS_ASSERT_EQUALS(f.getParameter("c1"),10.0);
-    TS_ASSERT_EQUALS(f.getParameter("c2"),22.2);
-    TS_ASSERT_EQUALS(f.getParameter("c3"),11.1);
+    TS_ASSERT( ! f.isFixed(0));
+    TS_ASSERT( ! f.isFixed(1));
+    TS_ASSERT( ! f.isFixed(2));
+    TS_ASSERT( ! f.isFixed(3));
 
   }
 
@@ -489,65 +415,57 @@ public:
     TS_ASSERT(!f.isExplicitlySet(3));
   }
 
-  void test_setWorkspace_works()
-  {
-    MatrixWorkspace_sptr ws(new MocMatrixWorkspace(10,11,10));
+  //void xtest_setWorkspace_works()
+  //{
+  //  MatrixWorkspace_sptr ws(new MocMatrixWorkspace(10,11,10));
 
-    MantidVec& x = ws->dataX(3);
-    MantidVec& y = ws->dataY(3);
-    for(size_t i=0; i < y.size(); ++i)
-    {
-      x[i] = 0.1 * static_cast<double>(i);
-      y[i] = static_cast<double>(i);
-    }
-    x.back() = 0.1 * static_cast<double>(y.size());
-    AnalysisDataService::Instance().add("IFT_Test_WS",ws);
-    IFT_Funct f;
-    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8",true));
-    TS_ASSERT_EQUALS(f.dataSize(),8);
-    TS_ASSERT_EQUALS(f.getData(),&y[2]);
-    AnalysisDataService::Instance().remove("IFT_Test_WS");
-  }
+  //  MantidVec& x = ws->dataX(3);
+  //  MantidVec& y = ws->dataY(3);
+  //  for(size_t i=0; i < y.size(); ++i)
+  //  {
+  //    x[i] = 0.1 * static_cast<double>(i);
+  //    y[i] = static_cast<double>(i);
+  //  }
+  //  x.back() = 0.1 * static_cast<double>(y.size());
+  //  AnalysisDataService::Instance().add("IFT_Test_WS",ws);
+  //  IFT_Funct f;
+  //  TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8",true));
+  //  TS_ASSERT_EQUALS(f.dataSize(),8);
+  //  TS_ASSERT_EQUALS(f.getData(),&y[2]);
+  //  AnalysisDataService::Instance().remove("IFT_Test_WS");
+  //}
 
   /** Refs #3003: Test to make sure setMatrix works in parallel */
-  void test_setWorkspace_works_inParallel()
-  {
-    double expected;
-    int numpixels = 15000;
-    MatrixWorkspace_sptr ws(new MocMatrixWorkspace(numpixels,11,10));
-    for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
-    {
-      MantidVec& x = ws->dataX(wi);
-      MantidVec& y = ws->dataY(wi);
-      for(size_t i=0; i < y.size(); ++i)
-      {
-        x[i] = 0.1 * double(i);
-        y[i] = double(i);
-      }
-      x.back() = 0.1 * double(y.size());
-      expected = y[2];
-    }
+  //void xtest_setWorkspace_works_inParallel()
+  //{
+  //  double expected;
+  //  int numpixels = 15000;
+  //  MatrixWorkspace_sptr ws(new MocMatrixWorkspace(numpixels,11,10));
+  //  for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
+  //  {
+  //    MantidVec& x = ws->dataX(wi);
+  //    MantidVec& y = ws->dataY(wi);
+  //    for(size_t i=0; i < y.size(); ++i)
+  //    {
+  //      x[i] = 0.1 * double(i);
+  //      y[i] = double(i);
+  //    }
+  //    x.back() = 0.1 * double(y.size());
+  //    expected = y[2];
+  //  }
 
-    // NOTE: In parallel, there is a segfault on SNS build servers ubuntu-10.04 and RHEL6. The rest pass!?
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i=0; i<numpixels; i++)
-    {
-      IFT_Funct f;
-      std::stringstream mess;
-      mess << "WorkspaceIndex=" << i << ",StartX=0.2,EndX = 0.8";
-      TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str(),true ));
-      TS_ASSERT_EQUALS(f.dataSize(),8);
-      TS_ASSERT_EQUALS(*f.getData(), expected);
-    }
-  }
-
-  private:
-  void interrupt()
-  {
-    int iii;
-    std::cerr<<"Enter a number:";
-    std::cin>>iii;
-  }
+  //  // NOTE: In parallel, there is a segfault on SNS build servers ubuntu-10.04 and RHEL6. The rest pass!?
+  //  PARALLEL_FOR_NO_WSP_CHECK()
+  //  for (int i=0; i<numpixels; i++)
+  //  {
+  //    IFT_Funct f;
+  //    std::stringstream mess;
+  //    mess << "WorkspaceIndex=" << i << ",StartX=0.2,EndX = 0.8";
+  //    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str(),true ));
+  //    TS_ASSERT_EQUALS(f.dataSize(),8);
+  //    TS_ASSERT_EQUALS(*f.getData(), expected);
+  //  }
+  //}
 
 };
 

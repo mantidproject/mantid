@@ -88,31 +88,24 @@ public:
   virtual std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(size_t i)const;
-
-  /// Number of active (in terms of fitting) parameters
-  virtual size_t nActive()const{return m_indexMap.size();}
-  /// Returns "global" index of active parameter i
-  virtual size_t indexOfActive(size_t i)const;
-  /// Returns the name of active parameter i
-  virtual std::string nameOfActive(size_t i)const;
-  /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(size_t i)const;
+  /// Get the fitting error for a parameter
+  virtual double getError(size_t i) const;
+  /// Set the fitting error for a parameter
+  virtual void setError(size_t i, double err);
 
   /// Check if a declared parameter i is active
-  virtual bool isActive(size_t i)const;
-  /// Get active index for a declared parameter i
-  virtual size_t activeIndex(size_t i)const;
+  virtual bool isFixed(size_t i)const;
   /// Removes a declared parameter i from the list of active
-  virtual void removeActive(size_t i);
+  virtual void fix(size_t i);
   /// Restores a declared parameter i to the active status
-  virtual void restoreActive(size_t i);
+  virtual void unfix(size_t i);
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const ParameterReference& ref)const;
+  IFunction_sptr getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
-  IFunction* getContainingFunction(const IFunction* fun);
+  IFunction_sptr getContainingFunction(IFunction_sptr fun);
 
   /// Apply the ties
   virtual void applyTies();
@@ -152,11 +145,13 @@ protected:
 
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
-  std::vector<size_t> m_indexMap;
+  std::vector<bool> m_isFixed;
   /// Keeps parameter names
   std::vector<std::string> m_parameterNames;
   /// Keeps parameter values
   std::vector<double> m_parameters;
+  /// Keeps parameter errors
+  std::vector<double> m_errors;
   /// Holds parameter ties as <parameter index,tie pointer> 
   std::vector<ParameterTie*> m_ties;
   /// Holds the constraints added to function

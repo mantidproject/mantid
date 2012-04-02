@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_stitching.ui'
 #
-# Created: Tue Mar  6 08:47:40 2012
+# Created: Fri Mar 30 16:23:19 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -119,14 +119,25 @@ class Ui_Frame(object):
         self.max_q_unity_label = QtGui.QLabel(self.scrollAreaWidgetContents)
         self.max_q_unity_label.setObjectName("max_q_unity_label")
         self.horizontalLayout_2.addWidget(self.max_q_unity_label)
+        self.min_q_unity_edit = QtGui.QLineEdit(self.scrollAreaWidgetContents)
+        self.min_q_unity_edit.setMinimumSize(QtCore.QSize(80, 0))
+        self.min_q_unity_edit.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.min_q_unity_edit.setObjectName("min_q_unity_edit")
+        self.horizontalLayout_2.addWidget(self.min_q_unity_edit)
+        self.label_6 = QtGui.QLabel(self.scrollAreaWidgetContents)
+        self.label_6.setObjectName("label_6")
+        self.horizontalLayout_2.addWidget(self.label_6)
         self.max_q_unity_edit = QtGui.QLineEdit(self.scrollAreaWidgetContents)
         self.max_q_unity_edit.setMinimumSize(QtCore.QSize(80, 0))
         self.max_q_unity_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.max_q_unity_edit.setObjectName("max_q_unity_edit")
         self.horizontalLayout_2.addWidget(self.max_q_unity_edit)
-        self.label_6 = QtGui.QLabel(self.scrollAreaWidgetContents)
-        self.label_6.setObjectName("label_6")
-        self.horizontalLayout_2.addWidget(self.label_6)
+        self.label_7 = QtGui.QLabel(self.scrollAreaWidgetContents)
+        self.label_7.setObjectName("label_7")
+        self.horizontalLayout_2.addWidget(self.label_7)
+        self.pick_unity_range_btn = QtGui.QPushButton(self.scrollAreaWidgetContents)
+        self.pick_unity_range_btn.setObjectName("pick_unity_range_btn")
+        self.horizontalLayout_2.addWidget(self.pick_unity_range_btn)
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem4)
         self.auto_scale_btn = QtGui.QPushButton(self.scrollAreaWidgetContents)
@@ -171,8 +182,10 @@ class Ui_Frame(object):
 "points to\n"
 "skip", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_to_one_chk.setText(QtGui.QApplication.translate("Frame", "Scale to unity", None, QtGui.QApplication.UnicodeUTF8))
-        self.max_q_unity_label.setText(QtGui.QApplication.translate("Frame", "Max Q where R=1:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("Frame", "1/Å", None, QtGui.QApplication.UnicodeUTF8))
+        self.max_q_unity_label.setText(QtGui.QApplication.translate("Frame", "Critical edge from", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_6.setText(QtGui.QApplication.translate("Frame", "1/Å  to  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setText(QtGui.QApplication.translate("Frame", "1/Å  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.pick_unity_range_btn.setText(QtGui.QApplication.translate("Frame", "Pick range", None, QtGui.QApplication.UnicodeUTF8))
         self.auto_scale_btn.setText(QtGui.QApplication.translate("Frame", "Auto scale", None, QtGui.QApplication.UnicodeUTF8))
         self.save_btn.setText(QtGui.QApplication.translate("Frame", "Save", None, QtGui.QApplication.UnicodeUTF8))
 

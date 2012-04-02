@@ -18,8 +18,8 @@ namespace Mantid
   namespace API
   {
     class MatrixWorkspace;
-    class IFitFunction;
-    class CompositeFunctionMW;
+    class IFunction;
+    class CompositeFunction;
   }
 }
 namespace MantidQt
@@ -91,14 +91,14 @@ namespace MantidQt
       void furyfitRun();
       void confitRun();
 
-      Mantid::API::CompositeFunctionMW* furyfitCreateFunction(bool tie=false);
-      Mantid::API::IFitFunction* furyfitCreateUserFunction(const QString & name, bool tie=false);
-      Mantid::API::CompositeFunctionMW* confitCreateFunction(bool tie=false);
+      boost::shared_ptr<Mantid::API::CompositeFunction> furyfitCreateFunction(bool tie=false);
+      boost::shared_ptr<Mantid::API::IFunction> furyfitCreateUserFunction(const QString & name, bool tie=false);
+      boost::shared_ptr<Mantid::API::CompositeFunction> confitCreateFunction(bool tie=false);
       QtProperty* createLorentzian(const QString &);
       QtProperty* createExponential(const QString &);
       QtProperty* createStretchedExp(const QString &);
 
-      void populateFunction(Mantid::API::IFitFunction*, Mantid::API::IFitFunction*, QtProperty*, size_t, const bool tie=false);
+      void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, size_t, const bool tie=false);
       QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index);
       std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
       

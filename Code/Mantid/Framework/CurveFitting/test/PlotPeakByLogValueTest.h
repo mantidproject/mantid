@@ -87,26 +87,26 @@ public:
     TS_ASSERT_EQUALS(tnames[10],"f1.Sigma_Err");
     TS_ASSERT_EQUALS(tnames[11],"Chi_squared");
 
-    TS_ASSERT_DELTA(result->Double(0,0),1,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,1),1,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,3),0.3,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,5),2,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,7),5,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,0),1,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,1),1,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,3),0.3,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,5),2,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,7),5,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-10);
 
-    TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,5),1.8,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,7),5.03,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,9),0.11,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,5),1.8,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,7),5.03,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,9),0.11,1e-10);
 
-    TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,3),0.26,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,3),0.26,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-10);
 
     deleteData();
     AnalysisDataService::Instance().remove("PlotPeakResult");
@@ -144,26 +144,26 @@ public:
     TS_ASSERT_EQUALS(tnames[10],"f1.Sigma_Err");
     TS_ASSERT_EQUALS(tnames[11],"Chi_squared");
 
-    TS_ASSERT_DELTA(result->Double(0,0),1,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,1),1,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,3),0.3,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,5),2,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,7),5,1e-12);
-    TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,0),1,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,1),1,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,3),0.3,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,5),2,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,7),5,1e-10);
+    TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-10);
 
-    TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,5),1.8,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,7),5.03,1e-12);
-    TS_ASSERT_DELTA(result->Double(1,9),0.11,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,5),1.8,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,7),5.03,1e-10);
+    TS_ASSERT_DELTA(result->Double(1,9),0.11,1e-10);
 
-    TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,3),0.26,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-12);
-    TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,3),0.26,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-10);
+    TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-10);
 
     deleteData();
     AnalysisDataService::Instance().remove("PlotPeakResult");

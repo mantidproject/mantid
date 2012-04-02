@@ -5,8 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include <string>
-#include <gsl/gsl_multifit_nlin.h>
+#include "MantidAPI/ICostFunction.h"
 #include "MantidCurveFitting/FuncMinimizerFactory.h"
 
 namespace Mantid
@@ -48,36 +47,30 @@ public:
   /// Virtual destructor
   virtual ~IFuncMinimizer() {}
 
-  /// Initialize minimizer, i.e. pass costFunction, data etc
-  virtual void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction) = 0;
-
   /// Initialize minimizer, i.e. pass function and costFunction
-  virtual void initialize(API::IFitFunction* function, const std::string& costFunction) = 0;
+  virtual void initialize(API::ICostFunction_sptr function) = 0;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;
 
+  /// Do one iteration
+  /// @return :: true if iterations should be continued or false to stop
+  virtual bool iterate() = 0;
+
   /// Perform iteration with minimizer and return info about how well this went
   /// using the GSL status integer system. See gsl_errno.h for details.
-  virtual int iterate() = 0;
+  virtual bool minimize(size_t maxIterations = 1000);
 
-  /// Has fit converged. Status is returned using the GSL status flags listed 
-  /// in the header file gsl_errno.h. E.g. GSL_SUCCESS  = 0, GSL_FAILURE  = -1,
-  /// GSL_CONTINUE = -2 where the latter means the minimizer has not quite 
-  /// converged yet and need another iteration
-  virtual int hasConverged() = 0;
+  virtual std::string getError() const {return m_errorString;}
 
   /// Get value of cost function 
   virtual double costFunctionVal() = 0;
 
-  /** Calculates covariance matrix
-   *
-   * @param epsrel :: Is used to remove linear-dependent columns
-   * @param covar :: Returned covariance matrix, here as 
-   */
-  virtual void calCovarianceMatrix(double epsrel, gsl_matrix * covar) = 0;
+protected:
+  std::string m_errorString;
 };
+
+typedef boost::shared_ptr<IFuncMinimizer> IFuncMinimizer_sptr;
 
 } // namespace CurveFitting
 } // namespace Mantid

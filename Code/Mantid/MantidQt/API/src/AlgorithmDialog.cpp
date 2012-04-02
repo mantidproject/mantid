@@ -291,13 +291,14 @@ void AlgorithmDialog::showValidators()
  */
 bool AlgorithmDialog::setPropertyValue(const QString pName, bool validateOthers)
 {
-  Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
+  //Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
   QString value = getInputValue(pName);
 
   std::string error("");
   try
   {
-    error = p->setValue(value.toStdString());
+    //error = p->setValue(value.toStdString());
+    getAlgorithm()->setPropertyValue(pName.toStdString(),value.toStdString());
   }
   catch(std::exception & err_details)
   {

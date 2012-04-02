@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <set>
-
+#include "MantidGeometry/IComponent.h"
 namespace Mantid
 {
   namespace Algorithms
@@ -71,9 +71,13 @@ namespace Mantid
 
       /// Calculate the median of the given workspace. This assumes that the input workspace contains 
       /// integrated counts
-      double calculateMedian(API::MatrixWorkspace_sptr input, bool excludeZeroes);
+      std::vector<double> calculateMedian(API::MatrixWorkspace_sptr input, bool excludeZeroes,std::vector<std::vector<size_t> > indexmap);
       /// Convert to a distribution
       API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
+      /// method to check which spectra should be grouped when calculating the median
+      std::vector<std::vector<size_t> >makeMap(API::MatrixWorkspace_sptr countsWS);
+      /// method to create the map with all spectra
+      std::vector<std::vector<size_t> >makeInstrumentMap(API::MatrixWorkspace_sptr countsWS);
 
       /** @name Progress reporting */
       //@{
@@ -107,6 +111,8 @@ namespace Mantid
       /// An estimate total number of additions or equilivent required to compute a spectrum 
       int m_TotalTime;
 
+      /// number of parents up, 0 go to instrument
+      int m_parents;
       //@}
 
       

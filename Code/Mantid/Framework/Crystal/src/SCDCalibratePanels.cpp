@@ -377,7 +377,7 @@ namespace Crystal
     AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
 
     double L0 =peaksWs->getPeak(0).getL1();
-    double T0;
+    double T0(0.0); // TODO: This variable is not set anywhere (initialized to zero here to avoid compiler warning).
     string FunctionArgument;
     string Constraints("");
     string TiesArgument;

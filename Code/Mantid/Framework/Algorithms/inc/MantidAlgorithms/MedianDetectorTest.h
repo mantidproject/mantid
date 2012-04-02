@@ -83,17 +83,17 @@ namespace Mantid
       /// Calculates the sum of solid angles of detectors for each histogram
       API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
       /// Mask the outlier values to get a better median value
-      int maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS);
+      int maskOutliers(const std::vector<double> median, API::MatrixWorkspace_sptr countsWS,std::vector<std::vector<size_t> >indexmap);
       /// Do the tests and mask those that fail
-      int doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const double median, API::MatrixWorkspace_sptr maskWS);
+      int doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const std::vector<double> median,std::vector<std::vector<size_t> > indexmap, API::MatrixWorkspace_sptr maskWS);
 
-      /// Input workspace
+
       API::MatrixWorkspace_sptr m_inputWS;
       /// The proportion of the median value below which a detector is considered under-reading
       double m_loFrac;
       /// The factor of the median value above which a detector is considered over-reading
       double m_hiFrac;
-      ///The index of the first spectrum to calculate
+      /// The index of the first spectrum to calculate
       int m_minSpec;
       /// The index of the last spectrum to calculate
       int m_maxSpec;
@@ -103,6 +103,7 @@ namespace Mantid
       double m_rangeUpper;
       /// flag for solid angle correction
       bool m_solidAngle;
+
     };
 
   } // namespace Algorithm

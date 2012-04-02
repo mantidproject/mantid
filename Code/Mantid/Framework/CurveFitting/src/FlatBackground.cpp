@@ -1,4 +1,5 @@
 #include "MantidCurveFitting/FlatBackground.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
@@ -38,7 +39,7 @@ namespace CurveFitting
    * @param xValues The points to evaluate at
    * @param nData The number of points.
    */
-  void FlatBackground::functionMW(double* out, const double* xValues, const size_t nData)const
+  void FlatBackground::function1D(double* out, const double* xValues, const size_t nData)const
   {
     UNUSED_ARG(xValues);
 
@@ -55,7 +56,7 @@ namespace CurveFitting
    * @param xValues The points to evaluate at
    * @param nData The number of points.
    */
-  void FlatBackground::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData)
+  void FlatBackground::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
   {
     UNUSED_ARG(xValues);
 

@@ -63,16 +63,16 @@ namespace Mantid
       }
 
       /// Constructor with boundary arguments
-      BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound);
+      BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound);
 
       /// Constructor with lower boundary argument
-      BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound);
+      BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound);
 
       /// Destructor
       virtual ~BoundaryConstraint() {}
 
       /// Initialize the constraint from an expression
-      void initialize(API::IFitFunction* fun, const API::Expression& expr);
+      void initialize(API::IFunction* fun, const API::Expression& expr);
 
       /// implement IConstraint virtual functions
       void setPenaltyFactor(const double& c); 
@@ -116,6 +116,7 @@ namespace Mantid
       /// overwrite IConstraint base class methods
       virtual double check();
       virtual double checkDeriv();
+      virtual double checkDeriv2();
       virtual void setParamToSatisfyConstraint();
       virtual std::string asString()const;
 

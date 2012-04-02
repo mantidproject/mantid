@@ -2,6 +2,7 @@
 #define LIVELISTENERFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "ILiveListenerTest.h"
 
@@ -32,6 +33,12 @@ public:
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS( factory.create("fdsfds"), Mantid::Kernel::Exception::NotFoundError )
+  }
+
+  void test_create_throws_when_unable_to_connect()
+  {
+    Kernel::ConfigService::Instance().setFacility("TEST");
+    TS_ASSERT_THROWS( factory.create("MINITOPAZ"), std::runtime_error );
   }
 
   void test_createUnwrapped_throws()

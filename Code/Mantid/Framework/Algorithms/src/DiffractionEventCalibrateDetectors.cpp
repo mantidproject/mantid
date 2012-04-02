@@ -27,6 +27,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -238,20 +239,25 @@ namespace Algorithms
       g_log.error("Can't locate Fit algorithm");
       throw ;
     }
+    std::ostringstream fun_str;
+    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=0.01,PeakCentre="<<peakLoc;
+    fit_alg->setProperty("Function",fun_str.str());
     fit_alg->setProperty("InputWorkspace",outputW);
     fit_alg->setProperty("WorkspaceIndex",0);
     fit_alg->setProperty("StartX",outputW->readX(0)[0]);
     fit_alg->setProperty("EndX",outputW->readX(0)[outputW->blocksize()]);
     fit_alg->setProperty("MaxIterations",200);
     fit_alg->setProperty("Output","fit");
-    std::ostringstream fun_str;
-    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=0.01,PeakCentre="<<peakLoc;
-    fit_alg->setProperty("Function",fun_str.str());
     fit_alg->executeAsSubAlg();
 
     if (debug) std::cout << tim << " to Fit" << std::endl;
 
-    std::vector<double> params = fit_alg->getProperty("Parameters");
+    std::vector<double> params;// = fit_alg->getProperty("Parameters");
+    Mantid::API::IFunction_sptr fun_res = fit_alg->getProperty("Function");
+    for(size_t i = 0; i < fun_res->nParams(); ++i)
+    {
+      params.push_back(fun_res->getParameter(i));
+    }
     peakHeight = params[0];
     peakLoc = params[1];
 

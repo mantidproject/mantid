@@ -1,5 +1,6 @@
 from interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refl_data_simple import DataReflWidget
+#from reduction_gui.widgets.reflectometer.refl_reduction import DataReflWidget
 try:
     from reduction_gui.widgets.reflectometer.stitcher import StitcherWidget
     HAS_STITCHER = True

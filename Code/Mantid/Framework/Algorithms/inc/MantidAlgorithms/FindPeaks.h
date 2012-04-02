@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
@@ -94,7 +94,7 @@ private:
   void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
 
   std::string createTies(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
-  API::IFitFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
+  API::IFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
   int backgroundOrder();
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
@@ -116,6 +116,11 @@ private:
   bool m_searchPeakPos; ///<flag to search for peak in the window
   std::string m_peakFuncType; //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
+
+  // Functions for reused 
+  API::IFunction_sptr m_peakFunction;
+  API::IFunction_sptr m_backgroundFunction;
+  API::IFunction_sptr m_peakAndBackgroundFunction;
 
   unsigned int minGuessedPeakWidth;
   unsigned int maxGuessedPeakWidth;

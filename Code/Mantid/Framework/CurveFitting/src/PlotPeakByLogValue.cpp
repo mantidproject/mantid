@@ -42,7 +42,7 @@ In this example a group of three Matrix workspaces were fitted with a [[Gaussian
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
@@ -140,7 +140,7 @@ namespace Mantid
         result->addColumn("double",logName);
       }
       // Create an instance of the fitting function to obtain the names of fitting parameters
-      IFitFunction* ifun = FunctionFactory::Instance().createInitialized(fun);
+      IFunction_sptr ifun = FunctionFactory::Instance().createInitialized(fun);
       if (!ifun)
       {
         throw std::invalid_argument("Fitting function failed to initialize");
@@ -151,7 +151,7 @@ namespace Mantid
         result->addColumn("double",ifun->parameterName(iPar)+"_Err");
       }
       result->addColumn("double","Chi_squared");
-      delete ifun;
+
       setProperty("OutputWorkspace",result);
 
       double dProg = 1./static_cast<double>(wsNames.size());
@@ -208,7 +208,7 @@ namespace Mantid
           }
 
           std::string resFun = fun;
-          std::vector<double> errors;
+          //std::vector<double> errors;
           double chi2;
 
           try
@@ -216,28 +216,27 @@ namespace Mantid
             // Fit the function
             API::IAlgorithm_sptr fit = createSubAlgorithm("Fit");
             fit->initialize();
+            fit->setPropertyValue("Function",fun);
             fit->setProperty("InputWorkspace",data.ws);
             //fit->setPropertyValue("InputWorkspace",data.ws->getName());
             fit->setProperty("WorkspaceIndex",j);
-            fit->setPropertyValue("Function",fun);
             fit->setPropertyValue("StartX",getPropertyValue("StartX"));
             fit->setPropertyValue("EndX",getPropertyValue("EndX"));
             fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
             fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
             fit->execute();
-            resFun = fit->getPropertyValue("Function");
-            errors = fit->getProperty("Errors");
+            ifun = fit->getProperty("Function");
             chi2 = fit->getProperty("OutputChi2overDoF");
           }
           catch(...)
           {
-            g_log.error("Error in Fit subalgorithm");
+            g_log.error("Error in FitMW subalgorithm");
             throw;
           }
 
           if (sequential)
           {
-            fun = resFun;
+            fun = ifun->asString();
           }
 
           // Extract the fitted parameters and put them into the result table
@@ -250,13 +249,13 @@ namespace Mantid
           {
             row << logValue;
           }
-          ifun = FunctionFactory::Instance().createInitialized(resFun);
+
           for(size_t iPar=0;iPar<ifun->nParams();++iPar)
           {
-            row << ifun->getParameter(iPar) << errors[iPar];
+            row << ifun->getParameter(iPar) << ifun->getError(iPar);
           }
           row << chi2;
-          delete ifun;
+
           Prog += dProg;
           progress(Prog);
           interruption_point();

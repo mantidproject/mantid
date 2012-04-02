@@ -7,7 +7,7 @@
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>
@@ -24,7 +24,7 @@ public:
 
   /// Overloading base class methods
   std::string name()const {return "Boevs";}
-  int iterate() {return 1000;}
+  bool iterate() {return true;}
   int hasConverged() {return 101;}
   double costFunctionVal() {return 5.0;}
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar)
@@ -32,22 +32,8 @@ public:
     UNUSED_ARG(epsrel);
     UNUSED_ARG(covar);
   }
-  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, IFitFunction* function, const std::string& costFunction)
+  void initialize(API::ICostFunction_sptr)
   {
-    UNUSED_ARG(X);
-    UNUSED_ARG(Y);
-    UNUSED_ARG(sqrtWeight);
-    UNUSED_ARG(nData);
-    UNUSED_ARG(nParam);
-    UNUSED_ARG(startGuess);
-    UNUSED_ARG(function);
-    UNUSED_ARG(costFunction);
-  }
-  void initialize(IFitFunction* function, const std::string& costFunction)
-  {
-    UNUSED_ARG(function);
-    UNUSED_ARG(costFunction);
   }
 };
 

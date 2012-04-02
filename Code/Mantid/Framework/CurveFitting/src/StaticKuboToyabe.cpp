@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/StaticKuboToyabe.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -21,23 +22,17 @@ void StaticKuboToyabe::init()
 }
 
 
-void StaticKuboToyabe::functionMW(double* out, const double* xValues, const size_t nData)const
+void StaticKuboToyabe::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const double& A = getParameter("A"); 
   const double& G = getParameter("Delta"); 
 
 
-  for (int i = 0; i < nData; i++) {  
+  for (size_t i = 0; i < nData; i++) {
     out[i] = A*(exp(-pow(G*xValues[i],2)/2)*(1-pow(G*xValues[i],2))*2.0/3 + 1.0/3); 
   } 
 
 }
-
-void StaticKuboToyabe::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
-{
-  calNumericalDeriv(out, xValues, nData);
-}
-
 
 } // namespace CurveFitting
 } // namespace Mantid

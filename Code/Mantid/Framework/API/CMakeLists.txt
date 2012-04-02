@@ -14,9 +14,8 @@ set ( SRC_FILES
 	src/CloneableAlgorithm.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
+	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
-	src/CompositeFunctionMD.cpp
-	src/CompositeFunctionMW.cpp
 	src/ConstraintFactory.cpp
 	src/CoordTransform.cpp
 	src/CostFunctionFactory.cpp
@@ -27,15 +26,17 @@ set ( SRC_FILES
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
-	src/FunctionDomain.cpp
+	src/FunctionDomain1D.cpp
+	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
 	src/FunctionProperty.cpp
+	src/FunctionValues.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
-	src/IFitFunction.cpp
 	src/IFunction.cpp
 	src/IFunctionMD.cpp
+	src/IFunction1D.cpp
 	src/IFunctionMW.cpp
 	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
@@ -52,6 +53,7 @@ set ( SRC_FILES
 	src/ImplictFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/LiveListenerFactory.cpp
+	src/JointDomain.cpp
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
@@ -62,6 +64,8 @@ set ( SRC_FILES
 	src/MemoryManager.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
+	src/MultiDomainFunction.cpp
+	src/NumericAxis.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
@@ -76,7 +80,6 @@ set ( SRC_FILES
 	src/SpectraAxis.cpp
 	src/SpectraDetectorMap.cpp
 	src/TableRow.cpp
-	src/TempFunction.cpp
 	src/TextAxis.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
@@ -87,7 +90,6 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
-        src/CompositeFunctionMW.cpp
         src/IDataFileChecker.cpp
         src/MatrixWorkspace.cpp
         src/IEventWorkspace.cpp
@@ -113,8 +115,8 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CompositeFunction.h
-	inc/MantidAPI/CompositeFunctionMD.h
-	inc/MantidAPI/CompositeFunctionMW.h
+	inc/MantidAPI/CompositeDomain.h
+	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
@@ -128,8 +130,11 @@ set ( INC_FILES
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionDomain.h
+	inc/MantidAPI/FunctionDomain1D.h
+	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionProperty.h
+	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -140,10 +145,11 @@ set ( INC_FILES
 	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
-	inc/MantidAPI/IFitFunction.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunctionMD.h
+	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunctionMW.h
+	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h
@@ -167,6 +173,7 @@ set ( INC_FILES
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
@@ -177,6 +184,8 @@ set ( INC_FILES
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+	inc/MantidAPI/MultiDomainFunction.h
+	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -193,7 +202,6 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
-	inc/MantidAPI/TempFunction.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
@@ -228,8 +236,12 @@ set ( TEST_FILES
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
 	test/FunctionPropertyTest.h
+	test/FunctionDomainTest.h
+	test/FunctionFactoryTest.h
 	test/FunctionTest.h
+	test/FunctionValuesTest.h
 	test/IEventListTest.h
+	test/IFunction1DTest.h
 	test/IFunctionMDTest.h
 	test/ILiveListenerTest.h
 	test/IMDWorkspaceTest.h
@@ -240,6 +252,7 @@ set ( TEST_FILES
 	test/MDGeometryTest.h
 	test/MatrixWorkspaceMDIteratorTest.h
 	test/MemoryManagerTest.h
+	test/MultiDomainFunctionTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
 	test/NumericAxisTest.h
@@ -251,7 +264,6 @@ set ( TEST_FILES
 	test/SampleTest.h
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
-	test/TempFunctionTest.h
 	test/TextAxisTest.h
 	test/VectorParameterParserTest.h
 	test/VectorParameterTest.h

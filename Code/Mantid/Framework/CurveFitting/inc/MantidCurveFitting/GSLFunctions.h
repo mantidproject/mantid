@@ -5,16 +5,12 @@
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/ICostFunction.h"
+#include "MantidCurveFitting/CostFuncLeastSquares.h"
 
 namespace Mantid
 {
-  namespace API
-  {
-    class IFitFunction;
-    class ICostFunction;
-  }
-
   namespace CurveFitting
   {
     /**
@@ -93,39 +89,26 @@ namespace Mantid
   /// Structure to contain least squares data and used by GSL
   struct GSL_FitData {
     /// Constructor
-    GSL_FitData(API::IFitFunction* fun,API::ICostFunction* cf);
+    GSL_FitData(boost::shared_ptr<CostFuncLeastSquares> cf);
     /// Destructor
     ~GSL_FitData();
     /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
     size_t n;
     /// number of (active) fit parameters
     size_t p;
-    /// the data to be fitted (abscissae)
-    double * X;
-    /// the data to be fitted (ordinates)
-    const double * Y;
-    /// the standard deviations of the Y data points
-    const double * sqrtWeightData;
     /// Pointer to the function
-    API::IFitFunction* function;
+    API::IFunction_sptr function;
+    boost::shared_ptr<CostFuncLeastSquares> costFunction;
     /// Initial function parameters
     gsl_vector *initFuncParams;
-    /// pointer to the cost function
-    API::ICostFunction* costFunc;
     /// Jacobi matrix interface
     JacobianImpl1 J;
-    /// To use the none least-squares gsl algorithms within the gsl least-squared framework
-    /// include here container for calculuated data and calculated jacobian. 
-    double * holdCalculatedData;
     gsl_matrix * holdCalculatedJacobian; ///< cache of the claculated jacobian
   };
 
   int gsl_f(const gsl_vector * x, void *params, gsl_vector * f);
   int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J);
   int gsl_fdf(const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
-  double gsl_costFunction(const gsl_vector * x, void *params);
-  void gsl_costFunction_df(const gsl_vector * x, void *params, gsl_vector *df);
-  void gsl_costFunction_fdf(const gsl_vector * x, void *params, double *f, gsl_vector *df);
 
 
   } // namespace CurveFitting

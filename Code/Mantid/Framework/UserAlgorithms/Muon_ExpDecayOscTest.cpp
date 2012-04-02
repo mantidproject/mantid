@@ -9,6 +9,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "Muon_ExpDecayOscTest.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -43,9 +44,9 @@ void Muon_ExpDecayOscTest::functionLocal(double* out, const double* xValues, con
       out[i] = gA0*exp(-gs*xValues[i])*cos(2*3.1415926536*gf*xValues[i]+gphi);
   }
 }
-void Muon_ExpDecayOscTest::functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
+void Muon_ExpDecayOscTest::functionDeriv(API::FunctionDomain& domain, API::Jacobian& out)
 {
-  calNumericalDeriv(out, xValues, nData);
+  calNumericalDeriv(domain, out);
 }
 
 

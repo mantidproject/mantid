@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"

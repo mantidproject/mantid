@@ -88,7 +88,6 @@ namespace Kernel
      */
     ~MRUList()
     {
-      //std::cout << "MRUList destructor called!\n";
       this->clear();
     }
 
@@ -102,42 +101,31 @@ namespace Kernel
      */
     T* insert(T* item)
     {
+      Mutex::ScopedLock _lock(m_mutex);
       std::pair<typename MRUList<T>::item_list::iterator,bool> p;
-      //PARALLEL_CRITICAL(MRUlist_map_access)
-      {
-        p = this->il.push_front(item);
-      }
+      p = this->il.push_front(item);
 
       if (!p.second)
       {
         /* duplicate item */
-        //PARALLEL_CRITICAL(MRUlist_map_access)
-        {
-          this->il.relocate(this->il.begin(), p.first); /* put in front */
-        }
+        this->il.relocate(this->il.begin(), p.first); /* put in front */
         return NULL;
       }
 
       bool exceeding_size;
-      //PARALLEL_CRITICAL(MRUlist_map_access)
-      {
-        exceeding_size = this->il.size()>max_num_items;
-      }
+      exceeding_size = this->il.size()>max_num_items;
+
       if (exceeding_size)
       {
         T *toWrite;
-        //PARALLEL_CRITICAL(MRUlist_map_access)
-        {
-          /* keep the length <= max_num_items */
-          // This is dropping an item - you may need to write it to disk (if it's changed) and delete
-          // but this is left up to the calling class to do,
-          // by returning the to-be-dropped item pointer.
-          toWrite = this->il.back();
-          this->il.pop_back();
-        }
+        /* keep the length <= max_num_items */
+        // This is dropping an item - you may need to write it to disk (if it's changed) and delete
+        // but this is left up to the calling class to do,
+        // by returning the to-be-dropped item pointer.
+        toWrite = this->il.back();
+        this->il.pop_back();
         return toWrite;
       }
-
       return NULL;
     }
 
@@ -145,14 +133,12 @@ namespace Kernel
     /// Delete all the T's pointed to by the list, and empty the list itself
     void clear()
     {
-      //PARALLEL_CRITICAL(MRUlist_map_access)
+      Mutex::ScopedLock _lock(m_mutex);
+      for (typename MRUList<T>::item_list::iterator it = this->il.begin(); it != this->il.end(); ++it)
       {
-        for (typename MRUList<T>::item_list::iterator it = this->il.begin(); it != this->il.end(); ++it)
-        {
-          delete (*it);
-        }
-      this->il.clear();
+        delete (*it);
       }
+      this->il.clear();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -191,11 +177,11 @@ namespace Kernel
       using namespace boost::multi_index;
       typename ordered_item_list::const_iterator it;
       bool found_nothing;
-      //PARALLEL_CRITICAL(MRUlist_map_access)
-      {
-        it = il.get<1>().find(int(index));
-        found_nothing = (it == il.get<1>().end());
-      }
+
+      Mutex::ScopedLock _lock(m_mutex);
+
+      it = il.get<1>().find(int(index));
+      found_nothing = (it == il.get<1>().end());
 
       if (found_nothing)
       {
@@ -212,6 +198,9 @@ namespace Kernel
     MRUList(MRUList&);
     /// Private, unimplemented copy assignment operator
     MRUList& operator=(MRUList&);
+
+    /// Mutex for modifying the MRU list
+    mutable Mutex m_mutex;
   };
 
 } // namespace Kernel

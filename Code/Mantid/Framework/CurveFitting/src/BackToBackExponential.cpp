@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BackToBackExponential.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
 
@@ -25,7 +26,7 @@ void BackToBackExponential::init()
 }
 
 
-void BackToBackExponential::functionMW(double* out, const double* xValues, const size_t nData)const
+void BackToBackExponential::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& I = getParameter("I");
     const double& a = getParameter("A");
@@ -46,7 +47,7 @@ void BackToBackExponential::functionMW(double* out, const double* xValues, const
     }
 }
 
-void BackToBackExponential::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void BackToBackExponential::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& I = getParameter("I");
     const double& a = getParameter("A");

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "LorentzianTest.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid

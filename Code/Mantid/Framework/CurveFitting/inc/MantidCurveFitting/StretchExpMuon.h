@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 namespace Mantid
 {
   namespace CurveFitting
@@ -37,7 +37,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport StretchExpMuon : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport StretchExpMuon : public API::ParamFunction, public API::IFunction1D
     {
     public:
 
@@ -48,8 +48,7 @@ namespace Mantid
       std::string name()const{return "StretchExpMuon";}
       virtual const std::string category() const { return "Muon";}
     protected:
-      virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
-      virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      virtual void function1D(double* out, const double* xValues, const size_t nData)const;
       virtual void init();
 
     };

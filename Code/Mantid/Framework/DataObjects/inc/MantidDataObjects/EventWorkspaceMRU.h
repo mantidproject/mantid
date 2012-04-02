@@ -6,6 +6,9 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/MRUList.h"
 #include <vector>
+#include "MantidKernel/MultiThreaded.h"
+
+using Mantid::Kernel::Mutex;
 
 
 namespace Mantid
@@ -27,9 +30,11 @@ namespace DataObjects
     /**
      * Constructor.
      * @param the_index :: unique index into the workspace of this data
+     * @param locked :: reference to a bool that will be set to true if
+     *        the marker should NOT be deleted
      */
-    MantidVecWithMarker(const size_t the_index)
-    : m_index(the_index)
+    MantidVecWithMarker(const size_t the_index, bool & locked)
+    : m_index(the_index), m_locked(locked)
     {
     }
 
@@ -43,22 +48,10 @@ namespace DataObjects
 
 
   private:
-    /// Copy constructor
-    MantidVecWithMarker(const MantidVecWithMarker &other)
-    {
-      (void) other; //Avoid compiler warning
-      throw Kernel::Exception::NotImplementedError("Cannot copy MantidVecWithMarker.");
-    }
-
-    /// Assignment operator
-    MantidVecWithMarker& operator=(const MantidVecWithMarker &other)
-    {
-      (void) other; //Avoid compiler warning
-      throw Kernel::Exception::NotImplementedError("Cannot assign to MantidVecWithMarker.");
-  //    m_index = other.m_index;
-  //    m_data.assign(other.m_data.begin(), other.m_data.end());
-      return *this;
-    }
+    /// Unimplemented, private copy constructor
+    MantidVecWithMarker(const MantidVecWithMarker &other);
+    /// Unimplemented, private assignment operator
+    MantidVecWithMarker& operator=(const MantidVecWithMarker &other);
 
   public:
     /// Unique index value.
@@ -78,6 +71,9 @@ namespace DataObjects
     {
       m_index = the_index;
     }
+
+    /// Locked: can't be deleted. This will point to the EventList's m_lockedMRU bool.
+    bool & m_locked;
   };
 
 
@@ -124,8 +120,8 @@ namespace DataObjects
 
     MantidVecWithMarker * findY(size_t thread_num, size_t index);
     MantidVecWithMarker * findE(size_t thread_num, size_t index);
-    MantidVecWithMarker * insertY(size_t thread_num, MantidVecWithMarker * data);
-    MantidVecWithMarker * insertE(size_t thread_num, MantidVecWithMarker * data);
+    void insertY(size_t thread_num, MantidVecWithMarker * data);
+    void insertE(size_t thread_num, MantidVecWithMarker * data);
 
     void deleteIndex(size_t index);
 
@@ -141,6 +137,16 @@ namespace DataObjects
 
     /// The most-recently-used list of dataE histograms
     mutable mru_lists m_bufferedDataE;
+
+    /// These markers will be deleted when they are NOT locked
+    mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
+
+    /// Mutex around accessing m_markersToDelete
+    Mutex m_toDeleteMutex;
+
+    /// Mutex when adding entries in the MRU list
+    mutable Mutex m_changeMruListsMutexE;
+    mutable Mutex m_changeMruListsMutexY;
 
   };
 

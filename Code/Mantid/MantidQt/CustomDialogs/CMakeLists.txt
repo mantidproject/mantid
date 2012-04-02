@@ -1,6 +1,7 @@
 set ( SRC_FILES src/CreateSampleShapeDialog.cpp
                 src/ConvertTableToMatrixWorkspaceDialog.cpp
                 src/StartLiveDataDialog.cpp
+                src/FitDialog.cpp
                 src/LoadDialog.cpp
                 src/LoadAsciiDialog.cpp
                 src/LoadDAEDialog.cpp
@@ -18,6 +19,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/ConvertTableToMatrixWorkspaceDialog.h
                 inc/MantidQtCustomDialogs/StartLiveDataDialog.h
+                inc/MantidQtCustomDialogs/FitDialog.h
                 inc/MantidQtCustomDialogs/LoadDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
@@ -42,6 +44,7 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/LoadDialog.ui
                inc/MantidQtCustomDialogs/StartLiveDataDialog.ui
                inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.ui
+               inc/MantidQtCustomDialogs/FitDialog.ui
 )
 
 include_directories ( inc )

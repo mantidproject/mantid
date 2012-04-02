@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include <boost/shared_array.hpp>
 
 namespace mu
@@ -43,7 +43,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport UserFunction : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport UserFunction : public API::ParamFunction, public API::IFunction1D
     {
     public:
       /// Constructor
@@ -57,9 +57,9 @@ namespace Mantid
       virtual const std::string category() const { return "General";}
 
       /// Function you want to fit to.
-      void functionMW(double* out, const double* xValues, const size_t nData)const;
+      void function1D(double* out, const double* xValues, const size_t nData)const;
       /// Derivatives of function with respect to active parameters
-      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
       /// Returns the number of attributes associated with the function
       size_t nAttributes()const{return 1;}

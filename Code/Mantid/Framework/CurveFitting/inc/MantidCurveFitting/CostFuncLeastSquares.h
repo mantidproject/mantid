@@ -4,7 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ICostFunction.h"
+#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 namespace Mantid
 {
@@ -35,32 +37,65 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncLeastSquares : public API::ICostFunction 
+class DLLExport CostFuncLeastSquares : public CostFuncFitting
 {
 public:
+  /// Constructor
+  CostFuncLeastSquares():CostFuncFitting(),m_value(0),m_pushed(false){}
   /// Virtual destructor
   virtual ~CostFuncLeastSquares() {}
 
-  /// Constructor
-  CostFuncLeastSquares() : m_name("Least squares") { }
-
   /// Get name of minimizer
-  virtual std::string name() const { return m_name;}
+  virtual std::string name() const { return "Least squares";}
 
   /// Get short name of minimizer - useful for say labels in guis
   virtual std::string shortName() const {return "Chi-sq";};
 
-  /// Calculate value of cost function from observed
-  /// and calculated values
-  virtual double val(const double* yData, const double* inverseError, double* yCal, const size_t& n);
+  /// Calculate value of cost function
+  virtual double val() const;
 
   /// Calculate the derivatives of the cost function
-  virtual void deriv(const double* yData, const double* inverseError, const double* yCal, 
-                     const double* jacobian, double* outDerivs, const size_t& p, const size_t& n);
+  /// @param der :: Container to output the derivatives
+  virtual void deriv(std::vector<double>& der) const;
+
+  /// Calculate the value and the derivatives of the cost function
+  /// @param der :: Container to output the derivatives
+  /// @return :: The value of the function
+  virtual double valAndDeriv(std::vector<double>& der) const;
+
+  virtual double valDerivHessian(bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
+  const GSLVector& getDeriv() const;
+  const GSLMatrix& getHessian() const;
+  void push();
+  void pop();
+  void drop();
+
+  void setParameters(const GSLVector& params);
+  void getParameters(GSLVector& params) const;
+
+protected:
+
+  virtual void calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
+
+  void addVal(
+    API::FunctionDomain_sptr domain,
+    API::FunctionValues_sptr values
+    )const;
+  void addValDerivHessian(
+    API::FunctionDomain_sptr domain,
+    API::FunctionValues_sptr values,
+    bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
 
 private:
-  /// name of this minimizer
-  const std::string m_name;
+
+  mutable double m_value;
+  mutable GSLVector m_der;
+  mutable GSLMatrix m_hessian;
+
+  mutable bool m_pushed;
+  mutable double m_pushedValue;
+  mutable GSLVector m_pushedParams;
+
 };
 
 } // namespace CurveFitting

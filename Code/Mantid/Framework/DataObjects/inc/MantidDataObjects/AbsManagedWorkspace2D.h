@@ -36,6 +36,7 @@ namespace DataObjects
 
   private:
     size_t m_index; ///< unique index of a data block
+
   };
 
 

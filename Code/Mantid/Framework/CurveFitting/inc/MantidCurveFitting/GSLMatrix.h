@@ -1,0 +1,355 @@
+#ifndef MANTID_CURVEFITTING_GSLMATRIX_H_
+#define MANTID_CURVEFITTING_GSLMATRIX_H_
+
+#include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/GSLVector.h"
+
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
+
+#include <vector>
+#include <stdexcept>
+#include <iostream>
+#include <iomanip>
+
+namespace Mantid
+{
+  namespace CurveFitting
+  {
+    class GSLMatrix;
+
+    // matrix transpose helper
+    struct Tr
+    {
+      const GSLMatrix& matrix;
+      Tr(const GSLMatrix& m):matrix(m){}
+    };
+
+    // mutrix multiplication helper
+    struct GSLMatrixMult2
+    {
+      const GSLMatrix& m_1;
+      const GSLMatrix& m_2;
+      const bool tr1;
+      const bool tr2;
+      GSLMatrixMult2(const GSLMatrix& m1,const GSLMatrix& m2):
+      m_1(m1),m_2(m2),tr1(false),tr2(false){}
+
+      GSLMatrixMult2(const Tr& m1,const GSLMatrix& m2):
+      m_1(m1.matrix),m_2(m2),tr1(true),tr2(false){}
+
+      GSLMatrixMult2(const GSLMatrix& m1,const Tr& m2):
+      m_1(m1),m_2(m2.matrix),tr1(false),tr2(true){}
+
+      GSLMatrixMult2(const Tr& m1,const Tr& m2):
+      m_1(m1.matrix),m_2(m2.matrix),tr1(true),tr2(true){}
+    };
+
+    // mutrix multiplication helper
+    struct GSLMatrixMult3
+    {
+      const GSLMatrix& m_1;
+      const GSLMatrix& m_2;
+      const GSLMatrix& m_3;
+      const bool tr1;
+      const bool tr2;
+      const bool tr3;
+      GSLMatrixMult3(const GSLMatrix& m1,const GSLMatrixMult2& mm):
+      m_1(m1),m_2(mm.m_1),m_3(mm.m_2),tr1(false),tr2(mm.tr1),tr3(mm.tr2){}
+
+      GSLMatrixMult3(const Tr& m1,const GSLMatrixMult2& mm):
+      m_1(m1.matrix),m_2(mm.m_1),m_3(mm.m_2),tr1(true),tr2(mm.tr1),tr3(mm.tr2){}
+
+      GSLMatrixMult3(const GSLMatrixMult2& mm, const GSLMatrix& m2):
+      m_1(mm.m_1),m_2(mm.m_2),m_3(m2),tr1(mm.tr1),tr2(mm.tr2),tr3(false){}
+
+      GSLMatrixMult3(const GSLMatrixMult2& mm, const Tr& m2):
+      m_1(mm.m_1),m_2(mm.m_2),m_3(m2.matrix),tr1(mm.tr1),tr2(mm.tr2),tr3(true){}
+    };
+
+    /**
+    An implementation of Jacobian using gsl_matrix.
+
+    @author Roman Tolchenov, Tessella plc
+    @date 24/02/2012
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
+  class GSLMatrix
+  {
+    /// The pointer to the GSL's internal jacobian matrix
+    gsl_matrix * m_matrix;
+    
+  public:
+    /// Constructor
+    GSLMatrix():m_matrix(NULL){}
+    /// Constructor
+    GSLMatrix(const size_t nx, const size_t ny)
+    {
+      m_matrix = gsl_matrix_alloc(nx,ny);
+    }
+
+    /// Copy constructor
+    GSLMatrix(const GSLMatrix& M)
+    {
+      m_matrix = gsl_matrix_alloc(M.size1(),M.size2());
+      gsl_matrix_memcpy(m_matrix,M.gsl());
+    }
+
+    /// Destructor.
+    ~GSLMatrix()
+    {
+      if (m_matrix)
+      {
+        gsl_matrix_free(m_matrix);
+      }
+    }
+
+    GSLMatrix& operator=(const GSLMatrix& M)
+    {
+      resize( M.size1(), M.size2() );
+      gsl_matrix_memcpy( m_matrix, M.gsl() );
+      return *this;
+    }
+
+    /// Get the pointer to the GSL matrix
+    gsl_matrix * gsl(){return m_matrix;}
+
+    /// Get the const pointer to the GSL matrix
+    const gsl_matrix * gsl() const {return m_matrix;}
+
+    bool isEmpty() const {return m_matrix == NULL;}
+
+    void resize(const size_t nx, const size_t ny)
+    {
+      if (m_matrix)
+      {
+        gsl_matrix_free(m_matrix);
+      }
+      m_matrix = gsl_matrix_alloc(nx,ny);
+    }
+
+    /// First size of the matrix
+    size_t size1() const {return m_matrix? m_matrix->size1 : 0;}
+
+    /// Second size of the matrix
+    size_t size2() const {return m_matrix? m_matrix->size2 : 0;}
+
+    /// set an element
+    void set(size_t i, size_t j, double value)
+    {
+      if (i < m_matrix->size1 && j < m_matrix->size2) gsl_matrix_set(m_matrix,i,j,value);
+      else
+      {
+        throw std::out_of_range("GSLMatrix indices are out of range.");
+      }
+    }
+    /// get an element
+    double get(size_t i, size_t j) const
+    {
+      if (i < m_matrix->size1 && j < m_matrix->size2) return gsl_matrix_get(m_matrix,i,j);
+      throw std::out_of_range("GSLMatrix indices are out of range.");
+    }
+
+    // Set this matrix to identity matrix
+    void identity()
+    {
+      gsl_matrix_set_identity( m_matrix );
+    }
+
+    // Set all elements to zero
+    void zero()
+    {
+      gsl_matrix_set_zero( m_matrix );
+    }
+
+    // add a matrix to this
+    GSLMatrix& operator+=(const GSLMatrix& M)
+    {
+      gsl_matrix_add( m_matrix, M.gsl() );
+      return *this;
+    }
+
+    // add a constant to this matrix
+    GSLMatrix& operator+=(const double& d)
+    {
+      gsl_matrix_add_constant( m_matrix, d );
+      return *this;
+    }
+
+    // subtract a matrix from this
+    GSLMatrix& operator-=(const GSLMatrix& M)
+    {
+      gsl_matrix_sub( m_matrix, M.gsl() );
+      return *this;
+    }
+
+    // multiply this matrix by a number
+    GSLMatrix& operator*=(const double& d)
+    {
+      gsl_matrix_scale( m_matrix, d );
+      return *this;
+    }
+
+    GSLMatrix& operator=(const GSLMatrixMult2& mult2)
+    {
+      // sizes of the result matrix
+      size_t n1 = mult2.tr1 ? mult2.m_1.size2() : mult2.m_1.size1();
+      size_t n2 = mult2.tr2 ? mult2.m_2.size1() : mult2.m_2.size2();
+
+      this->resize(n1,n2);
+
+      CBLAS_TRANSPOSE tr1 = mult2.tr1? CblasTrans : CblasNoTrans;
+      CBLAS_TRANSPOSE tr2 = mult2.tr2? CblasTrans : CblasNoTrans;
+
+      // this = m_1 * m_2
+      gsl_blas_dgemm (tr1, tr2,
+                      1.0, mult2.m_1.gsl(), mult2.m_2.gsl(),
+                      0.0, gsl());
+
+      return *this;
+    }
+
+    GSLMatrix& operator=(const GSLMatrixMult3& mult3)
+    {
+      // sizes of the result matrix
+      size_t n1 = mult3.tr1 ? mult3.m_1.size2() : mult3.m_1.size1();
+      size_t n2 = mult3.tr3 ? mult3.m_3.size1() : mult3.m_3.size2();
+
+      this->resize(n1,n2);
+
+      // intermediate matrix 
+      GSLMatrix AB( n1, mult3.m_2.size2() );
+
+      CBLAS_TRANSPOSE tr1 = mult3.tr1? CblasTrans : CblasNoTrans;
+      CBLAS_TRANSPOSE tr2 = mult3.tr2? CblasTrans : CblasNoTrans;
+      CBLAS_TRANSPOSE tr3 = mult3.tr3? CblasTrans : CblasNoTrans;
+
+      // AB = m_1 * m_2
+      gsl_blas_dgemm (tr1, tr2,
+                      1.0, mult3.m_1.gsl(), mult3.m_2.gsl(),
+                      0.0, AB.gsl());
+
+      // this = AB * m_3
+      gsl_blas_dgemm (CblasNoTrans, tr3,
+                      1.0, AB.gsl(), mult3.m_3.gsl(),
+                      0.0, gsl());
+
+      return *this;
+    }
+
+    /// Solve system of linear equations M*x == rhs, M is this matrix
+    /// This matrix is destroyed.
+    void solve(const GSLVector& rhs, GSLVector& x)
+    {
+      if (size1() != size2())
+      {
+        throw std::runtime_error("System of linear equations: the matrix must be square.");
+      }
+      size_t n = size1();
+      if (rhs.size() != n)
+      {
+        throw std::runtime_error("System of linear equations: right-hand side vector has wrong size.");
+      }
+      x.resize(n);
+      int s;
+      gsl_permutation * p = gsl_permutation_alloc( n );
+      gsl_linalg_LU_decomp( gsl(), p, &s ); // matrix is modified at this moment
+      gsl_linalg_LU_solve( gsl(), p, rhs.gsl(), x.gsl() );
+      gsl_permutation_free( p );
+    }
+
+    /// Invert this matrix
+    void invert()
+    {
+      if (size1() != size2())
+      {
+        throw std::runtime_error("Matrix inverse: the matrix must be square.");
+      }
+      size_t n = size1();
+      int s;
+      GSLMatrix LU(*this);
+      gsl_permutation * p = gsl_permutation_alloc( n );
+      gsl_linalg_LU_decomp( LU.gsl(), p, &s );
+      gsl_linalg_LU_invert( LU.gsl(), p, gsl() );
+      gsl_permutation_free( p );
+    }
+  };
+
+  inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const GSLMatrix& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult2 operator*(const Tr& m1, const GSLMatrix& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const Tr& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult2 operator*(const Tr& m1, const Tr& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult3 operator*(const GSLMatrix& m, const GSLMatrixMult2& mm)
+  {
+    return GSLMatrixMult3(m,mm);
+  }
+
+  inline GSLMatrixMult3 operator*( const GSLMatrixMult2& mm, const GSLMatrix& m )
+  {
+    return GSLMatrixMult3(mm,m);
+  }
+
+  inline GSLMatrixMult3 operator*(const Tr& m, const GSLMatrixMult2& mm)
+  {
+    return GSLMatrixMult3(m,mm);
+  }
+
+  inline GSLMatrixMult3 operator*( const GSLMatrixMult2& mm, const Tr& m )
+  {
+    return GSLMatrixMult3(mm,m);
+  }
+
+  inline std::ostream& operator<<(std::ostream& ostr, const GSLMatrix& m)
+  {
+    ostr << std::scientific << std::setprecision(6);
+    for(size_t i = 0; i < m.size1(); ++i)
+    {
+      for(size_t j = 0; j < m.size2(); ++j)
+      {
+        ostr << std::setw(13) << m.get(i,j) << ' ';
+      }
+      ostr << std::endl;
+    }
+    return ostr;
+  }
+  
+  } // namespace CurveFitting
+} // namespace Mantid
+
+#endif /*MANTID_CURVEFITTING_GSLMATRIX_H_*/

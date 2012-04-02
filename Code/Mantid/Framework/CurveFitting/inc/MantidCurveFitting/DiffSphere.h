@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "DeltaFunction.h"
 
 namespace Mantid
@@ -66,7 +66,7 @@ namespace Mantid
     /* Class representing the inelastic portion of the DiffSphere algorithm.
      * Contains the 98 Lorentzians.
      */
-    class DLLExport InelasticDiffSphere : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport InelasticDiffSphere : public API::ParamFunction, public API::IFunction1D
     {
     public:
       /// Constructor
@@ -78,8 +78,7 @@ namespace Mantid
       virtual const std::string category() const { return "Optimization\\FitModels";}
 
     protected:
-      void functionMW(double* out, const double* xValues, const size_t nData)const;
-      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      void function1D(double* out, const double* xValues, const size_t nData)const;
       std::vector<double> LorentzianCoefficients(double a) const;
 
     private:
@@ -94,7 +93,7 @@ namespace Mantid
       void initLinJlist();
     }; // end of class InelasticDiffSphere
 
-    class DLLExport DiffSphere : public API::CompositeFunctionMW
+    class DLLExport DiffSphere : public API::CompositeFunction
     {
     public:
       /// Constructor
@@ -109,8 +108,8 @@ namespace Mantid
 
     private:
       //API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
-      ElasticDiffSphere *m_elastic;
-      InelasticDiffSphere *m_inelastic;  //inelastic intensity of the DiffSphere structure factor
+      boost::shared_ptr<ElasticDiffSphere> m_elastic;
+      boost::shared_ptr<InelasticDiffSphere> m_inelastic;  //inelastic intensity of the DiffSphere structure factor
     };
 
   } // namespace CurveFitting

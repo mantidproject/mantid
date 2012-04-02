@@ -27,7 +27,7 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  * @param lowerBound :: The lower bound
  * @param upperBound :: The upper bound
  */
-BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true), 
@@ -38,7 +38,7 @@ m_upperBound(upperBound)
   reset(fun,fun->parameterIndex(paramName));
 }
 
-BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound) :
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound) :
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true),
@@ -54,7 +54,7 @@ m_lowerBound(lowerBound)
  * " 10 < Sigma < 20 " or
  * " Sigma > 20 "
  */
-void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expression& expr)
+void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr)
 {
   if ( expr.size() < 2 || expr.name() != "==")
   {
@@ -197,10 +197,16 @@ double BoundaryConstraint::check()
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      penalty = (m_lowerBound-paramValue)* m_penaltyFactor;
+    {
+      double dp = m_lowerBound-paramValue;
+      penalty = m_penaltyFactor * dp * dp;
+    }
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      penalty = (paramValue-m_upperBound)* m_penaltyFactor;
+    {
+      double dp = paramValue-m_upperBound;
+      penalty = m_penaltyFactor * dp * dp;
+    }
 
   return penalty;
 }
@@ -220,10 +226,39 @@ double BoundaryConstraint::checkDeriv()
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      penalty = -m_penaltyFactor;
+    {
+      double dp = m_lowerBound-paramValue;
+      penalty = 2 * m_penaltyFactor * dp;
+    }
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      penalty = m_penaltyFactor;
+    {
+      double dp = paramValue-m_upperBound;
+      penalty = 2 * m_penaltyFactor * dp;
+    }
+
+  return penalty;
+}
+
+double BoundaryConstraint::checkDeriv2()
+{
+  double penalty = 0.0;
+
+  if (/*m_activeParameterIndex < 0 ||*/ !(m_hasLowerBound || m_hasUpperBound))
+  {
+    // no point in logging any warning here since checkDeriv() will always be called after
+    // check() is called 
+    return penalty;
+  } 
+
+  double paramValue = getFunction()->getParameter(getIndex());
+
+  if (m_hasLowerBound)
+    if ( paramValue < m_lowerBound )
+      penalty = 2 * m_penaltyFactor;
+  if (m_hasUpperBound)
+    if ( paramValue > m_upperBound )
+      penalty = 2 * m_penaltyFactor;
 
   return penalty;
 }
