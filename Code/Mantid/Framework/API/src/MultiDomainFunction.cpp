@@ -87,7 +87,7 @@ namespace API
       if (it == m_domains.end())
       {// apply to all domains
         domains.resize(cd.getNParts());
-        for(size_t i = 0; i < m_domains.size(); ++i)
+        for(size_t i = 0; i < domains.size(); ++i)
         {
           domains[i] = i;
         }
