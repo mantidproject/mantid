@@ -65,6 +65,10 @@ namespace Algorithms
     double mLowerLimit;
     double mUpperLimit;
 
+    bool mProcessAllEventsOnDetector;
+    size_t mNumberEventsToProcessOnDetector;
+    size_t mNumberEventsProcessedOnDetector;
+
     size_t mNumMissFire;
 
     bool filterSingleSpectrum;
@@ -81,6 +85,9 @@ namespace Algorithms
     size_t numreversedevents;
     size_t numreasonunknown;
     double longest_tof, shortest_tof;
+
+    size_t mNumberEventsToWriteOnDetector;
+    size_t mNumberEventsWrittenOnDetector;
 
     virtual void initDocs();
 

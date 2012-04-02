@@ -80,11 +80,18 @@ namespace Algorithms
     this->declareProperty("Tf", 100.0, "Latest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
 
     this->declareProperty("WorkspaceIndex", -1, "The index of the workspace to have its events filtered. ");
+
+    this->declareProperty("NumberEventsToProcessOnDetector", -1,
+        "Number of events to process on specified detector.  Default is to process all.");
+
     this->declareProperty("NumberOfIntervals", 1, "Number of even intervals in the selected region. ");
     this->declareProperty("SelectedInterval", -1, "The interval selected to be a Workspace. If not selected, all!");
 
     this->declareProperty("NumberOfWriteOutEvents", 1000,
         "Number of events filtered to be written in output file for debug.");
+
+    this->declareProperty("NumberEventsToWriteOutOnDetector", -1,
+        "Number of events to (debug) write out on a specific detector");
 
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalDirectory),
         "Directory of all output files");
@@ -129,6 +136,19 @@ namespace Algorithms
       wkspIndexToFilter = static_cast<size_t>(itemp);
     }
 
+    int tempi1 = getProperty("NumberEventsToProcessOnDetector");
+    if (tempi1 > 0)
+    {
+      mProcessAllEventsOnDetector = false;
+      mNumberEventsToProcessOnDetector = static_cast<size_t>(tempi1);
+    }
+    else
+    {
+      mProcessAllEventsOnDetector = true;
+      mNumberEventsToProcessOnDetector = static_cast<size_t>(-1);
+    }
+    mNumberEventsProcessedOnDetector = 0;
+
     mFilterIntervals = getProperty("NumberOfIntervals");
     if (mFilterIntervals <= 0)
     {
@@ -143,6 +163,18 @@ namespace Algorithms
       mSelectedInterval = -1;
     }
     numOutputEvents = getProperty("NumberOfWriteOutEvents");
+
+    int itemp2 = getProperty("NumberEventsToWriteOutOnDetector");
+    if (itemp2 > 0)
+    {
+      mNumberEventsToWriteOnDetector = static_cast<size_t>(itemp2);
+      mNumberEventsWrittenOnDetector = 0;
+    }
+    else
+    {
+      mNumberEventsToWriteOnDetector = 0;
+      mNumberEventsWrittenOnDetector = static_cast<size_t>(-1);
+    }
 
     // b) Some time issues
     double t0r, tfr;
@@ -486,6 +518,7 @@ namespace Algorithms
 
     if (filterSingleSpectrum)
     {
+      g_log.notice() << "DB1212: Filter Single Spectrum" << std::endl;
       filterSingleDetectorSequential(wkspIndexToFilter);
     }
     else
@@ -787,6 +820,9 @@ namespace Algorithms
 
     g_log.information() << "Starting of filterSingleDetectorSequential" << std::endl;
 
+    // 0. Constants reset
+    mNumberEventsWrittenOnDetector = 0;
+
     // For each spectrum
     // a. Offset
     double percentageoffsettof = mCalibOffsets[wkspindex];
@@ -801,11 +837,11 @@ namespace Algorithms
     std::string dir = this->getProperty("OutputDirectory");
     std::string filename;
     if (!dir.empty() && dir[dir.size()-1]=='/')
-      filename = dir+"eventsfilterlist.txt";
+      filename = dir+"eventsfilterlist_v10.txt";
     else
-      filename = dir+"/eventsfilterlist.txt";
+      filename = dir+"/eventsfilterlist_v10.txt";
 
-    g_log.information() << "Output event list file = " << filename << std::endl
+    g_log.debug() << "Output event list file = " << filename << std::endl
         << "Workspace " << wkspindex << ":  Total " << events.getNumberEvents() << " events" << std::endl;
 
     ofs.open(filename.c_str(), std::ios::out);
@@ -816,9 +852,20 @@ namespace Algorithms
     size_t numeventsout = 0;
     size_t numoutrange = 0;
     size_t numoutvalue = 0;
-    for (size_t iv=0; iv<events.getNumberEvents(); iv++){
-      // FOR each event
 
+    size_t numeventstofilter = events.getNumberEvents();
+    if (!mProcessAllEventsOnDetector && mNumberEventsToProcessOnDetector < numeventstofilter)
+    {
+      numeventstofilter = mNumberEventsToProcessOnDetector;
+    }
+    g_log.notice() << "DB1212: Filter " << numeventstofilter << " events." << std::endl;
+
+    size_t iv = 0;
+    size_t numeventsprocessedfromt0 = 0;
+    while (iv < events.getNumberEvents() && numeventsprocessedfromt0 < mNumberEventsToProcessOnDetector)
+    // for (size_t iv=0; iv< numeventstofilter; iv++)
+    {
+      // FOR each event
       DataObjects::TofEvent rawevent = events.getEvent(iv);
 
       // i.  Check negative TOF, and update loop variables
@@ -827,6 +874,7 @@ namespace Algorithms
         numnegtofs += 1;
         g_log.error() << "Event " << iv << " has negative TOF " << rawevent.tof() << std::endl;
         numeventsout ++;
+        iv ++;
         continue;
       }
 
@@ -834,13 +882,14 @@ namespace Algorithms
       int64_t mtime = rawevent.m_pulsetime.totalNanoseconds()+
           static_cast<int64_t>(rawevent.m_tof*1000*percentageoffsettof)-
           mSensorSampleOffset;
-      double correctedtof = rawevent.m_tof*percentageoffsettof;
+      double correctedtofns = rawevent.m_tof*1000*percentageoffsettof;
 
       // iii. Filter out if time falls out of (T0, Tf), and update loop variables
       if (mtime < mFilterT0.totalNanoseconds() || mtime > mFilterTf.totalNanoseconds())
       {
         numeventsout ++;
         numoutrange ++;
+        iv ++;
         continue;
       }
 
@@ -877,6 +926,7 @@ namespace Algorithms
       // v. Filter in/out? by VALUE and section as an option
       double msevalue = mSEValues[mindex];
       bool selected = false;
+      int selecttype = 0;
       if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
         if (mSelectedInterval < 0 || section==mSelectedInterval)
         {
@@ -885,19 +935,42 @@ namespace Algorithms
           newevents.push_back(newevent);
           selected = true;
           numeventsin ++;
+          selecttype = 1;
+        }
+        else
+        {
+          selecttype = -1;
         }
       } else
       {
+        selecttype = -2;
         numeventsout ++;
         numoutvalue ++;
       }
 
+      /*
       if (selected && static_cast<int>(iv) <= numOutputEvents)
       {
         ofs << iv << "\t" << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
             << correctedtof << "\t" << mtime << "\t" << section << std::endl;
       }
-    } // ENDFOR iv: each event
+      */
+
+      if (mNumberEventsWrittenOnDetector < mNumberEventsToWriteOnDetector)
+      {
+        ofs << "DB208Event " << rawevent.pulseTime().totalNanoseconds() << "\t"
+            << static_cast<int64_t>(rawevent.tof()*1000) << "\t" << static_cast<int64_t>(correctedtofns)
+            << "\t" << static_cast<int64_t>(mtime) << std::endl;
+        ofs << "DB208Log " << mSETimes[mindex]  << "\t " <<
+            mSETimes[mindex+1] << "\tAllowed = " << selecttype <<
+            "  Log = " << mSEValues[mindex] << std::endl;
+        ofs << "DB208Index " << mNumberEventsWrittenOnDetector << " / " << iv << std::endl;
+        mNumberEventsWrittenOnDetector ++;
+      }
+
+      iv ++;
+      numeventsprocessedfromt0 ++;
+    } // ENDFOR/WHILE iv: each event
 
     ofs.close();
 
