@@ -83,6 +83,11 @@ namespace Crystal
                        boost::shared_ptr<Geometry::ParameterMap>   pmap,
                        boost::shared_ptr<const IComponent>  component)
    {
+    boost::shared_ptr<const ICompAssembly>pAssm= boost::dynamic_pointer_cast<const ICompAssembly>(component);
+
+    if( !pAssm)
+       return;//has no children. We are optimizing panels not pixels
+
      set<string> pnamesSv = component->getParameterNames( false );
 
      set<string>::iterator setIt = pnamesSv.begin();
@@ -118,7 +123,6 @@ namespace Crystal
      }
 
 
-      boost::shared_ptr<const ICompAssembly>pAssm= boost::dynamic_pointer_cast<const ICompAssembly>(component);
 
      if( pAssm )
      {
@@ -265,7 +269,7 @@ namespace Crystal
             }
 
          Groups.push_back(vbankName);
-      }else if( Grouping == "SpecifyGroups")
+      }else if( Grouping == "SpecifyGroups")//TODO get colon separators working
       {
         vector<string> GroupA;
         boost::split(GroupA, bankingCode, boost::is_any_of("]"));
@@ -525,11 +529,11 @@ namespace Crystal
               <<"<"<<prefix<<"Zoffset<"
               <<maxXYOffset<<",-10<"<<prefix<<"Xrot<10,-10<"<<prefix<<"Yrot<10,-10<"<<prefix<<"Zrot<10";
 
-      Constraints+=oss2.str();
+      Constraints += oss2.str();
 
    }//for vector<string> in Groups
 
-   boost::shared_ptr<Algorithm> fit_alg = createSubAlgorithm("Fit",.2,.9,true);
+   boost::shared_ptr<Algorithm> fit_alg = createSubAlgorithm("Fit", .2, .9, true );
 
    if( ! fit_alg)
    {
@@ -539,7 +543,7 @@ namespace Crystal
 
    fit_alg->setProperty("InputWorkspace", ws);
    fit_alg->setProperty("WorkspaceIndex", 0);
-   fit_alg->setProperty("MaxIterations", 20);
+   fit_alg->setProperty("MaxIterations", 1800);
    fit_alg->setProperty("Function",FunctionArgument);
    if(TiesArgument.size() > 0)
        fit_alg->setProperty("Ties",TiesArgument);
@@ -552,14 +556,17 @@ namespace Crystal
    fit_alg->executeAsSubAlg();
 
 
-    //double chisq = fit_alg->getProperty("OutputChi2overDoF");
+   // double chisq = fit_alg->getProperty("OutputChi2overDoF");
     std::vector<double>params = fit_alg->getProperty("Parameters");
     std::vector<double>errs = fit_alg->getProperty("Errors");
     std::vector<string>names = fit_alg->getProperty("ParameterNames");
-
+  //   std::cout<<"chisq/nodv="<<chisq<<std::endl;
     map<string,double> result;
     for( size_t i=0; i<min<size_t>(params.size(),names.size());i++)
+      {
       result[names[i]]=params[i];
+      //cout<<names[i]<<"="<<params[i]<<endl;
+      }
 
     boost::shared_ptr<ParameterMap> pmap( new ParameterMap());
     boost::shared_ptr<ParameterMap> pmapOld = instrument->getParameterMap();
@@ -675,11 +682,11 @@ namespace Crystal
     pmap->addPositionCoordinate(source.get(), string("x"), newsourceRelPos.X());
     pmap->addPositionCoordinate(source.get(), string("y"), newsourceRelPos.Y());
     pmap->addPositionCoordinate(source.get(), string("z"),newsourceRelPos.Z());
-    oss3<<"  < parameter name =\"x\"><value val=\""<< newsourceRelPos.X()<<"\" /> </parameter>"<<std::endl;
+    oss3<<"  <parameter name =\"x\"><value val=\""<< newsourceRelPos.X()<<"\" /> </parameter>"<<std::endl;
 
-    oss3<<"  < parameter name =\"y\"><value val=\""<< newsourceRelPos.Y()<<"\" /> </parameter>"<<std::endl;
+    oss3<<"  <parameter name =\"y\"><value val=\""<< newsourceRelPos.Y()<<"\" /> </parameter>"<<std::endl;
 
-    oss3<<"  < parameter name =\"z\"><value val=\""<<newsourceRelPos.Z()<<"\" /> </parameter>"<<std::endl;
+    oss3<<"  <parameter name =\"z\"><value val=\""<<newsourceRelPos.Z()<<"\" /> </parameter>"<<std::endl;
 
 
     oss3<<"</component-link>"<<std::endl;

@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/Parameter.h"
 
 using namespace Mantid::API;
 using namespace std;
@@ -170,61 +171,6 @@ namespace Mantid
 
 
 
-    void SCDPanelErrors::updateParams(boost::shared_ptr<const Geometry::ParameterMap> & pmapSv,
-        boost::shared_ptr<Geometry::ParameterMap> & pmap,
-        boost::shared_ptr<const IComponent> const component) const
-    {
-      std::set<std::string> pnamesSv = component->getParameterNames(false);
-
-      set<string>::iterator setIt = pnamesSv.begin();
-      int N = 0;
-
-      for (; setIt != pnamesSv.end(); setIt++)
-      {
-        string name = (*setIt);
-        vector<V3D> posParams = component->getPositionParameter(name, false);
-
-        if (posParams.size() > 0)
-        {
-          N++;
-          pmap->addV3D(component.get(), name, posParams[0]);
-        }
-
-        vector<Quat> rotParams = component->getRotationParameter(name, false);
-
-        if (rotParams.size() > 0)
-        {
-          N++;
-          pmap->addQuat(component.get(), name, rotParams[0]);
-        }
-
-        vector<string> strParams = component->getStringParameter(name, false);
-
-        if (strParams.size() > 0)
-        {
-          N++;
-          pmap->addString(component.get(), name, strParams[0]);
-        }
-
-      }
-
-      boost::shared_ptr<const ICompAssembly> pAssm = boost::dynamic_pointer_cast<const ICompAssembly>(
-          component);
-
-      if (pAssm)
-      {
-
-        for (int i = 0; i < pAssm->nelements(); i++)
-        {
-          boost::shared_ptr<IComponent> child = pAssm->getChild(i);
-          boost::shared_ptr<const IComponent> childComp = boost::const_pointer_cast<const IComponent>(
-              child);
-
-          updateParams(pmapSv, pmap, childComp);
-        }
-      }
-    }
-
     boost::shared_ptr<DataObjects::PeaksWorkspace> SCDPanelErrors::getPeaks() const
     {
       boost::shared_ptr<DataObjects::PeaksWorkspace> pwks;
@@ -245,9 +191,7 @@ namespace Mantid
     }
 
 
-
-
-    void SCDPanelErrors::Check(PeaksWorkspace_sptr pkwsp, const double *xValues, const size_t nData) const
+    void SCDPanelErrors::Check(PeaksWorkspace_sptr & pkwsp, const double *xValues, const size_t nData) const
     {
       if (NLatticeParametersSet < (int) nAttributes())
       {
@@ -302,11 +246,64 @@ namespace Mantid
     }
 
 
+   void SCDPanelErrors::updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
+                boost::shared_ptr<Geometry::ParameterMap> pmap,
+                boost::shared_ptr<const Geometry::ParameterMap>pmapSv)const
+   {
 
+       vector<V3D> posv= pmapSv->getV3D( bank_const->getName(),"pos");
+       if (posv.size() > 0)
+       {
+        V3D pos = posv[0];
+        pmap->addDouble(bank_const.get(), "x", pos.X());
+        pmap->addDouble(bank_const.get(), "y", pos.Y());
+        pmap->addDouble(bank_const.get(), "z", pos.Z());
+        pmap->addV3D(bank_const.get(), "pos", pos);
+       }
 
-    Instrument_sptr SCDPanelErrors::getNewInstrument(PeaksWorkspace_sptr pwks) const
+       boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(),("rot"));
+       if( rot)
+       {
+         Parameter rotP = (*rot);
+         pmap->addQuat(bank_const.get(), "rot",rotP.value<Quat>());
+       }
+
+       vector<double> scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
+       vector<double> scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
+       if( scalex.size() > 0)
+          pmap->addDouble(bank_const.get(),"scalex", scalex[0]);
+       if( scaley.size() > 0)
+          pmap->addDouble(bank_const.get(),"scaley", scaley[0]);
+
+       boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
+       if( parent)
+         updateBankParams( parent, pmap, pmapSv);
+
+   }
+
+   void SCDPanelErrors::updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const
     {
-      Geometry::Instrument_const_sptr instSave = pwks->getPeak(0).getInstrument();
+      vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
+      if (posv.size() > 0)
+      {
+        V3D pos = posv[0];
+        pmap->addDouble(bank_const.get(), "x", pos.X());
+        pmap->addDouble(bank_const.get(), "y", pos.Y());
+        pmap->addDouble(bank_const.get(), "z", pos.Z());
+        pmap->addV3D(bank_const.get(), "pos", pos);
+      }
+
+      boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), "rot");
+      if (rot)
+        pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
+    }
+
+
+    Instrument_sptr SCDPanelErrors::getNewInstrument(const DataObjects::Peak & peak) const
+    {
+
+      Geometry::Instrument_const_sptr instSave = peak.getInstrument();
       boost::shared_ptr<Geometry::ParameterMap> pmap(new ParameterMap());
       boost::shared_ptr<const Geometry::ParameterMap> pmapSv = instSave->getParameterMap();
 
@@ -315,9 +312,10 @@ namespace Mantid
         g_log.error(" Not all peaks have an instrument");
         throw invalid_argument(" Not all peaks have an instrument");
       }
-
       boost::shared_ptr<Geometry::Instrument> instChange(new Geometry::Instrument());
+
       bool isParameterized = false;
+
 
       if (!instSave->isParametrized())
       {
@@ -332,11 +330,12 @@ namespace Mantid
       else //catch(...)
       {
 
+
         isParameterized = true;
 
         boost::shared_ptr<const IComponent> inst3 = boost::dynamic_pointer_cast<const IComponent>(
             instSave);
-        updateParams(pmapSv, pmap, inst3);
+      // updateParams(pmapSv, pmap, inst3);
 
         boost::shared_ptr<Geometry::Instrument> P1(new Geometry::Instrument(instSave->baseInstrument(),
             pmap));
@@ -349,6 +348,7 @@ namespace Mantid
         g_log.error("Cannot 'clone' instrument");
         throw logic_error("Cannot clone instrument");
       }
+
       std::vector<std::string> bankNames;
       boost::split(bankNames, BankNames, boost::is_any_of("/"));
 
@@ -363,6 +363,7 @@ namespace Mantid
 
         boost::shared_ptr<const Geometry::IComponent> bank_const =
             instChange->getComponentByName(bankNm);
+        updateBankParams( bank_const, pmap, pmapSv);
         if (!bank_const)
         {
           g_log.error() << "No component named " << bankNm << std::endl;
@@ -378,8 +379,6 @@ namespace Mantid
           throw invalid_argument("No nonconst component named " + bankNm);
         }
 
-        //V3D panelCenter_old = bank->getPos();
-
         //------------------------ Rotate Panel------------------------
 
         Quat Rot0 = bank_const->getRelativeRot();
@@ -391,7 +390,7 @@ namespace Mantid
         Rot = Quat(getParameter("Zrot"), Kernel::V3D(0.0, 0.0, 1.0)) * Rot;
 
         std::string name = bankNm;
-        //TODO: go thru rotx, roty and rotz
+
         pmap->addQuat(bank.get(), "rot", Rot);
 
         //-------------------------Move Panel ------------------------
@@ -445,6 +444,8 @@ namespace Mantid
       //-------------------- Move source(L0)-------------------------------
       boost::shared_ptr<const Geometry::IObjComponent> source = instChange->getSource();
       boost::shared_ptr<const Geometry::IObjComponent> sample = instChange->getSample();
+      updateSourceParams( source, pmap, pmapSv);
+      updateSourceParams( sample, pmap, pmapSv);
 
       //For L0 change the source position
       Kernel::V3D sourcePos1 = source->getPos();
@@ -457,13 +458,14 @@ namespace Mantid
       pmap->addPositionCoordinate(source.get(), string("x"), sourceRelPos1.X());
       pmap->addPositionCoordinate(source.get(), string("y"), sourceRelPos1.Y());
       pmap->addPositionCoordinate(source.get(), string("z"), sourceRelPos1.Z());
+
       return instChange;
     }
 
 
 
 
-    Peak SCDPanelErrors::createNewPeak(Peak peak_old, Geometry::Instrument_sptr instrNew) const
+    Peak SCDPanelErrors::createNewPeak(const Peak & peak_old, Geometry::Instrument_sptr  instrNew) const
     {
       Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
       if (inst->getComponentID() != instrNew->getComponentID())
@@ -477,7 +479,7 @@ namespace Mantid
       int ID = peak_old.getDetectorID();
 
       Kernel::V3D hkl = peak_old.getHKL();
-      peak_old.setDetectorID(ID); //set det positions
+      //peak_old.setDetectorID(ID); //set det positions
       Peak peak(instrNew, ID, peak_old.getWavelength(), hkl, peak_old.getGoniometerMatrix());
 
       Wavelength wl;
@@ -521,7 +523,7 @@ namespace Mantid
       g_log.debug() << "BankNames " << BankNames << "   Number of peaks" << (EndX - StartX + 1) / 3
           << std::endl;
 
-      boost::shared_ptr<Geometry::Instrument> instChange = getNewInstrument(pwks);
+      boost::shared_ptr<Geometry::Instrument> instChange = getNewInstrument(pwks->getPeak(0));
 
       //---------------------------- Calculate q and hkl vectors-----------------
       Kernel::Matrix<double> UB(3, 3, false);
@@ -648,22 +650,22 @@ namespace Mantid
 
 
 
-    Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> DerivQ, Matrix<double> Mhkl,
-        Matrix<double> MhklT, Matrix<double> InvhklThkl, Matrix<double> UB)
+    Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> const& DerivQ, Matrix<double>const& Mhkl,
+        Matrix<double>const& MhklT, Matrix<double>const& InvhklThkl, Matrix<double>const& UB)const
     {
       Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * Q2UBq;
       Geometry::OrientedLattice lat;
-      lat.setUB(UB + dUB * .001);
+      lat.setUB(Matrix<double>(UB) + dUB * .001);
 
       const Kernel::DblMatrix U2 = lat.getU();
       Kernel::DblMatrix U2A(U2);
-      lat.setUB(UB - dUB * .001);
+      lat.setUB(Matrix<double>(UB) - dUB * .001);
       const Kernel::DblMatrix U1 = lat.getU();
       Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
       Kernel::DblMatrix dUB0 = dU * B0;
 
       Kernel::DblMatrix dQtheor = dUB0 * MhklT;
-      Kernel::DblMatrix Deriv = DerivQ - dQtheor * UBq2Q;
+      Kernel::DblMatrix Deriv = Matrix<double>(DerivQ) - dQtheor * UBq2Q;
       return Deriv;
     }
 
@@ -691,7 +693,7 @@ namespace Mantid
       peaks = getPeaks();
       Check(peaks, xValues, nData);
 
-      Instrument_sptr instrNew = getNewInstrument(peaks);
+      Instrument_sptr instrNew = getNewInstrument(peaks->getPeak(0));
       boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
       vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
       vector<V3D> pos, xvec, yvec, hkl, qlab, qXtal;

@@ -124,14 +124,24 @@ namespace CurveFitting
 
    /**
     * Copies some of the information from pmapSv to pmap
-    * @param pmapSv  - The original ParameterMap
-    * @param pmap    - The new map where some of the entries of pmapSv are transferred
     * @param component-The component that pmap will be associated with.  These maps
     *                   use component names, so this just give names.
+    * @param pmap    - The new map where some of the entries of pmapSv are transferred
+    * @param pmapSv  - The original ParameterMap
     */
-   void updateParams(  boost::shared_ptr<const Geometry::ParameterMap>  &  pmapSv,
-                         boost::shared_ptr<Geometry::ParameterMap>  & pmap,
-                         boost::shared_ptr<const Geometry::IComponent> const component)const;
+   void updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
+                 boost::shared_ptr<Geometry::ParameterMap> pmap,
+                 boost::shared_ptr<const Geometry::ParameterMap>pmapSv)const;
+
+   /**
+     * Copies some of the information from pmapSv to pmap
+     * @param component-The component that pmap will be associated with.  These maps
+     *                   use component names, so this just give names.
+     * @param pmap    - The new map where some of the entries of pmapSv are transferred
+     * @param pmapSv  - The original ParameterMap
+     */
+   void updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const;
 
    /**
     * Given the derivative of Qrot wrt to some parameter, this calculates the final derivative
@@ -149,8 +159,11 @@ namespace CurveFitting
     *
     * @return The derivative of the Error in Qrot
     */
-   Kernel::Matrix<double> CalcDiffDerivFromdQ( Kernel::Matrix<double>DerivQ, Kernel::Matrix<double>Mhkl, Kernel::Matrix<double>MhklT,
-                                    Kernel::Matrix<double>InvhklThkl,Kernel::Matrix<double>UB );
+   Kernel::Matrix<double> CalcDiffDerivFromdQ(  Kernel::Matrix<double>const &  DerivQ,
+                                                Kernel::Matrix<double>const &  Mhkl,
+                                                Kernel::Matrix<double>const &  MhklT,
+                                                Kernel::Matrix<double>const &  InvhklThkl,
+                                                Kernel::Matrix<double>const &  UB )const;
 
 
 
@@ -409,7 +422,7 @@ namespace CurveFitting
     /**
      *  Checks for out of bounds values ,  peaksWorkspace status
      */
-    void Check( DataObjects::PeaksWorkspace_sptr pkwsp, const double *xValues, const size_t nData)const;
+    void Check( DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData)const;
 
     /**
      * Gets the new instrument by applying parameters values to the old instrument
@@ -417,7 +430,7 @@ namespace CurveFitting
      *
      * @return A new instrument with the parameters applied.
      */
-    Geometry::Instrument_sptr getNewInstrument( DataObjects::PeaksWorkspace_sptr pwks)const;
+    Geometry::Instrument_sptr getNewInstrument( const DataObjects::Peak & peak)const;
 
     /**
      * Creates a new peak, matching the old peak except for a different instrument. The Time offset
@@ -426,7 +439,7 @@ namespace CurveFitting
      * @param instrNew -The new instrument
      * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
      */
-    DataObjects::Peak  createNewPeak( DataObjects::Peak peak_old, Geometry::Instrument_sptr instrNew)const;
+    DataObjects::Peak  createNewPeak( const DataObjects::Peak & peak_old, Geometry::Instrument_sptr  instrNew)const;
 
 
     boost::shared_ptr< DataObjects::PeaksWorkspace> peaks;

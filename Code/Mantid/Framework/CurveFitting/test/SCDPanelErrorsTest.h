@@ -132,13 +132,13 @@ public:
 
     //-------------------------Test the derivative --------------------------------
     boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
-   /*//The numerical derivatives take too long to calculate 14 sec's
-    calib.functionDerivMW(Jac.get(), xVals, (size_t) N);
+
+    calib.functionDerivMW(Jac.get(), xVals.data(), (size_t) N);
 
     size_t nData = N;
-    double * out0 = new double[ N ];
-    double * out1 = new double[ N ];
-    double compRes[N];
+    std::vector<double> out0(N);// = new double[ N ];
+    std::vector<double> out1(N);// = new double[ N ];
+    std::vector<double> compRes(N);
 
     int params[20] =
     { 0, 0,0,0,0, 1, 1,1,1,1, 2, 2, 2,2, 2,9, 9, 9, 9, 9 };
@@ -157,10 +157,10 @@ public:
         double sav = calib.getParameter(param);
         calib.setParameter(param, sav + .005);
 
-        calib.functionMW(out0, xVals, nData);
+        calib.functionMW(out0.data(), xVals.data(), nData);
         calib.setParameter(param, sav - .005);
 
-        calib.functionMW(out1, xVals, nData);
+        calib.functionMW(out1.data(), xVals.data(), nData);
         calib.setParameter(param, sav);
         for (int j = 0; j < (int) nData; j++)
           compRes[j] = (out0[j] - out1[j]) / .01;
@@ -173,9 +173,7 @@ public:
 
     }
 
-    delete[] out0;
-    delete[] out1;
-  */
+
   }
   ;
 
