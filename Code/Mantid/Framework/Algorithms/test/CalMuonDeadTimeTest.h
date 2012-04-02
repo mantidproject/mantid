@@ -39,7 +39,7 @@ public:
     TS_ASSERT( calDeadTime.isInitialized() )
   }
 
-  void testCalDeadTime()
+  void xtestCalDeadTime()
   {
     //Load the muon nexus file
     Mantid::DataHandling::LoadMuonNexus loader;
