@@ -43,23 +43,12 @@
  */
 ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
   : QTabWidget(parent), Scripted(env), m_last_dir(""),
-    m_cursor_pos(), m_interpreter_mode(false), m_recentScriptList()
+    m_cursor_pos(), m_recentScriptList(), m_nullScript(new NullScriptFileInterpreter),
+    m_current(m_nullScript)
 {
-  //Create actions for this widget
-  initActions();
-  
   // Start with a blank tab
-  newTab();
-  
-  // Settings
-  QSettings settings;
-  settings.beginGroup("ScriptWindow");
-  m_toggle_folding->setChecked(settings.value("CodeFolding", true).toBool());
-  m_toggle_completion->setChecked(settings.value("CodeCompletion", true).toBool());
-  m_toggle_calltips->setChecked(settings.value("CallTips", true).toBool());
-  settings.endGroup();
-
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged(int)));
+  newTab();
 }
 
 /**
@@ -67,99 +56,20 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
  */
 ScriptManagerWidget::~ScriptManagerWidget()
 {
-}
-
-/**
- * Save the settings applicable here
- */
-void ScriptManagerWidget::saveSettings()
-{
-  QString group("ScriptWindow");
-  QSettings settings;
-  settings.beginGroup(group);
-  settings.setValue("/CodeFolding", m_toggle_folding->isChecked());
-  settings.setValue("/CodeCompletion", m_toggle_completion->isChecked());
-  settings.setValue("/CallTips", m_toggle_calltips->isChecked());
-  settings.endGroup();
-}
-
-/// @return The current interpreter
-ScriptFileInterpreter * ScriptManagerWidget::currentInterpreter()
-{
-  return interpreterAt(currentIndex());
+  delete m_nullScript;
 }
 
 /// @return Interpreter at given index
 ScriptFileInterpreter * ScriptManagerWidget::interpreterAt(int index)
 {
-  return qobject_cast<ScriptFileInterpreter*>(widget(index));
-}
-
-// ----------------------- Menus --------------------------------------------
-/**
- *  Add the required entries for the file menu in this context
- * @param fileMenu A pointer to the menu object to fill
- */
-void ScriptManagerWidget::populateFileMenu(QMenu &fileMenu)
-{
-  fileMenu.addAction(m_new_tab);
-  fileMenu.addAction(m_open_curtab);
-  fileMenu.addAction(m_open_newtab);
-
-  fileMenu.insertSeparator();
-
-  if( count() > 0)
+  if(count() > 0)
   {
-    ScriptFileInterpreter *current = currentInterpreter();
-    current->populateFileMenu(fileMenu);
+    return qobject_cast<ScriptFileInterpreter*>(widget(index));
   }
-
-  fileMenu.insertSeparator();
-  fileMenu.addMenu(m_recent_scripts);
-  updateRecentScriptList();
-
-  if( count() > 0)
+  else
   {
-    fileMenu.insertSeparator();
-    fileMenu.addAction(m_close_tab);
+    return m_nullScript;
   }
-}
-/**
- *  Add the required entries for the edit menu in this context
- * @param editMenu A pointer to the menu object to fill
- */
-void ScriptManagerWidget::populateEditMenu(QMenu &editMenu)
-{
-  if( count() > 0 )
-  {
-    ScriptFileInterpreter *current = currentInterpreter();
-    current->populateEditMenu(editMenu);
-  }
-}
-/**
- *  Add the required entries for the execute menu in this context
- * @param editMenu A pointer to the menu object to fill
- */
-void ScriptManagerWidget::populateExecMenu(QMenu &execMenu)
-{
-  if( count() > 0 )
-  {
-    ScriptFileInterpreter *current = currentInterpreter();
-    current->populateExecMenu(execMenu);
-  }
-}
-
-/**
- * Add the required entries for a Window menu in this context
- */
-void ScriptManagerWidget::populateWindowMenu(QMenu &windowMenu)
-{
-  if( count() > 0 )
-  {
-    windowMenu.insertSeparator();
-    ScriptFileInterpreter *current = currentInterpreter();
-    current->populateWindowMenu(windowMenu);
-    }
 }
 
 /**
@@ -170,18 +80,6 @@ bool ScriptManagerWidget::isScriptRunning()
   return scriptingEnv()->isRunning();
 }
 
-
-/// copy method
-void ScriptManagerWidget::copy()
-{
-  QMessageBox::warning(this, "", "Copy not implemented");
-}
-  ///paste method
-void ScriptManagerWidget::paste()
-{
-  QMessageBox::warning(this, "", "Paste not implemented");
-  
-}
 //-------------------------------------------
 // Public slots
 //-------------------------------------------
@@ -252,6 +150,52 @@ void ScriptManagerWidget::openInNewTab(const QString & filename)
 }
 
 /**
+ * open the selected script from the File->Recent Scripts  in a new tab
+ * @param index :: The index of the selected script
+ */
+void ScriptManagerWidget::openRecentScript(int index)
+{
+  if(index < m_recentScriptList.count())
+  {
+    QString filename = m_recentScriptList[index];
+    openInNewTab(filename);
+  }
+}
+
+/// Save current file
+void ScriptManagerWidget::saveToCurrentFile()
+{
+  m_current->saveToCurrentFile();
+}
+
+/// Save to new file
+void ScriptManagerWidget::saveAs()
+{
+  m_current->saveToCurrentFile();
+}
+
+/// Print the current script
+void ScriptManagerWidget::print()
+{
+  m_current->printScript();
+}
+
+/**
+ * Close current tab
+ */
+int ScriptManagerWidget::closeCurrentTab()
+{
+  if( count() > 0 )
+  {
+    int index = currentIndex();
+    closeTabAtIndex(index);
+    return index;
+  }
+  return -1;
+}
+
+
+/**
  * Close all tabs
  */
 void ScriptManagerWidget::closeAllTabs()
@@ -263,6 +207,7 @@ void ScriptManagerWidget::closeAllTabs()
     //This closes the tab at the end.
     closeTabAtIndex(index);
   }
+  m_current = m_nullScript;
 }
 
 /**
@@ -289,31 +234,6 @@ QString ScriptManagerWidget::saveToString()
   fileNames+="\n</scriptwindow>\n";
   return fileNames;
 }
-/**
- * Execute the highlighted code from the current tab
- */
-void ScriptManagerWidget::executeAll()
-{
-  ScriptFileInterpreter *currentTab = qobject_cast<ScriptFileInterpreter*>(widget(currentIndex()));
-  currentTab->executeAll();
-}
-
-/**
- * Execute the whole script
- */
-void ScriptManagerWidget::executeSelection()
-{
-  ScriptFileInterpreter *currentTab = qobject_cast<ScriptFileInterpreter*>(widget(currentIndex()));
-  currentTab->executeSelection();
-}
-
-/**
- * Evaluate
- */
-void ScriptManagerWidget::evaluate()
-{  
-  QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented yet.");
-}
 
 
 /**
@@ -336,110 +256,72 @@ void ScriptManagerWidget::showFindDialog(bool replace)
   QMessageBox::information(this, "MantidPlot", "Find not implemented");
 }
 
-
-//--------------------------------------------
-// Private slots
-//--------------------------------------------
-/**
- * Handle a context menu request for one of the editors
- */
-void ScriptManagerWidget::editorContextMenu(const QPoint &)
+/// undo
+void ScriptManagerWidget::undo()
 {
-//  QMenu context(this);
-//
-//  if( !m_interpreter_mode )
-//  {
-//    //File actions
-//    context.addAction(m_open_curtab);
-//    context.addAction(m_save);
-//    context.addAction(printAction());
-//
-//
-//    context.insertSeparator();
-//
-//    //Evaluate and execute
-//    context.addAction(m_exec);
-//    context.addAction(m_exec_all);
-//    if( scriptingEnv()->supportsEvaluation() )
-//    {
-//      context.addAction(m_eval);
-//    }
-//  }
-//
-//  // Edit actions
-//   context.insertSeparator();
-//   context.addAction(copyAction());
-//   context.addAction(cutAction());
-//   context.addAction(pasteAction());
-//
-//   context.insertSeparator();
-//
-//   context.addAction(zoomInAction());
-//   context.addAction(zoomOutAction());
-//
-//   context.insertSeparator();
-//
-//  context.addAction(m_toggle_completion);
-//  context.addAction(m_toggle_calltips);
-//  context.exec(QCursor::pos());
+  m_current->undo();
+}
+/// redo
+void ScriptManagerWidget::redo()
+{
+  m_current->redo();
+}
+
+/// cut current
+void ScriptManagerWidget::cut()
+{
+  m_current->cut();
+}
+
+/// copy method
+void ScriptManagerWidget::copy()
+{
+  m_current->copy();
+}
+  ///paste method
+void ScriptManagerWidget::paste()
+{
+  m_current->paste();
+}
+
+void ScriptManagerWidget::findInScript()
+{
+  m_current->findInScript();
 }
 
 /**
- * Close current tab
+ * Execute the highlighted code from the current tab
  */
-int ScriptManagerWidget::closeCurrentTab()
+void ScriptManagerWidget::executeAll()
 {
-  if( count() > 0 )
-  {
-    int index = currentIndex();
-    closeTabAtIndex(index);
-    return index;
-  }
-  return -1;
+  m_current->executeAll();
 }
 
 /**
- * Close clicked tab. Qt cannot give the position where an action is clicked so this just gets 
- * the current cursor position and calls the closeAtPosition function
+ * Execute the whole script
  */
-void ScriptManagerWidget::closeClickedTab()
+void ScriptManagerWidget::executeSelection()
 {
-  closeTabAtPosition(m_cursor_pos);
+  m_current->executeSelection();
 }
 
 /**
- * Mark the current tab as changed. The signal is disconnected
- * from the emitting widget so that multiple calls are not performed
+ * Evaluate
  */
-void ScriptManagerWidget::markCurrentAsChanged()
+void ScriptManagerWidget::evaluate()
 {
-  int index = currentIndex();
-  setTabText(index, tabText(index) + "*");
-  // Disconnect signal so that this doesn't get run in the future
-  ScriptFileInterpreter *currentWidget = qobject_cast<ScriptFileInterpreter*>(widget(index));
-  disconnect(currentWidget, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+  QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented yet.");
 }
 
-/**
- * The current selection has changed
- * @param index The index of the new selection
- */
-void ScriptManagerWidget::tabSelectionChanged(int index)
+/// Increase font size
+void ScriptManagerWidget::zoomIn()
 {
-  if( count() > 0 )
-  {
-    ScriptFileInterpreter *currentWidget = qobject_cast<ScriptFileInterpreter*>(widget(index));
-    setFocusProxy(currentWidget);
-    currentWidget->setFocus();
-  }
+  m_current->zoomInOnScript();
 }
-
-/**
- * Enable/disable script interaction based on script execution status
- * @param running :: The state of the script
- */
-void ScriptManagerWidget::setScriptIsRunning(bool running)
+/// Decrease font size
+void ScriptManagerWidget::zoomOut()
 {
+  m_current->zoomOutOnScript();
 }
 
 /**
@@ -493,71 +375,62 @@ void ScriptManagerWidget::toggleCallTips(bool state)
   }
 }
 
+
 //--------------------------------------------
-// Private member functions (non-slot)
+// Private slots
 //--------------------------------------------
+
 /**
- * Initalize the actions relevant for this object
+ * Close clicked tab. Qt cannot give the position where an action is clicked so this just gets 
+ * the current cursor position and calls the closeAtPosition function
  */
-void ScriptManagerWidget::initActions()
+void ScriptManagerWidget::closeClickedTab()
 {
-  // **File** actions
-  // New tab
-  m_new_tab = new QAction(tr("&New Tab"), this);
-  m_new_tab->setShortcut(tr("Ctrl+N"));
-  connect(m_new_tab, SIGNAL(activated()), this, SLOT(newTab()));
-  // Open script in current tab
-  m_open_curtab = new QAction(tr("&Open"), this);
-  m_open_curtab->setShortcut(tr("Ctrl+O"));
-  connect(m_open_curtab, SIGNAL(activated()), this, SLOT(openInCurrentTab()));
-  //Open in new tab
-  m_open_newtab = new QAction(tr("&Open in New Tab"), this);
-  m_open_newtab->setShortcut(tr("Ctrl+Shift+O"));
-  connect(m_open_newtab, SIGNAL(activated()), this, SLOT(openInNewTab()));
+  closeTabAtPosition(m_cursor_pos);
+}
 
+/**
+ * Mark the current tab as changed. The signal is disconnected
+ * from the emitting widget so that multiple calls are not performed
+ */
+void ScriptManagerWidget::markCurrentAsChanged()
+{
+  int index = currentIndex();
+  setTabText(index, tabText(index) + "*");
+  // Disconnect signal so that this doesn't get run in the future
+  disconnect(m_current, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+}
 
-  //Close the current tab
-  m_close_tab = new QAction(tr("&Close Tab"), this);
-  m_close_tab->setShortcut(tr("Ctrl+W"));
-  connect(m_close_tab,SIGNAL(activated()), this, SLOT(closeCurrentTab()));
-
-  // recent scripts option
-  m_recent_scripts = new QMenu(tr("&Recent Scripts"),this);
-  connect(m_recent_scripts,SIGNAL(activated(int)),this,SLOT(openRecentScript(int)));
-  
-  // **Edit** actions
-  m_find = new QAction(tr("&Find/Replace"), this);
-  m_find->setShortcut(tr("Ctrl+F"));
-  connect(m_find, SIGNAL(activated()), this, SLOT(showFindDialog()));
-
-  // Toggle the progress arrow
-  m_toggle_progress = new QAction(tr("Show &Progress Marker"), this);
-  m_toggle_progress->setCheckable(true);
-  if( m_interpreter_mode )
+/**
+ * The current selection has changed
+ * @param index The index of the new selection
+ */
+void ScriptManagerWidget::tabSelectionChanged(int index)
+{
+  if( count() > 0 )
   {
-    m_toggle_progress->setEnabled(false);
+    m_current = qobject_cast<ScriptFileInterpreter*>(widget(index));
+    setFocusProxy(m_current);
+    m_current->setFocus();
   }
   else
   {
-    m_toggle_progress->setEnabled(scriptingEnv()->supportsProgressReporting());
+    m_current = m_nullScript;
   }
-  connect(m_toggle_progress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
-
-  // Toggle code folding
-  m_toggle_folding = new QAction(tr("Code &Folding"), this);
-  m_toggle_folding->setCheckable(true);
-  connect(m_toggle_folding, SIGNAL(toggled(bool)), this, SLOT(toggleCodeFolding(bool)));
-
-  // Toggle code completion
-  m_toggle_completion = new QAction(tr("Code &Completion"), this);
-  m_toggle_completion->setCheckable(true);
-  connect(m_toggle_completion, SIGNAL(toggled(bool)), this, SLOT(toggleCodeCompletion(bool)));
-
-  // Toggle call tips
-  m_toggle_calltips = new QAction(tr("Call &Tips"), this);
-  m_toggle_calltips->setCheckable(true);
-  connect(m_toggle_calltips, SIGNAL(toggled(bool)), this, SLOT(toggleCallTips(bool)));
 }
+
+/**
+ * Enable/disable script interaction based on script execution status
+ * @param running :: The state of the script
+ */
+void ScriptManagerWidget::setScriptIsRunning(bool running)
+{
+}
+
+
+//--------------------------------------------
+// Private member functions (non-slot)
+//--------------------------------------------
 
 /**
  * A context menu event for the tab widget itself
@@ -629,19 +502,17 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
       return;
     }
   }
-  /// remove the file name from script list
-  m_recentScriptList.remove(fileToOpen);
-  //add the script file to recent scripts list 
-  m_recentScriptList.push_front(fileToOpen);
-  //update the recent scripts menu 
-  updateRecentScriptList();
- 
+
   //Save last directory
   m_last_dir = QFileInfo(fileToOpen).absolutePath();
 
   int index(-1);
   if( !newtab ) index = closeCurrentTab();
   newTab(index, fileToOpen);
+
+  //update the recent scripts menu 
+  updateRecentScriptList(fileToOpen);
+
 }
 
 /**
@@ -650,7 +521,7 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
  */ 
 void ScriptManagerWidget::closeTabAtIndex(int index)
 {
-  ScriptFileInterpreter *interpreter = qobject_cast<ScriptFileInterpreter*>(widget(index));
+  ScriptFileInterpreter *interpreter = interpreterAt(index);
   interpreter->prepareToClose();
   removeTab(index);
 }
@@ -735,36 +606,18 @@ void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
 //  editor->setFolding(fold_option);
 //}
 
+
 /** 
- * open the selected script from the File->Recent Scripts  in a new tab
- * @param index :: The index of the selected script
+ * Keeps the recent script list up to date
  */
-void ScriptManagerWidget::openRecentScript(int index)
+void ScriptManagerWidget::updateRecentScriptList(const QString & filename)
 {
-  QString scriptname = m_recent_scripts->text(index);
-  scriptname.remove(0,3);
-  scriptname.trimmed();
-  openInNewTab(scriptname); 
-}
-
-/** 
-* update the Recent Scripts menu items
-* @param index :: The index of the selected script
-*/
-void ScriptManagerWidget::updateRecentScriptList()
-{
-  if (m_recentScriptList.isEmpty())
-    return;
-
-  while ((int)m_recentScriptList.size() > MaxRecentScripts)
-    m_recentScriptList.pop_back();
-
-  m_recent_scripts->clear();
-  for (int i = 0; i<m_recentScriptList.size(); i++ )
+  m_recentScriptList.remove(filename);
+  m_recentScriptList.push_front(filename);
+  if( m_recentScriptList.count() > MaxRecentScripts )
   {
-    m_recent_scripts->insertItem("&" + QString::number(i+1) + " " + m_recentScriptList[i]);
+    m_recentScriptList.pop_back();
   }
-
 }
 
 /** 

@@ -16,8 +16,7 @@
  */
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
   : QWidget(parent), m_editor(new ScriptEditor(this, NULL)),
-    m_messages(new ScriptOutputDisplay), m_runner(),
-    m_execAll(NULL), m_execSelect(NULL)
+    m_messages(new ScriptOutputDisplay), m_runner()
 {
   setFocusProxy(m_editor);
   m_editor->setFocus();
@@ -28,9 +27,11 @@ ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
   mainLayout->setContentsMargins(0,0,0,0);
   setLayout(mainLayout);
 
-  initActions();
-
   connect(m_editor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
+
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+          this, SLOT(showContextMenu(const QPoint&)));
 }
 
 /// Destroy the object
@@ -69,6 +70,26 @@ void ScriptFileInterpreter::prepareToClose()
 }
 
 /**
+ * Show custom context menu event
+ */
+void ScriptFileInterpreter::showContextMenu(const QPoint & clickPoint)
+{
+  QMenu context(this);
+  context.addAction("&Save", m_editor, "saveToCurrentFile");
+
+  context.insertSeparator();
+  context.addAction("&Copy", m_editor, "copy");
+  context.addAction("C&ut", m_editor, "cut");
+  context.addAction("P&aste", m_editor, "paste");
+
+  context.insertSeparator();
+  context.addAction("E&xecute Selection", this, "executeSelection");
+  context.addAction("Execute &All", this, "executeAll");
+
+  context.exec(this->mapToGlobal(clickPoint));
+}
+
+/**
  * Set up the widget from a given scripting environment
  * @param environ :: A pointer to the current scripting environment
  * @param identifier :: A string identifier, used mainly in error messages to identify the
@@ -97,63 +118,17 @@ bool ScriptFileInterpreter::isScriptModified() const
   return m_editor->isModified();
 }
 
-/**
- * Populate a menu with editing items
- * @param fileMenu A reference to a menu object that is to be populated
- */
-void ScriptFileInterpreter::populateFileMenu(QMenu &fileMenu)
+/// Save to the currently stored name
+void ScriptFileInterpreter::saveToCurrentFile()
 {
-  m_editor->populateFileMenu(fileMenu);
-
+  m_editor->saveToCurrentFile();
 }
 
-/**
- * Populate a menu with editing items
- * @param editMenu A reference to a menu object that is to be populated
- */
-void ScriptFileInterpreter::populateEditMenu(QMenu &editMenu)
+/// Save to a different name
+void ScriptFileInterpreter::saveAs()
 {
-  m_editor->populateEditMenu(editMenu);
-  editMenu.insertSeparator();
-  m_messages->populateEditMenu(editMenu);
+  m_editor->saveAs();
 }
-
-/**
- * Fill execute menu
- */
-void ScriptFileInterpreter::populateExecMenu(QMenu &execMenu)
-{
-  execMenu.addAction(m_execSelect);
-  execMenu.addAction(m_execAll);
-}
-
-/**
- * Fill a window menu
- * @param windowMenu
- */
-void ScriptFileInterpreter::populateWindowMenu(QMenu &windowMenu)
-{
-  m_editor->populateWindowMenu(windowMenu);
-}
-
-
-/**
- * Execute the whole script in the editor. This is always asynchronous
- */
-void ScriptFileInterpreter::executeAll()
-{
-  executeCode(m_editor->text());
-}
-
-/**
- * Execute the current selection from the editor. This is always asynchronous
- */
-void ScriptFileInterpreter::executeSelection()
-{
-  executeCode(m_editor->selectedText());
-}
-
-
 
 /**
  * Save the current script in the editor to a file
@@ -174,23 +149,91 @@ void ScriptFileInterpreter::saveOutput(const QString & filename)
   m_messages->saveToFile(filename);
 }
 
+/**
+ * Print script
+ */
+void ScriptFileInterpreter::printScript()
+{
+  m_editor->print();
+}
+
+/// Print the output
+void ScriptFileInterpreter::printOutput()
+{
+  m_messages->print();
+}
+
+/// Undo
+void ScriptFileInterpreter::undo()
+{
+  m_editor->undo();
+}
+/// Redo
+void ScriptFileInterpreter::redo()
+{
+  m_editor->redo();
+}
+
+/// Copy from the editor
+void ScriptFileInterpreter::copy()
+{
+  m_editor->copy();
+}
+
+/// Cut from the editor
+void ScriptFileInterpreter::cut()
+{
+  m_editor->cut();
+}
+/// Paste into the editor
+void ScriptFileInterpreter::paste()
+{
+  m_editor->paste();
+}
+
+/// Find in editor
+void ScriptFileInterpreter::findInScript()
+{
+  //m_editor->find();
+}
+
+/**
+ * Execute the whole script in the editor. This is always asynchronous
+ */
+void ScriptFileInterpreter::executeAll()
+{
+  executeCode(m_editor->text());
+}
+
+/**
+ * Execute the current selection from the editor. This is always asynchronous
+ */
+void ScriptFileInterpreter::executeSelection()
+{
+  if(m_editor->hasSelectedText())
+  {
+    executeCode(m_editor->selectedText());
+  }
+  else
+  {
+    executeAll();
+  }
+}
+
+/// Zoom in on script
+void ScriptFileInterpreter::zoomInOnScript()
+{
+  m_editor->zoomIn();
+}
+/// Zoom out on script
+void ScriptFileInterpreter::zoomOutOnScript()
+{
+  m_editor->zoomOut();
+}
+
 //-----------------------------------------------------------------------------
 // Private members
 //-----------------------------------------------------------------------------
-/**
- * Create action objects
- */
-void ScriptFileInterpreter::initActions()
-{
-  m_execSelect = new QAction(tr("E&xecute"), this);
-  m_execSelect->setShortcut(tr("Ctrl+Return"));
-  connect(m_execSelect, SIGNAL(activated()), this, SLOT(executeSelection()));
-
-  m_execAll = new QAction(tr("Execute &All"), this);
-  m_execAll->setShortcut(tr("Ctrl+Shift+Return"));
-  connect(m_execAll, SIGNAL(activated()), this, SLOT(executeAll()));
-}
-
 /**
  * @param environ :: A pointer to the current scripting environment
  * @param identifier :: A string identifier, used mainly in error messages to identify the
@@ -252,3 +295,4 @@ void ScriptFileInterpreter::executeCode(const QString & code)
   m_runner->executeAsync(code);
 
 }
+

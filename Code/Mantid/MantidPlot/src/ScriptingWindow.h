@@ -41,6 +41,8 @@ public:
   bool isScriptRunning() const;
   ///Save the current state of the script window for next time
   void saveSettings();
+  /// Read settings from store
+  void readSettings();
   /// Open a script in a new tab. This is here for backwards compatability with the old
   /// ScriptWindow class
   void open(const QString & filename, bool newtab = true);
@@ -62,23 +64,34 @@ signals:
 
   
 private:
-  /// Create menu bar and menu actions
+  /// Create menu bar
   void initMenus();
-  /// Create window actions
-  void initWindowActions();
+
+  /// Create all actions
+  void initActions();
+  /// Create the file actions
+  void initFileMenuActions();
+  /// Create the edit menu actions
+  void initEditMenuActions();
+  /// Create the execute menu actions
+  void initExecMenuActions();
+  /// Create the window menu actions
+  void initWindowMenuActions();
 
   /// Accept a custom defined event
   void customEvent(QEvent * event);
 
 private slots:
-  /// File menu is about to show
-  void fileMenuAboutToShow();
-  /// Edit menu is about to show
-  void editMenuAboutToShow();
-  /// Exec menu about to show
-  void execMenuAboutToShow();
-  /// Window menu is about to show
-  void windowMenuAboutToShow();
+  /// Populate file menu
+  void populateFileMenu();
+  /// Ensure the list is up to date
+  void populateRecentScriptsMenu();
+  /// Populate edit menu
+  void populateEditMenu();
+  /// Populate execute menu
+  void populateExecMenu();
+  /// Populate window menu
+  void populateWindowMenu();
 
   /// Update window flags
   void updateWindowFlags();
@@ -90,19 +103,31 @@ private:
   ScriptManagerWidget *m_manager;
 
   /// File menu
-  QMenu *m_file_menu;
+  QMenu *m_fileMenu;
+  /// File menu actions
+  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, 
+    *m_save, *m_saveAs, *m_print, *m_closeTab;
+  QMenu *m_recentScripts;
   /// Edit menu
-  QMenu *m_edit_menu;
+  QMenu *m_editMenu;
+  /// Edit menu actions
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
   /// Run menu
-  QMenu *m_run_menu;
+  QMenu *m_runMenu;
+  /// Execute menu actions
+  QAction *m_execSelect, *m_execAll;
   /// Window menu
-  QMenu *m_window_menu;
+  QMenu *m_windowMenu;
   /// Window actions
-  QAction *m_always_on_top, *m_hide;
+  QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut,
+    *m_toggleProgress, *m_toggleFolding, *m_toggleCallTips;
+
   /// Change scripting language
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
+
+
 };
 
 #endif //SCRIPTINGWINDOW_H_

@@ -211,12 +211,16 @@ CommandLineInterpreter::CommandLineInterpreter(const ScriptingEnv & environ, QWi
     m_inputBuffer(),m_status(Waiting),
     m_promptKey(markerDefine(QsciScintilla::ThreeRightArrows)),
     m_continuationKey(markerDefine(QsciScintilla::ThreeDots)),
-    m_pastedText(), m_pasteQueue()
+    m_pastedText(), m_pasteQueue(),
+    m_copy(NULL), m_cut(NULL), m_paste(NULL), m_saveAs(NULL),
+    m_zoomIn(NULL), m_zoomOut(NULL)
 {
   setupEnvironment(environ);
   setupMargin();
   setupIndentation();
   setupFont();
+
+  initActions();
 
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
@@ -288,16 +292,16 @@ void CommandLineInterpreter::cut()
 void CommandLineInterpreter::showContextMenu(const QPoint & clickPoint)
 {
   QMenu context;
-  context.addAction(copyAction());
-  context.addAction(cutAction());
-  context.addAction(pasteAction());
+  context.addAction(m_copy);
+  context.addAction(m_cut);
+  context.addAction(m_paste);
 
   context.addSeparator();
-  context.addAction(saveAsAction());
+  context.addAction(m_saveAs);
 
   context.addSeparator();
-  context.addAction(zoomInAction());
-  context.addAction(zoomOutAction());
+  context.addAction(m_zoomIn);
+  context.addAction(m_zoomOut);
 
   context.exec(this->mapToGlobal(clickPoint));
 }
@@ -425,11 +429,34 @@ void CommandLineInterpreter::setupFont()
 }
 
 /**
- * Removes unwanted actions that base class provides
+ * Create the required actions for this class
  */
-void CommandLineInterpreter::removeUnwantedActions()
+void CommandLineInterpreter::initActions()
 {
-  removeAction(saveAction());
+  m_copy = new QAction(tr("&Copy"), this);
+  connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
+
+  m_cut = new QAction(tr("C&ut"), this);
+  connect(m_cut, SIGNAL(activated()), this, SLOT(cut()));
+
+  m_paste = new QAction(tr("&Paste"), this);
+  connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
+
+  m_saveAs = new QAction(tr("Save &As"), this);
+  connect(m_paste, SIGNAL(activated()), this, SLOT(saveAs()));
+
+  m_zoomIn = new QAction(("Increase font size"), this);
+  // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
+  // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
+  // it doesn't seem to work for me
+  m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
+  m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
+  connect(m_zoomIn, SIGNAL(activated()), this, SLOT(zoomIn()));
+
+  m_zoomOut = new QAction(("Decrease font size"), this);
+  m_zoomOut->setShortcut(QKeySequence::ZoomOut);
+  connect(m_zoomOut, SIGNAL(activated()), this, SLOT(zoomOut()));
+
 }
 
 /**
@@ -564,6 +591,13 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   {
     handled = true;
     handleDownKeyPress();
+  }
+  else if (key == Qt::Key_Delete)
+  {
+    // We don't want to move the cursor to just
+    // pass this directly
+    handled = true;
+    ScriptEditor::keyPressEvent(event);
   }
 
   return handled;

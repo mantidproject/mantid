@@ -139,7 +139,6 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
   QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
   m_completer(NULL),m_previousKey(0),  m_zoomLevel(0)
 {
-  initActions();
   //Syntax highlighting and code completion
   setLexer(codelexer);
   readSettings();
@@ -174,43 +173,6 @@ ScriptEditor::~ScriptEditor()
     delete current;
   }
 }
-
-/**
- * Add actions applicable to file menu
- * @param fileMenu
- */
-void ScriptEditor::populateFileMenu(QMenu &fileMenu)
-{
-  fileMenu.addAction(m_save);
-  fileMenu.addAction(m_saveAs);
-  fileMenu.addAction(m_print);
-}
-/**
- * Add actions applicable to an edit menu
- * @param editMenu
- */
-void ScriptEditor::populateEditMenu(QMenu &editMenu)
-{
-  editMenu.addAction(m_undo);
-  editMenu.addAction(m_redo);
-  editMenu.addAction(m_cut);
-  editMenu.addAction(m_copy);
-  editMenu.addAction(m_paste);
-
-//  editMenu.insertSeparator();
-//  editMenu.addAction(m_find);
-}
-
-/**
- *  Add actions applicable to a window menu
- * @param windowMenu
- */
-void ScriptEditor::populateWindowMenu(QMenu &windowMenu)
-{
-  windowMenu.addAction(m_zoomIn);
-  windowMenu.addAction(m_zoomOut);
-}
-
 
 /**
  * Set a new code lexer for this object. Note that this clears all auto complete information
@@ -494,65 +456,6 @@ void ScriptEditor::writeToDevice(QIODevice & device) const
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
-/**
- * Create actions
- */
-void ScriptEditor::initActions()
-{
-  m_save = new QAction(tr("&Save"), this);
-  m_save->setShortcut(QKeySequence::Save);
-  connect(m_save, SIGNAL(activated()), this , SLOT(saveToCurrentFile()));
-  //Save a script under a new file name
-  m_saveAs = new QAction(tr("&Save As"), this);
-  connect(m_saveAs, SIGNAL(activated()), this , SLOT(saveAs()));
-  m_saveAs->setShortcut(tr("Ctrl+Shift+S"));
-  m_saveAs->setShortcutContext(Qt::WidgetShortcut);
-
-  m_undo = new QAction(tr("&Undo"), this);
-  //m_undo->setShortcut(QKeySequence::Undo);
-  connect(m_undo, SIGNAL(activated()), this, SLOT(undo()));
-  connect(this, SIGNAL(undoAvailable(bool)), m_undo, SLOT(setEnabled(bool)));
-
-  m_redo = new QAction(tr("&Redo"), this);
-  //m_redo->setShortcut(QKeySequence::Redo);
-  connect(m_redo, SIGNAL(activated()), this, SLOT(redo()));
-  connect(this, SIGNAL(redoAvailable(bool)), m_redo, SLOT(setEnabled(bool)));
-
-  m_cut = new QAction(tr("C&ut"), this);
-  //m_cut->setShortcut(QKeySequence::Cut);
-  connect(m_cut, SIGNAL(activated()), this, SLOT(cut()));
-  connect(this, SIGNAL(copyAvailable(bool)), m_cut, SLOT(setEnabled(bool)));
-
-  m_copy = new QAction(tr("&Copy"), this);
-  //m_copy->setShortcut(QKeySequence::Copy);
-  //m_copy->setShortcutContext(Qt::WidgetShortcut);
-  connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
-  connect(this, SIGNAL(copyAvailable(bool)), m_copy, SLOT(setEnabled(bool)));
-
-  m_paste = new QAction(tr("&Paste"), this);
-  //m_paste->setShortcut(QKeySequence::Paste);
-  //m_paste->setShortcutContext(Qt::WidgetShortcut);
-  connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
-
-  m_print = new QAction(tr("&Print script"), this);
-  m_print->setShortcut(QKeySequence::Print);
-  m_print->setShortcutContext(Qt::WidgetShortcut);
-  connect(m_print, SIGNAL(activated()), this, SLOT(print()));
-
-  m_zoomIn = new QAction(("Increase font size"), this);
-  // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
-  // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
-  // it doesn't seem to work for me
-  m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
-  m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
-  connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
-
-  m_zoomOut = new QAction(("Decrease font size"), this);
-  m_zoomOut->setShortcut(QKeySequence::ZoomOut);
-  connect(m_zoomOut, SIGNAL(activated()),this,SLOT(zoomOut()));
-
-}
-
 /// Settings group
 /**
  * Returns a string containing the settings group to use

@@ -11,6 +11,7 @@
 class Script;
 class ScriptingEnv;
 class QKeyEvent;
+class QAction;
 
 /**
  * A class to handle multi-line input and test whether
@@ -103,10 +104,6 @@ signals:
 
 private:
   Q_DISABLE_COPY(CommandLineInterpreter);
-  /// Hide these members
-  using ScriptEditor::populateFileMenu;
-  using ScriptEditor::populateEditMenu;
-  using ScriptEditor::populateWindowMenu;
 
   /// Status
   enum Status { Waiting, Executing };
@@ -119,8 +116,8 @@ private:
   void setupIndentation();
   /// Set the fonts used
   void setupFont();
-  /// Removes unwanted actions that base class provides
-  void removeUnwantedActions();
+  /// Create required actions
+  void initActions();
   /// Disable window editing keys
   void remapWindowEditingKeys();
 
@@ -175,6 +172,13 @@ private:
 
   QString m_pastedText;
   QTextStream m_pasteQueue;
+
+  QAction *m_copy;
+  QAction *m_cut;
+  QAction *m_paste;
+  QAction *m_saveAs;
+  QAction *m_zoomIn;
+  QAction *m_zoomOut;
 };
 
 #endif /* COMMANDLINEINTERPRETER_H_ */

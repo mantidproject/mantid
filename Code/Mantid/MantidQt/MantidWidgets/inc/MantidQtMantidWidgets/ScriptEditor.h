@@ -86,13 +86,6 @@ public:
   ///Destructor
   ~ScriptEditor();
 
-  /// Add actions applicable to an edit menu
-  void populateFileMenu(QMenu &fileMenu);
-  /// Add actions applicable to an edit menu
-  void populateEditMenu(QMenu &editMenu);
-  /// Add actions applicable to a window menu
-  void populateWindowMenu(QMenu &windowMenu);
-
   // Set a new code lexer for this object
   void setLexer(QsciLexer *);
   // Size hint
@@ -162,65 +155,10 @@ signals:
   void redoAvailable(bool);
 
 protected:
-  /// Save action for this editor
-  inline QAction* saveAction() const
-  {
-    return m_save;
-  }
-  /// SaveAs action for this editor
-  inline QAction* saveAsAction() const
-  {
-    return m_saveAs;
-  }
-
-  /// Undo action for this editor
-  inline QAction* undoAction() const
-  {
-    return m_undo;
-  }
-  /// Redo action for this editor
-  inline QAction* redoAction() const
-  {
-    return m_redo;
-  }
-  /// Cut action for this editor
-  inline QAction* cutAction() const
-  {
-    return m_cut;
-  }
-  /// Copy action for this editor
-  inline QAction* copyAction() const
-  {
-    return m_copy;
-  }
-  /// Paste action for this editor
-  inline QAction* pasteAction() const
-  {
-    return m_paste;
-  }
-
-  /// Zoom in action for this editor
-  inline QAction* zoomInAction() const
-  {
-    return m_zoomIn;
-  }
-  /// Zoom out action for this editor
-  inline QAction* zoomOutAction() const
-  {
-    return m_zoomOut;
-  }
-  /// Print action for this editor
-  inline QAction* printAction() const
-  {
-    return m_print;
-  }
   /// Write to the given device
   virtual void writeToDevice(QIODevice & device) const;
 
 private:
-  /// Create actions
-  void initActions();
-
   /// Settings group
   QString settingsGroup() const;
   /// Read settings from persistent store
@@ -233,12 +171,6 @@ private:
   /// The file name associated with this editor
   QString m_filename;
 
-  /// Saving actions
-  QAction *m_save, *m_saveAs;
-  /// Each editor needs its own undo/redo etc
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
-  /// Zoom in/out actions
-  QAction *m_zoomIn,*m_zoomOut;
   /// The margin marker 
   int m_progressArrowKey;
   /// A pointer to a QsciAPI object that handles the code completion

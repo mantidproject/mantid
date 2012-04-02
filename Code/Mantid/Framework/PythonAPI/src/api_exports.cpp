@@ -123,9 +123,26 @@ using namespace boost::python;
     return self.getProperty(prop_name);
   }
 
+  namespace
+  {
   // Overloads for createSubAlgorithm function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createSubAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createSubAlgorithm, 1, 2)
 
+  /**
+     * Releases the GIL, executes the calling algorithm object and re-acquires the GIL.
+     * As an algorithm is a potentially time-consuming operation, this allows other threads
+     * to execute python code while this thread is executing C code
+     * @param self :: A reference to the calling object
+     */
+    bool executeWhileReleasingGIL(IAlgorithm & self)
+    {
+      bool result(false);
+      Py_BEGIN_ALLOW_THREADS;
+      result = self.execute();
+      Py_END_ALLOW_THREADS;
+      return result;
+    }
+  }
   void export_ialgorithm()
   {
     
@@ -148,8 +165,7 @@ using namespace boost::python;
       .def("getWikiSummary", &API::IAlgorithm::getWikiSummary)
       .def("getWikiDescription", &API::IAlgorithm::getWikiDescription)
       .def("initialize", &API::IAlgorithm::initialize)
-      .def("execute", &API::IAlgorithm::execute)
-      .def("executeAsync", &API::IAlgorithm::executeAsync)
+      .def("execute", &executeWhileReleasingGIL)
       .def("isRunningAsync", &API::IAlgorithm::isRunningAsync)
       .def("isInitialized", &API::IAlgorithm::isInitialized)
       .def("isLogging", &API::IAlgorithm::isLogging)

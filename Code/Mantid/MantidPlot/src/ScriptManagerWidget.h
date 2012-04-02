@@ -18,6 +18,7 @@ class QPushButton;
 class QCheckBox;
 class QComboBox;
 class ScriptFileInterpreter;
+class NullScriptFileInterpreter;
 
 class FindReplaceDialog;
 class QMenu;
@@ -64,24 +65,10 @@ public:
   ///Destructor
   ~ScriptManagerWidget();
 
-  ///Save settings applicable to the manager
-  void saveSettings();
-
   /// Current interpreter
   ScriptFileInterpreter * currentInterpreter();
   /// Interpreter at given index
   ScriptFileInterpreter * interpreterAt(int index);
-
-  // ----------------------- Menus --------------------------------------------
-  /// Add the required entries for the file menu in this context
-  void populateFileMenu(QMenu &fileMenu);
-  /// Add the required entries for the edit menu in this context
-  void populateEditMenu(QMenu &editMenu);
-  /// Add the required entries for the execute menu in this context
-  void populateExecMenu(QMenu &execMenu);
-  /// Add the required entries for a Window menu in this context
-  void populateWindowMenu(QMenu &windowMenu);
-
 
   /// Is a script running in the environment
   bool isScriptRunning();
@@ -92,13 +79,9 @@ public:
   ///this method returns a list containing  recent scripts
   QStringList recentScripts();
   /// update the Recent Scripts menu items
-  void updateRecentScriptList();
+  void updateRecentScriptList(const QString & filename);
   ///set the recent script list
   void setRecentScripts(const QStringList & scriptList);
-  /// copy implementation
-  void copy();
-  /// paste implementation
-  void paste();
 
 public slots:
   /// Create a new tab for script editing with the text within the file imported and insert it at the index
@@ -107,10 +90,33 @@ public slots:
   void openInCurrentTab(const QString & filename = QString());
   /// Open a file in a new tab
   void openInNewTab(const QString & filename = QString());
+  /// open recent scripts
+  void openRecentScript(int index);
+  /// Save current file
+  void saveToCurrentFile();
+  /// Save to new file
+  void saveAs();
+  /// Print the current script
+  void print();
+  /// Close current tab
+  int closeCurrentTab();
   /// Close all tabs
   void closeAllTabs();
   /// Show the find dialog
   void showFindDialog(bool replace = true);
+
+  /// undo
+  void undo();
+  /// redo
+  void redo();
+  /// cut current
+  void cut();
+  /// copy implementation
+  void copy();
+  /// paste implementation
+  void paste();
+  /// find
+  void findInScript();
 
   /** @name Execute members.*/
   //@{
@@ -121,19 +127,11 @@ public slots:
   /// Evaluate
   void evaluate();
 
-private slots:
-  /// Context menu handler
-  void editorContextMenu(const QPoint & pos);
-  /// Close current tab
-  int closeCurrentTab();
-  /// Close clicked tab
-  void closeClickedTab();
-  /// Mark the current tab
-  void markCurrentAsChanged();
-  /// Current tab has changed
-  void tabSelectionChanged(int index);
-  /// Enable/disable the relevant actions based on the execution state of the script
-  void setScriptIsRunning(bool running);
+  /// Increase font size
+  void zoomIn();
+  /// Decrease font size
+  void zoomOut();
+
   /// Toggle the progress reporting arrow
   void toggleProgressArrow(bool on);
   /// Toggle code folding
@@ -142,12 +140,18 @@ private slots:
   void toggleCodeCompletion(bool on);
   /// Toggle call tips
   void toggleCallTips(bool on);
-  /// open recent scripts
-  void openRecentScript(int index);
+
+private slots:
+  /// Close clicked tab
+  void closeClickedTab();
+  /// Mark the current tab
+  void markCurrentAsChanged();
+  /// Current tab has changed
+  void tabSelectionChanged(int index);
+  /// Enable/disable the relevant actions based on the execution state of the script
+  void setScriptIsRunning(bool running);
 
 private:
-  /// Initialize the actions relevant to this object
-  void initActions();
   /// A context menu event for the tab widget itself
   void contextMenuEvent(QContextMenuEvent *event);
   /// A custom defined event handler
@@ -158,13 +162,6 @@ private:
   void closeTabAtIndex(int index);
   ///Close a tab at a given position
   void closeTabAtPosition(const QPoint & pos);
-
-//  ///Set auto complete behaviour for the given editor
-//  void setCodeCompletionBehaviour(ScriptEditor *editor, bool state);
-//  ///Set auto complete behaviour for the given editor
-//  void setCallTipsBehaviour(ScriptEditor *editor, bool state);
-//  ///Set auto complete behaviour for the given editor
-//  void setCodeFoldingBehaviour(ScriptEditor *editor, bool state);
 
  private:
   friend class ScriptingWindow;
@@ -178,32 +175,16 @@ private:
   /// The index of the last active tab 
   int m_last_active_tab;
 
-  /// File actions
-  QAction *m_new_tab, *m_open_curtab, *m_open_newtab, *m_save, *m_saveas, *m_close_tab;
-
-  ///Edit actions that are necessary for the manager
-  QAction *m_find;
-
-  ///Toggle progress
-  QAction *m_toggle_progress;
-  /// Toggle code folding
-  QAction *m_toggle_folding;
-  /// Toggle code folding
-  QAction *m_toggle_completion;
-  /// Toggle code folding
-  QAction *m_toggle_calltips;
-
-  /// Recent scripts option
-  QMenu* m_recent_scripts;
-
-  ///Display mode boolean
-  bool m_interpreter_mode;
-  ///list storing the recent scripts
+  /// enum used for maximum of recent scripts size
+  enum { MaxRecentScripts = 5 };
+  /// List of recent scripts, with most recent at the top
   QStringList m_recentScriptList;
   /// Flag to indicate whether stdout should be redirected
   bool m_capturePrint;
-  /// enum used for maximum of recent scripts size
-  enum {MaxRecentScripts = 5};
+  /// A pointer to the Null object
+  NullScriptFileInterpreter *m_nullScript;
+  /// A pointer to the current interpreter
+  ScriptFileInterpreter *m_current;
 };
 
 
