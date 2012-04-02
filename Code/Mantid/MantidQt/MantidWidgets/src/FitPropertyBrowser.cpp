@@ -520,8 +520,6 @@ void FitPropertyBrowser::addFunction()
   // Find the function which has ci as its top browser item 
   auto cf = getHandler()->findCompositeFunction(ci);
   if ( !cf ) return;
-  int i = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
-  bool ok = false;
   
   // Declare new widget for picking fit functions
   m_fitSelector = new QDialog();
@@ -536,9 +534,9 @@ void FitPropertyBrowser::addFunction()
   {
     boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().createFitFunction(m_registeredFunctions[i].toStdString());
     std::vector<std::string> tempCategories = f->categories();
-    for (int j=0; j<tempCategories.size(); ++j)
+    for (size_t j=0; j<tempCategories.size(); ++j)
     {
-      categories[tempCategories[j] ].push_back(m_registeredFunctions[i].toStdString());
+      categories[tempCategories[boost::lexical_cast<int>(j)] ].push_back(m_registeredFunctions[i].toStdString());
     }
   }
   
@@ -553,7 +551,6 @@ void FitPropertyBrowser::addFunction()
     for (std::vector<std::string>::const_iterator fitItrBegin = itr->second.begin(); fitItrBegin != fitItrEnd; ++fitItrBegin)
     {
       QTreeWidgetItem *fit = new QTreeWidgetItem(category);
-      int num(std::distance(itr->second.begin(), fitItrBegin));
       fit->setText(0, QString::fromStdString(fitItrBegin[0]) );      
     }
   }
