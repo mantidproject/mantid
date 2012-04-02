@@ -621,6 +621,7 @@ def DisplayMask(mask_worksp=None):
             CloneWorkspace(samp, mask_worksp)
         else:
             instrument.load_empty(mask_worksp)
+            instrument.set_up_for_run('emptyInstrument')
         
     ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
     if counts_data:
