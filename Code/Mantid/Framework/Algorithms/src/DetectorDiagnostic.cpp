@@ -8,7 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>
@@ -59,7 +59,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
                       "Name of the input workspace" );
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output),
-                      "A SpecialWorkspace2D containing the masked spectra as zeroes and ones.");
+                      "A MaskWorkspace containing the masked spectra as zeroes and ones.");
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
@@ -359,7 +359,7 @@ namespace Mantid
     MatrixWorkspace_sptr DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS, const bool initialize)
     {
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      DataObjects::SpecialWorkspace2D* maskWS = new DataObjects::SpecialWorkspace2D();
+      DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace();
       maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
       MatrixWorkspace_sptr outputWS(maskWS);
       WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
@@ -381,6 +381,10 @@ namespace Mantid
         }
         PARALLEL_CHECK_INTERUPT_REGION
       }
+
+      // Clear the mask flags
+      Geometry::ParameterMap & pmap = outputWS->instrumentParameters();
+      pmap.clearParametersByName("masked");
 
       return outputWS;
     }
