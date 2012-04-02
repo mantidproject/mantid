@@ -39,9 +39,6 @@ namespace DataObjects
     // Init the Workspace2D with one spectrum per detector, in the same order.
     this->init(int(detectorIDs.size()), 1, 1);
 
-    g_log.debug() << "Creating workspace from instrument " << inst->name() << " with "
-                  << detectorIDs.size() " detectors." <<std::endl;
-
     // Copy the instrument
     this->setInstrument( inst );
     
