@@ -499,10 +499,6 @@ void AlgorithmDialog::untie(const QString & property)
 QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout *parent_layout, 
                   bool readHistory)
 {
-  if (property == "WorkspaceIndex")
-  {
-    std::cerr << "tie " << property.toStdString() << std::endl;
-  }
   if( m_tied_properties.contains(property) )
     m_tied_properties.remove(property);
 

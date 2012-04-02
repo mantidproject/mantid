@@ -571,13 +571,7 @@ namespace Mantid
                if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
               {
 
-                fit_alg = createSubAlgorithm("FitMW");
-
-                fit_alg->setProperty("InputWorkspace", Data);
-                fit_alg->setProperty("WorkspaceIndex", 0);
-                fit_alg->setProperty("StartX", 0.0);
-                fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
-                fit_alg->setProperty("MaxIterations", 5000);
+                fit_alg = createSubAlgorithm("Fit");
 
                 std::string fun_str = CalculateFunctionProperty_Fit();
 
@@ -586,6 +580,12 @@ namespace Mantid
                 g_log.debug(SSS);
 
                 fit_alg->setPropertyValue("Function", fun_str);
+
+                fit_alg->setProperty("InputWorkspace", Data);
+                fit_alg->setProperty("WorkspaceIndex", 0);
+                fit_alg->setProperty("StartX", 0.0);
+                fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
+                fit_alg->setProperty("MaxIterations", 5000);
 
                 std::string tie = getProperty("Ties");
                 if( tie.length() > (size_t)0)

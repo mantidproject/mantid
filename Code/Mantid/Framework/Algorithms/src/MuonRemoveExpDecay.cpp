@@ -199,6 +199,8 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
     std::string function = ss.str();
 
     fit->setPropertyValue("Function", function);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("WorkspaceIndex", wsIndex);
     fit->setProperty("Ties", "A1=0.0");
     fit->execute();
 

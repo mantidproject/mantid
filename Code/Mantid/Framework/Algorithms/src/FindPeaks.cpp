@@ -936,11 +936,14 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     // d) complete fit
     double windowSize = 5. * fabs(X[i0] - X[i2]);
     g_log.debug() << "  Window: " << (in_centre - windowSize) << " to " << (in_centre + windowSize) <<"\n";
+    fit->setProperty("Function", fitFunction);
+    fit->setProperty("InputWorkspace", input);
+    fit->setProperty("WorkspaceIndex", spectrum);
+    fit->setProperty("MaxIterations", 50);
     fit->setProperty("StartX", (in_centre - windowSize)); //(X[i0] - 5 * (X[i0] - X[i2])));
     fit->setProperty("EndX", (in_centre + windowSize)); //(X[i0] + 5 * (X[i0] - X[i2])));
     fit->setProperty("Minimizer", "Levenberg-Marquardt");
     fit->setProperty("CostFunction", "Least squares");
-    fit->setProperty("Function", fitFunction);
 
     // e) Fit and get result
     fit->executeAsSubAlg();
@@ -1026,6 +1029,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   // d) complete fit
   fit->setProperty("Function", backgroundFunction);
+  fit->setProperty("InputWorkspace", bkgdWS);
+  fit->setProperty("WorkspaceIndex", 0);
+  fit->setProperty("MaxIterations", 50);
   fit->setProperty("StartX", in_centre - windowSize);
   fit->setProperty("EndX", in_centre + windowSize);
   fit->setProperty("Minimizer", "Levenberg-Marquardt");
@@ -1085,15 +1091,15 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       g_log.error("The FindPeaks algorithm requires the CurveFitting library");
       throw;
     }
-    gfit->setProperty("InputWorkspace", input);
-    gfit->setProperty("WorkspaceIndex", spectrum);
-    gfit->setProperty("MaxIterations", 50);
 
     // c) Set initial fitting parameters
     IFunction_sptr peakAndBackgroundFunction = this->createFunction(in_height, in_centre, in_sigma, a0, a1, a2, true);
 
     // d) Complete fit
     gfit->setProperty("Function", peakAndBackgroundFunction);
+    gfit->setProperty("InputWorkspace", input);
+    gfit->setProperty("WorkspaceIndex", spectrum);
+    gfit->setProperty("MaxIterations", 50);
     gfit->setProperty("StartX", in_centre - windowSize);
     gfit->setProperty("EndX",   in_centre + windowSize);
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
@@ -1140,6 +1146,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   // d) complete fit
   lastfit->setProperty("Function", peakAndBackgroundFunction);
+  lastfit->setProperty("InputWorkspace", input);
+  lastfit->setProperty("WorkspaceIndex", spectrum);
+  lastfit->setProperty("MaxIterations", 50);
   lastfit->setProperty("StartX", in_centre - windowSize);
   lastfit->setProperty("EndX", in_centre + windowSize);
   lastfit->setProperty("Minimizer", "Levenberg-Marquardt");

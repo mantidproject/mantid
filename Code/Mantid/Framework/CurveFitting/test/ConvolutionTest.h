@@ -262,15 +262,17 @@ public:
 
     res->function1D(out,xr,N);
 
+    FunctionDomain1DView xView(&x[0],N);
+    FunctionValues values(xView);
     // When called with only 1 function attached returns its fourier transform
-    conv.function1D(out,x,N);
+    conv.function(xView,values);
 
     // Check that the transform is correct: F( exp(-a*x^2) ) == sqrt(pi/a)*exp(-(pi*x)^2/a)
-    Convolution::HalfComplex hout(out,N);
+    Convolution::HalfComplex hout(values.getPointerToCalculated(0),N);
     double df = 1./Dx; // this is the x-step of the transformed data
     double pi= acos(0.)*2;
     double cc = pi*pi*df*df/a;
-    for(int i=0;i<(int)hout.size();i++)
+    for(size_t i=0;i<hout.size();i++)
     {
       TS_ASSERT_DELTA(hout.real(i),h*sqrt(pi/a)*exp(-cc*i*i),1e-7);
     }
@@ -301,7 +303,7 @@ public:
     conv.addFunction(res);
 
     const int N = 116;
-    double x[N],out[N],x0 = 0, dx = 0.13;
+    double x[N],x0 = 0, dx = 0.13;
     double Dx = dx*N;
     for(int i=0;i<N;i++)
     {
@@ -318,7 +320,9 @@ public:
 
     conv.addFunction(fun);
 
-    conv.function1D(out,x,N);
+    FunctionDomain1DView xView(&x[0],N);
+    FunctionValues out(xView);
+    conv.function(xView,out);
 
     // a convolution of two gaussians is a gaussian with h == hp and s == sp
     double sp = s1*s2/(s1+s2);
@@ -330,7 +334,7 @@ public:
     for(int i=0;i<N;i++)
     {
       double xi = x[i] - c2;
-      TS_ASSERT_DELTA(out[i],hp*exp(-sp*xi*xi),1e-10);
+      TS_ASSERT_DELTA(out.getCalculated(i),hp*exp(-sp*xi*xi),1e-10);
       //fconv<<x[i]<<' '<<out[i]<<' '<< 0/*pi/a/sqrt(2.)*exp(-0.)*/<<'\n';
       
       //double  f = i*df;

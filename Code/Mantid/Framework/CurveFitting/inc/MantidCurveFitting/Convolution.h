@@ -129,8 +129,8 @@ namespace Mantid
       /// Derivatives of function with respect to active parameters
       virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
-      void function1D(double* out, const double* xValues, const size_t nData)const;
-      void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
+      //void function1D(double* out, const double* xValues, const size_t nData)const;
+      //void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// Add a function. 
       size_t addFunction(API::IFunction_sptr f);

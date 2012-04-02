@@ -71,7 +71,7 @@ public:
     {
       x[i] = 1.0 + 0.1 * i;
     }
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     FunctionValues values(domain);
     function.function(domain,values);
     for(size_t i = 0; i < domain.size(); ++i)

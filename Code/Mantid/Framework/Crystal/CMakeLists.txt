@@ -84,7 +84,7 @@ set ( TEST_FILES
         test/SelectCellOfTypeTest.h
         test/SelectCellWithFormTest.h
     test/IndexSXPeaksTest.h
-	test/IntegratePeakTimeSlicesTest.h
+#	test/IntegratePeakTimeSlicesTest.h
 	test/LoadHKLTest.h
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h

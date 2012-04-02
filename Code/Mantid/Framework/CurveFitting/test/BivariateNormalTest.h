@@ -135,7 +135,7 @@ public:
       ws->setData(2,yvals);
 
 
-      //NormalFit.setWorkspace(ws, std::string("StartX=0,EndX=30,WorkspaceIndex=0"), true );
+      NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0 );
 
 
       NormalFit.setParameter("Background", 0.05, true);

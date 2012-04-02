@@ -90,7 +90,6 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
-        src/CompositeFunctionMW.cpp
         src/IDataFileChecker.cpp
         src/MatrixWorkspace.cpp
         src/IEventWorkspace.cpp

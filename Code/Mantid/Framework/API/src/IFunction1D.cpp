@@ -59,9 +59,11 @@ void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used.
  */
-void IFunction1D::functionDeriv1D(Jacobian*, const double*, const size_t)
+void IFunction1D::functionDeriv1D(Jacobian* jacobian, const double* xValues, const size_t nData)
 {
-  throw Kernel::Exception::NotImplementedError("No derivative IFunction1D provided");
+  //throw Kernel::Exception::NotImplementedError("No derivative IFunction1D provided");
+  FunctionDomain1DView domain(xValues,nData);
+  this->calNumericalDeriv(domain,*jacobian);
 }
 
 } // namespace API

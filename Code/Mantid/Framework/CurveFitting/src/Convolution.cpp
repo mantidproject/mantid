@@ -44,15 +44,15 @@ void Convolution::init()
 {
 }
 
-void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
-{
-  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
-  if (!d1d)
-  {
-    throw std::invalid_argument("Unexpected domain in Convolution");
-  }
-  function1D(values.getPointerToCalculated(0),d1d->getPointerAt(0),d1d->size());
-}
+//void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
+//{
+//  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
+//  if (!d1d)
+//  {
+//    throw std::invalid_argument("Unexpected domain in Convolution");
+//  }
+//  function1D(values.getPointerToCalculated(0),d1d->getPointerAt(0),d1d->size());
+//}
 
 void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
@@ -63,13 +63,25 @@ void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
 /**
  * Calculates convolution of the two member functions. 
  */
-void Convolution::function1D(double* out, const double* xValues, const size_t nData)const
+void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
+//void Convolution::function1D(double* out, const double* xValues, const size_t nData)const
 {
+  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
+  if (!d1d)
+  {
+    throw std::invalid_argument("Unexpected domain in Convolution");
+  }
+
   if (nFunctions() == 0)
   {
-    std::fill_n(out,nData,0.0);
+    //std::fill_n(out,nData,0.0);
+    values.zeroCalculated();
     return;
   }
+
+  size_t nData = domain.size();
+  const double *xValues = d1d->getPointerAt(0);
+  double *out = values.getPointerToCalculated(0);
 
   if (m_resolutionSize != nData)
   {
@@ -178,8 +190,7 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
     return;
   }
 
-  IFunction1D_sptr funct = boost::dynamic_pointer_cast<IFunction1D>(getFunction(1));
-  funct->function1D(out,xValues,nData);
+  getFunction(1)->function(domain,values);
   gsl_fft_real_transform (out, 1, nData, wavetable, workspace);
   gsl_fft_real_wavetable_free (wavetable);
 
@@ -250,7 +261,7 @@ size_t Convolution::addFunction(IFunction_sptr f)
     API::IFunction_sptr f1 = getFunction(1);
     if (!f1)
     {
-      throw std::runtime_error("IFitFunction expected but function of another type found");
+      throw std::runtime_error("IFunction expected but function of another type found");
     }
     CompositeFunction_sptr cf = boost::dynamic_pointer_cast<CompositeFunction>(f1);
     if (cf == 0)
@@ -288,7 +299,7 @@ std::string Convolution::asString()const
   IFunction_sptr fun = getFunction(1);
   if (!res || !fun)
   {
-    throw std::runtime_error("IFitFunction expected but function of another type found");
+    throw std::runtime_error("IFunction expected but function of another type found");
   }
   bool isCompRes = boost::dynamic_pointer_cast<CompositeFunction>(res) != 0;
   bool isCompFun = boost::dynamic_pointer_cast<CompositeFunction>(fun) != 0;

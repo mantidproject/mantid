@@ -229,6 +229,8 @@ namespace CurveFitting
 
     declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Kernel::Direction::Input), "Name of the input Workspace");
 
+    declareProperty("Ties","", Kernel::Direction::Input);
+    declareProperty("Constraints","", Kernel::Direction::Input);
     auto mustBePositive = boost::shared_ptr< Kernel::BoundedValidator<int> >( new Kernel::BoundedValidator<int>() );
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
@@ -283,6 +285,17 @@ namespace CurveFitting
 
     // do something with the function which may depend on workspace
     m_domainCreator->initFunction();
+
+    std::string ties = getPropertyValue("Ties");
+    if (!ties.empty())
+    {
+      m_function->addTies(ties);
+    }
+    std::string contstraints = getPropertyValue("Constraints");
+    if (!contstraints.empty())
+    {
+      m_function->addConstraints(contstraints);
+    }
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;

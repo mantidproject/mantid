@@ -158,15 +158,17 @@ public:
 
     //set up some frequency values centered around zero
     const int N = 117;
-    double w[N],out[N],w0,dw = 0.13;
+    double w[N],w0,dw = 0.13;
     w0=-dw*int(N/2);
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
 
+    FunctionDomain1DView xView(&w[0],N);
+    FunctionValues out(xView);
     //convolve. The result must be the resolution multiplied by factor H*hf);
-    conv.function1D(out,w,N);
+    conv.function(xView,out);
     double hpf = pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2); // height pre-factor
     for(int i=0;i<N;i++){
-      TS_ASSERT_DELTA(out[i],H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
+      TS_ASSERT_DELTA(out.getCalculated(i),H*hpf*h*exp(-w[i]*w[i]*a),1e-10);
     }
   }// end of testElasticDiffSphere
 
@@ -284,8 +286,10 @@ public:
     w0=-dw*int(N/2);
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
 
+    FunctionDomain1DView xView(&w[0],N);
+    FunctionValues values(xView);
     //obtain the set of values from the convolution and store in array 'in'
-    conv.function1D(in,w,N);
+    conv.function(xView,values);
 
     //Initialize now the parameters to some other values.
     ds->setParameter("f0.Height",1.0);
@@ -311,7 +315,7 @@ public:
     const double cc=0.1;
     for(int i=0; i<N; i++){
       x[i] = w[i];
-      y[i] = in[i];
+      y[i] = values.getCalculated(i);
       e[i] = cc*in[i];
     }
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D)); //put workspace in the data service

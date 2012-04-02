@@ -1422,6 +1422,7 @@ void FitPropertyBrowser::fit()
       //  funStr += ";";
       //}
       //funStr += ties;
+      funStr = "";
     }
     else if (m_compositeFunction->nFunctions() > 1)
     {
@@ -1444,23 +1445,24 @@ void FitPropertyBrowser::fit()
     {
       Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
     }
-    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
-    {
-      QMap<QString,QString> algParams;
-      algParams["InputWorkspace"] = QString::fromStdString(wsName);
-      algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
-      algParams["StartX"] = QString::number(startX());
-      algParams["EndX"] = QString::number(endX());
-      algParams["Output"] = QString::fromStdString(outputName());
-      algParams["Function"] = QString::fromStdString(funStr);
-      algParams["Minimizer"] = QString::fromStdString(minimizer());
-      algParams["CostFunction"] = QString::fromStdString(costFunction());
-      emit executeFit("Fit",algParams,this);
-    }
-    else
-    {
+    //if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+    //{
+    //  QMap<QString,QString> algParams;
+    //  algParams["InputWorkspace"] = QString::fromStdString(wsName);
+    //  algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
+    //  algParams["StartX"] = QString::number(startX());
+    //  algParams["EndX"] = QString::number(endX());
+    //  algParams["Output"] = QString::fromStdString(outputName());
+    //  algParams["Function"] = QString::fromStdString(funStr);
+    //  algParams["Minimizer"] = QString::fromStdString(minimizer());
+    //  algParams["CostFunction"] = QString::fromStdString(costFunction());
+    //  emit executeFit("Fit",algParams,this);
+    //}
+    //else
+    //{
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
+      alg->setPropertyValue("Function",funStr);
       alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
       alg->setProperty("StartX",startX());
@@ -1470,7 +1472,7 @@ void FitPropertyBrowser::fit()
       alg->setPropertyValue("CostFunction",costFunction());
       observeFinish(alg);
       alg->executeAsync();
-    }
+    //}
 
   }
   catch(std::exception& e)

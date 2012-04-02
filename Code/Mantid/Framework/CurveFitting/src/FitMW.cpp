@@ -112,7 +112,7 @@ namespace
   {
     if (workspacePropetyNames.empty())
     {
-      throw std::runtime_error("Cannot create FunctionDomain1D: no workspace given");
+      throw std::runtime_error("Cannot create FunctionDomain1DVector: no workspace given");
     }
     m_workspacePropertyName = workspacePropetyNames[0];
     // get the function
@@ -207,12 +207,12 @@ namespace
       {
         x[i] = (*it + *(it+1)) / 2;
       }
-      domain.reset(new API::FunctionDomain1D(x));
+      domain.reset(new API::FunctionDomain1DVector(x));
       x.clear();
     }
     else
     {
-      domain.reset(new API::FunctionDomain1D(from,to));
+      domain.reset(new API::FunctionDomain1DVector(from,to));
     }
 
     auto values = ivalues ? dynamic_cast<API::FunctionValues*>(ivalues.get()) : new API::FunctionValues(*domain);
@@ -231,6 +231,10 @@ namespace
     size_t ito = m_startIndex + n;
     const Mantid::MantidVec& Y = m_matrixWorkspace->readY( m_workspaceIndex );
     const Mantid::MantidVec& E = m_matrixWorkspace->readE( m_workspaceIndex );
+    if (ito > Y.size())
+    {
+      throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
+    }
     bool foundZeroOrNegativeError = false;
     for(size_t i = m_startIndex; i < ito; ++i)
     {

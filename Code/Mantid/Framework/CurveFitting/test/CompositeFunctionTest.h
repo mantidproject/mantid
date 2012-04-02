@@ -291,7 +291,7 @@ public:
       x[i] = 0.1 * i;
       y[i] = 3.3 * x[i] + 4.4;
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -330,7 +330,7 @@ public:
       x[i] = t;
       y[i] = 0.1 * t * t + 3.3 * t + 4.4;
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -371,7 +371,7 @@ public:
 
   void test_with_LM()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D( 0.0, 10.0, 10));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector( 0.0, 10.0, 10));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b+c*x^2");

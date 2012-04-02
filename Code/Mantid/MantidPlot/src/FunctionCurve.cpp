@@ -192,7 +192,7 @@ void FunctionCurve::loadData(int points)
       auto f = Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString());
       f->setMatrixWorkspace(ws,wsIndex,d_from,d_to);
       f->applyTies();
-      Mantid::API::FunctionDomain1D domain(X);
+      Mantid::API::FunctionDomain1DVector domain(X);
       Mantid::API::FunctionValues Y(domain);
       f->function(domain,Y);
 

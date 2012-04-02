@@ -163,7 +163,7 @@ public:
 
     void xtest_with_Levenberg_Marquardt()
     {
-      API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D( 79292.4, 79603.6, 41));
+      API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector( 79292.4, 79603.6, 41));
       API::FunctionValues mockData(*domain);
       UserFunction dataMaker;
       dataMaker.setAttributeValue("Formula","b+h*exp(-((x-c)/s)^2)");

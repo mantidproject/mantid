@@ -13,25 +13,30 @@ namespace API
   * Create a domain form a vector.
   * @param xvalues :: Points
   */
-FunctionDomain1D::FunctionDomain1D(const std::vector<double>& xvalues)
+FunctionDomain1DVector::FunctionDomain1DVector(const std::vector<double>& xvalues):
+FunctionDomain1D(NULL,0)
 {
   if (xvalues.empty())
   {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
   m_X.assign(xvalues.begin(),xvalues.end());
+  reset(&m_X[0],m_X.size());
 }
 
-FunctionDomain1D::FunctionDomain1D(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to)
+FunctionDomain1DVector::FunctionDomain1DVector(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to):
+FunctionDomain1D(NULL,0)
 {
   if (from == to)
   {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
   m_X.assign(from,to);
+  reset(&m_X[0],m_X.size());
 }
 
-FunctionDomain1D::FunctionDomain1D(const double startX, const double endX, const size_t n)
+FunctionDomain1DVector::FunctionDomain1DVector(const double startX, const double endX, const size_t n):
+FunctionDomain1D(NULL,0)
 {
   if (n == 0)
   {
@@ -50,12 +55,40 @@ FunctionDomain1D::FunctionDomain1D(const double startX, const double endX, const
       m_X[i] = startX + dx * i;
     }
   }
+  reset(&m_X[0],m_X.size());
 }
 
-FunctionDomain1D::FunctionDomain1D(const double x)
+FunctionDomain1DVector::FunctionDomain1DVector(const double x):
+FunctionDomain1D(NULL,0)
 {
   m_X.resize(1);
   m_X[0] = x;
+  reset(&m_X[0],m_X.size());
+}
+
+/**
+ * Copy constructor.
+ * @param right :: The other domain.
+ */
+FunctionDomain1DVector::FunctionDomain1DVector(const FunctionDomain1DVector& right):
+FunctionDomain1D(NULL,0)
+{
+  *this = right;
+}
+
+/**
+ * Copy assignment operator.
+ * @param right :: The other domain.
+ */
+FunctionDomain1DVector& FunctionDomain1DVector::operator=(const FunctionDomain1DVector& right)
+{
+  if (right.m_X.empty())
+  {
+    throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
+  }
+  m_X.assign(right.m_X.begin(),right.m_X.end());
+  reset(&m_X[0],m_X.size());
+  return *this;
 }
 
 } // namespace API

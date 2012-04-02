@@ -20,7 +20,7 @@ public:
     {
       x[i] = 1.0 + 0.1 * i;
     }
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     TS_ASSERT_EQUALS(domain.size(), x.size());
     for(size_t i = 0; i < x.size(); ++i)
     {

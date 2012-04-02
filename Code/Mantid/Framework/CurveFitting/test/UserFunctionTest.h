@@ -61,7 +61,7 @@ public:
       TS_ASSERT_DELTA(y[i],2.2*sin(2*x[i]-1.2),0.000001);
     }
 
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     UserTestJacobian J(nData,nParams);
     fun.functionDeriv(domain,J);
 

@@ -26,7 +26,7 @@ public:
 
   void test_Linear()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b");
@@ -58,7 +58,7 @@ public:
 
   void test_Gaussian()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b+h*exp(-s*x^2)");
@@ -95,7 +95,7 @@ public:
 
   void test_Gaussian_fixed()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b+h*exp(-s*x^2)");
@@ -135,7 +135,7 @@ public:
 
   void test_Gaussian_tied()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b+h*exp(-s*x^2)");
@@ -175,7 +175,7 @@ public:
   // doesn't work
   void xtest_Gaussian_tied_with_formula()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b+h*exp(-s*x^2)");
@@ -217,7 +217,7 @@ public:
 
   void test_Linear_constrained()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b");
@@ -253,7 +253,7 @@ public:
 
   void test_Linear_constrained1()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(0.0,10.0,20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0,10.0,20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a^2*x+b");

@@ -1821,7 +1821,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
       inputXData[i] = XValues[binIndxLow+i];
   }
 
-  Mantid::API::FunctionDomain1D domain(inputXData);
+  Mantid::API::FunctionDomain1DVector domain(inputXData);
   Mantid::API::FunctionValues outputData(domain);
   function->function(domain, outputData);
 
@@ -2130,7 +2130,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
     }
   }
 
-  Mantid::API::FunctionDomain1D domain(inputXData);
+  Mantid::API::FunctionDomain1DVector domain(inputXData);
   Mantid::API::FunctionValues outputData(domain);
   function->function(domain, outputData);
 

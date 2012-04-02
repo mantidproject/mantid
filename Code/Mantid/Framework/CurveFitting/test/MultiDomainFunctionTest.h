@@ -77,9 +77,9 @@ public:
     multi->getFunction(2)->setParameter("B",0);
 
     domain = boost::make_shared<JointDomain>();
-    domain->addDomain(boost::make_shared<FunctionDomain1D>(0,1,9));
-    domain->addDomain(boost::make_shared<FunctionDomain1D>(1,2,10));
-    domain->addDomain(boost::make_shared<FunctionDomain1D>(2,3,11));
+    domain->addDomain(boost::make_shared<FunctionDomain1DVector>(0,1,9));
+    domain->addDomain(boost::make_shared<FunctionDomain1DVector>(1,2,10));
+    domain->addDomain(boost::make_shared<FunctionDomain1DVector>(2,3,11));
 
     const double A0 = 0, A1 = 1, A2 = 2;
     const double B0 = 1, B1 = 2, B2 = 3;
@@ -132,19 +132,19 @@ public:
     const double A0 = 0, A1 = 1, A2 = 2;
     const double B0 = 1, B1 = 2, B2 = 3;
 
-    auto d0 = static_cast<const FunctionDomain1D&>(domain->getDomain(0));
+    auto& d0 = static_cast<const FunctionDomain1D&>(domain->getDomain(0));
     for(size_t i = 0; i < d0.size(); ++i)
     {
       values->setFitData(i, A0 + A1 + A2 + (B0 + B1 + B2) * d0[i]);
     }
 
-    auto d1 = static_cast<const FunctionDomain1D&>(domain->getDomain(1));
+    auto& d1 = static_cast<const FunctionDomain1D&>(domain->getDomain(1));
     for(size_t i = 0; i < d1.size(); ++i)
     {
       values->setFitData(9 + i, A0 + A1 + (B0 + B1) * d1[i]);
     }
 
-    auto d2 = static_cast<const FunctionDomain1D&>(domain->getDomain(2));
+    auto& d2 = static_cast<const FunctionDomain1D&>(domain->getDomain(2));
     for(size_t i = 0; i < d2.size(); ++i)
     {
       values->setFitData(19 + i, A0 + A2 + (B0 + B2) * d2[i]);
@@ -212,7 +212,6 @@ public:
 
   void test_Fit_resetting_properties()
   {
-    system("pause");
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     Mantid::API::IAlgorithm& fit = *alg;
     fit.initialize();

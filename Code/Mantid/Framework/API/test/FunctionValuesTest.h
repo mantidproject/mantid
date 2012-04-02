@@ -25,7 +25,7 @@ public:
 
   void testCalculatedValues()
   {
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     FunctionValues values(domain);
     TS_ASSERT_EQUALS(values.size(),domain.size());
     for(size_t i = 0; i < values.size(); ++i)
@@ -42,7 +42,7 @@ public:
 
   void testPlusOperator()
   {
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     FunctionValues values1(domain);
     FunctionValues values2(domain);
 
@@ -60,7 +60,7 @@ public:
     }
     
     std::vector<double> x3(9);
-    FunctionDomain1D domain3(x3);
+    FunctionDomain1DVector domain3(x3);
     FunctionValues values3(domain3);
     
     TS_ASSERT_THROWS(values3 += values1,std::runtime_error);
@@ -68,7 +68,7 @@ public:
 
   void testFitData()
   {
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     FunctionValues values1(domain);
 
     TS_ASSERT_THROWS(values1.getFitData(0),std::runtime_error);
@@ -100,7 +100,7 @@ public:
 
   void testFitWeights()
   {
-    FunctionDomain1D domain(x);
+    FunctionDomain1DVector domain(x);
     FunctionValues values1(domain);
 
     values1.setFitWeight(5,10.1);

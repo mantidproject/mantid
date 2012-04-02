@@ -51,10 +51,11 @@ public:
 class IMDWorkspaceTester: public WorkspaceTester
 {
 public:
-   IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const
-   {
-     return new IMDWorkspaceTesterIterator(this);
-   }
+  std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
+    Mantid::Geometry::MDImplicitFunction * function = NULL) const
+  {
+    return std::vector<IMDIterator*>(1,new IMDWorkspaceTesterIterator(this));
+  }
 };
 
   size_t IMDWorkspaceTesterIterator::getDataSize() const
@@ -148,7 +149,6 @@ public:
     fun->setParameter("h",1.0);
     fun->setParameter("s",1.0);
 
-    //system("pause");
     Fit fit;
     fit.initialize();
 

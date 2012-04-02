@@ -242,7 +242,7 @@ public:
       x[i] = i*dx;
     }
 
-    Mantid::API::FunctionDomain1D domain(x);
+    Mantid::API::FunctionDomain1DVector domain(x);
     Mantid::API::FunctionValues out(domain);
 
     double c2 = 2;
@@ -310,13 +310,12 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0,0.01);
 
     IFunction_sptr outF = fit.getProperty("Function"); 
-    //CompositeFunctionMW *pk = dynamic_cast<CompositeFunctionMW *>(out);
 
     TS_ASSERT_DELTA( outF->getParameter("f0.PeakCentre"), 1.0 ,0.001);
     TS_ASSERT_DELTA( outF->getParameter("f0.Height"), 3.0 ,0.001);
     TS_ASSERT_DELTA( outF->getParameter("f0.Sigma"), 0.5 ,0.001);
     TS_ASSERT_DELTA( outF->getParameter("f1.PeakCentre"), 2.0 ,0.001);
-    TS_ASSERT_DELTA( outF->getParameter("f1.Height"), 10.0 ,0.001);
+    TS_ASSERT_DELTA( outF->getParameter("f1.Height"), 10.0 ,0.01);
     TS_ASSERT_DELTA( outF->getParameter("f1.Sigma"), 0.5 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);

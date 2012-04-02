@@ -37,7 +37,7 @@ public:
       x[i] = 0.1 * i;
       y[i] = 3.3 * x[i] + 4.4;
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -67,7 +67,7 @@ public:
       x[i] = 0.1 * i;
       y[i] =  9.9 * exp( -(x[i])/0.5 );
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -97,7 +97,7 @@ public:
     x[0] = 0.; y[0] = a * x[0] + b; // == 2.0
     x[1] = 1.; y[1] = a * x[1] + b; // == 3.0
     x[2] = 2.; y[2] = a * x[2] + b; // == 4.0
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -138,7 +138,7 @@ public:
     x[0] = 0.; y[0] = a * x[0] + b; // == 2.0
     x[1] = 1.; y[1] = a * x[1] + b; // == 3.0
     x[2] = 2.; y[2] = a * x[2] + b; // == 4.0
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -174,7 +174,7 @@ public:
       x[i] = 0.1 * i;
       y[i] =  9.9 * exp( -(x[i])/0.5 );
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
@@ -202,7 +202,7 @@ public:
 
   void testDerivatives()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(79300.,79600.,41));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(79300.,79600.,41));
     API::FunctionValues_sptr data(new API::FunctionValues(*domain));
     boost::shared_ptr<UserFunction> fun0(new UserFunction);
     fun0->setAttributeValue("Formula","b + h * exp(-((x-c)/s)^2)");

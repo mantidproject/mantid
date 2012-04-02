@@ -69,9 +69,9 @@ public:
     multi.getFunction(2)->setParameter("A",2);
     multi.getFunction(2)->setParameter("B",3);
 
-    domain.addDomain(boost::make_shared<FunctionDomain1D>(0,1,9));
-    domain.addDomain(boost::make_shared<FunctionDomain1D>(1,2,10));
-    domain.addDomain(boost::make_shared<FunctionDomain1D>(2,3,11));
+    domain.addDomain(boost::make_shared<FunctionDomain1DVector>(0,1,9));
+    domain.addDomain(boost::make_shared<FunctionDomain1DVector>(1,2,10));
+    domain.addDomain(boost::make_shared<FunctionDomain1DVector>(2,3,11));
 
   }
 
@@ -97,7 +97,7 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    auto d = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    const FunctionDomain1D& d = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
     for(size_t i = 0; i < 9; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d[i]);
@@ -124,7 +124,7 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    auto d = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    const FunctionDomain1D& d = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
     for(size_t i = 0; i < 9; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), 0);
@@ -150,7 +150,7 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    auto d = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    const FunctionDomain1D& d = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
     for(size_t i = 0; i < 9; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), 0);
@@ -177,17 +177,17 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    auto d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    const FunctionDomain1D& d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
     for(size_t i = 0; i < 9; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
     }
-    auto d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    const FunctionDomain1D& d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
     for(size_t i = 9; i < 19; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
     }
-    auto d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    const FunctionDomain1D& d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
     for(size_t i = 19; i < 30; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
@@ -216,7 +216,7 @@ public:
     double B = multi.getFunction(0)->getParameter("B") + 
       multi.getFunction(1)->getParameter("B") + 
       multi.getFunction(2)->getParameter("B");
-    auto d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    const FunctionDomain1D& d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
     for(size_t i = 0; i < 9; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
@@ -224,7 +224,7 @@ public:
 
     A = multi.getFunction(1)->getParameter("A");
     B = multi.getFunction(1)->getParameter("B");
-    auto d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    const FunctionDomain1D& d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
     for(size_t i = 9; i < 19; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
@@ -232,7 +232,7 @@ public:
 
     A = multi.getFunction(2)->getParameter("A");
     B = multi.getFunction(2)->getParameter("B");
-    auto d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    const FunctionDomain1D& d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
     for(size_t i = 19; i < 30; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
@@ -256,7 +256,7 @@ public:
     double B = multi.getFunction(0)->getParameter("B") + 
       multi.getFunction(1)->getParameter("B") + 
       multi.getFunction(2)->getParameter("B");
-    auto d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    const FunctionDomain1D& d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
     for(size_t i = 0; i < 9; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
@@ -264,7 +264,7 @@ public:
 
     A = multi.getFunction(1)->getParameter("A");
     B = multi.getFunction(1)->getParameter("B");
-    auto d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    const FunctionDomain1D& d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
     for(size_t i = 9; i < 19; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
@@ -272,7 +272,7 @@ public:
 
     A = multi.getFunction(2)->getParameter("A");
     B = multi.getFunction(2)->getParameter("B");
-    auto d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    const FunctionDomain1D& d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
     for(size_t i = 19; i < 30; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
@@ -298,7 +298,7 @@ public:
     double B = mfun->getFunction(0)->getParameter("B") + 
       mfun->getFunction(1)->getParameter("B") + 
       mfun->getFunction(2)->getParameter("B");
-    auto d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    const FunctionDomain1D& d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
     double checksum = 0;
     for(size_t i = 0; i < 9; ++i)
     {
@@ -310,7 +310,7 @@ public:
     checksum = 0;
     A = mfun->getFunction(1)->getParameter("A");
     B = mfun->getFunction(1)->getParameter("B");
-    auto d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    const FunctionDomain1D& d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
     for(size_t i = 9; i < 19; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
@@ -321,7 +321,7 @@ public:
     checksum = 0;
     A = mfun->getFunction(2)->getParameter("A");
     B = mfun->getFunction(2)->getParameter("B");
-    auto d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    const FunctionDomain1D& d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
     for(size_t i = 19; i < 30; ++i)
     {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);

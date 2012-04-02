@@ -110,7 +110,7 @@ void PropertyHandler::init()
     else
     {
       QStringList functionNames;
-      functionNames << "CompositeFunctionMW" << "MultiBG";
+      functionNames << "CompositeFunction";// << "MultiBG";
       m_browser->m_enumManager->setEnumNames(m_type, functionNames);
     }
   }
@@ -1098,7 +1098,7 @@ void PropertyHandler::calcBase()
     }
     else
     {
-      Mantid::API::FunctionDomain1D x(X[m_ci]);
+      Mantid::API::FunctionDomain1DVector x(X[m_ci]);
       Mantid::API::FunctionValues y(x);
       m_browser->m_autoBackground->function()->function(x,y);
       m_base = y[0];
