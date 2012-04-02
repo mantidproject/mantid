@@ -53,6 +53,11 @@ namespace CurveFitting
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(Fit)
+
+  namespace
+  {
+    bool isStringEmpty(const std::string& str){return str.empty();}
+  }
   
   /// Sets documentation strings for this algorithm
   void Fit::initDocs()
@@ -259,7 +264,7 @@ namespace CurveFitting
         *it = "";
       }
     }
-    std::remove_if(costFuncOptions.begin(),costFuncOptions.end(),([](std::string& str)->bool{return str.empty();}));
+    std::remove_if(costFuncOptions.begin(),costFuncOptions.end(),isStringEmpty);
     declareProperty("CostFunction","Least squares",
       Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(costFuncOptions)),
       "The cost function to be used for the fit, default is Least squares", Kernel::Direction::InOut);
