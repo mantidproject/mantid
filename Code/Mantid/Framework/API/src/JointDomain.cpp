@@ -11,9 +11,10 @@ namespace API
   size_t JointDomain::size() const
   {
     size_t n = 0;
-    std::for_each(m_domains.begin(),m_domains.end(),[&n](const FunctionDomain_sptr d){
-      n += d->size();
-    });
+    for(auto d = m_domains.begin(); d != m_domains.end(); ++d)
+    {
+      n += (**d).size();
+    };
     return n;
   }
   /// Return the number of parts in the domain
