@@ -534,7 +534,7 @@ void FitPropertyBrowser::addFunction()
   std::map<std::string, std::vector<std::string> > categories;
   for (int i=0; i<m_registeredFunctions.size(); ++i)
   {
-    boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(Mantid::API::FunctionFactory::Instance().createFitFunction(m_registeredFunctions[i].toStdString()));
+    boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().createFitFunction(m_registeredFunctions[i].toStdString());
     std::vector<std::string> tempCategories = f->categories();
     for (int j=0; j<tempCategories.size(); ++j)
     {
@@ -576,7 +576,7 @@ void FitPropertyBrowser::addFunction()
 void FitPropertyBrowser::acceptFit()
 {
   QtBrowserItem * ci = m_browser->currentItem();
-  const Mantid::API::CompositeFunction* cf = getHandler()->findCompositeFunction(ci);
+  boost::shared_ptr<const Mantid::API::CompositeFunction> cf = getHandler()->findCompositeFunction(ci);
   if ( !cf )
     return;
 

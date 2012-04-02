@@ -1,6 +1,7 @@
 #ifndef IFUNCTIONWRAPPER_H
 #define IFUNCTIONWRAPPER_H
 
+#include <boost/shared_ptr.hpp>
 #include <QObject>
 
 namespace Mantid
