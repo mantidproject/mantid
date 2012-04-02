@@ -21,7 +21,7 @@ FunctionDomain1D(NULL,0)
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
   m_X.assign(xvalues.begin(),xvalues.end());
-  reset(&m_X[0],m_X.size());
+  resetData(&m_X[0],m_X.size());
 }
 
 FunctionDomain1DVector::FunctionDomain1DVector(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to):
@@ -32,7 +32,7 @@ FunctionDomain1D(NULL,0)
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
   m_X.assign(from,to);
-  reset(&m_X[0],m_X.size());
+  resetData(&m_X[0],m_X.size());
 }
 
 FunctionDomain1DVector::FunctionDomain1DVector(const double startX, const double endX, const size_t n):
@@ -55,7 +55,7 @@ FunctionDomain1D(NULL,0)
       m_X[i] = startX + dx * i;
     }
   }
-  reset(&m_X[0],m_X.size());
+  resetData(&m_X[0],m_X.size());
 }
 
 FunctionDomain1DVector::FunctionDomain1DVector(const double x):
@@ -63,7 +63,7 @@ FunctionDomain1D(NULL,0)
 {
   m_X.resize(1);
   m_X[0] = x;
-  reset(&m_X[0],m_X.size());
+  resetData(&m_X[0],m_X.size());
 }
 
 /**
@@ -87,7 +87,7 @@ FunctionDomain1DVector& FunctionDomain1DVector::operator=(const FunctionDomain1D
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
   m_X.assign(right.m_X.begin(),right.m_X.end());
-  reset(&m_X[0],m_X.size());
+  resetData(&m_X[0],m_X.size());
   return *this;
 }
 

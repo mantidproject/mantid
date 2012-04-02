@@ -235,7 +235,7 @@ public:
   virtual std::string asString()const;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {UNUSED_ARG(ws);}
   /// Set matrix workspace
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
   /// Iinialize the function
