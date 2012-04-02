@@ -185,8 +185,8 @@ namespace
         {
           std::swap(startX,endX);
         }
-        from = std::lower_bound(X.begin(),X.end(),startX,[](double x1,double x2)->bool{return x1 > x2;});
-        to = std::upper_bound(from,X.end(),endX,[](double x1,double x2)->bool{return x1 > x2;});
+        from = std::lower_bound(X.begin(),X.end(),startX,([](double x1,double x2)->bool{return x1 > x2;}));
+        to = std::upper_bound(from,X.end(),endX,([](double x1,double x2)->bool{return x1 > x2;}));
       }
     }
 

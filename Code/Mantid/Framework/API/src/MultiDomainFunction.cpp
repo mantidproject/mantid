@@ -87,8 +87,10 @@ namespace API
       if (it == m_domains.end())
       {// apply to all domains
         domains.resize(cd.getNParts());
-        size_t i = 0;
-        std::generate(domains.begin(),domains.end(),[&i]()->size_t{return i++;});
+        for(size_t i = 0; i < m_domains.size(); ++i)
+        {
+          domains[i] = i;
+        }
       }
       else
       {// apply to selected domains
