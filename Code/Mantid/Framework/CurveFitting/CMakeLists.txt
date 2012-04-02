@@ -135,7 +135,7 @@ set ( TEST_FILES
 	test/DeltaFunctionTest.h
 	test/DiffSphereTest.h
 	test/FlatBackgroundTest.h
-	test/GausOscTest.h
+#	test/GausOscTest.h
 	test/MuonFInteractionTest.h
 	test/SCDPanelErrorsTest.h
 	test/StaticKuboToyabeTest.h
@@ -144,30 +144,30 @@ set ( TEST_FILES
 	test/BivariateNormalTest.h
 	test/BoundaryConstraintTest.h
 	test/ChebyshevTest.h
-	test/CompositeFunctionTest.h
+#	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
-	test/FitMDTest.h
-	test/FitMWTest.h
+#	test/FitMDTest.h
+#	test/FitMWTest.h
 	test/FRConjugateGradientTest.h
 	test/FuncMinimizerFactoryTest.h
 	test/FunctionFactoryConstraintTest.h
 	test/Gaussian1DTest.h
-	test/GausDecayTest.h
+#	test/GausDecayTest.h
 	test/GaussianTest.h
 	test/GSLMatrixTest.h
-	test/IkedaCarpenterPVTest.h
-	test/LeastSquaresTest.h
+#	test/IkedaCarpenterPVTest.h
+#	test/LeastSquaresTest.h
 	test/LevenbergMarquardtTest.h
-	test/LevenbergMarquardtMDTest.h
+#	test/LevenbergMarquardtMDTest.h
 	test/LinearBackgroundTest.h
 	test/LinearTest.h
 	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
-	test/MultiDomainFunctionTest.h
+#	test/MultiDomainFunctionTest.h
 	test/PlotPeakByLogValueTest.h
 	test/PRConjugateGradientTest.h
 	test/ProductFunctionTest.h

@@ -389,7 +389,7 @@ set ( TEST_FILES
 	test/BinaryOperateMasksTest.h
 	test/BinaryOperationTest.h
 	test/BlendSqTest.h
-	test/CalMuonDeadTimeTest.h
+#	test/CalMuonDeadTimeTest.h
 	test/CalculateEfficiencyTest.h
 	test/CalculateTransmissionBeamSpreaderTest.h
 	test/CalculateTransmissionTest.h
