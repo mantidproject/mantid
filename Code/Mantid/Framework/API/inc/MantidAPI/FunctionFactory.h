@@ -140,7 +140,7 @@ namespace API
     for( std::vector<std::string>::const_iterator it = names.begin(); 
          it != names.end(); ++it )
     {
-      IFunction_sptr func = this->createFitFunction(*it);
+      boost::shared_ptr<IFunction> func = this->createFitFunction(*it);
       if ( func && dynamic_cast<FunctionType*>(func.get()) )
       {
         typeNames.push_back(*it);
