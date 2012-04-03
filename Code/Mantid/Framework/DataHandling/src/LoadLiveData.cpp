@@ -51,6 +51,7 @@ by the [[MonitorLiveData]] algorithm.
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/CPUTimer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -236,7 +237,8 @@ namespace DataHandling
       Workspace_sptr temp = wsProp->getWorkspace();
       m_accumWS = temp;
     }
-    std::cout << "ADD operation done " << std::endl;
+    // And sort the events, if any
+    doSortEvents(m_accumWS);
   }
 
 
@@ -251,6 +253,8 @@ namespace DataHandling
     // When the algorithm exits the chunk workspace will be renamed
     // and overwrite the old one
     m_accumWS = chunkWS;
+    // And sort the events, if any
+    doSortEvents(m_accumWS);
   }
 
 
@@ -265,24 +269,23 @@ namespace DataHandling
   void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS)
   {
     IAlgorithm_sptr alg;
+    ReadLock _lock1(*m_accumWS);
+    ReadLock _lock2(*chunkWS);
+
+    alg = this->createSubAlgorithm("AppendSpectra");
+    alg->setProperty("InputWorkspace1", m_accumWS);
+    alg->setProperty("InputWorkspace2", chunkWS);
+    alg->setProperty("ValidateInputs", false);
+    alg->execute();
+    if (!alg->isExecuted())
     {
-      ReadLock _lock1(*m_accumWS);
-      ReadLock _lock2(*chunkWS);
-
-      alg = this->createSubAlgorithm("AppendSpectra");
-      alg->setProperty("InputWorkspace1", m_accumWS);
-      alg->setProperty("InputWorkspace2", chunkWS);
-      alg->setProperty("ValidateInputs", false);
-      alg->execute();
-      if (!alg->isExecuted())
-      {
-        throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
-      }
-    } // Release the locks.
-
+      throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
+    }
     // TODO: What about workspace groups?
     MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
     m_accumWS = temp;
+    // And sort the events, if any
+    doSortEvents(m_accumWS);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -297,10 +300,12 @@ namespace DataHandling
     EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
     if (!eventWS)
       return;
+    CPUTimer tim;
     Algorithm_sptr alg = this->createSubAlgorithm("SortEvents");
     alg->setProperty("InputWorkspace", eventWS);
     alg->setPropertyValue("SortBy", "X Value");
     alg->executeAsSubAlg();
+    g_log.debug() << tim << " to perform SortEvents on " << ws->name() << std::endl;
   }
 
 
@@ -387,7 +392,6 @@ namespace DataHandling
       // Set both output workspaces
       this->setProperty("AccumulationWorkspace", m_accumWS);
       this->setProperty("OutputWorkspace", m_outputWS);
-      doSortEvents(m_accumWS);
       doSortEvents(m_outputWS);
     }
     else
@@ -396,7 +400,6 @@ namespace DataHandling
       m_outputWS = m_accumWS;
       // We DO NOT set AccumulationWorkspace.
       this->setProperty("OutputWorkspace", m_outputWS);
-      doSortEvents(m_outputWS);
     }
 
 
