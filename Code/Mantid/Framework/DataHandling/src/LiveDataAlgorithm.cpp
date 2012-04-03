@@ -95,15 +95,20 @@ namespace DataHandling
         " - Stop: live data monitoring ends.\n"
         " - Rename: the previous workspaces are renamed, and monitoring continues with cleared ones.");
 
+    // MonitorLiveData and StartLiveData need to NOT lock workspaces
+    LockMode::Type lockWorkspaces = LockMode::NoLock;
+    // But LoadLiveData SHOULD lock when it gets called
+//    if (this->name() == "LoadLiveData")
+//      lockWorkspaces = LockMode::Lock;
 
     declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
-                                                     PropertyMode::Optional, LockMode::NoLock),
+                                                     PropertyMode::Optional, lockWorkspaces),
         "Optional, unless performing PostProcessing:\n"
         " Give the name of the intermediate, accumulation workspace.\n"
         " This is the workspace after accumulation but before post-processing steps.");
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output,
-                                                     PropertyMode::Mandatory, LockMode::NoLock),
+                                                     PropertyMode::Mandatory, lockWorkspaces),
                     "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),

@@ -171,10 +171,6 @@ namespace DataHandling
       monitorAlg->copyPropertyValuesFrom(*this);
       monitorAlg->setProperty("UpdateEvery", UpdateEvery);
 
-      // Manually create the proxy and add it to the managed algorithms
-      //IAlgorithm_sptr algProxy(new AlgorithmProxy(algBase));
-      //AlgorithmManager::Instance().algorithms().push_back(algProxy);
-
       // Give the listener directly to LoadLiveData (don't re-create it)
       monitorAlg->setLiveListener(listener);
 

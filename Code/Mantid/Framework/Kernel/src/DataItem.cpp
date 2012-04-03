@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DataItem.h"
+#include <iostream>
 
 namespace Mantid
 {
@@ -39,7 +40,10 @@ namespace Mantid
     Poco::RWLock * DataItem::getLock()
     {
       if (m_lock == NULL)
+      {
         m_lock = new Poco::RWLock();
+      }
+      std::cout << this->name() << " getLock() called " << m_lock << std::endl;
       return m_lock;
     }
 

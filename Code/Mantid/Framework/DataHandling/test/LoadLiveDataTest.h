@@ -19,6 +19,12 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+class LoadLiveDataImpl : public LoadLiveData
+{
+public:
+//  void store() { Algorithm::store(); }
+};
+
 class LoadLiveDataTest : public CxxTest::TestSuite
 {
 public:
@@ -54,10 +60,11 @@ public:
       std::string PostProcessingAlgorithm = "",
       std::string PostProcessingProperties = "",
       bool PreserveEvents = true,
-      ILiveListener_sptr listener = ILiveListener_sptr()
+      ILiveListener_sptr listener = ILiveListener_sptr(),
+      bool makeThrow = false
       )
   {
-    std::auto_ptr<LoadLiveData> alg(new LoadLiveData);
+    std::auto_ptr<LoadLiveDataImpl> alg(new LoadLiveDataImpl);
     TS_ASSERT_THROWS_NOTHING( alg->initialize() )
     TS_ASSERT( alg->isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("Instrument", "TestDataListener") );
@@ -73,7 +80,10 @@ public:
     if (listener)
       alg->setLiveListener(listener);
 
-    TS_ASSERT_THROWS_NOTHING( alg->execute(); );
+    if (!makeThrow)
+    { TS_ASSERT_THROWS_NOTHING( alg->execute(); ); }
+    else
+      alg->exec();
     TS_ASSERT( alg->isExecuted() );
 
     // Retrieve the workspace from data service.
@@ -125,7 +135,7 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
 
     // Next one adds events, keeps # of histos the same
-    ws2 = doExec<EventWorkspace>("Add");
+    ws2 = doExec<EventWorkspace>("Add", "","","","",true, ILiveListener_sptr());
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
 

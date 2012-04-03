@@ -49,6 +49,8 @@ by the [[MonitorLiveData]] algorithm.
 #include "MantidKernel/ReadLock.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -165,6 +167,7 @@ namespace DataHandling
         AnalysisDataService::Instance().remove(inputName);
       }
 
+      std::cout << "PROCESSING IS DONE\n";
       return temp;
     }
     else
@@ -233,6 +236,7 @@ namespace DataHandling
       Workspace_sptr temp = wsProp->getWorkspace();
       m_accumWS = temp;
     }
+    std::cout << "ADD operation done " << std::endl;
   }
 
 

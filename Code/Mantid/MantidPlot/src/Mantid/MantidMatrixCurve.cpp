@@ -10,10 +10,12 @@
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
 #include "ErrorBarSettings.h"
+#include "MantidKernel/ReadLock.h"
 
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
+using Mantid::Kernel::ReadLock;
 
 /**
  *  @param name :: The curve's name - shown in the legend
@@ -247,8 +249,11 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
         << " could not be found - plotted curve(s) deleted\n";
     mws = Mantid::API::MatrixWorkspace_sptr();
   }
-
   if (!mws) return;
+
+  // Acquire a read-lock on the matrix workspace data
+  ReadLock _lock(*mws);
+
   const MantidQwtMatrixWorkspaceData * new_mantidData(NULL);
   try 
   {

@@ -45,11 +45,11 @@ namespace DataHandling
     virtual const std::string name() const;
     virtual int version() const;
 
-  private:
     virtual void initDocs();
     void init();
     void exec();
 
+  private:
     Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);
     Mantid::API::Workspace_sptr processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS);
     void runPostProcessing();
