@@ -149,14 +149,28 @@ namespace MDEvents
   /// Run the algorithm
   void QueryMDWorkspace::exec()
   {
+    IMDWorkspace_sptr input = getProperty("InputWorkspace");
     // Define a table workspace with a specific column schema.
     ITableWorkspace_sptr output = WorkspaceFactory::Instance().createTable();
     output->addColumn("double", "Signal");
     output->addColumn("double", "Error");
     output->addColumn("int", "Number of Events");
-    output->addColumn("str", "Center");
 
-    IMDWorkspace_sptr input = getProperty("InputWorkspace");
+    const size_t ndims = input->getNumDims();
+    for(size_t index = 0; index < ndims; ++index)
+    {
+      Mantid::Geometry::IMDDimension_const_sptr dim = input->getDimension(index);
+      std::string dimInUnit = dim->getName()+"/"+dim->getUnits();
+      output->addColumn("double",dimInUnit);
+      //Magic numbers required to configure the X axis.
+      output->getColumn(dimInUnit)->setPlotType(1);
+    }
+
+    //Magic numbers required to configure the Y axis.
+    output->getColumn("Signal")->setPlotType(2);
+    output->getColumn("Error")->setPlotType(5);
+
+    
     IMDIterator* it = input->createIterator();
 
     bool bLimitRows = getProperty("LimitRows");
@@ -172,12 +186,17 @@ namespace MDEvents
     Progress progress(this, 0, 1, int64_t(input->getNPoints()));
     while(true)
     {
+      size_t cellIndex = 0;
       output->appendRow();
-      output->cell<double>(rowCounter, 0) = it->getNormalizedSignal();
-      output->cell<double>(rowCounter, 1) = std::sqrt(it->getNormalizedError());
-      output->cell<int>(rowCounter, 2) = int(it->getNumEvents());
+      output->cell<double>(rowCounter, cellIndex++) = it->getNormalizedSignal();
+      output->cell<double>(rowCounter, cellIndex++) = std::sqrt(it->getNormalizedError());
+      output->cell<int>(rowCounter, cellIndex++) = int(it->getNumEvents());
       VMD center = it->getCenter();
-      output->cell<std::string>(rowCounter, 3) = center.toString(",");
+      for(size_t index = 0; index < ndims; ++index)
+      {
+        output->cell<double>(rowCounter, cellIndex++) = center[index];
+      }
+
       progress.report();
       if(!it->next() || (bLimitRows && ((rowCounter+1) >= maxRows)))
       {

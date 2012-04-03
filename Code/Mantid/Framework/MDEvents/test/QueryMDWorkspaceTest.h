@@ -75,9 +75,29 @@ public:
     ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
-    TSM_ASSERT_EQUALS("Four columns expected", 4, table->columnCount());
+    size_t expectedCount = 3 + in_ws->getNumDims(); //3 fixed columns are Signal, Error, nEvents 
+    TSM_ASSERT_EQUALS("Four columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 1000, table->rowCount());
   }
+
+  void testNumberOfColumnsDependsOnDimensionality()
+  {
+    MDEventWorkspace2Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<2>(10, -10.0, 20.0, 3);
+    QueryMDWorkspace query;
+    query.initialize();
+    query.setProperty("InputWorkspace", in_ws);
+    query.setPropertyValue("OutputWorkspace", "QueryWS");
+    query.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("QueryWS"));
+
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
+
+    TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
+    size_t expectedCount = 3 + in_ws->getNumDims(); //3 fixed columns are Signal, Error, nEvents 
+    TSM_ASSERT_EQUALS("Five columns expected", expectedCount, table->columnCount());
+  }
+
 
   void testLimitRows()
   {
@@ -95,7 +115,8 @@ public:
     ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
-    TSM_ASSERT_EQUALS("Four columns expected", 4, table->columnCount());
+    size_t expectedCount = 3 + in_ws->getNumDims(); //3 fixed columns are Signal, Error, nEvents 
+    TSM_ASSERT_EQUALS("Six columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 3, table->rowCount());
   }
 
