@@ -133,7 +133,7 @@ public:
     //-------------------------Test the derivative --------------------------------
     boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
 
-    calib.functionDerivMW(Jac.get(), xVals.data(), (size_t) N);
+    calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t) N);
 
     size_t nData = N;
     std::vector<double> out0(N);// = new double[ N ];
@@ -157,10 +157,10 @@ public:
         double sav = calib.getParameter(param);
         calib.setParameter(param, sav + .005);
 
-        calib.functionMW(out0.data(), xVals.data(), nData);
+        calib.function1D(out0.data(), xVals.data(), nData);
         calib.setParameter(param, sav - .005);
 
-        calib.functionMW(out1.data(), xVals.data(), nData);
+        calib.function1D(out1.data(), xVals.data(), nData);
         calib.setParameter(param, sav);
         for (int j = 0; j < (int) nData; j++)
           compRes[j] = (out0[j] - out1[j]) / .01;
