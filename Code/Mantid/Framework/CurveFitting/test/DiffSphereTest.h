@@ -195,17 +195,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up DiffSphere fitting function
-    InelasticDiffSphere* fn = new InelasticDiffSphere();
-    fn->initialize();
+    InelasticDiffSphere fn;
+    fn.initialize();
 
     //Start with some initial values
-    fn->setParameter("Intensity",0.4);
-    fn->setParameter("Radius",1.1);
-    fn->setParameter("Diffusion",1.2);
-    fn->setParameter("Q",0.7);
-    fn->tie("Q","0.7"); //set tie for Parameter Q, since it's supposed to be a constant
+    fn.setParameter("Intensity",0.4);
+    fn.setParameter("Radius",1.1);
+    fn.setParameter("Diffusion",1.2);
+    fn.setParameter("Q",0.7);
+    fn.tie("Q","0.7"); //set tie for Parameter Q, since it's supposed to be a constant
 
-    alg2.setPropertyValue("Function",fn->asString());
+    alg2.setPropertyValue("Function",fn.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -234,21 +234,21 @@ public:
   void testDiffSphereTies()
   {
     double I=2.9, Q=0.7, R=2.3, D=0.45;
-    DiffSphere* ds = new DiffSphere();
-    ds->setParameter("f1.Intensity",I);
-    ds->setParameter("f1.Q",Q);
-    ds->setParameter("f1.Radius",R);
-    ds->setParameter("f1.Diffusion",D);
+    DiffSphere ds;
+    ds.setParameter("f1.Intensity",I);
+    ds.setParameter("f1.Q",Q);
+    ds.setParameter("f1.Radius",R);
+    ds.setParameter("f1.Diffusion",D);
 
-    auto ids = boost::dynamic_pointer_cast<InelasticDiffSphere>(ds->getFunction(1));
+    auto ids = boost::dynamic_pointer_cast<InelasticDiffSphere>(ds.getFunction(1));
     TS_ASSERT_EQUALS(ids->getParameter("Intensity"),I);
     TS_ASSERT_EQUALS(ids->getParameter("Q"),Q);
     TS_ASSERT_EQUALS(ids->getParameter("Radius"),R);
     TS_ASSERT_EQUALS(ids->getParameter("Diffusion"),D);
 
-    ds->applyTies();
+    ds.applyTies();
 
-    auto eds = boost::dynamic_pointer_cast<ElasticDiffSphere>(ds->getFunction(0));
+    auto eds = boost::dynamic_pointer_cast<ElasticDiffSphere>(ds.getFunction(0));
     TS_ASSERT_EQUALS(eds->getParameter("Height"),I);
     TS_ASSERT_EQUALS(eds->getParameter("Q"),Q);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"),R);

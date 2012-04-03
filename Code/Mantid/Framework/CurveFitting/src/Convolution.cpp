@@ -177,7 +177,8 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
     {// all delta functions - return scaled reslution
       resolution->function1D(out,xValues,nData);
       std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
-      //TODO: shouldn't we free wavetable and workspace here?
+      gsl_fft_real_wavetable_free (wavetable);
+      gsl_fft_real_workspace_free (workspace);
       return;
     }
   }
@@ -186,7 +187,8 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
     auto df = boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1));
     resolution->function1D(out,xValues,nData);
     std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),df->getParameter("Height")*df->HeightPrefactor()));
-    //TODO: shouldn't we free wavetable and workspace here?
+    gsl_fft_real_wavetable_free (wavetable);
+    gsl_fft_real_workspace_free (workspace);
     return;
   }
 
