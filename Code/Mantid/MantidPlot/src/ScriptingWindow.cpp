@@ -234,13 +234,19 @@ void ScriptingWindow::initMenus()
   connect(m_fileMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
 
   m_editMenu = menuBar()->addMenu(tr("&Edit"));
-  connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
+  connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
 
   m_runMenu = menuBar()->addMenu(tr("E&xecute"));
   connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
 
   m_windowMenu = menuBar()->addMenu(tr("&Window"));
   connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
+
+  // If the menus are not populated at all then the shortcuts don't work
+  populateFileMenu();
+  populateEditMenu();
+  populateExecMenu();
+  populateWindowMenu();
 }
 
 /// Populate file menu

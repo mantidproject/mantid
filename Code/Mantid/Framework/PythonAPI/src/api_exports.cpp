@@ -28,6 +28,7 @@
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
 //Poco
 #include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeak.h"
 
@@ -137,9 +138,16 @@ using namespace boost::python;
     bool executeWhileReleasingGIL(IAlgorithm & self)
     {
       bool result(false);
-      Py_BEGIN_ALLOW_THREADS;
-      result = self.execute();
-      Py_END_ALLOW_THREADS;
+      if(Poco::Thread::current())
+      {
+        Py_BEGIN_ALLOW_THREADS;
+        result = self.execute();
+        Py_END_ALLOW_THREADS;
+      }
+      else
+      {
+        result = self.execute();
+      }
       return result;
     }
   }
@@ -186,8 +194,6 @@ using namespace boost::python;
       ;
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
-    class_< API::CloneableAlgorithm, bases<API::Algorithm>, boost::noncopyable>("CloneableAlgorithm", no_init)
-      ;
     
     /// Algorithm properties
     class_<Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>,
@@ -200,33 +206,32 @@ using namespace boost::python;
     //PyAlgorithmBase
     //Save some typing for all of the templated declareProperty and getProperty methods
 #define EXPORT_DECLAREPROPERTY(type, suffix)\
-    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
-    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, Kernel::IValidator &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
-    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)\
-    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, Kernel::IValidator &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>) \
+    .def("declareProperty_"#suffix,(void(PyAlgorithmWrapper::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
+    .def("declareProperty_"#suffix,(void(PyAlgorithmWrapper::*)(const std::string &, type, Kernel::IValidator &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
+    .def("declareListProperty_"#suffix,(void(PyAlgorithmWrapper::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)\
+    .def("declareListProperty_"#suffix,(void(PyAlgorithmWrapper::*)(const std::string &, boost::python::list, Kernel::IValidator &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>) \
     
 #define EXPORT_GETPROPERTY(type, suffix)\
-    .def("getProperty_"#suffix,(type(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getProperty<type>)
+    .def("getProperty_"#suffix,(type(PyAlgorithmWrapper::*)(const std::string &))&PyAlgorithmBase::_getProperty<type>)
 
 #define EXPORT_GETLISTPROPERTY(type, suffix)\
-    .def("getListProperty_"#suffix,(std::vector<type>(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getListProperty<type>)
+    .def("getListProperty_"#suffix,(std::vector<type>(PyAlgorithmWrapper::*)(const std::string &))&PyAlgorithmBase::_getListProperty<type>)
     
-    class_< PyAlgorithmBase, boost::shared_ptr<PyAlgorithmCallback>, bases<API::CloneableAlgorithm>, 
-      boost::noncopyable >("PyAlgorithmBase")
-      .enable_pickling()
-      .def("_setWorkspaceProperty", &PyAlgorithmBase::_setWorkspaceProperty)
-      .def("_setMatrixWorkspaceProperty", &PyAlgorithmBase::_setMatrixWorkspaceProperty)
-      .def("_setTableWorkspaceProperty", &PyAlgorithmBase::_setTableWorkspaceProperty)
-      .def("_declareFileProperty", &PyAlgorithmBase::_declareFileProperty)
-      .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
-      .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
-      .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
-      .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
-      .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)
-      .def("_declareAlgorithmProperty", &PyAlgorithmBase::_declareAlgorithmProperty)
-      .def("_setAlgorithmProperty", &PyAlgorithmBase::_setAlgorithmProperty)
-      .def("_getAlgorithmProperty", &PyAlgorithmBase::_getAlgorithmProperty)
-      .def("log", &PyAlgorithmBase::getLogger, return_internal_reference<>())
+
+    class_< PyAlgorithmWrapper, bases<API::Algorithm>, boost::noncopyable >("PyAlgorithmBase")
+      .def("_setWorkspaceProperty", &PyAlgorithmWrapper::_setWorkspaceProperty)
+      .def("_setMatrixWorkspaceProperty", &PyAlgorithmWrapper::_setMatrixWorkspaceProperty)
+      .def("_setTableWorkspaceProperty", &PyAlgorithmWrapper::_setTableWorkspaceProperty)
+      .def("_declareFileProperty", &PyAlgorithmWrapper::_declareFileProperty)
+      .def("_declareWorkspace", (void(PyAlgorithmWrapper::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmWrapper::_declareWorkspace)
+      .def("_declareWorkspace", (void(PyAlgorithmWrapper::*)(const std::string &, const std::string &,Kernel::IValidator&,const std::string &, const unsigned int))&PyAlgorithmWrapper::_declareWorkspace)
+      .def("_declareMatrixWorkspace", (void(PyAlgorithmWrapper::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmWrapper::_declareMatrixWorkspace)
+      .def("_declareMatrixWorkspace", (void(PyAlgorithmWrapper::*)(const std::string &, const std::string &,Kernel::IValidator&,const std::string &, const unsigned int))&PyAlgorithmWrapper::_declareMatrixWorkspace)
+      .def("_declareTableWorkspace", &PyAlgorithmWrapper::_declareTableWorkspace)
+      .def("_declareAlgorithmProperty", &PyAlgorithmWrapper::_declareAlgorithmProperty)
+      .def("_setAlgorithmProperty", &PyAlgorithmWrapper::_setAlgorithmProperty)
+      .def("_getAlgorithmProperty", &PyAlgorithmWrapper::_getAlgorithmProperty)
+      .def("log", &PyAlgorithmWrapper::getLogger, return_internal_reference<>())
       .def("_createSubAlgorithm", &PyAlgorithmBase::_createSubAlgorithm, PyAlgorithmBase_createSubAlgorithmOverloader()[return_value_policy< return_by_value >()] )
       EXPORT_DECLAREPROPERTY(int, int)
       EXPORT_DECLAREPROPERTY(double, dbl)

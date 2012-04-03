@@ -57,6 +57,7 @@ struct PythonThreadState
     }
   }
 private:
+  Q_DISABLE_COPY(PythonThreadState);
   PyThreadState * m_mainThreadState;
   PyThreadState * m_thisThreadState;
 };

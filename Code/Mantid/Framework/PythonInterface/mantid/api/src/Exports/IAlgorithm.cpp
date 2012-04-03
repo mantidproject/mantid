@@ -8,6 +8,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
+#include <Poco/Thread.h>
+
 #include <boost/python/object.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
@@ -173,9 +175,16 @@ namespace
   bool executeWhileReleasingGIL(IAlgorithm & self)
   {
     bool result(false);
-    Py_BEGIN_ALLOW_THREADS;
-    result = self.execute();
-    Py_END_ALLOW_THREADS;
+    if(Poco::Thread::current())
+    {
+      Py_BEGIN_ALLOW_THREADS;
+      result = self.execute();
+      Py_END_ALLOW_THREADS;
+    }
+    else
+    {
+      result = self.execute();
+    }
     return result;
   }
 

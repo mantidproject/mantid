@@ -50,7 +50,7 @@ namespace PythonAPI
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class PyAlgorithmBase : public Mantid::API::CloneableAlgorithm
+class PyAlgorithmBase : public Mantid::API::Algorithm
 {
 
 public:
@@ -317,30 +317,9 @@ DECLARE_DEFAULTRETURN(PyAlgorithmBase*, NULL)
 /**
  * A callback structure that can route calls into Python
  */
-class PyAlgorithmCallback : public PyAlgorithmBase
+class PyAlgorithmWrapper : public PyAlgorithmBase, public boost::python::wrapper<PyAlgorithmBase>
 {
-
 public:
-  ///Constructor
-  PyAlgorithmCallback(PyObject *self);
-
-  ///Destructor
-  virtual ~PyAlgorithmCallback();
-
-  /// Called when a delete is performed inside a shared pointer
-  virtual void kill()
-  {
-    PythonGIL gil;
-    // !-----
-    // This order is very important as the decref causes Python to call the destructor on this object
-    // and the destructor checks the value of the killed flag
-    // !-----
-    m_ref_killed = true;
-    Py_DECREF(m_self);
-  }
-
-  ///Overridden clone method
-  virtual CloneableAlgorithm * clone();
   ///Overridden name method
   const std::string name() const; 
   ///Overridden version method
@@ -354,12 +333,8 @@ private:
   /// Overridden algorithm exec method
   virtual void exec();
 
-  /// A pointer referring to the Python object 
-  PyObject *m_self;
-  /// A boolean flagging whether Py_DECREF has been called yet.
-  /// A shared pointer can't use 'delete' here so it uses kill() instead. If that is the
-  /// case then the destructor shouldn't decref the reference count as well
-  bool m_ref_killed;
+  /// Returns the PyObject that owns this wrapper, i.e. self
+  PyObject * getSelf() const;
 };
 
 

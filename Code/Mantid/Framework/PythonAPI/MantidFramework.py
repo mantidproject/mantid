@@ -1113,22 +1113,6 @@ class IAlgorithmProxy(ProxyObject):
         if dialog == False:
             sys.exit('Information: Script execution cancelled')
 
-    def execute(self, *args, **kwargs):
-        """
-        Execute the configured algorithm.
-        """
-        self.setPropertyValues(*args, **kwargs)
-        try:
-            # Was the async property added ?
-            run_async = self.__async__
-        except AttributeError:
-            run_async = False
-        if run_async:
-            success = _qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
-            if success == False:
-                sys.exit('An error occurred while running %s. See results log for details.' % self.name())
-        else:
-            self._getHeldObject().execute()
 #---------------------------------------------------------------------------------------
 
 class MantidPyFramework(FrameworkManager):
@@ -1205,10 +1189,10 @@ class MantidPyFramework(FrameworkManager):
             self.__gui__ = gui
 
         # Run through init steps 
-        self._importSimpleAPIToMain()
         self._pyalg_loader.load_modules(refresh=False)
-        # Janik Zikovsky, sep 29, 2011: Commented out this line to speed up starting. Seems to have had no ill effect
-        #self._importSimpleAPIToMain()
+        # Ensure the fake Python algorithm functions are overwritten by
+        # the real ones
+        self._importSimpleAPIToMain()
 
         self.__is_initialized = True
 
@@ -1356,7 +1340,7 @@ class MantidPyFramework(FrameworkManager):
 
     def _importSimpleAPIToMain(self):
         import mantidsimple
-        mantidsimple.translate() #Unnecessary : called already when importing.
+        mantidsimple.translate()
         for name in dir(mantidsimple):
             if name.startswith('_'):
                 continue
@@ -1553,10 +1537,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         super(PythonAlgorithm,self).__init__()
         # Dictionary of property names/types
         self._proptypes = {}
-    
-    def clone(self):
-        return copy.deepcopy(self)
-    
+   
     def name(self):
         return self.__class__.__name__
 
