@@ -1,5 +1,6 @@
 import unittest
 from mantidsimple import *
+import MantidFramework
 import ISISCommandInterface as ISIS
 
 class SANSMaskCommandsTest(unittest.TestCase):
@@ -43,7 +44,25 @@ class SANSMaskCommandsTest(unittest.TestCase):
         self.assertEqual(self.test_ws.readY(spec_nums1-1)[0], 0)
         # This pixel has not been masked because it is on the HAB detector
         self.assertEqual(self.test_ws.readY(spec_nums2-1)[0], 1.0)
-        
+
+    def test_horizontal_line(self):
+        """
+            Checks the ISIS specfic mask command for spectra numbers
+        """
+
+        # flags some whole spectra for masking
+        ISIS.Mask('MASK H0')
+
+        # this will apply the masking on the detector bank setup for 
+        # reduction, which in this case is the Main detector bank
+        ISIS.ReductionSingleton().mask.execute(ISIS.ReductionSingleton(), self.test_ws_name)
+
+        # Spectrum number is one more than workspace index
+        self.assertEqual(self.test_ws.readY(2)[0], 0)
+        self.assertEqual(self.test_ws.readY(3)[0], 0)
+        self.assertEqual(self.test_ws.readY(127)[0], 0)
+        self.assertEqual(self.test_ws.readY(1)[0], 2.0)
+
     def test_masking_timebins(self):
         """
             Time bin masking uses the MaskBins algorithm
