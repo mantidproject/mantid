@@ -1,0 +1,304 @@
+#include <iostream>
+#include <sstream>
+
+#include <QtGui>
+#include <QVector>
+#include <QString>
+#include <qimage.h>
+
+#include "MantidQtImageViewer/ImageDisplay.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtImageViewer/ColorMaps.h"
+#include "MantidQtImageViewer/QtUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
+
+namespace MantidQt
+{
+namespace ImageView
+{
+
+
+ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
+                             SliderHandler* slider_handler,
+                             GraphDisplay*  h_graph,
+                             GraphDisplay*  v_graph,
+                             QTableWidget*  table_widget )
+{
+  ColorMaps::getDefaultMap( color_table );
+
+  this->image_plot     = image_plot;
+  this->slider_handler = slider_handler;
+
+  image_plot_item = new ImagePlotItem;
+  image_plot_item->setXAxis( QwtPlot::xBottom );
+  image_plot_item->setYAxis( QwtPlot::yLeft );
+
+  image_plot_item->attach( image_plot ); 
+
+  h_graph_display  = h_graph;
+  v_graph_display  = v_graph;
+  image_table      = table_widget;
+
+  data_source = 0;
+  data_array  = 0;
+}
+
+
+ImageDisplay::~ImageDisplay()
+{
+  delete image_plot_item;
+}
+
+
+void ImageDisplay::SetDataSource( ImageDataSource* data_source )
+{
+//  std::cout << "Start of ImageDisplay::SetData......." << std::endl;
+
+  this->data_source = data_source;
+  h_graph_display->SetDataSource( data_source );
+  v_graph_display->SetDataSource( data_source );
+
+  data_array = data_source->GetDataArray( false );
+
+  image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
+                                              data_array->GetXMax() );
+  image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
+                                            data_array->GetYMax() );
+
+  image_plot_item->SetData( data_array, &color_table );
+
+  QRect draw_area;
+  GetDisplayRectangle( draw_area );
+  slider_handler->ConfigureSliders( draw_area, data_source );
+
+//  std::cout << "End of ImageDisplay::SetData" << std::endl;
+}
+
+
+void ImageDisplay::UpdateImage()
+{
+//  std::cout << "Start of ImageDisplay::UpdateImage......." << std::endl;
+  if ( data_source == 0 || data_array == 0 )
+  {
+    return;   // no image data to update
+  }
+
+  QRect display_rect;
+  GetDisplayRectangle( display_rect );
+
+  
+  double scale_y_min = data_source->GetYMin();
+  double scale_y_max = data_source->GetYMax();
+
+  double scale_x_min = data_source->GetXMin();
+  double scale_x_max = data_source->GetXMax();
+
+  int n_rows = (int)data_source->GetNRows();
+  int n_cols = (int)data_source->GetNCols();
+
+  if ( slider_handler->VSliderOn() )
+  {
+//    std::cout<<"USING VSliderON CODE" <<std::endl;
+    int y_min;
+    int y_max;
+    slider_handler->GetVSliderInterval( y_min, y_max );
+
+    double new_y_min = 0;
+    double new_y_max = 0;
+
+    IVUtils::Interpolate( 0, n_rows, y_min, 
+                          scale_y_min, scale_y_max, new_y_min );
+    IVUtils::Interpolate( 0, n_rows, y_max, 
+                          scale_y_min, scale_y_max, new_y_max );
+
+    scale_y_min = new_y_min;
+    scale_y_max = new_y_max;
+  }
+
+  if ( slider_handler->HSliderOn() )
+  {
+//    std::cout<<"USING HSliderON CODE" <<std::endl;
+    int x_min;
+    int x_max;
+    slider_handler->GetHSliderInterval( x_min, x_max );
+
+    double new_x_min = 0;
+    double new_x_max = 0;
+
+    IVUtils::Interpolate( 0, n_cols, x_min,
+                          scale_x_min, scale_x_max, new_x_min );
+    IVUtils::Interpolate( 0, n_cols, x_max,
+                          scale_x_min, scale_x_max, new_x_max );
+
+    scale_x_min = new_x_min;
+    scale_x_max = new_x_max;
+  }
+
+
+  if ( n_rows > display_rect.height() )
+  {
+    n_rows = display_rect.height();
+  }
+
+  if ( n_cols > display_rect.width() )
+  {
+    n_cols = display_rect.width();
+  }
+
+  data_array = data_source->GetDataArray( scale_x_min, scale_x_max, 
+                                          scale_y_min, scale_y_max, 
+                                          n_rows, n_cols,
+                                          false );
+
+  image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
+                                              data_array->GetXMax() );
+
+  image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
+                                            data_array->GetYMax() );
+
+  image_plot_item->SetData( data_array, &color_table );
+  image_plot->replot();
+
+//  std::cout << "End of ImageDisplay::UpdateImage......." << std::endl;
+}
+
+
+void ImageDisplay::SetPointedAtPoint( QPoint point )
+{
+  double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
+  double y = image_plot->invTransform( QwtPlot::yLeft, point.y() );
+
+  float *data   = data_array->GetData();
+
+  size_t n_rows = data_array->GetNRows();
+  size_t n_cols = data_array->GetNCols();
+
+  double y_min = data_array->GetYMin();
+  double y_max = data_array->GetYMax();
+
+  double x_min = data_array->GetXMin();
+  double x_max = data_array->GetXMax();
+
+  double relative_y = (y-y_min)/(y_max-y_min);            //  in 0 to 1
+  int    row = (int)(relative_y * (double)n_rows);
+  if ( row > (int)n_rows - 1 )
+  {
+    row = (int)n_rows - 1;
+  }
+  else if ( row < 0 )
+  {
+    row = 0;
+  }
+
+  QVector<double> xData;
+  QVector<double> yData;
+  double x_val;
+  for ( size_t col = 0; col < n_cols; col++ )
+  {
+    x_val = (double)col/(double)(n_cols-1) * (x_max-x_min) + x_min; 
+    xData.push_back( x_val );
+    yData.push_back( data[ row * n_cols + col ] );
+  }
+  h_graph_display->SetData( xData, yData, x, y );
+
+  double relative_x = (x-x_min)/(x_max-x_min);           // in 0 to 1
+  int    col = (int)(relative_x * (double)n_cols);
+  if ( col > (int)n_cols - 1 )
+  {
+    col = (int)n_cols - 1;
+  }
+  else if ( col < 0 )
+  {
+    col = 0;
+  }
+
+  QVector<double> v_xData;
+  QVector<double> v_yData;
+  double y_val;
+  for ( size_t row = 0; row < n_rows; row++ )
+  {
+    y_val = (double)row/(double)(n_rows-1) * (y_max-y_min) + y_min;
+    v_yData.push_back( y_val );
+    v_xData.push_back( data[ row * n_cols + col ] );
+  }
+  v_graph_display->SetData( v_xData, v_yData, x, y );
+
+  ShowInfoList( x, y );
+}
+
+
+void ImageDisplay::ShowInfoList( double x, double y )
+{
+  std::vector<std::string> info_list;
+  data_source->GetInfoList( x, y, info_list );
+  int n_infos = (int)info_list.size() / 2;
+
+  image_table->setRowCount(n_infos + 3);
+  image_table->setColumnCount(2);
+  image_table->verticalHeader()->hide();
+  image_table->horizontalHeader()->hide();
+
+  int width = 9;
+  int prec  = 3;
+  QtUtils::SetTableEntry( 0, 0, "X", image_table );
+  QtUtils::SetTableEntry( 0, 1, width, prec, x, image_table );
+
+  QtUtils::SetTableEntry( 1, 0, "Y", image_table );
+  QtUtils::SetTableEntry( 1, 1, width, prec, y, image_table );
+
+  double value = data_array->GetValue( x, y );
+  QtUtils::SetTableEntry( 2, 0, "Value", image_table );
+  QtUtils::SetTableEntry( 2, 1, width, prec, value, image_table );
+
+  for ( int i = 0; i < n_infos; i++ )
+  {
+    QtUtils::SetTableEntry( i+3, 0, info_list[2*i], image_table );
+    QtUtils::SetTableEntry( i+3, 1, info_list[2*i+1], image_table );
+  }
+}
+
+
+void ImageDisplay::GetDisplayRectangle( QRect &rect )
+{
+  QwtScaleMap xMap = image_plot->canvasMap( QwtPlot::xBottom ); 
+  QwtScaleMap yMap = image_plot->canvasMap( QwtPlot::yLeft ); 
+
+  double x_min = data_array->GetXMin();
+  double x_max = data_array->GetXMax();
+  double y_min = data_array->GetYMin();
+  double y_max = data_array->GetYMax();
+
+  int pix_x_min = (int)xMap.transform( x_min );
+  int pix_x_max = (int)xMap.transform( x_max );
+  int pix_y_min = (int)yMap.transform( y_min );
+  int pix_y_max = (int)yMap.transform( y_max );
+
+  rect.setLeft  ( pix_x_min );
+  rect.setRight ( pix_x_max );
+  rect.setBottom( pix_y_min );
+  rect.setTop   ( pix_y_max );
+
+  if ( rect.height() <= 1 ||        // must not have been drawn yet, so set
+       rect.width()  <= 1  )        // some reasonable default guesses
+  {
+    rect.setLeft  (   6 );
+    rect.setRight ( 440 );
+    rect.setBottom( 440 );
+    rect.setTop   (   6 );
+  }
+/*
+  std::cout << "GetDisplayRect: pix_x_min = " << pix_x_min << std::endl;
+  std::cout << "GetDisplayRect: pix_x_max = " << pix_x_max << std::endl;
+  std::cout << "GetDisplayRect: pix_y_min = " << pix_y_min << std::endl;
+  std::cout << "GetDisplayRect: pix_y_max = " << pix_y_max << std::endl;
+  std::cout << "GetDisplayRect: rect x      = " << rect.x() << std::endl;
+  std::cout << "GetDisplayRect: rect y      = " << rect.y() << std::endl;
+  std::cout << "GetDisplayRect: rect width  = " << rect.width()  << std::endl;
+  std::cout << "GetDisplayRect: rect height = " << rect.height() << std::endl;
+*/
+}
+
+
+} // namespace MantidQt 
+} // namespace ImageView 
