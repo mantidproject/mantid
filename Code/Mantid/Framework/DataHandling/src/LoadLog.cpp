@@ -502,6 +502,7 @@ std::string LoadLog::getThreeColumnName() const
 bool LoadLog::adsExists()
 {
 #ifdef _WIN32
+  std::string adsname(m_filename+":checksum");
   std::ifstream adstream(adsname.c_str());
   if(!adstream)
   {
