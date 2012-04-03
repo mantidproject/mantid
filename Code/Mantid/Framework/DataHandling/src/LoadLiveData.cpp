@@ -167,8 +167,6 @@ namespace DataHandling
         // Remove the chunk workspace from the ADS, it is no longer needed there.
         AnalysisDataService::Instance().remove(inputName);
       }
-
-      std::cout << "PROCESSING IS DONE\n";
       return temp;
     }
     else

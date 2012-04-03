@@ -336,11 +336,9 @@ namespace Mantid
               && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
-            std::cout << "Write-locking " << ws->getName() << std::endl;
             g_log.debug() << "Write-locking " << ws->getName() << std::endl;
             ws->getLock()->writeLock();
             m_writeLockedWorkspaces.push_back(ws);
-            std::cout << "Write-locking " << ws->getName() << " worked!" << std::endl;
           }
         }
       }
@@ -357,7 +355,6 @@ namespace Mantid
               && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
-            std::cout << "Read-locking " << ws->getName() << std::endl;
             g_log.debug() << "Read-locking " << ws->getName() << std::endl;
             ws->getLock()->readLock();
             m_readLockedWorkspaces.push_back(ws);
