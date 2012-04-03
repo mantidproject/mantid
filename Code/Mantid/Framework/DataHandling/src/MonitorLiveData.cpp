@@ -113,6 +113,10 @@ namespace DataHandling
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
+    // Grab ownership of the pointer in the LOCAL listener variable.
+    // This will make the listener destruct if the algorithm throws,
+    // but the Algorithm is still in the list of "Managed" algorithms.
+    m_listener.reset();
 
     // The last time we called LoadLiveData.
     // Since StartLiveData _just_ called it, use the current time.
@@ -127,7 +131,7 @@ namespace DataHandling
     // Keep going until you get cancelled
     while (true)
     {
-      // This call throws if the user presses cancel
+      // Exit if the user presses cancel
       this->interruption_point();
 
       // Sleep for 50 msec
