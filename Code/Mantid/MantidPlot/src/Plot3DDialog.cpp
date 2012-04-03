@@ -53,6 +53,10 @@
 #include <QApplication>
 
 #include <qwt3d_color.h>
+#include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/MantidColorMap.h"
+
+using Mantid::Kernel::ConfigService;
 
 Plot3DDialog::Plot3DDialog( QWidget* parent,  Qt::WFlags fl )
     : QDialog( parent, fl )
@@ -646,9 +650,9 @@ void Plot3DDialog::disableMeshOptions()
 
 void Plot3DDialog::pickDataColorMap()
 {
-QString fn = QFileDialog::getOpenFileName(d_plot->colorMap(), tr("Colormap files") + " (*.map *.MAP)", this);
-if (!fn.isEmpty())
-   d_plot->setDataColorMap(fn);
+  QString fileselection = MantidColorMap::loadMapDialog("", this);
+  if (!fileselection.isEmpty())
+    d_plot->setDataColorMap(fileselection);
 }
 
 void Plot3DDialog::pickTitleFont()

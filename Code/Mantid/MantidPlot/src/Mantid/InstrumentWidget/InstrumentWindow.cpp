@@ -345,10 +345,7 @@ void InstrumentWindow::changeColormap(const QString &filename)
   //Use a file dialog if no parameter is passed
   if( filename.isEmpty() )
   {
-    fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), 
-						 QFileInfo(m_instrumentActor->getCurrentColorMap()).absoluteFilePath(),
-						 tr("Colormaps (*.map *.MAP)"));
-    // User cancelled if filename is still empty
+    fileselection = MantidColorMap::loadMapDialog(m_instrumentActor->getCurrentColorMap(), this);
     if( fileselection.isEmpty() ) return;
   }
   else
@@ -357,7 +354,7 @@ void InstrumentWindow::changeColormap(const QString &filename)
     if( !QFileInfo(fileselection).exists() ) return;
   }
   
-  if( fileselection == m_instrumentActor->getCurrentColorMap() ) return;
+  if( !m_instrumentActor->getCurrentColorMap().isEmpty() && (fileselection == m_instrumentActor->getCurrentColorMap())) return;
 
   m_instrumentActor->loadColorMap(fileselection);
   if( this->isVisible() )

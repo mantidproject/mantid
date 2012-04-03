@@ -557,10 +557,7 @@ void SliceViewer::loadColorMap(QString filename)
   QString fileselection;
   if (filename.isEmpty())
   {
-    fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"),
-        QFileInfo(m_currentColorMapFile).absoluteFilePath(),
-        tr("Colormaps (*.map *.MAP)"));
-    // User cancelled if filename is still empty
+    QString fileselection = MantidColorMap::loadMapDialog(m_currentColorMapFile, this);
     if( fileselection.isEmpty() ) return;
   }
   else

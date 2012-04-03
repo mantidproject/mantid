@@ -14,6 +14,10 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidKernel/ConfigService.h"
+#include <qfiledialog.h>
+
+using Mantid::Kernel::ConfigService;
 
 //--------------------------------------
 // Public member functions
@@ -125,6 +129,29 @@ bool MantidColorMap::loadMap(const QString & filename)
   } 
   return is_success;
 }
+
+//-------------------------------------------------------------------------------------------------
+/** Static convenience method for loading a color map.
+ * Points to the "colormaps.directory" mantid property
+ *
+ * @param previousFile :: last open .map file
+ * @param parent :: widget owner of the dialog
+ * @return QString of the filename
+ */
+QString MantidColorMap::loadMapDialog(QString previousFile, QWidget * parent)
+{
+  QString fileselection;
+  // Get the installed color maps directory.
+  QString colormapdir = QString::fromStdString( ConfigService::Instance().getString("colormaps.directory") );
+  if (colormapdir.isEmpty())
+    colormapdir = QFileInfo(previousFile).absoluteFilePath();
+  // Ask the user to point to the .map file
+  fileselection = QFileDialog::getOpenFileName(parent, "Pick a Colormap",
+      colormapdir, "Colormaps (*.map *.MAP)");
+  return fileselection;
+}
+
+
 
 //-------------------------------------------------------------------------------------------------
 /** Set a color for Not-a-number

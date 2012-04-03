@@ -47,6 +47,8 @@ public:
 
   bool loadMap(const QString & filename);
   
+  static QString loadMapDialog(QString previousFile, QWidget * parent);
+
   void setNanColor(int r, int g, int b);
 
   void setupDefaultMap();

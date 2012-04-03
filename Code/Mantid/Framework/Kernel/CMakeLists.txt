@@ -353,6 +353,8 @@ set ( PLUGINS "." )
 set ( QTPLUGINS "." )
 set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
+set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
+
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
@@ -381,6 +383,7 @@ set ( PLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
 set ( QTPLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qtplugins/mantid )
 set ( PYTHONALGS ${PLUGINS}/PythonAlgs )
 set ( DATADIRS "" )
+set ( COLORMAPS_FOLDER ${CMAKE_INSTALL_PREFIX}/colormaps/ )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )

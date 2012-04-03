@@ -40,6 +40,9 @@ parameterDefinition.directory = @MANTID_ROOT@/instrument
 # Where to load OpenCL kernel files
 openclKernelFiles.directory = @MANTID_ROOT@/Framework/GPUAlgorithms/src
 
+# Where to load colormap files (.map)
+colormaps.directory = @COLORMAPS_FOLDER@
+
 # Location of Python scripts that are required for certain aspects of Mantid to function
 # correctly, i.e. customized interfaces
 #

@@ -68,6 +68,10 @@
 #include <QDoubleSpinBox>
 #include <QMenu>
 #include <QDateTime>
+#include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/MantidColorMap.h"
+
+using Mantid::Kernel::ConfigService;
 
 PlotDialog::PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml, Qt::WFlags fl )
 : QDialog(ml, fl),
@@ -2904,10 +2908,7 @@ void PlotDialog::changeColormap(const QString &filename)
   //Use a file dialog if no parameter is passed
   if( filename.isEmpty() )
   {
-    fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), 
-						 QFileInfo(mCurrentColorMap).absoluteFilePath(),
-						 tr("Colormaps (*.map *.MAP)"));
-    // User cancelled if filename is still empty
+    fileselection = MantidColorMap::loadMapDialog(mCurrentColorMap, this);
     if( fileselection.isEmpty() ) return;
   }
   else

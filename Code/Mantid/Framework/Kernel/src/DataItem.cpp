@@ -43,7 +43,6 @@ namespace Mantid
       {
         m_lock = new Poco::RWLock();
       }
-      std::cout << this->name() << " getLock() called " << m_lock << std::endl;
       return m_lock;
     }
 
