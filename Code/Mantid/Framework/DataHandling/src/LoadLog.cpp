@@ -416,6 +416,7 @@ void LoadLog::exec()
       }
       catch(std::exception&)
       {
+        inLogFile.close();
         continue;
       }
 
@@ -500,12 +501,17 @@ std::string LoadLog::getThreeColumnName() const
  */
 bool LoadLog::adsExists()
 {
-  std::string adsname(m_filename+":checksum");
+#ifdef _WIN32
   std::ifstream adstream(adsname.c_str());
   if(!adstream)
-  {return false;
+  {
+    return false;
   }
+  adstream.close();
   return true;
+#else
+  return false;
+#endif
 }
 
 /* this method reads  the checksum ADS associated with the
@@ -513,7 +519,7 @@ bool LoadLog::adsExists()
  * @return list of logfile names.
  */
 std::set<std::string> LoadLog::getLogfilenamesfromADS()
-{	
+{
   std::string adsname(m_filename+":checksum");
   std::ifstream adstream(adsname.c_str());
   if(!adstream)
