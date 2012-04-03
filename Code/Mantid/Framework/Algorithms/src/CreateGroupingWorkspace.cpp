@@ -295,7 +295,7 @@ namespace Algorithms
               PARALLEL_START_INTERUPT_REGION
               std::ostringstream mess;
               mess<< grouping<<num;
-              IComponent_const_sptr comp = inst->getComponentByName(mess.str());
+              IComponent_const_sptr comp = inst->getComponentByName(mess.str(), 15);
               PARALLEL_CRITICAL(GroupNames)
               if(comp) names.push_back(mess.str());
               PARALLEL_END_INTERUPT_REGION

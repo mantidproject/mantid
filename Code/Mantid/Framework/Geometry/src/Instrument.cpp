@@ -329,9 +329,10 @@ namespace Mantid
     /**
     * Find a component by name.
     * @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
+    * @param nlevels :: Optional argument to limit number of levels searched.
     * @returns A shared pointer to the component
     */
-    boost::shared_ptr<const IComponent> Instrument::getComponentByName(const std::string & cname) const
+    boost::shared_ptr<const IComponent> Instrument::getComponentByName(const std::string & cname, int nlevels) const
     {
       boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
       // Check the instrument name first
@@ -345,7 +346,8 @@ namespace Mantid
       std::deque<boost::shared_ptr<const IComponent> > nodeQueue;
       // Need to be able to enter the while loop
       nodeQueue.push_back(node);
-      while( !nodeQueue.empty() )
+      int nlevel = 0;
+      while( !nodeQueue.empty() && (nlevels == 0 || nlevel < nlevels))
       {
         node = nodeQueue.front();
         nodeQueue.pop_front();
@@ -368,6 +370,7 @@ namespace Mantid
             nodeQueue.push_back(comp);
           }
         }
+        nlevel++;
       }// while-end
 
       // If we have reached here then the search failed
