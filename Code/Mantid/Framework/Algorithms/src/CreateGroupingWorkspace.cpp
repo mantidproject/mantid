@@ -287,8 +287,8 @@ namespace Algorithms
       else
       {
           sortnames = true;
-          GroupNames = "";
           // cppcheck-suppress syntaxError
+          std::vector<std::string> names;
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 200; ++num)
           {
@@ -297,10 +297,16 @@ namespace Algorithms
               mess<< grouping<<num;
               IComponent_const_sptr comp = inst->getComponentByName(mess.str());
               PARALLEL_CRITICAL(GroupNames)
-              if(comp) GroupNames+=mess.str()+",";
+              if(comp) names.push_back(mess.str());
               PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
+          std::sort(names.begin(), names.end());
+          GroupNames = "";
+          for (std::vector<std::string>::iterator it=names.begin();it!=names.end();++it) 
+          {
+              GroupNames+= *it +",";
+          }
       }
     }
 
