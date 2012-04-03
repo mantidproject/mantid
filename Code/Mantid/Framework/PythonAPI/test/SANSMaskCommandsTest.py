@@ -47,7 +47,7 @@ class SANSMaskCommandsTest(unittest.TestCase):
 
     def test_horizontal_line(self):
         """
-            Checks the ISIS specfic mask command for spectra numbers
+            Checks the ISIS specfic horizontal line masking
         """
 
         # flags some whole spectra for masking
@@ -61,8 +61,18 @@ class SANSMaskCommandsTest(unittest.TestCase):
         self.assertEqual(self.test_ws.readY(2)[0], 0)
         self.assertEqual(self.test_ws.readY(3)[0], 0)
         self.assertEqual(self.test_ws.readY(127)[0], 0)
-        self.assertEqual(self.test_ws.readY(1)[0], 2.0)
+        self.assertEqual(self.test_ws.readY(1)[0], 2.0) # LoadEmptyInstrument set Monitor Y = 2.0
+        
+        # now try the same as above but after loading a dataset        
+        ws=Load("LOQ48094.raw","testMaskingTimebins")[0]
+        ISIS.ReductionSingleton().mask.execute(ISIS.ReductionSingleton(), "testMaskingTimebins")        
 
+        # Spectrum number is one more than workspace index
+        self.assertEqual(ws.readY(2)[0], 0)
+        self.assertEqual(ws.readY(3)[0], 0)
+        self.assertEqual(ws.readY(127)[0], 0)
+        self.assertEqual(ws.readY(1)[0], 10.0) 
+        
     def test_masking_timebins(self):
         """
             Time bin masking uses the MaskBins algorithm
