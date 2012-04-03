@@ -58,6 +58,7 @@ namespace DataHandling
     void addChunk(Mantid::API::Workspace_sptr chunkWS);
     void appendChunk(Mantid::API::Workspace_sptr chunkWS);
 
+    void doSortEvents(Mantid::API::Workspace_sptr ws);
 
     /// The "accumulation" workspace = after adding, but before post-processing
     Mantid::API::Workspace_sptr m_accumWS;

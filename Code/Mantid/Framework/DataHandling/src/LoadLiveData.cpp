@@ -285,6 +285,24 @@ namespace DataHandling
     m_accumWS = temp;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Perform SortEvents on the output workspaces (accumulation or output)
+   * but only if they are EventWorkspaces. This will help the GUI
+   * cope with redrawing.
+   *
+   * @param ws :: any Workspace. Does nothing if not EventWorkspace.
+   */
+  void LoadLiveData::doSortEvents(Mantid::API::Workspace_sptr ws)
+  {
+    EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    if (!eventWS)
+      return;
+    Algorithm_sptr alg = this->createSubAlgorithm("SortEvents");
+    alg->setProperty("InputWorkspace", eventWS);
+    alg->setPropertyValue("SortBy", "X Value");
+    alg->executeAsSubAlg();
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
@@ -369,6 +387,8 @@ namespace DataHandling
       // Set both output workspaces
       this->setProperty("AccumulationWorkspace", m_accumWS);
       this->setProperty("OutputWorkspace", m_outputWS);
+      doSortEvents(m_accumWS);
+      doSortEvents(m_outputWS);
     }
     else
     {
@@ -376,7 +396,9 @@ namespace DataHandling
       m_outputWS = m_accumWS;
       // We DO NOT set AccumulationWorkspace.
       this->setProperty("OutputWorkspace", m_outputWS);
+      doSortEvents(m_outputWS);
     }
+
 
   }
 
