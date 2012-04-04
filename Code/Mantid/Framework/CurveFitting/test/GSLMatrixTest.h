@@ -146,7 +146,7 @@ public:
       {
         d += m1.get(k,i) * m2.get(k,l) * m3.get(l,j);
       }
-      TS_ASSERT_DELTA( d, m.get(i,j), 1e-6 );
+      TS_ASSERT_DELTA( fabs(d - m.get(i,j)), 0.0, 1e-6 );
     }
   }
 
