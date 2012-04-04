@@ -10,9 +10,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
-#include <QtConcurrentRun>
 #include <Poco/File.h>
-#include <QFuture>
 
 #include <boost/algorithm/string.hpp>
 

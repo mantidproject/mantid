@@ -9,7 +9,6 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QStringList>
-#include <QFutureWatcher>
 #include <QThread>
 
 namespace MantidQt
