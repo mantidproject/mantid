@@ -51,6 +51,9 @@ Some features
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include <boost/algorithm/string.hpp>
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "../../API/inc/MantidAPI/IFunction1D.h"
 using namespace Mantid::DataObjects;
 using namespace std;
 using namespace  Mantid::API;
@@ -347,7 +350,7 @@ namespace Crystal
     string bankingCode = getProperty("Grouping");
 
 
-
+    cout<<"A"<<endl;
 
     set<string> AllBankNames;
     for( int i=0; i < peaksWs->getNumberPeaks(); i++)
@@ -367,6 +370,7 @@ namespace Crystal
       }
     }
 
+    cout<<"B"<<endl;
     vector<int>bounds;
     Workspace2D_sptr   ws = calcWorkspace( peaksWs, banksVec,tolerance,bounds);
     if( ws->getNumberHistograms() < 2)
@@ -376,6 +380,7 @@ namespace Crystal
     }
 
 
+    cout<<"C"<<endl;
     boost::shared_ptr<const Instrument> instrument = peaksWs->getPeak(0).getInstrument();
 
     AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
@@ -388,6 +393,7 @@ namespace Crystal
     int i=-1;//position in ParamResults Array.
     int nbanksSoFar =0;
 
+    cout<<"D"<<endl;
    bool first= false;
    int NGroups=(int)Groups.size();
    for( vector<vector<string> >::iterator itv=Groups.begin(); itv !=Groups.end();itv++)
@@ -398,6 +404,7 @@ namespace Crystal
     for( vector<string>::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++)
     {
 
+      cout<<"E "<<*it1<<endl;
      boost::shared_ptr<const IComponent> bank_cmp = instrument->getComponentByName((*it1));
      bank_rect=
           boost::dynamic_pointer_cast<const RectangularDetector>( bank_cmp);
@@ -533,6 +540,7 @@ namespace Crystal
 
    }//for vector<string> in Groups
 
+   cout<<"F"<<endl;
    boost::shared_ptr<Algorithm> fit_alg = createSubAlgorithm("Fit", .2, .9, true );
 
    if( ! fit_alg)
@@ -540,34 +548,82 @@ namespace Crystal
      g_log.error("Cannot find Fit algorithm");
      throw invalid_argument("Cannot find Fit algorithm" );
    }
-
-   fit_alg->setProperty("InputWorkspace", ws);
-   fit_alg->setProperty("WorkspaceIndex", 0);
-   fit_alg->setProperty("MaxIterations", 1800);
+   fit_alg->initialize();
+   cout<<"G"<<endl;
+  // fit_alg->setProperty("WorkspaceIndex", 0);
    fit_alg->setProperty("Function",FunctionArgument);
+   fit_alg->setProperty("MaxIterations", 1800);
    if(TiesArgument.size() > 0)
        fit_alg->setProperty("Ties",TiesArgument);
 
    fit_alg->setProperty("Constraints", Constraints);
 
-   fit_alg->initialize();
+   cout<<"H"<<endl;
+   fit_alg->setProperty("InputWorkspace", ws);
+
+   cout<<"I"<<endl;
 
 
    fit_alg->executeAsSubAlg();
 
 
-   // double chisq = fit_alg->getProperty("OutputChi2overDoF");
+    double chisq = fit_alg->getProperty("OutputChi2overDoF");
     std::vector<double>params = fit_alg->getProperty("Parameters");
     std::vector<double>errs = fit_alg->getProperty("Errors");
     std::vector<string>names = fit_alg->getProperty("ParameterNames");
-  //   std::cout<<"chisq/nodv="<<chisq<<std::endl;
+    int nVars = (int)Groups.size();
+    /*bool use_L0 = getProperty("use_L0");
+        bool use_timeOffset = getProperty("use_timeOffset");
+        bool use_PanelWidth = getProperty("use_PanelWidth");
+        bool use_PanelHeight = getProperty("use_PanelHeight");
+        bool use_PanelPosition = getProperty("use_PanelPosition");
+        bool use_PanelOrientation = getProperty("use_PanelOrientation");*/
+    if( !use_PanelWidth) nVars--;
+    if( !use_PanelHeight)nVars--;
+    if(!use_PanelPosition)nVars -=3;
+    if( !use_PanelOrientation)nVars -=3;
+    nVars *=(int)Groups.size()+2;
+    if(!use_L0)nVars--;
+    if( !use_timeOffset)nVars--;
+    g_log.information()<<"       Done"<<endl;
+    int NDof = ((int)ws->dataX(0).size()-nVars);
+    g_log.information()<<"ChiSqoverDoF =" << chisq<<" NDof ="<< NDof<<endl;
+
+
     map<string,double> result;
     for( size_t i=0; i<min<size_t>(params.size(),names.size());i++)
       {
       result[names[i]]=params[i];
-      //cout<<names[i]<<"="<<params[i]<<endl;
+
       }
 
+    TableWorkspace_sptr Result( new TableWorkspace(21));
+    Result->addColumn("string","Field");
+    for( int g=0; g< (int)Groups.size(); g++)
+      Result->addColumn("double","Group"+g);
+    string fieldBaseNames=";L0;           ;t0;           ;detWidthScale;;detHeightScale;Xoffset;      ;Yoffset;      ;Zoffset;      ;Xrot;         ;Yrot;         ;Zrot;";
+    for( int p=0; p < (int)names.size(); p++)
+    {
+      string fieldName = names[p];
+     size_t dotPos = fieldName.find('.');
+     if( dotPos >= fieldName.size())
+       dotPos =0;
+     string Field= fieldName.substr(dotPos);
+     int FieldNum = (int)fieldBaseNames.find(";"+Field+";")/15;
+     int col =0;
+     if( dotPos > 0)
+       col = atoi(fieldName.substr(1,dotPos).c_str());
+     if( col==0)
+     {
+       Result->cell<string>(FieldNum,0)=Field;
+       Result->cell<string>(FieldNum+10,0)="Err:"+Field;
+     }
+     Result->cell<double>(FieldNum, col+1)=params[p];
+     Result->cell<double>(FieldNum+10,col+1)=errs[p];
+
+    }
+
+    setProperty("ResultWorkspace", Result);
     boost::shared_ptr<ParameterMap> pmap( new ParameterMap());
     boost::shared_ptr<ParameterMap> pmapOld = instrument->getParameterMap();
     updateParams( pmapOld, pmap, boost::dynamic_pointer_cast<const IComponent>(instrument));
@@ -725,6 +781,76 @@ namespace Crystal
       fb.close();
 
     }
+
+   //------------------------------- Now get the Qerror table------------------
+
+    TableWorkspace_sptr QErrTable( new TableWorkspace(ws->dataX(0).size()/3));
+    QErrTable->addColumn("string","Bank Name");
+    QErrTable->addColumn("int","Peak Number");
+    QErrTable->addColumn("int","Peak Row");
+    QErrTable->addColumn("double","Error in Q");
+    QErrTable->addColumn("int","Peak Column");
+
+    ostringstream qErrFxnInfo (ostringstream::out);
+    qErrFxnInfo.precision(4);
+    qErrFxnInfo << "SCDPanelErrors(a="<<fixed<<a<<",b="<<fixed<<b<<",c="<<fixed<<c
+                <<",alpha="<<fixed<<alpha<<",beta="<<fixed<<beta<<",gamma="<<fixed<<gamma;
+    qErrFxnInfo << ",PeakWorkspaceName=xxx,startX=-1,endX=-1,";
+    int TableRow =0;
+    for( int g=0; g<(int)Groups.size();g++)
+    {
+      vector<string> Grp = Groups[g];
+      vector<int>limits;
+      DataObjects::Workspace2D_sptr ws=calcWorkspace( peaksWs, Grp, tolerance, limits);
+      string bankNames;
+
+      for( size_t v=0; v< Grp.size();v++)
+        {
+         if( v>0)bankNames +="/";
+         bankNames +=Grp[v];
+
+        }
+      qErrFxnInfo <<"BankNames=\""<<bankNames+"\"";
+      //Now add parameter values
+      ostringstream prefixStrm( ostringstream::out);
+      prefixStrm<<"f"<<g<<".";
+      string prefix =prefixStrm.str();
+      if( Groups.size()<=1)
+         prefix="";
+
+      for( int nm=0; nm < names.size(); nm++)
+      {
+        if( names[i].compare(0,prefix.length(),prefix)==0)
+        {
+          string prm = names[i].substr( prefix.length());
+          qErrFxnInfo<<","<<prm<<"="<<params[i];
+        }
+
+      }
+      boost::shared_ptr<IFunction1D> fit= boost::dynamic_pointer_cast<IFunction1D>(
+                FunctionFactory::Instance().createFitFunction(qErrFxnInfo.str()));
+      fit->setWorkspace( ws);
+      size_t nData =ws->dataX(0).size();
+      vector<double> out( nData);
+      vector<double> xVals = ws->dataX(0);
+      fit->function1D( out.data(),xVals.data(), nData);
+      for( size_t q=0; q < nData; q += 3)
+      {
+        int pk = (int)xVals[q];
+        Peak peak = peaksWs->getPeak( pk );
+        QErrTable->cell<string>(TableRow,0)=peak.getBankName();
+        QErrTable->cell<int>(TableRow,1)= pk;
+        QErrTable->cell<int>(TableRow,2)= peak.getRow();
+        QErrTable->cell<int>(TableRow,4)= peak.getCol();
+        QErrTable->cell<double>(TableRow,3)=sqrt(out[q]*out[q]+
+            out[q+1]*out[q+1]+out[q+2]*out[q+2]    );
+        TableRow++;
+      }
+
+
+    }
+    setProperty("QErrorWorkspace", QErrTable);
+
   }
 
 
@@ -784,8 +910,14 @@ namespace Crystal
                                           "Path to file with preprocessing information");
 
       declareProperty( "InitialTimeOffset",0, "Initial time offset when using xml files");
-      setPropertySettings("PanelNamePrefix", new EnabledWhenProperty("PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
-      setPropertySettings("Grouping", new EnabledWhenProperty("PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
+
+      declareProperty(new WorkspaceProperty<TableWorkspace> ("ResultWorkspace", "", Kernel::Direction::Output),
+                                                                     "Workspace of Results");
+      declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "", Kernel::Direction::Output),
+                                                                     "Workspace of Errors in Q");
+      setPropertySettings("PanelNamePrefix", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
+      setPropertySettings("Grouping", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
+
 
       setPropertySettings("PreProcFilename", new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_NOT_EQUAL_TO, "No PreProcessing") );
       setPropertySettings("InitialTimeOffset",new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file")) ;
