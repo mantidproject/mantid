@@ -216,173 +216,103 @@ class RefLReduction(PythonAlgorithm):
         BackfromYpixel = data_back[0]
         BacktoYpixel = data_back[1]
         
-        # Create a new event workspace of only the range of pixel of interest 
-        # background range (along the y-axis) and of only the pixel
-        # of interest along the x-axis (to avoid the frame effect)
-
-#        ws_integrated_data = "_IntegratedDataWks"
-#        print '-> keep only range of pixel of interest'
-#        wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
-#                                              ws_integrated_data,
-#                                              fromXpixel=Xrange[0],
-#                                              toXpixel=Xrange[1],
-#                                              fromYpixel=BackfromYpixel,
-#                                              toYpixel=BacktoYpixel,
-#                                              maxX=maxX,
-#                                              maxY=maxY)     
-
         ws_data = '_' + ws_name + '_DataWks'
         if subtract_data_bck:
 
             print '-> substract background'
-#            ConvertToHistogram(InputWorkspace=ws_integrated_data,
-#                               OutputWorkspace=ws_integrated_data)
-#
-#            Transpose(InputWorkspace=ws_integrated_data,
-#                      OutputWorkspace=ws_transposed)
-#        
-#            ConvertToHistogram(InputWorkspace=ws_transposed,
-#                               OutputWorkspace=ws_transposed)
-#
-#            ws_transposed_1 = ws_transposed + '_1'
-#            ws_transposed_2 = ws_transposed + '_2'
-#            FlatBackground(InputWorkspace=ws_transposed,
-#                           OutputWorkspace=ws_transposed_1,
-#                           StartX=BackfromYpixel,
-#                           Mode='Mean',
-#                           EndX=data_peak[0],
-#                           OutputMode="Return Background")
-#
-#            FlatBackground(InputWorkspace=ws_transposed,
-#                           OutputWorkspace=ws_transposed_2,
-#                           StartX=data_peak[1],
-#                           Mode='Mean',
-#                           EndX=BacktoYpixel,
-#                           OutputMode="Return Background")
-#
-#            ws_data_bck = "_DataBckWks"
-#            ws_data_bck_1 = ws_data_bck + "_1"
-##            Transpose(InputWorkspace=ws_transposed,
-##                      OutputWorkspace=ws_data_bck_1)
-#            Transpose(InputWorkspace=ws_transposed_1,
-#                      OutputWorkspace=ws_data_bck_1)
-#            ws_data_bck_2 = ws_data_bck + "_2"
-##            Transpose(InputWorkspace=ws_transposed,
-##                      OutputWorkspace=ws_data_bck_2)
-#            Transpose(InputWorkspace=ws_transposed_2,
-#                      OutputWorkspace=ws_data_bck_2)
-#
-#            ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
-#            ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
-
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
                                      OutputWorkspace=ws_histo_data)
             
             ws_data_bck = '_' + ws_name + '_DataBckWks'
-            ws_data_bck_1 = ws_data_bck + "_1"
-            RefRoi(InputWorkspace=ws_histo_data,
-                   OutputWorkspace=ws_data_bck_1,
-                   NXPixel=maxX,
-                   NYPixel=maxY,
-                   ConvertToQ=False,
-                   IntegrateY=False,
-                   SumPixels=True,
-                   XPixelMin=Xrange[0],
-                   XPixelMax=Xrange[1],
-                   YPixelMin=BackfromYpixel,
-                   YPixelMax=data_peak[0]-1,
-                   NormalizeSum=True)
-                           
-            ws_data_bck_2 = ws_data_bck + "_2"
-            RefRoi(InputWorkspace=ws_histo_data,
-                   OutputWorkspace=ws_data_bck_2,
-                   NXPixel=maxX,
-                   NYPixel=maxY,
-                   ConvertToQ=False,
-                   IntegrateY=False,
-                   SumPixels=True,
-                   XPixelMin=Xrange[0],
-                   XPixelMax=Xrange[1],
-                   YPixelMin=data_peak[1]+1,
-                   YPixelMax=BacktoYpixel,
-                   NormalizeSum=True)
             
-            ws_data_bck_1_rebin = ws_data_bck_1 + '_rebin'
-            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
-                             WorkspaceToMatch=ws_histo_data, 
-                             OutputWorkspace=ws_data_bck_1_rebin)
+            bBackLeft = False
+            if (BackfromYpixel < (data_peak[0]-1)):
 
-            ws_data_bck_2_rebin = ws_data_bck_2 + '_rebin'
-            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
-                             WorkspaceToMatch=ws_histo_data, 
-                             OutputWorkspace=ws_data_bck_2_rebin)
+                bBackLeft = True
+                ws_data_bck_1 = ws_data_bck + "_1"
+                RefRoi(InputWorkspace=ws_histo_data,
+                       OutputWorkspace=ws_data_bck_1,
+                       NXPixel=maxX,
+                       NYPixel=maxY,
+                       ConvertToQ=False,
+                       IntegrateY=False,
+                       SumPixels=True,
+                       XPixelMin=Xrange[0],
+                       XPixelMax=Xrange[1],
+                       YPixelMin=BackfromYpixel,
+                       YPixelMax=data_peak[0]-1,
+                       NormalizeSum=True)
+                           
+                ws_data_bck_1_rebin = ws_data_bck_1 + '_rebin'
+                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
+                                 WorkspaceToMatch=ws_histo_data, 
+                                 OutputWorkspace=ws_data_bck_1_rebin)
 
-            Plus(RHSWorkspace=ws_data_bck_1_rebin,
-                 LHSWorkspace=ws_data_bck_2_rebin,
-                 OutputWorkspace=ws_data_bck)
-            Scale(InputWorkspace=ws_data_bck,
-                  OutputWorkspace=ws_data_bck+'_scale',
-                  Factor=0.5,
-                  Operation="Multiply")
+            bBackRight = False
+            if ((data_peak[1]+1) < BacktoYpixel):
 
-            Minus(LHSWorkspace=ws_histo_data, 
-                  RHSWorkspace=ws_data_bck+'_scale', 
-                  OutputWorkspace=ws_data)
+                bBackRight = True
+                ws_data_bck_2 = ws_data_bck + "_2"
+                RefRoi(InputWorkspace=ws_histo_data,
+                       OutputWorkspace=ws_data_bck_2,
+                       NXPixel=maxX,
+                       NYPixel=maxY,
+                       ConvertToQ=False,
+                       IntegrateY=False,
+                       SumPixels=True,
+                       XPixelMin=Xrange[0],
+                       XPixelMax=Xrange[1],
+                       YPixelMin=data_peak[1]+1,
+                       YPixelMax=BacktoYpixel,
+                       NormalizeSum=True)
+            
+                ws_data_bck_2_rebin = ws_data_bck_2 + '_rebin'
+                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
+                                 WorkspaceToMatch=ws_histo_data, 
+                                 OutputWorkspace=ws_data_bck_2_rebin)
 
-            mtd.deleteWorkspace(ws_data_bck)
-            mtd.deleteWorkspace(ws_data_bck+'_scale')
-            mtd.deleteWorkspace(ws_data_bck_1_rebin)
-            mtd.deleteWorkspace(ws_data_bck_2_rebin)
-            mtd.deleteWorkspace(ws_data_bck_1)
-            mtd.deleteWorkspace(ws_data_bck_2)
+            if (bBackLeft and bBackRight):
+            
+                Plus(RHSWorkspace=ws_data_bck_1_rebin,
+                     LHSWorkspace=ws_data_bck_2_rebin,
+                     OutputWorkspace=ws_data_bck)
+                Scale(InputWorkspace=ws_data_bck,
+                      OutputWorkspace=ws_data_bck+'_scale',
+                      Factor=0.5,
+                      Operation="Multiply")
+                
+                Minus(LHSWorkspace=ws_histo_data, 
+                      RHSWorkspace=ws_data_bck+'_scale', 
+                      OutputWorkspace=ws_data)
+
+                mtd.deleteWorkspace(ws_data_bck+'_scale')
+                mtd.deleteWorkspace(ws_data_bck)
+                mtd.deleteWorkspace(ws_data_bck_1_rebin)
+                mtd.deleteWorkspace(ws_data_bck_2_rebin)
+                mtd.deleteWorkspace(ws_data_bck_1)
+                mtd.deleteWorkspace(ws_data_bck_2)
+                mtd.deleteWorkspace(ws_histo_data)
+
+            elif (bBackLeft):
+                
+                Minus(LHSWorkspace=ws_histo_data,
+                      RHSWorkspace=ws_data_bck_1_rebin,
+                      OutputWorkspace=ws_data)
+                mtd.deleteWorkspace(ws_data_bck_1_rebin)
+                mtd.deleteWorkspace(ws_data_bck_1)
+                
+            elif (bBackRight):
+                
+                Minus(LHSWorkspace=ws_histo_data,
+                      RHSWorkspace=ws_data_bck_2_rebin,
+                      OutputWorkspace=ws_data)
+                mtd.deleteWorkspace(ws_data_bck_2_rebin)
+                mtd.deleteWorkspace(ws_data_bck_2)
+
             mtd.deleteWorkspace(ws_histo_data)
-
-#            WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
-
-#            Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_data)
-#            
-#            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
-#                             WorkspaceToMatch=ws_integrated_data, 
-#                             OutputWorkspace=ws_data_bck_1)
-#                
-#            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
-#                             WorkspaceToMatch=ws_integrated_data, 
-#                             OutputWorkspace=ws_data_bck_2)
-#
-#            Plus(RHSWorkspace=ws_data_bck_1,
-#                 LHSWorkspace=ws_data_bck_2,
-#                 OutputWorkspace=ws_data_bck)
-#            Scale(InputWorkspace=ws_data_bck,
-#                  OutputWorkspace=ws_data_bck,
-#                  Factor=0.5,
-#                  Operation="Multiply")
-#
-##            WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
-#
-#            Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_data)
-
-            # Clean up intermediary workspaces
-#            mtd.deleteWorkspace(ws_integrated_data)
-#            mtd.deleteWorkspace(ws_histo_data)
-#            mtd.deleteWorkspace(ws_data_bck)
-#            mtd.deleteWorkspace(ws_transposed)
 
         else:        
         
-#            ws_integrated_data = "_IntegratedDataWks"
-#            print '-> keep only range of pixel of interest'
-#            wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
-#                                                  ws_integrated_data,
-#                                                  fromXpixel=Xrange[0],
-#                                                  toXpixel=Xrange[1],
-#                                                  fromYpixel=BackfromYpixel,
-#                                                  toYpixel=BacktoYpixel,
-#                                                  maxX=maxX,
-#                                                  maxY=maxY)     
-#
-#            ConvertToHistogram(InputWorkspace=ws_integrated_data,
-#                               OutputWorkspace=ws_data)
-
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
                                      OutputWorkspace=ws_data)
 
@@ -418,160 +348,105 @@ class RefLReduction(PythonAlgorithm):
                           TOFsteps, 
                           TOFrange[1]])
  
-#            # Keep only range of TOF of interest
-#            CropWorkspace(InputWorkspace=ws_norm_histo_data, 
-#                          OutputWorkspace=ws_norm_histo_data, 
-#                          XMin=TOFrange[0], XMax=TOFrange[1])
-    
             # Normalized by Current (proton charge)
             print '-> normalized by current direct beam'
             NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, 
                                OutputWorkspace=ws_norm_histo_data)
-
-#            #Create a new event workspace of only the range of pixel of interest 
-#            #background range (along the y-axis) and of only the pixel
-#            #of interest along the x-axis (to avoid the frame effect)
-#            ws_integrated_data = "_IntegratedNormWks"
-#            wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
-#                                                  ws_integrated_data,
-#                                                  fromXpixel=normXrange[0],
-#                                                  toXpixel=normXrange[1],
-#                                                  fromYpixel=BackfromYpixel,
-#                                                  toYpixel=BacktoYpixel,
-#                                                  maxX=maxX,
-#                                                  maxY=maxY)
 
             ws_data_bck = '_' + ws_name + '_NormBckWks'
             ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
             if subtract_norm_bck:
                 
                 print '-> substract background to direct beam'
-#                Transpose(InputWorkspace=ws_integrated_data,
-#                          OutputWorkspace=ws_transposed)
-#        
-#                ConvertToHistogram(InputWorkspace=ws_transposed,
-#                                   OutputWorkspace=ws_transposed)
-#
-#                ws_transposed_1 = ws_transposed + '_1'
-#                ws_transposed_2 = ws_transposed + '_2'
-#                FlatBackground(InputWorkspace=ws_transposed,
-#                               OutputWorkspace=ws_transposed_1,
-#                               StartX=BackfromYpixel,
-#                               Mode='Mean',
-#                               EndX=from_norm_peak,
-#                               OutputMode="Return Background")
-#
-#                ws_data_bck = "_NormBckWks"
-#                ws_data_bck_1 = ws_data_bck + "_1"
-#                Transpose(InputWorkspace=ws_transposed_1,
-#                          OutputWorkspace=ws_data_bck_1)
-#
-#                FlatBackground(InputWorkspace=ws_transposed,
-#                               OutputWorkspace=ws_transposed_2,
-#                               StartX=to_norm_peak,
-#                               Mode='Mean',
-#                               EndX=BacktoYpixel,
-#                               OutputMode="Return Background")
-#
-#                ws_data_bck_2 = ws_data_bck + "_2"
-#                Transpose(InputWorkspace=ws_transposed_2,
-#                          OutputWorkspace=ws_data_bck_2)
-#
-#                ConvertToHistogram(InputWorkspace=ws_data_bck_1, 
-#                                   OutputWorkspace=ws_data_bck_1)
-#                
-#                ConvertToHistogram(InputWorkspace=ws_data_bck_2, 
-#                                   OutputWorkspace=ws_data_bck_2)
-#
-#                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
-#                                 WorkspaceToMatch=ws_integrated_data, 
-#                                 OutputWorkspace=ws_data_bck_1)
-#       
-#                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
-#                                 WorkspaceToMatch=ws_integrated_data, 
-#                                 OutputWorkspace=ws_data_bck_2)
-#
-##                WeightedMean(InputWorkspace1=ws_data_bck_1, 
-##                             InputWorkspace2=ws_data_bck_2, 
-##                             OutputWorkspace=ws_data_bck)
-#
-#                Plus(RHSWorkspace=ws_data_bck_1,
-#                     LHSWorkspace=ws_data_bck_2,
-#                     OutputWorkspace=ws_data_bck)
-#                Scale(InputWorkspace=ws_data_bck,
-#                      OutputWorkspace=ws_data_bck,
-#                      Factor=0.5,
-#                      Operation="Multiply")
-#
-#
-#                ws_norm = "_NormWks"
-#                Minus(LHSWorkspace=ws_integrated_data,
-#                      RHSWorkspace=ws_data_bck, 
-#                      OutputWorkspace=ws_norm)
-#
-#                #Clean up intermediary workspaces
-##                mtd.deleteWorkspace(ws_data_bck)
-##                mtd.deleteWorkspace(ws_integrated_data)
-##                mtd.deleteWorkspace(ws_transposed)
-#
-#                ws_norm_rebinned = "_NormRebinnedWks"
-#                RebinToWorkspace(WorkspaceToRebin=ws_norm, 
-#                                 WorkspaceToMatch=ws_data,
-#                                 OutputWorkspace=ws_norm_rebinned)
-
                 ConvertToMatrixWorkspace(InputWorkspace=ws_norm_histo_data,
                                          OutputWorkspace=ws_norm_histo_data)
-            
+                            
                 ws_norm_bck = '_' + ws_name + '_NormBckWks'
-                ws_norm_bck_1 = ws_norm_bck + "_1"
-                RefRoi(InputWorkspace=ws_norm_histo_data,
-                       OutputWorkspace=ws_norm_bck_1,
-                       NXPixel=maxX,
-                       NYPixel=maxY,
-                       ConvertToQ=False,
-                       IntegrateY=False,
-                       SumPixels=True,
-                       XPixelMin=normXrange[0],
-                       XPixelMax=normXrange[1],
-                       YPixelMin=norm_back[0],
-                       YPixelMax=norm_peak[0]-1,
-                       NormalizeSum=True)
-                           
-                ws_norm_bck_2 = ws_norm_bck + "_2"
-                RefRoi(InputWorkspace=ws_norm_histo_data,
-                       OutputWorkspace=ws_norm_bck_2,
-                       NXPixel=maxX,
-                       NYPixel=maxY,
-                       ConvertToQ=False,
-                       IntegrateY=False,
-                       SumPixels=True,
-                       XPixelMin=normXrange[0],
-                       XPixelMax=normXrange[1],
-                       YPixelMin=norm_peak[1]+1,
-                       YPixelMax=norm_back[1],
-                       NormalizeSum=True)
+                
+                bBackLeft = False
+                if (norm_back[0] < (norm_peak[0]-1)):
             
-                ws_norm_bck_1_rebin = ws_norm_bck_1 + '_rebin'
-                RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_1, 
-                                 WorkspaceToMatch=ws_norm_histo_data, 
-                                 OutputWorkspace=ws_norm_bck_1_rebin)
+                    bBackLeft = True
+                    ws_norm_bck_1 = ws_norm_bck + "_1"
+                    RefRoi(InputWorkspace=ws_norm_histo_data,
+                           OutputWorkspace=ws_norm_bck_1,
+                           NXPixel=maxX,
+                           NYPixel=maxY,
+                           ConvertToQ=False,
+                           IntegrateY=False,
+                           SumPixels=True,
+                           XPixelMin=normXrange[0],
+                           XPixelMax=normXrange[1],
+                           YPixelMin=norm_back[0],
+                           YPixelMax=norm_peak[0]-1,
+                           NormalizeSum=True)
+                           
+                    ws_norm_bck_1_rebin = ws_norm_bck_1 + '_rebin'
+                    RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_1, 
+                                     WorkspaceToMatch=ws_norm_histo_data, 
+                                     OutputWorkspace=ws_norm_bck_1_rebin)
 
-                ws_norm_bck_2_rebin = ws_norm_bck_2 + '_rebin'
-                RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_2, 
-                                 WorkspaceToMatch=ws_norm_histo_data, 
-                                 OutputWorkspace=ws_norm_bck_2_rebin)
 
-                Plus(RHSWorkspace=ws_norm_bck_1_rebin,
-                     LHSWorkspace=ws_norm_bck_2_rebin,
-                     OutputWorkspace=ws_norm_bck)
-                Scale(InputWorkspace=ws_norm_bck,
-                      OutputWorkspace=ws_norm_bck+'_scale',
-                      Factor=0.5,
-                      Operation="Multiply")
+                bBackRight = False
+                if ((norm_peak[1]+1) < norm_back[1]):
 
-                Minus(LHSWorkspace=ws_norm_histo_data, 
-                      RHSWorkspace=ws_norm_bck+'_scale', 
-                      OutputWorkspace=ws_norm_rebinned)
+                    bBackRight = True
+                    ws_norm_bck_2 = ws_norm_bck + "_2"
+                    RefRoi(InputWorkspace=ws_norm_histo_data,
+                           OutputWorkspace=ws_norm_bck_2,
+                           NXPixel=maxX,
+                           NYPixel=maxY,
+                           ConvertToQ=False,
+                           IntegrateY=False,
+                           SumPixels=True,
+                           XPixelMin=normXrange[0],
+                           XPixelMax=normXrange[1],
+                           YPixelMin=norm_peak[1]+1,
+                           YPixelMax=norm_back[1],
+                           NormalizeSum=True)
+            
+                    ws_norm_bck_2_rebin = ws_norm_bck_2 + '_rebin'
+                    RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_2, 
+                                     WorkspaceToMatch=ws_norm_histo_data, 
+                                     OutputWorkspace=ws_norm_bck_2_rebin)
+
+                if (bBackLeft and bBackRight):
+
+                    Plus(RHSWorkspace=ws_norm_bck_1_rebin,
+                         LHSWorkspace=ws_norm_bck_2_rebin,
+                         OutputWorkspace=ws_norm_bck)
+                    Scale(InputWorkspace=ws_norm_bck,
+                          OutputWorkspace=ws_norm_bck+'_scale',
+                          Factor=0.5,
+                          Operation="Multiply")
+
+                    Minus(LHSWorkspace=ws_norm_histo_data, 
+                          RHSWorkspace=ws_norm_bck+'_scale', 
+                          OutputWorkspace=ws_norm_rebinned)
+                    mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+                    mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+                    mtd.deleteWorkspace(ws_norm_bck_1)
+                    mtd.deleteWorkspace(ws_norm_bck_2)
+                    mtd.deleteWorkspace(ws_norm_histo_data)
+                    mtd.deleteWorkspace(ws_norm_bck+'_scale')
+
+                elif (bBackLeft):
+                    
+                    Minus(LHSWorkspace=ws_norm_histo_data,
+                          RHSWorkspace=ws_norm_bck_1_rebin,
+                          OutputWorkspace=ws_norm_rebinned)
+                    mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+                    mtd.deleteWorkspace(ws_norm_bck_1)
+                    mtd.deleteWorkspace(ws_norm_histo_data)
+
+                elif (bBackRight):
+                    
+                    Minus(LHSWorkspace=ws_norm_histo_data,
+                          RHSWorkspace=ws_norm_bck_2_rebin,
+                          OutputWorkspace=ws_norm_rebinned)
+                    mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+                    mtd.deleteWorkspace(ws_norm_bck_2)
+                    mtd.deleteWorkspace(ws_norm_histo_data)
 
                 wks_utility.createIntegratedWorkspace(mtd[ws_norm_rebinned], 
                                                       ws_norm_rebinned,
@@ -581,13 +456,6 @@ class RefLReduction(PythonAlgorithm):
                                                       toYpixel=BacktoYpixel,
                                                       maxX=maxX,
                                                       maxY=maxY)
-
-                mtd.deleteWorkspace(ws_norm_bck+'_scale')
-                mtd.deleteWorkspace(ws_norm_bck_1_rebin)
-                mtd.deleteWorkspace(ws_norm_bck_2_rebin)
-                mtd.deleteWorkspace(ws_norm_bck_1)
-                mtd.deleteWorkspace(ws_norm_bck_2)
-                mtd.deleteWorkspace(ws_norm_histo_data)
 
             else:
             
