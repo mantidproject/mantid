@@ -380,11 +380,11 @@ def outputFittingParameters(a, b, error_a, error_b,
     8th column: error_b
     """
     _content = ['#y=a+bx\n', '#\n',
-                '#S1H S2H S1W S2W a b error_a error_b\n', '#\n']
+                '#S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
     sz = len(a)
     for i in range(sz):
-        _line = str(S1H[i]) + ' ' + str(S2H[i]) + ' '
-        _line = str(S1W[i]) + ' ' + str(S2W[i]) + ' '
+        _line = str(abs(S1H[i])) + ' ' + str(abs(S2H[i])) + ' '
+        _line += str(abs(S1W[i])) + ' ' + str(abs(S2W[i])) + ' '
         _line += str(a[i]) + ' '
         _line += str(b[i]) + ' '
         _line += str(error_a[i]) + ' '
@@ -456,7 +456,7 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
-def getSw(mt, left_tag, rigth_tag):
+def getSw(mt, left_tag, right_tag):
     """
         returns the width and units of the given slits
     """
@@ -569,9 +569,24 @@ def calculateAndFit(numerator='',
         cal1.fit()
         return cal1
 
+def help():
+    """
+        Here the user will have information about how the command line
+        works
+    """
+    print 'sfCalculator help:'
+    print
+    print 'example:'
+    print ' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",'
+    print '                          list_'
+
+
+
+
+
 #if __name__ == '__main__':
 def calculate(string_runs=None, 
-              list_attenuator=None, 
+#              list_attenuator=None, 
               list_peak_back=None, 
               output_path=None,
               tof_range=None):  
@@ -599,6 +614,8 @@ def calculate(string_runs=None,
         
     """    
     
+    list_attenuator = None;
+    
     #use default string files if not provided
     if (string_runs is None):
         #Input from user
@@ -612,7 +629,7 @@ def calculate(string_runs=None,
         post = '_event.nxs'
     
         for (offset, item) in enumerate(list_runs):
-            list_runs[offset] = nexus_path_pre + offset + post
+            list_runs[offset] = nexus_path_pre + item + post
 
     else:
         dico = createIndividualList(string_runs)
@@ -748,6 +765,8 @@ def calculate(string_runs=None,
                                 finalS1H, finalS2H, 
                                 finalS1W, finalS2W, 
                                 output_file)
+
+        print 'Done !'
 
     else:
         """
