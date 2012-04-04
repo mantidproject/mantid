@@ -124,7 +124,7 @@ class BaseWidget(QtGui.QWidget):
             return str(fname)     
     
     @process_file_parameter
-    def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None):
+    def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None, data_proxy=None):
         """
             Show instrument for the given data file.
             If both file_name and workspace are given, the file will be loaded in 
@@ -175,8 +175,12 @@ class BaseWidget(QtGui.QWidget):
         except:
             QtGui.QMessageBox.warning(self, "File Not Found", "The supplied mask file can't be found on the file system")
             return
-        if self._data_proxy is not None:
-            proxy = self._data_proxy(filepath, workspace)
+        
+        if data_proxy is None:
+            data_proxy = self._data_proxy
+        
+        if data_proxy is not None:
+            proxy = data_proxy(filepath, workspace)
             if proxy.data_ws is not None:
                 if mask is not None:
                     MaskDetectors(proxy.data_ws, DetectorList=mask)
