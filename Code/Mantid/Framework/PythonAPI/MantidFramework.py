@@ -1109,7 +1109,8 @@ class IAlgorithmProxy(ProxyObject):
                 presets += name + '=' + _makeString(value) + '|'
 
         # finally run the configured dialog
-        dialog = _qti.app.mantidUI.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
+        adapter = _qti.ThreadAdapter(_qti.app, _qti.app.mantidUI)
+        dialog = adapter.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
         if dialog == False:
             sys.exit('Information: Script execution cancelled')
 

@@ -1312,10 +1312,9 @@ public:
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
-
   // Algorithm-related methods
   void setIsRunning(bool);
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+  
 
 private:
   MantidUI(const MantidUI &);
@@ -1339,6 +1338,8 @@ public:
                                bool errs = true, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+  
+  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
   
 private:
   ThreadAdapter(const MantidUI &);

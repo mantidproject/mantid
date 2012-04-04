@@ -2,6 +2,7 @@
 #define THREADADAPTER_H_
 
 #include <QObject>
+
 #include "Graph.h"
 
 //-----------------------------------------------------------------------------
@@ -66,6 +67,10 @@ public slots:
 //                                    QList<int> indexList, bool errs=true, bool binCentres=false);
 //  Table* importTableWorkspace(const QString&, bool = false, bool = false);
 
+  //--------------------------- Dialog functions ----------------------------------------------
+  bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
+                                 const QString & optional_msg, const QStringList & enabled, 
+                                 const QStringList & disabled);
 
 private:
   // Ban default construction & copy
@@ -79,6 +84,8 @@ private:
 
   /// A pointer to the last widget object created
   QWidget *m_lastWidget;
+  /// Store the return value of the last boolean return
+  bool m_lastBool;
 };
 
 #endif /* ThreadAdapter_H_ */
