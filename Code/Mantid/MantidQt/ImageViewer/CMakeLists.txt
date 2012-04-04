@@ -12,6 +12,7 @@ set ( SRC_FILES
        src/ImageDataSource.cpp  
        src/IVConnections.cpp 
        src/TestDataSource.cpp
+       src/EventWSDataSource.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -28,9 +29,9 @@ set ( INC_FILES
        inc/MantidQtImageViewer/ImageView.h
        inc/MantidQtImageViewer/QtUtils.h
        inc/MantidQtImageViewer/ImageDataSource.h
-       inc/MantidQtImageViewer/ImageView.ui
        inc/MantidQtImageViewer/SliderHandler.h
        inc/MantidQtImageViewer/TestDataSource.h
+       inc/MantidQtImageViewer/EventWSDataSource.h
 )
 
 set ( MOC_FILES 
@@ -45,6 +46,9 @@ set ( UI_FILES
 # Python unit tests
 set ( TEST_PY_FILES 
 )
+
+include_directories ( inc )
+include_directories ( ../../Framework/DataObjects/inc )
 
 
 ###########################################################################
