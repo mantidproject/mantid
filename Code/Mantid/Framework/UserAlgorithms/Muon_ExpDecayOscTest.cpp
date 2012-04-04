@@ -44,7 +44,7 @@ void Muon_ExpDecayOscTest::functionLocal(double* out, const double* xValues, con
       out[i] = gA0*exp(-gs*xValues[i])*cos(2*3.1415926536*gf*xValues[i]+gphi);
   }
 }
-void Muon_ExpDecayOscTest::functionDeriv(API::FunctionDomain& domain, API::Jacobian& out)
+void Muon_ExpDecayOscTest::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& out)
 {
   calNumericalDeriv(domain, out);
 }
