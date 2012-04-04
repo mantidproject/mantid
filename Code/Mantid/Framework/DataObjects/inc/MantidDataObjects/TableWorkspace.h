@@ -83,7 +83,7 @@ namespace DataObjects
   #define TableWorkspace_DllImport
 #endif
 
-  class TableWorkspace_DllExport TableWorkspace: public API::ITableWorkspace
+  class TableWorkspace_DllExport TableWorkspace: virtual public API::ITableWorkspace
   {
   public:
     /// Constructor.
