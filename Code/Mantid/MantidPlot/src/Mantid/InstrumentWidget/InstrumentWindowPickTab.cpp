@@ -515,30 +515,40 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
   const Mantid::MantidVec& x = ws->readX(wi);
+  Mantid::MantidVec::const_iterator x_begin = x.begin();
+  Mantid::MantidVec::const_iterator x_end = x.end();
+  if (x_begin == x_end)
+  {
+    throw std::runtime_error("No bins found to plot");
+  }
+  if (ws->isHistogramData())
+  {
+    --x_end;
+  }
   if (instrActor->wholeRange())
   {
     imin = 0;
-    imax = x.size();
+    imax = static_cast<size_t>(x_end - x_begin);
   }
   else
   {
-    Mantid::MantidVec::const_iterator x_begin = std::lower_bound(x.begin(),x.end(),instrActor->minBinValue());
-    Mantid::MantidVec::const_iterator x_end = std::upper_bound(x.begin(),x.end(),instrActor->maxBinValue());
-    imin = static_cast<size_t>(x_begin - x.begin());
-    imax = static_cast<size_t>(x_end - x.begin());
+    Mantid::MantidVec::const_iterator x_from = std::lower_bound(x_begin,x_end,instrActor->minBinValue());
+    Mantid::MantidVec::const_iterator x_to = std::upper_bound(x_begin,x_end,instrActor->maxBinValue());
+    imin = static_cast<size_t>(x_from - x_begin);
+    imax = static_cast<size_t>(x_to - x_begin);
     if (imax <= imin)
     {
-      if (x_begin == x.end())
+      if (x_from == x_end)
       {
-        --x_begin;
-        x_end = x.end();
+        --x_from;
+        x_to = x_end;
       }
       else
       {
-        x_end = x_begin + 1;
+        x_to = x_from + 1;
       }
-      imin = static_cast<size_t>(x_begin - x.begin());
-      imax = static_cast<size_t>(x_end - x.begin());
+      imin = static_cast<size_t>(x_from - x_begin);
+      imax = static_cast<size_t>(x_to - x_begin);
     }
   }
 }
