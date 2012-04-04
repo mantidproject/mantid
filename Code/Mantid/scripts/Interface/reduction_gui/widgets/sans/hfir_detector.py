@@ -6,6 +6,17 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_hfir_detector
 
+IS_IN_MANTIDPLOT = False
+try:
+    import _qti
+    from MantidFramework import *
+    mtd.initialise(False)
+    from mantidsimple import *
+    IS_IN_MANTIDPLOT = True
+    from reduction import extract_workspace_name
+except:
+    pass
+
 class DetectorWidget(BaseWidget):    
     """
         Widget that presents the detector options to the user
@@ -16,7 +27,7 @@ class DetectorWidget(BaseWidget):
     name = "Detector"      
     
     def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, 
-                 data_proxy=None, use_sample_dc=False):
+                 data_proxy=None, use_sample_dc=False, options_callback=None):
         super(DetectorWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy) 
 
         class DetFrame(QtGui.QFrame, ui.sans.ui_hfir_detector.Ui_Frame): 
@@ -29,6 +40,8 @@ class DetectorWidget(BaseWidget):
         
         # Option to use the sample dark current instead of choosing it separately
         self._use_sample_dc = use_sample_dc
+        self.patch_ws = "__patch"
+        self.options_callback = options_callback
         
         self.initialize_content()
         
@@ -77,6 +90,12 @@ class DetectorWidget(BaseWidget):
         self.connect(self._content.sensitivity_dark_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_dark_plot_clicked)
         self.connect(self._content.data_file_plot_button_2, QtCore.SIGNAL("clicked()"), self._data_file_plot2_clicked)
 
+        # Patch sensitivity
+        self.connect(self._content.patch_sensitivity_check, QtCore.SIGNAL("clicked()"), self._patch_checked)
+        self.connect(self._content.draw_patch_button, QtCore.SIGNAL("clicked()"), self._draw_patch)
+        self.connect(self._content.create_sensitivity_button, QtCore.SIGNAL("clicked()"), self._create_sensitivity)
+        self._patch_checked()
+
         if not self._in_mantidplot:
             self._content.sensitivity_plot_button.hide()
             self._content.sensitivity_dark_plot_button.hide()
@@ -103,7 +122,44 @@ class DetectorWidget(BaseWidget):
             self._content.sensitivity_min_label.hide()
             self._content.sensitivity_max_label.hide()
             
+        if self.options_callback is None or not self._settings.debug:
+            # Patch sensitivity
+            self._content.patch_sensitivity_check.hide()
+            self._content.draw_patch_button.hide()
+            self._content.create_sensitivity_button.hide()            
+            
+    def _patch_checked(self):
+        enabled = self._content.patch_sensitivity_check.isChecked()
+        self._content.draw_patch_button.setEnabled(enabled)
+        self._content.create_sensitivity_button.setEnabled(enabled)
+        
+    def _draw_patch(self):
+        if IS_IN_MANTIDPLOT:
+            from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
+            self.show_instrument(self._content.sensitivity_file_edit.text,
+                                 workspace=self.patch_ws, tab=2, reload=True, 
+                                 data_proxy=DataProxy)
 
+    def _create_sensitivity(self):
+        if IS_IN_MANTIDPLOT:
+            # Get patch information
+            ids_str = None
+            if mtd.workspaceExists(self.patch_ws):
+                masked_detectors = ExtractMasking(InputWorkspace=self.patch_ws, OutputWorkspace="__edited_mask")
+                ids_str = masked_detectors.getPropertyValue("DetectorList")
+            
+            # Get options from all the tabs
+            if self.options_callback is not None:
+                try:
+                    table_ws = self.options_callback()
+                    c=ComputeSensitivity(Filename=self._content.sensitivity_file_edit.text(),
+                                         ReductionTableWorkspace=table_ws,
+                                         OutputWorkspace="sensitivity")
+                    print c.getPropertyValue("OutputMessage")
+                except:
+                    print "Could not compute sensitivity"
+
+    
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)
 
