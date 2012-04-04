@@ -125,10 +125,10 @@ public:
     m2.set(1,0,7);
     m2.set(1,1,8);
     GSLMatrix m3(2,2);
-    m2.set(0,0,9);
-    m2.set(0,1,10);
-    m2.set(1,0,11);
-    m2.set(1,1,12);
+    m3.set(0,0,9);
+    m3.set(0,1,10);
+    m3.set(1,0,11);
+    m3.set(1,1,12);
 
     GSLMatrix m;
 
@@ -146,7 +146,7 @@ public:
       {
         d += m1.get(k,i) * m2.get(k,l) * m3.get(l,j);
       }
-      TS_ASSERT_DELTA( fabs(d - m.get(i,j)), 0.0, 1e-6 );
+      TS_ASSERT_DELTA( d, m.get(i,j), 1e-8 );
     }
   }
 
