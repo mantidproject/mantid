@@ -65,7 +65,7 @@ namespace Mantid
       /// this function to the category "General" and the sub-category
       /// "Muon\\Custom" 
       virtual const std::string category() const { return "C++ User Defined";}
-      virtual void functionDeriv(API::FunctionDomain& domain, API::Jacobian& out);
+      virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& out);
 
     protected:
       virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
