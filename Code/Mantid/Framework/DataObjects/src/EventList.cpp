@@ -834,6 +834,53 @@ namespace DataObjects
     this->clear(false);
   }
 
+  namespace { // anonymous namespace
+  template<class T>
+  void eraseEventsHelper(std::vector<T> & events, const std::size_t start, const std::size_t stop)
+  {
+    if (start == 0) return; // REMOVE
+    if (stop >= events.size())
+    {
+      events.erase(events.begin() + start, events.end());
+    }
+    else
+    {
+      events.erase(events.begin() + start, events.begin() + stop);
+    }
+  }
+  }
+
+  /**
+   * Delete events from the list.
+   * @param start The first index to delete, inclusive.
+   * @param stop The last index to delete, exclusive.
+   */
+  void EventList::erase(std::size_t start, std::size_t stop)
+  {
+    // quick error checking
+    if (start >= stop)
+      return;
+    if (start > this->getNumberEvents())
+      return;
+
+    // do the actual work
+    if (eventType == TOF)
+    {
+      eraseEventsHelper(this->events, start, stop);
+    }
+    else if (eventType == WEIGHTED)
+    {
+      eraseEventsHelper(this->weightedEvents, start, stop);
+    }
+    else if (eventType == WEIGHTED_NOTIME)
+    {
+      eraseEventsHelper(this->weightedEventsNoTime, start, stop);
+    }
+    else
+    {
+      throw std::runtime_error("EventList: invalid event type value was found.");
+    }
+  }
 
   /** Sets the MRU list for this event list
    *
