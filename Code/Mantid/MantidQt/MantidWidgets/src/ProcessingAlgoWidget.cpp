@@ -161,6 +161,17 @@ void ProcessingAlgoWidget::changeAlgorithm()
   emit changedAlgorithm();
 }
 
+//------------------------------------------------------------------------------
+/** Set the name of the selected algorithm.
+ * Updates the GUI.
+ *
+ * @param algo :: name of the algorithm
+ */
+void ProcessingAlgoWidget::setSelectedAlgorithm(QString algo)
+{
+  ui.algoSelector->setSelectedAlgorithm(algo);
+  this->changeAlgorithm();
+}
 
 
 }//namespace

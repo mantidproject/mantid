@@ -46,8 +46,7 @@ namespace MantidQt
 
       /// @return the name of the selected algorithm
       QString getSelectedAlgorithm() { return ui.algoSelector->getSelectedAlgorithm(); };
-      /// Set the name of the selected algorithm
-      void setSelectedAlgorithm(QString algo) { ui.algoSelector->setSelectedAlgorithm(algo); }
+      void setSelectedAlgorithm(QString algo);
 
       /// @return the text in the script editor
       QString getScriptText() { return ui.editor->text(); };

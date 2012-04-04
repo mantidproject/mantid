@@ -128,6 +128,7 @@ void StartLiveDataDialog::initLayout()
       // Set the script to the previous value
       ui.processingAlgo->setScriptText(script);
       ui.processingAlgo->setSelectedAlgorithm(algo);
+      changeProcessingAlgorithm();
     }
     else
     {
@@ -141,6 +142,7 @@ void StartLiveDataDialog::initLayout()
       // Set the script to the previous value
       ui.postAlgo->setScriptText(script);
       ui.postAlgo->setSelectedAlgorithm(algo);
+      changePostProcessingAlgorithm();
     }
   }
 
