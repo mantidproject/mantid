@@ -60,10 +60,10 @@ protected slots:
   void shapeChanged();
   void applyMask();
   void clearMask();
-  void saveMaskToWorkspaceInclude();
-  void saveMaskToFileInclude();
-  void saveMaskToWorkspaceExclude();
-  void saveMaskToFileExclude();
+  void saveInvertedMaskToWorkspace();
+  void saveInvertedMaskToFile();
+  void saveMaskToWorkspace();
+  void saveMaskToFile();
 
   void doubleChanged(QtProperty*);
 protected:
@@ -71,9 +71,9 @@ protected:
 
   void clearProperties();
   void setProperties();
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool exclude = false);
-  void saveMaskToWorkspace(bool exclude = false);
-  void saveMaskToFile(bool exclude = false);
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask = false);
+  void saveMaskingToWorkspace(bool invertMask = false);
+  void saveMaskingToFile(bool invertMask = false);
 
   InstrumentWindow* m_instrumentWindow;
   MantidGLWidget *m_instrumentDisplay;

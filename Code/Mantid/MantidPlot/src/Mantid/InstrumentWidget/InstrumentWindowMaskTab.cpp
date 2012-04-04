@@ -4,6 +4,8 @@
 #include "ProjectionSurface.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Logger.h"
 
 #include "qttreepropertybrowser.h"
@@ -137,17 +139,17 @@ m_userEditing(true)
   m_clear_all = new QPushButton("Clear All");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
-  m_save_as_workspace_include = new QAction("Save As Workspace (include)",this);
-  connect(m_save_as_workspace_include,SIGNAL(activated()),this,SLOT(saveMaskToWorkspaceInclude()));
+  m_save_as_workspace_exclude = new QAction("Save Mask As Workspace",this);
+  connect(m_save_as_workspace_exclude,SIGNAL(activated()),this,SLOT(saveMaskToWorkspace()));
 
-  m_save_as_workspace_exclude = new QAction("Save As Workspace (exclude)",this);
-  connect(m_save_as_workspace_exclude,SIGNAL(activated()),this,SLOT(saveMaskToWorkspaceExclude()));
+  m_save_as_workspace_include = new QAction("Save Inverted Mask As Workspace",this);
+  connect(m_save_as_workspace_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToWorkspace()));
 
-  m_save_as_file_include = new QAction("Save As File (include)",this);
-  connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveMaskToFileInclude()));
+  m_save_as_file_exclude = new QAction("Save Mask As File",this);
+  connect(m_save_as_file_exclude,SIGNAL(activated()),this,SLOT(saveMaskToFile()));
 
-  m_save_as_file_exclude = new QAction("Save As File (exclude)",this);
-  connect(m_save_as_file_exclude,SIGNAL(activated()),this,SLOT(saveMaskToFileExclude()));
+  m_save_as_file_include = new QAction("Save Inverted Mask As File",this);
+  connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToFile()));
 
   QPushButton* saveButton = new QPushButton("Save");
   QMenu* saveMenu = new QMenu(this);
@@ -386,106 +388,67 @@ void InstrumentWindowMaskTab::clearMask()
 
 /*
  * parameters
- * @exclude:  if true, the detectors listed will not be masked
- *            if false, the detectors listed will be masked
+ * @invertMask:  if true, the selected mask will be inverted
+ *               if false, the mask will be used as is
  */
-Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool exclude)
+Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool invertMask)
 {
   m_instrumentDisplay->repaint(); // to refresh the pick image
   Mantid::API::MatrixWorkspace_const_sptr inputWS = m_instrumentWindow->getInstrumentActor()->getWorkspace();
-  Mantid::API::MatrixWorkspace_sptr outputWS = Mantid::API::WorkspaceFactory::Instance().create(
-    inputWS, inputWS->getNumberHistograms(), 1, 1);
-  if (!outputWS) return outputWS;
+  Mantid::API::MatrixWorkspace_sptr outputWS;
 
-  size_t wsSize = outputWS->getNumberHistograms();
 
-  if (exclude)
+  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
+  alg->setPropertyValue("InputWorkspace", inputWS->name());
+  alg->setPropertyValue("OutputWorkspace","MaskWorkspace");
+  alg->execute();
+
+  outputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("MaskWorkspace"));
+
+  if (invertMask)
   {
-    outputWS->setTitle("MaskWorkspaceExcludeDetectors");
+      Mantid::API::IAlgorithm * invertAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm("BinaryOperateMasks",-1);
+      invertAlg->setPropertyValue("InputWorkspace1", "MaskWorkspace");
+      invertAlg->setPropertyValue("OutputWorkspace", "MaskWorkspace");
+      invertAlg->setPropertyValue("OperationType", "NOT");
+      invertAlg->execute();
+
+      outputWS->setTitle("InvertedMaskWorkspace");
   }
   else
   {
-    outputWS->setTitle("MaskWorkspaceIncludeDetectors");
-  }
-
-  QList<int> dets;
-  m_instrumentDisplay->getSurface()->getMaskedDetectors(dets);
-
-  if (!dets.isEmpty())
-  {
-    if (exclude)
-    {
-      for(size_t i = 0; i < wsSize; ++i)
-      {
-        Mantid::Geometry::IDetector_const_sptr det = outputWS->getDetector(i);
-        int id = -1;
-        if (det)
-        {
-          id = det->getID();
-        }
-        if (id > 0 && dets.contains(id))
-        {
-          // Not mask
-          outputWS->dataY(i)[0] = 0.0;
-        }
-        else
-        {
-          // Mask the detector
-          outputWS->maskWorkspaceIndex(i);
-          outputWS->dataY(i)[0] = 1.0;
-        }
-      }
-    }
-    else
-    {
-      for(size_t i = 0; i < wsSize; ++i)
-      {
-        // Not mask
-        outputWS->dataY(i)[0] = 0.0;
-      }
-      foreach(int id,dets)
-      {
-        try {
-          // Mask the detector
-          size_t wi = m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id);
-          outputWS->maskWorkspaceIndex(wi);
-          outputWS->dataY(wi)[0] = 1.0;
-        } catch (Mantid::Kernel::Exception::NotFoundError &) {
-          continue; // Detector doesn't have a workspace index relating to it
-        }
-      }
-    }
+    outputWS->setTitle("MaskWorkspace");
   }
 
   return outputWS;
 }
 
-void InstrumentWindowMaskTab::saveMaskToWorkspaceInclude()
+void InstrumentWindowMaskTab::saveInvertedMaskToWorkspace()
 {
-  saveMaskToWorkspace(false);
+  saveMaskingToWorkspace(true);
 }
 
-void InstrumentWindowMaskTab::saveMaskToWorkspaceExclude()
+void InstrumentWindowMaskTab::saveMaskToWorkspace()
 {
-  saveMaskToWorkspace(true);
+  saveMaskingToWorkspace(false);
 }
 
-void InstrumentWindowMaskTab::saveMaskToFileInclude()
+void InstrumentWindowMaskTab::saveInvertedMaskToFile()
 {
-  saveMaskToFile(false);
+  saveMaskingToFile(true);
 }
 
-void InstrumentWindowMaskTab::saveMaskToFileExclude()
+void InstrumentWindowMaskTab::saveMaskToFile()
 {
-  saveMaskToFile(true);
+  saveMaskingToFile(false);
 }
 
-void InstrumentWindowMaskTab::saveMaskToWorkspace(bool exclude)
+void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_pointer->setChecked(true);
   setActivity();
-  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(exclude);
+  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
 
   if (outputWS)
   {
@@ -495,12 +458,12 @@ void InstrumentWindowMaskTab::saveMaskToWorkspace(bool exclude)
   QApplication::restoreOverrideCursor();
 }
 
-void InstrumentWindowMaskTab::saveMaskToFile(bool exclude)
+void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_pointer->setChecked(true);
   setActivity();
-  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(exclude);
+  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
   if (outputWS)
   {
     clearMask();
