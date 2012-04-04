@@ -493,34 +493,11 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutProcessing">
         <item>
-         <widget class="QLabel" name="lblProcessingInfo">
-          <property name="text">
-           <string>Select either Algorithm or Python Script under &quot;Processing&quot; to perform processing on each chunk of live data.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
+         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="processingAlgo">
+          <property name="editorVisible" stdset="0">
+           <bool>false</bool>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QSplitter" name="splitterProcessing">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="processingAlgoSelector">
-           <property name="showExecuteButton" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-          <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="processingAlgoProperties">
-           <property name="algorithmName">
-            <string/>
-           </property>
-          </widget>
-         </widget>
-        </item>
-        <item>
-         <widget class="ScriptEditor" name="processingScript"/>
         </item>
        </layout>
       </widget>
@@ -530,38 +507,14 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutPostProcessing">
         <item>
-         <widget class="QLabel" name="lblPostProcessingInfo">
-          <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Select either Algorithm or Python Script under &amp;quot;Post Processing&amp;quot; to perform processing on the &lt;span style=&quot; font-style:italic;&quot;&gt;accumulated&lt;/span&gt; data, after each chunk is added.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="postAlgo">
+          <property name="infoString" stdset="0">
+           <string>Select either Algorithm or Python Script under &quot;Post Processing&quot; to perform processing on the accumulated data, after each chunk is added.</string>
           </property>
-          <property name="wordWrap">
-           <bool>true</bool>
+          <property name="editorVisible" stdset="0">
+           <bool>false</bool>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QSplitter" name="splitterPost">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="postAlgoSelector">
-           <property name="showExecuteButton" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-          <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="postAlgoProperties">
-           <property name="algorithmName">
-            <string/>
-           </property>
-          </widget>
-         </widget>
-        </item>
-        <item>
-         <widget class="ScriptEditor" name="postScript"/>
         </item>
        </layout>
       </widget>
@@ -572,24 +525,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ScriptEditor</class>
-   <extends>QsciScintilla</extends>
-   <header>MantidQtMantidWidgets/ScriptEditor.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::AlgorithmSelectorWidget</class>
+   <class>MantidQt::MantidWidgets::ProcessingAlgoWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/AlgorithmSelectorWidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::API::AlgorithmPropertiesWidget</class>
-   <extends>QWidget</extends>
-   <header>MantidQtAPI/AlgorithmPropertiesWidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QsciScintilla</class>
-   <extends>QFrame</extends>
-   <header>Qsci/qsciscintilla.h</header>
+   <header>MantidQtMantidWidgets/ProcessingAlgoWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

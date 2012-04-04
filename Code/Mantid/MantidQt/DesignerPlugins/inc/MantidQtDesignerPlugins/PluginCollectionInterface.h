@@ -16,6 +16,7 @@
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
+#include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -132,5 +133,9 @@ DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
 DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
     MantidQt::API::AlgorithmPropertiesWidget,
     "List of algorithm properties");
+
+DECLARE_WIDGET_PLUGIN(ProcessingAlgoWidgetPlugin,
+    MantidQt::MantidWidgets::ProcessingAlgoWidget,
+    "Choose an algorithm or write a script as a processing step");
 
 #endif
