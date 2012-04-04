@@ -491,40 +491,36 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        <attribute name="title">
         <string>Processing Step</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayoutProcessing">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QLabel" name="lblProcessingInfo">
-            <property name="text">
-             <string>Select either Algorithm or Python Script under &quot;Processing&quot; to perform processing on each chunk of live data.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSplitter" name="splitterProcessing">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="processingAlgoSelector">
-             <property name="showExecuteButton" stdset="0">
-              <bool>false</bool>
-             </property>
-            </widget>
-            <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="processingAlgoProperties">
-             <property name="algorithmName">
-              <string/>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="ScriptEditor" name="processingScript"/>
-          </item>
-         </layout>
+         <widget class="QLabel" name="lblProcessingInfo">
+          <property name="text">
+           <string>Select either Algorithm or Python Script under &quot;Processing&quot; to perform processing on each chunk of live data.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSplitter" name="splitterProcessing">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="processingAlgoSelector">
+           <property name="showExecuteButton" stdset="0">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="processingAlgoProperties">
+           <property name="algorithmName">
+            <string/>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="ScriptEditor" name="processingScript"/>
         </item>
        </layout>
       </widget>
@@ -532,7 +528,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        <attribute name="title">
         <string>Post-Processing Step</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayoutPostProcessing">
         <item>
          <widget class="QLabel" name="lblPostProcessingInfo">
           <property name="text">

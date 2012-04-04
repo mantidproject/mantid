@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProcessingAlgoWidget</class>
+ <widget class="QWidget" name="ProcessingAlgoWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>550</width>
+    <height>737</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="lblProcessingInfo">
+     <property name="text">
+      <string>Select either Algorithm or Python Script under &quot;Processing&quot; to perform processing on each chunk of live data.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitterProcessing">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="MantidQt::MantidWidgets::AlgorithmSelectorWidget" name="algoSelector">
+      <property name="showExecuteButton" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="MantidQt::API::AlgorithmPropertiesWidget" name="algoProperties">
+      <property name="algorithmName">
+       <string/>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="btnSave">
+       <property name="text">
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnLoad">
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="ScriptEditor" name="editor"/>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ScriptEditor</class>
+   <extends>QsciScintilla</extends>
+   <header>MantidQtMantidWidgets/ScriptEditor.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::AlgorithmSelectorWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/AlgorithmSelectorWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::AlgorithmPropertiesWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtAPI/AlgorithmPropertiesWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QsciScintilla</class>
+   <extends>QFrame</extends>
+   <header>Qsci/qsciscintilla.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

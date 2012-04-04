@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/MultifitSetupDialog.cpp
 	src/MuonFitPropertyBrowser.cpp
 	src/PropertyHandler.cpp
+    src/ProcessingAlgoWidget.cpp
 	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
 	src/SafeQwtPlot.cpp
@@ -46,6 +47,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
+    inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
@@ -73,6 +75,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
+    inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui

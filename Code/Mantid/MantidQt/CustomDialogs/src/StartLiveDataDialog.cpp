@@ -13,6 +13,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include <Qsci/qscilexerpython.h>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -56,6 +57,9 @@ void StartLiveDataDialog::initLayout()
   // To save the history of inputs
   ui.processingAlgoProperties->setInputHistory(m_inputHistory);
   ui.postAlgoProperties->setInputHistory(m_inputHistory);
+
+  adornScriptEditor(ui.processingScript, ui.verticalLayoutProcessing);
+  adornScriptEditor(ui.postScript, ui.verticalLayoutPostProcessing);
 
   // ========== Set previous values from history =============
   fillAndSetComboBox("Instrument", ui.cmbInstrument);
@@ -159,6 +163,20 @@ void StartLiveDataDialog::initLayout()
 
   QHBoxLayout * buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
+}
+
+
+//------------------------------------------------------------------------------
+/** Fix up the ScriptEditor widget by:
+ * - Adding Save/Load capability
+ * - Enable syntax highlighting
+ * - Enable code completion (not currently implemented)
+ * @param editor :: pointer to the ScriptEditor object
+ */
+void StartLiveDataDialog::adornScriptEditor(ScriptEditor * editor, QVBoxLayout * layout)
+{
+  // Enable syntax highlighting
+  editor->setLexer(new QsciLexerPython);
 }
 
 //------------------------------------------------------------------------------
