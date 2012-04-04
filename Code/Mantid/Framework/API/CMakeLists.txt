@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/ConstraintFactory.cpp
 	src/CoordTransform.cpp
 	src/CostFunctionFactory.cpp
+	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/ExperimentInfo.cpp
@@ -35,8 +36,8 @@ set ( SRC_FILES
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
 	src/IFunction.cpp
-	src/IFunctionMD.cpp
 	src/IFunction1D.cpp
+	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
@@ -52,8 +53,8 @@ set ( SRC_FILES
 	src/ImplicitFunctionParserFactory.cpp
 	src/ImplictFunctionFactory.cpp
 	src/InstrumentDataService.cpp
-	src/LiveListenerFactory.cpp
 	src/JointDomain.cpp
+	src/LiveListenerFactory.cpp
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
@@ -62,10 +63,9 @@ set ( SRC_FILES
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/MemoryManager.cpp
+	src/MultiDomainFunction.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-	src/MultiDomainFunction.cpp
-	src/NumericAxis.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
@@ -114,12 +114,13 @@ set ( INC_FILES
 	inc/MantidAPI/CloneableAlgorithm.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
-	inc/MantidAPI/CompositeFunction.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
+	inc/MantidAPI/CompositeFunction.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
+	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DllConfig.h
@@ -146,8 +147,8 @@ set ( INC_FILES
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFunction.h
-	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunction1D.h
+	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -172,8 +173,8 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
-	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/JointDomain.h
+	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
@@ -182,10 +183,9 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MemoryManager.h
+	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-	inc/MantidAPI/MultiDomainFunction.h
-	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -229,15 +229,16 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 	test/CoordTransformTest.h
 	test/CostFunctionFactoryTest.h
+	test/DataProcessorAlgorithmTest.h
 	test/EnabledWhenWorkspaceIsTypeTest.h
 	test/ExperimentInfoTest.h
 	test/ExpressionTest.h
 	test/FileFinderTest.h
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
-	test/FunctionPropertyTest.h
 	test/FunctionDomainTest.h
 	test/FunctionFactoryTest.h
+	test/FunctionPropertyTest.h
 	test/FunctionTest.h
 	test/FunctionValuesTest.h
 	test/IEventListTest.h
