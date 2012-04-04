@@ -205,7 +205,7 @@ namespace Mantid
     void AlgorithmProxy::afterPropertySet(const std::string& name)
     {
       createConcreteAlg(true);
-      m_alg->getPointerToProperty(name)->setValue(*this->getPointerToProperty(name));
+      m_alg->getPointerToProperty(name)->setValueFromProperty(*this->getPointerToProperty(name));
       m_alg->afterPropertySet(name);
       copyPropertiesFrom(*m_alg);
       m_alg.reset();

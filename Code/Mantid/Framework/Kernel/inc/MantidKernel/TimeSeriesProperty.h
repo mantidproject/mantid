@@ -1764,7 +1764,7 @@ private:
    * The value is only accepted if the other property has the same type as this
    * @param right :: A reference to a property.
    */
-  virtual std::string setValue( const Property& right )
+  virtual std::string setValueFromProperty( const Property& right )
   {
     auto prop = dynamic_cast<const TimeSeriesProperty*>(&right);
     if ( !prop )
