@@ -59,7 +59,7 @@
        </widget>
        <widget class="QwtPlot" name="h_graphPlot"/>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="layoutWidget_grid4">
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
          <layout class="QFormLayout" name="formLayout">
