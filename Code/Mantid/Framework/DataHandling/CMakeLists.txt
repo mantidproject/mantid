@@ -116,8 +116,6 @@ set ( SRC_FILES
 	src/SetScalingPSD.cpp
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
-	src/FilterEventsPreNexus.cpp
-	src/FilterEventsOnHighFrequencyLog.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -237,8 +235,6 @@ set ( INC_FILES
 	src/LoadRaw/isisraw2.h
 	src/LoadRaw/item_struct.h
 	src/LoadRaw/vms_convert.h
-	inc/MantidDataHandling/FilterEventsPreNexus.h
-	inc/MantidDataHandling/FilterEventsOnHighFrequencyLog.h
 )
 
 set ( TEST_FILES
