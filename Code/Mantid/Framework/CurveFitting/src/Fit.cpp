@@ -327,7 +327,7 @@ namespace CurveFitting
     size_t iter = 0;
     bool success = false;
     std::string errorString;
-    double costFuncVal = 0;
+    //double costFuncVal = 0;
     do
     {
       iter++;
@@ -343,9 +343,9 @@ namespace CurveFitting
       }
       prog.report();
     }
-    while (iter < maxIterations);
+    while (static_cast<int>(iter) < maxIterations);
 
-    if (iter >= maxIterations)
+    if (static_cast<int>(iter) >= maxIterations)
     {
       if ( !errorString.empty() )
       {
@@ -360,7 +360,7 @@ namespace CurveFitting
     // degrees of freedom
     size_t dof = values->size() - costFunc->nParams();
     if (dof == 0) dof = 1;
-    double finalCostFuncVal = minimizer->costFunctionVal() / dof;
+    double finalCostFuncVal = minimizer->costFunctionVal() / double(dof);
 
     setProperty("OutputChi2overDoF",finalCostFuncVal);
 

@@ -579,6 +579,9 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
  */
 void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
 {
+  UNUSED_ARG(startX);
+  UNUSED_ARG(endX);
+
   if (!workspace) return; // unset the workspace
 
   try

@@ -162,7 +162,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     GSLVector p(n);
     m_leastSquares->getParameters(p);
     double dx_norm = gsl_blas_dnrm2(dx.gsl());
-    double p_norm = gsl_blas_dnrm2(p.gsl());
+    //double p_norm = gsl_blas_dnrm2(p.gsl());
     if (dx_norm < 0.0001)
     {
       return false;

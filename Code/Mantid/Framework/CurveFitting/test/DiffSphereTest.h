@@ -282,7 +282,7 @@ public:
 
     //set up some frequency values centered around zero
     const int N = 117;
-    double w[N],in[N],w0,dw = 0.13;
+    double w[N],w0,dw = 0.13;
     w0=-dw*int(N/2);
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
 
@@ -316,7 +316,7 @@ public:
     for(int i=0; i<N; i++){
       x[i] = w[i];
       y[i] = values.getCalculated(i);
-      e[i] = cc*in[i];
+      e[i] = cc*values.getCalculated(i);
     }
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D)); //put workspace in the data service
 

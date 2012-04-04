@@ -49,10 +49,10 @@ FunctionDomain1D(NULL,0)
   }
   else
   {
-    const double dx = (endX - startX) / (n - 1);
+    const double dx = (endX - startX) / double(n - 1);
     for(size_t i = 0; i < n; ++i)
     {
-      m_X[i] = startX + dx * i;
+      m_X[i] = startX + dx * double(i);
     }
   }
   resetData(&m_X[0],m_X.size());

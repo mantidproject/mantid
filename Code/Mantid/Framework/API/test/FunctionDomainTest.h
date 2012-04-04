@@ -18,7 +18,7 @@ public:
     std::vector<double> x(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 1.0 + 0.1 * i;
+      x[i] = 1.0 + 0.1 * double(i);
     }
     FunctionDomain1DVector domain(x);
     TS_ASSERT_EQUALS(domain.size(), x.size());

@@ -62,7 +62,7 @@ double CostFuncLeastSquares::val() const
 
 void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)const
 {
-  m_function->function(*m_domain,*values);
+  m_function->function(*domain,*values);
   size_t ny = m_values->size();
 
   double retVal = 0.0;
@@ -223,6 +223,7 @@ void CostFuncLeastSquares::addValDerivHessian(
   API::FunctionValues_sptr values,
   bool evalFunction , bool evalDeriv, bool evalHessian) const
 {
+  UNUSED_ARG(evalDeriv);
   size_t np = m_function->nParams();  // number of parameters 
   size_t ny = m_domain->size(); // number of data points
   Jacobian jacobian(ny,np);
@@ -275,7 +276,7 @@ void CostFuncLeastSquares::addValDerivHessian(
 
   if (!evalHessian) return;
 
-  size_t na = m_der.size(); // number of active parameters
+  //size_t na = m_der.size(); // number of active parameters
 
   size_t i1 = 0; // active parameter index
   for(size_t i = 0; i < np; ++i) // over parameters
@@ -396,6 +397,7 @@ void CostFuncLeastSquares::getParameters(GSLVector& params) const
   */
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
 {
+  UNUSED_ARG(epsrel);
   if (m_hessian.isEmpty())
   {
     valDerivHessian();

@@ -19,7 +19,7 @@ public:
     x.resize(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 1.0 + 0.1 * i;
+      x[i] = 1.0 + 0.1 * double(i);
     }
   }
 

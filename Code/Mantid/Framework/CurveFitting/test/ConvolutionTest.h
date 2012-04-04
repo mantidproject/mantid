@@ -274,7 +274,7 @@ public:
     double cc = pi*pi*df*df/a;
     for(size_t i=0;i<hout.size();i++)
     {
-      TS_ASSERT_DELTA(hout.real(i),h*sqrt(pi/a)*exp(-cc*i*i),1e-7);
+      TS_ASSERT_DELTA(hout.real(i),h*sqrt(pi/a)*exp(-cc*double(i*i)),1e-7);
     }
 
     //std::ofstream fres("fres.txt");

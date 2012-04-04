@@ -69,21 +69,21 @@ public:
     std::vector<double> x(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 1.0 + 0.1 * i;
+      x[i] = 1.0 + 0.1 * double(i);
     }
     FunctionDomain1DVector domain(x);
     FunctionValues values(domain);
     function.function(domain,values);
     for(size_t i = 0; i < domain.size(); ++i)
     {
-      TS_ASSERT_EQUALS(values.getCalculated(i),A * (1.0 + 0.1 * i) + B);
+      TS_ASSERT_EQUALS(values.getCalculated(i),A * (1.0 + 0.1 * double(i)) + B);
     }
     
     IFunction1DTest_Jacobian jacobian(10,2);
     function.functionDeriv(domain,jacobian);
     for(size_t i = 0; i < domain.size(); ++i)
     {
-      TS_ASSERT_EQUALS(jacobian.get(i,0), 1.0 + 0.1 * i);
+      TS_ASSERT_EQUALS(jacobian.get(i,0), 1.0 + 0.1 * double(i));
       TS_ASSERT_EQUALS(jacobian.get(i,1), 1.0);
     }
   }

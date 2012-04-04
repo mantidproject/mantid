@@ -35,6 +35,7 @@ namespace CurveFitting
     boost::shared_ptr<API::FunctionDomain>& domain, 
     boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
+    UNUSED_ARG(i0);
     if (workspacePropetyNames.empty())
     {
       throw std::runtime_error("Cannot create FunctionDomainMD: no workspace given");

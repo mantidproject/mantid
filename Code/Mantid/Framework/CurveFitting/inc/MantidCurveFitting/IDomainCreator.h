@@ -56,7 +56,8 @@ namespace Mantid
       /// declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
       /// @param addProp :: If false don't actually declare new properties but do other stuff if needed
-      virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true) {}
+      virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true) 
+      {UNUSED_ARG(suffix);UNUSED_ARG(addProp);}
       /// Create a domain and values from the input workspace. FunctionValues must be filled with data to fit to.
       /// @param workspacePropetyName :: A name of a workspace property. Domain will be created for this workspace.
       /// @param domain :: Shared pointer to hold the created domain
@@ -70,7 +71,8 @@ namespace Mantid
       virtual void createOutputWorkspace(
         const std::string& baseName,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> values) {}
+        boost::shared_ptr<API::IFunctionValues> values) 
+      {UNUSED_ARG(baseName);UNUSED_ARG(domain);UNUSED_ARG(values);}
       virtual void initFunction();
 
     protected:

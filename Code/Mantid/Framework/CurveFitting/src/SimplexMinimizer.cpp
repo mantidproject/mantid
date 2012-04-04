@@ -41,8 +41,8 @@ double SimplexMinimizer::fun(const gsl_vector * x, void *params)
 
 
 SimplexMinimizer::SimplexMinimizer():
-m_gslSolver(NULL),
-m_size(1.0)
+m_size(1.0),
+m_gslSolver(NULL)
 {
 }
 
