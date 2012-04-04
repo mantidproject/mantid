@@ -15,20 +15,37 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include <Qsci/qscilexerpython.h>
 
+using namespace MantidQt::CustomDialogs;
+using namespace MantidQt::API;
+using Mantid::API::AlgorithmManager;
+using Mantid::API::Algorithm_sptr;
+using Mantid::Kernel::DateAndTime;
+
+namespace {
+  class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory
+  {
+  private:
+    LiveDataAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
+    ~LiveDataAlgInputHistoryImpl() {}
+
+  private:
+    friend struct Mantid::Kernel::CreateUsingNew<LiveDataAlgInputHistoryImpl>;
+  };
+
+  #ifdef _WIN32
+  // this breaks new namespace declaraion rules; need to find a better fix
+    template class Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
+  #endif /* _WIN32 */
+    /// The specific instantiation of the templated type
+    typedef Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl> LiveDataAlgInputHistory;
+}
+
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
 {
 namespace CustomDialogs
 {
   DECLARE_DIALOG(StartLiveDataDialog);
-}
-}
-
-using namespace MantidQt::CustomDialogs;
-using namespace MantidQt::API;
-using Mantid::API::AlgorithmManager;
-using Mantid::API::Algorithm_sptr;
-using Mantid::Kernel::DateAndTime;
 
 //----------------------
 // Public member functions
@@ -38,15 +55,14 @@ StartLiveDataDialog::StartLiveDataDialog(QWidget *parent) :
   AlgorithmDialog(parent)
 {
   // Create the input history. This loads it too.
-  m_inputHistory = new AlgorithmInputHistoryImpl("LiveDataAlgorithms");
+  LiveDataAlgInputHistory::Instance();
 }
 
 /// Destructor
 StartLiveDataDialog::~StartLiveDataDialog()
 {
   // Save the input history to QSettings
-  m_inputHistory->save();
-  delete m_inputHistory;
+  LiveDataAlgInputHistory::Instance().save();
 }
 
 /// Set up the dialog layout
@@ -55,8 +71,10 @@ void StartLiveDataDialog::initLayout()
   ui.setupUi(this);
 
   // To save the history of inputs
-  ui.processingAlgo->setInputHistory(m_inputHistory);
-  ui.postAlgo->setInputHistory(m_inputHistory);
+  // RJT: I don't much like this, but at least it's safe from a lifetime point of view.
+  AbstractAlgorithmInputHistory * history = &LiveDataAlgInputHistory::Instance();
+  ui.processingAlgo->setInputHistory(history);
+  ui.postAlgo->setInputHistory(history);
 
   // ========== Set previous values from history =============
   fillAndSetComboBox("Instrument", ui.cmbInstrument);
@@ -250,4 +268,7 @@ void StartLiveDataDialog::changePostProcessingAlgorithm()
   Algorithm_sptr alg = ui.postAlgo->getAlgorithm();
   if (!alg) return;
   m_postProcessingAlg = alg;
+}
+
+}
 }

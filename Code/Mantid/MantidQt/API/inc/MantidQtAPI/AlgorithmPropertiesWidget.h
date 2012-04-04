@@ -55,7 +55,7 @@ namespace API
     AlgorithmPropertiesWidget(QWidget * parent = NULL);
     virtual ~AlgorithmPropertiesWidget();
     
-    void setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory);
+    void setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory * inputHistory);
 
     void initLayout();
 
@@ -117,7 +117,7 @@ namespace API
     QStringList m_disabled;
 
     /// History of inputs to the algorithm
-    MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
+    MantidQt::API::AbstractAlgorithmInputHistory * m_inputHistory;
 
   };
 

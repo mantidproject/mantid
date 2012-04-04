@@ -56,7 +56,7 @@ private:
   Mantid::API::Algorithm_sptr m_postProcessingAlg;
 
   /// History of the inputs to the processing algorithms
-  MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
+  //MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
 
 };
 

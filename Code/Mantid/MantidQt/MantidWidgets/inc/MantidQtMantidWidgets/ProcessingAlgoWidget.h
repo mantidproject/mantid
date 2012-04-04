@@ -56,7 +56,7 @@ namespace MantidQt
 
       void saveInput();
       /// Sets the AlgorithmInputHistory object recording the algorithm properties
-      void setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory) { ui.algoProperties->setInputHistory(inputHistory); }
+      void setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory * inputHistory) { ui.algoProperties->setInputHistory(inputHistory); }
 
       /// @return the last selected algorithm
       Mantid::API::Algorithm_sptr getAlgorithm() { return m_alg; };

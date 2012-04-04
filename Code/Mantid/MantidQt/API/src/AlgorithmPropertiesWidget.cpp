@@ -80,7 +80,7 @@ namespace API
    *
    * @param inputHistory :: AlgorithmInputHistoryImpl ptr
    */
-  void AlgorithmPropertiesWidget::setInputHistory(MantidQt::API::AlgorithmInputHistoryImpl * inputHistory)
+  void AlgorithmPropertiesWidget::setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory * inputHistory)
   {
     m_inputHistory = inputHistory;
   }

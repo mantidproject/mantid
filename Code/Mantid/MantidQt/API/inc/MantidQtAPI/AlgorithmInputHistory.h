@@ -6,42 +6,18 @@
 //----------------------------------
 #include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
-
-#include <QVector>
 #include <QHash>
 #include <QString>
 
-//----------------------------------
-// Mantid forward declarations
-//----------------------------------
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Property;
-  }
-}
-
-
-// Top level namespace for this library
 namespace MantidQt
 {
-
 namespace API
 {
 
-//----------------------------------
-// Forward declarations
-//----------------------------------
+/** This abstract class deals with the loading and saving of previous algorithm
+    property values to/from MantidPlot's QSettings.
 
-/** 
-    This class is responsible for creating the correct dialog for an algorithm. If 
-    no specialized version is registered for that algorithm then the default is created
-    
-    @author Martyn Gigg, Tessella Support Services plc
-    @date 27/02/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -55,22 +31,14 @@ namespace API
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API AlgorithmInputHistoryImpl
+class EXPORT_OPT_MANTIDQT_API AbstractAlgorithmInputHistory
 {
-  
 public:
-
-  /// Constructor
-  AlgorithmInputHistoryImpl(QString settingsGroup = "Mantid/Algorithms");
-  /// Destructor
-  virtual ~AlgorithmInputHistoryImpl();
+  /// Abstract destructor
+  virtual ~AbstractAlgorithmInputHistory() = 0;
 
   /// Update the old values that are stored here. Only valid
   /// values are stored here
@@ -91,13 +59,15 @@ public:
   /// Save the values stored here to persistent storage
   void save() const;
   
-private:
-  friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
+protected:
+  /// Constructor
+  AbstractAlgorithmInputHistory(QString settingsGroup);
 
+private:
   /// Private copy constructor - NO COPY ALLOWED
-  AlgorithmInputHistoryImpl(const AlgorithmInputHistoryImpl&);
+  AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  AlgorithmInputHistoryImpl& operator = (const AlgorithmInputHistoryImpl&);
+  AbstractAlgorithmInputHistory& operator = (const AbstractAlgorithmInputHistory&);
   
   /// Load any values that are available from persistent storage
   void load();
@@ -115,9 +85,19 @@ private:
   QString m_dirKey;
 };
 
+class EXPORT_OPT_MANTIDQT_API AlgorithmInputHistoryImpl : public AbstractAlgorithmInputHistory
+{
+private:
+  AlgorithmInputHistoryImpl() : AbstractAlgorithmInputHistory("Mantid/Algorithms") {}
+  ~AlgorithmInputHistoryImpl() {}
+
+private:
+  friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
+};
+
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
+  template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
 #endif /* _WIN32 */
   /// The specific instantiation of the templated type
   typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl> AlgorithmInputHistory;
