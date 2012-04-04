@@ -8,6 +8,8 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,7 +32,7 @@ public:
 class NormaliseToMonitorTest : public CxxTest::TestSuite
 {
 private:
-  NormaliseToMonitorTestHelper norm;
+
 
 public:
 
@@ -38,6 +40,10 @@ public:
   static void destroySuite(NormaliseToMonitorTest *suite) { delete suite; }
 
   NormaliseToMonitorTest()
+  {
+  }
+
+  void setUp()
   {
     MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     // Change the data in the monitor spectrum
@@ -66,7 +72,7 @@ public:
     instr->markAsDetector(det);
     input->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 3));
 
-    AnalysisDataService::Instance().add("normMon",input);
+    AnalysisDataService::Instance().addOrReplace("normMon",input);
 
     // Create a single spectrum workspace to be the monitor one
     MatrixWorkspace_sptr monWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,20,0.1,0.5);
@@ -82,33 +88,42 @@ public:
     //instr->markAsMonitor(mon2);
     monWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap2, forSpecDetMap2, 1));
 
-    AnalysisDataService::Instance().add("monWS",monWS);
+    AnalysisDataService::Instance().addOrReplace("monWS",monWS);
   }
 
   void testName()
   {
+    NormaliseToMonitorTestHelper norm;
     TS_ASSERT_EQUALS( norm.name(), "NormaliseToMonitor" )
   }
 
   void testVersion()
   {
+    NormaliseToMonitorTestHelper norm;
     TS_ASSERT_EQUALS( norm.version(), 1 )
   }
 
   void testInit()
   {
+    NormaliseToMonitorTestHelper norm;
     TS_ASSERT_THROWS_NOTHING( norm.initialize() )
     TS_ASSERT( norm.isInitialized() )
   }
 
-  void testExec()
+  void dotestExec(bool events)
   {
-    if ( !norm.isInitialized() ) norm.initialize();
+    NormaliseToMonitorTestHelper norm;
+    if (events)
+      FrameworkManager::Instance().exec("ConvertToEventWorkspace", 8,
+          "InputWorkspace", "normMon",
+          "GenerateZeros", "1",
+          "GenerateMultipleEvents", "0",
+          "OutputWorkspace", "normMon");
 
+    if ( !norm.isInitialized() ) norm.initialize();
     // Check it fails if properties haven't been set
     TS_ASSERT_THROWS( norm.execute(), std::runtime_error )
     TS_ASSERT( ! norm.isExecuted() )
-
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace","normMon2") )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("MonitorSpectrum","0") )
@@ -138,6 +153,16 @@ public:
     }
   }
 
+
+  void testExec()
+  {
+    dotestExec(false);
+  }
+
+  void testExec_Events()
+  {
+    dotestExec(true);
+  }
 
 
   void testNormaliseByIntegratedCount()

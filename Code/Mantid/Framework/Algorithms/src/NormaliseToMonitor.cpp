@@ -45,6 +45,9 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 
 #include <cfloat>
 #include <iomanip>
+#include "MantidDataObjects/EventWorkspace.h"
+
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -426,11 +429,16 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::Matrix
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
-
   childAlg->executeAsSubAlg();
+  MatrixWorkspace_sptr outWS = childAlg->getProperty("OutputWorkspace");
+
+  IAlgorithm_sptr alg = createSubAlgorithm("ConvertToMatrixWorkspace");
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outWS);
+  alg->executeAsSubAlg();
+  outWS = alg->getProperty("OutputWorkspace");
 
   // Only get to here if successful
-  return childAlg->getProperty("OutputWorkspace");
+  return outWS;
 }
 
 /** Sets the maximum and minimum X values of the monitor spectrum to use for integration
@@ -513,9 +521,25 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
 void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                                            API::MatrixWorkspace_sptr& outputWorkspace)
 { 
+  EventWorkspace_sptr inputEvent = boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
+  EventWorkspace_sptr outputEvent;
+
   // Only create output workspace if different to input one
-  if (outputWorkspace != inputWorkspace ) 
-    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+  if (outputWorkspace != inputWorkspace )
+  {
+    if (inputEvent)
+    {
+      //Make a brand new EventWorkspace
+      outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(
+          API::WorkspaceFactory::Instance().create("EventWorkspace", inputEvent->getNumberHistograms(), 2, 1));
+      //Copy geometry and data
+      API::WorkspaceFactory::Instance().initializeFromParent(inputEvent, outputEvent, false);
+      outputEvent->copyDataFrom( (*inputEvent) );
+      outputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(outputEvent);
+    }
+    else
+      outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+  }
 
   // Get hold of the monitor spectrum
   const MantidVec& monX = m_monitor->readX(0);
@@ -523,6 +547,7 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
   MantidVec& monE = m_monitor->dataE(0);
   // Calculate the overall normalisation just the once if bins are all matching
   if (m_commonBins) this->normalisationFactor(m_monitor->readX(0),&monY,&monE);
+
 
   const size_t numHists = inputWorkspace->getNumberHistograms();
   MantidVec::size_type specLength = inputWorkspace->blocksize();
@@ -549,31 +574,41 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
       this->normalisationFactor(X,Y,E);
     }
 
-    const MantidVec& inY = inputWorkspace->readY(i);
-    const MantidVec& inE = inputWorkspace->readE(i);
-    MantidVec& YOut = outputWorkspace->dataY(i);
-    MantidVec& EOut = outputWorkspace->dataE(i);
-    outputWorkspace->dataX(i) = inputWorkspace->readX(i);
-    // The code below comes more or less straight out of Divide.cpp
-    for (MantidVec::size_type k = 0; k < specLength; ++k)
+    if (inputEvent)
     {
-      // Get references to the input Y's
-      const double& leftY = inY[k];
-      const double& rightY = (*Y)[k];
-
-      // Calculate result and store in local variable to avoid overwriting original data if
-      // output workspace is same as one of the input ones
-      const double newY = leftY/rightY;
-
-      if (fabs(rightY)>1.0e-12 && fabs(newY)>1.0e-12)
+      // ----------------------------------- EventWorkspace ---------------------------------------
+      EventList & outEL = outputEvent->getEventList(i);
+      outEL.divide(X, *Y, *E);
+    }
+    else
+    {
+      // ----------------------------------- Workspace2D ---------------------------------------
+      const MantidVec& inY = inputWorkspace->readY(i);
+      const MantidVec& inE = inputWorkspace->readE(i);
+      MantidVec& YOut = outputWorkspace->dataY(i);
+      MantidVec& EOut = outputWorkspace->dataE(i);
+      outputWorkspace->dataX(i) = inputWorkspace->readX(i);
+      // The code below comes more or less straight out of Divide.cpp
+      for (MantidVec::size_type k = 0; k < specLength; ++k)
       {
-        const double lhsFactor = (inE[k]<1.0e-12|| fabs(leftY)<1.0e-12) ? 0.0 : pow((inE[k]/leftY),2);
-        const double rhsFactor = (*E)[k]<1.0e-12 ? 0.0 : pow(((*E)[k]/rightY),2);
-        EOut[k] = std::abs(newY) * sqrt(lhsFactor+rhsFactor);
-      }
+        // Get references to the input Y's
+        const double& leftY = inY[k];
+        const double& rightY = (*Y)[k];
 
-      // Now store the result
-      YOut[k] = newY;
+        // Calculate result and store in local variable to avoid overwriting original data if
+        // output workspace is same as one of the input ones
+        const double newY = leftY/rightY;
+
+        if (fabs(rightY)>1.0e-12 && fabs(newY)>1.0e-12)
+        {
+          const double lhsFactor = (inE[k]<1.0e-12|| fabs(leftY)<1.0e-12) ? 0.0 : pow((inE[k]/leftY),2);
+          const double rhsFactor = (*E)[k]<1.0e-12 ? 0.0 : pow(((*E)[k]/rightY),2);
+          EOut[k] = std::abs(newY) * sqrt(lhsFactor+rhsFactor);
+        }
+
+        // Now store the result
+        YOut[k] = newY;
+      } // end Workspace2D case
     } // end loop over current spectrum
 
     if (!m_commonBins) { delete Y; delete E; }
