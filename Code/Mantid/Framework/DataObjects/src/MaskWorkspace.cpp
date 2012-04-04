@@ -35,8 +35,8 @@ namespace DataObjects
      * @param[in] instrument Instrument that is the base for this workspace.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument)
-        : SpecialWorkspace2D(instrument)
+    MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
+        : SpecialWorkspace2D(instrument, includeMonitors)
     {
     }
 

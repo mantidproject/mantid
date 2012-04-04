@@ -16,7 +16,8 @@ namespace DataObjects
     public:
         MaskWorkspace();
         MaskWorkspace(std::size_t numvectors);
-        MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument);
+        MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+                      const bool includeMonitors=false);
         ~MaskWorkspace();
 
         virtual const std::string id() const;
