@@ -10,11 +10,105 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
+#include <QtConcurrentRun>
 #include <Poco/File.h>
+#include <QFuture>
+
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+
+/**
+ * Constructor.
+ *
+ * @param parent :: pointer to the parent QObject.
+ */
+FindFilesThread::FindFilesThread(QObject *parent) :
+  QThread(parent), m_error(), m_filenames(), m_text(), 
+    m_isForRunFiles(), m_isOptional()
+{
+}
+
+/**
+ * Set the values needed for the thread to run.
+ *
+ * @param text :: the text containing the file names, typed in by the user
+ * @param isForRunFiles :: whether or not we are finding run files.
+ * @param isOption :: whether or not the files are optional.
+ */
+void FindFilesThread::set(std::string text, bool isForRunFiles, bool isOptional)
+{
+  m_text = text;
+  m_isForRunFiles = isForRunFiles;
+  m_isOptional = isOptional;
+}
+
+/**
+ * Called when the thread is ran via start().  Tries to find the files, and
+ * populates the error and filenames member variables with the result of the search.
+ */
+void FindFilesThread::run()
+{
+  // Reset result member vars.
+  m_error.clear();
+  m_filenames.clear();
+  if( m_text.empty() )
+  {
+    if( m_isOptional )
+      m_error = "";
+    else
+      m_error = "No files specified.";
+
+    return;
+  }
+
+  Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
+  std::string error = "";
+  try
+  {
+    if( m_isForRunFiles )
+    {
+      m_filenames = fileSearcher.findRuns(m_text);
+    }
+    else
+    {
+      // Remove whitespace
+      m_text.erase(std::remove_if(m_text.begin(), m_text.end(), ::isspace));
+
+      // Tokenise on ","
+      std::vector<std::string> filestext;
+      filestext = boost::split(filestext, m_text, boost::is_any_of(","));
+
+      // Iterate over tokens.
+      auto it = filestext.begin();
+      for( ; it != filestext.end(); ++it)
+      {
+        std::string result = fileSearcher.getFullPath(*it);
+        Poco::File test(result);
+        if ( ( ! result.empty() ) && test.exists() )
+        {
+          m_filenames.push_back(*it);
+        }
+        else
+        {
+          throw std::invalid_argument("File \"" + (*it) + "\" not found");
+        }
+      }
+    }
+  }
+  catch(Exception::NotFoundError& exc)
+  {
+    m_error = exc.what();
+    m_filenames.clear();
+  }
+  catch(std::invalid_argument& exc)
+  {
+    m_error = exc.what();
+    m_filenames.clear();
+  }
+}
 
 MWRunFiles::MWRunFiles(QWidget *parent) 
   : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
@@ -22,6 +116,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
     m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
     m_foundFiles(), m_lastDir(), m_fileFilter()
 {
+  m_thread = new FindFilesThread(this);
+  
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
@@ -32,6 +128,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   connect(this, SIGNAL(fileEditingFinished()), this, SLOT(findFiles()));
   connect(m_uiForm.entryNum, SIGNAL(textChanged(const QString &)), this, SLOT(checkEntry()));
   connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this, SLOT(checkEntry()));
+
+  connect(m_thread, SIGNAL(finished()), this, SLOT(inspectThreadResult()));
 
   m_uiForm.fileEditor->clear();
   
@@ -57,6 +155,13 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   // is installed in
   QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
   if ( ! datadirs.isEmpty() ) m_lastDir = datadirs[0];
+}
+
+MWRunFiles::~MWRunFiles() 
+{
+  // Before destruction, make sure the file finding thread has stopped running. Wait if necessary.
+  m_thread->exit(-1);
+  m_thread->wait();
 }
 
 /**
@@ -411,71 +516,47 @@ void MWRunFiles::setFileText(const QString & text)
   m_uiForm.fileEditor->setText(text);
   findFiles();
 }
-/** 
-* Puts the comma separated string in the fileEditor into the m_files array
-*/
+
+/**
+ * Puts the comma separated string in the fileEditor into the m_files array.
+ */
 void MWRunFiles::findFiles()
 {
-  std::string text = this->m_uiForm.fileEditor->text().toStdString();
-  if( text.empty() )
+  if( m_uiForm.fileEditor->isModified() )
   {
-    if( this->isOptional() )
-    {
-      setFileProblem("");
-      m_foundFiles.clear();
-      return;
-    }
-    else
-    {
-      setFileProblem("No files specified.");
-      return;
-    }
-  }
+    // Reset modified flag.
+    m_uiForm.fileEditor->setModified(false);
 
-  QStringList filestext = this->m_uiForm.fileEditor->text().split(", ", QString::SkipEmptyParts);
-  QString file;
+    // If the thread is running, cancel it.
+    if( m_thread->isRunning() )
+      m_thread->exit(-1);
+    
+    // Set the values for the thread, and start it running.
+    std::string text = this->m_uiForm.fileEditor->text().toStdString();
+    m_thread->set(text, isForRunFiles(), this->isOptional());
+    m_thread->start();
+  }
+}
 
-  Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
-  std::vector<std::string> filenames;
-  QString error("");
-  try
+
+/**
+ * Called when the file finding thread finishes.  Inspects the result
+ * of the thread, and emits fileFound() if it has been successful.
+ */
+void MWRunFiles::inspectThreadResult()
+{
+  // Get results from the file finding thread.
+  std::string error = m_thread->error();
+  std::vector<std::string> filenames = m_thread->filenames();
+
+  if( !error.empty() )
   {
-    if( isForRunFiles() )
-    {
-      filenames = fileSearcher.findRuns(text);
-    }
-    else
-    {
-      foreach(file, filestext)
-      {
-        std::string result = fileSearcher.getFullPath(file.toStdString());
-        Poco::File test(result);
-        if ( ( ! result.empty() ) && test.exists() )
-        {
-          filenames.push_back(file.toStdString());
-        }
-        else
-        {
-          throw std::invalid_argument("File \"" + file.toStdString() + "\" not found");
-        }
-      }
-    }
-  }
-  catch(Exception::NotFoundError& exc)
-  {
-    error = QString::fromStdString(exc.what());
-  }
-  catch(std::invalid_argument& exc)
-  {
-    error = QString::fromStdString(exc.what());
-  }
-  if( !error.isEmpty() )
-  {
-    setFileProblem(error);
+    setFileProblem(QString::fromStdString(error));
     return;
   }
 
   m_foundFiles.clear();
+
   for( size_t i = 0; i < filenames.size(); ++i)
   {
     m_foundFiles.append(QString::fromStdString(filenames[i]));
@@ -492,6 +573,7 @@ void MWRunFiles::findFiles()
   {
     setFileProblem("");
   }
+
   emit filesFound();
 }
 

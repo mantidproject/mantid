@@ -8,11 +8,49 @@
 #include <QSettings>
 #include <QComboBox>
 #include <QMessageBox>
+#include <QStringList>
+#include <QFutureWatcher>
+#include <QThread>
 
 namespace MantidQt
 {
   namespace MantidWidgets
   {
+    /**
+     * A class to allow the asyncronous finding of files.
+     */
+    class FindFilesThread : public QThread
+    {
+      Q_OBJECT
+
+    public:
+      /// Constructor.
+      FindFilesThread(QObject *parent = NULL);
+      /// Set the various file-finding values / options.
+      void set(std::string text = "", bool isForRunFiles = true, bool isOptional = false);
+
+      /// Returns the error string.  Empty if no error was caught.
+      std::string error() const { return m_error; }
+      /// Returns the vector of filenames.  Empty if no files were found, or if there was an error.
+      std::vector<std::string> filenames() const { return m_filenames; }
+
+    protected:
+      /// Override parent class run().
+      virtual void run();
+
+    private:
+      /// Storage for any error thrown while trying to find files.
+      std::string m_error;
+      /// Filenames found during execution of the thread.
+      std::vector<std::string> m_filenames;
+
+      /// File name text typed in by the user.
+      std::string m_text;
+
+      bool m_isForRunFiles;
+      bool m_isOptional;
+    };
+
     /** 
     This class defines a widget for file searching. It allows either single or multiple files
     to be specified.
@@ -73,6 +111,10 @@ namespace MantidQt
 
       ///Default constructor
       MWRunFiles(QWidget *parent=NULL);
+
+      /// Destructor
+      ~MWRunFiles();
+
       // property accessors/modifiers
       bool isForRunFiles() const;
       void isForRunFiles(const bool);
@@ -129,6 +171,8 @@ namespace MantidQt
       void setFileText(const QString & text);
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
+      /// Slot called when file finding thread has finished.
+      void inspectThreadResult();
 
     private:
       /// Create a file filter from a list of extensions
@@ -178,6 +222,8 @@ namespace MantidQt
       QString m_lastDir;
       /// A file filter for the file browser
       QString m_fileFilter;
+      /// Thread to allow asynchronous finding of files.
+      FindFilesThread * m_thread;
     };
   }
 }
