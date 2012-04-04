@@ -86,7 +86,8 @@ public:
 
 
 
-  void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1, bool OneEventPerBin=false)
+  void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,
+      bool OneEventPerBin=false, bool MakeWorkspace2D = false)
   {
 
     int numEventsPer = 100;
@@ -104,11 +105,11 @@ public:
 
     // Rebin the workspace to have a manageable number bins
     AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
-    if (OneEventPerBin)
-      FrameworkManager::Instance().exec("Rebin", 6,
-          "InputWorkspace", "inputWS",
-          "OutputWorkspace", "inputWS",
-          "Params", "0, 1e3, 16e3");
+    FrameworkManager::Instance().exec("Rebin", 8,
+        "InputWorkspace", "inputWS",
+        "OutputWorkspace", "inputWS",
+        "Params", "0, 500, 16e3",
+        "PreserveEvents", MakeWorkspace2D ? "0" : "1" );
 
     ConvertToDiffractionMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -125,10 +126,9 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     size_t npoints = ws->getNPoints();
-    if (OneEventPerBin)
-    { TS_ASSERT_LESS_THAN( 100000, npoints); }// # of points != # of bins exactly because some are off the extents
-    else
-    { TS_ASSERT_LESS_THAN( 100000, npoints); }// Some points are left
+    // # of points != # of bins exactly because some are off the extents
+    TS_ASSERT_LESS_THAN( 100000, npoints);
+
     TS_ASSERT_EQUALS( ws->getNumExperimentInfo(), 1);
     TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(0) );
 
@@ -164,15 +164,31 @@ public:
     do_test_MINITOPAZ(TOF);
   }
 
+  void test_MINITOPAZ_Weighted()
+  {
+    do_test_MINITOPAZ(WEIGHTED);
+  }
+
   void test_MINITOPAZ_addToExistingWorkspace()
   {
     do_test_MINITOPAZ(TOF, 2);
   }
 
-  void test_MINITOPAZ_OneEventPerBin()
+  void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace()
   {
-    do_test_MINITOPAZ(TOF, 1, true);
+    do_test_MINITOPAZ(TOF, 1, true, false);
   }
+
+  void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D()
+  {
+    do_test_MINITOPAZ(TOF, 1, true, true);
+  }
+
+  void test_MINITOPAZ_fromWorkspace2D()
+  {
+    do_test_MINITOPAZ(TOF, 1, false, true);
+  }
+
 
 
 

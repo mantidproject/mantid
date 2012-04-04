@@ -187,13 +187,17 @@ namespace MDEvents
     }
     else
     {
-      // ----- Use the Histogram representation ------------
+      // ----- Workspace2D, or use the Histogram representation of EventWorkspace ------------
       // Construct a new event list
       EventList el;
 
       // Create the events using the bins
       const ISpectrum * inSpec = m_inWS->getSpectrum(workspaceIndex);
-      el.createFromHistogram(inSpec, true /* Generate zeros */, false /* no multiple events */, 1);
+      // If OneEventPerBin, generate exactly 1 event per bin, including zeros.
+      // If !OneEventPerBin, generate up to 10 events per bin, excluding zeros
+      el.createFromHistogram(inSpec, OneEventPerBin /* Generate zeros */,
+          !OneEventPerBin /* Multiple events */,
+          (OneEventPerBin ? 1 : 10) /* Max of this many events per bin */);
 
       // Perform the conversion on this temporary event list
       this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
@@ -247,8 +251,7 @@ namespace MDEvents
       V3D Q_dir = mat * Q_dir_lab_frame;
 
       // For speed we extract the components.
-      coord_t Q_dir_x = coord_t(Q_dir.X());
-      coord_t Q_dir_y = coord_t(Q_dir.Y());
+      coord_t Q_dir_x = coord_t(Q_dir.X());      coord_t Q_dir_y = coord_t(Q_dir.Y());
       coord_t Q_dir_z = coord_t(Q_dir.Z());
 
       // For lorentz correction, calculate  sin(theta))^2
@@ -345,28 +348,6 @@ namespace MDEvents
     // check the input units
     if (m_inWS->getAxis(0)->unit()->unitID() != "TOF")
       throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
-
-    if (!m_inEventWS && !OneEventPerBin)
-    {
-      // We DONT want 1 event per bin, but we didn't give an EventWorkspace
-      // So we need to convert to event workspace.
-      if (inWS2D)
-      {
-        // Convert from 2D to Event
-        IAlgorithm_sptr alg = createSubAlgorithm("ConvertToEventWorkspace", 0.0, 0.1, true);
-        alg->setProperty("InputWorkspace", inWS2D);
-        alg->setProperty("GenerateMultipleEvents", false); // One event per bin by default
-        alg->setPropertyValue("OutputWorkspace", getPropertyValue("InputWorkspace") + "_event");
-        alg->executeAsSubAlg();
-        EventWorkspace_sptr eventWS = alg->getProperty("OutputWorkspace");
-        m_inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(eventWS);
-        if (!alg->isExecuted() || !m_inWS)
-          throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
-      }
-      else
-        throw std::invalid_argument("InputWorkspace must be either an EventWorkspace or a Workspace2D (which will get converted to events).");
-    }
-
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
