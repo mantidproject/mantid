@@ -84,6 +84,8 @@ void StartLiveDataDialog::initLayout()
 
   // ========== Layout Tweaks =============
   ui.tabWidget->setCurrentIndex(0);
+  ui.splitterMain->setStretchFactor(0, 0);
+  ui.splitterMain->setStretchFactor(1, 1);
 
   // ========== Set previous values for Algorithms/scripts ============
   for (int i=0; i<2; i++)

@@ -2,6 +2,10 @@
 #include <Qsci/qscilexerpython.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include <qfiledialog.h>
+#include <iosfwd>
+#include <fstream>
+#include <QFileInfo>
 
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
@@ -35,19 +39,92 @@ ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent)
   //=========== SLOTS =============
   connect(ui.algoSelector, SIGNAL(algorithmSelectionChanged(const QString &, int)),
       this, SLOT(changeAlgorithm()));
+
+  connect(ui.btnSave, SIGNAL(clicked()), this, SLOT(btnSaveClicked()));
+  connect(ui.btnLoad, SIGNAL(clicked()), this, SLOT(btnLoadClicked()));
+
+  loadSettings();
 }
 
+//------------------------------------------------------------------------------
 /// Destructor
 ProcessingAlgoWidget::~ProcessingAlgoWidget()
 {
+  saveSettings();
 }
 
+//------------------------------------------------------------------------------
 /** Save the inputs to algorithm history */
 void ProcessingAlgoWidget::saveInput()
 {
   ui.algoProperties->saveInput();
 }
 
+
+//------------------------------------------------------------------------------------
+/** Load QSettings from .ini-type files */
+void ProcessingAlgoWidget::loadSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/ProcessingAlgoWidget");
+  m_lastFile = settings.value("LastFile", QString()).toString();
+  settings.endGroup();
+}
+
+//------------------------------------------------------------------------------------
+/** Save settings for next time. */
+void ProcessingAlgoWidget::saveSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/ProcessingAlgoWidget");
+  settings.setValue("LastFile", m_lastFile);
+  settings.endGroup();
+}
+
+
+//------------------------------------------------------------------------------
+/** Slot called when the save button is clicked */
+void ProcessingAlgoWidget::btnSaveClicked()
+{
+  // Save to a .py file
+  QString fileselection = QFileDialog::getSaveFileName(this, "Save a Python Script",
+      QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
+  if (!fileselection.isEmpty())
+  {
+    m_lastFile = fileselection;
+    std::ofstream file;
+    file.exceptions (std::ifstream::failbit | std::ifstream::badbit );
+    try
+    {
+      file.open(fileselection.toStdString());
+      file << ui.editor->text().toStdString();
+      file.close();
+    }
+    catch (std::ifstream::failure & e)
+    {
+      QMessageBox::critical(this, "Exception saving file " + m_lastFile,
+          QString("The file could not be saved due to the following exception:\n") + QString(e.what()));
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+/** Slot called when the Load button is clicked */
+void ProcessingAlgoWidget::btnLoadClicked()
+{
+  // Load a .py file
+  QString fileselection = QFileDialog::getOpenFileName(this, "Load a Python Script",
+      QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
+  if (!fileselection.isEmpty())
+  {
+    m_lastFile = fileselection;
+    std::ifstream file(fileselection.toStdString());
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    ui.editor->setText(QString::fromStdString(buffer.str()));
+    file.close();
+  }
+}
 
 
 //------------------------------------------------------------------------------
