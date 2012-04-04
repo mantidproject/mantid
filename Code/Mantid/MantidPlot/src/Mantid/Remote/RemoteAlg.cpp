@@ -4,6 +4,24 @@
 #include <string>
 using namespace std;
 
+
+// sets the m_name member, replacing all whitespace with '_' chars.  (Moab, and
+// possibly other job managers, doesn't allow spaces in job names.)
+void RemoteAlg::setName( const string &name)
+{
+  if (name.length() == 0)
+    return;
+
+  m_name = name;
+
+  // replace every whitespace char with an underscore
+  for (int i=0; i < m_name.length(); i++)
+  {
+    if (isspace( m_name[i]))
+      m_name[i] = '_';
+  }
+}
+
     
 // Queries the user for any user-supplied params and builds up the complete
 // list of command line paramters from user's responses and the list of 'fixed'

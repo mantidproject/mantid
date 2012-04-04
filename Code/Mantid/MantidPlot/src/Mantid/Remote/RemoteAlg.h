@@ -14,12 +14,15 @@ class RemoteAlg
 {
 public:
     
-    RemoteAlg( std::string executable = "") : m_executable( executable) { }
+    RemoteAlg( const std::string &algName = "", const std::string &executable = "") :
+        m_executable( executable) { setName( algName);}
     
     // At this point, the default copy constructor and assignment operator are all
     // valid and useful.  If that changes, we'll either need to explicitly implement them
     // or else declare them private.
     
+    // Getter funcs for algorithm name and executable
+    const std::string & getName() const { return m_name; }
     const std::string & getExecutable() const { return m_executable; }
     
     // Queries the user for any user-supplied params and builds up the complete
@@ -30,6 +33,10 @@ public:
     // Retrieves the specified resource value.  Will check the user-supplied params
     // substitute the user-supplied value if required.
     std::string getResourceValue (const std::string &name) const;
+
+    // sets the m_name member, replacing all whitespace with '_' chars.  (Moab, and
+    // possibly other job managers, doesn't allow spaces in job names.)
+    void setName( const std::string &name);
 
     void setExecutable( const std::string  &executable) { m_executable = executable; }
     void appendCmdLineParam( const std::string &param) { m_cmdLineParams.push_back( param); }
@@ -84,13 +91,15 @@ public:
         // Note: We're deliberately NOT checking m_userSuppliedParamValues.  Those
         // strings get filled in just before the job is submitted
         
-        // The only thing that's really necessary is the executable name.
-        // (MWS also requires the the number of nodes, but other job managers might not.
-        // Perhaps we create an MWSRemoteAlg subclass?)
-        return (m_executable.length() > 0);
+        // The only things that are really necessary are the algorithm name and the
+        // executable name.  (MWS also requires the the number of nodes, but other job
+        // managers might not. Perhaps we create an MWSRemoteAlg subclass?)
+        return (m_name.length() > 0 && m_executable.length() > 0);
     }
     
 private:
+    std::string m_name;         // The name of the algorithm.  Is sent over to the cluster (which will probably
+                                // use it for naming the files for stdout and stderr).
     std::string m_executable;  // The name of the program to run.  Probably something like /usr/bin/mpirun...
     std::vector<std::string> m_cmdLineParams;
     std::vector<std::string> m_userSuppliedParamNames;

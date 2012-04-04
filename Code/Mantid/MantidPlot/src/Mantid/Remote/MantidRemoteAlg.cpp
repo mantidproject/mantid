@@ -341,7 +341,7 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
 {
 
     RemoteAlg alg;
-    QString algName;
+    QString algDisplayName;  // Shows up in the GUI
     
     QDomNode n = elm.firstChild();
     while (!n.isNull())
@@ -351,7 +351,8 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
       {
         if (e.tagName() == "name" )
         {
-            algName = e.text();
+            algDisplayName = e.text();
+            alg.setName( algDisplayName.toStdString());
         }
         
         else if (e.tagName() == "executable")
@@ -476,10 +477,10 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
     }
 
     // Add to the view and the algorithm hash table
-    if (alg.isValid() && algName.length() > 0)
+    if (alg.isValid())
     {
         QListWidgetItem *algItem;
-        algItem = new QListWidgetItem( algName);
+        algItem = new QListWidgetItem( algDisplayName);  // algDisplayName is set at the same time as alg::m_name, so if alg is valid, so is algDisplayName...
         m_algList->addItem( algItem);       
         m_algorithmHash[algItem] = alg;
         
