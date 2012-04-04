@@ -5,7 +5,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "ImageDataSource.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class GraphDisplay 
@@ -42,7 +43,7 @@ namespace MantidQt
 namespace ImageView
 {
 
-class GraphDisplay 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay 
 {
   public:
      GraphDisplay( QwtPlot*      graph_plot, 

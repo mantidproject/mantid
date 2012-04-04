@@ -2,8 +2,9 @@
 #define TEST_DATA_SOURCE_H
 
 #include <cstddef>
-#include "DataArray.h"
-#include "ImageDataSource.h"
+#include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class TestDataSource 
@@ -41,7 +42,7 @@ namespace ImageView
 {
 
 
-class TestDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TestDataSource: public ImageDataSource
 {
   public:
 

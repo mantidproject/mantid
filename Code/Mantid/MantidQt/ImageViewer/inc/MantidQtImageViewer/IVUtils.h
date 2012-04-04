@@ -3,6 +3,8 @@
 
 #include <QVector>
 
+#include "MantidQtImageViewer/DllOptionIV.h"
+
 /**
     @class IVUtils 
   
@@ -39,7 +41,7 @@ namespace ImageView
 {
 
 
-class IVUtils
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
 {
   public:
 

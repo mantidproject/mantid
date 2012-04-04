@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class ImageDataSource 
@@ -42,7 +43,7 @@ namespace ImageView
 {
 
 
-class ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDataSource
 {
   public:
 

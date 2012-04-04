@@ -3,8 +3,9 @@
 
 #include <QRect>
 
-#include "ImageDataSource.h"
 #include "ui_ImageView.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class SliderHandler 
@@ -42,7 +43,7 @@ namespace ImageView
 {
 
 
-class SliderHandler 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler 
 {
   public:
 

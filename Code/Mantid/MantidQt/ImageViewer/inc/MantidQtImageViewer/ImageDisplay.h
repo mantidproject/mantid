@@ -7,10 +7,11 @@
 #include <QTableWidget>
 #include <qwt_plot.h>
 
-#include "ImageDataSource.h"
-#include "GraphDisplay.h"
-#include "ImagePlotItem.h"
-#include "SliderHandler.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/GraphDisplay.h"
+#include "MantidQtImageViewer/ImagePlotItem.h"
+#include "MantidQtImageViewer/SliderHandler.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class ImageDisplay 
@@ -48,7 +49,7 @@ namespace ImageView
 {
 
 
-class ImageDisplay
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 {
   public:
      ImageDisplay( QwtPlot*       image_plot, 

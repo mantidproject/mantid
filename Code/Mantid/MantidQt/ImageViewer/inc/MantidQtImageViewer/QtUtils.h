@@ -3,6 +3,8 @@
 
 #include <QTableWidget>
 
+#include "MantidQtImageViewer/DllOptionIV.h"
+
 /**
     @class QtUtils 
   
@@ -39,7 +41,7 @@ namespace ImageView
 {
 
 
-class QtUtils
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER QtUtils
 {
   public:
   /// enter the specified string in the table

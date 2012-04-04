@@ -3,6 +3,7 @@
 
 #include <qwt_plot_picker.h>
 #include <qwt_plot_canvas.h>
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /** 
    @class TrackingPicker
@@ -39,7 +40,7 @@ namespace MantidQt
 namespace ImageView
 {
 
-class TrackingPicker : public QwtPlotPicker
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TrackingPicker : public QwtPlotPicker
 {
   Q_OBJECT
 

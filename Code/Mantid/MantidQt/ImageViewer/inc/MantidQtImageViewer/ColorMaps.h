@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QColor>
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class ColorMaps 
@@ -39,7 +40,7 @@ namespace MantidQt
 namespace ImageView
 {
 
-class ColorMaps
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ColorMaps
 {
 
 public:

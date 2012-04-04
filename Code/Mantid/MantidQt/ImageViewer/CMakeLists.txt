@@ -27,7 +27,6 @@ set ( INC_FILES
        inc/MantidQtImageViewer/GraphDisplay.h
        inc/MantidQtImageViewer/ImageView.h
        inc/MantidQtImageViewer/QtUtils.h
-       inc/MantidQtImageViewer/ui_ImageView.h
        inc/MantidQtImageViewer/ImageDataSource.h
        inc/MantidQtImageViewer/ImageView.ui
        inc/MantidQtImageViewer/SliderHandler.h

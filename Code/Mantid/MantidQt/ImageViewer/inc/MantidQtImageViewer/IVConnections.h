@@ -4,10 +4,11 @@
 #include <QtCore/QtCore>
 #include <QtGui/QWidget>
 
-#include "TrackingPicker.h"
 #include "ui_ImageView.h"
-#include "ImageDisplay.h"
-#include "GraphDisplay.h"
+#include "MantidQtImageViewer/TrackingPicker.h"
+#include "MantidQtImageViewer/ImageDisplay.h"
+#include "MantidQtImageViewer/GraphDisplay.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 
 /**
@@ -49,7 +50,7 @@ namespace ImageView
 {
 
 
-class IVConnections: public QWidget
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVConnections: public QWidget
 {
   Q_OBJECT
 

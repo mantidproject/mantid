@@ -5,11 +5,12 @@
 #include <QtGui>
 
 #include "ui_ImageView.h"
-#include "IVConnections.h"
-#include "GraphDisplay.h"
-#include "ImageDisplay.h"
-#include "ImageDataSource.h"
-#include "SliderHandler.h"
+#include "MantidQtImageViewer/IVConnections.h"
+#include "MantidQtImageViewer/GraphDisplay.h"
+#include "MantidQtImageViewer/ImageDisplay.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/SliderHandler.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class ImageView 
@@ -48,7 +49,7 @@ namespace ImageView
 {
 
 
-class ImageView 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView 
 {
   public:
      ImageView( ImageDataSource* data_source );

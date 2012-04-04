@@ -7,7 +7,8 @@
 #include <qwt_plot_item.h>
 #include <qwt_scale_map.h>
 
-#include "DataArray.h"
+#include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class ImagePlotItem 
@@ -45,7 +46,7 @@ namespace ImageView
 {
 
 
-class ImagePlotItem : public QwtPlotItem
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImagePlotItem : public QwtPlotItem
 {
 
 public:

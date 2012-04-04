@@ -2,6 +2,9 @@
 #define DATA_ARRAY_H
 
 #include <cstddef>
+
+#include "MantidQtImageViewer/DllOptionIV.h"
+
 /**
     @class DataArray 
   
@@ -37,7 +40,7 @@ namespace MantidQt
 namespace ImageView
 {
 
-class DataArray
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
 {
   public:
     DataArray( double xmin,     double xmax,
