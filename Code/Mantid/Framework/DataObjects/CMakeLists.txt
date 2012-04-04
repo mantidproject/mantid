@@ -11,13 +11,14 @@ set ( SRC_FILES
 	src/ManagedDataBlock2D.cpp
 	src/ManagedHistogram1D.cpp
 	src/ManagedWorkspace2D.cpp
-        src/MaskWorkspace.cpp
+	src/MaskWorkspace.cpp
 	src/MementoTableWorkspace.cpp
 	src/OffsetsWorkspace.cpp
 	src/Peak.cpp
 	src/PeakColumn.cpp
 	src/PeaksWorkspace.cpp
 	src/SpecialWorkspace2D.cpp
+	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
 	src/Workspace2D.cpp
@@ -44,20 +45,21 @@ set ( INC_FILES
 	inc/MantidDataObjects/ManagedDataBlock2D.h
 	inc/MantidDataObjects/ManagedHistogram1D.h
 	inc/MantidDataObjects/ManagedWorkspace2D.h
-        inc/MantidDataObjects/MaskWorkspace.h
+	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
+	inc/MantidDataObjects/SplittersWorkspace.h
 	inc/MantidDataObjects/TableColumn.h
 	inc/MantidDataObjects/TableWorkspace.h
 	inc/MantidDataObjects/Workspace2D.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
 )
 
-set ( TEST_FILES 
+set ( TEST_FILES
 	test/CompressedWorkspace2DTest.h
 	test/EventListTest.h
 	test/EventWorkspaceMRUTest.h
@@ -68,7 +70,7 @@ set ( TEST_FILES
 	test/ManagedDataBlock2DTest.h
 	test/ManagedHistogram1DTest.h
 	test/ManagedWorkspace2DTest.h
-        test/MaskWorkspaceTest.h
+	test/MaskWorkspaceTest.h
 	test/MementoTableWorkspaceTest.h
 	test/OffsetsWorkspaceTest.h
 	test/PeakColumnTest.h
@@ -76,6 +78,7 @@ set ( TEST_FILES
 	test/PeaksWorkspaceTest.h
 	test/RefAxisTest.h
 	test/SpecialWorkspace2DTest.h
+	test/SplittersWorkspaceTest.h
 	test/TableWorkspacePropertyTest.h
 	test/TableWorkspaceTest.h
 	test/TofEventTest.h
