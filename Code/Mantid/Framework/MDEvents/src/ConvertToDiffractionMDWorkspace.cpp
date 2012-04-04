@@ -267,8 +267,8 @@ namespace MDEvents
       const double wavenumber_in_angstrom_times_tof_in_microsec =
           (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
 
-      //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
-      //std::cout << Q_dir.norm() << " Qdir norm" << std::endl;
+      //g_log.information() << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
+      //g_log.information() << Q_dir.norm() << " Qdir norm" << std::endl;
 
       // This little dance makes the getting vector of events more general (since you can't overload by return type).
       typename std::vector<T> * events_ptr;
@@ -505,7 +505,7 @@ namespace MDEvents
     this->failedDetectorLookupCount = 0;
     size_t eventsAdded = 0;
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-    if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
+    if (DODEBUG) g_log.information() << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 
     for (size_t wi=0; wi < m_inWS->getNumberHistograms(); wi++)
     {
@@ -532,10 +532,10 @@ namespace MDEvents
       eventsAdded += eventsAdding;
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
-        if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
+        if (DODEBUG) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks
         tp.joinAll();
-        if (DODEBUG) std::cout << cputim << ": Performing the addition of these events.\n";
+        if (DODEBUG) g_log.information() << cputim << ": Performing the addition of these events.\n";
 
         // Now do all the splitting tasks
         ws->splitAllIfNeeded(ts);
@@ -545,7 +545,7 @@ namespace MDEvents
 
         // Count the new # of boxes.
         lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-        if (DODEBUG) std::cout << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
+        if (DODEBUG) g_log.information() << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
         eventsAdded = 0;
       }
     }
@@ -558,34 +558,34 @@ namespace MDEvents
         g_log.warning()<<"Unable to find detectors for " << this->failedDetectorLookupCount << " spectra. They have been skipped." << std::endl;
     }
 
-    if (DODEBUG) std::cout << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";
+    if (DODEBUG) g_log.information() << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";
 
     tp.joinAll();
-    if (DODEBUG) std::cout << cputim << ": Performing the FINAL addition of these events.\n";
+    if (DODEBUG) g_log.information() << cputim << ": Performing the FINAL addition of these events.\n";
 
     // Do a final splitting of everything
     ws->splitAllIfNeeded(ts);
     tp.joinAll();
-    if (DODEBUG) std::cout << cputim << ": Performing the FINAL splitting of boxes. There are now " << ws->getBoxController()->getTotalNumMDBoxes() <<" boxes\n";
+    if (DODEBUG) g_log.information() << cputim << ": Performing the FINAL splitting of boxes. There are now " << ws->getBoxController()->getTotalNumMDBoxes() <<" boxes\n";
 
 
     // Recount totals at the end.
     cputim.reset();
     ws->refreshCache();
-    if (DODEBUG) std::cout << cputim << ": Performing the refreshCache().\n";
+    if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCache().\n";
 
     //TODO: Centroid in parallel, maybe?
     ws->getBox()->refreshCentroid(NULL);
-    if (DODEBUG) std::cout << cputim << ": Performing the refreshCentroid().\n";
+    if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCentroid().\n";
 
 
     if (DODEBUG)
     {
-      std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << cputimtotal << " in total.\n";
+      g_log.information() << "Workspace has " << ws->getNPoints() << " events. This took " << cputimtotal << " in total.\n";
       std::vector<std::string> stats = ws->getBoxControllerStats();
       for (size_t i=0; i<stats.size(); ++i)
-        std::cout << stats[i] << "\n";
-      std::cout << std::endl;
+        g_log.information() << stats[i] << "\n";
+      g_log.information() << std::endl;
     }
 
 
