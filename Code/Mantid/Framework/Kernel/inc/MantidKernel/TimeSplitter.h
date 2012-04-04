@@ -43,6 +43,9 @@ public:
 
   SplittingInterval operator |(const SplittingInterval& b) const;
 
+  bool operator < (const SplittingInterval& b) const;
+  bool operator > (const SplittingInterval& b) const;
+
 private:
     /// begin
     DateAndTime m_start;

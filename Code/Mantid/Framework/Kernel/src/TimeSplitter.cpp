@@ -86,6 +86,19 @@ SplittingInterval SplittingInterval::operator |(const SplittingInterval& b) cons
   return out;
 }
 
+/// Compare two splitter by the begin time
+bool SplittingInterval::operator < (const SplittingInterval& b) const
+{
+  return (this->m_start < b.m_start);
+}
+
+
+/// Compare two splitter by the begin time
+bool SplittingInterval::operator > (const SplittingInterval& b) const
+{
+  return (this->m_start > b.m_start);
+}
+
 
 /** Comparator for sorting lists of SplittingInterval */
 bool compareSplittingInterval(const SplittingInterval & si1, const SplittingInterval & si2)

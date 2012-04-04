@@ -489,6 +489,75 @@ public:
 
   }
 
+  //----------------------------------------------------------------------------
+  void test_sort()
+  {
+    DateAndTime start, stop;
+    TimeSplitterType b;
+
+    //  the splitter ------
+    start = DateAndTime("2007-11-30T16:15:00");
+    stop =  DateAndTime("2007-11-30T16:16:00");
+    b.push_back( SplittingInterval(start, stop, 0) );
+
+    start = DateAndTime("2007-11-30T16:19:00");
+    stop =  DateAndTime("2007-11-30T16:20:00");
+    b.push_back( SplittingInterval(start, stop, 3) );
+
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop =  DateAndTime("2007-11-30T16:19:00");
+    b.push_back( SplittingInterval(start, stop, 2) );
+
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop =  DateAndTime("2007-11-30T16:18:00");
+    b.push_back( SplittingInterval(start, stop, 1) );
+
+    std::sort(b.begin(), b.end());
+
+    TS_ASSERT_EQUALS(b[0].start(), DateAndTime("2007-11-30T16:15:00"));
+    TS_ASSERT_EQUALS(b[1].start(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(b[2].start(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(b[3].start(), DateAndTime("2007-11-30T16:19:00"));
+  }
+
+  //----------------------------------------------------------------------------
+  void test_find()
+  {
+    DateAndTime start, stop;
+    TimeSplitterType b;
+
+    //  the splitter ------
+    start = DateAndTime("2007-11-30T16:15:00");
+    stop =  DateAndTime("2007-11-30T16:16:00");
+    b.push_back( SplittingInterval(start, stop, 0) );
+
+    start = DateAndTime("2007-11-30T16:19:00");
+    stop =  DateAndTime("2007-11-30T16:20:00");
+    b.push_back( SplittingInterval(start, stop, 3) );
+
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop =  DateAndTime("2007-11-30T16:19:00");
+    b.push_back( SplittingInterval(start, stop, 2) );
+
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop =  DateAndTime("2007-11-30T16:18:00");
+    b.push_back( SplittingInterval(start, stop, 1) );
+
+    std::sort(b.begin(), b.end());
+
+    TimeSplitterType::iterator sit;
+
+    SplittingInterval temp1(DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:00"), -1);
+    sit = std::lower_bound(b.begin(), b.end(), temp1);
+    int index1 = int(sit-b.begin());
+    TS_ASSERT_EQUALS(index1, 1);
+
+    SplittingInterval temp2(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:00"), -1);
+    sit = std::lower_bound(b.begin(), b.end(), temp2);
+    int index2 = int(sit-b.begin());
+    TS_ASSERT_EQUALS(index2, 2);
+  }
+
 };
 
 
