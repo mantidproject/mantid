@@ -118,6 +118,12 @@ bool ScriptFileInterpreter::isScriptModified() const
   return m_editor->isModified();
 }
 
+/// Is the script running
+bool ScriptFileInterpreter::isExecuting() const
+{
+  return m_runner->isExecuting();
+}
+
 /// Save to the currently stored name
 void ScriptFileInterpreter::saveToCurrentFile()
 {
@@ -200,23 +206,23 @@ void ScriptFileInterpreter::findInScript()
 /**
  * Execute the whole script in the editor. This is always asynchronous
  */
-void ScriptFileInterpreter::executeAll()
+void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
 {
-  executeCode(m_editor->text());
+  executeCode(m_editor->text(), mode);
 }
 
 /**
  * Execute the current selection from the editor. This is always asynchronous
  */
-void ScriptFileInterpreter::executeSelection()
+void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
 {
   if(m_editor->hasSelectedText())
   {
-    executeCode(m_editor->selectedText());
+    executeCode(m_editor->selectedText(), mode);
   }
   else
   {
-    executeAll();
+    executeAll(mode);
   }
 }
 
@@ -289,10 +295,20 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString & filename)
  * Use the current Script object to execute the code asynchronously
  * @param code :: The code string to run
  */
-void ScriptFileInterpreter::executeCode(const QString & code)
+void ScriptFileInterpreter::executeCode(const QString & code, const Script::ExecutionMode mode)
 {
   if( code.isEmpty() ) return;
-  m_runner->executeAsync(code);
-
+  if(mode == Script::Asynchronous)
+  {
+    m_runner->executeAsync(code);
+  }
+  else if(mode == Script::Serialised)
+  {
+    m_runner->execute(code);
+  }
+  else
+  {
+    QMessageBox::warning(this, "MantidPlot", "Unknown script execution mode");
+  }
 }
 

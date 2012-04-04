@@ -33,9 +33,14 @@
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
   : QObject(), m_env(env), m_name(name), m_interactMode(interact), m_context(context),
-    m_redirectOutput(true)
+    m_redirectOutput(true), m_execMode(NotExecuting)
 {
   m_env->incref();
+
+  connect(this, SIGNAL(startedSerial(const QString &)), this, SLOT(setExecutingSerialised()));
+  connect(this, SIGNAL(startedAsync(const QString &)), this, SLOT(setExecutingAsync()));
+  connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
+  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
 }
 
 Script::~Script()
@@ -43,12 +48,22 @@ Script::~Script()
   m_env->decref();
 }
 
-/**
- * @return True if the script is running
- */
-bool Script::scriptIsRunning()
+
+/// Sets the execution mode to NotExecuting
+void Script::setNotExecuting()
 {
-  return m_env->isRunning();
+  m_execMode = NotExecuting;
+}
+
+/// Sets the execution mode to Serialised
+void Script::setExecutingSerialised()
+{
+  m_execMode = Serialised;
+}
+/// Sets the execution mode to Serialised
+void Script::setExecutingAsync()
+{
+  m_execMode = Asynchronous;
 }
 
 /**

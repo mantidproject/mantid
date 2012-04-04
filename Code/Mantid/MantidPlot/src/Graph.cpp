@@ -906,7 +906,7 @@ void Graph::setTitleColor(const QColor & c)
 void Graph::setTitleAlignment(int align)
 {
   QwtText t = d_plot->title();
-  t.setRenderFlags(align);
+  t.setRenderFlags(static_cast<int>(align));
   d_plot->setTitle (t);
   d_plot->replot();
   emit modifiedGraph();

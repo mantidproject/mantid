@@ -7,6 +7,7 @@
 #include <QTabWidget>
 #include <QDialog>
 #include "Scripted.h"
+#include "Script.h"
 
 //---------------------------------------------------------
 // Forward declarations
@@ -71,7 +72,7 @@ public:
   ScriptFileInterpreter * interpreterAt(int index);
 
   /// Is a script running in the environment
-  bool isScriptRunning();
+  bool isExecuting();
 
  /// this method appends the file names of scripts
  ///in different tabs to a string and returns 
@@ -121,9 +122,9 @@ public slots:
   /** @name Execute members.*/
   //@{
   /// Execute
-  void executeAll();
+  void executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
   ///Execute all
-  void executeSelection();
+  void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Evaluate
   void evaluate();
 

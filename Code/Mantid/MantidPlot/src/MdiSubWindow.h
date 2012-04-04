@@ -127,6 +127,7 @@ public:
 	};
 	enum Status{Hidden = -1, Normal = 0, Minimized = 1, Maximized = 2};
 
+public slots:
     //! Returns a pointer to the parent application
     ApplicationWindow *applicationWindow(){return d_app;};
 
@@ -184,6 +185,9 @@ public:
 
 	//! Toggle the "ask on close" flag
 	void askOnCloseEvent(bool ask){d_confirm_close = ask;};
+  //! Toggle the "ask on close" flag
+  void confirmClose(bool ask){d_confirm_close = ask;};
+
 	//! Filters other object's events (customizes title bar's context menu)
 	bool eventFilter(QObject *object, QEvent *e);
 	//! Returns the pointer to the parent folder of the window
@@ -214,7 +218,6 @@ public:
 
 	void setconfirmcloseFlag(bool closeflag){d_confirm_close=closeflag;}
 
-public slots:
 	//! Notifies the main application that the window has been modified
 	void notifyChanges(){emit modifiedWindow(this);};
 	virtual void print(){};

@@ -57,7 +57,7 @@ public:
   virtual void restore(const QStringList& );
   Folder* folder();
 
-  void askOnCloseEvent(bool)/PyName=confirmClose/;
+  void confirmClose(bool);
   void show();
   void hide();
   bool close();
@@ -657,6 +657,7 @@ public:
   sipRes = PyString_FromString(sipCpp->pieLegendText());
 %End
 
+public slots:
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(Table*, const QString&, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
@@ -736,7 +737,7 @@ public:
   void setTitle(const QString& t);
   void setTitleFont(const QFont &fnt);
   void setTitleColor(const QColor &c);
-  void setTitleAlignment(int align);
+  void setTitleAlignment(int);
   void removeTitle();
 
   LegendWidget* newLegend(const QString& = QString());

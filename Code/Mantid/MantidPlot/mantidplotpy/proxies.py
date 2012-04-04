@@ -6,6 +6,7 @@ reference to None, thus ensuring that further attempts at access do not cause a 
 
 from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
+import __builtin__
 
 #-----------------------------------------------------------------------------
 #--------------------------- Proxy Objects -----------------------------------
@@ -28,9 +29,24 @@ class AttributeProxy(object):
         
         qt_args = []
         for arg in args:
-            qt_args.append(QtCore.Q_ARG(type(arg), arg))
+            argtype = self._get_argtype(arg)
+            qt_args.append(QtCore.Q_ARG(argtype, arg))
         
         QtCore.QMetaObject.invokeMethod(self._proxied, self._attr_name, Qt.AutoConnection, *qt_args)
+        
+    def _get_argtype(self, argument):
+        """
+            Returns the argument type that will be passed to
+            the QMetaObject.invokeMethod call.
+            
+            Most types pass okay, but enums don't so they have
+            to be coerced to ints. An enum is currently detected
+            as a type that is not a bool and inherits from __builtin__.int
+        """
+        argtype = type(argument)
+        if isinstance(argument, __builtin__.int) and argtype != bool:
+            argtype = int
+        return argtype
     
 #-----------------------------------------------------------------------------
 class QtProxyObject(QtCore.QObject):
@@ -57,7 +73,6 @@ class QtProxyObject(QtCore.QObject):
         """
         Reroute a method call to the the stored object
         """
-        print 'Rerouting method call'
         return AttributeProxy(self._getHeldObject(), attr)
 
     def __str__(self):

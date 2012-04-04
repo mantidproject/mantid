@@ -30,6 +30,8 @@
 #include <QButtonGroup>
 #include <QTextCursor>
 
+#include <iostream>
+
 //***************************************************************************
 //
 // ScriptManagerWidget class
@@ -75,9 +77,13 @@ ScriptFileInterpreter * ScriptManagerWidget::interpreterAt(int index)
 /**
  * Is a script running in the environment
  */
-bool ScriptManagerWidget::isScriptRunning()
+bool ScriptManagerWidget::isExecuting()
 {
-  return scriptingEnv()->isRunning();
+  for(int i = 0; i <= count(); ++i)
+  {
+    if(interpreterAt(i)->isExecuting()) return true;
+  }
+  return false;
 }
 
 //-------------------------------------------
@@ -292,17 +298,17 @@ void ScriptManagerWidget::findInScript()
 /**
  * Execute the highlighted code from the current tab
  */
-void ScriptManagerWidget::executeAll()
+void ScriptManagerWidget::executeAll(const Script::ExecutionMode mode)
 {
-  m_current->executeAll();
+  m_current->executeAll(mode);
 }
 
 /**
  * Execute the whole script
  */
-void ScriptManagerWidget::executeSelection()
+void ScriptManagerWidget::executeSelection(const Script::ExecutionMode mode)
 {
-  m_current->executeSelection();
+  m_current->executeSelection(mode);
 }
 
 /**
@@ -447,19 +453,19 @@ void ScriptManagerWidget::contextMenuEvent(QContextMenuEvent *event)
     if( tabBar()->tabAt(m_cursor_pos) >= 0 )
     {
       QAction *close = new QAction(tr("&Close Tab"), this);
-      connect(close, SIGNAL(activated()), this, SLOT(closeClickedTab()));
+      connect(close, SIGNAL(triggered()), this, SLOT(closeClickedTab()));
       context.addAction(close);
     }
     // Close all tabs
     QAction *closeall = new QAction(tr("&Close All Tabs"), this);
-    connect(closeall, SIGNAL(activated()), this, SLOT(closeAllTabs()));
+    connect(closeall, SIGNAL(triggered()), this, SLOT(closeAllTabs()));
     context.addAction(closeall);
 
     context.insertSeparator();
   }
 
   QAction *newtab = new QAction(tr("&New Tab"), this);
-  connect(newtab, SIGNAL(activated()), this, SLOT(newTab()));
+  connect(newtab, SIGNAL(triggered()), this, SLOT(newTab()));
   context.addAction(newtab);
 
 
@@ -472,13 +478,11 @@ void ScriptManagerWidget::contextMenuEvent(QContextMenuEvent *event)
  */
 void ScriptManagerWidget::customEvent(QEvent *event)
 {
-  if( !isScriptRunning() && event->type() == SCRIPTING_CHANGE_EVENT )
-  {    
+  if( !isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT )
+  {
     ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent*>(event);
     // This handles reference counting of the scripting environment
     Scripted::scriptingChangeEvent(sce);
-
-    QMessageBox::warning(this, "", "Implement script changing");
   }
 }
 
@@ -501,6 +505,11 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
     {
       return;
     }
+  }
+  else
+  {
+    QFileInfo details(fileToOpen);
+    fileToOpen = details.absoluteFilePath();
   }
 
   //Save last directory
@@ -635,7 +644,7 @@ QStringList ScriptManagerWidget::recentScripts()
  */
 void ScriptManagerWidget::setRecentScripts(const QStringList& rslist)
 {
-  m_recentScriptList=rslist;
+  m_recentScriptList = rslist;
 }
 
 //***************************************************************************

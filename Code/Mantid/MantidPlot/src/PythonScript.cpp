@@ -271,28 +271,14 @@ QVariant PythonScript::evaluate(const QString & code)
 
 bool PythonScript::execute(const QString & code)
 {
-
-  emit started("Script execution started.");
-  bool success(false);
-  QSharedPointer<PythonThreadState> pythonThreadState =  pythonEnv()->createPythonThread();
-  beginStdoutRedirect();
-  PyObject * result = PyRun_String(code.toAscii(), Py_file_input, localDict, localDict);
-  endStdoutRedirect();
-  if(result)
-  {
-    emit finished("Script execution finished.");
-    success = true;
-  }
-  else
-  {
-    emit error(constructErrorMsg(), name(), 0);
-  }
-  return success;
+  emit startedSerial("");
+  return doExecution(code);
 }
 
 QFuture<bool> PythonScript::executeAsync(const QString & code)
 {
-  return QtConcurrent::run(this, &PythonScript::execute, code);
+  emit startedAsync("");
+  return QtConcurrent::run(this, &PythonScript::doExecution, code);
 }
 
 QString PythonScript::constructErrorMsg()
@@ -442,40 +428,9 @@ void PythonScript::initialize(const QString & name, QObject *context)
 }
 
 
-/**
- * Create a list autocomplete keywords
- */
-QStringList PythonScript::createAutoCompleteList() const
-{
-  PyObject *main_module = PyImport_AddModule("__main__");
-  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
-  PyObject *keywords(NULL);
-  if( method && main_module )
-  {
-    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  }
-  else
-  {
-    return QStringList();
-  }
-  QStringList keyword_list;
-  if( PyErr_Occurred() || !keywords )
-  {
-    PyErr_Print();
-    return keyword_list;
-  }
-
-  keyword_list = pythonEnv()->toStringList(keywords);
-  Py_DECREF(keywords);
-  Py_DECREF(method);
-  return keyword_list;
-}
-
 //-------------------------------------------------------
 // Private
 //-------------------------------------------------------
-
-
 /**
  * Redirect the std out to this object
  */
@@ -499,6 +454,27 @@ void PythonScript::endStdoutRedirect()
   Py_XDECREF(stdoutSave);
   PyDict_SetItemString(pythonEnv()->sysDict(), "stderr", stderrSave);
   Py_XDECREF(stderrSave);
+}
+
+/// Performs the call to Python
+bool PythonScript::doExecution(const QString & code)
+{
+  emit started("Script execution started.");
+  bool success(false);
+  QSharedPointer<PythonThreadState> pythonThreadState =  pythonEnv()->createPythonThread();
+  beginStdoutRedirect();
+  PyObject * result = PyRun_String(code.toAscii(), Py_file_input, localDict, localDict);
+  endStdoutRedirect();
+  if(result)
+  {
+    emit finished("Script execution finished.");
+    success = true;
+  }
+  else
+  {
+    emit error(constructErrorMsg(), name(), 0);
+  }
+  return success;
 }
 
 /**
@@ -604,6 +580,35 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
     compiledCode = NULL;
   }
   return compiledCode;
+}
+
+/**
+ * Create a list autocomplete keywords
+ */
+QStringList PythonScript::createAutoCompleteList() const
+{
+  PyObject *main_module = PyImport_AddModule("__main__");
+  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
+  PyObject *keywords(NULL);
+  if( method && main_module )
+  {
+    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
+  }
+  else
+  {
+    return QStringList();
+  }
+  QStringList keyword_list;
+  if( PyErr_Occurred() || !keywords )
+  {
+    PyErr_Print();
+    return keyword_list;
+  }
+
+  keyword_list = pythonEnv()->toStringList(keywords);
+  Py_DECREF(keywords);
+  Py_DECREF(method);
+  return keyword_list;
 }
 
 /**

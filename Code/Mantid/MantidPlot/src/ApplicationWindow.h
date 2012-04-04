@@ -220,11 +220,11 @@ public slots:
   /**
   * \brief Create a new project from a script file.
   *
-  * @param fn :: is read as a Python script file and loaded in the command script window.
-  * @param execute :: specifies if the script should be executed after opening.
-  * @param quit :: If true then the application will quit after execution of the script
+  * @param fn :: is read as a Python script file and loaded in the script window.
   */
-  ApplicationWindow * loadScript(const QString& fn, bool execute = false, bool quit = false);
+  ApplicationWindow * loadScript(const QString& fn);
+  /// Runs a script from a file. Mainly useful for automatically running scripts
+  void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
 
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;

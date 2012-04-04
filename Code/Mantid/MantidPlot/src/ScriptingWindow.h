@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------
 #include <QMainWindow>
+#include "Script.h"
 
 //----------------------------------------------------------
 // Forward declarations
@@ -38,17 +39,17 @@ public:
   /// Override the showEvent
   void showEvent(QShowEvent *event);
   /// Is a script running?
-  bool isScriptRunning() const;
+  bool isExecuting() const;
   ///Save the current state of the script window for next time
   void saveSettings();
   /// Read settings from store
   void readSettings();
-  /// Open a script in a new tab. This is here for backwards compatability with the old
-  /// ScriptWindow class
+  /// Open a script in a new tab. Primarily useful for automatically
+  /// opening a script
   void open(const QString & filename, bool newtab = true);
-  /// Execute all code. This is here for backwards compatability with the old
-  /// ScriptWindow class
-  void executeAll();
+  /// Executes whatever is in the current tab. Primarily useful for automatically
+  /// running a script loaded with open
+  void executeCurrentTab(const Script::ExecutionMode mode);
   ///saves scripts file names to a string 
   QString saveToString();
   ///Set whether to accept/reject close events
@@ -97,6 +98,10 @@ private slots:
   void updateWindowFlags();
   /// Update based on tab changes
   void tabSelectionChanged();
+
+  /// Finds the script corresponding to the action and
+  /// asks the manager to open it
+  void openRecentScript(QAction*);
 
 private:
   /// The script editors' manager

@@ -53,6 +53,8 @@ class Script : public QObject
   public:
   /// Interaction type
   enum InteractionType {Interactive, NonInteractive};
+  /// Execution mode
+  enum ExecutionMode {Serialised, Asynchronous, NotExecuting};
 
   /// Constructor
   Script(ScriptingEnv *env, const QString &name, const InteractionType interact,
@@ -73,15 +75,14 @@ class Script : public QObject
   virtual void setContext(QObject *context) { m_context = context; }
   /// Is this an interactive script
   bool isInteractive() { return m_interactMode == Interactive; }
+  /// Is the script being executed
+  inline bool isExecuting() const { return m_execMode != NotExecuting; }
 
   bool redirectStdOut() const { return m_redirectOutput; }
   void redirectStdOut(bool on) { m_redirectOutput = on; }
 
   // Does the code compile to a complete statement, i.e no more input is required
   virtual bool compilesToCompleteStatement(const QString & code) const = 0;
-
-  // Is anything running
-  bool scriptIsRunning();
 
 public slots:
   /// Compile the code, returning true/false depending on the status
@@ -93,6 +94,13 @@ public slots:
   /// Execute the code asynchronously, returning immediately after the execution has started
   virtual QFuture<bool> executeAsync(const QString & code) = 0;
 
+  /// Sets the execution mode to NotExecuting
+  void setNotExecuting();
+  /// Sets the execution mode to Serialised
+  void setExecutingSerialised();
+  /// Sets the execution mode to Serialised
+  void setExecutingAsync();
+
   // local variables
   virtual bool setQObject(QObject*, const char*) { return false; }
   virtual bool setInt(int, const char*) { return false; }
@@ -101,6 +109,10 @@ public slots:
 signals:
   /// A signal defining when this script has started executing
   void started(const QString & message);
+  /// A separate signal defining when this script has started executing serial running
+  void startedSerial(const QString & message);
+  /// A separate signal defining when this script has started executing asynchronously
+  void startedAsync(const QString & message);
   /// A signal defining when this script has completed successfully
   void finished(const QString & message);
   /// signal an error condition / exception
@@ -121,6 +133,7 @@ private:
   InteractionType m_interactMode;
   QObject *m_context;
   bool m_redirectOutput;
+  ExecutionMode m_execMode;
 };
 
 

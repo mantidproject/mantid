@@ -66,9 +66,9 @@ ScriptingWindow::~ScriptingWindow()
  * Is a script executing?
  * @returns A flag indicating the current state
  */
-bool ScriptingWindow::isScriptRunning() const
+bool ScriptingWindow::isExecuting() const
 {
-  return m_manager->isScriptRunning();
+  return m_manager->isExecuting();
 }
 
 /**
@@ -156,9 +156,14 @@ void ScriptingWindow::open(const QString & filename, bool newtab)
   m_manager->open(newtab, filename);
 }
 
-void ScriptingWindow::executeAll()
+/**
+ * Executes whatever is in the current tab. Primarily useful for automatically
+ * running a script loaded with open
+ * @param mode :: The execution type
+ * */
+void ScriptingWindow::executeCurrentTab(const Script::ExecutionMode mode)
 {
-  m_manager->executeAll();
+  m_manager->executeAll(mode);
 }
 
 //-------------------------------------------
@@ -170,7 +175,7 @@ void ScriptingWindow::executeAll()
  */ 
 void ScriptingWindow::customEvent(QEvent *event)
 {
-  if( !m_manager->isScriptRunning() && event->type() == SCRIPTING_CHANGE_EVENT )
+  if( !m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT )
   {
     ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent*>(event);
     setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() + " Window");
@@ -196,6 +201,18 @@ void ScriptingWindow::updateWindowFlags()
 void ScriptingWindow::tabSelectionChanged()
 {
 
+}
+
+/**
+ * Maps the QAction to an index in the recent scripts list
+ * @param item A pointer to the action that triggered the slot
+ */
+void ScriptingWindow::openRecentScript(QAction* item)
+{
+  const QList<QAction*> actions = m_recentScripts->actions();
+  const int index = actions.indexOf(item);
+  assert(index >= 0);
+  m_manager->openRecentScript(index);
 }
 
 //-------------------------------------------
@@ -229,7 +246,7 @@ void ScriptingWindow::initMenus()
   m_fileMenu = menuBar()->addMenu(tr("&File"));
 #ifdef SCRIPTING_DIALOG
   m_scripting_lang = new QAction(tr("Scripting &language"), this);
-  connect(m_scripting_lang, SIGNAL(activated()), this, SIGNAL(chooseScriptingLanguage()));
+  connect(m_scripting_lang, SIGNAL(triggered()), this, SIGNAL(chooseScriptingLanguage()));
 #endif
   connect(m_fileMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
 
@@ -269,6 +286,7 @@ void ScriptingWindow::populateFileMenu()
 
   m_fileMenu->insertSeparator();
   m_fileMenu->addMenu(m_recentScripts);
+  m_recentScripts->setEnabled(m_manager->recentScripts().count() > 0);
 
   if( scriptsOpen )
   {
@@ -349,36 +367,36 @@ void ScriptingWindow::initActions()
 void ScriptingWindow::initFileMenuActions()
 {
   m_newTab = new QAction(tr("&New Tab"), this);
-  connect(m_newTab, SIGNAL(activated()), m_manager, SLOT(newTab()));
+  connect(m_newTab, SIGNAL(triggered()), m_manager, SLOT(newTab()));
   m_newTab->setShortcut(tr("Ctrl+N"));
 
   m_openInCurTab = new QAction(tr("&Open"), this);
-  connect(m_openInCurTab, SIGNAL(activated()), m_manager, SLOT(openInCurrentTab()));
+  connect(m_openInCurTab, SIGNAL(triggered()), m_manager, SLOT(openInCurrentTab()));
   m_openInCurTab->setShortcut(tr("Ctrl+O"));
 
   m_openInNewTab = new QAction(tr("&Open in New Tab"), this);
-  connect(m_openInNewTab, SIGNAL(activated()), m_manager, SLOT(openInNewTab()));
+  connect(m_openInNewTab, SIGNAL(triggered()), m_manager, SLOT(openInNewTab()));
   m_openInNewTab->setShortcut(tr("Ctrl+Shift+O"));
 
   m_save = new QAction(tr("&Save"), this);
-  connect(m_save, SIGNAL(activated()), m_manager, SLOT(saveToCurrentFile()));
+  connect(m_save, SIGNAL(triggered()), m_manager, SLOT(saveToCurrentFile()));
   m_save->setShortcut(QKeySequence::Save);
 
   m_saveAs = new QAction(tr("&Save As"), this);
-  connect(m_saveAs, SIGNAL(activated()), m_manager, SLOT(saveAs()));
+  connect(m_saveAs, SIGNAL(triggered()), m_manager, SLOT(saveAs()));
   m_saveAs->setShortcut(tr("Ctrl+Shift+S"));  
 
   m_print = new QAction(tr("&Print script"), this);
-  connect(m_print, SIGNAL(activated()), m_manager, SLOT(print()));
+  connect(m_print, SIGNAL(triggered()), m_manager, SLOT(print()));
   m_print->setShortcut(QKeySequence::Print);
 
   m_closeTab = new QAction(tr("&Close Tab"), this);
-  connect(m_closeTab, SIGNAL(activated()), m_manager, SLOT(closeCurrentTab()));
+  connect(m_closeTab, SIGNAL(triggered()), m_manager, SLOT(closeCurrentTab()));
   m_closeTab->setShortcut(tr("Ctrl+W"));
 
   m_recentScripts = new QMenu(tr("&Recent Scripts"),this);
   connect(m_recentScripts, SIGNAL(aboutToShow()), this, SLOT(populateRecentScriptsMenu()));
-  connect(m_recentScripts, SIGNAL(activated(int)), m_manager, SLOT(openRecentScript(int)));
+  connect(m_recentScripts, SIGNAL(triggered(QAction*)), this, SLOT(openRecentScript(QAction*)));
 }
 
 /**
@@ -386,27 +404,27 @@ void ScriptingWindow::initFileMenuActions()
 void ScriptingWindow::initEditMenuActions()
 {
   m_undo = new QAction(tr("&Undo"), this);
-  connect(m_undo, SIGNAL(activated()), m_manager, SLOT(undo()));
+  connect(m_undo, SIGNAL(triggered()), m_manager, SLOT(undo()));
   m_undo->setShortcut(QKeySequence::Undo);
 
   m_redo = new QAction(tr("&Redo"), this);
-  connect(m_redo, SIGNAL(activated()), m_manager, SLOT(redo()));
+  connect(m_redo, SIGNAL(triggered()), m_manager, SLOT(redo()));
   m_redo->setShortcut(QKeySequence::Redo);
 
   m_cut = new QAction(tr("C&ut"), this);
-  connect(m_cut, SIGNAL(activated()), m_manager, SLOT(cut()));
+  connect(m_cut, SIGNAL(triggered()), m_manager, SLOT(cut()));
   m_cut->setShortcut(QKeySequence::Cut);
 
   m_copy = new QAction(tr("&Copy"), this);
-  connect(m_copy, SIGNAL(activated()), m_manager, SLOT(copy()));
+  connect(m_copy, SIGNAL(triggered()), m_manager, SLOT(copy()));
   m_copy->setShortcut(QKeySequence::Copy);
 
   m_paste = new QAction(tr("&Paste"), this);
-  connect(m_paste, SIGNAL(activated()), m_manager, SLOT(paste()));
+  connect(m_paste, SIGNAL(triggered()), m_manager, SLOT(paste()));
   m_paste->setShortcut(QKeySequence::Paste);
 
   m_find = new QAction(tr("&Find/Replace"), this);
-  connect(m_find, SIGNAL(activated()), m_manager, SLOT(findInScript()));
+  connect(m_find, SIGNAL(triggered()), m_manager, SLOT(findInScript()));
   m_find->setShortcut(QKeySequence::Find);
 }
 
@@ -417,13 +435,13 @@ void ScriptingWindow::initEditMenuActions()
 void ScriptingWindow::initExecMenuActions()
 {
   m_execSelect = new QAction(tr("E&xecute Selection"), this);
-  connect(m_execSelect, SIGNAL(activated()), m_manager, SLOT(executeSelection()));
+  connect(m_execSelect, SIGNAL(triggered()), m_manager, SLOT(executeSelection()));
   QList<QKeySequence> shortcuts;
   shortcuts << Qt::CTRL + Qt::Key_Return << Qt::CTRL + Qt::Key_Enter;
   m_execSelect->setShortcuts(shortcuts);
 
   m_execAll = new QAction(tr("Execute &All"), this);
-  connect(m_execAll, SIGNAL(activated()), m_manager, SLOT(executeAll()));
+  connect(m_execAll, SIGNAL(triggered()), m_manager, SLOT(executeAll()));
   shortcuts.clear();
   shortcuts << Qt::CTRL + Qt::SHIFT + Qt::Key_Return << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
   m_execAll->setShortcuts(shortcuts);
@@ -445,7 +463,7 @@ void ScriptingWindow::initWindowMenuActions()
   m_hide->setShortcut(tr("F3"));
 #endif
   // Note that we channel the hide through the parent so that we can save the geometry state
-  connect(m_hide, SIGNAL(activated()), this, SIGNAL(hideMe()));
+  connect(m_hide, SIGNAL(triggered()), this, SIGNAL(hideMe()));
 
   m_zoomIn = new QAction(("Increase font size"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
@@ -453,11 +471,11 @@ void ScriptingWindow::initWindowMenuActions()
   // it doesn't seem to work for me
   m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
   m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
-  connect(m_zoomIn, SIGNAL(activated()), m_manager, SLOT(zoomIn()));
+  connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(zoomIn()));
 
   m_zoomOut = new QAction(("Decrease font size"), this);
   m_zoomOut->setShortcut(QKeySequence::ZoomOut);
-  connect(m_zoomOut, SIGNAL(activated()), m_manager, SLOT(zoomOut()));
+  connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(zoomOut()));
 
   // Toggle the progress arrow
   m_toggleProgress = new QAction(tr("Show &Progress Marker"), this);

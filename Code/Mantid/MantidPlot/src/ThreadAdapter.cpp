@@ -14,8 +14,8 @@ namespace
 
 #define BEGIN_THREAD_CHECK(ReturnType, DefaultValue) \
   ReturnType result(DefaultValue);\
-  if( QThread::currentThread() != QCoreApplication::instance()->thread() )\
-  {
+  if( QThread::currentThread() != qApp->thread() )\
+  {\
 
 #define END_THREAD_CHECK(ReturnType, FunctionCall) \
    if(!methodSuccess)\
@@ -48,7 +48,7 @@ ThreadAdapter::ThreadAdapter(ApplicationWindow & appWindow, MantidUI & mantidUI)
 {
   // This object must live on the GUI thread so that the slots that are called
   // will be called in that thread
-  this->moveToThread(QCoreApplication::instance()->thread());
+  this->moveToThread(qApp->thread());
 }
 
 MultiLayer * ThreadAdapter::plotSpectraList(const QStringList& wsNames, const QList<int>& spectrumList,

@@ -126,7 +126,7 @@ void ScriptOutputDisplay::showContextMenu(const QPoint & pos)
   if( !isEmpty() )
   {
     QAction* print = new QAction(getQPixmap("fileprint_xpm"), "&Print", this);
-    connect(print, SIGNAL(activated()), this, SLOT(print()));
+    connect(print, SIGNAL(triggered()), this, SLOT(print()));
     menu.addAction(print);
   }
 
@@ -217,15 +217,15 @@ void ScriptOutputDisplay::initActions()
   // Copy action
   m_copy = new QAction(getQPixmap("copy_xpm"), "Copy", this);
   m_copy->setShortcut(tr("Ctrl+C"));
-  connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
+  connect(m_copy, SIGNAL(triggered()), this, SLOT(copy()));
 
   // Clear action
   m_clear = new QAction("Clear Output", this);
-  connect(m_clear, SIGNAL(activated()), this, SLOT(clear()));
+  connect(m_clear, SIGNAL(triggered()), this, SLOT(clear()));
 
   // Save  action
   m_save = new QAction("Save Output", this);
-  connect(m_save, SIGNAL(activated()), this, SLOT(saveToFile()));
+  connect(m_save, SIGNAL(triggered()), this, SLOT(saveToFile()));
 }
 
 /**

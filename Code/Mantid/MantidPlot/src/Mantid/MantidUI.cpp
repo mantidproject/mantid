@@ -63,7 +63,6 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-
 using namespace std;
 
 using namespace Mantid::API;
@@ -71,8 +70,7 @@ using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 namespace MantidException = Mantid::Kernel::Exception;
 
-Q_DECLARE_METATYPE(Graph::CurveType);
-Q_DECLARE_METATYPE(MultiLayer*);
+Q_DECLARE_METATYPE(Qt::AlignmentFlag);
 
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -95,8 +93,10 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
     qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     //Register std::string as well as we use it alot
     qRegisterMetaType<std::string>();
+    // Move these somewhere sensible
     qRegisterMetaType<Graph::CurveType>();
     qRegisterMetaType<MultiLayer*>();
+    qRegisterMetaType<Qt::AlignmentFlag>();
   }
 
   m_exploreMantid = new MantidDockWidget(this,aw);
@@ -1832,8 +1832,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   insWin->selectTab(tab);
 
   appWindow()->addMdiSubWindow(insWin);
-  // When called from python, we want the window to start out hidden.
-  //insWin->hide(); 
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
     SLOT(plotSpectraList(const QString&,const std::set<int>&)));
@@ -2082,7 +2080,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
   QList<int> binAsList;
   binAsList.append(bin);
   Table *t = createTableFromBins(wsName, ws, binAsList, errors);
-  t->askOnCloseEvent(false);
+  t->confirmClose(false);
   t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
   if( !t )
@@ -2094,7 +2092,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
   // TODO: Use the default style instead of a line if nothing is passed into this method
   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
   setUpBinGraph(ml,wsName, ws);
-  ml->askOnCloseEvent(false);
+  ml->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return ml;
 }

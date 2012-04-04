@@ -195,7 +195,7 @@ public:
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
 
-public:
+public slots:
   // Create a 1d graph form specified spectra in a MatrixWorkspace
   MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
@@ -230,8 +230,7 @@ public:
 
   //
   bool executeICatLogout(int version);
-	
-public slots:
+
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
   //  *****                            *****  //

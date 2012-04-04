@@ -260,4 +260,6 @@ signals:
 	void clicked(LayerButton*);
 };
 
+Q_DECLARE_METATYPE(MultiLayer*);
+
 #endif

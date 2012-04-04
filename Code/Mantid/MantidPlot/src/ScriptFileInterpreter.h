@@ -1,6 +1,8 @@
 #ifndef SCRIPTRUNNERWIDGET_H_
 #define SCRIPTRUNNERWIDGET_H_
 
+#include "Script.h"
+
 #include <QWidget>
 #include <QTextEdit>
 #include <QPoint>
@@ -8,7 +10,6 @@
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
-class Script;
 class ScriptingEnv;
 class ScriptEditor;
 class ScriptOutputDisplay;
@@ -37,6 +38,8 @@ public:
   virtual QString filename() const;
   /// Has the script text been modified
   virtual bool isScriptModified() const;
+  /// Is the script running
+  virtual bool isExecuting() const;
 
 public slots:
   /// Save to the currently stored name
@@ -66,9 +69,9 @@ public slots:
   void findInScript();
 
   /// Execute the whole script.
-  virtual void executeAll();
+  virtual void executeAll(const Script::ExecutionMode mode);
   /// Execute the current selection
-  virtual void executeSelection();
+  virtual void executeSelection(const Script::ExecutionMode mode);
 
   /// Zoom in on script
   virtual void zoomInOnScript();
@@ -89,7 +92,7 @@ private:
   void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
 
   bool readFileIntoEditor(const QString & filename);
-  void executeCode(const QString & code);
+  void executeCode(const QString & code, const Script::ExecutionMode mode);
 
 
   ScriptEditor *m_editor;
@@ -136,9 +139,9 @@ private slots:
   void findInScript() {};
 
   /// Execute the whole script.
-  virtual void executeAll() {}
+  virtual void executeAll(const Script::ExecutionMode) {}
   /// Execute the current selection
-  virtual void executeSelection() {}
+  virtual void executeSelection(const Script::ExecutionMode) {}
 
   /// Save to the currently stored name
   virtual void saveToCurrentFile() {}

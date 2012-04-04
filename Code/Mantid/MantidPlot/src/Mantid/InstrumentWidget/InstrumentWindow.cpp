@@ -151,7 +151,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_clearPeakOverlays = new QAction("Clear peaks",this);
   connect(m_clearPeakOverlays,SIGNAL(activated()),this,SLOT(clearPeakOverlays()));
 
-  askOnCloseEvent(app->confirmCloseInstrWindow);
+  confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
 

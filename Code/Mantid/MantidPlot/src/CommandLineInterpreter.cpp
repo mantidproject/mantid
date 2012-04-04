@@ -434,16 +434,16 @@ void CommandLineInterpreter::setupFont()
 void CommandLineInterpreter::initActions()
 {
   m_copy = new QAction(tr("&Copy"), this);
-  connect(m_copy, SIGNAL(activated()), this, SLOT(copy()));
+  connect(m_copy, SIGNAL(triggered()), this, SLOT(copy()));
 
   m_cut = new QAction(tr("C&ut"), this);
-  connect(m_cut, SIGNAL(activated()), this, SLOT(cut()));
+  connect(m_cut, SIGNAL(triggered()), this, SLOT(cut()));
 
   m_paste = new QAction(tr("&Paste"), this);
-  connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
+  connect(m_paste, SIGNAL(triggered()), this, SLOT(paste()));
 
   m_saveAs = new QAction(tr("Save &As"), this);
-  connect(m_paste, SIGNAL(activated()), this, SLOT(saveAs()));
+  connect(m_paste, SIGNAL(triggered()), this, SLOT(saveAs()));
 
   m_zoomIn = new QAction(("Increase font size"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
@@ -451,11 +451,11 @@ void CommandLineInterpreter::initActions()
   // it doesn't seem to work for me
   m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
   m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
-  connect(m_zoomIn, SIGNAL(activated()), this, SLOT(zoomIn()));
+  connect(m_zoomIn, SIGNAL(triggered()), this, SLOT(zoomIn()));
 
   m_zoomOut = new QAction(("Decrease font size"), this);
   m_zoomOut->setShortcut(QKeySequence::ZoomOut);
-  connect(m_zoomOut, SIGNAL(activated()), this, SLOT(zoomOut()));
+  connect(m_zoomOut, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
 }
 

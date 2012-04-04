@@ -68,6 +68,7 @@
 #include "Mantid/MantidMDCurveDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
+
 LayerButton::LayerButton(const QString& text, QWidget* parent)
 : QPushButton(text, parent)
 {

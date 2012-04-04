@@ -47,7 +47,7 @@ class muParserScript: public Script
     muParserScript(ScriptingEnv *env, const QString &name,
                    QObject *context, bool checkMultilineCode = true);
 
-  bool compilesToCompleteStatement(const QString & code) const { return true; };
+  bool compilesToCompleteStatement(const QString &) const { return true; };
 
   public slots:
     QVariant evaluate(const QString &);

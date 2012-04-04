@@ -84,6 +84,7 @@
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
 #include "CommandLineInterpreter.h"
+#include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
 #include "MultiPeakFit.h"
@@ -3175,7 +3176,7 @@ Note* ApplicationWindow::newNote(const QString& caption)
 
   m->setName(name);
   m->setIcon(getQPixmap("note_xpm"));
-  m->askOnCloseEvent(confirmCloseNotes);
+  m->confirmClose(confirmCloseNotes);
 
   addMdiSubWindow(m);
   m->showNormal();
@@ -3446,7 +3447,7 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->setWindowTitle(name);
   m->setName(name);
   m->setIcon( m->matrixIcon() );//Mantid
-  m->askOnCloseEvent(confirmCloseMatrix);
+  m->confirmClose(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
   addMdiSubWindow(m);
@@ -4003,7 +4004,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     foreach(MdiSubWindow *w, windows){
 
       if (w->inherits("Table"))
-      {w->askOnCloseEvent(confirmCloseTable);
+      {w->confirmClose(confirmCloseTable);
       }
     }
   }
@@ -4012,7 +4013,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmCloseMatrix = askMatrices;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("Matrix"))
-      {w->askOnCloseEvent(confirmCloseMatrix);
+      {w->confirmClose(confirmCloseMatrix);
       }
     }
   }
@@ -4021,7 +4022,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmClosePlot2D=askPlots2D;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("MultiLayer"))
-      {w->askOnCloseEvent(confirmClosePlot2D);
+      {w->confirmClose(confirmClosePlot2D);
       }
     }
   }
@@ -4030,7 +4031,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmClosePlot3D=askPlots3D;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("Graph3D"))
-        w->askOnCloseEvent(confirmClosePlot3D);
+        w->confirmClose(confirmClosePlot3D);
     }
   }
 
@@ -4038,7 +4039,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmCloseNotes = askNotes;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("Note"))
-        w->askOnCloseEvent(confirmCloseNotes);
+        w->confirmClose(confirmCloseNotes);
     }
   }
 
@@ -4047,7 +4048,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 
     foreach(MdiSubWindow *w, windows){
       if (w->isA("InstrumentWindow"))
-      {w->askOnCloseEvent(confirmCloseInstrWindow);
+      {w->confirmClose(confirmCloseInstrWindow);
       }
     }
   }
@@ -9483,7 +9484,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   MDIWindowList windows = getAllWindows();
   foreach(MdiSubWindow* w,windows)
   {
-    w->askOnCloseEvent(false);
+    w->confirmClose(false);
   }
 
   if( scriptingEnv()->isRunning() )
@@ -11448,7 +11449,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
 
         } catch (std::invalid_argument&) {
           // Get here if invalid spectrum number given - shouldn't be possible, but just in case
-          // plot->askOnCloseEvent(false);
+          // plot->confirmClose(false);
           //plot->close();
           closeWindow(plot);
           return 0;
@@ -11836,7 +11837,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       QStringList fList=s.split("\t");
       ag->setTitle(fList[1]);
       ag->setTitleColor(QColor(fList[2]));
-      ag->setTitleAlignment(fList[3].toInt());
+      ag->setTitleAlignment((Qt::AlignmentFlag)fList[3].toInt());
     }
     else if (s.contains ("TitleFont")){
       QStringList fList=s.split("\t");
@@ -12444,7 +12445,7 @@ void ApplicationWindow::pickDataTool( QAction* action )
 void ApplicationWindow::connectSurfacePlot(Graph3D *plot)
 {
   connect (plot, SIGNAL(showOptionsDialog()), this,SLOT(showPlot3dDialog()));
-  plot->askOnCloseEvent(confirmClosePlot3D);
+  plot->confirmClose(confirmClosePlot3D);
 }
 
 void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
@@ -12475,7 +12476,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
   connect (g,SIGNAL(currentFontChanged(const QFont&)), this, SLOT(setFormatBarFont(const QFont&)));
   connect (g,SIGNAL(enableTextEditor(Graph *)), this, SLOT(enableTextEditor(Graph *)));
 
-  g->askOnCloseEvent(confirmClosePlot2D);
+  g->confirmClose(confirmClosePlot2D);
 }
 
 void ApplicationWindow::connectTable(Table* w)
@@ -12490,7 +12491,7 @@ void ApplicationWindow::connectTable(Table* w)
   connect (w,SIGNAL(changedColHeader(const QString&,const QString&)),this,SLOT(updateColNames(const QString&,const QString&)));
   connect (w,SIGNAL(createTable(const QString&,int,int,const QString&)),this,SLOT(newTable(const QString&,int,int,const QString&)));
 
-  w->askOnCloseEvent(confirmCloseTable);
+  w->confirmClose(confirmCloseTable);
 }
 
 void ApplicationWindow::setAppColors(const QColor& wc, const QColor& pc, const QColor& tpc, bool force)
@@ -14281,7 +14282,7 @@ void ApplicationWindow::deleteFitTables()
             if (!t)
               continue;
 
-            t->askOnCloseEvent(false);
+            t->confirmClose(false);
             t->close();
           }
         }
@@ -14709,7 +14710,14 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     saveSettings();//the recent projects must be saved
 
     if (exec)
-      loadScript(file_name, exec, quit);
+    {
+      executeScriptFile(file_name, Script::Asynchronous);
+      if(quit)
+      {
+        saved = true;
+        this->close();
+      }
+    }
     else
     {
       saved=true;
@@ -16361,22 +16369,15 @@ void ApplicationWindow::cascade()
   modifiedProject();
 }
 
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool quit)
+ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
 {
 #ifdef SCRIPTING_PYTHON
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   setScriptingLanguage("Python");
   restoreApplicationGeometry();
-  showScriptWindow(false, quit);
+  showScriptWindow(false);
   scriptingWindow->open(fn, false);
   QApplication::restoreOverrideCursor();
-  if (execute)
-    scriptingWindow->executeAll();
-  if( quit )
-  {
-    saved = true;
-    this->close();
-  }
   return this;
 #else
   QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
@@ -16384,6 +16385,29 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execut
   return 0;
 #endif
 }
+
+/**
+ *  Runs a script from a file. Mainly useful for automatically running scripts
+ * @param filename The full path to the file
+ * @param execMode How should the script be executed. Note that this method will always wait for the
+ *        script to complete before returning
+ */
+void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
+{
+  ScriptFileInterpreter * scriptFile = new ScriptFileInterpreter(this);
+  scriptFile->setup(*scriptingEnv(),filename);
+  scriptFile->hide();
+  scriptFile->executeAll(execMode);
+  if(execMode == Script::Asynchronous)
+  {
+    while(scriptFile->isExecuting())
+    {
+      QCoreApplication::processEvents();
+    }
+  }
+  delete scriptFile;
+}
+
 
 bool ApplicationWindow::validFor2DPlot(Table *table)
 {

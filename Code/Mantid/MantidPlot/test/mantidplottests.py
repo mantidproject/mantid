@@ -14,6 +14,8 @@ import time
 import _qti
 import datetime
 from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import pyqtSlot
+#from PyQt4.uic.Compiler.qtproxies import QtCore
 
 # Try to import QTest. Not available on Windows?
 try:
@@ -85,6 +87,37 @@ def get_screenshot_dir():
     return dest
             
 
+class Screenshot(QtCore.QObject):
+    """
+        Handles taking a screenshot while
+        ensuring the call takes place on the GUI
+        thread
+    """
+    
+    def take_picture(self, widget, filename):
+        """
+        Takes a screenshot and saves it to the 
+        filename given, ensuring the call is processed
+        through a slot if the call is from a separate 
+        thread
+        """
+        if QtGui.qApp.thread() != QtCore.QThread.currentThread():
+            QtCore.QMetaObject.invokeMethod(self, '_take_picture_impl', QtCore.Qt.BlockingQueuedConnection, 
+                                            QtCore.Q_ARG(QtGui.QWidget, widget), QtCore.Q_ARG(str, filename))
+        else:
+            self._take_picture_impl(widget, filename)
+    
+    @pyqtSlot(QtGui.QWidget, str)
+    def _take_picture_impl(self, widget, filename):
+        
+                # First save the screenshot
+        widget.show()
+        widget.resize(widget.size())
+        QtCore.QCoreApplication.processEvents()
+        
+        pix = QtGui.QPixmap.grabWidget(widget)
+        pix.save(filename)
+
 
 def screenshot(widget, filename, description, png_exists=False):
     """ Take a screenshot of the widget for displaying in a html report.
@@ -109,14 +142,10 @@ def screenshot(widget, filename, description, png_exists=False):
             # Find the widget if handled with a proxy
             if hasattr(widget, "_getHeldObject"):
                 widget = widget._getHeldObject()
-            
-            # First save the screenshot
-            widget.show()
-            widget.resize(widget.size())
-            QtCore.QCoreApplication.processEvents()
-            
-            pix = QtGui.QPixmap.grabWidget(widget)
-            pix.save(os.path.join(dest, filename+".png"))
+                
+        camera = Screenshot()
+        camera.moveToThread(QtGui.qApp.thread())
+        camera.take_picture(widget, os.path.join(dest, filename+".png"))
         
         # Modify the section in the HTML page
         section_text = '<h2>%s</h2>' % filename

@@ -63,7 +63,9 @@ public:
   {}
   /// Is the given code complete
   bool compilesToCompleteStatement(const QString & code) const;
- 
+  /// Is the script being executed
+  bool isExecuting() const;
+
 public slots:
   /// Compile the code, returning true if it was successful, false otherwise
   bool compile(const QString & code);
@@ -131,6 +133,16 @@ private:
   void beginStdoutRedirect();
   void endStdoutRedirect();
 
+  // --------------------------- Script compilation/execution  -----------------------------------
+  /// Performs the call to Python
+  bool doExecution(const QString & code);
+
+  /// Compile to bytecode
+  PyObject * compileToByteCode(const QString &, bool for_eval=true);
+  /// Create a list of keywords for the code completion API
+  QStringList createAutoCompleteList() const;
+
+  // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS
   void addHandle(const std::string& wsName, const Mantid::API::Workspace_sptr ws);
   /// Listen to add/replace notifications from the ADS
@@ -144,11 +156,6 @@ private:
   /// Delete a Python reference to the given workspace name
   void deletePythonReference(const std::string& wsName);
 
-  // --------------------------- Script compilation/execution  -----------------------------------
-  /// Compile to bytecode
-  PyObject * compileToByteCode(const QString &, bool for_eval=true);
-  /// Create a list of keywords for the code completion API
-  QStringList createAutoCompleteList() const;
 
   PythonScripting * m_pythonEnv;
   PyObject *localDict, *stdoutSave, *stderrSave;

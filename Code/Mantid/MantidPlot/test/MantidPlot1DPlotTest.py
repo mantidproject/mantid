@@ -52,16 +52,15 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         g = plotSpectrum("fake", 0, error_bars=True)
         l = g.activeLayer()
         l.setCurveLineColor(0, QtGui.QColor("orange") )
-        l.setCurveLineWidth(0, 2 )
+        l.setCurveLineWidth(0, 2.0)
         l.setTitle('My customized plot of <font face="Symbol">D</font>q')
         l.setTitleFont(QtGui.QFont("Arial", 12))
         l.setTitleColor(QtGui.QColor("red"))
         l.setTitleAlignment(QtCore.Qt.AlignLeft)
-        l.setScale(2, 0, 3.0)
+        l.setScale(2, 0.0, 3.0)
         l.setAntialiasing(True)
         screenshot(g, "Customized1DPlot", "1D plot of a spectrum, with error bars, an orange line of width 2, a custom title in red Arial font, with X from 0 to 3")
         self.g = g
-
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlot1DPlotTest)
