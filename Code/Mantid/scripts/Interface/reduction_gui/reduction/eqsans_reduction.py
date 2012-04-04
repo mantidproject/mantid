@@ -6,6 +6,15 @@ import time
 import os
 from scripter import BaseReductionScripter
 
+HAS_MANTID = False
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    from mantidsimple import *
+    HAS_MANTID = True
+except:
+    pass
+
 class EQSANSReductionScripter(BaseReductionScripter):
     """
         Organizes the set of reduction parameters that will be used to
@@ -48,6 +57,36 @@ class EQSANSReductionScripter(BaseReductionScripter):
             f.close()
         
         return script
+    
+    def set_options(self):
+        """
+            Set up the reduction options, without executing
+        """
+        if HAS_MANTID:
+            self.update()
+            table_ws = "__patch_options"
+            script = "# Reduction script\n"
+            script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
+            
+            script += "from MantidFramework import *\n"
+            script += "mtd.initialise(False)\n"
+            script += "\n"
+            
+            script += "if mtd.workspaceExists('%s'):\n" % table_ws
+            script += "   mtd.deleteWorkspace('%s')\n\n" % table_ws
+            script += "SetupEQSANSReduction(\n"
+            for item in self._observers:
+                if item.state() is not None:
+                    if hasattr(item.state(), "options"):
+                        script += item.state().options()
+
+            script += "ReductionTableWorkspace='%s')" % table_ws
+            
+            exec script
+            return table_ws
+        else:
+            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
+
         
 
     

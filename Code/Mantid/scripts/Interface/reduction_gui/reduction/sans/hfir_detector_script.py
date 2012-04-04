@@ -99,6 +99,40 @@ class Detector(BaseScriptElement):
                     
         return script           
     
+    def options(self):
+        """
+            Set up the reduction options
+        """
+        # Beam finder options
+        script = "  FindBeamCenter=%s,\n" % str(self.use_finder)
+        if self.use_finder:
+            script += "  BeamCenterFile=%s,\n" % self.beam_file
+            script += "  BeamRadius=%g,\n" % self.beam_radius
+        else:
+            script += "  BeamCenterX=%g,\n" % self.x_position
+            script += "  BeamCenterY=%g,\n" % self.y_position
+        
+        # Sensitivity options
+        if self.sensitivity_corr:
+            script += "  SensitivityFile='%s',\n" % self.sensitivity_data
+            script += "  OutputSensitivityWorkspace='sensitivity',\n"
+            if self.use_sample_dark:
+                script += "  UseDefaultDC=1,\n"
+            else:
+                script += "  UseDefaultDC=0,\n"
+                script += "  SensitivityDarkCurrentFile=%s,\n" % self.sensitivity_dark
+            script += "  MinEfficiency=%g,\n" % self.min_sensitivity
+            script += "  MaxEfficiency=%g,\n" % self.max_sensitivity
+            
+        if not self.use_sample_beam_center:
+            if not self.flood_use_finder:
+                script += "  SensitivityBeamCenterX=%g,\n" % self.flood_x_position
+                script += "  SensitivityBeamCenterY=%g,\n" % self.flood_y_position
+            else:
+                raise RuntimeError, "The beam finder is not yet supported for the sensitivity correction"
+                      
+        return script
+        
     def to_xml(self):
         """
             Create XML from the current data.

@@ -53,6 +53,41 @@ class ReductionOptions(BaseOptions):
         self.compute_resolution = ReductionOptions.compute_resolution
         self.sample_aperture_diameter = ReductionOptions.sample_aperture_diameter
 
+    def options(self):
+        """
+            Set up the reduction options
+        """
+        # Load options
+        script = ""
+        
+        if self.use_config_cutoff:
+            script += "  UseConfigTOFCuts=1,\n"
+        else:
+            script += "  UseConfigTOFCuts=0,\n"
+            script += "  LowTOFCut=%g,\n" % self.low_TOF_cut
+            script += "  HighTOFCut=%g,\n" % self.high_TOF_cut
+        
+        if self.use_config_mask:
+            script += "  UseConfigMask=1,\n"
+        else:
+            script += "  UseConfigMask=0,\n"
+            
+        if self.correct_for_flight_path:
+            script += "  CorrectForFlightPath=1,\n"
+        else:
+            script += "  CorrectForFlightPath=0,\n"
+                      
+                      
+        if self.solid_angle_corr:
+            script += "  SolidAngleCorrection=1,\n"
+        else:
+            script += "  SolidAngleCorrection=0,\n"
+            
+        if self.dark_current_corr:
+            script += "  DarkCurrentFile='%s',\n" % self.dark_current_data
+            
+        return script
+
     def to_script(self):
         """
             Generate reduction script
