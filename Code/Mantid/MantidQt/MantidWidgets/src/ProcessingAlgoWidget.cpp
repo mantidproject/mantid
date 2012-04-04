@@ -96,7 +96,7 @@ void ProcessingAlgoWidget::btnSaveClicked()
     file.exceptions (std::ifstream::failbit | std::ifstream::badbit );
     try
     {
-      file.open(fileselection.toStdString());
+      file.open(fileselection.toStdString().c_str());
       file << ui.editor->text().toStdString();
       file.close();
     }
@@ -118,7 +118,7 @@ void ProcessingAlgoWidget::btnLoadClicked()
   if (!fileselection.isEmpty())
   {
     m_lastFile = fileselection;
-    std::ifstream file(fileselection.toStdString());
+    std::ifstream file(fileselection.toStdString().c_str());
     std::stringstream buffer;
     buffer << file.rdbuf();
     ui.editor->setText(QString::fromStdString(buffer.str()));
