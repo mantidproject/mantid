@@ -45,6 +45,8 @@ void export_MatrixWorkspace()
     .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, "Returns the number of spectra in the workspace")
     .def("binIndexOf", &MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads(args("xvalue", "workspace_index"),
          "Returns the index of the bin containing the given xvalue. The workspace_index is optional [default=0]"))
+    .def("detectorTwoTheta", &MatrixWorkspace::detectorTwoTheta, "Returns the two theta value for a given detector")
+    .def("detectorSignedTwoTheta",&MatrixWorkspace::detectorSignedTwoTheta, "Returns the signed two theta value for given detector")
     .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&MatrixWorkspace::getSpectrum,
        return_internal_reference<>(), "Return the spectra at the given workspace index.")
     .def("getDetector", (IDetector_sptr (MatrixWorkspace::*) (const size_t) const)&MatrixWorkspace::getDetector,

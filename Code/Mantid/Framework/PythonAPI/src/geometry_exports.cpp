@@ -94,6 +94,8 @@ namespace Mantid
 
       //IDetector Class
       register_ptr_to_python<boost::shared_ptr<Geometry::IDetector> >();
+      register_ptr_to_python<boost::shared_ptr<const Geometry::IDetector> >();
+      implicitly_convertible<boost::shared_ptr<Geometry::IDetector>, boost::shared_ptr<const Geometry::IDetector> >();
 
       class_< Geometry::IDetector, bases<Geometry::IObjComponent>,
         boost::noncopyable>("IDetector", no_init)

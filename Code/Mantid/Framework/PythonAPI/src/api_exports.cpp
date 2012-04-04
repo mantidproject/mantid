@@ -272,6 +272,8 @@ using namespace boost::python;
     class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceWrapper,
       boost::noncopyable >("MatrixWorkspace", no_init)
       .def("getNumberHistograms", &API::MatrixWorkspace::getNumberHistograms)
+	    .def("detectorTwoTheta", &API::MatrixWorkspace::detectorTwoTheta)
+      .def("detectorSignedTwoTheta",&API::MatrixWorkspace::detectorSignedTwoTheta)
       .def("getNumberBins", &API::MatrixWorkspace::blocksize)
       .def("binIndexOf", &API::MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads() )
       .def("readX", &PythonAPI::MatrixWorkspaceWrapper::readX)
