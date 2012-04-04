@@ -11,6 +11,8 @@ set ( SRC_FILES
         src/EQSANSDarkCurrentSubtraction.cpp
         src/HFIRDarkCurrentSubtraction.cpp
         src/SetupHFIRReduction.cpp
+        src/SetupEQSANSReduction.cpp
+        src/ComputeSensitivity.cpp
         src/RefRoi.cpp
         src/RefReduction.cpp
 )
@@ -31,6 +33,8 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
         inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
         inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
+        inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
+        inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
         inc/MantidWorkflowAlgorithms/RefRoi.h
         inc/MantidWorkflowAlgorithms/RefReduction.h
 )

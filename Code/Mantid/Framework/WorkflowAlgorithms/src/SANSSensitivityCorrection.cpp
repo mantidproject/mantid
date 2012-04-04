@@ -44,7 +44,7 @@ using namespace DataObjects;
 
 void SANSSensitivityCorrection::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, PropertyMode::Optional));
 
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
       "Flood field or sensitivity file.");
@@ -62,7 +62,7 @@ void SANSSensitivityCorrection::init()
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (optional: otherwise sample beam center is used)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (optional: otherwise sample beam center is used)");
 
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output, PropertyMode::Optional));
   declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputSensitivityWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage","",Direction::Output);
@@ -107,7 +107,6 @@ void SANSSensitivityCorrection::exec()
 
   Progress progress(this,0.0,1.0,10);
 
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const std::string fileName = getPropertyValue("Filename");
 
   // Get the reduction table workspace or create one
@@ -179,8 +178,8 @@ void SANSSensitivityCorrection::exec()
     {
       IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
-      if (!isEmpty(center_x)) loadAlg->setProperty("BeamCenterX", center_x);
-      if (!isEmpty(center_y)) loadAlg->setProperty("BeamCenterY", center_y);
+      if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
+      if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
       loadAlg->executeAsSubAlg();
       rawFloodWS = loadAlg->getProperty("OutputWorkspace");
       m_output_message += "   | Loaded " + fileName + "\n";
@@ -231,6 +230,7 @@ void SANSSensitivityCorrection::exec()
           darkAlg->setProperty("Filename", darkCurrentFile);
           darkAlg->execute();
           if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
+          else dark_result = "   Dark current subtracted\n";
         }
       } else if (darkCurrentFile.size()>0)
       {
@@ -289,21 +289,27 @@ void SANSSensitivityCorrection::exec()
   }
   progress.report(3, "Loaded flood field");
 
-  // Divide sample data by detector efficiency
-  IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide", 0.6, 0.7);
-  divideAlg->setProperty("LHSWorkspace", inputWS);
-  divideAlg->setProperty("RHSWorkspace", floodWS);
-  divideAlg->executeAsSubAlg();
-  MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
+  // Check whether we need to apply the correction to a workspace
+  const std::string inputWSName = getPropertyValue("InputWorkspace");
+  if (inputWSName.size()>0)
+  {
+    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    // Divide sample data by detector efficiency
+    IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide", 0.6, 0.7);
+    divideAlg->setProperty("LHSWorkspace", inputWS);
+    divideAlg->setProperty("RHSWorkspace", floodWS);
+    divideAlg->executeAsSubAlg();
+    MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
-  // Copy over the efficiency's masked pixels to the reduced workspace
-  IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors", 0.75, 0.85);
-  maskAlg->setProperty("Workspace", outputWS);
-  maskAlg->setProperty("MaskedWorkspace", floodWS);
-  maskAlg->executeAsSubAlg();
+    // Copy over the efficiency's masked pixels to the reduced workspace
+    IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors", 0.75, 0.85);
+    maskAlg->setProperty("Workspace", outputWS);
+    maskAlg->setProperty("MaskedWorkspace", floodWS);
+    maskAlg->executeAsSubAlg();
 
-  setProperty("OutputWorkspace", outputWS);
-  setProperty("OutputMessage", "Sensitivity correction applied\n"+m_output_message);
+    setProperty("OutputWorkspace", outputWS);
+  }
+  setProperty("OutputMessage", "Sensitivity correction computed\n"+m_output_message);
 
   progress.report("Performed sensitivity correction");
 }
