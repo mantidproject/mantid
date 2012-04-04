@@ -19,7 +19,6 @@ add_subdirectory ( CustomDialogs )
 add_subdirectory ( CustomInterfaces )
 add_subdirectory ( DesignerPlugins )
 add_subdirectory ( SliceViewer )
-add_subdirectory ( ImageViewer )
 add_subdirectory ( Factory )
 
 
@@ -35,11 +34,9 @@ if ( MSVC_IDE )
   set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET DesignerPlugins PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtSliceViewer PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtImageViewer PROPERTY FOLDER "MantidQt" )
 else ()
   add_custom_target ( MantidQt DEPENDS MantidQtAPI MantidWidgets 
-                                       CustomDialogs CustomInterfaces
-MantidQtSliceViewer MantidQtImageViewer
+                                       CustomDialogs CustomInterfaces MantidQtSliceViewer
   )
 endif ()
 
@@ -119,9 +116,6 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/SliceViewer/inc )
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/MantidWidgets/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui_*.h auto-generated files
 
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/ImageViewer/inc )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/ImageViewer ) #to find ui*.h
-
 # This creates the target library, just for python bindings
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
 
@@ -138,7 +132,7 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython 
-	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer MantidQtImageViewer  MantidQtFactory
+	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer MantidQtFactory
 	${QT_LIBRARIES} ${QWT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	)
