@@ -3,6 +3,8 @@
 //-----------------------------------------------
 #include "MantidKernel/ThreadSafeLogStream.h"
 #include "MantidKernel/MultiThreaded.h"
+#include <iostream>
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 
@@ -35,15 +37,15 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c)
 {
   if (c == '\n' || c == '\r')
   {
-    Poco::Message msg(logger().name(), m_messages[PARALLEL_THREAD_NUMBER], getPriority());
-    m_messages[PARALLEL_THREAD_NUMBER] = "";
+    Poco::Message msg(logger().name(), m_messages[Poco::Thread::currentTid()], getPriority());
+    m_messages[Poco::Thread::currentTid()] = "";
     logger().log(msg);
   }
   else 
   {
     PARALLEL_CRITICAL(logstream)
     {
-      m_messages[PARALLEL_THREAD_NUMBER] += c;
+      m_messages[Poco::Thread::currentTid()] += c;
     }
   }
   return static_cast<int>(c);

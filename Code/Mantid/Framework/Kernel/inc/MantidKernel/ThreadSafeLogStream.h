@@ -9,6 +9,7 @@
 #include <Poco/LogStream.h>
 #include <Poco/UnbufferedStreamBuf.h>
 #include <istream>
+#include <Poco/Thread.h>
 
 namespace Mantid 
 {
@@ -58,7 +59,7 @@ private:
   
 private:
   /// Store a map of thread indices to messages
-  std::map<int, std::string> m_messages;
+  std::map<Poco::Thread::TID, std::string> m_messages;
 };
 
 
