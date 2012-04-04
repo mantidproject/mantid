@@ -10,10 +10,12 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument;
 
 class NormaliseToMonitorTestHelper : public NormaliseToMonitor
@@ -150,6 +152,12 @@ public:
       TS_ASSERT_EQUALS( output->readX(0)[k], k )
       TS_ASSERT_DELTA( output->readY(0)[k], 10, 0.00001 )
       TS_ASSERT_DELTA( output->readE(0)[k], 4.24264, 0.00001 )
+    }
+
+    if (events)
+    {
+      EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(output);
+      TS_ASSERT(eventOut);
     }
   }
 
