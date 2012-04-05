@@ -125,6 +125,8 @@ namespace Mantid
       double longest_tof;
       /// Limits found to tof
       double shortest_tof;
+      /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
+      size_t bad_tofs;
 
       /// Do we pre-count the # of events in each pixel ID?
       bool precount;

@@ -182,6 +182,8 @@ public:
     double my_shortest_tof, my_longest_tof;
     my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
     my_longest_tof = 0.;
+    // A count of "bad" TOFs that were too high
+    size_t badTofs = 0;
 
     prog->report(entry_name + ": precount");
 
@@ -293,7 +295,13 @@ public:
 
           //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
-          if (tof > my_longest_tof) { my_longest_tof = tof;}
+          // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
+          if (tof < 2e8)
+          {
+            if (tof > my_longest_tof) { my_longest_tof = tof;}
+          }
+          else
+            badTofs++;
 
           // Track all the touched wi (only necessary when compressing events, for thread safety)
           if (compress) usedDetIds[detId] = true;
@@ -328,6 +336,7 @@ public:
       //This is not thread safe, so only one thread at a time runs this.
       if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
       if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
+      alg->bad_tofs += badTofs;
     }
 
     // Free Memory
@@ -1160,6 +1169,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0,0);
+  // Initialize the counter of bad TOFs
+  bad_tofs = 0;
 
   if (loadlogs)
   {
@@ -1357,7 +1368,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an invalid time-of-flight." << std::endl;
-
+  if (bad_tofs > 0)
+    g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This may indicate errors in the raw TOF data." << std::endl;
 
   //Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
