@@ -601,7 +601,8 @@ namespace MDEvents
 
     // Copy the experiment infos to the output
     IMDEventWorkspace_sptr inEWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
-    outWS->copyExperimentInfos( *inEWS );
+    if (inEWS)
+      outWS->copyExperimentInfos( *inEWS );
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
