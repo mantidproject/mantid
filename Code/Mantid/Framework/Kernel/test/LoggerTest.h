@@ -56,7 +56,7 @@ public:
     if (Poco::File(m_logFile).exists())
     {
       std::ifstream t;
-      t.open(m_logFile);
+      t.open(m_logFile.c_str());
       std::string line;
       std::getline(t, line);
       std::cout << "LINE IS " << line << std::endl;
@@ -72,7 +72,7 @@ public:
   /** Get the same logger from many threads. */
   void test_Logger_get_inParallel()
   {
-    PARALLEL_FOR_IF(true)
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<1000; i++)
     {
       Logger::get("MyOtherTestLogger");
