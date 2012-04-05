@@ -74,7 +74,8 @@ class Property;
      *  simple PropertyWithValue, this function has to replace the validator. 
      *  For WorkspaceProperty, which obtains its values from dataservice and filters them by validators, 
      *  a new validator has to be a new filter      */
-    virtual void applyChanges(Property * const){};
+    virtual void applyChanges(const IPropertyManager * , Property * const)
+    {}
  
     //--------------------------------------------------------------------------------------------
     /// Make a copy of the present type of IPropertySettings

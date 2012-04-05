@@ -118,15 +118,15 @@ class DLLExport MonIDPropChanger: public Kernel::IPropertySettings
 
 public:
     //   properties this property depends on:                                       "InputWorkspace","MonitorSpectrum","MonitorWorkspace"
-    MonIDPropChanger(Kernel::IPropertyManager * algo,const std::string &WSProperty,const std::string &SpectrToNormByProperty,const std::string &MonitorWorkspace):
-      hostWSname(WSProperty),SpectraNum(SpectrToNormByProperty), MonitorWorkspaceProp(MonitorWorkspace),host_algo(algo),is_enabled(true){}
+    MonIDPropChanger(const std::string &WSProperty,const std::string &SpectrToNormByProperty,const std::string &MonitorWorkspace):
+      hostWSname(WSProperty),SpectraNum(SpectrToNormByProperty), MonitorWorkspaceProp(MonitorWorkspace),is_enabled(true){}
   // if input to this property is enabled
-      bool isEnabled()const;
-      bool isConditionChanged()const;
-      void applyChanges(Kernel::Property *const pProp);
+      bool isEnabled(const IPropertyManager * algo)const;
+      bool isConditionChanged(const IPropertyManager * algo)const;
+      void applyChanges(const IPropertyManager * algo, Kernel::Property *const pProp);
 
    // interface needs it but if indeed proper clone used -- do not know. 
-   virtual IPropertySettings* clone(){return new MonIDPropChanger(host_algo,hostWSname,SpectraNum,MonitorWorkspaceProp);}
+   virtual IPropertySettings* clone(){return new MonIDPropChanger(hostWSname,SpectraNum,MonitorWorkspaceProp);}
    virtual ~MonIDPropChanger(){};
 private:
     // the name of the property, which specifies the workspace which has to be modified
@@ -135,8 +135,6 @@ private:
     std::string SpectraNum;
     // the name of the property, which specifies if you want to allow normalizing by any spectra.
     std::string MonitorWorkspaceProp;
-    // the pointer to the main host algorithm.
-    Kernel::IPropertyManager * host_algo;
 
     // the string with existing allowed monitors indexes
     mutable std::vector<int> iExistingAllowedValues;

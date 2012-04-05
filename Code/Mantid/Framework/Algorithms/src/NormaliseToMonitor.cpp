@@ -58,9 +58,9 @@ namespace Algorithms
 
 // Method of complex validator class
 // method checks if the property is enabled
-bool MonIDPropChanger::isEnabled()const
+bool MonIDPropChanger::isEnabled(const IPropertyManager * algo)const
 {
-       int sp_id =host_algo->getProperty(SpectraNum);
+       int sp_id =algo->getProperty(SpectraNum);
        // if there is spectra number set to norbalize by, nothing else can be selected;
        if(sp_id>0){
            is_enabled=false;
@@ -70,7 +70,7 @@ bool MonIDPropChanger::isEnabled()const
        }
 
        // is there the ws property, which describes monitors ws. It also disables the monitors ID property
-       API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(MonitorWorkspaceProp);
+       API::MatrixWorkspace_const_sptr monitorsWS = algo->getProperty(MonitorWorkspaceProp);
        if(monitorsWS){
            is_enabled = false;
        }else{
@@ -80,19 +80,19 @@ bool MonIDPropChanger::isEnabled()const
 }
 
 // method checks if other properties have chanded and these changes affected MonID property
-bool MonIDPropChanger::isConditionChanged()const
+bool MonIDPropChanger::isConditionChanged(const IPropertyManager * algo)const
 {
       // is enabled is based on other properties:
        if(!is_enabled)return false;
        // read monitors list from the input workspace
-       API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
+       API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
        bool monitors_changed = monitorIdReader(inputWS);
        if(!monitors_changed)return false;
 
        return true;
 }
 // function which modifies the allowed values for the list of monitors. 
-void MonIDPropChanger::applyChanges(Kernel::Property *const pProp)
+void MonIDPropChanger::applyChanges(const IPropertyManager * algo, Kernel::Property *const pProp)
 {
        Kernel::PropertyWithValue<int>* piProp  = dynamic_cast<Kernel::PropertyWithValue<int>* >(pProp);
        if(!piProp){
@@ -100,7 +100,7 @@ void MonIDPropChanger::applyChanges(Kernel::Property *const pProp)
        }
        //
        if(iExistingAllowedValues.empty()){
-           API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(hostWSname);
+           API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
            int spectra_max(-1);
            if(inputWS){ // let's assume that detectors IDs correspond to spectraID -- not always the case but often. TODO: should be fixed
                spectra_max = static_cast<int>(inputWS->getNumberHistograms())+1;

@@ -31,20 +31,20 @@ public:
 
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
-    TSM_ASSERT( "Property always returns enabled.", prop->isEnabled() )
+    TSM_ASSERT( "Property always returns enabled.", prop->getSettings()->isEnabled(&alg) )
     TSM_ASSERT( "Property always returns valid.", prop->isValid().empty() )
 
-    TSM_ASSERT( "Starts off NOT Visible",  !prop->isVisible());
+    TSM_ASSERT( "Starts off NOT Visible",  !prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", 234);
-    TSM_ASSERT( "Becomes visible when another property has been changed",  prop->isVisible());
+    TSM_ASSERT( "Becomes visible when another property has been changed",  prop->getSettings()->isVisible(&alg));
 
     IPropertySettings * val2 = val->clone();
     alg.declareProperty("MySecondValidatorProp", 456);
     alg.setPropertySettings("MySecondValidatorProp", val2);
     prop = alg.getPointerToProperty("MySecondValidatorProp");
-    TSM_ASSERT( "Starts off visible",  prop->isVisible());
+    TSM_ASSERT( "Starts off visible",  prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", 123);
-    TSM_ASSERT( "Goes back to not visible", !prop->isVisible());
+    TSM_ASSERT( "Goes back to not visible", !prop->getSettings()->isVisible(&alg));
   }
 
   void test_when_IS_DEFAULT()
@@ -57,9 +57,9 @@ public:
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
-    TSM_ASSERT( "Starts off visible", prop->isVisible());
+    TSM_ASSERT( "Starts off visible", prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", -1);
-    TSM_ASSERT( "Becomes not visible when another property has been changed", !prop->isVisible());
+    TSM_ASSERT( "Becomes not visible when another property has been changed", !prop->getSettings()->isVisible(&alg));
   }
 
   void test_when_IS_EQUAL_TO()
@@ -71,9 +71,9 @@ public:
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
-    TSM_ASSERT( "Starts off not visible", !prop->isVisible());
+    TSM_ASSERT( "Starts off not visible", !prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", 234);
-    TSM_ASSERT( "Becomes visible when the other property is equal to the given string", prop->isVisible());
+    TSM_ASSERT( "Becomes visible when the other property is equal to the given string", prop->getSettings()->isVisible(&alg));
   }
 
   void test_when_IS_NOT_EQUAL_TO()
@@ -85,9 +85,9 @@ public:
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
-    TSM_ASSERT( "Starts off not visible", prop->isVisible());
+    TSM_ASSERT( "Starts off not visible", prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", 234);
-    TSM_ASSERT( "Becomes visible when the other property is equal to the given string", !prop->isVisible());
+    TSM_ASSERT( "Becomes visible when the other property is equal to the given string", !prop->getSettings()->isVisible(&alg));
   }
 
 
