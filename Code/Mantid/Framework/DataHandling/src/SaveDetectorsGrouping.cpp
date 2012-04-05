@@ -249,8 +249,7 @@ namespace DataHandling
     std::ofstream ofs;
     ofs.open(xmlfilename.c_str(), std::fstream::out);
 
-    ofs << "<?xml version=\"1.0\"?>\n"
-        << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
+    ofs << "<?xml version=\"1.0\"?>\n";
 
     writer.writeNode(std::cout, pDoc);
     writer.writeNode(ofs, pDoc);

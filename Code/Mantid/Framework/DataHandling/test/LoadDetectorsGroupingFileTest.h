@@ -95,7 +95,6 @@ public:
     ofs.open(xmlfilename.c_str(), std::ios::out);
 
     ofs << "<?xml version=\"1.0\"?>" << std::endl;
-    ofs << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>" << std::endl;
     ofs << "<detector-grouping instrument=\"VULCAN\">" << std::endl;
     ofs << "  <group>" << std::endl;
     ofs << "    <detids>26250-27481,27500-28731,28750-29981</detids>" << std::endl;
@@ -149,7 +148,6 @@ public:
     ofs.open(xmlfilename.c_str(), std::ios::out);
 
     ofs << "<?xml version=\"1.0\"?>" << std::endl;
-    ofs << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>" << std::endl;
     ofs << "<detector-grouping>" << std::endl;
     ofs << "  <group>" << std::endl;
     ofs << "    <ids>30-36,12-16,100-111</ids>" << std::endl;
