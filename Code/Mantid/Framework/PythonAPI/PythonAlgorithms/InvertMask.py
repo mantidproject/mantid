@@ -14,7 +14,7 @@ class InvertMask(PythonAlgorithm):
     """
    
     def category(self):
-        return "Diagnostic;PythonAlgorithms"
+        return "Diagnostics;PythonAlgorithms"
 
     def name(self):
         return "InvertMask"
