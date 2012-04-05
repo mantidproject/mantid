@@ -219,6 +219,11 @@ void CropWorkspace::execEvent()
     ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
   }
 
+  // run inplace branch if appropriate
+  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
+  if (inPlace)
+    this->execEventInplace(minX_val, maxX_val);
+
   // Create the output workspace
   EventWorkspace_sptr outputWorkspace =
     boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", m_maxSpec-m_minSpec+1, ntcnew, ntcnew-m_histogram));
@@ -226,9 +231,6 @@ void CropWorkspace::execEvent()
   outputWorkspace->sortAll(TOF_SORT, NULL);
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWorkspace, outputWorkspace, true);
-  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
-  if (inPlace)
-    g_log.debug("Cropping EventWorkspace in-place.");
 
   Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
@@ -238,7 +240,7 @@ void CropWorkspace::execEvent()
   {
     PARALLEL_START_INTERUPT_REGION
     int j = i - m_minSpec;
-    EventList el = eventW->getEventList(i);
+    const EventList & el = eventW->getEventList(i);
     // The output event list
     EventList & outEL = outputWorkspace->getOrAddEventList(j);
     switch (el.getEventType())
@@ -340,6 +342,80 @@ void CropWorkspace::execEvent()
   outputWorkspace->generateSpectraMap();
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
+}
+
+template<typename T>
+std::size_t lowerBound(std::vector<T> & events, const double tof)
+{
+  typename std::vector<T>::iterator first = events.begin();
+  typename std::vector<T>::iterator last = events.end();
+  typename std::vector<T>::iterator it;
+  typename std::vector<T>::difference_type count = distance(first, last);
+  typename std::vector<T>::difference_type step;
+
+  while (count>0)
+  {
+    it = first; step=count/2; advance (it,step);
+    if (it->tof()<tof)                   // or: if (comp(*it,value)), for the comp version
+      { first=++it; count-=step+1;  }
+    else count=step;
+  }
+  if (first == events.end())
+    return events.size();
+  else
+    return distance(events.begin(), first);
+}
+
+void CropWorkspace::execEventInplace(double minX_val, double maxX_val)
+{
+  g_log.debug("Cropping EventWorkspace in-place.");
+
+  Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
+  eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
+  // Loop over the required spectra, copying in the desired bins
+  PARALLEL_FOR1(eventW)
+  for (int i = m_minSpec; i <= m_maxSpec; ++i)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    EventList & el = eventW->getEventList(i);
+    std::size_t numEvents = el.getNumberEvents();
+
+    // left side of the crop - will erase 0 -> endLeft
+    std::size_t endLeft = 0;
+    // right side of the crop - will erase endRight->numEvents+1
+    std::size_t endRight = numEvents + 1;
+    switch (el.getEventType())
+    {
+    case TOF:
+    {
+      endLeft = lowerBound(el.getEvents(), minX_val);
+      endRight = lowerBound(el.getEvents(), maxX_val);
+      break;
+    }
+    case WEIGHTED:
+    {
+      endLeft = lowerBound(el.getWeightedEvents(), minX_val);
+      endRight = lowerBound(el.getWeightedEvents(), maxX_val);
+      break;
+    }
+    case WEIGHTED_NOTIME:
+    {
+      endLeft = lowerBound(el.getWeightedEventsNoTime(), minX_val);
+      endRight = lowerBound(el.getWeightedEventsNoTime(), maxX_val);
+    }
+    }
+
+    g_log.debug() << 0 << "->" << endLeft << "     " << endRight << " -> " << numEvents << "\n";
+    el.erase(endRight, numEvents+1);
+    el.erase(0, endLeft);
+    el.clearUnused();
+
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(eventW));
 }
 
 /** Retrieves the optional input properties and checks that they have valid values.

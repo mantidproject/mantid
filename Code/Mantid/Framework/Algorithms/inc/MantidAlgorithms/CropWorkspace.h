@@ -82,6 +82,7 @@ private:
   ///Execution code
   void exec();
   void execEvent();
+  void execEventInplace(double minX_val, double maxX_val);
 
   void checkProperties();
   std::size_t getXMin(const int wsIndex = 0);
