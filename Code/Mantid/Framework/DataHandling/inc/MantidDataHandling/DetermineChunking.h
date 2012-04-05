@@ -37,6 +37,22 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+/// Make the code clearer by having this an explicit type
+typedef int PixelType;
+/// Type for the DAS time of flight (data file)
+typedef int DasTofType;
+
+/// Structure that matches the form in the binary event list.
+#pragma pack(push, 4) //Make sure the structure is 8 bytes.
+struct DasEvent
+{
+    /// Time of flight.
+    DasTofType tof;
+    /// Pixel identifier as published by the DAS/DAE/DAQ.
+    PixelType pid;
+};
+#pragma pack(pop)
+
   class DLLExport DetermineChunking  :  public API::IDataFileChecker
   {
   public:

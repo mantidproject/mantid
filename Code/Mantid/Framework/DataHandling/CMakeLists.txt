@@ -243,6 +243,7 @@ set ( TEST_FILES
 	test/CreateSampleShapeTest.h
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
+	test/DetermineChunkingTest.h
 	test/FakeEventDataListenerTest.h
 	test/FileEventDataListenerTest.h
 	test/FindDetectorsInShapeTest.h

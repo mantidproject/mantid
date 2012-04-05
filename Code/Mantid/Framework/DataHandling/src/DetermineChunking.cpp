@@ -24,6 +24,7 @@ Workflow algorithm to determine chunking strategy.
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/BinaryFile.h"
 
 using namespace ::NeXus;
 using namespace Mantid::Kernel;
@@ -149,8 +150,8 @@ namespace DataHandling
       LoadPreNexus lp;
       lp.parseRuninfo(runinfo, dataDir, eventFilenames);
       for (size_t i = 0; i < eventFilenames.size(); i++) {
-        // factor is 3 / (1024*1024*1024) to convert to Gbytes
-        filesize += static_cast<double>(Poco::File(dataDir + eventFilenames[i]).getSize()) * 3.0 / (1024.0*1024.0*1024.0);
+        Mantid::Kernel::BinaryFile<DasEvent> * eventfile = new BinaryFile<DasEvent>(dataDir + eventFilenames[i]);
+        filesize += static_cast<double>(eventfile->getNumElements()) * 24.0 / (1024.0*1024.0*1024.0);
       }
     }
     else
