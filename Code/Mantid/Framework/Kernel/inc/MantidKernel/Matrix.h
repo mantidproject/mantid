@@ -78,10 +78,10 @@ namespace Mantid
       T* operator[](const size_t A) { return V[A]; }
 
       Matrix<T>& operator+=(const Matrix<T>&);       ///< Basic addition operator
-      Matrix<T> operator+(const Matrix<T>&);         ///< Basic addition operator
+      Matrix<T> operator+(const Matrix<T>&) const;         ///< Basic addition operator
 
       Matrix<T>& operator-=(const Matrix<T>&);       ///< Basic subtraction operator
-      Matrix<T> operator-(const Matrix<T>&);         ///< Basic subtraction operator
+      Matrix<T> operator-(const Matrix<T>&) const;         ///< Basic subtraction operator
 
       Matrix<T> operator*(const Matrix<T>&) const;    ///< Basic matrix multiply
       std::vector<T> operator*(const std::vector<T>&) const; ///< Multiply M*Vec

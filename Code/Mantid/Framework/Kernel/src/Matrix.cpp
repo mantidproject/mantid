@@ -382,7 +382,7 @@ Matrix<T>::operator-=(const Matrix<T>& A)
 
 template<typename T>
 Matrix<T>
-Matrix<T>::operator+(const Matrix<T>& A)
+Matrix<T>::operator+(const Matrix<T>& A) const
    /** 
      Matrix addition THIS + A  
      If the size is different then 0 is added where appropiate
@@ -397,7 +397,7 @@ Matrix<T>::operator+(const Matrix<T>& A)
 
 template<typename T>
 Matrix<T>
-Matrix<T>::operator-(const Matrix<T>& A)
+Matrix<T>::operator-(const Matrix<T>& A) const
    /** 
      Matrix subtraction THIS - A  
      If the size is different then 0 is subtracted where 
