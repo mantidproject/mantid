@@ -834,22 +834,6 @@ namespace DataObjects
     this->clear(false);
   }
 
-  namespace { // anonymous namespace
-  template<class T>
-  void eraseEventsHelper(std::vector<T> & events, const std::size_t start, const std::size_t stop)
-  {
-    if (start == 0) return; // REMOVE
-    if (stop >= events.size())
-    {
-      events.erase(events.begin() + start, events.end());
-    }
-    else
-    {
-      events.erase(events.begin() + start, events.begin() + stop);
-    }
-  }
-  }
-
   /**
    * Delete events from the list.
    * @param start The first index to delete, inclusive.
@@ -866,15 +850,18 @@ namespace DataObjects
     // do the actual work
     if (eventType == TOF)
     {
-      eraseEventsHelper(this->events, start, stop);
+      std::vector<TofEvent>(this->events.begin() + start,
+                            this->events.begin() + stop).swap(this->events);
     }
     else if (eventType == WEIGHTED)
     {
-      eraseEventsHelper(this->weightedEvents, start, stop);
+      std::vector<WeightedEvent>(this->weightedEvents.begin() + start,
+                                 this->weightedEvents.begin() + stop).swap(this->weightedEvents);
     }
     else if (eventType == WEIGHTED_NOTIME)
     {
-      eraseEventsHelper(this->weightedEventsNoTime, start, stop);
+      std::vector<WeightedEventNoTime>(this->weightedEventsNoTime.begin() + start,
+                                       this->weightedEventsNoTime.begin() + stop).swap(this->weightedEventsNoTime);
     }
     else
     {
