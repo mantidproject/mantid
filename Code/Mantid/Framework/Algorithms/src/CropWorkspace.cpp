@@ -221,8 +221,8 @@ void CropWorkspace::execEvent()
 
   // run inplace branch if appropriate
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
-  if (inPlace)
-    this->execEventInplace(minX_val, maxX_val);
+//  if (inPlace)
+//    this->execEventInplace(minX_val, maxX_val);
 
   // Create the output workspace
   EventWorkspace_sptr outputWorkspace =
@@ -405,7 +405,7 @@ void CropWorkspace::execEventInplace(double minX_val, double maxX_val)
     }
     }
 
-    g_log.debug() << 0 << "->" << endLeft << "     " << endRight << " -> " << numEvents << "\n";
+    g_log.debug() << 0 << "->" << endLeft << "     " << endRight << "->" << numEvents << "\n";
     el.erase(endRight, numEvents+1);
     el.erase(0, endLeft);
     el.clearUnused();
