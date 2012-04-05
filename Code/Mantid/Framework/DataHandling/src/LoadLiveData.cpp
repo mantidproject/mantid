@@ -127,7 +127,7 @@ namespace DataHandling
   Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess)
   {
     if (!inputWS)
-      throw std::runtime_error("LoadLiveData::runProcessing() called fplots or an empty input workspace.");
+      throw std::runtime_error("LoadLiveData::runProcessing() called for an empty input workspace.");
     // Prevent others writing to the workspace while we run.
     ReadLock _lock(*inputWS);
 
@@ -173,7 +173,7 @@ namespace DataHandling
       if (!wsProp)
         throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
       Workspace_sptr temp = wsProp->getWorkspace();
-      plots
+
       if (!PostProcess)
       {
         // Remove the chunk workspace from the ADS, it is no longer needed there.
