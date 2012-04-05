@@ -10,6 +10,8 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+using Mantid::Kernel::IPropertyManager;
+
 namespace Mantid
 {
 namespace API
@@ -51,9 +53,9 @@ namespace API
      * @param otherPropName :: Name of the OTHER property that we will check.
      * @param enabledSetting :: Set Enabled on this property to this value when the workspace is of type T. Default true.
      */
-    EnabledWhenWorkspaceIsType(const Mantid::Kernel::IPropertyManager * algo, std::string otherPropName,
+    EnabledWhenWorkspaceIsType(const Mantid::Kernel::IPropertyManager * , std::string otherPropName,
             bool enabledSetting = true)
-    : IPropertySettings(algo),
+    : IPropertySettings(),
       m_otherPropName(otherPropName), m_enabledSetting(enabledSetting)
     {
     }
@@ -68,14 +70,14 @@ namespace API
      * other property values?
      * @return true if fulfilled or if any problem was found (missing property, e.g.).
      */
-    virtual bool fulfillsCriterion() const
+    virtual bool fulfillsCriterion(const IPropertyManager * algo) const
     {
       // Find the property
-      if (this->m_propertyManager == NULL) return true;
+      if (algo == NULL) return true;
       Mantid::Kernel::Property * prop = NULL;
       try
       {
-        prop = this->m_propertyManager->getPointerToProperty(m_otherPropName);
+        prop = algo->getPointerToProperty(m_otherPropName);
       }
       catch (Mantid::Kernel::Exception::NotFoundError&)
       {
@@ -107,14 +109,14 @@ namespace API
 
     //--------------------------------------------------------------------------------------------
     /// Return true/false based on whether the other property satisfies the criterion
-    virtual bool isEnabled() const
+    virtual bool isEnabled(const IPropertyManager * algo) const
     {
-      return fulfillsCriterion();
+      return fulfillsCriterion(algo);
     }
 
     //--------------------------------------------------------------------------------------------
     /// Return true always
-    virtual bool isVisible() const
+    virtual bool isVisible(const IPropertyManager * ) const
     {
       return true;
     }
@@ -123,7 +125,7 @@ namespace API
     /// Make a copy of the present type of validator
     virtual IPropertySettings * clone()
     {
-      EnabledWhenWorkspaceIsType * out = new EnabledWhenWorkspaceIsType<T>(this->m_propertyManager, m_otherPropName, m_enabledSetting);
+      EnabledWhenWorkspaceIsType * out = new EnabledWhenWorkspaceIsType<T>(NULL, m_otherPropName, m_enabledSetting);
       return out;
     }
    protected:

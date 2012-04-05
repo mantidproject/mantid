@@ -76,9 +76,9 @@ namespace Kernel
      * @param when :: Criterion to evaluate
      * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to check for
      */
-    EnabledWhenProperty(const IPropertyManager * algo, std::string otherPropName,
+    EnabledWhenProperty(const IPropertyManager * , std::string otherPropName,
                         ePropertyCriterion when, std::string value = "")
-    : IPropertySettings(algo),
+    : IPropertySettings(),
       m_otherPropName(otherPropName), m_when(when), m_value(value)
     {
     }
@@ -93,14 +93,14 @@ namespace Kernel
      * other property values?
      * @return true if fulfilled or if any problem was found (missing property, e.g.).
      */
-    virtual bool fulfillsCriterion() const
+    virtual bool fulfillsCriterion(const IPropertyManager * algo) const
     {
       // Find the property
-      if (this->m_propertyManager == NULL) return true;
+      if (algo == NULL) return true;
       Property * prop = NULL;
       try
       {
-        prop = this->m_propertyManager->getPointerToProperty(m_otherPropName);
+        prop = algo->getPointerToProperty(m_otherPropName);
       }
       catch (Exception::NotFoundError&)
       {
@@ -134,14 +134,14 @@ namespace Kernel
 
     //--------------------------------------------------------------------------------------------
     /// Return true/false based on whether the other property satisfies the criterion
-    virtual bool isEnabled() const
+    virtual bool isEnabled(const IPropertyManager * algo) const
     {
-      return fulfillsCriterion();
+      return fulfillsCriterion(algo);
     }
 
     //--------------------------------------------------------------------------------------------
     /// Return true always
-    virtual bool isVisible() const
+    virtual bool isVisible(const IPropertyManager * ) const
     {
       return true;
     }
@@ -151,7 +151,7 @@ namespace Kernel
     /// Make a copy of the present type of validator
     virtual IPropertySettings * clone()
     {
-      EnabledWhenProperty * out = new EnabledWhenProperty(this->m_propertyManager, m_otherPropName, m_when, m_value);
+      EnabledWhenProperty * out = new EnabledWhenProperty(NULL, m_otherPropName, m_when, m_value);
       return out;
     }
 

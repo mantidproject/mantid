@@ -53,18 +53,18 @@ public:
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     Property * prop2 = alg.getPointerToProperty("MyValidatorProp2");
     TS_ASSERT(prop); if (!prop) return;
-    TSM_ASSERT( "Property always returns visible.", prop->isVisible() )
+    TSM_ASSERT( "Property always returns visible.", prop->getSettings()->isVisible(&alg) )
     TSM_ASSERT( "Property always returns valid.", prop->isValid().empty() )
 
-    TSM_ASSERT( "Starts off enabled because empty",  prop->isEnabled());
+    TSM_ASSERT( "Starts off enabled because empty",  prop->getSettings()->isEnabled(&alg));
     alg.setProperty("InputWorkspace", "tester");
-    TSM_ASSERT( "Becomes disabled when the workspace is the wrong type", !prop->isEnabled());
+    TSM_ASSERT( "Becomes disabled when the workspace is the wrong type", !prop->getSettings()->isEnabled(&alg));
     alg.setProperty("InputWorkspace", "testersub");
-    TSM_ASSERT( "Becomes enabled when the workspace is correct type",  prop->isEnabled());
+    TSM_ASSERT( "Becomes enabled when the workspace is correct type",  prop->getSettings()->isEnabled(&alg));
 
-    TSM_ASSERT( "Starts disabled when the workspace is correct type",  !prop2->isEnabled());
+    TSM_ASSERT( "Starts disabled when the workspace is correct type",  !prop2->getSettings()->isEnabled(&alg));
     alg.setProperty("InputWorkspace", "tester");
-    TSM_ASSERT( "Becomes enabled when the workspace is the wrong type", prop2->isEnabled());
+    TSM_ASSERT( "Becomes enabled when the workspace is the wrong type", prop2->getSettings()->isEnabled(&alg));
 
   }
 

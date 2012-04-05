@@ -102,26 +102,6 @@ public:
   ///Overridden function that checks whether the property, if not overriden returns ""
   virtual std::string isValid() const;
 
-  ///Overridden function that returns true if the property should be enabled in GUI
-  virtual bool isEnabled() const
-  { 
-    if (m_settings) return m_settings->isEnabled();
-    else return true;
-  }
-
-  ///Overridden function that returns true if the property should be visible in GUI
-  virtual bool isVisible() const
-  { 
-    if (m_settings) return m_settings->isVisible();
-    else return true;
-  }
-  /// function reports if the property limits have changed and property widgets have to be reset in GUI
-  virtual bool isConditionChanged()const
-  {
-      if(m_settings) return m_settings->isConditionChanged();
-      else return false;
-  }
-
   /** Set the PropertySettings determining when this property is visible/enabled */
   void setSettings(IPropertySettings * settings)
   { m_settings = settings; }

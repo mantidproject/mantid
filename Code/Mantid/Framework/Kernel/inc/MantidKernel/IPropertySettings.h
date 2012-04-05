@@ -43,13 +43,8 @@ class Property;
   class DLLExport IPropertySettings 
   {
   public:
-    IPropertySettings()
-    : m_propertyManager(NULL)
-    {}
-
     /// Constructor
-    IPropertySettings(const IPropertyManager * propManager)
-    : m_propertyManager(propManager)
+    IPropertySettings()
     {}
 
     /// Destructor
@@ -57,16 +52,16 @@ class Property;
     { }
 
     /** Is the property to be shown as "enabled" in the GUI. Default true. */
-    virtual bool isEnabled() const
-    { return true; }
+    virtual bool isEnabled(const IPropertyManager * algo) const
+    { UNUSED_ARG(algo); return true; }
 
     /** Is the property to be shown in the GUI? Default true. */
-    virtual bool isVisible() const
-    { return true; }
+    virtual bool isVisible(const IPropertyManager * algo) const
+    { UNUSED_ARG(algo); return true; }
     /** to verify if the properties, this one depends on have changed
         or other special condition occurs which needs the framework to react to */
-    virtual bool isConditionChanged()const
-    {return false;}
+    virtual bool isConditionChanged(const IPropertyManager * algo)const
+    { UNUSED_ARG(algo); return false; }
     /** The function user have to overload it in his custom code to modify the property 
         according to the changes to other properties.
      *
@@ -81,22 +76,12 @@ class Property;
      *  a new validator has to be a new filter      */
     virtual void applyChanges(Property * const){};
  
-    //------------------------------------------------------------------------------------------------------------
-    /** Set the property manager (i.e. algorithm) containing the other properties to use to validate
-     * @param propertyManager :: pointer  */
-    void setPropertyManager(const IPropertyManager * propertyManager)
-    {
-      m_propertyManager = propertyManager;
-    }
-
     //--------------------------------------------------------------------------------------------
     /// Make a copy of the present type of IPropertySettings
     virtual IPropertySettings* clone() = 0;
 
   protected:
 
-    /** Pointer to the property manager (i.e. algorithm) containing the other properties to use to validate */
-    const IPropertyManager * m_propertyManager;
   private:
       // non-copyable directly
       IPropertySettings(const IPropertySettings &){}

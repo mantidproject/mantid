@@ -446,7 +446,10 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
   {
     // Regular C++ algo. Let the property tell us,
     // possibly using validators, if it is to be shown enabled
-    return property->isEnabled();
+    if (property->getSettings())
+      return property->getSettings()->isEnabled(m_algorithm);
+    else
+      return true;
   }
   else
   {

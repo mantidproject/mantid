@@ -360,8 +360,12 @@ namespace API
     }
     else
     {
-      // Rely on the property to determine if it is enabled.
-      return property->isEnabled();
+      // Regular C++ algo. Let the property tell us,
+      // possibly using validators, if it is to be shown enabled
+      if (property->getSettings())
+        return property->getSettings()->isEnabled(m_algo);
+      else
+        return true;
     }
 
   }
@@ -380,28 +384,36 @@ namespace API
       PropertyWidget * widget = pitr.value();
       Mantid::Kernel::Property *prop = widget->getProperty();
       QString propName = pitr.key();
+      IPropertySettings * settings = prop->getSettings();
 
       // Set the enabled and visible flags based on what the validators say. Default is always true.
-      bool visible = prop->isVisible();
+      bool visible = true;
       // Dynamically check if the widget should be enabled.
       bool enabled = this->isWidgetEnabled(prop, propName);
 
-      // Dynamic PropertySettings objects allow a property to change validators.
-      // This removes the old widget and creates a new one instead.
-      if (prop->isConditionChanged())
+      // Do we have a custom IPropertySettings?
+      if (settings)
       {
-        prop->getSettings()->applyChanges(prop);
+        // Set the visible flag
+        visible = settings->isVisible(m_algo);
 
-        // Delete the old widget
-        int row = widget->getGridRow();
-        QGridLayout * layout = widget->getGridLayout();
-        widget->deleteLater();
+        // Dynamic PropertySettings objects allow a property to change validators.
+        // This removes the old widget and creates a new one instead.
+        if (settings->isConditionChanged(m_algo))
+        {
+          settings->applyChanges(prop);
 
-        // Create the appropriate widget at this row in the grid.
-        widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+          // Delete the old widget
+          int row = widget->getGridRow();
+          QGridLayout * layout = widget->getGridLayout();
+          widget->deleteLater();
 
-        // Whenever the value changes in the widget, this fires propertyChanged()
-        connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+          // Create the appropriate widget at this row in the grid.
+          widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+
+          // Whenever the value changes in the widget, this fires propertyChanged()
+          connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+        }
       }
 
       // Show/hide the validator label (that red star)

@@ -57,23 +57,23 @@ namespace Kernel
 
     //--------------------------------------------------------------------------------------------
     /// Return true always
-    virtual bool isEnabled() const
+    virtual bool isEnabled(const IPropertyManager * ) const
     {
       return true;
     }
 
     //--------------------------------------------------------------------------------------------
     /// Return true/false based on whether the other property satisfies the criterion
-    virtual bool isVisible() const
+    virtual bool isVisible(const IPropertyManager * algo) const
     {
-      return this->fulfillsCriterion();
+      return this->fulfillsCriterion(algo);
     }
 
     //--------------------------------------------------------------------------------------------
     /// Make a copy of the present type of validator
     virtual IPropertySettings* clone()
     {
-      VisibleWhenProperty * out = new VisibleWhenProperty(this->m_propertyManager, this->m_otherPropName, this->m_when, this->m_value);
+      VisibleWhenProperty * out = new VisibleWhenProperty(NULL, this->m_otherPropName, this->m_when, this->m_value);
       return out;
     }
 
