@@ -242,7 +242,8 @@ void CropWorkspace::execEvent()
   }
 
   // run inplace branch if appropriate
-  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
+  MatrixWorkspace_sptr OutputWorkspace = this->getProperty("OutputWorkspace");
+  bool inPlace = (OutputWorkspace == m_inputWorkspace);
   if (inPlace)
     g_log.debug("Cropping EventWorkspace in-place.");
 
@@ -265,37 +266,55 @@ void CropWorkspace::execEvent()
     const EventList & el = eventW->getEventList(i);
     // The output event list
     EventList & outEL = outputWorkspace->getOrAddEventList(j);
-    // left side of the crop - will erase 0 -> endLeft
-    std::size_t endLeft;
-    // right side of the crop - will erase endRight->numEvents+1
-    std::size_t endRight;
+//    // left side of the crop - will erase 0 -> endLeft
+//    std::size_t endLeft;
+//    // right side of the crop - will erase endRight->numEvents+1
+//    std::size_t endRight;
 
     switch (el.getEventType())
     {
       case TOF:
       {
-        endLeft = lowerBound(el.getEvents(), minX_val);
-        endRight = lowerBound(el.getEvents(), maxX_val);
-        std::vector<TofEvent>::const_iterator begin = el.getEvents().begin();
-        std::vector<TofEvent> moreevents(begin + endLeft, begin + endRight);
+        std::vector<TofEvent>::const_iterator itev = el.getEvents().begin();
+        std::vector<TofEvent>::const_iterator end = el.getEvents().end();
+        std::vector<TofEvent> moreevents;
+        moreevents.reserve(el.getNumberEvents()); // assume all will make it
+        for (; itev != end; ++itev)
+        {
+          const double tof = itev->tof();
+          if(tof <=  maxX_val && tof >= minX_val)
+            moreevents.push_back(*itev);
+        }
         outEL += moreevents;
         break;
       }
       case WEIGHTED:
       {
-        endLeft = lowerBound(el.getWeightedEvents(), minX_val);
-        endRight = lowerBound(el.getWeightedEvents(), maxX_val);
-        std::vector<WeightedEvent>::const_iterator begin = el.getWeightedEvents().begin();
-        std::vector<WeightedEvent> moreevents(begin + endLeft, begin + endRight);
+        std::vector<WeightedEvent>::const_iterator itev = el.getWeightedEvents().begin();
+        std::vector<WeightedEvent>::const_iterator end = el.getWeightedEvents().end();
+        std::vector<WeightedEvent> moreevents;
+        moreevents.reserve(el.getNumberEvents()); // assume all will make it
+        for (; itev != end; ++itev)
+        {
+          const double tof = itev->tof();
+          if(tof <=  maxX_val && tof >= minX_val)
+            moreevents.push_back(*itev);
+        }
         outEL += moreevents;
         break;
       }
       case WEIGHTED_NOTIME:
       {
-        endLeft = lowerBound(el.getWeightedEventsNoTime(), minX_val);
-        endRight = lowerBound(el.getWeightedEventsNoTime(), maxX_val);
-        std::vector<WeightedEventNoTime>::const_iterator begin = el.getWeightedEventsNoTime().begin();
-        std::vector<WeightedEventNoTime> moreevents(begin + endLeft, begin + endRight);
+        std::vector<WeightedEventNoTime>::const_iterator itev = el.getWeightedEventsNoTime().begin();
+        std::vector<WeightedEventNoTime>::const_iterator end  = el.getWeightedEventsNoTime().end();
+        std::vector<WeightedEventNoTime> moreevents;
+        moreevents.reserve(el.getNumberEvents()); // assume all will make it
+        for ( ; itev != end; ++itev)
+        {
+          const double tof = itev->tof();
+          if(tof <=  maxX_val && tof >= minX_val)
+            moreevents.push_back(*itev);
+        }
         outEL += moreevents;
         break;
       }
