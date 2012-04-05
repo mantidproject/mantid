@@ -106,7 +106,7 @@ namespace MDEvents
         "If Filename is specified to use a file back end:\n"
         "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
         "  If not specified, a default of 40% of free physical memory is used.");
-    setPropertySettings("Memory", new EnabledWhenProperty(this, "Filename", IS_NOT_DEFAULT));
+    setPropertySettings("Memory", new EnabledWhenProperty("Filename", IS_NOT_DEFAULT));
 
   }
 

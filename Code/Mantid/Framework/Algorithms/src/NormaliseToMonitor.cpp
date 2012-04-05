@@ -46,8 +46,10 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include <cfloat>
 #include <iomanip>
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/IPropertyManager.h"
 
 using namespace Mantid::DataObjects;
+using Mantid::Kernel::IPropertyManager;
 
 namespace Mantid
 {
@@ -222,19 +224,19 @@ void NormaliseToMonitor::init()
        "The MonitorID (pixel ID), which defines the monitor's data within the InputWorkspace. Will be overridden by the values correspondent to MonitorSpectrum field if one is provided in the field above.\n"
        "If workspace do not have monitors, the MonitorID can refer to empty data and the field then can accepts any MonitorID within the InputWorkspace.");
    // set up the validator, which would verify if spectrum is correct
-   setPropertySettings("MonitorID",new MonIDPropChanger(this,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+   setPropertySettings("MonitorID",new MonIDPropChanger("InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,PropertyMode::Optional,val),
     "A workspace containing one or more spectra to normalize the InputWorkspace by.");
-  setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
+  setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty("MonitorSpectrum",IS_DEFAULT));
 
   declareProperty("MonitorWorkspaceIndex",0,
       "The index of the spectrum within the MonitorWorkspace(2 (0<=ind<=nHistohrams in MonitorWorkspace) you want to normalize by\n"
       "(usually related to the index, responsible for the monitor's data but can be any).\n"
       "If no value is provided in this field, '''InputWorkspace''' will be normalized by first spectra (with index 0)",
        Direction::InOut);
-  setPropertySettings("MonitorWorkspaceIndex",new Kernel::EnabledWhenProperty(this,"MonitorSpectrum",IS_DEFAULT));
+  setPropertySettings("MonitorWorkspaceIndex",new Kernel::EnabledWhenProperty("MonitorSpectrum",IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
   // 1) normalisation is by an integrated count instead of bin-by-bin

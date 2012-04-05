@@ -41,14 +41,13 @@ namespace Kernel
   public:
     //--------------------------------------------------------------------------------------------
     /** Constructor
-     * @param algo :: ptr to the calling Algorithm (type IPropertyManager)
      * @param otherPropName :: Name of the OTHER property that we will check.
      * @param when :: Criterion to evaluate
      * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to check for
      */
-    VisibleWhenProperty(const IPropertyManager * algo, std::string otherPropName,
+    VisibleWhenProperty(std::string otherPropName,
                         ePropertyCriterion when, std::string value = "")
-    : EnabledWhenProperty(algo, otherPropName, when, value)
+    : EnabledWhenProperty(otherPropName, when, value)
     {}
 
     /// Destructor
@@ -73,7 +72,7 @@ namespace Kernel
     /// Make a copy of the present type of validator
     virtual IPropertySettings* clone()
     {
-      VisibleWhenProperty * out = new VisibleWhenProperty(NULL, this->m_otherPropName, this->m_when, this->m_value);
+      VisibleWhenProperty * out = new VisibleWhenProperty(this->m_otherPropName, this->m_when, this->m_value);
       return out;
     }
 

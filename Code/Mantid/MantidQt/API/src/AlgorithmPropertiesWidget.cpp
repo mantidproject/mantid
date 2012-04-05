@@ -401,7 +401,7 @@ namespace API
         // This removes the old widget and creates a new one instead.
         if (settings->isConditionChanged(m_algo))
         {
-          settings->applyChanges(prop);
+          settings->applyChanges(m_algo, prop);
 
           // Delete the old widget
           int row = widget->getGridRow();

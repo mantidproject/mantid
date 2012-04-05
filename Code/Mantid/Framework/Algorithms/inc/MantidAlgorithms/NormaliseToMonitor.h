@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid
 {
@@ -121,9 +122,9 @@ public:
     MonIDPropChanger(const std::string &WSProperty,const std::string &SpectrToNormByProperty,const std::string &MonitorWorkspace):
       hostWSname(WSProperty),SpectraNum(SpectrToNormByProperty), MonitorWorkspaceProp(MonitorWorkspace),is_enabled(true){}
   // if input to this property is enabled
-      bool isEnabled(const IPropertyManager * algo)const;
-      bool isConditionChanged(const IPropertyManager * algo)const;
-      void applyChanges(const IPropertyManager * algo, Kernel::Property *const pProp);
+      bool isEnabled(const Mantid::Kernel::IPropertyManager * algo)const;
+      bool isConditionChanged(const Mantid::Kernel::IPropertyManager * algo)const;
+      void applyChanges(const Mantid::Kernel::IPropertyManager * algo, Kernel::Property *const pProp);
 
    // interface needs it but if indeed proper clone used -- do not know. 
    virtual IPropertySettings* clone(){return new MonIDPropChanger(hostWSname,SpectraNum,MonitorWorkspaceProp);}

@@ -87,7 +87,7 @@ namespace Mantid
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
         "If present, will overide any specified choice given to Separator.");
 
-      setPropertySettings("CustomSeparator", new VisibleWhenProperty(this, "Separator", IS_EQUAL_TO, "UserDefined") );
+      setPropertySettings("CustomSeparator", new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined") );
     }
 
     /** 

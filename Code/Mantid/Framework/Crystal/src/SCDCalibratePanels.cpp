@@ -784,11 +784,11 @@ namespace Crystal
                                           "Path to file with preprocessing information");
 
       declareProperty( "InitialTimeOffset",0, "Initial time offset when using xml files");
-      setPropertySettings("PanelNamePrefix", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
-      setPropertySettings("Grouping", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
+      setPropertySettings("PanelNamePrefix", new EnabledWhenProperty("PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
+      setPropertySettings("Grouping", new EnabledWhenProperty("PanelGroups", Kernel::IS_EQUAL_TO, "SpecifyGroups") );
 
-      setPropertySettings("PreProcFilename", new EnabledWhenProperty(this, "PreProcessInstrument", Kernel::IS_NOT_EQUAL_TO, "No PreProcessing") );
-      setPropertySettings("InitialTimeOffset",new EnabledWhenProperty(this, "PreProcessInstrument", Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file")) ;
+      setPropertySettings("PreProcFilename", new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_NOT_EQUAL_TO, "No PreProcessing") );
+      setPropertySettings("InitialTimeOffset",new EnabledWhenProperty("PreProcessInstrument", Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file")) ;
 
    }
 

@@ -119,12 +119,12 @@ namespace DataHandling
     declareProperty("PreserveEvents", true,
         "For EventWorkspaces, preserve the events when saving (default).\n"
         "If false, will save the 2D histogram version of the workspace with the current binning parameters.");
-    setPropertySettings("PreserveEvents", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
+    setPropertySettings("PreserveEvents", new EnabledWhenWorkspaceIsType<EventWorkspace>("InputWorkspace", true));
 
     declareProperty("CompressNexus", false,
         "For EventWorkspaces, compress the Nexus data field (default False).\n"
         "This will make smaller files but takes much longer.");
-    setPropertySettings("CompressNexus", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
+    setPropertySettings("CompressNexus", new EnabledWhenWorkspaceIsType<EventWorkspace>("InputWorkspace", true));
 
   }
 

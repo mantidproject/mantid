@@ -182,19 +182,19 @@ void SmoothNeighbours::init()
        );
 
   declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings("Sigma", new EnabledWhenProperty(this, "WeightedSum", IS_EQUAL_TO, "Gaussian"));
+  setPropertySettings("Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty("AdjX", 1, mustBePositive,
     "The number of X (horizontal) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
-  setPropertySettings("AdjX", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
+  setPropertySettings("AdjX", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
   declareProperty("AdjY", 1, mustBePositive,
     "The number of Y (vertical) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
-  setPropertySettings("AdjY", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
+  setPropertySettings("AdjY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
   declareProperty("ZeroEdgePixels", 0, mustBePositive,
     "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
-  setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
+  setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
   setPropertyGroup("AdjX", "Rectangular Detectors Only");
   setPropertyGroup("AdjY", "Rectangular Detectors Only");

@@ -25,7 +25,7 @@ public:
     alg.declareProperty("MyIntProp", 123);
 
     // Make a property with its validator. Will be Visible when that other one is NOT the default
-    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_NOT_DEFAULT);
+    VisibleWhenProperty * val = new VisibleWhenProperty("MyIntProp", IS_NOT_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
 
@@ -52,7 +52,7 @@ public:
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
     // Make a property with its validator. Will be Visible when that other one is the default
-    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_DEFAULT);
+    VisibleWhenProperty * val = new VisibleWhenProperty("MyIntProp", IS_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
@@ -66,7 +66,7 @@ public:
   {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_EQUAL_TO, "234");
+    VisibleWhenProperty * val = new VisibleWhenProperty("MyIntProp", IS_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
@@ -80,7 +80,7 @@ public:
   {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_NOT_EQUAL_TO, "234");
+    VisibleWhenProperty * val = new VisibleWhenProperty("MyIntProp", IS_NOT_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");

@@ -45,10 +45,10 @@ public:
 
     // Make a property with its validator. Will be enabled when that other one is NOT the default
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", new EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>(&alg, "InputWorkspace", true));
+    alg.setPropertySettings("MyValidatorProp", new EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>("InputWorkspace", true));
 
     alg.declareProperty("MyValidatorProp2", 456);
-    alg.setPropertySettings("MyValidatorProp2", new EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>(&alg, "InputWorkspace", false));
+    alg.setPropertySettings("MyValidatorProp2", new EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>("InputWorkspace", false));
 
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     Property * prop2 = alg.getPointerToProperty("MyValidatorProp2");

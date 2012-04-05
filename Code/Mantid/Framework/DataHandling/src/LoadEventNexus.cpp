@@ -929,7 +929,7 @@ void LoadEventNexus::init()
       new PropertyWithValue<bool>("SingleBankPixelsOnly", true, Direction::Input),
     "Optional: Only applies if you specified a single bank to load with BankName.\n"
     "Only pixels in the specified bank will be created if true; all of the instrument's pixels will be created otherwise.");
-  setPropertySettings("SingleBankPixelsOnly", new VisibleWhenProperty(this, "BankName", IS_NOT_DEFAULT) );
+  setPropertySettings("SingleBankPixelsOnly", new VisibleWhenProperty("BankName", IS_NOT_DEFAULT) );
 
   std::string grp2 = "Loading a Single Bank";
   setPropertyGroup("BankName", grp2);
@@ -953,7 +953,7 @@ void LoadEventNexus::init()
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
-  setPropertySettings("TotalChunks", new VisibleWhenProperty(this, "ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
@@ -986,8 +986,8 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
     "Optional: To only include events from monitors before the provided stop time, in seconds (relative to the start of the run).");
 
-  setPropertySettings("MonitorsAsEvents", new VisibleWhenProperty(this, "LoadMonitors", IS_EQUAL_TO, "1") );
-  IPropertySettings *asEventsIsOn = new VisibleWhenProperty(this, "MonitorsAsEvents", IS_EQUAL_TO, "1");
+  setPropertySettings("MonitorsAsEvents", new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1") );
+  IPropertySettings *asEventsIsOn = new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
   setPropertySettings("FilterMonByTofMin", asEventsIsOn);
   setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
   setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());

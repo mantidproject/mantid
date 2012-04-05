@@ -80,12 +80,12 @@ namespace Mantid
       declareProperty("YMax", 7, "Maximum of Y (row) Range to integrate for peak");
       declareProperty("TOFBinMin", -4, "Minimum of TOF Bin Range to integrate for peak");
       declareProperty("TOFBinMax", 6, "Maximum of TOF Bin Range to integrate for peak");
-      setPropertySettings("XMin", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
-      setPropertySettings("XMax", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
-      setPropertySettings("YMin", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
-      setPropertySettings("YMax", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
-      setPropertySettings("TOFBinMin", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
-      setPropertySettings("TOFBinMax", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("XMin", new VisibleWhenProperty("FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("XMax", new VisibleWhenProperty("FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("YMin", new VisibleWhenProperty("FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("YMax", new VisibleWhenProperty("FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("TOFBinMin", new VisibleWhenProperty("FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("TOFBinMax", new VisibleWhenProperty("FitSlices", IS_NOT_DEFAULT) );
 
       std::string grp1 = "ShoeBox Limits";
       setPropertyGroup("XMin", grp1);

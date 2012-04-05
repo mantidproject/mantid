@@ -280,36 +280,36 @@ public:
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("InputWorkspace","normMon"));
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("OutputWorkspace","normMon5"));
 
-    std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(&norm5,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+    std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger("InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
 
     // property is enabled but the conditions have not changed;
-    TS_ASSERT(pID->isEnabled());
+    TS_ASSERT(pID->isEnabled(&norm5));
     // workspace has monitors so the condition has changed
-    TS_ASSERT(pID->isConditionChanged());
+    TS_ASSERT(pID->isConditionChanged(&norm5));
 
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorWorkspace","monWS"));
     // monitor ws disables this property;
-    TS_ASSERT(!pID->isEnabled());
+    TS_ASSERT(!pID->isEnabled(&norm5));
     // but no changes to condition for disabled property
-    TS_ASSERT(!pID->isConditionChanged());
+    TS_ASSERT(!pID->isConditionChanged(&norm5));
 
     // no mon ws should enable it again
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorWorkspace",""));
-    TS_ASSERT(pID->isEnabled());
-    TS_ASSERT(!pID->isConditionChanged());
+    TS_ASSERT(pID->isEnabled(&norm5));
+    TS_ASSERT(!pID->isConditionChanged(&norm5));
 
     // and MonitorSpectrum disable: 
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","1"));
-    TS_ASSERT(!pID->isEnabled());
-    TS_ASSERT(!pID->isConditionChanged());
+    TS_ASSERT(!pID->isEnabled(&norm5));
+    TS_ASSERT(!pID->isConditionChanged(&norm5));
     // and enable:
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","-1"));
-    TS_ASSERT(pID->isEnabled());
-    TS_ASSERT(!pID->isConditionChanged());
+    TS_ASSERT(pID->isEnabled(&norm5));
+    TS_ASSERT(!pID->isConditionChanged(&norm5));
     // and disable: 
     TS_ASSERT_THROWS_NOTHING(norm5.setPropertyValue("MonitorSpectrum","10"));
-    TS_ASSERT(!pID->isEnabled());
-    TS_ASSERT(!pID->isConditionChanged());
+    TS_ASSERT(!pID->isEnabled(&norm5));
+    TS_ASSERT(!pID->isConditionChanged(&norm5));
 
   }
   void testIsConditionChanged(){
@@ -317,11 +317,11 @@ public:
         norm6.initialize();
         TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","normMon"));
         TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("OutputWorkspace","normMon6"));
-        std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger(&norm6,"InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
+        std::auto_ptr<MonIDPropChanger> pID = std::auto_ptr<MonIDPropChanger>(new MonIDPropChanger("InputWorkspace","MonitorSpectrum","MonitorWorkspace"));
         // first time in a row the condition has changed as it shluld read the monitors from the workspace
-        TS_ASSERT(pID->isConditionChanged());
+        TS_ASSERT(pID->isConditionChanged(&norm6));
         // and second time the monitons should be the same so no changes
-        TS_ASSERT(!pID->isConditionChanged());
+        TS_ASSERT(!pID->isConditionChanged(&norm6));
 
   }
    void testAlgoConditionChanged(){
@@ -333,11 +333,11 @@ public:
         
         Property* monSpec = norm6.getProperty("MonitorID");
         // this function is usually called by GUI when senning input workspace. It should read monitors and report the condition changed
-        TS_ASSERT(monSpec->isConditionChanged());
+        TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
         // this funciton is called by gui when the above is true. It should not throw and change the validator
         IPropertySettings *pSett;
         TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
-        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(monSpec));
+        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
         // it should return the list of allowed monitor ID-s
         std::set<std::string> monitors = monSpec->allowedValues();
         TS_ASSERT_EQUALS(1,monitors.size());
@@ -352,10 +352,10 @@ public:
 
         TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace","someWS"));
         // this function is usually called by GUI when setting an input workspace. It should read monitors and report the condition changed
-        TS_ASSERT(monSpec->isConditionChanged());
+        TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
         // this funciton is called by gui when the above is true. It should not throw and change the validator  
         TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
-        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(monSpec));
+        TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
         // it should return the list of allowed monitor ID-s
         monitors = monSpec->allowedValues();
         TS_ASSERT(monitors.empty());

@@ -188,7 +188,7 @@ void LoadEventPreNexus::init()
       "If loading the file by sections ('chunks'), this is the total number of sections.");
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
-  setPropertySettings("TotalChunks", new VisibleWhenProperty(this, "ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.push_back("Auto");

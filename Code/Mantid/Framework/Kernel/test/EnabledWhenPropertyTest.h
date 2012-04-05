@@ -26,7 +26,7 @@ public:
     alg.declareProperty("MyIntProp", 123);
 
     // Make a property with its validator. Will be enabled when that other one is NOT the default
-    EnabledWhenProperty * val = new EnabledWhenProperty(&alg, "MyIntProp", IS_NOT_DEFAULT);
+    EnabledWhenProperty * val = new EnabledWhenProperty("MyIntProp", IS_NOT_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
 
@@ -53,7 +53,7 @@ public:
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
     // Make a property with its validator. Will be enabled when that other one is the default
-    EnabledWhenProperty * val = new EnabledWhenProperty(&alg, "MyIntProp", IS_DEFAULT);
+    EnabledWhenProperty * val = new EnabledWhenProperty("MyIntProp", IS_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
@@ -67,7 +67,7 @@ public:
   {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    EnabledWhenProperty * val = new EnabledWhenProperty(&alg, "MyIntProp", IS_EQUAL_TO, "234");
+    EnabledWhenProperty * val = new EnabledWhenProperty("MyIntProp", IS_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
@@ -81,7 +81,7 @@ public:
   {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    EnabledWhenProperty * val = new EnabledWhenProperty(&alg, "MyIntProp", IS_NOT_EQUAL_TO, "234");
+    EnabledWhenProperty * val = new EnabledWhenProperty("MyIntProp", IS_NOT_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");

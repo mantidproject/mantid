@@ -53,7 +53,7 @@ namespace API
      * @param otherPropName :: Name of the OTHER property that we will check.
      * @param enabledSetting :: Set Enabled on this property to this value when the workspace is of type T. Default true.
      */
-    EnabledWhenWorkspaceIsType(const Mantid::Kernel::IPropertyManager * , std::string otherPropName,
+    EnabledWhenWorkspaceIsType(std::string otherPropName,
             bool enabledSetting = true)
     : IPropertySettings(),
       m_otherPropName(otherPropName), m_enabledSetting(enabledSetting)
@@ -125,7 +125,7 @@ namespace API
     /// Make a copy of the present type of validator
     virtual IPropertySettings * clone()
     {
-      EnabledWhenWorkspaceIsType * out = new EnabledWhenWorkspaceIsType<T>(NULL, m_otherPropName, m_enabledSetting);
+      EnabledWhenWorkspaceIsType * out = new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
       return out;
     }
    protected:

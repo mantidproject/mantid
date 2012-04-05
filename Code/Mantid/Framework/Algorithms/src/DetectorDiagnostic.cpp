@@ -109,12 +109,12 @@ namespace Mantid
       declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
                       "the median calculation, otherwise they will not be included but they will be left unmasked");
       this->setPropertyGroup("ExcludeZeroesFromMedian", medianDetTestGrp);
-      setPropertySettings("SignificanceTest", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
-      setPropertySettings("LowThresholdFraction", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
-      setPropertySettings("HighThresholdFraction", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
-      setPropertySettings("LowOutlier", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
-      setPropertySettings("HighOutlier", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
-      setPropertySettings("ExcludeZeroesFromMedian", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("SignificanceTest", new EnabledWhenProperty("RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("LowThresholdFraction", new EnabledWhenProperty("RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("HighThresholdFraction", new EnabledWhenProperty("RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("LowOutlier", new EnabledWhenProperty("RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("HighOutlier", new EnabledWhenProperty("RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("ExcludeZeroesFromMedian", new EnabledWhenProperty("RunMedianDetectorTest", IS_EQUAL_TO, "1"));
 
       string detEffVarGrp("Detector Efficiency Variation");
       declareProperty(new WorkspaceProperty<>("WhiteBeamCompare","",Direction::Input, PropertyMode::Optional),
@@ -125,7 +125,7 @@ namespace Mantid
                       "Identify spectra whose total number of counts has changed by more\n"
                       "than this factor of the median change between the two input workspaces" );
       this->setPropertyGroup("WhiteBeamVariation", detEffVarGrp);
-      setPropertySettings("WhiteBeamVariation", new EnabledWhenProperty(this, "WhiteBeamCompare", IS_NOT_DEFAULT));
+      setPropertySettings("WhiteBeamVariation", new EnabledWhenProperty("WhiteBeamCompare", IS_NOT_DEFAULT));
 
       string psdBleedMaskGrp("Create PSD Bleed Mask");
       declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl,
@@ -134,7 +134,7 @@ namespace Mantid
       declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
           "The number of pixels about the centre to ignore.");
       this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
-      setPropertySettings("NIgnoredCentralPixels", new EnabledWhenProperty(this, "MaxTubeFramerate", IS_NOT_DEFAULT));
+      setPropertySettings("NIgnoredCentralPixels", new EnabledWhenProperty("MaxTubeFramerate", IS_NOT_DEFAULT));
 
       declareProperty("NumberOfFailures", 0, Direction::Output);
     }

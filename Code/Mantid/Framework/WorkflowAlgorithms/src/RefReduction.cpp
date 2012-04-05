@@ -95,14 +95,14 @@ void RefReduction::init()
   declareProperty("DetectorAngle0", EMPTY_DBL());
   declareProperty("DirectPixel", EMPTY_DBL());
   declareProperty("PolarizedData", true);
-  setPropertySettings("ReflectivityPixel", new VisibleWhenProperty(this, "Instrument", IS_EQUAL_TO, "REF_M") );
-  setPropertySettings("DetectorAngle", new VisibleWhenProperty(this, "Instrument", IS_EQUAL_TO, "REF_M") );
-  setPropertySettings("DetectorAngle0", new VisibleWhenProperty(this, "Instrument", IS_EQUAL_TO, "REF_M") );
-  setPropertySettings("DirectPixel", new VisibleWhenProperty(this, "Instrument", IS_EQUAL_TO, "REF_M") );
-  setPropertySettings("PolarizedData", new VisibleWhenProperty(this, "Instrument", IS_EQUAL_TO, "REF_M") );
+  setPropertySettings("ReflectivityPixel", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
+  setPropertySettings("DetectorAngle", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
+  setPropertySettings("DetectorAngle0", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
+  setPropertySettings("DirectPixel", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
+  setPropertySettings("PolarizedData", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
 
   declareProperty("AngleOffset", EMPTY_DBL());
-  setPropertySettings("AngleOffset", new VisibleWhenProperty(this, "Instrument", IS_EQUAL_TO, "REF_L") );
+  setPropertySettings("AngleOffset", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_L") );
 
   std::vector<std::string> instrOptions;
   instrOptions.push_back("REF_L");

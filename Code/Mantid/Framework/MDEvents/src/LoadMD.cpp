@@ -92,12 +92,12 @@ namespace Mantid
 
       declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
-      setPropertySettings("FileBackEnd", new EnabledWhenProperty(this, "MetadataOnly", IS_EQUAL_TO, "0") );
+      setPropertySettings("FileBackEnd", new EnabledWhenProperty("MetadataOnly", IS_EQUAL_TO, "0") );
 
       declareProperty(new PropertyWithValue<double>("Memory", -1),
         "For FileBackEnd only: the amount of memory (in MB) to allocate to the in-memory cache.\n"
         "If not specified, a default of 40% of free physical memory is used.");
-      setPropertySettings("Memory", new EnabledWhenProperty(this, "FileBackEnd", IS_EQUAL_TO, "1") );
+      setPropertySettings("Memory", new EnabledWhenProperty("FileBackEnd", IS_EQUAL_TO, "1") );
 
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
     }

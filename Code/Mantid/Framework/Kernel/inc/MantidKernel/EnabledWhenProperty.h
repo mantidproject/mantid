@@ -34,11 +34,11 @@ namespace Kernel
 
         - Add a call like this:
 
-        setPropertySettings("PropA", new EnabledWhenProperty(this, "OtherProperty", IS_EQUAL_TO, "2000");
+        setPropertySettings("PropA", new EnabledWhenProperty("OtherProperty", IS_EQUAL_TO, "2000");
 
         - This will make the property "PropA" show as enabled when "OtherProperty"'s value is equal to "2000". Similarly, you can use:
 
-        setPropertySettings("PropA", new VisibleWhenProperty(this, "OtherProperty", IS_NOT_DEFAULT);
+        setPropertySettings("PropA", new VisibleWhenProperty("OtherProperty", IS_NOT_DEFAULT);
 
         - This will make the property "PropA" show as visible when "OtherProperty" is NOT the default value for it.
 
@@ -71,12 +71,11 @@ namespace Kernel
   public:
     //--------------------------------------------------------------------------------------------
     /** Constructor
-     * @param algo :: ptr to the calling Algorithm (type IPropertyManager)
      * @param otherPropName :: Name of the OTHER property that we will check.
      * @param when :: Criterion to evaluate
      * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to check for
      */
-    EnabledWhenProperty(const IPropertyManager * , std::string otherPropName,
+    EnabledWhenProperty(std::string otherPropName,
                         ePropertyCriterion when, std::string value = "")
     : IPropertySettings(),
       m_otherPropName(otherPropName), m_when(when), m_value(value)
@@ -151,7 +150,7 @@ namespace Kernel
     /// Make a copy of the present type of validator
     virtual IPropertySettings * clone()
     {
-      EnabledWhenProperty * out = new EnabledWhenProperty(NULL, m_otherPropName, m_when, m_value);
+      EnabledWhenProperty * out = new EnabledWhenProperty(m_otherPropName, m_when, m_value);
       return out;
     }
 

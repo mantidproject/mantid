@@ -67,7 +67,7 @@ namespace MDEvents
     declareProperty("LimitRows", true, "Limit the report output to a maximum number of rows");
 
     declareProperty(new PropertyWithValue<int>("MaximumRows", 100000, boost::make_shared<BoundedValidator<int>>(), Direction::Input), "The number of neighbours to utilise. Defaults to 100000.");
-    setPropertySettings("MaximumRows", new EnabledWhenProperty(this, "LimitRows", IS_DEFAULT));
+    setPropertySettings("MaximumRows", new EnabledWhenProperty("LimitRows", IS_DEFAULT));
 
     declareProperty(new WorkspaceProperty<ITableWorkspace>("BoxDataTable","",Direction::Output, Mantid::API::PropertyMode::Optional),
         "Optional output data table with MDEventWorkspace-specific box data.");

@@ -118,10 +118,10 @@ namespace Crystal
     declareProperty("RoundHKL", true,
         "When using HKLPeaksWorkspace, this will round the HKL values in the HKLPeaksWorkspace to the nearest integers if checked.\n"
         "Keep unchecked to use the original values");
-    setPropertySettings("RoundHKL", new EnabledWhenProperty(this, "HKLPeaksWorkspace", IS_NOT_DEFAULT) );
+    setPropertySettings("RoundHKL", new EnabledWhenProperty("HKLPeaksWorkspace", IS_NOT_DEFAULT) );
 
     // Disable some props when using HKLPeaksWorkspace
-    IPropertySettings * set = new EnabledWhenProperty(this, "HKLPeaksWorkspace", IS_DEFAULT);
+    IPropertySettings * set = new EnabledWhenProperty("HKLPeaksWorkspace", IS_DEFAULT);
     setPropertySettings("WavelengthMin", set);
     setPropertySettings("WavelengthMax", set->clone());
     setPropertySettings("MinDSpacing", set->clone());
