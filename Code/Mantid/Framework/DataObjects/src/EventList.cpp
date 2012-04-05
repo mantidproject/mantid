@@ -834,41 +834,6 @@ namespace DataObjects
     this->clear(false);
   }
 
-  /**
-   * Delete events from the list.
-   * @param start The first index to delete, inclusive.
-   * @param stop The last index to delete, exclusive.
-   */
-  void EventList::erase(std::size_t start, std::size_t stop)
-  {
-    // quick error checking
-    if (start >= stop)
-      return;
-    if (start > this->getNumberEvents())
-      return;
-
-    // do the actual work
-    if (eventType == TOF)
-    {
-      std::vector<TofEvent>(this->events.begin() + start,
-                            this->events.begin() + stop).swap(this->events);
-    }
-    else if (eventType == WEIGHTED)
-    {
-      std::vector<WeightedEvent>(this->weightedEvents.begin() + start,
-                                 this->weightedEvents.begin() + stop).swap(this->weightedEvents);
-    }
-    else if (eventType == WEIGHTED_NOTIME)
-    {
-      std::vector<WeightedEventNoTime>(this->weightedEventsNoTime.begin() + start,
-                                       this->weightedEventsNoTime.begin() + stop).swap(this->weightedEventsNoTime);
-    }
-    else
-    {
-      throw std::runtime_error("EventList: invalid event type value was found.");
-    }
-  }
-
   /** Sets the MRU list for this event list
    *
    * @param newMRU :: new MRU for the workspace containing this EventList

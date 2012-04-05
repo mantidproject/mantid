@@ -227,8 +227,6 @@ public:
 
   void clearData();
 
-  void erase(std::size_t start, std::size_t stop);
-
   void reserve(size_t num);
 
   void sort(const EventSortType order) const;
