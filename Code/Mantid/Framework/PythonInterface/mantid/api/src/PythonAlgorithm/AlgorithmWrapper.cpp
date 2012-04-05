@@ -1,8 +1,8 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
-#include <boost/python/class.hpp>
+#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
-using namespace boost::python;
+#include <boost/python/class.hpp>
 
 //-----------------------------------------------------------------------------
 // AlgorithmWrapper definition
@@ -11,6 +11,8 @@ namespace Mantid
 {
   namespace PythonInterface
   {
+    using namespace boost::python;
+    using Environment::CallMethod_NoArg;
 
     /**
      * Returns the name of the algorithm. If not overridden
@@ -18,17 +20,7 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::name() const
     {
-      static const char * method = "name";
-      std::string name;
-      if( Environment::typeHasAttribute(*this, method) )
-      {
-        name = call<std::string>(get_override(method).ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
-      }
-      else
-      {
-        name = this->defaultName();
-      }
-      return name;
+      return CallMethod_NoArg<std::string>::dispatchWithDefaultReturn(getSelf(), "name", defaultName());
     }
 
     /**
@@ -36,9 +28,7 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::defaultName() const
     {
-      // Use the class name
-      PyObject *self = boost::python::detail::wrapper_base_::get_owner(*this);
-      return std::string(self->ob_type->tp_name);
+      return std::string(getSelf()->ob_type->tp_name);
     }
 
     /**
@@ -47,17 +37,7 @@ namespace Mantid
      */
     int AlgorithmWrapper::version() const
     {
-      static const char * method = "version";
-      int version(1);
-      if( Environment::typeHasAttribute(*this, method) )
-      {
-        version = call<int>(get_override(method).ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
-      }
-      else
-      {
-        version = this->defaultVersion();
-      }
-      return version;
+      return CallMethod_NoArg<int>::dispatchWithDefaultReturn(getSelf(), "version", defaultVersion());
     }
 
     int AlgorithmWrapper::defaultVersion() const
@@ -71,13 +51,16 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::category() const
     {
-      static const char * method = "category";
-      std::string cat("PythonAlgorithms");
-      if (  Environment::typeHasAttribute(*this, method) )
-      {
-        cat = call<std::string>(this->get_override(method).ptr());
-      }
-      return cat;
+      return CallMethod_NoArg<std::string>::dispatchWithDefaultReturn(getSelf(), "category", defaultCategory());
+    }
+
+    /**
+     * A default category, chosen if there is no override
+     * @returns A default category
+     */
+    std::string AlgorithmWrapper::defaultCategory() const
+    {
+      return "PythonAlgorithms";
     }
 
     /**
@@ -86,16 +69,10 @@ namespace Mantid
      */
     void AlgorithmWrapper::init()
     {
-      if( boost::python::override fn = this->get_override("PyInit") )
-      {
-        fn();
-      }
-      else
-      {
-        std::ostringstream os;
-        os << "Python algorithm '" << this->name() << "' does not define the PyInit function, cannot initialize.";
-        throw std::runtime_error(os.str());
-      }
+      std::ostringstream os;
+      os << "Python algorithm '" << this->name()
+      << "' does not define the PyInit function, cannot initialize.";
+      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyInit", os.str().c_str());
     }
 
     /**
@@ -104,19 +81,19 @@ namespace Mantid
      */
     void AlgorithmWrapper::exec()
     {
-      
+      std::ostringstream os;
+      os << "Python algorithm '" << this->name()
+         << "' does not define the PyExec function, cannot execute.";
+      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyExec", os.str().c_str());
+    }
 
-      if( boost::python::override fn = this->get_override("PyExec") )
-      {
-        //fn();
-        throw Kernel::Exception::NotImplementedError("Sort out the threading!!!!!");
-      }
-      else
-      {
-        std::ostringstream os;
-        os << "Python algorithm '" << this->name() << "' does not define the PyExec function, cannot execute.";
-        throw std::runtime_error(os.str());
-      }
+    /**
+     *  Returns the PyObject that owns this wrapper, i.e. self
+     * @returns A pointer to self
+     */
+    PyObject * AlgorithmWrapper::getSelf() const
+    {
+      return boost::python::detail::wrapper_base_::get_owner(*this);
     }
 
   }
