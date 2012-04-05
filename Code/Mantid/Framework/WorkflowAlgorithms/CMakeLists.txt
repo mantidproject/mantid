@@ -9,6 +9,7 @@ set ( SRC_FILES
         src/SANSSensitivityCorrection.cpp
         src/EQSANSSensitivityCorrection.cpp
         src/EQSANSDarkCurrentSubtraction.cpp
+        src/EQSANSPatchSensitivity.cpp
         src/HFIRDarkCurrentSubtraction.cpp
         src/SetupHFIRReduction.cpp
         src/SetupEQSANSReduction.cpp
@@ -31,6 +32,7 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
+        inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
         inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
         inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
         inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h

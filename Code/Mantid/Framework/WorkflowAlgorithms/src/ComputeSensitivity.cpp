@@ -21,8 +21,8 @@ DECLARE_ALGORITHM(ComputeSensitivity)
 /// Sets documentation strings for this algorithm
 void ComputeSensitivity::initDocs()
 {
-  this->setWikiSummary("Calculate sensitivity correction.");
-  this->setOptionalMessage("Calculate sensitivity correction.");
+  this->setWikiSummary("Calculate EQSANS sensitivity correction.");
+  this->setOptionalMessage("Calculate EQSANS sensitivity correction.");
 }
 
 using namespace Kernel;
@@ -34,6 +34,7 @@ void ComputeSensitivity::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
       "Flood field or sensitivity file.");
+  declareProperty(new WorkspaceProperty<>("PatchWorkspace","", Direction::Input, PropertyMode::Optional));
   declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   declareProperty("OutputMessage","",Direction::Output);
@@ -61,8 +62,10 @@ void ComputeSensitivity::exec()
   double center_x = reductionHandler.findDoubleEntry("LatestBeamCenterX");
   double center_y = reductionHandler.findDoubleEntry("LatestBeamCenterY");
 
-  if (beamCenter.size()>0 && beamCenterFile.size()>0)
+  if (beamCenter.size()>0 && beamCenterFile.size()>0
+      && isEmpty(center_x) && isEmpty(center_y))
   {
+    progress(0.1, "Starting beam finder");
     // Load direct beam file
     IAlgorithm_sptr loadAlg = Algorithm::fromString(loader);
     loadAlg->setChild(true);
@@ -85,6 +88,18 @@ void ComputeSensitivity::exec()
     g_log.notice() << "WARNING! No beam center information found!" << std::endl;
   }
 
+  // Set patch information so that the SANS sensitivity algorithm can
+  // patch the sensitivity workspace
+  const std::string patchWSName = getPropertyValue("PatchWorkspace");
+  if (patchWSName.size()>0)
+  {
+    progress(0.2, "Patch sensitivity parameters found");
+    IAlgorithm_sptr patchAlg = createSubAlgorithm("EQSANSPatchSensitivity");
+    patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
+    reductionHandler.addEntry("SensitivityPatchAlgorithm", patchAlg->toString());
+  }
+
+  progress(0.3, "Computing sensitivity");
   std::string eff = reductionHandler.findStringEntry("SensitivityAlgorithm");
   if (eff.size()==0) g_log.error() << "Could not find sensitivity algorithm" << std::endl;
   IAlgorithm_sptr effAlg = Algorithm::fromString(eff);

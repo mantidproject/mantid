@@ -284,6 +284,17 @@ void SANSSensitivityCorrection::exec()
       floodWS = rawFloodWS;
     }
 
+    // Patch as needed
+    std::string sensitivity_patch = reductionHandler.findStringEntry("SensitivityPatchAlgorithm");
+    if (sensitivity_patch.size()>0)
+    {
+      IAlgorithm_sptr patchAlg = Algorithm::fromString(sensitivity_patch);
+      patchAlg->setChild(true);
+      patchAlg->setProperty("Workspace", floodWS);
+      patchAlg->execute();
+      m_output_message += "   |Sensitivity patch applied\n";
+    }
+
     floodWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
     setProperty("OutputSensitivityWorkspace", floodWS);
   }

@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import os
+import sys
 from reduction_gui.reduction.sans.hfir_detector_script import Detector
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -137,28 +138,27 @@ class DetectorWidget(BaseWidget):
         if IS_IN_MANTIDPLOT:
             from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
             self.show_instrument(self._content.sensitivity_file_edit.text,
-                                 workspace=self.patch_ws, tab=2, reload=True, 
-                                 data_proxy=DataProxy)
+              workspace=self.patch_ws, tab=2, reload=True, 
+              data_proxy=DataProxy)            
 
     def _create_sensitivity(self):
-        if IS_IN_MANTIDPLOT:
+        if IS_IN_MANTIDPLOT and self.options_callback is not None:
             # Get patch information
-            ids_str = None
+            patch_ws = ""
             if mtd.workspaceExists(self.patch_ws):
-                masked_detectors = ExtractMasking(InputWorkspace=self.patch_ws, OutputWorkspace="__edited_mask")
-                ids_str = masked_detectors.getPropertyValue("DetectorList")
+                patch_ws = self.patch_ws
             
-            # Get options from all the tabs
-            if self.options_callback is not None:
-                try:
-                    table_ws = self.options_callback()
-                    c=ComputeSensitivity(Filename=self._content.sensitivity_file_edit.text(),
-                                         ReductionTableWorkspace=table_ws,
-                                         OutputWorkspace="sensitivity")
-                    print c.getPropertyValue("OutputMessage")
-                except:
-                    print "Could not compute sensitivity"
-
+            try:
+                reduction_table_ws = self.options_callback()
+                patch_output = mtd.workspaceExists(patch_ws)
+                c=ComputeSensitivity(Filename=self._content.sensitivity_file_edit.text(),
+                                     ReductionTableWorkspace=reduction_table_ws,
+                                     OutputWorkspace="sensitivity",
+                                     PatchWorkspace=patch_ws)
+                print c.getPropertyValue("OutputMessage")
+            except:
+                print "Could not compute sensitivity"
+                print sys.exc_value
     
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)

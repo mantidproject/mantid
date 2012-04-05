@@ -19,11 +19,13 @@ def process_file_parameter(f):
         Decorator that allows a function parameter to either be
         a string or a function returning a string
     """
-    def processed_function(self, file_name, *args, **kwargs): 
+    def processed_function(self, file_name=None, **kwargs):
+        if file_name is None:
+            return f(self, **kwargs) 
         if isinstance(file_name, types.StringType):
-            return f(self, file_name, *args)
+            return f(self, file_name, **kwargs)
         else:
-            return f(self, str(file_name()), *args, **kwargs)
+            return f(self, str(file_name()), **kwargs)
     return processed_function
     
 class BaseWidget(QtGui.QWidget):    
@@ -137,6 +139,9 @@ class BaseWidget(QtGui.QWidget):
         file_name = str(file_name)
         
         def _show_ws_instrument(ws):
+            if not mtd.workspaceExists(ws):
+                return
+            
             # Do nothing if the instrument view is already displayed
             #FIXME: this doesn't seem to work 100% yet
             if False and self._instrument_view is not None and \
@@ -163,7 +168,7 @@ class BaseWidget(QtGui.QWidget):
 
         # Set up workspace name
         if workspace is None:
-            workspace = '_'+os.path.split(file_name)[1]
+            workspace = '__'+os.path.basename(file_name)
 
         # See if the file is already loaded
         if not reload and _show_ws_instrument(workspace):
@@ -173,7 +178,7 @@ class BaseWidget(QtGui.QWidget):
         try:
             filepath = find_data(file_name, instrument=self._settings.instrument_name)
         except:
-            QtGui.QMessageBox.warning(self, "File Not Found", "The supplied mask file can't be found on the file system")
+            QtGui.QMessageBox.warning(self, "File Not Found", "The supplied file can't be found on the file system")
             return
         
         if data_proxy is None:
@@ -186,8 +191,8 @@ class BaseWidget(QtGui.QWidget):
                     MaskDetectors(proxy.data_ws, DetectorList=mask)
                 _show_ws_instrument(proxy.data_ws)
             else:
-                QtGui.QMessageBox.warning(self, "Mask Error", "Mantid doesn't know how to load this file")
+                QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
         else:
-            QtGui.QMessageBox.warning(self, "Mask Error", "Mantid doesn't know how to load this file")
+            QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
         
 
