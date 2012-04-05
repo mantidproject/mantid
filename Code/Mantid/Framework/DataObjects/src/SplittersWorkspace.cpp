@@ -64,7 +64,7 @@ namespace DataObjects
   }
 
 
-  bool SplittersWorkspace::removeSplitter(unsigned long index)
+  bool SplittersWorkspace::removeSplitter(size_t index)
   {
     bool removed;
     if (index >= this->rowCount())

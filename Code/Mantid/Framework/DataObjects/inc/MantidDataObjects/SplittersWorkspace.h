@@ -53,7 +53,7 @@ namespace DataObjects
 
     size_t getNumberSplitters();
 
-    bool removeSplitter(unsigned long);
+    bool removeSplitter(size_t);
 
   };
 
