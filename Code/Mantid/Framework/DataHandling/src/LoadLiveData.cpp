@@ -14,6 +14,7 @@ by the [[MonitorLiveData]] algorithm.
 * You have two options on how to process this workspace:
 
 ==== Processing with an Algorithm ====
+
 * Specify the name of the algorithm in the ''ProcessingAlgorithm'' property.
 ** This could be, e.g. a [[Python Algorithm]] written for this purpose.
 ** The algorithm ''must'' have at least 2 properties: ''InputWorkspace'' and ''OutputWorkspace''.
@@ -21,19 +22,30 @@ by the [[MonitorLiveData]] algorithm.
 ** The algorithm is then run, and its OutputWorkspace is saved.
 
 ==== Processing with a Python Script ====
+
 * Specify a python script in the ''ProcessingScript'' property.
 ** This can have several lines.
 ** Two variables have special meaning:
 *** ''input'' is the input workspace.
 *** ''output'' is the name of the processed, output workspace.
 ** Otherwise, your script can contain any legal python code including calls to other Mantid algorithms.
+** If you create temporary workspaces, you should delete them in the script.
 
 === Data Accumulation ===
 
-* The ''AccumulationMethod'' specifies what to do with each chunk.
+* The ''AccumulationMethod'' property specifies what to do with each chunk.
 ** If you select 'Add', the chunks of processed data will be added using [[Plus]] or [[PlusMD]].
 ** If you select 'Replace', then the output workspace will always be equal to the latest processed chunk.
 ** If you select 'Append', then the spectra from each chunk will be appended to the output workspace.
+
+<div style="border:1px solid #5599FF; {{Round corners}}; margin: 15px;">
+==== A Warning About Events ====
+
+Beware! If you select ''PreserveEvents'' and your processing keeps the data as [[EventWorkspace]]s, you may end
+up creating '''very large''' EventWorkspaces in long runs. Most plots require re-sorting the events,
+which is an operation that gets much slower as the list gets bigger (Order of N*log(N)).
+This could cause Mantid to run very slowly or to crash due to lack of memory.
+</div>
 
 === Post-Processing Step ===
 
@@ -115,7 +127,7 @@ namespace DataHandling
   Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess)
   {
     if (!inputWS)
-      throw std::runtime_error("LoadLiveData::runProcessing() called for an empty input workspace.");
+      throw std::runtime_error("LoadLiveData::runProcessing() called fplots or an empty input workspace.");
     // Prevent others writing to the workspace while we run.
     ReadLock _lock(*inputWS);
 
@@ -161,7 +173,7 @@ namespace DataHandling
       if (!wsProp)
         throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
       Workspace_sptr temp = wsProp->getWorkspace();
-
+      plots
       if (!PostProcess)
       {
         // Remove the chunk workspace from the ADS, it is no longer needed there.
