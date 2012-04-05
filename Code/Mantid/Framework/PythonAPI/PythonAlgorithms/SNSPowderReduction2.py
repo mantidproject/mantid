@@ -298,8 +298,15 @@ class SNSPowderReduction2(PythonAlgorithm):
         strategy = []
         if HAVE_MPI:
             comm = mpi.world
-            if comm.size > 1:
+            if self._chunks > 0 and not "histo" in extension and comm.size > 1:
+                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+                for row in Chunks: 
+                    if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
+                        strategy.append(row)
+            elif comm.size > 1:
                 strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
+            else:
+                strategy.append({})
         else:
             if self._chunks > 0 and not "histo" in extension:
                 Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
@@ -322,7 +329,7 @@ class SNSPowderReduction2(PythonAlgorithm):
             if self._info is None:
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
-            if HAVE_MPI:
+            if HAVE_MPI and len(strategy) == 1:
                 alg = GatherWorkspaces(InputWorkspace=temp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
             else:
@@ -333,6 +340,9 @@ class SNSPowderReduction2(PythonAlgorithm):
                 else:
                     wksp += temp
                     DeleteWorkspace(temp)
+        if HAVE_MPI and len(strategy) > 1:
+            alg = GatherWorkspaces(InputWorkspace=wksp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
+            wksp = alg['OutputWorkspace']
         if self._chunks > 0 and not "histo" in extension:
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
