@@ -123,7 +123,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TextEditor.cpp
                    src/TextFileIO.cpp
                    src/TitlePicker.cpp
-                   src/ThreadAdapter.cpp
                    src/TranslateCurveTool.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
@@ -349,7 +348,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TableDialog.h
                    src/Table.h
                    src/TableStatistics.h
-                   src/ThreadAdapter.h
                    src/TextDialog.h
                    src/TextEditor.h
                    src/TextFileIO.h
@@ -617,7 +615,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/TextDialog.h
                         src/TextEditor.h
                         src/TitlePicker.h
-                        src/ThreadAdapter.h
                         src/TranslateCurveTool.h
                         src/lib/include/CollapsiveGroupBox.h
                         src/lib/include/ColorBox.h

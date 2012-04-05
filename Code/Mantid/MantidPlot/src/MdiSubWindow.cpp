@@ -105,6 +105,16 @@ void MdiSubWindow::resizeEvent( QResizeEvent* e )
 }
 
 /**
+ * Set whether a dialog should be raised when closing the
+ * window. If not sets the delete on close flag
+ */
+void MdiSubWindow::confirmClose(bool ask)
+{
+  d_confirm_close = ask;
+  setAttribute(Qt::WA_DeleteOnClose, !ask);
+}
+
+/**
  * Override the QWidget's show() slot to show the wrapper window instead.
  */
 void MdiSubWindow::show()

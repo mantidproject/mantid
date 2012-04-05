@@ -9,6 +9,7 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 import mantidplotpy.proxies as proxies
+from mantidplotpy.proxies import threadsafe_call
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
@@ -16,7 +17,6 @@ from PyQt4.QtCore import Qt
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python
 from _qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
-from _qti import ThreadAdapter
 
 #-------------------------- Mantid Python access functions----------------
 # Grab a few Mantid things so that we can recognise workspace variables
@@ -35,21 +35,6 @@ def _get_analysis_data_service():
         import MantidFramework
         return MantidFramework.mtd
     
-#-------------------------- MantidPlot Threaded Access -------------------
-def threadsafe_call(func_name, *args):
-    """
-        Calls the given function with the given arguments
-        by passing it through the ThreadAdapter. This
-        ensures that the calls to the GUI functions
-        happen on the correct thread
-    """
-    adapter = ThreadAdapter(_qti.app, _qti.app.mantidUI)
-    try:
-        callable = getattr(adapter, func_name)
-    except AttributeError:
-        raise AttributeError("ThreadAdaptor has not been updated for %s. "
-                             "Cannot perform call as it would be dangerous")
-    return callable(*args)
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -71,7 +56,7 @@ def table(name):
     Returns:
         A handle to the table.
     """
-    return proxies.MDIWindow(_qti.app.table(name))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.table,name))
 
 def newTable(name=None,rows=30,columns=2):
     """Create a table.
@@ -85,9 +70,9 @@ def newTable(name=None,rows=30,columns=2):
         A handle to the created table.
     """
     if name is None:
-        return proxies.MDIWindow(_qti.app.newTable())
+        return proxies.MDIWindow(threadsafe_call(_qti.app.newTable))
     else:
-        return proxies.MDIWindow(_qti.app.newTable(name,rows,columns))
+        return proxies.MDIWindow(threadsafe_call(_qti.app.newTable,name,rows,columns))
 
 def matrix(name):
     """Get a handle on a matrix.
@@ -204,7 +189,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         raise ValueError("No workspace names given to plot")
     if len(index_list) == 0:
         raise ValueError("No indices given to plot")
-    graph = proxies.Graph(threadsafe_call('plotSpectraList', workspace_names, index_list, error_bars, type))
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
@@ -407,7 +392,7 @@ def matrixToTable(matrix, conversionType=_qti.app.Direct):
 
 def mergePlots(graph1,graph2):
     """Combine two graphs into a single plot"""
-    return proxies.Graph(threadsafe_call('mergePlots',graph1._getHeldObject(),graph2._getHeldObject()))
+    return proxies.Graph(threadsafe_call(_qti.app.mantidUI.mergePlots,graph1._getHeldObject(),graph2._getHeldObject()))
 
 def convertToWaterfall(graph):
     """Convert a graph (containing a number of plotted spectra) to a waterfall plot"""

@@ -657,7 +657,6 @@ public:
   sipRes = PyString_FromString(sipCpp->pieLegendText());
 %End
 
-public slots:
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(Table*, const QString&, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
@@ -737,7 +736,7 @@ public slots:
   void setTitle(const QString& t);
   void setTitleFont(const QFont &fnt);
   void setTitleColor(const QColor &c);
-  void setTitleAlignment(int);
+  void setTitleAlignment(int align);
   void removeTitle();
 
   LegendWidget* newLegend(const QString& = QString());
@@ -1299,8 +1298,11 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-
+  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
+
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
@@ -1313,35 +1315,9 @@ public:
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
-  // Algorithm-related methods
-  void setIsRunning(bool);
-  
+
+  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
 private:
   MantidUI(const MantidUI &);
-};
-
-class ThreadAdapter: QObject
-{
-%TypeHeaderCode
-#include "src/ThreadAdapter.h"
-%End
-%ConvertToSubClassCode
-// we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
-// Russell Taylor, 4/8/09: Change needed for mac build.
-//   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
-%End
-public:
-  ThreadAdapter(ApplicationWindow & appWindow, MantidUI & mantidUI);
-  
-  MultiLayer * plotSpectraList(const QStringList& wsNames, const QList<int>& spectrumList,
-                               bool errs = true, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
-  
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
-  
-private:
-  ThreadAdapter(const MantidUI &);
 };

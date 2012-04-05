@@ -183,10 +183,8 @@ public slots:
 	void closeEvent( QCloseEvent *);
 	void resizeEvent( QResizeEvent* );
 
-	//! Toggle the "ask on close" flag
-	void askOnCloseEvent(bool ask){d_confirm_close = ask;};
   //! Toggle the "ask on close" flag
-  void confirmClose(bool ask){d_confirm_close = ask;};
+  void confirmClose(bool ask);
 
 	//! Filters other object's events (customizes title bar's context menu)
 	bool eventFilter(QObject *object, QEvent *e);

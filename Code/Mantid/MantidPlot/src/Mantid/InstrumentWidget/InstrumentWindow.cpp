@@ -698,7 +698,7 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
 {
   if (ws_name == m_workspaceName.toStdString())
   {
-    askOnCloseEvent(false);
+    confirmClose(false);
     close();
     return;
   }
@@ -723,7 +723,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
 
 void InstrumentWindow::clearADSHandle()
 {
-  askOnCloseEvent(false);
+  confirmClose(false);
   close();
 }
 

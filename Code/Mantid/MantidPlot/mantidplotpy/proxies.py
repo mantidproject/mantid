@@ -4,36 +4,57 @@ accessible from python. They listen for the QObject 'destroyed' signal and set t
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
 
-from PyQt4 import QtCore
-from PyQt4.QtCore import Qt
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt, pyqtSlot
 import __builtin__
 
 #-----------------------------------------------------------------------------
-#--------------------------- Proxy Objects -----------------------------------
+#--------------------------- MultiThreaded Access ----------------------------
 #-----------------------------------------------------------------------------
 
-class AttributeProxy(object):
+class CrossThreadCall(QtCore.QObject):
+    """
+    Defines a dispatch call that marshals
+    function calls between threads
+    """
+    __callable = None
+    __args = []
+    __func_return = None
     
-    _proxied = None
-    _attr_name = None
-    
-    def __init__(self, proxied, attr_name):
-        self._proxied = proxied
-        self._attr_name = attr_name
+    def __init__(self, callable):
+        """ Construct the object
+        """
+        QtCore.QObject.__init__(self)
+        self.moveToThread(QtGui.qApp.thread())
+        self.__callable = callable
         
+        
+    def dispatch(self, *args):
+        """Dispatches a call to callable with
+        the given arguments using QMetaObject.invokeMethod
+        to ensure the call happens in the object's thread
+        """
+        self.__args = args
+        self.__func_return = None
+        return self._do_dispatch()
+    
     def __call__(self, *args):
-        if self._proxied is None:
-          raise RunTimeError("No attribute has been set to be proxied")
-        if len(args) > 9:
-            raise RuntimeError("Asynchronous method call cannot handle > 9 arguments")
+        """
+        Calls the dispatch method
+        """
+        return self.dispatch(*args)
         
-        qt_args = []
-        for arg in args:
-            argtype = self._get_argtype(arg)
-            qt_args.append(QtCore.Q_ARG(argtype, arg))
-        
-        QtCore.QMetaObject.invokeMethod(self._proxied, self._attr_name, Qt.AutoConnection, *qt_args)
-        
+    @pyqtSlot()
+    def _do_dispatch(self):
+        """Perform a call to a GUI function across a
+        thread and return the result
+        """
+        if QtCore.QThread.currentThread() != QtGui.qApp.thread():
+            QtCore.QMetaObject.invokeMethod(self, "_do_dispatch", Qt.BlockingQueuedConnection)
+        else:
+            self.__func_return = self.__callable(*self.__args)
+        return self.__func_return
+    
     def _get_argtype(self, argument):
         """
             Returns the argument type that will be passed to
@@ -44,11 +65,25 @@ class AttributeProxy(object):
             as a type that is not a bool and inherits from __builtin__.int
         """
         argtype = type(argument)
+        return argtype
         if isinstance(argument, __builtin__.int) and argtype != bool:
             argtype = int
         return argtype
-    
+
+def threadsafe_call(callable, *args):
+    """
+        Calls the given function with the given arguments
+        by passing it through the CrossThreadCall class. This
+        ensures that the calls to the GUI functions
+        happen on the correct thread.
+    """
+    caller = CrossThreadCall(callable)
+    return caller.dispatch(*args)
+
 #-----------------------------------------------------------------------------
+#--------------------------- Proxy Objects -----------------------------------
+#-----------------------------------------------------------------------------
+
 class QtProxyObject(QtCore.QObject):
     """Generic Proxy object for wrapping Qt C++ QObjects.
     This holds the QObject internally and passes methods to it.
@@ -60,20 +95,25 @@ class QtProxyObject(QtCore.QObject):
         self.__obj = toproxy
         # Connect to track the destroyed
         if self.__obj is not None:
-            QtCore.QObject.connect( self.__obj, QtCore.SIGNAL("destroyed()"),
-                                    self._heldObjectDestroyed)
+            self.connect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                         self._kill_object, Qt.DirectConnection)
 
-    def _heldObjectDestroyed(self):
-        """Slot called when the held object is destroyed.
-        Sets it to None, preventing segfaults """
-        QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
+    def close(self):
+        """
+        Make sure closing the window kills the object. While the destroyed
+        signal is sent, it is not received in time for scripts that will
+        use the object again quickly
+        """
+        if hasattr(self._getHeldObject(), 'close'):
+            threadsafe_call(self._getHeldObject().close)
         self._kill_object()
 
     def __getattr__(self, attr):
         """
         Reroute a method call to the the stored object
         """
-        return AttributeProxy(self._getHeldObject(), attr)
+        callable = getattr(self._getHeldObject(), attr)
+        return CrossThreadCall(callable)
 
     def __str__(self):
         """
@@ -112,7 +152,7 @@ class MDIWindow(QtProxyObject):
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
-
+        
     def folder(self):
         return Folder(self._getHeldObject().folder())
 

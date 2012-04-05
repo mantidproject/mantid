@@ -70,8 +70,6 @@ using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 namespace MantidException = Mantid::Kernel::Exception;
 
-Q_DECLARE_METATYPE(Qt::AlignmentFlag);
-
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_addObserver(*this,&MantidUI::handleAddWorkspace),
@@ -93,10 +91,6 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
     qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     //Register std::string as well as we use it alot
     qRegisterMetaType<std::string>();
-    // Move these somewhere sensible
-    qRegisterMetaType<Graph::CurveType>();
-    qRegisterMetaType<MultiLayer*>();
-    qRegisterMetaType<Qt::AlignmentFlag>();
   }
 
   m_exploreMantid = new MantidDockWidget(this,aw);
