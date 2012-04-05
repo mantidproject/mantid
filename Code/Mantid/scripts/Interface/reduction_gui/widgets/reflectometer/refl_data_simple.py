@@ -118,7 +118,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
-        
+                
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
@@ -226,6 +226,9 @@ class DataReflWidget(BaseWidget):
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
+
+    def _my_test(self):
+        print "I'm in my test"
         
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Fri Mar 23 10:45:35 2012
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Thu Apr  5 13:15:51 2012
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 

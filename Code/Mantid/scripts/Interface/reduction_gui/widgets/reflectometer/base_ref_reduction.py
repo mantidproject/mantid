@@ -94,6 +94,8 @@ class BaseRefWidget(BaseWidget):
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+#        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self.refresh_data_peak_counts_vs_pixel)
+
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_to_pixel)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel1)
@@ -169,7 +171,7 @@ class BaseRefWidget(BaseWidget):
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
-        
+            
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
                                                             os.path.expanduser('~'), 
@@ -491,7 +493,8 @@ class BaseRefWidget(BaseWidget):
         min, max = self._integrated_plot(True,
                                          self._summary.data_run_number_edit,
                                          self._summary.data_peak_from_pixel,
-                                         self._summary.data_peak_to_pixel)
+                                         self._summary.data_peak_to_pixel,
+                                         True)
                 
     def _plot_count_vs_y_bck(self):
         """
@@ -503,7 +506,8 @@ class BaseRefWidget(BaseWidget):
         self._integrated_plot(True,
                               self._summary.data_run_number_edit,
                               self._summary.data_background_from_pixel1,
-                              self._summary.data_background_to_pixel1)
+                              self._summary.data_background_to_pixel1,
+                              False)
         
     def _plot_count_vs_x(self):
         """
@@ -534,7 +538,7 @@ class BaseRefWidget(BaseWidget):
                                          self._summary.norm_x_min_edit,
                                          self._summary.norm_x_max_edit)
 
-    def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl):
+    def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl, isPeak=True):
         """
             Plot counts as a function of:
             
@@ -550,6 +554,7 @@ class BaseRefWidget(BaseWidget):
             @param file_ctrl: control widget containing the data file name
             @param min_ctrl: control widget containing the range minimum
             @param max_ctrl: control widget containing the range maximum
+            @param isPeak: are we working with peak or with background
         """
         if not IS_IN_MANTIDPLOT:
             return
@@ -575,9 +580,10 @@ class BaseRefWidget(BaseWidget):
                                                                       range_min=range_min,
                                                                       range_max=range_max,
                                                                       high_res=is_high_res,
-                                                                      instrument=self.short_name)
+                                                                      instrument=self.short_name,
+                                                                      isPeak=isPeak)
             return min, max
-        
+            
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
             return

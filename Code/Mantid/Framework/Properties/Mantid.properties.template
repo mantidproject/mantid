@@ -15,11 +15,11 @@ supported.facilities = ISIS;SNS;HFIR;NCNR
 # Set a default facility
 default.facility = ISIS
 
-# Set a default instrument
+# Set a default insument
 default.instrument = 
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space
-mantidqt.python_interfaces = ORNL_SANS.py REFL_Reduction.py REFM_Reduction.py
+mantidqt.python_interfaces = ORNL_SANS.py REFL_Reduction.py REFL_SF_Calculator.py REFM_Reduction.py
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
 # Where to find mantid plugin libraries

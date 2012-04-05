@@ -15,6 +15,7 @@ class RangeSelector(object):
     __instance=None
 
     class _Selector(object):
+
         def __init__(self):
             self._call_back = None
             self._graph = "Range Selector"
@@ -26,14 +27,20 @@ class RangeSelector(object):
             
         def connect(self, ws, call_back, xmin=None, xmax=None, 
                     range_min=None, range_max=None, x_title=None,
-                    log_scale=False):
+                    log_scale=False,
+                    ws_output_base=None):
+            
             self._call_back = call_back
+            self._ws_output_base = ws_output_base
+            
             _qti.app.connect(_qti.app.mantidUI,
                              QtCore.SIGNAL("x_range_update(double,double)"),
                              self._call_back)
             g = _qti.app.graph(self._graph)
+            
             if g is not None:
                 g.close()
+                
             g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
             g.setName(self._graph)        
             l=g.activeLayer()
@@ -59,11 +66,13 @@ class RangeSelector(object):
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,
                 range_min=None, range_max=None, x_title=None,
-                log_scale=False):
+                log_scale=False, ws_output_base=None):
+        
         if RangeSelector.__instance is not None:
             RangeSelector.__instance.disconnect()
         else:
             RangeSelector.__instance = RangeSelector._Selector()
+
         RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax,
                                          range_min=range_min, range_max=range_max,
                                          x_title=x_title, log_scale=log_scale)            

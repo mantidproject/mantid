@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refm_reduction.ui'
 #
-# Created: Fri Mar 30 14:20:19 2012
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Thu Apr  5 13:15:52 2012
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 

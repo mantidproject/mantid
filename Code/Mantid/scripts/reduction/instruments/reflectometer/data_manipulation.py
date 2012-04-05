@@ -37,14 +37,33 @@ def tof_distribution(file_path, callback=None,
     
 def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                  range_min=None, range_max=None,
-                                 high_res = True, instrument="REFL"):
+                                 high_res = True, instrument="REFL",
+                                 isPeak=True):
+    """
+        Display counts vs pixel of data or normalization data
+    
+        @param isPeak: are we working with peak or with background
+    
+    """
     basename = os.path.basename(file_path)
     ws_base = "__%s" % basename
-    ws_output_base = "Counts vs Y pixel - %s" % basename
-    x_title = "Y pixel"
-    if is_pixel_y is False:
-        ws_output_base = "Counts vs X pixel - %s" % basename
-        x_title = "X pixel"
+    ws_output_base = ''
+    if (instrument == 'REFL'):
+        if isPeak:
+            type = 'Peak'
+        else:
+            type = 'Background'
+        ws_output_base =  type + " - " + basename
+        if is_pixel_y is False:
+            x_title = "Y pixel"
+        else:
+            x_title = "X pixel"
+    else:
+        ws_output_base = "Counts vs Y pixel - %s" % basename
+        x_title = "Y pixel"
+        if is_pixel_y is False:
+            ws_output_base = "Counts vs X pixel - %s" % basename
+            x_title = "X pixel"
         
     ws_list = []
     
@@ -120,7 +139,9 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                              range_min=range_min,
                                              range_max=range_max,
                                              x_title=x_title,
-                                             log_scale=True)
+                                             log_scale=True,
+                                             ws_output_base=ws_output_base)
+                                             
 
     # Estimate peak limits
     ws_output = ws_base+'_all'
