@@ -17,6 +17,7 @@ set ( SRC_FILES
 	src/Peak.cpp
 	src/PeakColumn.cpp
 	src/PeaksWorkspace.cpp
+	src/RebinnedOutput.cpp
 	src/SpecialWorkspace2D.cpp
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
@@ -51,6 +52,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeaksWorkspace.h
+	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/SplittersWorkspace.h
 	inc/MantidDataObjects/TableColumn.h
@@ -76,6 +78,7 @@ set ( TEST_FILES
 	test/PeakColumnTest.h
 	test/PeakTest.h
 	test/PeaksWorkspaceTest.h
+	test/RebinnedOutputTest.h
 	test/RefAxisTest.h
 	test/SpecialWorkspace2DTest.h
 	test/SplittersWorkspaceTest.h
