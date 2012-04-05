@@ -472,9 +472,9 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 
     if (!fileName.isEmpty())
     {
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveNexusProcessed",-1);
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveMask",-1);
       alg->setProperty("InputWorkspace",boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
-      alg->setPropertyValue("Filename",fileName.toStdString());
+      alg->setPropertyValue("OutputFile",fileName.toStdString());
       alg->execute();
     }
 }
