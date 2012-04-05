@@ -106,13 +106,6 @@ class EQSANSNormalise(PythonAlgorithm):
                 flux_data_path = "Could not find beam flux file!"
             
         NormaliseByCurrent(workspace, workspace)
-        #proton_charge = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().mean
-        #duration = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().duration
-        #frequency = mantid.getMatrixWorkspace(workspace).getRun()["frequency"].getStatistics().mean
-        #acc_current = 1.0e-12 * proton_charge * duration * frequency
-        
-        #Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
-        
         self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, str(flux_data_path))) 
 
 mtd.registerPyAlgorithm(EQSANSNormalise())
