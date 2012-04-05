@@ -436,6 +436,7 @@ void PythonScript::initialize(const QString & name, QObject *context)
  */
 void PythonScript::beginStdoutRedirect()
 {
+  if(!redirectStdOut()) return;
   stdoutSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stdout");
   Py_XINCREF(stdoutSave);
   stderrSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stderr");
@@ -450,6 +451,8 @@ void PythonScript::beginStdoutRedirect()
  */
 void PythonScript::endStdoutRedirect()
 {
+  if(!redirectStdOut()) return;
+
   PyDict_SetItemString(pythonEnv()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);
   PyDict_SetItemString(pythonEnv()->sysDict(), "stderr", stderrSave);

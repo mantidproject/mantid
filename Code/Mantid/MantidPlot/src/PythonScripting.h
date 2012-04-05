@@ -66,6 +66,8 @@ public:
 
   /// Create a new code lexer for Python
   QsciLexer * createCodeLexer() const;
+  void redirectStdOut(bool on);
+
   // Python supports progress monitoring
   virtual bool supportsProgressReporting() const { return true; }
 

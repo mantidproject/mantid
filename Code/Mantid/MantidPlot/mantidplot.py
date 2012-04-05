@@ -83,7 +83,7 @@ def matrix(name):
     Returns:
         A handle to the matrix.
     """
-    return proxies.MDIWindow(_qti.app.matrix(name))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.matrix,name))
 
 def newMatrix(name=None,rows=32,columns=32):
     """Create a matrix (N.B. This is not the same as a 'MantidMatrix').
@@ -97,9 +97,9 @@ def newMatrix(name=None,rows=32,columns=32):
         A handle to the created matrix.
     """
     if name is None:
-        return proxies.MDIWindow(_qti.app.newMatrix())
+        return proxies.MDIWindow(threadsafe_call(_qti.app.newMatrix))
     else:
-        return proxies.MDIWindow(_qti.app.newMatrix(name,rows,columns))
+        return proxies.MDIWindow(threadsafe_call(_qti.app.newMatrix, name,rows,columns))
 
 def graph(name):
     """Get a handle on a graph widget.
@@ -110,7 +110,7 @@ def graph(name):
     Returns:
         A handle to the graph.
     """
-    return proxies.Graph(_qti.app.graph(name))
+    return proxies.Graph(threadsafe_call(_qti.app.graph, name))
 
 def newGraph(name=None,layers=1,rows=1,columns=1):
     """Create a graph window.
@@ -125,9 +125,9 @@ def newGraph(name=None,layers=1,rows=1,columns=1):
         A handle to the created graph widget.
     """
     if name is None:
-        return proxies.Graph(_qti.app.newGraph())
+        return proxies.Graph(threadsafe_call(_qti.app.newGraph))
     else:
-        return proxies.Graph(_qti.app.newGraph(name,layers,rows,columns))
+        return proxies.Graph(threadsafe_call(_qti.app.newGraph,name,layers,rows,columns))
 
 def note(name):
     """Get a handle on a note.
@@ -138,7 +138,7 @@ def note(name):
     Returns:
         A handle to the note.
     """
-    return proxies.MDIWindow(_qti.app.note(name))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.note, name))
 
 def newNote(name=None):
     """Create a note.
@@ -150,9 +150,9 @@ def newNote(name=None):
         A handle to the created note.
     """
     if name is None:
-        return proxies.MDIWindow(_qti.app.newNote())
+        return proxies.MDIWindow(threadsafe_call(_qti.app.newNote))
     else:
-        return proxies.MDIWindow(_qti.app.newNote(name))
+        return proxies.MDIWindow(threadsafe_call(_qti.app.newNote, name))
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
@@ -167,7 +167,7 @@ def plot(source, *args, **kwargs):
         A handle to the created Graph widget.
     """
     if hasattr(source, '_getHeldObject') and isinstance(source._getHeldObject(), QtCore.QObject):
-        return proxies.Graph(_qti.app.plot(source._getHeldObject(), *args, **kwargs))
+        return proxies.Graph(threadsafe_call(_qti.app.plot, source._getHeldObject(), *args, **kwargs))
     else:
         return plotSpectrum(source, *args, **kwargs)
         
@@ -242,14 +242,14 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
     elif hasattr(source, 'getName'):
         # If the source is a workspace, create a table from the specified index
         wsName = source.getName()
-        source = _qti.app.mantidUI.workspaceToTable(wsName,wsName,[index],False,True)
+        source = threadsafe_call(_qti.app.mantidUI.workspaceToTable.wsName,wsName,[index],False,True)
         # The C++ stemPlot method takes the name of the column, so get that
         index = source.colName(2)
     # Get column name if necessary
     if isinstance(index, int):
         index = source.colName(index)
     # Call the C++ method
-    return _qti.app.stemPlot(source,index,power,startPoint,endPoint)
+    return threadsafe_call(_qti.app.stemPlot, source,index,power,startPoint,endPoint)
 
 #-----------------------------------------------------------------------------
 def waterfallPlot(table, columns):
@@ -262,7 +262,7 @@ def waterfallPlot(table, columns):
     Returns:
         A handle to the created plot (Layer).
     """
-    return proxies.Graph(_qti.app.waterfallPlot(table._getHeldObject(),columns))
+    return proxies.Graph(threadsafe_call(_qti.app.waterfallPlot, table._getHeldObject(),columns))
 
 #-----------------------------------------------------------------------------
 def importImage(filename):
@@ -274,17 +274,17 @@ def importImage(filename):
     Returns:
         A handle to the matrix containing the image data.
     """
-    return proxies.MDIWindow(_qti.app.importImage(filename))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.importImage, filename))
 
 #-----------------------------------------------------------------------------
 def newPlot3D():
-    return proxies.Graph3D(_qti.app.newPlot3D())
+    return proxies.Graph3D(threadsafe_call(_qti.app.newPlot3D))
 
 def plot3D(*args):
     if isinstance(args[0],str):
-        return proxies.Graph3D(_qti.app.plot3D(*args))
+        return proxies.Graph3D(threadsafe_call(_qti.app.plot3D, *args))
     else:
-        return proxies.Graph3D(_qti.app.plot3D(args[0]._getHeldObject(),*args[1:]))
+        return proxies.Graph3D(threadsafe_call(_qti.app.plot3D, args[0]._getHeldObject(),*args[1:]))
 
 #-----------------------------------------------------------------------------
 def selectMultiPeak(source, showFitPropertyBrowser = True):
@@ -294,7 +294,7 @@ def selectMultiPeak(source, showFitPropertyBrowser = True):
         source: A reference to a MultiLayer with the data to fit.
         showFitPropertyBrowser: Whether to show the FitPropertyBrowser or not.
     """
-    _qti.app.selectMultiPeak(source._getHeldObject(), showFitPropertyBrowser)
+    threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
 
 #-----------------------------------------------------------------------------
 #-------------------------- Project/Folder functions -----------------------
@@ -309,7 +309,7 @@ def windows():
 
 def activeFolder():
     """Get a handle to the currently active folder."""
-    return proxies.Folder(_qti.app.activeFolder())
+    return proxies.Folder(threadsafe_call(_qti.app.activeFolder))
 
 # These methods don't seem to work
 #def appendProject(filename, parentFolder=None):
@@ -322,7 +322,7 @@ def activeFolder():
 
 def rootFolder():
     """Get a handle to the top-level folder."""
-    return proxies.Folder(_qti.app.rootFolder())
+    return proxies.Folder(threadsafe_call(_qti.app.rootFolder))
 
 def addFolder(name,parentFolder=None):
     """Create a new folder.
@@ -336,11 +336,11 @@ def addFolder(name,parentFolder=None):
     """
     if parentFolder is not None:
         parentFolder = parentFolder._getHeldObject()
-    return proxies.Folder(_qti.app.addFolder(name,parentFolder))
+    return proxies.Folder(threadsafe_call(_qti.app.addFolder, name,parentFolder))
 
 def deleteFolder(folder):
     """Delete the referenced folder"""
-    return _qti.app.deleteFolder(folder._getHeldObject())
+    return threadsafe_call(_qti.app.deleteFolder, folder._getHeldObject())
 
 def changeFolder(folder, force=False):
     """Changes the current folder.
@@ -352,7 +352,7 @@ def changeFolder(folder, force=False):
     Returns:
         True on success.
     """
-    return _qti.app.changeFolder(folder._getHeldObject(),force)
+    return threadsafe_call(_qti.app.changeFolder, folder._getHeldObject(),force)
 
 def copyFolder(source, destination):
     """Copy a folder (and its contents) into another.
@@ -360,31 +360,31 @@ def copyFolder(source, destination):
     Returns:
         True on success.
     """
-    return _qti.app.copyFolder(source._getHeldObject(),destination._getHeldObject())
+    return threadsafe_call(_qti.app.copyFolder, source._getHeldObject(),destination._getHeldObject())
 
 def openTemplate(filename):
     """Load a previously saved window template"""
-    return proxies.MDIWindow(_qti.app.openTemplate(filename))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.openTemplate, filename))
 
 def saveAsTemplate(window, filename):
     """Save the characteristics of the given window to file"""
-    _qti.app.saveAsTemplate(window._getHeldObject(), filename)
+    threadsafe_call(_qti.app.saveAsTemplate, window._getHeldObject(), filename)
 
 def setWindowName(window, name):
     """Set the given window to have the given name"""
-    _qti.app.setWindowName(window._getHeldObject(), name)
+    threadsafe_call(_qti.app.setWindowName, window._getHeldObject(), name)
 
 def setPreferences(layer):
-    _qti.app.setPreferences(graph._getHeldObject())
+    threadsafe_call(_qti.app.setPreferences, layer._getHeldObject())
 
 def clone(window):
-    return proxies.MDIWindow(_qti.app.clone(window._getHeldObject()))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.clone, window._getHeldObject()))
 
 def tableToMatrix(table):
-    return proxies.MDIWindow(_qti.app.tableToMatrix(table._getHeldObject()))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.tableToMatrix, table._getHeldObject()))
 
 def matrixToTable(matrix, conversionType=_qti.app.Direct):
-    return proxies.MDIWindow(_qti.app.matrixToTable(matrix._getHeldObject(),conversionType))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.matrixToTable, matrix._getHeldObject(),conversionType))
 
 #-----------------------------------------------------------------------------
 #-------------------------- Wrapped MantidUI functions -----------------------
@@ -396,11 +396,11 @@ def mergePlots(graph1,graph2):
 
 def convertToWaterfall(graph):
     """Convert a graph (containing a number of plotted spectra) to a waterfall plot"""
-    _qti.app.mantidUI.convertToWaterfall(graph._getHeldObject())
+    threadsafe_call(_qti.app.mantidUI.convertToWaterfall, graph._getHeldObject())
 
 def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
-    return proxies.MantidMatrix(_qti.app.mantidUI.getMantidMatrix(name))
+    return proxies.MantidMatrix(threadsafe_call(_qti.app.mantidUI.getMantidMatrix, name))
 
 def getInstrumentView(name, tab=-1):
     """Create an instrument view window based on the given workspace.
@@ -412,7 +412,7 @@ def getInstrumentView(name, tab=-1):
     Returns:
         A handle to the created instrument view widget.
     """
-    return proxies.MDIWindow(_qti.app.mantidUI.getInstrumentView(name,tab))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.mantidUI.getInstrumentView, name,tab))
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
@@ -432,7 +432,8 @@ def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=Fals
         firstIndex = -1
     if lastIndex is None:
         lastIndex = -1
-    return proxies.MantidMatrix(_qti.app.mantidUI.importMatrixWorkspace(name,firstIndex,lastIndex,showDialog,visible))
+    return proxies.MantidMatrix(threadsafe_call(_qti.app.mantidUI.importMatrixWorkspace, name,
+                                                firstIndex,lastIndex,showDialog,visible))
 
 def importTableWorkspace(name, visible=False):
     """Create a MantidPlot table from a table workspace.
@@ -444,7 +445,7 @@ def importTableWorkspace(name, visible=False):
     Returns:
         A handle to the newly created table.
     """
-    return proxies.MDIWindow(_qti.app.mantidUI.importTableWorkspace(name,False,visible))
+    return proxies.MDIWindow(threadsafe_call(_qti.app.mantidUI.importTableWorkspace, name,False,visible))
 
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------
@@ -519,7 +520,7 @@ def getSliceViewer(source, label=""):
     if len(workspace_names) != 1:
         raise Exception("Please specify only one workspace.")
     else:
-        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow(workspace_names[0], label)
+        svw = threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow, workspace_names[0], label)
         return proxies.SliceViewerWindowProxy(svw)
 
 
@@ -530,7 +531,7 @@ def closeAllSliceViewers():
     clean up your desktop after opening many windows.
     """
     import mantidqtpython
-    mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows()
+    threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows)
 
 #-----------------------------------------------------------------------------
 # Legacy function
@@ -623,20 +624,20 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     import mantidqtpython
     from PyQt4 import QtCore
     
-    svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow(wsname, label)
-    svw.show()
+    svw = threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow, wsname, label)
+    threadsafe_call(svw.show)
     
     # -- Connect to main window's shut down signal ---
     QtCore.QObject.connect(_qti.app, QtCore.SIGNAL("shutting_down()"),
                     svw, QtCore.SLOT("close()"))
     
-    sv = svw.getSlicer()
+    sv = threadsafe_call(svw.getSlicer)
     # --- X/Y Dimensions ---
     if (not xydim is None):
         if len(xydim) != 2:
             raise Exception("You need to specify two values in the 'xydim' parameter")
         else:
-            sv.setXYDim(xydim[0], xydim[1])
+            threadsafe_call(sv.setXYDim, xydim[0], xydim[1])
     
     # --- Slice point ---
     if not slicepoint is None:
@@ -652,18 +653,18 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     
     # --- Color scale ---
     if (not colormin is None) and (not colormax is None):
-        sv.setColorScale(colormin, colormax, colorscalelog)
+        threadsafe_call(sv.setColorScale, colormin, colormax, colorscalelog)
     else:
         if (not colormin is None): sv.setColorScaleMin(colormin)
         if (not colormax is None): sv.setColorScaleMax(colormax)
     try:
-        sv.setColorScaleLog(colorscalelog)
+        threadsafe_call(sv.setColorScaleLog, colorscalelog)
     except:
         print "Log color scale not possible."
     
     # --- XY limits ---
     if not limits is None:
-        sv.setXYLimits(limits[0], limits[1], limits[2], limits[3])
+        threadsafe_call(sv.setXYLimits, limits[0], limits[1], limits[2], limits[3])
     
     return svw
 

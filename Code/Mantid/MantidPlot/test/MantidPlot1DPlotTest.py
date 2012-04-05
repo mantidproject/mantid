@@ -31,6 +31,11 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         """Clean up by closing the created window """
         self.g.confirmClose(False)
         self.g.close()
+	try:
+		self.t.confirmClose(False)
+		self.t.close()
+	except AttributeError:
+		pass
         QtCore.QCoreApplication.processEvents()
 
     def test_plotSpectrum_errorBars(self):
@@ -61,6 +66,25 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         l.setAntialiasing(True)
         screenshot(g, "Customized1DPlot", "1D plot of a spectrum, with error bars, an orange line of width 2, a custom title in red Arial font, with X from 0 to 3")
         self.g = g
+
+    def test_standard_plot_command(self):
+        t = newTable("test", 30, 4)
+        self.t = t
+        for i in range(1, t.numRows()+1):
+            t.setCell(1, i, i)
+            t.setCell(2, i, i)
+            t.setCell(3, i, i+2)
+            t.setCell(4, i, i+4)
+ 
+        g = plot(t, (2,3,4), Layer.Line)
+        self.g = g
+        l = g.activeLayer() # Plot columns 2, 3 and 4
+        for i in range(0, l.numCurves()):
+            l.setCurveLineColor(i, 1 + i) # Curve color is defined as an integer value. Alternatively, the 2nd argument can be of type QtGui.QColor.
+            l.setCurveLineWidth(i, 0.5 + 2*i)
+
+            l.setCurveLineStyle(1, QtCore.Qt.DotLine)
+            l.setCurveLineStyle(2, QtCore.Qt.DashLine)
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlot1DPlotTest)

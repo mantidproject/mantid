@@ -53,14 +53,6 @@ void ScriptOutputDisplay::populateEditMenu(QMenu &editMenu)
 }
 
 /**
- * Clear the text area
- */
-void ScriptOutputDisplay::clear()
-{
-  clear();
-}
-
-/**
  * Change the title based on the script's execution state
  * @param running :: The current state of the script environment
  */

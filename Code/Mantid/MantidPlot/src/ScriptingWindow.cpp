@@ -63,7 +63,7 @@ ScriptingWindow::~ScriptingWindow()
 }
 
 /**
- * Is a script executing?
+ * Is a script executing
  * @returns A flag indicating the current state
  */
 bool ScriptingWindow::isExecuting() const

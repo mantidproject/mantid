@@ -133,6 +133,25 @@ QsciLexer * PythonScripting::createCodeLexer() const
 }
 
 /**
+ * Turn redirects on/off
+ * @return
+ */
+void PythonScripting::redirectStdOut(bool on)
+{
+  if(on)
+  {
+    setQObject(this, "stdout", m_sys);
+    setQObject(this, "stderr", m_sys);
+  }
+  else
+  {
+    PyDict_SetItemString(m_sys, "stdout",PyDict_GetItemString(m_sys, "__stdout__"));
+    PyDict_SetItemString(m_sys, "stderr",PyDict_GetItemString(m_sys, "__stderr__"));
+
+  }
+}
+
+/**
  * Start the Python environment
  */
 bool PythonScripting::start()
@@ -187,8 +206,7 @@ bool PythonScripting::start()
       return false;
     }
 
-    setQObject(this, "stdout", m_sys);
-    setQObject(this, "stderr", m_sys);
+    redirectStdOut(true);
 
     // Add in Mantid paths so that the framework will be found
     // Linux has the libraries in the lib directory at bin/../lib

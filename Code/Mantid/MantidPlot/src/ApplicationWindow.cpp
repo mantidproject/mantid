@@ -16394,18 +16394,37 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
  */
 void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
 {
-  ScriptFileInterpreter * scriptFile = new ScriptFileInterpreter(this);
-  scriptFile->setup(*scriptingEnv(),filename);
-  scriptFile->hide();
-  scriptFile->executeAll(execMode);
+  QFile scriptFile(filename);
+  if(!scriptFile.open(QIODevice::ReadOnly|QIODevice::Text))
+  {
+    throw std::runtime_error("Unable to open script file");
+  }
+  QTextStream in(&scriptFile);
+  QString code;
+  while (!in.atEnd())
+  {
+    code += in.readLine() + "\n";
+  }
+  Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
+  runner->redirectStdOut(false);
+  scriptingEnv()->redirectStdOut(false);
   if(execMode == Script::Asynchronous)
   {
-    while(scriptFile->isExecuting())
+    runner->executeAsync(code);
+    while(runner->isExecuting())
     {
       QCoreApplication::processEvents();
     }
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
+    sleep(1);
   }
-  delete scriptFile;
+  else
+  {
+    runner->execute(code);
+  }
+  delete runner;
 }
 
 

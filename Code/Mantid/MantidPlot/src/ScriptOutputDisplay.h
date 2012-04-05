@@ -22,8 +22,6 @@ public:
   void populateEditMenu(QMenu &editMenu);
 
 public slots:
-  /// Clear the text
-  void clear();
   /// Print the text within the window
   void print();
   /// Save the output to a file

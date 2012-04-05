@@ -88,6 +88,8 @@ class ScriptingEnv : public QObject
   /// is transferred to the caller.
   virtual QsciLexer * createCodeLexer() const { return NULL; }
 
+  virtual void redirectStdOut(bool) {}
+
 public slots:
   /// Set a reference to a QObject in the global scope
   virtual bool setQObject(QObject*, const char*) { return false; }
