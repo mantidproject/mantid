@@ -14,19 +14,29 @@ namespace MantidQt
 namespace ImageView
 {
 
-EventWSDataSource::EventWSDataSource( EventWorkspace* ev_ws )
+EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->ev_ws = ev_ws;
-  total_xmin = ev_ws->getXMin(); 
-  total_xmax = ev_ws->getXMax(); 
+  total_xmin = ev_ws->getTofMin(); 
+  total_xmax = ev_ws->getTofMax(); 
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)ev_ws->getNumberHistograms();
   total_rows = ev_ws->getNumberHistograms();
-  total_cols = 1000;              // initially use 1000 bins for event data
+  total_cols = 500;              // initially use 1000 bins for event data
+
+  std::cout << "total_xmin = " << total_xmin << std::endl;
+  std::cout << "total_xmax = " << total_xmax << std::endl;
+
+  if ( total_xmax > 66666 )   
+  {
+    total_xmax = 66666;          // hack for now
+    std::cout << "WARNING: max tof too large, set to " 
+              << total_xmax << std::endl;
+  }
 
   x_scale = new MantidVec();
-  x_scale->resize(1000);
+  x_scale->resize(total_cols+1);
   double dx = (total_xmax - total_xmin)/((double)total_cols + 1.0);
   for ( size_t i = 0; i < total_cols+1; i++ )
   {
@@ -73,7 +83,6 @@ DataArray * EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   size_t first_row;
   IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
-
   if ( new_data )
   {
     delete[] new_data;
@@ -82,11 +91,11 @@ DataArray * EventWSDataSource::GetDataArray( double xmin,   double  xmax,
 
   delete x_scale;
   x_scale = new MantidVec();
-  x_scale->resize(n_cols);
-  double dx = (xmax - xmin)/((double)total_cols + 1.0);
-  for ( size_t i = 0; i < total_cols+1; i++ )
+  x_scale->resize(n_cols+1);
+  double dx = (xmax - xmin)/((double)n_cols + 1.0);
+  for ( size_t i = 0; i < n_cols+1; i++ )
   {
-    (*x_scale)[i] = total_xmin + (double)i * dx;;
+    (*x_scale)[i] = xmin + (double)i * dx;;
   }
 
   size_t index = 0;
@@ -95,10 +104,11 @@ DataArray * EventWSDataSource::GetDataArray( double xmin,   double  xmax,
     EventList & list = ev_ws->getEventList(i);
     list.setX( *x_scale );
     list.setTofs( *x_scale );
-    MantidVec & y_vals = ev_ws->dataY(i);
+    const MantidVec & y_vals = ev_ws->readY(i);
     for ( size_t col = 0; col < n_cols; col++ )
     {
-      new_data[index++] = (float)y_vals[col];
+      new_data[index] = (float)y_vals[col];
+      index++;
     }
   }
 
@@ -108,7 +118,6 @@ DataArray * EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   }
   new_data_array = new DataArray( xmin, xmax, ymin, ymax,
                                   is_log_x, n_rows, n_cols, new_data);
-
   return new_data_array;
 }
 

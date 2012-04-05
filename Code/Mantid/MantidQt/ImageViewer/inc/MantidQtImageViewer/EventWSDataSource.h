@@ -53,7 +53,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
 {
   public:
 
-    EventWSDataSource( EventWorkspace* ev_ws );
+    EventWSDataSource( EventWorkspace_sptr ev_ws );
 
    ~EventWSDataSource();
 
@@ -73,10 +73,10 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
                       double y,
                       std::vector<std::string> &list );
   private:
-    EventWorkspace*  ev_ws;
-    float*           new_data;
-    DataArray*       new_data_array;
-    MantidVec*       x_scale;
+    EventWorkspace_sptr  ev_ws;
+    float*               new_data;
+    DataArray*           new_data_array;
+    MantidVec*           x_scale;
 };
 
 } // namespace MantidQt 

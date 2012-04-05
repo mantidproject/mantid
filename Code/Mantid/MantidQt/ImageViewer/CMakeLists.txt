@@ -48,7 +48,9 @@ set ( TEST_PY_FILES
 )
 
 include_directories ( inc )
+include_directories ( ../../Framework/API/inc )
 include_directories ( ../../Framework/DataObjects/inc )
+include_directories ( ../../Framework/DataHandling/inc )
 
 
 ###########################################################################
@@ -84,7 +86,15 @@ if ( WIN32 )
 else ()
 
 add_executable ( ImageViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/ImageViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( ImageViewDemo MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( ImageViewDemo MantidQtAPI QtPropertyBrowser
+DataObjects ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+
+
+add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}
+src/ImageViewNxEventFile.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
+target_link_libraries ( ImageViewNxEventFile 
+MantidQtAPI QtPropertyBrowser DataObjects DataHandling ${CORE_MANTIDLIBS}
+${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 endif ()
 
