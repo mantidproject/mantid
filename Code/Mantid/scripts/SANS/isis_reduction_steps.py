@@ -1866,10 +1866,25 @@ class UserFile(ReductionStep):
             return 'Unable to parse monitor line: '
 
     def _readDetectorCorrections(self, details, reducer):
-        values = details.split()
-        det_name = values[0]
-        det_axis = values[1]
-        shift = float(values[2])
+        """
+            Handle user commands of the type DET/CORR/FRONT/RADIUS x 
+            @param details: the contents of the line after DET/CORR
+            @param reducer: the object that contains all the settings
+        """     
+        if details[0]=='/': 
+            details = details.lstrip('/')
+        values = details.split() 
+        if '/' in values[0]:
+            # assume notation is e.g. FRONT/RADIUS x
+            values2 = values[0].split('/')
+            det_name = values2[0]
+            det_axis = values2[1]
+            shift = float(values[1])            
+        else: 
+            # assume notation is e.g. FRONT RADIUS x
+            det_name = values[0]
+            det_axis = values[1]
+            shift = float(values[2])
     
         detector = reducer.instrument.getDetector(det_name)
         if det_axis == 'X':
