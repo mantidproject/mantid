@@ -183,6 +183,28 @@ void CropWorkspace::exec()
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
+template<typename T>
+std::size_t lowerBound(const std::vector<T> & events, const double tof)
+{
+  typename std::vector<T>::const_iterator first = events.begin();
+  typename std::vector<T>::const_iterator last = events.end();
+  typename std::vector<T>::const_iterator it;
+  typename std::vector<T>::difference_type count = distance(first, last);
+  typename std::vector<T>::difference_type step;
+
+  while (count>0)
+  {
+    it = first; step=count/2; advance (it,step);
+    if (it->tof()<tof)                   // or: if (comp(*it,value)), for the comp version
+      { first=++it; count-=step+1;  }
+    else count=step;
+  }
+  if (first == events.end())
+    return events.size();
+  else
+    return distance(events.begin(), first);
+}
+
 /** Executes the algorithm
  *  @throw std::out_of_range If a property is set to an invalid value for the input workspace
  */
@@ -221,8 +243,8 @@ void CropWorkspace::execEvent()
 
   // run inplace branch if appropriate
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
-//  if (inPlace)
-//    this->execEventInplace(minX_val, maxX_val);
+  if (inPlace)
+    g_log.debug("Cropping EventWorkspace in-place.");
 
   // Create the output workspace
   EventWorkspace_sptr outputWorkspace =
@@ -243,50 +265,37 @@ void CropWorkspace::execEvent()
     const EventList & el = eventW->getEventList(i);
     // The output event list
     EventList & outEL = outputWorkspace->getOrAddEventList(j);
+    // left side of the crop - will erase 0 -> endLeft
+    std::size_t endLeft;
+    // right side of the crop - will erase endRight->numEvents+1
+    std::size_t endRight;
+
     switch (el.getEventType())
     {
       case TOF:
       {
-        std::vector<TofEvent>::const_iterator itev = el.getEvents().begin();
-        std::vector<TofEvent>::const_iterator end = el.getEvents().end();
-        std::vector<TofEvent> moreevents;
-        moreevents.reserve(el.getNumberEvents()); // assume all will make it
-        for (; itev != end; ++itev)
-        {
-          const double tof = itev->tof();
-          if(tof <=  maxX_val && tof >= minX_val)
-            moreevents.push_back(*itev);
-        }
+        endLeft = lowerBound(el.getEvents(), minX_val);
+        endRight = lowerBound(el.getEvents(), maxX_val);
+        std::vector<TofEvent>::const_iterator begin = el.getEvents().begin();
+        std::vector<TofEvent> moreevents(begin + endLeft, begin + endRight);
         outEL += moreevents;
         break;
       }
       case WEIGHTED:
       {
-        std::vector<WeightedEvent>::const_iterator itev = el.getWeightedEvents().begin();
-        std::vector<WeightedEvent>::const_iterator end = el.getWeightedEvents().end();
-        std::vector<WeightedEvent> moreevents;
-        moreevents.reserve(el.getNumberEvents()); // assume all will make it
-        for (; itev != end; ++itev)
-        {
-          const double tof = itev->tof();
-          if(tof <=  maxX_val && tof >= minX_val)
-            moreevents.push_back(*itev);
-        }
+        endLeft = lowerBound(el.getWeightedEvents(), minX_val);
+        endRight = lowerBound(el.getWeightedEvents(), maxX_val);
+        std::vector<WeightedEvent>::const_iterator begin = el.getWeightedEvents().begin();
+        std::vector<WeightedEvent> moreevents(begin + endLeft, begin + endRight);
         outEL += moreevents;
         break;
       }
       case WEIGHTED_NOTIME:
       {
-        std::vector<WeightedEventNoTime>::const_iterator itev = el.getWeightedEventsNoTime().begin();
-        std::vector<WeightedEventNoTime>::const_iterator end  = el.getWeightedEventsNoTime().end();
-        std::vector<WeightedEventNoTime> moreevents;
-        moreevents.reserve(el.getNumberEvents()); // assume all will make it
-        for ( ; itev != end; ++itev)
-        {
-          const double tof = itev->tof();
-          if(tof <=  maxX_val && tof >= minX_val)
-            moreevents.push_back(*itev);
-        }
+        endLeft = lowerBound(el.getWeightedEventsNoTime(), minX_val);
+        endRight = lowerBound(el.getWeightedEventsNoTime(), maxX_val);
+        std::vector<WeightedEventNoTime>::const_iterator begin = el.getWeightedEventsNoTime().begin();
+        std::vector<WeightedEventNoTime> moreevents(begin + endLeft, begin + endRight);
         outEL += moreevents;
         break;
       }
@@ -342,80 +351,6 @@ void CropWorkspace::execEvent()
   outputWorkspace->generateSpectraMap();
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
-}
-
-template<typename T>
-std::size_t lowerBound(std::vector<T> & events, const double tof)
-{
-  typename std::vector<T>::iterator first = events.begin();
-  typename std::vector<T>::iterator last = events.end();
-  typename std::vector<T>::iterator it;
-  typename std::vector<T>::difference_type count = distance(first, last);
-  typename std::vector<T>::difference_type step;
-
-  while (count>0)
-  {
-    it = first; step=count/2; advance (it,step);
-    if (it->tof()<tof)                   // or: if (comp(*it,value)), for the comp version
-      { first=++it; count-=step+1;  }
-    else count=step;
-  }
-  if (first == events.end())
-    return events.size();
-  else
-    return distance(events.begin(), first);
-}
-
-void CropWorkspace::execEventInplace(double minX_val, double maxX_val)
-{
-  g_log.debug("Cropping EventWorkspace in-place.");
-
-  Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
-  eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
-  // Loop over the required spectra, copying in the desired bins
-  PARALLEL_FOR1(eventW)
-  for (int i = m_minSpec; i <= m_maxSpec; ++i)
-  {
-    PARALLEL_START_INTERUPT_REGION
-    EventList & el = eventW->getEventList(i);
-    std::size_t numEvents = el.getNumberEvents();
-
-    // left side of the crop - will erase 0 -> endLeft
-    std::size_t endLeft = 0;
-    // right side of the crop - will erase endRight->numEvents+1
-    std::size_t endRight = numEvents + 1;
-    switch (el.getEventType())
-    {
-    case TOF:
-    {
-      endLeft = lowerBound(el.getEvents(), minX_val);
-      endRight = lowerBound(el.getEvents(), maxX_val);
-      break;
-    }
-    case WEIGHTED:
-    {
-      endLeft = lowerBound(el.getWeightedEvents(), minX_val);
-      endRight = lowerBound(el.getWeightedEvents(), maxX_val);
-      break;
-    }
-    case WEIGHTED_NOTIME:
-    {
-      endLeft = lowerBound(el.getWeightedEventsNoTime(), minX_val);
-      endRight = lowerBound(el.getWeightedEventsNoTime(), maxX_val);
-    }
-    }
-
-    g_log.debug() << 0 << "->" << endLeft << "     " << endRight << "->" << numEvents << "\n";
-    el.erase(endRight, numEvents+1);
-    el.erase(0, endLeft);
-    el.clearUnused();
-
-    prog.report();
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(eventW));
 }
 
 /** Retrieves the optional input properties and checks that they have valid values.
