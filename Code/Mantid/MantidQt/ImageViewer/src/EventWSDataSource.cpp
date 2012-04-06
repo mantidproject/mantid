@@ -4,10 +4,12 @@
 
 #include "MantidQtImageViewer/EventWSDataSource.h"
 #include "MantidQtImageViewer/IVUtils.h"
+#include "MantidAPI/ISpectrum.h"
 
 using namespace Mantid;
 using namespace DataObjects;
 using namespace Kernel;
+using namespace API;
 
 namespace MantidQt
 {
@@ -71,10 +73,10 @@ EventWSDataSource::~EventWSDataSource()
 }
 
 
-DataArray * EventWSDataSource::GetDataArray( double xmin,   double  xmax,
-                                             double ymin,   double  ymax,
-                                             size_t n_rows, size_t  n_cols,
-                                             bool   is_log_x )
+DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
+                                            double ymin,   double  ymax,
+                                            size_t n_rows, size_t  n_cols,
+                                            bool   is_log_x )
 {
   size_t first_col;
   IVUtils::CalculateInterval( total_xmin, total_xmax, total_cols,
@@ -144,6 +146,14 @@ void EventWSDataSource::GetInfoList( double x,
   std::string y_str;
   IVUtils::Format(8,3,y,y_str);
   list.push_back(y_str);
+
+  ISpectrum* spec = ev_ws->getSpectrum( (int)y );
+  double spec_id = spec->getSpectrumNo();
+
+  list.push_back("Spec ID");
+  std::string spec_id_str;
+  IVUtils::Format(8,0,spec_id,spec_id_str);
+  list.push_back( spec_id_str );
 }
 
 } // namespace MantidQt 
