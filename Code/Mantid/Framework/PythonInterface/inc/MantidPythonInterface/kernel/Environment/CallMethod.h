@@ -32,7 +32,7 @@ namespace Mantid { namespace PythonInterface {
   {
 
     /// Handle a Python error state
-    void translateErrorToException(const bool withTrace = true);
+    DLLExport void translateErrorToException(const bool withTrace = true);
 
     ///
     /// A wrapper around the boost::call_method to ensure that
@@ -45,7 +45,7 @@ namespace Mantid { namespace PythonInterface {
      * Perform a call to a python function that takes no arguments and returns a value
      */
     template<typename ResultType>
-    struct CallMethod_NoArg
+    struct DLLExport CallMethod_NoArg
     {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
@@ -104,7 +104,7 @@ namespace Mantid { namespace PythonInterface {
 
     ///Specialization for void return type
     template<>
-    struct CallMethod_NoArg<void>
+    struct DLLExport CallMethod_NoArg<void>
     {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist

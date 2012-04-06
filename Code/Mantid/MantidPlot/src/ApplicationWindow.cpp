@@ -16389,8 +16389,8 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
 /**
  *  Runs a script from a file. Mainly useful for automatically running scripts
  * @param filename The full path to the file
- * @param execMode How should the script be executed. Note that this method will always wait for the
- *        script to complete before returning
+ * @param execMode How should the script be executed. If asynchronous
+ * this method waits on the thread finishing
  */
 void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
 {
@@ -16410,15 +16410,8 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
   scriptingEnv()->redirectStdOut(false);
   if(execMode == Script::Asynchronous)
   {
-    runner->executeAsync(code);
-    while(runner->isExecuting())
-    {
-      QCoreApplication::processEvents();
-    }
-    QCoreApplication::processEvents();
-    QCoreApplication::processEvents();
-    QCoreApplication::processEvents();
-    sleep(1);
+    QFuture<bool> result = runner->executeAsync(code);
+    result.waitForFinished();
   }
   else
   {
