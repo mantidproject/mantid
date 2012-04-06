@@ -75,7 +75,8 @@ add_definitions ( -DIN_MANTIDQT_IMAGEVIEWER )
 add_library ( MantidQtImageViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtImageViewer MantidQtAPI MantidWidgets QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtImageViewer
+MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
@@ -87,7 +88,7 @@ else ()
 
 add_executable ( ImageViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/ImageViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
 target_link_libraries ( ImageViewDemo MantidQtAPI QtPropertyBrowser
-DataObjects ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+DataObjects DataHandling ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 
 add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}
