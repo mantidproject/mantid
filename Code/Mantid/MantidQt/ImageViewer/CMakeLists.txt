@@ -76,7 +76,7 @@ add_library ( MantidQtImageViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtImageViewer
-MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+DataObjects DataHandling MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
