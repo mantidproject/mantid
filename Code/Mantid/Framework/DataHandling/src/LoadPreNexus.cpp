@@ -330,7 +330,7 @@ namespace DataHandling
                                       IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop)
   {
     // determine the name of the file "inst_run"
-    string shortName = runinfo.substr(0, runinfo.find_last_of("/\\"));
+    string shortName = runinfo.substr(runinfo.find_last_of("/\\")+1);
     shortName = shortName.substr(0, shortName.find("_runinfo.xml"));
     g_log.debug() << "SHORTNAME = \"" << shortName << "\"\n";
 
