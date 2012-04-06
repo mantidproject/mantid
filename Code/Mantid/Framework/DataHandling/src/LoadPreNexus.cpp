@@ -23,6 +23,8 @@ Workflow algorithm to load all of the preNeXus files.
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 
 
 using namespace Mantid::Kernel;
@@ -356,6 +358,9 @@ namespace DataHandling
         alg->setProperty("OverwriteLogs", false);
         alg->executeAsSubAlg();
         loadedLogs = true;
+        //Reload instrument so SNAP can use log values
+        std::string entry_name = LoadTOFRawNexus::getEntryName(possibilities[i]);
+        LoadEventNexus::runLoadInstrument(possibilities[i], wksp, entry_name, this);
         break;
       }
     }

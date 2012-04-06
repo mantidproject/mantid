@@ -249,10 +249,6 @@ class SNSPowderReduction2(PythonAlgorithm):
         alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **chunk)
         wksp = alg['OutputWorkspace']
 
-        # add the logs to it
-        if (str(self._instrument) == "SNAP"):
-            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
-
         return wksp
 
     def _loadEventNeXusData(self, runnumber, extension, filterWall=None, **chunk):
