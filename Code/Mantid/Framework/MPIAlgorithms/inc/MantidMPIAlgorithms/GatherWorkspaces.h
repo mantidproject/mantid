@@ -72,6 +72,7 @@ private:
 
 
   void execEvent();
+  API::MatrixWorkspace_sptr inputWorkspace;
   DataObjects::EventWorkspace_const_sptr eventW;
   std::size_t totalSpec;
   std::size_t sumSpec;

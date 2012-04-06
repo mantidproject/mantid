@@ -96,7 +96,7 @@ void GatherWorkspaces::exec()
   // Every process in an MPI job must hit this next line or everything hangs!
   mpi::communicator world; // The communicator containing all processes
 
-  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  inputWorkspace = getProperty("InputWorkspace");
 
   // Create a new communicator that includes only those processes that have an input workspace
   const int haveWorkspace(inputWorkspace ? 1 : 0);
@@ -158,6 +158,8 @@ void GatherWorkspaces::exec()
     // Create the workspace for the output
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,sumSpec,numBins+hist,numBins);
     setProperty("OutputWorkspace",outputWorkspace);
+    ExperimentInfo_sptr inWS = inputWorkspace;
+    outputWorkspace->copyExperimentInfoFrom(inWS.get());
   }
 
   for (size_t wi = 0; wi < totalSpec; wi++)
@@ -242,6 +244,8 @@ void GatherWorkspaces::execEvent()
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(eventW, outputWorkspace, true);
     setProperty("OutputWorkspace",outputWorkspace);
+    ExperimentInfo_sptr inWS = inputWorkspace;
+    outputWorkspace->copyExperimentInfoFrom(inWS.get());
   }
 
   for (size_t wi = 0; wi < totalSpec; wi++)
