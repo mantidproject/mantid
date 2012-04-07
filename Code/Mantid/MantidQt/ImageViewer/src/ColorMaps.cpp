@@ -9,48 +9,150 @@ namespace MantidQt
 namespace ImageView
 {
 
-void ColorMaps::getDefaultMap( std::vector<QRgb> & color_table )
-{
-  // The coldfire map distributed with qtiplot is the default and putting this into a string with an @ separator was the
-  // easiest way to construct it as it doesn't have a regular pattern so a loop wouldn't work.
-  std::string colorstring =
-    "0 172 252@0 170 252@0 168 252@0 164 252@0 160 252@0 156 252@0 152 252@0 152 252@0 148 252@0 144 252@0 140 252@0 136 252"
-    "@0 132 252@0 132 252@0 128 252@0 124 252@0 120 252@0 116 252@0 112 252@0 112 252@0 108 252@0 104 252@0 100 252@0  96 252"
-    "@0  92 252@0  92 252@0  88 252@0  84 252@0  80 252@0  76 252@0  72 252@0  68 252@0  64 252@0  60 252@0  56 252@0  52 252"
-    "@0  48 252@0  44 252@0  40 252@0  36 252@0  32 252@0  28 252@0  24 252@0  20 252@0  16 252@0  12 252@0   8 252@0   4 252"
-    "@0   4 252@4   4 248@4   4 248@8   4 244@8   8 240@12   8 240@12   8 236@16   8 232@16  12 232@20  12 228@20  12 224"
-    "@24  12 224@24  16 220@28  16 216@28  16 216@32  16 212@32  20 212@36  20 208@36  20 204@40  20 204@40  24 200@44  24 196"
-    "@44  24 196@48  24 192@48  24 188@52  28 188@52  28 184@56  28 180@56  28 180@60  32 176@60  32 172@64  32 172@64  32 168"
-    "@68  36 168@68  36 164@72  36 160@72  36 160@76  40 156@76  40 152@80  40 152@80  40 148@84  44 144@84  44 144@88  44 140"
-    "@88  44 136@92  48 136@92  48 132@96  48 128@100  48 128@100  48 124@104  52 124@104  52 120@108  52 116@108  52 116"
-    "@112  56 112@112  56 108@116  56 108@116  56 104@120  60 100@120  60 100@124  60  96@124  60  92@128  64  92@128  64  88"
-    "@132  64  88@132  64  84@136  68  80@136  68  80@140  68  76@140  68  72@144  72  72@144  72  68@148  72  64@148  72  64"
-    "@152  72  60@152  76  56@156  76  56@156  76  52@160  76  48@160  80  48@164  80  44@164  80  44@168  80  40@168  84  36"
-    "@172  84  36@172  84  32@176  84  28@176  88  28@180  88  24@180  88  20@184  88  20@184  92  16@188  92  12@188  92  12"
-    "@192  92   8@196  96   4@196  96   4@196 100   4@196 100   4@196 104   4@200 108   4@200 108   4@200 112   4@200 112   4"
-    "@200 116   4@204 120   4@204 120   4@204 124   4@204 124   4@208 128   4@208 132   4@208 132   4@208 136   4@208 136   4"
-    "@212 140   4@212 144   4@212 144   4@212 148   4@216 152   4@216 152   4@216 156   4@216 156   4@216 160   4@220 164   4"
-    "@220 164   4@220 168   4@220 168   4@224 172   4@224 176   4@224 176   4@224 180   4@224 180   4@228 184   4@228 188   4"
-    "@228 188   4@228 192   4@228 192   4@232 196   4@232 200   4@232 200   4@232 204   4@236 208   4@236 208   4@236 212   4"
-    "@236 212   4@236 216   4@240 220   4@240 220   4@240 224   4@240 224   4@244 228   4@244 232   4@244 232   4@244 236   4"
-    "@244 236   4@248 240   4@248 244   4@248 244   4@248 248   4@252 252   0@252 252 104@252 252 104@252 252 108@252 252 112"
-    "@252 252 116@252 252 120@252 252 120@252 252 124@252 252 128@252 252 132@252 252 136@252 252 136@252 252 140@252 252 144"
-    "@252 252 148@252 252 152@252 252 152@252 252 156@252 252 160@252 252 164@252 252 168@252 252 168@252 252 172@252 252 176"
-    "@252 252 180@252 252 184@252 252 184@252 252 188@252 252 192@252 252 196@252 252 200@252 252 200@252 252 204@252 252 208"
-    "@252 252 212@252 252 216@252 252 216@252 252 220@252 252 224@252 252 228@252 252 232@252 252 232@252 252 236@252 252 240"
-    "@252 252 244@252 252 248@252 252 252@255 255 255@";
 
-  color_table.clear();
-  std::stringstream colorstream(colorstring);
-  float red(0.0f), green(0.0f), blue(0.0f);
-  std::string line;
-  while ( std::getline(colorstream, line, '@') )
+void ColorMaps::getColorMap( ColorScale          name, 
+                             int                 n_colors,
+                             std::vector<QRgb> & color_table )
+{
+  if ( name == HEAT )
   {
-    std::stringstream reader(line);
-    reader >> red >> green >> blue;
-    color_table.push_back(qRgb((unsigned char)red, (unsigned char)green, (unsigned char)blue));
+    double base_red[]    = { 40, 127, 230, 255, 255 };
+    double base_green[]  = { 20,   0, 127, 180, 255 };
+    double base_blue[]   = { 20,   0,   0,  77, 255 };
+    int    n_base_colors = 5;
+    InterpolateColorScale( base_red, base_green, base_blue, 
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == GRAY )
+  {
+    double base_red[]   = { 30 , 255 };
+    double base_green[] = { 30 , 255 };
+    double base_blue[]  = { 30 , 255 };
+    int    n_base_colors = 2;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == NEGATIVE_GRAY )
+  {
+    double base_red[]   = { 255, 30 };
+    double base_green[] = { 255, 30 };
+    double base_blue[]  = { 255, 30 };
+    int    n_base_colors = 2;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == GREEN_YELLOW )
+  {
+    double base_red[]   = { 40, 255 };
+    double base_green[] = { 80, 255 };
+    double base_blue[]  = {  0,   0 };
+    int    n_base_colors = 2;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == RAINBOW )
+  {
+    double base_red[]   = {  0,   0,   0, 153, 255, 255, 255 };
+    double base_green[] = {  0,   0, 255, 255, 255, 153,   0 };
+    double base_blue[]  = { 77, 204, 255,  77,   0,   0,   0 };
+    int    n_base_colors = 7;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == OPTIMAL )
+  {
+    double base_red[]   = { 30, 200, 230,  30, 255 };
+    double base_green[] = { 30,  30, 230,  30, 255 };
+    double base_blue[]  = { 30,  30,  30, 255, 255 };
+    int    n_base_colors = 5;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == MULTI )
+  {
+    double base_red[]   = { 30,  30,  30, 230, 245, 255 };
+    double base_green[] = { 30,  30, 200,  30, 245, 255 };
+    double base_blue[]  = { 30, 200,  30,  30,  30, 255 };
+    int    n_base_colors = 6;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
+  }
+  else if ( name == SPECTRUM )
+  {
+    double base_red[]   = { 100, 235,   0, 130 };
+    double base_green[] = {   0, 255, 235,   0 };
+    double base_blue[]  = {   0,   0, 255, 130 };
+    int    n_base_colors = 4;
+    InterpolateColorScale( base_red, base_green, base_blue,
+                           n_base_colors, n_colors, color_table );
   }
 }
+
+
+  /** 
+   *  Build a color table by interpolating between a base set of colors.
+   *  The "base" color arrays must all be of the same length ( the length
+   *  being the number of base colors given.  The base color values must
+   *  be between 0 and 255.  The arrays of base colors must be of length
+   *  two or more.
+   *  The calling routine must provide red, green and blue arrays, each 
+   *  of the same length (n_colors) to hold the color table being 
+   *  constructed.  
+   *
+   *  @param base_red       Red components of the base colors to interpolate.
+   *  @param base_green     Green components of the base colors to interpolate.
+   *  @param base_blue      Blue components of the base colors to interpolate.
+   *  @param n_base_colors  The number of key colors that will be interpolated
+   *                        form the color table. 
+   *  @param n_colors       The number of colors to be created in the output
+   *                        color table.
+   *  @param color_table    Vector containing n_colors qRgb colors, 
+   *                        interpolated from the specified base colors. 
+   */
+
+void ColorMaps::InterpolateColorScale( double base_red[],
+                                       double base_green[],
+                                       double base_blue[],
+                                       int    n_base_colors,
+                                       int    n_colors,
+                                       std::vector<QRgb> & color_table )
+{
+  color_table.clear();
+  color_table.resize( n_colors );
+                                      // first output color is first base color
+  color_table[0] = qRgb( (unsigned char)base_red[0], 
+                         (unsigned char)base_green[0], 
+                         (unsigned char)base_blue[0]  );
+
+                                      // last output color is last base color
+  int last_out = n_colors - 1;         
+  int last_in  = n_base_colors - 1;
+  color_table[last_out] = qRgb( (unsigned char)base_red[last_in],       
+                                (unsigned char)base_green[last_in],      
+                                (unsigned char)base_blue[last_in]  );
+
+                                       // interpolate remaining output colors
+  for ( int i = 1; i < last_out; i++ )
+  {
+                                      // fraction of way along output indices
+    double t_out = (double)i / (double)last_out;
+
+    double float_index = t_out * last_in; // corresponding "floating point"
+                                          // index in array of input colors
+    int base_index = (int)float_index;
+
+    double t = float_index - (double)base_index;
+
+    color_table[i] = qRgb(
+                     (unsigned char) ( (1.0-t) * base_red[base_index]+
+                                          t    * base_red[base_index + 1] ),
+                     (unsigned char) ( (1.0-t) * base_green[base_index]+
+                                          t    * base_green[base_index + 1] ),
+                     (unsigned char) ( (1.0-t) * base_blue[base_index]+
+                                          t    * base_blue[base_index + 1] ) );
+  }
+}
+
 
 
 } // namespace MantidQt 

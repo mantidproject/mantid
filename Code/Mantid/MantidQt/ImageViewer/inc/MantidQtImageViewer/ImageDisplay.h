@@ -64,6 +64,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 
      /// Rebuild image from data source, due to resize or scroll bar
      void UpdateImage();
+
+     void SetColorScale( std::vector<QRgb> & new_color_table );
    
      void SetPointedAtPoint( QPoint point );
 

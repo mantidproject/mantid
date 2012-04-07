@@ -25,7 +25,9 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
 {
-  ColorMaps::getDefaultMap( color_table );
+  ColorMaps::getColorMap( ColorMaps::ColorScale::HEAT,
+                          256,
+                          color_table );
 
   this->image_plot     = image_plot;
   this->slider_handler = slider_handler;
@@ -161,6 +163,17 @@ void ImageDisplay::UpdateImage()
   image_plot->replot();
 
 //  std::cout << "End of ImageDisplay::UpdateImage......." << std::endl;
+}
+
+
+void ImageDisplay::SetColorScale( std::vector<QRgb> & new_color_table )
+{
+  color_table.resize( new_color_table.size() );
+  for ( size_t i = 0; i < new_color_table.size(); i++ )
+  {
+    color_table[i] = new_color_table[i];
+  }
+  UpdateImage();
 }
 
 

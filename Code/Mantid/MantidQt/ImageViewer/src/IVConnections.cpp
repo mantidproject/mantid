@@ -1,8 +1,10 @@
 
 #include <iostream>
 #include <qwt_plot_canvas.h>
+#include <QActionGroup>
 
 #include "MantidQtImageViewer/IVConnections.h"
+#include "MantidQtImageViewer/ColorMaps.h"
 
 namespace MantidQt
 {
@@ -116,6 +118,51 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   QObject::connect(iv_ui->action_Vscroll, SIGNAL(changed()),
                    this, SLOT(toggle_Vscroll()) );
 
+  iv_ui->actionHeat->setCheckable(true);
+  iv_ui->actionHeat->setChecked(true);
+  iv_ui->actionGray->setCheckable(true);
+  iv_ui->actionNegative_Gray->setCheckable(true);
+  iv_ui->actionGreen_Yellow->setCheckable(true);
+  iv_ui->actionRainbow->setCheckable(true);
+  iv_ui->actionOptimal->setCheckable(true);
+  iv_ui->actionMulti->setCheckable(true);
+  iv_ui->actionSpectrum->setCheckable(true);
+                                                     // color scale selections 
+  QActionGroup* color_group = new QActionGroup(this);
+  color_group->addAction(iv_ui->actionHeat);
+  color_group->addAction(iv_ui->actionGray);
+  color_group->addAction(iv_ui->actionNegative_Gray);
+  color_group->addAction(iv_ui->actionGreen_Yellow);
+  color_group->addAction(iv_ui->actionRainbow);
+  color_group->addAction(iv_ui->actionOptimal);
+  color_group->addAction(iv_ui->actionMulti);
+  color_group->addAction(iv_ui->actionSpectrum);
+
+  QObject::connect(iv_ui->actionHeat, SIGNAL(triggered()),
+                   this, SLOT(heat_color_scale()) );
+
+  QObject::connect(iv_ui->actionGray, SIGNAL(triggered()),
+                   this, SLOT(gray_color_scale()) );
+
+  QObject::connect(iv_ui->actionNegative_Gray, SIGNAL(triggered()),
+                   this, SLOT(negative_gray_color_scale()) );
+
+  QObject::connect(iv_ui->actionGreen_Yellow, SIGNAL(triggered()),
+                   this, SLOT(green_yellow_color_scale()) );
+
+  QObject::connect(iv_ui->actionRainbow, SIGNAL(triggered()),
+                   this, SLOT(rainbow_color_scale()) );
+
+  QObject::connect(iv_ui->actionOptimal, SIGNAL(triggered()),
+                   this, SLOT(optimal_color_scale()) );
+
+  QObject::connect(iv_ui->actionMulti, SIGNAL(triggered()),
+                   this, SLOT(multi_color_scale()) );
+
+  QObject::connect(iv_ui->actionSpectrum, SIGNAL(triggered()),
+                   this, SLOT(spectrum_color_scale()) );
+
+
   h_graph_picker = new TrackingPicker( iv_ui->h_graphPlot->canvas() );
   h_graph_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
   h_graph_picker->setTrackerMode(QwtPicker::ActiveOnly);
@@ -158,6 +205,8 @@ void IVConnections::toggle_Hscroll()
   iv_ui->imageHorizontalScrollBar->setVisible( is_on );
   iv_ui->imageHorizontalScrollBar->setEnabled( is_on );
   image_display->UpdateImage();
+
+  std::cout << iv_ui->action_Hscroll->iconText().toStdString() << std::endl;
 }
 
 
@@ -228,6 +277,63 @@ void IVConnections::v_graphPickerMoved()
     int index = selected_points.size() - 1;
     v_graph_display->SetPointedAtPoint( selected_points[index] );
   }
+}
+
+
+void IVConnections::heat_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::HEAT, 256, color_table );
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::gray_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::GRAY, 256, color_table );
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::negative_gray_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::NEGATIVE_GRAY,256,color_table);
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::green_yellow_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::GREEN_YELLOW, 256,color_table);
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::rainbow_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::RAINBOW, 256, color_table );
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::optimal_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::OPTIMAL, 256, color_table );
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::multi_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::MULTI, 256, color_table );
+  image_display->SetColorScale( color_table );
+}
+
+void IVConnections::spectrum_color_scale()
+{
+  std::vector<QRgb> color_table;
+  ColorMaps::getColorMap( ColorMaps::ColorScale::SPECTRUM, 256, color_table );
+  image_display->SetColorScale( color_table );
 }
 
 

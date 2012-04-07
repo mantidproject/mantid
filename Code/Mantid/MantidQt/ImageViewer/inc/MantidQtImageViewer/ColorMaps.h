@@ -44,7 +44,34 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ColorMaps
 {
 
 public:
+
+  enum ColorScale
+       {
+         HEAT,
+         GRAY,
+         NEGATIVE_GRAY,
+         GREEN_YELLOW,
+         RAINBOW,
+         OPTIMAL,
+         MULTI,
+         SPECTRUM
+       };
+
   static void getDefaultMap( std::vector<QRgb> & color_table );
+
+  static void getColorMap( ColorScale          name, 
+                           int                 n_colors,
+                           std::vector<QRgb> & color_table );
+
+  private:
+
+    /// Fill out a color table by interpolating the given base RGB components
+    static void InterpolateColorScale( double              base_red[],
+                                       double              base_green[], 
+                                       double              base_blue[], 
+                                       int                 n_base_colors,
+                                       int                 n_colors,
+                                       std::vector<QRgb> & color_table );
 
 };
 

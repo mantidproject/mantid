@@ -72,6 +72,14 @@ public slots:
   void imagePickerMoved();
   void h_graphPickerMoved();
   void v_graphPickerMoved();
+  void heat_color_scale();
+  void gray_color_scale();
+  void negative_gray_color_scale();
+  void green_yellow_color_scale();
+  void rainbow_color_scale();
+  void optimal_color_scale();
+  void multi_color_scale();
+  void spectrum_color_scale();
 
 private:
 
