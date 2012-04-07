@@ -162,6 +162,7 @@ bool PythonScripting::start()
     Py_Initialize();
     PyEval_InitThreads();
     m_mainThreadState = PyThreadState_Get();
+    PyThreadState_Swap(m_mainThreadState);
 
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *pymodule = PyImport_AddModule("__main__");
@@ -244,9 +245,7 @@ bool PythonScripting::start()
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     d_initialized = false;
   }
-  // release the lock
   PyEval_ReleaseLock();
-
   return d_initialized;
 }
 
@@ -255,9 +254,7 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
-  // release the lock
-  PyEval_AcquireLock();
-  PyThreadState_Swap(m_mainThreadState);
+  GlobalInterpreterLock gil;
   Py_XDECREF(m_math);
   Py_Finalize();
 }

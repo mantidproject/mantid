@@ -115,6 +115,7 @@ PythonScript::~PythonScript()
 bool PythonScript::compilesToCompleteStatement(const QString & code) const
 {
   bool result(false);
+  GlobalInterpreterLock gil;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
   if( PyObject *exception = PyErr_Occurred() )
   {
@@ -166,6 +167,7 @@ bool PythonScript::compile(const QString & code)
  */
 QVariant PythonScript::evaluate(const QString & code)
 {
+  GlobalInterpreterLock gil;
   PyObject *compiledCode = this->compileToByteCode(code, true);
   if(!compiledCode)
   {
@@ -464,12 +466,19 @@ bool PythonScript::doExecution(const QString & code)
 {
   emit started("Script execution started.");
   bool success(false);
-  QSharedPointer<PythonThreadState> pythonThreadState =  pythonEnv()->createPythonThread();
+  GlobalInterpreterLock gil;
   beginStdoutRedirect();
-  PyObject * result = PyRun_String(code.toAscii(), Py_file_input, localDict, localDict);
+  PyObject *codeObject = Py_CompileString(code.toAscii(), nameAsCStr(), Py_file_input);
+  PyObject *result(NULL);
+  if(codeObject)
+  {
+    result = PyEval_EvalCode((PyCodeObject*)codeObject, localDict, localDict);
+    Py_DECREF(codeObject);
+  }
   endStdoutRedirect();
   if(result)
   {
+    Py_DECREF(result);
     emit finished("Script execution finished.");
     success = true;
   }
@@ -590,6 +599,7 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
  */
 QStringList PythonScript::createAutoCompleteList() const
 {
+  GlobalInterpreterLock gil;
   PyObject *main_module = PyImport_AddModule("__main__");
   PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
   PyObject *keywords(NULL);
