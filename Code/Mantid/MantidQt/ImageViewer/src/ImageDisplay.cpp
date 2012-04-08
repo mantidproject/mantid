@@ -25,7 +25,7 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
 {
-  ColorMaps::getColorMap( ColorMaps::ColorScale::HEAT,
+  ColorMaps::getColorMap( ColorMaps::HEAT,
                           256,
                           color_table );
 

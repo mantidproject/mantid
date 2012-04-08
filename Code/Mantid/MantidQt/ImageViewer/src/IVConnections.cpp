@@ -283,56 +283,56 @@ void IVConnections::v_graphPickerMoved()
 void IVConnections::heat_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::HEAT, 256, color_table );
+  ColorMaps::getColorMap( ColorMaps::HEAT, 256, color_table );
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::gray_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::GRAY, 256, color_table );
+  ColorMaps::getColorMap( ColorMaps::GRAY, 256, color_table );
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::negative_gray_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::NEGATIVE_GRAY,256,color_table);
+  ColorMaps::getColorMap( ColorMaps::NEGATIVE_GRAY,256,color_table);
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::green_yellow_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::GREEN_YELLOW, 256,color_table);
+  ColorMaps::getColorMap( ColorMaps::GREEN_YELLOW, 256,color_table);
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::rainbow_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::RAINBOW, 256, color_table );
+  ColorMaps::getColorMap( ColorMaps::RAINBOW, 256, color_table );
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::optimal_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::OPTIMAL, 256, color_table );
+  ColorMaps::getColorMap( ColorMaps::OPTIMAL, 256, color_table );
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::multi_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::MULTI, 256, color_table );
+  ColorMaps::getColorMap( ColorMaps::MULTI, 256, color_table );
   image_display->SetColorScale( color_table );
 }
 
 void IVConnections::spectrum_color_scale()
 {
   std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::ColorScale::SPECTRUM, 256, color_table );
+  ColorMaps::getColorMap( ColorMaps::SPECTRUM, 256, color_table );
   image_display->SetColorScale( color_table );
 }
 
