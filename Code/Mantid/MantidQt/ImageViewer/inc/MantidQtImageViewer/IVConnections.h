@@ -3,6 +3,7 @@
 
 #include <QtCore/QtCore>
 #include <QtGui/QWidget>
+#include <QActionGroup>
 
 #include "ui_ImageView.h"
 #include "MantidQtImageViewer/TrackingPicker.h"
@@ -90,6 +91,7 @@ private:
   TrackingPicker*  image_picker;
   TrackingPicker*  h_graph_picker;
   TrackingPicker*  v_graph_picker;
+  QActionGroup*    color_group;
 
 };
 

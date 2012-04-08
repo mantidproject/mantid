@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include <qwt_plot_canvas.h>
-#include <QActionGroup>
 
 #include "MantidQtImageViewer/IVConnections.h"
 #include "MantidQtImageViewer/ColorMaps.h"
@@ -128,7 +127,7 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->actionMulti->setCheckable(true);
   iv_ui->actionSpectrum->setCheckable(true);
                                                      // color scale selections 
-  QActionGroup* color_group = new QActionGroup(this);
+  color_group = new QActionGroup(this);
   color_group->addAction(iv_ui->actionHeat);
   color_group->addAction(iv_ui->actionGray);
   color_group->addAction(iv_ui->actionNegative_Gray);
@@ -190,6 +189,7 @@ IVConnections::~IVConnections()
   delete image_picker;
   delete h_graph_picker;
   delete v_graph_picker;
+  delete color_group;
 }
 
 
