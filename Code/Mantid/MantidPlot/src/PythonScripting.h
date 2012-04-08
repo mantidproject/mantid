@@ -61,8 +61,6 @@ public:
 
   /// Create a new script object that can execute code within this enviroment
   virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const;
-  /// Creates a new PythonThreadState object
-  QSharedPointer<PythonThreadState> createPythonThread() const;
 
   /// Create a new code lexer for Python
   QsciLexer * createCodeLexer() const;

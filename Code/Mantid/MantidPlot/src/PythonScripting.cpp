@@ -108,17 +108,6 @@ Script *PythonScripting::newScript(const QString &name, QObject * context,
   return new PythonScript(const_cast<PythonScripting*>(this), name, interact, context);
 }
 
-/**
- * Returns a pointer to a new PythonThreadState object that creates
- * a new thread context on construction. Note that this also locks the
- * GIL
- * @return
- */
-QSharedPointer<PythonThreadState> PythonScripting::createPythonThread() const
-{
-  return QSharedPointer<PythonThreadState>(new PythonThreadState(m_mainThreadState));
-}
-
 bool PythonScripting::isRunning() const
 {
   return (m_is_running );
@@ -160,9 +149,16 @@ bool PythonScripting::start()
   {
     if( Py_IsInitialized() ) return true;
     Py_Initialize();
-    PyEval_InitThreads();
-    m_mainThreadState = PyThreadState_Get();
-    PyThreadState_Swap(m_mainThreadState);
+    PyEval_InitThreads(); // Acquires the GIL as well
+    // Release the lock & reset the current thread state to NULL
+    // This is necessary to ensure that PyGILState_Ensure/Release can
+    // be used correctly from now on. If not then the current thread-state
+    // blocks the first call to PyGILState_Ensure and a dead-lock ensues
+    // (doesn't seem to happen on Linux though)
+    m_mainThreadState = PyEval_SaveThread(); 
+
+    // Acquire the GIL in an OO way...
+    GlobalInterpreterLock gil;
 
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *pymodule = PyImport_AddModule("__main__");
@@ -245,7 +241,6 @@ bool PythonScripting::start()
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     d_initialized = false;
   }
-  PyEval_ReleaseLock();
   return d_initialized;
 }
 
@@ -254,7 +249,7 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
-  GlobalInterpreterLock gil;
+  PyEval_RestoreThread(m_mainThreadState);
   Py_XDECREF(m_math);
   Py_Finalize();
 }
