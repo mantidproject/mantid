@@ -35,6 +35,7 @@ Please contact Michal Chodkiewicz (michal.chodkiewicz@gmail.com); Vickie Lynch (
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -121,10 +122,33 @@ namespace MDAlgorithms
     uint32_t isLocal = 1;
     file->makeGroup("CoordinateSystem", "NXgroup", true);
     file->putAttr("isLocal", isLocal);
+
+    if (ws->getNumExperimentInfo() > 0)
+    {
+      ExperimentInfo_const_sptr ei = ws->getExperimentInfo(0);
+      if (ei)
+      {
+        if (ei->sample().hasOrientedLattice())
+        {
+          std::vector<double> unitCell;
+          const OrientedLattice & latt = ei->sample().getOrientedLattice();
+          unitCell.push_back(latt.a());
+          unitCell.push_back(latt.b());
+          unitCell.push_back(latt.c());
+          unitCell.push_back(latt.alpha());
+          unitCell.push_back(latt.beta());
+          unitCell.push_back(latt.gamma());
+
+          // Now write out the 6D vector
+          std::vector<int> unit_cell_size(1, 6);
+          file->writeData("unit_cell", unitCell, unit_cell_size);
+        }
+      }
+    }
+
     file->closeGroup();
 
     uint64_t numPoints = ws->getNPoints();
-    signal_t * signal = ws->getSignalArray();
 
     file->makeGroup("Data", "NXgroup", true);
     file->makeGroup("Data_0", "NXgroup", true);
@@ -157,9 +181,18 @@ namespace MDAlgorithms
     file->writeData("size", size_field);
 
     // Copy data into a vector
+    signal_t * signal = ws->getSignalArray();
     std::vector<double> data;
     data.insert(data.begin(), signal, signal+numPoints);
     file->writeData("Data", data, size);
+
+    // Copy errors (not squared) into a vector called sigma
+    signal_t * errorSquared = ws->getErrorSquaredArray();
+    std::vector<double> sigma;
+    sigma.reserve(numPoints);
+    for (size_t i=0; i<numPoints; i++)
+      sigma.push_back( sqrt(errorSquared[i]) );
+    file->writeData("sigma", sigma, size);
 
     // Close Data_0 group
     file->closeGroup();
