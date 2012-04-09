@@ -413,7 +413,9 @@ namespace Crystal
 
             for (long ind = start; ind <= stop; ind += step)
             {
-              char bankName[ bankPrefix.length() + 4 ];
+              const int NN = bankPrefix.length() + 4 ;
+              char bankName[NN ];
+
               sprintf(bankName, "%s%d", bankPrefix.c_str(), (int)ind);
               string postName = string(bankName).substr(bankPrefix.length());
 
