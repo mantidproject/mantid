@@ -25,7 +25,7 @@ FindUBUsingLatticeParameters(PeaksWorkspace=ws+'_peaksLattice',a='10.3522',b='6.
 IndexPeaks(PeaksWorkspace=ws+'_peaksLattice', Tolerance='0.12')
 # Integrate peaks in Q space using spheres
 IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
-	BackgroundRadius='0.18',BackgroundStartRadius='0.15',
+	BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
 	PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
 # Save for SHELX
 SaveHKL(InputWorkspace=ws+'_peaksLattice', Filename=ws+'.hkl')
@@ -44,7 +44,7 @@ FindUBUsingFFT(PeaksWorkspace=ws+'_peaksFFT',MinD=3.,MaxD=14.)
 IndexPeaks(PeaksWorkspace=ws+'_peaksFFT', Tolerance='0.12')
 # Integrate peaks in Q space using spheres
 IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
-	BackgroundRadius='0.18',BackgroundStartRadius='0.15',
+	BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
 	PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
 # Save for SHELX
 SaveHKL(InputWorkspace=ws+'_peaksFFT', Filename=ws+'FFT.hkl')
@@ -57,22 +57,22 @@ CopySample(InputWorkspace=ws+'_peaksLattice',OutputWorkspace=ws,
 ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_HKL',
 		OutputDimensions='HKL',LorentzCorrection='0', SplitInto='2',SplitThreshold='150')
 # Bin to a regular grid
-BinMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 0, 800',AlignedDim1='K, -3, 7, 50',
-      AlignedDim2='L, -10, 0,  800',OutputWorkspace=ws+'_binned')
+BinMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 20, 800',AlignedDim1='K, -5, 5, 50',
+      AlignedDim2='L, -10, 10,  800',OutputWorkspace=ws+'_binned')
 # Show in slice Viewer		
-sv = plotSlice(ws+'_binned', xydim=('H','L'), slicepoint=[0, -2, 0], colorscalelog=True)
+sv = plotSlice(ws+'_binned', xydim=('H','L'), slicepoint=[0, +0, 0], colorscalelog=True)
 sv.setColorMapBackground(0,0,0)
 
 # Again, lower resolution
-BinMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 0, 200',AlignedDim1='K, -3, 7, 50',
-      AlignedDim2='L, -10, 00, 100',OutputWorkspace=ws+'_binned_lowres')
-sv = plotSlice(ws+'_binned_lowres', xydim=('H','L'), slicepoint=[0, -2, 0], colorscalelog=True)
+BinMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 20, 200',AlignedDim1='K, -5, 5, 50',
+      AlignedDim2='L, -10, 10, 100',OutputWorkspace=ws+'_binned_lowres')
+sv = plotSlice(ws+'_binned_lowres', xydim=('H','L'), slicepoint=[0, +0, 0], colorscalelog=True)
 sv.setColorMapBackground(0,0,0)
 
 # Dynamic binning
-SliceMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 0, 2',AlignedDim1='K, -2.2, -1.8, 1',
-      AlignedDim2='L, -10, 0, 2',OutputWorkspace=ws+'_slice')
-sv = plotSlice(ws+'_slice', xydim=('H','L'), slicepoint=[0, -2, 0], colorscalelog=True)
-sv.setColorMapBackground(0,0,0)
+#SliceMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 20, 2',AlignedDim1='K, -2, +2, 1',
+#     AlignedDim2='L, -10, 10, 2',OutputWorkspace=ws+'_slice')
+#sv = plotSlice(ws+'_slice', xydim=('H','L'), slicepoint=[0, +0, 0], colorscalelog=True)
+#sv.setColorMapBackground(0,0,0)
 
 

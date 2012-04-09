@@ -448,6 +448,7 @@ def importTableWorkspace(name, visible=False):
 #-----------------------------------------------------------------------------
 def plotSlice(source, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
+                    normalization=1,
                     limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
     
@@ -462,6 +463,7 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         colormax :: value of the maximum color in the scale. See SliceViewer::setColorScaleMax()
         colorscalelog :: value of the maximum color in the scale. See SliceViewer::setColorScaleLog()
         limits :: list with the (xleft, xright, ybottom, ytop) limits to the view to show. See SliceViewer::setXYLimits()
+        normalization :: 0=none; 1=volume (default); 2=# of events.
         
     Returns:
         a (list of) handle(s) to the SliceViewerWindow widgets that were open.
@@ -481,6 +483,7 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         window = __doSliceViewer(wsname, label=label,
            xydim=xydim, slicepoint=slicepoint, colormin=colormin,
            colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
+           normalization=normalization,
            **kwargs) 
         pxy = proxies.SliceViewerWindowProxy(window)
         out.append(pxy)
@@ -602,7 +605,7 @@ def __getWorkspaceNames(source):
 #-----------------------------------------------------------------------------
 def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
-                    limits=None):
+                    limits=None, normalization=1):
     """Open a single SliceViewerWindow for the workspace, and shows it
     
     Args:
@@ -637,7 +640,10 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                 val = float(slicepoint[d])
             except ValueError:
                 raise ValueError("Could not convert item %d of slicepoint parameter to float (got '%s'" % (d, slicepoint[d]))
-            sv.setSlicePoint(d, val)     
+            sv.setSlicePoint(d, val)  
+            
+    # Set the normalization before the color scale
+    sv.setNormalization(normalization);   
     
     # --- Color scale ---
     if (not colormin is None) and (not colormax is None):
@@ -645,7 +651,10 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     else:
         if (not colormin is None): sv.setColorScaleMin(colormin)
         if (not colormax is None): sv.setColorScaleMax(colormax)
-    sv.setColorScaleLog(colorscalelog)
+    try:
+        sv.setColorScaleLog(colorscalelog)
+    except:
+        print "Log color scale not possible."
     
     # --- XY limits ---
     if not limits is None:
