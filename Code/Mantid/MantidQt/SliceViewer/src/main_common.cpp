@@ -54,7 +54,7 @@ Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, 
         );
   }
   Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
-  ws_sptr->setTo(signal, signal);
+  ws_sptr->setTo(signal, signal, 1.0);
   return ws_sptr;
 }
 

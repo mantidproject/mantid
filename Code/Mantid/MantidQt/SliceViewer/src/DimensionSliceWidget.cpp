@@ -13,12 +13,10 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
     : QWidget(parent),
       m_dim(),
       m_dimIndex(0), m_shownDim(0),
-      m_slicePoint(0.0)
+      m_slicePoint(0.0),
+      m_showRebinControls(false)
 {
   ui.setupUi(this);
-
-  m_insideSetShownDim = false;
-  m_insideSpinBoxChanged = false;
 
   QObject::connect(ui.horizontalSlider, SIGNAL( valueChanged(double)),
                    this, SLOT(sliderMoved()));
@@ -28,6 +26,11 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
                    this, SLOT(btnXYChanged()));
   QObject::connect(ui.btnY, SIGNAL(toggled(bool)),
                    this, SLOT(btnXYChanged()));
+
+  // Hide the rebinning controls
+  ui.spinBins->setVisible(false);
+  ui.spinThickness->setVisible(false);
+  ui.lblRebinInfo->setVisible(false);
 }
 
 DimensionSliceWidget::~DimensionSliceWidget()
@@ -38,11 +41,8 @@ DimensionSliceWidget::~DimensionSliceWidget()
 /** Slot called when the slider moves */
 void DimensionSliceWidget::sliderMoved()
 {
-  // Don't update when called from the spin box
-  if (m_insideSpinBoxChanged) return;
-
   // Find the slice point
-  m_slicePoint =  ui.horizontalSlider->value();
+  m_slicePoint = ui.horizontalSlider->value();
 
   // This will, in turn, emit the changedSlicePoint() signal
   ui.doubleSpinBox->setValue(m_slicePoint);
@@ -52,26 +52,25 @@ void DimensionSliceWidget::sliderMoved()
 /** Slot called when the slider moves */
 void DimensionSliceWidget::spinBoxChanged()
 {
-  m_insideSpinBoxChanged = true;
   // This is the slice point
   m_slicePoint = ui.doubleSpinBox->value();
 
   // Set the slider to the matching point
+  ui.horizontalSlider->blockSignals(true);
   ui.horizontalSlider->setValue(m_slicePoint);
+  ui.horizontalSlider->blockSignals(false);
 
   // Emit that the user changed the slicing point
   emit changedSlicePoint(m_dimIndex, m_slicePoint);
-
-  m_insideSpinBoxChanged = false;
 }
 
 //-------------------------------------------------------------------------------------------------
 /** Called when the X button is clicked */
 void DimensionSliceWidget::btnXYChanged()
 {
-  if (m_insideSetShownDim)
-    return;
   int oldDim = m_shownDim;
+  ui.btnX->blockSignals(true);
+  ui.btnY->blockSignals(true);
   if (ui.btnX->isChecked() && ui.btnY->isChecked() )
   {
     // Toggle when both are checked
@@ -89,6 +88,9 @@ void DimensionSliceWidget::btnXYChanged()
 
   // Emit that the user changed the shown dimension
   emit changedShownDim(m_dimIndex, m_shownDim, oldDim);
+
+  ui.btnX->blockSignals(false);
+  ui.btnY->blockSignals(false);
 }
 
 
@@ -100,7 +102,6 @@ void DimensionSliceWidget::btnXYChanged()
  */
 void DimensionSliceWidget::setShownDim(int dim)
 {
-  m_insideSetShownDim = true;
   m_shownDim = dim;
   ui.btnX->blockSignals(true);
   ui.btnY->blockSignals(true);
@@ -137,7 +138,6 @@ void DimensionSliceWidget::setShownDim(int dim)
   }
 
   this->update();
-  m_insideSetShownDim = false;
 }
 
 
@@ -186,6 +186,48 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
   double min = m_dim->getMinimum();
   double max = m_dim->getMaximum(); //- m_dim->getBinWidth()/2.0;
   this->setMinMax(min,max);
+}
+
+
+
+//-------------------------------------------------------------------------------------------------
+/** Sets whether to display the rebinning controls */
+void DimensionSliceWidget::showRebinControls(bool show)
+{
+  m_showRebinControls=show;
+  //FIXME: refresh
+}
+
+/** @return whether the rebinning controls are shown */
+bool DimensionSliceWidget::showRebinControls() const
+{
+  return m_showRebinControls;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** @return the number of bins to rebin to */
+int DimensionSliceWidget::getNumBins() const
+{
+  return ui.spinBins->value();
+}
+
+/** Sets the number of bins to rebin to */
+void DimensionSliceWidget::setNumBins(int val)
+{
+  ui.spinBins->setValue(val);
+}
+
+//-------------------------------------------------------------------------------------------------
+/** @return the thickness to integrate when rebinning */
+double DimensionSliceWidget::getThickness() const
+{
+  return ui.spinThickness->value();
+}
+
+/** Sets the thickness to integrate when rebinning */
+void DimensionSliceWidget::setThickness(double val)
+{
+  ui.spinThickness->setValue(val);
 }
 
 }

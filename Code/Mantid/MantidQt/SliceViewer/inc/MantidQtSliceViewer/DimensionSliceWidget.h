@@ -43,9 +43,17 @@ public:
   void setShownDim(int dim);
   void setSlicePoint(double value);
 
+  void showRebinControls(bool show);
+  bool showRebinControls() const;
+
+  int getNumBins() const;
+  void setNumBins(int val);
+
+  double getThickness() const;
+  void setThickness(double val);
+
   double getSlicePoint() const
   { return m_slicePoint; }
-
 
   /// @return the shown dimension, 0=X, 1=Y, -1=None
   int getShownDim() const
@@ -78,8 +86,8 @@ private:
   /// If the dimensions is not shown, where is the slice point?
   double m_slicePoint;
 
-  bool m_insideSetShownDim;
-  bool m_insideSpinBoxChanged;
+  /// Show the controls for rebinning (thickness/number of bins)
+  bool m_showRebinControls;
 };
 
 } // namespace SliceViewer

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>488</width>
-    <height>37</height>
+    <width>648</width>
+    <height>39</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -141,7 +141,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QwtSlider" name="horizontalSlider" native="true"/>
+    <widget class="QwtSlider" name="horizontalSlider"/>
    </item>
    <item>
     <widget class="QDoubleSpinBox" name="doubleSpinBox">
@@ -160,6 +160,40 @@
     <widget class="QLabel" name="lblUnits">
      <property name="text">
       <string>Ang</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDoubleSpinBox" name="spinThickness">
+     <property name="toolTip">
+      <string>Thickness (above and below the plane) to integrate in this dimension</string>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>15.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSpinBox" name="spinBins">
+     <property name="toolTip">
+      <string>Number of bins to rebin to in this dimension</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblRebinInfo">
+     <property name="text">
+      <string>bins</string>
      </property>
     </widget>
    </item>
