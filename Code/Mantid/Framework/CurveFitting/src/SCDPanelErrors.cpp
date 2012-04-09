@@ -25,14 +25,15 @@ namespace Mantid
 {
   namespace CurveFitting
   {
-    // Include when setup for the Fit interface public API::ParamFunction,
+
     DECLARE_FUNCTION(SCDPanelErrors)
 
     // Assumes UB from optimize UB maps hkl to qxyz/2PI. So conversion factors to an from
     // UB ified q's are below.
 
-    const double UBq2Q(2 * M_PI);
-    const double Q2UBq = 1 / UBq2Q;
+    static const double UBq2Q(2 * M_PI);
+    static const double Q2UBq = 1 / UBq2Q;
+
     Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
 
 
@@ -513,9 +514,27 @@ namespace Mantid
         EndX = (int) nData - 1;
       }
 
+
       if (nData <= (size_t) 0)
         return;
 
+      double r = checkForNonsenseParameters();
+
+      if( r != 0 )
+      {
+         for( int i=0;i < (int)nData; i++ )
+             out[i]=100 + r;
+
+         g_log.debug() << "Parametersxx  for " << BankNames << ">=";
+          for( int i=0; i < (int)nParams(); i++)
+              g_log.debug() << getParameter(i) << ",";
+
+          g_log.debug() << endl;
+
+          return;
+        }
+
+      //cout<<"D"<<endl;
       boost::shared_ptr<DataObjects::PeaksWorkspace> pwks = getPeaks();
 
       Check(pwks, xValues, nData);
@@ -588,31 +607,41 @@ namespace Mantid
       }
 
       //----------------------------------Calculate out ----------------------------------
+      bool badParams=false;
+      Kernel::DblMatrix UB0;
+
       try
       {
 
         Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);
 
+        Geometry::OrientedLattice lat;
+
+        lat.setUB(UB);
+
+        const Kernel::DblMatrix U = lat.getU();
+
+        UB0 = U * B0;
       } catch (std::exception & s)
       {
-
-        g_log.error("Not enough points to find Optimized UB1 =" + std::string(s.what()));
-        throw std::runtime_error("Not enough good points to find Optimized UB");
+        badParams = true;
       } catch (char * s1)
       {
-        g_log.error("Not enough points to find Optimized UB2=" + std::string(s1));
-        throw std::runtime_error("Not enough good points to find Optimized UB");
+        badParams = true;
       } catch (...)
       {
-        g_log.error("Not enough points to find Optimized UB3");
-        throw std::runtime_error("Not enough good points to find Optimized UB");
+        badParams = true;
       }
 
-      Geometry::OrientedLattice lat;
-      lat.setUB(UB);
-      const Kernel::DblMatrix U = lat.getU();
+      if( badParams)
+      {
+        for(int i = StartX; i <= EndX; i++)
+           out[i]= 10000;
+        return;
+      }
 
-      Kernel::DblMatrix UB0 = U * B0;
+
+
 
       double chiSq = 0;// for debug log message
 
@@ -620,11 +649,10 @@ namespace Mantid
       {
         Kernel::V3D err = q_vectors[i] - UB0 * hkl_vectors[i] * UBq2Q;
 
-        out[3 * i] = err[0];
-        out[3 * i + 1] = err[1];
-        out[3 * i + 2] = err[2];
-        chiSq += out[3 * i] * out[3 * i] + out[3 * i + 1] * out[3 * i + 1] + out[3 * i + 2] * out[3 * i
-            + 2];
+        out[3 * i+StartX] = err[0];
+        out[3 * i + 1+StartX] = err[1];
+        out[3 * i + 2+StartX] = err[2];
+        chiSq += err[0]*err[0] + err[1]*err[1] + err[2]*err[2] ;
 
       }
 
@@ -650,26 +678,90 @@ namespace Mantid
 
 
 
-    Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> const& DerivQ, Matrix<double>const& Mhkl,
-        Matrix<double>const& MhklT, Matrix<double>const& InvhklThkl, Matrix<double>const& UB)const
+    Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> const& DerivQ,
+                                     Matrix<double> const& Mhkl, Matrix<double> const& MhklT,
+                                     Matrix<double> const& InvhklThkl, Matrix<double> const& UB) const
     {
-      Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * Q2UBq;
-      Geometry::OrientedLattice lat;
-      lat.setUB(Matrix<double>(UB) + dUB * .001);
+      try
+      {
+        Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * Q2UBq;
 
-      const Kernel::DblMatrix U2 = lat.getU();
-      Kernel::DblMatrix U2A(U2);
-      lat.setUB(Matrix<double>(UB) - dUB * .001);
-      const Kernel::DblMatrix U1 = lat.getU();
-      Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
-      Kernel::DblMatrix dUB0 = dU * B0;
+        Geometry::OrientedLattice lat;
+        lat.setUB(Matrix<double> (UB) + dUB * .001);
+        const Kernel::DblMatrix U2 = lat.getU();
 
-      Kernel::DblMatrix dQtheor = dUB0 * MhklT;
-      Kernel::DblMatrix Deriv = Matrix<double>(DerivQ) - dQtheor * UBq2Q;
-      return Deriv;
+        Kernel::DblMatrix U2A(U2);
+        lat.setUB(Matrix<double> (UB) - dUB * .001);
+        const Kernel::DblMatrix U1 = lat.getU();
+
+        Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
+        Kernel::DblMatrix dUB0 = dU * B0;
+
+        Kernel::DblMatrix dQtheor = dUB0 * MhklT;
+        Kernel::DblMatrix Deriv = Matrix<double> (DerivQ) - dQtheor * UBq2Q;
+
+        return Deriv;
+
+      } catch (...)
+      {
+
+        for (int i = 0; i < (int)nParams(); i++)
+          g_log.debug() << getParameter(i) << ",";
+
+        g_log.debug() << endl;
+
+        throw std::invalid_argument(" Invalid initial data ");
+      }
     }
 
+    double SCDPanelErrors::checkForNonsenseParameters()const
+    {
+      double L0= getParameter(0);
+      double T0 = getParameter(1);
+      double Dwdth = getParameter(2);
+      double Dhght = getParameter(3);
+      double x = getParameter(4);
+      double y = getParameter(5);
+      double z = getParameter(6);
+      double rx = getParameter(7);
+      double ry = getParameter(8);
+      double rz = getParameter(9);
 
+       double r =0;
+       if( L0 <1 )
+        r = 1-L0;
+
+      if( fabs(T0) > 20)
+        r += (T0-20)*2;
+
+      if( Dwdth < .5 || Dwdth > 2)
+        r += 3*fabs(1-Dwdth);
+
+      if( Dhght <.5 || Dhght >2)
+        r+=3*fabs(1-Dhght);
+
+      if( fabs(x) >.35 )
+        r+= fabs(x)*.2;
+
+      if( fabs(y) >.35 )
+        r+= fabs(y)*.2;
+
+      if( fabs(z) >.35)
+        r+= fabs(z)*.2;
+
+      if( fabs(rx) >15 )
+        r+= fabs(rx)*.02;
+
+      if( fabs(ry) >15 )
+        r+= fabs(ry)*.02;
+
+      if( fabs(rz) >15 )
+        r+= fabs(ry)*.02;
+
+      return 5*r;
+
+
+    }
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
@@ -682,6 +774,7 @@ namespace Mantid
         throw std::invalid_argument("Not all lattice parameters have been set");
       }
 
+
       int StartX = startX;
       int EndX = endX;
       if (StartX < 0 || EndX < 0)
@@ -690,10 +783,23 @@ namespace Mantid
         EndX = (int) nData - 1;
       }
 
+      double rr =checkForNonsenseParameters();
+
+      if( rr > 0 )
+      {
+        for( int i = 0; i< (int)nParams(); i++ )
+          for( int k = 0; k<(int)nData;  k++ )
+            out->set( k, i, 10 + rr );
+
+        return;
+      }
+
+
       peaks = getPeaks();
       Check(peaks, xValues, nData);
 
       Instrument_sptr instrNew = getNewInstrument(peaks->getPeak(0));
+
       boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
       vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
       vector<V3D> pos, xvec, yvec, hkl, qlab, qXtal;

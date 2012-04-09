@@ -8,9 +8,11 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
-using Mantid::Kernel::Quat;
-using Mantid::Geometry::IComponent;
+using namespace Mantid::Kernel;
+using namespace  Mantid::Geometry;
 
 namespace Mantid
 {
@@ -52,6 +54,7 @@ namespace Crystal
    */
   void Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz);
 
+
   /**
    * Given a string representation of a set of groups( [] separated list of bank nums separated by
    * commas or colons( for ranges) , this method will produce a vector of "groups"( vector of bank names).
@@ -71,12 +74,16 @@ namespace Crystal
                        std::vector<std::vector<std::string> > &Groups);
 
   /**
-   * Calculate the Matrix workspace associated with a Peaksworkspace for Composite functions.
-   * the elements of bounds can be used to calculate Xstart and X end
+   * Calculate the Workspace2D associated with a Peaksworkspace for Composite functions.
+   * the elements of parameter bounds can be used to calculate Xstart and Xend
+   *
    * @param pwks        The PeaksWorkspace
+   *
    * @param  bankNames  The list of bank names( from Peak.getBankName())
+   *
    * @param tolerance   The maximum distance the h value, k value, and l value of a Peak is from
    *                    an integer, for a peak to be considered Indexed.
+   *
    * @param  bounds     bounds[i] is the starting index for the xvalues from the resultant workspace.
    *                    This can be used to determine startX and endX.
    */
@@ -97,6 +104,10 @@ namespace Crystal
                       boost::shared_ptr<Geometry::ParameterMap>   pmap,
                       boost::shared_ptr<const Geometry::IComponent>  component);
 
+  //const std::string OnePanelPerGroup;//("OnePanelPerGroup");
+ // const std::string AllPanelsInOneGroup;//("AllPanelsInOneGroup");
+  //const std::string SpecifyGroups;//("SpecifyGroups");
+
   private:
     void exec ();
 
@@ -105,6 +116,80 @@ namespace Crystal
     void initDocs ();
 
     static Kernel::Logger & g_log;
+
+
+    /**
+     * Creates a new instrument when a calibration file( .xml or .detcal)
+     * is loaded
+     *
+     * @param instrument   The old instrument
+     * @param preprocessCommand  either "No PreProcessing",
+     *                                  "Apply a ISAW.DetCal File",or
+     *                                  "Apply a LoadParameter.xml type file"
+     * @param preprocessFilename  Filename is one of the preprocessCommand
+     *                            indicates use of  a file
+     * @param timeOffset  The timeoffset to use
+     * @param L0          The initial flight path
+     * @param AllBankNames  The names of all the banks that wiil be processed.
+     */
+    boost::shared_ptr<const Instrument> GetNewCalibInstrument(
+                              boost::shared_ptr<const Instrument>   instrument,
+                              std::string preprocessCommand,
+                              std::string preprocessFilename,
+                              double &timeOffset, double &L0,
+                              std::vector<std::string>  & AllBankNames);
+
+    /**
+     * Calculates the initial values for all the parameters.  This is needed if
+     * when preprocessing is done( load in a calibration file before starting)
+     *
+     * @param  bank_rect   a bank in the instrument
+     * @param instrument   The old instrument
+     * @param PreCalibinstrument  the precalibrated instrument
+     * @param detWidthScale0  The initial scaling on the panel width
+     * @param detHeightScale0  The initial scaling on the panel height
+     * @param Xoffset0         The initial X offset of the center of the panel
+     * @param Yoffset0         The initial Y offset of the center of the panel
+     * @param Zoffset0         The initial Z offset of the center of the panel
+     * @param Xrot0            The initial relative rotation about the  x-axis
+     *                                  around the center of the panel
+     * @param Yrot0            The initial relative rotation about the  y-axis
+     *                                  around the center of the panel
+     * @param Zrot0            The initial relative rotation about the  z-axis
+     *                                  around the center of the panel
+     *
+     */
+    void CalcInitParams(  RectangularDetector_const_sptr bank_rect,
+                            Instrument_const_sptr instrument,
+                            Instrument_const_sptr  PreCalibinstrument,
+                            double & detWidthScale0,double &detWidthHeight0,
+                            double &Xoffset0,double &Yoffset0,double &Zoffset0,
+                            double &Xrot0,double &Yrot0,double &Zrot0);
+
+    /**
+     *  Copies positional entries in pmapSv to pmap starting at bank_const
+     *  and parents.
+     *  @param  bank_const  the starting component for copying entries.
+     *  @param pmap         the Parameter Map to be updated
+     *  @param pmapSv       the original Parameter Map
+     *
+     */
+    void updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
+                  boost::shared_ptr<Geometry::ParameterMap> pmap,
+                  boost::shared_ptr<const Geometry::ParameterMap>pmapSv) const;
+
+
+    /**
+     *  Copies positional entries in pmapSv to pmap starting at bank_const
+     *  and parents.
+     *  @param  bank_const  the starting component for copying entries.
+     *  @param pmap         the Parameter Map to be updated
+     *  @param pmapSv       the original Parameter Map
+     *
+     */
+    void updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+         boost::shared_ptr<Geometry::ParameterMap> pmap,
+         boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const;
 
   };
 
