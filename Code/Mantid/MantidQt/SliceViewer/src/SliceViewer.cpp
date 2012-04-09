@@ -766,6 +766,7 @@ void SliceViewer::RebinMode_toggled(bool checked)
   {
     // Remove the overlay WS
     this->m_overlayWS.reset();
+    this->m_data->setOverlayWorkspace(m_overlayWS);
     this->updateDisplay();
   }
   else

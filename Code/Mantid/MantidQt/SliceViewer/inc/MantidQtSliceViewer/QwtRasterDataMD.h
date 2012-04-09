@@ -71,11 +71,9 @@ protected:
   /// Range of colors to plot
   QwtDoubleInterval m_range;
 
-  /// Edges of the overlay workspace, in the X
-  double m_overlayXMin;
-  double m_overlayXMax;
-  double m_overlayYMin;
-  double m_overlayYMax;
+  /// The extents of the overlay workspace
+  Mantid::Kernel::VMD m_overlayMin;
+  Mantid::Kernel::VMD m_overlayMax;
 
   /// Not a number
   double nan;
