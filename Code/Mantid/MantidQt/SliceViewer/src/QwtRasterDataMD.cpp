@@ -236,7 +236,16 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Manti
   delete [] m_slicePoint;
   m_slicePoint = new coord_t[slicePoint.size()];
   for (size_t d=0; d<m_nd; d++)
+  {
     m_slicePoint[d] = slicePoint[d];
+    // Don't show the overlay WS if it is outside of range in the slice points
+    if (m_overlayWS && d != m_dimX && d != m_dimY)
+    {
+      if (slicePoint[d] < m_overlayWS->getDimension(d)->getMinimum()
+          || slicePoint[d] >= m_overlayWS->getDimension(d)->getMaximum())
+        m_overlayWS.reset();
+    }
+  }
   // Cache the edges of the overlaid workspace
   if (m_overlayWS)
   {
