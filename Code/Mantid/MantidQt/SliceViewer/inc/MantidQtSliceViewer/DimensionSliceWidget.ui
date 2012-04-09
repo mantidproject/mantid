@@ -188,6 +188,12 @@
      <property name="toolTip">
       <string>Number of bins to rebin to in this dimension</string>
      </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>9999</number>
+     </property>
     </widget>
    </item>
    <item>

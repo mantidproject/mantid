@@ -51,6 +51,8 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
 
 
 using namespace Mantid;
@@ -400,6 +402,11 @@ void SliceViewer::updateDimensionSliceWidgets()
                        this, SLOT(changedShownDim(int,int,int)));
       QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
                        this, SLOT(updateDisplaySlot(int,double)));
+      // Slots for dynamic rebinning
+      QObject::connect(widget, SIGNAL(changedThickness(int,double)),
+                       this, SLOT(rebinParamsChanged()));
+      QObject::connect(widget, SIGNAL(changedNumBins(int,int)),
+                       this, SLOT(rebinParamsChanged()));
 
       // Save in this list
       m_dimWidgets.push_back(widget);
@@ -1717,6 +1724,73 @@ void SliceViewer::openFromXML(const QString & xml)
 
 }
 
+
+
+//------------------------------------------------------------------------------------
+/** This slot is called when the dynamic rebinning parameters are changed.
+ * It recalculates the dynamically rebinned workspace and plots it
+ */
+void SliceViewer::rebinParamsChanged()
+{
+  if (!m_ws) return;
+  IAlgorithm * alg = FrameworkManager::Instance().createAlgorithm("BinMD");
+  alg->setProperty("InputWorkspace", m_ws);
+  alg->setProperty("AxisAligned", false);
+
+  std::vector<double> OutputExtents;
+  std::vector<int> OutputBins;
+
+  for (size_t d=0; d < m_dimWidgets.size(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[d];
+    MDHistoDimension_sptr dim = m_dimensions[d];
+
+    // Build up the arguments to BinMD
+    double min=0;
+    double max=1;
+    int numBins=1;
+    if (widget->getShownDim() < 0)
+    {
+      // Slice point. So integrate with a thickness
+      min = widget->getSlicePoint()-widget->getThickness();
+      max = widget->getSlicePoint()+widget->getThickness();
+      // From min to max, with only 1 bin
+    }
+    else
+    {
+      // Shown dimension. Use the currently visible range.
+      QwtDoubleInterval limits;
+      if (widget->getShownDim() == 0)
+        limits = this->getXLimits();
+      else
+        limits = this->getYLimits();
+      min = limits.minValue();
+      max = limits.maxValue();
+      // And the user-entered number of bins
+      numBins = widget->getNumBins();
+    }
+
+    OutputExtents.push_back(min);
+    OutputExtents.push_back(max);
+    OutputBins.push_back(numBins);
+
+    // Set the BasisVector property...
+    VMD basis(m_ws->getNumDims());
+    basis[d] = 1.0;
+    std::string prop = dim->getName() +"," + dim->getUnits() + ","
+        + basis.toString(",");
+    alg->setPropertyValue("BasisVector" + Strings::toString(d), prop);
+  }
+
+  // Set all the other properties
+  alg->setProperty("OutputExtents", OutputExtents);
+  alg->setProperty("OutputBins", OutputBins);
+  alg->setPropertyValue("Translation", "");
+  alg->setProperty("NormalizeBasisVectors", true);
+  alg->setProperty("ForceOrthogonal", false);
+  alg->setPropertyValue("OutputWorkspace", m_ws->getName() + "_rebinned");
+  alg->execute();
+}
 
 
 } //namespace

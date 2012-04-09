@@ -14,7 +14,7 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
       m_dim(),
       m_dimIndex(0), m_shownDim(0),
       m_slicePoint(0.0),
-      m_showRebinControls(false)
+      m_showRebinControls(true)
 {
   ui.setupUi(this);
 
@@ -22,6 +22,10 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
                    this, SLOT(sliderMoved()));
   QObject::connect(ui.doubleSpinBox, SIGNAL( valueChanged(double)),
                    this, SLOT(spinBoxChanged()));
+  QObject::connect(ui.spinThickness, SIGNAL( valueChanged(double)),
+                   this, SLOT(spinThicknessChanged()));
+  QObject::connect(ui.spinBins, SIGNAL( valueChanged(int)),
+                   this, SLOT(spinBinsChanged()));
   QObject::connect(ui.btnX, SIGNAL(toggled(bool)),
                    this, SLOT(btnXYChanged()));
   QObject::connect(ui.btnY, SIGNAL(toggled(bool)),
@@ -137,6 +141,15 @@ void DimensionSliceWidget::setShownDim(int dim)
     }
   }
 
+  // Hide or show the rebinning controls
+  ui.spinBins->setVisible(m_showRebinControls && !slicing);
+  ui.spinThickness->setVisible(m_showRebinControls && slicing);
+  ui.lblRebinInfo->setVisible(m_showRebinControls);
+  if (slicing)
+    ui.lblRebinInfo->setText("thick");
+  else
+    ui.lblRebinInfo->setText("bins");
+
   this->update();
 }
 
@@ -228,6 +241,20 @@ double DimensionSliceWidget::getThickness() const
 void DimensionSliceWidget::setThickness(double val)
 {
   ui.spinThickness->setValue(val);
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Slot called when the thickness to rebin to is changed */
+void DimensionSliceWidget::spinThicknessChanged()
+{
+  emit changedThickness(m_dimIndex, this->getThickness());
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Slot called when the number of bins to rebin to is changed */
+void DimensionSliceWidget::spinBinsChanged()
+{
+  emit changedNumBins(m_dimIndex, this->getNumBins());
 }
 
 }

@@ -118,6 +118,8 @@ public slots:
   void LineMode_toggled(bool);
   void SnapToGrid_toggled(bool);
 
+  void rebinParamsChanged();
+
 
 private:
   void loadSettings();

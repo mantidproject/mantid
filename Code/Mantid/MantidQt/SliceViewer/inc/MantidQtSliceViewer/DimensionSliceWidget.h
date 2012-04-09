@@ -64,10 +64,14 @@ public slots:
   void sliderMoved();
   void btnXYChanged();
   void spinBoxChanged();
+  void spinThicknessChanged();
+  void spinBinsChanged();
 
 signals:
   void changedShownDim(int index, int dim, int oldDim);
   void changedSlicePoint(int index, double value);
+  void changedThickness(int index, double value);
+  void changedNumBins(int index, int numbins);
 
 public:
   /// Auto-gen UI class
