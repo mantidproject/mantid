@@ -97,7 +97,7 @@ set ( TEST_FILES
 	test/SaveIsawPeaksTest.h
 	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
-	test/SCDCalibratePanelsTest.h
+#	test/SCDCalibratePanelsTest.h
 	test/SetGoniometerTest.h
 	test/SetUBTest.h
 	test/SortHKLTest.h
