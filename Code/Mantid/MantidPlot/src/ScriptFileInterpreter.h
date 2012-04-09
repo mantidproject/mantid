@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QTextEdit>
 #include <QPoint>
+#include <QSplitter>
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -65,8 +66,8 @@ public slots:
   virtual void cut();
   /// Paste into the editor
   virtual void paste();
-  /// Find in editor
-  void findInScript();
+  /// Find/replace in editor
+  virtual void showFindReplaceDialog();
 
   /// Execute the whole script.
   virtual void executeAll(const Script::ExecutionMode mode);
@@ -88,13 +89,15 @@ private slots:
 
 private:
   Q_DISABLE_COPY(ScriptFileInterpreter);
+  void setupChildWidgets();
+
   void setupEditor(const ScriptingEnv & environ, const QString & identifier);
   void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
-
+  
   bool readFileIntoEditor(const QString & filename);
   void executeCode(const QString & code, const Script::ExecutionMode mode);
 
-
+  QSplitter *m_splitter;
   ScriptEditor *m_editor;
   ScriptOutputDisplay *m_messages;
   QSharedPointer<Script> m_runner;
@@ -136,7 +139,7 @@ private slots:
   /// Paste into the editor
   void paste() {}
   /// Find in editor
-  void findInScript() {};
+  void showFindReplaceDialog() {};
 
   /// Execute the whole script.
   virtual void executeAll(const Script::ExecutionMode) {}

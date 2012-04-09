@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------
 #include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtMantidWidgets/FindReplaceDialog.h"
 
 // Qt
 #include <QApplication>
@@ -137,7 +138,8 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
   QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-  m_completer(NULL),m_previousKey(0),  m_zoomLevel(0)
+  m_completer(NULL),m_previousKey(0),  m_zoomLevel(0),
+  m_findDialog(new FindReplaceDialog(this))
 {
   //Syntax highlighting and code completion
   setLexer(codelexer);
@@ -405,6 +407,14 @@ void ScriptEditor::print()
   }
   QTextDocument document(text());
   document.print(&printer);
+}
+
+/**
+ * Raises the find replace dialog
+ */
+void ScriptEditor::showFindReplaceDialog()
+{
+  m_findDialog->show();
 }
 
 /**

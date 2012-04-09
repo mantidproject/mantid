@@ -1,5 +1,6 @@
 #include "CommandLineInterpreter.h"
 #include "ScriptingEnv.h"
+#include "MantidQtMantidWidgets/FindDialog.h"
 
 #include <QKeyEvent>
 #include <QMenu>
@@ -468,6 +469,14 @@ void CommandLineInterpreter::remapWindowEditingKeys()
 }
 
 /**
+ * Show find dialog
+ */
+void CommandLineInterpreter::showFindDialog()
+{
+  //m_findDialog->show();
+}
+
+/**
  * @return The index of the line that the cursor is currently sitting on
  */
 int CommandLineInterpreter::indexOfCursorLine() const
@@ -570,6 +579,11 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   {
     handled = true;
     cut();
+  }
+  else if(event->matches(QKeySequence::Find))
+  {
+    handled = true;
+    showFindDialog();
   }
   else if(key == Qt::Key_Return || key == Qt::Key_Enter)
   {

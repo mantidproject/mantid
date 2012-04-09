@@ -424,7 +424,8 @@ void ScriptingWindow::initEditMenuActions()
   m_paste->setShortcut(QKeySequence::Paste);
 
   m_find = new QAction(tr("&Find/Replace"), this);
-  connect(m_find, SIGNAL(triggered()), m_manager, SLOT(findInScript()));
+  connect(m_find, SIGNAL(triggered()), m_manager, 
+          SLOT(showFindReplaceDialog()));
   m_find->setShortcut(QKeySequence::Find);
 }
 

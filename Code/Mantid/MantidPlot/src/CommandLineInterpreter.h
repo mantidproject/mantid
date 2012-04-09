@@ -10,6 +10,8 @@
 //-----------------------------------------------------------------------------
 class Script;
 class ScriptingEnv;
+class FindDialog;
+
 class QKeyEvent;
 class QAction;
 
@@ -120,6 +122,10 @@ private:
   void initActions();
   /// Disable window editing keys
   void remapWindowEditingKeys();
+  /// Show find dialog
+  void showFindDialog();
+  /// Do nothing for find replace
+  void showFindReplaceDialog() {}
 
   /// Returns the index of line the cursor is currently on
   int indexOfCursorLine() const;
@@ -148,7 +154,7 @@ private:
   void handleDownKeyPress();
   /// Handle a return key press
   void handleReturnKeyPress();
-    /// Try to execute the code in the current buffer.
+  /// Try to execute the code in the current buffer.
   void tryExecute();
   /// Execute the given code
   void execute();
@@ -172,7 +178,7 @@ private:
 
   QString m_pastedText;
   QTextStream m_pasteQueue;
-
+  
   QAction *m_copy;
   QAction *m_cut;
   QAction *m_paste;

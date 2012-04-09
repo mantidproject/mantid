@@ -13,11 +13,14 @@
 //----------------------------------
 // Forward declarations
 //----------------------------------
+class FindReplaceDialog;
+
 class QAction;
 class QMenu;
 class QKeyEvent;
 class QMouseEvent;
 class QsciAPIs;
+
 
 /**
  * A small wrapper around a QStringList to manage a command history
@@ -138,7 +141,9 @@ public slots:
   void updateCompletionAPI(const QStringList & keywords);
   /// Print the text within the widget
   void print();
-  
+  /// Raise find replace dialog
+  virtual void showFindReplaceDialog();
+
   /// Override the zoomIn slot
   virtual void zoomIn();
   /// Override the zoomIn slot
@@ -183,7 +188,8 @@ private:
   int m_previousKey;
   /// How many times the zoom level is changed
   int m_zoomLevel;
- 
+  /// A pointer to the find replace dialog
+  FindReplaceDialog *m_findDialog;
 };
 
 

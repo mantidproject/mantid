@@ -15,17 +15,11 @@
  * @param parent :: The parent widget
  */
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
-  : QWidget(parent), m_editor(new ScriptEditor(this, NULL)),
+  : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical,this)),
+    m_editor(new ScriptEditor(this, NULL)),
     m_messages(new ScriptOutputDisplay), m_runner()
 {
-  setFocusProxy(m_editor);
-  m_editor->setFocus();
-
-  QVBoxLayout *mainLayout = new QVBoxLayout;
-  mainLayout->addWidget(m_editor);
-  mainLayout->addWidget(m_messages);
-  mainLayout->setContentsMargins(0,0,0,0);
-  setLayout(mainLayout);
+  setupChildWidgets();
 
   connect(m_editor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
 
@@ -196,11 +190,10 @@ void ScriptFileInterpreter::paste()
 {
   m_editor->paste();
 }
-
 /// Find in editor
-void ScriptFileInterpreter::findInScript()
+void ScriptFileInterpreter::showFindReplaceDialog()
 {
-  //m_editor->find();
+  m_editor->showFindReplaceDialog();
 }
 
 /**
@@ -240,6 +233,22 @@ void ScriptFileInterpreter::zoomOutOnScript()
 //-----------------------------------------------------------------------------
 // Private members
 //-----------------------------------------------------------------------------
+/**
+ * Create the splitter and layout for the child widgets
+ */
+void ScriptFileInterpreter::setupChildWidgets()
+{
+  m_splitter->addWidget(m_editor);
+  m_splitter->addWidget(m_messages);
+  QVBoxLayout *mainLayout = new QVBoxLayout;
+  mainLayout->setContentsMargins(0,0,0,0);
+  mainLayout->addWidget(m_splitter);
+  setLayout(mainLayout);
+
+  setFocusProxy(m_editor);
+  m_editor->setFocus();
+}
+
 /**
  * @param environ :: A pointer to the current scripting environment
  * @param identifier :: A string identifier, used mainly in error messages to identify the

@@ -12575,7 +12575,6 @@ void ApplicationWindow::createActions()
   connect(actionNewMatrix, SIGNAL(activated()), this, SLOT(newMatrix()));
 
   actionNewFunctionPlot = new QAction(QIcon(getQPixmap("newF_xpm")), tr("New &Function Plot"), this);
-  actionNewFunctionPlot->setShortcut( tr("Ctrl+F") );
   connect(actionNewFunctionPlot, SIGNAL(activated()), this, SLOT(functionDialog()));
 
   actionNewSurfacePlot = new QAction(QIcon(getQPixmap("newFxy_xpm")), tr("New 3D &Surface Plot"), this);
@@ -13468,7 +13467,6 @@ void ApplicationWindow::translateActionsStrings()
 
   actionNewFunctionPlot->setMenuText(tr("New &Function Plot"));
   actionNewFunctionPlot->setToolTip(tr("Create a new 2D function plot"));
-  actionNewFunctionPlot->setShortcut(tr("Ctrl+F"));
 
   actionNewSurfacePlot->setMenuText(tr("New 3D &Surface Plot"));
   actionNewSurfacePlot->setToolTip(tr("Create a new 3D surface plot"));

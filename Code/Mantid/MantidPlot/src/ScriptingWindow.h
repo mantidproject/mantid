@@ -62,7 +62,6 @@ signals:
   void closeMe();
   /// Tell others we are hiding
   void hideMe();
-
   
 private:
   /// Create menu bar

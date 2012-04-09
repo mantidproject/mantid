@@ -21,12 +21,10 @@ class QComboBox;
 class ScriptFileInterpreter;
 class NullScriptFileInterpreter;
 
-class FindReplaceDialog;
 class QMenu;
 class QStringList;
 
 class ScriptingWindow;
-
 
 /** 
     This class manages ScriptEditor objects and displays them in a series
@@ -104,7 +102,7 @@ public slots:
   /// Close all tabs
   void closeAllTabs();
   /// Show the find dialog
-  void showFindDialog(bool replace = true);
+  void showFindReplaceDialog();
 
   /// undo
   void undo();
@@ -116,8 +114,6 @@ public slots:
   void copy();
   /// paste implementation
   void paste();
-  /// find
-  void findInScript();
 
   /** @name Execute members.*/
   //@{
@@ -187,74 +183,5 @@ private:
   /// A pointer to the current interpreter
   ScriptFileInterpreter *m_current;
 };
-
-
-/**
-   @class FindReplaceDialog
-
-   This class raises a dialog to find and optionally replace text within in a text edit. 
-   Note: It came from the main qtiplot repository at r1341 and it has been modified to
-   work with our script window (also added comments). Since it's keyed to work only with Script editing
-   classes, it's definition may as well just go here
- */
-//class FindReplaceDialog : public QDialog
-//{
-//  // Qt macro
-//  Q_OBJECT
-//
-//public:
-//  ///Constructor
-//  FindReplaceDialog(ScriptManagerWidget *manager, bool replace = false,
-//		    QWidget* parent = 0, Qt::WindowFlags fl = 0 );
-//
-//public slots:
-//  /// An option has been toggled or the manager has some update that is necessary
-//  void resetSearchFlag();
-//
-//protected slots:
-//  /// Find
-//  bool find(bool backwards = false);
-//  /// Replace slot
-//  void replace();
-//  /// Replace all slot
-//  void replaceAll();
-//
-//private slots:
-//  /// A slot for the findClicked button
-//  void findClicked();
-//
-//private:
-//  ///The current text editor we are working on
-//  ScriptManagerWidget *m_manager;
-//
-//  ///Find next match button
-//  QPushButton* buttonNext;
-//  /// Replace text button
-//  QPushButton* buttonReplace;
-//  /// Replace all text button
-//  QPushButton* buttonReplaceAll;
-//  /// Cancel dialog button
-//  QPushButton* buttonCancel;
-//
-//  /// Find box
-//  QComboBox* boxFind;
-//  /// Replace box
-//  QComboBox* boxReplace;
-//
-//  /// Case-sensitive check box
-//  QCheckBox *boxCaseSensitive;
-//  /// Whole words check box
-//  QCheckBox *boxWholeWords;
-//  /// Search backwards
-//  QCheckBox *boxSearchBackwards;
-//  /// Wrap around
-//  QCheckBox *boxWrapAround;
-//  /// Treat as regular expressions
-//  QCheckBox *boxRegex;
-//
-//  /// If a find is in progress
-//  bool m_find_inprogress;
-//};
-
 
 #endif
