@@ -35,6 +35,7 @@ namespace DataHandling
   /** Constructor
    */
   MonitorLiveData::MonitorLiveData()
+  : m_chunkNumber(0)
   {
   }
     
