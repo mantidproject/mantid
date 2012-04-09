@@ -813,6 +813,7 @@ void MWRunFiles::browseClicked()
   if( uFile.trimmed().isEmpty() ) return;
 
   m_uiForm.fileEditor->setText(uFile);
+  m_uiForm.fileEditor->setModified(true);
 
   emit fileEditingFinished();
 }
