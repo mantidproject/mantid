@@ -14,7 +14,7 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
       m_dim(),
       m_dimIndex(0), m_shownDim(0),
       m_slicePoint(0.0),
-      m_showRebinControls(true)
+      m_showRebinControls(false)
 {
   ui.setupUi(this);
 
@@ -208,7 +208,7 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
 void DimensionSliceWidget::showRebinControls(bool show)
 {
   m_showRebinControls=show;
-  //FIXME: refresh
+  this->setShownDim(m_shownDim);
 }
 
 /** @return whether the rebinning controls are shown */

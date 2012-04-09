@@ -115,6 +115,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
+  QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -251,6 +252,11 @@ void SliceViewer::initMenus()
   action->setCheckable(true);
   action->setChecked(true);
   connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Dynamic R&ebin Mode", this);
+  m_syncRebinMode = new SyncedCheckboxes(action, ui.btnRebinMode, false);
+  connect(m_syncRebinMode, SIGNAL(toggled(bool)), this, SLOT(RebinMode_toggled(bool)));
   m_menuView->addAction(action);
 
   m_menuView->addSeparator();
@@ -748,6 +754,27 @@ void SliceViewer::SnapToGrid_toggled(bool checked)
   }
 }
 
+//------------------------------------------------------------------------------------
+/** Slot called when going into or out of dynamic rebinning mode */
+void SliceViewer::RebinMode_toggled(bool checked)
+{
+  for (size_t d=0; d<m_dimWidgets.size(); d++)
+    m_dimWidgets[d]->showRebinControls(checked);
+  ui.btnRebinRefresh->setEnabled(checked);
+
+  if (!checked)
+  {
+    // Remove the overlay WS
+    this->m_overlayWS.reset();
+    this->updateDisplay();
+  }
+  else
+  {
+    // Start the rebin
+    this->rebinParamsChanged();
+  }
+
+}
 
 //------------------------------------------------------------------------------------
 /// Slot for zooming into
