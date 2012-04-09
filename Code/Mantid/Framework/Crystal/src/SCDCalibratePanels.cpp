@@ -413,11 +413,13 @@ namespace Crystal
 
             for (long ind = start; ind <= stop; ind += step)
             {
-              const int NN = bankPrefix.length() + 4 ;
-              char bankName[NN ];
+              ostringstream oss (ostringstream::out);
+              oss<<bankPrefix<<ind;
+              //const int NN = bankPrefix.length() + 4 ;
+              string bankName = oss.str();
 
-              sprintf(bankName, "%s%d", bankPrefix.c_str(), (int)ind);
-              string postName = string(bankName).substr(bankPrefix.length());
+              //sprintf(bankName, "%s%d", bankPrefix.c_str(), (int)ind);
+              string postName = bankName.substr(bankPrefix.length());
 
 
               if (AllBankNames.find(string(bankName) )!= AllBankNames.end())

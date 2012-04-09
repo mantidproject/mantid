@@ -277,7 +277,7 @@ row 14=4.53658  row 15=1.69236 row 16=3.34122  row 17=10.1843  row 18=15.5436 ro
       {
         cout<<"XmlFileName="<<XmlFileName<<std::endl;
         filebuf fb;
-        fb.open (XmlFileName,ios::out);
+        fb.open (XmlFileName.c_str(),ios::out);
         ostream os(&fb);
         os << oss3.str();
         fb.close();
