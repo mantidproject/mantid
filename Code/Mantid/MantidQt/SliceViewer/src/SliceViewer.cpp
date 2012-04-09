@@ -1782,14 +1782,24 @@ void SliceViewer::rebinParamsChanged()
     alg->setPropertyValue("BasisVector" + Strings::toString(d), prop);
   }
 
+  std::string outputName = m_ws->getName() + "_rebinned";
+
   // Set all the other properties
   alg->setProperty("OutputExtents", OutputExtents);
   alg->setProperty("OutputBins", OutputBins);
   alg->setPropertyValue("Translation", "");
   alg->setProperty("NormalizeBasisVectors", true);
   alg->setProperty("ForceOrthogonal", false);
-  alg->setPropertyValue("OutputWorkspace", m_ws->getName() + "_rebinned");
+  alg->setPropertyValue("OutputWorkspace", outputName);
   alg->execute();
+
+  m_overlayWS.reset();
+  if (AnalysisDataService::Instance().doesExist(outputName))
+    m_overlayWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(outputName);
+
+  // Make it so we refresh the display, with this workspace on TOP
+  m_data->setOverlayWorkspace(m_overlayWS);
+  this->updateDisplay();
 }
 
 

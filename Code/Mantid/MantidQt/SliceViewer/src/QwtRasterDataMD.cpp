@@ -16,7 +16,8 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-: m_slicePoint(NULL), m_fast(true), m_zerosAsNan(true),
+: m_ws(), m_overlayWS(),
+  m_slicePoint(NULL), m_fast(true), m_zerosAsNan(true),
   m_normalization(Mantid::API::VolumeNormalization)
 {
   m_range = QwtDoubleInterval(0.0, 1.0);
@@ -51,6 +52,12 @@ QwtRasterData* QwtRasterDataMD::copy() const
   out->m_fast = this->m_fast;
   out->m_zerosAsNan = this->m_zerosAsNan;
   out->m_normalization = this->m_normalization;
+
+  out->m_overlayWS = this->m_overlayWS;
+  out->m_overlayXMin = this->m_overlayXMin;
+  out->m_overlayXMax = this->m_overlayXMax;
+  out->m_overlayYMin = this->m_overlayYMin;
+  out->m_overlayYMax = this->m_overlayYMax;
   return out;
 }
 
@@ -83,8 +90,21 @@ double QwtRasterDataMD::value(double x, double y) const
     else
       lookPoint[d] = m_slicePoint[d];
   }
+
   // Get the signal at that point
-  signal_t value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
+  signal_t value = 0;
+  if (m_overlayWS
+      && (x >= m_overlayXMin) && (x < m_overlayXMax)
+      && (y >= m_overlayYMin) && (y < m_overlayYMax))
+  {
+    // Point is in the overlaid workspace
+    value = m_overlayWS->getSignalAtCoord(lookPoint, m_normalization);
+  }
+  else
+  {
+    // No overlay, or not within range of that workspace
+    value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
+  }
   delete [] lookPoint;
 
   // Special case for 0 = show as NAN
@@ -150,9 +170,13 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
   if (!m_ws) return QSize();
   // Slow mode? Don't give a raster hint. This will be 1 pixel per point
   if (!m_fast) return QSize();
+
   // Fast mode: use the bin size to guess at the pixel density
-  IMDDimension_const_sptr m_X = m_ws->getDimension(m_dimX);
-  IMDDimension_const_sptr m_Y = m_ws->getDimension(m_dimY);
+  IMDWorkspace_sptr ws = m_ws;
+  // Use the overlay workspace, if any
+  if (m_overlayWS) ws = m_overlayWS;
+  IMDDimension_const_sptr m_X = ws->getDimension(m_dimX);
+  IMDDimension_const_sptr m_Y = ws->getDimension(m_dimY);
   int w = 2 * int(area.width() / m_X->getBinWidth());
   int h = 2 * int(area.height() /m_Y->getBinWidth());
   if (w<10) w = 10;
@@ -179,6 +203,24 @@ void QwtRasterDataMD::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 }
 
 //------------------------------------------------------------------------------------------------------
+/** Sets the workspace that will be displayed ON TOP of the original workspace.
+ * For dynamic rebinning.
+ *
+ * @param ws :: IMDWorkspace to show
+ */
+void QwtRasterDataMD::setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws)
+{
+  if (!ws)
+  {
+    m_overlayWS.reset();
+    return;
+  }
+  if (ws->getNumDims() != m_nd)
+    throw std::runtime_error("QwtRasterDataMD::setOverlayWorkspace(): workspace does not have the same number of dimensions!");
+  m_overlayWS = ws;
+}
+
+//------------------------------------------------------------------------------------------------------
 /** Set the slicing parameters
  *
  * @param dimX :: index of the X dimension
@@ -195,6 +237,15 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Manti
   m_slicePoint = new coord_t[slicePoint.size()];
   for (size_t d=0; d<m_nd; d++)
     m_slicePoint[d] = slicePoint[d];
+  // Cache the edges of the overlaid workspace
+  if (m_overlayWS)
+  {
+    m_overlayXMin = m_overlayWS->getDimension(m_dimX)->getMinimum();
+    m_overlayXMax = m_overlayWS->getDimension(m_dimX)->getMaximum();
+    m_overlayYMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
+    m_overlayYMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
+    //std::cout << m_overlayXMin << "," << m_overlayXMax << "," << m_overlayYMin << "," << m_overlayYMax << std::endl;
+  }
 }
 
 } //namespace

@@ -31,6 +31,8 @@ public:
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
 
+  void setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+
   QwtDoubleInterval range() const;
   void setRange(const QwtDoubleInterval & range);
 
@@ -51,6 +53,9 @@ protected:
   /// Workspace being shown
   Mantid::API::IMDWorkspace_sptr m_ws;
 
+  /// Workspace overlaid on top of original (optional)
+  Mantid::API::IMDWorkspace_sptr m_overlayWS;
+
   /// Number of dimensions in the workspace
   size_t m_nd;
 
@@ -65,6 +70,12 @@ protected:
 
   /// Range of colors to plot
   QwtDoubleInterval m_range;
+
+  /// Edges of the overlay workspace, in the X
+  double m_overlayXMin;
+  double m_overlayXMax;
+  double m_overlayYMin;
+  double m_overlayYMax;
 
   /// Not a number
   double nan;

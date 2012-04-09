@@ -168,6 +168,9 @@ private:
   /// Workspace being shown
   Mantid::API::IMDWorkspace_sptr m_ws;
 
+  /// Workspace overlaid on top of original (optional) for dynamic rebinning
+  Mantid::API::IMDWorkspace_sptr m_overlayWS;
+
   /// Set to true once the first workspace has been loaded in it
   bool m_firstWorkspaceOpen;
 
