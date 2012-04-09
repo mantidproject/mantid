@@ -441,7 +441,11 @@ namespace CurveFitting
      */
     DataObjects::Peak  createNewPeak( const DataObjects::Peak & peak_old, Geometry::Instrument_sptr  instrNew)const;
 
-
+    /**
+     * Even though constrains are used. Often very illogical parameters have to be processed.
+     * This checks for these conditions.
+     */
+    double checkForNonsenseParameters() const;
     boost::shared_ptr< DataObjects::PeaksWorkspace> peaks;
 
     double a,b,c,alpha,beta,gamma;
