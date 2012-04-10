@@ -412,7 +412,7 @@ void ScriptEditor::print()
   QPrinter printer(QPrinter::HighResolution);
   QPrintDialog *print_dlg = new QPrintDialog(&printer, this);
   print_dlg->setWindowTitle(tr("Print Script"));
-  if (print_dlg->exec() != QDialog::Accepted) 
+  if(print_dlg->exec() != QDialog::Accepted)
   {
     return;
   }

@@ -16408,8 +16408,14 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
   scriptingEnv()->redirectStdOut(false);
   if(execMode == Script::Asynchronous)
   {
-    QFuture<bool> result = runner->executeAsync(code);
-    result.waitForFinished();
+    QFuture<bool> job = runner->executeAsync(code);
+    while(job.isRunning())
+    {
+      QCoreApplication::processEvents();
+    }
+    // Required for windows tests to work
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
   }
   else
   {

@@ -659,14 +659,14 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
             sv.setSlicePoint(d, val)  
             
     # Set the normalization before the color scale
-    sv.setNormalization(normalization);   
+    threadsafe_call(sv.setNormalization, normalization)
     
     # --- Color scale ---
     if (not colormin is None) and (not colormax is None):
         threadsafe_call(sv.setColorScale, colormin, colormax, colorscalelog)
     else:
-        if (not colormin is None): sv.setColorScaleMin(colormin)
-        if (not colormax is None): sv.setColorScaleMax(colormax)
+        if (not colormin is None): threadsafe_call(sv.setColorScaleMin, colormin)
+        if (not colormax is None): threadsafe_call(sv.setColorScaleMax, colormax)
     try:
         threadsafe_call(sv.setColorScaleLog, colorscalelog)
     except:
