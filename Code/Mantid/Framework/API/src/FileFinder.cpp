@@ -784,7 +784,8 @@ namespace Mantid
             run = boost::lexical_cast<std::string>(irun);
             while (run.size() < nZero)
               run.insert(0, "0");
-            std::string path = findFullPath(p1.first + run);
+            //std::string path = findFullPath(p1.first + run);
+            std::string path = findRun(p1.first + run);
             if (!path.empty())
             {
               res.push_back(path);
@@ -794,7 +795,8 @@ namespace Mantid
         }
         else
         {
-          std::string path = findFullPath(*h);
+          //std::string path = findFullPath(*h);
+          std::string path = findRun(*h);
           if (!path.empty())
           {
             res.push_back(path);
