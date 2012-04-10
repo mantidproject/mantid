@@ -86,7 +86,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
       m_logColor(false),
-      m_fastRender(true)
+      m_fastRender(true),
+      m_rebinMode(false), m_rebinLocked(true)
 {
 	ui.setupUi(this);
 
@@ -117,6 +118,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
+  QObject::connect(ui.btnClearLine, SIGNAL(clicked()), this, SLOT(clearLine()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
   QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
@@ -264,9 +266,16 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
   m_menuView->addAction(action);
 
+  m_menuView->addSeparator();
+
   action = new QAction(QPixmap(), "Dynamic R&ebin Mode", this);
   m_syncRebinMode = new SyncedCheckboxes(action, ui.btnRebinMode, false);
   connect(m_syncRebinMode, SIGNAL(toggled(bool)), this, SLOT(RebinMode_toggled(bool)));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "&Lock Rebinned WS", this);
+  m_syncRebinLock = new SyncedCheckboxes(action, ui.btnRebinLock, true);
+  connect(m_syncRebinLock, SIGNAL(toggled(bool)), this, SLOT(RebinLock_toggled(bool)));
   m_menuView->addAction(action);
 
   m_menuView->addSeparator();
@@ -731,7 +740,7 @@ void SliceViewer::toggleLineMode(bool lineMode)
 
 //------------------------------------------------------------------------------------
 /// Slot called to clear the line in the line overlay
-void SliceViewer::on_btnClearLine_clicked()
+void SliceViewer::clearLine()
 {
   m_lineOverlay->reset();
   m_plot->update();
@@ -771,8 +780,10 @@ void SliceViewer::RebinMode_toggled(bool checked)
   for (size_t d=0; d<m_dimWidgets.size(); d++)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
+  ui.btnRebinLock->setEnabled(checked);
+  m_rebinMode = checked;
 
-  if (!checked)
+  if (!m_rebinMode)
   {
     // Remove the overlay WS
     this->m_overlayWS.reset();
@@ -784,7 +795,19 @@ void SliceViewer::RebinMode_toggled(bool checked)
     // Start the rebin
     this->rebinParamsChanged();
   }
+}
 
+//------------------------------------------------------------------------------------
+/** Slot called when locking/unlocking the dynamically rebinned
+ * overlaid workspace
+ * @param checked :: DO lock the workspace in place
+ */
+void SliceViewer::RebinLock_toggled(bool checked)
+{
+  m_rebinLocked = checked;
+  // Rebin immediately
+  if (!m_rebinLocked && m_rebinMode)
+    this->rebinParamsChanged();
 }
 
 //------------------------------------------------------------------------------------
@@ -854,6 +877,9 @@ void SliceViewer::updateDisplaySlot(int index, double value)
   UNUSED_ARG(index)
   UNUSED_ARG(value)
   this->updateDisplay();
+  // Trigger a rebin on each movement of the slice point
+  if (m_rebinMode && ! m_rebinLocked)
+    this->rebinParamsChanged();
 }
 
 

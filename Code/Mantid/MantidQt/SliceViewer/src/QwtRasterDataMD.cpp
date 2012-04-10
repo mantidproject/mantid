@@ -179,7 +179,7 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
   coord_t binY = m_ws->getDimension(m_dimY)->getBinWidth();
 
   // Use the overlay workspace, if any, and if its bins are smaller
-  if (m_overlayWS)
+  if (m_overlayWS && m_overlayInSlice)
   {
     coord_t temp;
     temp = m_overlayWS->getDimension(m_dimX)->getBinWidth();
