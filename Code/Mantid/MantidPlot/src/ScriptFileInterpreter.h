@@ -98,7 +98,8 @@ private:
   void setupChildWidgets();
 
   void setupEditor(const ScriptingEnv & environ, const QString & identifier);
-  void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
+  void createScriptRunner(const ScriptingEnv & environ, const QString & identifier);
+  void connectScriptRunnerSignals();
   
   bool readFileIntoEditor(const QString & filename);
   void executeCode(const QString & code, const Script::ExecutionMode mode);

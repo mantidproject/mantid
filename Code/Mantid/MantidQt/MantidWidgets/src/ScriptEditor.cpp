@@ -209,13 +209,33 @@ void ScriptEditor::setLexer(QsciLexer *codelexer)
 }
 
 /**
- *
- * @return
+ * Make the object resize to margin to fit the contents with padding
  */
-// Make the object resize to margin to fit the contents
 void ScriptEditor::setAutoMarginResize()
 {
   connect(this, SIGNAL(linesChanged()), this, SLOT(padMargin()));
+}
+
+/**
+ * Enable the auto complete
+ */
+void ScriptEditor::enableAutoCompletion()
+{
+  setAutoCompletionSource(QsciScintilla::AcsAPIs);
+  setCallTipsVisible(QsciScintilla::CallTipsNoAutoCompletionContext);
+  setAutoCompletionThreshold(2);
+  setCallTipsVisible(0); // This actually makes all of them visible
+}
+
+/**
+ * Disable the auto complete
+ * */
+void ScriptEditor::disableAutoCompletion()
+{
+  setAutoCompletionSource(QsciScintilla::AcsNone);
+  setCallTipsVisible(QsciScintilla::CallTipsNone);
+  setAutoCompletionThreshold(-1);
+  setCallTipsVisible(-1);
 }
 
 /**

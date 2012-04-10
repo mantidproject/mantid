@@ -122,7 +122,7 @@ signals:
   /// Line number changed
   void currentLineChanged(int lineno, bool error);
   // Signal that new keywords are available
-  void keywordsChanged(const QStringList & keywords);
+  void autoCompleteListGenerated(const QStringList & keywords);
   
 private:
   /// Normalise line endings for the given code. The Python C/API does not seem to like CRLF endings so normalise to just LF

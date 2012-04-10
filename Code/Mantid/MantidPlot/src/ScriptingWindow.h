@@ -124,7 +124,7 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut,
-    *m_toggleProgress, *m_toggleFolding, *m_toggleCallTips;
+    *m_toggleProgress, *m_toggleFolding;
 
   /// Change scripting language
   QAction *m_scripting_lang;

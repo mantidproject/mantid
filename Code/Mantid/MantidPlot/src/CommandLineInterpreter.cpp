@@ -216,6 +216,7 @@ CommandLineInterpreter::CommandLineInterpreter(const ScriptingEnv & environ, QWi
     m_copy(NULL), m_cut(NULL), m_paste(NULL), m_saveAs(NULL),
     m_zoomIn(NULL), m_zoomOut(NULL)
 {
+  enableAutoCompletion();
   setupEnvironment(environ);
   setupMargin();
   setupIndentation();
@@ -375,6 +376,10 @@ void CommandLineInterpreter::processNextPastedLine()
 void CommandLineInterpreter::setupEnvironment(const ScriptingEnv & environ)
 {
   m_runner = QSharedPointer<Script>(environ.newScript("__main__",this,Script::Interactive));
+  connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)),
+          this, SLOT(updateCompletionAPI(const QStringList &)));
+  m_runner->execute("None"); // Initial API list
+
   connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setStatusToExecuting()));
   connect(m_runner.data(), SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(insertInputPrompt()));

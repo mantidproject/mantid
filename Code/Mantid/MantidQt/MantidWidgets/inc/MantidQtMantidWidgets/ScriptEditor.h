@@ -93,6 +93,11 @@ public:
   void setLexer(QsciLexer *);
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
+  /// Enable the auto complete
+  void enableAutoCompletion();
+  /// Disable the auto complete
+  void disableAutoCompletion();
+
   // Size hint
   QSize sizeHint() const;
   // Unhide base class method to avoid intel compiler warning

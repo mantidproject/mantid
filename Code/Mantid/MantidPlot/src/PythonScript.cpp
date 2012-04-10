@@ -479,6 +479,10 @@ bool PythonScript::doExecution(const QString & code)
   if(result)
   {
     Py_DECREF(result);
+    if(isInteractive())
+    {
+      generateAutoCompleteList();
+    }
     emit finished("Script execution finished.");
     success = true;
   }
@@ -597,9 +601,8 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
 /**
  * Create a list autocomplete keywords
  */
-QStringList PythonScript::createAutoCompleteList() const
+void PythonScript::generateAutoCompleteList()
 {
-  GlobalInterpreterLock gil;
   PyObject *main_module = PyImport_AddModule("__main__");
   PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
   PyObject *keywords(NULL);
@@ -609,19 +612,19 @@ QStringList PythonScript::createAutoCompleteList() const
   }
   else
   {
-    return QStringList();
+    return;
   }
-  QStringList keyword_list;
+  QStringList keywordList;
   if( PyErr_Occurred() || !keywords )
   {
     PyErr_Print();
-    return keyword_list;
+    return;
   }
 
-  keyword_list = pythonEnv()->toStringList(keywords);
+  keywordList = pythonEnv()->toStringList(keywords);
   Py_DECREF(keywords);
   Py_DECREF(method);
-  return keyword_list;
+  emit autoCompleteListGenerated(keywordList);
 }
 
 /**

@@ -140,7 +140,7 @@ private:
   /// Compile to bytecode
   PyObject * compileToByteCode(const QString &, bool for_eval=true);
   /// Create a list of keywords for the code completion API
-  QStringList createAutoCompleteList() const;
+  void generateAutoCompleteList();
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS

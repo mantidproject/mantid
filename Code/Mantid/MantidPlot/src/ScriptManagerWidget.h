@@ -141,8 +141,6 @@ public slots:
   void toggleCodeFolding(bool on);
   /// Toggle code folding
   void toggleCodeCompletion(bool on);
-  /// Toggle call tips
-  void toggleCallTips(bool on);
 
 private slots:
   /// Close clicked tab

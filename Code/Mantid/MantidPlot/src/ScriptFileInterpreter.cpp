@@ -21,7 +21,6 @@ ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
 {
   setupChildWidgets();
 
-
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint&)));
@@ -91,8 +90,13 @@ void ScriptFileInterpreter::showContextMenu(const QPoint & clickPoint)
 void ScriptFileInterpreter::setup(const ScriptingEnv & environ, const QString & identifier)
 {
   setupEditor(environ, identifier);
-  setupScriptRunner(environ, identifier);
+  createScriptRunner(environ, identifier);
+  connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)),
+          m_editor, SLOT(updateCompletionAPI(const QStringList &)));
+  m_runner->execute("None");
+  connectScriptRunnerSignals();
 }
+
 
 /**
  * @return The string containing the filename of the script
@@ -262,6 +266,7 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
   m_editor->setLexer(environ.createCodeLexer());
   m_editor->padMargin();
   m_editor->setAutoMarginResize();
+  m_editor->enableAutoCompletion();
   m_editor->setCursorPosition(0,0);
 
   connect(m_editor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
@@ -277,9 +282,16 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
  * @param identifier :: A string identifier, used mainly in error messages to identify the
  * current script
  */
-void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, const QString & identifier)
+void ScriptFileInterpreter::createScriptRunner(const ScriptingEnv & environ, const QString & identifier)
 {
   m_runner = QSharedPointer<Script>(environ.newScript(identifier,this, Script::Interactive));
+}
+
+/**
+ * Connect the required signals from the script runner to the outside world
+ */
+void ScriptFileInterpreter::connectScriptRunnerSignals()
+{
   connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));

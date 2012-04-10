@@ -80,7 +80,6 @@ void ScriptingWindow::saveSettings()
   settings.beginGroup("/ScriptWindow");
   settings.setValue("/AlwaysOnTop", m_alwaysOnTop->isChecked());
   settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
-  settings.setValue("/CallTips", m_toggleCallTips->isChecked());
   settings.setValue("/ProgressArrow", m_toggleProgress->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.setValue("/RecentScripts",m_manager->recentScripts());
@@ -102,7 +101,6 @@ void ScriptingWindow::readSettings()
   }
   m_manager->m_last_dir = lastdir;
   m_toggleFolding->setChecked(settings.value("CodeFolding", true).toBool());
-  m_toggleCallTips->setChecked(settings.value("CallTips", true).toBool());
   m_toggleProgress->setChecked(settings.value("ProgressArrow", true).toBool());
 
   m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
@@ -489,9 +487,4 @@ void ScriptingWindow::initWindowMenuActions()
   m_toggleFolding = new QAction(tr("Code &Folding"), this);
   m_toggleFolding->setCheckable(true);
   //connect(m_toggleFolding, SIGNAL(toggled(bool)), this, SLOT(toggleCodeFolding(bool)));
-
-  // Toggle call tips
-  m_toggleCallTips = new QAction(tr("Call &Tips"), this);
-  m_toggleCallTips->setCheckable(true);
-  //connect(m_toggleCallTips, SIGNAL(toggled(bool)), this, SLOT(toggleCallTips(bool)));
 }
