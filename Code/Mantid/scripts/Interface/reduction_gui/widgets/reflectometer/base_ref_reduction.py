@@ -602,6 +602,7 @@ class BaseRefWidget(BaseWidget):
                                                range_max=range_max)
 
     def _add_data(self):
+        print 'inside _add_data'
         state = self.get_editing_state()
         in_list = False
         # Check whether it's already in the list
