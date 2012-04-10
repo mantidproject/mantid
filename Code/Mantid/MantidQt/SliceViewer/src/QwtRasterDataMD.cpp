@@ -3,9 +3,6 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/VMD.h"
-
-using Mantid::Kernel::VMD;
 
 namespace MantidQt
 {
@@ -57,8 +54,11 @@ QwtRasterData* QwtRasterDataMD::copy() const
   out->m_normalization = this->m_normalization;
 
   out->m_overlayWS = this->m_overlayWS;
-  out->m_overlayMin = this->m_overlayMin;
-  out->m_overlayMax = this->m_overlayMax;
+  out->m_overlayXMin = this->m_overlayXMin;
+  out->m_overlayXMax = this->m_overlayXMax;
+  out->m_overlayYMin = this->m_overlayYMin;
+  out->m_overlayYMax = this->m_overlayYMax;
+  out->m_overlayInSlice = this->m_overlayInSlice;
   return out;
 }
 
@@ -94,21 +94,20 @@ double QwtRasterDataMD::value(double x, double y) const
 
   // Get the signal at that point
   signal_t value = 0;
-  IMDWorkspace_sptr ws = m_ws;
 
-  // Look if there is an overlaid workspace in range
-  if (m_overlayWS)
+  // Check if the overlay WS is within range of being viewed
+  if (m_overlayWS && m_overlayInSlice
+      && (x >= m_overlayXMin) && (x < m_overlayXMax)
+      && (y >= m_overlayYMin) && (y < m_overlayYMax))
   {
-    bool allWithin = true;
-    for (size_t d=0; d<m_nd; d++)
-      allWithin = allWithin && (lookPoint[d] >= m_overlayMin[d]) &&
-        (lookPoint[d] < m_overlayMax[d]);
-    if (allWithin)
-      ws = m_overlayWS;
+    // Point is in the overlaid workspace
+    value = m_overlayWS->getSignalAtCoord(lookPoint, m_normalization);
   }
-
-  // No overlay, or not within range of that workspace
-  value = ws->getSignalAtCoord(lookPoint, m_normalization);
+  else
+  {
+    // No overlay, or not within range of that workspace
+    value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
+  }
   delete [] lookPoint;
 
   // Special case for 0 = show as NAN
@@ -222,15 +221,6 @@ void QwtRasterDataMD::setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   if (ws->getNumDims() != m_nd)
     throw std::runtime_error("QwtRasterDataMD::setOverlayWorkspace(): workspace does not have the same number of dimensions!");
   m_overlayWS = ws;
-  // Cache the extents
-  m_overlayMin = VMD(m_nd);
-  m_overlayMax = VMD(m_nd);
-  for (size_t d=0; d<m_nd; d++)
-  {
-    m_overlayMin[d] = m_overlayWS->getDimension(d)->getMinimum();
-    m_overlayMax[d] = m_overlayWS->getDimension(d)->getMaximum();
-  }
-
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -248,9 +238,27 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Manti
   m_dimY = dimY;
   delete [] m_slicePoint;
   m_slicePoint = new coord_t[slicePoint.size()];
+  m_overlayInSlice = true;
   for (size_t d=0; d<m_nd; d++)
+  {
     m_slicePoint[d] = slicePoint[d];
-
+    // Don't show the overlay WS if it is outside of range in the slice points
+    if (m_overlayWS && d != m_dimX && d != m_dimY)
+    {
+      if (slicePoint[d] < m_overlayWS->getDimension(d)->getMinimum()
+          || slicePoint[d] >= m_overlayWS->getDimension(d)->getMaximum())
+        m_overlayInSlice = false;
+    }
+  }
+  // Cache the edges of the overlaid workspace
+  if (m_overlayWS)
+  {
+    m_overlayXMin = m_overlayWS->getDimension(m_dimX)->getMinimum();
+    m_overlayXMax = m_overlayWS->getDimension(m_dimX)->getMaximum();
+    m_overlayYMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
+    m_overlayYMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
+    //std::cout << m_overlayXMin << "," << m_overlayXMax << "," << m_overlayYMin << "," << m_overlayYMax << std::endl;
+  }
 }
 
 } //namespace
