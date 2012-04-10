@@ -152,7 +152,7 @@ class DetectorWidget(BaseWidget):
                 reduction_table_ws = self.options_callback()
                 patch_output = mtd.workspaceExists(patch_ws)
                 c=ComputeSensitivity(Filename=self._content.sensitivity_file_edit.text(),
-                                     ReductionTableWorkspace=reduction_table_ws,
+                                     ReductionProperties=reduction_table_ws,
                                      OutputWorkspace="sensitivity",
                                      PatchWorkspace=patch_ws)
                 print c.getPropertyValue("OutputMessage")

@@ -80,7 +80,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
                     if hasattr(item.state(), "options"):
                         script += item.state().options()
 
-            script += "ReductionTableWorkspace='%s')" % table_ws
+            script += "ReductionProperties='%s')" % table_ws
             
             exec script
             return table_ws

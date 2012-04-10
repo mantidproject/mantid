@@ -6,11 +6,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SetupEQSANSReduction.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -30,7 +31,6 @@ void SetupEQSANSReduction::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace DataObjects;
 
 void SetupEQSANSReduction::init()
 {
@@ -103,20 +103,23 @@ void SetupEQSANSReduction::init()
 
   // Outputs
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
 
 void SetupEQSANSReduction::exec()
 {
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable && reductionTableName.size()>0)
-    setProperty("ReductionTableWorkspace", reductionHandler.getTable());
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  if (reductionManagerName.size()==0)
+  {
+    g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
+    return;
+  }
+  boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
+  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
 
   // Store name of the instrument
-  reductionHandler.addEntry("InstrumentName", "EQSANS", true);
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "EQSANS") );
 
   // Load algorithm
   IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad");
@@ -134,25 +137,35 @@ void SetupEQSANSReduction::exec()
   loadAlg->setProperty("UseConfigMask", useConfigMask);
   const bool correctForFlightPath = getProperty("CorrectForFlightPath");
   loadAlg->setProperty("CorrectForFlightPath", correctForFlightPath);
-  reductionHandler.addEntry("LoadAlgorithm", loadAlg->toString());
+  reductionManager->declareProperty(new AlgorithmProperty("LoadAlgorithm"));
+  reductionManager->setProperty("LoadAlgorithm", loadAlg);
 
-  // Store dark current algorithm algorithm
+  // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
   if (darkCurrentFile.size() > 0)
   {
     IAlgorithm_sptr darkAlg = createSubAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
-    darkAlg->setPropertyValue("ReductionTableWorkspace", reductionTableName);
-    reductionHandler.addEntry("DarkCurrentAlgorithm", darkAlg->toString());
+    darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    reductionManager->declareProperty(new AlgorithmProperty("DarkCurrentAlgorithm"));
+    reductionManager->setProperty("DarkCurrentAlgorithm", darkAlg);
   }
+
+  // Store default dark current algorithm
+  IAlgorithm_sptr darkDefaultAlg = createSubAlgorithm("EQSANSDarkCurrentSubtraction");
+  darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
+  darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+  reductionManager->declareProperty(new AlgorithmProperty("DefaultDarkCurrentAlgorithm"));
+  reductionManager->setProperty("DefaultDarkCurrentAlgorithm", darkDefaultAlg);
 
   // Solid angle correction
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
   if (solidAngleCorrection)
   {
     IAlgorithm_sptr solidAlg = createSubAlgorithm("SANSSolidAngleCorrection");
-    reductionHandler.addEntry("SolidAngleAlgorithm", solidAlg->toString());
+    reductionManager->declareProperty(new AlgorithmProperty("SANSSolidAngleCorrection"));
+    reductionManager->setProperty("SANSSolidAngleCorrection", solidAlg);
   }
 
   // Beam center
@@ -167,11 +180,12 @@ void SetupEQSANSReduction::exec()
     IAlgorithm_sptr ctrAlg = createSubAlgorithm("FindCenterOfMassPosition");
     if (!isEmpty(tolerance)) ctrAlg->setProperty("Tolerance", tolerance);
     if (!isEmpty(beamRadius)) ctrAlg->setProperty("BeamRadius", beamRadius);
-    reductionHandler.addEntry("BeamCenterAlgorithm", ctrAlg->toString());
-    reductionHandler.addEntry("BeamCenterFile", beamCenterFile);
+    reductionManager->declareProperty(new AlgorithmProperty("BeamCenterAlgorithm"));
+    reductionManager->setProperty("BeamCenterAlgorithm", ctrAlg);
+    reductionManager->declareProperty(new PropertyWithValue<std::string>("BeamCenterFile", beamCenterFile) );
   } else {
-    reductionHandler.addEntry("LatestBeamCenterX", beamCenterX);
-    reductionHandler.addEntry("LatestBeamCenterY", beamCenterY);
+    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
+    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
   }
 
   // Sensitivity correction
@@ -194,8 +208,9 @@ void SetupEQSANSReduction::exec()
     if (!isEmpty(sensitivityBeamCenterX)) effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
     if (!isEmpty(sensitivityBeamCenterY)) effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
     effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
-    effAlg->setPropertyValue("ReductionTableWorkspace", reductionTableName);
-    reductionHandler.addEntry("SensitivityAlgorithm", effAlg->toString());
+    effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    reductionManager->declareProperty(new AlgorithmProperty("SensitivityAlgorithm"));
+    reductionManager->setProperty("SensitivityAlgorithm", effAlg);
   }
 
   setPropertyValue("OutputMessage", "EQSANS reduction options set");

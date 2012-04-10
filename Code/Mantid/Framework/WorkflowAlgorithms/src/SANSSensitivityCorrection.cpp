@@ -6,7 +6,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSensitivityCorrection.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
+//#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -21,7 +21,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidKernel/BoundedValidator.h"
-
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 namespace Mantid
 {
 namespace WorkflowAlgorithms
@@ -63,7 +65,7 @@ void SANSSensitivityCorrection::init()
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (optional: otherwise sample beam center is used)");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output, PropertyMode::Optional));
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("ReductionProperties","__sans_reduction_properties");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputSensitivityWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage","",Direction::Output);
 
@@ -107,197 +109,214 @@ void SANSSensitivityCorrection::exec()
 
   Progress progress(this,0.0,1.0,10);
 
-  const std::string fileName = getPropertyValue("Filename");
-
-  // Get the reduction table workspace or create one
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable)
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  boost::shared_ptr<PropertyManager> reductionManager;
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
   {
-    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   }
-  if (reductionHandler.findStringEntry("SensitivityAlgorithm").size()==0)
-    reductionHandler.addEntry("SensitivityAlgorithm", toString());
+  else
+  {
+    reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+  }
+
+  if (!reductionManager->existsProperty("SensitivityAlgorithm"))
+  {
+    AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");
+    algProp->setValue(toString());
+    reductionManager->declareProperty(algProp);
+  }
+
 
   progress.report("Loading sensitivity file");
+  const std::string fileName = getPropertyValue("Filename");
 
   // Look for an entry for the dark current in the reduction table
   Poco::Path path(fileName);
   const std::string entryName = "Sensitivity"+path.getBaseName();
-  MatrixWorkspace_sptr floodWS = reductionHandler.findWorkspaceEntry(entryName);
-  std::string floodWSName = reductionHandler.findStringEntry(entryName);
+  MatrixWorkspace_sptr floodWS;
+  std::string floodWSName = getPropertyValue("OutputSensitivityWorkspace");
 
-  if (floodWSName.size()==0) {
-    floodWSName = getPropertyValue("OutputSensitivityWorkspace");
+  if (reductionManager->existsProperty(entryName))
+  {
+    floodWS = reductionManager->getProperty(entryName);
+    floodWSName = reductionManager->getPropertyValue(entryName);
+  } else {
     if (floodWSName.size()==0)
       floodWSName = "__sensitivity_"+path.getBaseName();
     setPropertyValue("OutputSensitivityWorkspace", floodWSName);
-    reductionHandler.addEntry(entryName, floodWSName);
-  }
 
-  // Load the flood field if we don't have it already
-  // First, try to determine whether we need to load data or a sensitivity workspace...
-  if (!floodWS && fileCheck(fileName))
-  {
-    IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
-    loadAlg->setProperty("Filename", fileName);
-    loadAlg->executeAsSubAlg();
-    Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
-    floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
-
-    // Check that it's really a sensitivity file
-    if (floodWS->run().hasProperty("is_sensitivity"))
-    {
-      setProperty("OutputSensitivityWorkspace", floodWS);
-    }
-    else
-    {
-      // Reset pointer
-      floodWS.reset();
-      g_log.error() << "A processed Mantid workspace was loaded but it wasn't a sensitivity file!" << std::endl;
-    }
-  }
-
-  // ... if we don't, just load the data and process it
-  if (!floodWS)
-  {
-    std::string loader = reductionHandler.findStringEntry("LoadAlgorithm");
-    // Read in default beam center
-    double center_x = getProperty("BeamCenterX");
-    double center_y = getProperty("BeamCenterY");
-    if (isEmpty(center_x) || isEmpty(center_y))
-    {
-      center_x = reductionHandler.findDoubleEntry("LatestBeamCenterX");
-      center_y = reductionHandler.findDoubleEntry("LatestBeamCenterY");
-    }
-
-    const std::string rawFloodWSName = "__flood_data_"+path.getBaseName();
-    MatrixWorkspace_sptr rawFloodWS;
-    if (loader.size()==0)
+    // Load the flood field if we don't have it already
+    // First, try to determine whether we need to load data or a sensitivity workspace...
+    if (!floodWS && fileCheck(fileName))
     {
       IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
-      if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
-      if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
       loadAlg->executeAsSubAlg();
-      rawFloodWS = loadAlg->getProperty("OutputWorkspace");
-      m_output_message += "   | Loaded " + fileName + "\n";
-    } else {
-      IAlgorithm_sptr loadAlg = Algorithm::fromString(loader);
-      loadAlg->setChild(true);
-      loadAlg->setProperty("Filename", fileName);
-      loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
-      if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
-      if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
-      loadAlg->execute();
-      rawFloodWS = loadAlg->getProperty("OutputWorkspace");
-      // rawFloodWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(rawFloodWSName);
-      //AnalysisDataService::Instance().addOrReplace(rawFloodWSName, rawFloodWS);
-      m_output_message += "   |Loaded " + fileName + "\n";
-      if (loadAlg->existsProperty("OutputMessage")) 
+      Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
+      floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
+
+      // Check that it's really a sensitivity file
+      if (floodWS->run().hasProperty("is_sensitivity"))
       {
-	      std::string msg = loadAlg->getPropertyValue("OutputMessage");
-  	    m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
-  	  }
+        setProperty("OutputSensitivityWorkspace", floodWS);
+      }
+      else
+      {
+        // Reset pointer
+        floodWS.reset();
+        g_log.error() << "A processed Mantid workspace was loaded but it wasn't a sensitivity file!" << std::endl;
+      }
     }
 
-    // Check whether we just loaded a flood field data set, or the actual sensitivity
-    if (!rawFloodWS->run().hasProperty("is_sensitivity"))
+    // ... if we don't, just load the data and process it
+    if (!floodWS)
     {
-      const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
-
-      // Look for a dark current subtraction algorithm
-      std::string dark_current = reductionHandler.findStringEntry("DarkCurrentAlgorithm");
-      std::string dark_result = "";
-      if (dark_current.size()>0)
+      // Read in default beam center
+      double center_x = getProperty("BeamCenterX");
+      double center_y = getProperty("BeamCenterY");
+      if (isEmpty(center_x) || isEmpty(center_y))
       {
-        IAlgorithm_sptr darkAlg = Algorithm::fromString(dark_current);
-        darkAlg->setChild(true);
-        darkAlg->setProperty("InputWorkspace", rawFloodWS);
-        darkAlg->setProperty("OutputWorkspace", rawFloodWS);
+        if (reductionManager->existsProperty("LatestBeamCenterX")
+            && reductionManager->existsProperty("LatestBeamCenterY"))
+        {
+          center_x = reductionManager->getProperty("LatestBeamCenterX");
+          center_y = reductionManager->getProperty("LatestBeamCenterY");
+          g_log.notice() << "No beam center provided: taking last position " << center_x << ", " << center_y << std::endl;
+          m_output_message += "   |No beam center provided: taking last position\n";
+        }
+        else m_output_message += "   |No beam center provided!\n";
+      }
 
-        // Execute as-is if we use the sample dark current, otherwise check
-        // whether a dark current file was provided.
-        // Otherwise do nothing
-        if (getProperty("UseSampleDC"))
-        {
-          darkAlg->execute();
-          if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
-        }
-        else if (darkCurrentFile.size()>0)
-        {
-          darkAlg->setProperty("Filename", darkCurrentFile);
-          darkAlg->execute();
-          if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
-          else dark_result = "   Dark current subtracted\n";
-        }
-      } else if (darkCurrentFile.size()>0)
+      const std::string rawFloodWSName = "__flood_data_"+path.getBaseName();
+      MatrixWorkspace_sptr rawFloodWS;
+      if (!reductionManager->existsProperty("LoadAlgorithm"))
       {
-        // We need to subtract the dark current for the flood field but no dark
-        // current subtraction was set for the sample! Use the default dark
-        // current algorithm if we can find it.
-        dark_current = reductionHandler.findStringEntry("DefaultDarkCurrentAlgorithm");
-        if (dark_current.size()>0)
+        IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
+        loadAlg->setProperty("Filename", fileName);
+        if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
+        if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
+        loadAlg->executeAsSubAlg();
+        rawFloodWS = loadAlg->getProperty("OutputWorkspace");
+        m_output_message += "   | Loaded " + fileName + "\n";
+      } else {
+        IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
+        loadAlg->setChild(true);
+        loadAlg->setProperty("Filename", fileName);
+        loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
+        if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
+        if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
+        loadAlg->execute();
+        rawFloodWS = loadAlg->getProperty("OutputWorkspace");
+        // rawFloodWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(rawFloodWSName);
+        //AnalysisDataService::Instance().addOrReplace(rawFloodWSName, rawFloodWS);
+        m_output_message += "   |Loaded " + fileName + "\n";
+        if (loadAlg->existsProperty("OutputMessage"))
         {
-          IAlgorithm_sptr darkAlg = Algorithm::fromString(dark_current);
+          std::string msg = loadAlg->getPropertyValue("OutputMessage");
+          m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+        }
+      }
+
+      // Check whether we just loaded a flood field data set, or the actual sensitivity
+      if (!rawFloodWS->run().hasProperty("is_sensitivity"))
+      {
+        const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
+
+        // Look for a dark current subtraction algorithm
+        std::string dark_result = "";
+        if (reductionManager->existsProperty("DarkCurrentAlgorithm"))
+        {
+          IAlgorithm_sptr darkAlg = reductionManager->getProperty("DarkCurrentAlgorithm");
           darkAlg->setChild(true);
           darkAlg->setProperty("InputWorkspace", rawFloodWS);
           darkAlg->setProperty("OutputWorkspace", rawFloodWS);
-          darkAlg->setProperty("Filename", darkCurrentFile);
-          darkAlg->execute();
-          if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
-        } else {
-          // We are running out of options
-          g_log.error() << "No dark current algorithm provided to load ["
-              << getPropertyValue("DarkCurrentFile") << "]: skipped!" << std::endl;
-          dark_result = "   No dark current algorithm provided: skipped\n";
+
+          // Execute as-is if we use the sample dark current, otherwise check
+          // whether a dark current file was provided.
+          // Otherwise do nothing
+          if (getProperty("UseSampleDC"))
+          {
+            darkAlg->execute();
+            if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
+          }
+          else if (darkCurrentFile.size()>0)
+          {
+            darkAlg->setProperty("Filename", darkCurrentFile);
+            darkAlg->execute();
+            if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
+            else dark_result = "   Dark current subtracted\n";
+          }
+        } else if (darkCurrentFile.size()>0)
+        {
+          // We need to subtract the dark current for the flood field but no dark
+          // current subtraction was set for the sample! Use the default dark
+          // current algorithm if we can find it.
+          if (reductionManager->existsProperty("DefaultDarkCurrentAlgorithm"))
+          {
+            IAlgorithm_sptr darkAlg = reductionManager->getProperty("DefaultDarkCurrentAlgorithm");
+            darkAlg->setChild(true);
+            darkAlg->setProperty("InputWorkspace", rawFloodWS);
+            darkAlg->setProperty("OutputWorkspace", rawFloodWS);
+            darkAlg->setProperty("Filename", darkCurrentFile);
+            darkAlg->execute();
+            if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
+          } else {
+            // We are running out of options
+            g_log.error() << "No dark current algorithm provided to load ["
+                << getPropertyValue("DarkCurrentFile") << "]: skipped!" << std::endl;
+            dark_result = "   No dark current algorithm provided: skipped\n";
+          }
         }
-      }
-      m_output_message += "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
+        m_output_message += "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
 
-      // Look for solid angle correction algorithm
-      std::string solid_angle = reductionHandler.findStringEntry("SolidAngleAlgorithm");
-      if (solid_angle.size()>0)
+        // Look for solid angle correction algorithm
+        if (reductionManager->existsProperty("SolidAngleAlgorithm"))
+        {
+          IAlgorithm_sptr solidAlg = reductionManager->getProperty("SolidAngleAlgorithm");
+          solidAlg->setChild(true);
+          solidAlg->setProperty("InputWorkspace", rawFloodWS);
+          solidAlg->setProperty("OutputWorkspace", rawFloodWS);
+          solidAlg->execute();
+          std::string msg = "Solid angle correction applied\n";
+          if (solidAlg->existsProperty("OutputMessage")) msg = solidAlg->getPropertyValue("OutputMessage");
+          m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+        }
+
+        // Calculate detector sensitivity
+        IAlgorithm_sptr effAlg = createSubAlgorithm("CalculateEfficiency");
+        effAlg->setProperty("InputWorkspace", rawFloodWS);
+
+        const double minEff = getProperty("MinEfficiency");
+        const double maxEff = getProperty("MaxEfficiency");
+        effAlg->setProperty("MinEfficiency", minEff);
+        effAlg->setProperty("MaxEfficiency", maxEff);
+        effAlg->execute();
+        floodWS = effAlg->getProperty("OutputWorkspace");
+      } else {
+        floodWS = rawFloodWS;
+      }
+
+      // Patch as needed
+      if (reductionManager->existsProperty("SensitivityPatchAlgorithm"))
       {
-        IAlgorithm_sptr solidAlg = Algorithm::fromString(solid_angle);
-        solidAlg->setChild(true);
-        solidAlg->setProperty("InputWorkspace", rawFloodWS);
-        solidAlg->setProperty("OutputWorkspace", rawFloodWS);
-        solidAlg->execute();
-        std::string msg = "Solid angle correction applied\n";
-        if (solidAlg->existsProperty("OutputMessage")) msg = solidAlg->getPropertyValue("OutputMessage");
-        m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+        IAlgorithm_sptr patchAlg = reductionManager->getProperty("SensitivityPatchAlgorithm");
+        patchAlg->setChild(true);
+        patchAlg->setProperty("Workspace", floodWS);
+        patchAlg->execute();
+        m_output_message += "   |Sensitivity patch applied\n";
       }
 
-      // Calculate detector sensitivity
-      IAlgorithm_sptr effAlg = createSubAlgorithm("CalculateEfficiency");
-      effAlg->setProperty("InputWorkspace", rawFloodWS);
-
-      const double minEff = getProperty("MinEfficiency");
-      const double maxEff = getProperty("MaxEfficiency");
-      effAlg->setProperty("MinEfficiency", minEff);
-      effAlg->setProperty("MaxEfficiency", maxEff);
-      effAlg->execute();
-      floodWS = effAlg->getProperty("OutputWorkspace");
-    } else {
-      floodWS = rawFloodWS;
+      floodWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
+      setProperty("OutputSensitivityWorkspace", floodWS);
+      reductionManager->declareProperty(new WorkspaceProperty<>(entryName,"",Direction::Output));
+      reductionManager->setPropertyValue(entryName, floodWSName);
+      reductionManager->setProperty(entryName, floodWS);
     }
-
-    // Patch as needed
-    std::string sensitivity_patch = reductionHandler.findStringEntry("SensitivityPatchAlgorithm");
-    if (sensitivity_patch.size()>0)
-    {
-      IAlgorithm_sptr patchAlg = Algorithm::fromString(sensitivity_patch);
-      patchAlg->setChild(true);
-      patchAlg->setProperty("Workspace", floodWS);
-      patchAlg->execute();
-      m_output_message += "   |Sensitivity patch applied\n";
-    }
-
-    floodWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
-    setProperty("OutputSensitivityWorkspace", floodWS);
   }
+
   progress.report(3, "Loaded flood field");
 
   // Check whether we need to apply the correction to a workspace

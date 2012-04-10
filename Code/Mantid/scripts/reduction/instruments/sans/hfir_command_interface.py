@@ -59,14 +59,14 @@ def DarkCurrent(datafile):
     ReductionSingleton().set_dark_current_subtracter(mantidsimple.HFIRDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
-                                                     ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                                     ReductionProperties=ReductionSingleton().get_reduction_table_name())
     
 def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)
     
 def SolidAngle():
     ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, InputWorkspace=None, OutputWorkspace=None,
-                                                   ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                                   ReductionProperties=ReductionSingleton().get_reduction_table_name())
     
 def NoSolidAngle():
     ReductionSingleton().set_solid_angle_correcter(None)
@@ -193,7 +193,7 @@ def HFIRSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
     ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
-                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                       ReductionProperties=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
     
@@ -201,7 +201,7 @@ def BIOSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("BIOSANS"))
     ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
-                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                       ReductionProperties=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
 
@@ -209,7 +209,7 @@ def HFIRDEV():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("BIOSANS"))
     ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
-                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                       ReductionProperties=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
 
@@ -217,7 +217,7 @@ def GPSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
     ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
-                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                       ReductionProperties=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
     

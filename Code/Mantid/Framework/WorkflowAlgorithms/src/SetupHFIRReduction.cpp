@@ -6,8 +6,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SetupHFIRReduction.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -32,26 +33,30 @@ using namespace DataObjects;
 void SetupHFIRReduction::init()
 {
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
 
 void SetupHFIRReduction::exec()
 {
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable && reductionTableName.size()>0)
-    setProperty("ReductionTableWorkspace", reductionHandler.getTable());
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  if (reductionManagerName.size()==0)
+  {
+    g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
+    return;
+  }
+  boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
+  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
 
   // Store name of the instrument
-  reductionHandler.addEntry("InstrumentName", "BIOSANS", true);
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "BIOSANS") );
 
-  // Store dark current algorithm algorithm
+  // Store default dark current algorithm
   IAlgorithm_sptr darkAlg = createSubAlgorithm("HFIRDarkCurrentSubtraction");
   darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
-  darkAlg->setPropertyValue("ReductionTableWorkspace", reductionTableName);
-  reductionHandler.addEntry("DefaultDarkCurrentAlgorithm", darkAlg->toString());
+  darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+  reductionManager->declareProperty(new AlgorithmProperty("DefaultDarkCurrentAlgorithm"));
+  reductionManager->setProperty("DefaultDarkCurrentAlgorithm", darkAlg);
 
   setPropertyValue("OutputMessage", "HFIR reduction options set");
 }

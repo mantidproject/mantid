@@ -1,5 +1,4 @@
 set ( SRC_FILES
-		src/ReductionTableHandler.cpp
         src/EQSANSQ2D.cpp
         src/EQSANSLoad.cpp
         src/HFIRLoad.cpp
@@ -27,7 +26,6 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/HFIRLoad.h
         inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
         inc/MantidWorkflowAlgorithms/HFIRInstrument.h
-        inc/MantidWorkflowAlgorithms/ReductionTableHandler.h
         inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
         inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h

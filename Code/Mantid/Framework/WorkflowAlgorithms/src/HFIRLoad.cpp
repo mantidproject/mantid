@@ -10,9 +10,10 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include <MantidAPI/FileProperty.h>
 #include "Poco/NumberFormatter.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -55,8 +56,7 @@ void HFIRLoad::init()
     "Wavelength spread to use when loading the data file (default 0.0)" );
 
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
-
+  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
 
 /// Move the detector according to the beam center
@@ -87,15 +87,26 @@ void HFIRLoad::moveToBeamCenter()
 
 void HFIRLoad::exec()
 {
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable)
-  {
-    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
-  }
-  if (reductionHandler.findStringEntry("LoadAlgorithm").size()==0)
-    reductionHandler.addEntry("LoadAlgorithm", toString());
+  // Reduction property manager
+   const std::string reductionManagerName = getProperty("ReductionProperties");
+   boost::shared_ptr<PropertyManager> reductionManager;
+   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+   {
+     reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+   }
+   else
+   {
+     reductionManager = boost::make_shared<PropertyManager>();
+     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+   }
+
+   // If the load algorithm isn't in the reduction properties, add it
+   if (!reductionManager->existsProperty("LoadAlgorithm"))
+   {
+     AlgorithmProperty *algProp = new AlgorithmProperty("LoadAlgorithm");
+     algProp->setValue(toString());
+     reductionManager->declareProperty(algProp);
+   }
 
   const std::string fileName = getPropertyValue("Filename");
 
@@ -180,10 +191,14 @@ void HFIRLoad::exec()
     m_center_x = pixel_ctr_x;
     m_center_y = pixel_ctr_y;
     moveToBeamCenter();
-    // Add beam center to reduction table, as the last beam center position that was used.
+    // Add beam center to reduction properties, as the last beam center position that was used.
     // This will give us our default position next time.
-    reductionHandler.addEntry("LatestBeamCenterX", m_center_x);
-    reductionHandler.addEntry("LatestBeamCenterY", m_center_y);
+    if (!reductionManager->existsProperty("LatestBeamCenterX"))
+      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", m_center_x) );
+    else reductionManager->setProperty("LatestBeamCenterX", m_center_x);
+    if (!reductionManager->existsProperty("LatestBeamCenterY"))
+      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", m_center_y) );
+    else reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   } else {
     HFIRInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
     g_log.information() << "No beam finding method: setting to default ["

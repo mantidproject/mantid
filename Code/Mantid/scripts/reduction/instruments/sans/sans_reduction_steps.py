@@ -268,7 +268,7 @@ class BeamSpreaderTransmission(BaseTransmission):
                 self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
                                                   InputWorkspace=None, Filename=dark_current,
                                                   OutputWorkspace=None,
-                                                  ReductionTableWorkspace=reducer.get_reduction_table_name())
+                                                  ReductionProperties=reducer.get_reduction_table_name())
                 self._dark_current_subtracter.execute(reducer, sample_spreader_ws)
                 self._dark_current_subtracter.execute(reducer, direct_spreader_ws)
                 self._dark_current_subtracter.execute(reducer, sample_scatt_ws)
@@ -370,7 +370,7 @@ class DirectBeamTransmission(BaseTransmission):
             self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
                                               InputWorkspace=None, Filename=dark_current,
                                               OutputWorkspace=None,
-                                              ReductionTableWorkspace=reducer.get_reduction_table_name())
+                                              ReductionProperties=reducer.get_reduction_table_name())
             partial_out = self._dark_current_subtracter.execute(reducer, sample_ws)
             partial_out2 = self._dark_current_subtracter.execute(reducer, empty_ws)
             partial_out = "\n%s\n%s" % (partial_out, partial_out2)
@@ -698,7 +698,7 @@ class SensitivityCorrection(ReductionStep):
                                   BeamCenterX=center_x,
                                   BeamCenterY=center_y,
                                   OutputWorkspace=workspace,
-                                  ReductionTableWorkspace=reducer.get_reduction_table_name(),
+                                  ReductionProperties=reducer.get_reduction_table_name(),
                                   OutputSensitivityWorkspace=self._efficiency_ws
                                   )
         return l.getPropertyValue("OutputMessage")

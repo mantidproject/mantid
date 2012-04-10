@@ -123,7 +123,7 @@ class LoadRun(ReductionStep):
                          SampleDetectorDistanceOffset = self._sample_det_offset,
                          Wavelength = self._wavelength,
                          WavelengthSpread = self._wavelength_spread,
-                         ReductionTableWorkspace=reducer.get_reduction_table_name())
+                         ReductionProperties=reducer.get_reduction_table_name())
             return l.getPropertyValue("OutputMessage")
 
         # Check whether we have a list of files that need merging

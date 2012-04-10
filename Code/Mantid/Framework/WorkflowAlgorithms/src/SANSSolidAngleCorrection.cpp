@@ -15,7 +15,9 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -45,21 +47,31 @@ void SANSSolidAngleCorrection::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
 
 void SANSSolidAngleCorrection::exec()
 {
-  // Get the reduction table workspace or create one
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable)
-  {
-    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
-  }
-  if (reductionHandler.findStringEntry("SolidAngleAlgorithm").size()==0)
-    reductionHandler.addEntry("SolidAngleAlgorithm", toString());
+  // Reduction property manager
+   const std::string reductionManagerName = getProperty("ReductionProperties");
+   boost::shared_ptr<PropertyManager> reductionManager;
+   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+   {
+     reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+   }
+   else
+   {
+     reductionManager = boost::make_shared<PropertyManager>();
+     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+   }
+
+   // If the solid angle algorithm isn't in the reduction properties, add it
+   if (!reductionManager->existsProperty("SolidAngleAlgorithm"))
+   {
+     AlgorithmProperty *algProp = new AlgorithmProperty("SolidAngleAlgorithm");
+     algProp->setValue(toString());
+     reductionManager->declareProperty(algProp);
+   }
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);

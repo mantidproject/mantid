@@ -37,7 +37,7 @@ def DarkCurrent(datafile):
     ReductionSingleton().set_dark_current_subtracter(mantidsimple.EQSANSDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
-                                                     ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
+                                                     ReductionProperties=ReductionSingleton().get_reduction_table_name())
 
 def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
     ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToBeam=normalize_to_beam, BeamSpectrumFile=beam_file)

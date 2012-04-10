@@ -179,7 +179,7 @@ class LoadRun(ReductionStep):
                        SampleDetectorDistance=self._sample_det_dist,
                        SampleDetectorDistanceOffset=self._sample_det_offset,
                        PreserveEvents=self._keep_events,
-                       ReductionTableWorkspace=reducer.get_reduction_table_name()
+                       ReductionProperties=reducer.get_reduction_table_name()
                        )            
             return l.getPropertyValue("OutputMessage")
         

@@ -32,7 +32,7 @@ class SubtractDarkCurrent(ReductionStep):
             @param workspace: input workspace
         """
         alg = EQSANSDarkCurrentSubtraction(InputWorkspace=workspace, Filename=self._dark_current_file, OutputWorkspace=workspace,
-                                     ReductionTableWorkspace=reducer.get_reduction_table_name())        
+                                     ReductionProperties=reducer.get_reduction_table_name())        
         return alg.getPropertyValue("OutputMessage")
     
 class AzimuthalAverageByFrame(WeightedAzimuthalAverage):

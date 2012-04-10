@@ -26,8 +26,9 @@ Workflow algorithm that loads EQSANS event data, applies TOF corrections, and co
 #include <boost/tokenizer.hpp>
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -69,7 +70,7 @@ void EQSANSLoad::init()
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
   declareProperty("OutputMessage","",Direction::Output);
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 
 }
 
@@ -323,7 +324,7 @@ void EQSANSLoad::moveToBeamCenter()
   if (isEmpty(m_center_x) || isEmpty(m_center_y))
   {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    g_log.information() << "No beam finding method: setting to default ["
+    g_log.notice() << "No beam finding method: setting to default ["
       << Poco::NumberFormatter::format(m_center_x, 1) << ", "
       << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
     return;
@@ -424,17 +425,30 @@ void EQSANSLoad::exec()
   m_center_x = getProperty("BeamCenterX");
   m_center_y = getProperty("BeamCenterY");
 
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable)
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  boost::shared_ptr<PropertyManager> reductionManager;
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
   {
-    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   }
-  if (reductionHandler.findStringEntry("LoadAlgorithm").size()==0)
-    reductionHandler.addEntry("LoadAlgorithm", toString());
-  if (reductionHandler.findStringEntry("InstrumentName").size()==0)
-    reductionHandler.addEntry("InstrumentName", "EQSANS");
+  else
+  {
+    reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+  }
+
+  if (!reductionManager->existsProperty("LoadAlgorithm"))
+  {
+    AlgorithmProperty *loadProp = new AlgorithmProperty("LoadAlgorithm");
+    loadProp->setValue(toString());
+    reductionManager->declareProperty(loadProp);
+  }
+
+  if (!reductionManager->existsProperty("InstrumentName"))
+  {
+    reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "EQSANS") );
+  }
 
   const std::string fileName = getPropertyValue("Filename");
 
@@ -524,6 +538,14 @@ void EQSANSLoad::exec()
 
   // Move the beam center to its proper position
   moveToBeamCenter();
+  // Add beam center to reduction properties, as the last beam center position that was used.
+  // This will give us our default position next time.
+  if (!reductionManager->existsProperty("LatestBeamCenterX"))
+    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", m_center_x) );
+  else reductionManager->setProperty("LatestBeamCenterX", m_center_x);
+  if (!reductionManager->existsProperty("LatestBeamCenterY"))
+    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", m_center_y) );
+  else reductionManager->setProperty("LatestBeamCenterY", m_center_y);
 
   // Modify TOF
   bool correct_for_flight_path = getProperty("CorrectForFlightPath");

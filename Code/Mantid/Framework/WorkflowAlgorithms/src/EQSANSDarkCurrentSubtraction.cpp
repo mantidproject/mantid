@@ -6,7 +6,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -18,6 +17,9 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -49,7 +51,7 @@ void EQSANSDarkCurrentSubtraction::init()
       "The name of the input event Nexus file to load as dark current.");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputDarkCurrentWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage","",Direction::Output);
 
@@ -57,6 +59,26 @@ void EQSANSDarkCurrentSubtraction::init()
 
 void EQSANSDarkCurrentSubtraction::exec()
 {
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  boost::shared_ptr<PropertyManager> reductionManager;
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+  {
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+  }
+  else
+  {
+    reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+  }
+
+  if (!reductionManager->existsProperty("DarkCurrentAlgorithm"))
+  {
+    AlgorithmProperty *algProp = new AlgorithmProperty("DarkCurrentAlgorithm");
+    algProp->setValue(toString());
+    reductionManager->declareProperty(algProp);
+  }
+
   Progress progress(this,0.0,1.0,10);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -83,56 +105,44 @@ void EQSANSDarkCurrentSubtraction::exec()
   }
 
   const std::string fileName = getPropertyValue("Filename");
-  MatrixWorkspace_sptr darkWS = getProperty("OutputDarkCurrentWorkspace");
+  MatrixWorkspace_sptr darkWS;
   std::string darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
-
-  // Get the reduction table workspace or create one
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable)
-  {
-    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
-    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
-  }
-  if (reductionHandler.findStringEntry("DarkCurrentAlgorithm").size()==0)
-    reductionHandler.addEntry("DarkCurrentAlgorithm", toString());
 
   progress.report("Subtracting dark current");
 
   // Look for an entry for the dark current in the reduction table
   Poco::Path path(fileName);
   const std::string entryName = "DarkCurrent"+path.getBaseName();
-  darkWS = reductionHandler.findWorkspaceEntry(entryName);
-  darkWSName = reductionHandler.findStringEntry(entryName);
 
-  if (darkWSName.size()==0) {
-    darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
-    if (darkWSName.size()==0)
-      darkWSName = "__dark_current_"+path.getBaseName();
-    setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
-    reductionHandler.addEntry(entryName, darkWSName);
-  }
-
-  // Load the dark current if we don't have it already
-  if (!darkWS)
+  if (reductionManager->existsProperty(entryName))
   {
-    std::string loader = reductionHandler.findStringEntry("LoadAlgorithm");
-    if (loader.size()==0)
+    darkWS = reductionManager->getProperty(entryName);
+    darkWSName = reductionManager->getPropertyValue(entryName);
+  } else {
+    // Load the dark current if we don't have it already
+    if (darkWSName.size()==0) {
+      darkWSName = "__dark_current_"+path.getBaseName();
+      setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
+    }
+
+    if (!reductionManager->existsProperty("LoadAlgorithm"))
     {
       IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsSubAlg();
       darkWS = loadAlg->getProperty("OutputWorkspace");
     } else {
-      IAlgorithm_sptr loadAlg = Algorithm::fromString(loader);
+      IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
       loadAlg->setChild(true);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->setPropertyValue("OutputWorkspace", darkWSName);
       loadAlg->execute();
-      //darkWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(darkWSName);
       darkWS = loadAlg->getProperty("OutputWorkspace");
     }
     setProperty("OutputDarkCurrentWorkspace", darkWS);
+    reductionManager->declareProperty(new WorkspaceProperty<>(entryName,"",Direction::Output));
+    reductionManager->setPropertyValue(entryName, darkWSName);
+    reductionManager->setProperty(entryName, darkWS);
   }
   progress.report(3, "Loaded dark current");
 
