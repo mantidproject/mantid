@@ -15,7 +15,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
 {
   if( no_output )
   {
-    emit runAsPythonScript(code);
+    emit runAsPythonScript(code, true);
     return QString();
   }
 
@@ -32,7 +32,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
    tmp_file.close();
    QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w')\n" + code;
 
-   emit runAsPythonScript(code_to_run);
+   emit runAsPythonScript(code_to_run, true);
 
    //Now get the output
    tmp_file.open();

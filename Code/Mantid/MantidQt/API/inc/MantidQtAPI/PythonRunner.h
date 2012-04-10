@@ -52,7 +52,7 @@ namespace MantidQt
       /// Converts a list of strings into a string recognised by Python as a tuple
       static const QString stringList2Tuple(const QStringList & list);
     signals:
-      void runAsPythonScript(const QString& code);
+      void runAsPythonScript(const QString& code, bool);
     };
   }
 }

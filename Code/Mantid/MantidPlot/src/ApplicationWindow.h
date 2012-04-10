@@ -1141,7 +1141,8 @@ private:
   void showCustomActionDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
-  bool runPythonScript(const QString & code, bool quiet=false, bool redirect=true);
+  bool runPythonScript(const QString & code, const bool async = false,
+      bool quiet=false, bool redirect=true);
 
   void setPlotType(const QStringList & plotType);
 

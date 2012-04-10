@@ -293,8 +293,8 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     {
       m_directInstruments = new Homer(qobject_cast<QWidget*>(this->parent()), m_uiForm);
       m_directInstruments->initLayout();
-      connect(m_directInstruments, SIGNAL(runAsPythonScript(const QString&)),
-	      this, SIGNAL(runAsPythonScript(const QString&)));
+      connect(m_directInstruments, SIGNAL(runAsPythonScript(const QString&, bool)),
+	      this, SIGNAL(runAsPythonScript(const QString&, bool)));
       m_directInstruments->initializeLocalPython();
     }
     m_directInstruments->setIDFValues(curInstPrefix);

@@ -147,12 +147,12 @@ QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
 {
   if( no_output )
   {
-    emit runAsPythonScript(code);
+    emit runAsPythonScript(code, true);
     return QString();
   }
   
   // Otherwise we need to gather the information from stdout. This is achieved by redirecting the stdout stream
-  // to a temproary file and then reading its contents
+  // to a temporary file and then reading its contents
   // A QTemporaryFile object is used since the file is automatically deleted when the object goes out of scope
   QTemporaryFile tmp_file;
   if( !tmp_file.open() )
@@ -164,7 +164,8 @@ QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
    QString tmpstring = tmp_file.fileName();
    tmp_file.close();
    QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w')\n" + code;
-   emit runAsPythonScript(code_to_run);
+
+   emit runAsPythonScript(code_to_run, true);
 
    //Now get the output
    tmp_file.open();

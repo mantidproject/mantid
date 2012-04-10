@@ -16215,13 +16215,13 @@ void ApplicationWindow::showScriptInterpreter()
 
 bool ApplicationWindow::testForIPython()
 {
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",true,false);
+  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
 }
 
 void ApplicationWindow::launchIPythonConsole()
 {
   // MantidPlot_IPython will already be imported in the testForIPython method
-  runPythonScript("MantidPlot_IPython().launch_console()",true,false);
+  runPythonScript("MantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**
@@ -16980,16 +16980,16 @@ if( QFileInfo(action_data).exists() )
   QTextStream stream(&script_file);
   QString scriptPath = QString("r'%1'").arg(QFileInfo(action_data).absolutePath());
   QString code = QString("sys.path.append(%1)\n").arg(scriptPath);
-    runPythonScript(code, true);
+    runPythonScript(code, false,true);
   code = "";
   while( !stream.atEnd() )
   {
     code.append(stream.readLine() + "\n");
   }
-  runPythonScript(code, true);
+  runPythonScript(code, false, true);
   code = "";
   code.append(QString("\nsys.path.remove(%1)").arg(scriptPath));
-    runPythonScript(code, true);
+    runPythonScript(code, false, true);
 }
 else
 {
@@ -17012,8 +17012,8 @@ else
     connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
     connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
-        SLOT(runPythonScript(const QString&)));
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
+        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->objectName() == "Muon Analysis")
     {
       // Re-emits the signal caught from the muon analysis
@@ -17167,7 +17167,8 @@ void ApplicationWindow::showGraphs()
 /**
 * Run Python Script
 */
-bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool redirect)
+bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
+    bool quiet, bool redirect)
 {
   if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
 
@@ -17189,7 +17190,20 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool r
     connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
             SLOT(scriptPrint(const QString &)));
   }
-  bool success = m_iface_script->execute(code);
+  bool success(false);
+  if(async)
+  {
+    QFuture<bool> job = m_iface_script->executeAsync(code);
+    while(job.isRunning())
+    {
+      QCoreApplication::instance()->processEvents();
+    }
+    success = job.result();
+  }
+  else
+  {
+    success = m_iface_script->execute(code);
+  }
   if (redirect)
   {
     m_iface_script->redirectStdOut(false);

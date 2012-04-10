@@ -10,8 +10,8 @@ using namespace MantidQt::API;
 MantidWidget::MantidWidget(QWidget *parent) : QWidget(parent), m_pyRunner()
 {
   // re-emit the run Python code from m_pyRunner, to work this signal must reach the slot in QtiPlot
-  connect(&m_pyRunner, SIGNAL(runAsPythonScript(const QString&)),
-    this, SIGNAL(runAsPythonScript(const QString&)));
+  connect(&m_pyRunner, SIGNAL(runAsPythonScript(const QString&, bool)),
+    this, SIGNAL(runAsPythonScript(const QString&, bool)));
 }
 
 /** Run a piece of python code and return any output that it writes to stdout

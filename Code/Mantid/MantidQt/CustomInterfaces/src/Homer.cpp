@@ -178,7 +178,7 @@ void Homer::setUpPage2()
 
   connect(m_uiForm.ckRunDiag, SIGNAL(toggled(bool)), m_diagPage, SLOT(setEnabled(bool)));
   connect(m_uiForm.ckSumSpecs, SIGNAL(toggled(bool)), m_diagPage, SLOT(setSumState(bool)));
-  connect(m_diagPage, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
+  connect(m_diagPage, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   m_uiForm.ckRunDiag->setChecked(true);
 }
 
@@ -578,8 +578,8 @@ bool Homer::runScripts()
   m_uiForm.tabWidget->setCurrentIndex(0);
   // constructing this builds the Python script, it is executed below
   deltaECalc unitsConv( this, m_uiForm, m_backgroundDialog->removeBackground(),
-			m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
-  connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
+      m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
+  connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   
   // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
   if (m_uiForm.ckRunDiag->isChecked())

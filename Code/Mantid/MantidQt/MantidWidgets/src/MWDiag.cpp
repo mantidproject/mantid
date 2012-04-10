@@ -451,8 +451,8 @@ void MWDiag::showTestResults(const QString & testSummary) const
   if( !m_dispDialog )
   {
     m_dispDialog = new DiagResults(this->parentWidget());
-    connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&)), this, 
-	    SIGNAL(runAsPythonScript(const QString&)));
+    connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&, bool)), this,
+	    SIGNAL(runAsPythonScript(const QString&, bool)));
   }
   
   m_dispDialog->updateResults(testSummary);
