@@ -131,6 +131,9 @@ private slots:
   ///
   void runFirstGoodBinFront();
 
+  /// Set whether previous / next buttons are enabled.
+  void enableButtons(bool enabled);
+
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
 
@@ -288,6 +291,9 @@ private:
 
   /// name for file to temperary store grouping
   std::string m_groupingTempFilename;
+
+  /// Deal with input file changes.
+  void handleInputFileChanges();
 
   ///
   void updatePairTable();

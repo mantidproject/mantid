@@ -456,6 +456,7 @@ QVariant MWRunFiles::getUserInput() const
 void MWRunFiles::setText(const QString & value)
 {
   m_uiForm.fileEditor->setText(value);
+  m_uiForm.fileEditor->setModified(true);
 }
 
 /**
@@ -466,7 +467,7 @@ void MWRunFiles::setText(const QString & value)
  */
 void MWRunFiles::setUserInput(const QVariant & value)
 {
-  m_uiForm.fileEditor->setText(value.toString());
+  setText(value.toString());
   emit fileEditingFinished();
 }
 

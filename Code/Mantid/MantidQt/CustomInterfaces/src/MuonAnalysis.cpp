@@ -936,11 +936,20 @@ void MuonAnalysis::updatePairTable()
   }
 }
 
-
 /**
- * Do some check when reading from MWRun, before actually reading new data file, to see if file is valid (slot)
+ * Slot called when the input file is changed.
  */
 void MuonAnalysis::inputFileChanged_MWRunFiles()
+{
+  // Handle changed input, then turn previous / next buttons back on.
+  handleInputFileChanges();
+  enableButtons(true);
+}
+
+/**
+ * Do some check when reading from MWRun, before actually reading new data file, to see if file is valid
+ */
+void MuonAnalysis::handleInputFileChanges()
 {
   if ( m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
@@ -965,7 +974,9 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
           same = false;
       }
       if (same == true)
+      {
         return;
+      }
     }
 
     // in case file is selected from browser button check that it actually exist
@@ -976,14 +987,12 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
         if (m_previousFilenames.size() > 0) // If a previous file exists then reset the name.
         {
           if (runFiles.size() > 1) 
-          
             m_uiForm.mwRunFiles->setText(m_textToDisplay);
           else
             m_uiForm.mwRunFiles->setText(m_textToDisplay);
         }
         else // Ohterwise set the text a blank string.
           m_uiForm.mwRunFiles->setText("");
-
         return;
       }
     }
@@ -3014,6 +3023,11 @@ void MuonAnalysis::loadFittings()
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
 }
 
+void MuonAnalysis::enableButtons(bool enabled)
+{
+  m_uiForm.nextRun->setEnabled(enabled);
+  m_uiForm.previousRun->setEnabled(enabled);
+}
 
 /**
 *   Check to see if the appending option is true when the previous button has been pressed and acts accordingly
@@ -3025,7 +3039,7 @@ void MuonAnalysis::checkAppendingPreviousRun()
     return;
   }
   
-  m_uiForm.previousRun->setEnabled(false);
+  enableButtons(false);
   
   if (m_uiForm.mwRunFiles->getText().contains("-"))
   {
@@ -3036,10 +3050,7 @@ void MuonAnalysis::checkAppendingPreviousRun()
     //Subtact one from the current run and load
     changeRun(-1);
   }
-
-  m_uiForm.previousRun->setEnabled(true);
 }
-
 
 /**
 *   Check to see if the appending option is true when the next button has been pressed and acts accordingly
@@ -3049,7 +3060,7 @@ void MuonAnalysis::checkAppendingNextRun()
   if (m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
 
-  m_uiForm.nextRun->setEnabled(false);
+  enableButtons(false);
 
   if (m_uiForm.mwRunFiles->getText().contains("-"))
   {
@@ -3060,8 +3071,6 @@ void MuonAnalysis::checkAppendingNextRun()
     //Add one to current run and laod
     changeRun(1);
   }
-
-  m_uiForm.nextRun->setEnabled(true);
 }
 
 
