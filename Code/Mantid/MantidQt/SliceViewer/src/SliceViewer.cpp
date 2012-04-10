@@ -135,6 +135,10 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_lineOverlay = new LineOverlay(m_plot);
   m_lineOverlay->setVisible(false);
 
+  m_overlayWSOutline = new LineOverlay(m_plot);
+  m_overlayWSOutline->setShowHandles(false);
+  m_overlayWSOutline->setVisible(false);
+
 }
 
 //------------------------------------------------------------------------------------
@@ -1857,6 +1861,21 @@ void SliceViewer::rebinParamsChanged()
  */
 void SliceViewer::dynamicRebinCompleteSlot()
 {
+  if (m_overlayWS)
+  {
+    double yMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
+    double yMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
+    double yMiddle = (yMin + yMax)/2.0;
+    QPointF pointA(m_overlayWS->getDimension(m_dimX)->getMinimum(), yMiddle);
+    QPointF pointB(m_overlayWS->getDimension(m_dimX)->getMaximum(), yMiddle);
+    m_overlayWSOutline->setPointA(pointA);
+    m_overlayWSOutline->setPointB(pointB);
+    m_overlayWSOutline->setWidth((yMax - yMin)/2.0);
+    m_overlayWSOutline->setCreationMode(false);
+    m_overlayWSOutline->setVisible(true);
+  }
+  else
+    m_overlayWSOutline->setVisible(false);
   this->updateDisplay();
 }
 

@@ -178,6 +178,9 @@ private:
   /// The LineOverlay widget for drawing line cross-sections (hidden at startup)
   LineOverlay * m_lineOverlay;
 
+  /// The LineOverlay widget for drawing the outline of the rebinned workspace
+  LineOverlay * m_overlayWSOutline;
+
 
 
   // -------------------------- Data Members ----------------------------
