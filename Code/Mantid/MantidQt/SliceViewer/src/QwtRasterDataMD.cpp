@@ -175,16 +175,23 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
   if (!m_fast) return QSize();
 
   // Fast mode: use the bin size to guess at the pixel density
-  IMDWorkspace_sptr ws = m_ws;
-  // Use the overlay workspace, if any
-  if (m_overlayWS) ws = m_overlayWS;
-  IMDDimension_const_sptr m_X = ws->getDimension(m_dimX);
-  IMDDimension_const_sptr m_Y = ws->getDimension(m_dimY);
-  int w = 3 * int(area.width() / m_X->getBinWidth());
-  int h = 3 * int(area.height() /m_Y->getBinWidth());
+  coord_t binX = m_ws->getDimension(m_dimX)->getBinWidth();
+  coord_t binY = m_ws->getDimension(m_dimY)->getBinWidth();
+
+  // Use the overlay workspace, if any, and if its bins are smaller
+  if (m_overlayWS)
+  {
+    coord_t temp;
+    temp = m_overlayWS->getDimension(m_dimX)->getBinWidth();
+    if (temp < binX) binX = temp;
+    temp = m_overlayWS->getDimension(m_dimY)->getBinWidth();
+    if (temp < binY) binY = temp;
+  }
+
+  int w = 3 * int(area.width() / binX);
+  int h = 3 * int(area.height() / binY);
   if (w<10) w = 10;
   if (h<10) h = 10;
-//  std::cout << "rasterHint: " << w << std::endl;
   return QSize(w,h);
 }
 
