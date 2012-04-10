@@ -746,7 +746,7 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().prep_normalize.getPixelCorrFile()");
   file = file.trimmed();
   //Check if the file name is set to Python's None object and then adjust the controls if there is an empty entry
-  m_uiForm.floodFile->setFileText(file == "None" ? "" : file);
+  m_uiForm.floodFile->setFileTextWithSearch(file == "None" ? "" : file);
   m_uiForm.enableFlood_ck->setChecked( ! m_uiForm.floodFile->isEmpty() );
   prepareFlood(m_uiForm.enableFlood_ck->checkState());
 
@@ -1750,7 +1750,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
     if ( ( ! m_uiForm.transCan->isEmpty() ) && m_uiForm.dirCan->isEmpty() )
     {
-      m_uiForm.dirCan->setFileText(m_uiForm.direct->getText());
+      m_uiForm.dirCan->setFileTextWithSearch(m_uiForm.direct->getText());
       m_uiForm.dirCan->setEntryNum(m_uiForm.direct->getEntryNum());
     }
     if ( ( ! m_uiForm.transCan->isEmpty() ) && ( ! m_uiForm.dirCan->isEmpty() ) )

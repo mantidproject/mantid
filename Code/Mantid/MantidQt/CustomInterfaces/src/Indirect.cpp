@@ -1359,7 +1359,7 @@ void Indirect::calibCreate()
       {
         createRESfile(filenames);
       }
-      m_uiForm.ind_calibFile->setFileText(pyOutput + ".nxs");
+      m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs");
       m_uiForm.ckUseCalib->setChecked(true);
     }
   }

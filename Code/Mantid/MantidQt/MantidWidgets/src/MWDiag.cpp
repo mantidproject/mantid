@@ -253,10 +253,9 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   // signals connected to the interface that this form is on
   if ( parentInterface != NULL )
   {
-
     // controls that copy the text from other controls
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
-      m_designWidg.white_file, SLOT(setFileText(const QString&)));
+      m_designWidg.white_file, SLOT(setFileTextWithSearch(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
 	        this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));

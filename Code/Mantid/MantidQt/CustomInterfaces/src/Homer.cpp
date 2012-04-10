@@ -125,8 +125,8 @@ void Homer::setUpPage1()
 /// put default values into the controls in the first tab
 void Homer::page1FileWidgs()
 {
-  connect(m_uiForm.runFiles, SIGNAL(fileEditingFinished()), this, SLOT(runFilesChanged()));
-  connect(m_uiForm.whiteBeamFile, SIGNAL(fileEditingFinished()), this, SLOT(updateWBV()));
+  connect(m_uiForm.runFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesChanged()));
+  connect(m_uiForm.whiteBeamFile, SIGNAL(fileFindingFinished()), this, SLOT(updateWBV()));
 
   // Add the save buttons to a button group
   m_saveChecksGroup = new QButtonGroup();
@@ -187,7 +187,7 @@ void Homer::setUpPage3()
   m_uiForm.ckRunAbsol->setToolTip("Normalise to calibration run(s)");
 
   // Update values on absolute tab with those from vanadium tab
-  connect(m_uiForm.mapFile, SIGNAL(fileTextChanged(const QString&)), m_uiForm.absMapFile, SLOT(setFileText(const QString &)));
+  connect(m_uiForm.mapFile, SIGNAL(fileFindingFinished()), this, SLOT(updateVanadiumMapFile()));
 
   connect(m_uiForm.leEGuess, SIGNAL(textChanged(const QString &)), this, SLOT(updateAbsEi(const QString &)));
   connect(m_uiForm.leVanEi, SIGNAL(textChanged(const QString&)), this, SLOT(validateAbsEi(const QString &)));
@@ -313,8 +313,8 @@ void Homer::readSettings()
  
   m_uiForm.ckFixEi->setChecked(settings.value("fixei", false).toBool());
   m_uiForm.ckSumSpecs->setChecked(settings.value("sumsps", false).toBool());
-  m_uiForm.mapFile->setFileText(settings.value("map", "").toString()); 
-    
+  m_uiForm.mapFile->setFileTextWithSearch(settings.value("map", "").toString());
+
   m_lastSaveDir = settings.value("save file dir", "").toString();
   m_lastLoadDir = settings.value("load file dir", "").toString();
 
@@ -664,6 +664,16 @@ void Homer::runFilesChanged()
   m_saveChanged = false;
   // the output file's default name is based on the input file names
   updateSaveName();
+}
+
+/**
+ * Syncs the vanadium map file with the standard map file
+ */
+void Homer::updateVanadiumMapFile()
+{
+  if( !m_uiForm.mapFile->isValid() ) return;
+  m_uiForm.absMapFile->setFileTextWithoutSearch(m_uiForm.mapFile->getText());
+  m_uiForm.absMapFile->findFiles();
 }
 
 /** Check if the user has specified a name for the output SPE file,
