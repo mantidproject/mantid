@@ -24,7 +24,7 @@ namespace SliceViewer
     m_plot(parent),
     m_snapEnabled(false),
     m_snapX(0.1), m_snapY(0.1), m_snapLength(0),
-    m_showHandles(true)
+    m_showHandles(true), m_showLine(true)
 
   {
     m_creation = true; // Will create with the mouse
@@ -132,6 +132,13 @@ namespace SliceViewer
   void LineOverlay::setShowHandles(bool shown)
   {
     m_showHandles = shown;
+  }
+
+  /** Sets whether to show the central line
+   * @param shown :: if false, the central line is invisible */
+  void LineOverlay::setShowLine(bool shown)
+  {
+    m_showLine = shown;
   }
 
   /** Sets whether we are in "creation" mode
@@ -295,10 +302,13 @@ namespace SliceViewer
     painter.setCompositionMode( QPainter::CompositionMode_SourceOver );
 
     // --- Draw the central line ---
-    centerPen.setWidth(2);
-    centerPen.setCapStyle(Qt::FlatCap);
-    painter.setPen(centerPen);
-    painter.drawLine(transform(m_pointA), transform(m_pointB));
+    if (m_showLine)
+    {
+      centerPen.setWidth(2);
+      centerPen.setCapStyle(Qt::FlatCap);
+      painter.setPen(centerPen);
+      painter.drawLine(transform(m_pointA), transform(m_pointB));
+    }
 
     // --- Draw and store the rects of the 4 handles ---
     m_handles.clear();
@@ -446,6 +456,13 @@ namespace SliceViewer
     if (event->buttons() & Qt::RightButton)
       m_rightButton = true;
 
+    // Do not respond to mouse when handles are hidden
+    if (!m_showHandles)
+    {
+      event->ignore();
+      return;
+    }
+
     // --- Initial creation mode - wait for first click ----
     if (m_creation)
     {
@@ -497,6 +514,12 @@ namespace SliceViewer
    * @param event mouse event info */
   void LineOverlay::mousePressEvent(QMouseEvent * event)
   {
+    // Do not respond to mouse when handles are hidden
+    if (!m_showHandles)
+    {
+      event->ignore();
+      return;
+    }
 
     // First left-click = create!
     if (m_creation && (event->buttons() & Qt::LeftButton))
@@ -534,6 +557,13 @@ namespace SliceViewer
   {
     if (!(event->buttons() & Qt::RightButton))
       m_rightButton = false;
+
+    // Do not respond to mouse when handles are hidden
+    if (!m_showHandles)
+    {
+      event->ignore();
+      return;
+    }
 
     if (m_dragHandle != HandleNone)
     {

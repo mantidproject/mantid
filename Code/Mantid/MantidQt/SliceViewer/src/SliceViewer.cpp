@@ -137,6 +137,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   m_overlayWSOutline = new LineOverlay(m_plot);
   m_overlayWSOutline->setShowHandles(false);
+  m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setVisible(false);
 
 }
