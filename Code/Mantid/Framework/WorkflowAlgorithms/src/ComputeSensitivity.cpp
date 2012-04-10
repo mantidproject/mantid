@@ -5,10 +5,12 @@ Calculate the EQSANS detector sensitivity.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/ComputeSensitivity.h"
-#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -35,7 +37,7 @@ void ComputeSensitivity::init()
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
       "Flood field or sensitivity file.");
   declareProperty(new WorkspaceProperty<>("PatchWorkspace","", Direction::Input, PropertyMode::Optional));
-  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output));
+  declareProperty("ReductionProperties","__eqsans_reduction_properties", Direction::Input);
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   declareProperty("OutputMessage","",Direction::Output);
 }
@@ -43,45 +45,59 @@ void ComputeSensitivity::init()
 void ComputeSensitivity::exec()
 {
   std::string outputMessage = "";
-  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
-  const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
+
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  boost::shared_ptr<PropertyManager> reductionManager;
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+  {
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+  }
+  else
+  {
+    g_log.notice() << "Could not find property manager" << std::endl;
+    reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+  }
+
   const std::string outputWS = getPropertyValue("OutputWorkspace");
   const std::string fileName = getPropertyValue("Filename");
 
-  ReductionTableHandler reductionHandler(reductionTable);
-  if (!reductionTable && reductionTableName.size()>0)
-    setProperty("ReductionTableWorkspace", reductionHandler.getTable());
-
-  // Find load algorithm
-  const std::string loader = reductionHandler.findStringEntry("LoadAlgorithm");
-  if (loader.size()==0) g_log.error() << "WARNING! No data loader found!" << std::endl;
-
   // Find beam center
-  const std::string beamCenter = reductionHandler.findStringEntry("BeamCenterAlgorithm");
-  const std::string beamCenterFile = reductionHandler.findStringEntry("BeamCenterFile");
-  double center_x = reductionHandler.findDoubleEntry("LatestBeamCenterX");
-  double center_y = reductionHandler.findDoubleEntry("LatestBeamCenterY");
+  double center_x = EMPTY_DBL();
+  double center_y = EMPTY_DBL();
+  if (reductionManager->existsProperty("LatestBeamCenterX") &&
+      reductionManager->existsProperty("LatestBeamCenterY"))
+  {
+    center_x = reductionManager->getProperty("LatestBeamCenterX");
+    center_y = reductionManager->getProperty("LatestBeamCenterY");
+    g_log.notice() << "No beam center provided: taking last position " << center_x << ", " << center_y << std::endl;
+  }
 
-  if (beamCenter.size()>0 && beamCenterFile.size()>0
-      && isEmpty(center_x) && isEmpty(center_y))
+  if (reductionManager->existsProperty("BeamCenterAlgorithm") &&
+      reductionManager->existsProperty("BeamCenterFile"))
   {
     progress(0.1, "Starting beam finder");
     // Load direct beam file
-    IAlgorithm_sptr loadAlg = Algorithm::fromString(loader);
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", beamCenterFile);
-    loadAlg->execute();
-    MatrixWorkspace_sptr beamCenterWS = loadAlg->getProperty("OutputWorkspace");
-    const std::string outMsg = loadAlg->getPropertyValue("OutputMessage");
-    outputMessage += outMsg;
+    const std::string beamCenterFile = reductionManager->getProperty("BeamCenterFile");
+    IAlgorithm_sptr loadAlg;
+    if (reductionManager->existsProperty("LoadAlgorithm"))
+    {
+      loadAlg = reductionManager->getProperty("LoadAlgorithm");
+      loadAlg->setChild(true);
+      loadAlg->setProperty("Filename", beamCenterFile);
+      loadAlg->execute();
+      MatrixWorkspace_sptr beamCenterWS = loadAlg->getProperty("OutputWorkspace");
+      const std::string outMsg = loadAlg->getPropertyValue("OutputMessage");
+      outputMessage += outMsg;
 
-    IAlgorithm_sptr centerAlg = Algorithm::fromString(beamCenter);
-    centerAlg->setChild(true);
-    centerAlg->setProperty("InputWorkspace", beamCenterWS);
-    centerAlg->execute();
-    std::vector<double> centerOfMass = centerAlg->getProperty("CenterOfMass");
-    EQSANSInstrument::getPixelFromCoordinate(centerOfMass[0], centerOfMass[1], beamCenterWS, center_x, center_y);
-
+      IAlgorithm_sptr centerAlg = reductionManager->getProperty("BeamCenterAlgorithm");
+      centerAlg->setChild(true);
+      centerAlg->setProperty("InputWorkspace", beamCenterWS);
+      centerAlg->execute();
+      std::vector<double> centerOfMass = centerAlg->getProperty("CenterOfMass");
+      EQSANSInstrument::getPixelFromCoordinate(centerOfMass[0], centerOfMass[1], beamCenterWS, center_x, center_y);
+    }
   }
   else if (isEmpty(center_x) || isEmpty(center_y))
   {
@@ -96,25 +112,28 @@ void ComputeSensitivity::exec()
     progress(0.2, "Patch sensitivity parameters found");
     IAlgorithm_sptr patchAlg = createSubAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
-    reductionHandler.addEntry("SensitivityPatchAlgorithm", patchAlg->toString());
+    reductionManager->declareProperty(new AlgorithmProperty("SensitivityPatchAlgorithm"));
+    reductionManager->setProperty("SensitivityPatchAlgorithm", patchAlg);
   }
 
   progress(0.3, "Computing sensitivity");
-  std::string eff = reductionHandler.findStringEntry("SensitivityAlgorithm");
-  if (eff.size()==0) g_log.error() << "Could not find sensitivity algorithm" << std::endl;
-  IAlgorithm_sptr effAlg = Algorithm::fromString(eff);
-  effAlg->setChild(true);
-  effAlg->setProperty("Filename", fileName);
-  effAlg->setProperty("BeamCenterX", center_x);
-  effAlg->setProperty("BeamCenterY", center_y);
-  effAlg->setPropertyValue("OutputSensitivityWorkspace", outputWS);
-  effAlg->execute();
-  MatrixWorkspace_sptr effWS = effAlg->getProperty("OutputSensitivityWorkspace");
-  std::string outMsg2 = effAlg->getPropertyValue("OutputMessage");
-  setProperty("OutputWorkspace", effWS);
-  outputMessage += outMsg2;
-  setProperty("OutputMessage", outputMessage);
-
+  if (reductionManager->existsProperty("SensitivityAlgorithm"))
+  {
+    IAlgorithm_sptr effAlg = reductionManager->getProperty("SensitivityAlgorithm");
+    effAlg->setChild(true);
+    effAlg->setProperty("Filename", fileName);
+    effAlg->setProperty("BeamCenterX", center_x);
+    effAlg->setProperty("BeamCenterY", center_y);
+    effAlg->setPropertyValue("OutputSensitivityWorkspace", outputWS);
+    effAlg->execute();
+    MatrixWorkspace_sptr effWS = effAlg->getProperty("OutputSensitivityWorkspace");
+    std::string outMsg2 = effAlg->getPropertyValue("OutputMessage");
+    setProperty("OutputWorkspace", effWS);
+    outputMessage += outMsg2;
+    setProperty("OutputMessage", outputMessage);
+  } else {
+    g_log.error() << "Could not find sensitivity algorithm" << std::endl;
+  }
 }
 
 } // namespace WorkflowAlgorithms
