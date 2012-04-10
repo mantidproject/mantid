@@ -1014,6 +1014,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     return;
 
   m_updating = true;
+  m_uiForm.tabWidget->setTabEnabled(3, false);
 
   std::string mainFieldDirection("");
   double timeZero(0.0);
@@ -1048,6 +1049,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file " + filename + " not recognised.");
       deleteRangedWorkspaces();
+      m_uiForm.tabWidget->setTabEnabled(3, true);
       return;
     }
 
@@ -1077,6 +1079,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
       deleteRangedWorkspaces();
+      m_uiForm.tabWidget->setTabEnabled(3, true);
       return;
     }
   }
@@ -1140,7 +1143,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
 
   if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
+  {
+    m_uiForm.tabWidget->setTabEnabled(3, true);
     return;
+  }
 
   // Populate instrument fields
   std::stringstream str;
@@ -1308,6 +1314,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     runFrontPlotButton();
   
   m_updating = false;
+  m_uiForm.tabWidget->setTabEnabled(3, true);
 }
 
 
