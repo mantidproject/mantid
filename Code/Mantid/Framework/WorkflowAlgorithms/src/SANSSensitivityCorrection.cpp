@@ -48,7 +48,10 @@ void SANSSensitivityCorrection::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, PropertyMode::Optional));
 
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
+  std::vector<std::string> exts;
+  exts.push_back(".nxs");
+  exts.push_back(".xml");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
       "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true, "If true, the dark current subtracted from the sample data will also be subtracted from the flood field.");
   declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
