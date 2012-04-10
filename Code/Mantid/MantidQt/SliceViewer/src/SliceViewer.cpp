@@ -1235,6 +1235,20 @@ void SliceViewer::updateDisplay(bool resetAxes)
 //  m_colorBar->setColorMap(m_colorRange, m_colorMap);
 //  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(), m_colorRange.maxValue() );
 
+  // Is the overlay workspace visible at all from this slice point?
+  if (m_overlayWS)
+  {
+    bool overlayInSlice = true;
+    for (size_t d=0; d< m_overlayWS->getNumDims(); d++)
+    {
+      if ((d != m_dimX && d != m_dimY) &&
+          (m_slicePoint[d] < m_overlayWS->getDimension(d)->getMinimum()
+              || m_slicePoint[d] >= m_overlayWS->getDimension(d)->getMaximum()))
+        overlayInSlice = false;
+    }
+    m_overlayWSOutline->setShown(overlayInSlice);
+  }
+
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);
   m_spect->itemChanged();
@@ -1864,6 +1878,7 @@ void SliceViewer::dynamicRebinCompleteSlot()
 {
   if (m_overlayWS)
   {
+    // Position the outline according to the position of the workspace.
     double yMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
     double yMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
     double yMiddle = (yMin + yMax)/2.0;

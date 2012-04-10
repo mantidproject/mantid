@@ -462,8 +462,8 @@ namespace SliceViewer
     if (event->buttons() & Qt::RightButton)
       m_rightButton = true;
 
-    // Do not respond to mouse when handles are hidden
-    if (!m_showHandles)
+    // Do not respond to mouse when hidden
+    if (!m_showHandles || !m_shown)
     {
       event->ignore();
       return;
@@ -520,8 +520,8 @@ namespace SliceViewer
    * @param event mouse event info */
   void LineOverlay::mousePressEvent(QMouseEvent * event)
   {
-    // Do not respond to mouse when handles are hidden
-    if (!m_showHandles)
+    // Do not respond to mouse when hidden
+    if (!m_showHandles || !m_shown)
     {
       event->ignore();
       return;
@@ -564,8 +564,8 @@ namespace SliceViewer
     if (!(event->buttons() & Qt::RightButton))
       m_rightButton = false;
 
-    // Do not respond to mouse when handles are hidden
-    if (!m_showHandles)
+    // Do not respond to mouse when hidden
+    if (!m_showHandles || !m_shown)
     {
       event->ignore();
       return;
