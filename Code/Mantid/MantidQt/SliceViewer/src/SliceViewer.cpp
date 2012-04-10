@@ -132,13 +132,13 @@ SliceViewer::SliceViewer(QWidget *parent)
   updateDisplay();
 
   // -------- Line Overlay ----------------
-  m_lineOverlay = new LineOverlay(m_plot);
-  m_lineOverlay->setVisible(false);
+  m_lineOverlay = new LineOverlay(m_plot, m_plot->canvas());
+  m_lineOverlay->setShown(false);
 
-  m_overlayWSOutline = new LineOverlay(m_plot);
+  m_overlayWSOutline = new LineOverlay(m_plot, m_lineOverlay);
   m_overlayWSOutline->setShowHandles(false);
   m_overlayWSOutline->setShowLine(false);
-  m_overlayWSOutline->setVisible(false);
+  m_overlayWSOutline->setShown(false);
 
 }
 
@@ -700,7 +700,7 @@ Mantid::API::MDNormalization SliceViewer::getNormalization() const
 /// Slot called when the btnDoLine button is checked/unchecked
 void SliceViewer::LineMode_toggled(bool checked)
 {
-  m_lineOverlay->setVisible(checked);
+  m_lineOverlay->setShown(checked);
   if (checked)
   {
     QString text;
@@ -1873,10 +1873,10 @@ void SliceViewer::dynamicRebinCompleteSlot()
     m_overlayWSOutline->setPointB(pointB);
     m_overlayWSOutline->setWidth((yMax - yMin)/2.0);
     m_overlayWSOutline->setCreationMode(false);
-    m_overlayWSOutline->setVisible(true);
+    m_overlayWSOutline->setShown(true);
   }
   else
-    m_overlayWSOutline->setVisible(false);
+    m_overlayWSOutline->setShown(false);
   this->updateDisplay();
 }
 

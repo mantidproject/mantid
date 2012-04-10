@@ -19,13 +19,12 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LineOverlay::LineOverlay(QwtPlot * parent)
-  : QWidget( parent->canvas() ),
-    m_plot(parent),
+  LineOverlay::LineOverlay(QwtPlot * plot, QWidget * parent)
+  : QWidget( parent ),
+    m_plot(plot),
     m_snapEnabled(false),
     m_snapX(0.1), m_snapY(0.1), m_snapLength(0),
-    m_showHandles(true), m_showLine(true)
-
+    m_shown(true), m_showHandles(true), m_showLine(true)
   {
     m_creation = true; // Will create with the mouse
     m_rightButton = false;
@@ -126,6 +125,13 @@ namespace SliceViewer
     m_snapLength = spacing;
   }
 
+
+  /** Sets whether any of the control is visible
+   * @param shown :: if false, the the control is not drawng */
+  void LineOverlay::setShown(bool shown)
+  {
+    m_shown = shown;
+  }
 
   /** Sets whether to show the mouse handles
    * @param shown :: if false, the mouse handles are invisible */
@@ -248,7 +254,7 @@ namespace SliceViewer
   {
     // Don't paint until created
     // Also, don't paint while right-click dragging (panning) the underlying pic
-    if (m_creation || m_rightButton)
+    if (m_creation || m_rightButton || !m_shown)
       return;
 
     QPainter painter(this);

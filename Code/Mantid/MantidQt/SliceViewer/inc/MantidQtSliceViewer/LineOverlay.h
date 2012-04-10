@@ -57,7 +57,7 @@ namespace SliceViewer
     };
 
   public:
-    LineOverlay(QwtPlot * parent);
+    LineOverlay(QwtPlot * plot, QWidget * parent);
     virtual ~LineOverlay();
     
     void reset();
@@ -75,6 +75,7 @@ namespace SliceViewer
     void setSnap(double spacing);
     void setSnapEnabled(bool enabled);
     void setSnapLength(double spacing);
+    void setShown(bool shown);
     void setShowHandles(bool shown);
     void setShowLine(bool shown);
     void setCreationMode(bool creation);
@@ -154,6 +155,9 @@ namespace SliceViewer
     double m_snapY;
     /// Snap to length of the line
     double m_snapLength;
+
+    /// Is any of the control visible?
+    bool m_shown;
 
     /// Are the mouse handles visible?
     bool m_showHandles;
