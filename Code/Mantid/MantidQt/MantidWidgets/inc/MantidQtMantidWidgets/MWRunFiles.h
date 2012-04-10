@@ -162,8 +162,10 @@ namespace MantidQt
       void fileTextChanged(const QString &);
       /// Emitted when the editing has finished
       void fileEditingFinished();
-      /// Emitted when a files have been found
+      /// Emitted when files have been found
       void filesFound();
+      /// Emitted when file finding is finished (files may or may not have been found).
+      void fileFindingFinished();
 
     public slots:
       /// Set the file text

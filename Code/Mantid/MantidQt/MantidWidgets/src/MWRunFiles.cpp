@@ -128,6 +128,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this, SLOT(checkEntry()));
 
   connect(m_thread, SIGNAL(finished()), this, SLOT(inspectThreadResult()));
+  connect(m_thread, SIGNAL(finished()), this, SIGNAL(fileFindingFinished()));
 
   m_uiForm.fileEditor->clear();
   

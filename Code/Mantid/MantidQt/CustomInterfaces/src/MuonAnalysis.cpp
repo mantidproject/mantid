@@ -167,7 +167,7 @@ void MuonAnalysis::initLayout()
   }
 
   // file input
-  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
+  connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
 
   // Input check for First Good Data
   connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this,
