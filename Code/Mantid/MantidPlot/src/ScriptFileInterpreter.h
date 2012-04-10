@@ -82,6 +82,12 @@ public slots:
 signals:
   /// Emits a signal when any text in the editor changes
   void textChanged();
+  /// Emits a signal whenever the modification state of the editor changes
+  void editorModificationChanged(bool);
+  /// Emitted when the undo availability changes
+  void editorUndoAvailable(bool);
+  /// Emitted when the redo availability changes
+  void editorRedoAvailable(bool);
 
 private slots:
   // Popup a context menu

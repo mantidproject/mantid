@@ -82,6 +82,12 @@ public:
   ///set the recent script list
   void setRecentScripts(const QStringList & scriptList);
 
+signals:
+  /// Undo availability for current editor
+  void undoAvailable(bool);
+  /// Redo availability for current editor
+  void redoAvailable(bool);
+
 public slots:
   /// Create a new tab for script editing with the text within the file imported and insert it at the index
   void newTab(int index = -1, const QString & filename = "");
@@ -141,8 +147,8 @@ public slots:
 private slots:
   /// Close clicked tab
   void closeClickedTab();
-  /// Mark the current tab
-  void markCurrentAsChanged();
+  /// Current editor's modification status has changed
+  void currentEditorModified(bool state);
   /// Current tab has changed
   void tabSelectionChanged(int index);
   /// Enable/disable the relevant actions based on the execution state of the script
@@ -155,6 +161,10 @@ private:
   void customEvent(QEvent *event);
   ///Open a script
   void open(bool newtab, const QString & filename = QString());
+  /// Sets the tab title & tooltip from the filename
+  void setTabTitle(QWidget *widget, const QString & filename);
+  /// Returns the tab title for the given filename
+  QString createTabTitle(const QString & filename) const;
   ///Close a tab with a given index
   void closeTabAtIndex(int index);
   ///Close a tab at a given position

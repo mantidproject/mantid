@@ -21,7 +21,6 @@ ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
 {
   setupChildWidgets();
 
-  connect(m_editor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
 
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
@@ -259,10 +258,18 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
   if(QFileInfo(identifier).exists())
   {
     readFileIntoEditor(identifier);
-    m_editor->setFileName(identifier);
   }
   m_editor->setLexer(environ.createCodeLexer());
+  m_editor->padMargin();
+  m_editor->setAutoMarginResize();
   m_editor->setCursorPosition(0,0);
+
+  connect(m_editor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
+  connect(m_editor, SIGNAL(modificationChanged(bool)), this, SIGNAL(editorModificationChanged(bool)));
+  connect(m_editor, SIGNAL(undoAvailable(bool)), this, SIGNAL(editorUndoAvailable(bool)));
+  connect(m_editor, SIGNAL(redoAvailable(bool)), this, SIGNAL(editorRedoAvailable(bool)));
+  emit editorUndoAvailable(false);
+  emit editorRedoAvailable(false);
 }
 
 /**

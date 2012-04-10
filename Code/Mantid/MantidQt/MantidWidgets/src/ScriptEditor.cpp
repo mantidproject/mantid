@@ -152,6 +152,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
 
   zoomIn(m_zoomLevel);
   setMarginLineNumbers(1,true);
+
   //Editor properties
   setAutoIndent(true);
   setFocusPolicy(Qt::StrongFocus);
@@ -205,6 +206,16 @@ void ScriptEditor::setLexer(QsciLexer *codelexer)
   }
   
   m_completer = new QsciAPIs(codelexer);
+}
+
+/**
+ *
+ * @return
+ */
+// Make the object resize to margin to fit the contents
+void ScriptEditor::setAutoMarginResize()
+{
+  connect(this, SIGNAL(linesChanged()), this, SLOT(padMargin()));
 }
 
 /**
@@ -263,8 +274,9 @@ bool ScriptEditor::saveScript(const QString & filename)
     return false;
   }
 
+  m_filename = filename;
   writeToDevice(file);
-
+  file.close();
   setModified(false);
 
   return true;
@@ -324,18 +336,17 @@ void ScriptEditor::wheelEvent( QWheelEvent * e )
 //-----------------------------------------------
 // Public slots
 //-----------------------------------------------
-/**
- * Update the editor
- */
-void ScriptEditor::update()
+/// Ensure the margin width is big enough to hold everything
+void ScriptEditor::padMargin()
 {
-  int width = 38;
+  const int minWidth = 38;
+  int width = minWidth;
   int ntens = static_cast<int>(std::log10(static_cast<double>(lines())));
   if( ntens > 1 )
   {
     width += 5*ntens;
   }
-  setMarginWidth( 1, width );
+  setMarginWidth(1, width);
 }
 
 /**
@@ -466,6 +477,7 @@ void ScriptEditor::writeToDevice(QIODevice & device) const
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
+
 /// Settings group
 /**
  * Returns a string containing the settings group to use

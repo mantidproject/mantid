@@ -82,44 +82,16 @@ bool ScriptManagerWidget::isExecuting()
  */
 void ScriptManagerWidget::newTab(int index, const QString & filename)
 {
-  QString tabTitle;
-  if( filename.isEmpty() )
-  {
-    tabTitle = "New script";
-  }
-  else
-  {
-    tabTitle = QFileInfo(filename).fileName();
-  }
-//  if( m_interpreter_mode )
-//  {
-//    ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode, scriptingEnv()->createCodeLexer());
-//    editor->setFileName(filename);
-//    editor->setContextMenuPolicy(Qt::CustomContextMenu);
-//    connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)),
-//      this, SLOT(editorContextMenu(const QPoint&)));
-//    index = insertTab(index, editor, tabTitle);
-//
-//    // Store a script runner
-//    Script * runner = createScriptRunner(editor);
-//    m_script_runners.insert(editor, runner);
-//
-//    // Completion etc
-//    setCodeCompletionBehaviour(editor, m_toggle_completion->isChecked());
-//    setCallTipsBehaviour(editor, m_toggle_calltips->isChecked());
-//    setCodeFoldingBehaviour(editor, m_toggle_folding->isChecked());
-//    // Set the current editor to focus
-//    setFocusProxy(editor);
-//    editor->setFocus();
-//    editor->setCursorPosition(0,0);
-//    return editor;
-//  }
   ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this);
   scriptRunner->setup(*scriptingEnv(), filename);
-  connect(scriptRunner, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
-  index = insertTab(index, scriptRunner, tabTitle);
+  connect(scriptRunner, SIGNAL(editorModificationChanged(bool)),
+          this, SLOT(currentEditorModified(bool)));
+  index = insertTab(index, scriptRunner, "");
   setCurrentIndex(index);
+  setTabTitle(scriptRunner, filename); // Make sure the tooltip is set
   scriptRunner->setFocus();
+  emit undoAvailable(false);
+  emit redoAvailable(false);
   m_last_active_tab = index;
 }
 
@@ -158,12 +130,14 @@ void ScriptManagerWidget::openRecentScript(int index)
 void ScriptManagerWidget::saveToCurrentFile()
 {
   m_current->saveToCurrentFile();
+  setTabTitle(m_current, m_current->filename());
 }
 
 /// Save to new file
 void ScriptManagerWidget::saveAs()
 {
-  m_current->saveToCurrentFile();
+  m_current->saveAs();
+  setTabTitle(m_current, m_current->filename());
 }
 
 /// Print the current script
@@ -368,12 +342,20 @@ void ScriptManagerWidget::closeClickedTab()
  * Mark the current tab as changed. The signal is disconnected
  * from the emitting widget so that multiple calls are not performed
  */
-void ScriptManagerWidget::markCurrentAsChanged()
+void ScriptManagerWidget::currentEditorModified(bool state)
 {
-  int index = currentIndex();
-  setTabText(index, tabText(index) + "*");
-  // Disconnect signal so that this doesn't get run in the future
-  disconnect(m_current, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+  static const QString modifiedLabel("*");
+  const int index = currentIndex();
+  QString tabLabel = tabText(index);
+  if(state)
+  {
+    tabLabel += modifiedLabel;
+  }
+  else
+  {
+    tabLabel.chop(modifiedLabel.length());
+  }
+  setTabText(index, tabLabel);
 }
 
 /**
@@ -384,21 +366,28 @@ void ScriptManagerWidget::tabSelectionChanged(int index)
 {
   if( count() > 0 )
   {
+    disconnect(m_current, SIGNAL(editorUndoAvailable(bool)), this, SIGNAL(undoAvailable(bool)));
+    disconnect(m_current, SIGNAL(editorRedoAvailable(bool)), this, SIGNAL(redoAvailable(bool)));
     m_current = qobject_cast<ScriptFileInterpreter*>(widget(index));
+    connect(m_current, SIGNAL(editorUndoAvailable(bool)), this, SIGNAL(undoAvailable(bool)));
+    connect(m_current, SIGNAL(editorRedoAvailable(bool)), this, SIGNAL(redoAvailable(bool)));
     setFocusProxy(m_current);
     m_current->setFocus();
   }
   else
   {
     m_current = m_nullScript;
+    emit undoAvailable(false);
+    emit redoAvailable(false);
   }
+
 }
 
 /**
  * Enable/disable script interaction based on script execution status
  * @param running :: The state of the script
  */
-void ScriptManagerWidget::setScriptIsRunning(bool running)
+void ScriptManagerWidget::setScriptIsRunning(bool)
 {
 }
 
@@ -491,6 +480,37 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
   //update the recent scripts menu 
   updateRecentScriptList(fileToOpen);
 
+}
+
+/**
+ * Sets the tab title & tooltip from the filename
+ * @param widget A pointer to the widget on the tab
+ * @param filename The filename on the tab
+ */
+void ScriptManagerWidget::setTabTitle(QWidget *widget, const QString & filename)
+{
+  setTabLabel(widget, createTabTitle(filename));
+  setTabToolTip(widget, filename);
+}
+
+/**
+ * Returns the tab title for the given filename. If the filename
+ * is empty the string "New Script" is returned
+ * @param filename The filename of the script.
+ * @return A string to use as the tab title
+ */
+QString ScriptManagerWidget::createTabTitle(const QString & filename) const
+{
+  QString title;
+  if( filename.isEmpty() )
+  {
+    title = "New script";
+  }
+  else
+  {
+    title = QFileInfo(filename).fileName();
+  }
+  return title;
 }
 
 /**

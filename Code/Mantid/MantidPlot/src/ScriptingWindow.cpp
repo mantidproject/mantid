@@ -405,10 +405,12 @@ void ScriptingWindow::initEditMenuActions()
 {
   m_undo = new QAction(tr("&Undo"), this);
   connect(m_undo, SIGNAL(triggered()), m_manager, SLOT(undo()));
+  connect(m_manager, SIGNAL(undoAvailable(bool)), m_undo, SLOT(setEnabled(bool)));
   m_undo->setShortcut(QKeySequence::Undo);
 
   m_redo = new QAction(tr("&Redo"), this);
   connect(m_redo, SIGNAL(triggered()), m_manager, SLOT(redo()));
+  connect(m_manager, SIGNAL(redoAvailable(bool)), m_redo, SLOT(setEnabled(bool)));
   m_redo->setShortcut(QKeySequence::Redo);
 
   m_cut = new QAction(tr("C&ut"), this);
@@ -481,15 +483,15 @@ void ScriptingWindow::initWindowMenuActions()
   // Toggle the progress arrow
   m_toggleProgress = new QAction(tr("Show &Progress Marker"), this);
   m_toggleProgress->setCheckable(true);
-  connect(m_toggleProgress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
+  //connect(m_toggleProgress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
 
   // Toggle code folding
   m_toggleFolding = new QAction(tr("Code &Folding"), this);
   m_toggleFolding->setCheckable(true);
-  connect(m_toggleFolding, SIGNAL(toggled(bool)), this, SLOT(toggleCodeFolding(bool)));
+  //connect(m_toggleFolding, SIGNAL(toggled(bool)), this, SLOT(toggleCodeFolding(bool)));
 
   // Toggle call tips
   m_toggleCallTips = new QAction(tr("Call &Tips"), this);
   m_toggleCallTips->setCheckable(true);
-  connect(m_toggleCallTips, SIGNAL(toggled(bool)), this, SLOT(toggleCallTips(bool)));
+  //connect(m_toggleCallTips, SIGNAL(toggled(bool)), this, SLOT(toggleCallTips(bool)));
 }

@@ -91,6 +91,8 @@ public:
 
   // Set a new code lexer for this object
   void setLexer(QsciLexer *);
+  // Make the object resize to margin to fit the contents
+  void setAutoMarginResize();
   // Size hint
   QSize sizeHint() const;
   // Unhide base class method to avoid intel compiler warning
@@ -131,8 +133,8 @@ public slots:
   /// Save a the text to the given filename
   bool saveScript(const QString & filename);
 
-  /// Update the editor
-  void update();
+  /// Ensure the margin width is big enough to hold everything + padding
+  void padMargin();
   /// Set the marker state
   void setMarkerState(bool enabled);
   /// Update the marker on this widget
@@ -162,6 +164,8 @@ signals:
 protected:
   /// Write to the given device
   virtual void writeToDevice(QIODevice & device) const;
+
+private slots:
 
 private:
   /// Settings group
