@@ -93,11 +93,11 @@ class DataSets(BaseScriptElement):
         # Scattering angle options
         if self.use_center_pixel:
             if self.set_detector_angle:
-                script += "              DetectorAngle=%s\n" % str(self.detector_angle)
+                script += "              DetectorAngle=%s,\n" % str(self.detector_angle)
             if self.set_detector_angle_offset:
-                script += "              DetectorAngle0=%s\n" % str(self.detector_angle_offset)
+                script += "              DetectorAngle0=%s,\n" % str(self.detector_angle_offset)
             if self.set_direct_pixel:
-                script += "              DirectPixel=%s\n" % str(self.direct_pixel)
+                script += "              DirectPixel=%s,\n" % str(self.direct_pixel)
                 
         else:
             script += "              Theta=%s,\n" % str(self.theta)
