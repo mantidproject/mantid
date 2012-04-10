@@ -11,6 +11,7 @@
 #include <Poco/File.h>
 #include <cctype>
 #include <algorithm>
+#include <iostream>
 
 namespace Mantid
 {
@@ -247,13 +248,13 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
       addExtension(lower, exts);
       addExtension(upper, exts);
     }
-    foundFile = FileFinder::Instance().findRun(propValue, exts);
+    //foundFile = FileFinder::Instance().findRun(propValue, exts);
+    foundFile = FileFinder::Instance().findFullPath(propValue, exts);
   }
   else
   {
     foundFile = FileFinder::Instance().getFullPath(propValue);
   }
-
   if( foundFile.empty() )
   {
     return PropertyWithValue<std::string>::setValue(propValue);
