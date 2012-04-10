@@ -1882,7 +1882,7 @@ void SliceViewer::dynamicRebinCompleteSlot()
 
 //--------------------------------------------------------------------------------------
 /** Observer called when the BinMD algorithm has completed when
- * dynamic rebinnign is on.
+ * dynamic rebinning is on.
  *
  * This is called in a separate (non-GUI) thread and so
  * CANNOT directly change the gui.
