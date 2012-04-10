@@ -2096,9 +2096,9 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
 * Sets the flag that tells the scripting environment that
 * a script is currently running
 */
-void MantidUI::setIsRunning(bool running)
+void MantidUI::setIsRunning(bool)
 {
-  appWindow()->scriptingEnv()->setIsRunning(running);
+  // deprecated
 }
 
 /**

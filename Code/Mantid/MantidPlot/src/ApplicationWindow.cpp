@@ -16418,6 +16418,59 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
   delete runner;
 }
 
+/**
+* Run Python code
+*/
+bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
+    bool quiet, bool redirect)
+{
+  if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
+
+  if( m_iface_script == NULL )
+  {
+    setScriptingLanguage("Python");
+    m_iface_script = scriptingEnv()->newScript("<Interface>", NULL, Script::NonInteractive);
+
+  }
+  if( !quiet )
+  {
+    // Output a message to say we've started
+    scriptPrint("Script execution started.", false, true);
+  }
+  if(redirect)
+  {
+    m_iface_script->redirectStdOut(true);
+    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
+    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
+            SLOT(scriptPrint(const QString &)));
+  }
+  bool success(false);
+  if(async)
+  {
+    QFuture<bool> job = m_iface_script->executeAsync(code);
+    while(job.isRunning())
+    {
+      QCoreApplication::instance()->processEvents();
+    }
+    success = job.result();
+  }
+  else
+  {
+    success = m_iface_script->execute(code);
+  }
+  if (redirect)
+  {
+    m_iface_script->redirectStdOut(false);
+  }
+  if(success && !quiet)
+  {
+    scriptPrint("Script execution completed successfully.", false, true);
+  }
+
+  return success;
+}
+
+
 
 bool ApplicationWindow::validFor2DPlot(Table *table)
 {
@@ -17034,7 +17087,6 @@ else
   {
     delete usr_win;
   }
-
 }
 #else
 QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
@@ -17164,57 +17216,6 @@ void ApplicationWindow::showGraphs()
   }
 }
 
-/**
-* Run Python Script
-*/
-bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
-    bool quiet, bool redirect)
-{
-  if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
-
-  if( m_iface_script == NULL )
-  {
-    setScriptingLanguage("Python");
-    m_iface_script = scriptingEnv()->newScript("<Interface>", NULL, Script::NonInteractive);
-
-  }
-  if( !quiet )
-  {
-    // Output a message to say we've started
-    scriptPrint("Script execution started.", false, true);
-  }
-  if(redirect)
-  {
-    m_iface_script->redirectStdOut(true);
-    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
-    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
-            SLOT(scriptPrint(const QString &)));
-  }
-  bool success(false);
-  if(async)
-  {
-    QFuture<bool> job = m_iface_script->executeAsync(code);
-    while(job.isRunning())
-    {
-      QCoreApplication::instance()->processEvents();
-    }
-    success = job.result();
-  }
-  else
-  {
-    success = m_iface_script->execute(code);
-  }
-  if (redirect)
-  {
-    m_iface_script->redirectStdOut(false);
-  }
-  if(success && !quiet)
-  {
-    scriptPrint("Script execution completed successfully.", false, true);
-  }
-
-  return success;
-}
 
 /**
 * Makes sure that it is dealing with a graph and then tells the plotDialog class 

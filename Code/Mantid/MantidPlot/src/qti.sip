@@ -1024,6 +1024,8 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   void setExitCode(int code);
+  bool runPythonScript(const QString & code, const bool async = false,
+      bool quiet=false, bool redirect=true);
 
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
   Table* table(const QString&);
@@ -1316,6 +1318,7 @@ public:
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
 
+  void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
 private:
