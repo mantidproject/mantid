@@ -342,10 +342,12 @@ namespace Mantid
       {
         // check in normal search locations
         std::string path = getFullPath(hint);
+        g_log.debug() << "path returned from getFullPath = " << path << '\n';
         try
         {
           if (!path.empty() && Poco::File(path).exists())
           {
+            g_log.debug() << "path is not empty and exists" << '\n';
             return path;
           }
         }
@@ -664,7 +666,6 @@ namespace Mantid
       {
         for(size_t i = 0; i < filenames.size(); ++i)
         {
-          //g_log.debug() << "shelly ext = " << *ext << ", filenames(" << i << ") = " << filenames[i] << "\n";
           std::string path = getFullPath(filenames[i] + *ext);
           if (!path.empty())
             return path;
@@ -710,7 +711,7 @@ namespace Mantid
           } // i
         }  // ext
       } // archs
-    std::cout << "shely FileFinder = " << std::endl;
+
       return "";
     }
 
