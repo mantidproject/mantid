@@ -95,7 +95,7 @@ namespace Crystal
     }
     else
     {
-      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from run object");
+      smu = 0.0;
     }
     if ( run.hasProperty("LinearAbsorptionCoef") )
     {
@@ -104,7 +104,7 @@ namespace Crystal
     }
     else
     {
-      throw std::invalid_argument("Could not retrieve LinearAbsorptionCoef from run object");
+      amu = 0.0;
     }
     if ( run.hasProperty("Radius") )
     {
@@ -113,7 +113,7 @@ namespace Crystal
     }
     else
     {
-      throw std::invalid_argument("Could not retrieve Radius from run object");
+      radius = 0.0;
     }
 
     double scaleFactor = getProperty("ScalePeaks"); 
@@ -163,13 +163,8 @@ namespace Crystal
       int run = p.getRunNumber();
       int bank = 0;
       std::string bankName = p.getBankName();
-      if (bankName.size() <= 4)
-      {
-        g_log.information() << "Could not interpret bank number of peak " << wi << "(" << bankName << ")\n";
-        continue;
-      }
       // Take out the "bank" part of the bank name and convert to an int
-      bankName = bankName.substr(4, bankName.size()-4);
+      bankName.erase(remove_if(bankName.begin(), bankName.end(), not1(std::ptr_fun (::isdigit))), bankName.end());
       Strings::convert(bankName, bank);
 
       double tbar = 0;
@@ -296,7 +291,7 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
-    if(mu == 0.0)
+    if(std::fabs(mu) < 1e-300)
       tbar=0.0;
     else
       tbar = -(double)std::log(trans)/mu;
