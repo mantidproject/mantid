@@ -62,6 +62,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         Push \\\"$INSTDIR\\\\bin\\\"
         Call EnvVarUpdate
         Pop  \\\$0
+		
+		CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
+		
 	    ")
 		
 	# On unistall reverse stages listed above.
@@ -79,7 +82,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         Push \\\"$INSTDIR\\\\bin\\\"
         Call un.EnvVarUpdate
         Pop  \\\$0
+		
+		Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
 	  ")
+	  
 ENDIF()
 
 ###########################################################################
