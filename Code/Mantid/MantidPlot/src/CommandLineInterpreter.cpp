@@ -378,7 +378,7 @@ void CommandLineInterpreter::setupEnvironment(const ScriptingEnv & environ)
   m_runner = QSharedPointer<Script>(environ.newScript("__main__",this,Script::Interactive));
   connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)),
           this, SLOT(updateCompletionAPI(const QStringList &)));
-  m_runner->execute("None"); // Initial API list
+  m_runner->generateAutoCompleteList();
 
   connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setStatusToExecuting()));
   connect(m_runner.data(), SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));

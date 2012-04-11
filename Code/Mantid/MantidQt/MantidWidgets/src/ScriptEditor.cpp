@@ -391,7 +391,7 @@ void ScriptEditor::setMarkerState(bool enabled)
  * @param lineno :: The line to place the marker at. A negative number will clear all markers
  * @param error :: If true, the marker will turn red
  */
-void ScriptEditor::updateMarker(int lineno, bool error)
+void ScriptEditor::updateProgressMarker(int lineno, bool error)
 {
   if(error)
   {

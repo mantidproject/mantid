@@ -37,6 +37,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *
 {
   Q_UNUSED(capturePrint);
   setObjectName("MantidScriptWindow");
+
   // Sub-widgets
   m_manager = new ScriptManagerWidget(env, this);
   setCentralWidget(m_manager);
@@ -46,12 +47,11 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *
   initMenus();
   readSettings();
 
-  // This connection must occur after the objects have been created and initialized
-  connect(m_manager, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged()));
-
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
 
+  // Start with a single script
+  m_manager->newTab();
 }
 
 /**
@@ -79,7 +79,6 @@ void ScriptingWindow::saveSettings()
   QSettings settings;
   settings.beginGroup("/ScriptWindow");
   settings.setValue("/AlwaysOnTop", m_alwaysOnTop->isChecked());
-  settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
   settings.setValue("/ProgressArrow", m_toggleProgress->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.setValue("/RecentScripts",m_manager->recentScripts());
@@ -100,7 +99,6 @@ void ScriptingWindow::readSettings()
     lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
   }
   m_manager->m_last_dir = lastdir;
-  m_toggleFolding->setChecked(settings.value("CodeFolding", true).toBool());
   m_toggleProgress->setChecked(settings.value("ProgressArrow", true).toBool());
 
   m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
@@ -196,10 +194,18 @@ void ScriptingWindow::updateWindowFlags()
   show();
 }
 
-void ScriptingWindow::tabSelectionChanged()
+/**
+ *  Update menus based on current tab states. Called when
+ *  the number of tabs changes
+ *  @param ntabs :: The number of tabs now open
+ */
+void ScriptingWindow::setMenuStates(int ntabs)
 {
-
+  const bool tabsOpen(ntabs > 0);
+  m_editMenu->setEnabled(tabsOpen);
+  m_runMenu->setEnabled(tabsOpen);
 }
+
 
 /**
  * Maps the QAction to an index in the recent scripts list
@@ -248,6 +254,7 @@ void ScriptingWindow::initMenus()
 #endif
   connect(m_fileMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
 
+
   m_editMenu = menuBar()->addMenu(tr("&Edit"));
   connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
 
@@ -255,13 +262,20 @@ void ScriptingWindow::initMenus()
   connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
 
   m_windowMenu = menuBar()->addMenu(tr("&Window"));
-  connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
+  connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateWindowMenu()));
 
-  // If the menus are not populated at all then the shortcuts don't work
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(setMenuStates(int)));
+
+  // The menu items must be populated for the shortcuts to work
   populateFileMenu();
   populateEditMenu();
   populateExecMenu();
   populateWindowMenu();
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateFileMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateEditMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateExecMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateWindowMenu()));
+
 }
 
 /// Populate file menu
@@ -269,13 +283,13 @@ void ScriptingWindow::populateFileMenu()
 {
   m_fileMenu->clear();
   const bool scriptsOpen(m_manager->count() > 0);
+
   m_fileMenu->addAction(m_newTab);
   m_fileMenu->addAction(m_openInNewTab);
 
-  if( scriptsOpen )
+  if(scriptsOpen)
   {
     m_fileMenu->addAction(m_openInCurTab);
-
     m_fileMenu->insertSeparator();
     m_fileMenu->addAction(m_save);
     m_fileMenu->addAction(m_saveAs);
@@ -286,7 +300,7 @@ void ScriptingWindow::populateFileMenu()
   m_fileMenu->addMenu(m_recentScripts);
   m_recentScripts->setEnabled(m_manager->recentScripts().count() > 0);
 
-  if( scriptsOpen )
+  if(scriptsOpen)
   {
     m_fileMenu->insertSeparator();
     m_fileMenu->addAction(m_closeTab);
@@ -310,7 +324,6 @@ void ScriptingWindow::populateRecentScriptsMenu()
 void ScriptingWindow::populateEditMenu()
 {
   m_editMenu->clear();
-
   m_editMenu->addAction(m_undo);
   m_editMenu->addAction(m_redo);
   m_editMenu->addAction(m_cut);
@@ -319,7 +332,6 @@ void ScriptingWindow::populateEditMenu()
 
   m_editMenu->insertSeparator();
   m_editMenu->addAction(m_find);
-
 }
 /// Populate execute menu
 void ScriptingWindow::populateExecMenu()
@@ -334,17 +346,20 @@ void ScriptingWindow::populateExecMenu()
 void ScriptingWindow::populateWindowMenu()
 {
   m_windowMenu->clear();
+  const bool scriptsOpen(m_manager->count() > 0);
+
   m_windowMenu->addAction(m_alwaysOnTop);
   m_windowMenu->addAction(m_hide);
 
-  if(m_manager->count() > 0)
+  if(scriptsOpen)
   {
     m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_zoomIn);
     m_windowMenu->addAction(m_zoomOut);
 
     m_windowMenu->insertSeparator();
-
+    m_windowMenu->addAction(m_toggleProgress);
+    m_windowMenu->addAction(m_toggleFolding);
   }
 }
 
@@ -479,12 +494,12 @@ void ScriptingWindow::initWindowMenuActions()
   connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(zoomOut()));
 
   // Toggle the progress arrow
-  m_toggleProgress = new QAction(tr("Show &Progress Marker"), this);
+  m_toggleProgress = new QAction(tr("&Progress Reporting"), this);
   m_toggleProgress->setCheckable(true);
-  //connect(m_toggleProgress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
+  connect(m_toggleProgress, SIGNAL(toggled(bool)), m_manager, SLOT(toggleProgressReporting(bool)));
 
   // Toggle code folding
   m_toggleFolding = new QAction(tr("Code &Folding"), this);
   m_toggleFolding->setCheckable(true);
-  //connect(m_toggleFolding, SIGNAL(toggled(bool)), this, SLOT(toggleCodeFolding(bool)));
+  connect(m_toggleFolding, SIGNAL(toggled(bool)), m_manager, SLOT(toggleCodeFolding(bool)));
 }

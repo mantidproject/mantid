@@ -53,15 +53,14 @@ public:
   /// Destructor
   ~PythonScript();
 
+  /// Create a PyObject that wraps this C++ instance
+  PyObject * createSipInstanceFromMe();
+
   // -------------------------- Print/error message handling ------------------
   /// Connects the python stdout to a Qt signal
-  inline void write(const QString &text) 
-  { 
-    emit print(text); 
-  }
+  inline void write(const QString &text) { emit print(text); }
   /// 'Fake' method needed for IPython import
-  inline void flush()
-  {}
+  inline void flush() {}
   /// Is the given code complete
   bool compilesToCompleteStatement(const QString & code) const;
 
@@ -79,6 +78,8 @@ public slots:
   bool execute(const QString &);
   /// Execute the code asynchronously, returning immediately after the execution has started
   QFuture<bool> executeAsync(const QString & code);
+  /// Create a list of keywords for the code completion API
+  void generateAutoCompleteList();
 
   /// Construct the error message from the stack trace (if one exists)
   QString constructErrorMsg();
@@ -133,20 +134,20 @@ private:
   };
 
   inline PythonScripting * pythonEnv() const { return m_pythonEnv; }
-  PyObject * createSipInstanceFromMe();
   void initialize(const QString & name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
 
-
   // --------------------------- Script compilation/execution  -----------------------------------
-  /// Performs the call to Python
-  bool doExecution(const QString & code);
+  /// Performs the call to Python from a string
+  bool executeString(const QString & code);
+  /// Executes the code object and returns the result, may be null
+  PyObject* executeCompiledCode(PyCodeObject *compiledCode);
+  /// Check an object for a result.
+  bool checkResult(PyObject *result);
 
   /// Compile to bytecode
   PyObject * compileToByteCode(const QString &, bool for_eval=true);
-  /// Create a list of keywords for the code completion API
-  void generateAutoCompleteList();
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS

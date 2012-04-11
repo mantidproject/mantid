@@ -83,6 +83,14 @@ public:
   void setRecentScripts(const QStringList & scriptList);
 
 signals:
+  /// Signal that a tab has been created
+  void newTabCreated(int);
+  /// Signal that a tab has closed, parametrised by the index
+  void tabClosed(int);
+  /// Signal that the last tab has closed
+  void lastTabClosed();
+  /// Signal that the tab count has changed, giving the new count
+  void tabCountChanged(int);
   /// Undo availability for current editor
   void undoAvailable(bool);
   /// Redo availability for current editor
@@ -136,11 +144,9 @@ public slots:
   void zoomOut();
 
   /// Toggle the progress reporting arrow
-  void toggleProgressArrow(bool on);
+  void toggleProgressReporting(bool on);
   /// Toggle code folding
   void toggleCodeFolding(bool on);
-  /// Toggle code folding
-  void toggleCodeCompletion(bool on);
 
 private slots:
   /// Close clicked tab
@@ -175,11 +181,10 @@ private:
   QString m_last_dir;
   // The cursor position within the tab bar when the right-mouse button was last clicked
   // I need this to ensure that the position of a call to tabBar()->tabAt() is accurate
-  // as Qt doesn't provide an action signal parameterized on a position
+  // as Qt doesn't provide an action signal parameterised on a position
   QPoint m_cursor_pos;
-  /// The index of the last active tab 
-  int m_last_active_tab;
-
+  /// Current progress report state
+  bool m_reportProgress;
   /// enum used for maximum of recent scripts size
   enum { MaxRecentScripts = 5 };
   /// List of recent scripts, with most recent at the top

@@ -94,6 +94,24 @@ PythonScript::~PythonScript()
 }
 
 /**
+ * Creates a PyObject that wraps the calling C++ instance.
+ * Ownership is transferred to the caller, i.e. the caller
+ * is responsible for calling Py_DECREF
+ * @return A PyObject wrapping this instance
+ */
+PyObject * PythonScript::createSipInstanceFromMe()
+{
+  static sipWrapperType *sipClass(NULL);
+  if(!sipClass)
+  {
+    sipClass = sipFindClass("PythonScript");
+  }
+  PyObject *sipWrapper = sipConvertFromInstance(this, sipClass, NULL);
+  assert(sipWrapper);
+  return sipWrapper;
+}
+
+/**
  * @param code A lump of python code
  * @return True if the code forms a complete statment
  */
@@ -274,14 +292,46 @@ QVariant PythonScript::evaluate(const QString & code)
 bool PythonScript::execute(const QString & code)
 {
   emit startedSerial("");
-  return doExecution(code);
+  return executeString(code);
 }
 
 QFuture<bool> PythonScript::executeAsync(const QString & code)
 {
   emit startedAsync("");
-  return QtConcurrent::run(this, &PythonScript::doExecution, code);
+  return QtConcurrent::run(this, &PythonScript::executeString, code);
 }
+
+/**
+ * Create a list autocomplete keywords
+ */
+void PythonScript::generateAutoCompleteList()
+{
+  GlobalInterpreterLock gil;
+
+  PyObject *main_module = PyImport_AddModule("__main__");
+  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
+  PyObject *keywords(NULL);
+  if( method && main_module )
+  {
+    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
+  }
+  else
+  {
+    return;
+  }
+  QStringList keywordList;
+  if( PyErr_Occurred() || !keywords )
+  {
+    PyErr_Print();
+    return;
+  }
+
+  keywordList = pythonEnv()->toStringList(keywords);
+  Py_DECREF(keywords);
+  Py_DECREF(method);
+  emit autoCompleteListGenerated(keywordList);
+}
+
 
 QString PythonScript::constructErrorMsg()
 {
@@ -408,18 +458,6 @@ void PythonScript::setContext(QObject *context)
   setQObject(context, "self");
 }
 
-PyObject * PythonScript::createSipInstanceFromMe()
-{
-  static sipWrapperType *sipClass(NULL);
-  if(!sipClass)
-  {
-    sipClass = sipFindClass("PythonScript");
-  }
-  PyObject *sipWrapper = sipConvertFromInstance(this, sipClass, NULL);
-  assert(sipWrapper);
-  return sipWrapper;
-}
-
 /**
  * Sets the context for the script and if name points to a file then
  * sets the __file__ variable
@@ -473,50 +511,92 @@ void PythonScript::endStdoutRedirect()
 }
 
 /// Performs the call to Python
-bool PythonScript::doExecution(const QString & code)
+bool PythonScript::executeString(const QString & code)
 {
   emit started("Script execution started.");
   bool success(false);
   GlobalInterpreterLock gil;
-  beginStdoutRedirect();
 
-  PyCodeObject *compiledCode = (PyCodeObject*)Py_CompileString(code.toAscii(), nameAsCStr(), Py_file_input);
-  PyObject *result(NULL);
-  if(compiledCode)
+  PyObject *compiledCode = compileToByteCode(code);
+  PyObject *result = executeCompiledCode((PyCodeObject*)compiledCode);
+  if(isInteractive())
   {
-    PyObject *me(NULL);
-    if(isInteractive())
+    generateAutoCompleteList();
+  }
+  success = checkResult(result);
+
+  Py_XDECREF(compiledCode);
+  Py_XDECREF(result);
+  return success;
+}
+
+namespace
+{
+  /**
+   * RAII struct for installing a tracing function
+   * to monitor the line number events and ensuring it is removed
+   * when the object is destroyed
+   */
+  struct InstallTrace
+  {
+    InstallTrace(PythonScript & scriptObject)
+      : m_sipWrappedScript(NULL)
     {
-      m_CodeFileObject = compiledCode->co_filename;
-      PyObject *me = createSipInstanceFromMe();
-      PyEval_SetTrace((Py_tracefunc)&traceLineNumber, me);
+      if(scriptObject.reportProgress())
+      {
+        m_sipWrappedScript = scriptObject.createSipInstanceFromMe();
+        PyEval_SetTrace((Py_tracefunc)&traceLineNumber, m_sipWrappedScript);
+      }
     }
-    result = PyEval_EvalCode(compiledCode, localDict, localDict);
-    if(isInteractive())
+    ~InstallTrace()
     {
       PyEval_SetTrace(NULL, NULL);
-      Py_XDECREF(me);
+      Py_XDECREF(m_sipWrappedScript);
     }
-    Py_DECREF(compiledCode);
-    m_CodeFileObject = NULL;
-  }
+  private:
+    InstallTrace();
+    Q_DISABLE_COPY(InstallTrace);
+    PyObject *m_sipWrappedScript;
+  };
+}
+
+/**
+ * Executes the compiled code object. If NULL nothing happens
+ * @param compiledCode An object that has been compiled from a code fragment
+ * @return The result python object
+ */
+PyObject* PythonScript::executeCompiledCode(PyCodeObject *compiledCode)
+{
+  PyObject *result(NULL);
+  if(!compiledCode) return result;
+
+  InstallTrace traceInstall(*this);
+  beginStdoutRedirect();
+  result = PyEval_EvalCode(compiledCode, localDict, localDict);
   endStdoutRedirect();
+  return result;
+}
+
+/**
+ * Check an object for a result. A null object means that the execution failed
+ * and an error signal is emitted. A valid pointer indicates success
+ * @param result The output from a PyEval call
+ * @return A boolean indicating success status
+ */
+bool PythonScript::checkResult(PyObject *result)
+{
   if(result)
   {
-    Py_DECREF(result);
-    if(isInteractive())
-    {
-      generateAutoCompleteList();
-    }
     emit finished("Script execution finished.");
-    success = true;
+    return true;
   }
   else
   {
     emit error(constructErrorMsg(), name(), 0);
+    return false;
   }
-  return success;
 }
+
 
 /**
  * Compile the code
@@ -619,38 +699,13 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
   {
     emit error(constructErrorMsg(), name(), 0);
     compiledCode = NULL;
+    m_CodeFileObject = NULL;
   }
+  m_CodeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
   return compiledCode;
 }
 
-/**
- * Create a list autocomplete keywords
- */
-void PythonScript::generateAutoCompleteList()
-{
-  PyObject *main_module = PyImport_AddModule("__main__");
-  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
-  PyObject *keywords(NULL);
-  if( method && main_module )
-  {
-    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  }
-  else
-  {
-    return;
-  }
-  QStringList keywordList;
-  if( PyErr_Occurred() || !keywords )
-  {
-    PyErr_Print();
-    return;
-  }
-
-  keywordList = pythonEnv()->toStringList(keywords);
-  Py_DECREF(keywords);
-  Py_DECREF(method);
-  emit autoCompleteListGenerated(keywordList);
-}
+//--------------------------------------------------------------------------------------------
 
 /**
  * Listen to add notifications from the ADS and add a Python variable of the workspace name

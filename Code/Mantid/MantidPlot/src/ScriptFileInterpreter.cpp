@@ -90,13 +90,12 @@ void ScriptFileInterpreter::showContextMenu(const QPoint & clickPoint)
 void ScriptFileInterpreter::setup(const ScriptingEnv & environ, const QString & identifier)
 {
   setupEditor(environ, identifier);
-  createScriptRunner(environ, identifier);
+  setupScriptRunner(environ, identifier);
   connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)),
           m_editor, SLOT(updateCompletionAPI(const QStringList &)));
-  m_runner->execute("None");
+  m_runner->generateAutoCompleteList();
   connect(m_runner.data(), SIGNAL(currentLineChanged(int,bool)),
-          m_editor, SLOT(updateMarker(int,bool)));
-  connectScriptRunnerSignals();
+          m_editor, SLOT(updateProgressMarker(int,bool)));
 }
 
 
@@ -238,6 +237,30 @@ void ScriptFileInterpreter::zoomOutOnScript()
   m_editor->zoomOut();
 }
 
+/// Toggles the progress reports on/off
+void ScriptFileInterpreter::toggleProgressReporting(bool state)
+{
+  if(state) m_runner->enableProgressReporting();
+  else
+  {
+    m_editor->setMarkerState(false);
+    m_runner->disableProgressReporting();
+  }
+}
+
+/// Toggles the code folding on/off
+void ScriptFileInterpreter::toggleCodeFolding(bool state)
+{
+  if(state)
+  {
+    m_editor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+  }
+  else
+  {
+    m_editor->setFolding(QsciScintilla::NoFoldStyle);
+  }
+}
+
 //-----------------------------------------------------------------------------
 // Private members
 //-----------------------------------------------------------------------------
@@ -278,8 +301,6 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
   connect(m_editor, SIGNAL(modificationChanged(bool)), this, SIGNAL(editorModificationChanged(bool)));
   connect(m_editor, SIGNAL(undoAvailable(bool)), this, SIGNAL(editorUndoAvailable(bool)));
   connect(m_editor, SIGNAL(redoAvailable(bool)), this, SIGNAL(editorRedoAvailable(bool)));
-  emit editorUndoAvailable(false);
-  emit editorRedoAvailable(false);
 }
 
 /**
@@ -287,16 +308,9 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
  * @param identifier :: A string identifier, used mainly in error messages to identify the
  * current script
  */
-void ScriptFileInterpreter::createScriptRunner(const ScriptingEnv & environ, const QString & identifier)
+void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, const QString & identifier)
 {
   m_runner = QSharedPointer<Script>(environ.newScript(identifier,this, Script::Interactive));
-}
-
-/**
- * Connect the required signals from the script runner to the outside world
- */
-void ScriptFileInterpreter::connectScriptRunnerSignals()
-{
   connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));

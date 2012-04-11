@@ -79,13 +79,22 @@ class Script : public QObject
   inline int getLineOffset() const { return m_lineOffset; }
 
   /// Is this an interactive script
-  bool isInteractive() { return m_interactMode == Interactive; }
+  inline bool isInteractive() { return m_interactMode == Interactive; }
   /// Is the script being executed
   inline bool isExecuting() const { return m_execMode != NotExecuting; }
+
+  /// Enable progress reporting for this script
+  void enableProgressReporting() { m_reportProgress = true; }
+  /// Disable progress reporting for this script
+  void disableProgressReporting() { m_reportProgress = false; }
+  /// Query progress reporting state
+  bool reportProgress() const { return m_reportProgress; }
 
   bool redirectStdOut() const { return m_redirectOutput; }
   void redirectStdOut(bool on) { m_redirectOutput = on; }
 
+  /// Create a list of keywords for the code completion API
+  virtual void generateAutoCompleteList() {};
   // Does the code compile to a complete statement, i.e no more input is required
   virtual bool compilesToCompleteStatement(const QString & code) const = 0;
 
@@ -137,6 +146,7 @@ private:
   QString m_name;
   QObject *m_context;
   bool m_redirectOutput;
+  bool m_reportProgress;
   int m_lineOffset;
 
   InteractionType m_interactMode;

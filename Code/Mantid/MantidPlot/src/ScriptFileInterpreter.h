@@ -78,6 +78,10 @@ public slots:
   virtual void zoomInOnScript();
   /// Zoom out on script
   virtual void zoomOutOnScript();
+  /// Toggles the progress reports on/off
+  virtual void toggleProgressReporting(bool state);
+  /// Toggles the code folding on/off
+  virtual void toggleCodeFolding(bool state);
 
 signals:
   /// Emits a signal when any text in the editor changes
@@ -98,8 +102,7 @@ private:
   void setupChildWidgets();
 
   void setupEditor(const ScriptingEnv & environ, const QString & identifier);
-  void createScriptRunner(const ScriptingEnv & environ, const QString & identifier);
-  void connectScriptRunnerSignals();
+  void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
   
   bool readFileIntoEditor(const QString & filename);
   void executeCode(const QString & code, const Script::ExecutionMode mode);
@@ -152,6 +155,16 @@ private slots:
   virtual void executeAll(const Script::ExecutionMode) {}
   /// Execute the current selection
   virtual void executeSelection(const Script::ExecutionMode) {}
+
+  /// Zoom in on script
+  virtual void zoomInOnScript() {}
+  /// Zoom out on script
+  virtual void zoomOutOnScript() {}
+  /// Toggles the progress reports on/off
+  virtual void toggleProgressReporting(bool) {}
+  /// Toggles the code folding on/off
+  virtual void toggleCodeFolding(bool) {}
+
 
   /// Save to the currently stored name
   virtual void saveToCurrentFile() {}

@@ -31,12 +31,10 @@
  */
 ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
   : QTabWidget(parent), Scripted(env), m_last_dir(""),
-    m_cursor_pos(), m_recentScriptList(), m_nullScript(new NullScriptFileInterpreter),
+    m_cursor_pos(), m_reportProgress(false), m_recentScriptList(), m_nullScript(new NullScriptFileInterpreter),
     m_current(m_nullScript)
 {
-  // Start with a blank tab
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged(int)));
-  newTab();
 }
 
 /**
@@ -84,15 +82,15 @@ void ScriptManagerWidget::newTab(int index, const QString & filename)
 {
   ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this);
   scriptRunner->setup(*scriptingEnv(), filename);
+  scriptRunner->toggleProgressReporting(m_reportProgress);
   connect(scriptRunner, SIGNAL(editorModificationChanged(bool)),
           this, SLOT(currentEditorModified(bool)));
   index = insertTab(index, scriptRunner, "");
   setCurrentIndex(index);
   setTabTitle(scriptRunner, filename); // Make sure the tooltip is set
   scriptRunner->setFocus();
-  emit undoAvailable(false);
-  emit redoAvailable(false);
-  m_last_active_tab = index;
+  emit newTabCreated(index);
+  emit tabCountChanged(count());
 }
 
 /**
@@ -259,7 +257,7 @@ void ScriptManagerWidget::executeSelection(const Script::ExecutionMode mode)
  */
 void ScriptManagerWidget::evaluate()
 {
-  QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented yet.");
+  QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented.");
 }
 
 /// Increase font size
@@ -277,12 +275,13 @@ void ScriptManagerWidget::zoomOut()
  * Toggle the progress arrow on/off
  * @param state :: The state of the option
  */
-void ScriptManagerWidget::toggleProgressArrow(bool state)
+void ScriptManagerWidget::toggleProgressReporting(bool state)
 {
+  m_reportProgress = state;
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    QMessageBox::warning(this, "", "Implement progress arrow");
+    interpreterAt(index)->toggleProgressReporting(state);
   }
 }
 
@@ -295,19 +294,7 @@ void ScriptManagerWidget::toggleCodeFolding(bool state)
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    QMessageBox::warning(this, "", "Implement code folding");
-  }
-}
-/**
- * Toggle code completion. Note that turning off code completion automatically turns off call tips
- * @param state :: The state of the option
- */
-void ScriptManagerWidget::toggleCodeCompletion(bool state)
-{
-  int index_end = count() - 1;
-  for( int index = index_end; index >= 0; --index )
-  {
-    QMessageBox::warning(this, "", "Implement code completion");
+    interpreterAt(index)->toggleProgressReporting(state);
   }
 }
 
@@ -325,8 +312,8 @@ void ScriptManagerWidget::closeClickedTab()
 }
 
 /**
- * Mark the current tab as changed. The signal is disconnected
- * from the emitting widget so that multiple calls are not performed
+ * Mark the current tab as changed. True means that the editor has
+ * modifications
  */
 void ScriptManagerWidget::currentEditorModified(bool state)
 {
@@ -352,19 +339,13 @@ void ScriptManagerWidget::tabSelectionChanged(int index)
 {
   if( count() > 0 )
   {
-    disconnect(m_current, SIGNAL(editorUndoAvailable(bool)), this, SIGNAL(undoAvailable(bool)));
-    disconnect(m_current, SIGNAL(editorRedoAvailable(bool)), this, SIGNAL(redoAvailable(bool)));
-    m_current = qobject_cast<ScriptFileInterpreter*>(widget(index));
-    connect(m_current, SIGNAL(editorUndoAvailable(bool)), this, SIGNAL(undoAvailable(bool)));
-    connect(m_current, SIGNAL(editorRedoAvailable(bool)), this, SIGNAL(redoAvailable(bool)));
+    m_current = interpreterAt(index);
     setFocusProxy(m_current);
     m_current->setFocus();
   }
   else
   {
     m_current = m_nullScript;
-    emit undoAvailable(false);
-    emit redoAvailable(false);
   }
 
 }
@@ -508,6 +489,10 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
   ScriptFileInterpreter *interpreter = interpreterAt(index);
   interpreter->prepareToClose();
   removeTab(index);
+  emit tabClosed(index);
+  const int nTabs = count();
+  emit tabCountChanged(nTabs);
+  if(nTabs == 0) emit lastTabClosed();
 }
 
 
@@ -521,27 +506,6 @@ void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
   //Index is checked in closeTab
   closeTabAtIndex(index);
 }
-
-///**
-// * Set code folding behaviour for the given editor
-// * @param editor :: The editor widget to set the behaviour on
-// * @param state :: The state required
-// */
-//void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool state)
-//{
-//  QsciScintilla::FoldStyle fold_option;
-//  if( state && !m_interpreter_mode )
-//  {
-//    fold_option = QsciScintilla::BoxedTreeFoldStyle;
-//  }
-//  else
-//  {
-//    fold_option = QsciScintilla::NoFoldStyle;
-//  }
-//
-//  editor->setFolding(fold_option);
-//}
-
 
 /** 
  * Keeps the recent script list up to date

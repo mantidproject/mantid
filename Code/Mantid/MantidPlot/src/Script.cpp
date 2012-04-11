@@ -33,7 +33,8 @@
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
   : QObject(), m_env(env), m_name(name) , m_context(context),
-    m_redirectOutput(true), m_lineOffset(0), m_interactMode(interact), m_execMode(NotExecuting)
+    m_redirectOutput(true), m_reportProgress(false), m_lineOffset(0), m_interactMode(interact),
+    m_execMode(NotExecuting)
 {
   m_env->incref();
 
