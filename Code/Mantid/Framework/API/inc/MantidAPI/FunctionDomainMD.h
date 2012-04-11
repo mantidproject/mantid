@@ -11,11 +11,7 @@ namespace Mantid
 {
 namespace API
 {
-/** Base class that represents the domain of a function.
-    A domain is a generalisation of x (argument) and y (value) arrays.
-    A domain consists at least of a list of function arguments for which a function should 
-    be evaluated and a buffer for the calculated values. If used in fitting also contains
-    the fit data and weights.
+/** Implements a domain for MD functions (IFunctionMD).
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
@@ -62,6 +58,7 @@ protected:
   mutable size_t m_currentIndex; 
   /// The size of the domain
   size_t m_size;
+  /// Just reset flag
   mutable bool m_justReset;
 };
 

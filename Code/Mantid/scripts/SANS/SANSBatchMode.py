@@ -70,8 +70,12 @@ class SkipEntry(RuntimeError):
 class SkipReduction(RuntimeError):
     pass
 
-# Add a CSV line to the input data store
+
 def addRunToStore(parts, run_store):
+    """ Add a CSV line to the input data store (run_store)
+        @param parts: the parts of a CSV line
+        @param run_store: Append info about CSV line 
+    """     
     # Check logical structure of line
     nparts = len(parts) 
     if nparts not in ALLOWED_NUM_ENTRIES:
@@ -95,7 +99,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
         @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
-        @param save: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
+        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
         @param verbose: set to true to write more information to the log (default=False)
         @param centreit: do centre finding (default=False)
         @param reducer: if to use the command line (default) or GUI reducer object
@@ -103,6 +107,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     if not format.startswith('.'):
         format = '.' + format
         
+    # Read CSV file and store information in runinfo using format IN_FORMAT
     file_handle = open(filename, 'r')
     runinfo = []
     for line in file_handle:
@@ -110,13 +115,12 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         parts = line.rstrip().split(',')
         if addRunToStore(parts, runinfo) > 0:
             issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
-    # End of file reading
     file_handle.close()
 
     if reducer:
         ReductionSingleton().replace(reducer)
 
-    #first copy the user settings incase running the reductionsteps can change it
+    #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
 
     # Now loop over all the lines and do a reduction (hopefully) for each

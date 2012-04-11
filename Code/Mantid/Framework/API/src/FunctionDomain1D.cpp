@@ -10,8 +10,8 @@ namespace API
 {
 
 /**
-  * Create a domain form a vector.
-  * @param xvalues :: Points
+  * Create a domain from a vector.
+  * @param xvalues :: Vector with function arguments to be copied from.
   */
 FunctionDomain1DVector::FunctionDomain1DVector(const std::vector<double>& xvalues):
 FunctionDomain1D(NULL,0)
@@ -24,6 +24,11 @@ FunctionDomain1D(NULL,0)
   resetData(&m_X[0],m_X.size());
 }
 
+/**
+  * Create a domain from a part of a vector.
+  * @param from :: Iterator to start copying values from.
+  * @param to :: Iterator to the end of the data.
+  */
 FunctionDomain1DVector::FunctionDomain1DVector(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to):
 FunctionDomain1D(NULL,0)
 {
@@ -35,6 +40,13 @@ FunctionDomain1D(NULL,0)
   resetData(&m_X[0],m_X.size());
 }
 
+/**
+ * Create a domain with regular values in an interval. The step in values is (endX - startX) / (n - 1).
+ * If n == 1 creates a single value of (startX + endX) / 2.
+ * @param startX :: The start of an interval.
+ * @param endX :: The end of an interval.
+ * @param n :: Number of values to create. 
+ */
 FunctionDomain1DVector::FunctionDomain1DVector(const double startX, const double endX, const size_t n):
 FunctionDomain1D(NULL,0)
 {
@@ -58,6 +70,10 @@ FunctionDomain1D(NULL,0)
   resetData(&m_X[0],m_X.size());
 }
 
+/**
+ * Create a domain with a single value.
+ * @param x :: The argument value.
+ */
 FunctionDomain1DVector::FunctionDomain1DVector(const double x):
 FunctionDomain1D(NULL,0)
 {

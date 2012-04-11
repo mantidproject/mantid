@@ -393,6 +393,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 wksp.getRun()['iparm_file'] = self._config.iparmFile
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning[1]) # reset bin width
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if normByCurrent:
@@ -588,7 +589,8 @@ class SNSPowderReduction(PythonAlgorithm):
                     if self.getProperty("StripVanadiumPeaks"):
                         ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                         StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
-                                           PeakPositionTolerance=self.getProperty("VanadiumPeakTol"), HighBackground=True)
+                                           PeakPositionTolerance=self.getProperty("VanadiumPeakTol"),
+                                           BackgroundType="Quadratic", HighBackground=True)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)

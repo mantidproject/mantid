@@ -12,7 +12,7 @@ namespace Mantid
 {
 namespace API
 {
-/** Base class that represents values of a function.
+/** Base class for a storage of values of a function.
 
     @author Roman Tolchenov, Tessella plc
     @date 23/03/2012

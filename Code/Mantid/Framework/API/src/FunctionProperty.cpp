@@ -94,7 +94,7 @@ namespace API
   }
 
   /** Checks whether the entered function is valid.
-  *  To be valid it has to be 
+  *  To be valid it has to be other then default which is no function defined.
   *  @returns A user level description of the problem or "" if it is valid.
   */
   std::string FunctionProperty::isValid() const 
@@ -102,8 +102,8 @@ namespace API
     return isDefault() ? "Funcion is empty." : "";
   }
 
-  /** Indicates if the object is still pointing to the same workspace, using the workspace name
-  *  @return true if the value is the same as the initial value or false otherwise
+  /** Indicates if the function has not been created yet.
+  *  @return true if the function has not been created yet.
   */
   bool FunctionProperty::isDefault() const
   {

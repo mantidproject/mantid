@@ -9,6 +9,10 @@ namespace Mantid
 namespace CurveFitting
 {
 
+/** Used by the GSL to calculate the cost function.
+ * @param x :: Vector with parameters
+ * @param params :: Pointer to a DerivMinimizer
+ */
 double DerivMinimizer::fun (const gsl_vector * x, void * params)
 {
   DerivMinimizer& minimizer = *static_cast<DerivMinimizer*>(params);
@@ -25,6 +29,11 @@ double DerivMinimizer::fun (const gsl_vector * x, void * params)
   return minimizer.m_costFunction->val();
 }
 
+/** Used by the GSL to calculate the derivatives.
+ * @param x :: Vector with parameters
+ * @param params :: Pointer to a DerivMinimizer
+ * @param g :: Buffer for the derivatives
+ */
 void DerivMinimizer::dfun(const gsl_vector * x, void * params, gsl_vector * g)
 {
   DerivMinimizer& minimizer = *static_cast<DerivMinimizer*>(params);
@@ -46,6 +55,12 @@ void DerivMinimizer::dfun(const gsl_vector * x, void * params, gsl_vector * g)
   }
 }
 
+/** Used by the GSL to calculate the cost function and the derivatives.
+ * @param x :: Vector with parameters
+ * @param params :: Pointer to a DerivMinimizer
+ * @param f :: Buffer for the fanction value
+ * @param g :: Buffer for the derivatives
+ */
 void DerivMinimizer::fundfun (const gsl_vector * x, void * params, double * f, gsl_vector * g)
 {
   DerivMinimizer& minimizer = *static_cast<DerivMinimizer*>(params);
@@ -76,6 +91,11 @@ m_tolerance(0.0001)
 {
 }
 
+/**
+ * Constructor.
+ * @param stepSize :: Initial step size.
+ * @param tolerance :: Tolerance.
+ */
 DerivMinimizer::DerivMinimizer(const double stepSize, const double tolerance):
 m_gslSolver(NULL),
 m_stopGradient(1e-3),
@@ -84,6 +104,9 @@ m_tolerance(tolerance)
 {
 }
 
+/**
+ * Destructor.
+ */
 DerivMinimizer::~DerivMinimizer()
 {
   if (m_gslSolver != NULL)
@@ -93,6 +116,10 @@ DerivMinimizer::~DerivMinimizer()
   }
 }
 
+/**
+ * Initialize the minimizer.
+ * @param function :: A cost function to minimize.
+ */
 void DerivMinimizer::initialize(API::ICostFunction_sptr function) 
 {
   m_costFunction = function;
@@ -117,6 +144,8 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function)
 }
 
 /**
+ * Perform one iteration.
+ * @return :: true to continue, false to stop.
  */
 bool DerivMinimizer::iterate() 
 {
@@ -125,15 +154,6 @@ bool DerivMinimizer::iterate()
     throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
   }
   int status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
-  //std::cerr << "iter " << status << ' ' << m_gslSolver->f << ' ' 
-  //  << gsl_vector_get(m_gslSolver->dx,0)/gsl_vector_get(m_gslSolver->gradient,0) << std::endl;
-  //for(size_t i = 0; i < m_gslSolver->x->size; ++i)
-  //{
-  //  std::cerr << "p " << i << ' ' << gsl_vector_get(m_gslSolver->x,i) << ' ' 
-  //    << gsl_vector_get(m_gslSolver->dx,i) << ' ' 
-  //    << gsl_vector_get(m_gslSolver->gradient,i) << ' ' 
-  //    << std::endl;
-  //}
   if (status)
   {
     m_errorString = gsl_strerror(status);

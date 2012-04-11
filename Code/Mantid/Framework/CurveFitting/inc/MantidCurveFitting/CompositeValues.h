@@ -12,10 +12,10 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-/** Cost function for least squares
+/** Composite values.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 11/05/2010
+    @author Roman Tolchenov, Tessella plc
+    @date 10/04/2012
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

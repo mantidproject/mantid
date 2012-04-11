@@ -6,12 +6,16 @@
 #include "MantidAPI/IConstraint.h"
 
 #include <gsl/gsl_multifit_nlin.h>
+#include <limits>
 
 namespace Mantid
 {
 namespace CurveFitting
 {
 
+/**
+ * Constructor.
+ */
 CostFuncFitting::CostFuncFitting():
 m_dirtyVal(true),
 m_dirtyDeriv(true),
@@ -19,6 +23,9 @@ m_dirtyHessian(true)
 {
 }
 
+/**
+ * Set all dirty flags.
+ */
 void CostFuncFitting::setDirty()
 {
   m_dirtyVal = true;

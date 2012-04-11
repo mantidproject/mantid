@@ -54,7 +54,7 @@ namespace Mantid
       /// Copy constructor
       FunctionProperty( const FunctionProperty& right );
 
-      /// Copy assignment operator. Only copies the value (i.e. the pointer to the workspace)
+      /// Copy assignment operator. Only copies the value (i.e. the pointer to the function)
       FunctionProperty& operator=( const FunctionProperty& right );
 
       /// Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
@@ -69,13 +69,13 @@ namespace Mantid
       /// Virtual destructor
       virtual ~FunctionProperty();
 
-      /// Get the name of the workspace
+      /// Get the function definition string
       virtual std::string value() const;
 
       /// Get the value the property was initialised with -its default value
       virtual std::string getDefault() const;
 
-      /// Set the value of the property
+      /// Set the value of the property. 
       virtual std::string setValue( const std::string& value );
 
       /// Checks whether the entered function is valid.
@@ -89,7 +89,7 @@ namespace Mantid
 
     private:
 
-      /// The name of the workspace (as used by the AnalysisDataService)
+      /// The function definition string (as used by the FunctionFactory)
       std::string m_definition;
 
       /// for access to logging streams

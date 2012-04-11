@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <vector>
 
@@ -302,14 +303,25 @@ public:
       "No file name to parse.");
   }
 
-  void test_errorThrownIfPassedNoInstrumentName()
+  void test_defaultInstrumentUsedIfPassedNoInstrumentName()
   {
     Parser parser;
+    
+    Mantid::Kernel::ConfigService::Instance().setString("default.instrument", "TSC");
 
-    TS_ASSERT_THROWS_EQUALS(parser.parse("c:/20:30.raw"),
-      const std::runtime_error & re, 
-      std::string(re.what()),
-      "There does not appear to be an instrument name present.");
+    parser.parse("c:/2:4.raw");
+
+    TS_ASSERT_EQUALS(parser.dirString(), "c:/");
+    TS_ASSERT_EQUALS(parser.instString(), "TSC");
+    TS_ASSERT_EQUALS(parser.underscoreString(), "");
+    TS_ASSERT_EQUALS(parser.runString(), "2:4");
+    TS_ASSERT_EQUALS(parser.extString(), ".raw");
+
+    std::vector<std::vector<std::string> > filenames = parser.fileNames();
+
+    TS_ASSERT_EQUALS(filenames[0][0], "c:/TSC00002.raw");
+    TS_ASSERT_EQUALS(filenames[1][0], "c:/TSC00003.raw");
+    TS_ASSERT_EQUALS(filenames[2][0], "c:/TSC00004.raw");
   }
 };
 

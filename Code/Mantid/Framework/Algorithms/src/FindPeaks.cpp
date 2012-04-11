@@ -1048,6 +1048,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   double a0(0.0), a1(0.0), a2(0.0);
 
   double bkgdchi2;
+  double mincost = 1.0E10;
+  std::vector<double> bestparams, bestRawParams;
+
   if (fitStatus.compare("success") == 0){
     a0 = backgroundFunction->getParameter(0);//params[0];
     if (this->backgroundOrder() > 0)
@@ -1060,8 +1063,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     bkgdchi2 = fit->getProperty("OutputChi2overDoF");
   } else {
     g_log.warning() << "Fit " << m_backgroundType << " Fails For Peak @ " << X[i4] << std::endl;
-    a0 = a1 = a2 = 0;
-    bkgdchi2 = -100;
+    a0 = a1 = a2 = 0.;
+    bkgdchi2 = -100.;
   }
   g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2
                       << " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << "\n";
@@ -1069,10 +1072,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   const double in_height = Y[i4] - in_bg0;
 
   // g) Looping on peak width for the best fit
-  double mincost = 1.0E10;
-  std::vector<double> bestparams, bestRawParams;
-
-
   g_log.information() << "Loop From " << minGuessedPeakWidth << " To " << maxGuessedPeakWidth << " with step "
       << stepGuessedPeakWidth << "  Over about " << 10*(i0-i2) << " pixels" << std::endl;
 

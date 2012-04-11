@@ -31,6 +31,7 @@ class MockNearestNeighboursFactory : public Mantid::Geometry::INearestNeighbours
 {
 public:
   MOCK_METHOD3(create, Mantid::Geometry::INearestNeighbours*(boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectraDetectorMap&, bool));
+  MOCK_METHOD4(create, Mantid::Geometry::INearestNeighbours*(int,boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectraDetectorMap&, bool));
   virtual ~MockNearestNeighboursFactory()
   {
   }
@@ -40,8 +41,8 @@ public:
 typedef std::map<Mantid::specid_t, Mantid::Kernel::V3D> SpectrumDistanceMap;
 class MockNearestNeighbours : public Mantid::Geometry::INearestNeighbours {
  public:
-  MOCK_CONST_METHOD2(neighbours, SpectrumDistanceMap(specid_t spectrum, double radius));
-  MOCK_CONST_METHOD3(neighbours, SpectrumDistanceMap(specid_t spectrum, bool force, int numberofneighbours));
+  MOCK_CONST_METHOD2(neighboursInRadius, SpectrumDistanceMap(specid_t spectrum, double radius));
+  MOCK_CONST_METHOD1(neighbours, SpectrumDistanceMap(specid_t spectrum));
   MOCK_METHOD0(die, void());
   virtual ~MockNearestNeighbours()
   {

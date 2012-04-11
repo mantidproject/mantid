@@ -22,7 +22,42 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    New algorithm for fitting functions. The name is temporary.
+
+    A generic fitting algorithm. It fits a function to some data in a workspace.
+
+    The static properties are:
+    <UL>
+      <LI>Function - The fitting function</LI>
+      <LI>InputWorkspace - First input workspace with the data</LI>
+      <LI>Ties - Optional parameter ties</LI>
+      <LI>Constraints - Optional parameter constraints</LI>
+      <LI>MaxIterations - Max number of iterations, default 500</LI>
+      <LI>OutputStatus - A string with the output status</LI>
+      <LI>OutputChi2overDoF - The final chi^2 over degrees of freedom</LI>
+      <LI>Minimizer - The minimizer, default Levenberg-Marquardt</LI>
+      <LI>CostFunction - The cost function , default Least squares</LI>
+      <LI>CreateOutput - A flag to create output workspaces.</LI>
+      <LI>Output - Optional base name for the output workspaces.</LI>
+    </UL>
+
+    After setting "Function" and "InputWorkspace" additional dynamic properties can be declared.
+    Property "Function" must be set first. If it is of a multi-domain variety the algorithm will
+    declare a number of properties with names "InputWorkspace_#" where # stands for a number from 1
+    to n-1 where n is the number of domains required for the function. All the workspace properties
+    have to be set.
+
+    After a "InputWorkspace[_#]" property is set more dynamic proeprties can be declared. This depends
+    on the functions and the type of the workspace. For example, if "Function" is IFunction1D and 
+    "InputWorkspace" is a MatrixWorkspace then properties "WorkspaceIndex", "StartX", and "EndX" will
+    be added.
+
+    If the output workspaces are to be created they will have the following properties:
+    <UL>
+      <LI>OutputNormalisedCovarianceMatrix - A TableWorkspace with the covariance matrix</LI>
+      <LI>OutputParameters - A TableWorkspace with the optimized parameters</LI>
+      <LI>OutputWorkspace - Optional: some functions and input workspaces may alow to create a workspace
+          with the calculated values</LI>
+    </UL>
 
     @author Roman Tolchenov, Tessella plc
     @date 06/12/2011

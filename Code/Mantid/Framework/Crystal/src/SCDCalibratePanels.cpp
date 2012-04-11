@@ -55,6 +55,7 @@ Some features
 #include <fstream>
 #include <math.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include "../../Kernel/inc/MantidKernel/Property.h"
 
 using namespace Mantid::DataObjects;
@@ -980,8 +981,9 @@ namespace Crystal
 
     for( int g = 0; g < NGroups; g++ )
     {
-      char GroupName[ 8 ];
-      sprintf( GroupName,"Group%d\n",g);
+      //char GroupName[ 8 ];
+      //sprintf( GroupName,"Group%d\n",g);
+      std::string GroupName = std::string("Group") + boost::lexical_cast<std::string>(g);
       Result->addColumn( "double",GroupName);
     }
 
@@ -1201,7 +1203,7 @@ namespace Crystal
     //--------------- Create Function argument for the FunctionHandler------------
     ostringstream qErrFxnInfo (ostringstream::out);
     qErrFxnInfo.precision(4);
-    qErrFxnInfo <<  "SCDPanelErrors(a=" << fixed << a << ",b=" << fixed << b << ",c=" << fixed << c
+    qErrFxnInfo <<  "name=SCDPanelErrors,a=" << fixed << a << ",b=" << fixed << b << ",c=" << fixed << c
                 <<",alpha=" << fixed << alpha << ",beta=" << fixed << beta
                 <<",gamma=" << fixed << gamma;
     qErrFxnInfo <<  ",PeakWorkspaceName=xxx,startX=-1,endX=-1,";
@@ -1244,11 +1246,10 @@ namespace Crystal
         }
 
       }
-      qErrFxnInfo << ")";
 
 
       boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
-                FunctionFactory::Instance().createFitFunction(CommonString  + qErrFxnInfo.str()));
+                FunctionFactory::Instance().createInitialized(CommonString  + qErrFxnInfo.str()));
       fit->setWorkspace( ws);
 
       size_t nData = ws->dataX(0).size();

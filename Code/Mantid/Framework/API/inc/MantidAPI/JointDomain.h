@@ -15,11 +15,7 @@ namespace Mantid
 {
 namespace API
 {
-/** Base class that represents the domain of a function.
-    A domain is a generalisation of x (argument) and y (value) arrays.
-    A domain consists at least of a list of function arguments for which a function should 
-    be evaluated and a buffer for the calculated values. If used in fitting also contains
-    the fit data and weights.
+/** An implementation of CompositeDomain.
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
@@ -55,6 +51,7 @@ public:
   virtual const FunctionDomain& getDomain(size_t i) const;
   void addDomain(FunctionDomain_sptr domain);
 protected:
+  /// Vector with member domains.
   std::vector< FunctionDomain_sptr > m_domains;
 };
 

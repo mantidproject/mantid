@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Tue Apr 10 12:27:49 2012
+# Created: Tue Apr 10 13:22:25 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!

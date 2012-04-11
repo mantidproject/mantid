@@ -47,7 +47,7 @@ public:
   /// Virtual destructor
   virtual ~IFuncMinimizer() {}
 
-  /// Initialize minimizer, i.e. pass function and costFunction
+  /// Initialize minimizer, i.e. pass costFunction
   virtual void initialize(API::ICostFunction_sptr function) = 0;
 
   /// Get name of minimizer
@@ -57,16 +57,17 @@ public:
   /// @return :: true if iterations should be continued or false to stop
   virtual bool iterate() = 0;
 
-  /// Perform iteration with minimizer and return info about how well this went
-  /// using the GSL status integer system. See gsl_errno.h for details.
+  /// Perform iteration with minimizer and return true if successful.
   virtual bool minimize(size_t maxIterations = 1000);
 
+  /// Get the error string
   virtual std::string getError() const {return m_errorString;}
 
   /// Get value of cost function 
   virtual double costFunctionVal() = 0;
 
 protected:
+  /// Error string.
   std::string m_errorString;
 };
 

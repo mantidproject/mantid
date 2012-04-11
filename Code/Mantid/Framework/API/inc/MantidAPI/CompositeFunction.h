@@ -14,7 +14,18 @@ namespace Mantid
 {
 namespace API
 {
-/** A composite function.
+/** A composite function is a function containing other functions. It combines values 
+    calculated by the member function using an operation. The default operation is summation (+).
+    Composite functions do not have their own parameters, they use parameters of the member functions.
+    Functions are added to a composite functions with addFunction method and can be retrieved with
+    getFinction(i) method. Function indices are defined by the order they are added. Parameter names
+    are formed from the member function's index and its parameter name: f<index>.<name>. For example,
+    name "f0.Sigma" would be given to the "Sigma" parameter of a Gaussian added first to the composite
+    function. If a member function is a composite function itself the same principle applies: 'f<index>.'
+    is prepended to a name, e.g. "f0.f1.Sigma".
+
+    The default implementation expects its member to use the same type of FunctionDomain. The domain
+    passed to the function(...) method is used to evaluate all member functions.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 20/10/2009
@@ -43,7 +54,7 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction
 {
 public:
   /// Default constructor
-  CompositeFunction():/*m_nActive(0),*/m_nParams(0){}
+  CompositeFunction(): m_nParams(0){}
   /// Copy contructor
   CompositeFunction(const CompositeFunction&);
   ///Assignment operator

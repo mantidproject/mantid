@@ -74,9 +74,6 @@ namespace API
     ///Creates an instance of a function
     boost::shared_ptr<IFunction> createInitialized(const std::string& input) const;
 
-    ///Creates an instance of a function
-    boost::shared_ptr<IFunction> createFitFunction(const std::string& input) const;
-
     /// Query available functions based on the template type
     template<typename FunctionType>
     std::vector<std::string> getFunctionNames() const;
@@ -107,8 +104,6 @@ namespace API
       const Expression& expr, 
       std::map<std::string,std::string>& parentAttributes
       )const;
-    ///Creates an instance of a function
-    boost::shared_ptr<IFunction> createFitFunction(const Expression& expr) const;
 
     /// Throw an exception
     void inputError(const std::string& str="")const;
@@ -140,7 +135,7 @@ namespace API
     for( std::vector<std::string>::const_iterator it = names.begin(); 
          it != names.end(); ++it )
     {
-      boost::shared_ptr<IFunction> func = this->createFitFunction(*it);
+      boost::shared_ptr<IFunction> func = this->createFunction(*it);
       if ( func && dynamic_cast<FunctionType*>(func.get()) )
       {
         typeNames.push_back(*it);

@@ -19,8 +19,9 @@ namespace CurveFitting
 
 DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
 
-/// Calculate value of cost function
-/// @return :: The value of the function
+/** Calculate value of cost function
+ * @return :: The value of the function
+ */
 double CostFuncLeastSquares::val() const
 {
   if ( !m_dirtyVal ) return m_value;
@@ -60,6 +61,11 @@ double CostFuncLeastSquares::val() const
   return m_value;
 }
 
+/**
+ * Add a contribution to the cost function value from the fitting function evaluated on a particular domain.
+ * @param domain :: A domain 
+ * @param values :: Values
+ */
 void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)const
 {
   m_function->function(*domain,*values);
@@ -78,8 +84,9 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
 }
 
 
-/// Calculate the derivatives of the cost function
-/// @param der :: Container to output the derivatives
+/** Calculate the derivatives of the cost function
+ * @param der :: Container to output the derivatives
+ */
 void CostFuncLeastSquares::deriv(std::vector<double>& der) const
 {
   valDerivHessian(false,true,false);
@@ -94,9 +101,10 @@ void CostFuncLeastSquares::deriv(std::vector<double>& der) const
   }
 }
 
-/// Calculate the value and the derivatives of the cost function
-/// @param der :: Container to output the derivatives
-/// @return :: The value of the function
+/** Calculate the value and the derivatives of the cost function
+ * @param der :: Container to output the derivatives
+ * @return :: The value of the function
+ */
 double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
 {
   valDerivHessian(true,true,false);
@@ -217,6 +225,11 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 /**
  * Update the cost function, derivatives and hessian by adding values calculated
  * on a domain.
+ * @param domain :: The domain.
+ * @param values :: The fit function values
+ * @param evalFunction :: Flag to evaluate the function
+ * @param evalDeriv :: Flag to evaluate the derivatives
+ * @param evalHessian :: Flag to evaluate the Hessian
  */
 void CostFuncLeastSquares::addValDerivHessian(
   API::FunctionDomain_sptr domain,
@@ -304,7 +317,9 @@ void CostFuncLeastSquares::addValDerivHessian(
   }
 }
 
-
+/**
+ * Return cached or calculate the drivatives.
+ */
 const GSLVector& CostFuncLeastSquares::getDeriv() const
 {
   if (m_pushed)
@@ -318,6 +333,9 @@ const GSLVector& CostFuncLeastSquares::getDeriv() const
   return m_der;
 }
 
+/**
+ * Return cached or calculate the Hessian.
+ */
 const GSLMatrix& CostFuncLeastSquares::getHessian() const
 {
   if (m_pushed)
@@ -331,6 +349,9 @@ const GSLMatrix& CostFuncLeastSquares::getHessian() const
   return m_hessian;
 }
 
+/**
+ * Save current parameters, derivatives and hessian.
+ */
 void CostFuncLeastSquares::push()
 {
   if (m_pushed)
@@ -343,6 +364,9 @@ void CostFuncLeastSquares::push()
   m_pushed = true;
 }
 
+/**
+ * Restore saved parameters, derivatives and hessian.
+ */
 void CostFuncLeastSquares::pop()
 {
   if ( !m_pushed )
@@ -357,6 +381,9 @@ void CostFuncLeastSquares::pop()
   m_dirtyHessian = false;
 }
 
+/**
+ * Discard saved parameters, derivatives and hessian.
+ */
 void CostFuncLeastSquares::drop()
 {
   if ( !m_pushed )
@@ -367,6 +394,10 @@ void CostFuncLeastSquares::drop()
   setDirty();
 }
 
+/**
+ * Copy the parameter values from a GSLVector.
+ * @param params :: A vector to copy the parameters from
+ */
 void CostFuncLeastSquares::setParameters(const GSLVector& params)
 {
   if (nParams() != params.size())
@@ -380,6 +411,10 @@ void CostFuncLeastSquares::setParameters(const GSLVector& params)
   m_function->applyTies();
 }
 
+/**
+ * Copy the parameter values to a GSLVector.
+ * @param params :: A vector to copy the parameters to
+ */
 void CostFuncLeastSquares::getParameters(GSLVector& params) const
 {
   if (params.size() != nParams())
@@ -394,6 +429,8 @@ void CostFuncLeastSquares::getParameters(GSLVector& params) const
 
 /**
   * Calculates covariance matrix for fitting function's active parameters. 
+  * @param covar :: Output cavariance matrix.
+  * @param epsrel :: Tolerance.
   */
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
 {

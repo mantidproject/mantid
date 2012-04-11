@@ -57,10 +57,10 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, *spectramap);
+    NearestNeighbours nn(actualNeighboursNumber, m_instrument, *spectramap);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
-    std::map<specid_t, V3D> distances = nn.neighbours(14, true, actualNeighboursNumber);
+    std::map<specid_t, V3D> distances = nn.neighbours(14);
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(expectedNeighboursNumber, distances.size());
@@ -112,11 +112,11 @@ public:
 
     // Check that the 'radius' option works as expected
     // Lower radius
-    distances = nn.neighbours(14, 0.008);
+    distances = nn.neighboursInRadius(14, 0.008);
     TS_ASSERT_EQUALS(distances.size(), 4);
 
     // Higher than currently computed
-    distances = nn.neighbours(14, 6.0);
+    distances = nn.neighboursInRadius(14, 6.0);
     TS_ASSERT_EQUALS(distances.size(), 17);
   }
 
@@ -157,11 +157,11 @@ public:
 
     // Too close!
     specid_t spec = 256 + 2*16+3; // This gives the spectrum number for this detector
-    nb = nn.neighbours(spec, 0.003);
+    nb = nn.neighboursInRadius(spec, 0.003);
     TS_ASSERT_EQUALS( nb.size(), 0 );
 
     // The ones above below and next to it
-    nb = nn.neighbours(spec, 0.016);
+    nb = nn.neighboursInRadius(spec, 0.016);
     TS_ASSERT_EQUALS( nb.size(), 4 );
 
   }
@@ -223,7 +223,7 @@ public:
     NearestNeighbours nn(m_instrument, *spectramap);
     for(size_t i = 0; i < 2000; i++)
     {
-      nn.neighbours(1, 5.0);
+      nn.neighboursInRadius(1, 5.0);
     }
   }
 
@@ -240,7 +240,7 @@ public:
     NearestNeighbours nn(m_instrument, *spectramap);
     for(size_t i = 0; i < 2000; i++)
     {
-      nn.neighbours(1, 0.0);
+      nn.neighboursInRadius(1, 0.0);
     }
   }
 
@@ -254,10 +254,10 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, *spectramap);
     for(size_t i = 0; i < 2000; i++)
     {
-      nn.neighbours(1, true, 8);
+      NearestNeighbours nn(8, m_instrument, *spectramap);
+      nn.neighbours(1);
     }
   }
 };

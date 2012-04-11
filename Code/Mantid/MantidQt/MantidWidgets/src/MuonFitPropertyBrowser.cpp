@@ -210,7 +210,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    auto f = Mantid::API::FunctionFactory::Instance().createFitFunction(fnName);
+    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
     for (size_t j=0; j<categories.size(); ++j)
@@ -314,7 +314,8 @@ void MuonFitPropertyBrowser::fit()
     }
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
+    alg->initialize();    
+    alg->setPropertyValue("Function",funStr);
     if (rawData())
       alg->setPropertyValue("InputWorkspace",wsName + "_Raw");
     else
@@ -323,7 +324,6 @@ void MuonFitPropertyBrowser::fit()
     alg->setProperty("StartX",startX());
     alg->setProperty("EndX",endX());
     alg->setPropertyValue("Output",outputName());
-    alg->setPropertyValue("Function",funStr);
     alg->setPropertyValue("Minimizer",minimizer());
     alg->setPropertyValue("CostFunction",costFunction());
     observeFinish(alg);

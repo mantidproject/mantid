@@ -52,7 +52,7 @@ namespace API
   class MANTID_API_DLL CostFunctionFactoryImpl : public Kernel::DynamicFactory<ICostFunction>
   {
   public:
-    /**Creates an instance of a function
+    /**Creates an instance of a cost function
      * @param type :: The function's type
      * @return A pointer to the created function
      */

@@ -5,7 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/PropertyManager.h"
+//#include "MantidKernel/PropertyManager.h"
+
+#include <boost/shared_ptr.hpp>
 
 #include <stdexcept>
 
@@ -14,10 +16,9 @@ namespace Mantid
 namespace API
 {
 /** Base class that represents the domain of a function.
-    A domain is a generalisation of x (argument) and y (value) arrays.
-    A domain consists at least of a list of function arguments for which a function should 
-    be evaluated and a buffer for the calculated values. If used in fitting also contains
-    the fit data and weights.
+    It is a generalisation of function arguments. 
+    A domain consists at least of a list of function arguments for which a function (IFunction) should 
+    be evaluated. 
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
@@ -42,7 +43,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomain: public Kernel::PropertyManager
+class MANTID_API_DLL FunctionDomain//: public Kernel::PropertyManager
 {
 public:
   /// Virtual destructor

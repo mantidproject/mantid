@@ -261,12 +261,33 @@ namespace Kernel
       std::string base = m_multiFileName.substr(
         m_dirString.size(), m_multiFileName.size() - (m_dirString.size() + m_extString.size()));
 
-      // Get the instrument name using a regex.  Throw if not found since this is required.
+      // Get the instrument name using a regex.
       m_instString = getMatchingString("^" + Regexs::INST, base);
-      if(m_instString.empty())
-        throw std::runtime_error("There does not appear to be an instrument name present.");
 
-      // Check if instrument exists, if not then clear the parser, and rethrow an exception.
+      if(m_instString.empty())
+      {
+        // Use default instrument name if one is not found.
+        m_instString = ConfigService::Instance().getString("default.instrument");
+
+        // The run string is now what's left.  Throw if nothing found since runs are required.
+        m_runString = base;
+        if(m_runString.empty())
+          throw std::runtime_error("There does not appear to be any runs present.");
+      }
+      else
+      {
+        // Check for an underscore after the instrument name.
+        size_t underscore = base.find_first_of("_");
+        if(underscore == m_instString.size())
+          m_underscoreString = "_";
+
+        // We can now deduce the run string.  Throw if not found since this runs are required.
+        m_runString = base.substr(m_underscoreString.size() + m_instString.size());
+        if(m_instString.empty())
+          throw std::runtime_error("There does not appear to be any runs present.");
+      }
+      
+      // Get zero padding of instrument. If throws then instrument does not exist.
       try
       {
         InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
@@ -276,16 +297,6 @@ namespace Kernel
       {
         throw std::runtime_error("There does not appear to be a valid instrument name present.");
       }
-
-      // Check for an underscore after the instrument name.
-      size_t underscore = base.find_first_of("_");
-      if(underscore == m_instString.size())
-        m_underscoreString = "_";
-
-      // We can now deduce the run string.  Throw if not found since this is required.
-      m_runString = base.substr(m_underscoreString.size() + m_instString.size());
-      if(m_instString.empty())
-        throw std::runtime_error("There does not appear to be any runs present.");
     }
 
     /////////////////////////////////////////////////////////////////////////////

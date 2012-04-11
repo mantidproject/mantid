@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_sf_calculator.ui'
 #
-# Created: Tue Apr 10 12:27:50 2012
+# Created: Tue Apr 10 13:22:26 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -288,8 +288,8 @@ class Ui_Frame(object):
         self.label_9.setObjectName("label_9")
         self.horizontalLayout_5.addWidget(self.label_9)
         self.lambda_request = QtGui.QLabel(self.groupBox)
-        self.lambda_request.setMinimumSize(QtCore.QSize(100, 0))
-        self.lambda_request.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.lambda_request.setMinimumSize(QtCore.QSize(50, 0))
+        self.lambda_request.setMaximumSize(QtCore.QSize(50, 16777215))
         self.lambda_request.setObjectName("lambda_request")
         self.horizontalLayout_5.addWidget(self.lambda_request)
         self.label_4 = QtGui.QLabel(self.groupBox)
@@ -481,16 +481,16 @@ class Ui_Frame(object):
         self.lambda_request.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "&#8491;", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "S1 height:", None, QtGui.QApplication.UnicodeUTF8))
-        self.s1h.setText(QtGui.QApplication.translate("Frame", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.s1h.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("Frame", "S2 height:", None, QtGui.QApplication.UnicodeUTF8))
-        self.s2h.setText(QtGui.QApplication.translate("Frame", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.s2h.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_2.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("Frame", "S1 width :", None, QtGui.QApplication.UnicodeUTF8))
-        self.s1w.setText(QtGui.QApplication.translate("Frame", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.s1w.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_3.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("Frame", "S2 width :", None, QtGui.QApplication.UnicodeUTF8))
-        self.s2w.setText(QtGui.QApplication.translate("Frame", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.s2w.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_4.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

@@ -77,7 +77,9 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
-
+        self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
+        self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
+        
         #Catch edited controls        
         #Incident medium (selection or text changed)
         call_back = partial(self._edit_event, ctrl=self._summary.incident_medium_combobox)
@@ -129,6 +131,78 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #TODO: allow log binning
         self._summary.log_scale_chk.hide()
                  
+    def _plot_count_vs_y(self, is_peak=True):
+        """
+            Plot counts as a function of high-resolution pixels
+            and select peak range
+            For REFM, this is X
+            For REFL, this is Y
+        """
+        min, max = self._integrated_plot(True,
+                                         self._summary.data_run_number_edit,
+                                         self._summary.data_peak_from_pixel,
+                                         self._summary.data_peak_to_pixel)
+#        self._summary.data_peak_from_pixel_estimate.setText(str(int(math.ceil(min))))
+#        self._summary.data_peak_to_pixel_estimate.setText(str(int(math.ceil(max))))
+#        util.set_tiny(self._summary.data_peak_from_pixel_estimate)
+#        util.set_tiny(self._summary.data_peak_to_pixel_estimate)
+
+    def _plot_count_vs_y_bck(self):
+        """
+            Plot counts as a function of high-resolution pixels
+            and select background range
+            For REFM, this is X
+            For REFL, this is Y
+        """
+        self._integrated_plot(True,
+                              self._summary.data_run_number_edit,
+                              self._summary.data_background_from_pixel,
+                              self._summary.data_background_to_pixel)
+
+    def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl):
+        """
+            Plot counts as a function of:
+            
+            Low-resolution pixels
+                For REFM, this is Y
+                For REFL, this is X
+                
+            High-resolution pixels
+                For REFM, this is X
+                For REFL, this is Y  
+                
+            @param is_high_res: True if we are plotting the high-res pixel distribution
+            @param file_ctrl: control widget containing the data file name
+            @param min_ctrl: control widget containing the range minimum
+            @param max_ctrl: control widget containing the range maximum
+        """
+        if not IS_IN_MANTIDPLOT:
+            return
+        
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))
+
+        range_min = int(min_ctrl.text())
+        range_max = int(max_ctrl.text())
+
+        if len(f)>0 and os.path.isfile(f[0]):
+            def call_back(xmin, xmax):
+                min_ctrl.setText("%-d" % int(xmin))
+                max_ctrl.setText("%-d" % int(xmax))
+            
+            # For REFL, Y is high-res
+            is_pixel_y = is_high_res
+            # For REFM it's the other way around
+            if self.short_name == "REFM":
+                is_pixel_y = not is_pixel_y
+                
+            min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
+                                                                      callback=call_back,
+                                                                      range_min=range_min,
+                                                                      range_max=range_max,
+                                                                      high_res=is_high_res,
+                                                                      instrument=self.short_name)
+            return min, max
+
     def _remove_item(self):
         if self._summary.angle_list.count()==0:
             return
@@ -149,37 +223,17 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
 
     def data_run_number_validated(self):
         self._summary.data_run_number_processing.show()
-        print 'inside data_run_number_validated'
         run_number = self._summary.data_run_number_edit.text()
         _file = FileFinder.findRuns("REF_L%d"%int(run_number))
-#        S1H = ''
-#        S2H = ''
-#        S1W = ''
-#        S2W = ''
         lambdaRequest = ''
-        print _file[0]
-#        self.getSlitsValueAndLambda(_file[0], S1H, S2H, S1W, S2W, lambdaRequest)
-        _file = '/mnt/hgfs/j35/results/REF_L_70982_event.nxs'
-        S1H, S2H, S1W, S2W, lambdaRequest = self.getSlitsValueAndLambda(_file)
-        print S1H
-        print S2H
-        print S1W
-        print S2W
-        
+        S1H, S2H, S1W, S2W, lambdaRequest = self.getSlitsValueAndLambda(_file[0])
         self._summary.s1h.setText(S1H)
         self._summary.s2h.setText(S2H)
         self._summary.s1w.setText(S1W)
         self._summary.s2w.setText(S2W)
         self._summary.lambda_request.setText(lambdaRequest)
-
-        
-        
-        
-        
-        
         self._summary.data_run_number_processing.hide()
         
-
     def _add_data(self):
         state = self.get_editing_state()
         in_list = False
@@ -422,7 +476,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         S2W = "%2.4f" %(_s2w_value)
         
         _lambda_value = self.getLambdaValue(mt=mt1)
-        lambdaRequest = "%2.4" %(_lambda_value)
+        lambdaRequest = "%2.2f" %(_lambda_value[0])
         
         return S1H, S2H, S1W, S2W, lambdaRequest
         

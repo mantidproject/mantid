@@ -14,10 +14,11 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-/** Cost function for least squares
+/** A semi-abstract class for a cost function for fitting functions.
+    Implement val(), deriv(), and valAndDeriv() methods in a concrete class.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 11/05/2010
+    @author Roman Tolchenov, Tessella plc
+    @date 10/04/2012
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -69,7 +70,9 @@ public:
 
   /// Calculate fitting errors
   virtual void calFittingErrors(const GSLMatrix& covar);
+  /// Get the domain the fitting function is applied to
   API::FunctionDomain_sptr getDomain() const {return m_domain;}
+  /// Get FunctionValues where function values are stored.
   API::IFunctionValues_sptr getValues() const {return m_values;}
 
 protected:
@@ -84,14 +87,18 @@ protected:
   void calTransformationMatrixNumerically(GSLMatrix& tm);
   void setDirty();
   
+  /// Shared pointer to the fitting function
   API::IFunction_sptr m_function;
+  /// Shared pointer to the function domain
   API::FunctionDomain_sptr m_domain;
+  /// Shared poinetr to the function values
   API::IFunctionValues_sptr m_values;
+  /// maps the cost function's parameters to the ones of the fitting function.
   std::vector<size_t> m_indexMap;
 
-  mutable bool m_dirtyVal;
-  mutable bool m_dirtyDeriv;
-  mutable bool m_dirtyHessian;
+  mutable bool m_dirtyVal; /// dirty value flag
+  mutable bool m_dirtyDeriv; /// dirty derivatives flag
+  mutable bool m_dirtyHessian; /// dirty hessian flag
 };
 
 } // namespace CurveFitting

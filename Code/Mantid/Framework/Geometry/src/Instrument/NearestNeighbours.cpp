@@ -16,7 +16,8 @@ namespace Mantid
     using Mantid::detid_t;
     using Kernel::V3D;
 
-    /**
+
+      /**
      * Constructor
      * @param instrument :: A shared pointer to Instrument object
      * @param spectraMap :: A reference to the spectra-detector mapping
@@ -29,6 +30,21 @@ namespace Mantid
       this->build(m_noNeighbours);
     }
 
+
+    /**
+     * Constructor
+     * @param nNeighbours :: Number of neighbours to use
+     * @param instrument :: A shared pointer to Instrument object
+     * @param spectraMap :: A reference to the spectra-detector mapping
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored.
+     */
+    NearestNeighbours::NearestNeighbours(int nNeighbours, boost::shared_ptr<const Instrument> instrument,
+                                         const ISpectraDetectorMap & spectraMap, bool ignoreMaskedDetectors) : 
+      m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_scale(), m_radius(0), m_bIgnoreMaskedDetectors(ignoreMaskedDetectors)
+    {
+      this->build(m_noNeighbours);
+    }
+
     /**
      * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
      * @param spectrum :: Spectrum ID of the central pixel
@@ -37,12 +53,8 @@ namespace Mantid
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
-    std::map<specid_t, V3D> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const int noNeighbours) const
+    std::map<specid_t, V3D> NearestNeighbours::neighbours(const specid_t spectrum) const
     {
-      if(force || m_noNeighbours != int(noNeighbours))
-      {
-        const_cast<NearestNeighbours*>(this)->build(noNeighbours);
-      }
       return defaultNeighbours(spectrum);
     }
    
@@ -53,7 +65,7 @@ namespace Mantid
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
-    std::map<specid_t, V3D> NearestNeighbours::neighbours(const specid_t spectrum, const double radius) const
+    std::map<specid_t, V3D> NearestNeighbours::neighboursInRadius(const specid_t spectrum, const double radius) const
     {
       // If the radius is stupid then don't let it continue as well be stuck forever
       if( radius < 0.0 || radius > 10.0 )
