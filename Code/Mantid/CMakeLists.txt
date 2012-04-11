@@ -27,6 +27,8 @@ include ( UseSystemQt4 )
 # Set paths to Third_Party for Windows builds
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
+
+	set( CPACK_PACKAGE_INSTALL_DIRECTORY "/MantidInstall")
 	if ( NOT THIRD_PARTY )
   		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
 	endif ()
@@ -40,6 +42,42 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	
 	include ( WindowsSetup )
 	
+	#Windows CPACK specifics
+	set( CPACK_GENERATOR "NSIS" )
+	set( CPACK_SET_DESTDIR "ON")    
+	set( TARGET_TYPE RUNTIME)
+	
+	  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"MANTIDPATH\\\"
+        Push \\\"A\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\bin\\\"
+        Call EnvVarUpdate
+        Pop  \\\$0
+		
+	    Push \\\"PATH\\\"
+        Push \\\"A\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\bin\\\"
+        Call EnvVarUpdate
+        Pop  \\\$0
+	    ")
+		
+	# On unistall reverse stages listed above.
+	  set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS 
+        "Push \\\"PATH\\\"
+        Push \\\"R\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\bin\\\"
+        Call un.EnvVarUpdate
+        Pop  \\\$0
+		
+		Push \\\"MANTIDPATH\\\"
+		Push \\\"R\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\bin\\\"
+        Call un.EnvVarUpdate
+        Pop  \\\$0
+	  ")
 ENDIF()
 
 ###########################################################################
@@ -48,7 +86,7 @@ ENDIF()
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
 
   execute_process(
-      COMMAND /usr/bin/sw_vers -productVersion
+      COMMAND /usr/bin/sw_vers -product
       OUTPUT_VARIABLE OSX_VERSION
       RESULT_VARIABLE OSX_VERSION_STATUS
   )
@@ -182,11 +220,11 @@ endif()
 # Keep this in a defaulted-to-off option
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
-  if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  #if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   
     include ( CPackCommon )
     
-    set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
+    #set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
     set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
   
     # Mac Packagemaker settings
@@ -221,5 +259,5 @@ if ( ENABLE_CPACK )
 
     # run cpack configuration
     include ( CPack )
-  ENDIF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  #ENDIF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif ()
