@@ -10,54 +10,29 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class DataSets(BaseScriptElement):
 
-    DataPeakSelectionType = 'narrow'
-    DataPeakPixels = [120, 130]
-    DataPeakDiscreteSelection = 'N/A'
-    DataBackgroundFlag = False
-    DataBackgroundRoi = [115, 137,123, 137]
-    DataTofRange = [9600., 21600.]
-    crop_TOF_range = True;
-    
-    data_x_range_flag = True
-    data_x_range = [115,210]
-    
-    norm_x_range_flag = True
-    norm_x_range = [115,210]
-
-    NormFlag = True
-    NormPeakPixels = [120, 130]
-    NormBackgroundFlag = False
-    NormBackgroundRoi = [115, 137]
-
-    # Data files
-    #data_files = [66421]
-    #norm_file = 66196
-    data_files = [0]
-    norm_file = 0
-    
-    # Q range
-    q_min = 0.001
-    q_step = 0.001
-    auto_q_binning = False
-    
-    # Angle offset
-    angle_offset = 0.0
-    angle_offset_error = 0.0
+    data_file = 0
+    incident_medium = 'H20'
+    number_atenuator = 0
+    peak_selection = [0,0]
+    back_selection = [0,0]
+    back_flag = True
+    lambda_requested = ''
+    s1h = 0.
+    s2h = 0.
+    s1w = 0.
+    s2w = 0.
 
     def __init__(self):
         super(DataSets, self).__init__()
         self.reset()
 
-    def to_script(self, for_automated_reduction=False):
+    def to_script(self):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
         """
 
-        if for_automated_reduction:
-            script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
-        else:
-            script =  "RefLReduction(RunNumbers=[int(%s)],\n" % str(self.data_files[0])
+        script =  "RefLReduction(RunNumbers=[int(%s)],\n" % str(self.data_files[0])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
@@ -73,18 +48,6 @@ class DataSets(BaseScriptElement):
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
-
-        # Angle offset
-        if self.angle_offset != 0.0:
-            script += "              AngleOffset=%s,\n" % str(self.angle_offset)
-            script += "              AngleOffsetError=%s,\n" % str(self.angle_offset_error)
-            
-        # The output should be slightly different if we are generating
-        # a script for the automated reduction
-        if for_automated_reduction:
-            script += "              OutputWorkspace='reflectivity_'+%s)" % str(self.data_files[0])
-        else:
-            script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
 
         return script
@@ -227,30 +190,15 @@ class DataSets(BaseScriptElement):
         """
             Reset state
         """
-        self.DataPeakSelectionType = DataSets.DataPeakSelectionType
-        self.DataBackgroundFlag = DataSets.DataBackgroundFlag
-        self.DataBackgroundRoi = DataSets.DataBackgroundRoi
-        self.DataPeakDiscreteSelection = DataSets.DataPeakDiscreteSelection
-        self.DataPeakPixels = DataSets.DataPeakPixels
-        self.DataTofRange = DataSets.DataTofRange
-        self.data_files = DataSets.data_files
-        
-        self.NormFlag = DataSets.NormFlag
-        self.NormBackgroundFlag = DataSets.NormBackgroundFlag
-        self.NormBackgroundRoi = DataSets.NormBackgroundRoi
-        self.NormPeakPixels = DataSets.NormPeakPixels
-        self.norm_file = DataSets.norm_file
-        self.data_x_range_flag = DataSets.data_x_range_flag
-        self.data_x_range = DataSets.data_x_range
-        self.norm_x_range_flag = DataSets.norm_x_range_flag
-        self.norm_x_range = DataSets.norm_x_range
-        
-        # Q range
-        self.q_min = DataSets.q_min
-        self.q_step = DataSets.q_step
-        self.auto_q_binning = DataSets.auto_q_binning
-        
-        # Angle offset
-        self.angle_offset = DataSets.angle_offset
-        self.angle_offset_error = DataSets.angle_offset_error
+        self.data_file = DataSets.data_file
+        self.incident_medium = DataSets.incident_medium
+        self.number_atenuator = DataSets.number_atenuator
+        self.peak_selection = DataSets.peak_selection
+        self.back_selection = DataSets.back_selection
+        self.back_flag = DataSets.back_flag
+        self.lambda_requested = DataSets.lambda_requested
+        self.s1h = DataSets.s1h
+        self.s2h = DataSets.s2h
+        self.s1w = DataSets.s1w
+        self.s2w = DataSets.s2w 
         

@@ -332,8 +332,18 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         return state
     
     def get_editing_state(self):
+        
         m = REFLDataSets()
-        return m
+
+        #run number
+        m.data_file = str(self._summary.data_run_number_edit)
+        
+        #incident medium
+        m.incident_medium = self._summary.incident_medium_combobox.currentText()
+        
+        #number of attenuator
+        m.number_attenuator = int(self.)
+
         
         #Peak from/to pixels
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
