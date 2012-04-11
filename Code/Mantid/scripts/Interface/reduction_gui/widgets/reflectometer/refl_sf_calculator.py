@@ -79,6 +79,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
+        self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         
         #Catch edited controls        
         #Incident medium (selection or text changed)
@@ -227,11 +228,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         _file = FileFinder.findRuns("REF_L%d"%int(run_number))
         lambdaRequest = ''
         S1H, S2H, S1W, S2W, lambdaRequest = self.getSlitsValueAndLambda(_file[0])
-        self._summary.s1h.setText(S1H)
-        self._summary.s2h.setText(S2H)
-        self._summary.s1w.setText(S1W)
-        self._summary.s2w.setText(S2W)
-        self._summary.lambda_request.setText(lambdaRequest)
+        self._summary.s1h.setText(str(S1H))
+        self._summary.s2h.setText(str(S2H))
+        self._summary.s1w.setText(str(S1W))
+        self._summary.s2w.setText(str(S2W))
+        self._summary.lambda_request.setText(str(lambdaRequest))
         self._summary.data_run_number_processing.hide()
         
     def _add_data(self):
@@ -278,6 +279,19 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         util.set_edited(self._summary.data_background_from_pixel, False)
         util.set_edited(self._summary.data_background_to_pixel, False)
     
+    def _angle_changed(self):
+        if self._summary.angle_list.count()==0:
+            return
+        self._summary.angle_list.setEnabled(False)  
+        self._summary.remove_btn.setEnabled(False)  
+        current_item =  self._summary.angle_list.currentItem()
+        if current_item is not None:
+            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            self.set_editing_state(state)
+            self._reset_warnings()
+        self._summary.angle_list.setEnabled(True)
+        self._summary.remove_btn.setEnabled(True)  
+
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state. 
@@ -291,11 +305,24 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
 #        self._reset_warnings()
 
     def set_editing_state(self, state):
-        super(DataReflSFCalculatorWidget, self).set_editing_state(state)
+    #    super(DataReflSFCalculatorWidget, self).set_editing_state(state)
                 
-        self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
-        self._tof_range_clicked(state.crop_TOF_range)
-                                                
+        self._summary.data_run_number_edit.setText(state.data_file)
+        self._summary.incident_medium_combobox.clear()
+        self._summary.incident_medium_combobox.addItems(state.incident_medium_list)
+        self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
+        self._summary.number_of_attenuator.setText(str(state.number_attenuator))
+        self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
+        self._summary.data_peak_to_pixel.setText(str(state.peak_selection[1]))
+        self._summary.data_background_from_pixel.setText(str(state.back_selection[0]))
+        self._summary.data_background_to_pixel.setText(str(state.back_selection[1]))
+        self._summary.data_background_switch.setChecked(state.back_flag)
+        self._summary.lambda_request.setText(state.lambda_requested)
+        self._summary.s1h.setText(state.s1h)
+        self._summary.s2h.setText(state.s2h)
+        self._summary.s1w.setText(state.s1w)
+        self._summary.s2w.setText(state.s2w)
+    
     def get_state(self):
         """
             Returns an object with the state of the interface
@@ -336,64 +363,37 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         m = REFLDataSets()
 
         #run number
-        m.data_file = str(self._summary.data_run_number_edit)
+        m.data_file = str(self._summary.data_run_number_edit.text())
         
         #incident medium
-        m.incident_medium = self._summary.incident_medium_combobox.currentText()
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
+                                  for i in range(self._summary.incident_medium_combobox.count())]
+        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
         
         #number of attenuator
-        m.number_attenuator = int(self.)
+        m.number_attenuator = int(self._summary.number_of_attenuator.text())
+
+        #peak selection
+        m.peak_selection = [int(self._summary.data_peak_from_pixel.text()),
+                            int(self._summary.data_peak_to_pixel.text())]
+        
+        #background flag
+        m.back_flag = self._summary.data_background_switch.isChecked()
 
         
-        #Peak from/to pixels
-        m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
-                            int(self._summary.data_peak_to_pixel.text())] 
+        #background
+        m.back_selection = [int(self._summary.data_background_from_pixel.text()),
+                            int(self._summary.data_background_to_pixel.text())]
         
-        m.data_x_range = [int(self._summary.x_min_edit.text()),
-                     int(self._summary.x_max_edit.text())]
-        m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
+        #lambda request
+        m.lambda_requested = self._summary.lambda_request.text()
         
-        m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
-                          int(self._summary.norm_x_max_edit.text())]
-        m.norm_x_range_flag = self._summary.norm_low_res_range_switch.isChecked()
+        #s1h, s2h, s1w and s2w
+        m.s1h = self._summary.s1h.text()
+        m.s2h = self._summary.s2h.text()
+        m.s1w = self._summary.s1w.text()
+        m.s2w = self._summary.s2w.text()
         
-        #Background flag
-        m.DataBackgroundFlag = self._summary.data_background_switch.isChecked()
-
-        #Background from/to pixels
-        roi1_from = int(self._summary.data_background_from_pixel1.text())
-        roi1_to = int(self._summary.data_background_to_pixel1.text())
-        m.DataBackgroundRoi = [roi1_from, roi1_to, 0, 0]
-
-        #from TOF and to TOF
-        from_tof = float(self._summary.data_from_tof.text())
-        to_tof = float(self._summary.data_to_tof.text())
-        m.DataTofRange = [from_tof, to_tof]
-        m.crop_TOF_range = self._summary.tof_range_switch.isChecked()
-    
-        datafiles = str(self._summary.data_run_number_edit.text()).split(',')
-        m.data_files = [int(i) for i in datafiles]
-    
-        # Normalization flag
-        m.NormFlag = self._summary.norm_switch.isChecked()
-
-        # Normalization options
-        m.norm_file = int(self._summary.norm_run_number_edit.text())
-        m.NormPeakPixels = [int(self._summary.norm_peak_from_pixel.text()),
-                            int(self._summary.norm_peak_to_pixel.text())]   
-        
-        #Background flag
-        m.NormBackgroundFlag = self._summary.norm_background_switch.isChecked()
-
-        #Background from/to pixels
-        roi1_from = int(self._summary.norm_background_from_pixel1.text())
-        roi1_to = int(self._summary.norm_background_to_pixel1.text())
-        m.NormBackgroundRoi = [roi1_from, roi1_to]
-        
-        # Scattering angle
-        m.theta = float(self._summary.angle_edit.text())
-        m.use_center_pixel = False
-
         return m
     
     def getLambdaValue(self,mt):

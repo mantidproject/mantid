@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_sf_calculator.ui'
 #
-# Created: Wed Apr 11 09:36:04 2012
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Wed Apr 11 07:36:02 2012
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -23,7 +23,7 @@ class Ui_Frame(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1005, 862))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 999, 856))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_7 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
@@ -296,6 +296,7 @@ class Ui_Frame(object):
         self.lambda_request = QtGui.QLabel(self.groupBox)
         self.lambda_request.setMinimumSize(QtCore.QSize(100, 0))
         self.lambda_request.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.lambda_request.setText("")
         self.lambda_request.setObjectName("lambda_request")
         self.horizontalLayout_5.addWidget(self.lambda_request)
         self.label_4 = QtGui.QLabel(self.groupBox)
@@ -317,6 +318,7 @@ class Ui_Frame(object):
         self.s1h = QtGui.QLabel(self.groupBox)
         self.s1h.setMinimumSize(QtCore.QSize(100, 0))
         self.s1h.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.s1h.setText("")
         self.s1h.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.s1h.setObjectName("s1h")
         self.horizontalLayout_20.addWidget(self.s1h)
@@ -332,6 +334,7 @@ class Ui_Frame(object):
         self.s2h = QtGui.QLabel(self.groupBox)
         self.s2h.setMinimumSize(QtCore.QSize(100, 0))
         self.s2h.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.s2h.setText("")
         self.s2h.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.s2h.setObjectName("s2h")
         self.horizontalLayout_20.addWidget(self.s2h)
@@ -353,6 +356,7 @@ class Ui_Frame(object):
         self.s1w = QtGui.QLabel(self.groupBox)
         self.s1w.setMinimumSize(QtCore.QSize(100, 0))
         self.s1w.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.s1w.setText("")
         self.s1w.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.s1w.setObjectName("s1w")
         self.horizontalLayout_22.addWidget(self.s1w)
@@ -369,6 +373,7 @@ class Ui_Frame(object):
         self.s2w = QtGui.QLabel(self.groupBox)
         self.s2w.setMinimumSize(QtCore.QSize(100, 0))
         self.s2w.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.s2w.setText("")
         self.s2w.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.s2w.setObjectName("s2w")
         self.horizontalLayout_22.addWidget(self.s2w)
@@ -486,19 +491,14 @@ class Ui_Frame(object):
         self.data_background_to_pixel.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_count_vs_y_bck_btn.setText(QtGui.QApplication.translate("Frame", "Counts vs Pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.label_9.setText(QtGui.QApplication.translate("Frame", "Lambda requested:", None, QtGui.QApplication.UnicodeUTF8))
-        self.lambda_request.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "&#8491;", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "S1 height:", None, QtGui.QApplication.UnicodeUTF8))
-        self.s1h.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("Frame", "S2 height:", None, QtGui.QApplication.UnicodeUTF8))
-        self.s2h.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_2.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("Frame", "S1 width :", None, QtGui.QApplication.UnicodeUTF8))
-        self.s1w.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_3.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("Frame", "S2 width :", None, QtGui.QApplication.UnicodeUTF8))
-        self.s2w.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_unit_label_4.setText(QtGui.QApplication.translate("Frame", "mm", None, QtGui.QApplication.UnicodeUTF8))
         self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

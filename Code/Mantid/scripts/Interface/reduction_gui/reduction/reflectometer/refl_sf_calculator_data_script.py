@@ -11,16 +11,17 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class DataSets(BaseScriptElement):
 
     data_file = 0
-    incident_medium = 'H20'
+    incident_medium_list = ['']
+    incident_medium_index_selected = 0
     number_atenuator = 0
     peak_selection = [0,0]
     back_selection = [0,0]
     back_flag = True
-    lambda_requested = ''
-    s1h = 0.
-    s2h = 0.
-    s1w = 0.
-    s2w = 0.
+    lambda_requested = 'N/A'
+    s1h = 'N/A'
+    s2h = 'N/A'
+    s1w = 'N/A'
+    s2w = 'N/A'
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -191,7 +192,8 @@ class DataSets(BaseScriptElement):
             Reset state
         """
         self.data_file = DataSets.data_file
-        self.incident_medium = DataSets.incident_medium
+        self.incident_medium_list = DataSets.incident_medium_list
+        self.incident_medium_index_selected = DataSets.incident_medium_index_selected
         self.number_atenuator = DataSets.number_atenuator
         self.peak_selection = DataSets.peak_selection
         self.back_selection = DataSets.back_selection
