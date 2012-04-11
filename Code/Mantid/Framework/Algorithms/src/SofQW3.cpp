@@ -1,0 +1,418 @@
+/*WIKI*
+
+
+
+Converts a 2D workspace from units of spectrum number/energy transfer to the intensity as a function of momentum transfer and energy. The rebinning is done as a weighted  sum of overlapping polygons.
+
+
+
+ *WIKI*/
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAlgorithms/SofQW3.h"
+#include "MantidAlgorithms/SofQW.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidGeometry/Math/LaszloIntersection.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
+#include "MantidGeometry/Math/Vertex2D.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+
+namespace Mantid
+{
+namespace Algorithms
+{
+  // Setup typedef for later use
+  typedef std::map<specid_t, Mantid::Kernel::V3D>  SpectraDistanceMap;
+  typedef Geometry::IDetector_const_sptr DetConstPtr;
+
+  // Register the algorithm into the AlgorithmFactory
+  DECLARE_ALGORITHM(SofQW3)
+
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
+  using Geometry::IDetector_const_sptr;
+  using Geometry::DetectorGroup;
+  using Geometry::DetectorGroup_const_sptr;
+  using Geometry::ConvexPolygon;
+  using Geometry::Quadrilateral;
+  using Geometry::Vertex2D;
+
+  /// Default constructor
+  SofQW3::SofQW3()
+    : Rebin2D(), m_emode(0), m_efixedGiven(false), m_efixed(0.0),
+      m_Qout(), m_thetaPts(), m_thetaWidth(0.0)
+  {
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// Sets documentation strings for this algorithm
+  void SofQW3::initDocs()
+  {
+    this->setWikiSummary("Calculate the intensity as a function of momentum transfer and energy");
+    this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
+  }
+
+  /**
+   * @return the name of the Algorithm
+   */
+  const std::string SofQW3::name() const
+  {
+    return "SofQW3";
+  }
+
+  /**
+   * @return the version number of the Algorithm
+   */
+  int SofQW3::version() const
+  {
+    return 1;
+  }
+
+  /**
+   * @return the category list for the Algorithm
+   */
+  const std::string SofQW3::category() const
+  {
+    return "Inelastic";
+  }
+
+  /**
+   * Initialize the algorithm
+   */
+  void SofQW3::init()
+  {
+    SofQW::createInputProperties(*this);
+  }
+
+  /**
+   * Execute the algorithm.
+   */
+  void SofQW3::exec()
+  {
+    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    // Do the full check for common binning
+    if( !WorkspaceHelpers::commonBoundaries(inputWS) )
+    {
+      throw std::invalid_argument("The input workspace must have common binning across all spectra");
+    }
+
+    MatrixWorkspace_sptr outputWS = SofQW::setUpOutputWorkspace(inputWS,
+                                                 getProperty("QAxisBinning"),
+                                                                m_Qout);
+    g_log.notice() << "Workspace type: " << outputWS->id() << std::endl;
+    setProperty("OutputWorkspace", outputWS);
+    const size_t nEnergyBins = inputWS->blocksize();
+    const size_t nHistos = inputWS->getNumberHistograms();
+
+    // Progress reports & cancellation
+    const size_t nreports(nHistos * nHistos * nEnergyBins);
+    m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0,
+                                                                    1.0,
+                                                                    nreports));
+
+    // Compute input caches
+    initCachedValues(inputWS);
+    const MantidVec & X = inputWS->readX(0);
+
+    this->getValuesAndWidths(inputWS);
+
+    PARALLEL_FOR2(inputWS, outputWS)
+    for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) // signed for openmp
+    {
+      PARALLEL_START_INTERUPT_REGION
+
+      DetConstPtr detector = inputWS->getDetector(i);
+      if (detector->isMasked() || detector->isMonitor())
+      {
+        continue;
+      }
+
+      double theta = this->m_theta[i];
+      double phi = this->m_phi[i];
+      double thetaWidth = this->m_thetaWidths[i];
+      double phiWidth = this->m_phiWidths[i];
+
+      double thetaHalfWidth = 0.5 * thetaWidth;
+      double phiHalfWidth = 0.5 * phiWidth;
+
+      const double thetaLower = theta - thetaHalfWidth;
+      const double thetaUpper = theta + thetaHalfWidth;
+
+      const double phiLower = phi - phiHalfWidth;
+      const double phiUpper = phi + phiHalfWidth;
+
+      const double efixed = this->getEFixed(detector);
+
+      for(size_t j = 0; j < nEnergyBins; ++j)
+      {
+        m_progress->report("Computing polygon intersections");
+        // For each input polygon test where it intersects with
+        // the output grid and assign the appropriate weights of Y/E
+        const double dE_j = X[j];
+        const double dE_jp1 = X[j+1];
+
+        const V2D ll(dE_j, this->calculateQ(efixed, dE_j, thetaLower, phiLower));
+        const V2D lr(dE_jp1, this->calculateQ(efixed, dE_jp1, thetaLower, phiLower));
+        const V2D ur(dE_jp1, this->calculateQ(efixed, dE_jp1, thetaUpper, phiUpper));
+        const V2D ul(dE_j, this->calculateQ(efixed, dE_j, thetaUpper, phiUpper));
+        Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
+
+        this->rebinToOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+      }
+
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    normaliseOutput(outputWS, inputWS);
+  }
+
+  /**
+   * Return the efixed for this detector
+   * @param det :: A pointer to a detector object
+   * @return The value of efixed
+   */
+  double SofQW3::getEFixed(Geometry::IDetector_const_sptr det) const
+  {
+    double efixed(0.0);
+    if( m_emode == 1 ) //Direct
+    {
+      efixed = m_efixed;
+    }
+    else // Indirect
+    {
+      if( m_efixedGiven ) efixed = m_efixed; // user provided a value
+      else
+      {
+        std::vector<double> param = det->getNumberParameter("EFixed");
+        if( param.empty() ) throw std::runtime_error("Cannot find EFixed parameter for component \"" + det->getName()
+                                                     + "\". This is required in indirect mode. Please check the IDF contains these values.");
+        efixed = param[0];
+      }
+    }
+    return efixed;
+  }
+
+  /**
+   * Calculate the Q value for a given set of energy transfer, scattering
+   * and azimuthal angle.
+   * @param efixed :: An fixed energy value
+   * @param deltaE :: The energy change
+   * @param twoTheta :: The value of the scattering angle
+   * @param azimuthal :: The value of the azimuthual angle
+   * @return The value of Q
+   */
+  double SofQW3::calculateQ(const double efixed, const double deltaE,
+                            const double twoTheta, const double azimuthal) const
+  {
+    const double ki = std::sqrt(efixed * SofQW::energyToK());
+    const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
+    const double Qx = ki - kf * std::cos(twoTheta);
+    const double Qy = -kf * std::sin(twoTheta) * std::cos(azimuthal);
+    const double Qz = -kf * std::sin(twoTheta) * std::sin(azimuthal);
+    return std::sqrt(Qx * Qx + Qy * Qy + Qz * Qz);
+  }
+
+  /**
+   * Init variables caches
+   * @param workspace :: Workspace pointer
+   */
+  void SofQW3::initCachedValues(API::MatrixWorkspace_const_sptr workspace)
+  {
+    // Retrieve the emode & efixed properties
+    const std::string emode = getProperty("EMode");
+    // Convert back to an integer representation
+    m_emode = 0;
+    if (emode == "Direct")
+    {
+      m_emode = 1;
+    }
+    else if (emode == "Indirect")
+    {
+      m_emode = 2;
+    }
+    m_efixed = getProperty("EFixed");
+
+    // Check whether they should have supplied an EFixed value
+    if( m_emode == 1 ) // Direct
+    {
+      // If GetEi was run then it will have been stored in the workspace, if not the user will need to enter one
+      if( m_efixed == 0.0 )
+      {
+        if ( workspace->run().hasProperty("Ei") )
+        {
+          Kernel::Property *p = workspace->run().getProperty("Ei");
+          Kernel::PropertyWithValue<double> *eiProp = dynamic_cast<Kernel::PropertyWithValue<double>*>(p);
+          if( !eiProp )
+          {
+            throw std::runtime_error("Input workspace contains Ei but its property type is not a double.");
+          }
+          m_efixed = (*eiProp)();
+        }
+        else
+        {
+          throw std::invalid_argument("Input workspace does not contain an EFixed value. Please provide one or run GetEi.");
+        }
+      }
+      else
+      {
+        m_efixedGiven = true;
+      }
+    }
+    else
+    {
+      if( m_efixed != 0.0 )
+      {
+        m_efixedGiven = true;
+      }
+    }
+
+    // Index theta cache
+    //initThetaCache(workspace);
+  }
+
+  /**
+   * A map detector ID and Q ranges
+   * This method looks unnecessary as it could be calculated on the fly but
+   * the parallelization means that lazy instantation slows it down due to the
+   * necessary CRITICAL sections required to update the cache. The Q range
+   * values are required very frequently so the total time is more than
+   * offset by this precaching step
+   */
+  void SofQW3::initThetaCache(API::MatrixWorkspace_const_sptr workspace)
+  {
+    const size_t nhist = workspace->getNumberHistograms();
+    m_thetaPts = std::vector<double>(nhist);
+    size_t ndets(0);
+    double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
+
+    for(int64_t i = 0 ; i < (int64_t)nhist; ++i) //signed for OpenMP
+    {
+
+      m_progress->report("Calculating detector angles");
+      IDetector_const_sptr det;
+      try
+      {
+        det = workspace->getDetector(i);
+        // Check to see if there is an EFixed, if not skip it
+        try
+        {
+          getEFixed(det);
+        }
+        catch(std::runtime_error&)
+        {
+          det.reset();
+        }
+      }
+      catch(Kernel::Exception::NotFoundError&)
+      {
+        // Catch if no detector. Next line tests whether this happened - test placed
+        // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+        // in an openmp block.
+      }
+      // If no detector found, skip onto the next spectrum
+      if( !det || det->isMonitor() )
+      {
+        m_thetaPts[i] = -1.0; // Indicates a detector to skip
+      }
+      else
+      {
+        ++ndets;
+        const double theta = workspace->detectorTwoTheta(det);
+        m_thetaPts[i] = theta;
+        if( theta < minTheta )
+        {
+          minTheta = theta;
+        }
+        else if( theta > maxTheta )
+        {
+          maxTheta = theta;
+        }
+      }
+    }
+
+    m_thetaWidth = (maxTheta - minTheta)/static_cast<double>(ndets);
+    g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth*180.0/M_PI) << " degrees.\n";
+  }
+
+  /**
+   * Function that retrieves the two-theta and azimuthal angles from a given
+   * detector. It then looks up the nearest neighbours. Using those detectors,
+   * it calculates the two-theta and azimuthal angle widths.
+   * @param workspace : the workspace containing the needed detector information
+   */
+  void SofQW3::getValuesAndWidths(API::MatrixWorkspace_const_sptr workspace)
+  {
+    m_progress->report("Calculating detector angular widths");
+
+    // Trigger a build of the nearst neighbors outside the OpenMP loop
+    const int numNeighbours = 4;
+    const size_t nHistos = workspace->getNumberHistograms();
+    g_log.debug() << "Number of Histograms: " << nHistos << std::endl;
+
+    this->m_theta = std::vector<double>(nHistos);
+    this->m_thetaWidths = std::vector<double>(nHistos);
+    this->m_phi = std::vector<double>(nHistos);
+    this->m_phiWidths = std::vector<double>(nHistos);
+
+    for (size_t i = 0; i < nHistos; ++i)
+    {
+      DetConstPtr detector = workspace->getDetector(i);
+      g_log.debug() << "Current histogram: " << i << std::endl;
+      specid_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
+      SpectraDistanceMap neighbours = workspace->getNeighboursExact(inSpec,
+                                                                    numNeighbours,
+                                                                    true);
+
+      g_log.debug() << "Current ID: " << inSpec << std::endl;
+      // Convert from spectrum numbers to workspace indices
+      double thetaWidth = -DBL_MAX;
+      double phiWidth = -DBL_MAX;
+
+      // Find theta and phi widths
+      double theta = workspace->detectorTwoTheta(detector);
+      double phi = detector->getPhi();
+
+      // WARNING: This only works for BASIS
+      specid_t deltaPlus1 = inSpec + 1;
+      specid_t deltaMinus1 = inSpec - 1;
+      specid_t deltaPlus45 = inSpec + 45;
+      specid_t deltaMinus45 = inSpec - 45;
+
+      for (SpectraDistanceMap::iterator it = neighbours.begin();
+           it != neighbours.end(); ++it)
+      {
+        specid_t spec = it->first;
+        g_log.debug() << "Neighbor ID: " << spec << std::endl;
+        if (spec == deltaPlus1 || spec == deltaMinus1 ||
+            spec == deltaPlus45 || spec == deltaMinus45)
+        {
+          DetConstPtr detector_n = workspace->getDetector(spec - 1);
+          double theta_n = workspace->detectorTwoTheta(detector_n);
+          double phi_n = detector_n->getPhi();
+
+          double dTheta = std::fabs(theta - theta_n);
+          double dPhi = std::fabs(phi - phi_n);
+          if (dTheta > thetaWidth)
+          {
+            thetaWidth = dTheta;
+            //g_log.debug() << "Current ThetaWidth: " << thetaWidth << std::endl;
+          }
+          if (dPhi > phiWidth)
+          {
+            phiWidth = dPhi;
+            //g_log.debug() << "Current PhiWidth: " << phiWidth << std::endl;
+          }
+        }
+      }
+      this->m_theta[i] = theta;
+      this->m_phi[i] = phi;
+      this->m_thetaWidths[i] = thetaWidth;
+      this->m_phiWidths[i] = phiWidth;
+    }
+  }
+
+} // namespace Mantid
+} // namespace Algorithms
+
