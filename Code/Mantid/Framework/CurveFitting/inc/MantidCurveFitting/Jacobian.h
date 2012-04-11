@@ -12,7 +12,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    An implementation of Jacobian using gsl_matrix.
+    An implementation of Jacobian using std::vector.
 
     @author Roman Tolchenov
     @date 17/02/2012

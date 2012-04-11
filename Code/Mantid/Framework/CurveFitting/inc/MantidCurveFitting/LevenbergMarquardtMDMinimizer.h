@@ -15,11 +15,11 @@ namespace CurveFitting
 
 class CostFuncLeastSquares;
 
-/** Implementing Levenberg-Marquardt by wrapping the IFuncMinimizer interface
-    around the GSL implementation of this algorithm.
+/** Implementing Levenberg-Marquardt algorithm. Uses the normal system calculate 
+    the corrections to the parameters. Expects a cost function that can evaluate
+    the value, the derivatives and the hessian matrix.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 11/12/2009
+    @author Roman Tolchenov, Tessella plc
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

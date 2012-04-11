@@ -16,7 +16,7 @@ namespace API
 }
 namespace CurveFitting
 {
-/** An interface for function minimizers.
+/** An interface for function minimizers. Minimizers minimize cost functions.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009

@@ -13,6 +13,7 @@ namespace Mantid
     // Subscribe the function into the factory.
     DECLARE_FUNCTION(UserFunctionMD);
 
+    /// Default conatructor
     UserFunctionMD::UserFunctionMD()
     {
       m_vars.resize(4);
@@ -23,17 +24,25 @@ namespace Mantid
         m_parser.DefineVar(m_varNames[i],&m_vars[i]);
       }
     }
+
+    /// Has attribute "Formula"
     bool UserFunctionMD::hasAttribute(const std::string& attName)const 
     { 
       UNUSED_ARG(attName);
       return attName == "Formula";
     }
+
+    /// Return Formula
     UserFunctionMD::Attribute UserFunctionMD::getAttribute(const std::string& attName)const
     {
       UNUSED_ARG(attName);
       return Attribute(m_formula);
     }
 
+    /** Set Formula
+     * @param attName :: Attribute name - must be "Formula"
+     * @param attr :: Attribute value - the formula
+     */
     void UserFunctionMD::setAttribute(const std::string& attName,const UserFunctionMD::Attribute& attr)
     {
       UNUSED_ARG(attName);
@@ -63,6 +72,10 @@ namespace Mantid
       setFormula();
     }
 
+    /**
+     * Evaluate the function at MD iterator r.
+     * @param r :: MD iterator.
+     */
     double UserFunctionMD::functionMD(const API::IMDIterator& r) const
     {
       size_t n = m_dimensions.size();

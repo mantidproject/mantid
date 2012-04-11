@@ -10,6 +10,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
+    A wrapper around gsl_vector.
 
     @author Roman Tolchenov, Tessella plc
     @date 24/02/2012
@@ -36,24 +37,30 @@ namespace Mantid
     */
   class GSLVector
   {
-    /// The pointer to the GSL's internal jacobian matrix
+    /// The pointer to the GSL vector
     gsl_vector * m_vector;
     
   public:
     /// Constructor
     GSLVector():m_vector(NULL){}
+
     /// Constructor
+    /// @param n :: The length of the vector.
     GSLVector(const size_t n)
     {
       m_vector = gsl_vector_alloc(n);
     }
 
+    /// Copy constructor.
+    /// @param v :: The other vector
     GSLVector(const GSLVector& v)
     {
       m_vector = gsl_vector_alloc(v.size());
       gsl_vector_memcpy(m_vector, v.gsl());
     }
 
+    /// Copy assignment operator
+    /// @param v :: The other vector
     GSLVector& operator=(const GSLVector& v)
     {
       if (m_vector && size() != v.size())
@@ -84,6 +91,8 @@ namespace Mantid
     /// Get the pointer to the GSL vector
     const gsl_vector * gsl() const {return m_vector;}
 
+    /// Resize the vector
+    /// @param n :: The new length
     void resize(const size_t n)
     {
       gsl_vector_free(m_vector);
@@ -94,6 +103,8 @@ namespace Mantid
     size_t size() const {return m_vector? m_vector->size : 0;}
 
     /// set an element
+    /// @param i :: The element index
+    /// @param value :: The new value
     void set(size_t i, double value)
     {
       if (i < m_vector->size) gsl_vector_set(m_vector,i,value);
@@ -103,6 +114,7 @@ namespace Mantid
       }
     }
     /// get an element
+    /// @param i :: The element index
     double get(size_t i) const
     {
       if (i < m_vector->size) return gsl_vector_get(m_vector,i);
@@ -115,18 +127,24 @@ namespace Mantid
       gsl_vector_set_zero( m_vector );
     }
 
+    /// Add a vector
+    /// @param v :: The other vector
     GSLVector& operator+=(const GSLVector& v)
     {
       gsl_vector_add(m_vector, v.gsl());
       return *this;
     }
 
+    /// Subtract a vector
+    /// @param v :: The other vector
     GSLVector& operator-=(const GSLVector& v)
     {
       gsl_vector_sub(m_vector, v.gsl());
       return *this;
     }
 
+    /// Multiply by a number
+    /// @param d :: The number
     GSLVector& operator*=(const double d)
     {
       gsl_vector_scale(m_vector, d);
