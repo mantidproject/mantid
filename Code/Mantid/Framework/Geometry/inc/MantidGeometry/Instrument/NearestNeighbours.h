@@ -59,14 +59,19 @@ namespace Mantid
       /// Constructor with an instrument and a spectra map
       NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                         const ISpectraDetectorMap & spectraMap, bool ignoreMasked=true);
+
+      /// Constructor with an instrument and a spectra map and number of neighbours
+      NearestNeighbours(int nNeighbours, boost::shared_ptr<const Instrument> instrument,
+                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=true);
+
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
 
       // Neighbouring spectra by radius
-      std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum, double radius=0.0) const;
+      std::map<specid_t, Mantid::Kernel::V3D> neighboursInRadius(specid_t spectrum, double radius=0.0) const;
 
       // Neighbouring spectra by 
-      std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum, bool force, int numberofneighbours=8) const;
+      std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum) const;
 
     protected:
 

@@ -41,6 +41,9 @@ namespace Geometry
     /// Factory Method
     NearestNeighbours* create(boost::shared_ptr<const Instrument> instrument,
                         const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false);
+    /// Factory Method
+    NearestNeighbours* create(int numberOfNeighbours, boost::shared_ptr<const Instrument> instrument,
+        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false);
     /// Destructor
     virtual ~NearestNeighboursFactory();
     

@@ -374,7 +374,7 @@ namespace Mantid
       {
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - Cannot find spectrum number for detector", comp->getID());
       }
-      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spectra[0], radius);
+      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighboursInRadius(spectra[0], radius);
       return neighbours;
     }
 
@@ -393,7 +393,7 @@ namespace Mantid
       {
         m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
-      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec, radius);
+      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighboursInRadius(spec, radius);
       return neighbours;
     }
 
@@ -409,9 +409,9 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(nNeighbours, this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
-      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
+      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
       return neighbours;
     }
 

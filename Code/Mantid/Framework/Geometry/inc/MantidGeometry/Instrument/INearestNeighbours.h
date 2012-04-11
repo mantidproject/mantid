@@ -53,10 +53,10 @@ namespace Mantid
       virtual ~INearestNeighbours() {};
 
       // Neighbouring spectra by radius
-      virtual std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum, double radius=0.0) const = 0;
+      virtual std::map<specid_t, Mantid::Kernel::V3D> neighboursInRadius(specid_t spectrum, double radius=0.0) const = 0;
 
       // Neighbouring spectra by exact number of neighbours
-      virtual std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum, bool force, int numberofneighbours=8) const = 0;
+      virtual std::map<specid_t, Mantid::Kernel::V3D> neighbours(specid_t spectrum) const = 0;
     };
   }
 }
