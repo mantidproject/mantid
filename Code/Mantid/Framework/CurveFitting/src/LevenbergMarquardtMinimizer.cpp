@@ -82,7 +82,7 @@ bool LevenbergMarquardtMinimizer::iterate()
     {
       if (m_function->isActive(i))
       {
-        m_function->setActiveParameter(i,gsl_vector_get(m_gslSolver->x,i));
+        m_function->setActiveParameter(i,gsl_vector_get(m_gslSolver->x,ia));
         ++ia;
       }
     }

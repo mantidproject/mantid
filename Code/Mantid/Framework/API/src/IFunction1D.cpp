@@ -31,8 +31,14 @@ namespace API
 {
   using namespace Geometry;
   
+  /// The logger
   Kernel::Logger& IFunction1D::g_log = Kernel::Logger::get("IFunction1D");
 
+/**
+ * Implements the virtual method. Tests the domain for FunctionDomain1D and calls function1D.
+ * @param domain :: The domain, must be FunctionDomain1D.
+ * @param values :: The output values.
+ */
 void IFunction1D::function(const FunctionDomain& domain,FunctionValues& values)const
 {
   const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
@@ -43,6 +49,11 @@ void IFunction1D::function(const FunctionDomain& domain,FunctionValues& values)c
   function1D(values.getPointerToCalculated(0),d1d->getPointerAt(0),d1d->size());
 }
 
+/**
+ * Implements the virtual method. Tests the domain for FunctionDomain1D and calls functionDeriv1D.
+ * @param domain :: The domain, must be FunctionDomain1D.
+ * @param jacobian :: The output Jacobian.
+ */
 void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
   const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
@@ -53,11 +64,10 @@ void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
   functionDeriv1D(&jacobian,d1d->getPointerAt(0),d1d->size());
 }
 
-/** Base class implementation of derivative IFunction1D throws error. This is to check if such a function is provided
-    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
-    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
-    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
-    algorithm is used.
+/** Base class implementation calculates the derivatives numerically.
+ * @param jacobian :: Pointer to a Jacobian.
+ * @param xValues :: Pointer to an array with x-values.
+ * @param nData :: The size of the x-array.
  */
 void IFunction1D::functionDeriv1D(Jacobian* jacobian, const double* xValues, const size_t nData)
 {

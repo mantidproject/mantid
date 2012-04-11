@@ -15,11 +15,9 @@ namespace API
 {
 class FunctionDomainMD;
 
-/** Base class that represents the domain of a function.
-    A domain is a generalisation of x (argument) and y (value) arrays.
-    A domain consists at least of a list of function arguments for which a function should 
-    be evaluated and a buffer for the calculated values. If used in fitting also contains
-    the fit data and weights.
+/** 
+    A composite domain for MD functions.
+    
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011

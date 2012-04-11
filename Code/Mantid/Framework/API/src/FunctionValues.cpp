@@ -60,7 +60,9 @@ namespace API
     }
   }
 
-  /// set all calculated values to same number
+  /** Set all calculated values to same number.
+   * @param value :: A new value.
+   */
   void FunctionValues::setCalculated(double value)
   {
     std::fill(m_calculated.begin(),m_calculated.end(),value);
@@ -95,15 +97,17 @@ namespace API
     std::copy(m_calculated.begin(),m_calculated.end(),to);
   }
 
-  /// Add calculated values to values in a buffer and save result to the buffer
-  /// @param to :: Pointer to the buffer, it must be large enough
+  /** Add calculated values to values in a buffer and save result to the buffer
+   * @param to :: Pointer to the buffer, it must be large enough
+   */
   void FunctionValues::add(double* to) const
   {
     std::transform(m_calculated.begin(),m_calculated.end(),to,to,std::plus<double>());
   }
 
-  /// Multiply calculated values by values in a buffer and save result to the buffer
-  /// @param to :: Pointer to the buffer, it must be large enough
+  /** Multiply calculated values by values in a buffer and save result to the buffer
+   * @param to :: Pointer to the buffer, it must be large enough
+   */
   void FunctionValues::multiply(double* to) const
   {
     std::transform(m_calculated.begin(),m_calculated.end(),to,to,std::multiplies<double>());

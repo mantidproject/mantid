@@ -13,11 +13,10 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-/** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
-    by wrapping the IFuncMinimizer interface around the GSL implementation of this algorithm.
+/** A wrapper around the GSL functions implementing a minimizer using derivatives.
+    Concrete classes must implement the getGSLMinimizerType() method.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 13/1/2010
+    @author Roman Tolchenov, Tessella plc
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -82,9 +81,11 @@ protected:
   double m_stepSize;
   /// Tolerance
   double m_tolerance;
-
+  /// Used by the GSL
   static double fun(const gsl_vector * x, void * params);
+  /// Used by the GSL
   static void dfun(const gsl_vector * x, void * params, gsl_vector * g);
+  /// Used by the GSL
   static void fundfun (const gsl_vector * x, void * params, double * f, gsl_vector * g);
 };
 

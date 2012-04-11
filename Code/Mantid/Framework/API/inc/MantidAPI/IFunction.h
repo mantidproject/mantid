@@ -43,46 +43,51 @@ class FunctionHandler;
     A function has a number of named parameters (not arguments), type double, on which it depends.
     Parameters must be declared either in the constructor or in the init() method
     of a derived class with method declareParameter(...). Method nParams() returns 
-    the number of declared parameters. A parameter can be accessed either by its name
+    the number of parameters. A parameter can be accessed either by its name
     or the index. For example in case of Gaussian the parameters can be "Height",
     "PeakCentre" and "Sigma".
+
+    The main method of IFunction is called function(const FunctionDomain&,FunctionValues&). 
+    It takes a set of function arguments via interface FunctionDomain, calculates the values, and
+    returns them via the FunctionValues. The derived classes must implement this method.
+
+    Implement functionDeriv method for the function to be used with
+    fitting algorithms using derivatives. functionDeriv calculates patrial derivatives of the
+    function with respect to the fitting parameters. The default implementation uses numeric differentiation.
 
     To fit a function to a set of data its parameters must be adjusted so that the difference
     between the data and the corresponding function values were minimized. This is the aim
     of the Fit algorithm. But Fit does not work with the declared parameters directly.
-    Instead it uses other - active - parameters. The active parameters can be a subset of the
-    declared parameters or completely different ones. The rationale for this is following.
-    The fitting parameters sometimes need to be fixed during the fit or "tied" (expressed
-    in terms of other parameters). In this case the active parameters will be those
-    declared parameters which are not tied in any sence. Also some of the declared parameters
-    can be unsuitable for the use in a fitting algorithm. In this case different active parameters
-    can be used in place of the inefficient declared parameters. An example is Gaussian where
-    "Sigma" makes the fit unstable. So in the fit it can be replaced with variable Weight = 1 / Sigma
-    which is more efficient. The number of active parameters (returned by nActive()) cannot be
-    greater than nParams(). The function which connects the active parameters with the declared ones
-    must be monotonic so that the forward and backward transformations between the two sets are
-    single-valued (this is my understanding). At the moment only simple one to one transformations
-    of Weight - Sigma type are allowed. More complecated cases of simultaneous transformations of
-    several parameters are not supported.
+    Instead it uses other - active - parameters. In simple case the active parameters are the
+    same as the declared ones. But they can be overidden if the declared parameters make fit unstable.
+    There are as many active parameters as there are the declared ones. A one-to-one transformation
+    must exist between the active and the declared parameters. Overide activeParameter and
+    setActiveParameter methods to implement this transformation. An example is Gaussian where
+    "Sigma" makes the fit unstable. So in the fit it is replaced with variable Weight = 1 / Sigma
+    which is more efficient.
 
     The active parameters can be accessed by their index. The implementations of the access method
     for both active and declared parameters must ensure that any changes to one of them 
-    immediately reflected on the other so that the two are consistent at any moment.
+    immediately reflected on the other so that the two sets are consistent at any moment.
 
     IFunction declares method nameOfActive(int i) which returns the name of the declared parameter
     corresponding to the i-th active parameter. I am not completely sure in the usefulness of it.
 
+    The declared parameters can be made fixed in a fit with method fix(). If a parameter is fixed a fit
+    shouldn't change its value unless it is also tied to values of other parameters. Implementations of
+    active parameters must ensure this behaviour.
+
+    When a declared parameter is made fixed one of the active parameters must become inactive. isActive(i)
+    method must return false for it. In case of declared == active the fixed parameter becomes inactive.
+    Classes overriding active parameters must ensure that number of inactive parameters == number of
+    fixed declared ones at any moment.
+
     IFunction provides methods for tying and untying parameters. Only the declared parameters can be 
-    tied. A tied parameter cannot be active. When a parameter is tied it becomes inactive.
-    This implies that the number of active parameters is variable and can change at runtime.
+    tied. isFixed() method returns true for a tied parameter. The value of a tied parameter is defined
+    by its tie and can change in a fit.
 
-    Method addConstraint adds constraints on possible values of a declared parameter. Constraints
-    and ties are used only in fitting.
-
-    The main method of IFunction is called function(out,xValues,nData). It calculates nData output values
-    out[i] at arguments xValues[i]. Implement functionDeriv method for the function to be used with
-    fitting algorithms using derivatives. functionDeriv calculates patrial derivatives of the
-    function with respect to the fitting parameters.
+    Method addConstraint adds constraints on possible values of a declared parameter. A constrained parameter
+    is not fixed and can vary within its constraint. Constraints and ties are used only in fitting.
 
     Any non-fitting parameters can be implemented as attributes (class IFunction::Attribute). 
     An attribute can have one of three types: std::string, int, or double. The type is set at construction
@@ -252,10 +257,11 @@ public:
   /// Function to return the sperator token for the category string. A default implementation ';' is provided
   virtual const std::string categorySeparator() const {return ";";}
 
-  /// Function you want to fit to. 
-  /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /// Evaluates the function for all arguments in the domain.
+  /// @param domain :: Provides arguments for the function.
+  /// @param values :: A buffer to store the function values. It must be large enogh to store domain.size() values.
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const = 0;
-  /// Derivatives of function with respect to active parameters
+  /// Derivatives of function with respect to active parameters.
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
   /** @name Function parameters */

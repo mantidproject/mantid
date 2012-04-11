@@ -210,7 +210,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    auto f = Mantid::API::FunctionFactory::Instance().createFitFunction(fnName);
+    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
     for (size_t j=0; j<categories.size(); ++j)

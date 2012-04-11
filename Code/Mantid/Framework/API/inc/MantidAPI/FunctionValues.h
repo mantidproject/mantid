@@ -14,11 +14,8 @@ namespace Mantid
 {
 namespace API
 {
-/** Base class that represents the domain of a function.
-    A domain is a generalisation of x (argument) and y (value) arrays.
-    A domain consists at least of a list of function arguments for which a function should 
-    be evaluated and a buffer for the calculated values. If used in fitting also contains
-    the fit data and weights.
+/** A class to store values calculated by a function. It also can contain data
+    a function can fit to.
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
@@ -67,11 +64,18 @@ public:
 
   /// Reset the values to match a new domain.
   void reset(const FunctionDomain& domain);
-  /// store i-th calculated value. 0 <= i < size()
+  /// Store i-th calculated value.
+  /// @param i :: Index of the stored value 0 <= i < size()
+  /// @param value :: A value to store.
   void setCalculated(size_t i,double value) {m_calculated[i] = value;}
-  /// get i-th calculated value. 0 <= i < size()
+  /// Get i-th calculated value.
+  /// @param i :: An index of a value 0 <= i < size()
   double getCalculated(size_t i) const {return m_calculated[i];}
+  /// Get i-th calculated value.
+  /// @param i :: An index of a value 0 <= i < size()
   double operator[](size_t i) const {return m_calculated[i];}
+  /// Add a number to a calculated value.
+  /// @param i :: An index of a value 0 <= i < size()
   void addToCalculated(size_t i, double value) {m_calculated[i] += value;}
 
   /// Add other calculated values

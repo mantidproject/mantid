@@ -12,6 +12,7 @@ namespace CurveFitting
 
 /**
  * Do minimization of the set function.
+ * @param maxIterations :: Maximum number of iterations.
  * @return :: true if successful, false otherwise. Call getError() to see the error message string.
  */
 bool IFuncMinimizer::minimize(size_t maxIterations) 

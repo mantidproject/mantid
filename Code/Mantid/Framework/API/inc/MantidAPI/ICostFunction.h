@@ -11,8 +11,8 @@ namespace Mantid
 {
 namespace API
 {
-/** An interface for specifying the cost function to be used with Fit,
-    for example, the default being least squares fitting
+/** An interface for specifying the cost function to be used with Fit algorithm or minimizers,
+    for example, the default being least squares fitting.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 11/05/2010

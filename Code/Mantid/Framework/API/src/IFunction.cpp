@@ -47,13 +47,9 @@ namespace API
     }
   }
 
-/** Base class implementation of derivative IFunction throws error. This is to check if such a function is provided
-    by derivative class. In the derived classes this method must return the derivatives of the function
-    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
-    algorithm is used or the derivatives are computed numerically.
+/** Base class implementation calculates the derivatives numerically.
  * @param domain :: The domain of the function
- * @param jacobian :: Pointer to a Jacobian matrix. If it is NULL the method is called in order to check whether it's implemented or not.
- *      If the derivatives are implemented the method must simply return, otherwise it must throw Kernel::Exception::NotImplementedError.
+ * @param jacobian :: A Jacobian matrix. It is expected to have dimensions of domain.size() by nParams().
  */
 void IFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
@@ -177,7 +173,7 @@ std::string IFunction::asString()const
   return ostr.str();
 }
 
-/** Add a list of conatraints from a string
+/** Add a list of constraints from a string
  * @param str :: A comma-separated list of name=expr pairs, where name is a parameter name and 
  *  expr is a constraint expression.
  */
@@ -300,6 +296,9 @@ std::string IFunction::Attribute::value()const
   return apply(tmp);
 }
 
+/**
+ * Return the attribute as a string if it is a string.
+ */
 std::string IFunction::Attribute::asString()const
 {
   if( m_quoteValue ) return asQuotedString();
@@ -315,6 +314,9 @@ std::string IFunction::Attribute::asString()const
   }
 }
 
+/**
+ * Return the attribute as a quoted string if it is a string.
+ */
 std::string IFunction::Attribute::asQuotedString()const
 {
   std::string attr;
@@ -335,6 +337,9 @@ std::string IFunction::Attribute::asQuotedString()const
   return quoted;
 }
 
+/**
+ * Return the attribute as an unquoted string if it is a string.
+ */
 std::string IFunction::Attribute::asUnquotedString()const
 {
   std::string attr;
@@ -355,6 +360,9 @@ std::string IFunction::Attribute::asUnquotedString()const
   return unquoted;
 }
 
+/**
+ * Return the attribute as an int if it is a int.
+ */
 int IFunction::Attribute::asInt()const
 {
   try
@@ -368,6 +376,9 @@ int IFunction::Attribute::asInt()const
   }
 }
 
+/**
+ * Return the attribute as a double if it is a double.
+ */
 double IFunction::Attribute::asDouble()const
 {
   try
@@ -516,9 +527,8 @@ std::string IFunction::descriptionOfActive(size_t i)const
 }
 
 /** Calculate numerical derivatives.
- * @param out :: Derivatives
- * @param xValues :: X values for data points
- * @param nData :: Number of data points
+ * @param domain :: The domain of the function
+ * @param jacobian :: A Jacobian matrix. It is expected to have dimensions of domain.size() by nParams().
  */
 void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {

@@ -134,7 +134,7 @@ m_mantidui(mantidui)
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not loaded
   boost::shared_ptr<Mantid::API::IFunction> f = boost::shared_ptr<Mantid::API::IFunction>(
-    Mantid::API::FunctionFactory::Instance().createFitFunction("Gaussian"));
+    Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
   if (m_autoBgName.toLower() == "none")
   {
     m_autoBgName = "";
@@ -532,7 +532,7 @@ void FitPropertyBrowser::addFunction()
   std::map<std::string, std::vector<std::string> > categories;
   for (int i=0; i<m_registeredFunctions.size(); ++i)
   {
-    boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().createFitFunction(m_registeredFunctions[i].toStdString());
+    boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().createFunction(m_registeredFunctions[i].toStdString());
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j=0; j<tempCategories.size(); ++j)
     {
@@ -1315,7 +1315,7 @@ void FitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    auto f = Mantid::API::FunctionFactory::Instance().createFitFunction(fnName);
+    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
     m_registeredFunctions << qfnName;
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
@@ -2374,7 +2374,7 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)
     if (nameList.isEmpty()) return;
     QString name = nameList[0];
     boost::shared_ptr<Mantid::API::IFunction> f = boost::shared_ptr<Mantid::API::IFunction>(
-      Mantid::API::FunctionFactory::Instance().createFitFunction(name.toStdString()));
+      Mantid::API::FunctionFactory::Instance().createFunction(name.toStdString()));
     m_auto_back = true;
     m_autoBgName = name;
     if (nameList.size() > 1)
