@@ -28,7 +28,7 @@ include ( UseSystemQt4 )
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
 
-	set( CPACK_PACKAGE_INSTALL_DIRECTORY "/MantidInstall")
+	
 	if ( NOT THIRD_PARTY )
   		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
 	endif ()
@@ -44,7 +44,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	
 	#Windows CPACK specifics
 	set( CPACK_GENERATOR "NSIS" )
-	set( CPACK_SET_DESTDIR "ON")    
+	set( CPACK_SET_DESTDIR "ON") 
+	set( CPACK_INSTALL_PREFIX "/")
+	set( CPACK_NSIS_INSTALL_ROOT "C:\\\\MantidInstall")
 	set( TARGET_TYPE RUNTIME)
 	
 	  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"MANTIDPATH\\\"
