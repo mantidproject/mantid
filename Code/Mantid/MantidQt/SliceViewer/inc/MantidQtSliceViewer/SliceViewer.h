@@ -114,6 +114,7 @@ public slots:
   void setXYLimitsDialog();
   void zoomInSlot();
   void zoomOutSlot();
+  void zoomRectSlot(const QwtDoubleRect & rect);
 
   // Color scale slots
   void setColorScaleAutoFull();

@@ -372,11 +372,23 @@ void SliceViewer::initMenus()
 void SliceViewer::initZoomer()
 {
 //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
-//  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton, Qt::ControlModifier);
-//  zoomer->setTrackerMode(QwtPicker::AlwaysOn);
+//  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
+//  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
 //  const QColor c(Qt::darkBlue);
 //  zoomer->setRubberBandPen(c);
 //  zoomer->setTrackerPen(c);
+//  QObject::connect(zoomer, SIGNAL(zoomed(const QRectF &)),
+//      this, SLOT(zoomRectSlot(const QRectF &)));
+
+  QwtPlotPicker * zoomer = new QwtPlotPicker(m_plot->canvas());
+  zoomer->setSelectionFlags(QwtPicker::RectSelection | QwtPicker::DragSelection);
+  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
+  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
+  const QColor c(Qt::darkBlue);
+  zoomer->setRubberBand(QwtPicker::RectRubberBand);
+  zoomer->setRubberBandPen(c);
+  QObject::connect(zoomer, SIGNAL(selected(const QwtDoubleRect &)),
+      this, SLOT(zoomRectSlot(const QwtDoubleRect &)));
 
   // Zoom in/out using middle-click+drag or the mouse wheel
   QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
@@ -392,6 +404,7 @@ void SliceViewer::initZoomer()
   panner->setMouseButton(Qt::RightButton);
   panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
 
+  // Custom picker for showing the current coordinates
   CustomPicker * picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
   QObject::connect(picker, SIGNAL(mouseMoved(double,double)), this, SLOT(showInfoAt(double, double)));
 
@@ -889,6 +902,16 @@ void SliceViewer::zoomOutSlot()
 {
   this->zoomBy(1.0 / 1.1);
 }
+
+/** Slot called when zooming using QwtPlotZoomer (rubber-band method)
+ *
+ * @param rect :: rectangle to zoom to
+ */
+void SliceViewer::zoomRectSlot(const QwtDoubleRect & rect)
+{
+  this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
+}
+
 
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer()
