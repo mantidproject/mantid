@@ -72,13 +72,19 @@ void StripPeaks::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
-    "If set, peaks will only be removed from this spectrum (otherwise from all)");   
+    "If set, peaks will only be removed from this spectrum (otherwise from all)");
+
+  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double> >();
+  mustBePositiveDbl->setLower(0.);
+  declareProperty("MaximumChisq",100.,mustBePositiveDbl,
+    "The maximum chisq value for fits to remove the peak. Default 100.");
 }
 
 void StripPeaks::exec()
 {
   // Retrieve the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  m_maxChiSq = getProperty("MaximumChisq");
 
   // Call FindPeaks as a sub-algorithm
   ITableWorkspace_sptr peakslist = this->findPeaks(inputWS);
@@ -166,15 +172,22 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     const double height = peakslist->getRef<double>("f0.Height",i);
     const double centre = peakslist->getRef<double>("f0.PeakCentre",i);
     const double width = peakslist->getRef<double>("f0.Sigma",i);
+    const double chisq = peakslist->getRef<double>("chi2", i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
     if ( height < 0 ) {
       g_log.error() << "Find Peak with Negative Height" << std::endl;
       continue;              // Height must be positive
     }
+    if ( chisq > m_maxChiSq)
+    {
+      if (chisq != 1.e10)
+        g_log.error() << "Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
+      continue;
+    }
 
     g_log.debug() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
-                  << " at x = " << centre << " h = " << height << "\n";
+                  << " at x = " << centre << " h = " << height << " s = " << width << " chi2 = " << chisq << "\n";
 
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());
