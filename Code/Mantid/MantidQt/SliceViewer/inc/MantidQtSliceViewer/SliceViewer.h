@@ -83,6 +83,12 @@ public:
   void setNormalization(Mantid::API::MDNormalization norm);
   Mantid::API::MDNormalization getNormalization() const;
 
+  /// Dynamic Rebinning-related Python bindings
+  void setRebinThickness(int dim, double thickness);
+  void setRebinNumBins(int xBins, int yBins);
+  void setRebinMode(bool mode, bool locked);
+  void refreshRebin();
+
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
   void changedShownDim(size_t dimX, size_t dimY);

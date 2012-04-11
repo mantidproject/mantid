@@ -712,6 +712,66 @@ Mantid::API::MDNormalization SliceViewer::getNormalization() const
   return m_data->getNormalization();
 }
 
+
+//------------------------------------------------------------------------------------
+/** Set the thickness (above and below the plane) for dynamic rebinning.
+ *
+ * @param dim :: index of the dimension to adjust
+ * @param thickness :: thickness to set, in units of the dimension.
+ * @throw runtime_error if the dimension index is invalid or the thickness is <= 0.0.
+ */
+void SliceViewer::setRebinThickness(int dim, double thickness)
+{
+  if (dim < 0 || dim >= static_cast<int>(m_dimWidgets.size()))
+    throw std::runtime_error("SliceViewer::setRebinThickness(): Invalid dimension index");
+  if (thickness <= 0.0)
+    throw std::runtime_error("SliceViewer::setRebinThickness(): Thickness must be > 0.0");
+  m_dimWidgets[dim]->setThickness(thickness);
+}
+
+//------------------------------------------------------------------------------------
+/** Set the number of bins for dynamic rebinning.
+ *
+ * @param xBins :: number of bins in the viewed X direction
+ * @param yBins :: number of bins in the viewed Y direction
+ * @throw runtime_error if the number of bins is < 1
+ */
+void SliceViewer::setRebinNumBins(int xBins, int yBins)
+{
+  if (xBins < 1 || yBins < 1)
+    throw std::runtime_error("SliceViewer::setRebinNumBins(): Number of bins must be >= 1");
+  m_dimWidgets[m_dimX]->setNumBins(xBins);
+  m_dimWidgets[m_dimY]->setNumBins(yBins);
+}
+
+//------------------------------------------------------------------------------------
+/** Sets the SliceViewer in dynamic rebin mode.
+ * In this mode, the current view area (see setXYLimits()) is used as the
+ * limits to rebin.
+ * See setRebinNumBins() to adjust the number of bins in the X/Y dimensions.
+ * See setRebinThickness() to adjust the thickness in other dimensions.
+ *
+ * @param mode :: true for rebinning mode
+ * @param locked :: if true, then the rebinned area is only refreshed manually
+ *        or when changing rebinning parameters.
+ */
+void SliceViewer::setRebinMode(bool mode, bool locked)
+{
+  // The events associated with these controls will trigger a re-draw
+  m_syncRebinMode->toggle(mode);
+  m_syncRebinLock->toggle(locked);
+}
+
+//------------------------------------------------------------------------------------
+/** When in dynamic rebinning mode, this refreshes the rebinned area to be the
+ * currently viewed area. See setXYLimits(), setRebinNumBins(), setRebinThickness()
+ */
+void SliceViewer::refreshRebin()
+{
+  this->rebinParamsChanged();
+}
+
+
 //------------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
 void SliceViewer::LineMode_toggled(bool checked)
