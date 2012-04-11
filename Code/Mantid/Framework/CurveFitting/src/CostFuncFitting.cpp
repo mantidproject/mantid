@@ -6,6 +6,7 @@
 #include "MantidAPI/IConstraint.h"
 
 #include <gsl/gsl_multifit_nlin.h>
+#include <limits>
 
 namespace Mantid
 {
