@@ -1063,8 +1063,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     bkgdchi2 = fit->getProperty("OutputChi2overDoF");
   } else {
     g_log.warning() << "Fit " << m_backgroundType << " Fails For Peak @ " << X[i4] << std::endl;
-    this->addRow(spectrum, bestparams, bestRawParams, mincost, true);
-    return;
+    a0 = a1 = a2 = 0.;
+    bkgdchi2 = -100.;
   }
   g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2
                       << " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << "\n";
