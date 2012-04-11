@@ -501,13 +501,20 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
   IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
-  if (mdew)
-    mdew->estimateResolution();
+  std::vector<coord_t> binSizes = m_ws->estimateResolution();
 
   // Copy the dimensions to this so they can be modified
   m_dimensions.clear();
   for (size_t d=0; d < m_ws->getNumDims(); d++)
-    m_dimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(m_ws->getDimension(d).get())) );
+  {
+    // Choose the number of bins based on the resolution of the workspace (for MDEWs)
+    coord_t min = m_ws->getDimension(d)->getMinimum();
+    coord_t max = m_ws->getDimension(d)->getMaximum();
+    size_t numBins = static_cast<size_t>((max-min)/binSizes[d]);
+    MDHistoDimension_sptr dim(new MDHistoDimension(m_ws->getDimension(d).get()));
+    dim->setRange(numBins, min, max);
+    m_dimensions.push_back(dim);
+  }
 
   // Adjust the range to that of visible data
   if (mdew)
@@ -1242,11 +1249,11 @@ void SliceViewer::updateDisplay(bool resetAxes)
   // Avoid going out of range
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
   if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
-  m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
-  m_slicePoint = VMD(slicePoint);
-
   m_X = m_dimensions[m_dimX];
   m_Y = m_dimensions[m_dimY];
+
+  m_data->setSliceParams(m_dimX, m_dimY, m_X, m_Y, slicePoint);
+  m_slicePoint = VMD(slicePoint);
 
   // Was there a change of which dimensions are shown?
   if (resetAxes || oldX != m_dimX || oldY != m_dimY )

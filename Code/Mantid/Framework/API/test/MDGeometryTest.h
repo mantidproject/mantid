@@ -30,8 +30,8 @@ public:
   {
     MDGeometry g;
     std::vector<IMDDimension_sptr> dims;
-    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
-    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 10));
+    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 20));
     dims.push_back(dim1);
     dims.push_back(dim2);
     g.initGeometry(dims);
@@ -46,6 +46,12 @@ public:
     TS_ASSERT_THROWS_ANYTHING( g.setBasisVector(2, VMD(1.2, 3.4)) );
     TS_ASSERT_EQUALS( g.getBasisVector(0), VMD(1.2, 3.4));
     TS_ASSERT_EQUALS( g.getBasisVector(1), VMD(1.2, 3.4));
+
+    // Get the resolution
+    std::vector<coord_t> binSizes = g.estimateResolution();
+    TS_ASSERT_EQUALS( binSizes.size(), 2);
+    TS_ASSERT_DELTA( binSizes[0], 0.2, 1e-6);
+    TS_ASSERT_DELTA( binSizes[1], 0.1, 1e-6);
   }
 
 

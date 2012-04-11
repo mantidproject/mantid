@@ -62,6 +62,7 @@ namespace API
     size_t getDimensionIndexByName(const std::string & name) const;
     size_t getDimensionIndexById(const std::string & id) const;
     Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
+    virtual std::vector<coord_t> estimateResolution() const;
 
     // --------------------------------------------------------------------------------------------
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
