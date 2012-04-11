@@ -55,6 +55,7 @@ Some features
 #include <fstream>
 #include <math.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include "../../Kernel/inc/MantidKernel/Property.h"
 
 using namespace Mantid::DataObjects;
@@ -980,8 +981,9 @@ namespace Crystal
 
     for( int g = 0; g < NGroups; g++ )
     {
-      char GroupName[ 8 ];
-      sprintf( GroupName,"Group%d\n",g);
+      //char GroupName[ 8 ];
+      //sprintf( GroupName,"Group%d\n",g);
+      std::string GroupName = std::string("Group") + boost::lexical_cast<std::string>(g);
       Result->addColumn( "double",GroupName);
     }
 
