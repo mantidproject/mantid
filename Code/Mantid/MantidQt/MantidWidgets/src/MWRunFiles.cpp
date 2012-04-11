@@ -73,7 +73,7 @@ void FindFilesThread::run()
     else
     {
       // Remove whitespace
-      m_text.erase(std::remove_if(m_text.begin(), m_text.end(), ::isspace));
+      m_text.erase(std::remove_if(m_text.begin(), m_text.end(), ::isspace), m_text.end());
 
       // Tokenise on ","
       std::vector<std::string> filestext;
