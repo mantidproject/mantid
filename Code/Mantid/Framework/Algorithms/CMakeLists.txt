@@ -166,6 +166,7 @@ set ( SRC_FILES
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
 	src/SofQW2.cpp
+  src/SofQW3.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
 	src/SortEvents.cpp
@@ -358,6 +359,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SofQW2.h
+  inc/MantidAlgorithms/SofQW3.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
@@ -531,6 +533,7 @@ set ( TEST_FILES
 	test/SmoothNeighboursTest.h
 	test/SofQW2Test.h
 	test/SofQWTest.h
+  test/SofQW3Test.h
 	test/SolidAngleTest.h
 	test/SortEventsTest.h
 	test/SpatialGroupingTest.h

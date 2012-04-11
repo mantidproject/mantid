@@ -106,7 +106,7 @@ namespace Algorithms
     const size_t nHistos = inputWS->getNumberHistograms();
 
     // Progress reports & cancellation
-    const size_t nreports(nHistos * nHistos * nEnergyBins);
+    const size_t nreports(nHistos * nEnergyBins);
     m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0,
                                                                     1.0,
                                                                     nreports));
@@ -344,8 +344,6 @@ namespace Algorithms
    */
   void SofQW3::getValuesAndWidths(API::MatrixWorkspace_const_sptr workspace)
   {
-    m_progress->report("Calculating detector angular widths");
-
     // Trigger a build of the nearst neighbors outside the OpenMP loop
     const int numNeighbours = 4;
     const size_t nHistos = workspace->getNumberHistograms();
@@ -358,6 +356,7 @@ namespace Algorithms
 
     for (size_t i = 0; i < nHistos; ++i)
     {
+      m_progress->report("Calculating detector angular widths");
       DetConstPtr detector = workspace->getDetector(i);
       g_log.debug() << "Current histogram: " << i << std::endl;
       specid_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
