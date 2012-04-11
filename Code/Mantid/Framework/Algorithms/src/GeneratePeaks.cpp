@@ -184,7 +184,7 @@ namespace Algorithms
 
       // 4. Put to output
       PARALLEL_FOR1(dataWS)
-      for (size_t i = 0; i < dataWS->dataY(wsindex).size(); i ++)
+      for (int i = 0; i < static_cast<int>(dataWS->dataY(wsindex).size()); i ++)
       {
         PARALLEL_START_INTERUPT_REGION
         dataWS->dataY(wsindex)[i] += values[i];
