@@ -479,7 +479,7 @@ namespace MDEvents
     bool MultiThreadedAdding = m_inWS->threadSafe();
 
     // Create the thread pool that will run all of these.
-    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
+    ThreadScheduler * ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0);
 
     // To track when to split up boxes
