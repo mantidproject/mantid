@@ -1881,6 +1881,7 @@ void SliceViewer::rebinParamsChanged()
   alg->setPropertyValue("Translation", "");
   alg->setProperty("NormalizeBasisVectors", true);
   alg->setProperty("ForceOrthogonal", false);
+  alg->setProperty("Parallel", true);
   alg->setPropertyValue("OutputWorkspace", m_overlayWSName);
 
   // Start asynchronous execution

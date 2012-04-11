@@ -511,7 +511,7 @@ namespace MDEvents
 
       // Keep a running total of how many events we've added
       eventsAdded += eventsAdding;
-      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
+      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes) || (eventsAdded > 1000000))
       {
         if (DODEBUG) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks
