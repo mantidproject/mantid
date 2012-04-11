@@ -94,6 +94,8 @@ void ScriptFileInterpreter::setup(const ScriptingEnv & environ, const QString & 
   connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)),
           m_editor, SLOT(updateCompletionAPI(const QStringList &)));
   m_runner->execute("None");
+  connect(m_runner.data(), SIGNAL(currentLineChanged(int,bool)),
+          m_editor, SLOT(updateMarker(int,bool)));
   connectScriptRunnerSignals();
 }
 
@@ -125,12 +127,14 @@ bool ScriptFileInterpreter::isExecuting() const
 void ScriptFileInterpreter::saveToCurrentFile()
 {
   m_editor->saveToCurrentFile();
+  m_runner->setName(m_editor->fileName());
 }
 
 /// Save to a different name
 void ScriptFileInterpreter::saveAs()
 {
   m_editor->saveAs();
+  m_runner->setName(m_editor->fileName());
 }
 
 /**
@@ -140,6 +144,7 @@ void ScriptFileInterpreter::saveAs()
 void ScriptFileInterpreter::saveScript(const QString & filename)
 {
   m_editor->saveScript(filename);
+  m_runner->setName(m_editor->fileName());
 }
 
 /**

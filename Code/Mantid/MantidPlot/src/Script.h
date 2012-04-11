@@ -73,6 +73,11 @@ class Script : public QObject
   const QObject * context() const { return m_context; }
   /// Set the context in which the code is to be executed.
   virtual void setContext(QObject *context) { m_context = context; }
+  /// Set an offset for the current code fragment
+  void setLineOffset(const int offset) { m_lineOffset = offset;}
+  /// Set an offset for the current code fragment
+  inline int getLineOffset() const { return m_lineOffset; }
+
   /// Is this an interactive script
   bool isInteractive() { return m_interactMode == Interactive; }
   /// Is the script being executed
@@ -130,9 +135,11 @@ private:
 
   ScriptingEnv *m_env;
   QString m_name;
-  InteractionType m_interactMode;
   QObject *m_context;
   bool m_redirectOutput;
+  int m_lineOffset;
+
+  InteractionType m_interactMode;
   ExecutionMode m_execMode;
 };
 

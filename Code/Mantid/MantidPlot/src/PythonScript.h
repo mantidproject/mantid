@@ -38,6 +38,7 @@
 
 class ScriptingEnv;
 class PythonScripting;
+struct _sipWrapperType;
 
 /**
  * This class holds, compiles and executes the Python code. 
@@ -63,8 +64,11 @@ public:
   {}
   /// Is the given code complete
   bool compilesToCompleteStatement(const QString & code) const;
-  /// Is the script being executed
-  bool isExecuting() const;
+
+  // -------------------------- Line number tracing ---------------------------
+  /// Emits a signal from this object indicating the current line number of the
+  /// code. This includes any offset.
+  void lineNumberChanged(PyObject * codeObject, int lineNo);
 
 public slots:
   /// Compile the code, returning true if it was successful, false otherwise
@@ -129,9 +133,11 @@ private:
   };
 
   inline PythonScripting * pythonEnv() const { return m_pythonEnv; }
+  PyObject * createSipInstanceFromMe();
   void initialize(const QString & name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
+
 
   // --------------------------- Script compilation/execution  -----------------------------------
   /// Performs the call to Python
@@ -156,14 +162,14 @@ private:
   /// Delete a Python reference to the given workspace name
   void deletePythonReference(const std::string& wsName);
 
-
   PythonScripting * m_pythonEnv;
   PyObject *localDict, *stdoutSave, *stderrSave;
+  PyObject *m_CodeFileObject;
   bool isFunction;
   QString fileName;
   bool m_isInitialized;
   PythonPathHolder m_pathHolder;
-  /// Set of current python variables that point to worksapce handles
+  /// Set of current python variables that point to workspace handles
   std::set<std::string> m_workspaceHandles;
 };
 

@@ -389,17 +389,17 @@ void ScriptEditor::setMarkerState(bool enabled)
 /**
  * Update the arrow marker to point to the correct line and colour it depending on the error state
  * @param lineno :: The line to place the marker at. A negative number will clear all markers
- * @param success :: If false, the marker will turn red
+ * @param error :: If true, the marker will turn red
  */
-void ScriptEditor::updateMarker(int lineno, bool success)
+void ScriptEditor::updateMarker(int lineno, bool error)
 {
-  if( success )
+  if(error)
   {
-    setMarkerBackgroundColor(g_success_colour, m_progressArrowKey);
+    setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
   }
   else
   {
-    setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
+    setMarkerBackgroundColor(g_success_colour, m_progressArrowKey);
   }
   markerDeleteAll();
   // Check the lineno actually exists, -1 means delete

@@ -67,7 +67,7 @@ public:
   void redirectStdOut(bool on);
 
   // Python supports progress monitoring
-  virtual bool supportsProgressReporting() const { return true; }
+  bool supportsProgressReporting() const { return true; }
 
   /// Return a string represenation of the given object
   QString toString(PyObject *object, bool decref = false);

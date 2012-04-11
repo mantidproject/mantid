@@ -143,7 +143,7 @@ public slots:
   /// Set the marker state
   void setMarkerState(bool enabled);
   /// Update the marker on this widget
-  void updateMarker(int lineno, bool success);
+  void updateMarker(int lineno, bool error);
   /// Refresh the autocomplete information base on a new set of keywords
   void updateCompletionAPI(const QStringList & keywords);
   /// Print the text within the widget

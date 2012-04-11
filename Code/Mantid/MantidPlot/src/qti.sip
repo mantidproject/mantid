@@ -1210,6 +1210,8 @@ public:
   void write(const QString&);
   // 'Fake' method needed for IPython import
   void flush();
+  // Line number trace
+  void lineNumberChanged(SIP_PYOBJECT,int);
 private:
   PythonScript(const PythonScript&);
 };

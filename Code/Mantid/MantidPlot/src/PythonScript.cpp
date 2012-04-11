@@ -34,6 +34,8 @@
 #include "PythonScript.h"
 #include "PythonScripting.h"
 
+#include "sipAPI_qti.h"
+
 #include <QVariant>
 #include <QMessageBox>
 #include <QtConcurrentRun>
@@ -42,44 +44,27 @@
 #include <stdexcept>
 
 
-//namespace
-//{
-//  // Keep a reference to the current PyCode filename object for the line tracing.
-//  // The tracing function is a static member function so this variable needs to be global
-//  // so it's kept in an anonymous namespace to keep it at this file scope.
-//  PyObject* ROOT_CODE_OBJECT = NULL;
-//  PythonScript *CURRENT_SCRIPT_OBJECT = NULL;
-//
-//  static int _trace_callback(PyObject *, _frame *frame, int what, PyObject *)
-//  {
-//    // If we are in the main code and this is a line number event
-//    if( ROOT_CODE_OBJECT && CURRENT_SCRIPT_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
-//      && what == PyTrace_LINE )
-//    {
-//      CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
-//    }
-//    // I don't care about the return value
-//    return 0;
-//  }
-//
-//  /**
-//   * Sets a pointer to null when its destructor is run
-//   */
-//  struct ScriptNullifier
-//  {
-//    ScriptNullifier(PythonScript *script) :
-//      m_script(script)
-//    {}
-//
-//    ~ScriptNullifier()
-//    {
-//      m_script = NULL;
-//    }
-//  private:
-//    PythonScript *m_script;
-//  };
-//
-//}
+namespace
+{
+  /**
+   * A callback, set using PyEval_SetTrace, that is called by Python
+   * to allow inspection into the current execution frame. It is currently
+   * used to emit the line number of the frame that is being executed.
+   * @param scriptObj :: A reference to the object passed as the second argument of PyEval_SetTrace
+   * @param frame :: A reference to the current frame object
+   * @param event :: An integer defining the event type, see http://docs.python.org/c-api/init.html#profiling-and-tracing
+   * @param arg :: Meaning varies depending on event type, see http://docs.python.org/c-api/init.html#profiling-and-tracing
+   */
+  int traceLineNumber(PyObject *scriptObj, PyFrameObject *frame, int event, PyObject *arg)
+  {
+    Q_UNUSED(arg);
+    int retcode(0);
+    if(event != PyTrace_LINE) return retcode;
+    PyObject_CallMethod(scriptObj, "lineNumberChanged", "O i", frame->f_code->co_filename, frame->f_lineno);
+    return retcode;
+  }
+}
+
 
 /**
  * Constructor
@@ -87,7 +72,7 @@
 PythonScript::PythonScript(PythonScripting *env, const QString &name, const InteractionType interact,
                            QObject * context)
   : Script(env, name, interact, context), m_pythonEnv(env), localDict(NULL),
-    stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false),
+    stdoutSave(NULL), stderrSave(NULL), m_CodeFileObject(NULL), isFunction(false), m_isInitialized(false),
     m_pathHolder(name), m_workspaceHandles()
 {
   initialize(name, context);
@@ -140,6 +125,21 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
   }
   Py_XDECREF(compiledCode);
   return result;
+}
+
+/**
+ * Emits a signal from this object indicating the current line number of the
+ * code. This includes any offset
+ * @param codeObject A pointer to the code object whose line is executing
+ * @param lineNo The line number that the code is currently executing
+ */
+void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo)
+{
+  if(codeObject == m_CodeFileObject)
+  {
+    lineNo += getLineOffset();
+    emit currentLineChanged(lineNo, false);
+  }
 }
 
 
@@ -309,7 +309,7 @@ QString PythonScript::constructErrorMsg()
     }
   }
 
-  //Exception value
+  // Exception value
 
   int msg_lineno(-1);
   int marker_lineno(-1);
@@ -362,15 +362,14 @@ QString PythonScript::constructErrorMsg()
 
   if( marker_lineno >=0 
       && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) 
-      && !filename.isEmpty() 
-      && filename != "<input>"
+      && !filename.isEmpty()
     )
   {
     message += "in file '" + QFileInfo(filename).fileName() 
       + "' at line " + QString::number(msg_lineno);
   }
   
-  emit currentLineChanged(marker_lineno, false);
+  emit currentLineChanged(marker_lineno, true);
 
   // We're responsible for the reference count of these objects
   Py_XDECREF(traceback);
@@ -407,6 +406,18 @@ void PythonScript::setContext(QObject *context)
 {
   Script::setContext(context);
   setQObject(context, "self");
+}
+
+PyObject * PythonScript::createSipInstanceFromMe()
+{
+  static sipWrapperType *sipClass(NULL);
+  if(!sipClass)
+  {
+    sipClass = sipFindClass("PythonScript");
+  }
+  PyObject *sipWrapper = sipConvertFromInstance(this, sipClass, NULL);
+  assert(sipWrapper);
+  return sipWrapper;
 }
 
 /**
@@ -468,12 +479,26 @@ bool PythonScript::doExecution(const QString & code)
   bool success(false);
   GlobalInterpreterLock gil;
   beginStdoutRedirect();
-  PyObject *codeObject = Py_CompileString(code.toAscii(), nameAsCStr(), Py_file_input);
+
+  PyCodeObject *compiledCode = (PyCodeObject*)Py_CompileString(code.toAscii(), nameAsCStr(), Py_file_input);
   PyObject *result(NULL);
-  if(codeObject)
+  if(compiledCode)
   {
-    result = PyEval_EvalCode((PyCodeObject*)codeObject, localDict, localDict);
-    Py_DECREF(codeObject);
+    PyObject *me(NULL);
+    if(isInteractive())
+    {
+      m_CodeFileObject = compiledCode->co_filename;
+      PyObject *me = createSipInstanceFromMe();
+      PyEval_SetTrace((Py_tracefunc)&traceLineNumber, me);
+    }
+    result = PyEval_EvalCode(compiledCode, localDict, localDict);
+    if(isInteractive())
+    {
+      PyEval_SetTrace(NULL, NULL);
+      Py_XDECREF(me);
+    }
+    Py_DECREF(compiledCode);
+    m_CodeFileObject = NULL;
   }
   endStdoutRedirect();
   if(result)
