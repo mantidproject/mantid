@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/IPropertyManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -85,3 +86,45 @@ namespace DataObjects
 
 } // namespace Mantid
 } // namespace DataObjects
+
+///\cond TEMPLATE
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+
+    template<> DLLExport
+    Mantid::DataObjects::SplittersWorkspace_sptr IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected SplittersWorkspace.";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> DLLExport
+    Mantid::DataObjects::SplittersWorkspace_const_sptr IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const SplittersWorkspace.";
+        throw std::runtime_error(message);
+      }
+    }
+
+  } // namespace Kernel
+} // namespace Mantid

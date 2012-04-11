@@ -6,7 +6,6 @@
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-
 namespace Mantid
 {
 namespace DataObjects
@@ -57,6 +56,8 @@ namespace DataObjects
 
   };
 
+  typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;
+  typedef boost::shared_ptr<const SplittersWorkspace> SplittersWorkspace_const_sptr;
 
 } // namespace DataObjects
 } // namespace Mantid
