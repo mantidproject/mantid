@@ -59,6 +59,10 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->imageVerticalScrollBar->show();
   iv_ui->imageVerticalScrollBar->setEnabled(true);
 
+  iv_ui->intensity_slider->setTickInterval(10);
+  iv_ui->intensity_slider->setTickPosition(QSlider::TicksBelow);
+  iv_ui->intensity_slider->setSliderPosition(30);
+
   image_picker = new TrackingPicker( iv_ui->imagePlot->canvas() );
   image_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
   image_picker->setTrackerMode(QwtPicker::ActiveOnly);
@@ -99,11 +103,11 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
                                   QwtPicker::ClickSelection  );
 */
   QObject::connect( image_picker, SIGNAL(mouseMoved()),
-                    this, SLOT(imagePickerMoved()) );
+                    this, SLOT(imagePicker_moved()) );
 
 
   QObject::connect(iv_ui->imageSplitter, SIGNAL(splitterMoved(int,int)), 
-                   this, SLOT(imageSplitterMoved()));
+                   this, SLOT(imageSplitter_moved()));
 
   QObject::connect(iv_ui->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
                    this, SLOT(v_scroll_bar_moved() ) );
@@ -117,6 +121,9 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   QObject::connect(iv_ui->action_Vscroll, SIGNAL(changed()),
                    this, SLOT(toggle_Vscroll()) );
 
+  QObject::connect(iv_ui->intensity_slider, SIGNAL(valueChanged(int)),
+                   this, SLOT(intensity_slider_moved()) );
+                                                     // color scale selections 
   iv_ui->actionHeat->setCheckable(true);
   iv_ui->actionHeat->setChecked(true);
   iv_ui->actionGray->setCheckable(true);
@@ -126,7 +133,7 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->actionOptimal->setCheckable(true);
   iv_ui->actionMulti->setCheckable(true);
   iv_ui->actionSpectrum->setCheckable(true);
-                                                     // color scale selections 
+
   color_group = new QActionGroup(this);
   color_group->addAction(iv_ui->actionHeat);
   color_group->addAction(iv_ui->actionGray);
@@ -170,7 +177,7 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   h_graph_picker->setSelectionFlags(QwtPicker::PointSelection |
                                   QwtPicker::DragSelection  );
   QObject::connect( h_graph_picker, SIGNAL(mouseMoved()),
-                    this, SLOT(h_graphPickerMoved()) );
+                    this, SLOT(h_graphPicker_moved()) );
 
   // NOTE: This initialization could be (static?) method ih TrackingPicker
   v_graph_picker = new TrackingPicker( iv_ui->v_graphPlot->canvas() );
@@ -181,7 +188,7 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   v_graph_picker->setSelectionFlags(QwtPicker::PointSelection |
                                     QwtPicker::DragSelection  );
   QObject::connect( v_graph_picker, SIGNAL(mouseMoved()),
-                    this, SLOT(v_graphPickerMoved()) );
+                    this, SLOT(v_graphPicker_moved()) );
 }
 
 IVConnections::~IVConnections()
@@ -231,7 +238,7 @@ void IVConnections::h_scroll_bar_moved()
 }
 
 
-void IVConnections::imageSplitterMoved()
+void IVConnections::imageSplitter_moved()
 {
   QList<int> sizes = iv_ui->imageSplitter->sizes();
 /*
@@ -247,7 +254,7 @@ void IVConnections::imageSplitterMoved()
 }
 
 
-void IVConnections::imagePickerMoved()
+void IVConnections::imagePicker_moved()
 {
   QwtPolygon selected_points = image_picker->selection();
   if ( selected_points.size() >= 1 )
@@ -258,7 +265,7 @@ void IVConnections::imagePickerMoved()
 }
 
 
-void IVConnections::h_graphPickerMoved()
+void IVConnections::h_graphPicker_moved()
 {
   QwtPolygon selected_points = h_graph_picker->selection();
   if ( selected_points.size() >= 1 )
@@ -269,7 +276,7 @@ void IVConnections::h_graphPickerMoved()
 }
 
 
-void IVConnections::v_graphPickerMoved()
+void IVConnections::v_graphPicker_moved()
 {
   QwtPolygon selected_points = v_graph_picker->selection();
   if ( selected_points.size() >= 1 )
@@ -279,6 +286,15 @@ void IVConnections::v_graphPickerMoved()
   }
 }
 
+void IVConnections::intensity_slider_moved()
+{
+  double value = (double)iv_ui->intensity_slider->value();
+  double min   = (double)iv_ui->intensity_slider->minimum();
+  double max   = (double)iv_ui->intensity_slider->maximum();
+
+  double scaled_value = 100.0*(value - min)/(max - min);
+  image_display->SetIntensity( scaled_value );
+}
 
 void IVConnections::heat_color_scale()
 {

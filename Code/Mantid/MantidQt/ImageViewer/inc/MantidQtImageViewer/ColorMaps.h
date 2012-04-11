@@ -57,11 +57,15 @@ public:
          SPECTRUM
        };
 
-  static void getDefaultMap( std::vector<QRgb> & color_table );
-
+  /// Get the specified color scale
   static void getColorMap( ColorScale          name, 
-                           int                 n_colors,
+                           size_t              n_colors,
                            std::vector<QRgb> & color_table );
+
+  /// Get look up table to brighten image
+  static void getIntensityMap( double                 control_s,
+                               size_t                 n_entries,
+                               std::vector<double>  & intensity_table );
 
   private:
 
@@ -69,8 +73,8 @@ public:
     static void InterpolateColorScale( double              base_red[],
                                        double              base_green[], 
                                        double              base_blue[], 
-                                       int                 n_base_colors,
-                                       int                 n_colors,
+                                       size_t              n_base_colors,
+                                       size_t              n_colors,
                                        std::vector<QRgb> & color_table );
 
 };

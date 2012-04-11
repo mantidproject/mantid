@@ -42,8 +42,11 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
   v_graph_display  = v_graph;
   image_table      = table_widget;
 
-  data_source = 0;
-  data_array  = 0;
+  data_source     = 0;
+  data_array      = 0;
+
+  double DEFAULT_INTENSITY = 30;
+  SetIntensity( DEFAULT_INTENSITY );
 }
 
 
@@ -76,6 +79,16 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
 
 //  std::cout << "End of ImageDisplay::SetData" << std::endl;
 }
+
+
+void ImageDisplay::SetIntensity( double control_parameter )
+{
+  size_t DEFAULT_SIZE = 100000;
+  ColorMaps::getIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
+  image_plot_item->SetIntensityTable( &intensity_table );
+  UpdateImage();
+}
+
 
 
 void ImageDisplay::UpdateImage()

@@ -69,10 +69,11 @@ public slots:
   void toggle_Vscroll();
   void v_scroll_bar_moved();
   void h_scroll_bar_moved();
-  void imageSplitterMoved();
-  void imagePickerMoved();
-  void h_graphPickerMoved();
-  void v_graphPickerMoved();
+  void imageSplitter_moved();
+  void imagePicker_moved();
+  void h_graphPicker_moved();
+  void v_graphPicker_moved();
+  void intensity_slider_moved();
   void heat_color_scale();
   void gray_color_scale();
   void negative_gray_color_scale();

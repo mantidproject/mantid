@@ -1,5 +1,6 @@
 
 #include  "MantidQtImageViewer/ImageView.h"
+#include  "MantidQtImageViewer/ColorMaps.h"
 
 namespace MantidQt
 {
@@ -29,6 +30,13 @@ ImageView::ImageView( ImageDataSource* data_source )
   iv_connections = new IVConnections( ui, image_display, h_graph, v_graph );
 
   image_display->SetDataSource( data_source );
+
+                                                 // ####### hack for testing
+/*
+  std::vector<double>* intensity_table = new std::vector<double>; 
+  ColorMaps::getIntensityMap( 30, 100000, *intensity_table );
+  image_display->SetIntensityTable( intensity_table );
+*/
 }
 
 
