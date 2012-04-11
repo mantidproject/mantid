@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidAPI/SpectraAxis.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -83,7 +84,7 @@ namespace Algorithms
     DataObjects::TableWorkspace_sptr mPeakParametersWS = this->getProperty("PeakParametersWorkspace");
     std::string mPeakFunction = this->getProperty("PeakFunction");
 
-    API::MatrixWorkspace_const_sptr mInputWS = this->getProperty("InputWorkspace");
+    mInputWS = this->getProperty("InputWorkspace");
     const std::vector<double> mBinParameters = this->getProperty("BinningParameters");
 
     mGeneratePeak = this->getProperty("GeneratePeaks");
@@ -97,6 +98,7 @@ namespace Algorithms
     API::MatrixWorkspace_sptr mOutputWorkspace;
     if (!mInputWS && mBinParameters.empty())
     {
+      // a) Nothing is setup
       g_log.error("Must define either InputWorkspace or BinningParameters.");
       throw std::invalid_argument("Must define either InputWorkspace or BinningParameters.");
     }
@@ -109,10 +111,14 @@ namespace Algorithms
 
       mOutputWorkspace = API::WorkspaceFactory::Instance().create(mInputWS, mInputWS->getNumberHistograms(),
           mInputWS->dataX(0).size(), mInputWS->dataY(0).size());
-      for (size_t iws = 0; iws < mOutputWorkspace->getNumberHistograms(); ++iws)
+
+      std::set<specid_t>::iterator siter;
+      for (siter = spectra.begin(); siter != spectra.end(); ++siter)
       {
+        specid_t iws = *siter;
         std::copy(mInputWS->dataX(iws).begin(), mInputWS->dataX(iws).end(), mOutputWorkspace->dataX(iws).begin());
       }
+
       mNewWSFromParent = true;
     }
     else
@@ -162,15 +168,6 @@ namespace Algorithms
           "  center = " << centre << ", height = " << height << ", sigma = " << width <<
           "  a0 = " << a0 << ", a1 = " << a1 << ", a2 = " << a2 << std::endl;
 
-      if (!mGeneratePeak)
-        height = 0.0;
-      if (!mGenerateBackground)
-      {
-        a0 = 0.0;
-        a1 = 0.0;
-        a2 = 0.0;
-      }
-
       if (chi2 > maxchi2)
       {
         g_log.notice() << "Skip Peak " << ipk << ": chi^2 = " << chi2 << " Larger than max. allowed chi^2" << std::endl;
@@ -178,19 +175,23 @@ namespace Algorithms
       }
 
       // 3. Build domain & function
+      // TODO Can make this part more smart to sum over only a portion of X range
       API::FunctionDomain1DVector domain(dataWS->dataX(wsindex));
       API::IFunction_sptr mfunc = this->createFunction(peakfunction, height, centre, width,
-          a0, a1, a2, true);
+          a0, a1, a2, mGeneratePeak, mGenerateBackground);
       API::FunctionValues values(domain);
       mfunc->function(domain, values);
 
       // 4. Put to output
-      // TODO Parallelize it!
-      g_log.debug() << "Writing To WS Index = " << wsindex << "  Size = " << dataWS->dataY(wsindex).size() << std::endl;
+      PARALLEL_FOR1(dataWS)
       for (size_t i = 0; i < dataWS->dataY(wsindex).size(); i ++)
       {
+        PARALLEL_START_INTERUPT_REGION
         dataWS->dataY(wsindex)[i] += values[i];
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
+
     } // for peak
 
     return;
@@ -203,9 +204,15 @@ namespace Algorithms
    */
   API::IFunction_sptr GeneratePeaks::createFunction(std::string m_peakFuncType,
       const double height, const double centre, const double sigma,
-      const double a0, const double a1, const double a2, const bool withPeak)
+      const double a0, const double a1, const double a2, const bool withPeak, const bool withBackground)
   {
-      // setup the background
+
+    // 1. Create return
+    API::CompositeFunction* fitFunc = new CompositeFunction();
+
+    // 2. setup the background
+    if (withBackground)
+    {
       auto background =
           API::FunctionFactory::Instance().createFunction("QuadraticBackground");
 
@@ -213,25 +220,23 @@ namespace Algorithms
       background->setParameter("A1", a1);
       background->setParameter("A2", a2);
 
-      // just return the background if there is no need for a peak
-      if (!withPeak)
-      {
-        return background;
-      }
+      fitFunc->addFunction(background);
+    }
 
-      // setup the peak
+    // 3. setup the peak
+    if (withPeak)
+    {
       auto tempPeakFunc = API::FunctionFactory::Instance().createFunction(m_peakFuncType);
       auto peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(tempPeakFunc);
       peakFunc->setHeight(height);
       peakFunc->setCentre(centre);
       peakFunc->setFwhm(sigma);
 
-      // put the two together and return
-      API::CompositeFunction* fitFunc = new CompositeFunction();
-      fitFunc->addFunction(peakFunc);
-      fitFunc->addFunction(background);
+      if (withPeak)
+        fitFunc->addFunction(peakFunc);
+    }
 
-      return boost::shared_ptr<IFunction>(fitFunc);
+    return boost::shared_ptr<IFunction>(fitFunc);
   }
 
   /*
@@ -275,7 +280,24 @@ namespace Algorithms
       std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
 
     // 3. Link spectrum to workspace index
-    // FIXME TODO In Phase 2
+    API::SpectraAxis * ax = dynamic_cast<API::SpectraAxis * >( ws->getAxis(1));
+    if (!ax)
+      throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+
+    std::map<specid_t, specid_t>::iterator spiter;
+    for (spiter = mSpectrumMap.begin(); spiter != mSpectrumMap.end(); ++spiter)
+    {
+      specid_t specid = spiter->first;
+      specid_t wsindex = spiter->second;
+      g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , " << specid << std::endl;
+      ax->setValue(wsindex, specid);
+    }
+
+    // TODO Remove after test
+    spec2index_map* tmap = ws->getSpectrumToWorkspaceIndexMap();
+    spec2index_map::iterator titer;
+    for (titer = tmap->begin(); titer != tmap->end(); ++titer)
+      g_log.notice() << "Map built:  wsindex = " << titer->first << "\t\tspectrum = " << titer->second << std::endl;
 
     return ws;
   }

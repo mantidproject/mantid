@@ -14,7 +14,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** GeneratePeaks : TODO: DESCRIPTION
+  /** GeneratePeaks : Generate peaks from a table workspace containing peak parameters
     
     @date 2012-04-10
 
@@ -62,7 +62,7 @@ namespace Algorithms
     API::MatrixWorkspace_sptr createOutputWorkspace(std::set<specid_t> spectra, std::vector<double> mBinParameters);
 
     API::IFunction_sptr createFunction(std::string m_peakFuncType, const double height, const double centre,
-        const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
+        const double sigma, const double a0, const double a1, const double a2, const bool withPeak, const bool withBackground);
 
     void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra);
 
@@ -76,6 +76,8 @@ namespace Algorithms
     bool mGeneratePeak;
     bool mGenerateBackground;
     bool mNewWSFromParent;
+
+    API::MatrixWorkspace_const_sptr mInputWS;
 
   };
 
