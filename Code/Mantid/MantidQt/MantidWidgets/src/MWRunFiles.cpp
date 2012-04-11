@@ -446,29 +446,33 @@ QVariant MWRunFiles::getUserInput() const
 }
 
 /**
- * Sets a value on the widget through a common interface. The 
- * QString is assumed to be text and to contain a file string. Note that this
- * is primarily here for use within the MuonAnalysis when the previous and 
- * next buttons select files and the text needs to be updated.
+ * "Silently" sets the value of the widget.  It does NOT emit a signal to say it
+ * has changed, and as far as the file finding routine is concerned it has not
+ * been modified and so it will NOT go searching for files.
+ *
  * @param value A QString containing text to be entered into the widget
  */
 
 void MWRunFiles::setText(const QString & value)
 {
   m_uiForm.fileEditor->setText(value);
-  m_uiForm.fileEditor->setModified(true);
 }
 
 /**
  * Sets a value on the widget through a common interface. The 
  * QVariant is assumed to be text and to contain a file string. Note that this
- * is primarily here for use within the AlgorithmDialog
+ * is primarily here for use within the AlgorithmDialog.
+ *
+ * Emits fileEditingFinished(), and changes to state of the text box widget
+ * to be "modified", so that the file finder will try and find the file(s).
+ *
  * @param value A QVariant containing user text
  */
 void MWRunFiles::setUserInput(const QVariant & value)
 {
-  setText(value.toString());
-  emit fileEditingFinished();
+  m_uiForm.fileEditor->setText(value.toString());
+  m_uiForm.fileEditor->setModified(true);
+  emit fileEditingFinished(); // Which is connected to slot findFiles()
 }
 
 /**
@@ -508,12 +512,16 @@ void MWRunFiles::setNumberOfEntries(const int number)
   }
 }
 /** 
-* Set the file text
+* Set the file text.  This is different to setText in that it emits findFiles, as well
+* changing the state of the text box widget to "modified = true" which is a prerequisite
+* of findFiles.
+*
 * @param text :: The text string to set
 */
 void MWRunFiles::setFileText(const QString & text)
 {
   m_uiForm.fileEditor->setText(text);
+  m_uiForm.fileEditor->setModified(true);
   findFiles();
 }
 
