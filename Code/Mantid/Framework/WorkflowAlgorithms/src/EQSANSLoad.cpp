@@ -52,7 +52,7 @@ using namespace DataObjects;
 
 void EQSANSLoad::init()
 {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, "_event.nxs"),
       "The name of the input event Nexus file to load");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Then name of the output EventWorkspace");

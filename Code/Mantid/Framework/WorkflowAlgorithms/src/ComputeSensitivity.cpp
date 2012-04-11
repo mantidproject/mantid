@@ -34,7 +34,7 @@ using namespace DataObjects;
 
 void ComputeSensitivity::init()
 {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, "_event.nxs"),
       "Flood field or sensitivity file.");
   declareProperty(new WorkspaceProperty<>("PatchWorkspace","", Direction::Input, PropertyMode::Optional));
   declareProperty("ReductionProperties","__eqsans_reduction_properties", Direction::Input);
