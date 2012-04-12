@@ -70,7 +70,7 @@ namespace Mantid
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
 
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace();
+      DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace(inputWS->getInstrument(), true);
       maskWS->initialize(nHist, 1, 1);
       MatrixWorkspace_sptr outputWS(maskWS);
       WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
