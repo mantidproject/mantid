@@ -6,7 +6,7 @@ Convert a Workspace2D
 #include "MantidAlgorithms/ConvertToMaskingWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 using namespace Mantid::Kernel;
@@ -36,7 +36,7 @@ namespace Algorithms
   void ConvertToMaskingWorkspace::initDocs()
   {
     this->setWikiSummary("Convert a Workspace to a Masking workspace");
-    this->setOptionalMessage("Convert Workspace2D to a SpecailWorkspace2D.");
+    this->setOptionalMessage("Convert Workspace2D to a MaskWorkspace.");
   }
 
   void ConvertToMaskingWorkspace::init()
@@ -45,7 +45,7 @@ namespace Algorithms
     this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "", Direction::Input),
         "Input Workspace2D.  Must have instrument associated, and cannot be focussed.");
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "", Direction::Output),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::MaskWorkspace>("OutputWorkspace", "", Direction::Output),
         "Output masking workspace.");
 
     return;
@@ -64,7 +64,7 @@ namespace Algorithms
       throw std::invalid_argument("Input workspace has not instrument set up");
     }
 
-    DataObjects::SpecialWorkspace2D_sptr maskWS(new DataObjects::SpecialWorkspace2D(myinstrument));
+    DataObjects::MaskWorkspace_sptr maskWS(new DataObjects::MaskWorkspace(myinstrument));
     g_log.debug() << "Output Masking Workspace has " << maskWS->getNumberHistograms() << " specs" << std::endl;
     std::vector<detid_t> detids = myinstrument->getDetectorIDs();
     g_log.debug() << "Instrument has " << detids.size() << " Detectors " << std::endl;
