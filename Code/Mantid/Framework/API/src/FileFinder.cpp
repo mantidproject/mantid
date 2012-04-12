@@ -213,7 +213,7 @@ namespace Mantid
           g_log.debug() << e.what() << "\n";
         }
       }
-      return Kernel::ConfigService::Instance().getFacility();;
+      return Kernel::ConfigService::Instance().getFacility();
     }
 
     /**
@@ -386,7 +386,7 @@ namespace Mantid
         {
           try
           {
-            std::string path = getPath(archs, hint);
+            std::string path = getArchivePath(archs, hint);
             if (!path.empty())
             {
               Poco::File file(path);
@@ -401,10 +401,6 @@ namespace Mantid
             g_log.error() << "Archive search could not find '" << hint << "'\n";
           }
         }
-      }
-      else
-      {
-        g_log.debug() << "Starting hintPath.getExtension().empty()..." << "\n";
       }
 
       // Do we need to try and form a filename from our preset rules
@@ -453,6 +449,7 @@ namespace Mantid
       {
         extensions.assign(facility_extensions.begin(), facility_extensions.end());
       }
+
       // Look first at the original filename then for case variations. This is important
       // on platforms where file names ARE case sensitive.
       std::vector<std::string> filenames(3,filename);
@@ -502,7 +499,7 @@ namespace Mantid
           {
             try
             {
-              path = getPath(archs, filenames[i] + *ext);
+              path = getArchivePath(archs, filenames[i] + *ext);
             }
             catch(...)
             {
@@ -548,6 +545,8 @@ namespace Mantid
     std::string FileFinderImpl::findFullPath(const std::string& hint,const std::vector<std::string> &exts)const
     {
       g_log.debug() << "vector findFullPath(\'" << hint << "\', exts[" << exts.size() << "])\n";
+
+      //if partial filename or run number is not supplied, return here
       if (hint.empty())
         return "";
 
@@ -556,23 +555,20 @@ namespace Mantid
       if (!hintPath.getExtension().empty())
       {
         // check in normal search locations
+        g_log.debug() << "hintPath is not empty, check in normal search locations" << "\n";
         std::string path = getFullPath(hint);
-        try
+        if (!path.empty())
         {
-          if (!path.empty() && Poco::File(path).exists())
-          {
-            return path;
-          }
-        }
-        catch(std::exception& e)
-        {
-          g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
-          return "";
+          g_log.information() << "found path = " << path << '\n';
+          return path;
+        } else {
+          g_log.notice() << "Unable to find files via direcotry search with the filename that looks like a full filename" << "\n";
         }
       }
 
-      // so many things depend on the facility just get it now
+      // get facility from the FacilityInfo
       const Kernel::FacilityInfo facility = this->getFacility(hint);
+
       // initialize the archive searcher
       std::vector<IArchiveSearch_sptr> archs;
       { // hide in a local namespace so things fall out of scope
@@ -580,11 +576,10 @@ namespace Mantid
         std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
         if (!archiveOpt.empty() && archiveOpt != "off" && !facility.archiveSearch().empty())
         {
-          g_log.debug() << "archive search count..." << facility.archiveSearch().size() << "\n";
           std::vector<std::string>::const_iterator it = facility.archiveSearch().begin();
           for (; it != facility.archiveSearch().end(); it++)
           {
-            g_log.debug() << "Starting archive search..." << *it << "\n";
+            g_log.debug() << "get archive search for the facility..." << *it << "\n";
             archs.push_back(ArchiveSearchFactory::Instance().create(*it));
           }
         }
@@ -594,31 +589,21 @@ namespace Mantid
       // ask the archive search for help
       if (!hintPath.getExtension().empty())
       {
-        g_log.debug() << "Starting hintPath.getExtension()..." << hintPath.getExtension() << "\n";
+        g_log.debug() << "hintPath is not empty, try archive search" << "\n";
         if (archs.size() != 0 )
         {
-          try
+          std::string path = getArchivePath(archs, hint);
+          if (!path.empty())
           {
-            std::string path = getPath(archs, hint);
-            if (!path.empty())
-            {
-              Poco::File file(path);
-              if (file.exists())
-              {
-                return file.path();
-              }
-            }
+            g_log.information() << "found path = " << path << '\n';
+            return path;
+          } else {
+            g_log.notice() << "Unable to find files via archive search with the filename that looks like a full filename" << "\n";
           }
-          catch(...)
-          {
-            g_log.error() << "Archive search could not find '" << hint << "'\n";
-          }
+          return path;
         }
       }
-      else
-      {
-        g_log.debug() << "Starting hintPath.getExtension().empty()..." << "\n";
-      }
+
 
       // Do we need to try and form a filename from our preset rules
       std::string filename(hint);
@@ -641,89 +626,61 @@ namespace Mantid
         }
       }
 
+      // Look first at the original filename then for case variations. This is important
+      // on platforms where file names ARE case sensitive.
+      std::set<std::string> filenames;
+      filenames.insert(filename);
+      std::transform(filename.begin(),filename.end(),filename.begin(),toupper);
+      filenames.insert(filename);
+      std::transform(filename.begin(),filename.end(),filename.begin(),tolower);
+      filenames.insert(filename);
+
+      // work through the extensions
+      // try the extension that comes with the filename
+      if (!extension.empty())
+      {
+        g_log.debug() << "Attempt to find files with the extension that comes with the filename" <<  extension << "\n";
+        std::string path = getPath(archs, filenames, std::vector<std::string>(1, extension));
+        if (!path.empty())
+        {
+          g_log.information() << "found path = " << path << '\n';
+          return path;
+        } else {
+          g_log.notice() << "Unable to find files with extensions that comes with the filename" << "\n";
+        }
+      }
+
+      // try the extension that are supplied by user
+      if (!exts.empty())
+      {
+        g_log.debug() << "Attempt to find files with extensions that are supplied by users or algorithms, first extension = " <<  *(exts.begin()) << "\n";
+        std::string path = getPath(archs, filenames, exts);
+        if (!path.empty())
+        {
+          g_log.information() << "found path = " << path << '\n';
+          return path;
+        } else {
+          g_log.notice() << "Unable to find files with extensions that are supplied by users or algorithms" << "\n";
+        }
+      }
+
       // work through the extensions
       const std::vector<std::string> facility_extensions = facility.extensions();
       // select allowed extensions
       std::vector < std::string > extensions;
 
-      if (!extension.empty())
+      g_log.debug() << "Add facility extensions defined in the Facility.xml file" << "\n";
+      extensions.assign(facility_extensions.begin(), facility_extensions.end());
+      std::string path = getPath(archs, filenames, extensions);
+      if (!path.empty())
       {
-        g_log.debug() << "file extension.size()=" <<  extension.size() << "\n";
-        extensions.push_back(extension);
-      }
-      else if (!exts.empty())
-      {
-        g_log.debug() << "algorithm exts.size()=" <<  exts.size() << "\n";
-        extensions.assign(exts.begin(), exts.end());
-       // extensions.insert(extensions.end(), exts.begin(), exts.end());
-      }
-      else
-      {
-        g_log.debug() << "facility_extensions.size()=" <<  facility_extensions.size() << "\n";
-        extensions.assign(facility_extensions.begin(), facility_extensions.end());
-      }
-      // Look first at the original filename then for case variations. This is important
-      // on platforms where file names ARE case sensitive.
-      std::vector<std::string> filenames(2,filename);
-      std::transform(filename.begin(),filename.end(),filenames[0].begin(),toupper);
-      std::transform(filename.begin(),filename.end(),filenames[1].begin(),tolower);
-
-      // Remove wild cards.
-      extensions.erase(std::remove_if( // "Erase-remove" idiom.
-          extensions.begin(), extensions.end(),
-          containsWildCard),
-        extensions.end());
-      std::vector<std::string>::const_iterator ext = extensions.begin();
-
-      for (; ext != extensions.end(); ++ext)
-      {
-        for(size_t i = 0; i < filenames.size(); ++i)
-        {
-          std::string path = getFullPath(filenames[i] + *ext);
-          if (!path.empty())
-            return path;
-        }
+        g_log.information() << "found path = " << path << '\n';
+        return path;
+      } else {
+        g_log.notice() << "Unable to find files with extensions that are defined in the Facility.xml file" << "\n";
       }
 
-      // Search the archive of the default facility
-      if (archs.size() != 0 )
-      {
-        g_log.debug() << "Search the archive of the default facility" << "\n";
-        std::string path;
-        std::vector<std::string>::const_iterator ext = extensions.begin();
-        for (; ext != extensions.end(); ++ext)
-        {
-          for(size_t i = 0; i < filenames.size(); ++i)
-          {
-            try
-            {
-              path = getPath(archs, filenames[i] + *ext);
-            }
-            catch(...)
-            {
-              return "";
-            }
-            if( path.empty() ) return "";
-
-            Poco::Path pathPattern(path);
-            if (ext->find("*") != std::string::npos)
-            {
-              continue;
-              // FIXME: Does this need to be before continue?
-              //std::set < std::string > files;
-              //Kernel::Glob::glob(pathPattern, files, globOption);
-            }
-            else
-            {
-              Poco::File file(pathPattern);
-              if (file.exists())
-              {
-                return file.path();
-              }
-            }
-          } // i
-        }  // ext
-      } // archs
+      g_log.notice() << "Unable to find files" << "\n";
 
       return "";
     }
@@ -798,8 +755,8 @@ namespace Mantid
             run = boost::lexical_cast<std::string>(irun);
             while (run.size() < nZero)
               run.insert(0, "0");
-            //std::string path = findFullPath(p1.first + run);
-            std::string path = findRun(p1.first + run);
+            std::string path = findFullPath(p1.first + run);
+            //std::string path = findRun(p1.first + run);
             if (!path.empty())
             {
               res.push_back(path);
@@ -809,8 +766,8 @@ namespace Mantid
         }
         else
         {
-          //std::string path = findFullPath(*h);
-          std::string path = findRun(*h);
+          std::string path = findFullPath(*h);
+          //std::string path = findRun(*h);
           if (!path.empty())
           {
             res.push_back(path);
@@ -821,8 +778,16 @@ namespace Mantid
       return res;
     }
 
-    std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::string& fName) const
+    /**
+     * Return the path to the file found in archive
+     * @param archs :: A full file name (without path) including extension
+     * @param fName :: A full file name (without path) including extension
+     * @return The full path if the file exists and can be found in one of the search locations
+     *  or an empty string otherwise.
+     */
+    std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr>& archs, const std::string& fName) const
     {
+      g_log.debug() << "getArchivePath(" << fName << ")\n";
       std::string path = "";
       std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
       for (; it != archs.end(); it++)
@@ -830,11 +795,84 @@ namespace Mantid
         path = (*it)->getPath(fName);
         if (!path.empty())
         {
-          g_log.debug() << "getPath path = " << path << "\n";
           return path;
         }
       }
       return path;
+    }
+
+    /**
+     * Return the full path to the file given its name
+     * @param fName :: A vector of full file name (without path) and a vector of extensions
+     * @return The full path if the file exists and can be found in one of the search locations
+     *  or an empty string otherwise.
+     */
+    std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::set<std::string>& filenames, const std::vector<std::string>& exts) const
+    {
+      std::string path;
+
+      std::vector<std::string> extensions;
+      extensions.assign(exts.begin(),exts.end());
+
+      // Remove wild cards.
+      extensions.erase(std::remove_if( // "Erase-remove" idiom.
+          extensions.begin(), extensions.end(),
+          containsWildCard),
+        extensions.end());
+
+      std::vector<std::string>::const_iterator ext = extensions.begin();
+
+      for (; ext != extensions.end(); ++ext)
+      {
+        std::set<std::string>::const_iterator it = filenames.begin();
+        for(; it!=filenames.end(); it++)
+        {
+          path = getFullPath(*it + *ext);
+          try
+          {
+            if (!path.empty() && Poco::File(path).exists())
+            {
+              g_log.debug() << "path returned from getFullPath() = " << path << '\n';
+              return path;
+            }
+          }
+          catch(std::exception& e)
+          {
+            g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
+            return "";
+          }
+        }
+      }
+
+      // Search the archive
+      if (archs.size() != 0 )
+      {
+        g_log.debug() << "Search the archive of the default facility" << "\n";
+        std::string path = "";
+        std::vector<std::string>::const_iterator ext = extensions.begin();
+        for (; ext != extensions.end(); ++ext)
+        {
+          std::set<std::string>::const_iterator it = filenames.begin();
+          for(; it!=filenames.end(); it++)
+          {
+            path = getArchivePath(archs, *it + *ext);
+            try
+            {
+              if (!path.empty() && Poco::File(path).exists())
+              {
+                return path;
+              }
+            }
+            catch(std::exception& e)
+            {
+              g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
+              return "";
+            }
+          } // it
+        }  // ext
+      } // archs
+
+      return "";
     }
 
   }// API
