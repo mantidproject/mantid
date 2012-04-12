@@ -486,6 +486,14 @@ void MWRunFiles::setFileProblem(const QString & message)
   refreshValidator();
 }
 
+/**
+* Return the error.
+* @returns A string explaining the error.
+*/
+QString MWRunFiles::getFileProblem()
+{
+  return m_fileProblem;
+}
 
 /**
 * Save settings to the given group
@@ -500,6 +508,7 @@ void MWRunFiles::saveSettings(const QString & group)
 
   settings.endGroup();
 }
+
 /** Writes the total number of periods in a file to the NumEntries
 *  Qlabel
 *  @param number the number to write, if this is < 1 a ? will be displayed in it's place
@@ -511,6 +520,7 @@ void MWRunFiles::setNumberOfEntries(const int number)
     m_uiForm.numEntries->setText("/"+total);
   }
 }
+
 /** 
 * Set the file text.  This is different to setText in that it emits findFiles, as well
 * changing the state of the text box widget to "modified = true" which is a prerequisite
@@ -545,7 +555,6 @@ void MWRunFiles::findFiles()
     m_thread->start();
   }
 }
-
 
 /**
  * Called when the file finding thread finishes.  Inspects the result

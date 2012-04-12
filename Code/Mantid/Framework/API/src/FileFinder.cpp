@@ -472,7 +472,20 @@ namespace Mantid
         {
           std::string path = getFullPath(filenames[i] + *ext);
           if (!path.empty())
-            return path;
+          {
+            //Check file actually exists.
+            try
+            {
+              if (Poco::File(path).exists() )
+                return path;
+              else
+                return("");
+            }
+            catch(...)
+            {
+              return("");
+            }
+          }
         }
       }
 
@@ -762,11 +775,12 @@ namespace Mantid
           size_t nZero = run.size(); // zero padding
           if (range[1].size() > nZero)
           {
-            ("Malformed range of runs: " + *h
+            throw std::invalid_argument("Malformed range of runs: " + *h
                 + ". The end of string value is longer than the instrument's zero padding");
           }
           int runNumber = boost::lexical_cast<int>(run);
           std::string runEnd = run;
+          // Adds zero padding to end of range.
           runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
 
           // Throw if runEnd contains something else other than a digit.

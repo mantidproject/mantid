@@ -150,6 +150,8 @@ namespace MantidQt
       void setText(const QString & value);
       /// flag a problem with the file the user entered, an empty string means no error
       void setFileProblem(const QString & message);
+      /// Get file problem, empty string means no error.
+      QString getFileProblem();
       /// Read settings from the given group
       void readSettings(const QString & group);
       /// Save settings in the given group

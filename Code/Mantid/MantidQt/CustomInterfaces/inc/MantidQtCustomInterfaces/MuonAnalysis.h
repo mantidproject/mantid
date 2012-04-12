@@ -216,9 +216,6 @@ private:
 
   /// is string a number?
   bool isNumber(const std::string& s) const;
-  
-  /// Check to see if file given is valid.
-  bool isValidFile(const QString & fileName);
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
