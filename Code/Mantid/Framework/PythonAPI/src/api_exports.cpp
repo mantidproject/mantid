@@ -129,6 +129,18 @@ using namespace boost::python;
     // Overloads for createSubAlgorithm function which has 1 optional argument
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createSubAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createSubAlgorithm, 1, 2)
 
+    struct AllowCThreads
+    {
+      AllowCThreads() : m_saved(PyEval_SaveThread())
+      {}
+      ~AllowCThreads()
+      {
+        PyEval_RestoreThread(m_saved);
+      }
+    private:
+      PyThreadState *m_saved;
+    };
+
     /**
      * Releases the GIL and disables any tracer functions, executes the calling algorithm object
      * and re-acquires the GIL and resets the tracing functions.
@@ -148,9 +160,8 @@ using namespace boost::python;
       PyEval_SetTrace(NULL,NULL);
 
       bool result(false);
-      Py_BEGIN_ALLOW_THREADS;
+      AllowCThreads threadStateHolder;
       result = self.execute();
-      Py_END_ALLOW_THREADS;
 
       PyEval_SetTrace(func, arg);
       Py_XDECREF(arg);
