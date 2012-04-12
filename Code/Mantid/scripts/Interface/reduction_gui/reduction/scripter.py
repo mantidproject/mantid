@@ -215,8 +215,6 @@ class BaseReductionScripter(object):
                 @param init: if True, the state class will be kept for later type checking
             """
             
-            print 'inside update of scripter (ReducitonObserver class)'
-            
             self._state = self._subject.get_state()
             
             # If we are initializing, store the object class
@@ -285,7 +283,6 @@ class BaseReductionScripter(object):
         """
             Tell all observers to update their state.
         """
-        print 'in update of scripter.py'
         for item in self._observers:
             item.update()
             

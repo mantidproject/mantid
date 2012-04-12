@@ -586,7 +586,7 @@ def help():
 
 #if __name__ == '__main__':
 def calculate(string_runs=None, 
-#              list_attenuator=None, 
+              list_attenuator=None, 
               list_peak_back=None, 
               output_path=None,
               tof_range=None):  
