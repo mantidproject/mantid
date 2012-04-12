@@ -190,6 +190,62 @@ namespace Mantid
     }
 
     /**
+     * Rebin the input quadrilateral to the output grid
+     * @param inputQ The input polygon
+     * @param inputWS The input workspace containing the input intensity values
+     * @param i The index in the vertical axis direction that inputQ references
+     * @param j The index in the horizontal axis direction that inputQ references
+     * @param outputWS A pointer to the output workspace that accumulates the data
+     * @param verticalAxis A vector containing the output vertical axis bin boundaries
+     */
+    void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral & inputQ,
+                                          MatrixWorkspace_const_sptr inputWS,
+                                          const size_t i, const size_t j,
+                                          MatrixWorkspace_sptr outputWS,
+                                          const std::vector<double> & verticalAxis)
+    {
+      const MantidVec & X = outputWS->readX(0);
+      size_t qstart(0), qend(verticalAxis.size()-1), en_start(0), en_end(X.size() - 1);
+      if( !getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend, en_start, en_end)) return;
+
+      for( size_t qi = qstart; qi < qend; ++qi )
+      {
+        const double vlo = verticalAxis[qi];
+        const double vhi = verticalAxis[qi+1];
+        for( size_t ei = en_start; ei < en_end; ++ei )
+        {
+          const V2D ll(X[ei], vlo);
+          const V2D lr(X[ei+1], vlo);
+          const V2D ur(X[ei+1], vhi);
+          const V2D ul(X[ei], vhi);
+          const Quadrilateral outputQ(ll, lr, ur, ul);
+
+          try
+          {
+            ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
+            const double weight = overlap.area()/inputQ.area();
+            double yValue = inputWS->readY(i)[j] * weight;
+            double eValue = inputWS->readE(i)[j] * weight;
+            const double overlapWidth = overlap.largestX() - overlap.smallestX();
+            if(inputWS->isDistribution())
+            {
+              yValue *= overlapWidth;
+              eValue *= overlapWidth;
+            }
+            eValue = eValue*eValue;
+            PARALLEL_CRITICAL(overlap)
+            {
+              outputWS->dataY(qi)[ei] += yValue;
+              outputWS->dataE(qi)[ei] += eValue;
+            }
+          }
+          catch(Geometry::NoIntersectionException &)
+          {}
+        }
+      }
+    }
+
+    /**
      * Find the possible region of intersection on the output workspace for the given polygon
      * @param outputWS A pointer to the output workspace
      * @param verticalAxis A vector containing the output vertical axis edges

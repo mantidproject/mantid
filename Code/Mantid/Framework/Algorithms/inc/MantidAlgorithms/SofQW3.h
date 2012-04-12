@@ -83,6 +83,11 @@ namespace Mantid
       /// Get angles and calculate angular widths.
       void getValuesAndWidths(API::MatrixWorkspace_const_sptr workspace);
 
+      /// Create the output workspace
+      API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+                                                     const std::vector<double> & binParams, std::vector<double>& newAxis);
+
+
       /// E Mode
       int m_emode;
       /// EFixed has been provided
