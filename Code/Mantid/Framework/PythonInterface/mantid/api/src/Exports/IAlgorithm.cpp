@@ -168,13 +168,25 @@ namespace
 
   struct AllowCThreads
   {
-    AllowCThreads() : m_saved(PyEval_SaveThread())
-    {}
+    AllowCThreads() : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL)
+    {
+      PyThreadState *curThreadState = PyThreadState_GET();
+      assert(curThreadState != NULL);
+      m_tracefunc = curThreadState->c_tracefunc;
+      m_tracearg = curThreadState->c_traceobj;
+      Py_XINCREF(m_tracearg);
+      PyEval_SetTrace(NULL,NULL);
+      m_saved = PyEval_SaveThread();
+    }
     ~AllowCThreads()
     {
       PyEval_RestoreThread(m_saved);
+      PyEval_SetTrace(m_tracefunc, m_tracearg);
+      Py_XDECREF(m_tracearg);
     }
   private:
+    Py_tracefunc m_tracefunc;
+    PyObject *m_tracearg;
     PyThreadState *m_saved;
   };
 
@@ -189,19 +201,9 @@ namespace
    */
   bool executeWhileReleasingGIL(IAlgorithm & self)
   {
-    PyThreadState *curThreadState = PyThreadState_GET();
-    assert(curThreadState != NULL);
-    Py_tracefunc func = curThreadState->c_tracefunc;
-    PyObject *arg = curThreadState->c_traceobj;
-    Py_XINCREF(arg);
-    PyEval_SetTrace(NULL,NULL);
-
     bool result(false);
     AllowCThreads threadStateHolder;
     result = self.execute();
-
-    PyEval_SetTrace(func, arg);
-    Py_XDECREF(arg);
     return result;
   }
 
