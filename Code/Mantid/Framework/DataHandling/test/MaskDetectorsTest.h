@@ -50,7 +50,7 @@ public:
   /*
    * Generate a Workspace which can be (1) EventWorkspace, (2) Workspace2D, and (3) SpecialWorkspace2D
    */
-  void setUpWS(bool event, const std::string & name = "testSpace", bool specialworkspace2d = false, size_t numspec=9)
+  void setUpWS(bool event, const std::string & name = "testSpace", bool asMaskWorkspace = false, size_t numspec=9)
   {
     // 1. Instrument
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1, false));
@@ -81,7 +81,7 @@ public:
       spaceEvent->setAllX(x);
 
     }
-    else if (!specialworkspace2d)
+    else if (!asMaskWorkspace)
     {
       space = WorkspaceFactory::Instance().create("Workspace2D",numspec,6,5);
       Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
@@ -99,8 +99,8 @@ public:
     }
     else
     {
-      // In case of SpecialWorkspace2D
-      Mantid::DataObjects::SpecialWorkspace2D_sptr specspace(new  Mantid::DataObjects::SpecialWorkspace2D(instr));
+      // In case of MaskWorkspace
+      Mantid::DataObjects::MaskWorkspace_sptr specspace(new  Mantid::DataObjects::MaskWorkspace(instr));
       for (size_t i = 0; i < specspace->getNumberHistograms(); i ++)
       {
         // default to use all the detectors
@@ -109,11 +109,11 @@ public:
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
     }
 
-    if (!specialworkspace2d){
+    if (!asMaskWorkspace){
       space->setInstrument(instr);
       space->generateSpectraMap();
 
-      std::cout << "another way of find number of detetors = " << space->getInstrument()->getDetectorIDs().size() << std::endl;
+      std::cout << "another way of find number of detectors = " << space->getInstrument()->getDetectorIDs().size() << std::endl;
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);
@@ -310,9 +310,9 @@ public:
   }
 
   /*
-   * Test for masking detectors by SpecialWorkspace2D
+   * Test for masking detectors by using a MaskWorkspace
    */
-  void xtest_Giving_A_SpecialWorkspace2D()
+  void test_Using_A_MaskWorkspace()
   {
     // 1. Create 2 workspaces
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
@@ -322,34 +322,6 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(existingMaskName);
     MatrixWorkspace_sptr inputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
-
-    /* Some test output.
-    std::cout << std::endl;
-    for (size_t i = 0; i < existingMask->getNumberHistograms(); i ++)
-    {
-      std::cout << "Histogram " << i;
-      std::set<detid_t> detids = existingMask->getSpectrum(i)->getDetectorIDs();
-      if (detids.size() > 0){
-        detid_t detid = *detids.begin();
-        std::cout << "  has " << detids.size() << " detectors including " << detid << "\t\t";
-      } else {
-        std::cout << "  has ZERO detectors associated" << "\t\t";
-      }
-      Mantid::Geometry::IDetector_const_sptr detector = existingMask->getDetector(i);
-      std::cout << "Is monitor? = " << detector->isMonitor() << std::endl;
-    } // ENDFOR
-    for (size_t i = 0; i < inputWS->getNumberHistograms(); i ++)
-    {
-      std::cout << "Histogram " << i;
-      std::set<detid_t> detids = inputWS->getSpectrum(i)->getDetectorIDs();
-      if (detids.size() > 0){
-        detid_t detid = *detids.begin();
-        std::cout << "  has " << detids.size() << " detectors including " << detid << std::endl;
-      } else {
-        std::cout << "  has ZERO detectors associated" << std::endl;
-      }
-    } // ENDFOR
-    */
 
     // 2. Mask some detectors: Mask workspace indexes 0, 3, 4
     std::set<int> masked_indices;
