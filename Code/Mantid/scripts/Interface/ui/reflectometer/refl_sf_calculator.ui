@@ -383,7 +383,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>Number of attenuator</string>
+                       <string>Number of attenuators</string>
                       </property>
                      </widget>
                     </item>
@@ -622,13 +622,13 @@ p, li { white-space: pre-wrap; }
                      <widget class="QCheckBox" name="data_background_switch">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
+                        <width>160</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>160</width>
                         <height>16777215</height>
                        </size>
                       </property>

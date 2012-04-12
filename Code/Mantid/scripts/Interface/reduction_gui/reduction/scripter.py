@@ -388,12 +388,12 @@ class BaseReductionScripter(object):
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
-        
+
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(script)
             f.close()
-        
+
         return script
     
     def apply(self):
