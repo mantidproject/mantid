@@ -55,15 +55,15 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	#Manually place necessary files and directories
 	
 	#python bundle here.
-	#install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/DLLs DESTINATION bin/DLLs PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Lib DESTINATION bin/Lib PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Scripts DESTINATION bin/Scripts PATTERN ".svn" EXCLUDE )
-	#install ( FILES ${CMAKE_LIBRARY_PATH}/Python27/python.exe ${CMAKE_LIBRARY_PATH}/Python27/python27.dll DESTINATION bin )
+	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/DLLs DESTINATION bin PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Lib DESTINATION bin PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Scripts DESTINATION bin PATTERN ".svn" EXCLUDE )
+	install ( FILES ${CMAKE_LIBRARY_PATH}/Python27/python.exe ${CMAKE_LIBRARY_PATH}/Python27/python27.dll DESTINATION bin )
 
 	#TODO: remove old pyc files on uninstall
 	
-	#install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats DESTINATION plugins/qtplugins PATTERN ".svn" EXCLUDE )
-	#install ( FILES ${CMAKE_LIBRARY_PATH}/qt.conf DESTINATION bin )
+	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats DESTINATION plugins/qtplugins PATTERN ".svn" EXCLUDE )
+	install ( FILES ${CMAKE_LIBRARY_PATH}/qt.conf DESTINATION bin )
 	
 	#TODO: create logs directory
 	#TODO: create documents directory  what does the config service do if the logs directory is missing?
@@ -71,28 +71,28 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	#TODO: put these commands in the associated CMakeLists.
 	
 	#Handle includes
-	#install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost/ DESTINATION include PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/Poco/ DESTINATION include PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/nexus/ DESTINATION include PATTERN ".svn" EXCLUDE )
-	#install ( FILES ${CMAKE_INCLUDE_PATH}/napi.h DESTINATION include )
-	#install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ DESTINATION include PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/ DESTINATION include PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/API/inc/MantidAPI/ DESTINATION include PATTERN ".svn" EXCLUDE )
-	#install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/NexusCPP/inc/MantidNexusCPP/ DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/Poco DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/nexus DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( FILES ${CMAKE_INCLUDE_PATH}/napi.h DESTINATION include )
+	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/API/inc/MantidAPI DESTINATION include PATTERN ".svn" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/NexusCPP/inc/MantidNexusCPP DESTINATION include PATTERN ".svn" EXCLUDE )
 	
 	#Copy scons directory
 	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/scons-local/ DESTINATION scons-local PATTERN ".svn" EXCLUDE )
 	#User algorithms
-	#install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.h" )
-	#install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.cpp" )
-	#install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/build.bat ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/createAlg.py ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/SConstruct DESTINATION UserAlgorithms )
-	#install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidKernel.lib" DESTINATION UserAlgorithms)
-	#install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidGeometry.lib" DESTINATION UserAlgorithms)
-	#install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidAPI.lib" DESTINATION UserAlgorithms)
-	#install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidNexusCPP.lib" DESTINATION UserAlgorithms)
-	#install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidDataObjects.lib" DESTINATION UserAlgorithms)
-	#install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
-	#install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/PocoXML.lib ${CMAKE_LIBRARY_PATH}/boost_date_time-vc100-mt-1_43.lib DESTINATION UserAlgorithms)
+	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.h" )
+	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.cpp" )
+	install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/build.bat ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/createAlg.py ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/SConstruct DESTINATION UserAlgorithms )
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidKernel.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidGeometry.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidAPI.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidNexusCPP.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidDataObjects.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
+	install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/PocoXML.lib ${CMAKE_LIBRARY_PATH}/boost_date_time-vc100-mt-1_43.lib DESTINATION UserAlgorithms)
 	
 	
 	# On install
