@@ -128,10 +128,6 @@ namespace MDEvents
     size_t getEventVectorSize() const
     { return data.size(); }
 
-    /// @return the mutex for modifying the data vector
-    Mantid::Kernel::Mutex & getDataMutex()
-    { return dataMutex; }
-
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
     bool getHasAddedEventsOnCached() const
     { return (!m_inMemory && (data.size() != 0)); }

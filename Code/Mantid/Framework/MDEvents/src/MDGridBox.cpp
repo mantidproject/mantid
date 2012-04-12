@@ -147,7 +147,7 @@ namespace MDEvents
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
     for (; it != it_end; ++it)
-        addEventUnsafe(*it);
+        addEvent(*it);
 
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
@@ -737,16 +737,11 @@ namespace MDEvents
     // You can only split it if it is a MDBox (not MDGridBox).
     MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[index]);
     if (!box) return;
-    MDGridBox<MDE, nd> * gridbox;
+    // Track how many MDBoxes there are in the overall workspace
+    this->m_BoxController->trackNumBoxes(box->getDepth());
+    // Construct the grid box. This should take the object out of the disk MRU
+    MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(box);
 
-    { // Lock against accessing the same box while splitting it
-      Kernel::Mutex::ScopedLock _lock(box->getDataMutex());
-
-      // Track how many MDBoxes there are in the overall workspace (thread-safe call)
-      this->m_BoxController->trackNumBoxes(box->getDepth());
-      // Construct the grid box. This should take the object out of the disk MRU
-      gridbox = new MDGridBox<MDE, nd>(box);
-    }
     // Delete the old ungridded box
     delete boxes[index];
     // And now we have a gridded box instead of a boring old regular box.
@@ -788,7 +783,6 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts)
   {
-    return; // TODO: remove this method when not needeed
     for (size_t i=0; i < numBoxes; ++i)
     {
       MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
@@ -890,17 +884,7 @@ namespace MDEvents
 
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-    {
-      if (boxes[index]->getNPoints() >= this->m_BoxController->getSplitThreshold())
-      {
-        if (boxes[index]->getDepth() < this->m_BoxController->getMaxDepth())
-        {
-          Mantid::Kernel::Mutex::ScopedLock _lock(m_splittingMutex);
-          this->splitContents(index, NULL);
-        }
-      }
       boxes[index]->addEvent(event);
-    }
   }
 
   //-----------------------------------------------------------------------------------------------

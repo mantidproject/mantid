@@ -153,8 +153,8 @@ namespace MDEvents
     /// Cached number of points contained (including all sub-boxes)
     size_t nPoints;
 
-    /// Mutex for calls to splitContents()
-    Mantid::Kernel::Mutex m_splittingMutex;
+    /// Mutex for counting points and total signal
+    Mantid::Kernel::Mutex statsMutex;
 
 
     //=================== PRIVATE METHODS =======================================
