@@ -24,6 +24,7 @@ GetDetectorOffsets("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <iomanip>
@@ -112,7 +113,7 @@ namespace Mantid
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
       // Create the output MaskWorkspace
-      MatrixWorkspace_sptr maskWS(new SpecialWorkspace2D(inputW->getInstrument()));
+      MaskWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
