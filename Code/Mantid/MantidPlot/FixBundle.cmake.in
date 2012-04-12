@@ -34,7 +34,7 @@ endfunction()
 
 # Additional steps so that the plugins that depend on plugins actually work
 set ( mantid_bundle ${bundle}/Contents/MacOS/mantid ) 
-set ( mantid_exec_path @executable_path/../MacOS/mantid )
+set ( mantid_exec_path @loader_path/.. )
 set ( macos_exec_path @executable_path/../../Contents/MacOS )
 
 # First make sure the IDs is correct
