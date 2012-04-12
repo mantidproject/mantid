@@ -175,16 +175,9 @@ namespace
   bool executeWhileReleasingGIL(IAlgorithm & self)
   {
     bool result(false);
-    if(Poco::Thread::current())
-    {
-      Py_BEGIN_ALLOW_THREADS;
-      result = self.execute();
-      Py_END_ALLOW_THREADS;
-    }
-    else
-    {
-      result = self.execute();
-    }
+    Py_BEGIN_ALLOW_THREADS;
+    result = self.execute();
+    Py_END_ALLOW_THREADS;
     return result;
   }
 

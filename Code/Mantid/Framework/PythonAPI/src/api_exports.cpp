@@ -126,10 +126,10 @@ using namespace boost::python;
 
   namespace
   {
-  // Overloads for createSubAlgorithm function which has 1 optional argument
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createSubAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createSubAlgorithm, 1, 2)
+    // Overloads for createSubAlgorithm function which has 1 optional argument
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createSubAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createSubAlgorithm, 1, 2)
 
-  /**
+    /**
      * Releases the GIL, executes the calling algorithm object and re-acquires the GIL.
      * As an algorithm is a potentially time-consuming operation, this allows other threads
      * to execute python code while this thread is executing C code
@@ -138,16 +138,9 @@ using namespace boost::python;
     bool executeWhileReleasingGIL(IAlgorithm & self)
     {
       bool result(false);
-      if(Poco::Thread::current())
-      {
-        Py_BEGIN_ALLOW_THREADS;
-        result = self.execute();
-        Py_END_ALLOW_THREADS;
-      }
-      else
-      {
-        result = self.execute();
-      }
+      Py_BEGIN_ALLOW_THREADS;
+      result = self.execute();
+      Py_END_ALLOW_THREADS;
       return result;
     }
   }
