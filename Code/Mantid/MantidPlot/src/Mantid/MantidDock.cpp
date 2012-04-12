@@ -419,7 +419,8 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   // Experiment info data
   ExperimentInfo_sptr experimentInfo_ws = boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
   bool specialWorkspace = false;
-  specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
+  specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "MaskWorkspace"
+                      || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
   if (experimentInfo_ws && (!specialWorkspace))
     populateExperimentInfoData(experimentInfo_ws, item);
 
