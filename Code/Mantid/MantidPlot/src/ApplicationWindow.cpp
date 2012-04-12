@@ -6108,11 +6108,19 @@ void ApplicationWindow::savetoNexusFile()
 
 void ApplicationWindow::loadDataFile()
 {
-  if(mantidUI)
-  {
-    mantidUI->executeAlgorithm("Load",-1);
+  // Ask user for file
+  QString fn = QFileDialog::getOpenFileName( 0, tr("Mantidplot - Open file to load"), AlgorithmInputHistory::Instance().getPreviousDirectory());
+  if(fn != "") {
+     AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fn).absoluteDir().path());
+     if(mantidUI)
+     {
+       QMap<QString,QString> params;
+       params["Filename"] = fn;
+       mantidUI->executeAlgorithmDlg("Load",params);
+     }
   }
 }
+
 void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
 {
   QString fn = fileName;
