@@ -2413,7 +2413,7 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
     if (instname == "ARGUS")
       zeroPadding = 7;  
 
-    for (size_t i=runNumber.size(); i<zeroPadding; ++i)
+    for (int i=runNumber.size(); i<zeroPadding; ++i)
     {
       runNumber = '0' + runNumber;
     }
@@ -3111,7 +3111,7 @@ void MuonAnalysis::changeRun(int amountToChange)
 {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
-  if ( (currentFile.isEmpty() ) )//|| (currentFile == "CURRENT RUN") )
+  if ( (currentFile.isEmpty() ) )
     currentFile = m_previousFilenames[0];
   
   QString run("");
