@@ -167,17 +167,30 @@ namespace
   }
 
   /**
-   * Releases the GIL, executes the calling algorithm object and re-acquires the GIL.
+   * Releases the GIL and disables any tracer functions, executes the calling algorithm object
+   * and re-acquires the GIL and resets the tracing functions.
+   * The trace functions are disabled as they can seriously hamper performance of Python algorithms
+   *
    * As an algorithm is a potentially time-consuming operation, this allows other threads
    * to execute python code while this thread is executing C code
    * @param self :: A reference to the calling object
    */
   bool executeWhileReleasingGIL(IAlgorithm & self)
   {
+    PyThreadState *curThreadState = PyThreadState_GET();
+    assert(curThreadState != NULL);
+    Py_tracefunc func = curThreadState->c_tracefunc;
+    PyObject *arg = curThreadState->c_traceobj;
+    Py_XINCREF(arg);
+    PyEval_SetTrace(NULL,NULL);
+
     bool result(false);
     Py_BEGIN_ALLOW_THREADS;
     result = self.execute();
     Py_END_ALLOW_THREADS;
+
+    PyEval_SetTrace(func, arg);
+    Py_XDECREF(arg);
     return result;
   }
 
