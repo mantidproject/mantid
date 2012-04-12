@@ -33,7 +33,7 @@
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
   : QObject(), m_env(env), m_name(name) , m_context(context),
-    m_redirectOutput(true), m_reportProgress(false), m_lineOffset(0), m_interactMode(interact),
+    m_redirectOutput(true), m_reportProgress(false), m_codeOffset(0), m_interactMode(interact),
     m_execMode(NotExecuting)
 {
   m_env->incref();
@@ -47,6 +47,43 @@ Script::Script(ScriptingEnv *env, const QString &name,
 Script::~Script()
 {
   m_env->decref();
+}
+
+///
+/**
+ * Compile the code, returning true/false depending on the status
+ * @param code Code to compile
+ * @return True/false depending on success
+ */
+bool Script::compile(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->compileImpl(code);
+}
+
+/**
+ * Evaluate the Code, returning QVariant() on an error / exception.
+ * @param code Code to evaluate
+ * @return The result as a QVariant
+ */
+QVariant Script::evaluate(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->evaluateImpl(code);
+}
+
+/// Execute the Code, returning false on an error / exception.
+bool Script::execute(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->executeImpl(code);
+}
+
+/// Execute the code asynchronously, returning immediately after the execution has started
+QFuture<bool> Script::executeAsync(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->executeAsyncImpl(code);
 }
 
 

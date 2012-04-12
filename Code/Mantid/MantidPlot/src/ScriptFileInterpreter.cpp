@@ -218,7 +218,9 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
 {
   if(m_editor->hasSelectedText())
   {
-    executeCode(m_editor->selectedText(), mode);
+    int firstLineOffset(0), unused(0);
+    m_editor->getSelection(&firstLineOffset, &unused, &unused, &unused);
+    executeCode(ScriptCode(m_editor->selectedText(), firstLineOffset), mode);
   }
   else
   {
@@ -315,6 +317,7 @@ void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, cons
   connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
   connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_messages, SLOT(displayError(const QString &)));
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_editor, SLOT(markExecutingLineAsError()));
 }
 
 /**
@@ -342,9 +345,10 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString & filename)
  * Use the current Script object to execute the code asynchronously
  * @param code :: The code string to run
  */
-void ScriptFileInterpreter::executeCode(const QString & code, const Script::ExecutionMode mode)
+void ScriptFileInterpreter::executeCode(const ScriptCode & code, const Script::ExecutionMode mode)
 {
-  if( code.isEmpty() ) return;
+  const QString codeStr = code;
+  if( codeStr.isEmpty() ) return;
   if(mode == Script::Asynchronous)
   {
     m_runner->executeAsync(code);

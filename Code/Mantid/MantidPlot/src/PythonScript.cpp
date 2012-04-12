@@ -146,27 +146,251 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
 }
 
 /**
- * Emits a signal from this object indicating the current line number of the
- * code. This includes any offset
+ * Called from Python with the codeObject and line number of the currently executing line
  * @param codeObject A pointer to the code object whose line is executing
- * @param lineNo The line number that the code is currently executing
+ * @param lineNo The line number that the code is currently executing, note that
+ * this will be relative to the top of the code that was executed
  */
 void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo)
 {
   if(codeObject == m_CodeFileObject)
   {
-    lineNo += getLineOffset();
-    emit currentLineChanged(lineNo, false);
+    sendLineChangeSignal(getRealLineNo(lineNo), false);
   }
 }
 
+/**
+ * Emit the line change signal for the give line no
+ * @param lineNo The line number to flag
+ * @param error True if it is an error
+ */
+void PythonScript::sendLineChangeSignal(int lineNo, bool error)
+{
+  emit currentLineChanged(lineNo, error);
+}
+
+
+/**
+ * Create a list autocomplete keywords
+ */
+void PythonScript::generateAutoCompleteList()
+{
+  GlobalInterpreterLock gil;
+
+  PyObject *main_module = PyImport_AddModule("__main__");
+  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
+  PyObject *keywords(NULL);
+  if( method && main_module )
+  {
+    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
+  }
+  else
+  {
+    return;
+  }
+  QStringList keywordList;
+  if(PyErr_Occurred() || !keywords)
+  {
+    PyErr_Print();
+    return;
+  }
+
+  keywordList = pythonEnv()->toStringList(keywords);
+  Py_DECREF(keywords);
+  Py_DECREF(method);
+  emit autoCompleteListGenerated(keywordList);
+}
+
+/**
+ * Convert a python error state into a human-readable string
+ *
+ * @return A string containing the error message
+ */
+QString PythonScript::constructErrorMsg()
+{
+  GlobalInterpreterLock gil;
+  QString message;
+  if (!PyErr_Occurred()) 
+  {
+    return message;
+  }
+  PyObject *exception(NULL), *value(NULL), *traceback(NULL);
+  PyErr_Fetch(&exception, &value, &traceback);
+  PyErr_NormalizeException(&exception, &value, &traceback);
+  PyErr_Clear();
+  PyObject *str_repr = PyObject_Str(value);
+  QTextStream msgStream(&message);
+  if( value && str_repr )
+  {
+    QString excTypeName(value->ob_type->tp_name); // This is fully qualified with the module name
+    excTypeName = excTypeName.section(".", -1);
+    QString exceptionAsStr(PyString_AsString(str_repr));
+    if(value->ob_type == (PyTypeObject*)PyExc_SyntaxError) 
+    {
+      exceptionAsStr = constructSyntaxErrorStr(exceptionAsStr);
+    }
+    msgStream << excTypeName << ": " << exceptionAsStr;
+  }
+  else
+  {
+    msgStream << "Unknown exception has occurred.";
+  }
+  tracebackToMsg(msgStream, (PyTracebackObject *)(traceback));
+  msgStream << "\n";
+
+  Py_XDECREF(traceback);
+  Py_XDECREF(exception);
+  Py_XDECREF(value);
+  return msgStream.readAll();
+}
+
+/**
+ * Include the line offset & oddity that the syntax error 
+ * line number is always 1 to high
+ */
+QString PythonScript::constructSyntaxErrorStr(const QString & originalString)
+{
+  // Format: "some prefix string (filename, line no)"
+  QStringList pieces = originalString.split(" ");
+  // Last 3 pieces should always be the parenthesized (filename, line no)
+  if(pieces.size() < 3)
+  {
+    return QString("Unknown syntax error occurred");
+  }
+  QString linenoAsStr = pieces.takeLast();
+  linenoAsStr.chop(1); // last bracket
+  int lineno = linenoAsStr.toInt();
+
+
+  pieces.removeLast(); //Remove the word line
+  QString filename = pieces.takeLast();
+  filename.chop(1); // comma
+  filename.remove(0,1); // first bracket
+
+  if(filename == QFileInfo(name()).fileName())
+  {
+    lineno -= 1; // Fix for bug when original exception generated
+    lineno = getRealLineNo(lineno);
+    sendLineChangeSignal(lineno, true);
+  }
+  linenoAsStr = QString::number(lineno);
+  QString msg = pieces.join(" ");
+  msg += " (" + filename + ", line " + linenoAsStr + ")";
+  return msg;
+}
+
+  /**
+   * Form a traceback
+   * @param msg The reference to the textstream to accumulate the message
+   * @param traceback A traceback object
+   * @param root If true then this is the root of the traceback
+   */
+void PythonScript::tracebackToMsg(QTextStream &msgStream, 
+                                  PyTracebackObject* traceback, 
+                                  bool root)
+{
+  if(traceback == NULL) return;
+  msgStream << "\n  ";
+  if (root) msgStream << "at";
+  else msgStream << "caused by";
+  
+  int lineno = traceback->tb_lineno;
+  QString filename = PyString_AsString(traceback->tb_frame->f_code->co_filename);
+  if(filename == name())
+  {
+    lineno = getRealLineNo(lineno);
+    sendLineChangeSignal(lineno, true);
+
+  }
+  
+  msgStream << " line " << lineno << " in \'" << filename  << "\'";
+  tracebackToMsg(msgStream, traceback->tb_next, false);
+}
+
+bool PythonScript::setQObject(QObject *val, const char *name)
+{
+  if (localDict)
+  {
+    return pythonEnv()->setQObject(val, name, localDict);
+  }
+  else
+    return false;
+}
+
+bool PythonScript::setInt(int val, const char *name)
+{
+  return pythonEnv()->setInt(val, name, localDict);
+}
+
+bool PythonScript::setDouble(double val, const char *name)
+{
+  return pythonEnv()->setDouble(val, name, localDict);
+}
+
+void PythonScript::setContext(QObject *context)
+{
+  Script::setContext(context);
+  setQObject(context, "self");
+}
+
+/**
+ * Sets the context for the script and if name points to a file then
+ * sets the __file__ variable
+ * @param name A string identifier for the script
+ * @param context A QObject defining the context
+ */
+void PythonScript::initialize(const QString & name, QObject *context)
+{
+  GlobalInterpreterLock pythonlock;
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  if( QFileInfo(name).exists() )
+  {
+    QString scriptPath = QFileInfo(name).absoluteFilePath();
+    // Make sure the __file__ variable is set
+    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
+  }
+  setContext(context);
+}
+
+
+//-------------------------------------------------------
+// Private
+//-------------------------------------------------------
+/**
+ * Redirect the std out to this object
+ */
+void PythonScript::beginStdoutRedirect()
+{
+  if(!redirectStdOut()) return;
+  stdoutSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stdout");
+  Py_XINCREF(stdoutSave);
+  stderrSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stderr");
+  Py_XINCREF(stderrSave);
+  pythonEnv()->setQObject(this, "stdout", pythonEnv()->sysDict());
+  pythonEnv()->setQObject(this, "stderr", pythonEnv()->sysDict());
+}
+
+/**
+ * Restore the std out to this object to what it was before the last call to
+ * beginStdouRedirect
+ */
+void PythonScript::endStdoutRedirect()
+{
+  if(!redirectStdOut()) return;
+
+  PyDict_SetItemString(pythonEnv()->sysDict(), "stdout", stdoutSave);
+  Py_XDECREF(stdoutSave);
+  PyDict_SetItemString(pythonEnv()->sysDict(), "stderr", stderrSave);
+  Py_XDECREF(stderrSave);
+}
 
 /**
  * Compile the code returning true if successful, false otherwise
  * @param code
  * @return True if success, false otherwise
  */
-bool PythonScript::compile(const QString & code)
+bool PythonScript::compileImpl(const QString & code)
 {
   PyObject *codeObject = compileToByteCode(code, false);
   if(codeObject)
@@ -183,7 +407,7 @@ bool PythonScript::compile(const QString & code)
  * Evaluate the code and return the value
  * @return
  */
-QVariant PythonScript::evaluate(const QString & code)
+QVariant PythonScript::evaluateImpl(const QString & code)
 {
   GlobalInterpreterLock gil;
   PyObject *compiledCode = this->compileToByteCode(code, true);
@@ -271,7 +495,7 @@ QVariant PythonScript::evaluate(const QString & code)
       }
     }
   }
-  
+
   Py_DECREF(pyret);
   if (PyErr_Occurred())
   {
@@ -289,226 +513,18 @@ QVariant PythonScript::evaluate(const QString & code)
   return qret;
 }
 
-bool PythonScript::execute(const QString & code)
+bool PythonScript::executeImpl(const QString & code)
 {
   emit startedSerial("");
   return executeString(code);
 }
 
-QFuture<bool> PythonScript::executeAsync(const QString & code)
+QFuture<bool> PythonScript::executeAsyncImpl(const QString & code)
 {
   emit startedAsync("");
   return QtConcurrent::run(this, &PythonScript::executeString, code);
 }
 
-/**
- * Create a list autocomplete keywords
- */
-void PythonScript::generateAutoCompleteList()
-{
-  GlobalInterpreterLock gil;
-
-  PyObject *main_module = PyImport_AddModule("__main__");
-  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
-  PyObject *keywords(NULL);
-  if( method && main_module )
-  {
-    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  }
-  else
-  {
-    return;
-  }
-  QStringList keywordList;
-  if( PyErr_Occurred() || !keywords )
-  {
-    PyErr_Print();
-    return;
-  }
-
-  keywordList = pythonEnv()->toStringList(keywords);
-  Py_DECREF(keywords);
-  Py_DECREF(method);
-  emit autoCompleteListGenerated(keywordList);
-}
-
-
-QString PythonScript::constructErrorMsg()
-{
-  if ( !PyErr_Occurred() ) 
-  {
-    return QString("");
-  }
-  PyObject *exception(NULL), *value(NULL), *traceback(NULL);
-  PyTracebackObject *excit(NULL);
-  PyErr_Fetch(&exception, &value, &traceback);
-  PyErr_NormalizeException(&exception, &value, &traceback);
-
-  // Get the filename of the error. This will be blank if it occurred in the main script
-  QString filename("");
-  int endtrace_line(-1);
-  if( traceback )
-  {
-    excit = (PyTracebackObject*)traceback;
-    while (excit && (PyObject*)excit != Py_None)
-    {
-      _frame *frame = excit->tb_frame;
-      endtrace_line = excit->tb_lineno;
-      filename = PyString_AsString(frame->f_code->co_filename);
-      excit = excit->tb_next;
-    }
-  }
-
-  // Exception value
-
-  int msg_lineno(-1);
-  int marker_lineno(-1);
-
-  QString message("");
-  QString exception_details("");
-  if( PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) )
-  {
-    msg_lineno = pythonEnv()->toString(PyObject_GetAttrString(value, "lineno"),true).toInt();
-    if( traceback )
-    {
-      marker_lineno = endtrace_line;
-    }
-    else
-    {
-      // No traceback here get line from exception value object
-      marker_lineno = msg_lineno;
-    }
-
-    message = "SyntaxError";
-    QString except_value(pythonEnv()->toString(value));
-    exception_details = except_value.section('(',0,0);
-    filename = except_value.section('(',1).section(',',0,0);
-  }
-  else
-  {
-    if( traceback )
-    {
-      excit = (PyTracebackObject*)traceback;
-      marker_lineno = excit->tb_lineno;
-     }
-    else
-    {
-      marker_lineno = -10000;
-    }
-
-    if( filename.isEmpty() )
-    {
-      msg_lineno = marker_lineno;
-    }
-    else
-    {
-      msg_lineno = endtrace_line;
-    }
-    message = pythonEnv()->toString(exception).section('.',1).remove("'>");
-    exception_details = pythonEnv()->toString(value) + QString(' ');
-  }
-  message += " on line " + QString::number(marker_lineno);
-  message += ": \"" + exception_details.trimmed() + "\" ";
-
-  if( marker_lineno >=0 
-      && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) 
-      && !filename.isEmpty()
-    )
-  {
-    message += "in file '" + QFileInfo(filename).fileName() 
-      + "' at line " + QString::number(msg_lineno);
-  }
-  
-  emit currentLineChanged(marker_lineno, true);
-
-  // We're responsible for the reference count of these objects
-  Py_XDECREF(traceback);
-  Py_XDECREF(value);
-  Py_XDECREF(exception);
-
-  PyErr_Clear();
-
-  return message + QString("\n");
-}
-
-
-bool PythonScript::setQObject(QObject *val, const char *name)
-{
-  if (localDict)
-  {
-    return pythonEnv()->setQObject(val, name, localDict);
-  }
-  else
-    return false;
-}
-
-bool PythonScript::setInt(int val, const char *name)
-{
-  return pythonEnv()->setInt(val, name, localDict);
-}
-
-bool PythonScript::setDouble(double val, const char *name)
-{
-  return pythonEnv()->setDouble(val, name, localDict);
-}
-
-void PythonScript::setContext(QObject *context)
-{
-  Script::setContext(context);
-  setQObject(context, "self");
-}
-
-/**
- * Sets the context for the script and if name points to a file then
- * sets the __file__ variable
- * @param name A string identifier for the script
- * @param context A QObject defining the context
- */
-void PythonScript::initialize(const QString & name, QObject *context)
-{
-  GlobalInterpreterLock pythonlock;
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  if( QFileInfo(name).exists() )
-  {
-    QString scriptPath = QFileInfo(name).absoluteFilePath();
-    // Make sure the __file__ variable is set
-    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
-  }
-  setContext(context);
-}
-
-
-//-------------------------------------------------------
-// Private
-//-------------------------------------------------------
-/**
- * Redirect the std out to this object
- */
-void PythonScript::beginStdoutRedirect()
-{
-  if(!redirectStdOut()) return;
-  stdoutSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stdout");
-  Py_XINCREF(stdoutSave);
-  stderrSave = PyDict_GetItemString(pythonEnv()->sysDict(), "stderr");
-  Py_XINCREF(stderrSave);
-  pythonEnv()->setQObject(this, "stdout", pythonEnv()->sysDict());
-  pythonEnv()->setQObject(this, "stderr", pythonEnv()->sysDict());
-}
-
-/**
- * Restore the std out to this object to what it was before the last call to
- * beginStdouRedirect
- */
-void PythonScript::endStdoutRedirect()
-{
-  if(!redirectStdOut()) return;
-
-  PyDict_SetItemString(pythonEnv()->sysDict(), "stdout", stdoutSave);
-  Py_XDECREF(stdoutSave);
-  PyDict_SetItemString(pythonEnv()->sysDict(), "stderr", stderrSave);
-  Py_XDECREF(stderrSave);
-}
 
 /// Performs the call to Python
 bool PythonScript::executeString(const QString & code)
@@ -518,12 +534,12 @@ bool PythonScript::executeString(const QString & code)
   GlobalInterpreterLock gil;
 
   PyObject *compiledCode = compileToByteCode(code);
-  PyObject *result = executeCompiledCode((PyCodeObject*)compiledCode);
+  PyObject *result = executeCompiledCode(compiledCode);
+  success = checkResult(result);
   if(isInteractive())
   {
     generateAutoCompleteList();
   }
-  success = checkResult(result);
 
   Py_XDECREF(compiledCode);
   Py_XDECREF(result);
@@ -565,14 +581,14 @@ namespace
  * @param compiledCode An object that has been compiled from a code fragment
  * @return The result python object
  */
-PyObject* PythonScript::executeCompiledCode(PyCodeObject *compiledCode)
+PyObject* PythonScript::executeCompiledCode(PyObject *compiledCode)
 {
   PyObject *result(NULL);
   if(!compiledCode) return result;
 
   InstallTrace traceInstall(*this);
   beginStdoutRedirect();
-  result = PyEval_EvalCode(compiledCode, localDict, localDict);
+  result = PyEval_EvalCode((PyCodeObject*)compiledCode, localDict, localDict);
   endStdoutRedirect();
   return result;
 }
@@ -695,13 +711,16 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
     success = (compiledCode != NULL);
   }
 
-  if(!success)
+  if(success) 
+  {
+    m_CodeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
+  }
+  else
   {
     emit error(constructErrorMsg(), name(), 0);
     compiledCode = NULL;
     m_CodeFileObject = NULL;
   }
-  m_CodeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
   return compiledCode;
 }
 

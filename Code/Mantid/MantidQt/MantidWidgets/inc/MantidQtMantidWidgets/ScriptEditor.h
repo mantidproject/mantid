@@ -144,6 +144,8 @@ public slots:
   void setMarkerState(bool enabled);
   /// Update the progress marker
   void updateProgressMarker(int lineno, bool error);
+  /// Mark the progress arrow as an error
+  void markExecutingLineAsError();
   /// Refresh the autocomplete information base on a new set of keywords
   void updateCompletionAPI(const QStringList & keywords);
   /// Print the text within the widget
@@ -187,6 +189,8 @@ private:
 
   /// The margin marker 
   int m_progressArrowKey;
+  /// Hold the line number of the currently executing line
+  int m_currentExecLine;
   /// A pointer to a QsciAPI object that handles the code completion
   QsciAPIs *m_completer;
   /// The colour of the marker for a success state

@@ -100,6 +100,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ScalePicker.cpp
                    src/ScreenPickerTool.cpp
                    src/Script.cpp
+                   src/ScriptCode.cpp
                    src/Scripted.cpp
                    src/ScriptingEnv.cpp
                    src/ScriptingLangDialog.cpp
@@ -330,6 +331,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScreenPickerTool.h
                    src/Scripted.h
                    src/Script.h
+                   src/ScriptCode.h
                    src/ScriptingEnv.h
                    src/ScriptingLangDialog.h
                    src/ScriptingWindow.h

@@ -396,7 +396,7 @@ double muParserScript::evalSingleLine()
 
 muParserScript *muParserScript::current = NULL;
 
-bool muParserScript::compile(const QString & code)
+bool muParserScript::compileImpl(const QString & code)
 {
   muCode.clear();
   QString muCodeLine = "";
@@ -459,7 +459,7 @@ bool muParserScript::compile(const QString & code)
   return true;
 }
 
-QVariant muParserScript::evaluate(const QString & code)
+QVariant muParserScript::evaluateImpl(const QString & code)
 {
   if (!compile(code))
     return QVariant();
@@ -479,7 +479,7 @@ QVariant muParserScript::evaluate(const QString & code)
   return QVariant(val);
 }
 
-bool muParserScript::execute(const QString & code)
+bool muParserScript::executeImpl(const QString & code)
 {
   if (!compile(code))
     return false;
@@ -501,7 +501,7 @@ bool muParserScript::execute(const QString & code)
 /**
  * Execute the script in a seprate thread
  */
-QFuture<bool> muParserScript::executeAsync(const QString &)
+QFuture<bool> muParserScript::executeAsyncImpl(const QString &)
 {
   throw std::runtime_error("muParser does not support asynchronous execution");
 }

@@ -35,6 +35,8 @@
 #include <QEvent>
 #include <QFuture>
 
+#include "ScriptCode.h"
+
 //-------------------------------------------
 // Forward declarations
 //-------------------------------------------
@@ -73,10 +75,6 @@ class Script : public QObject
   const QObject * context() const { return m_context; }
   /// Set the context in which the code is to be executed.
   virtual void setContext(QObject *context) { m_context = context; }
-  /// Set an offset for the current code fragment
-  void setLineOffset(const int offset) { m_lineOffset = offset;}
-  /// Set an offset for the current code fragment
-  inline int getLineOffset() const { return m_lineOffset; }
 
   /// Is this an interactive script
   inline bool isInteractive() { return m_interactMode == Interactive; }
@@ -100,13 +98,13 @@ class Script : public QObject
 
 public slots:
   /// Compile the code, returning true/false depending on the status
-  virtual bool compile(const QString & code) = 0;
+  bool compile(const ScriptCode & code);
   /// Evaluate the Code, returning QVariant() on an error / exception.
-  virtual QVariant evaluate(const QString & code) = 0;
+  QVariant evaluate(const ScriptCode & code);
   /// Execute the Code, returning false on an error / exception.
-  virtual bool execute(const QString & code) = 0;
+  bool execute(const ScriptCode & code);
   /// Execute the code asynchronously, returning immediately after the execution has started
-  virtual QFuture<bool> executeAsync(const QString & code) = 0;
+  QFuture<bool> executeAsync(const ScriptCode & code);
 
   /// Sets the execution mode to NotExecuting
   void setNotExecuting();
@@ -138,6 +136,19 @@ signals:
   // Signal that new keywords are available
   void autoCompleteListGenerated(const QStringList & keywords);
   
+protected:
+  /// Return the true line number by adding the offset
+  inline int getRealLineNo(const int codeLine) const { return codeLine + m_codeOffset; }
+
+  /// Compile the code, returning true/false depending on the status
+  virtual bool compileImpl(const QString & code) = 0;
+  /// Evaluate the Code, returning QVariant() on an error / exception.
+  virtual QVariant evaluateImpl(const QString & code) = 0;
+  /// Execute the Code, returning false on an error / exception.
+  virtual bool executeImpl(const QString & code) = 0;
+  /// Execute the code asynchronously, returning immediately after the execution has started
+  virtual QFuture<bool> executeAsyncImpl(const QString & code) = 0;
+
 private:
   /// Normalise line endings for the given code. The Python C/API does not seem to like CRLF endings so normalise to just LF
   QString normaliseLineEndings(QString text) const;
@@ -147,7 +158,7 @@ private:
   QObject *m_context;
   bool m_redirectOutput;
   bool m_reportProgress;
-  int m_lineOffset;
+  int m_codeOffset;
 
   InteractionType m_interactMode;
   ExecutionMode m_execMode;

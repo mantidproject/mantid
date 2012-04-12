@@ -138,7 +138,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
   QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-  m_completer(NULL),m_previousKey(0),  m_zoomLevel(0),
+  m_currentExecLine(0), m_completer(NULL),m_previousKey(0),  m_zoomLevel(0),
   m_findDialog(new FindReplaceDialog(this))
 {
   //Syntax highlighting and code completion
@@ -393,6 +393,7 @@ void ScriptEditor::setMarkerState(bool enabled)
  */
 void ScriptEditor::updateProgressMarker(int lineno, bool error)
 {
+  m_currentExecLine = lineno;
   if(error)
   {
     setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
@@ -406,7 +407,13 @@ void ScriptEditor::updateProgressMarker(int lineno, bool error)
   if( lineno < 0 || lineno > this->lines() ) return;
 
   ensureLineVisible(lineno);
-  markerAdd(lineno - 1, m_progressArrowKey);
+  markerAdd(m_currentExecLine - 1, m_progressArrowKey);
+}
+
+/// Mark the progress arrow as an error
+void ScriptEditor::markExecutingLineAsError()
+{
+  updateProgressMarker(m_currentExecLine, true);
 }
 
 /**

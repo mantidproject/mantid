@@ -50,12 +50,12 @@ class muParserScript: public Script
   bool compilesToCompleteStatement(const QString &) const { return true; };
 
   public slots:
-    QVariant evaluate(const QString &);
+    QVariant evaluateImpl(const QString &);
     double evalSingleLine();
     QString evalSingleLineToString(const QLocale& locale, char f, int prec);
-    bool compile(const QString & code);
-    bool execute(const QString &);
-    QFuture<bool> executeAsync(const QString &);
+    bool compileImpl(const QString & code);
+    bool executeImpl(const QString &);
+    QFuture<bool> executeAsyncImpl(const QString &);
     bool setQObject(QObject *val, const char *name);
     bool setInt(int val, const char* name);
     bool setDouble(double val, const char* name);

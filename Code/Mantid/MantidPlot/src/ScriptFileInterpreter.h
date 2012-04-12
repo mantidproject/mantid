@@ -105,7 +105,7 @@ private:
   void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
   
   bool readFileIntoEditor(const QString & filename);
-  void executeCode(const QString & code, const Script::ExecutionMode mode);
+  void executeCode(const ScriptCode & code, const Script::ExecutionMode mode);
 
   QSplitter *m_splitter;
   ScriptEditor *m_editor;

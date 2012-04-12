@@ -68,22 +68,21 @@ public:
   /// Emits a signal from this object indicating the current line number of the
   /// code. This includes any offset.
   void lineNumberChanged(PyObject * codeObject, int lineNo);
+  /// Emit the line change signal
+  void sendLineChangeSignal(int lineNo, bool error);
 
-public slots:
-  /// Compile the code, returning true if it was successful, false otherwise
-  bool compile(const QString & code);
-  /// Evaluate the current code and return a result as a QVariant
-  QVariant evaluate(const QString & code);
-  /// Execute the current code and return a boolean indicating success/failure
-  bool execute(const QString &);
-  /// Execute the code asynchronously, returning immediately after the execution has started
-  QFuture<bool> executeAsync(const QString & code);
   /// Create a list of keywords for the code completion API
   void generateAutoCompleteList();
 
   /// Construct the error message from the stack trace (if one exists)
   QString constructErrorMsg();
-
+  /// Fix the line number of the syntax errors. This includes the offset
+  /// & a fix for the syntax errors always off by one
+  QString constructSyntaxErrorStr(const QString & originalString);
+  /// Convert a traceback to a string
+  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback, 
+                      bool root=true);
+  
   /// Set the name of the passed object so that Python can refer to it
   bool setQObject(QObject *val, const char *name);
   /// Set the name of the integer so that Python can refer to it
@@ -139,10 +138,19 @@ private:
   void endStdoutRedirect();
 
   // --------------------------- Script compilation/execution  -----------------------------------
+  /// Compile the code, returning true if it was successful, false otherwise
+  bool compileImpl(const QString & code);
+  /// Evaluate the current code and return a result as a QVariant
+  QVariant evaluateImpl(const QString & code);
+  /// Execute the current code and return a boolean indicating success/failure
+  bool executeImpl(const QString &);
+  /// Execute the code asynchronously, returning immediately after the execution has started
+  QFuture<bool> executeAsyncImpl(const QString & code);
+
   /// Performs the call to Python from a string
   bool executeString(const QString & code);
   /// Executes the code object and returns the result, may be null
-  PyObject* executeCompiledCode(PyCodeObject *compiledCode);
+  PyObject* executeCompiledCode(PyObject *compiledCode);
   /// Check an object for a result.
   bool checkResult(PyObject *result);
 
