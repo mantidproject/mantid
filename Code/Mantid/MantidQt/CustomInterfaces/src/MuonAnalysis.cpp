@@ -2408,12 +2408,12 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
     std::string runNumber = runDetails.getProperty("run_number")->value();
     QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
-    int zeroPadding(8);
+    size_t zeroPadding(8);
 
     if (instname == "ARGUS")
       zeroPadding = 7;  
 
-    for (int i=runNumber.size(); i<zeroPadding; ++i)
+    for (size_t i=runNumber.size(); i<zeroPadding; ++i)
     {
       runNumber = '0' + runNumber;
     }
