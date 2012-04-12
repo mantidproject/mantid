@@ -59,7 +59,7 @@ void SetupEQSANSReduction::init()
   declareProperty("BeamCenterY", EMPTY_DBL(), "Position of the beam center, in pixel");
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(new API::FileProperty("BeamCenterFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+  declareProperty(new API::FileProperty("BeamCenterFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load");
   declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass position between each iteration [m]. Default: 0.00125");
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
@@ -76,19 +76,19 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("BeamRadius", center_grp);
 
   // Dark current
-  declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+  declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
-  declareProperty(new API::FileProperty("SensitivityFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+  declareProperty(new API::FileProperty("SensitivityFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "Flood field or sensitivity file.");
   declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
       "Minimum efficiency for a pixel to be considered (default: no minimum).");
   declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
   declareProperty("UseDefaultDC", true, "If true, the dark current subtracted from the sample data will also be subtracted from the flood field.");
-  declareProperty(new API::FileProperty("SensitivityDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+  declareProperty(new API::FileProperty("SensitivityDarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input file to load as dark current.");
   declareProperty("SensitivityBeamCenterX", EMPTY_DBL(), "Position of the beam center for the sensitivity data, in pixel");
   declareProperty("SensitivityBeamCenterY", EMPTY_DBL(), "Position of the beam center for the sensitivity data, in pixel");
