@@ -35,6 +35,7 @@ class DataSeries(BaseScriptElement):
         """
             Update transmission from reduction output
         """
+        print 'inside update of refl_sf_calculator_data_series'
         pass
 
     def to_xml(self):
@@ -54,6 +55,9 @@ class DataSeries(BaseScriptElement):
             Read in data from XML
             @param xml_str: text to read the data from
         """   
+        
+        print 'inside from_xml of refl_sf_calculator_data_series'
+        
         self.reset()
         self.data_sets = []
         dom = xml.dom.minidom.parseString(xml_str)
@@ -64,10 +68,7 @@ class DataSeries(BaseScriptElement):
         self._data_class = REFLDataSets
         element_list = dom.getElementsByTagName("Data")
         if len(element_list)==0:
-            element_list = dom.getElementsByTagName("RefLData")
-        if len(element_list)==0:
-            self._data_class = REFMDataSets
-            element_list = dom.getElementsByTagName("RefMData")
+            element_list = dom.getElementsByTagName("RefLSFCalculator")
             
         if len(element_list)>0:
             for item in element_list:

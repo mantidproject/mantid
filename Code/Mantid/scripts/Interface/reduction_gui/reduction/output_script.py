@@ -19,6 +19,7 @@ class Output(BaseScriptElement):
         """
             Update data members according to reduction results
         """
+        print 'in output_script, inside update'
         if IS_IN_MANTIDPLOT:
             self.log_text = ReductionSingleton().log_text
             try:

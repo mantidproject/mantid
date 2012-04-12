@@ -90,6 +90,7 @@ class InstrumentInterface(object):
             be reloaded
             @param file_name: XML file to be saved
         """
+        print 'inside interface.py, save_file'
         self.scripter.update()
         self.scripter.to_xml(file_name)
         
