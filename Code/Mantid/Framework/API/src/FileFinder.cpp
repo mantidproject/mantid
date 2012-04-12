@@ -600,7 +600,6 @@ namespace Mantid
           } else {
             g_log.notice() << "Unable to find files via archive search with the filename that looks like a full filename" << "\n";
           }
-          return path;
         }
       }
 
@@ -792,11 +791,15 @@ namespace Mantid
       std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
       for (; it != archs.end(); it++)
       {
-        path = (*it)->getPath(fName);
-        if (!path.empty())
+        try
         {
-          return path;
+          path = (*it)->getPath(fName);
+          if (!path.empty())
+          {
+            return path;
+          }
         }
+        catch (...){ }
       }
       return path;
     }
