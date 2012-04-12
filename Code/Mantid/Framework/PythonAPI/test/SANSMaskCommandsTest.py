@@ -11,16 +11,22 @@ class SANSMaskCommandsTest(unittest.TestCase):
     
     def setUp(self):
         
+        # Set up LOQ workspace
         self.test_ws_name = "SANSMaskCommands_ws"
         LoadEmptyInstrument('LOQ_Definition_20020226-.xml', self.test_ws_name)
         self.test_ws = mantid[self.test_ws_name]
 
-        # Use the LOQ setttings
+        # Use the LOQ setttings to start with
         ISIS.LOQ()
 
-        # Test the LOQ instrument is what it suppose to be 
+        # Test LOQ ws created ok...
         self.assertEqual(self.test_ws.getNumberHistograms(), 17778)
         self.assertTrue(self.test_ws.readY(0)[0] > 0)
+        
+        # Set up SANS2D workspace
+        self.test_ws_name_sans2d = "SANS2DMaskCommands_ws"
+        LoadEmptyInstrument('SANS2D_Definition.xml', self.test_ws_name_sans2d)
+        self.test_ws_sans2d = mantid[self.test_ws_name_sans2d]
         
     def test_single_spectrum(self):
         """
@@ -108,14 +114,12 @@ class SANSMaskCommandsTest(unittest.TestCase):
         self.assertEqual(self.test_ws.readY(5376)[0], 0)
         self.assertEqual(self.test_ws.readY(14468)[0], 1)
         
-    #
-    # This test makes no sense as line masking isn't used on LOQ.
-    # Test needs to be looked at and updated. Refs #4810
-    #
-    def xtest_mask_line(self):
+    def test_mask_line(self):
         """
             The line is a semi-infinite line that starts at the beam centre, it is implemented using the
             MaskDetectorsInShape algorithm and are controlled with MASK/LINE user file command
+            MASK/LINE Masking was introduced for SANS2D it may be applied to any SANS instrument
+            and below that is LOQ
         """
         # this is a thin vertical line that will mask a single column of detectors
         ISIS.Mask('MASK/LINE '+str(2)+' '+str(90))
@@ -127,7 +131,6 @@ class SANSMaskCommandsTest(unittest.TestCase):
         centre_main_bank = num_monitors+(bank_square/2)*(bank_square+1)
         end_main_bank = bank_square*bank_square
         #test every tenth pixel in the line
-#enable these tests once the functionality has been added under ticket #3403
         for i in range(centre_main_bank, end_main_bank, 10*bank_square):
             #first test the unmasked
             self.assertEqual(self.test_ws.readY(i-1)[0], 1)
@@ -135,10 +138,34 @@ class SANSMaskCommandsTest(unittest.TestCase):
             #now the masked
             self.assertEqual(self.test_ws.readY(i)[0], 1)
 
-        ISIS.Mask('mask/line '+str(10)+' '+str(47))
+    def test_mask_line_SANS2D(self):
+        """
+            The line is a semi-infinite line that starts at the beam centre, it is implemented using the
+            MaskDetectorsInShape algorithm and are controlled with MASK/LINE user file command
+            MASK/LINE Masking was introduced for SANS2D and here tested for this instrument
+        """
+        # Use the SANS2D setttings
+        ISIS.SANS2D()        
+        
+        # this is a thin vertical line that will mask a single column of detectors
+        ISIS.Mask('MASK/LINE '+str(2)+' '+str(90))
+
+        ISIS.ReductionSingleton().mask.execute(ISIS.ReductionSingleton(), self.test_ws_name_sans2d)
+        
+        num_monitors = 8
+        bank_square = 192
+        centre_main_bank = num_monitors+(bank_square/2)*(bank_square+1)
+        end_main_bank = bank_square*bank_square
+        #test every tenth pixel in the line
+        for i in range(centre_main_bank, end_main_bank, 10*bank_square):
+            #first test the unmasked
+            self.assertEqual(self.test_ws_sans2d.readY(i-1)[0], 1)
+            self.assertEqual(self.test_ws_sans2d.readY(i+1)[0], 1)
+            #now the masked
+            self.assertEqual(self.test_ws_sans2d.readY(i)[0], 1)
 
     def tearDown(self):
         ISIS._refresh_singleton()
-        
+
 if __name__ == '__main__':
     unittest.main()
