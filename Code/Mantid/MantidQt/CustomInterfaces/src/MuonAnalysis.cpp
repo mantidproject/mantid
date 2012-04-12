@@ -986,10 +986,7 @@ void MuonAnalysis::handleInputFileChanges()
       {
         if (m_previousFilenames.size() > 0) // If a previous file exists then reset the name.
         {
-          if (runFiles.size() > 1) 
-            m_uiForm.mwRunFiles->setText(m_textToDisplay);
-          else
-            m_uiForm.mwRunFiles->setText(m_textToDisplay);
+          m_uiForm.mwRunFiles->setText(m_textToDisplay);
         }
         else // Ohterwise set the text a blank string.
           m_uiForm.mwRunFiles->setText("");

@@ -10,6 +10,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -113,6 +114,8 @@ namespace WorkspaceCreationHelper
   Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(const std::vector<double> &L2, const std::vector<double> &ploar, const std::vector<double> &azimutal,
                                                                size_t numBins=4,double Emin=-10,double Emax=10,double Ei=11);
   
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS, std::string wsname, Mantid::API::Algorithm* alg);
+
 
 };
 

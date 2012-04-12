@@ -177,24 +177,26 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
+  /** @return a vector with the size of the smallest bin in each dimension */
   TMDE(
-  void MDEventWorkspace)::estimateResolution()
+  std::vector<coord_t> MDEventWorkspace)::estimateResolution() const
   {
     size_t realDepth = 0;
     std::vector<size_t> numMD = m_BoxController->getNumMDBoxes();
     for (size_t i=0; i<numMD.size(); i++)
       if (numMD[i] > 0) realDepth = i;
 
+    std::vector<coord_t> out;
     for (size_t d=0; d<nd; d++)
     {
       size_t finestSplit = 1;
       for (size_t i=0; i<realDepth; i++)
         finestSplit *= m_BoxController->getSplitInto(d);
-      IMDDimension_sptr dim = m_dimensions[d];
-      // Set the number of bins
-      dim->setRange( finestSplit, dim->getMinimum(), dim->getMaximum());
+      IMDDimension_const_sptr dim = this->getDimension(d);
+      // Calculate the bin size at the smallest split amount
+      out.push_back((dim->getMaximum() - dim->getMinimum())/static_cast<coord_t>(finestSplit));
     }
+    return out;
   }
 
 

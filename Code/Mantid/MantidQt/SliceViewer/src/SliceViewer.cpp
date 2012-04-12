@@ -86,7 +86,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
       m_logColor(false),
-      m_fastRender(true)
+      m_fastRender(true),
+      m_rebinMode(false), m_rebinLocked(true)
 {
 	ui.setupUi(this);
 
@@ -117,6 +118,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
+  QObject::connect(ui.btnClearLine, SIGNAL(clicked()), this, SLOT(clearLine()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
   QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
@@ -264,9 +266,16 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
   m_menuView->addAction(action);
 
+  m_menuView->addSeparator();
+
   action = new QAction(QPixmap(), "Dynamic R&ebin Mode", this);
   m_syncRebinMode = new SyncedCheckboxes(action, ui.btnRebinMode, false);
   connect(m_syncRebinMode, SIGNAL(toggled(bool)), this, SLOT(RebinMode_toggled(bool)));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "&Lock Rebinned WS", this);
+  m_syncRebinLock = new SyncedCheckboxes(action, ui.btnRebinLock, true);
+  connect(m_syncRebinLock, SIGNAL(toggled(bool)), this, SLOT(RebinLock_toggled(bool)));
   m_menuView->addAction(action);
 
   m_menuView->addSeparator();
@@ -363,11 +372,23 @@ void SliceViewer::initMenus()
 void SliceViewer::initZoomer()
 {
 //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
-//  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton, Qt::ControlModifier);
-//  zoomer->setTrackerMode(QwtPicker::AlwaysOn);
+//  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
+//  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
 //  const QColor c(Qt::darkBlue);
 //  zoomer->setRubberBandPen(c);
 //  zoomer->setTrackerPen(c);
+//  QObject::connect(zoomer, SIGNAL(zoomed(const QRectF &)),
+//      this, SLOT(zoomRectSlot(const QRectF &)));
+
+  QwtPlotPicker * zoomer = new QwtPlotPicker(m_plot->canvas());
+  zoomer->setSelectionFlags(QwtPicker::RectSelection | QwtPicker::DragSelection);
+  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
+  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
+  const QColor c(Qt::darkBlue);
+  zoomer->setRubberBand(QwtPicker::RectRubberBand);
+  zoomer->setRubberBandPen(c);
+  QObject::connect(zoomer, SIGNAL(selected(const QwtDoubleRect &)),
+      this, SLOT(zoomRectSlot(const QwtDoubleRect &)));
 
   // Zoom in/out using middle-click+drag or the mouse wheel
   QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
@@ -383,6 +404,7 @@ void SliceViewer::initZoomer()
   panner->setMouseButton(Qt::RightButton);
   panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
 
+  // Custom picker for showing the current coordinates
   CustomPicker * picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
   QObject::connect(picker, SIGNAL(mouseMoved(double,double)), this, SLOT(showInfoAt(double, double)));
 
@@ -492,13 +514,20 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
   IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
-  if (mdew)
-    mdew->estimateResolution();
+  std::vector<coord_t> binSizes = m_ws->estimateResolution();
 
   // Copy the dimensions to this so they can be modified
   m_dimensions.clear();
   for (size_t d=0; d < m_ws->getNumDims(); d++)
-    m_dimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(m_ws->getDimension(d).get())) );
+  {
+    // Choose the number of bins based on the resolution of the workspace (for MDEWs)
+    coord_t min = m_ws->getDimension(d)->getMinimum();
+    coord_t max = m_ws->getDimension(d)->getMaximum();
+    size_t numBins = static_cast<size_t>((max-min)/binSizes[d]);
+    MDHistoDimension_sptr dim(new MDHistoDimension(m_ws->getDimension(d).get()));
+    dim->setRange(numBins, min, max);
+    m_dimensions.push_back(dim);
+  }
 
   // Adjust the range to that of visible data
   if (mdew)
@@ -696,6 +725,66 @@ Mantid::API::MDNormalization SliceViewer::getNormalization() const
   return m_data->getNormalization();
 }
 
+
+//------------------------------------------------------------------------------------
+/** Set the thickness (above and below the plane) for dynamic rebinning.
+ *
+ * @param dim :: index of the dimension to adjust
+ * @param thickness :: thickness to set, in units of the dimension.
+ * @throw runtime_error if the dimension index is invalid or the thickness is <= 0.0.
+ */
+void SliceViewer::setRebinThickness(int dim, double thickness)
+{
+  if (dim < 0 || dim >= static_cast<int>(m_dimWidgets.size()))
+    throw std::runtime_error("SliceViewer::setRebinThickness(): Invalid dimension index");
+  if (thickness <= 0.0)
+    throw std::runtime_error("SliceViewer::setRebinThickness(): Thickness must be > 0.0");
+  m_dimWidgets[dim]->setThickness(thickness);
+}
+
+//------------------------------------------------------------------------------------
+/** Set the number of bins for dynamic rebinning.
+ *
+ * @param xBins :: number of bins in the viewed X direction
+ * @param yBins :: number of bins in the viewed Y direction
+ * @throw runtime_error if the number of bins is < 1
+ */
+void SliceViewer::setRebinNumBins(int xBins, int yBins)
+{
+  if (xBins < 1 || yBins < 1)
+    throw std::runtime_error("SliceViewer::setRebinNumBins(): Number of bins must be >= 1");
+  m_dimWidgets[m_dimX]->setNumBins(xBins);
+  m_dimWidgets[m_dimY]->setNumBins(yBins);
+}
+
+//------------------------------------------------------------------------------------
+/** Sets the SliceViewer in dynamic rebin mode.
+ * In this mode, the current view area (see setXYLimits()) is used as the
+ * limits to rebin.
+ * See setRebinNumBins() to adjust the number of bins in the X/Y dimensions.
+ * See setRebinThickness() to adjust the thickness in other dimensions.
+ *
+ * @param mode :: true for rebinning mode
+ * @param locked :: if true, then the rebinned area is only refreshed manually
+ *        or when changing rebinning parameters.
+ */
+void SliceViewer::setRebinMode(bool mode, bool locked)
+{
+  // The events associated with these controls will trigger a re-draw
+  m_syncRebinMode->toggle(mode);
+  m_syncRebinLock->toggle(locked);
+}
+
+//------------------------------------------------------------------------------------
+/** When in dynamic rebinning mode, this refreshes the rebinned area to be the
+ * currently viewed area. See setXYLimits(), setRebinNumBins(), setRebinThickness()
+ */
+void SliceViewer::refreshRebin()
+{
+  this->rebinParamsChanged();
+}
+
+
 //------------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
 void SliceViewer::LineMode_toggled(bool checked)
@@ -731,7 +820,7 @@ void SliceViewer::toggleLineMode(bool lineMode)
 
 //------------------------------------------------------------------------------------
 /// Slot called to clear the line in the line overlay
-void SliceViewer::on_btnClearLine_clicked()
+void SliceViewer::clearLine()
 {
   m_lineOverlay->reset();
   m_plot->update();
@@ -771,8 +860,10 @@ void SliceViewer::RebinMode_toggled(bool checked)
   for (size_t d=0; d<m_dimWidgets.size(); d++)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
+  ui.btnRebinLock->setEnabled(checked);
+  m_rebinMode = checked;
 
-  if (!checked)
+  if (!m_rebinMode)
   {
     // Remove the overlay WS
     this->m_overlayWS.reset();
@@ -784,7 +875,19 @@ void SliceViewer::RebinMode_toggled(bool checked)
     // Start the rebin
     this->rebinParamsChanged();
   }
+}
 
+//------------------------------------------------------------------------------------
+/** Slot called when locking/unlocking the dynamically rebinned
+ * overlaid workspace
+ * @param checked :: DO lock the workspace in place
+ */
+void SliceViewer::RebinLock_toggled(bool checked)
+{
+  m_rebinLocked = checked;
+  // Rebin immediately
+  if (!m_rebinLocked && m_rebinMode)
+    this->rebinParamsChanged();
 }
 
 //------------------------------------------------------------------------------------
@@ -799,6 +902,16 @@ void SliceViewer::zoomOutSlot()
 {
   this->zoomBy(1.0 / 1.1);
 }
+
+/** Slot called when zooming using QwtPlotZoomer (rubber-band method)
+ *
+ * @param rect :: rectangle to zoom to
+ */
+void SliceViewer::zoomRectSlot(const QwtDoubleRect & rect)
+{
+  this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
+}
+
 
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer()
@@ -854,6 +967,9 @@ void SliceViewer::updateDisplaySlot(int index, double value)
   UNUSED_ARG(index)
   UNUSED_ARG(value)
   this->updateDisplay();
+  // Trigger a rebin on each movement of the slice point
+  if (m_rebinMode && ! m_rebinLocked)
+    this->rebinParamsChanged();
 }
 
 
@@ -1216,11 +1332,11 @@ void SliceViewer::updateDisplay(bool resetAxes)
   // Avoid going out of range
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
   if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
-  m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
-  m_slicePoint = VMD(slicePoint);
-
   m_X = m_dimensions[m_dimX];
   m_Y = m_dimensions[m_dimY];
+
+  m_data->setSliceParams(m_dimX, m_dimY, m_X, m_Y, slicePoint);
+  m_slicePoint = VMD(slicePoint);
 
   // Was there a change of which dimensions are shown?
   if (resetAxes || oldX != m_dimX || oldY != m_dimY )
@@ -1855,6 +1971,7 @@ void SliceViewer::rebinParamsChanged()
   alg->setPropertyValue("Translation", "");
   alg->setProperty("NormalizeBasisVectors", true);
   alg->setProperty("ForceOrthogonal", false);
+  alg->setProperty("Parallel", true);
   alg->setPropertyValue("OutputWorkspace", m_overlayWSName);
 
   // Start asynchronous execution

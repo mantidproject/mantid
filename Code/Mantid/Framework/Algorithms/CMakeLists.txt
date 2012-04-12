@@ -79,6 +79,7 @@ set ( SRC_FILES
 	src/FilterBadPulses.cpp
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
+	src/FilterEvents.cpp
 	src/FilterEventsHighFrequency.cpp
 	src/FindCenterOfMassPosition.cpp
 	src/FindCenterOfMassPosition2.cpp
@@ -88,6 +89,8 @@ set ( SRC_FILES
 	src/FlatBackground.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
+	src/GenerateEventsFilter.cpp
+	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
@@ -163,6 +166,7 @@ set ( SRC_FILES
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
 	src/SofQW2.cpp
+  src/SofQW3.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
 	src/SortEvents.cpp
@@ -267,6 +271,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FilterBadPulses.h
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
+	inc/MantidAlgorithms/FilterEvents.h
 	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition2.h
@@ -277,6 +282,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
+	inc/MantidAlgorithms/GenerateEventsFilter.h
+	inc/MantidAlgorithms/GeneratePeaks.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
@@ -352,6 +359,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SofQW2.h
+  inc/MantidAlgorithms/SofQW3.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
@@ -376,6 +384,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	#	test/CalMuonDeadTimeTest.h
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
 	test/AlignDetectorInTOFTest.h
@@ -389,7 +398,6 @@ set ( TEST_FILES
 	test/BinaryOperateMasksTest.h
 	test/BinaryOperationTest.h
 	test/BlendSqTest.h
-#	test/CalMuonDeadTimeTest.h
 	test/CalculateEfficiencyTest.h
 	test/CalculateTransmissionBeamSpreaderTest.h
 	test/CalculateTransmissionTest.h
@@ -449,6 +457,7 @@ set ( TEST_FILES
 	test/FilterByLogValueTest.h
 	test/FilterByTimeTest.h
 	test/FilterEventsHighFrequencyTest.h
+	test/FilterEventsTest.h
 	test/FindCenterOfMassPosition2Test.h
 	test/FindCenterOfMassPositionTest.h
 	test/FindDeadDetectorsTest.h
@@ -456,6 +465,8 @@ set ( TEST_FILES
 	test/FindPeaksTest.h
 	test/FlatBackgroundTest.h
 	test/FlatPlateAbsorptionTest.h
+	test/GenerateEventsFilterTest.h
+	test/GeneratePeaksTest.h
 	test/GeneratePythonScriptTest.h
 	test/GetDetOffsetsMultiPeaksTest.h
 	test/GetDetectorOffsetsTest.h
@@ -522,6 +533,7 @@ set ( TEST_FILES
 	test/SmoothNeighboursTest.h
 	test/SofQW2Test.h
 	test/SofQWTest.h
+  test/SofQW3Test.h
 	test/SolidAngleTest.h
 	test/SortEventsTest.h
 	test/SpatialGroupingTest.h

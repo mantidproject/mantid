@@ -85,8 +85,7 @@ namespace MDEvents
     virtual bool isFileBacked() const
     { return m_BoxController->isFileBacked(); }
 
-    /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
-    void estimateResolution();
+    std::vector<coord_t> estimateResolution() const;
 
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 

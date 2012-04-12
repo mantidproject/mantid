@@ -75,7 +75,9 @@ namespace Mantid
 
     private:
 
+      /// Expression parser
       mu::Parser m_parser;
+      /// 
       mutable std::vector<double> m_vars;
       std::vector<std::string> m_varNames;
       std::string m_formula;

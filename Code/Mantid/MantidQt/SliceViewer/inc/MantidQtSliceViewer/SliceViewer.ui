@@ -319,6 +319,35 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="btnRebinLock">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Lock the rebinned workspace in place (use the refresh button to refresh)</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/stock-lock.png</normaloff>:/SliceViewer/icons/stock-lock.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

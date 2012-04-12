@@ -170,16 +170,16 @@ Mantid::API::MDNormalization QwtRasterDataMD::getNormalization() const
  */
 QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
 {
-  if (!m_ws) return QSize();
+  if (!m_ws || !m_X || !m_Y) return QSize();
   // Slow mode? Don't give a raster hint. This will be 1 pixel per point
   if (!m_fast) return QSize();
 
   // Fast mode: use the bin size to guess at the pixel density
-  coord_t binX = m_ws->getDimension(m_dimX)->getBinWidth();
-  coord_t binY = m_ws->getDimension(m_dimY)->getBinWidth();
+  coord_t binX = m_X->getBinWidth();
+  coord_t binY = m_Y->getBinWidth();
 
   // Use the overlay workspace, if any, and if its bins are smaller
-  if (m_overlayWS)
+  if (m_overlayWS && m_overlayInSlice)
   {
     coord_t temp;
     temp = m_overlayWS->getDimension(m_dimX)->getBinWidth();
@@ -237,12 +237,18 @@ void QwtRasterDataMD::setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws)
  * @param dimY :: index of the Y dimension
  * @param slicePoint :: vector of slice points
  */
-void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Mantid::coord_t> & slicePoint)
+void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY,
+    Mantid::Geometry::IMDDimension_const_sptr X, Mantid::Geometry::IMDDimension_const_sptr Y,
+    std::vector<Mantid::coord_t> & slicePoint)
 {
   if (slicePoint.size() != m_nd)
     throw std::runtime_error("QwtRasterDataMD::setSliceParams(): inconsistent vector/number of dimensions size.");
   m_dimX = dimX;
   m_dimY = dimY;
+  m_X = X;
+  m_Y = Y;
+  if (!m_X || !m_Y)
+    throw std::runtime_error("QwtRasterDataMD::setSliceParams(): one of the input dimensions is NULL");
   delete [] m_slicePoint;
   m_slicePoint = new coord_t[slicePoint.size()];
   m_overlayInSlice = true;

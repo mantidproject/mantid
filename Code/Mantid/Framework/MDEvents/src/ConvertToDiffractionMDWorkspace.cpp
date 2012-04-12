@@ -343,6 +343,25 @@ namespace MDEvents
     // -------- Input workspace -> convert to Event ------------------------------------
     m_inWS = getProperty("InputWorkspace");
     Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
+    if (LorentzCorrection)
+    {
+      API::Run & run = m_inWS->mutableRun();
+      if ( run.hasProperty("LorentzCorrection") )
+      {
+        Kernel::Property* prop = run.getProperty("LorentzCorrection");
+        bool lorentzDone = boost::lexical_cast<bool,std::string>(prop->value());
+        if(lorentzDone)
+        {
+          LorentzCorrection = false;
+          g_log.warning()<<"Lorentz Correction was already done for this workspace.  LorentzCorrection was changed to false." << std::endl;
+        }
+      }
+      else
+      {
+        run.addProperty<bool>("LorentzCorrection", 1, true);
+      }
+    }
+
     m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
 
     // check the input units
@@ -479,7 +498,7 @@ namespace MDEvents
     bool MultiThreadedAdding = m_inWS->threadSafe();
 
     // Create the thread pool that will run all of these.
-    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
+    ThreadScheduler * ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0);
 
     // To track when to split up boxes
@@ -511,7 +530,7 @@ namespace MDEvents
 
       // Keep a running total of how many events we've added
       eventsAdded += eventsAdding;
-      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
+      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes) || (eventsAdded > 1000000))
       {
         if (DODEBUG) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks

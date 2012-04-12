@@ -69,7 +69,8 @@ namespace Mantid
     };
 
     /**
-    An implementation of Jacobian using gsl_matrix.
+    A wrapper around gsl_matrix. The '*' operator is overloaded to help with
+    matrix multiplication.
 
     @author Roman Tolchenov, Tessella plc
     @date 24/02/2012
@@ -96,13 +97,15 @@ namespace Mantid
     */
   class GSLMatrix
   {
-    /// The pointer to the GSL's internal jacobian matrix
+    /// The pointer to the GSL matrix
     gsl_matrix * m_matrix;
     
   public:
     /// Constructor
     GSLMatrix():m_matrix(NULL){}
     /// Constructor
+    /// @param nx :: First dimension
+    /// @param ny :: Second dimension
     GSLMatrix(const size_t nx, const size_t ny)
     {
       m_matrix = gsl_matrix_alloc(nx,ny);
@@ -124,6 +127,7 @@ namespace Mantid
       }
     }
 
+    /// Copy assignment operator
     GSLMatrix& operator=(const GSLMatrix& M)
     {
       resize( M.size1(), M.size2() );
@@ -137,8 +141,12 @@ namespace Mantid
     /// Get the const pointer to the GSL matrix
     const gsl_matrix * gsl() const {return m_matrix;}
 
+    /// Is matrix empty
     bool isEmpty() const {return m_matrix == NULL;}
 
+    /// Resize the matrix
+    /// @param nx :: New first dimension
+    /// @param ny :: New second dimension
     void resize(const size_t nx, const size_t ny)
     {
       if (m_matrix)
@@ -155,6 +163,9 @@ namespace Mantid
     size_t size2() const {return m_matrix? m_matrix->size2 : 0;}
 
     /// set an element
+    /// @param i :: The row
+    /// @param j :: The column
+    /// @param value :: The new vaule
     void set(size_t i, size_t j, double value)
     {
       if (i < m_matrix->size1 && j < m_matrix->size2) gsl_matrix_set(m_matrix,i,j,value);
@@ -164,52 +175,60 @@ namespace Mantid
       }
     }
     /// get an element
+    /// @param i :: The row
+    /// @param j :: The column
     double get(size_t i, size_t j) const
     {
       if (i < m_matrix->size1 && j < m_matrix->size2) return gsl_matrix_get(m_matrix,i,j);
       throw std::out_of_range("GSLMatrix indices are out of range.");
     }
 
-    // Set this matrix to identity matrix
+    /// Set this matrix to identity matrix
     void identity()
     {
       gsl_matrix_set_identity( m_matrix );
     }
 
-    // Set all elements to zero
+    /// Set all elements to zero
     void zero()
     {
       gsl_matrix_set_zero( m_matrix );
     }
 
-    // add a matrix to this
+    /// add a matrix to this
+    /// @param M :: A matrix
     GSLMatrix& operator+=(const GSLMatrix& M)
     {
       gsl_matrix_add( m_matrix, M.gsl() );
       return *this;
     }
 
-    // add a constant to this matrix
+    /// add a constant to this matrix
+    /// @param d :: A number
     GSLMatrix& operator+=(const double& d)
     {
       gsl_matrix_add_constant( m_matrix, d );
       return *this;
     }
 
-    // subtract a matrix from this
+    /// subtract a matrix from this
+    /// @param M :: A matrix
     GSLMatrix& operator-=(const GSLMatrix& M)
     {
       gsl_matrix_sub( m_matrix, M.gsl() );
       return *this;
     }
 
-    // multiply this matrix by a number
+    /// multiply this matrix by a number
+    /// @param d :: A number
     GSLMatrix& operator*=(const double& d)
     {
       gsl_matrix_scale( m_matrix, d );
       return *this;
     }
 
+    /// Assign this matrix to a product of two other matrices
+    /// @param mult2 :: Matrix multiplication helper object.
     GSLMatrix& operator=(const GSLMatrixMult2& mult2)
     {
       // sizes of the result matrix
@@ -229,6 +248,8 @@ namespace Mantid
       return *this;
     }
 
+    /// Assign this matrix to a product of three other matrices
+    /// @param mult3 :: Matrix multiplication helper object.
     GSLMatrix& operator=(const GSLMatrixMult3& mult3)
     {
       // sizes of the result matrix
@@ -259,6 +280,8 @@ namespace Mantid
 
     /// Solve system of linear equations M*x == rhs, M is this matrix
     /// This matrix is destroyed.
+    /// @param rhs :: The right-hand-side vector
+    /// @param x :: The solution vector
     void solve(const GSLVector& rhs, GSLVector& x)
     {
       if (size1() != size2())
@@ -295,46 +318,75 @@ namespace Mantid
     }
   };
 
+  /// Overloaded operator for matrix multiplication 
+  /// @param m1 :: First matrix
+  /// @param m2 :: Second matrix
   inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const GSLMatrix& m2)
   {
     return GSLMatrixMult2(m1,m2);
   }
 
+  /// Overloaded operator for matrix multiplication 
+  /// @param m1 :: First matrix transposed
+  /// @param m2 :: Second matrix
   inline GSLMatrixMult2 operator*(const Tr& m1, const GSLMatrix& m2)
   {
     return GSLMatrixMult2(m1,m2);
   }
 
+  /// Overloaded operator for matrix multiplication 
+  /// @param m1 :: First matrix
+  /// @param m2 :: Second matrix transposed
   inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const Tr& m2)
   {
     return GSLMatrixMult2(m1,m2);
   }
 
+  /// Overloaded operator for matrix multiplication 
+  /// @param m1 :: First matrix transposed
+  /// @param m2 :: Second matrix transposed
   inline GSLMatrixMult2 operator*(const Tr& m1, const Tr& m2)
   {
     return GSLMatrixMult2(m1,m2);
   }
 
+  /// Overloaded operator for matrix multiplication. Multiplies a matrix by a 
+  /// product of two other matrices.
+  /// @param m :: A matrix
+  /// @param mm :: Product of two matrices
   inline GSLMatrixMult3 operator*(const GSLMatrix& m, const GSLMatrixMult2& mm)
   {
     return GSLMatrixMult3(m,mm);
   }
 
+  /// Overloaded operator for matrix multiplication. Multiplies a matrix by a 
+  /// product of two other matrices.
+  /// @param mm :: Product of two matrices
+  /// @param m :: A matrix
   inline GSLMatrixMult3 operator*( const GSLMatrixMult2& mm, const GSLMatrix& m )
   {
     return GSLMatrixMult3(mm,m);
   }
 
+  /// Overloaded operator for matrix multiplication. Multiplies a matrix by a 
+  /// product of two other matrices.
+  /// @param m :: A transposed matrix
+  /// @param mm :: Product of two matrices
   inline GSLMatrixMult3 operator*(const Tr& m, const GSLMatrixMult2& mm)
   {
     return GSLMatrixMult3(m,mm);
   }
 
+  /// Overloaded operator for matrix multiplication. Multiplies a matrix by a 
+  /// product of two other matrices.
+  /// @param mm :: Product of two matrices
+  /// @param m :: A transposed matrix
   inline GSLMatrixMult3 operator*( const GSLMatrixMult2& mm, const Tr& m )
   {
     return GSLMatrixMult3(mm,m);
   }
 
+  /// The << operator. Prints a matrix in rows.
   inline std::ostream& operator<<(std::ostream& ostr, const GSLMatrix& m)
   {
     ostr << std::scientific << std::setprecision(6);

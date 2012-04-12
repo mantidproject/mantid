@@ -13,6 +13,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/Run.h"
 
+#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
+
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 
@@ -812,6 +816,77 @@ namespace WorkspaceCreationHelper
 
     return ws;  
   }
+
+
+   /*
+    * Create an EventWorkspace from a source EventWorkspace.
+    * The new workspace should be exactly the same as the source workspace but without any events
+    */
+   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS, std::string wsname, API::Algorithm* alg)
+   {
+     // 1. Initialize:use dummy numbers for arguments, for event workspace it doesn't matter
+      Mantid::DataObjects::EventWorkspace_sptr outputWS = Mantid::DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace());
+      outputWS->setName(wsname);
+      outputWS->initialize(1,1,1);
+
+      // 2. Set the units
+      outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      outputWS->setYUnit("Counts");
+      outputWS->setTitle("Empty_Title");
+
+      // 3. Add the run_start property:
+      int runnumber = sourceWS->getRunNumber();
+      outputWS->mutableRun().addProperty("run_number", runnumber);
+
+      std::string runstartstr = sourceWS->run().getProperty("run_start")->value();
+      outputWS->mutableRun().addProperty("run_start", runstartstr);
+
+      // 4. Instrument
+      Mantid::API::Algorithm_sptr loadInst= alg->createSubAlgorithm("LoadInstrument");
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      loadInst->setPropertyValue("InstrumentName", sourceWS->getInstrument()->getName());
+      loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", outputWS);
+      loadInst->setProperty("RewriteSpectraMap", true);
+      loadInst->executeAsSubAlg();
+      // Populate the instrument parameters in this workspace - this works around a bug
+      outputWS->populateInstrumentParameters();
+
+      // 6. Build spectrum and event list
+      // a) We want to pad out empty pixels.
+      detid2det_map detector_map;
+      outputWS->getInstrument()->getDetectors(detector_map);
+
+      // b) determine maximum pixel id
+      detid2det_map::iterator it;
+      detid_t detid_max = 0; // seems like a safe lower bound
+      for (it = detector_map.begin(); it != detector_map.end(); ++it)
+        if (it->first > detid_max)
+          detid_max = it->first;
+
+      // c) Pad all the pixels and Set to zero
+      std::vector<std::size_t> pixel_to_wkspindex;
+      pixel_to_wkspindex.reserve(detid_max+1); //starting at zero up to and including detid_max
+      pixel_to_wkspindex.assign(detid_max+1, 0);
+      size_t workspaceIndex = 0;
+      for (it = detector_map.begin(); it != detector_map.end(); ++it)
+      {
+        if (!it->second->isMonitor())
+        {
+          pixel_to_wkspindex[it->first] = workspaceIndex;
+          DataObjects::EventList & spec = outputWS->getOrAddEventList(workspaceIndex);
+          spec.addDetectorID(it->first);
+          // Start the spectrum number at 1
+          spec.setSpectrumNo(specid_t(workspaceIndex+1));
+          workspaceIndex += 1;
+        }
+      }
+      outputWS->doneAddingEventLists();
+
+      // Clear
+      pixel_to_wkspindex.clear();
+
+      return outputWS;
+   }
 
 
 }

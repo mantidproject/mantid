@@ -139,6 +139,23 @@ void AnvredCorrection::exec()
 {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
+  OnlySphericalAbsorption = getProperty("OnlySphericalAbsorption");
+  ReturnTransmissionOnly = getProperty("ReturnTransmissionOnly");
+  if (!OnlySphericalAbsorption)
+  {
+    const API::Run & run = m_inputWS->run();
+    if ( run.hasProperty("LorentzCorrection") )
+    {
+      Kernel::Property* prop = run.getProperty("LorentzCorrection");
+      bool lorentzDone = boost::lexical_cast<bool,std::string>(prop->value());
+      if(lorentzDone)
+      {
+         OnlySphericalAbsorption = true;
+         g_log.warning()<<"Lorentz Correction was already done for this workspace.  OnlySphericalAbsorption was changed to true." << std::endl;
+      }
+    }
+  }
+
   std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
 
   // Get the input parameters
@@ -248,6 +265,8 @@ void AnvredCorrection::exec()
   run.addProperty<double>("LinearScatteringCoef", smu, true);
   run.addProperty<double>("LinearAbsorptionCoef", amu, true);
   run.addProperty<double>("Radius", radius, true);
+  if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
+    run.addProperty<bool>("LorentzCorrection", 1, true);
   setProperty("OutputWorkspace", correctionFactors);
 
 }
@@ -358,6 +377,8 @@ void AnvredCorrection::execEvent()
   run.addProperty<double>("LinearScatteringCoef", smu, true);
   run.addProperty<double>("LinearAbsorptionCoef", amu, true);
   run.addProperty<double>("Radius", radius, true);
+  if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
+    run.addProperty<bool>("LorentzCorrection", 1, true);
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -391,7 +412,7 @@ double AnvredCorrection::getEventWeight( double lamda, double two_theta )
     if ( radius > 0 )
        transinv = absor_sphere(two_theta, lamda);
     // Only Spherical absorption correction 
-    if (getProperty("OnlySphericalAbsorption") || getProperty("ReturnTransmissionOnly")) return transinv;
+    if (OnlySphericalAbsorption || ReturnTransmissionOnly) return transinv;
 
     // Resolution of the lambda table
     size_t lamda_index = static_cast<size_t>( STEPS_PER_ANGSTROM * lamda );

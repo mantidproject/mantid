@@ -6,6 +6,8 @@
 #include <qwt_double_interval.h>
 #include <qwt_raster_data.h>
 #include <vector>
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 namespace MantidQt
 {
@@ -36,7 +38,7 @@ public:
   QwtDoubleInterval range() const;
   void setRange(const QwtDoubleInterval & range);
 
-  void setSliceParams(size_t dimX, size_t dimY, std::vector<Mantid::coord_t> & slicePoint);
+  void setSliceParams(size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X, Mantid::Geometry::IMDDimension_const_sptr Y, std::vector<Mantid::coord_t> & slicePoint);
 
   double value(double x, double y) const;
 
@@ -64,6 +66,12 @@ protected:
 
   /// Dimension index used as the Y axis
   size_t m_dimY;
+
+  /// The X dimensions of the workspace (with the estimated bin resolution)
+  Mantid::Geometry::IMDDimension_const_sptr m_X;
+
+  /// The Y dimensions of the workspace (with the estimated bin resolution)
+  Mantid::Geometry::IMDDimension_const_sptr m_Y;
 
   /// nd-sized array indicating where the slice is being done in the OTHER dimensions
   Mantid::coord_t * m_slicePoint;

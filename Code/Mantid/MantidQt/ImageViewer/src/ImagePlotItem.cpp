@@ -9,11 +9,25 @@ namespace ImageView
 {
   
 
+ImagePlotItem::ImagePlotItem()
+{
+  data_array      = 0;
+  color_table     = 0;
+  intensity_table = 0;
+}
+
+
 void ImagePlotItem::SetData( DataArray*         data_array, 
                              std::vector<QRgb>* color_table )
 {
   this->data_array  = data_array;
   this->color_table = color_table;
+}
+
+
+void ImagePlotItem::SetIntensityTable( std::vector<double>* intensity_table )
+{
+  this->intensity_table = intensity_table;
 }
 
 
@@ -24,7 +38,7 @@ void ImagePlotItem::draw(       QPainter    * painter,
 {
 //std::cout << "ImagePlotItem::draw called =====================" << std::endl;
 
-  if ( data_array )
+  if ( data_array && color_table )     // if data not yet set, just return
   {
 /*
     std::cout << "canvasRect width  = " << canvasRect.width()  << std::endl;
@@ -57,21 +71,44 @@ void ImagePlotItem::draw(       QPainter    * painter,
 
     std::cout << "Data Array n_rows = " << n_rows << std::endl;
 */
-    double scale = 255.0/(max-min);
+    double scale = ((double)color_table->size()-1)/(max-min);
+    size_t lut_size = 0;
+    double ct_scale = ((double)color_table->size()-1);
+    if ( intensity_table != 0 )
+    {
+      lut_size = intensity_table->size();
+      scale    = ((double)lut_size-1.0) / (max-min);
+      ct_scale = ((double)color_table->size()-1);
+    }
     double shift = -min * scale;
-    size_t color_index;
-    size_t image_index = 0;
     size_t data_index;
+    size_t color_index;
+    size_t lut_index;
+    size_t image_index = 0;
     unsigned int *rgb_data = new unsigned int[n_rows * n_cols];
     for ( int row = (int)n_rows-1; row >= 0; row-- )
     {
       data_index = row * n_cols;
-      for ( int col = 0; col < (int)n_cols; col++ )
+      if (intensity_table == 0 )              // use color table directly
       {
-        color_index = (uint)(data[data_index] * scale + shift);
-        rgb_data[image_index] = (*color_table)[ color_index ];
-        image_index++;
-        data_index++;
+        for ( int col = 0; col < (int)n_cols; col++ )
+        {
+          color_index = (uint)(data[data_index] * scale + shift);
+          rgb_data[image_index] = (*color_table)[ color_index ];
+          image_index++;
+          data_index++;
+        }
+      }
+      else                                    // go through intensity table
+      {
+        for ( int col = 0; col < (int)n_cols; col++ )
+        {
+          lut_index   = (uint)(data[data_index] * scale + shift);
+          color_index = (uint)((*intensity_table)[lut_index] * ct_scale );
+          rgb_data[image_index] = (*color_table)[ color_index ];
+          image_index++;
+          data_index++;
+        }
       }
     }
 

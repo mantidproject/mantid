@@ -51,7 +51,11 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImagePlotItem : public QwtPlotItem
 
 public:
   
+  ImagePlotItem();
+  
   void SetData( DataArray* data_array, std::vector<QRgb>* color_table );
+
+  void SetIntensityTable( std::vector<double>*  intensity_table );
 
   virtual void draw(      QPainter    * painter,
                     const QwtScaleMap & xMap, 
@@ -60,8 +64,10 @@ public:
 
 private:
 
-  DataArray*         data_array;
-  std::vector<QRgb>* color_table;
+  DataArray*            data_array;
+  std::vector<QRgb>*    color_table;
+  std::vector<double>*  intensity_table;   // look up table to brighten image,
+                                           // similar to gamma correction
 };
 
 } // namespace MantidQt 

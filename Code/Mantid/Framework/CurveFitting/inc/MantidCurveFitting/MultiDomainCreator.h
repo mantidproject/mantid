@@ -12,7 +12,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    New algorithm for fitting functions. The name is temporary.
+    Creates a composite domain.
 
     @author Roman Tolchenov, Tessella plc
     @date 06/12/2011
@@ -55,6 +55,8 @@ namespace Mantid
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values, size_t i0);
 
+      /// Set ith creator
+      /// 
       void setCreator(size_t i, const std::string& workspacePropetyName,IDomainCreator* creator);
       bool hasCreator(size_t i) const;
 

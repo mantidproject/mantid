@@ -11,11 +11,10 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-/** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
+/** Implementing the steepest descent algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of this algorithm.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 13/1/2010
+    @author Roman Tolchenov, Tessella plc
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

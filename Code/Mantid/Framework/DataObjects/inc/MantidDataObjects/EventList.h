@@ -357,6 +357,11 @@ public:
   void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
+  template< class T >
+  void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
+      double tofcorrection) const;
+  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection) const;
+
   template< class T>
   static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   void multiply(const double value, const double error = 0.0);
@@ -381,6 +386,9 @@ public:
   void convertUnitsViaTof(Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
   void convertUnitsQuickly(const double& factor, const double& power);
 
+  template< class T >
+  void duplicateHelper(EventList* output, typename std::vector<T> & events) const;
+  void duplicate(EventList* output) const;
 
 private:
   ///List of TofEvent (no weights).

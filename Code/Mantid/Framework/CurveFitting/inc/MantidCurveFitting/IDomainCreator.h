@@ -22,7 +22,9 @@ namespace Mantid
     /**
 
     An base class for domain creators for use in Fit. Implementations create function domains
-    from particular workspaces.
+    from particular workspaces. Domain creators are instantiated by Fit algorithm and are responsible
+    for declaring Fit's dynamic properties. Derived creators can implement createOutput method to
+    declare the OutputWorkspace property for comparing the fitted and calculated data.
 
     @author Roman Tolchenov, Tessella plc
     @date 22/03/2012

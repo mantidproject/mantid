@@ -20,7 +20,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    New algorithm for fitting functions. The name is temporary.
+    Creates FunctionDomainMD from an IMDWorkspace. Does not create any properties.
 
     @author Roman Tolchenov, Tessella plc
     @date 06/12/2011

@@ -47,7 +47,7 @@ void EQSANSDarkCurrentSubtraction::init()
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
 
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

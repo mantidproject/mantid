@@ -54,9 +54,6 @@ namespace API
     /// @return true if the workspace is file-backed
     virtual bool isFileBacked() const = 0;
 
-    /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
-    virtual void estimateResolution() = 0;
-
     /// Split the top-level MDBox into a MDGridBox.
     virtual void splitBox() = 0;
 

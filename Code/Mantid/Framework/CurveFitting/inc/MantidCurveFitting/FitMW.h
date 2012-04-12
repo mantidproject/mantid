@@ -20,7 +20,9 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    New algorithm for fitting functions. The name is temporary.
+    Creates FunctionDomain1D form a spectrum in a MatrixWorkspace.
+    Declares WorkspaceIndex, StartX, and EndX input properties.
+    Declares OutputWorkspace output property.
 
     @author Roman Tolchenov, Tessella plc
     @date 06/12/2011

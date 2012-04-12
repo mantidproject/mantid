@@ -159,6 +159,15 @@ namespace API
     return vecCollapsedDimensions;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** @return a vector with the size of the smallest bin in each dimension */
+  std::vector<coord_t> MDGeometry::estimateResolution() const
+  {
+    std::vector<coord_t> out;
+    for (size_t d=0; d<this->getNumDims(); d++)
+      out.push_back(this->getDimension(d)->getBinWidth());
+    return out;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Get the index of the dimension that matches the name given

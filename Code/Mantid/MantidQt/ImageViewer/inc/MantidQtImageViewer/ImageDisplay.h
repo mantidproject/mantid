@@ -66,6 +66,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      void UpdateImage();
 
      void SetColorScale( std::vector<QRgb> & new_color_table );
+
+     void SetIntensity( double control_parameter );
    
      void SetPointedAtPoint( QPoint point );
 
@@ -74,20 +76,21 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
   private:
      void ShowInfoList( double x, double y );
 
-     std::vector<QRgb> color_table;
+     std::vector<QRgb>    color_table;
+     std::vector<double>  intensity_table;
 
-     ImageDataSource* data_source;
-     DataArray*       data_array;
+     ImageDataSource*     data_source;
+     DataArray*           data_array;
 
-     QwtPlot*         image_plot;
-     ImagePlotItem*   image_plot_item;
+     QwtPlot*             image_plot;
+     ImagePlotItem*       image_plot_item;
 
-     SliderHandler*   slider_handler;
+     SliderHandler*       slider_handler;
 
-     GraphDisplay*    h_graph_display;
-     GraphDisplay*    v_graph_display;
+     GraphDisplay*        h_graph_display;
+     GraphDisplay*        v_graph_display;
 
-     QTableWidget*    image_table;
+     QTableWidget*        image_table;
 };
 
 } // namespace MantidQt 

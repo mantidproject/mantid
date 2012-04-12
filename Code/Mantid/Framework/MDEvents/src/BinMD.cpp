@@ -400,7 +400,7 @@ namespace MDEvents
       {
         PARALLEL_CRITICAL(BinMD_progress)
         {
-          std::cout << "Chunk " << chunk << ": found " << boxes.size() << " boxes within the implicit function." << std::endl;
+          g_log.debug() << "Chunk " << chunk << ": found " << boxes.size() << " boxes within the implicit function." << std::endl;
           progNumSteps += boxes.size();
           prog->setNumSteps( progNumSteps );
         }

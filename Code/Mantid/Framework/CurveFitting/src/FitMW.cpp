@@ -1,16 +1,3 @@
-/*WIKI* 
-
-
-This algorithm fits data in a [[Workspace]] with a function. The function and the initial values for its parameters are set with the Function property. The function must be compatible with the workspace.
-
-Using the Minimizer property, Fit can be set to use different algorithms to perform the minimization. By default if the function's derivatives can be evaluated then Fit uses the GSL Levenberg-Marquardt minimizer. If the function's derivatives cannot be evaluated the GSL Simplex minimizer is used. Also, if one minimizer fails, for example the Levenberg-Marquardt minimizer, Fit may try its luck with a different minimizer. If this happens the user is notified about this and the Minimizer property is updated accordingly.
-
-===Output===
-
-Setting the Output property defines the names of the output workspaces. One of them is a [[TableWorkspace]] with the fitted parameter values.  If the function's derivatives can be evaluated an additional TableWorkspace is returned containing correlation coefficients in %.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -85,7 +72,7 @@ namespace
   using API::Jacobian;
 
   /**
-   * declare properties that specify the dataset within the workspace to fit to.
+   * Declare properties that specify the dataset within the workspace to fit to.
    * @param domainIndex :: Index of created domain in a composite domain or 0 in single domain case
    */
   void FitMW::declareDatasetProperties(const std::string& suffix,bool addProp)

@@ -113,6 +113,8 @@ private:
   double radius; ///< sample radius in cm
   double power_th;  ///< Power of lamda in BuildLamdaWeights
   std::vector<double> lamda_weight; ///< lmabda weights
+  bool OnlySphericalAbsorption;
+  bool ReturnTransmissionOnly;
 
 };
 
