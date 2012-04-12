@@ -20,6 +20,7 @@ namespace DataObjects
                       const bool includeMonitors=false);
         ~MaskWorkspace();
 
+        bool isMasked(const detid_t detectorID) const;
         virtual const std::string id() const;
 
     private:

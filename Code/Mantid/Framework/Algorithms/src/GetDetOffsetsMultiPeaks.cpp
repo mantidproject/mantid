@@ -27,6 +27,7 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
@@ -198,7 +199,7 @@ namespace Mantid
       double wkspDmin, wkspDmax;
       inputW->getXMinMax(wkspDmin, wkspDmax);
       // Create the output MaskWorkspace
-      MatrixWorkspace_sptr maskWS(new SpecialWorkspace2D(inputW->getInstrument()));
+      MatrixWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
       // the peak positions and where to fit

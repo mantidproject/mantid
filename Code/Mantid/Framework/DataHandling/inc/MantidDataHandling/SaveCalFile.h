@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -31,8 +32,8 @@ namespace DataHandling
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling\\Text;Diffraction";}
 
-    static void saveCalFile(const std::string& calFileName,
-        Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, Mantid::API::MatrixWorkspace_sptr maskWS);
+    void saveCalFile(const std::string& calFileName,
+        Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, Mantid::DataObjects::MaskWorkspace_sptr maskWS);
 
   private:
     /// Sets documentation strings for this algorithm
