@@ -312,7 +312,7 @@ public:
   /*
    * Test for masking detectors by SpecialWorkspace2D
    */
-  void test_Giving_A_SpecialWorkspace2D()
+  void xtest_Giving_A_SpecialWorkspace2D()
   {
     // 1. Create 2 workspaces
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
