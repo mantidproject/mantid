@@ -5,6 +5,7 @@ from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
 import _qti
+import mantidplot
 from PyQt4 import QtGui, QtCore
 
 class RangeSelector(object):
@@ -41,7 +42,8 @@ class RangeSelector(object):
             if g is not None:
                 g.close()
                 
-            g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
+            g_proxy = mantidplot.plotSpectrum(ws, [0], True)
+            g = g_proxy._getHeldObject()
             g.setName(self._graph)        
             l=g.activeLayer()
             try:
