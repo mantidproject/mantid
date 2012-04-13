@@ -369,15 +369,17 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     #==========================================================================
     #======================= Dynamic Rebinning ================================
     #==========================================================================
-    # FIXME: Figure out why this fails
-    def xtest_DynamicRebinning(self):
+    def test_DynamicRebinning(self):
         sv = self.sv
         sv.setRebinThickness(2, 1.0)
         sv.setRebinNumBins(50, 200)
         sv.refreshRebin()
         sv.setRebinMode(True, True)
         time.sleep(1)
-        self.assertTrue(mtd.workspaceExists('uniform_binned'), 'Dynamically rebinned workspace was created.')
+        self.assertTrue(mtd.workspaceExists('uniform_rebinned'), 'Dynamically rebinned workspace was created.')
+        ws = mtd['uniform_rebinned']
+        self.assertEqual(ws.getNumDims(), 3)
+        self.assertEqual(ws.getNPoints(), 50*200*1)
         
         
         
