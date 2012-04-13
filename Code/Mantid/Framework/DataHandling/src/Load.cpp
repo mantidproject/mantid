@@ -93,6 +93,27 @@ namespace
 
     return wsName;
   }
+
+  /**
+   * Helper function that takes a vector of vectors of items and flattens it into
+   * a single vector of items.
+   */
+  template<typename T>
+  std::vector<T> flattenVecOfVec(std::vector<std::vector<T> > vecOfVec)
+  {
+    std::vector<T> flattenedVec;
+
+    std::vector<std::vector<T> >::const_iterator it = vecOfVec.begin();
+
+    for(; it != vecOfVec.end(); ++it)
+    {
+      flattenedVec.insert(
+        flattenedVec.end(),
+        it->begin(), it->end());
+    }
+
+    return flattenedVec;
+  }
 }
 
 namespace Mantid
@@ -139,12 +160,39 @@ namespace Mantid
       {
         // Get back full path before passing to getFileLoader method, and also
         // find out whether this is a multi file load.
-        std::vector<std::vector<std::string> > fileNames = getProperty("Filename");
+        std::vector<std::string> fileNames = flattenVecOfVec<std::string>(getProperty("Filename"));
         // If it's a single file load, then it's fine to change loader.
-        if(isSingleFile(fileNames))
+        if(fileNames.size() == 1)
         {
           IDataFileChecker_sptr loader = getFileLoader(getPropertyValue(name));
-          if( loader ) declareLoaderProperties(loader);
+          assert(loader); // (getFileLoader should throw if no loader is found.)
+          declareLoaderProperties(loader);
+        }
+
+        // Else we've got multiple files, and must enforce the rule that only one type of loader is allowed.
+        // Allowing more than one would mean that "extra" properties defined by the class user (for example
+        // "LoadLogFiles") are potentially ambiguous.
+        else if(fileNames.size() > 1)
+        {
+          IDataFileChecker_sptr loader = getFileLoader(fileNames[0]);
+          
+          // If the first file has a loader ...
+          if( loader )
+          {
+            // ... store it's name and version and check that all other files have loaders with the same name and version.
+            std::string name = loader->name();
+            int version = loader->version();
+            for(size_t i = 1; i < fileNames.size(); ++i)
+            {
+              loader = getFileLoader(fileNames[i]);
+
+              if( name != loader->name() || version != loader->version() )
+                throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");
+            }
+          }
+
+          assert(loader); // (getFileLoader should throw if no loader is found.)
+          declareLoaderProperties(loader);
         }
       }
     }
@@ -638,13 +686,37 @@ namespace Mantid
       const std::string & wsName)
     {
       Mantid::API::IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 1);
+
       // Here, as a workaround for groupworkspaces who's members have names but no
-      // accompanying entries in the ADS, we set the sub algo to not be a child ...
+      // accompanying entries in the ADS, we set the sub algo to not be a child.
       loadAlg->setChild(false);
-      // ... and now, so that the the workspaces dont appear in the window, we prefix
-      // all workspace names with "__".
-      loadAlg->setPropertyValue("Filename",fileName);
-      loadAlg->setPropertyValue("OutputWorkspace","__" + wsName);
+
+      // Get the list properties for the concrete loader load algorithm
+      const std::vector<Kernel::Property*> & props = getProperties();
+
+      // Loop through and set the properties on the sub algorithm
+      std::vector<Kernel::Property*>::const_iterator itr;
+      for (itr = props.begin(); itr != props.end(); ++itr)
+      {
+        const std::string propName = (*itr)->name();
+
+        if( this->existsProperty(propName) )
+        {
+          if(propName == "Filename")
+          {
+            loadAlg->setPropertyValue("Filename",fileName);
+          }
+          else if(propName == "OutputWorkspace")
+          {
+            loadAlg->setPropertyValue("OutputWorkspace","__" + wsName);
+          }
+          else
+          {
+            loadAlg->setPropertyValue(propName, getPropertyValue(propName));
+          }
+        }
+      }
+
       loadAlg->executeAsSubAlg();
 
       return AnalysisDataService::Instance().retrieve("__" + wsName);
