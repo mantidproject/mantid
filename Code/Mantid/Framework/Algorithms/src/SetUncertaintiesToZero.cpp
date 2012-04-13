@@ -6,6 +6,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SetUncertaintiesToZero.h"
+#include "MantidKernel/ListValidator.h"
 #include <vector>
 
 namespace Mantid
@@ -43,17 +44,26 @@ const std::string SetUncertaintiesToZero::name() const
 int SetUncertaintiesToZero::version() const
 { return (1);}
 
+const std::string ZERO("zero");
+const std::string SQRT("sqrt");
+
 void SetUncertaintiesToZero::init()
 {
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",
                                                               Direction::Input));
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",
                                                               Direction::Output));
+  std::vector<std::string> errorTypes;
+  errorTypes.push_back(ZERO);
+  errorTypes.push_back(SQRT);
+  declareProperty("SetError", ZERO, boost::make_shared<StringListValidator>(errorTypes), "How to reset the uncertainties");
 }
 
 void SetUncertaintiesToZero::exec()
 {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  std::string errorType = getProperty("SetError");
+  bool zeroError = (errorType.compare(ZERO) == 0);
 
   // Create the output workspace. This will copy many aspects from the input one.
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
@@ -70,6 +80,17 @@ void SetUncertaintiesToZero::exec()
     outputWorkspace->setX(i,inputWorkspace->refX(i));
     outputWorkspace->dataY(i) = inputWorkspace->readY(i);
     outputWorkspace->dataE(i) = std::vector<double>(inputWorkspace->readE(i).size(), 0.);
+
+    if (!zeroError)
+    {
+      MantidVec& Y = outputWorkspace->dataY(i);
+      MantidVec& E = outputWorkspace->dataE(i);
+      std::size_t numE = E.size();
+      for (std::size_t j = 0; j < numE; j++)
+      {
+        E[j] = sqrt(Y[j]);
+      }
+    }
 
     prog.report();
 
