@@ -159,7 +159,7 @@ set ( SRC_FILES
 	src/SANSDirectBeamScaling.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
-	src/SetUncertaintiesToZero.cpp
+	src/SetUncertainties.cpp
 	src/ShiftLogTime.cpp
 	src/SignalOverError.cpp
 	src/SmoothData.cpp
@@ -352,7 +352,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
-	inc/MantidAlgorithms/SetUncertaintiesToZero.h
+	inc/MantidAlgorithms/SetUncertainties.h
 	inc/MantidAlgorithms/ShiftLogTime.h
 	inc/MantidAlgorithms/SignalOverError.h
 	inc/MantidAlgorithms/SmoothData.h
@@ -559,7 +559,7 @@ set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp 
     src/FFTSmooth2.cpp
     src/FilterBadPulses.cpp
-    src/SetUncertaintiesToZero.cpp
+    src/SetUncertainties.cpp
     )
 
 # Python unit tests

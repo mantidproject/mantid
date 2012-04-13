@@ -667,7 +667,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                     MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
-                    SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                 if HAVE_MPI:
                     if mpi.world.rank > 0:
                         return
