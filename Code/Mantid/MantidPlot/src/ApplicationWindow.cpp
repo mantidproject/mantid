@@ -14720,11 +14720,16 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 
     if (exec)
     {
-      executeScriptFile(file_name, Script::Asynchronous);
       if(quit)
       {
+        executeScriptFile(file_name, Script::Asynchronous);
         saved = true;
         this->close();
+      }
+      else
+      {
+        loadScript(file_name);
+        scriptingWindow->executeCurrentTab(Script::Asynchronous);
       }
     }
     else
