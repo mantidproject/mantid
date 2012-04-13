@@ -1353,6 +1353,16 @@ private:
   Graph *lastCopiedLayer;
   QSplitter *explorerSplitter;
 
+    /**
+  *  Load a script file into a new or existing project
+  *
+  * @param fn :: is read as a Python script file and loaded in the command script window.
+  * @param execute :: specifies if the script should be executed after opening.
+  * @param quit :: If true then the application will quit after execution of the script
+  * @param exisatingProject :: True if loading into an already existing project
+  */
+  ApplicationWindow * loadScript(const QString& fn, bool execute, bool quit, bool existingProject );
+
   //	QAssistantClient *assistant;
   ScriptingWindow *scriptingWindow; //Mantid
   Script *m_iface_script;
