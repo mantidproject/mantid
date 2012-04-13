@@ -95,6 +95,8 @@ signals:
   void undoAvailable(bool);
   /// Redo availability for current editor
   void redoAvailable(bool);
+  /// Execution state changed
+  void executionStateChanged(bool state);
 
 public slots:
   /// Create a new tab for script editing with the text within the file imported and insert it at the index
@@ -155,8 +157,10 @@ private slots:
   void currentEditorModified(bool state);
   /// Current tab has changed
   void tabSelectionChanged(int index);
-  /// Enable/disable the relevant actions based on the execution state of the script
-  void setScriptIsRunning(bool running);
+  /// Receive events regarding script started
+  void sendScriptExecutingSignal();
+  /// Receive events regarding script stopped state
+  void sendScriptStoppedSignal();
 
 private:
   /// A context menu event for the tab widget itself

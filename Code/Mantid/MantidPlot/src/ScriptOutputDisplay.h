@@ -26,8 +26,6 @@ public slots:
   void print();
   /// Save the output to a file
   void saveToFile(const QString & filename = "");
-  /// Change the title based on the script's execution state
-  void setScriptIsRunning(bool running);
   /// Display an output message that is not an error
   void displayMessage(const QString & msg);
   /// Disply an output message with a timestamp & border

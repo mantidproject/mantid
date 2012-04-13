@@ -9520,6 +9520,8 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     scriptingWindow->saveSettings();
     scriptingWindow->acceptCloseEvent(true);
     scriptingWindow->close();
+    delete scriptingWindow;
+    scriptingWindow = NULL;
   }
 
 	// Emit a shutting_down() signal that can be caught by

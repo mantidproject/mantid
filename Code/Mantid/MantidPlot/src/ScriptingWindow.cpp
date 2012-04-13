@@ -257,9 +257,11 @@ void ScriptingWindow::initMenus()
 
   m_editMenu = menuBar()->addMenu(tr("&Edit"));
   connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), m_editMenu, SLOT(setDisabled(bool)));
 
   m_runMenu = menuBar()->addMenu(tr("E&xecute"));
   connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), m_runMenu, SLOT(setDisabled(bool)));
 
   m_windowMenu = menuBar()->addMenu(tr("&Window"));
   connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateWindowMenu()));

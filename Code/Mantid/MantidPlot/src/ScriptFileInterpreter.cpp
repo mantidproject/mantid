@@ -318,6 +318,10 @@ void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, cons
   connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
   connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_messages, SLOT(displayError(const QString &)));
   connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_editor, SLOT(markExecutingLineAsError()));
+
+  connect(m_runner.data(), SIGNAL(started(const QString &)), this, SIGNAL(executionStarted()));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SIGNAL(executionStopped()));
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), this, SIGNAL(executionStopped()));
 }
 
 /**

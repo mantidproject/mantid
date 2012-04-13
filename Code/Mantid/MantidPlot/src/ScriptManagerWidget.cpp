@@ -337,9 +337,14 @@ void ScriptManagerWidget::currentEditorModified(bool state)
  */
 void ScriptManagerWidget::tabSelectionChanged(int index)
 {
+  m_current->disconnect(SIGNAL(executionStarted()));
+  m_current->disconnect(SIGNAL(executionStopped()));
   if( count() > 0 )
   {
     m_current = interpreterAt(index);
+    connect(m_current, SIGNAL(executionStarted()), this, SLOT(sendScriptExecutingSignal()));
+    connect(m_current, SIGNAL(executionStopped()), this, SLOT(sendScriptStoppedSignal()));
+    emit executionStateChanged(m_current->isExecuting());
     setFocusProxy(m_current);
     m_current->setFocus();
   }
@@ -347,17 +352,23 @@ void ScriptManagerWidget::tabSelectionChanged(int index)
   {
     m_current = m_nullScript;
   }
-
 }
 
 /**
- * Enable/disable script interaction based on script execution status
- * @param running :: The state of the script
+ * Emits the executionStateChanged(true) signal
  */
-void ScriptManagerWidget::setScriptIsRunning(bool)
+void ScriptManagerWidget::sendScriptExecutingSignal()
 {
+  emit executionStateChanged(true);
 }
 
+/**
+ * Emits the executionStateChanged(false) signal
+ */
+void ScriptManagerWidget::sendScriptStoppedSignal()
+{
+  emit executionStateChanged(false);
+}
 
 //--------------------------------------------
 // Private member functions (non-slot)

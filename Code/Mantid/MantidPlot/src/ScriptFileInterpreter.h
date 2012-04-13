@@ -92,6 +92,10 @@ signals:
   void editorUndoAvailable(bool);
   /// Emitted when the redo availability changes
   void editorRedoAvailable(bool);
+  /// Emitted when a script starts executing
+  void executionStarted();
+  /// Emitted when a script stops executing
+  void executionStopped();
 
 private slots:
   // Popup a context menu
