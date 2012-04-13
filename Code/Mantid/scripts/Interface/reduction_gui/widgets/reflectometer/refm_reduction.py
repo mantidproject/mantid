@@ -725,14 +725,6 @@ class DataReflWidget(BaseWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-        if False and IS_IN_MANTIDPLOT:
-            ws_name = "reflectivity"
-            ws_list = [n for n in mtd.keys() if n.startswith(ws_name)]
-            g = _qti.app.graph(ws_name)
-            if g is None and len(ws_list)>0:
-                g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
-                g.setName(ws_name)  
-        
         self._summary.angle_list.clear()
         if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
             pass
