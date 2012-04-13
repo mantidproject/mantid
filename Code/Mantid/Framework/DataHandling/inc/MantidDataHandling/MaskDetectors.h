@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 
 namespace Mantid
 {
@@ -17,7 +17,7 @@ namespace DataHandling
 
     Required Properties:
     <UL>
-    <LI> Workspace - The name of the (input & output) Workspace2D on which to perform the algorithm </LI>
+    <LI> Workspace - The name of the (input & output) Workspace on which to perform the algorithm </LI>
     </UL>
 
     Optional Properties (One should be set. The highest listed below will be used if more than one is.):
@@ -27,10 +27,7 @@ namespace DataHandling
     <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to mask </LI>
     </UL>
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 15/04/2008
-
-    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -72,7 +69,7 @@ private:
   void fillIndexListFromSpectra(std::vector<size_t>& indexList, const std::vector<specid_t>& spectraList,
                                 const API::MatrixWorkspace_sptr WS);
   void appendToIndexListFromWS(std::vector<size_t>& indexList, const API::MatrixWorkspace_sptr maskedWorkspace);
-  void appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::SpecialWorkspace2D_const_sptr maskedWorkspace);
+  void appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::MaskWorkspace_const_sptr maskedWorkspace);
 };
 
 } // namespace DataHandling

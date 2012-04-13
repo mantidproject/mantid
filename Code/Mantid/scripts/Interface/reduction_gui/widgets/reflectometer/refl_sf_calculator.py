@@ -35,6 +35,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
     short_name = 'REFL'
     peak_pixel_range = []
     background_pixel_range = []
+    cfg_scaling_factor_file = '~/ReflSFCalculator.cfg'
 
     def __init__(self, parent=None, state=None, settings=None, name="REFL", data_proxy=None):      
         super(DataReflSFCalculatorWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
@@ -143,10 +144,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                                          self._summary.data_run_number_edit,
                                          self._summary.data_peak_from_pixel,
                                          self._summary.data_peak_to_pixel)
-#        self._summary.data_peak_from_pixel_estimate.setText(str(int(math.ceil(min))))
-#        self._summary.data_peak_to_pixel_estimate.setText(str(int(math.ceil(max))))
-#        util.set_tiny(self._summary.data_peak_from_pixel_estimate)
-#        util.set_tiny(self._summary.data_peak_to_pixel_estimate)
 
     def _plot_count_vs_y_bck(self):
         """
@@ -227,13 +224,16 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         run_number = self._summary.data_run_number_edit.text()
         _file = FileFinder.findRuns("REF_L%d"%int(run_number))
         lambdaRequest = ''
-        S1H, S2H, S1W, S2W, lambdaRequest = self.getSlitsValueAndLambda(_file[0])
-        self._summary.s1h.setText(str(S1H))
-        self._summary.s2h.setText(str(S2H))
-        self._summary.s1w.setText(str(S1W))
-        self._summary.s2w.setText(str(S2W))
-        self._summary.lambda_request.setText(str(lambdaRequest))
-        self._summary.data_run_number_processing.hide()
+        try:
+            S1H, S2H, S1W, S2W, lambdaRequest = self.getSlitsValueAndLambda(_file[0])
+            self._summary.s1h.setText(str(S1H))
+            self._summary.s2h.setText(str(S2H))
+            self._summary.s1w.setText(str(S1W))
+            self._summary.s2w.setText(str(S2W))
+            self._summary.lambda_request.setText(str(lambdaRequest))
+            self._summary.data_run_number_processing.hide()
+        except:
+            self._summary.data_run_number_processing.hide()
         
     def _add_data(self):
         state = self.get_editing_state()
@@ -297,65 +297,68 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-        super(DataReflSFCalculatorWidget, self).set_state(state)
-        
-#        if len(state.data_sets)>0:
-#            self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
+
+        self._summary.angle_list.clear()
+        if len(state.data_sets) == 1 and state.data_sets[0].data_file==0:
+            pass
+        else:
+            for item in state.data_sets:
+                if item is not None:
+                    item_widget = QtGui.QListWidgetItem(unicode(str(item.data_file)), self._summary.angle_list)
+                    item_widget.setData(QtCore.Qt.UserRole, item)
+
+        if len(state.data_sets)>0:
+            self.set_editing_state(state.data_sets[0])
             
-#        self._reset_warnings()
+        self._reset_warnings()
 
     def set_editing_state(self, state):
     #    super(DataReflSFCalculatorWidget, self).set_editing_state(state)
                 
-        self._summary.data_run_number_edit.setText(state.data_file)
-        self._summary.incident_medium_combobox.clear()
-        self._summary.incident_medium_combobox.addItems(state.incident_medium_list)
+        self._summary.incident_medium_combobox.clear() 
+
+        _incident_medium_str = str(state.incident_medium_list[0])
+        _list = _incident_medium_str.split(',')
+        for i in range(len(_list)):
+            self._summary.incident_medium_combobox.addItem(str(_list[i]))
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
+
+        self._summary.data_run_number_edit.setText(str(state.data_file))
         self._summary.number_of_attenuator.setText(str(state.number_attenuator))
         self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
         self._summary.data_peak_to_pixel.setText(str(state.peak_selection[1]))
         self._summary.data_background_from_pixel.setText(str(state.back_selection[0]))
         self._summary.data_background_to_pixel.setText(str(state.back_selection[1]))
-        self._summary.data_background_switch.setChecked(state.back_flag)
-        self._summary.lambda_request.setText(state.lambda_requested)
-        self._summary.s1h.setText(state.s1h)
-        self._summary.s2h.setText(state.s2h)
-        self._summary.s1w.setText(state.s1w)
-        self._summary.s2w.setText(state.s2w)
+        self._summary.data_background_switch.setChecked(bool(state.back_flag))
+        self._summary.lambda_request.setText(str(state.lambda_requested))
+        self._summary.s1h.setText(str(state.s1h))
+        self._summary.s2h.setText(str(state.s2h))
+        self._summary.s1w.setText(str(state.s1w))
+        self._summary.s2w.setText(str(state.s2w))
     
     def get_state(self):
         """
             Returns an object with the state of the interface
         """
+        
         m = self.get_editing_state()
         state = DataSeries(data_class=REFLDataSets)
         state_list = []
         
-#        # Common Q binning
-#        q_min = float(self._summary.q_min_edit.text())
-#        q_step = float(self._summary.q_step_edit.text())
-#        if self._summary.log_scale_chk.isChecked():
-#            q_step = -q_step
-#            
-#        # Angle offset
-#        if hasattr(m, "angle_offset"):
-#            angle_offset = float(self._summary.angle_offset_edit.text())
-#            angle_offset_error = float(self._summary.angle_offset_error_edit.text())
-#                
-#        for i in range(self._summary.angle_list.count()):
-#            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
-#            # Over-write Q binning with common binning
-#            data.q_min = q_min
-#            data.q_step = q_step
-#        
-#            # Over-write angle offset
-#            if hasattr(data, "angle_offset"):
-#                data.angle_offset = angle_offset
-#                data.angle_offset_error = angle_offset_error
-#
-#            state_list.append(data)
-        state.data_sets = state_list
+        #common incident medium
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
+                                for i in range(self._summary.incident_medium_combobox.count())]
+        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+
+        incident_medium = m.incident_medium_list[m.incident_medium_index_selected]
         
+        for i in range(self._summary.angle_list.count()):
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            # Over-write incident medium with global incident medium
+            data.incident_medium = incident_medium
+            state_list.append(data)
+
+        state.data_sets = state_list
         return state
     
     def get_editing_state(self):

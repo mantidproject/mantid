@@ -13,6 +13,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
+                   src/CommandLineInterpreter.cpp
                    src/ColorMapDialog.cpp
                    src/Cone3D.cpp
                    src/ConfigDialog.cpp
@@ -99,12 +100,14 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ScalePicker.cpp
                    src/ScreenPickerTool.cpp
                    src/Script.cpp
+                   src/ScriptCode.cpp
                    src/Scripted.cpp
-                   src/ScriptEdit.cpp
                    src/ScriptingEnv.cpp
                    src/ScriptingLangDialog.cpp
                    src/ScriptingWindow.cpp
+                   src/ScriptFileInterpreter.cpp
                    src/ScriptManagerWidget.cpp
+                   src/ScriptOutputDisplay.cpp
                    src/SelectionMoveResizer.cpp
                    src/SendToProgramDialog.cpp
                    src/SetColValuesDialog.cpp
@@ -119,6 +122,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TableStatistics.cpp
                    src/TextDialog.cpp
                    src/TextEditor.cpp
+                   src/TextFileIO.cpp
                    src/TitlePicker.cpp
                    src/TranslateCurveTool.cpp
                    src/UserFunction.cpp
@@ -231,6 +235,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
+                   src/CommandLineInterpreter.h
                    src/ColorMapDialog.h
                    src/Cone3D.h
                    src/ConfigDialog.h
@@ -312,6 +317,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PythonScript.h
                    src/PythonScripting.h
                    src/PythonSystemHeader.h
+                   src/PythonThreading.h
                    src/QwtBarCurve.h
                    src/qwt_compat.h
                    src/QwtErrorPlotCurve.h
@@ -324,12 +330,14 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScalePicker.h
                    src/ScreenPickerTool.h
                    src/Scripted.h
-                   src/ScriptEdit.h
                    src/Script.h
+                   src/ScriptCode.h
                    src/ScriptingEnv.h
                    src/ScriptingLangDialog.h
                    src/ScriptingWindow.h
                    src/ScriptManagerWidget.h
+                   src/ScriptOutputDisplay.h
+                   src/ScriptFileInterpreter.h
                    src/SelectionMoveResizer.h
                    src/SendToProgramDialog.h
                    src/SetColValuesDialog.h
@@ -344,6 +352,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TableStatistics.h
                    src/TextDialog.h
                    src/TextEditor.h
+                   src/TextFileIO.h
                    src/TitlePicker.h
                    src/TranslateCurveTool.h
                    src/UserFunction.h
@@ -516,6 +525,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AxesDialog.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
+                        src/CommandLineInterpreter.h
                         src/ConfigDialog.h
                         src/ContourLinesEditor.h
                         src/Convolution.h
@@ -585,12 +595,13 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/RenameWindowDialog.h
                         src/ScalePicker.h
                         src/ScreenPickerTool.h
-                        src/ScriptEdit.h
                         src/Script.h
                         src/ScriptingEnv.h
                         src/ScriptingLangDialog.h
                         src/ScriptingWindow.h
                         src/ScriptManagerWidget.h
+                        src/ScriptOutputDisplay.h
+                        src/ScriptFileInterpreter.h
                         src/SelectionMoveResizer.h
                         src/SendToProgramDialog.h
                         src/SetColValuesDialog.h
@@ -861,7 +872,7 @@ else ()
 	endif ()
 
 	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}/test;MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 	
 	# Fixes for Darwin (MacOS)
 	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

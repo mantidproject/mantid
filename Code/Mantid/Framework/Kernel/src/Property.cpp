@@ -213,6 +213,7 @@ namespace DataObjects
   class PeaksWorkspace;
   class GroupingWorkspace;
   class OffsetsWorkspace;
+  class MaskWorkspace;
   class SpecialWorkspace2D;
   class Workspace2D;
 }
@@ -270,8 +271,10 @@ std::string getUnmangledTypeName(const std::type_info& type)
                                       string("PeaksWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<GroupingWorkspace>).name(), 
                                       string("GroupingWorkspace")));
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<OffsetsWorkspace>).name(), 
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<OffsetsWorkspace>).name(),
                                       string("OffsetsWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<MaskWorkspace>).name(),
+                                      string("MaskWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(), 
                                       string("SpecialWorkspace2D")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<IMDHistoWorkspace>).name(),

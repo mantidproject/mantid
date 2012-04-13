@@ -46,7 +46,6 @@ namespace Mantid
       g_log.debug() << "SNSDataArchive URL = \'" << URL << "\'\n";
 
       std::string wsResult = "";
-      std::string result = "";
 
       //#ifdef _WIN32
       //	// Return an empty string

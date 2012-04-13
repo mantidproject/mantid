@@ -62,6 +62,11 @@ namespace Mantid
       void rebinToOutput(const Geometry::Quadrilateral & inputQ, API::MatrixWorkspace_const_sptr inputWS,
                          const size_t i, const size_t j, API::MatrixWorkspace_sptr outputWS,
                          const std::vector<double> & verticalAxis);
+      /// Rebin the input quadrilateral to to output grid
+      void rebinToFractionalOutput(const Geometry::Quadrilateral & inputQ, API::MatrixWorkspace_const_sptr inputWS,
+                                   const size_t i, const size_t j, API::MatrixWorkspace_sptr outputWS,
+                                   const std::vector<double> & verticalAxis);
+
       /// Find the intersect region on the output grid
       bool getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const std::vector<double> & verticalAxis,
                                  const Geometry::Quadrilateral & inputQ,

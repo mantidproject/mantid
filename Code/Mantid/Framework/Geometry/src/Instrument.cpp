@@ -347,7 +347,8 @@ namespace Mantid
       // Need to be able to enter the while loop
       nodeQueue.push_back(node);
       int nlevel = 0;
-      while( !nodeQueue.empty() && (nlevels == 0 || nlevel < nlevels))
+      const bool limitSearch(nlevels > 0);
+      while( !nodeQueue.empty() )
       {
         node = nodeQueue.front();
         nodeQueue.pop_front();
@@ -371,6 +372,7 @@ namespace Mantid
           }
         }
         nlevel++;
+        if( limitSearch && nlevel == nlevels) break;
       }// while-end
 
       // If we have reached here then the search failed

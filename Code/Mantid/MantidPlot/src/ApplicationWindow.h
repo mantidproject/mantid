@@ -106,7 +106,7 @@ class FitPropertyBrowser;
 //Mantid
 class MantidUI;
 class ScriptingWindow;
-class ScriptManagerWidget;
+class CommandLineInterpreter;
 
 /**
 * \brief QtiPlot's main window.
@@ -220,11 +220,13 @@ public slots:
   /**
   * \brief Create a new project from a script file.
   *
-  * @param fn :: is read as a Python script file and loaded in the command script window.
-  * @param execute :: specifies if the script should be executed after opening.
-  * @param quit :: If true then the application will quit after execution of the script
+  * @param fn :: is read as a Python script file and loaded in the script window.
   */
-  ApplicationWindow * loadScript(const QString& fn, bool execute = false, bool quit = false);
+  ApplicationWindow * loadScript(const QString& fn);
+  /// Runs a script from a file. Mainly useful for automatically running scripts
+  void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  bool runPythonScript(const QString & code, const bool async = false, bool quiet=false, bool redirect=true);
+
 
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;
@@ -1141,7 +1143,6 @@ private:
   void showCustomActionDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
-  bool runPythonScript(const QString & code, bool quiet=false, bool redirect=true);
 
   void setPlotType(const QStringList & plotType);
 
@@ -1361,7 +1362,7 @@ private:
   QDockWidget *consoleWindow;
   QTextEdit *console;
   QDockWidget *m_interpreterDock;
-  ScriptManagerWidget *m_scriptInterpreter;
+  CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
   QToolBar *fileTools, *plotTools, *tableTools, *columnTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;

@@ -32,16 +32,16 @@
 #include <QVariant>
 #include <QString>
 #include <QStringList>
-#include <QObject>
-#include <QStringList>
 #include <QEvent>
+#include <QFuture>
 
-#include "ScriptingEnv.h"
+#include "ScriptCode.h"
 
 //-------------------------------------------
 // Forward declarations
 //-------------------------------------------
 class ApplicationWindow;
+class ScriptingEnv;
 
 /**
  * Script objects represent a chunk of code, possibly together with local
@@ -53,60 +53,80 @@ class Script : public QObject
   Q_OBJECT
 
   public:
+  /// Interaction type
+  enum InteractionType {Interactive, NonInteractive};
+  /// Execution mode
+  enum ExecutionMode {Serialised, Asynchronous, NotExecuting};
+
   /// Constructor
-  Script(ScriptingEnv *env, const QString &code, QObject *context=NULL, 
-	 const QString &name="<input>", bool interactive = true, bool reportProgress = false);
+  Script(ScriptingEnv *env, const QString &name, const InteractionType interact,
+         QObject * context = NULL);
   /// Destructor
-  virtual ~Script();
-  /// Return the code that will be executed when calling exec() or eval()
-  const QString code() const { return Code; }
-  /// Return the context in which the code is to be executed.
-  const QObject* context() const { return Context; }
-  /// Like QObject::name, but with unicode support.
-  const QString name() const { return Name; }
-  /// Return whether errors / exceptions are to be emitted or silently ignored
-  bool emitErrors() const { return EmitErrors; }
-  /// Append to the code that will be executed when calling exec() or eval()
-  virtual void addCode(const QString &code);
-  /// Set the code that will be executed when calling exec() or eval()
-  virtual void setCode(const QString &code);
+  ~Script();
+  /// Returns the envirnoment this script is tied to
+  inline ScriptingEnv *environment() { return m_env; }
+  /// Returns the identifier for the script.
+  inline const QString name() const { return m_name; }
+  /// Returns the identifier as a C string
+  inline const char * nameAsCStr() const { return m_name.toAscii(); }
+  /// Update the identifier for the object.
+  void setName(const QString &name) { m_name = name; }
+  /// Return the current context
+  const QObject * context() const { return m_context; }
   /// Set the context in which the code is to be executed.
-  virtual void setContext(QObject *context) { Context = context; compiled = notCompiled; }
-  /// Like QObject::setName, but with unicode support.
-  void setName(const QString &name) { Name = name; compiled = notCompiled; }
-  /// Set whether errors / exceptions are to be emitted or silently ignored
-  void setEmitErrors(bool yes) { EmitErrors = yes; }
-  /// Whether we should be reporting progress  
-  bool reportProgress() const { return (m_interactive && m_report_progress); }
-  //!Set whether we should be reporting progress
-  void reportProgress(bool on) 
-  { 
-    if( Env->supportsProgressReporting() && m_interactive ) m_report_progress = on; 
-    else m_report_progress = false;
-  }
+  virtual void setContext(QObject *context) { m_context = context; }
+
+  /// Is this an interactive script
+  inline bool isInteractive() { return m_interactMode == Interactive; }
+  /// Is the script being executed
+  inline bool isExecuting() const { return m_execMode != NotExecuting; }
+
+  /// Enable progress reporting for this script
+  void enableProgressReporting() { m_reportProgress = true; }
+  /// Disable progress reporting for this script
+  void disableProgressReporting() { m_reportProgress = false; }
+  /// Query progress reporting state
+  bool reportProgress() const { return m_reportProgress; }
+
   bool redirectStdOut() const { return m_redirectOutput; }
   void redirectStdOut(bool on) { m_redirectOutput = on; }
-  // Set the line offset of the current code
-  void setLineOffset(int offset) { m_line_offset = offset; } 
-  // The current line offset
-  int getLineOffset() const { return m_line_offset; } 
-  // Is anything running
-  bool scriptIsRunning() { return Env->isRunning(); }
+
+  /// Create a list of keywords for the code completion API
+  virtual void generateAutoCompleteList() {};
+  // Does the code compile to a complete statement, i.e no more input is required
+  virtual bool compilesToCompleteStatement(const QString & code) const = 0;
+
 public slots:
-  /// Compile the Code. Return true if the implementation doesn't support compilation.
-  virtual bool compile(bool for_eval=true);
+  /// Compile the code, returning true/false depending on the status
+  bool compile(const ScriptCode & code);
   /// Evaluate the Code, returning QVariant() on an error / exception.
-  virtual QVariant eval();
+  QVariant evaluate(const ScriptCode & code);
   /// Execute the Code, returning false on an error / exception.
-  virtual bool exec();
+  bool execute(const ScriptCode & code);
+  /// Execute the code asynchronously, returning immediately after the execution has started
+  QFuture<bool> executeAsync(const ScriptCode & code);
+
+  /// Sets the execution mode to NotExecuting
+  void setNotExecuting();
+  /// Sets the execution mode to Serialised
+  void setExecutingSerialised();
+  /// Sets the execution mode to Serialised
+  void setExecutingAsync();
+
   // local variables
   virtual bool setQObject(QObject*, const char*) { return false; }
   virtual bool setInt(int, const char*) { return false; }
   virtual bool setDouble(double, const char*) { return false; }
   
 signals:
-  /// This is emitted whenever the code to be executed by exec() and eval() is changed.
-  void codeChanged();
+  /// A signal defining when this script has started executing
+  void started(const QString & message);
+  /// A separate signal defining when this script has started executing serial running
+  void startedSerial(const QString & message);
+  /// A separate signal defining when this script has started executing asynchronously
+  void startedAsync(const QString & message);
+  /// A signal defining when this script has completed successfully
+  void finished(const QString & message);
   /// signal an error condition / exception
   void error(const QString & message, const QString & scriptName, int lineNumber);
   /// output generated by the code
@@ -114,29 +134,34 @@ signals:
   /// Line number changed
   void currentLineChanged(int lineno, bool error);
   // Signal that new keywords are available
-  void keywordsChanged(const QStringList & keywords);
-
-protected:
-  ScriptingEnv *Env;
-  QString Code, Name;
-  QObject *Context;
-  /// Should this be an interactive environment?
-  bool m_interactive;
-  /// Is progress reporting on?
-  bool m_report_progress;
-  enum compileStatus { notCompiled, isCompiled, compileErr } compiled;
-  bool EmitErrors;
-
-  void emit_error(const QString & message, int lineNumber)
-  { if(EmitErrors) emit error(message, Name, lineNumber); }
+  void autoCompleteListGenerated(const QStringList & keywords);
   
+protected:
+  /// Return the true line number by adding the offset
+  inline int getRealLineNo(const int codeLine) const { return codeLine + m_codeOffset; }
+
+  /// Compile the code, returning true/false depending on the status
+  virtual bool compileImpl(const QString & code) = 0;
+  /// Evaluate the Code, returning QVariant() on an error / exception.
+  virtual QVariant evaluateImpl(const QString & code) = 0;
+  /// Execute the Code, returning false on an error / exception.
+  virtual bool executeImpl(const QString & code) = 0;
+  /// Execute the code asynchronously, returning immediately after the execution has started
+  virtual QFuture<bool> executeAsyncImpl(const QString & code) = 0;
+
 private:
   /// Normalise line endings for the given code. The Python C/API does not seem to like CRLF endings so normalise to just LF
   QString normaliseLineEndings(QString text) const;
 
-private:
-  int m_line_offset;
-  bool m_redirectOutput; // Should the output be redirected?
+  ScriptingEnv *m_env;
+  QString m_name;
+  QObject *m_context;
+  bool m_redirectOutput;
+  bool m_reportProgress;
+  int m_codeOffset;
+
+  InteractionType m_interactMode;
+  ExecutionMode m_execMode;
 };
 
 

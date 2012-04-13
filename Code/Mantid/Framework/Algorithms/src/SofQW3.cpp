@@ -12,11 +12,15 @@ Converts a 2D workspace from units of spectrum number/energy transfer to the int
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQW3.h"
 #include "MantidAlgorithms/SofQW.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/Vertex2D.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -97,9 +101,9 @@ namespace Algorithms
       throw std::invalid_argument("The input workspace must have common binning across all spectra");
     }
 
-    MatrixWorkspace_sptr outputWS = SofQW::setUpOutputWorkspace(inputWS,
+    MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS,
                                                  getProperty("QAxisBinning"),
-                                                                m_Qout);
+                                                               m_Qout);
     g_log.notice() << "Workspace type: " << outputWS->id() << std::endl;
     setProperty("OutputWorkspace", outputWS);
     const size_t nEnergyBins = inputWS->blocksize();
@@ -158,14 +162,14 @@ namespace Algorithms
         const V2D ul(dE_j, this->calculateQ(efixed, dE_j, thetaUpper, phiUpper));
         Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
-        this->rebinToOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+        this->rebinToFractionalOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
       }
 
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    normaliseOutput(outputWS, inputWS);
+    this->normaliseOutput(outputWS, inputWS);
   }
 
   /**
@@ -410,6 +414,50 @@ namespace Algorithms
       this->m_thetaWidths[i] = thetaWidth;
       this->m_phiWidths[i] = phiWidth;
     }
+  }
+
+  /** Creates the output workspace, setting the axes according to the input binning parameters
+   *  @param[in]  inputWorkspace The input workspace
+   *  @param[in]  binParams The bin parameters from the user
+   *  @param[out] newAxis        The 'vertical' axis defined by the given parameters
+   *  @return A pointer to the newly-created workspace
+   */
+  API::MatrixWorkspace_sptr SofQW3::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+      const std::vector<double> & binParams, std::vector<double>& newAxis)
+  {
+    // Create vector to hold the new X axis values
+    MantidVecPtr xAxis;
+    xAxis.access() = inputWorkspace->readX(0);
+    const int xLength = static_cast<int>(xAxis->size());
+    // Create a vector to temporarily hold the vertical ('y') axis and populate that
+    const int yLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(binParams,newAxis));
+
+    // Create the output workspace
+    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("RebinnedOutput", yLength - 1, xLength, xLength - 1);
+    WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
+                                                      outputWorkspace, true);
+
+    // Create a numeric axis to replace the default vertical one
+    Axis* const verticalAxis = new NumericAxis(yLength);
+    outputWorkspace->replaceAxis(1, verticalAxis);
+
+    // Now set the axis values
+    for (int i = 0; i < yLength - 1; ++i)
+    {
+      outputWorkspace->setX(i, xAxis);
+      verticalAxis->setValue(i, newAxis[i]);
+    }
+    // One more to set on the 'y' axis
+    verticalAxis->setValue(yLength - 1, newAxis[yLength - 1]);
+
+    // Set the axis units
+    verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    verticalAxis->title() = "|Q|";
+
+    // Set the X axis title (for conversion to MD)
+    outputWorkspace->getAxis(0)->title() = "Energy transfer";
+
+    return outputWorkspace;
   }
 
 } // namespace Mantid

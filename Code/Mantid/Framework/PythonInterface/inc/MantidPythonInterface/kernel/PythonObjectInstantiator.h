@@ -28,6 +28,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Instantiator.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidPythonInterface/kernel/Environment/Threading.h"
 
 #include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
@@ -89,6 +90,7 @@ namespace Mantid
     Base * PythonObjectInstantiator<Base>::createUnwrappedInstance() const
     {
       using namespace boost::python;
+      Environment::GlobalInterpreterLock gil;
       PyObject *alg = PyObject_CallObject(m_classObject.ptr(), NULL); // No args
       object wrap(handle<>(borrowed(alg))); // borrowed: Do not decrement reference count on destruction
       Base *ptr = extract<Base*>(wrap);

@@ -26,7 +26,7 @@ namespace MantidQt
       /// Constructor.
       FindFilesThread(QObject *parent = NULL);
       /// Set the various file-finding values / options.
-      void set(std::string text = "", bool isForRunFiles = true, bool isOptional = false);
+      void set(QString text = "", bool isForRunFiles = true, bool isOptional = false);
 
       /// Returns the error string.  Empty if no error was caught.
       std::string error() const { return m_error; }
@@ -143,13 +143,15 @@ namespace MantidQt
       int getEntryNum() const;
       void setEntryNum(const int num);
       /// Overridden from base class to retrieve user input through a common interface
-      QVariant getUserInput() const;      
+      QVariant getUserInput() const;
       /// Sets a value on the widget through a common interface
       void setUserInput(const QVariant & value);
       /// Sets a value on the widget but doesn't emit a signal to say it has changed
       void setText(const QString & value);
       /// flag a problem with the file the user entered, an empty string means no error
       void setFileProblem(const QString & message);
+      /// Get file problem, empty string means no error.
+      QString getFileProblem();
       /// Read settings from the given group
       void readSettings(const QString & group);
       /// Save settings in the given group
@@ -168,8 +170,10 @@ namespace MantidQt
       void fileFindingFinished();
 
     public slots:
-      /// Set the file text
-      void setFileText(const QString & text);
+      /// Set the file text and try and find it
+      void setFileTextWithSearch(const QString & text);
+      /// Just update the file text, useful for syncing two boxes
+      void setFileTextWithoutSearch(const QString & text);
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
       /// Slot called when file finding thread has finished.

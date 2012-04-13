@@ -118,6 +118,7 @@ namespace MantidQt
       void browseSaveFile();
 
       void runFilesChanged();
+      void updateVanadiumMapFile();
       void updateSaveName();
       void saveNameUpd();
       void updateWBV();

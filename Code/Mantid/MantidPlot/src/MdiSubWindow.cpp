@@ -62,7 +62,7 @@ MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const Q
 	setObjectName(name);
 	setAttribute(Qt::WA_DeleteOnClose);
 	setLocale(app->locale());
-  askOnCloseEvent(false);
+  confirmClose(false);
 	if (d_folder)
 		d_folder->addWindow(this);
 }
@@ -102,6 +102,16 @@ void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {
   emit resizedWindow(this);
   MdiSubWindowParent_t::resizeEvent( e );
+}
+
+/**
+ * Set whether a dialog should be raised when closing the
+ * window. If not sets the delete on close flag
+ */
+void MdiSubWindow::confirmClose(bool ask)
+{
+  d_confirm_close = ask;
+  setAttribute(Qt::WA_DeleteOnClose, !ask);
 }
 
 /**

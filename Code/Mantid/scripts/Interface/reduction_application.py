@@ -465,6 +465,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Present a file dialog to the user and saves the content of the
             UI in XML format
         """
+        print 'inside _save in reduction_application'
+        print '-> self._filename' 
+        print self._filename
         if self._filename is None:
             self._save_as()
         else:
@@ -533,18 +536,62 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             else:
                 self.statusBar().showMessage("Could not save file")
 
-        
-def start(argv=[]):
-    app = QtGui.QApplication(argv)
-    app.setOrganizationName("Mantid")
-    app.setOrganizationDomain("mantidproject.org")
-    app.setApplicationName("Mantid Reduction")
+#--------------------------------------------------------------------------------------------------------
+
+class ReducerApplication(object):
+    """
+    Starts the application and reduction GUI.
+    Handles being embedded within another application
+    """
     
-    reducer = ReductionGUI()    
-    reducer.setup_layout(load_last=True)
-    reducer.show()
-    app.exec_() 
-        
+    _argv = []
+    _app = None
+    _eventloop_started = False
+
+    def __init__(self, argv=[]):
+        self.argv = argv
+
+    def start():
+        """
+        Starts the application and shows the
+        reduction GUI
+        """
+        _qtapp()
+        reducer = ReductionGUI()    
+        reducer.setup_layout(load_last=True)
+        reducer.show()
+        _appexec()
+
+    def _qtapp():
+        """
+            If we are embedded within another app then
+            this returns the already running application
+            instance, else it starts its own
+        """
+        app = QtGui.qApp
+        if app is None:
+            app = QtGui.QApplication(argv)
+            app.setOrganizationName("Mantid")
+            app.setOrganizationDomain("mantidproject.org")
+            app.setApplicationName("Mantid Reduction")
+            _eventloop_started = False
+        else:
+            _eventloop_started = True
+        return app
+
+    def _appexec():
+        """
+            If we are embedded within another app then
+            do nothing, else start the event loop
+        """
+        if not _eventloop_started:
+            self._app.exec_()
+
+
+def start(argv):
+    reducer_app = ReductionApplication(argv)
+    reducer_app.start()     
+
 if __name__ == '__main__':
     start(argv=sys.argv)
 

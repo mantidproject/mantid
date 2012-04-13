@@ -482,6 +482,33 @@ public:
     TS_ASSERT(ws2);
     removeGroupFromADS(output);
   }
+
+  void testMultiFilesExtraProperties()
+  {    
+    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename","IRS21360,26173,38633.raw"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("OutputWorkspace","test"));
+
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin","10"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax","100"));
+
+    TS_ASSERT_THROWS_NOTHING(proxy->execute());
+
+    // get result
+    WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("test");
+    TS_ASSERT(wsg);
+
+    // get first ws in group
+    std::vector<std::string> childNames = wsg->getNames();
+    MatrixWorkspace_sptr childWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(childNames[0]);
+    TS_ASSERT(childWs);
+
+    // Make sure that it contains the requested number of spectra as per SpectrumMin and SpectrumMax
+    TS_ASSERT_EQUALS(childWs->getNumberHistograms(), 91);
+
+    removeGroupFromADS(wsg);
+  }
 };
 
 #endif /*LOADTEST_H_*/

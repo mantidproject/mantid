@@ -696,7 +696,6 @@ class DataReflWidget(BaseWidget):
         util.set_tiny(self._summary.norm_xmin_estimate)
         util.set_tiny(self._summary.norm_xmax_estimate)
         
-
     def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl):
         """
             Plot counts as a function of:

@@ -809,7 +809,7 @@ double * MatrixModel::dataCopy(int startRow, int endRow, int startCol, int endCo
 bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol, int endCol)
 {
 	ScriptingEnv *scriptEnv = d_matrix->scriptingEnv();
-    muParserScript *mup = new muParserScript(scriptEnv, d_matrix->formula(), d_matrix, QString("<%1>").arg(d_matrix->objectName()));
+  muParserScript *mup = new muParserScript(scriptEnv, QString("<%1>").arg(d_matrix->objectName()), d_matrix);
 	connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
 	connect(mup, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
 
@@ -831,7 +831,7 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol, int 
     double *x = mup->defineVariable("x");
     double *y = mup->defineVariable("y");
 
-	if (!mup->compile()){
+	if (!mup->compile( d_matrix->formula())){
 		QApplication::restoreOverrideCursor();
 		return false;
 	}
@@ -864,7 +864,7 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol, int 
                 double c = col + 1.0;
                 *cj = c; *cc = c;
                 *x = x_start + col*dx;
-                res = mup->eval();
+                res = mup->evaluate(d_matrix->formula());
                 if (res.canConvert(QVariant::Double))
                      d_data[aux++] = res.toDouble();
                 else
@@ -886,14 +886,9 @@ bool MatrixModel::calculate(int startRow, int endRow, int startCol, int endCol)
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
 	ScriptingEnv *scriptEnv = d_matrix->scriptingEnv();
-	  Script *script = scriptEnv->newScript(formula, this, QString("<%1>").arg(objectName()), false);
+	Script *script = scriptEnv->newScript(QString("<%1>").arg(objectName()), this, Script::NonInteractive);
 	connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
 	connect(script, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
-	
-	if (!script->compile()){
-		QApplication::restoreOverrideCursor();
-		return false;
-	}
 
 	if (endRow < 0)
 		endRow = d_rows - 1;
@@ -921,7 +916,7 @@ bool MatrixModel::calculate(int startRow, int endRow, int startCol, int endCol)
 			script->setDouble(c, "j");
 			script->setDouble(c, "col");
 			script->setDouble(x_start + col*dx, "x");
-			res = script->eval();
+			res = script->evaluate(formula);
 			if (res.canConvert(QVariant::Double))
 				d_data[aux++] = res.toDouble();
 			else {

@@ -195,13 +195,10 @@ public:
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
 
-  bool runAlgorithmAsync_PyCallback(const QString & algName);
-
 public slots:
   // Create a 1d graph form specified spectra in a MatrixWorkspace
+  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
-
-public:
   MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false);
   /// Draw a color fill plot for each of the listed workspaces
@@ -233,8 +230,7 @@ public:
 
   //
   bool executeICatLogout(int version);
-	
-public slots:
+
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
   //  *****                            *****  //
@@ -244,12 +240,8 @@ public:
   // Return pointer to the fit function property browser
   MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
 
-  /** ---------------------------------
-   * Commands purely for python interaction
-   */
-    // The Python API wouldn't accept a multimap as a type so had to resort to this which is still more efficient than
-    // the old merge plots method
-  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
+
+public:
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);

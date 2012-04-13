@@ -52,8 +52,13 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         """
             Apply the reduction process
         """
+        print 'inside apply of refl_sf_calculator.py'
+        
         if HAS_MANTID:
             script = self.to_script(None)
+            
+            print script
+            
             try:
                 t0 = time.time()
                 exec script

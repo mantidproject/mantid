@@ -9,7 +9,7 @@
 
 #include "MantidAlgorithms/ConvertToMaskingWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -90,7 +90,7 @@ public:
       wsexist = false;
     TS_ASSERT(wsexist);
 
-    DataObjects::SpecialWorkspace2D_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(outputWS);
+    DataObjects::MaskWorkspace_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(outputWS);
     wsexist = true;
     if (!maskWS)
       wsexist = false;

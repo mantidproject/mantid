@@ -36,9 +36,9 @@ FindFilesThread::FindFilesThread(QObject *parent) :
  * @param isForRunFiles :: whether or not we are finding run files.
  * @param isOption :: whether or not the files are optional.
  */
-void FindFilesThread::set(std::string text, bool isForRunFiles, bool isOptional)
+void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional)
 {
-  m_text = text;
+  m_text = text.trimmed().toStdString();
   m_isForRunFiles = isForRunFiles;
   m_isOptional = isOptional;
 }
@@ -72,9 +72,6 @@ void FindFilesThread::run()
     }
     else
     {
-      // Remove whitespace
-      m_text.erase(std::remove_if(m_text.begin(), m_text.end(), ::isspace), m_text.end());
-
       // Tokenise on ","
       std::vector<std::string> filestext;
       filestext = boost::split(filestext, m_text, boost::is_any_of(","));
@@ -119,10 +116,10 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
+  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   connect(m_uiForm.browseIco, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
-  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(this, SIGNAL(fileEditingFinished()), this, SLOT(findFiles()));
   connect(m_uiForm.entryNum, SIGNAL(textChanged(const QString &)), this, SLOT(checkEntry()));
   connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this, SLOT(checkEntry()));
@@ -135,7 +132,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   if (m_multiEntry)
   {
     m_uiForm.entryNum->show();
-    m_uiForm.numEntries->show();     
+    m_uiForm.numEntries->show();
   }
   else
   {
@@ -147,8 +144,6 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
-
-  findFiles();
 
   // When first used try to starting directory better than the directory MantidPlot
   // is installed in
@@ -486,6 +481,14 @@ void MWRunFiles::setFileProblem(const QString & message)
   refreshValidator();
 }
 
+/**
+* Return the error.
+* @returns A string explaining the error.
+*/
+QString MWRunFiles::getFileProblem()
+{
+  return m_fileProblem;
+}
 
 /**
 * Save settings to the given group
@@ -500,6 +503,7 @@ void MWRunFiles::saveSettings(const QString & group)
 
   settings.endGroup();
 }
+
 /** Writes the total number of periods in a file to the NumEntries
 *  Qlabel
 *  @param number the number to write, if this is < 1 a ? will be displayed in it's place
@@ -511,6 +515,7 @@ void MWRunFiles::setNumberOfEntries(const int number)
     m_uiForm.numEntries->setText("/"+total);
   }
 }
+
 /** 
 * Set the file text.  This is different to setText in that it emits findFiles, as well
 * changing the state of the text box widget to "modified = true" which is a prerequisite
@@ -518,11 +523,19 @@ void MWRunFiles::setNumberOfEntries(const int number)
 *
 * @param text :: The text string to set
 */
-void MWRunFiles::setFileText(const QString & text)
+void MWRunFiles::setFileTextWithSearch(const QString & text)
+{
+  setFileTextWithoutSearch(text);
+  findFiles();
+}
+/**
+* Set the file text but do not search
+* @param text :: The text string to set
+*/
+void MWRunFiles::setFileTextWithoutSearch(const QString & text)
 {
   m_uiForm.fileEditor->setText(text);
   m_uiForm.fileEditor->setModified(true);
-  findFiles();
 }
 
 /**
@@ -530,7 +543,7 @@ void MWRunFiles::setFileText(const QString & text)
  */
 void MWRunFiles::findFiles()
 {
-  if( m_uiForm.fileEditor->isModified() )
+  if(m_uiForm.fileEditor->isModified())
   {
     // Reset modified flag.
     m_uiForm.fileEditor->setModified(false);
@@ -540,12 +553,15 @@ void MWRunFiles::findFiles()
       m_thread->exit(-1);
     
     // Set the values for the thread, and start it running.
-    std::string text = this->m_uiForm.fileEditor->text().toStdString();
-    m_thread->set(text, isForRunFiles(), this->isOptional());
+    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional());
     m_thread->start();
   }
+  else
+  {
+    // Make sure errors are correctly set if we didn't run
+    inspectThreadResult();
+  }
 }
-
 
 /**
  * Called when the file finding thread finishes.  Inspects the result
@@ -569,7 +585,7 @@ void MWRunFiles::inspectThreadResult()
   {
     m_foundFiles.append(QString::fromStdString(filenames[i]));
   }
-  if( m_foundFiles.isEmpty() )
+  if( m_foundFiles.isEmpty() && !isOptional() )
   {
     setFileProblem("Error: No files found. Check search paths and instrument selection.");
   }

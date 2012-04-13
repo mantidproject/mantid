@@ -48,6 +48,7 @@ namespace Mantid
     {
     public:
       std::string getFullPath(const std::string& fName)const;
+      std::string getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::set<std::string>& filename, const std::vector<std::string>& extensions)const;
       std::string makeFileName(const std::string& hint, const Kernel::FacilityInfo& facility)const;
       void setCaseSensitive(const bool cs); 
       std::string findRun(const std::string& hint,const std::set<std::string> *exts)const;
@@ -71,7 +72,7 @@ namespace Mantid
       FileFinderImpl& operator=(const FileFinderImpl&);
       std::string extractAllowedSuffix(std::string & userString) const;
       std::pair<std::string,std::string> toInstrumentAndNumber(const std::string& hint)const;
-      std::string getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::string& fName)const;
+      std::string getArchivePath(const std::vector<IArchiveSearch_sptr>& archs, const std::string& fName)const;
       /// glob option - set to case sensitive or insensitive
       int globOption;
 

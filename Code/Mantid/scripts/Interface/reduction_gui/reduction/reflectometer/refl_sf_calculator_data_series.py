@@ -64,10 +64,7 @@ class DataSeries(BaseScriptElement):
         self._data_class = REFLDataSets
         element_list = dom.getElementsByTagName("Data")
         if len(element_list)==0:
-            element_list = dom.getElementsByTagName("RefLData")
-        if len(element_list)==0:
-            self._data_class = REFMDataSets
-            element_list = dom.getElementsByTagName("RefMData")
+            element_list = dom.getElementsByTagName("RefLSFCalculator")
             
         if len(element_list)>0:
             for item in element_list:

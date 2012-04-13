@@ -41,16 +41,16 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
-#include <string.h>
+#include <cstring>
 
 #include <QDir>
 #include <QDateTime>
 #include "MantidKernel/ConfigService.h"
 
 
-ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
+ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const QString & langName)
   : QObject(0, langName), d_initialized(false), d_parent(parent), m_is_running(false), d_refcount(0),
-    languageName(langName) 
+    m_languageName(langName)
 {
 }
 
@@ -58,20 +58,35 @@ ScriptingEnv::~ScriptingEnv()
 {
 }
 
+/**
+ * Start the environment
+ * @return
+ */
 bool ScriptingEnv::initialize()
 {
   static bool init_called(false);
   if( !init_called )
   {
     init_called = true;
+    emit starting();
     return start();
   }
   return isInitialized();
 }
 
-const QString ScriptingEnv::scriptingLanguage() const
+/**
+ * Perform a shutdown of the environment
+ */
+void ScriptingEnv::finalize()
 {
-  return QString(languageName);
+  emit shuttingDown();
+  shutdown();
+}
+
+
+const QString ScriptingEnv::languageName() const
+{
+  return m_languageName;
 }
 
 const QString ScriptingEnv::fileFilter() const
@@ -103,12 +118,8 @@ void ScriptingEnv::decref()
  */
 ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = 
   {
-#ifdef SCRIPTING_MUPARSER
-    { muParserScripting::langName, muParserScripting::constructor },
-#endif
-#ifdef SCRIPTING_PYTHON
-    { PythonScripting::langName, PythonScripting::constructor },
-#endif
+    { "muParser", muParserScripting::constructor },
+    { "Python", PythonScripting::constructor },
     // Sentinel defining the end of the list
     { NULL, NULL }
 };
@@ -125,11 +136,11 @@ ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
   }
 }
 
-ScriptingEnv *ScriptingLangManager::newEnv(const char *name, ApplicationWindow *parent)
+ScriptingEnv *ScriptingLangManager::newEnv(const QString & name, ApplicationWindow *parent)
 {
   for(ScriptingLang *l = g_langs; l->constructor; l++)
-  {	
-    if( QString(name) == QString(l->name) )
+  {
+    if( name == QString(l->name) )
     {
       return l->constructor(parent);
     }

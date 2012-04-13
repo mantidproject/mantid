@@ -185,6 +185,98 @@ p, li { white-space: pre-wrap; }
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_13">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="label_16">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Incident medium </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="incident_medium_combobox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>H20</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Small Circular SA holder</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Large Circular SA holder</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_12">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeType">
+                    <enum>QSizePolicy::Fixed</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>5</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
                 <widget class="QGroupBox" name="groupBox">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -266,82 +358,6 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_13">
-                    <property name="spacing">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="QLabel" name="label_16">
-                      <property name="minimumSize">
-                       <size>
-                        <width>150</width>
-                        <height>0</height>
-                       </size>
-                      </property>
-                      <property name="text">
-                       <string>Incident medium </string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QComboBox" name="incident_medium_combobox">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>200</width>
-                        <height>0</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>16777215</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="editable">
-                       <bool>true</bool>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>H20</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Small Circular SA holder</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Large Circular SA holder</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_12">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_4">
                     <property name="spacing">
                      <number>0</number>
@@ -367,7 +383,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>Number of attenuator</string>
+                       <string>Number of attenuators</string>
                       </property>
                      </widget>
                     </item>
@@ -501,8 +517,14 @@ p, li { white-space: pre-wrap; }
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>60</width>
+                        <width>80</width>
                         <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>80</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
@@ -600,13 +622,13 @@ p, li { white-space: pre-wrap; }
                      <widget class="QCheckBox" name="data_background_switch">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
+                        <width>160</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>160</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -696,8 +718,14 @@ p, li { white-space: pre-wrap; }
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>60</width>
+                        <width>80</width>
                         <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>80</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
@@ -881,8 +909,14 @@ p, li { white-space: pre-wrap; }
                      <widget class="QLabel" name="label_3">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
+                        <width>70</width>
                         <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>70</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
@@ -908,7 +942,7 @@ p, li { white-space: pre-wrap; }
                        <string/>
                       </property>
                       <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       <set>Qt::AlignCenter</set>
                       </property>
                      </widget>
                     </item>
@@ -935,8 +969,14 @@ p, li { white-space: pre-wrap; }
                      <widget class="QLabel" name="label_6">
                       <property name="minimumSize">
                        <size>
-                        <width>50</width>
+                        <width>70</width>
                         <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>70</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
@@ -962,7 +1002,7 @@ p, li { white-space: pre-wrap; }
                        <string/>
                       </property>
                       <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       <set>Qt::AlignCenter</set>
                       </property>
                      </widget>
                     </item>
@@ -1009,8 +1049,14 @@ p, li { white-space: pre-wrap; }
                      <widget class="QLabel" name="label_7">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
+                        <width>70</width>
                         <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>70</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
@@ -1036,7 +1082,7 @@ p, li { white-space: pre-wrap; }
                        <string/>
                       </property>
                       <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       <set>Qt::AlignCenter</set>
                       </property>
                      </widget>
                     </item>
@@ -1063,13 +1109,13 @@ p, li { white-space: pre-wrap; }
                      <widget class="QLabel" name="label_8">
                       <property name="minimumSize">
                        <size>
-                        <width>65</width>
+                        <width>70</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>65</width>
+                        <width>70</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -1096,7 +1142,7 @@ p, li { white-space: pre-wrap; }
                        <string/>
                       </property>
                       <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       <set>Qt::AlignCenter</set>
                       </property>
                      </widget>
                     </item>
@@ -1136,22 +1182,6 @@ p, li { white-space: pre-wrap; }
                   </item>
                  </layout>
                 </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_3">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>5</height>
-                  </size>
-                 </property>
-                </spacer>
                </item>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1298,25 +1328,60 @@ p, li { white-space: pre-wrap; }
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
                  <item>
                   <widget class="QLabel" name="label_11">
+                   <property name="minimumSize">
+                    <size>
+                     <width>190</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>190</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>Preview of scaling factor file.</string>
+                    <string>Preview of scaling factor file:</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_5">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                  <widget class="QLabel" name="cfg_scaling_factor_file_name">
+                   <property name="text">
+                    <string>N/A</string>
                    </property>
-                   <property name="sizeHint" stdset="0">
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="cfg_scaling_factor_file_browse">
+                   <property name="maximumSize">
                     <size>
-                     <width>40</width>
-                     <height>20</height>
+                     <width>90</width>
+                     <height>16777215</height>
                     </size>
                    </property>
-                  </spacer>
+                   <property name="sizeIncrement">
+                    <size>
+                     <width>90</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Browse...</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
+               </item>
+               <item>
+                <widget class="QTextBrowser" name="textBrowser">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>400</height>
+                  </size>
+                 </property>
+                </widget>
                </item>
                <item>
                 <spacer name="verticalSpacer">
@@ -1333,16 +1398,6 @@ p, li { white-space: pre-wrap; }
                   </size>
                  </property>
                 </spacer>
-               </item>
-               <item>
-                <widget class="QTextBrowser" name="textBrowser">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>400</height>
-                  </size>
-                 </property>
-                </widget>
                </item>
               </layout>
              </item>

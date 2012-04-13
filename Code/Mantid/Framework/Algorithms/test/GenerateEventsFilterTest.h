@@ -29,6 +29,11 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  void test_genTimeOnly()
+  {
+
+  }
+
 
 };
 

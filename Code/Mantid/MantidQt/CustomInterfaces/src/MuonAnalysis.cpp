@@ -449,9 +449,8 @@ void MuonAnalysis::runLoadCurrent()
         QString("does not seem to exist"));
       return;
     }
-    m_previousFilenames.clear();
-    m_previousFilenames.append(argusDAE);
-    inputFileChanged(m_previousFilenames);
+    m_uiForm.mwRunFiles->setUserInput(argusDAE);
+    m_uiForm.mwRunFiles->setText("CURRENT RUN");
     return;
   }
 
@@ -501,10 +500,8 @@ void MuonAnalysis::runLoadCurrent()
         QString("does not seem to exist"));
       return;
     }
-
-    m_previousFilenames.clear();
-    m_previousFilenames.append(psudoDAE);
-    inputFileChanged(m_previousFilenames);
+    m_uiForm.mwRunFiles->setUserInput(psudoDAE);
+    m_uiForm.mwRunFiles->setText("CURRENT RUN");
     return;
   }
 
@@ -951,12 +948,15 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
  */
 void MuonAnalysis::handleInputFileChanges()
 {
+  std::cout << "\n\n" << m_uiForm.mwRunFiles->getFirstFilename().toStdString() << "\n\n";
+  
   if ( m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
 
   if ( !m_uiForm.mwRunFiles->isValid() )
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
+  { 
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", m_uiForm.mwRunFiles->getFileProblem() );
+    m_uiForm.mwRunFiles->setFileProblem("Error finding file. Reset to last working data.");
     m_uiForm.mwRunFiles->setText(m_textToDisplay);
     return;
   }
@@ -964,35 +964,6 @@ void MuonAnalysis::handleInputFileChanges()
   if (!m_updating)
   {
     QStringList runFiles = m_uiForm.mwRunFiles->getFilenames();
-  
-    if (runFiles.size() == m_previousFilenames.size())
-    {
-      bool same(true);
-      for (int i=0; i<runFiles.size(); ++i)
-      {
-        if (runFiles[i] != m_previousFilenames[i])
-          same = false;
-      }
-      if (same == true)
-      {
-        return;
-      }
-    }
-
-    // in case file is selected from browser button check that it actually exist
-    for (int i=0; i<runFiles.size(); ++i)
-    {
-      if (!(isValidFile(runFiles[i]) ) ) // If the file isn't valid...
-      {
-        if (m_previousFilenames.size() > 0) // If a previous file exists then reset the name.
-        {
-          m_uiForm.mwRunFiles->setText(m_textToDisplay);
-        }
-        else // Ohterwise set the text a blank string.
-          m_uiForm.mwRunFiles->setText("");
-        return;
-      }
-    }
   
     m_previousFilenames.clear();
     m_previousFilenames = runFiles;
@@ -1102,19 +1073,15 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   else if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 2) )
   {
     QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
-    if (isValidFile(deadTimeFile) )
+
+    try
     {
-      try
-      {
-        getDeadTimeFromFile(deadTimeFile);
-      }
-      catch (std::exception&)
-      {
-        QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
-      }
+      getDeadTimeFromFile(deadTimeFile);
     }
-    else
-      QMessageBox::information(this, "Mantid - MuonAnalysis", "The dead time file could not be found. No dead times will be applied.");
+    catch (std::exception&)
+    {
+      QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
+    }
   }
 
   // Make the options available
@@ -2430,18 +2397,9 @@ std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
 */
 void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
 {
-  bool isAuto(false);
+  QString tempGroupName(QString::fromStdString(workspaceGroupName) );
 
-  for (size_t i=0; i<workspaceGroupName.size(); ++i)
-  {
-    if (workspaceGroupName[i] == '_')
-    {
-      isAuto = true;
-      break;
-    }
-  }
-
-  if (isAuto)
+  if ( (tempGroupName.contains("auto") ) || (tempGroupName.contains("argus0000000") ) )
   {
     Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
@@ -2450,7 +2408,12 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
     std::string runNumber = runDetails.getProperty("run_number")->value();
     QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
-    for (size_t i=runNumber.size(); i<8; ++i)
+    size_t zeroPadding(8);
+
+    if (instname == "ARGUS")
+      zeroPadding = 7;  
+
+    for (size_t i=runNumber.size(); i<zeroPadding; ++i)
     {
       runNumber = '0' + runNumber;
     }
@@ -3148,11 +3111,19 @@ void MuonAnalysis::changeRun(int amountToChange)
 {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
-  if (currentFile.isEmpty())
+  if ( (currentFile.isEmpty() ) )
     currentFile = m_previousFilenames[0];
+  
   QString run("");
   int runSize(-1);
 
+  // If load current run get the correct run number.
+  if (currentFile.contains("auto") || currentFile.contains("argus0000000"))
+  {
+    separateMuonFile(filePath, currentFile, run, runSize);
+    currentFile = filePath + getGroupName() + ".nxs";
+  }
+    
   separateMuonFile(filePath, currentFile, run, runSize);
 
   int fileExtensionSize(currentFile.size()-currentFile.find('.') );
@@ -3168,7 +3139,7 @@ void MuonAnalysis::changeRun(int amountToChange)
 
   getFullCode(runSize, newRun);
 
-  if (m_textToDisplay.contains("\\") || m_textToDisplay.contains("/") )
+  if (m_textToDisplay.contains("\\") || m_textToDisplay.contains("/") || m_textToDisplay == "CURRENT RUN")
     m_uiForm.mwRunFiles->setUserInput(filePath + currentFile + newRun);
   else
     m_uiForm.mwRunFiles->setUserInput(newRun);
@@ -3211,18 +3182,19 @@ void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile, QSt
   }
 
   runSize = 0;
-
-  //Find where the run number ends
-  for (int i = firstRunDigit; i<currentFile.size(); i++)
+  if (! (firstRunDigit < 0) )
   {
-    if(currentFile[i] == '.')
-      break;
-    if(currentFile[i].isDigit())
+    //Find where the run number ends
+    for (int i = firstRunDigit; i<currentFile.size(); i++)
     {
-      ++runSize;
+      if(currentFile[i] == '.')
+        break;
+      if(currentFile[i].isDigit())
+      {
+        ++runSize;
+      }
     }
   }
-
   run = currentFile.right(currentFile.size()-firstRunDigit);
   run = run.left(runSize);
 }
@@ -3453,63 +3425,6 @@ void MuonAnalysis::deadTimeFileSelected()
 {
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
-}
-
-
-/**
-* Validate the file path of the dead time table.
-*/
-bool MuonAnalysis::isValidFile(const QString & fileName)
-{
-  if (fileName == "")
-    return false;
-
-  try
-  {
-    Poco::File l_path( fileName.toStdString() );
-    if ( !l_path.exists() )
-    {
-      QString tempFilename;
-      if (fileName.contains('.'))
-      {
-        tempFilename = fileName.left(fileName.find('.'));
-      }
-      Poco::File l_path( tempFilename.toStdString() );
-      if ( !l_path.exists() )
-      {
-        m_updating = true;
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " does not exist.");
-        return false;
-      }
-    }
-  }
-  catch(std::exception&)
-  {
-    //Specified a network drive.
-    QString tempFilename;
-    if (fileName.contains('.'))
-    {
-      tempFilename = fileName.left(fileName.find('.'));
-    }
-    Poco::File l_path( tempFilename.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-      {
-        m_updating = true;
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " does not exist.");
-        return false;
-      }
-    }
-    catch (std::exception&)
-    {
-      m_updating = true;
-      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " does not exist.");
-      return false;
-    }
-  }
-  // Must be valid so return true
-  return true;
 }
 
 

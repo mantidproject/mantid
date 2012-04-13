@@ -2,7 +2,8 @@
 // Includes
 //--------------------------------------------
 #include "MantidPythonAPI/BoostPython_Silent.h"
-#include <MantidPythonAPI/PyAlgorithmWrapper.h>
+#include "MantidPythonAPI/PyAlgorithmWrapper.h"
+#include "MantidPythonAPI/PythonThreading.h"
 
 using namespace Mantid::PythonAPI;
 
@@ -12,84 +13,62 @@ using namespace Mantid::PythonAPI;
 /**
  * Constructor
  */
-PyAlgorithmBase::PyAlgorithmBase() : CloneableAlgorithm()
+PyAlgorithmBase::PyAlgorithmBase() : Algorithm()
 {
 }
 
 //--------------------------------------------------
-// PyAlgorithmCallback
+// PyAlgorithmWrapper
 //--------------------------------------------------
-/**
- * Constructor for callback
- * @param self :: The python object to use to perform the callback
- */
-PyAlgorithmCallback::PyAlgorithmCallback(PyObject *self) : PyAlgorithmBase(), m_self(self), m_ref_killed(false)
-{
-  Py_INCREF(m_self);
-}
-
-/** 
- * Destructor
- */
-PyAlgorithmCallback::~PyAlgorithmCallback()
-{
-  if( !m_ref_killed )
-  {
-    Py_XDECREF(m_self);
-  }
-}
-
-/**
- * Return a clone of this object
- * @returns a pointer to the clone object
- */ 
-Mantid::API::CloneableAlgorithm * PyAlgorithmCallback::clone()
-{
-  // Call the python clone method to get back a full copy of the whole object and
-  // then return the C++ object extracted from this
-  PyAlgorithmBase *cloned = PyCall_NoArg<PyAlgorithmBase*>::dispatch(m_self, "clone");
-  return cloned;
-}
-
 /**
  * Call the name method on the Python object
  * @returns The name of the algorithm
  */ 
-const std::string PyAlgorithmCallback::name() const 
+const std::string PyAlgorithmWrapper::name() const
 {
-  return PyCall_NoArg<const std::string>::dispatch(m_self, "name");
+  GlobalInterpreterLock gil;
+  PyObject *self = getSelf();
+  return std::string(self->ob_type->tp_name);
 }
 
 /**
  * Call the version method on the Python object
  * @returns The version number of the algorithm
  */
-int PyAlgorithmCallback::version() const
+int PyAlgorithmWrapper::version() const
 {
-  return PyCall_NoArg<const int>::dispatch(m_self, "version");
+  return PyCall_NoArg<const int>::dispatch(getSelf(), "version");
 }
 
 /**
  * Call the category method on the Python object
  * @returns The category this algorithm belongs to
  */
-const std::string PyAlgorithmCallback::category() const 
+const std::string PyAlgorithmWrapper::category() const
 {
-  return PyCall_NoArg<const std::string>::dispatch(m_self, "category");
+  return PyCall_NoArg<const std::string>::dispatch(getSelf(), "category");
 }
 
 /**
  * Perform initialization for this algorithm. This just calls up to Python.
  */
-void  PyAlgorithmCallback::init()
+void  PyAlgorithmWrapper::init()
 {
-  PyCall_NoArg<void>::dispatch(m_self, "PyInit");
+  PyCall_NoArg<void>::dispatch(getSelf(), "PyInit");
 }
 
 /**
  * Execute this algorithm. This just calls up to Python.
  */
-void PyAlgorithmCallback::exec()
+void PyAlgorithmWrapper::exec()
 {
-  PyCall_NoArg<void>::dispatch(m_self, "PyExec");
+  PyCall_NoArg<void>::dispatch(getSelf(), "PyExec");
 }
+
+/// Returns the PyObject that owns this wrapper, i.e. self
+/// @returns A pointer to self
+PyObject * PyAlgorithmWrapper::getSelf() const
+{
+  return boost::python::detail::wrapper_base_::get_owner(*this);
+}
+

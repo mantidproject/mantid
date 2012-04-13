@@ -33,7 +33,6 @@
 #include <QDialog>
 #include "ScriptingEnv.h"
 #include "Script.h"
-#include "ScriptEdit.h"
 #include "Matrix.h"
 
 #ifdef SCRIPTING_PYTHON
@@ -43,7 +42,7 @@ class QComboBox;
 class QTextEdit;
 class QSpinBox;
 class QPushButton;
-class ScriptEdit;
+class ScriptEditor;
 class Matrix;
 
 //! Set matrix values dialog
@@ -67,7 +66,7 @@ private:
 	QSize sizeHint() const ;
 	void customEvent( QEvent *e);
 
-	ScriptEdit* commands;
+	ScriptEditor* commands;
     QComboBox* functions;
     QPushButton* btnAddFunction;
 	QPushButton* btnAddCell;

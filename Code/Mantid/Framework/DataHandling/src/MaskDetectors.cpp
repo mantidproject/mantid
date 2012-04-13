@@ -11,7 +11,9 @@ The set of detectors to be masked can be given as a list of either spectrum numb
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -90,6 +92,9 @@ void MaskDetectors::exec()
   // Is it an event workspace?
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
 
+  // Is it a Mask Workspace ?
+  MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
   std::vector<specid_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
@@ -118,19 +123,21 @@ void MaskDetectors::exec()
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
   // If we have a workspace that could contain masking,copy that in too
+
   if( prevMasking )
   {
-
-    DataObjects::SpecialWorkspace2D_const_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(prevMasking);
+    DataObjects::MaskWorkspace_const_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
     if (maskWS)
     {
       if (maskWS->getInstrument()->getDetectorIDs().size() != WS->getInstrument()->getDetectorIDs().size())
       {
-        throw std::runtime_error("Size mismatch between input Workspace and SpecialWorkspace2D");
+        throw std::runtime_error("Size mismatch between input Workspace and MaskWorkspace");
       }
 
+      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name() << ")" << std::endl;
       appendToIndexListFromMaskWS(indexList, maskWS);
-    } else
+    }
+    else
     {
       // Check the provided workspace has the same number of spectra as the input
       if(prevMasking->getNumberHistograms() > WS->getNumberHistograms() )
@@ -191,6 +198,18 @@ void MaskDetectors::exec()
     //Also clear the MRU for event workspaces.
     eventWS->clearMRU();
   }
+
+  if (isMaskWS)
+  {
+      // If the input was a mask workspace, then extract the mask to ensure
+      // we are returning the correct thing.
+      IAlgorithm_sptr alg = createSubAlgorithm("ExtractMask");
+      alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
+      alg->executeAsSubAlg();
+      MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+      setProperty("Workspace", ws);
+  }
+
   /*
   This rebuild request call, gives the workspace the opportunity to rebuild the nearest neighbours map
   and therfore pick up any detectors newly masked with this algorithm.
@@ -263,7 +282,7 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, cons
  * @param indexList :: An existing list of indices
  * @param maskedWorkspace :: An workspace with masked spectra
  */
-void MaskDetectors::appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::SpecialWorkspace2D_const_sptr maskedWorkspace)
+void MaskDetectors::appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::MaskWorkspace_const_sptr maskedWorkspace)
 {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> existingIndices(indexList.begin(), indexList.end());
@@ -276,6 +295,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(std::vector<size_t>& indexList, 
 
     if( maskedWorkspace->dataY(i-startIndex)[0] > 0.5 && existingIndices.count(i) == 0 )
     {
+      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask." << std::endl;
       indexList.push_back(i);
     }
   }

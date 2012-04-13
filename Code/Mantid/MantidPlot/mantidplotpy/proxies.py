@@ -4,16 +4,96 @@ accessible from python. They listen for the QObject 'destroyed' signal and set t
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
 
-from PyQt4 import QtCore
-from PyQt4.QtCore import Qt
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt, pyqtSlot
+import __builtin__
+
+#-----------------------------------------------------------------------------
+#--------------------------- MultiThreaded Access ----------------------------
+#-----------------------------------------------------------------------------
+
+class CrossThreadCall(QtCore.QObject):
+    """
+    Defines a dispatch call that marshals
+    function calls between threads
+    """
+    __callable = None
+    __args = []
+    __kwargs = {}
+    __func_return = None
+    __exception = None
+    
+    def __init__(self, callable):
+        """ Construct the object
+        """
+        QtCore.QObject.__init__(self)
+        self.moveToThread(QtGui.qApp.thread())
+        self.__callable = callable
+        
+        
+    def dispatch(self, *args, **kwargs):
+        """Dispatches a call to callable with
+        the given arguments using QMetaObject.invokeMethod
+        to ensure the call happens in the object's thread
+        """
+        self.__args = args
+        self.__kwargs = kwargs
+        self.__func_return = None
+        self.__exception = None
+        return self._do_dispatch()
+    
+    def __call__(self, *args, **kwargs):
+        """
+        Calls the dispatch method
+        """
+        return self.dispatch(*args, **kwargs)
+        
+    @pyqtSlot()
+    def _do_dispatch(self):
+        """Perform a call to a GUI function across a
+        thread and return the result
+        """
+        if QtCore.QThread.currentThread() != QtGui.qApp.thread():
+            QtCore.QMetaObject.invokeMethod(self, "_do_dispatch", Qt.BlockingQueuedConnection)
+        else:
+            try:
+                self.__func_return = self.__callable(*self.__args, **self.__kwargs)
+            except Exception, exc:
+                self.__exception = exc
+
+        if self.__exception is not None:
+            raise self.__exception # Ensures this happens in the right thread
+        return self.__func_return
+    
+    def _get_argtype(self, argument):
+        """
+            Returns the argument type that will be passed to
+            the QMetaObject.invokeMethod call.
+            
+            Most types pass okay, but enums don't so they have
+            to be coerced to ints. An enum is currently detected
+            as a type that is not a bool and inherits from __builtin__.int
+        """
+        argtype = type(argument)
+        return argtype
+        if isinstance(argument, __builtin__.int) and argtype != bool:
+            argtype = int
+        return argtype
+
+def threadsafe_call(callable, *args):
+    """
+        Calls the given function with the given arguments
+        by passing it through the CrossThreadCall class. This
+        ensures that the calls to the GUI functions
+        happen on the correct thread.
+    """
+    caller = CrossThreadCall(callable)
+    return caller.dispatch(*args)
 
 #-----------------------------------------------------------------------------
 #--------------------------- Proxy Objects -----------------------------------
 #-----------------------------------------------------------------------------
 
-
-
-#-----------------------------------------------------------------------------
 class QtProxyObject(QtCore.QObject):
     """Generic Proxy object for wrapping Qt C++ QObjects.
     This holds the QObject internally and passes methods to it.
@@ -25,24 +105,36 @@ class QtProxyObject(QtCore.QObject):
         self.__obj = toproxy
         # Connect to track the destroyed
         if self.__obj is not None:
-            QtCore.QObject.connect( self.__obj, QtCore.SIGNAL("destroyed()"),
-                                    self._heldObjectDestroyed)
+            self.connect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                         self._kill_object, Qt.DirectConnection)
 
     def __del__(self):
-        # Disconnect the signal or you get a segfault on quitting MantidPlot
+        """
+        Disconnect the signal
+        """
         if self.__obj is not None:
-            QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
+            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                            self._kill_object)
 
-    def _heldObjectDestroyed(self):
-        """Slot called when the held object is destroyed.
-        Sets it to None, preventing segfaults """
+    def close(self):
+        """
+        Make sure closing the window kills the object. While the destroyed
+        signal is sent, it is not received in time for scripts that will
+        use the object again quickly
+        """
+        if self.__obj is not None:
+            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                            self._kill_object)
+        if hasattr(self._getHeldObject(), 'close'):
+            threadsafe_call(self._getHeldObject().close)
         self._kill_object()
 
     def __getattr__(self, attr):
         """
         Reroute a method call to the the stored object
         """
-        return getattr(self._getHeldObject(), attr)
+        callable = getattr(self._getHeldObject(), attr)
+        return CrossThreadCall(callable)
 
     def __str__(self):
         """
@@ -81,7 +173,7 @@ class MDIWindow(QtProxyObject):
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
-
+        
     def folder(self):
         return Folder(self._getHeldObject().folder())
 
@@ -432,7 +524,7 @@ class SliceViewerWindowProxy(QtProxyObject):
             raise Exception("Error! The SliceViewerWindow has been deleted.")
         
         # Pass-through to the contained SliceViewer widget.
-        sv = self._getHeldObject().getSlicer()
+        sv = self.getSlicer()
         # But only those attributes that are methods on the SliceViewer
         if attr in SliceViewerProxy.slicer_methods:
             return getattr(sv, attr)
@@ -553,6 +645,8 @@ class LineViewerProxy(QtProxyObject):
         
     def __dir__(self):
         """Returns the list of attributes for this object.   """
-        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setThickness", "setThickness", "setThickness", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth", "getFixedBinWidthMode", "getNumBins", "getBinWidth", "setPlotAxis", "getPlotAxis"]
+        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setThickness", "setThickness",
+                "setThickness", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth",
+                "getFixedBinWidthMode", "getNumBins", "getBinWidth", "setPlotAxis", "getPlotAxis"]
     
     

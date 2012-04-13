@@ -462,12 +462,12 @@ namespace Mantid
       g_log.debug() << "SaveGSS(): MultipyByBinwidth = " << MultiplyByBinWidth << std::endl;
 
       const size_t datasize = Y.size();
-      double bc1 = *(X.begin()); // minimum TOF in microseconds
+      double bc1 = X.front(); // minimum TOF in microseconds
       if (bc1 <= 0.)
       {
         throw std::runtime_error("Cannot write out logarithmic data starting at zero");
       }
-      double bc2 = *(X.rbegin() + 1); // maximum TOF (in microseconds?)
+      double bc2 = 0.5 * (*(X.rbegin()) + *(X.rbegin()+ 1)); // maximum TOF (in microseconds?)
       double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
 
       g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;

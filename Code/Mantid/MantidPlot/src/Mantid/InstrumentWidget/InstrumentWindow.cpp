@@ -151,7 +151,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_clearPeakOverlays = new QAction("Clear peaks",this);
   connect(m_clearPeakOverlays,SIGNAL(activated()),this,SLOT(clearPeakOverlays()));
 
-  askOnCloseEvent(app->confirmCloseInstrWindow);
+  confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -698,7 +698,7 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
 {
   if (ws_name == m_workspaceName.toStdString())
   {
-    askOnCloseEvent(false);
+    confirmClose(false);
     close();
     return;
   }
@@ -723,7 +723,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
 
 void InstrumentWindow::clearADSHandle()
 {
-  askOnCloseEvent(false);
+  confirmClose(false);
   close();
 }
 

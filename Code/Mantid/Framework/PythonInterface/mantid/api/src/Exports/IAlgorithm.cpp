@@ -8,6 +8,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
+#include <Poco/Thread.h>
+
 #include <boost/python/object.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
@@ -164,6 +166,47 @@ namespace
     return buffer.str();
   }
 
+  struct AllowCThreads
+  {
+    AllowCThreads() : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL)
+    {
+      PyThreadState *curThreadState = PyThreadState_GET();
+      assert(curThreadState != NULL);
+      m_tracefunc = curThreadState->c_tracefunc;
+      m_tracearg = curThreadState->c_traceobj;
+      Py_XINCREF(m_tracearg);
+      PyEval_SetTrace(NULL,NULL);
+      m_saved = PyEval_SaveThread();
+    }
+    ~AllowCThreads()
+    {
+      PyEval_RestoreThread(m_saved);
+      PyEval_SetTrace(m_tracefunc, m_tracearg);
+      Py_XDECREF(m_tracearg);
+    }
+  private:
+    Py_tracefunc m_tracefunc;
+    PyObject *m_tracearg;
+    PyThreadState *m_saved;
+  };
+
+  /**
+   * Releases the GIL and disables any tracer functions, executes the calling algorithm object
+   * and re-acquires the GIL and resets the tracing functions.
+   * The trace functions are disabled as they can seriously hamper performance of Python algorithms
+   *
+   * As an algorithm is a potentially time-consuming operation, this allows other threads
+   * to execute python code while this thread is executing C code
+   * @param self :: A reference to the calling object
+   */
+  bool executeWhileReleasingGIL(IAlgorithm & self)
+  {
+    bool result(false);
+    AllowCThreads threadStateHolder;
+    result = self.execute();
+    return result;
+  }
+
 }
 
 void export_ialgorithm()
@@ -195,7 +238,7 @@ void export_ialgorithm()
         "are NOT stored in the Analysis Data Service but must be retrieved from the property.")
     .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
-    .def("execute", &IAlgorithm::execute, "Runs the algorithm")
+    .def("execute", &executeWhileReleasingGIL, "Runs the algorithm and returns whether it has been successful")
     // Special methods
     .def("__str__", &IAlgorithm::toString)
     ;

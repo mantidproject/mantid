@@ -3,6 +3,7 @@
 
 #include <MantidPythonAPI/FrameworkManagerProxy.h>
 #include "MantidPythonAPI/BoostPython_Silent.h"
+#include "MantidPythonAPI/PythonThreading.h"
 
 namespace Mantid
 {
@@ -33,47 +34,6 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-
-    // @cond UNDOC
-    // We have to perform some magic due to threading issues.  There are 2 scenarios:
-    // 1) If asynchronous execution of code is requested from currently executing Python code then we must acquire the GIL before we
-    //    perform an call up to python;
-    // 2) If asynchronous execution of code is requested from outside of running Python code then the GIL is not required since there is
-    //    no other thread to lock against and worse still if we try then we get a deadlock
-
-    // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock for more information on the GIL
-
-    class PythonGIL
-    {
-    public:
-      ///Constructor
-      PythonGIL() : m_tstate(NULL), m_gil_state(PyGILState_UNLOCKED), m_locked(false)
-      {
-        if( !PyThreadState_GetDict() )
-        {
-          m_gil_state = PyGILState_Ensure();
-          m_tstate = PyThreadState_GET();
-          m_locked = true;
-        }
-      }
-
-      ///Destructor
-      ~PythonGIL()
-      {
-        if( m_locked )
-        {
-          PyThreadState_Swap(m_tstate);
-          PyGILState_Release(m_gil_state);
-        }
-      }
-    private:
-      /// Store the thread state
-      PyThreadState *m_tstate;
-      /// Store the GIL state
-      PyGILState_STATE m_gil_state;
-      /// If we've locked the state
-      bool m_locked;
-    };
 
     /// Handle a Python error state
     void handlePythonError(const bool with_trace=true);
@@ -127,9 +87,9 @@ namespace Mantid
       static ResultType dispatch(PyObject *object, const std::string & func_name)
       {
         DefaultReturn<ResultType> default_value;
+        GlobalInterpreterLock gil;
         try 
         {
-          PythonGIL gil;
           return boost::python::call_method<ResultType>(object, func_name.c_str());
         }
         catch(boost::python::error_already_set&)
@@ -146,9 +106,9 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name)
       {
+        GlobalInterpreterLock gil;
         try
         {
-          PythonGIL gil;
           boost::python::call_method<void>(object, func_name.c_str());
         }
         catch(boost::python::error_already_set&)
@@ -171,9 +131,9 @@ namespace Mantid
       static ResultType dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
         DefaultReturn<ResultType> default_value;
+        GlobalInterpreterLock gil;
         try 
         {
-          PythonGIL gil;
           return boost::python::call_method<ResultType>(object, func_name.c_str(), arg);
         }
         catch(boost::python::error_already_set&)
@@ -191,9 +151,9 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
+        GlobalInterpreterLock gil;
         try 
         {
-          PythonGIL gil;
           boost::python::call_method<void>(object, func_name.c_str(), arg);
         }
         catch(boost::python::error_already_set&)

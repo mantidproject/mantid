@@ -56,7 +56,7 @@ namespace MantidQt
     virtual void setUserInput(const QVariant & value)  { Q_UNUSED(value); }
 
     signals:
-      void runAsPythonScript(const QString& code);
+      void runAsPythonScript(const QString& code, bool);
 
     protected:
       /// Default constructor

@@ -14,6 +14,9 @@ import time
 import _qti
 import datetime
 from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import pyqtSlot
+
+from mantidplotpy.proxies import threadsafe_call
 
 # Try to import QTest. Not available on Windows?
 try:
@@ -85,6 +88,27 @@ def get_screenshot_dir():
     return dest
             
 
+class Screenshot(QtCore.QObject):
+    """
+        Handles taking a screenshot while
+        ensuring the call takes place on the GUI
+        thread
+    """
+    
+    def take_picture(self, widget, filename):
+        """
+        Takes a screenshot and saves it to the 
+        filename given, ensuring the call is processed
+        through a slot if the call is from a separate 
+        thread
+        """
+        # First save the screenshot
+        widget.show()
+        widget.resize(widget.size())
+        QtCore.QCoreApplication.processEvents()
+        
+        pix = QtGui.QPixmap.grabWidget(widget)
+        pix.save(filename)
 
 def screenshot(widget, filename, description, png_exists=False):
     """ Take a screenshot of the widget for displaying in a html report.
@@ -109,14 +133,10 @@ def screenshot(widget, filename, description, png_exists=False):
             # Find the widget if handled with a proxy
             if hasattr(widget, "_getHeldObject"):
                 widget = widget._getHeldObject()
-            
-            # First save the screenshot
-            widget.show()
-            widget.resize(widget.size())
-            QtCore.QCoreApplication.processEvents()
-            
-            pix = QtGui.QPixmap.grabWidget(widget)
-            pix.save(os.path.join(dest, filename+".png"))
+                
+        if widget is not None:
+            camera = Screenshot()
+            threadsafe_call(camera.take_picture, widget, os.path.join(dest, filename+".png"))
         
         # Modify the section in the HTML page
         section_text = '<h2>%s</h2>' % filename
@@ -126,6 +146,13 @@ def screenshot(widget, filename, description, png_exists=False):
         
         _replace_report_text(report, filename, section_text)
 
+def moveMouseToCentre(widget):
+    """Moves the mouse over the widget
+    """
+    if qtest:
+        QtCore.QCoreApplication.processEvents()
+        threadsafe_call(QTest.mouseMove, widget)
+        QtCore.QCoreApplication.processEvents()
 
 def runTests(classname):
     """ Run the test suite in the class.

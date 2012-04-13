@@ -10,6 +10,12 @@ try:
 except:
     HAS_MANTID = False  
 
+try:
+    import mantidplot
+    HAS_MANTIDPLOT = True
+except ImportError:
+    HAS_MANTIDPLOT = False
+
 import xml.dom.minidom
 import sys
 import time
@@ -214,6 +220,7 @@ class BaseReductionScripter(object):
                 Retrieve state from observed widget
                 @param init: if True, the state class will be kept for later type checking
             """
+            
             self._state = self._subject.get_state()
             
             # If we are initializing, store the object class
@@ -384,12 +391,12 @@ class BaseReductionScripter(object):
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
-        
+
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(script)
             f.close()
-        
+
         return script
     
     def apply(self):
@@ -399,7 +406,7 @@ class BaseReductionScripter(object):
         if HAS_MANTID:
             script = self.to_script(None)
             try:
-                exec script
+                self.execute_script(script)
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
@@ -416,6 +423,22 @@ class BaseReductionScripter(object):
                 raise RuntimeError, sys.exc_value
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
+
+    def execute_script(self, script):
+        """
+            Executes the given script code.
+
+            If MantidPlot is available it calls back to MantidPlot
+            to ensure the code is executed asynchronously, if not
+            then a simple exec call is used
+
+            @param script :: A chunk of code to execute
+        """
+        if HAS_MANTIDPLOT:
+            mantidplot.runPythonScript(script, True)
+        else:
+            exec script
+        
 
     def reset(self):
         """
