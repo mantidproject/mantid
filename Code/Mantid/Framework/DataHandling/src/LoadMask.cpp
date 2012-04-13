@@ -21,6 +21,7 @@ Supporting
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument.h"
@@ -98,7 +99,7 @@ namespace DataHandling
     exts.push_back(".msk");
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, exts),
         "Masking file for masking. Supported file format is XML and ISIS ASCII. ");
-    declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "Masking", Direction::Output),
+    declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("OutputWorkspace", "Masking", Direction::Output),
         "Output Masking Workspace");
 
     return;
@@ -870,7 +871,7 @@ namespace DataHandling
 
     // 2. Use the instrument in the temp Workspace for new MaskWorkspace
     Geometry::Instrument_const_sptr minstrument = tempWS->getInstrument();
-    API::MatrixWorkspace_sptr mm = API::MatrixWorkspace_sptr(new DataObjects::SpecialWorkspace2D(minstrument));
+    API::MatrixWorkspace_sptr mm = API::MatrixWorkspace_sptr(new DataObjects::MaskWorkspace(minstrument));
     mMaskWS = mm;
     mMaskWS->setTitle("Mask");
 
