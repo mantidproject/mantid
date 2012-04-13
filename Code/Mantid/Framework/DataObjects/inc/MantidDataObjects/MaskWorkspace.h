@@ -21,6 +21,7 @@ namespace DataObjects
         ~MaskWorkspace();
 
         bool isMasked(const detid_t detectorID) const;
+        std::size_t getNumberMasked() const;
         virtual const std::string id() const;
 
     private:

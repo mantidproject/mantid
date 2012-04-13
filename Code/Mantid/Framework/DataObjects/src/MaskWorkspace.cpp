@@ -52,21 +52,21 @@ namespace DataObjects
 
     //--------------------------------------------------------------------------
 
+    std::size_t MaskWorkspace::getNumberMasked() const
+    {
+      std::size_t numMasked(0);
+      return numMasked;
+    }
+
     bool MaskWorkspace::isMasked(const detid_t detectorID) const
     {
-      std::cout << "isMasked(" << detectorID << ") " << this->getValue(detectorID, 42.);
       // return true if the value isn't zero
       if (this->getValue(detectorID, 0.) != 0.)
       {
-        std::cout << " A -> 1\n";
         return true;
       }
-      // the mask bit on the workspace can be set
-      if (this->getInstrument()->isDetectorMasked(detectorID))
-        std::cout << " B -> 1\n";
-      else
-        std::cout << " B -> 0\n";
 
+      // the mask bit on the workspace can be set
       return this->getInstrument()->isDetectorMasked(detectorID);
     }
 
