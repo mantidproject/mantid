@@ -48,6 +48,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set( CPACK_INSTALL_PREFIX "/")
 	set( CPACK_NSIS_INSTALL_ROOT "C:\\\\MantidInstall")
 	set( TARGET_TYPE RUNTIME)
+	set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
+	set( WINDOWS_DEPLOYMENT_TYPE "Release" CACHE STRING "Type of deployment used")
+	set_property(CACHE WINDOWS_DEPLOYMENT_TYPE PROPERTY STRINGS Release Debug)
+	mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 	
 	#TODO: Tidy this up by excluding .git as well as .svn!
 	#TODO check destinations are relative to the actual install location.
@@ -67,6 +71,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	
 	#TODO: create logs directory
 	#TODO: create documents directory  what does the config service do if the logs directory is missing?
+	#install ( DIRECTORY "logs" DESTINATION bin)
+	#install ( DIRECTORY "documents" DESTINATION bin)
 	
 	#TODO: put these commands in the associated CMakeLists.
 	
@@ -86,14 +92,16 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.h" )
 	install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.cpp" )
 	install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/build.bat ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/createAlg.py ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/SConstruct DESTINATION UserAlgorithms )
-	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidKernel.lib" DESTINATION UserAlgorithms)
-	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidGeometry.lib" DESTINATION UserAlgorithms)
-	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidAPI.lib" DESTINATION UserAlgorithms)
-	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidNexusCPP.lib" DESTINATION UserAlgorithms)
-	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidDataObjects.lib" DESTINATION UserAlgorithms)
-	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidKernel.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidGeometry.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidAPI.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidNexusCPP.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidDataObjects.lib" DESTINATION UserAlgorithms)
+	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
 	install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/PocoXML.lib ${CMAKE_LIBRARY_PATH}/boost_date_time-vc100-mt-1_43.lib DESTINATION UserAlgorithms)
 	
+	# Copy third party dlls
+	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/ DESTINATION bin FILES_MATCHING PATTERN "*.dll" REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" EXCLUDE )
 	
 	# On install
 	#TODO only set env variables for the release builds.
@@ -112,6 +120,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         Pop  \\\$0
 		
 		CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
+		
+		CreateDirectory \\\"$INSTDIR\\\\logs\\\"
+		
+		CreateDirectory \\\"$INSTDIR\\\\docs\\\"
 	")
 		
 	# On unistall reverse stages listed above.
@@ -131,6 +143,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         Pop  \\\$0
 		
 		Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
+		
+		RMDir \\\"$INSTDIR\\\\logs\\\"
+		
+		RMDir \\\"$INSTDIR\\\\docs\\\"
 	")
 	  
 ENDIF()
