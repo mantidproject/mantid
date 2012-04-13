@@ -29,7 +29,7 @@ namespace DataObjects
         MaskWorkspace(const MaskWorkspace&);
         /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
         MaskWorkspace& operator=(const MaskWorkspace&);
-
+        bool m_hasInstrument;
     };
 
     ///shared pointer to the MaskWorkspace class

@@ -22,6 +22,8 @@ public:
         Mantid::DataObjects::MaskWorkspace* maskWS = new Mantid::DataObjects::MaskWorkspace(nDetectors);
         TS_ASSERT_EQUALS(maskWS->getNumberHistograms(), nDetectors);
         TS_ASSERT_EQUALS(maskWS->blocksize(), 1);
+        TS_ASSERT_EQUALS(maskWS->getNumberMasked(), 0);
+        TS_ASSERT_THROWS(maskWS->isMasked(0), std::runtime_error);
     }
 
     void test_constructure_using_instrument()
@@ -34,9 +36,12 @@ public:
 
         Mantid::DataObjects::MaskWorkspace* maskWS =
                 new Mantid::DataObjects::MaskWorkspace(inst, false);
+        for (int i = 0; i < pixels; i++)
+          maskWS->setValue(i, 1); // mask the pixel
 
         TS_ASSERT_EQUALS(maskWS->getNumberHistograms(), pixels*pixels);
-
+        TS_ASSERT_EQUALS(maskWS->getNumberMasked(), pixels);
+        TS_ASSERT(maskWS->isMasked(0));
     }
 
 };
