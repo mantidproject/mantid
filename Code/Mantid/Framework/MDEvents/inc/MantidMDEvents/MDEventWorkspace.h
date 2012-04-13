@@ -89,6 +89,8 @@ namespace MDEvents
 
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 
+    void splitTrackedBoxes(Kernel::ThreadScheduler * ts);
+
     virtual void splitBox();
 
     virtual void refreshCache();

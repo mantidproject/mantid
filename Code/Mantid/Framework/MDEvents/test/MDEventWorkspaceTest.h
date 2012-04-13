@@ -146,6 +146,38 @@ public:
     delete ew;
   }
 
+
+  //-------------------------------------------------------------------------------------
+  /** MDBox->addEvent() tracks when a box is too big.
+   * MDEventWorkspace->splitTrackedBoxes() splits them
+   * */
+  void test_splitTrackedBoxes()
+  {
+    MDEventWorkspace1Lean::sptr ew = MDEventsTestHelper::makeMDEW<1>(2, 0.0, 1.0, 0);
+    BoxController_sptr bc = ew->getBoxController();
+    bc->setSplitInto(2);
+    bc->setSplitThreshold(100);
+    ew->splitBox();
+
+    typedef MDGridBox<MDLeanEvent<1>,1> gbox_t;
+    typedef MDBox<MDLeanEvent<1>,1> box_t;
+    typedef IMDBox<MDLeanEvent<1>,1> ibox_t;
+
+    // Make 99 events
+    coord_t centers[1] = {0};
+    for (size_t i=0; i<99; i++)
+    {
+      centers[0] = coord_t(i)*0.001;
+      ew->addEvent(MDEvent<1>(1.0, 1.0, centers) );
+    }
+    TS_ASSERT_EQUALS( bc->getBoxesToSplit().size(), 0);
+
+    // The 100th event triggers the adding to the list
+    ew->addEvent(MDEvent<1>(1.0, 1.0, centers) );
+    TS_ASSERT_EQUALS( bc->getBoxesToSplit().size(), 1);
+
+  }
+
   //-------------------------------------------------------------------------------------
   /** Create an IMDIterator */
   void test_createIterator()

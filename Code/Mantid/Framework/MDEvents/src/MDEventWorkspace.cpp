@@ -539,11 +539,40 @@ namespace MDEvents
    * enough events to be worth it.
    *
    * @param ts :: optional ThreadScheduler * that will be used to parallelize
-   *        recursive splitting. Set to NULL to do it serially. */
+   *        recursive splitting. Set to NULL to do it serially.
+   */
   TMDE(
   void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler * ts)
   {
     data->splitAllIfNeeded(ts);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Goes through the MDBoxes that were tracked by the BoxController
+   * as being too large, and splits them.
+   * @param ts :: optional ThreadScheduler * that will be used to parallelize
+   *        recursive splitting.
+   */
+  TMDE(
+  void MDEventWorkspace)::splitTrackedBoxes(ThreadScheduler * ts)
+  {
+    UNUSED_ARG(ts);
+    throw std::runtime_error("Not implemented yet");
+//    // Get a COPY of the vector (to avoid thread-safety issues)
+//    std::vector<void *> boxes = this->getBoxController()->getBoxesToSplit();
+//    //PRAGMA_OMP( parallel for )
+//    for (int i=0; i<int(boxes.size()); i++)
+//    {
+//      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+//      if (box)
+//      {
+//        MDGridBox<MDE,nd> * parent = dynamic_cast<MDGridBox<MDE,nd> *>(box->getParent());
+//        if (parent)
+//        {
+//          parent->splitContents(parent->getChildIndexFromID(box->getId()), ts);
+//        }
+//      }
+//    }
   }
 
   //-----------------------------------------------------------------------------------------------

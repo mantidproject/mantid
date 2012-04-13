@@ -480,6 +480,13 @@ namespace MDEvents
     // Yes, we added some data
     this->m_dataAdded = true;
 
+    // When we reach the split threshold exactly, track that the MDBox is too small
+    // We check on equality and not >= to only add a box once.
+    if (this->data.size() == this->m_BoxController->getSplitThreshold())
+    {
+      this->m_BoxController->addBoxToSplit(this);
+    }
+
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Keep the running total of signal and error
     signal_t signal = static_cast<signal_t>(event.getSignal());
