@@ -242,6 +242,18 @@ void CommandLineInterpreter::saveSettings() const
 }
 
 /**
+ * Shutdown the interpreter
+ * The script runner objects may need to perform
+ * shutdown operations that require the environment to be
+ * running. The destructor is not controlled enough for this
+ */
+void CommandLineInterpreter::shutdown()
+{
+  m_inputBuffer.clear();
+  m_runner.clear();
+}
+
+/**
  * Paste in code and execute as new lines are encountered
  */
 void CommandLineInterpreter::paste()
@@ -392,6 +404,8 @@ void CommandLineInterpreter::setupEnvironment(const ScriptingEnv & environ)
   connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setStatusToWaiting()));
 
   m_inputBuffer = QSharedPointer<InputSplitter>(new InputSplitter(m_runner));
+
+  connect(&environ, SIGNAL(shuttingDown()), this, SLOT(shutdown()));
 }
 
 /**

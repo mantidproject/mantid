@@ -55,13 +55,14 @@ class CrossThreadCall(QtCore.QObject):
         """
         if QtCore.QThread.currentThread() != QtGui.qApp.thread():
             QtCore.QMetaObject.invokeMethod(self, "_do_dispatch", Qt.BlockingQueuedConnection)
-            if self.__exception is not None:
-                raise self.__exception
         else:
             try:
                 self.__func_return = self.__callable(*self.__args, **self.__kwargs)
             except Exception, exc:
                 self.__exception = exc
+
+        if self.__exception is not None:
+            raise self.__exception # Ensures this happens in the right thread
         return self.__func_return
     
     def _get_argtype(self, argument):
@@ -106,6 +107,14 @@ class QtProxyObject(QtCore.QObject):
         if self.__obj is not None:
             self.connect(self.__obj, QtCore.SIGNAL("destroyed()"),
                          self._kill_object, Qt.DirectConnection)
+
+    def __del__(self):
+        """
+        Disconnect the signal
+        """
+        if self.__obj is not None:
+            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                            self._kill_object)
 
     def close(self):
         """

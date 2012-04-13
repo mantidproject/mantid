@@ -91,7 +91,6 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 
 PythonScripting::~PythonScripting()
 {
-  shutdown();
 }
 
 /**
@@ -164,13 +163,13 @@ bool PythonScripting::start()
     PyObject *pymodule = PyImport_AddModule("__main__");
     if( !pymodule )
     {
-      shutdown();
+      finalize();
       return false;
     }
     m_globals = PyModule_GetDict(pymodule);
     if( !m_globals )
     {
-      shutdown();
+      finalize();
       return false;
     }
 
@@ -181,7 +180,7 @@ bool PythonScripting::start()
     m_sys = PyModule_GetDict(pymodule);
     if( !m_sys )
     {
-      shutdown();
+      finalize();
       return false;
     }
 
@@ -199,7 +198,7 @@ bool PythonScripting::start()
     }
     else
     {
-      shutdown();
+      finalize();
       return false;
     }
 

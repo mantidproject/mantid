@@ -56,8 +56,11 @@ class ScriptingEnv : public QObject
   ScriptingEnv(ApplicationWindow *parent, const QString & langName);
   /// Destructor
   ~ScriptingEnv();
-  /// Initialize the environment
+  /// Start the environment
   bool initialize();
+  /// Shutdown the environment in a more controlled manner than the destructor allows
+  void finalize();
+
   /// Is the environment initialized
   bool isInitialized() const { return d_initialized; }
   /// Query if any code is currently being executed
@@ -108,12 +111,21 @@ public slots:
   void decref();
   
 signals:
+  /// Starting
+  void starting();
+  /// Stopping
+  void shuttingDown();
   /// signal an error condition / exception
   void error(const QString & message, const QString & scriptName, int lineNumber);
   /// output that is not handled by a Script
   void print(const QString & output);
 
 protected:
+  /// Override to perform some initialisation code
+  virtual bool start() { return true; }
+  /// Override to perform shutdown code
+  virtual void shutdown() {}
+
   /// whether the interpreter has been successfully initialized
   bool d_initialized;
   /// the context in which we are running
@@ -124,10 +136,6 @@ protected:
 private:
   /// Private default constructor
   ScriptingEnv();
-  /** Override to perform some initialisation code */
-  virtual bool start() { return true; }
-  /** Override to perform some finalisation code */
-  virtual void shutdown() {}
 
 private:
   int d_refcount;

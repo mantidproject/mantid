@@ -9530,6 +9530,9 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   //Save the settings and exit
   saveSettings();
   mantidUI->shutdown();
+  m_scriptInterpreter->shutdown();
+  scriptingEnv()->finalize();
+
   ce->accept();
 
 }

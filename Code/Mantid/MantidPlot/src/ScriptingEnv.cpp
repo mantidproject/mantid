@@ -58,16 +58,31 @@ ScriptingEnv::~ScriptingEnv()
 {
 }
 
+/**
+ * Start the environment
+ * @return
+ */
 bool ScriptingEnv::initialize()
 {
   static bool init_called(false);
   if( !init_called )
   {
     init_called = true;
+    emit starting();
     return start();
   }
   return isInitialized();
 }
+
+/**
+ * Perform a shutdown of the environment
+ */
+void ScriptingEnv::finalize()
+{
+  emit shuttingDown();
+  shutdown();
+}
+
 
 const QString ScriptingEnv::languageName() const
 {

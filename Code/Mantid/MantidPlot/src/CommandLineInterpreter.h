@@ -71,14 +71,15 @@ class CommandLineInterpreter : public ScriptEditor
 public:
   /// Construct
   CommandLineInterpreter(const ScriptingEnv & environ, QWidget *parent = NULL);
-
   /// Persist to store
   void saveSettings() const;
-
   /// Is any code executing
   inline bool isExecuting() const { return m_status == Executing; }
 
 public slots:
+  /// Shutdown the interpreter
+  void shutdown();
+
   /// Paste needs to execute lines as it goes
   void paste();
   /// Cut can only edit text on the current input line
