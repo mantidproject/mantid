@@ -98,12 +98,11 @@ namespace
    * Helper function that takes a vector of vectors of items and flattens it into
    * a single vector of items.
    */
-  template<typename T>
-  std::vector<T> flattenVecOfVec(std::vector<std::vector<T> > vecOfVec)
+  std::vector<std::string> flattenVecOfVec(std::vector<std::vector<std::string> > vecOfVec)
   {
-    std::vector<T> flattenedVec;
+    std::vector<std::string> flattenedVec;
 
-    std::vector<std::vector<T> >::const_iterator it = vecOfVec.begin();
+    std::vector<std::vector<std::string> >::const_iterator it = vecOfVec.begin();
 
     for(; it != vecOfVec.end(); ++it)
     {
@@ -160,7 +159,7 @@ namespace Mantid
       {
         // Get back full path before passing to getFileLoader method, and also
         // find out whether this is a multi file load.
-        std::vector<std::string> fileNames = flattenVecOfVec<std::string>(getProperty("Filename"));
+        std::vector<std::string> fileNames = flattenVecOfVec(getProperty("Filename"));
         // If it's a single file load, then it's fine to change loader.
         if(fileNames.size() == 1)
         {
