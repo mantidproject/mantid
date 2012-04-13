@@ -947,16 +947,17 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
  * Do some check when reading from MWRun, before actually reading new data file, to see if file is valid
  */
 void MuonAnalysis::handleInputFileChanges()
-{
-  std::cout << "\n\n" << m_uiForm.mwRunFiles->getFirstFilename().toStdString() << "\n\n";
-  
+{ 
   if ( m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
 
   if ( !m_uiForm.mwRunFiles->isValid() )
   { 
     QMessageBox::warning(this,"Mantid - MuonAnalysis", m_uiForm.mwRunFiles->getFileProblem() );
-    m_uiForm.mwRunFiles->setFileProblem("Error finding file. Reset to last working data.");
+    if (m_textToDisplay == "")
+      m_uiForm.mwRunFiles->setFileProblem("Error. No File specified.");
+    else
+      m_uiForm.mwRunFiles->setFileProblem("Error finding file. Reset to last working data.");
     m_uiForm.mwRunFiles->setText(m_textToDisplay);
     return;
   }

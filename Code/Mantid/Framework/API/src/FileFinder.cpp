@@ -559,9 +559,16 @@ namespace Mantid
         std::string path = getFullPath(hint);
         if (!path.empty())
         {
-          g_log.information() << "found path = " << path << '\n';
-          return path;
-        } else {
+          if (Poco::File(path).exists() )
+          {
+            g_log.information() << "found path = " << path << '\n';
+            return path;
+          }
+          else
+            return "";
+        } 
+        else 
+        {
           g_log.notice() << "Unable to find files via direcotry search with the filename that looks like a full filename" << "\n";
         }
       }
