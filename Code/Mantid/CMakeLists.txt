@@ -15,7 +15,11 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 
 # Define the project name.
 project ( Mantid )
-set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used in linux packages and for symlinks")
+set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
+set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
+
+#Set package name here 
+set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
@@ -46,6 +50,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set( CPACK_GENERATOR "NSIS" )
 	set( CPACK_SET_DESTDIR "ON") 
 	set( CPACK_INSTALL_PREFIX "/")
+	set( CPACK_PACKAGE_INSTALL_DIRECTORY "Mantid${CPACK_PACKAGE_SUFFIX}")
 	set( CPACK_NSIS_INSTALL_ROOT "C:\\\\MantidInstall")
 	set( TARGET_TYPE RUNTIME)
 	set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
@@ -101,51 +106,71 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	# Copy third party dlls excluding selected Qt ones and debug ones
 	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/ DESTINATION bin FILES_MATCHING PATTERN "*.dll" REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" EXCLUDE PATTERN ".git" EXCLUDE )
 	
-	# On install
-	#TODO only set env variables for the release builds.
-	set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"MANTIDPATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+	#Release deployments do modify enviromental varialbes, other deployments do not.
+	if(CPACK_PACKAGE_SUFFIX STREQUAL "") 
+	    # On install
+	    set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"MANTIDPATH\\\"
+            Push \\\"A\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\bin\\\"
+            Call EnvVarUpdate
+            Pop  \\\$0
 		
-	    Push \\\"PATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+	        Push \\\"PATH\\\"
+            Push \\\"A\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\bin\\\"
+            Call EnvVarUpdate
+            Pop  \\\$0
 		
-		CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
+		    CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
 		
-		CreateDirectory \\\"$INSTDIR\\\\logs\\\"
+		    CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 		
-		CreateDirectory \\\"$INSTDIR\\\\docs\\\"
-	")
-		
+		    CreateDirectory \\\"$INSTDIR\\\\docs\\\"
+	    ")
 	# On unistall reverse stages listed above.
-	set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS 
-        "Push \\\"PATH\\\"
-        Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
+	    set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS 
+            "Push \\\"PATH\\\"
+            Push \\\"R\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\bin\\\"
+            Call un.EnvVarUpdate
+            Pop  \\\$0
 		
-		Push \\\"MANTIDPATH\\\"
-		Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
+		    Push \\\"MANTIDPATH\\\"
+		    Push \\\"R\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\bin\\\"
+            Call un.EnvVarUpdate
+            Pop  \\\$0
 		
-		Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
+		    Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
 		
-		RMDir \\\"$INSTDIR\\\\logs\\\"
+		    RMDir \\\"$INSTDIR\\\\logs\\\"
 		
-		RMDir \\\"$INSTDIR\\\\docs\\\"
-	")
+		    RMDir \\\"$INSTDIR\\\\docs\\\"
+	    ")
+	else ()
+	# On install
+	    set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+            CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
+		
+		    CreateDirectory \\\"$INSTDIR\\\\logs\\\"
+		
+		    CreateDirectory \\\"$INSTDIR\\\\docs\\\"
+	    ")
+	# On unistall reverse stages listed above.
+	    set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+            Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
+		
+		    RMDir \\\"$INSTDIR\\\\logs\\\"
+		
+		    RMDir \\\"$INSTDIR\\\\docs\\\"
+	    ")
+	endif()
+		
+	
 	  
 ENDIF()
 
@@ -294,8 +319,6 @@ if ( ENABLE_CPACK )
     include ( CPackCommon )
     
     #set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
-    set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
-  
     # Mac Packagemaker settings
     set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
