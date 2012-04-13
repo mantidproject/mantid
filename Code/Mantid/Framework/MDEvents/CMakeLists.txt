@@ -17,7 +17,7 @@ set ( SRC_FILES
 	src/CreateMDWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
-	src/IMDBox.cpp
+	src/MDBoxBase.cpp
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
@@ -41,7 +41,7 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
-    src/IMDBox.cpp
+    src/MDBoxBase.cpp
 	src/MDBin.cpp
     src/MDBox.cpp
     src/MDBoxIterator.cpp
@@ -68,7 +68,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CreateMDWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
-	inc/MantidMDEvents/IMDBox.h
+	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/IntegratePeaksMD.h
 	inc/MantidMDEvents/LoadMD.h
 	inc/MantidMDEvents/LoadSQW.h
@@ -112,7 +112,7 @@ set ( TEST_FILES
 	test/CreateMDWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
-	test/IMDBoxTest.h
+	test/MDBoxBaseTest.h
 	test/IntegratePeaksMDTest.h
 	test/LoadMDTest.h
 	test/LoadSQWTest.h

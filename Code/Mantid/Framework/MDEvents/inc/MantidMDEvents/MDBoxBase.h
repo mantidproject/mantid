@@ -1,5 +1,5 @@
-#ifndef IMDBOX_H_
-#define IMDBOX_H_
+#ifndef MDBOXBASE_H_
+#define MDBOXBASE_H_
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -15,7 +15,7 @@
 #include "MantidKernel/VMD.h"
 
 
-/// Define to keep the centroid around as a field on each IMDBox.
+/// Define to keep the centroid around as a field on each MDBoxBase.
 #undef MDBOX_TRACK_CENTROID
 
 namespace Mantid
@@ -26,8 +26,8 @@ namespace MDEvents
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
 
   //===============================================================================================
-  /** Abstract Interface for a multi-dimensional event "box".
-   * To be subclassed by MDBox and MDGridBox
+  /** Templated super-class of a multi-dimensional event "box".
+   * To be subclassed by MDBox<> and MDGridBox<>
    *
    * A box is a container of MDEvents within a certain range of values
    * within the nd dimensions. This range defines a n-dimensional "box"
@@ -41,19 +41,19 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport IMDBox : public Mantid::Kernel::ISaveable
+  class DLLExport MDBoxBase : public Mantid::Kernel::ISaveable
   {
   public:
 
     //-----------------------------------------------------------------------------------------------
-    IMDBox();
+    MDBoxBase();
 
-    IMDBox(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
-    IMDBox(const IMDBox<MDE,nd> & box);
+    MDBoxBase(const MDBoxBase<MDE,nd> & box);
 
     /// Destructor
-    virtual ~IMDBox() {}
+    virtual ~MDBoxBase() {}
 
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
@@ -73,7 +73,7 @@ namespace MDEvents
     virtual void save() const
     {
       std::cerr << "ID " << getId() << std::endl;
-      throw std::runtime_error("IMDBox::save() called and should have been overridden.");
+      throw std::runtime_error("MDBoxBase::save() called and should have been overridden.");
     }
 
     /// Flush the data to disk. Allows NXS api to actually write out the file.
@@ -106,7 +106,7 @@ namespace MDEvents
 
 
     // ----------------------------- Helper Methods --------------------------------------------------------
-    static void sortBoxesByFilePos(std::vector<IMDBox<MDE,nd> *> & boxes);
+    static void sortBoxesByFilePos(std::vector<MDBoxBase<MDE,nd> *> & boxes);
     // -----------------------------------------------------------------------------------------------------
 
 
@@ -115,32 +115,32 @@ namespace MDEvents
     virtual size_t getNumMDBoxes() const = 0;
 
 
-    /// Get the # of children IMDBox'es (non-recursive)
+    /// Get the # of children MDBoxBase'es (non-recursive)
     virtual size_t getNumChildren() const = 0;
 
-    /// Return the indexth child IMDBox.
-    virtual IMDBox<MDE,nd> * getChild(size_t index) = 0;
+    /// Return the indexth child MDBoxBase.
+    virtual MDBoxBase<MDE,nd> * getChild(size_t index) = 0;
 
     /// Sets the children from a vector of children
-    virtual void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd) = 0;
+    virtual void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd) = 0;
 
     /// Return a pointer to the parent box
-    void setParent(IMDBox<MDE,nd> * parent)
+    void setParent(MDBoxBase<MDE,nd> * parent)
     { m_parent = parent; }
 
     /// Return a pointer to the parent box
-    IMDBox<MDE,nd> * getParent()
+    MDBoxBase<MDE,nd> * getParent()
     { return m_parent; }
 
     /// Return a pointer to the parent box (const)
-    const IMDBox<MDE,nd> * getParent() const
+    const MDBoxBase<MDE,nd> * getParent() const
     { return m_parent; }
 
     /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
+    virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
 
     /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
+    virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
     /** Split sub-boxes, if this is possible and neede for this box */
     virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
@@ -151,7 +151,7 @@ namespace MDEvents
     {  /* Do nothing by default. */ }
 
     /// Returns the lowest-level box at the given coordinates
-    virtual const IMDBox<MDE,nd> * getBoxAtCoord(const coord_t * /*coords*/) const
+    virtual const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * /*coords*/) const
     { return this; }
 
 
@@ -446,7 +446,7 @@ namespace MDEvents
     size_t m_depth;
 
     /// Pointer to the parent of this box. NULL if no parent.
-    IMDBox<MDE,nd> * m_parent;
+    MDBoxBase<MDE,nd> * m_parent;
 
 #ifdef MDBOX_TRACK_CENTROID
     /** The centroid (weighted center of mass) of the events in this MDBox.
@@ -457,9 +457,9 @@ namespace MDEvents
 
   public:
     /// Convenience typedef for a shared pointer to a this type of class
-    typedef boost::shared_ptr< IMDBox<MDE, nd> > sptr;
+    typedef boost::shared_ptr< MDBoxBase<MDE, nd> > sptr;
 
-  }; //(end class IMDBox)
+  }; //(end class MDBoxBase)
 
 #pragma pack(pop) //Return to default packing size
 
@@ -471,4 +471,4 @@ namespace MDEvents
 
 }//namespace Mantid
 
-#endif /* IMDBOX_H_ */
+#endif /* MDBOXBASE_H_ */

@@ -23,7 +23,7 @@ See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using a
 
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -98,8 +98,8 @@ namespace MDAlgorithms
     float scalarRelativeErrorSquared = (scalarError * scalarError) / (scalar * scalar);
 
     // Get all the MDBoxes contained
-    IMDBox<MDE,nd> * parentBox = ws->getBox();
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    MDBoxBase<MDE,nd> * parentBox = ws->getBox();
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
 
     for (size_t i=0; i<boxes.size(); i++)

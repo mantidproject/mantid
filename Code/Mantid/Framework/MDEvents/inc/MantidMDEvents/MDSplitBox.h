@@ -3,7 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 
@@ -20,12 +20,12 @@ namespace MDEvents
    * @date 2011-04-15 10:26:16.413856
    */
   TMDE_CLASS
-  class DLLExport MDSplitBox : public IMDBox<MDE,nd>
+  class DLLExport MDSplitBox : public MDBoxBase<MDE,nd>
   {
   public:
     MDSplitBox(MDBox<MDE, nd> * box);
 
-    MDSplitBox(IMDBox<MDE, nd> * box, size_t _dimSplit, coord_t _splitPoint);
+    MDSplitBox(MDBoxBase<MDE, nd> * box, size_t _dimSplit, coord_t _splitPoint);
 
     virtual ~MDSplitBox();
     
@@ -38,7 +38,7 @@ namespace MDEvents
     size_t getNumMDBoxes() const;
 
     /// Fill a vector with all the boxes up to a certain depth
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & /*boxes*/, size_t /*maxDepth*/, bool)
+    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & /*boxes*/, size_t /*maxDepth*/, bool)
     { throw std::runtime_error("Not implemented."); }
 
     void addEvent(const MDE & point);
@@ -70,12 +70,12 @@ namespace MDEvents
     coord_t getSplitPoint() const
     { return splitPoint; }
 
-    /// Returns the IMDBox on the left side (x[dimSplit] < splitPoint)
-    IMDBox<MDE,nd> * getLeft()
+    /// Returns the MDBoxBase on the left side (x[dimSplit] < splitPoint)
+    MDBoxBase<MDE,nd> * getLeft()
     { return left; }
 
-    /// Returns the IMDBox on the right side (x[dimSplit] >= splitPoint)
-    IMDBox<MDE,nd> * getRight()
+    /// Returns the MDBoxBase on the right side (x[dimSplit] >= splitPoint)
+    MDBoxBase<MDE,nd> * getRight()
     { return right; }
 
   protected:
@@ -88,15 +88,15 @@ namespace MDEvents
     /// X-value that splits the dimension at index dimSplit.
     coord_t splitPoint;
 
-    /// IMDBox on the left of the split (x[dimSplit] < splitPoint)
-    IMDBox<MDE,nd> * left;
+    /// MDBoxBase on the left of the split (x[dimSplit] < splitPoint)
+    MDBoxBase<MDE,nd> * left;
 
-    /// IMDBox on the right of the split (x[dimSplit] >= splitPoint)
-    IMDBox<MDE,nd> * right;
+    /// MDBoxBase on the right of the split (x[dimSplit] >= splitPoint)
+    MDBoxBase<MDE,nd> * right;
 
   private:
     /// Used by constructor only.
-    void initBoxes(IMDBox<MDE, nd> * box);
+    void initBoxes(MDBoxBase<MDE, nd> * box);
 
   };
 

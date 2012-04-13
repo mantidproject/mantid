@@ -116,19 +116,19 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd>
   void TransformMD::doTransform(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     // Get ALL the boxes, including MDGridBoxes.
     ws->getBox()->getBoxes(boxes, 1000, false);
 
     // If file backed, sort them first.
     if (ws->isFileBacked())
-      IMDBox<MDE, nd>::sortBoxesByFilePos(boxes);
+      MDBoxBase<MDE, nd>::sortBoxesByFilePos(boxes);
 
     PARALLEL_FOR_IF( !ws->isFileBacked() )
     for (int i=0; i<int(boxes.size()); i++)
     {
       PARALLEL_START_INTERUPT_REGION
-      IMDBox<MDE,nd> * box = boxes[i];
+      MDBoxBase<MDE,nd> * box = boxes[i];
       if (box)
       {
         box->transformDimensions(m_scaling, m_offset);

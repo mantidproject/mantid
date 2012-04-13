@@ -214,7 +214,7 @@ namespace MDEvents
   void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex, EventList & el)
   {
     size_t numEvents = el.getNumberEvents();
-    IMDBox<MDLeanEvent<3>,3> * box = ws->getBox();
+    MDBoxBase<MDLeanEvent<3>,3> * box = ws->getBox();
 
     // Get the position of the detector there.
     const std::set<detid_t>& detectors = el.getDetectorIDs();

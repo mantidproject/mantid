@@ -21,7 +21,7 @@
 //
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 
 
 
@@ -133,16 +133,16 @@ void test_compareTwoBuilds()
      return;
    }
     // Get all the MDBoxes contained    
-    //IMDBox<MDE,nd> * parentBox = ws->getBox();
-    //std::vector<IMDBox<MDE,nd> *> boxes;
+    //MDBoxBase<MDE,nd> * parentBox = ws->getBox();
+    //std::vector<MDBoxBase<MDE,nd> *> boxes;
     //parentBox->getBoxes(boxes, 1000, true);
 
-    IMDBox<MDEvent<4> ,4> * parentBox = pMatrWs->getBox();
-    std::vector<IMDBox<MDEvent<4>,4> *> boxesM;
+    MDBoxBase<MDEvent<4> ,4> * parentBox = pMatrWs->getBox();
+    std::vector<MDBoxBase<MDEvent<4>,4> *> boxesM;
     parentBox->getBoxes(boxesM, 1000, true);
 
                             parentBox = pEvntWs->getBox();
-    std::vector<IMDBox<MDEvent<4>,4> *> boxesE;
+    std::vector<MDBoxBase<MDEvent<4>,4> *> boxesE;
     parentBox->getBoxes(boxesE, 1000, true);
 
 

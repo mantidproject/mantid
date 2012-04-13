@@ -190,7 +190,7 @@ namespace MDEventsTestHelper
    * @param step :: x-coordinate increases by this much.
    */
   template <size_t nd>
-  static void feedMDBox(IMDBox<MDLeanEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
+  static void feedMDBox(MDBoxBase<MDLeanEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
   {
     size_t counters[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd,counters,0);
     size_t index_max[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd,index_max,numPerSide);
@@ -224,7 +224,7 @@ namespace MDEventsTestHelper
   template<size_t nd>
   static void recurseSplit(MDGridBox<MDLeanEvent<nd>,nd> * box, size_t atRecurseLevel, size_t recurseLimit)
   {
-    typedef std::vector<IMDBox<MDLeanEvent<nd>,nd> *> boxVector;
+    typedef std::vector<MDBoxBase<MDLeanEvent<nd>,nd> *> boxVector;
     if (atRecurseLevel >= recurseLimit) return;
 
     // Split all the contents

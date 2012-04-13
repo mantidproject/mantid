@@ -153,7 +153,7 @@ public:
     // build another workspace with non uniform signal This time with 4x4x4x4=256 boxes
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<4>,4> >
     outnew2 = MDEventsTestHelper::makeMDEWFull<4>(4,0.0,4.);
-    IMDBox<MDEvent<4>,4> * out = outnew2->getBox();
+    MDBoxBase<MDEvent<4>,4> * out = outnew2->getBox();
 
     // add additional events to make data quadratic in 4th coordinate (energy)
     out->calcVolume();
@@ -204,7 +204,7 @@ public:
     // build third workspace with non uniform signal and noise
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<4>,4> >
     outnew3 = MDEventsTestHelper::makeMDEWFull<4>(4,0.0,4.);
-    IMDBox<MDEvent<4>,4> * out3 = outnew3->getBox();
+    MDBoxBase<MDEvent<4>,4> * out3 = outnew3->getBox();
 
     // add events to make data quadratic in 4th coordinate with noise
     // Make 2 events per box

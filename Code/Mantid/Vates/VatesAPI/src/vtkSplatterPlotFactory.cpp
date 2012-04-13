@@ -60,7 +60,7 @@ namespace Mantid
     std::cout << "Plotting points at an interval of " << interval << ", will give " << numPoints << " points." << std::endl;
 
     // First we get all the boxes, up to the given depth; with or wo the slice function
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     if (this->slice)
       ws->getBox()->getBoxes(boxes, 1000, true, this->sliceImplicitFunction);
     else

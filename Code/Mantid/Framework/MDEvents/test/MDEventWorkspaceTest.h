@@ -162,7 +162,7 @@ public:
 
     typedef MDGridBox<MDLeanEvent<1>,1> gbox_t;
     typedef MDBox<MDLeanEvent<1>,1> box_t;
-    typedef IMDBox<MDLeanEvent<1>,1> ibox_t;
+    typedef MDBoxBase<MDLeanEvent<1>,1> ibox_t;
 
     // Make 99 events
     coord_t centers[1] = {0};
@@ -303,7 +303,7 @@ public:
     TS_ASSERT_EQUALS( b->getBox()->getErrorSquared(), 100*double(num_repeat)*2.0);
 
     box_t * gridBox = dynamic_cast<box_t *>(b->getBox());
-    std::vector<IMDBox<MDLeanEvent<2>,2>*> boxes = gridBox->getBoxes();
+    std::vector<MDBoxBase<MDLeanEvent<2>,2>*> boxes = gridBox->getBoxes();
     TS_ASSERT_EQUALS( boxes[0]->getNPoints(), num_repeat);
     // The box should have been split itself into a gridbox, because 1000 events > the split threshold.
     subbox = dynamic_cast<box_t *>(boxes[0]);

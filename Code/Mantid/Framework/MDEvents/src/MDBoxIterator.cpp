@@ -1,6 +1,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 
 using namespace Mantid;
@@ -22,7 +22,7 @@ namespace MDEvents
    *        Note that the top level box is ALWAYS returned at least once, even if it is outside the
    *        implicit function
    */
-  TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+  TMDE(MDBoxIterator)::MDBoxIterator(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
       Mantid::Geometry::MDImplicitFunction * function)
       : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(new SkipMaskedBins(this))
   {
@@ -40,7 +40,7 @@ namespace MDEvents
    *        Note that the top level box is ALWAYS returned at least once, even if it is outside the
    *        implicit function
    */
-  TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly, SkippingPolicy* skippingPolicy,
+  TMDE(MDBoxIterator)::MDBoxIterator(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly, SkippingPolicy* skippingPolicy,
       Mantid::Geometry::MDImplicitFunction * function)
       : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(skippingPolicy)
   {
@@ -58,7 +58,7 @@ namespace MDEvents
    *        implicit function
    * @param skippingPolicy :: policy for skipping boxes upon next().
    */
-  TMDE(void MDBoxIterator)::commonConstruct(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+  TMDE(void MDBoxIterator)::commonConstruct(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
       Mantid::Geometry::MDImplicitFunction * function)
   {
     if (!topBox)
@@ -89,7 +89,7 @@ namespace MDEvents
    * @param begin :: start iterating at this point in the list
    * @param end :: stop iterating at this point in the list
    */
-  TMDE(MDBoxIterator)::MDBoxIterator(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end)
+  TMDE(MDBoxIterator)::MDBoxIterator(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end)
     : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(new SkipMaskedBins(this))
 
   {
@@ -103,7 +103,7 @@ namespace MDEvents
    * @param end :: stop iterating at this point in the list
    */
   TMDE(
-  void MDBoxIterator)::init(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end)
+  void MDBoxIterator)::init(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end)
   {
     if (begin >= boxes.size())
       throw std::runtime_error("MDBoxIterator::ctor(): invalid beginning position.");

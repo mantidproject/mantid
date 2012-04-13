@@ -29,7 +29,7 @@ class MDBoxIteratorTest : public CxxTest::TestSuite
 {
 public:
   typedef MDGridBox<MDLeanEvent<1>,1> gbox_t;
-  typedef IMDBox<MDLeanEvent<1>,1> ibox_t;
+  typedef MDBoxBase<MDLeanEvent<1>,1> ibox_t;
 
   //--------------------------------------------------------------------------------------
   /** Make a gridded box with this structure:
@@ -476,7 +476,7 @@ public:
 
     MDBoxIterator<MDLeanEvent<2>, 2> it(&mockBox, 1, true);
 
-    //All that we want to test is that iterator::getIsMasked calls IMDBox::getIsMasked
+    //All that we want to test is that iterator::getIsMasked calls MDBoxBase::getIsMasked
     EXPECT_CALL(mockBox, getIsMasked()).Times(1);
     it.getIsMasked();
 
@@ -576,7 +576,7 @@ public:
   {
     // Count the top level box.
     size_t counter = 1;
-    IMDBox<MDLeanEvent<3>,3> * box = NULL;
+    MDBoxBase<MDLeanEvent<3>,3> * box = NULL;
 
     MDBoxImplicitFunction * function = NULL;
     if (ImplicitFunction)
@@ -624,9 +624,9 @@ public:
    * which directly returns that vector, if that happens to be what you need.*/
   void do_test_iterator_that_fills_a_vector(bool leafOnly)
   {
-    IMDBox<MDLeanEvent<3>,3> * box;
+    MDBoxBase<MDLeanEvent<3>,3> * box;
     MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, new SkipNothing);
-    std::vector< IMDBox<MDLeanEvent<3>,3> * > boxes;
+    std::vector< MDBoxBase<MDLeanEvent<3>,3> * > boxes;
 
     // Iterate and fill the vector as you go.
     boxes.push_back(it.getBox());
@@ -658,7 +658,7 @@ public:
    */
   void do_test_getBoxes(bool leafOnly, int ImplicitFunction, size_t expected)
   {
-    std::vector< IMDBox<MDLeanEvent<3>,3> * > boxes;
+    std::vector< MDBoxBase<MDLeanEvent<3>,3> * > boxes;
 
     MDImplicitFunction * function = NULL;
     if (ImplicitFunction==1)
@@ -697,8 +697,8 @@ public:
 
     // Now we still need to iterate through the vector to do anything, so this is a more fair comparison
     size_t counter = 0;
-    std::vector< IMDBox<MDLeanEvent<3>,3> * >::iterator it;
-    std::vector< IMDBox<MDLeanEvent<3>,3> * >::iterator it_end = boxes.end();
+    std::vector< MDBoxBase<MDLeanEvent<3>,3> * >::iterator it;
+    std::vector< MDBoxBase<MDLeanEvent<3>,3> * >::iterator it_end = boxes.end();
     for (it = boxes.begin(); it != it_end; it++)
     {
       counter++;

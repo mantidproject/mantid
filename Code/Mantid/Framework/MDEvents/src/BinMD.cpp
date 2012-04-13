@@ -83,7 +83,7 @@ For more details on the coordinate transformations applied in this case, please 
 #include "MantidMDEvents/BinMD.h"
 #include "MantidMDEvents/CoordTransformAffineParser.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -387,13 +387,13 @@ namespace MDEvents
       MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin, chunkMax);
 
       // Use getBoxes() to get an array with a pointer to each box
-      std::vector<IMDBox<MDE,nd>*> boxes;
+      std::vector<MDBoxBase<MDE,nd>*> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
       ws->getBox()->getBoxes(boxes, 1000, true, function);
 
       // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
       if (bc->isFileBacked())
-        IMDBox<MDE, nd>::sortBoxesByFilePos(boxes);
+        MDBoxBase<MDE, nd>::sortBoxesByFilePos(boxes);
 
       // For progress reporting, the # of boxes
       if (prog)
@@ -460,7 +460,7 @@ namespace MDEvents
 //      prog->setNumSteps( int(outWS->getNPoints()/100) );
 //
 //    // The root-level box.
-//    IMDBox<MDE,nd> * rootBox = ws->getBox();
+//    MDBoxBase<MDE,nd> * rootBox = ws->getBox();
 //
 //    // This is the limit to loop over in each dimension
 //    size_t * index_max = new size_t[m_outD];

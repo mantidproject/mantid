@@ -4,7 +4,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/SkippingPolicy.h"
@@ -16,7 +16,7 @@ namespace MDEvents
   //Forward declaration.
   class SkippingPolicy;
 
-  /** MDBoxIterator: iterate through IMDBox
+  /** MDBoxIterator: iterate through MDBoxBase
    * hierarchy down to a given maximum depth.
    * 
    * @author Janik Zikovsky
@@ -26,16 +26,16 @@ namespace MDEvents
   class DLLExport MDBoxIterator : public Mantid::API::IMDIterator
   {
   public:
-    MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+    MDBoxIterator(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
         Mantid::Geometry::MDImplicitFunction * function = NULL);
-    MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+    MDBoxIterator(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
         SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function = NULL);
-    MDBoxIterator(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end);
-    void init(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end);
+    MDBoxIterator(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end);
+    void init(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end);
     ~MDBoxIterator();
 
     /// Return a pointer to the current box pointed to by the iterator.
-    IMDBox<MDE,nd> * getBox() const
+    MDBoxBase<MDE,nd> * getBox() const
     {
       return m_current;
     }
@@ -88,7 +88,7 @@ namespace MDEvents
   private:
 
     /// Common code run my a few of the constructors.
-    void commonConstruct(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+    void commonConstruct(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
       Mantid::Geometry::MDImplicitFunction * function);
 
     void getEvents() const;
@@ -102,10 +102,10 @@ namespace MDEvents
     size_t m_max;
 
     /// Vector of all the boxes that will be iterated.
-    std::vector<IMDBox<MDE,nd> *> m_boxes;
+    std::vector<MDBoxBase<MDE,nd> *> m_boxes;
 
     /// Box currently pointed to
-    IMDBox<MDE,nd> * m_current;
+    MDBoxBase<MDE,nd> * m_current;
 
     /// MDBox currently pointed to
     mutable MDBox<MDE,nd> * m_currentMDBox;

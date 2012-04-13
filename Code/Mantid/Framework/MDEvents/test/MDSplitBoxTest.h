@@ -69,7 +69,7 @@ public:
 
     // Build the splitbox
     typedef MDSplitBox<MDLeanEvent<2>,2> MDSplitBox2;
-    typedef IMDBox<MDLeanEvent<2>,2> IMDBox2;
+    typedef MDBoxBase<MDLeanEvent<2>,2> MDBoxBase2;
     MDSplitBox2 * box = NULL;
     TS_ASSERT_THROWS_NOTHING( box = new MDSplitBox2(mdbox) );
 
@@ -81,8 +81,8 @@ public:
     TS_ASSERT_EQUALS(box->getSplitDimension(), 1);
     TS_ASSERT_DELTA(box->getSplitPoint(), 5.00, 1e-3);
 
-    IMDBox2 * left;
-    IMDBox2 * right;
+    MDBoxBase2 * left;
+    MDBoxBase2 * right;
     TS_ASSERT_THROWS_NOTHING(left = box->getLeft());
     TS_ASSERT_THROWS_NOTHING(right = box->getRight());
     TS_ASSERT(left);
@@ -121,7 +121,7 @@ public:
     MDBox<MDLeanEvent<2>,2> * mdbox = makeMDBox2();
 
     typedef MDSplitBox<MDLeanEvent<2>,2> MDSplitBox2;
-    typedef IMDBox<MDLeanEvent<2>,2> IMDBox2;
+    typedef MDBoxBase<MDLeanEvent<2>,2> MDBoxBase2;
     MDSplitBox2 * box = NULL;
 
     //Manually create it
@@ -131,8 +131,8 @@ public:
     TS_ASSERT_EQUALS(box->getSplitDimension(), 1);
     TS_ASSERT_DELTA(box->getSplitPoint(), 5.00, 1e-3);
 
-    IMDBox2 * left;
-    IMDBox2 * right;
+    MDBoxBase2 * left;
+    MDBoxBase2 * right;
     TS_ASSERT_THROWS_NOTHING(left = box->getLeft());
     TS_ASSERT_THROWS_NOTHING(right = box->getRight());
     TS_ASSERT(left);

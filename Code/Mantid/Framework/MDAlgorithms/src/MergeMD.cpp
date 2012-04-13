@@ -186,14 +186,14 @@ namespace MDAlgorithms
     if (!ws1 || !ws2)
       throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
 
-    IMDBox<MDE,nd> * box1 = ws1->getBox();
-    IMDBox<MDE,nd> * box2 = ws2->getBox();
+    MDBoxBase<MDE,nd> * box1 = ws1->getBox();
+    MDBoxBase<MDE,nd> * box2 = ws2->getBox();
 
     // How many events you started with
     size_t initial_numEvents = ws1->getNPoints();
 
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     box2->getBoxes(boxes, 1000, true);
     int numBoxes = int(boxes.size());
 

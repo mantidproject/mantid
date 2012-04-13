@@ -245,7 +245,7 @@ namespace MDEvents
 
     Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
 
-    IMDBox<MDE,nd> * box;
+    MDBoxBase<MDE,nd> * box;
     while (true)
     {
       box = it.getBox();

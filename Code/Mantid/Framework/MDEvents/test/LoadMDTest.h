@@ -75,8 +75,8 @@ public:
     compareBoxControllers(*ws1->getBoxController(), *ws2->getBoxController());
     
     // Compare every box1
-    std::vector<IMDBox<MDE,nd>*> boxes;
-    std::vector<IMDBox<MDE,nd>*> boxes1;
+    std::vector<MDBoxBase<MDE,nd>*> boxes;
+    std::vector<MDBoxBase<MDE,nd>*> boxes1;
 
     ws1->getBox()->getBoxes(boxes, 1000, false);
     ws2->getBox()->getBoxes(boxes1, 1000, false);
@@ -86,8 +86,8 @@ public:
 
     for (size_t j=0; j<boxes.size(); j++)
     {
-      IMDBox<MDE,nd>* box1 = boxes[j];
-      IMDBox<MDE,nd>* box2 = boxes1[j];
+      MDBoxBase<MDE,nd>* box1 = boxes[j];
+      MDBoxBase<MDE,nd>* box2 = boxes1[j];
 
       //std::cout << "ID: " << box1->getId() << std::endl;
       TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
@@ -245,7 +245,7 @@ public:
       DiskBuffer & dbuf = bc->getDiskBuffer();
       dbuf.flushCache();
 
-      typename std::vector<IMDBox<MDE,nd>*> boxes;
+      typename std::vector<MDBoxBase<MDE,nd>*> boxes;
       ws->getBox()->getBoxes(boxes, 1000, false);
       for (size_t i=0; i<boxes.size(); i++)
       {

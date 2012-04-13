@@ -127,7 +127,7 @@ public:
     TS_ASSERT( g->getBoxController() );
 
     // Check the boxes
-    std::vector<IMDBox<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
+    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS( boxes.size(), 10);
     for (size_t i=0; i<boxes.size(); i++)
     {
@@ -178,7 +178,7 @@ public:
     g->addEvents( MDEventsTestHelper::makeMDEvents1(10) );
 
     // And now there should be 2 events per box
-    std::vector<IMDBox<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
+    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
     for (size_t i=0; i<10; i++)
     {
       MDBox<MDLeanEvent<1>,1> * box = dynamic_cast<MDBox<MDLeanEvent<1>,1> *>(boxes[i]);
@@ -251,7 +251,7 @@ public:
   {
     // Build the grid box
     MDGridBox<MDLeanEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
-    std::vector<IMDBox<MDLeanEvent<1>,1>*> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>,1>*> boxes;
     for (size_t i=0; i<15; i++)
       boxes.push_back( MDEventsTestHelper::makeMDBox1() );
     TS_ASSERT_THROWS_NOTHING( g->setChildren(boxes, 2, 12) );
@@ -287,7 +287,7 @@ public:
     TS_ASSERT_EQUALS(g->getNumDims(), 3);
 
     // Check the boxes
-    std::vector<IMDBox<MDLeanEvent<3>,3> *> boxes = g->getBoxes();
+    std::vector<MDBoxBase<MDLeanEvent<3>,3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS( boxes.size(), 10*5*2);
     for (size_t i=0; i<boxes.size(); i++)
     {
@@ -318,7 +318,7 @@ public:
     MDGridBox<MDLeanEvent<2>,2> * gb;
     MDBox<MDLeanEvent<2>,2> * b;
 
-    std::vector<IMDBox<MDLeanEvent<2>,2>*> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<2>,2>*> boxes;
 
     // Start with 100 boxes
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 100);
@@ -371,7 +371,7 @@ public:
   {
     MDGridBox<MDLeanEvent<2>,2> * gb;
     MDBox<MDLeanEvent<2>,2> * b;
-    std::vector<IMDBox<MDLeanEvent<2>,2>*> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<2>,2>*> boxes;
 
     // 10x10 box, extents 0-10.0
     MDGridBox<MDLeanEvent<2>,2> * superbox = MDEventsTestHelper::makeMDGridBox<2>();
@@ -451,12 +451,12 @@ public:
 
 
   //-------------------------------------------------------------------------------------
-  /** Recursive getting of a list of IMDBox */
+  /** Recursive getting of a list of MDBoxBase */
   void test_getBoxes()
   {
     MDGridBox<MDLeanEvent<1>,1> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(3,3);
     TS_ASSERT(parent);
-    std::vector<IMDBox<MDLeanEvent<1>,1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes;
 
     boxes.clear();
     parent->getBoxes(boxes, 0, false);
@@ -495,13 +495,13 @@ public:
 
 
   //-------------------------------------------------------------------------------------
-  /** Recursive getting of a list of IMDBox, with an implicit function limiting it */
+  /** Recursive getting of a list of MDBoxBase, with an implicit function limiting it */
   void test_getBoxes_ImplicitFunction()
   {
 
     MDGridBox<MDLeanEvent<1>,1> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(4,3);
     TS_ASSERT(parent);
-    std::vector<IMDBox<MDLeanEvent<1>,1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes;
 
     // Function of everything x > 1.51
     MDImplicitFunction * function = new MDImplicitFunction;
@@ -567,13 +567,13 @@ public:
 
 
   //-------------------------------------------------------------------------------------
-  /** Recursive getting of a list of IMDBox, with an implicit function limiting it */
+  /** Recursive getting of a list of MDBoxBase, with an implicit function limiting it */
   void test_getBoxes_ImplicitFunction_2D()
   {
 
     MDGridBox<MDLeanEvent<2>,2> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4,1);
     TS_ASSERT(parent);
-    std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<2>,2> *> boxes;
 
     // Function of x,y between 2 and 3
     std::vector<coord_t> min(2, 1.99f);
@@ -612,13 +612,13 @@ public:
 
 
   //-------------------------------------------------------------------------------------
-  /** Recursive getting of a list of IMDBox, with an implicit function limiting it.
+  /** Recursive getting of a list of MDBoxBase, with an implicit function limiting it.
    * This implicit function is a box of size 0. */
   void test_getBoxes_ZeroSizeImplicitFunction_2D()
   {
     MDGridBox<MDLeanEvent<2>,2> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4,1);
     TS_ASSERT(parent);
-    std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<2>,2> *> boxes;
 
     // Function of x,y with 0 width and height
     std::vector<coord_t> min(2, 1.99f);
@@ -639,13 +639,13 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
-  /** Recursive getting of a list of IMDBox, with an implicit function limiting it.
+  /** Recursive getting of a list of MDBoxBase, with an implicit function limiting it.
    * This implicit function is a box of size 0. */
   void test_getBoxes_ZeroSizeImplicitFunction_4D()
   {
     MDGridBox<MDLeanEvent<4>,4> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<4>(4,1);
     TS_ASSERT(parent);
-    std::vector<IMDBox<MDLeanEvent<4>,4> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<4>,4> *> boxes;
 
     // Function of x,y with 0 width and height
     std::vector<coord_t> min(4, 1.99f);
@@ -738,7 +738,7 @@ public:
     TS_ASSERT_DELTA( b->getErrorSquaredNormalized(), 100*2.0 / 100.0, 1e-5);
 
     // Get all the boxes contained
-    std::vector<IMDBox<MDLeanEvent<2>,2>*> boxes = b->getBoxes();
+    std::vector<MDBoxBase<MDLeanEvent<2>,2>*> boxes = b->getBoxes();
     TS_ASSERT_EQUALS( boxes.size(), 100);
     for (size_t i=0; i < boxes.size(); i++)
     {
@@ -846,7 +846,7 @@ public:
   {
     MDGridBox<MDLeanEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
     coord_t coords[2] = {1.5,1.5};
-    const IMDBox<MDLeanEvent<2>,2> * c = b->getBoxAtCoord(coords);
+    const MDBoxBase<MDLeanEvent<2>,2> * c = b->getBoxAtCoord(coords);
     TS_ASSERT_EQUALS(c, b->getChild(11));
   }
 
@@ -860,7 +860,7 @@ public:
   {
     typedef MDGridBox<MDLeanEvent<2>,2> gbox_t;
     typedef MDBox<MDLeanEvent<2>,2> box_t;
-    typedef IMDBox<MDLeanEvent<2>,2> ibox_t;
+    typedef MDBoxBase<MDLeanEvent<2>,2> ibox_t;
 
     gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
     b->getBoxController()->setSplitThreshold(100);
@@ -921,7 +921,7 @@ public:
   {
     typedef MDGridBox<MDLeanEvent<2>,2> gbox_t;
     typedef MDBox<MDLeanEvent<2>,2> box_t;
-    typedef IMDBox<MDLeanEvent<2>,2> ibox_t;
+    typedef MDBoxBase<MDLeanEvent<2>,2> ibox_t;
 
     gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
     b->getBoxController()->setSplitThreshold(100);
@@ -981,7 +981,7 @@ public:
     typedef MDLeanEvent<2> MDE;
     typedef MDGridBox<MDE,2> gbox_t;
     typedef MDBox<MDE,2> box_t;
-    typedef IMDBox<MDE,2> ibox_t;
+    typedef MDBoxBase<MDE,2> ibox_t;
 
     // Make a fake file-backing for the grid box
     std::string filename = "MDGridBoxTest.nxs";
@@ -1082,7 +1082,7 @@ public:
   {
     typedef MDGridBox<MDLeanEvent<2>,2> gbox_t;
     typedef MDBox<MDLeanEvent<2>,2> box_t;
-    typedef IMDBox<MDLeanEvent<2>,2> ibox_t;
+    typedef MDBoxBase<MDLeanEvent<2>,2> ibox_t;
 
     // 10x10 bins, 2 events per bin, each weight of 1.0
     gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
@@ -1349,7 +1349,7 @@ public:
 
   void test_getIsMasked_WhenNoMasking()
   {
-    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1370,7 +1370,7 @@ public:
 
   void test_getIsMasked_WhenFirstMasked()
   {
-    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1391,7 +1391,7 @@ public:
 
   void test_getIsMasked_WhenLastMasked()
   {
-    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1412,7 +1412,7 @@ public:
 
   void test_mask()
   {
-    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1434,7 +1434,7 @@ public:
 
   void test_unmask()
   {
-    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1663,12 +1663,12 @@ public:
   }
 
 
-  /** Recursive getting of a list of IMDBox.
+  /** Recursive getting of a list of MDBoxBase.
    * Gets about 11 million boxes */
   void test_getBoxes()
   {
     CPUTimer tim;
-    std::vector<IMDBox<MDLeanEvent<1>,1> *> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes;
     for (size_t i=0; i<10; i++)
     {
       boxes.clear();

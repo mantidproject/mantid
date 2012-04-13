@@ -276,7 +276,7 @@ namespace Mantid
 //
 //        if (false)
 //        {
-//          std::vector<IMDBox<MDEvent<4>,4>*> boxes;
+//          std::vector<MDBoxBase<MDEvent<4>,4>*> boxes;
 //          ws->getBox()->getBoxes(boxes, 100, true);
 //          size_t modified = 0;
 //          size_t inmem = 0;
