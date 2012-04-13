@@ -646,7 +646,7 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
 {
   // Are we showing one of the special workspaces, OffsetsWorkspace or GroupingWorkspace
   bool specialWorkspace = false;
-  specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
+  specialWorkspace = (workspace->id() == "MaskWorkspace" || workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
 
   MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
