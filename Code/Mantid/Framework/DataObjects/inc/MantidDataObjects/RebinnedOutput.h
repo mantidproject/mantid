@@ -50,6 +50,11 @@ namespace DataObjects
   class DLLExport RebinnedOutput : public Workspace2D
   {
   public:
+    /// Typedef for the workspace_iterator to use with a RebinnedOutput
+    typedef API::workspace_iterator<API::LocatedDataRef, RebinnedOutput> iterator;
+    /// Typedef for the const workspace_iterator to use with a RebinnedOutput
+    typedef API::workspace_iterator<const API::LocatedDataRef, const RebinnedOutput> const_iterator;
+
     /// Class constructor.
     RebinnedOutput();
     /// Class destructor.
@@ -58,13 +63,21 @@ namespace DataObjects
     /// Get the workspace ID.
     virtual const std::string id() const;
 
-    
+    /// Returns the fractional area
+    virtual MantidVec& dataF(const std::size_t index);
+
+    /// Returns the fractional area
+    virtual const MantidVec& dataF(const std::size_t index) const;
+
+    /// Create final representation
+    void finalize();
+
   protected:
     /// Called by initialize() in MatrixWorkspace
     virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
-    /// A vector that holds the 1D histograms for the fractional area.
-    std::vector<Mantid::API::ISpectrum *> fracArea;
+    /// A vector that holds the 1D vectors for the fractional area.
+    std::vector<MantidVec> fracArea;
 
     /// Static reference to the logger class
     static Kernel::Logger &g_log;
