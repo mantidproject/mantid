@@ -16,11 +16,13 @@ def run_script(sname):
  
     clickButton(waitForObject(":MantidPlot - Open a script from a file.Open_QPushButton"))
     activateItem(waitForObjectItem(":MantidPlot: Python Window_QMenuBar", "Execute"))
-    activateItem(waitForObjectItem(":MantidPlot: Python Window.Execute_QMenu", "Execute"))
-    waitForObject(":MantidPlot: Python Window.Script Output - Status: Stopped_ScriptOutputDock")
+    activateItem(waitForObjectItem(":MantidPlot: Python Window.Execute_QMenu", "Execute All"))
+    #waitForObject(":MantidPlot: Python Window.Script Output - Status: Stopped_ScriptOutputDock")
 
-def get_workspace(workspace_name):
-    workspace_tree = waitForObject(":Workspaces.WorkspaceTree_MantidTreeWidget")
+def get_workspace(workspace_name, do_snooze=False):
+    if do_snooze:
+        snooze(3)
+    workspace_tree = waitForObject(":Workspaces.WorkspaceTree_MantidTreeWidget", 60000)
     openItemContextMenu(workspace_tree, fix_slashes(workspace_name), 10, 10, 0)
 
 def get_action(widget, text):
