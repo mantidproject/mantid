@@ -1,8 +1,10 @@
 <?xml version='1.0' encoding='ASCII'?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument valid-to="2100-01-31 23:59:59" name="SEQUOIA" valid-from="2012-04-04 14:15:46.929098">
-  <!--For runs after 19889 -->
+<instrument name="SEQUOIA" valid-from   ="1900-01-31 23:59:59"
+                           valid-to     ="2100-01-31 23:59:59"
+		           last-modified="2010-11-15 09:39:38">
+  <!--Created by Michael Reuter-->
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
@@ -485,10 +487,10 @@
     <component type="C25T">
       <location/>
     </component>
-    <component type="C26T">
+    <component type="C25B">
       <location/>
     </component>
-    <component type="C25B">
+    <component type="C26T">
       <location/>
     </component>
     <component type="C26B">
@@ -703,17 +705,17 @@
       </location>
     </component>
   </type>
-  <type name="C26T">
-    <component type="eightpack-top">
-      <location y="0.431673" x="-0.0480523141568" z="5.51024428302">
-        <rot axis-z="0" axis-x="0" axis-y="1" val="179.50036244"/>
-      </location>
-    </component>
-  </type>
   <type name="C25B">
     <component type="eightpack-bottom">
       <location y="-0.468884" x="0.17600619612" z="5.50764222828">
         <rot axis-z="0" axis-x="0" axis-y="1" val="181.83036244"/>
+      </location>
+    </component>
+  </type>
+  <type name="C26T">
+    <component type="eightpack-top">
+      <location y="0.431673" x="-0.0480523141568" z="5.51024428302">
+        <rot axis-z="0" axis-x="0" axis-y="1" val="179.50036244"/>
       </location>
     </component>
   </type>
