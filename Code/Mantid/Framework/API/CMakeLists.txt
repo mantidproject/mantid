@@ -11,7 +11,6 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
-	src/CloneableAlgorithm.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CompositeDomainMD.cpp
@@ -113,7 +112,6 @@ set ( INC_FILES
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
-	inc/MantidAPI/CloneableAlgorithm.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CompositeDomain.h

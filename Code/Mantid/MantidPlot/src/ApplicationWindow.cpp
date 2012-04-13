@@ -199,6 +199,7 @@
 #include "MantidKernel/MantidVersion.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -477,6 +478,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   {
     showFirstTimeSetup();
   }
+  using namespace Mantid::API;
+  // Do this as late as possible to avoid unnecessary updates
+  AlgorithmFactory::Instance().enableNotifications();
+  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
+
 }
 
 /*

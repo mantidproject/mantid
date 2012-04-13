@@ -7,6 +7,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 // Boost
 #include <boost/shared_ptr.hpp>
@@ -26,21 +27,6 @@ namespace Mantid
 namespace Kernel
 {
   
-  /** 
-   * This class is simply used in the subscription of classes into the various
-   * factories in Mantid. The fact that the constructor takes an int means that
-   * the comma operator can be used to make a call to the factories' subscribe
-   * method in the first part.
-   */
-  class DLLExport RegistrationHelper
-  {
-  public:
-    /** Constructor. Does nothing.
-     * @param i :: Takes an int and does nothing with it
-     */
-    inline RegistrationHelper(int i) { UNUSED_ARG(i); } 
-  };
-
   //----------------------------------------------------------------------------
   // Forward declarations
   //----------------------------------------------------------------------------
@@ -77,6 +63,9 @@ namespace Kernel
 template <class Base>
 class DynamicFactory
 {
+  /// Defines the whether notifications are dispatched
+  enum NotificationStatus {Enabled, Disabled};
+
 public:
   /**
    * Base class for dynamic factory notifications
@@ -86,11 +75,28 @@ public:
   };
 
   /**
-   * A notification that the factory has been updated
+   * A notification that the factory has been updated. This is
+   * blind to the details.
    */
   class UpdateNotification : public DynamicFactoryNotification
   {
   };
+
+  /**
+   * Enable notifications
+   */
+  void enableNotifications()
+  {
+    m_notifyStatus = Enabled;
+  }
+
+  /**
+   * Enable notifications
+   */
+  void disableNotifications()
+  {
+    m_notifyStatus = Disabled;
+  }
 
 public:
   /// A typedef for the instantiator
@@ -162,6 +168,7 @@ public:
     if (!className.empty() && it == _map.end())
     {
       _map[className] = pAbstractFactory;
+      sendUpdateNotificationIfEnabled();
     }
     else
     {
@@ -181,6 +188,7 @@ public:
     {
       delete it->second;
       _map.erase(it);
+      sendUpdateNotificationIfEnabled();
     }
     else 
     {
@@ -219,7 +227,8 @@ public:
     
 protected:
   /// Protected constructor for base class
-  DynamicFactory() : notificationCenter()
+  DynamicFactory() : notificationCenter(), _map(),
+    m_notifyStatus(Disabled)
   {
   }  
 
@@ -229,10 +238,23 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   DynamicFactory& operator = (const DynamicFactory&);
 
+  /// Send an update notification if they are enabled
+  void sendUpdateNotificationIfEnabled()
+  {
+    if(m_notifyStatus == Enabled) sendUpdateNotification();
+  }
+  /// Send an update notification
+  void sendUpdateNotification()
+  {
+    notificationCenter.postNotification(new UpdateNotification);
+  }
+
   /// A typedef for the map of registered classes
   typedef std::map<std::string, AbstractFactory*> FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
+  /// Flag marking whether we should dispatch notifications
+  NotificationStatus m_notifyStatus;
 };
 
 } // namespace Kernel

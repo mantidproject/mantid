@@ -17,7 +17,7 @@ namespace { \
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
-#include "MantidKernel/DynamicFactory.h" // For RegistrationHelper
+#include "MantidKernel/RegistrationHelper.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <typeinfo>

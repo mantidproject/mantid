@@ -1,7 +1,7 @@
 #ifndef MANTIDAPI_PYTHONAPI_PYALGORITHMWRAPPER_H_
 #define MANTIDAPI_PYTHONAPI_PYALGORITHMWRAPPER_H_
 
-#include <MantidAPI/CloneableAlgorithm.h>
+#include <MantidAPI/Algorithm.h>
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/ITableWorkspace.h>
