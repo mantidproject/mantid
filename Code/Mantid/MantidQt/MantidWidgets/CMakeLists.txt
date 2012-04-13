@@ -1,6 +1,8 @@
 set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
 	src/DiagResults.cpp
+        src/FindReplaceDialog.cpp
+        src/FindDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/ICatAdvancedSearch.cpp
 	src/ICatInvestigation.cpp
@@ -35,6 +37,8 @@ set ( SRC_UNITY_IGNORE_FILES
 set ( MOC_FILES 
 	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/DiagResults.h
+    inc/MantidQtMantidWidgets/FindReplaceDialog.h
+    inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
     inc/MantidQtMantidWidgets/ICatInvestigation.h

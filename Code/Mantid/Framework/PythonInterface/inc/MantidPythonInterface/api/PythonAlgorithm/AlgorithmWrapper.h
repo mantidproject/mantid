@@ -56,12 +56,17 @@ namespace Mantid
 
       /// Returns a category of the algorithm.
       virtual const std::string category() const;
+      /// A default category, chosen if there is no override
+      std::string defaultCategory() const;
 
     private:
       /// Private init for this algorithm
       virtual void init();
       /// Private exec for this algorithm
       virtual void exec();
+
+      /// Returns the self object
+      PyObject * getSelf() const;
     };
   }
 }

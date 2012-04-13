@@ -165,9 +165,9 @@ public:
                  Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
                  Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot,User};
 
+public slots:
   //! Returns a pointer to the parent MultiLayer object.
   MultiLayer *multiLayer();
-  //MultiLayer *multiLayer(){return (MultiLayer *)(this->parent()->parent());};
 
   //! Change the active tool, deleting the old one if it exists.
   void setActiveTool(PlotToolInterface *tool);
@@ -200,7 +200,7 @@ public:
   // Are MantidCurves plotted as distributions in this Graph
   bool isDistribution()const{return m_isDistribution;}
 	
-public slots:
+
   //! Accessor method for #d_plot.
   Plot* plotWidget(){return d_plot;};
   void copy(Graph* g);
@@ -598,7 +598,7 @@ public slots:
   void setTitle(const QString& t);
   void setTitleFont(const QFont &fnt);
   void setTitleColor(const QColor &c);
-  void setTitleAlignment(int align);
+  void setTitleAlignment(int);
 
   bool titleSelected();
   void selectTitle(bool select = true);
@@ -878,4 +878,8 @@ private:
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 
 };
+
+Q_DECLARE_METATYPE(Graph::CurveType);
+
+
 #endif // GRAPH_H

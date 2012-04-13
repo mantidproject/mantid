@@ -31,23 +31,21 @@
 #ifndef SCRIPTINGENV_H
 #define SCRIPTINGENV_H
 
+#include "Script.h"
+
 #include <QVariant>
-#include <QString>
 #include <QStringList>
 #include <QObject>
-#include <QStringList>
 #include <QEvent>
 
 #include "customevents.h"
 
 class ApplicationWindow;
-class Script;
 class QsciLexer;
 
 /**
- * A ScriptingEnv object represents a running interpreter, possibly with global
- * variables, and is responsible for generating Script objects that perform
- * the actual evaluation of code.
+ * A ScriptingEnv object represents a running interpreter. It can create
+ * script objects that execute arbitrary strings of code.
  */
 class ScriptingEnv : public QObject
 {
@@ -55,7 +53,7 @@ class ScriptingEnv : public QObject
 
   public:
   ///Constructor
-  ScriptingEnv(ApplicationWindow *parent, const char *langName);
+  ScriptingEnv(ApplicationWindow *parent, const QString & langName);
   /// Destructor
   ~ScriptingEnv();
   /// Initialize the environment
@@ -66,18 +64,10 @@ class ScriptingEnv : public QObject
   virtual bool isRunning() const { return m_is_running; }
   /// Set that a script is being executed
   void setIsRunning(bool running) { m_is_running = running; }
+
   /// Create a script object that is responsible for executing actual code
-  virtual Script *newScript(const QString& code = "", QObject* context = NULL, 
-			    const QString &name="<input>", bool interactive = true,
-			    bool reportProgress = false)
-  {
-    Q_UNUSED(code);
-    Q_UNUSED(context);
-    Q_UNUSED(name);
-    Q_UNUSED(interactive);
-    Q_UNUSED(reportProgress);
-    return NULL;
-  }
+  virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const = 0;
+
   //! If an exception / error occured, return a nicely formated stack backtrace.
   virtual QString stackTraceString() { return QString::null; }
   /// Return a list of supported mathematical functions. These should be imported into the global namespace.
@@ -89,7 +79,7 @@ class ScriptingEnv : public QObject
   /// Construct a filter expression from fileExtension(), suitable for QFileDialog.
   const QString fileFilter() const;
   /// Return the name of the scripting language supported by this environment
-  const QString scriptingLanguage() const;
+  const QString languageName() const;
   /// If the environment supports evaluation as well as execution then override and return true
   virtual bool supportsEvaluation() { return false; }
   ///  Is progress reporting supported
@@ -97,6 +87,8 @@ class ScriptingEnv : public QObject
   /// Create a code lexer for this environment, can be NULL. Ownership of a created object 
   /// is transferred to the caller.
   virtual QsciLexer * createCodeLexer() const { return NULL; }
+
+  virtual void redirectStdOut(bool) {}
 
 public slots:
   /// Set a reference to a QObject in the global scope
@@ -138,11 +130,8 @@ private:
   virtual void shutdown() {}
 
 private:
-  /// the reference counter
   int d_refcount;
-  ///Mantid - Store the language name of the concrete implementation so that
-  /// the script window title can be set appropriately
-  const char * languageName;
+  QString m_languageName;
 };
 
 /**
@@ -154,7 +143,7 @@ public:
   /// Return an instance of the first implementation we can find.
   static ScriptingEnv *newEnv(ApplicationWindow *parent);
   /// Return an instance of the implementation specified by name, NULL on failure.
-  static ScriptingEnv *newEnv(const char *name, ApplicationWindow *parent);
+  static ScriptingEnv *newEnv(const QString &name, ApplicationWindow *parent);
   /// Return the names of available implementations.
   static QStringList languages();
   /// Return the number of available implementations.

@@ -189,7 +189,7 @@ void MantidTable::fillTableTransposed()
 //------------------------------------------------------------------------------------------------
 void MantidTable::closeTable()
 {
-  askOnCloseEvent(false);
+  confirmClose(false);
   close();
 }
 

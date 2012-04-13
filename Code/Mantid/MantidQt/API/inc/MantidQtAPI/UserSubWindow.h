@@ -109,7 +109,7 @@ public:
   
 signals:
   /// Emitted to start a (generally small) script running
-  void runAsPythonScript(const QString& code);
+  void runAsPythonScript(const QString& code, bool);
 
   /// Change the plot style/color
   void setAsPlotType(const QStringList & plotDetails);

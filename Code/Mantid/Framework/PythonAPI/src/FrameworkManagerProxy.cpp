@@ -2,6 +2,7 @@
 // Includes
 //------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -12,6 +13,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
+#include "MantidPythonAPI/PythonObjectInstantiator.h"
+
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -537,18 +540,17 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
  */
 void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
 {
-  Mantid::API::CloneableAlgorithm* cppobj = boost::python::extract<Mantid::API::CloneableAlgorithm*>(pyobj);
-  if( cppobj )
-  {
-    if( ! Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(cppobj) )
-    {
-      g_log.error("Unable to register Python algorithm \"" + cppobj->name() + "\"");
-    }
-  }
-  else
-  {
-    throw std::runtime_error("Unrecognized object type in Python algorithm registration.");
-  }
+  using Mantid::PythonAPI::PythonObjectInstantiator;
+  using Mantid::API::Algorithm;
+  using Mantid::API::AlgorithmFactory;
+  using boost::python::object;
+  using boost::python::handle;
+  using boost::python::borrowed;
+
+  PyObject *classObject = PyObject_GetAttrString(pyobj.ptr(), "__class__");
+  object classType(handle<>(borrowed(classObject)));
+  // Takes ownership of instantiator and replaces any existing algorithm
+  AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), true);
 }
   
 //--------------------------------------------------------------------------

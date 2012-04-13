@@ -53,9 +53,6 @@
 // so this is necessary
 extern "C" void init_qti();
 
-// Language name
-const char* PythonScripting::langName = "Python";
-
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
 { 
@@ -64,8 +61,8 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-  : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
-    m_sys(NULL), refresh_allowed(0)
+  : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
+    m_sys(NULL), refresh_allowed(0), m_mainThreadState(NULL)
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
@@ -97,9 +94,23 @@ PythonScripting::~PythonScripting()
   shutdown();
 }
 
+/**
+ * Create a new script object that can execute code within this environment
+ *
+ * @param name :: A identifier of the script, mainly used in error messages
+ * @param interact :: Whether the script is interactive defined by @see Script::InteractionType
+ * @param context :: An object that identifies the current context of the script (NULL is allowed)
+ * @return
+ */
+Script *PythonScripting::newScript(const QString &name, QObject * context,
+                                   const Script::InteractionType interact) const
+{
+  return new PythonScript(const_cast<PythonScripting*>(this), name, interact, context);
+}
+
 bool PythonScripting::isRunning() const
 {
-  return (m_is_running || d_parent->mantidUI->runningAlgCount() > 0 );
+  return (m_is_running );
 }
 
 /**
@@ -111,6 +122,25 @@ QsciLexer * PythonScripting::createCodeLexer() const
 }
 
 /**
+ * Turn redirects on/off
+ * @return
+ */
+void PythonScripting::redirectStdOut(bool on)
+{
+  if(on)
+  {
+    setQObject(this, "stdout", m_sys);
+    setQObject(this, "stderr", m_sys);
+  }
+  else
+  {
+    PyDict_SetItemString(m_sys, "stdout",PyDict_GetItemString(m_sys, "__stdout__"));
+    PyDict_SetItemString(m_sys, "stderr",PyDict_GetItemString(m_sys, "__stderr__"));
+
+  }
+}
+
+/**
  * Start the Python environment
  */
 bool PythonScripting::start()
@@ -118,8 +148,17 @@ bool PythonScripting::start()
   try
   {
     if( Py_IsInitialized() ) return true;
-    // Initialize interpreter, disabling signal registration as we don't need it
-    Py_InitializeEx(0);
+    Py_Initialize();
+    PyEval_InitThreads(); // Acquires the GIL as well
+    // Release the lock & reset the current thread state to NULL
+    // This is necessary to ensure that PyGILState_Ensure/Release can
+    // be used correctly from now on. If not then the current thread-state
+    // blocks the first call to PyGILState_Ensure and a dead-lock ensues
+    // (doesn't seem to happen on Linux though)
+    m_mainThreadState = PyEval_SaveThread(); 
+
+    // Acquire the GIL in an OO way...
+    GlobalInterpreterLock gil;
 
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *pymodule = PyImport_AddModule("__main__");
@@ -164,8 +203,7 @@ bool PythonScripting::start()
       return false;
     }
 
-    setQObject(this, "stdout", m_sys);
-    setQObject(this, "stderr", m_sys);
+    redirectStdOut(true);
 
     // Add in Mantid paths so that the framework will be found
     // Linux has the libraries in the lib directory at bin/../lib
@@ -211,6 +249,7 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
+  PyEval_RestoreThread(m_mainThreadState);
   Py_XDECREF(m_math);
   Py_Finalize();
 }

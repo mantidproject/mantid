@@ -32,7 +32,7 @@ namespace {
 /// Convert a python error state to a C++ exception so that Mantid can catch it
 void handlePythonError(const bool with_trace)
 {
-  PythonGIL gil;
+  GlobalInterpreterLock gil;
   if( !PyErr_Occurred() ) {
     boost::python::throw_error_already_set();
     return;

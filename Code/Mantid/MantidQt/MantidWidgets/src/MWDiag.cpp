@@ -253,10 +253,9 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   // signals connected to the interface that this form is on
   if ( parentInterface != NULL )
   {
-
     // controls that copy the text from other controls
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
-      m_designWidg.white_file, SLOT(setFileText(const QString&)));
+      m_designWidg.white_file, SLOT(setFileTextWithSearch(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
 	        this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
@@ -452,8 +451,8 @@ void MWDiag::showTestResults(const QString & testSummary) const
   if( !m_dispDialog )
   {
     m_dispDialog = new DiagResults(this->parentWidget());
-    connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&)), this, 
-	    SIGNAL(runAsPythonScript(const QString&)));
+    connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&, bool)), this,
+	    SIGNAL(runAsPythonScript(const QString&, bool)));
   }
   
   m_dispDialog->updateResults(testSummary);

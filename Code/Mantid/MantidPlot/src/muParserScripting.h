@@ -53,13 +53,10 @@ class muParserScripting: public ScriptingEnv
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
   bool isRunning() const { return true; }
-  Script *newScript(const QString &code = "", QObject *context = NULL,    
-		    const QString &name="<input>", bool interactive=true,bool reportProgress=false)
-    {
-      Q_UNUSED(reportProgress);
-      Q_UNUSED(interactive);
-      return new muParserScript(this, code, context, name);
-    }
+  Script *newScript(const QString &name, QObject * context, const Script::InteractionType) const
+  {
+    return new muParserScript(const_cast<muParserScripting*>(this), name, context);
+  }
     
     virtual bool supportsEvaluation() { return true; }
 
@@ -83,11 +80,6 @@ class muParserScripting: public ScriptingEnv
     static const mathFunction math_functions[];
 
   private:
-  //Mantid M. Gigg - These will cause an infinite recursive loop!
-//     static double ceil(double x)
-//       { return ceil(x); }
-//     static double floor(double x)
-//       { return floor(x); }
     static double mod(double x, double y)
       { return fmod(x,y); }
     static double mypow(double x, double y)

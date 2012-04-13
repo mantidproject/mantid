@@ -30,7 +30,6 @@
 #ifndef MUPARSER_SCRIPT_H
 #define MUPARSER_SCRIPT_H
 
-#include "ScriptingEnv.h"
 #include "Script.h"
 
 #include "MantidGeometry/muParser_Silent.h"
@@ -38,21 +37,25 @@
 #include <gsl/gsl_sf.h>
 #include <q3asciidict.h>
 
-//! TODO
+class ScriptingEnv;
+
 class muParserScript: public Script
 {
   Q_OBJECT
 
   public:
-    muParserScript(ScriptingEnv *env, const QString &code, QObject *context=0, 
-		   const QString &name="<input>", bool checkMultilineCode = true);
+    muParserScript(ScriptingEnv *env, const QString &name,
+                   QObject *context, bool checkMultilineCode = true);
+
+  bool compilesToCompleteStatement(const QString &) const { return true; };
 
   public slots:
-    bool compile(bool asFunction=true);
-    QVariant eval();
+    QVariant evaluateImpl(const QString &);
     double evalSingleLine();
     QString evalSingleLineToString(const QLocale& locale, char f, int prec);
-    bool exec();
+    bool compileImpl(const QString & code);
+    bool executeImpl(const QString &);
+    QFuture<bool> executeAsyncImpl(const QString &);
     bool setQObject(QObject *val, const char *name);
     bool setInt(int val, const char* name);
     bool setDouble(double val, const char* name);

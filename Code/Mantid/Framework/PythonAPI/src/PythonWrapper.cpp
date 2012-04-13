@@ -8,6 +8,8 @@
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
 #include "MantidKernel/DllOpen.h"
+#include "MantidPythonAPI/PythonThreading.h"
+
 // Noisy MSVC compiler that complains about Boost stuff we can do nothing about. For some reason
 // it wouldn't accept it in the BoostPython_Silent.h header
 #ifdef _MSC_VER
@@ -45,6 +47,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 {
   /// @cond
   using namespace Mantid::PythonAPI;
+  saveMainThreadState(PyThreadState_Get());
+
   boost::python::def("mantid_build_version", mantid_version);
   MantidVecHelper::initializeDependencies(); // This initializes numpy if it is available
   // Export some frequently used stl containers

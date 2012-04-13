@@ -8,6 +8,7 @@
 
 #include "MantidKernel/MantidVersion.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/Environment/Threading.h"
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
@@ -21,6 +22,8 @@ using boost::python::def;
 
 BOOST_PYTHON_MODULE(_kernel)
 {
+  Mantid::PythonInterface::Environment::saveMainThreadState(PyThreadState_Get());
+
   // Doc string options - User defined, python arguments, C++ call signatures
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy

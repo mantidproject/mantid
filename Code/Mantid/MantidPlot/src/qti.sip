@@ -57,7 +57,7 @@ public:
   virtual void restore(const QStringList& );
   Folder* folder();
 
-  void askOnCloseEvent(bool)/PyName=confirmClose/;
+  void confirmClose(bool);
   void show();
   void hide();
   bool close();
@@ -1024,6 +1024,8 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   void setExitCode(int code);
+  bool runPythonScript(const QString & code, const bool async = false,
+      bool quiet=false, bool redirect=true);
 
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
   Table* table(const QString&);
@@ -1208,6 +1210,8 @@ public:
   void write(const QString&);
   // 'Fake' method needed for IPython import
   void flush();
+  // Line number trace
+  void lineNumberChanged(SIP_PYOBJECT,int);
 private:
   PythonScript(const PythonScript&);
 };
@@ -1298,7 +1302,7 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
@@ -1316,9 +1320,7 @@ public:
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
 
-  // Algorithm-related methods
-  void setIsRunning(bool);
-  bool runAlgorithmAsync_PyCallback(const QString &);  	
+  void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
 private:

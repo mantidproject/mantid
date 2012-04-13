@@ -38,11 +38,7 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         """ Move the mouse over the slice viewer """
         svw = plotSlice('uniform')
         svw.setSlicePoint(2, 2.5)
-        if qtest:
-            sv = svw._getHeldObject()
-            QtCore.QCoreApplication.processEvents()
-            QTest.mouseMove(sv)
-            QtCore.QCoreApplication.processEvents()
+        moveMouseToCentre(svw._getHeldObject())
         screenshot(svw, "SliceViewer", "SliceViewer with mouse at center, showing coordinates.")
         
     def test_plotSlice_empty(self):

@@ -122,7 +122,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
 
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
-  askOnCloseEvent(false);
+  confirmClose(false);
 }
 
 MantidMatrix::~MantidMatrix()
@@ -921,7 +921,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
 
   a->initPlot3D(plot);
-  //plot->askOnCloseEvent(false);
+  //plot->confirmClose(false);
   QApplication::restoreOverrideCursor();
 
   return plot;
@@ -951,7 +951,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
   Graph* plot = g->activeGraph();
   ProjectData *prjData=0;
   plotSpectrogram(plot,a,type,false,prjData);
- // g->askOnCloseEvent(false);
+ // g->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return g;
 }
@@ -1147,7 +1147,7 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
       {
         if (i.value() != 0)
         {
-          i.value()->askOnCloseEvent(false);
+          i.value()->confirmClose(false);
           i.value()->close();
         }
         m_plots1D.erase(i);
@@ -1270,14 +1270,14 @@ void MantidMatrix::closeDependants()
   while(m_plots2D.size())
   {
     MultiLayer* ml = m_plots2D.front();
-    ml->askOnCloseEvent(false);
+    ml->confirmClose(false);
     ml->close();// this calls slot dependantClosed() which removes the pointer from m_plots2D
   }
 
   while(m_plots1D.size())
   {
     MultiLayer* ml = m_plots1D.begin().key();
-    ml->askOnCloseEvent(false);
+    ml->confirmClose(false);
     ml->close();// this calls slot dependantClosed() which removes the pointer from m_plots1D
   }
 
@@ -1367,7 +1367,7 @@ void MantidMatrix::clearADSHandle()
 
 void MantidMatrix::closeMatrix()
 {
-  askOnCloseEvent(false);
+  confirmClose(false);
   close();
 }
 

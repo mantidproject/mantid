@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include <boost/python/wrapper.hpp>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -40,6 +41,19 @@ namespace Mantid
       bool DLLExport typeHasAttribute(PyObject * obj, const char * attr);
       /// An overload for the above taking a wrapper reference
       bool DLLExport typeHasAttribute(const boost::python::detail::wrapper_base & wrapper, const char * attr);
+      
+      /**
+       * Defines an exception for an undefined attribute
+       */
+      class UndefinedAttributeError : std::runtime_error
+      {
+      public:
+        /// Construct the exception
+        UndefinedAttributeError() : 
+          std::runtime_error("")
+        {
+        }
+      };
     }
   }
 }

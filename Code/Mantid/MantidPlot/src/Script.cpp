@@ -26,59 +26,82 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "ScriptingEnv.h"
 #include "Script.h"
-
-#include <QMessageBox>
+#include "ScriptingEnv.h"
 #include <QRegExp>
 
-Script::Script(ScriptingEnv *env, const QString &code, QObject *context, 
-	       const QString &name, bool interactive, bool reportProgress)
-  : Env(env), Code(code), Name(name), m_interactive(interactive),
-    m_report_progress(reportProgress), compiled(notCompiled),
-    m_line_offset(-1), m_redirectOutput(true)
-{ 
-  Env->incref(); 
-  Context = context; 
-  EmitErrors=true; 
+Script::Script(ScriptingEnv *env, const QString &name,
+               const InteractionType interact, QObject * context)
+  : QObject(), m_env(env), m_name(name) , m_context(context),
+    m_redirectOutput(true), m_reportProgress(false), m_codeOffset(0), m_interactMode(interact),
+    m_execMode(NotExecuting)
+{
+  m_env->incref();
+
+  connect(this, SIGNAL(startedSerial(const QString &)), this, SLOT(setExecutingSerialised()));
+  connect(this, SIGNAL(startedAsync(const QString &)), this, SLOT(setExecutingAsync()));
+  connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
+  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
 }
 
 Script::~Script()
 {
-  Env->decref();
+  m_env->decref();
 }
 
-void Script::addCode(const QString &code) 
-{ 
-  Code.append(normaliseLineEndings(code));
-  compiled = notCompiled; 
-  emit codeChanged(); 
-}
-
-void Script::setCode(const QString &code) 
+///
+/**
+ * Compile the code, returning true/false depending on the status
+ * @param code Code to compile
+ * @return True/false depending on success
+ */
+bool Script::compile(const ScriptCode & code)
 {
-  Code = normaliseLineEndings(code);
-  compiled = notCompiled; 
-  emit codeChanged();
+  m_codeOffset = code.offset();
+  return this->compileImpl(code);
+}
+
+/**
+ * Evaluate the Code, returning QVariant() on an error / exception.
+ * @param code Code to evaluate
+ * @return The result as a QVariant
+ */
+QVariant Script::evaluate(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->evaluateImpl(code);
+}
+
+/// Execute the Code, returning false on an error / exception.
+bool Script::execute(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->executeImpl(code);
+}
+
+/// Execute the code asynchronously, returning immediately after the execution has started
+QFuture<bool> Script::executeAsync(const ScriptCode & code)
+{
+  m_codeOffset = code.offset();
+  return this->executeAsyncImpl(code);
 }
 
 
-bool Script::compile(bool)
+/// Sets the execution mode to NotExecuting
+void Script::setNotExecuting()
 {
-  emit_error("Script::compile called!", 0);
-  return false;
+  m_execMode = NotExecuting;
 }
 
-QVariant Script::eval()
+/// Sets the execution mode to Serialised
+void Script::setExecutingSerialised()
 {
-  emit_error("Script::eval called!",0);
-  return QVariant();
+  m_execMode = Serialised;
 }
-
-bool Script::exec()
+/// Sets the execution mode to Serialised
+void Script::setExecutingAsync()
 {
-  emit_error("Script::exec called!",0);
-  return false;
+  m_execMode = Asynchronous;
 }
 
 /**

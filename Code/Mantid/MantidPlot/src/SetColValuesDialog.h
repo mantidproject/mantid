@@ -46,7 +46,7 @@ class QCheckBox;
 #endif
 class Table;
 class ScriptingEnv;
-class ScriptEdit;
+class ScriptEditor;
 
 
 //! Set column values dialog
@@ -83,7 +83,7 @@ private:
     QPushButton *buttonNext;
     QPushButton *addCellButton;
     QPushButton *btnApply;
-    ScriptEdit* commands;
+    ScriptEditor* commands;
     QTextEdit* explain;
 	QSpinBox* start, *end;
 	QLabel *colNameLabel;

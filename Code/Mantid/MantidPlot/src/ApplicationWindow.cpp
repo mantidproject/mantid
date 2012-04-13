@@ -83,7 +83,8 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "ScriptManagerWidget.h"
+#include "CommandLineInterpreter.h"
+#include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
 #include "MultiPeakFit.h"
@@ -451,7 +452,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new ScriptManagerWidget(scriptingEnv(), m_interpreterDock,true);
+  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
   delete m_interpreterDock->widget();
   m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;
@@ -3175,7 +3176,7 @@ Note* ApplicationWindow::newNote(const QString& caption)
 
   m->setName(name);
   m->setIcon(getQPixmap("note_xpm"));
-  m->askOnCloseEvent(confirmCloseNotes);
+  m->confirmClose(confirmCloseNotes);
 
   addMdiSubWindow(m);
   m->showNormal();
@@ -3446,7 +3447,7 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->setWindowTitle(name);
   m->setName(name);
   m->setIcon( m->matrixIcon() );//Mantid
-  m->askOnCloseEvent(confirmCloseMatrix);
+  m->confirmClose(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
   addMdiSubWindow(m);
@@ -4003,7 +4004,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     foreach(MdiSubWindow *w, windows){
 
       if (w->inherits("Table"))
-      {w->askOnCloseEvent(confirmCloseTable);
+      {w->confirmClose(confirmCloseTable);
       }
     }
   }
@@ -4012,7 +4013,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmCloseMatrix = askMatrices;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("Matrix"))
-      {w->askOnCloseEvent(confirmCloseMatrix);
+      {w->confirmClose(confirmCloseMatrix);
       }
     }
   }
@@ -4021,7 +4022,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmClosePlot2D=askPlots2D;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("MultiLayer"))
-      {w->askOnCloseEvent(confirmClosePlot2D);
+      {w->confirmClose(confirmClosePlot2D);
       }
     }
   }
@@ -4030,7 +4031,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmClosePlot3D=askPlots3D;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("Graph3D"))
-        w->askOnCloseEvent(confirmClosePlot3D);
+        w->confirmClose(confirmClosePlot3D);
     }
   }
 
@@ -4038,7 +4039,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
     confirmCloseNotes = askNotes;
     foreach(MdiSubWindow *w, windows){
       if (w->isA("Note"))
-        w->askOnCloseEvent(confirmCloseNotes);
+        w->confirmClose(confirmCloseNotes);
     }
   }
 
@@ -4047,7 +4048,7 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 
     foreach(MdiSubWindow *w, windows){
       if (w->isA("InstrumentWindow"))
-      {w->askOnCloseEvent(confirmCloseInstrWindow);
+      {w->confirmClose(confirmCloseInstrWindow);
       }
     }
   }
@@ -8414,7 +8415,6 @@ void ApplicationWindow::pasteSelection()
 {  
   if (m_interpreterDock->hasFocus())
   {
-    
     m_scriptInterpreter->paste();
     return;
   }
@@ -9484,7 +9484,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   MDIWindowList windows = getAllWindows();
   foreach(MdiSubWindow* w,windows)
   {
-    w->askOnCloseEvent(false);
+    w->confirmClose(false);
   }
 
   if( scriptingEnv()->isRunning() )
@@ -11120,7 +11120,7 @@ void ApplicationWindow::openScriptWindow(const QStringList &list)
   showScriptWindow();
   if(!scriptingWindow) 
     return;
-  scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->scriptingLanguage() + " Window");
+  scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
   QString s=list[0];
   QStringList scriptnames=s.split("\t");
   int count=scriptnames.size();
@@ -11449,7 +11449,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
 
         } catch (std::invalid_argument&) {
           // Get here if invalid spectrum number given - shouldn't be possible, but just in case
-          // plot->askOnCloseEvent(false);
+          // plot->confirmClose(false);
           //plot->close();
           closeWindow(plot);
           return 0;
@@ -11837,7 +11837,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       QStringList fList=s.split("\t");
       ag->setTitle(fList[1]);
       ag->setTitleColor(QColor(fList[2]));
-      ag->setTitleAlignment(fList[3].toInt());
+      ag->setTitleAlignment((Qt::AlignmentFlag)fList[3].toInt());
     }
     else if (s.contains ("TitleFont")){
       QStringList fList=s.split("\t");
@@ -12445,7 +12445,7 @@ void ApplicationWindow::pickDataTool( QAction* action )
 void ApplicationWindow::connectSurfacePlot(Graph3D *plot)
 {
   connect (plot, SIGNAL(showOptionsDialog()), this,SLOT(showPlot3dDialog()));
-  plot->askOnCloseEvent(confirmClosePlot3D);
+  plot->confirmClose(confirmClosePlot3D);
 }
 
 void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
@@ -12476,7 +12476,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
   connect (g,SIGNAL(currentFontChanged(const QFont&)), this, SLOT(setFormatBarFont(const QFont&)));
   connect (g,SIGNAL(enableTextEditor(Graph *)), this, SLOT(enableTextEditor(Graph *)));
 
-  g->askOnCloseEvent(confirmClosePlot2D);
+  g->confirmClose(confirmClosePlot2D);
 }
 
 void ApplicationWindow::connectTable(Table* w)
@@ -12491,7 +12491,7 @@ void ApplicationWindow::connectTable(Table* w)
   connect (w,SIGNAL(changedColHeader(const QString&,const QString&)),this,SLOT(updateColNames(const QString&,const QString&)));
   connect (w,SIGNAL(createTable(const QString&,int,int,const QString&)),this,SLOT(newTable(const QString&,int,int,const QString&)));
 
-  w->askOnCloseEvent(confirmCloseTable);
+  w->confirmClose(confirmCloseTable);
 }
 
 void ApplicationWindow::setAppColors(const QColor& wc, const QColor& pc, const QColor& tpc, bool force)
@@ -12575,7 +12575,6 @@ void ApplicationWindow::createActions()
   connect(actionNewMatrix, SIGNAL(activated()), this, SLOT(newMatrix()));
 
   actionNewFunctionPlot = new QAction(QIcon(getQPixmap("newF_xpm")), tr("New &Function Plot"), this);
-  actionNewFunctionPlot->setShortcut( tr("Ctrl+F") );
   connect(actionNewFunctionPlot, SIGNAL(activated()), this, SLOT(functionDialog()));
 
   actionNewSurfacePlot = new QAction(QIcon(getQPixmap("newFxy_xpm")), tr("New 3D &Surface Plot"), this);
@@ -13468,7 +13467,6 @@ void ApplicationWindow::translateActionsStrings()
 
   actionNewFunctionPlot->setMenuText(tr("New &Function Plot"));
   actionNewFunctionPlot->setToolTip(tr("Create a new 2D function plot"));
-  actionNewFunctionPlot->setShortcut(tr("Ctrl+F"));
 
   actionNewSurfacePlot->setMenuText(tr("New 3D &Surface Plot"));
   actionNewSurfacePlot->setToolTip(tr("Create a new 3D surface plot"));
@@ -14282,7 +14280,7 @@ void ApplicationWindow::deleteFitTables()
             if (!t)
               continue;
 
-            t->askOnCloseEvent(false);
+            t->confirmClose(false);
             t->close();
           }
         }
@@ -14710,7 +14708,14 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     saveSettings();//the recent projects must be saved
 
     if (exec)
-      loadScript(file_name, exec, quit);
+    {
+      executeScriptFile(file_name, Script::Asynchronous);
+      if(quit)
+      {
+        saved = true;
+        this->close();
+      }
+    }
     else
     {
       saved=true;
@@ -16192,19 +16197,6 @@ void ApplicationWindow::saveScriptWindowGeometry()
 
 void ApplicationWindow::showScriptInterpreter()
 {
-  if( !m_interpreterDock )
-  {
-    m_interpreterDock = new QDockWidget(this);
-    m_interpreterDock->setObjectName("interpreterDock");
-    m_interpreterDock->setWindowTitle("Script Interpreter");
-    addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
-
-    m_scriptInterpreter = new ScriptManagerWidget(scriptingEnv(), m_interpreterDock,true);
-    m_interpreterDock->setWidget(m_scriptInterpreter);
-    m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    
-  }
   if( m_interpreterDock->isVisible() )
   {
     m_interpreterDock->hide();
@@ -16223,13 +16215,13 @@ void ApplicationWindow::showScriptInterpreter()
 
 bool ApplicationWindow::testForIPython()
 {
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",true,false);
+  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
 }
 
 void ApplicationWindow::launchIPythonConsole()
 {
   // MantidPlot_IPython will already be imported in the testForIPython method
-  runPythonScript("MantidPlot_IPython().launch_console()",true,false);
+  runPythonScript("MantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**
@@ -16375,22 +16367,15 @@ void ApplicationWindow::cascade()
   modifiedProject();
 }
 
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool quit)
+ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
 {
 #ifdef SCRIPTING_PYTHON
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   setScriptingLanguage("Python");
   restoreApplicationGeometry();
-  showScriptWindow(false, quit);
+  showScriptWindow(false);
   scriptingWindow->open(fn, false);
   QApplication::restoreOverrideCursor();
-  if (execute)
-    scriptingWindow->executeAll();
-  if( quit )
-  {
-    saved = true;
-    this->close();
-  }
   return this;
 #else
   QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
@@ -16398,6 +16383,100 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execut
   return 0;
 #endif
 }
+
+/**
+ *  Runs a script from a file. Mainly useful for automatically running scripts
+ * @param filename The full path to the file
+ * @param execMode How should the script be executed. If asynchronous
+ * this method waits on the thread finishing
+ */
+void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
+{
+  QFile scriptFile(filename);
+  if(!scriptFile.open(QIODevice::ReadOnly|QIODevice::Text))
+  {
+    throw std::runtime_error("Unable to open script file");
+  }
+  QTextStream in(&scriptFile);
+  QString code;
+  while (!in.atEnd())
+  {
+    code += in.readLine() + "\n";
+  }
+  Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
+  runner->redirectStdOut(false);
+  scriptingEnv()->redirectStdOut(false);
+  if(execMode == Script::Asynchronous)
+  {
+    QFuture<bool> job = runner->executeAsync(code);
+    while(job.isRunning())
+    {
+      QCoreApplication::processEvents();
+    }
+    // Required for windows tests to work
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
+  }
+  else
+  {
+    runner->execute(code);
+  }
+  delete runner;
+}
+
+/**
+* Run Python code
+*/
+bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
+    bool quiet, bool redirect)
+{
+  if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
+
+  if( m_iface_script == NULL )
+  {
+    setScriptingLanguage("Python");
+    m_iface_script = scriptingEnv()->newScript("<Interface>", NULL, Script::NonInteractive);
+
+  }
+  if( !quiet )
+  {
+    // Output a message to say we've started
+    scriptPrint("Script execution started.", false, true);
+  }
+  if(redirect)
+  {
+    m_iface_script->redirectStdOut(true);
+    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
+    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
+            SLOT(scriptPrint(const QString &)));
+  }
+  bool success(false);
+  if(async)
+  {
+    QFuture<bool> job = m_iface_script->executeAsync(code);
+    while(job.isRunning())
+    {
+      QCoreApplication::instance()->processEvents();
+    }
+    success = job.result();
+  }
+  else
+  {
+    success = m_iface_script->execute(code);
+  }
+  if (redirect)
+  {
+    m_iface_script->redirectStdOut(false);
+  }
+  if(success && !quiet)
+  {
+    scriptPrint("Script execution completed successfully.", false, true);
+  }
+
+  return success;
+}
+
+
 
 bool ApplicationWindow::validFor2DPlot(Table *table)
 {
@@ -16960,16 +17039,16 @@ if( QFileInfo(action_data).exists() )
   QTextStream stream(&script_file);
   QString scriptPath = QString("r'%1'").arg(QFileInfo(action_data).absolutePath());
   QString code = QString("sys.path.append(%1)\n").arg(scriptPath);
-    runPythonScript(code, true);
+    runPythonScript(code, false,true);
   code = "";
   while( !stream.atEnd() )
   {
     code.append(stream.readLine() + "\n");
   }
-  runPythonScript(code, true);
+  runPythonScript(code, false, true);
   code = "";
   code.append(QString("\nsys.path.remove(%1)").arg(scriptPath));
-    runPythonScript(code, true);
+    runPythonScript(code, false, true);
 }
 else
 {
@@ -16992,8 +17071,8 @@ else
     connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
     connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
-        SLOT(runPythonScript(const QString&)));
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
+        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->objectName() == "Muon Analysis")
     {
       // Re-emits the signal caught from the muon analysis
@@ -17014,7 +17093,6 @@ else
   {
     delete usr_win;
   }
-
 }
 #else
 QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
@@ -17144,48 +17222,6 @@ void ApplicationWindow::showGraphs()
   }
 }
 
-/**
-* Run Python Script
-*/
-bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool redirect)
-{
-  if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
-
-  if( m_iface_script == NULL )
-  {
-    setScriptingLanguage("Python");
-    m_iface_script = scriptingEnv()->newScript("",this, "",false, false);
-    m_iface_script->setLineOffset(0);
-    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
-    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 
-        SLOT(scriptPrint(const QString &)));
-  }
-  m_iface_script->setCode(code);
-  if( !quiet )
-  {
-    // Output a message to say we've started
-    scriptPrint("Script execution started.", false, true);
-  }
-  const bool cachedEmit = m_iface_script->emitErrors();
-  if (!redirect)
-  {
-    m_iface_script->redirectStdOut(false);
-    // The redirect option was introduced for IPython, where was also don't want errors to go to the console window
-    m_iface_script->setEmitErrors(false);
-  }
-  bool success = m_iface_script->exec();
-  if (!redirect)
-  {
-    m_iface_script->redirectStdOut(true);
-    m_iface_script->setEmitErrors(cachedEmit);
-  }
-  if(success && !quiet)
-  {
-    scriptPrint("Script execution completed successfully.", false, true);
-  }
-
-  return success;
-}
 
 /**
 * Makes sure that it is dealing with a graph and then tells the plotDialog class 

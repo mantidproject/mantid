@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------
 #include <QMainWindow>
-#include <QDockWidget>
+#include "Script.h"
 
 //----------------------------------------------------------
 // Forward declarations
@@ -19,82 +19,6 @@ class QAction;
 class QCloseEvent;
 class QShowEvent;
 class QHideEvent;
-
-/** @class ScriptOutputDock
-    
-   This class holds any output from executed scripts. It defines a custom context menu
-   that allows the text to be cleared, copied and printed. Note: Ideally this would be
-   nested inside ScriptWindow as it is not needed anywhere else, but the Qt SIGNAL/SLOTS
-   mechanism doesn't work with nested classes.
-   
-   This class displays a window for editing and executing scripts.
-   
-   @author Martyn Gigg, Tessella Support Services plc
-   @date 19/08/2009
-   
-   Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-   
-   This file is part of Mantid.
-   
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-   
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-   
-   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-   Code Documentation is available at: <http://doxygen.mantidproject.org>    
-*/
-class ScriptOutputDock : public QDockWidget
-{
-  /// Qt macro
-  Q_OBJECT
-  
-public:
-  /// Constructor
-  ScriptOutputDock(const QString & title, ScriptManagerWidget *manager, QWidget *parent = 0, 
-		   Qt::WindowFlags flags = 0);
-
-  /// Is there anything here
-  bool isEmpty() const;
-
-public slots:
-  /// Clear the text
-  void clear();
-  /// Print the text within the window
-  void print();
-  /// Save the output to a file
-  void saveToFile();
-  /// Change the title based on the script's execution state
-  void setScriptIsRunning(bool running);    
-	      
-private slots:
-  /// Context menu slot
-  void showContextMenu(const QPoint & pos);
-  /// A slot to pass messages to the output dock
-  void displayOutputMessage(const QString &, bool error, bool timestamp);
-
-private:
-  /// Create the action pointers
-  void initActions();
-  /// Reset the default font
-  void resetFont();
-
-private:
-  /// The script manager
-  ScriptManagerWidget *m_manager;
-  /// The actually widget that displays the text
-  QTextEdit *m_text_display;
-  /// Copy action
-  QAction *m_copy;
-};
 
 
 /** @class ScriptingWindow    
@@ -115,15 +39,17 @@ public:
   /// Override the showEvent
   void showEvent(QShowEvent *event);
   /// Is a script running?
-  bool isScriptRunning() const;
+  bool isExecuting() const;
   ///Save the current state of the script window for next time
   void saveSettings();
-  /// Open a script in a new tab. This is here for backwards compatability with the old
-  /// ScriptWindow class
+  /// Read settings from store
+  void readSettings();
+  /// Open a script in a new tab. Primarily useful for automatically
+  /// opening a script
   void open(const QString & filename, bool newtab = true);
-  /// Execute all code. This is here for backwards compatability with the old
-  /// ScriptWindow class
-  void executeAll();
+  /// Executes whatever is in the current tab. Primarily useful for automatically
+  /// running a script loaded with open
+  void executeCurrentTab(const Script::ExecutionMode mode);
   ///saves scripts file names to a string 
   QString saveToString();
   ///Set whether to accept/reject close events
@@ -138,45 +64,74 @@ signals:
   void hideMe();
   
 private:
-  /// Create menu bar and menu actions
+  /// Create menu bar
   void initMenus();
+
+  /// Create all actions
+  void initActions();
+  /// Create the file actions
+  void initFileMenuActions();
+  /// Create the edit menu actions
+  void initEditMenuActions();
+  /// Create the execute menu actions
+  void initExecMenuActions();
+  /// Create the window menu actions
+  void initWindowMenuActions();
+
   /// Accept a custom defined event
   void customEvent(QEvent * event);
 
 private slots:
-  /// File menu is about to show
-  void fileAboutToShow();
-  /// Edit menu is about to show
-  void editAboutToShow();
-  /// Window menu is about to show
-  void windowAboutToShow();
+  /// Populate file menu
+  void populateFileMenu();
+  /// Ensure the list is up to date
+  void populateRecentScriptsMenu();
+  /// Populate edit menu
+  void populateEditMenu();
+  /// Populate execute menu
+  void populateExecMenu();
+  /// Populate window menu
+  void populateWindowMenu();
+
   /// Update window flags
   void updateWindowFlags();
-  /// Update based on tab changes
-  void tabSelectionChanged();
+  /// Update menus based on current tab counts
+  void setMenuStates(int nTabs);
+
+  /// Finds the script corresponding to the action and
+  /// asks the manager to open it
+  void openRecentScript(QAction*);
 
 private:
   /// The script editors' manager
   ScriptManagerWidget *m_manager;
-  /// Output display dock
-  ScriptOutputDock *m_output_dock;
 
-  /// File menu (actions are stored in ScriptManagerWidget)
-  QMenu *m_file_menu;
+  /// File menu
+  QMenu *m_fileMenu;
+  /// File menu actions
+  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, 
+    *m_save, *m_saveAs, *m_print, *m_closeTab;
+  QMenu *m_recentScripts;
   /// Edit menu
-  QMenu *m_edit_menu;
-  /// Specific window edit actions
-  QAction *m_clear_output;
-  /// Run menu (actions are stored in ScriptManagerWidget)
-  QMenu *m_run_menu;
+  QMenu *m_editMenu;
+  /// Edit menu actions
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
+  /// Run menu
+  QMenu *m_runMenu;
+  /// Execute menu actions
+  QAction *m_execSelect, *m_execAll;
   /// Window menu
-  QMenu *m_window_menu;
+  QMenu *m_windowMenu;
   /// Window actions
-  QAction *m_always_on_top, *m_hide, *m_toggle_output, *m_print_output;
+  QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut,
+    *m_toggleProgress, *m_toggleFolding;
+
   /// Change scripting language
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
+
+
 };
 
 #endif //SCRIPTINGWINDOW_H_

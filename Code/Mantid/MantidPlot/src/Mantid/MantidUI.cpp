@@ -35,6 +35,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
+
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -62,14 +63,12 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-
 using namespace std;
 
 using namespace Mantid::API;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 namespace MantidException = Mantid::Kernel::Exception;
-
 
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -1057,19 +1056,6 @@ bool MantidUI::drop(QDropEvent* e)
   return false;
 }
 
-/** 
-* Run the named algorithm asynchronously 
-*/ 
-bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name) 
-{ 
-  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name); 
-  if( !alg ) 
-  { 
-    return false; 
-  } 
-  return executeAlgorithmAsync(alg, true);
-}
-
 /**
 executes Save Nexus
 saveNexus Input Dialog is a generic dialog.Below code is added to remove
@@ -1840,8 +1826,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   insWin->selectTab(tab);
 
   appWindow()->addMdiSubWindow(insWin);
-  // When called from python, we want the window to start out hidden.
-  //insWin->hide(); 
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
     SLOT(plotSpectraList(const QString&,const std::set<int>&)));
@@ -2090,7 +2074,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
   QList<int> binAsList;
   binAsList.append(bin);
   Table *t = createTableFromBins(wsName, ws, binAsList, errors);
-  t->askOnCloseEvent(false);
+  t->confirmClose(false);
   t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
   if( !t )
@@ -2102,51 +2086,19 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
   // TODO: Use the default style instead of a line if nothing is passed into this method
   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
   setUpBinGraph(ml,wsName, ws);
-  ml->askOnCloseEvent(false);
+  ml->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return ml;
 }
 
-//-------------------------------------------------
-// The following commands are purely for the Python
-// interface
-//-------------------------------------------------
-/**
-* This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
-* argument
-*/
-MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs, Graph::CurveType style)
-{
-  // Convert the list into a map (with the same workspace as key in each case)
-  QMultiMap<QString,int> pairs;
-  QListIterator<QString> ws_itr(ws_names);
-  ws_itr.toBack();
-  QListIterator<int> spec_itr(spec_list);
-  spec_itr.toBack();
-
-  // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
-  while( ws_itr.hasPrevious() )
-  {
-    QString workspace_name = ws_itr.previous();
-    while( spec_itr.hasPrevious() )
-    {
-      pairs.insert(workspace_name, spec_itr.previous());
-    }
-    //Reset spectrum index pointer
-    spec_itr.toBack();
-  }
-
-  // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,false,style);
-}
 
 /**
 * Sets the flag that tells the scripting environment that
 * a script is currently running
 */
-void MantidUI::setIsRunning(bool running)
+void MantidUI::setIsRunning(bool)
 {
-  appWindow()->scriptingEnv()->setIsRunning(running);
+  // deprecated
 }
 
 /**
@@ -2860,6 +2812,35 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   g->setXAxisTitle(tr(xtitle.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
   g->setAntialiasing(false);
+}
+
+/**
+* Plots the spectra from the given workspaces
+*/
+MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<int>& spec_list,
+                                      bool errs, Graph::CurveType style)
+{
+  // Convert the list into a map (with the same workspace as key in each case)
+  QMultiMap<QString,int> pairs;
+  QListIterator<QString> ws_itr(ws_names);
+  ws_itr.toBack();
+  QListIterator<int> spec_itr(spec_list);
+  spec_itr.toBack();
+
+  // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
+  while( ws_itr.hasPrevious() )
+  {
+    QString workspace_name = ws_itr.previous();
+    while( spec_itr.hasPrevious() )
+    {
+      pairs.insert(workspace_name, spec_itr.previous());
+    }
+    //Reset spectrum index pointer
+    spec_itr.toBack();
+  }
+
+  // Pass over to the overloaded method
+  return plotSpectraList(pairs,errs,false,style);
 }
 
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr)

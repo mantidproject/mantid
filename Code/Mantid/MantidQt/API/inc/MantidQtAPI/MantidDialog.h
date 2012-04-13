@@ -84,7 +84,7 @@ public:
 
 
 signals:
-  void runAsPythonScript(const QString& code);
+  void runAsPythonScript(const QString& code, bool);
 
 protected:
   /// Run python code that is passed to it and, optionally, return anything it wrote to standard output as a string
