@@ -54,15 +54,15 @@ class ScriptingWindow;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class ScriptManagerWidget : public QTabWidget, Scripted
+class MultiTabScriptInterpreter : public QTabWidget, Scripted
 {
   Q_OBJECT
 
 public:
   /// Constructor
-  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent);
+  MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent);
   ///Destructor
-  ~ScriptManagerWidget();
+  ~MultiTabScriptInterpreter();
 
   /// Current interpreter
   ScriptFileInterpreter * currentInterpreter();

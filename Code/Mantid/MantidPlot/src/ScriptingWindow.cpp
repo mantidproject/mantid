@@ -2,7 +2,7 @@
 // Includes
 //-------------------------------------------
 #include "ScriptingWindow.h"
-#include "ScriptManagerWidget.h"
+#include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "pixmaps.h"
 
@@ -39,7 +39,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *
   setObjectName("MantidScriptWindow");
 
   // Sub-widgets
-  m_manager = new ScriptManagerWidget(env, this);
+  m_manager = new MultiTabScriptInterpreter(env, this);
   setCentralWidget(m_manager);
   setFocusProxy(m_manager);
 
@@ -223,7 +223,7 @@ void ScriptingWindow::openRecentScript(QAction* item)
 // Private non-slot member functions
 //-------------------------------------------
 /**
- * calls ScriptManagerWidget saveToString and  
+ * calls MultiTabScriptInterpreter saveToString and  
  *  saves the currently opened script file names to a string
  */
 QString ScriptingWindow::saveToString()

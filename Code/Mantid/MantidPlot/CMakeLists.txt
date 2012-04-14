@@ -106,7 +106,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ScriptingLangDialog.cpp
                    src/ScriptingWindow.cpp
                    src/ScriptFileInterpreter.cpp
-                   src/ScriptManagerWidget.cpp
+                   src/MultiTabScriptInterpreter.cpp
                    src/ScriptOutputDisplay.cpp
                    src/SelectionMoveResizer.cpp
                    src/SendToProgramDialog.cpp
@@ -335,7 +335,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScriptingEnv.h
                    src/ScriptingLangDialog.h
                    src/ScriptingWindow.h
-                   src/ScriptManagerWidget.h
+                   src/MultiTabScriptInterpreter.h
                    src/ScriptOutputDisplay.h
                    src/ScriptFileInterpreter.h
                    src/SelectionMoveResizer.h
@@ -599,7 +599,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/ScriptingEnv.h
                         src/ScriptingLangDialog.h
                         src/ScriptingWindow.h
-                        src/ScriptManagerWidget.h
+                        src/MultiTabScriptInterpreter.h
                         src/ScriptOutputDisplay.h
                         src/ScriptFileInterpreter.h
                         src/SelectionMoveResizer.h
