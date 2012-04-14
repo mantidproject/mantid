@@ -134,6 +134,28 @@ namespace Algorithms
     return;
   }
 
+  //------------------------------------------------------------------------------------------------
+  /** Use group numbers for sorting
+   *
+   * @param groupi :: first group string
+   * @param groupj :: second group string
+   * @return true if first group number is less than second group number
+   */
+
+  bool groupnumber (std::string groupi,std::string groupj)
+  {
+    int i = 0;
+    std::string groupName = groupi;
+    // Take out the "group" part of the group name and convert to an int
+    groupName.erase(remove_if(groupName.begin(), groupName.end(), not1(std::ptr_fun (::isdigit))), groupName.end());
+    Strings::convert(groupName, i);
+    int j = 0;
+    groupName = groupj;
+    // Take out the "group" part of the group name and convert to an int
+    groupName.erase(remove_if(groupName.begin(), groupName.end(), not1(std::ptr_fun (::isdigit))), groupName.end());
+    Strings::convert(groupName, j);
+     return (i<j);
+   }
 
   //------------------------------------------------------------------------------------------------
   /** Use bank names to build grouping
@@ -153,7 +175,7 @@ namespace Algorithms
       vgroups.pop_back();
     }
     if (sortnames) {
-      std::sort(vgroups.begin(), vgroups.end());
+      std::sort(vgroups.begin(), vgroups.end(), groupnumber);
     }
 
     // Trim and assign incremental number to each group
@@ -287,8 +309,8 @@ namespace Algorithms
       else
       {
           sortnames = true;
+          GroupNames = "";
           // cppcheck-suppress syntaxError
-          std::vector<std::string> names;
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 200; ++num)
           {
@@ -297,16 +319,10 @@ namespace Algorithms
               mess<< grouping<<num;
               IComponent_const_sptr comp = inst->getComponentByName(mess.str(), 15);
               PARALLEL_CRITICAL(GroupNames)
-              if(comp) names.push_back(mess.str());
+              if(comp) GroupNames+=mess.str()+",";
               PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
-          std::sort(names.begin(), names.end());
-          GroupNames = "";
-          for (std::vector<std::string>::iterator it=names.begin();it!=names.end();++it) 
-          {
-              GroupNames+= *it +",";
-          }
       }
     }
 
