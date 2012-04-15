@@ -46,11 +46,11 @@ namespace Mantid
         // numpy arrays requires special handling to extract their types. Hand-off to a more appropriate handler
         if( PyArray_Check(value.ptr()) )
         {
-          alg->setProperty(name, Converters::NDArrayToVectorConverter<DestElementType>(value)());
+          alg->setProperty(name, Converters::NDArrayToVector<DestElementType>(value)());
         }
         else if( PySequence_Check(value.ptr()) )
         {
-          alg->setProperty(name, Converters::PySequenceToVectorConverter<DestElementType>(value)());
+          alg->setProperty(name, Converters::PySequenceToVector<DestElementType>(value)());
         }
         else
         {

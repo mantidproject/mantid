@@ -19,7 +19,7 @@ namespace
   void setDataSearchDirs(ConfigServiceImpl &self, const boost::python::list & paths)
   {
     using namespace Mantid::PythonInterface;
-    self.setDataSearchDirs(Converters::PySequenceToVectorConverter<std::string>(paths)());
+    self.setDataSearchDirs(Converters::PySequenceToVector<std::string>(paths)());
   }
 
   /// Overload generator for getInstrument

@@ -57,7 +57,7 @@ add_subdirectory ( mantid )
 set ( TEST_FILES
   test/cpp/PropertyWithValueFactoryTest.h
   test/cpp/PythonObjectInstantiatorTest.h
-  test/cpp/PySequenceToVectorConverterTest.h
+  test/cpp/PySequenceToVectorTest.h
 )  
   
 if ( CXXTEST_FOUND )

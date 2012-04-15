@@ -9,10 +9,10 @@
 
 using namespace Mantid::PythonInterface::Converters;
 
-class PySequenceToVectorConverterTest : public CxxTest::TestSuite
+class PySequenceToVectorTest : public CxxTest::TestSuite
 {
 private:
-  typedef PySequenceToVectorConverter<double> PySequenceToVectorDouble;
+  typedef PySequenceToVector<double> PySequenceToVectorDouble;
 public:
 
   void test_construction_succeeds_with_a_valid_sequence_type()
@@ -47,7 +47,7 @@ public:
   {
     // Double->int is not generally safe so should not be allowed
     boost::python::list testlist = createHomogeneousPythonList();
-    typedef PySequenceToVectorConverter<int> PySequenceToVectorInt;
+    typedef PySequenceToVector<int> PySequenceToVectorInt;
     std::vector<int> cvector;
     TS_ASSERT_THROWS(cvector = PySequenceToVectorInt(testlist)(), boost::python::error_already_set);
   }

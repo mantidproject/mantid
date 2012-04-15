@@ -67,7 +67,7 @@ namespace
     createArrayPropertyFromList(const std::string &name, const boost::python::list & values,
                         IValidator_sptr validator, const unsigned int direction)
    {
-     return new ArrayProperty<T>(name, Converters::PySequenceToVectorConverter<T>(values)(), validator, direction);
+     return new ArrayProperty<T>(name, Converters::PySequenceToVector<T>(values)(), validator, direction);
    }
 
    /**
@@ -83,7 +83,7 @@ namespace
     createArrayPropertyFromNDArray(const std::string &name, const boost::python::numeric::array & values,
                         IValidator_sptr validator, const unsigned int direction)
    {
-     return new ArrayProperty<T>(name, Converters::NDArrayToVectorConverter<T>(values)(), validator, direction);
+     return new ArrayProperty<T>(name, Converters::NDArrayToVector<T>(values)(), validator, direction);
    }
 
 }
