@@ -32,6 +32,7 @@ namespace Mantid
       DEFINE_TYPE_MAPPING(bool, NPY_BOOL);
       DEFINE_TYPE_MAPPING(double, NPY_DOUBLE);
       DEFINE_TYPE_MAPPING(float, NPY_FLOAT);
+      DEFINE_TYPE_MAPPING(std::string, NPY_STRING);
 
     }
   }

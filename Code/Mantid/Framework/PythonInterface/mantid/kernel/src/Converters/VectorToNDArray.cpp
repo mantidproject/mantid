@@ -4,10 +4,12 @@
 #include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 
-#include <boost/python/detail/prefix.hpp> // Safe include of Python.h
+#include <boost/python/list.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+
+#include <string>
 
 namespace Mantid { namespace PythonInterface
   {
@@ -38,7 +40,8 @@ namespace Mantid { namespace PythonInterface
       }
 
       /**
-       * Returns a new numpy array with the a copy of the data from cvector
+       * Returns a new numpy array with the a copy of the data from cvector. A specialization
+       * exists for strings so that they simply create a standard python list.
        * @param cvector :: A reference to a std::vector
        * @return
        */
@@ -47,15 +50,37 @@ namespace Mantid { namespace PythonInterface
       {
         npy_intp dims[1] = { cvector.size() };
         int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
-        PyArrayObject *nparray = (PyArrayObject *)PyArray_NewFromDescr(&PyArray_Type,
-            PyArray_DescrFromType(datatype),
-            1, // rank 1
-            dims, // Length in each dimension
-            NULL, NULL,
-            0, NULL);
-        double *dest = (double*)PyArray_DATA(nparray); // HEAD of the contiguous numpy data array
-        std::copy(cvector.begin(), cvector.end(), dest);
-        return (PyObject *)nparray;
+        PyObject *nparray =
+          PyArray_NewFromDescr(&PyArray_Type,
+                               PyArray_DescrFromType(datatype),
+                               1, // rank 1
+                               dims, // Length in each dimension
+                               NULL, NULL,
+                               0, NULL);
+
+        void *arrayData = PyArray_DATA(nparray);
+        const void *data = cvector.data();
+        std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * dims[0]);
+        return (PyObject*)nparray;
+      }
+
+      /**
+       * Returns a new python list of strings from the given vector
+       * exists for strings so that they simply create a standard python list.
+       * @param cvector :: A reference to a std::vector
+       * @return
+       */
+      template<>
+      PyObject *cloneToNDArray(const std::vector<std::string> & cvector)
+      {
+        boost::python::list pystrs;
+        for(auto iter = cvector.begin(); iter != cvector.end(); ++iter)
+        {
+          pystrs.append(iter->c_str());
+        }
+        PyObject *rawptr = pystrs.ptr();
+        Py_INCREF(rawptr); // Make sure it survies after the wrapper decrefs the count
+        return rawptr;
       }
 
       //-----------------------------------------------------------------------
@@ -72,6 +97,7 @@ namespace Mantid { namespace PythonInterface
       INSTANTIATE(unsigned long);
       INSTANTIATE(unsigned long long);
       INSTANTIATE(double);
+      INSTANTIATE(std::string);
     }
   }
 }}

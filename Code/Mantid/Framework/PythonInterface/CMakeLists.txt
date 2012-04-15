@@ -77,6 +77,7 @@ set ( TEST_PY_FILES
   test/python/AlgorithmFactoryTest.py
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
+  test/python/ArrayPropertyTest.py
   test/python/AxisTest.py
   test/python/BoundedValidatorTest.py
   test/python/ConfigServiceTest.py
@@ -96,6 +97,7 @@ set ( TEST_PY_FILES
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/MDHistoWorkspaceTest.py
+  test/python/NullValidatorTest.py
   test/python/OrientedLatticeTest.py
   test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py
