@@ -13,7 +13,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** DetermineChunking : Workflow algorithm to load a collection of preNeXus files.
+  /** DetermineChunking : Workflow algorithm to determine chunking
     
     @date 2012-01-30
 
