@@ -26,6 +26,7 @@ set ( EXPORT_FILES
   src/Exports/InstrumentInfo.cpp
   src/Exports/FacilityInfo.cpp
   src/Exports/NullValidator.cpp
+  src/Exports/ListValidator.cpp
 )  
 
 set ( SRC_FILES

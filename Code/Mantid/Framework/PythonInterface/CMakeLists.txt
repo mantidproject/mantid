@@ -94,6 +94,7 @@ set ( TEST_PY_FILES
   test/python/InstrumentInfoTest.py
   test/python/InstrumentTest.py
   test/python/ITableWorkspaceTest.py
+  test/python/ListValidatorTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/MDHistoWorkspaceTest.py

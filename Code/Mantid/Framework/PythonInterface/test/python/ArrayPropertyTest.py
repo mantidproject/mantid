@@ -1,7 +1,8 @@
 """Test the exposed ArrayProperty
 """
 import unittest
-from mantid import FloatArrayProperty, Direction, NullValidator
+from mantid import (FloatArrayProperty, StringArrayProperty, Direction, 
+                    NullValidator, PythonAlgorithm)
 import numpy as np
 
 class ArrayPropertyTest(unittest.TestCase):
@@ -90,3 +91,53 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertEquals(arrprop.direction, direction)
         self.assertEquals(len(arrprop.value), length)
         
+    def test_PythonAlgorithm_setProperty_with_FloatArrayProperty(self):
+        """
+            Test ArrayProperty within a python algorithm
+        """
+        class AlgWithFloatArrayProperty(PythonAlgorithm):
+            
+            _input_values = None
+
+            def PyInit(self):
+                        name = "numbers"
+                        self.declareProperty(
+                            FloatArrayProperty("Input", Direction.Input), "Float array")
+
+            def PyExec(self):
+                self._input_values = self.getProperty("Input").value
+        
+        input_values = [1.1,2.5,5.6,4.6,9.0,6.0]
+        self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
+
+    def test_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
+        """
+            Test StringArrayProperty within a python algorithm
+        """
+        class AlgWithStringArrayProperty(PythonAlgorithm):
+            
+            _input_values = None
+
+            def PyInit(self):
+                        self.declareProperty(
+                            StringArrayProperty("Input", Direction.Input), "string array")
+
+            def PyExec(self):
+                self._input_values = self.getProperty("Input").value
+        
+        input_values = ["val1","val2","val3"]
+        self._do_algorithm_test(AlgWithStringArrayProperty, input_values)
+
+    def _do_algorithm_test(self, class_, input_values):
+        """
+            Run the algorithm and test the values are passed correctly
+        """
+        alg = class_()
+        alg.initialize()
+        alg.setProperty("Input", input_values)
+        alg.execute()
+
+        self.assertTrue(alg._input_values is not None)
+        self.assertEquals(len(alg._input_values), len(input_values))
+        for index, val in enumerate(input_values):
+            self.assertEquals(val,input_values[index])
