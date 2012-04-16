@@ -359,7 +359,7 @@ namespace Mantid
         if (box_event_index.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_event_index.");
         if (box_signal_errorsquared.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_signal_errorsquared.");
 
-        std::vector<IMDBox<MDE,nd> *> boxes(numBoxes, NULL);
+        std::vector<MDBoxBase<MDE,nd> *> boxes(numBoxes, NULL);
         BoxController_sptr bc = ws->getBoxController();
 
         // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
@@ -412,7 +412,7 @@ namespace Mantid
           size_t box_type = boxType[i];
           if (box_type > 0)
           {
-            IMDBox<MDE,nd> * ibox = NULL;
+            MDBoxBase<MDE,nd> * ibox = NULL;
 
             // Extents of the box, as a vector
             std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector(nd);

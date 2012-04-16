@@ -35,6 +35,7 @@ namespace Algorithms
 
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
+  using namespace Mantid::DataObjects;
   using Geometry::IDetector_const_sptr;
   using Geometry::DetectorGroup;
   using Geometry::DetectorGroup_const_sptr;
@@ -101,9 +102,9 @@ namespace Algorithms
       throw std::invalid_argument("The input workspace must have common binning across all spectra");
     }
 
-    MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS,
+    RebinnedOutput_sptr outputWS = this->setUpOutputWorkspace(inputWS,
                                                  getProperty("QAxisBinning"),
-                                                               m_Qout);
+                                                              m_Qout);
     g_log.notice() << "Workspace type: " << outputWS->id() << std::endl;
     setProperty("OutputWorkspace", outputWS);
     const size_t nEnergyBins = inputWS->blocksize();
@@ -169,6 +170,7 @@ namespace Algorithms
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
+    outputWS->finalize();
     this->normaliseOutput(outputWS, inputWS);
   }
 
@@ -422,7 +424,7 @@ namespace Algorithms
    *  @param[out] newAxis        The 'vertical' axis defined by the given parameters
    *  @return A pointer to the newly-created workspace
    */
-  API::MatrixWorkspace_sptr SofQW3::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+  RebinnedOutput_sptr SofQW3::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
       const std::vector<double> & binParams, std::vector<double>& newAxis)
   {
     // Create vector to hold the new X axis values
@@ -433,7 +435,8 @@ namespace Algorithms
     const int yLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(binParams,newAxis));
 
     // Create the output workspace
-    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("RebinnedOutput", yLength - 1, xLength, xLength - 1);
+    MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create("RebinnedOutput", yLength - 1, xLength, xLength - 1);
+    RebinnedOutput_sptr outputWorkspace = boost::static_pointer_cast<RebinnedOutput>(temp);
     WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
                                                       outputWorkspace, true);
 

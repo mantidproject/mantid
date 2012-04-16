@@ -20,6 +20,8 @@ namespace DataObjects
                       const bool includeMonitors=false);
         ~MaskWorkspace();
 
+        bool isMasked(const detid_t detectorID) const;
+        std::size_t getNumberMasked() const;
         virtual const std::string id() const;
 
     private:
@@ -27,7 +29,7 @@ namespace DataObjects
         MaskWorkspace(const MaskWorkspace&);
         /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
         MaskWorkspace& operator=(const MaskWorkspace&);
-
+        bool m_hasInstrument;
     };
 
     ///shared pointer to the MaskWorkspace class

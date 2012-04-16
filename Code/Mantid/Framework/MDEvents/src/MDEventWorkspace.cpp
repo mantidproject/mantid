@@ -9,7 +9,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -158,12 +158,12 @@ namespace MDEvents
     for (size_t depth = 1; depth < minDepth; depth++)
     {
       // Get all the MDGridBoxes in the workspace
-      std::vector<IMDBox<MDE,nd>*> boxes;
+      std::vector<MDBoxBase<MDE,nd>*> boxes;
       boxes.clear();
       this->getBox()->getBoxes(boxes, depth-1, false);
       for (size_t i=0; i<boxes.size(); i++)
       {
-        IMDBox<MDE,nd> * box = boxes[i];
+        MDBoxBase<MDE,nd> * box = boxes[i];
         MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
         if (gbox)
         {
@@ -212,7 +212,7 @@ namespace MDEvents
       Mantid::Geometry::MDImplicitFunction * function) const
   {
     // Get all the boxes in this workspaces
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     // TODO: Should this be leaf only? Depends on most common use case
     if (function)
       this->data->getBoxes(boxes, 10000, true, function);
@@ -260,7 +260,7 @@ namespace MDEvents
         return std::numeric_limits<signal_t>::quiet_NaN();
     }
     // If you got here, then the point is in the workspace.
-    const IMDBox<MDE,nd> * box = data->getBoxAtCoord(coords);
+    const MDBoxBase<MDE,nd> * box = data->getBoxAtCoord(coords);
     if (box)
     {
       // What is our normalization factor?
@@ -293,14 +293,14 @@ namespace MDEvents
   std::vector<Mantid::Geometry::MDDimensionExtents> MDEventWorkspace)::getMinimumExtents(size_t depth)
   {
     std::vector<Mantid::Geometry::MDDimensionExtents> out(nd);
-    std::vector<IMDBox<MDE,nd>*> boxes;
+    std::vector<MDBoxBase<MDE,nd>*> boxes;
     // Get all the end (leaf) boxes
     this->data->getBoxes(boxes, depth, true);
-    typename std::vector<IMDBox<MDE,nd>*>::iterator it;
-    typename std::vector<IMDBox<MDE,nd>*>::iterator it_end = boxes.end();
+    typename std::vector<MDBoxBase<MDE,nd>*>::iterator it;
+    typename std::vector<MDBoxBase<MDE,nd>*>::iterator it_end = boxes.end();
     for (it = boxes.begin(); it != it_end; ++it)
     {
-      IMDBox<MDE,nd>* box = *it;
+      MDBoxBase<MDE,nd>* box = *it;
       if (box->getNPoints() > 0)
       {
         for (size_t d=0; d<nd; d++)
@@ -381,7 +381,7 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Comparator for sorting IMDBox'es by ID */
+  /** Comparator for sorting MDBoxBase'es by ID */
   template <typename BOXTYPE>
   bool SortBoxesByID(const BOXTYPE& a, const BOXTYPE& b)
   {
@@ -398,8 +398,8 @@ namespace MDEvents
     UNUSED_ARG(start);
     UNUSED_ARG(num);
     // Boxes to show
-    std::vector<IMDBox<MDE,nd>*> boxes;
-    std::vector<IMDBox<MDE,nd>*> boxes_filtered;
+    std::vector<MDBoxBase<MDE,nd>*> boxes;
+    std::vector<MDBoxBase<MDE,nd>*> boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
 
     bool withPointsOnly = true;
@@ -414,7 +414,7 @@ namespace MDEvents
       boxes_filtered = boxes;
 
     // Now sort by ID
-    typedef IMDBox<MDE,nd> * ibox_t;
+    typedef MDBoxBase<MDE,nd> * ibox_t;
     std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t> );
 
 
@@ -434,7 +434,7 @@ namespace MDEvents
 
     for (int i=0; i<int(boxes_filtered.size()); i++)
     {
-      IMDBox<MDE,nd>* box = boxes_filtered[i];
+      MDBoxBase<MDE,nd>* box = boxes_filtered[i];
       int col = 0;
       ws->cell<int>(i, col++) = int(box->getId());;
       ws->cell<int>(i, col++) = int(box->getDepth());
@@ -539,11 +539,40 @@ namespace MDEvents
    * enough events to be worth it.
    *
    * @param ts :: optional ThreadScheduler * that will be used to parallelize
-   *        recursive splitting. Set to NULL to do it serially. */
+   *        recursive splitting. Set to NULL to do it serially.
+   */
   TMDE(
   void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler * ts)
   {
     data->splitAllIfNeeded(ts);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Goes through the MDBoxes that were tracked by the BoxController
+   * as being too large, and splits them.
+   * @param ts :: optional ThreadScheduler * that will be used to parallelize
+   *        recursive splitting.
+   */
+  TMDE(
+  void MDEventWorkspace)::splitTrackedBoxes(ThreadScheduler * ts)
+  {
+    UNUSED_ARG(ts);
+    throw std::runtime_error("Not implemented yet");
+//    // Get a COPY of the vector (to avoid thread-safety issues)
+//    std::vector<void *> boxes = this->getBoxController()->getBoxesToSplit();
+//    //PRAGMA_OMP( parallel for )
+//    for (int i=0; i<int(boxes.size()); i++)
+//    {
+//      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+//      if (box)
+//      {
+//        MDGridBox<MDE,nd> * parent = dynamic_cast<MDGridBox<MDE,nd> *>(box->getParent());
+//        if (parent)
+//        {
+//          parent->splitContents(parent->getChildIndexFromID(box->getId()), ts);
+//        }
+//      }
+//    }
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -674,7 +703,7 @@ namespace MDEvents
       x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
       // Look for the box at this coordinate
-      const IMDBox<MDE,nd> * box = NULL;
+      const MDBoxBase<MDE,nd> * box = NULL;
 
       // Do an initial bounds check
       bool outOfBounds = false;
@@ -738,7 +767,7 @@ namespace MDEvents
   {
     if(maskingRegion)
     {
-      std::vector<IMDBox<MDE,nd> *> toMaskBoxes;
+      std::vector<MDBoxBase<MDE,nd> *> toMaskBoxes;
 
       //Apply new masks
       this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
@@ -757,7 +786,7 @@ namespace MDEvents
   TMDE(
   void MDEventWorkspace)::clearMDMasking()
   {    
-    std::vector<IMDBox<MDE,nd> *> allBoxes;
+    std::vector<MDBoxBase<MDE,nd> *> allBoxes;
     //Clear old masks
     this->data->getBoxes(allBoxes, 10000, true);
     for(size_t i = 0; i < allBoxes.size(); ++i)

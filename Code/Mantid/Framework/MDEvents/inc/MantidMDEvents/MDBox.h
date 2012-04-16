@@ -6,7 +6,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 
@@ -36,7 +36,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport MDBox : public IMDBox<MDE, nd>
+  class DLLExport MDBox : public MDBoxBase<MDE, nd>
   {
   public:
     MDBox();
@@ -83,16 +83,16 @@ namespace MDEvents
 
     size_t getNumMDBoxes() const;
 
-    /// Get the # of children IMDBox'es (non-recursive)
+    /// Get the # of children MDBoxBase'es (non-recursive)
     size_t getNumChildren() const
     { return 0; }
 
-    /// Return the indexth child IMDBox.
-    IMDBox<MDE,nd> * getChild(size_t /*index*/)
+    /// Return the indexth child MDBoxBase.
+    MDBoxBase<MDE,nd> * getChild(size_t /*index*/)
         { throw std::runtime_error("MDBox does not have children."); }
 
     /// Sets the children from a vector of children
-    void setChildren(const std::vector<IMDBox<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
+    void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
     { throw std::runtime_error("MDBox cannot have children."); }
 
 
@@ -195,9 +195,9 @@ namespace MDEvents
 
     void loadNexus(::NeXus::File * file);
 
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
+    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
 
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 

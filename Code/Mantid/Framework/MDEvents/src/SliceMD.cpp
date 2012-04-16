@@ -219,17 +219,17 @@ namespace MDEvents
     // Function defining which events (in the input dimensions) to place in the output
     MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
 
-    std::vector<IMDBox<MDE,nd>*> boxes;
+    std::vector<MDBoxBase<MDE,nd>*> boxes;
     // Leaf-only; no depth limit; with the implicit function passed to it.
     ws->getBox()->getBoxes(boxes, 1000, true, function);
     // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
     if (bc->isFileBacked())
-      IMDBox<MDE, nd>::sortBoxesByFilePos(boxes);
+      MDBoxBase<MDE, nd>::sortBoxesByFilePos(boxes);
 
     Progress * prog = new Progress(this, 0.0, 1.0, boxes.size());
 
     // The root of the output workspace
-    IMDBox<OMDE,ond>* outRootBox = outWS->getBox();
+    MDBoxBase<OMDE,ond>* outRootBox = outWS->getBox();
 
     uint64_t totalAdded = 0;
     uint64_t numSinceSplit = 0;

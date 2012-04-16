@@ -20,6 +20,7 @@ The format is
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -203,7 +204,7 @@ namespace DataHandling
 
     if (MakeMaskWorkspace)
     {
-      maskWS = MatrixWorkspace_sptr(new SpecialWorkspace2D(inst));
+      maskWS = MatrixWorkspace_sptr(new MaskWorkspace(inst));
       maskWS->setTitle(title);
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
               "Set the the output MaskWorkspace, if any.");

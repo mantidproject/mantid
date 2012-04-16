@@ -212,44 +212,44 @@ namespace MDEvents
 
 
 
-  // ------------- Typedefs for IMDBox ------------------
+  // ------------- Typedefs for MDBoxBase ------------------
 
-  /// Typedef for a IMDBox with 1 dimension 
-  typedef IMDBox<MDEvent<1>, 1> IMDBox1;
-  /// Typedef for a IMDBox with 2 dimensions 
-  typedef IMDBox<MDEvent<2>, 2> IMDBox2;
-  /// Typedef for a IMDBox with 3 dimensions 
-  typedef IMDBox<MDEvent<3>, 3> IMDBox3;
-  /// Typedef for a IMDBox with 4 dimensions 
-  typedef IMDBox<MDEvent<4>, 4> IMDBox4;
-  /// Typedef for a IMDBox with 5 dimensions 
-  typedef IMDBox<MDEvent<5>, 5> IMDBox5;
-  /// Typedef for a IMDBox with 6 dimensions 
-  typedef IMDBox<MDEvent<6>, 6> IMDBox6;
-  /// Typedef for a IMDBox with 7 dimensions 
-  typedef IMDBox<MDEvent<7>, 7> IMDBox7;
-  /// Typedef for a IMDBox with 8 dimensions 
-  typedef IMDBox<MDEvent<8>, 8> IMDBox8;
-  /// Typedef for a IMDBox with 9 dimensions 
-  typedef IMDBox<MDEvent<9>, 9> IMDBox9;
-  /// Typedef for a IMDBox with 1 dimension 
-  typedef IMDBox<MDLeanEvent<1>, 1> IMDBox1Lean;
-  /// Typedef for a IMDBox with 2 dimensions 
-  typedef IMDBox<MDLeanEvent<2>, 2> IMDBox2Lean;
-  /// Typedef for a IMDBox with 3 dimensions 
-  typedef IMDBox<MDLeanEvent<3>, 3> IMDBox3Lean;
-  /// Typedef for a IMDBox with 4 dimensions 
-  typedef IMDBox<MDLeanEvent<4>, 4> IMDBox4Lean;
-  /// Typedef for a IMDBox with 5 dimensions 
-  typedef IMDBox<MDLeanEvent<5>, 5> IMDBox5Lean;
-  /// Typedef for a IMDBox with 6 dimensions 
-  typedef IMDBox<MDLeanEvent<6>, 6> IMDBox6Lean;
-  /// Typedef for a IMDBox with 7 dimensions 
-  typedef IMDBox<MDLeanEvent<7>, 7> IMDBox7Lean;
-  /// Typedef for a IMDBox with 8 dimensions 
-  typedef IMDBox<MDLeanEvent<8>, 8> IMDBox8Lean;
-  /// Typedef for a IMDBox with 9 dimensions 
-  typedef IMDBox<MDLeanEvent<9>, 9> IMDBox9Lean;
+  /// Typedef for a MDBoxBase with 1 dimension 
+  typedef MDBoxBase<MDEvent<1>, 1> MDBoxBase1;
+  /// Typedef for a MDBoxBase with 2 dimensions 
+  typedef MDBoxBase<MDEvent<2>, 2> MDBoxBase2;
+  /// Typedef for a MDBoxBase with 3 dimensions 
+  typedef MDBoxBase<MDEvent<3>, 3> MDBoxBase3;
+  /// Typedef for a MDBoxBase with 4 dimensions 
+  typedef MDBoxBase<MDEvent<4>, 4> MDBoxBase4;
+  /// Typedef for a MDBoxBase with 5 dimensions 
+  typedef MDBoxBase<MDEvent<5>, 5> MDBoxBase5;
+  /// Typedef for a MDBoxBase with 6 dimensions 
+  typedef MDBoxBase<MDEvent<6>, 6> MDBoxBase6;
+  /// Typedef for a MDBoxBase with 7 dimensions 
+  typedef MDBoxBase<MDEvent<7>, 7> MDBoxBase7;
+  /// Typedef for a MDBoxBase with 8 dimensions 
+  typedef MDBoxBase<MDEvent<8>, 8> MDBoxBase8;
+  /// Typedef for a MDBoxBase with 9 dimensions 
+  typedef MDBoxBase<MDEvent<9>, 9> MDBoxBase9;
+  /// Typedef for a MDBoxBase with 1 dimension 
+  typedef MDBoxBase<MDLeanEvent<1>, 1> MDBoxBase1Lean;
+  /// Typedef for a MDBoxBase with 2 dimensions 
+  typedef MDBoxBase<MDLeanEvent<2>, 2> MDBoxBase2Lean;
+  /// Typedef for a MDBoxBase with 3 dimensions 
+  typedef MDBoxBase<MDLeanEvent<3>, 3> MDBoxBase3Lean;
+  /// Typedef for a MDBoxBase with 4 dimensions 
+  typedef MDBoxBase<MDLeanEvent<4>, 4> MDBoxBase4Lean;
+  /// Typedef for a MDBoxBase with 5 dimensions 
+  typedef MDBoxBase<MDLeanEvent<5>, 5> MDBoxBase5Lean;
+  /// Typedef for a MDBoxBase with 6 dimensions 
+  typedef MDBoxBase<MDLeanEvent<6>, 6> MDBoxBase6Lean;
+  /// Typedef for a MDBoxBase with 7 dimensions 
+  typedef MDBoxBase<MDLeanEvent<7>, 7> MDBoxBase7Lean;
+  /// Typedef for a MDBoxBase with 8 dimensions 
+  typedef MDBoxBase<MDLeanEvent<8>, 8> MDBoxBase8Lean;
+  /// Typedef for a MDBoxBase with 9 dimensions 
+  typedef MDBoxBase<MDLeanEvent<9>, 9> MDBoxBase9Lean;
 
 
 

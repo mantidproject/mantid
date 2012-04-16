@@ -106,11 +106,11 @@ namespace MDEvents
     std::vector<double> TotalErrorSquared(depth, 0);
     std::vector<std::vector<double>> Dims(depth, std::vector<double>(nd,0.0) );
 
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     ws->getBox()->getBoxes(boxes, depth, true);
     for (size_t i=0; i<boxes.size(); i++)
     {
-      IMDBox<MDE,nd> * box = boxes[i];
+      MDBoxBase<MDE,nd> * box = boxes[i];
       size_t d = box->getDepth();
       NumBoxes[d] += 1;
       if (box->getNPoints() > 0)
@@ -180,7 +180,7 @@ namespace MDEvents
       maxRows = getProperty("MaximumRows");
     }
    
-    // Use the iterator to loop through each IMDBox and create a row for each entry.
+    // Use the iterator to loop through each MDBoxBase and create a row for each entry.
     int rowCounter = 0;
 
     Progress progress(this, 0, 1, int64_t(input->getNPoints()));

@@ -57,7 +57,7 @@ add_subdirectory ( mantid )
 set ( TEST_FILES
   test/cpp/PropertyWithValueFactoryTest.h
   test/cpp/PythonObjectInstantiatorTest.h
-  test/cpp/PySequenceToVectorConverterTest.h
+  test/cpp/PySequenceToVectorTest.h
 )  
   
 if ( CXXTEST_FOUND )
@@ -77,6 +77,7 @@ set ( TEST_PY_FILES
   test/python/AlgorithmFactoryTest.py
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
+  test/python/ArrayPropertyTest.py
   test/python/AxisTest.py
   test/python/BoundedValidatorTest.py
   test/python/ConfigServiceTest.py
@@ -93,9 +94,11 @@ set ( TEST_PY_FILES
   test/python/InstrumentInfoTest.py
   test/python/InstrumentTest.py
   test/python/ITableWorkspaceTest.py
+  test/python/ListValidatorTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/MDHistoWorkspaceTest.py
+  test/python/NullValidatorTest.py
   test/python/OrientedLatticeTest.py
   test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py

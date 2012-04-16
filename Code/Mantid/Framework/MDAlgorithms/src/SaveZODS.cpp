@@ -141,7 +141,7 @@ namespace MDAlgorithms
 
           // Now write out the 6D vector
           std::vector<int> unit_cell_size(1, 6);
-          file->writeData("unit_cell", unitCell, unit_cell_size);
+          file->writeData("UnitCell", unitCell, unit_cell_size);
         }
       }
     }

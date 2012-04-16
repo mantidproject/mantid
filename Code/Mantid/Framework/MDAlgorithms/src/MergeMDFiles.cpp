@@ -21,7 +21,7 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
@@ -182,7 +182,7 @@ namespace MDAlgorithms
 //    bc->setSplitThreshold(10000);
 //
 //    // Perform the initial box splitting.
-//    IMDBox<MDE,nd> * box = outWS->getBox();
+//    MDBoxBase<MDE,nd> * box = outWS->getBox();
 //    for (size_t d=0; d<nd; d++)
 //      box->setExtents(d, outWS->getDimension(d)->getMinimum(), outWS->getDimension(d)->getMaximum());
 //    box->setBoxController(bc);
@@ -412,7 +412,7 @@ namespace MDAlgorithms
     /// Output workspace
     typename MDEventWorkspace<MDE, nd>::sptr outWS;
     /// List of boxes where index = box ID, value = the box pointer.
-    typename std::vector<IMDBox<MDE,nd> *> & m_boxesById;
+    typename std::vector<MDBoxBase<MDE,nd> *> & m_boxesById;
     /// True to split in parallel
     bool m_parallelSplit;
 
@@ -425,7 +425,7 @@ namespace MDAlgorithms
      * @param parallelSplit :: if true, split the boxes via parallel mechanism
      */
     MergeMDLoadToBoxTask(MergeMDFiles * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS,
-        typename std::vector<IMDBox<MDE,nd> *> & boxesById, bool parallelSplit)
+        typename std::vector<MDBoxBase<MDE,nd> *> & boxesById, bool parallelSplit)
       : m_alg(alg), m_blockNum(blockNum), outWS(outWS),
         m_boxesById(boxesById), m_parallelSplit(parallelSplit)
     {
@@ -440,7 +440,7 @@ namespace MDAlgorithms
       if (numEvents == 0) return;
 
       // Find the box in the output.
-      IMDBox<MDE,nd> * outBox = this->m_boxesById[this->m_blockNum];
+      MDBoxBase<MDE,nd> * outBox = this->m_boxesById[this->m_blockNum];
       if (!outBox)
         throw std::runtime_error("Could not find box at ID " + Strings::toString(this->m_blockNum) );
       BoxController_sptr bc = outBox->getBoxController();
@@ -559,13 +559,13 @@ namespace MDAlgorithms
     typename MDEventWorkspace<MDE, nd>::sptr outWS = this->createOutputWSbyCloning<MDE,nd>(ws);
 
     // --------  Make a vector where index = box ID, value = box. ------------
-    std::vector<IMDBox<MDE,nd> *> boxes;
-    std::vector<IMDBox<MDE,nd> *> boxesById(outWS->getBoxController()->getMaxId()+1, NULL);
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxesById(outWS->getBoxController()->getMaxId()+1, NULL);
     //std::cout << boxesById.size() << " vector" << std::endl;
     outWS->getBox()->getBoxes(boxes, 1000, false);
     for (size_t i=0; i < boxes.size(); i++)
     {
-      IMDBox<MDE,nd> * box = boxes[i];
+      MDBoxBase<MDE,nd> * box = boxes[i];
       //std::cout << "Found box " << box->getId() << std::endl;
       boxesById[box->getId()] = box;
     }

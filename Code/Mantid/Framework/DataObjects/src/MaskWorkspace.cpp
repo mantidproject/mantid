@@ -16,7 +16,7 @@ namespace DataObjects
      * Constructor - Default.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace()
+    MaskWorkspace::MaskWorkspace(): m_hasInstrument(false)
     {
     }
 
@@ -25,7 +25,7 @@ namespace DataObjects
      * @param[in] numvectors Number of vectors/histograms for this workspace.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace(std::size_t numvectors)
+    MaskWorkspace::MaskWorkspace(std::size_t numvectors): m_hasInstrument(false)
     {
         this->init(numvectors, 1, 1);
     }
@@ -36,7 +36,7 @@ namespace DataObjects
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
-        : SpecialWorkspace2D(instrument, includeMonitors)
+      : SpecialWorkspace2D(instrument, includeMonitors), m_hasInstrument(true)
     {
     }
 
@@ -51,6 +51,43 @@ namespace DataObjects
     }
 
     //--------------------------------------------------------------------------
+
+    /**
+     * @return The total number of masked spectra.
+     */
+    std::size_t MaskWorkspace::getNumberMasked() const
+    {
+      std::size_t numMasked(0);
+      const std::size_t numWksp(this->getNumberHistograms());
+      for (std::size_t i = 0; i < numWksp; i++)
+      {
+        if (this->dataY(i)[0] != 0.) // quick check the value
+        {
+          numMasked++;
+        }
+        else if (m_hasInstrument)
+        {
+          if (this->isMasked(this->getDetectorID(i))) // slow and correct check with the real method
+              numMasked++;
+        }
+      }
+      return numMasked;
+    }
+
+    bool MaskWorkspace::isMasked(const detid_t detectorID) const
+    {
+      if (!m_hasInstrument)
+        throw std::runtime_error("There is no instrument associated with the workspace");
+
+      // return true if the value isn't zero
+      if (this->getValue(detectorID, 0.) != 0.)
+      {
+        return true;
+      }
+
+      // the mask bit on the workspace can be set
+      return this->getInstrument()->isDetectorMasked(detectorID);
+    }
 
     /**
      * Gets the name of the workspace type.

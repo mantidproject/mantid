@@ -40,14 +40,14 @@ namespace Algorithms
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SetUncertaintiesToZero : public API::Algorithm
+class DLLExport SetUncertainties : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  SetUncertaintiesToZero();
+  SetUncertainties();
 
   /// Virtual destructor
-  virtual ~SetUncertaintiesToZero();
+  virtual ~SetUncertainties();
 
   /// Algorithm's name
   virtual const std::string name() const;

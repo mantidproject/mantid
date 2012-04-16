@@ -89,9 +89,6 @@ class DataReflWidget(BaseRefWidget):
         self._summary.outdir_edit.hide()
         self._summary.outdir_browse_button.hide()
 
-        #TODO: allow log binning
-        self._summary.log_scale_chk.hide()
-                 
     def _tof_range_clicked(self, is_checked):
         """
             This is reached by the TOF range switch

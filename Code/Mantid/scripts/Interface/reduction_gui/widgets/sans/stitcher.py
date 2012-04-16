@@ -6,6 +6,7 @@ import reduction_gui.widgets.util as util
 import ui.ui_stitcher
 
 import _qti
+import mantidplot
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
@@ -439,7 +440,8 @@ class StitcherWidget(BaseWidget):
         if len(ws_list)>0:
             g = _qti.app.graph(self._graph)
             if g is None or not self._plotted:
-                g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+                g_proxy = mantidplot.plotSpectrum(ws_list, [0], True)
+                g = g_proxy._getHeldObject()
                 g.setName(self._graph)
                 self._plotted = True
                 

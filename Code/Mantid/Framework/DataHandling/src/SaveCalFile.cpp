@@ -15,8 +15,6 @@ The format is
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/SaveCalFile.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 #include <fstream>
@@ -70,7 +68,7 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
 
-    declareProperty(new WorkspaceProperty<>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
         "Optional: An Workspace workspace giving which detectors are masked.");
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".cal"),
@@ -84,7 +82,7 @@ namespace DataHandling
   {
     GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
     OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
-    MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
+    MaskWorkspace_sptr maskWS = getProperty("MaskWorkspace");
     std::string Filename = getPropertyValue("Filename");
 
     // Do the saving
@@ -101,7 +99,7 @@ namespace DataHandling
    * @param maskWS :: optional, masking-type workspace to save. Will be 1 (selected) if not specified.
    */
   void SaveCalFile::saveCalFile(const std::string& calFileName,
-      GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MatrixWorkspace_sptr maskWS)
+      GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MaskWorkspace_sptr maskWS)
   {
     Instrument_const_sptr inst;
 
@@ -111,6 +109,7 @@ namespace DataHandling
     if (offsetsWS) { doOffsets = true; inst = offsetsWS->getInstrument(); }
     bool doMask = false;
     if (maskWS) { doMask = true; inst = maskWS->getInstrument(); }
+    g_log.information() << "doGroup = " << doGroup << " doOffsets = " << doOffsets << " doMask = " << doMask << "\n";
 
     if (!inst)
       throw std::invalid_argument("You must give at least one of the grouping, offsets or masking workspaces.");
@@ -142,15 +141,15 @@ namespace DataHandling
         group = static_cast<int64_t>(groupWS->getValue(detectorID, 0.0));
 
       // Find the selection, if any
-      bool selected = true;
-      if (doMask)
-        selected = !maskWS->getInstrument()->getDetector(detectorID)->isMasked();
+      int selected = 1;
+      if (doMask && (maskWS->isMasked(detectorID)))
+        selected = 0;
 
       //if(group > 0)
         fout << std::fixed << std::setw(9) << number <<
         std::fixed << std::setw(15) << detectorID <<
         std::fixed << std::setprecision(7) << std::setw(15)<< offset <<
-        std::fixed << std::setw(8) << (selected?1:0) <<
+        std::fixed << std::setw(8) << selected <<
         std::fixed << std::setw(8) << group  << "\n";
 
        number++;

@@ -12,6 +12,7 @@ set ( EXPORT_FILES
   src/Exports/DataItem.cpp
   src/Exports/IPropertyManager.cpp
   src/Exports/Property.cpp
+  src/Exports/IValidator.cpp
   src/Exports/PropertyWithValue.cpp
   src/Exports/ArrayProperty.cpp
   src/Exports/Quat.cpp
@@ -19,12 +20,13 @@ set ( EXPORT_FILES
   src/Exports/StlContainers.cpp
   src/Exports/Logger.cpp
   src/Exports/Unit.cpp
-  src/Exports/IValidator.cpp
   src/Exports/BoundedValidator.cpp
   src/Exports/TimeSeriesProperty.cpp
   src/Exports/DateAndTime.cpp
   src/Exports/InstrumentInfo.cpp
   src/Exports/FacilityInfo.cpp
+  src/Exports/NullValidator.cpp
+  src/Exports/ListValidator.cpp
 )  
 
 set ( SRC_FILES

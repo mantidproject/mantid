@@ -1,6 +1,5 @@
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::Kernel;
@@ -16,9 +15,9 @@ namespace MantidWidgets
   /** Constructor
    */
   AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
-  : QWidget(parent)
+  : QWidget(parent), m_tree(NULL), m_findAlg(NULL), m_execButton(NULL),
+    m_updateObserver(*this, &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate)
   {
-
     QHBoxLayout * buttonLayout = new QHBoxLayout();
 
     m_tree = new AlgorithmTreeWidget(this);
@@ -50,6 +49,7 @@ namespace MantidWidgets
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
 
+    AlgorithmFactory::Instance().notificationCenter.addObserver(m_updateObserver);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -57,6 +57,7 @@ namespace MantidWidgets
    */
   AlgorithmSelectorWidget::~AlgorithmSelectorWidget()
   {
+    AlgorithmFactory::Instance().notificationCenter.removeObserver(m_updateObserver);
   }
   
 
@@ -164,7 +165,15 @@ namespace MantidWidgets
     m_tree->blockSignals(false);
   }
 
-
+  /**
+   * The algorithm factory has been updated, refresh the widget
+   * @param
+   */
+  void AlgorithmSelectorWidget::
+  handleAlgorithmFactoryUpdate(const Mantid::API::AlgorithmFactoryUpdateNotification_ptr &)
+  {
+    this->update();
+  }
 
   //============================================================================
   //============================================================================

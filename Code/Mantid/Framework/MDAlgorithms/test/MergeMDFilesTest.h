@@ -73,7 +73,7 @@ public:
     if (!ws) return;
     
     TS_ASSERT_EQUALS( ws->getNPoints(), 30000);
-    IMDBox3Lean * box = ws->getBox();
+    MDBoxBase3Lean * box = ws->getBox();
     TS_ASSERT_EQUALS( box->getNumChildren(), 1000);
 
     // Every sub-box has on average 30 events (there are 1000 boxes)

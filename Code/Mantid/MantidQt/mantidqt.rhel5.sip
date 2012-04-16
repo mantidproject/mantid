@@ -269,11 +269,15 @@ public:
   Mantid::API::MDNormalization getNormalization() const;
 
 
-//  //*WIKI* ==== Dynamic Rebinning ====
-//  void setRebinThickness(int dim, double thickness)   throw (std::runtime_error);
-//  void setRebinNumBins(int xBins, int yBins)   throw (std::runtime_error);
-//  void setRebinMode(bool mode, bool locked)   throw (std::runtime_error);
-//  void refreshRebin()   throw (std::runtime_error);
+  //*WIKI* ==== Dynamic Rebinning ====
+  void setRebinThickness(int dim, double thickness)   throw (std::runtime_error);
+
+  void setRebinNumBins(int xBins, int yBins)   throw (std::runtime_error);
+
+  void setRebinMode(bool mode, bool locked)   throw (std::runtime_error);
+
+  void refreshRebin()   throw (std::runtime_error);
+
 };
 
 

@@ -9,7 +9,7 @@
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
@@ -24,7 +24,7 @@ namespace MDEvents
   //===============================================================================================
   /** Templated class for a GRIDDED multi-dimensional event "box".
    * A MDGridBox contains a dense array with nd dimensions
-   * of IMDBox'es, each being either a regular MDBox or a MDGridBox itself.
+   * of MDBoxBase'es, each being either a regular MDBox or a MDGridBox itself.
    *
    * This means that MDGridBoxes can be recursively gridded finer and finer.
    *
@@ -36,7 +36,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport MDGridBox : public IMDBox<MDE, nd>
+  class DLLExport MDGridBox : public MDBoxBase<MDE, nd>
   {
   public:
     MDGridBox();
@@ -61,17 +61,17 @@ namespace MDEvents
 
     size_t getChildIndexFromID(size_t childId) const;
 
-    IMDBox<MDE,nd> * getChild(size_t index);
+    MDBoxBase<MDE,nd> * getChild(size_t index);
 
-    void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
+    void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
 
     std::vector< MDE > * getEventsCopy();
 
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
+    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
 
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
-    const IMDBox<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
+    const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
@@ -101,7 +101,7 @@ namespace MDEvents
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a reference to) the vector of boxes */
-    std::vector<IMDBox<MDE, nd>*> & getBoxes()
+    std::vector<MDBoxBase<MDE, nd>*> & getBoxes()
     { return boxes; }
 
     /** For testing: return the internal-stored size of each box in each dimension */
@@ -120,8 +120,8 @@ namespace MDEvents
     /// Typedef for a shared pointer to a MDGridBox
     typedef boost::shared_ptr< MDGridBox<MDE, nd> > sptr;
 
-    /// Typedef for a vector of IMDBox pointers
-    typedef std::vector<IMDBox<MDE, nd>*> boxVector_t;
+    /// Typedef for a vector of MDBoxBase pointers
+    typedef std::vector<MDBoxBase<MDE, nd>*> boxVector_t;
 
 
   private:
@@ -138,7 +138,7 @@ namespace MDEvents
     /** 1D array of boxes contained within. These map
      * to the nd-array.
      */
-    std::vector<IMDBox<MDE, nd>*> boxes;
+    std::vector<MDBoxBase<MDE, nd>*> boxes;
 
     /// How many boxes in the boxes vector? This is just to avoid boxes.size() calls.
     size_t numBoxes;

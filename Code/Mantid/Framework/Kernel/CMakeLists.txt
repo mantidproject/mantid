@@ -167,6 +167,7 @@ set ( INC_FILES
 	inc/MantidKernel/ReadLock.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
+	inc/MantidKernel/RegistrationHelper.h
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/Statistics.h

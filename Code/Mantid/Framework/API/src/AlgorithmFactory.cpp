@@ -4,9 +4,9 @@
 #include <iostream>
 #include <sstream>
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/CloneableAlgorithm.h"
 
 #include "Poco/StringTokenizer.h"
 
@@ -17,7 +17,7 @@ namespace Mantid
 
     AlgorithmFactoryImpl::AlgorithmFactoryImpl() : 
   Kernel::DynamicFactory<Algorithm>(), g_log(Kernel::Logger::get("AlgorithmFactory")),
-    m_vmap(), m_cloneable_algs()
+    m_vmap()
   {
     // we need to make sure the library manager has been loaded before we 
     // are constructed so that it is destroyed after us and thus does
@@ -164,14 +164,6 @@ namespace Mantid
   {
     //Start with those subscribed with the factory and add the cleanly constructed algorithm keys
     std::vector<std::string> names = Kernel::DynamicFactory<Algorithm>::getKeys();
-    names.reserve(names.size() + m_cloneable_algs.size());
-
-    std::map<std::string, API::CloneableAlgorithm*>::const_iterator itr_end = m_cloneable_algs.end();
-    for(std::map<std::string, API::CloneableAlgorithm*>::const_iterator itr = m_cloneable_algs.begin(); 
-      itr!= itr_end; ++itr )
-    {
-      names.push_back(itr->first);
-    }
 
     if (includeHidden)
     {
@@ -229,7 +221,7 @@ namespace Mantid
     std::set<std::string> hiddenCategories;
     fillHiddenCategories(&hiddenCategories);
 
-    //get all of the alroithm keys, including the hidden ones for speed purposes we will filter later if required
+    //get all of the algorithm keys, including the hidden ones for speed purposes we will filter later if required
     std::vector<std::string> names = getKeys(true);
     
     std::vector<std::string>::const_iterator itr_end = names.end();
@@ -356,57 +348,6 @@ namespace Mantid
 
   }
 
-  /**
-  * Store a pointer to an Algorithm object that is cloneable, e.g. a Python algorithm
-  * @param algorithm :: A pointer to a clonable algorithm object
-  */
-  bool AlgorithmFactoryImpl::storeCloneableAlgorithm(CloneableAlgorithm* algorithm)
-  {
-    const std::string alg_name = algorithm->name();
-    if( alg_name.empty() )
-    {
-      throw std::runtime_error("Cannot register algorithm with empty name.");
-    }
-    const int alg_version(algorithm->version());
-    //Check if we already have an algorithm of this name and version within the factory
-    std::map<std::string, int>::const_iterator itr = m_vmap.find(alg_name);
-    if( itr != m_vmap.end() )
-    {
-      int registered_version = itr->second;
-      if( alg_version > registered_version )
-      {
-        m_vmap[alg_name] = alg_version;
-      }
-    }
-    else
-    {
-      m_vmap[alg_name] = alg_version;
-    }
-
-    // Finally check that the algorithm can be initialized without throwing
-    try
-    {
-      algorithm->clone()->initialize();
-    }
-    catch( std::runtime_error & e )
-    {
-      g_log.error(e.what());
-      return false;
-    }
-    catch( ... )
-    {
-      return false;
-    }
-
-    //Insert into map, overwriting if necessary
-    m_cloneable_algs[createName(alg_name, alg_version)] = algorithm;
-
-    //Notify whomever is interested that the factory has been updated
-    notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
-
-    return true;
-  }
-
   /** Extract the name of an algorithm
   * @param alg :: the Algrorithm to use
   * @returns the name of the algroithm
@@ -434,29 +375,7 @@ namespace Mantid
   */
   boost::shared_ptr<Algorithm> AlgorithmFactoryImpl::createAlgorithm(const std::string & name, const int version) const
   {
-    try
-    {
-      return Kernel::DynamicFactory<Algorithm>::create(createName(name,version));
-    }
-    catch(Mantid::Kernel::Exception::NotFoundError &)
-    {
-    }
-    //See if we can make one from the clean cache
-    const std::string fqlname(createName(name, version));
-    std::map<std::string, CloneableAlgorithm*>::const_iterator itr = m_cloneable_algs.find(fqlname);
-    if( itr != m_cloneable_algs.end() )
-    {
-      API::CloneableAlgorithm *cloned = itr->second->clone();
-      if( !cloned )
-      {
-        throw std::runtime_error("Cloning algorithm failed, cannot create algorithm \"" + name + "\"");
-      }
-      return boost::shared_ptr<API::CloneableAlgorithm>(cloned, std::mem_fun(&CloneableAlgorithm::kill));
-    }
-    else
-    {
-      throw Mantid::Kernel::Exception::NotFoundError("Unknown algorithm requested.", name);
-    }
+    return Kernel::DynamicFactory<Algorithm>::create(createName(name,version));
   }
 
   } // namespace API

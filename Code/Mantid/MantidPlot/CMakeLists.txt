@@ -106,7 +106,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ScriptingLangDialog.cpp
                    src/ScriptingWindow.cpp
                    src/ScriptFileInterpreter.cpp
-                   src/ScriptManagerWidget.cpp
+                   src/MultiTabScriptInterpreter.cpp
                    src/ScriptOutputDisplay.cpp
                    src/SelectionMoveResizer.cpp
                    src/SendToProgramDialog.cpp
@@ -335,7 +335,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScriptingEnv.h
                    src/ScriptingLangDialog.h
                    src/ScriptingWindow.h
-                   src/ScriptManagerWidget.h
+                   src/MultiTabScriptInterpreter.h
                    src/ScriptOutputDisplay.h
                    src/ScriptFileInterpreter.h
                    src/SelectionMoveResizer.h
@@ -599,7 +599,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/ScriptingEnv.h
                         src/ScriptingLangDialog.h
                         src/ScriptingWindow.h
-                        src/ScriptManagerWidget.h
+                        src/MultiTabScriptInterpreter.h
                         src/ScriptOutputDisplay.h
                         src/ScriptFileInterpreter.h
                         src/SelectionMoveResizer.h
@@ -750,7 +750,7 @@ include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 include_directories ( ../MantidQt/SliceViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
-
+include_directories ( ../Framework/DataObjects/inc )
 
 ###########################################################################
 # Application icon files
@@ -776,7 +776,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
-                        ${CORE_MANTIDLIBS}
+                        ${CORE_MANTIDLIBS} DataObjects
                         MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
                         QtPropertyBrowser ${QT_LIBRARIES} 
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}

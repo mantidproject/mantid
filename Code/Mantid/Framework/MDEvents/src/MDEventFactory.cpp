@@ -9,7 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
  
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -20,7 +20,7 @@
 
 // We need to include the .cpp files so that the declarations are picked up correctly. Weird, I know. 
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13 
-#include "IMDBox.cpp"
+#include "MDBoxBase.cpp"
 #include "MDBox.cpp"
 #include "MDEventWorkspace.cpp"
 #include "MDGridBox.cpp"
@@ -56,25 +56,25 @@ template DLLExport class MDLeanEvent<8>;
 template DLLExport class MDLeanEvent<9>;
 
 
-// Instantiations for IMDBox
-template DLLExport class IMDBox<MDEvent<1>, 1>;
-template DLLExport class IMDBox<MDEvent<2>, 2>;
-template DLLExport class IMDBox<MDEvent<3>, 3>;
-template DLLExport class IMDBox<MDEvent<4>, 4>;
-template DLLExport class IMDBox<MDEvent<5>, 5>;
-template DLLExport class IMDBox<MDEvent<6>, 6>;
-template DLLExport class IMDBox<MDEvent<7>, 7>;
-template DLLExport class IMDBox<MDEvent<8>, 8>;
-template DLLExport class IMDBox<MDEvent<9>, 9>;
-template DLLExport class IMDBox<MDLeanEvent<1>, 1>;
-template DLLExport class IMDBox<MDLeanEvent<2>, 2>;
-template DLLExport class IMDBox<MDLeanEvent<3>, 3>;
-template DLLExport class IMDBox<MDLeanEvent<4>, 4>;
-template DLLExport class IMDBox<MDLeanEvent<5>, 5>;
-template DLLExport class IMDBox<MDLeanEvent<6>, 6>;
-template DLLExport class IMDBox<MDLeanEvent<7>, 7>;
-template DLLExport class IMDBox<MDLeanEvent<8>, 8>;
-template DLLExport class IMDBox<MDLeanEvent<9>, 9>;
+// Instantiations for MDBoxBase
+template DLLExport class MDBoxBase<MDEvent<1>, 1>;
+template DLLExport class MDBoxBase<MDEvent<2>, 2>;
+template DLLExport class MDBoxBase<MDEvent<3>, 3>;
+template DLLExport class MDBoxBase<MDEvent<4>, 4>;
+template DLLExport class MDBoxBase<MDEvent<5>, 5>;
+template DLLExport class MDBoxBase<MDEvent<6>, 6>;
+template DLLExport class MDBoxBase<MDEvent<7>, 7>;
+template DLLExport class MDBoxBase<MDEvent<8>, 8>;
+template DLLExport class MDBoxBase<MDEvent<9>, 9>;
+template DLLExport class MDBoxBase<MDLeanEvent<1>, 1>;
+template DLLExport class MDBoxBase<MDLeanEvent<2>, 2>;
+template DLLExport class MDBoxBase<MDLeanEvent<3>, 3>;
+template DLLExport class MDBoxBase<MDLeanEvent<4>, 4>;
+template DLLExport class MDBoxBase<MDLeanEvent<5>, 5>;
+template DLLExport class MDBoxBase<MDLeanEvent<6>, 6>;
+template DLLExport class MDBoxBase<MDLeanEvent<7>, 7>;
+template DLLExport class MDBoxBase<MDLeanEvent<8>, 8>;
+template DLLExport class MDBoxBase<MDLeanEvent<9>, 9>;
 
 
 // Instantiations for MDBox

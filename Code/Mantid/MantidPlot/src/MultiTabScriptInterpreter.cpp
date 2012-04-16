@@ -6,7 +6,7 @@
 
 #include "ScriptingEnv.h"
 #include "ScriptingLangDialog.h"
-#include "ScriptManagerWidget.h"
+#include "MultiTabScriptInterpreter.h"
 
 // Qt
 #include <QPoint>
@@ -20,7 +20,7 @@
 
 //***************************************************************************
 //
-// ScriptManagerWidget class
+// MultiTabScriptInterpreter class
 //
 //***************************************************************************
 //-----------------------------------------------------
@@ -29,7 +29,7 @@
 /**
  * Constructor
  */
-ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
+MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent)
   : QTabWidget(parent), Scripted(env), m_last_dir(""),
     m_cursor_pos(), m_reportProgress(false), m_recentScriptList(), m_nullScript(new NullScriptFileInterpreter),
     m_current(m_nullScript)
@@ -40,13 +40,13 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent)
 /**
  * Destructor
  */
-ScriptManagerWidget::~ScriptManagerWidget()
+MultiTabScriptInterpreter::~MultiTabScriptInterpreter()
 {
   delete m_nullScript;
 }
 
 /// @return Interpreter at given index
-ScriptFileInterpreter * ScriptManagerWidget::interpreterAt(int index)
+ScriptFileInterpreter * MultiTabScriptInterpreter::interpreterAt(int index)
 {
   if(count() > 0)
   {
@@ -61,7 +61,7 @@ ScriptFileInterpreter * ScriptManagerWidget::interpreterAt(int index)
 /**
  * Is a script running in the environment
  */
-bool ScriptManagerWidget::isExecuting()
+bool MultiTabScriptInterpreter::isExecuting()
 {
   for(int i = 0; i <= count(); ++i)
   {
@@ -78,7 +78,7 @@ bool ScriptManagerWidget::isExecuting()
  * @param index :: The index to give the new tab. If this is invalid the tab is simply appended
  * @param filename :: An optional filename
  */
-void ScriptManagerWidget::newTab(int index, const QString & filename)
+void MultiTabScriptInterpreter::newTab(int index, const QString & filename)
 {
   ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this);
   scriptRunner->setup(*scriptingEnv(), filename);
@@ -97,7 +97,7 @@ void ScriptManagerWidget::newTab(int index, const QString & filename)
  * Open a file in the current tab
  * @param filename :: An optional file name
  */
-void ScriptManagerWidget::openInCurrentTab(const QString & filename)
+void MultiTabScriptInterpreter::openInCurrentTab(const QString & filename)
 {
   open(false, filename);
 }
@@ -106,7 +106,7 @@ void ScriptManagerWidget::openInCurrentTab(const QString & filename)
  * Open a file in a new tab
  * @param filename :: An optional file name
  */
-void ScriptManagerWidget::openInNewTab(const QString & filename)
+void MultiTabScriptInterpreter::openInNewTab(const QString & filename)
 {
   open(true, filename);
 }
@@ -115,7 +115,7 @@ void ScriptManagerWidget::openInNewTab(const QString & filename)
  * open the selected script from the File->Recent Scripts  in a new tab
  * @param index :: The index of the selected script
  */
-void ScriptManagerWidget::openRecentScript(int index)
+void MultiTabScriptInterpreter::openRecentScript(int index)
 {
   if(index < m_recentScriptList.count())
   {
@@ -125,21 +125,21 @@ void ScriptManagerWidget::openRecentScript(int index)
 }
 
 /// Save current file
-void ScriptManagerWidget::saveToCurrentFile()
+void MultiTabScriptInterpreter::saveToCurrentFile()
 {
   m_current->saveToCurrentFile();
   setTabTitle(m_current, m_current->filename());
 }
 
 /// Save to new file
-void ScriptManagerWidget::saveAs()
+void MultiTabScriptInterpreter::saveAs()
 {
   m_current->saveAs();
   setTabTitle(m_current, m_current->filename());
 }
 
 /// Print the current script
-void ScriptManagerWidget::print()
+void MultiTabScriptInterpreter::print()
 {
   m_current->printScript();
 }
@@ -147,7 +147,7 @@ void ScriptManagerWidget::print()
 /**
  * Close current tab
  */
-int ScriptManagerWidget::closeCurrentTab()
+int MultiTabScriptInterpreter::closeCurrentTab()
 {
   if( count() > 0 )
   {
@@ -162,7 +162,7 @@ int ScriptManagerWidget::closeCurrentTab()
 /**
  * Close all tabs
  */
-void ScriptManagerWidget::closeAllTabs()
+void MultiTabScriptInterpreter::closeAllTabs()
 {
   int index_end = count() - 1;
   setCurrentIndex(index_end);
@@ -177,7 +177,7 @@ void ScriptManagerWidget::closeAllTabs()
 /**
  *  This method is useful for saving the currently opened script files to project file 
 */
-QString ScriptManagerWidget::saveToString()
+QString MultiTabScriptInterpreter::saveToString()
 {
   QString fileNames;
   fileNames="<scriptwindow>\n";
@@ -203,35 +203,35 @@ QString ScriptManagerWidget::saveToString()
 /**
  * Show the find/replace dialog
  */
-void ScriptManagerWidget::showFindReplaceDialog()
+void MultiTabScriptInterpreter::showFindReplaceDialog()
 {
   m_current->showFindReplaceDialog();
 }
 
 /// undo
-void ScriptManagerWidget::undo()
+void MultiTabScriptInterpreter::undo()
 {
   m_current->undo();
 }
 /// redo
-void ScriptManagerWidget::redo()
+void MultiTabScriptInterpreter::redo()
 {
   m_current->redo();
 }
 
 /// cut current
-void ScriptManagerWidget::cut()
+void MultiTabScriptInterpreter::cut()
 {
   m_current->cut();
 }
 
 /// copy method
-void ScriptManagerWidget::copy()
+void MultiTabScriptInterpreter::copy()
 {
   m_current->copy();
 }
   ///paste method
-void ScriptManagerWidget::paste()
+void MultiTabScriptInterpreter::paste()
 {
   m_current->paste();
 }
@@ -239,7 +239,7 @@ void ScriptManagerWidget::paste()
 /**
  * Execute the highlighted code from the current tab
  */
-void ScriptManagerWidget::executeAll(const Script::ExecutionMode mode)
+void MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode)
 {
   m_current->executeAll(mode);
 }
@@ -247,7 +247,7 @@ void ScriptManagerWidget::executeAll(const Script::ExecutionMode mode)
 /**
  * Execute the whole script
  */
-void ScriptManagerWidget::executeSelection(const Script::ExecutionMode mode)
+void MultiTabScriptInterpreter::executeSelection(const Script::ExecutionMode mode)
 {
   m_current->executeSelection(mode);
 }
@@ -255,18 +255,18 @@ void ScriptManagerWidget::executeSelection(const Script::ExecutionMode mode)
 /**
  * Evaluate
  */
-void ScriptManagerWidget::evaluate()
+void MultiTabScriptInterpreter::evaluate()
 {
   QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented.");
 }
 
 /// Increase font size
-void ScriptManagerWidget::zoomIn()
+void MultiTabScriptInterpreter::zoomIn()
 {
   m_current->zoomInOnScript();
 }
 /// Decrease font size
-void ScriptManagerWidget::zoomOut()
+void MultiTabScriptInterpreter::zoomOut()
 {
   m_current->zoomOutOnScript();
 }
@@ -275,7 +275,7 @@ void ScriptManagerWidget::zoomOut()
  * Toggle the progress arrow on/off
  * @param state :: The state of the option
  */
-void ScriptManagerWidget::toggleProgressReporting(bool state)
+void MultiTabScriptInterpreter::toggleProgressReporting(bool state)
 {
   m_reportProgress = state;
   int index_end = count() - 1;
@@ -289,7 +289,7 @@ void ScriptManagerWidget::toggleProgressReporting(bool state)
  * Toggle code folding on/off
  * @param state :: The state of the option
  */
-void ScriptManagerWidget::toggleCodeFolding(bool state)
+void MultiTabScriptInterpreter::toggleCodeFolding(bool state)
 {
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
@@ -306,7 +306,7 @@ void ScriptManagerWidget::toggleCodeFolding(bool state)
  * Close clicked tab. Qt cannot give the position where an action is clicked so this just gets 
  * the current cursor position and calls the closeAtPosition function
  */
-void ScriptManagerWidget::closeClickedTab()
+void MultiTabScriptInterpreter::closeClickedTab()
 {
   closeTabAtPosition(m_cursor_pos);
 }
@@ -315,7 +315,7 @@ void ScriptManagerWidget::closeClickedTab()
  * Mark the current tab as changed. True means that the editor has
  * modifications
  */
-void ScriptManagerWidget::currentEditorModified(bool state)
+void MultiTabScriptInterpreter::currentEditorModified(bool state)
 {
   static const QString modifiedLabel("*");
   const int index = currentIndex();
@@ -335,11 +335,16 @@ void ScriptManagerWidget::currentEditorModified(bool state)
  * The current selection has changed
  * @param index The index of the new selection
  */
-void ScriptManagerWidget::tabSelectionChanged(int index)
+void MultiTabScriptInterpreter::tabSelectionChanged(int index)
 {
+  m_current->disconnect(SIGNAL(executionStarted()));
+  m_current->disconnect(SIGNAL(executionStopped()));
   if( count() > 0 )
   {
     m_current = interpreterAt(index);
+    connect(m_current, SIGNAL(executionStarted()), this, SLOT(sendScriptExecutingSignal()));
+    connect(m_current, SIGNAL(executionStopped()), this, SLOT(sendScriptStoppedSignal()));
+    emit executionStateChanged(m_current->isExecuting());
     setFocusProxy(m_current);
     m_current->setFocus();
   }
@@ -347,17 +352,23 @@ void ScriptManagerWidget::tabSelectionChanged(int index)
   {
     m_current = m_nullScript;
   }
-
 }
 
 /**
- * Enable/disable script interaction based on script execution status
- * @param running :: The state of the script
+ * Emits the executionStateChanged(true) signal
  */
-void ScriptManagerWidget::setScriptIsRunning(bool)
+void MultiTabScriptInterpreter::sendScriptExecutingSignal()
 {
+  emit executionStateChanged(true);
 }
 
+/**
+ * Emits the executionStateChanged(false) signal
+ */
+void MultiTabScriptInterpreter::sendScriptStoppedSignal()
+{
+  emit executionStateChanged(false);
+}
 
 //--------------------------------------------
 // Private member functions (non-slot)
@@ -367,7 +378,7 @@ void ScriptManagerWidget::setScriptIsRunning(bool)
  * A context menu event for the tab widget itself
  * @param event :: The context menu event
  */  
-void ScriptManagerWidget::contextMenuEvent(QContextMenuEvent *event)
+void MultiTabScriptInterpreter::contextMenuEvent(QContextMenuEvent *event)
 {
   QMenu context(this);
 
@@ -401,7 +412,7 @@ void ScriptManagerWidget::contextMenuEvent(QContextMenuEvent *event)
  * A custom event handler, which in this case monitors for ScriptChangeEvent signals
  * @param event :: The custome event
  */
-void ScriptManagerWidget::customEvent(QEvent *event)
+void MultiTabScriptInterpreter::customEvent(QEvent *event)
 {
   if( !isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT )
   {
@@ -416,7 +427,7 @@ void ScriptManagerWidget::customEvent(QEvent *event)
  * @param newtab :: If true, a new tab will be created
  * @param filename :: An optional file name
  */
-void ScriptManagerWidget::open(bool newtab, const QString & filename)
+void MultiTabScriptInterpreter::open(bool newtab, const QString & filename)
 {
   QString fileToOpen = filename;
   if( fileToOpen.isEmpty() )
@@ -454,7 +465,7 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
  * @param widget A pointer to the widget on the tab
  * @param filename The filename on the tab
  */
-void ScriptManagerWidget::setTabTitle(QWidget *widget, const QString & filename)
+void MultiTabScriptInterpreter::setTabTitle(QWidget *widget, const QString & filename)
 {
   setTabLabel(widget, createTabTitle(filename));
   setTabToolTip(widget, filename);
@@ -466,7 +477,7 @@ void ScriptManagerWidget::setTabTitle(QWidget *widget, const QString & filename)
  * @param filename The filename of the script.
  * @return A string to use as the tab title
  */
-QString ScriptManagerWidget::createTabTitle(const QString & filename) const
+QString MultiTabScriptInterpreter::createTabTitle(const QString & filename) const
 {
   QString title;
   if( filename.isEmpty() )
@@ -484,7 +495,7 @@ QString ScriptManagerWidget::createTabTitle(const QString & filename) const
  * Close a given tab
  * @param index :: The tab index
  */ 
-void ScriptManagerWidget::closeTabAtIndex(int index)
+void MultiTabScriptInterpreter::closeTabAtIndex(int index)
 {
   ScriptFileInterpreter *interpreter = interpreterAt(index);
   interpreter->prepareToClose();
@@ -500,7 +511,7 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
  * Close a tab at a given position
  * @param pos :: The tab at the given position
  */ 
-void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
+void MultiTabScriptInterpreter::closeTabAtPosition(const QPoint & pos)
 {
   int index = tabBar()->tabAt(pos);
   //Index is checked in closeTab
@@ -510,7 +521,7 @@ void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
 /** 
  * Keeps the recent script list up to date
  */
-void ScriptManagerWidget::updateRecentScriptList(const QString & filename)
+void MultiTabScriptInterpreter::updateRecentScriptList(const QString & filename)
 {
   m_recentScriptList.remove(filename);
   m_recentScriptList.push_front(filename);
@@ -524,7 +535,7 @@ void ScriptManagerWidget::updateRecentScriptList(const QString & filename)
 * This method returns the recent scripts list
 * @returns a list containing the name of the recent scripts.
 */
-QStringList ScriptManagerWidget::recentScripts() 
+QStringList MultiTabScriptInterpreter::recentScripts() 
 {
   return m_recentScriptList;
 }
@@ -533,7 +544,7 @@ QStringList ScriptManagerWidget::recentScripts()
  * sets the recent scripts list
  * @param rslist :: list containing the name of the recent scripts.
  */
-void ScriptManagerWidget::setRecentScripts(const QStringList& rslist)
+void MultiTabScriptInterpreter::setRecentScripts(const QStringList& rslist)
 {
   m_recentScriptList = rslist;
 }

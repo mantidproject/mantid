@@ -30,6 +30,8 @@ void EQSANSPatchSensitivity::init()
 {
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut));
   declareProperty(new WorkspaceProperty<>("PatchWorkspace","",Direction::Input));
+  declareProperty("UseLinearRegression",true,
+      "If true, a linear regression will be used instead of computing the average");
   declareProperty("OutputMessage","",Direction::Output);
 }
 
@@ -37,6 +39,7 @@ void EQSANSPatchSensitivity::exec()
 {
   MatrixWorkspace_sptr inputWS = getProperty("Workspace");
   MatrixWorkspace_sptr patchWS = getProperty("PatchWorkspace");
+  bool useRegression = getProperty("UseLinearRegression");
   const int nx_pixels = (int)(inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
   const int ny_pixels = (int)(inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
 
@@ -51,6 +54,12 @@ void EQSANSPatchSensitivity::exec()
     int nUnmasked = 0;
     double totalUnmasked = 0.0;
     double errorUnmasked = 0.0;
+
+    double sumXY = 0.0;
+    double sumX  = 0.0;
+    double sumX2 = 0.0;
+    double sumY  = 0.0;
+
     progress(0.9*i/nx_pixels, "Processing patch");
 
     for (int j=0; j<ny_pixels; j++)
@@ -74,14 +83,26 @@ void EQSANSPatchSensitivity::exec()
       if ( det->isMasked() ) patched_ids.push_back(iDet);
       else
       {
+        double yPosition = det->getPos().Y();
         totalUnmasked += YErrors[0]*YErrors[0]*YValues[0];
         errorUnmasked += YErrors[0]*YErrors[0];
         nUnmasked++;
+
+        sumXY += yPosition*YValues[0];
+        sumX += yPosition;
+        sumX2 += yPosition*yPosition;
+        sumY += YValues[0];
       }
     }
 
     if (nUnmasked>0 && errorUnmasked>0)
     {
+      sumXY /= nUnmasked;
+      sumX /= nUnmasked;
+      sumX2 /= nUnmasked;
+      sumY /= nUnmasked;
+      double beta  = (sumXY-sumX*sumY)/(sumX2-sumX*sumX);
+      double alpha = sumY-beta*sumX;
       double error = sqrt(errorUnmasked)/nUnmasked;
       double average = totalUnmasked / errorUnmasked;
 
@@ -89,14 +110,22 @@ void EQSANSPatchSensitivity::exec()
       progress(0.91, "Applying patch");
       for (size_t k=0; k<patched_ids.size(); k++)
       {
-        MantidVec& YValues = inputWS->dataY(patched_ids[k]);
-        MantidVec& YErrors = inputWS->dataE(patched_ids[k]);
-        YValues[0] = average;
-        YErrors[0] = error;
+        const Geometry::ComponentID det = inputWS->getDetector(patched_ids[k])->getComponentID();
         try
         {
-          if ( const Geometry::ComponentID det = inputWS->getDetector(patched_ids[k])->getComponentID() )
+          if ( det )
           {
+             MantidVec& YValues = inputWS->dataY(patched_ids[k]);
+             MantidVec& YErrors = inputWS->dataE(patched_ids[k]);
+             if (useRegression)
+             {
+               YValues[0] = alpha + beta*det->getPos().Y();
+               YErrors[0] = error;
+             } else {
+               YValues[0] = average;
+               YErrors[0] = error;
+             }
+
              pmap.addBool(det,"masked",false);
           }
         }

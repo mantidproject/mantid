@@ -1,4 +1,4 @@
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidKernel/System.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/VMD.h"
@@ -15,7 +15,7 @@ namespace MDEvents
   /** Default constructor.
    */
   TMDE(
-  IMDBox)::IMDBox()
+  MDBoxBase)::MDBoxBase()
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(1.0),
       m_depth(0),
@@ -33,7 +33,7 @@ namespace MDEvents
   /** Constructor with extents
    */
   TMDE(
-  IMDBox)::IMDBox(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  MDBoxBase)::MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(1.0),
       m_depth(0),
@@ -45,7 +45,7 @@ namespace MDEvents
       m_centroid[d] = 0;
 #endif
     // Set the extents
-    if (extentsVector.size() != nd) throw std::invalid_argument("IMDBox::ctor(): extentsVector.size() must be == nd.");
+    if (extentsVector.size() != nd) throw std::invalid_argument("MDBoxBase::ctor(): extentsVector.size() must be == nd.");
     for (size_t d=0; d<nd; d++)
       this->extents[d] = extentsVector[d];
   }
@@ -57,7 +57,7 @@ namespace MDEvents
    * @param box :: incoming box to copy.
    */
   TMDE(
-  IMDBox)::IMDBox(const IMDBox<MDE,nd> & box)
+  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box)
   : ISaveable(box),
     m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
     m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
@@ -93,7 +93,7 @@ namespace MDEvents
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  size_t IMDBox)::addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
+  size_t MDBoxBase)::addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
   {
     size_t numBad = 0;
     // --- Go event by event and add them ----
@@ -139,7 +139,7 @@ namespace MDEvents
    * @return 0 (since no events were rejected)
    */
   TMDE(
-  size_t IMDBox)::addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
+  size_t MDBoxBase)::addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
   {
     // --- Go event by event and add them ----
     typename std::vector<MDE>::const_iterator it = events.begin() + start_at;
@@ -162,7 +162,7 @@ namespace MDEvents
    * @param events :: Vector of MDEvent
    */
   TMDE(
-  size_t IMDBox)::addEventsUnsafe(const std::vector<MDE> & events)
+  size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> & events)
   {
     return this->addEventsPartUnsafe(events, 0, events.size());
   }
@@ -175,7 +175,7 @@ namespace MDEvents
    * @param events :: Vector of MDEvent
    */
   TMDE(
-  size_t IMDBox)::addEvents(const std::vector<MDE> & events)
+  size_t MDBoxBase)::addEvents(const std::vector<MDE> & events)
   {
     return this->addEventsPart(events, 0, events.size());
   }
@@ -189,7 +189,7 @@ namespace MDEvents
    * @param offset :: after multiplying, add this offset.
    */
   TMDE(
-  void IMDBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
+  void MDBoxBase)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
   {
     for (size_t d=0; d<nd; d++)
     {
@@ -207,10 +207,10 @@ namespace MDEvents
    * @return a vector of VMD objects
    */
   TMDE(
-  std::vector<Mantid::Kernel::VMD> IMDBox)::getVertexes() const
+  std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const
   {
     if (nd > 4)
-      throw std::runtime_error("IMDBox::getVertexes(): At this time, cannot return vertexes for > 4 dimensions.");
+      throw std::runtime_error("MDBoxBase::getVertexes(): At this time, cannot return vertexes for > 4 dimensions.");
     std::vector<Mantid::Kernel::VMD> out;
 
     // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
@@ -253,7 +253,7 @@ namespace MDEvents
    * @return the bare array. This should be deleted by the caller!
    * */
   TMDE(
-  coord_t * IMDBox)::getVertexesArray(size_t & numVertices) const
+  coord_t * MDBoxBase)::getVertexesArray(size_t & numVertices) const
   {
     // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
     numVertices = 1 << nd;
@@ -304,10 +304,10 @@ namespace MDEvents
    * @throw if outDimensions == 0
    * */
   TMDE(
-  coord_t * IMDBox)::getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const
+  coord_t * MDBoxBase)::getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const
   {
     if (outDimensions == 0)
-      throw std::invalid_argument("IMDBox::getVertexesArray(): Must have > 0 output dimensions.");
+      throw std::invalid_argument("MDBoxBase::getVertexesArray(): Must have > 0 output dimensions.");
 
     // How many vertices does one box have? 2^numOutputDimensions
     numVertices = (size_t)1 << outDimensions;
@@ -353,28 +353,28 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Helper method for sorting IMDBoxes by file position.
+  /** Helper method for sorting MDBoxBasees by file position.
    * MDGridBoxes return 0 for file position and so aren't sorted.
    *
-   * @param a :: an IMDBox pointer
-   * @param b :: an IMDBox pointer
+   * @param a :: an MDBoxBase pointer
+   * @param b :: an MDBoxBase pointer
    * @return
    */
   template<typename MDE, size_t nd>
-  bool CompareMDBoxFilePosition (const IMDBox<MDE,nd> * a, const IMDBox<MDE,nd> * b)
+  bool CompareMDBoxFilePosition (const MDBoxBase<MDE,nd> * a, const MDBoxBase<MDE,nd> * b)
   {
     return (a->getFilePosition() < b->getFilePosition());
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Static method for sorting a list of IMDBox pointers by their file position,
+  /** Static method for sorting a list of MDBoxBase pointers by their file position,
    * ascending. This should optimize the speed of loading a bit by
    * reducing the amount of disk seeking.
    *
    * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
    */
   TMDE(
-  void IMDBox)::sortBoxesByFilePos(std::vector<IMDBox<MDE,nd> *> & boxes)
+  void MDBoxBase)::sortBoxesByFilePos(std::vector<MDBoxBase<MDE,nd> *> & boxes)
   {
     std::sort( boxes.begin(), boxes.end(), CompareMDBoxFilePosition<MDE,nd>);
   }

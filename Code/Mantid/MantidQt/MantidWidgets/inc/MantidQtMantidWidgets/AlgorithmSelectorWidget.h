@@ -2,11 +2,16 @@
 #define MANTID_MANTIDWIDGETS_ALGORITHMSELECTORWIDGET_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "WidgetDllOption.h"
+
+#include <Poco/NObserver.h>
+
 #include <QtGui>
-#include <QtGui/qwidget.h>
 
-
+//------------------------------------------------------------------------------
+// Forward declaration
+//------------------------------------------------------------------------------
 namespace MantidQt
 {
 namespace MantidWidgets
@@ -51,6 +56,12 @@ namespace MantidWidgets
     FindAlgComboBox* m_findAlg;
     QPushButton *m_execButton;
 
+  private:
+    /// Callback for AlgorithmFactory update notifications
+    void handleAlgorithmFactoryUpdate(const Mantid::API::AlgorithmFactoryUpdateNotification_ptr &);
+    /// Observes algorithm factory update notifications
+    Poco::NObserver<AlgorithmSelectorWidget,
+                    Mantid::API::AlgorithmFactoryUpdateNotification> m_updateObserver;
   };
 
   //============================================================================

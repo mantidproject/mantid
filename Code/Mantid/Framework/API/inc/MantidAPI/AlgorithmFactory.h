@@ -29,7 +29,6 @@ struct Algorithm_descriptor
 //----------------------------------------------------------------------
 class IAlgorithm;
 class Algorithm;
-class CloneableAlgorithm;
 
 /** The AlgorithmFactory class is in charge of the creation of concrete
     instances of Algorithms. It inherits most of its implementation from
@@ -133,9 +132,6 @@ public:
 
   ///unmangles the names used as keys into the name and version
   std::pair<std::string,int> decodeName(const std::string& mangledName)const;
-          
-  /// Store a pointer to an algorithm that has alread been constructed; for instance an algorithm created in Python
-  bool storeCloneableAlgorithm(CloneableAlgorithm* algorithm);
 
  private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
@@ -167,8 +163,6 @@ public:
   typedef std::map<std::string, int> VersionMap;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
-  /// A hash table storing clean pointers to algorithms
-  std::map<std::string, CloneableAlgorithm*> m_cloneable_algs;
 };
   
 

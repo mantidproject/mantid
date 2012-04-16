@@ -961,11 +961,63 @@ Mantid::API::MDNormalization SliceViewer::getNormalization()
 %End
 
 
-//  //*WIKI* ==== Dynamic Rebinning ====
-//  void setRebinThickness(int dim, double thickness)   throw (std::runtime_error);
-//  void setRebinNumBins(int xBins, int yBins)   throw (std::runtime_error);
-//  void setRebinMode(bool mode, bool locked)   throw (std::runtime_error);
-//  void refreshRebin()   throw (std::runtime_error);
+  //*WIKI* ==== Dynamic Rebinning ====
+  void setRebinThickness(int dim, double thickness)   throw (std::runtime_error);
+%Docstring
+void SliceViewer::setRebinThickness(int dim, double thickness)
+--------------------------------------------------------------
+    Set the thickness (above and below the plane) for dynamic rebinning.
+   
+    Args:
+        dim :: index of the dimension to adjust
+        thickness :: thickness to set, in units of the dimension.
+    
+    Raises:
+        runtime_error if the dimension index is invalid or the thickness is <= 0.0.
+   
+%End
+
+  void setRebinNumBins(int xBins, int yBins)   throw (std::runtime_error);
+%Docstring
+void SliceViewer::setRebinNumBins(int xBins, int yBins)
+-------------------------------------------------------
+    Set the number of bins for dynamic rebinning.
+   
+    Args:
+        xBins :: number of bins in the viewed X direction
+        yBins :: number of bins in the viewed Y direction
+    
+    Raises:
+        runtime_error if the number of bins is < 1
+   
+%End
+
+  void setRebinMode(bool mode, bool locked)   throw (std::runtime_error);
+%Docstring
+void SliceViewer::setRebinMode(bool mode, bool locked)
+------------------------------------------------------
+    Sets the SliceViewer in dynamic rebin mode.
+    In this mode, the current view area (see setXYLimits()) is used as the
+    limits to rebin.
+    See setRebinNumBins() to adjust the number of bins in the X/Y dimensions.
+    See setRebinThickness() to adjust the thickness in other dimensions.
+   
+    Args:
+        mode :: true for rebinning mode
+        locked :: if true, then the rebinned area is only refreshed manually
+           or when changing rebinning parameters.
+   
+%End
+
+  void refreshRebin()   throw (std::runtime_error);
+%Docstring
+void SliceViewer::refreshRebin()
+--------------------------------
+    When in dynamic rebinning mode, this refreshes the rebinned area to be the
+    currently viewed area. See setXYLimits(), setRebinNumBins(), setRebinThickness()
+   
+%End
+
 };
 
 

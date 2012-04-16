@@ -35,7 +35,7 @@ namespace MDEvents
   /** Empty constructor. Used when loading from NXS files.
    * */
   TMDE(MDGridBox)::MDGridBox()
-   : IMDBox<MDE, nd>(), numBoxes(0), nPoints(0)
+   : MDBoxBase<MDE, nd>(), numBoxes(0), nPoints(0)
   {
   }
 
@@ -46,7 +46,7 @@ namespace MDEvents
    * @param extentsVector :: size of the box
    */
   TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
-   : IMDBox<MDE, nd>(extentsVector),
+   : MDBoxBase<MDE, nd>(extentsVector),
      numBoxes(0), nPoints(0)
   {
     this->m_depth = depth;
@@ -69,7 +69,7 @@ namespace MDEvents
   /** Constructor
    * @param box :: MDBox containing the events to split */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
-   : IMDBox<MDE, nd>(*box),
+   : MDBoxBase<MDE, nd>(*box),
      nPoints(0)
   {
     BoxController_sptr bc = box->getBoxController();
@@ -162,7 +162,7 @@ namespace MDEvents
   /** Copy constructor
    * @param other :: MDGridBox to copy */
   TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other)
-   : IMDBox<MDE, nd>(other),
+   : MDBoxBase<MDE, nd>(other),
      numBoxes(other.numBoxes),
      diagonalSquared(other.diagonalSquared),
      nPoints(other.nPoints)
@@ -177,7 +177,7 @@ namespace MDEvents
     boxes.clear();
     for (size_t i=0; i<other.boxes.size(); i++)
     {
-      IMDBox<MDE, nd>* otherBox = other.boxes[i];
+      MDBoxBase<MDE, nd>* otherBox = other.boxes[i];
       const MDBox<MDE, nd>* otherMDBox = dynamic_cast<const MDBox<MDE, nd>* >(otherBox);
       const MDGridBox<MDE, nd>* otherMDGridBox = dynamic_cast<const MDGridBox<MDE, nd>* >(otherBox);
       if (otherMDBox)
@@ -210,7 +210,7 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
   {
-    IMDBox<MDE,nd>::transformDimensions(scaling, offset);
+    MDBoxBase<MDE,nd>::transformDimensions(scaling, offset);
     this->computeSizesFromSplit();
   }
 
@@ -309,10 +309,10 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Get a child box
    * @param index :: index into the array, within range 0..getNumChildren()-1
-   * @return the child IMDBox pointer.
+   * @return the child MDBoxBase pointer.
    */
   template <typename MDE, size_t nd>
-  IMDBox<MDE,nd> * MDGridBox<MDE,nd>::getChild(size_t index)
+  MDBoxBase<MDE,nd> * MDGridBox<MDE,nd>::getChild(size_t index)
   {
     return boxes[index];
   }
@@ -326,7 +326,7 @@ namespace MDEvents
    * @param indexEnd :: end point in the vector, not-inclusive
    */
   TMDE(
-  void MDGridBox)::setChildren(const std::vector<IMDBox<MDE,nd> *> & otherBoxes, const size_t indexStart, const size_t indexEnd)
+  void MDGridBox)::setChildren(const std::vector<MDBoxBase<MDE,nd> *> & otherBoxes, const size_t indexStart, const size_t indexEnd)
   {
     boxes.clear();
     boxes.assign( otherBoxes.begin()+indexStart, otherBoxes.begin()+indexEnd);
@@ -383,7 +383,7 @@ namespace MDEvents
       //--------- Serial -----------
       for (it = boxes.begin(); it != it_end; ++it)
       {
-        IMDBox<MDE,nd> * ibox = *it;
+        MDBoxBase<MDE,nd> * ibox = *it;
 
         // Refresh the cache (does nothing for MDBox)
         ibox->refreshCache();
@@ -436,7 +436,7 @@ namespace MDEvents
       //--------- Serial -----------
       for (it = boxes.begin(); it != it_end; ++it)
       {
-        IMDBox<MDE,nd> * ibox = *it;
+        MDBoxBase<MDE,nd> * ibox = *it;
 
         // Refresh the centroid of all sub-boxes.
         ibox->refreshCentroid();
@@ -480,7 +480,7 @@ namespace MDEvents
    * @param leafOnly :: if true, only add the boxes that are no more subdivided (leaves on the tree)
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly)
+  void MDGridBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly)
   {
     // Add this box, unless we only want the leaves
     if (!leafOnly)
@@ -521,7 +521,7 @@ namespace MDEvents
    * @param function :: implicitFunction pointer
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
+  void MDGridBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
   {
     // Add this box, unless we only want the leaves
     if (!leafOnly)
@@ -608,7 +608,7 @@ namespace MDEvents
       {
         // Find the linear index into the BOXES array.
         size_t boxLinearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, boxIndexMaker);
-        IMDBox<MDE,nd> * box = boxes[boxLinearIndex];
+        MDBoxBase<MDE,nd> * box = boxes[boxLinearIndex];
 
 //        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd, ", ")
 //              << " (" << box->getExtentsStr() << ") ";
@@ -696,10 +696,10 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Returns the lowest-level box at the given coordinates
    * @param coords :: nd-sized array of the coordinate of the point to look at
-   * @return IMDBox pointer.
+   * @return MDBoxBase pointer.
    */
   template <typename MDE, size_t nd>
-  const IMDBox<MDE,nd> * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) const
+  const MDBoxBase<MDE,nd> * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) const
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
@@ -1179,7 +1179,7 @@ namespace MDEvents
 //    while (!allDone)
 //    {
 //      size_t index = getLinearIndex(counters);
-//      IMDBox<MDE,nd> * box = boxes[index];
+//      MDBoxBase<MDE,nd> * box = boxes[index];
 //
 //      // Is this box fully contained?
 //      if (verticesContained[index] >= maxVertices)
@@ -1307,7 +1307,7 @@ namespace MDEvents
 
     for (size_t i=0; i < numBoxes; ++i)
     {
-      IMDBox<MDE, nd> * box = boxes[i];
+      MDBoxBase<MDE, nd> * box = boxes[i];
       // Box partially contained?
       bool partialBox = false;
 
@@ -1384,7 +1384,7 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      IMDBox<MDE, nd> * box = boxes[i];
+      MDBoxBase<MDE, nd> * box = boxes[i];
       coord_t boxCenter[nd];
       box->getCenter(boxCenter);
 
@@ -1415,7 +1415,7 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      IMDBox<MDE, nd> * box = boxes[i];
+      MDBoxBase<MDE, nd> * box = boxes[i];
       if(box->getIsMasked())
       {
         isMasked = true;
@@ -1432,7 +1432,7 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      IMDBox<MDE, nd> * box = boxes[i];
+      MDBoxBase<MDE, nd> * box = boxes[i];
       box->mask();
     }
   }
@@ -1444,7 +1444,7 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      IMDBox<MDE, nd> * box = boxes[i];
+      MDBoxBase<MDE, nd> * box = boxes[i];
       box->unmask();
     }
   }

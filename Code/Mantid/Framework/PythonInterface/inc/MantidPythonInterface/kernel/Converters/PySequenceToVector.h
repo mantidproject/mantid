@@ -75,9 +75,9 @@ namespace Mantid
        * type is defined by the template type
        */
       template <typename DestElementType>
-      struct DLLExport PySequenceToVectorConverter
+      struct DLLExport PySequenceToVector
       {
-        PySequenceToVectorConverter(const boost::python::object & value)
+        PySequenceToVector(const boost::python::object & value)
         : m_obj(value.ptr())
         {
           check(value);
@@ -108,7 +108,7 @@ namespace Mantid
         {
           if( !PySequence_Check(obj.ptr()) )
           {
-            throw std::invalid_argument(std::string("PySequenceToVectorConverter expects Python sequence type, found ")
+            throw std::invalid_argument(std::string("PySequenceToVector expects Python sequence type, found ")
             + obj.ptr()->ob_type->tp_name);
           }
         }

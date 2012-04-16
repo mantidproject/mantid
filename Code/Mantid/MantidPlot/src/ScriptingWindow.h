@@ -10,7 +10,7 @@
 //----------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------
-class ScriptManagerWidget;
+class MultiTabScriptInterpreter;
 class ScriptingEnv;
 class QTextEdit;
 class QPoint;
@@ -104,7 +104,7 @@ private slots:
 
 private:
   /// The script editors' manager
-  ScriptManagerWidget *m_manager;
+  MultiTabScriptInterpreter *m_manager;
 
   /// File menu
   QMenu *m_fileMenu;

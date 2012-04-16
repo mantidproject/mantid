@@ -1,11 +1,11 @@
-#ifndef MANTID_MDEVENTS_IMDBOXTEST_H_
-#define MANTID_MDEVENTS_IMDBOXTEST_H_
+#ifndef MANTID_MDEVENTS_MDBOXBASETEST_H_
+#define MANTID_MDEVENTS_MDBOXBASETEST_H_
 
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -16,22 +16,22 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using Mantid::Kernel::ConfigService;
 
-/** Tester class that implements the minimum IMDBox to
+/** Tester class that implements the minimum MDBoxBase to
  * allow testing
  */
 TMDE_CLASS
-class IMDBoxTester : public IMDBox<MDE,nd>
+class MDBoxBaseTester : public MDBoxBase<MDE,nd>
 {
 public:
-  IMDBoxTester()
-  : IMDBox<MDE,nd>(), m_filePos(0)
+  MDBoxBaseTester()
+  : MDBoxBase<MDE,nd>(), m_filePos(0)
   { }
-  IMDBoxTester(uint64_t filePos)
-  : IMDBox<MDE,nd>(), m_filePos(filePos)
+  MDBoxBaseTester(uint64_t filePos)
+  : MDBoxBase<MDE,nd>(), m_filePos(filePos)
   { }
 
-  IMDBoxTester(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
-  : IMDBox<MDE,nd>(extentsVector)
+  MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  : MDBoxBase<MDE,nd>(extentsVector)
   { }
 
   /// Clear all contained data
@@ -53,11 +53,11 @@ public:
   virtual size_t getNumChildren() const
   {return 0;}
 
-  IMDBox<MDE,nd> * getChild(size_t /*index*/)
+  MDBoxBase<MDE,nd> * getChild(size_t /*index*/)
   { throw std::runtime_error("MDBox does not have children."); }
 
   /// Sets the children from a vector of children
-  void setChildren(const std::vector<IMDBox<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
+  void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
   { throw std::runtime_error("MDBox cannot have children."); }
 
   /// Return a copy of contained events
@@ -80,23 +80,23 @@ public:
 
   virtual void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
   virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
-  virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
-  virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
+  virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
+  virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
 
   virtual bool getIsMasked() const
   {
-    throw std::runtime_error("IMDBoxTester does not implement getIsMasked");
+    throw std::runtime_error("MDBoxBaseTester does not implement getIsMasked");
   }
 
   virtual void mask()
   {
-    throw std::runtime_error("IMDBoxTester does not implement mask");
+    throw std::runtime_error("MDBoxBaseTester does not implement mask");
   }
 
   virtual void unmask()
   {
-    throw std::runtime_error("IMDBoxTester does not implement unmask");
+    throw std::runtime_error("MDBoxBaseTester does not implement unmask");
   }
 
   uint64_t getFilePosition() const
@@ -105,20 +105,20 @@ public:
 };
 
 
-class IMDBoxTest : public CxxTest::TestSuite
+class MDBoxBaseTest : public CxxTest::TestSuite
 {
 public:
 
   void test_default_constructor()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> box;
+    MDBoxBaseTester<MDLeanEvent<3>,3> box;
     TS_ASSERT_EQUALS( box.getSignal(), 0.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 0.0);
   }
 
   void test_extents_constructor()
   {
-    typedef IMDBoxTester<MDLeanEvent<3>,3> ibox3;
+    typedef MDBoxBaseTester<MDLeanEvent<3>,3> ibox3;
     std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
     TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
     extentsVector.resize(3);
@@ -127,7 +127,7 @@ public:
       extentsVector[d].min = static_cast<coord_t>(d) + 0.1f;
       extentsVector[d].max = static_cast<coord_t>(d + 1);
     }
-    IMDBoxTester<MDLeanEvent<3>,3> box(extentsVector);
+    MDBoxBaseTester<MDLeanEvent<3>,3> box(extentsVector);
     TS_ASSERT_DELTA( box.getExtents(0).min, 0.1, 1e-4 );
     TS_ASSERT_DELTA( box.getExtents(0).max, 1.0, 1e-4 );
     TS_ASSERT_DELTA( box.getExtents(1).min, 1.1, 1e-4 );
@@ -138,7 +138,7 @@ public:
 
   void test_transformDimensions()
   {
-    typedef IMDBoxTester<MDLeanEvent<2>,2> ibox3;
+    typedef MDBoxBaseTester<MDLeanEvent<2>,2> ibox3;
     std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
     TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
     extentsVector.resize(2);
@@ -147,7 +147,7 @@ public:
       extentsVector[d].min = 1.0;
       extentsVector[d].max = 2.0;
     }
-    IMDBoxTester<MDLeanEvent<2>,2> box(extentsVector);
+    MDBoxBaseTester<MDLeanEvent<2>,2> box(extentsVector);
     // Now transform
     std::vector<double> scaling(2, 3.0);
     std::vector<double> offset(2, 1.0);
@@ -163,7 +163,7 @@ public:
 
   void test_get_and_set_signal()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> box;
+    MDBoxBaseTester<MDLeanEvent<3>,3> box;
     TS_ASSERT_EQUALS( box.getSignal(), 0.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 0.0);
     box.setSignal(123.0);
@@ -175,7 +175,7 @@ public:
 
   void test_getTotalWeight()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> box;
+    MDBoxBaseTester<MDLeanEvent<3>,3> box;
     TS_ASSERT_EQUALS( box.getTotalWeight(), 0.0);
     box.setTotalWeight(123.0);
     TS_ASSERT_EQUALS( box.getTotalWeight(), 123.0);
@@ -183,7 +183,7 @@ public:
 
   void test_get_and_set_depth()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> b;
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
     b.setDepth(123);
     TS_ASSERT_EQUALS( b.getDepth(), 123);
   }
@@ -191,19 +191,19 @@ public:
   void test_getBoxAtCoord()
   {
     coord_t dummy[3] = {1,2,3};
-    IMDBoxTester<MDLeanEvent<3>,3> b;
-    TSM_ASSERT_EQUALS("IMDBox->getBoxAtCoord() always returns this.", b.getBoxAtCoord(dummy), &b);
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
+    TSM_ASSERT_EQUALS("MDBoxBase->getBoxAtCoord() always returns this.", b.getBoxAtCoord(dummy), &b);
   }
 
   void test_getParent_and_setParent()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> b;
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
     TSM_ASSERT( "Default parent is NULL", !b.getParent() );
-    IMDBoxTester<MDLeanEvent<3>,3> * daddy = new IMDBoxTester<MDLeanEvent<3>,3>;
+    MDBoxBaseTester<MDLeanEvent<3>,3> * daddy = new MDBoxBaseTester<MDLeanEvent<3>,3>;
     b.setParent(daddy);
     TS_ASSERT_EQUALS( b.getParent(), daddy);
     // Copy ctor
-    IMDBoxTester<MDLeanEvent<3>,3> c(b);
+    MDBoxBaseTester<MDLeanEvent<3>,3> c(b);
     TS_ASSERT_EQUALS( c.getParent(), daddy);
 
   }
@@ -212,7 +212,7 @@ public:
    * also, getting the center */
   void test_setExtents()
   {
-    IMDBoxTester<MDLeanEvent<2>,2> b;
+    MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -8.0, 10.0);
     TS_ASSERT_DELTA(b.getExtents(0).min, -8.0, 1e-6);
     TS_ASSERT_DELTA(b.getExtents(0).max, +10.0, 1e-6);
@@ -231,7 +231,7 @@ public:
 
   void test_copy_constructor()
   {
-    IMDBoxTester<MDLeanEvent<2>,2> b;
+    MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setDepth(6);
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
@@ -241,7 +241,7 @@ public:
     b.calcVolume();
 
     // Perform the copy
-    IMDBoxTester<MDLeanEvent<2>,2> box(b);
+    MDBoxBaseTester<MDLeanEvent<2>,2> box(b);
     TS_ASSERT_DELTA(box.getExtents(0).min, -10.0, 1e-6);
     TS_ASSERT_DELTA(box.getExtents(0).max, +10.0, 1e-6);
     TS_ASSERT_DELTA(box.getExtents(1).min, -4.0, 1e-6);
@@ -258,7 +258,7 @@ public:
   /** Calculating volume and normalizing signal by it. */
   void test_calcVolume()
   {
-    IMDBoxTester<MDLeanEvent<2>,2> b;
+    MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     b.calcVolume();
@@ -279,7 +279,7 @@ public:
   /** Get vertexes using the extents */
   void test_getVertexes()
   {
-    IMDBoxTester<MDLeanEvent<2>,2> b;
+    MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     std::vector<Mantid::Kernel::VMD> v = b.getVertexes();
@@ -296,7 +296,7 @@ public:
   /** Get vertexes as a bare array */
   void test_getVertexesArray()
   {
-    IMDBoxTester<MDLeanEvent<2>,2> b;
+    MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
@@ -317,7 +317,7 @@ public:
    * projecting down into fewer dimensions */
   void test_getVertexesArray_reducedDimension()
   {
-    IMDBoxTester<MDLeanEvent<2>,2> b;
+    MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
@@ -342,7 +342,7 @@ public:
    * projecting down into fewer dimensions */
   void test_getVertexesArray_reducedDimension_3D()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> b;
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     b.setExtents(2, -2.0, 8.0);
@@ -391,11 +391,11 @@ public:
 
   void test_sortBoxesByFilePos()
   {
-    std::vector<IMDBox<MDLeanEvent<1>,1>*> boxes;
+    std::vector<MDBoxBase<MDLeanEvent<1>,1>*> boxes;
     // 10 to 1 in reverse order
     for (uint64_t i=0; i<10; i++)
-      boxes.push_back(new IMDBoxTester<MDLeanEvent<1>,1>(10-i));
-    IMDBox<MDLeanEvent<1>,1>::sortBoxesByFilePos(boxes);
+      boxes.push_back(new MDBoxBaseTester<MDLeanEvent<1>,1>(10-i));
+    MDBoxBase<MDLeanEvent<1>,1>::sortBoxesByFilePos(boxes);
     // After sorting, they are in the right order 1,2,3, etc.
     for (uint64_t i=0; i<10; i++)
       { TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); }
@@ -409,7 +409,7 @@ public:
 //======================================================================
 //======================================================================
 //======================================================================
-class IMDBoxTestPerformance : public CxxTest::TestSuite
+class MDBoxBaseTestPerformance : public CxxTest::TestSuite
 {
 public:
 
@@ -418,7 +418,7 @@ public:
    */
   void test_getVertexes_3D()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> b;
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -430,7 +430,7 @@ public:
 
   void test_getVertexesArray_3D()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> b;
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -444,7 +444,7 @@ public:
 
   void test_getVertexesArray_3D_projected_to_2D()
   {
-    IMDBoxTester<MDLeanEvent<3>,3> b;
+    MDBoxBaseTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -459,7 +459,7 @@ public:
 
   void test_getVertexesArray_4D()
   {
-    IMDBoxTester<MDLeanEvent<4>,4> b;
+    MDBoxBaseTester<MDLeanEvent<4>,4> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -473,7 +473,7 @@ public:
   }
   void test_getVertexesArray_4D_projected_to_3D()
   {
-    IMDBoxTester<MDLeanEvent<4>,4> b;
+    MDBoxBaseTester<MDLeanEvent<4>,4> b;
     bool maskDim[4] = {true, true, true, false};
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
@@ -491,5 +491,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_IMDBOXTEST_H_ */
+#endif /* MANTID_MDEVENTS_MDBOXBASETEST_H_ */
 

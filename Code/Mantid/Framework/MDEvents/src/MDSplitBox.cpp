@@ -20,7 +20,7 @@ namespace MDEvents
    */
   TMDE(
   MDSplitBox)::MDSplitBox(MDBox<MDE, nd> * box)
-  : IMDBox<MDE, nd>(box) // copy extents, etc, other common values
+  : MDBoxBase<MDE, nd>(box) // copy extents, etc, other common values
   {
     // Initialization
     nPoints = box->getNPoints();
@@ -67,8 +67,8 @@ namespace MDEvents
    * @param _splitPoint :: left/right split point in that dimension.
    */
   TMDE(
-  MDSplitBox)::MDSplitBox(IMDBox<MDE, nd> * box, size_t _dimSplit, coord_t _splitPoint)
-  : IMDBox<MDE, nd>(box) // copy extents, etc, other common values
+  MDSplitBox)::MDSplitBox(MDBoxBase<MDE, nd> * box, size_t _dimSplit, coord_t _splitPoint)
+  : MDBoxBase<MDE, nd>(box) // copy extents, etc, other common values
   {
     // Directly use the given split dimensions and values
     dimSplit = _dimSplit;
@@ -86,7 +86,7 @@ namespace MDEvents
    * @param box :: incoming box to use as dimensions to split.
    */
   TMDE(
-  void MDSplitBox)::initBoxes(IMDBox<MDE, nd> * box)
+  void MDSplitBox)::initBoxes(MDBoxBase<MDE, nd> * box)
   {
     // Create the left and right boxes with the right dimensions
     left = new MDBox<MDE,nd>(box->getBoxController(), box->getDepth() + 1 );

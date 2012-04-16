@@ -13,7 +13,7 @@
 
 using Mantid::API::FileProperty;
 using Mantid::Kernel::PropertyWithValue;
-using Mantid::PythonInterface::Converters::PySequenceToVectorConverter;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
 namespace bpl = boost::python;
 
 void export_ActionEnum()
@@ -54,7 +54,7 @@ namespace
       }
       else
       {
-        extsAsVector = PySequenceToVectorConverter<std::string>(extensions)();
+        extsAsVector = PySequenceToVector<std::string>(extensions)();
       }
     }
     return new FileProperty(name, defaultValue, action, extsAsVector, direction);

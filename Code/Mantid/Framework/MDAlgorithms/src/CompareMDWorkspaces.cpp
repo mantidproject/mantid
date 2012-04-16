@@ -199,8 +199,8 @@ namespace MDAlgorithms
     if (!ws1 || !ws2)
       throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
 
-    std::vector<IMDBox<MDE,nd>*> boxes1;
-    std::vector<IMDBox<MDE,nd>*> boxes2;
+    std::vector<MDBoxBase<MDE,nd>*> boxes1;
+    std::vector<MDBoxBase<MDE,nd>*> boxes2;
 
     ws1->getBox()->getBoxes(boxes1, 1000, false);
     ws2->getBox()->getBoxes(boxes2, 1000, false);
@@ -210,8 +210,8 @@ namespace MDAlgorithms
     for (size_t j=0; j<boxes1.size(); j++)
     {
 
-      IMDBox<MDE,nd>* box1 = boxes1[j];
-      IMDBox<MDE,nd>* box2 = boxes2[j];
+      MDBoxBase<MDE,nd>* box1 = boxes1[j];
+      MDBoxBase<MDE,nd>* box2 = boxes2[j];
 
       this->compare( box1->getId(), box2->getId(), "Boxes have different ID" );
       this->compare( box1->getDepth(), box2->getDepth(), "Boxes are at a different depth" );

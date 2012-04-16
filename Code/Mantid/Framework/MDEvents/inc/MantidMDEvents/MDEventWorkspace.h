@@ -8,7 +8,7 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/CoordTransform.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
@@ -89,6 +89,8 @@ namespace MDEvents
 
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 
+    void splitTrackedBoxes(Kernel::ThreadScheduler * ts);
+
     virtual void splitBox();
 
     virtual void refreshCache();
@@ -117,20 +119,20 @@ namespace MDEvents
     }
 
     /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
-    IMDBox<MDE,nd> * getBox()
+    MDBoxBase<MDE,nd> * getBox()
     {
       return data;
     }
 
     /** @returns a pointer to the box (MDBox or MDGridBox) contained within, const version.  */
-    const IMDBox<MDE,nd> * getBox() const
+    const MDBoxBase<MDE,nd> * getBox() const
     {
       return data;
     }
 
     /** Set the base-level box contained within.
      * Used in file loading */
-    void setBox(IMDBox<MDE,nd> * box)
+    void setBox(MDBoxBase<MDE,nd> * box)
     {
       data = box;
     }
@@ -144,7 +146,7 @@ namespace MDEvents
   protected:
 
     /** MDBox containing all of the events in the workspace. */
-    IMDBox<MDE, nd> * data;
+    MDBoxBase<MDE, nd> * data;
 
     /// Box controller in use
     Mantid::API::BoxController_sptr m_BoxController;

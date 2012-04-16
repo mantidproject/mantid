@@ -2,6 +2,8 @@
 
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include <algorithm>
+
 //using namespace Mantid::Kernel;
 //using namespace Mantid::API;
 
@@ -20,11 +22,13 @@ namespace DataObjects
     
   RebinnedOutput::~RebinnedOutput()
   {
+    /*
     // Clear out the memory
     for (std::size_t i = 0; i < this->fracArea.size(); i++)
     {
       delete this->fracArea[i];
     }
+    */
   }
   
   /**
@@ -49,8 +53,58 @@ namespace DataObjects
     Workspace2D::init(NVectors, XLength, YLength);
     std::size_t nHist = this->getNumberHistograms();
     this->fracArea.resize(nHist);
+    for (std::size_t i = 0; i < nHist; ++i)
+    {
+      this->fracArea[i].resize(YLength);
+    }
   }
 
+  /**
+   * Function that returns a fractional area array for a given index.
+   * @param index :: the array to fetch
+   * @return the requested fractional area array
+   */
+  MantidVec &RebinnedOutput::dataF(const std::size_t index)
+  {
+    return this->fracArea[index];
+  }
+
+  /**
+   * Function that returns a fractional area array for a given index. This
+   * returns an unmodifiable array.
+   * @param index :: the array to fetch
+   * @return the requested fractional area array
+   */
+  const MantidVec &RebinnedOutput::dataF(const std::size_t index) const
+  {
+    return this->fracArea[index];
+  }
+
+  /**
+   * This function takes the data/error arrays and divides them by the
+   * corresponding fractional area array. This creates a representation that
+   * is easily visualized. The Rebin and Integration algorithms will have to
+   * undo this in order to properly treat the data.
+   */
+  void RebinnedOutput::finalize()
+  {
+    std::size_t nHist = this->getNumberHistograms();
+    for (std::size_t i = 0; i < nHist; ++i)
+    {
+      MantidVec data = this->dataY(i);
+      MantidVec err = this->dataE(i);
+      MantidVec frac = this->dataF(i);
+      MantidVec frac_sqr(frac.size());
+
+      std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
+                     std::divides<double>());
+      std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
+                     std::multiplies<double>());
+      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                     std::divides<double>());
+
+    }
+  }
 
 } // namespace Mantid
 } // namespace DataObjects

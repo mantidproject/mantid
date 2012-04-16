@@ -51,7 +51,7 @@ namespace Mantid
     ReadLock lock(*ws);
 
     // First we get all the boxes, up to the given depth; with or wo the slice function
-    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<MDBoxBase<MDE,nd> *> boxes;
     if (this->slice)
       ws->getBox()->getBoxes(boxes, m_maxDepth, true, this->sliceImplicitFunction);
     else
@@ -97,7 +97,7 @@ namespace Mantid
       {
         // Get the box here
         size_t i = size_t(ii);
-        IMDBox<MDE,nd> * box = boxes[i];
+        MDBoxBase<MDE,nd> * box = boxes[i];
         Mantid::signal_t signal_normalized= box->getSignalNormalized();
 
         if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))

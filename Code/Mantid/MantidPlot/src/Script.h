@@ -68,7 +68,7 @@ class Script : public QObject
   /// Returns the identifier for the script.
   inline const QString name() const { return m_name; }
   /// Returns the identifier as a C string
-  inline const char * nameAsCStr() const { return m_name.toAscii(); }
+  inline const char * nameAsCStr() const { return m_name.toAscii().data(); }
   /// Update the identifier for the object.
   void setName(const QString &name) { m_name = name; }
   /// Return the current context

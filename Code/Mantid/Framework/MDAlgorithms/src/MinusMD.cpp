@@ -106,8 +106,8 @@ namespace MDAlgorithms
     if (!ws1 || !ws2)
       throw std::runtime_error("Incompatible workspace types passed to MinusMD.");
 
-    IMDBox<MDE,nd> * box1 = ws1->getBox();
-    IMDBox<MDE,nd> * box2 = ws2->getBox();
+    MDBoxBase<MDE,nd> * box1 = ws1->getBox();
+    MDBoxBase<MDE,nd> * box2 = ws2->getBox();
 
     Progress prog(this, 0.0, 0.4, box2->getBoxController()->getTotalNumMDBoxes());
 

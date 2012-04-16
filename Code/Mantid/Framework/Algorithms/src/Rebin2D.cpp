@@ -11,6 +11,7 @@ The algorithms currently requires the second axis on the workspace to be a numer
 // Includes
 //------------------------------------------------------------------------------    
 #include "MantidAlgorithms/Rebin2D.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -29,6 +30,7 @@ namespace Mantid
     DECLARE_ALGORITHM(Rebin2D)
 
     using namespace API;
+    using namespace DataObjects;
     using Geometry::ConvexPolygon;
     using Geometry::Quadrilateral;
     using Kernel::V2D;
@@ -201,7 +203,7 @@ namespace Mantid
     void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral & inputQ,
                                           MatrixWorkspace_const_sptr inputWS,
                                           const size_t i, const size_t j,
-                                          MatrixWorkspace_sptr outputWS,
+                                          RebinnedOutput_sptr outputWS,
                                           const std::vector<double> & verticalAxis)
     {
       const MantidVec & X = outputWS->readX(0);
@@ -232,11 +234,12 @@ namespace Mantid
               yValue *= overlapWidth;
               eValue *= overlapWidth;
             }
-            eValue = eValue*eValue;
+            eValue *= eValue;
             PARALLEL_CRITICAL(overlap)
             {
               outputWS->dataY(qi)[ei] += yValue;
               outputWS->dataE(qi)[ei] += eValue;
+              outputWS->dataF(qi)[ei] += weight;
             }
           }
           catch(Geometry::NoIntersectionException &)

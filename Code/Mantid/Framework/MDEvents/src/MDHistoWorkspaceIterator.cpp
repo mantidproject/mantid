@@ -279,7 +279,7 @@ namespace MDEvents
 
   coord_t * MDHistoWorkspaceIterator::getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const
   {
-    //Do the same thing as is done in the IMDBox
+    //Do the same thing as is done in the MDBoxBase
     UNUSED_ARG(numVertices);
     UNUSED_ARG(outDimensions);
     UNUSED_ARG(maskDim);

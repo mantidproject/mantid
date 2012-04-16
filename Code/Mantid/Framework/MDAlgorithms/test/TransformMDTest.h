@@ -73,13 +73,13 @@ public:
       TS_ASSERT_DELTA( ws2->getDimension(d)->getMinimum(), 21.0, 1e-5);
       TS_ASSERT_DELTA( ws2->getDimension(d)->getMaximum(), 41.0, 1e-5);
     }
-    std::vector<IMDBox3Lean*> boxes;
+    std::vector<MDBoxBase3Lean*> boxes;
     ws2->getBox()->getBoxes(boxes, 1000, true);
     for (size_t i=0; i<boxes.size(); i++)
     {
-      IMDBox3Lean* box = boxes[i];
+      MDBoxBase3Lean* box = boxes[i];
       TSM_ASSERT_LESS_THAN( "Box extents was offset", 20.0, box->getExtents(0).min );
-      // More detailed tests are in MDBox, IMDBox and MDGridBox.
+      // More detailed tests are in MDBox, MDBoxBase and MDGridBox.
     }
 
     // Clean up files

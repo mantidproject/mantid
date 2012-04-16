@@ -199,6 +199,7 @@
 #include "MantidKernel/MantidVersion.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -477,6 +478,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   {
     showFirstTimeSetup();
   }
+  using namespace Mantid::API;
+  // Do this as late as possible to avoid unnecessary updates
+  AlgorithmFactory::Instance().enableNotifications();
+  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
+
 }
 
 /*
@@ -9520,6 +9526,8 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     scriptingWindow->saveSettings();
     scriptingWindow->acceptCloseEvent(true);
     scriptingWindow->close();
+    delete scriptingWindow;
+    scriptingWindow = NULL;
   }
 
 	// Emit a shutting_down() signal that can be caught by
@@ -14712,11 +14720,16 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 
     if (exec)
     {
-      executeScriptFile(file_name, Script::Asynchronous);
       if(quit)
       {
+        executeScriptFile(file_name, Script::Asynchronous);
         saved = true;
         this->close();
+      }
+      else
+      {
+        loadScript(file_name);
+        scriptingWindow->executeCurrentTab(Script::Asynchronous);
       }
     }
     else

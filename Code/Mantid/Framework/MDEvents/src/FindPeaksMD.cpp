@@ -201,7 +201,7 @@ namespace MDEvents
     // Make sure all centroids are fresh
     ws->getBox()->refreshCentroid();
 
-    typedef IMDBox<MDE,nd>* boxPtr;
+    typedef MDBoxBase<MDE,nd>* boxPtr;
 
     if (ws->getNumExperimentInfo() == 0)
       throw std::runtime_error("No instrument was found in the MDEventWorkspace. Cannot find peaks.");

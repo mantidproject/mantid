@@ -14,7 +14,7 @@ namespace MDEvents
 //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
-   : IMDBox<MDE, nd>(),
+   : MDBoxBase<MDE, nd>(),
      m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
      m_fileIndexStart(0), m_fileNumEvents(0),
      m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
@@ -27,7 +27,7 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth)
-    : IMDBox<MDE, nd>(),
+    : MDBoxBase<MDE, nd>(),
       m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
       m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
@@ -47,7 +47,7 @@ namespace MDEvents
    * @param extentsVector :: vector defining the extents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
-      : IMDBox<MDE, nd>(extentsVector),
+      : MDBoxBase<MDE, nd>(extentsVector),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
         m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
@@ -64,7 +64,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor */
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
-   : IMDBox<MDE, nd>(other),
+   : MDBoxBase<MDE, nd>(other),
      data(other.data),
      m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
      m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents),
@@ -120,7 +120,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /// Fill a vector with all the boxes up to a certain depth
   TMDE(
-  void MDBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
+  void MDBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
   {
     boxes.push_back(this);
   }
@@ -128,7 +128,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /// Fill a vector with all the boxes up to a certain depth
   TMDE(
-  void MDBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
+  void MDBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
   {
     boxes.push_back(this);
   }
@@ -480,6 +480,13 @@ namespace MDEvents
     // Yes, we added some data
     this->m_dataAdded = true;
 
+//    // When we reach the split threshold exactly, track that the MDBox is too small
+//    // We check on equality and not >= to only add a box once.
+//    if (this->data.size() == this->m_BoxController->getSplitThreshold())
+//    {
+//      this->m_BoxController->addBoxToSplit(this);
+//    }
+
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Keep the running total of signal and error
     signal_t signal = static_cast<signal_t>(event.getSignal());
@@ -747,7 +754,7 @@ namespace MDEvents
   TMDE(
   void MDBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
   {
-    IMDBox<MDE,nd>::transformDimensions(scaling, offset);
+    MDBoxBase<MDE,nd>::transformDimensions(scaling, offset);
     std::vector<MDE> & events = this->getEvents();
     typename std::vector<MDE>::iterator it;
     typename std::vector<MDE>::iterator it_end = events.end();

@@ -5,7 +5,7 @@
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -42,7 +42,7 @@ public:
     // --- Make up some data ----
     GroupingWorkspace_sptr groupWS(new GroupingWorkspace(inst));
     OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inst));
-    SpecialWorkspace2D_sptr maskWS(new SpecialWorkspace2D(inst));
+    MaskWorkspace_sptr maskWS(new MaskWorkspace(inst));
     groupWS->setValue(1, 12);
     groupWS->setValue(2, 23);
     groupWS->setValue(3, 45);

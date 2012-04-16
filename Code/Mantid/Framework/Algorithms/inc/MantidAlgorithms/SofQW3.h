@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include <list>
 
 namespace Mantid
@@ -84,7 +85,7 @@ namespace Mantid
       void getValuesAndWidths(API::MatrixWorkspace_const_sptr workspace);
 
       /// Create the output workspace
-      API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+      DataObjects::RebinnedOutput_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                                                      const std::vector<double> & binParams, std::vector<double>& newAxis);
 
 

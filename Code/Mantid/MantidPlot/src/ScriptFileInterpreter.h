@@ -7,6 +7,7 @@
 #include <QTextEdit>
 #include <QPoint>
 #include <QSplitter>
+#include <QStatusBar>
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -70,9 +71,9 @@ public slots:
   virtual void showFindReplaceDialog();
 
   /// Execute the whole script.
-  virtual void executeAll(const Script::ExecutionMode mode);
+  virtual void executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Execute the current selection
-  virtual void executeSelection(const Script::ExecutionMode mode);
+  virtual void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
 
   /// Zoom in on script
   virtual void zoomInOnScript();
@@ -92,10 +93,18 @@ signals:
   void editorUndoAvailable(bool);
   /// Emitted when the redo availability changes
   void editorRedoAvailable(bool);
+  /// Emitted when a script starts executing
+  void executionStarted();
+  /// Emitted when a script stops executing
+  void executionStopped();
 
 private slots:
-  // Popup a context menu
+  /// Popup a context menu
   void showContextMenu(const QPoint & clickPoint);
+  /// Update the status bar while the script is executing
+  void setExecutingStatus();
+  /// Update the status bar when the script has stopped
+  void setStoppedStatus();
 
 private:
   Q_DISABLE_COPY(ScriptFileInterpreter);
@@ -110,6 +119,7 @@ private:
   QSplitter *m_splitter;
   ScriptEditor *m_editor;
   ScriptOutputDisplay *m_messages;
+  QStatusBar *m_status;
   QSharedPointer<Script> m_runner;
 };
 

@@ -57,7 +57,7 @@ public:
 
       boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<4>,4> >
                 outnew2 = MDEventsTestHelper::makeMDEWFull<4>(2,0.0,2.,1);
-    	IMDBox<MDEvent<4>,4> * out = outnew2->getBox();
+    	MDBoxBase<MDEvent<4>,4> * out = outnew2->getBox();
 
     	// add 2 additional events to the first two boxes to make the data less uniform
     	double pos[4];

@@ -104,7 +104,7 @@ namespace Mantid
     namespace Converters
     {
       //-------------------------------------------------------------------------
-      // NDArrayToVectorConverter definitions
+      // NDArrayToVector definitions
       //-------------------------------------------------------------------------
 
       /**
@@ -112,8 +112,8 @@ namespace Mantid
        * @param value :: A boost python object wrapping a numpy.ndarray
        */
       template<typename DestElementType>
-      NDArrayToVectorConverter<DestElementType>::
-      NDArrayToVectorConverter(const boost::python::object & value)
+      NDArrayToVector<DestElementType>::
+      NDArrayToVector(const boost::python::object & value)
       : m_arr(value)
         {
         typeCheck();
@@ -126,7 +126,7 @@ namespace Mantid
        */
       template<typename DestElementType>
       const std::vector<DestElementType>
-      NDArrayToVectorConverter<DestElementType>::operator()()
+      NDArrayToVector<DestElementType>::operator()()
       {
         npy_intp length = PyArray_SIZE(m_arr.ptr()); // Returns the total number of elements in the array
         std::vector<DestElementType> cvector(length);
@@ -145,7 +145,7 @@ namespace Mantid
        */
       template<typename DestElementType>
       void
-      NDArrayToVectorConverter<DestElementType>::typeCheck()
+      NDArrayToVector<DestElementType>::typeCheck()
       {
         if( !PyArray_Check(m_arr.ptr()) )
         {
@@ -160,7 +160,7 @@ namespace Mantid
       // Explicit instantiations
       //------------------------------------------------------------------------
       #define INSTANTIATE(ElementType)\
-        template DLLExport struct NDArrayToVectorConverter<ElementType>;
+        template DLLExport struct NDArrayToVector<ElementType>;
 
       INSTANTIATE(int);
       INSTANTIATE(long);

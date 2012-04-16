@@ -238,6 +238,7 @@ QString PythonScript::constructErrorMsg()
   tracebackToMsg(msgStream, (PyTracebackObject *)(traceback));
   msgStream << "\n";
 
+
   Py_XDECREF(traceback);
   Py_XDECREF(exception);
   Py_XDECREF(value);
@@ -295,7 +296,7 @@ void PythonScript::tracebackToMsg(QTextStream &msgStream,
   else msgStream << "caused by";
   
   int lineno = traceback->tb_lineno;
-  QString filename = PyString_AsString(traceback->tb_frame->f_code->co_filename);
+  QString filename = QString::fromAscii(PyString_AsString(traceback->tb_frame->f_code->co_filename));
   if(filename == name())
   {
     lineno = getRealLineNo(lineno);
@@ -608,7 +609,7 @@ bool PythonScript::checkResult(PyObject *result)
   }
   else
   {
-    emit error(constructErrorMsg(), name(), 0);
+    emit error(constructErrorMsg(), "", 0);
     return false;
   }
 }
@@ -664,6 +665,7 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
   }
   bool success(false);
   // Simplest case: Code is a single expression
+
   PyObject *compiledCode = Py_CompileString(code, nameAsCStr(), Py_file_input);
 
   if( compiledCode )
@@ -717,7 +719,7 @@ PyObject *PythonScript::compileToByteCode(const QString & code, bool for_eval)
   }
   else
   {
-    emit error(constructErrorMsg(), name(), 0);
+    emit error(constructErrorMsg(), "", 0);
     compiledCode = NULL;
     m_CodeFileObject = NULL;
   }

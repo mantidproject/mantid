@@ -17,7 +17,8 @@
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
   : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical,this)),
     m_editor(new ScriptEditor(this, NULL)),
-    m_messages(new ScriptOutputDisplay), m_runner()
+    m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
+    m_runner()
 {
   setupChildWidgets();
 
@@ -67,18 +68,34 @@ void ScriptFileInterpreter::prepareToClose()
 void ScriptFileInterpreter::showContextMenu(const QPoint & clickPoint)
 {
   QMenu context(this);
-  context.addAction("&Save", m_editor, "saveToCurrentFile");
+  context.addAction("&Save", m_editor, SLOT(saveToCurrentFile()));
 
   context.insertSeparator();
-  context.addAction("&Copy", m_editor, "copy");
-  context.addAction("C&ut", m_editor, "cut");
-  context.addAction("P&aste", m_editor, "paste");
+  context.addAction("&Copy", m_editor, SLOT(copy()));
+  context.addAction("C&ut", m_editor, SLOT(cut()));
+  context.addAction("P&aste", m_editor, SLOT(paste()));
 
   context.insertSeparator();
-  context.addAction("E&xecute Selection", this, "executeSelection");
-  context.addAction("Execute &All", this, "executeAll");
+  context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  context.addAction("Execute &All", this, SLOT(executeAll()));
 
   context.exec(this->mapToGlobal(clickPoint));
+}
+
+/**
+ * Set the status bar when the script is executing
+ */
+void ScriptFileInterpreter::setExecutingStatus()
+{
+  m_status->showMessage("Status: Executing...");
+}
+
+/**
+ * Set the status bar when the script is stopped
+ */
+void ScriptFileInterpreter::setStoppedStatus()
+{
+  m_status->showMessage("Status: Stopped");
 }
 
 /**
@@ -276,6 +293,7 @@ void ScriptFileInterpreter::setupChildWidgets()
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->setContentsMargins(0,0,0,0);
   mainLayout->addWidget(m_splitter);
+  mainLayout->addWidget(m_status);
   setLayout(mainLayout);
 
   setFocusProxy(m_editor);
@@ -318,6 +336,15 @@ void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, cons
   connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
   connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_messages, SLOT(displayError(const QString &)));
   connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_editor, SLOT(markExecutingLineAsError()));
+
+  connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setExecutingStatus()));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(setStoppedStatus()));
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), this, SLOT(setStoppedStatus()));
+
+  connect(m_runner.data(), SIGNAL(started(const QString &)), this, SIGNAL(executionStarted()));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SIGNAL(executionStopped()));
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), this, SIGNAL(executionStopped()));
+
 }
 
 /**

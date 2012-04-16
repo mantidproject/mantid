@@ -53,24 +53,6 @@ void ScriptOutputDisplay::populateEditMenu(QMenu &editMenu)
 }
 
 /**
- * Change the title based on the script's execution state
- * @param running :: The current state of the script environment
- */
-void ScriptOutputDisplay::setScriptIsRunning(bool running)
-{
-//  QString title("Script Output - Status: ");
-//  if( running )
-//  {
-//    title += "Running ...";
-//  }
-//  else
-//  {
-//    title += "Stopped";
-//  }
-//  setWindowTitle(title);
-}
-
-/**
  *  Display an output message that is not an error
  *  @param msg :: The string message
  */

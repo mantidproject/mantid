@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidMDEvents/LoadSQW.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxBase.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::MDEvents;
