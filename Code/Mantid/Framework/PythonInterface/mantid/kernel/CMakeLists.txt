@@ -27,6 +27,7 @@ set ( EXPORT_FILES
   src/Exports/FacilityInfo.cpp
   src/Exports/NullValidator.cpp
   src/Exports/ListValidator.cpp
+  src/Exports/ArrayLengthValidator.cpp
 )  
 
 set ( SRC_FILES
