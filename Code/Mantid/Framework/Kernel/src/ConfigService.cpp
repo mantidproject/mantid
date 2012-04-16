@@ -25,6 +25,8 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/String.h>
+#include <Poco/PipeStream.h>
+#include <Poco/StreamCopier.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -1728,6 +1730,34 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 }
 
 /*
+Quick check to determine if paraview is installed. We make the assumption 
+that if the executable paraview binary is on the path that the paraview libraries 
+will also be available on the library path, or equivalent.
+*/
+bool ConfigServiceImpl::quickParaViewCheck() const
+{
+  this->g_log.information("Checking for ParaView");
+  bool isAvailable = false;
+
+  try
+  {
+    std::string cmd("paraview");
+    std::vector<std::string> args;
+    args.push_back("-V");
+    Poco::Pipe outPipe;
+    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, 0);
+    isAvailable = true;
+    this->g_log.information("ParaView is available");
+  }
+  catch(Poco::RuntimeException& e)
+  {
+    g_log.information(e.what());
+    this->g_log.information("ParaView is not available");
+  }
+  return isAvailable; 
+}
+
+/*
 Quick check to determine if VATES is installed.
 @return TRUE if available.
 */
@@ -1753,19 +1783,6 @@ bool ConfigServiceImpl::quickVatesCheck() const
       break;
     }
     ++it;
-  }
-
-  if(!found)
-  {
-    //On windows, the VSI gui is made available on the path.
-    try
-    {
-      Poco::Environment::get("MANTIDPARAVIEWPATH");
-      found = true;
-    }
-    catch(Poco::NotFoundException&)
-    {
-    }
   }
   return found;
 }
