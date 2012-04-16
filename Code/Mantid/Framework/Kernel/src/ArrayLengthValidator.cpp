@@ -206,6 +206,7 @@ namespace Kernel
   // Required explicit instantiations
   template class ArrayLengthValidator<double>;
   template class ArrayLengthValidator<int>;
+  template class ArrayLengthValidator<long>;
   template class ArrayLengthValidator<std::string>;
 } // namespace Mantid
 } // namespace Kernel

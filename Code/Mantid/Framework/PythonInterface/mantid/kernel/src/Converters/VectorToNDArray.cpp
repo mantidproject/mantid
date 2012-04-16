@@ -97,7 +97,8 @@ namespace Mantid { namespace PythonInterface
       INSTANTIATE(unsigned long);
       INSTANTIATE(unsigned long long);
       INSTANTIATE(double);
-      INSTANTIATE(std::string);
+      // std::string already has clone instantiated as it is specialized
+      template DLLExport PyObject * wrapWithNDArray<std::vector<std::string> >(const std::vector<std::string> &, const NumpyWrapMode);
     }
   }
 }}

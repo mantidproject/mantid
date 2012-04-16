@@ -27,6 +27,8 @@ set ( EXPORT_FILES
   src/Exports/FacilityInfo.cpp
   src/Exports/NullValidator.cpp
   src/Exports/ListValidator.cpp
+  src/Exports/ArrayLengthValidator.cpp
+  src/Exports/ArrayBoundedValidator.cpp
 )  
 
 set ( SRC_FILES
@@ -83,7 +85,6 @@ set ( PY_FILES
   dlopen.py
   funcreturns.py
   plugins.py
-  validators.py
 )
 
 #############################################################################################

@@ -160,6 +160,7 @@ void ArrayBoundedValidator<TYPE>::clearUpper()
 // Required explicit instantiations
 template class ArrayBoundedValidator<double>;
 template class ArrayBoundedValidator<int>;
+template class ArrayBoundedValidator<long>;
 
 } // Kernel
 } // Mantid

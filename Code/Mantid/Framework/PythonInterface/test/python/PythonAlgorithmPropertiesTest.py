@@ -6,7 +6,7 @@ import unittest
 import testhelpers
 
 from mantid import PythonAlgorithm, Direction
-from mantid import BoundedValidator, FileProperty, FileAction
+from mantid import IntBoundedValidator, FileProperty, FileAction
 
 
 # ======================================================================
@@ -67,8 +67,10 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         class PropertiesWithValidation(PythonAlgorithm):
             
             def PyInit(self):
-                self.declareProperty('NumPropWithDefaultDir', -1, BoundedValidator(lower=0))
-                self.declareProperty('NumPropWithInOutDir', -1, BoundedValidator(lower=0),"doc string", Direction.InOut)
+                only_positive = IntBoundedValidator()
+                only_positive.setLower(0)
+                self.declareProperty('NumPropWithDefaultDir', -1, only_positive)
+                self.declareProperty('NumPropWithInOutDir', -1, only_positive,"doc string", Direction.InOut)
             
             def PyExec(self):
                 pass

@@ -6108,11 +6108,24 @@ void ApplicationWindow::savetoNexusFile()
 
 void ApplicationWindow::loadDataFile()
 {
-  if(mantidUI)
-  {
-    mantidUI->executeAlgorithm("Load",-1);
+  // Ask user for file
+  QString fn = QFileDialog::getOpenFileName( 0, tr("Mantidplot - Open file to load"), AlgorithmInputHistory::Instance().getPreviousDirectory());
+  if(fn != "") {
+     QFileInfo fnInfo(fn);
+     AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
+     if( fnInfo.suffix() == "py") 
+     { // We have a python file, just load it into script window
+       loadScript( fn, true );
+     }
+     else if(mantidUI)
+     {  // Run Load algorithm on file
+       QMap<QString,QString> params;
+       params["Filename"] = fn;
+       mantidUI->executeAlgorithmDlg("Load",params);
+     }
   }
 }
+
 void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
 {
   QString fn = fileName;
@@ -16385,12 +16398,18 @@ void ApplicationWindow::cascade()
 
 ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
 {
+  return loadScript (fn, false);
+}
+
+ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool existingProject )
+{
 #ifdef SCRIPTING_PYTHON
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   setScriptingLanguage("Python");
   restoreApplicationGeometry();
-  showScriptWindow(false);
-  scriptingWindow->open(fn, false);
+  bool oldScriptingWindow = scriptingWindow;
+  showScriptWindow(existingProject, false);
+  scriptingWindow->open(fn, existingProject && oldScriptingWindow );
   QApplication::restoreOverrideCursor();
   return this;
 #else

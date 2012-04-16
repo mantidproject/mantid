@@ -82,8 +82,8 @@ namespace DataHandling
   /// @copydoc Mantid::API::Algorithm::initDocs()
   void DetermineChunking::initDocs()
   {
-    this->setWikiSummary("Load a collection of PreNexus files.");
-    this->setOptionalMessage("Load a collection of PreNexus files.");
+    this->setWikiSummary("Determine chunking strategy for event nexus or runinfo.xml files.");
+    this->setOptionalMessage("Determine chunking strategy for event nexus or runinfo.xml files.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -151,7 +151,8 @@ namespace DataHandling
       lp.parseRuninfo(runinfo, dataDir, eventFilenames);
       for (size_t i = 0; i < eventFilenames.size(); i++) {
         Mantid::Kernel::BinaryFile<DasEvent> * eventfile = new BinaryFile<DasEvent>(dataDir + eventFilenames[i]);
-        filesize += static_cast<double>(eventfile->getNumElements()) * 24.0 / (1024.0*1024.0*1024.0);
+        // Factor fo 2 for compression
+        filesize += static_cast<double>(eventfile->getNumElements()) * 48.0 / (1024.0*1024.0*1024.0);
       }
     }
     else
@@ -209,7 +210,8 @@ namespace DataHandling
       //Close up the file
       file.closeGroup();
       file.close();
-      filesize = static_cast<double>(total_events) * 24.0 / (1024.0*1024.0*1024.0);
+      // Factor fo 2 for compression
+      filesize = static_cast<double>(total_events) * 48.0 / (1024.0*1024.0*1024.0);
     }
 
     int numChunks = static_cast<int>(filesize/maxChunk);

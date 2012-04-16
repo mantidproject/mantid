@@ -245,7 +245,7 @@ namespace
 
     if (foundZeroOrNegativeError)
     {
-      log().warning() << "Zero or negative errors are replaced with 1.0\n";
+      log().debug() << "Zero or negative errors are replaced with 1.0\n";
     }
 
   }
