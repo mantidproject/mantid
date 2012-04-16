@@ -226,7 +226,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                              Description="How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", Description="Default=20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
-        outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
+        outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof', 'gsas and fullprof and pdfgetn']
         self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")
         self.declareProperty("FilterMinimumValue", 0.0, Description="Minimum log value for which to keep events.")
         self.declareProperty("FilterMaximumValue", 0.0, Description="Maximum log value for which to keep events.")
@@ -460,6 +460,7 @@ class SNSPowderReduction2(PythonAlgorithm):
             NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
             wksp.getRun()['gsas_monitor'] = 1
 
+        self._save(wksp, info, False, True)
         return wksp
 
     def _getinfo(self, wksp):
@@ -484,8 +485,16 @@ class SNSPowderReduction2(PythonAlgorithm):
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
         return self._config.getInfo(frequency, wavelength)
 
-    def _save(self, wksp, info, normalized):
+    def _save(self, wksp, info, normalized, pdfgetn):
         filename = os.path.join(self._outDir, str(wksp))
+        if pdfgetn:
+            if "pdfgetn" in self._outTypes:
+                pdfwksp = str(wksp)+"_norm"
+                SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
+                SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles="False", Append=False,
+                        MultiplyByBinWidth=False, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
+                mtd.deleteWorkspace(pdfwksp)
+            return # don't do the other bits of saving
         if "gsas" in self._outTypes:
             SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, 
                     MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
@@ -652,6 +661,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                                 vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,
                                    preserveEvents=False)
                         vanRun -= vbackRun
+                        workspacelist.append(str(vbackRun))
 
                     if HAVE_MPI:
                         if mpi.world.rank > 0:
@@ -703,10 +713,10 @@ class SNSPowderReduction2(PythonAlgorithm):
             # write out the files
             if HAVE_MPI:
                 if mpi.world.rank == 0:
-                    self._save(samRun, self._info, normalized)
+                    self._save(samRun, self._info, normalized, False)
                     samRun = str(samRun)
             else:
-                self._save(samRun, self._info, normalized)
+                self._save(samRun, self._info, normalized, False)
                 samRun = str(samRun)
             mtd.releaseFreeMemory()
 
