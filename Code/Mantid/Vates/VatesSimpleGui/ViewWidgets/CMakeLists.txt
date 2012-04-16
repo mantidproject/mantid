@@ -113,4 +113,4 @@ if( SQUISH_FOUND )
 
 endif()
 
-install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )
+install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
