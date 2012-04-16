@@ -1,3 +1,14 @@
+##########################################################################
+# Does the CPack configuration for Windows/NSIS
+#
+# Bundles python
+# Copies include directories
+# Copies scons
+# Copies files required for User Algorithms
+# Copies selected third party dlls accross
+# Sets up env variables, shortcuts and required folders post install and post uninstall.
+###########################################################################
+
 	#Windows CPACK specifics
 	set( CPACK_GENERATOR "NSIS" )
 	set( CPACK_SET_DESTDIR "ON") 
@@ -13,9 +24,6 @@
 	set_property(CACHE WINDOWS_DEPLOYMENT_TYPE PROPERTY STRINGS Release Debug)
 	mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 	
-	#TODO: Tidy this up by excluding .git as well as .svn!
-	#TODO check destinations are relative to the actual install location.
-	
 	#Manually place necessary files and directories
 	
 	#python bundle here.
@@ -24,12 +32,8 @@
 	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Scripts DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
 	install ( FILES ${CMAKE_LIBRARY_PATH}/Python27/python.exe ${CMAKE_LIBRARY_PATH}/Python27/python27.dll DESTINATION bin )
 
-	#TODO: remove old pyc files on uninstall
-	
 	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats DESTINATION plugins/qtplugins PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
 	install ( FILES ${CMAKE_LIBRARY_PATH}/qt.conf DESTINATION bin )
-	
-	#TODO: put these commands in the associated CMakeLists.
 	
 	#Handle includes
 	install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
