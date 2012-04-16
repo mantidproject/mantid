@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, uic, QtCore
 import sip
 import os
+import sys
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
@@ -154,15 +155,17 @@ class ReflData(object):
             Update skipped points for all cross-sections
         """
         low, high = self.get_skipped()
+        xmin = None
+        xmax = None
         
         # Get info from the OFF OFF cross-section
         if self._data[ReflData.OFF_OFF] is not None:
-            xmin, xmax = self._data[ReflData.OFF_OFF].get_skipped_range()
             self._data[ReflData.OFF_OFF].set_skipped_points(low, high)
+            xmin, xmax = self._data[ReflData.OFF_OFF].get_skipped_range()
             self._data[ReflData.OFF_OFF].set_range(xmin, xmax)        
         else:
             print "No Off-Off data to process"
-            return
+            return xmin, xmax
         
         for polarization in [ReflData.ON_OFF,
                              ReflData.OFF_ON,
@@ -170,6 +173,8 @@ class ReflData(object):
             if self._data[polarization] is not None:
                 self._data[polarization].set_skipped_points(low, high)
                 self._data[polarization].set_range(xmin, xmax)        
+    
+        return xmin, xmax
     
     def connect_to_scale(self, call_back):
         self._call_back = call_back
@@ -238,7 +243,7 @@ class StitcherWidget(BaseWidget):
         try:
             self._scale_data_sets()
         except:
-            mtd.sendLogMessage("Could not scale data")
+            mtd.sendLogMessage("Could not scale data\n%s" % sys.exc_value)
             
     def _pick_specular_ridge(self):
         from LargeScaleStructures import data_stitching
@@ -275,7 +280,7 @@ class StitcherWidget(BaseWidget):
             item.set_user_data(data)
 
             # Set skipped points for all cross-section
-            item.update_skipped()
+            xmin, xmax = item.update_skipped()
             
             if item.is_selected():
                 data.set_scale(item.get_scale())
@@ -290,6 +295,7 @@ class StitcherWidget(BaseWidget):
             s.append(data)
         
         if s.size()==0:
+            mtd.sendLogMessage("No data to scale")
             return
         
         s.set_reference(refID)
