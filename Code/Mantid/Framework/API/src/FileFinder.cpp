@@ -628,7 +628,7 @@ namespace Mantid
         }
         catch(std::invalid_argument&)
         {
-          g_log.error() << "Could not find file '" << filename << "'\n";
+          g_log.error() << "Could not find file" << filename << "'\n";
         }
       }
 
@@ -686,7 +686,7 @@ namespace Mantid
         g_log.notice() << "Unable to find files with extensions that are defined in the Facility.xml file" << "\n";
       }
 
-      g_log.notice() << "Unable to find files" << "\n";
+      g_log.notice() << "Unable to find file path for " << hint << "\n";
 
       return "";
     }

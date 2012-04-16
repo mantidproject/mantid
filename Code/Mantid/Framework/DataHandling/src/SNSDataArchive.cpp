@@ -77,11 +77,11 @@ namespace Mantid
           wsResult.append(&buff[0], n);
         } while (n == 300);
       } catch (ConnectionRefusedException &) {
-        g_log.error() << "Connection refused by prod.sns.gov\n";
+        g_log.information() << "Connection refused by prod.sns.gov\n";
         throw;
       } catch(Poco::IOException &e) {
         g_log.debug() << e.name() << " thrown.\n";
-        g_log.error() << e.message() << "\n";
+        g_log.information() << e.message() << "\n";
         throw;
       }
 
