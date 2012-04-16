@@ -28,6 +28,7 @@ set ( EXPORT_FILES
   src/Exports/NullValidator.cpp
   src/Exports/ListValidator.cpp
   src/Exports/ArrayLengthValidator.cpp
+  src/Exports/ArrayBoundedValidator.cpp
 )  
 
 set ( SRC_FILES

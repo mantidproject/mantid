@@ -78,6 +78,7 @@ set ( TEST_PY_FILES
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
   test/python/ArrayPropertyTest.py
+  test/python/ArrayBoundedValidatorTest.py
   test/python/ArrayLengthValidatorTest.py
   test/python/AxisTest.py
   test/python/BoundedValidatorTest.py
