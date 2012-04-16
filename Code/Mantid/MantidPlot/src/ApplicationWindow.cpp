@@ -6115,7 +6115,7 @@ void ApplicationWindow::loadDataFile()
      AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
      if( fnInfo.suffix() == "py") 
      { // We have a python file, just load it into script window
-       loadScript( fn, false, false, true );
+       loadScript( fn, true );
      }
      else if(mantidUI)
      {  // Run Load algorithm on file
@@ -16398,17 +16398,17 @@ void ApplicationWindow::cascade()
 
 ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
 {
-  return loadScript (fn, execute, quit, false);
+  return loadScript (fn, false);
 }
 
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool quit, bool existingProject )
+ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool existingProject )
 {
 #ifdef SCRIPTING_PYTHON
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   setScriptingLanguage("Python");
   restoreApplicationGeometry();
   bool oldScriptingWindow = scriptingWindow;
-  showScriptWindow(existingProject, quit);
+  showScriptWindow(existingProject, false);
   scriptingWindow->open(fn, existingProject && oldScriptingWindow );
   QApplication::restoreOverrideCursor();
   return this;
