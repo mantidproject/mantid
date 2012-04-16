@@ -1,0 +1,10 @@
+Instructions for creating autoreduce rpm package in your home area and installing the autoreduce package on SNS analysis machines:
+
+1. check out the latest mantid code
+2. go to the mantid project rpmbuild directory: 
+   cd $mantid_project/mantid/Code/Tools/AutoReduce/rpmbuild
+3. create an autoreduce rpm package in your home area: 
+   run ./make-autoreduce-rpm.sh
+4. log into your analysis machine
+5. install autoreduce script and libraries on analysis machines:
+   sudo rpm -i ~/rpmbuild/RPMS/x86_64/autoreduce-1-.1.x86_64.rpm
