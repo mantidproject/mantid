@@ -149,6 +149,28 @@ class ReflData(object):
         high = int(self._high_skip_ctrl.text())
         return low, high
     
+    def update_skipped(self):
+        """
+            Update skipped points for all cross-sections
+        """
+        low, high = self.get_skipped()
+        
+        # Get info from the OFF OFF cross-section
+        if self._data[ReflData.OFF_OFF] is not None:
+            xmin, xmax = self._data[ReflData.OFF_OFF].get_skipped_range()
+            self._data[ReflData.OFF_OFF].set_skipped_points(low, high)
+            self._data[ReflData.OFF_OFF].set_range(xmin, xmax)        
+        else:
+            print "No Off-Off data to process"
+            return
+        
+        for polarization in [ReflData.ON_OFF,
+                             ReflData.OFF_ON,
+                             ReflData.ON_ON]:
+            if self._data[polarization] is not None:
+                self._data[polarization].set_skipped_points(low, high)
+                self._data[polarization].set_range(xmin, xmax)        
+    
     def connect_to_scale(self, call_back):
         self._call_back = call_back
     
@@ -250,15 +272,11 @@ class StitcherWidget(BaseWidget):
             item = self._workspace_list[i]
             data = DataSet(item.name)
             data.load(True, True)
-            #xmin,xmax = data.get_range()
             item.set_user_data(data)
 
-            # Set skipped points
-            low, high = item.get_skipped()
-            data.set_skipped_points(low, high)
-            xmin, xmax = data.get_skipped_range()
-            data.set_range(xmin, xmax)
-
+            # Set skipped points for all cross-section
+            item.update_skipped()
+            
             if item.is_selected():
                 data.set_scale(item.get_scale())
                 refID = i

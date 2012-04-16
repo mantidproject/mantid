@@ -751,6 +751,7 @@ class DataReflWidget(BaseWidget):
                 self._summary.angle_offset_edit.setText(str(state.data_sets[0].angle_offset))
                 self._summary.angle_offset_error_edit.setText(str(state.data_sets[0].angle_offset_error))
 
+        self._update_scattering_angle()
         self._reset_warnings()
         
     def set_editing_state(self, state):
