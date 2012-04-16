@@ -85,7 +85,6 @@ set ( PY_FILES
   dlopen.py
   funcreturns.py
   plugins.py
-  validators.py
 )
 
 #############################################################################################

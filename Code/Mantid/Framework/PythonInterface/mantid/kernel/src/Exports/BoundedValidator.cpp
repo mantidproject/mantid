@@ -9,9 +9,9 @@ using namespace boost::python;
 namespace
 {
   /// A macro for generating exports for each type
-  #define EXPORT_BOUNDEDVALIDATOR(ElementType) \
+  #define EXPORT_BOUNDEDVALIDATOR(ElementType, prefix) \
     class_<BoundedValidator<ElementType>, bases<IValidator>, \
-           boost::noncopyable>("BoundedValidator_"#ElementType) \
+           boost::noncopyable>(#prefix"BoundedValidator") \
       .def(init<ElementType,ElementType>()) \
       .def("setLower", &BoundedValidator<ElementType>::setLower, "Set the lower bound") \
       .def("setUpper", &BoundedValidator<ElementType>::setUpper, "Set the upper bound" ) \
@@ -28,8 +28,7 @@ namespace
 
 void export_BoundedValidator()
 {
-  EXPORT_BOUNDEDVALIDATOR(double);
-  EXPORT_BOUNDEDVALIDATOR(int);
-  EXPORT_BOUNDEDVALIDATOR(long);
+  EXPORT_BOUNDEDVALIDATOR(double, Float);
+  EXPORT_BOUNDEDVALIDATOR(long, Int);
 }
 

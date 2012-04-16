@@ -30,6 +30,6 @@ namespace
 void export_ArrayBoundedValidator()
 {
   EXPORT_ARRAYBOUNDEDVALIDATOR(double, Float);
-  EXPORT_ARRAYBOUNDEDVALIDATOR(int, Int);
+  EXPORT_ARRAYBOUNDEDVALIDATOR(long, Int);
 }
 

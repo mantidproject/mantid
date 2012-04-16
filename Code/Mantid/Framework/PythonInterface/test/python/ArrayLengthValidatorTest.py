@@ -57,8 +57,6 @@ class ArrayLengthValidatorTest(unittest.TestCase):
         validator.clearLengthMax()
         self.assertFalse(validator.hasMinLength())
         self.assertFalse(validator.hasMaxLength())
-        
-
 
     def test_Validator_on_ArrayProperty_accepts_array_of_specified_length(self):
         fixedlength = 6

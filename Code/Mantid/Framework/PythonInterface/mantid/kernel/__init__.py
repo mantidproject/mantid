@@ -17,5 +17,4 @@ from _kernel import *
 dlopen.restore_flags(flags)
 ###############################################################################
 
-from validators import *
 from _aliases import *

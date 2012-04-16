@@ -37,7 +37,7 @@ namespace
 void export_ArrayLengthValidator()
 {
   EXPORT_LENGTHVALIDATOR(double, Float);
-  EXPORT_LENGTHVALIDATOR(int, Int);
+  EXPORT_LENGTHVALIDATOR(long, Int);
   EXPORT_LENGTHVALIDATOR(std::string, String);
 }
 
