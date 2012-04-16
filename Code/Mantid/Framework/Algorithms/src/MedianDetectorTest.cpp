@@ -127,7 +127,7 @@ namespace Mantid
       std::vector<double>::iterator medit;
       for (medit=median.begin();medit!=median.end();++medit)
       {
-        g_log.information() << "Median value = " << (*medit) << "\n";
+        g_log.debug() << "Median value = " << (*medit) << "\n";
       }
       // 2. Mask outliers
       int numFailed = maskOutliers(median, countsWS,specmap);
