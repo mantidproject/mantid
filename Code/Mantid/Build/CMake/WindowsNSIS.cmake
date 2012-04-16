@@ -80,6 +80,13 @@
             Push \\\"$INSTDIR\\\\bin\\\"
             Call EnvVarUpdate
             Pop  \\\$0
+			
+		    Push \\\"PV_PLUGIN_PATH\\\"
+            Push \\\"A\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
+            Call EnvVarUpdate
+            Pop  \\\$0
 		
 		    CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
 		
@@ -100,6 +107,13 @@
 		    Push \\\"R\\\"
             Push \\\"HKCU\\\"
             Push \\\"$INSTDIR\\\\bin\\\"
+            Call un.EnvVarUpdate
+            Pop  \\\$0
+
+		    Push \\\"PV_PLUGIN_PATH\\\"
+            Push \\\"R\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
             Call un.EnvVarUpdate
             Pop  \\\$0
 		
