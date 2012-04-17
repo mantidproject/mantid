@@ -370,6 +370,7 @@ void SANSRunWindow::connectAnalysDetSignals()
 
   connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(handleInstrumentChange()));
+
   connect(m_uiForm.transFit_ck, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
   updateTransInfo(m_uiForm.transFit_ck->state());
 
@@ -604,6 +605,11 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
 */
 bool SANSRunWindow::loadUserFile()
 {
+  const std::string facility = ConfigService::Instance().getFacility().name();
+  if (facility != "ISIS"){
+    return false;
+  }
+
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if( filetext.isEmpty() )
   {
@@ -2412,6 +2418,8 @@ void SANSRunWindow::handleShowMaskButtonClick()
   m_uiForm.showMaskBtn->setEnabled(true);
   m_uiForm.showMaskBtn->setText("Display mask");
 }
+
+
 /** Update the GUI and the Python objects with the instrument selection
  * @throw runtime_error if the instrument doesn't have exactly two detectors 
  */
@@ -2419,9 +2427,14 @@ void SANSRunWindow::handleInstrumentChange()
 {
   const std::string facility = ConfigService::Instance().getFacility().name();
   if (facility != "ISIS"){
-    QMessageBox::critical(this, "Unsupported facility", "Only the ISIS facility is supported by this interface.\nSelect ISIS as your default facility to continue.");
+    QMessageBox::critical(this, "Unsupported facility", QString("Only the ISIS facility is supported by this interface.\n")
+                         + "Select ISIS as your default facility in View->Preferences...->Mantid to continue.");
     return;
   }
+
+  // need this if facility changed to force update of technique at this point
+  m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+
   //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
   const QString instClass(getInstrumentClass());
   QString pyCode("if i.ReductionSingleton().get_instrument() != '");
