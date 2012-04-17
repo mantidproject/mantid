@@ -70,7 +70,7 @@ class DLLExport IValidator
 {
 public:
   /// Constructor
-  IValidator()
+  IValidator() : g_log(Logger::get("IValidator"))
   {}
 
   ///virtual Destructor
@@ -159,7 +159,7 @@ private:
     return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
   }
 
-  static Logger & g_log;
+  Logger & g_log;
 };
 
 } // namespace Kernel
