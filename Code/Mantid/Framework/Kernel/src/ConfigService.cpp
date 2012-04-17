@@ -1741,18 +1741,27 @@ bool ConfigServiceImpl::quickParaViewCheck() const
 
   try
   {
+    //Try to run "paraview -V", which will succeed if ParaView is installed.
     std::string cmd("paraview");
     std::vector<std::string> args;
     args.push_back("-V");
     Poco::Pipe outPipe;
     Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, 0);
-    isAvailable = true;
-    this->g_log.information("ParaView is available");
+    const int rc = ph.wait();
+    if(rc == 1)
+    {
+      isAvailable = true;
+      this->g_log.notice("ParaView is available");
+    }
+    else
+    {
+      this->g_log.notice("ParaView is not available");
+    }
   }
-  catch(Poco::RuntimeException& e)
+  catch(Poco::SystemException &e)
   {
-    g_log.information(e.what());
-    this->g_log.information("ParaView is not available");
+    g_log.notice(e.what());
+    this->g_log.notice("ParaView is not available");
   }
   return isAvailable; 
 }
