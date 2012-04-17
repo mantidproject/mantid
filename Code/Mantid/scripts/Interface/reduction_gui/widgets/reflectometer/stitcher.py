@@ -146,8 +146,14 @@ class ReflData(object):
             return self._data[ReflData.OFF_OFF]
     
     def get_skipped(self):
-        low = int(self._low_skip_ctrl.text())
-        high = int(self._high_skip_ctrl.text())
+        low_str = str(self._low_skip_ctrl.text())
+        low = 0
+        high = 0
+        if len(low_str.strip())>0:
+            low = int(low_str)
+        high_str = str(self._high_skip_ctrl.text())
+        if len(high_str.strip())>0:
+            high = int(high_str)
         return low, high
     
     def update_skipped(self):
@@ -217,6 +223,21 @@ class StitcherWidget(BaseWidget):
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
         
+        if self._settings.instrument_name == "REFL":
+            self._content.ref_pol_label.hide()
+            self._content.off_off_radio.hide()
+            self._content.on_off_radio.hide()
+            self._content.off_on_radio.hide()
+            self._content.on_on_radio.hide()
+        else:
+            self.radio_group = QtGui.QButtonGroup()
+            self.radio_group.addButton(self._content.off_off_radio)
+            self.radio_group.addButton(self._content.off_on_radio)
+            self.radio_group.addButton(self._content.on_off_radio)
+            self.radio_group.addButton(self._content.on_on_radio)
+            self.radio_group.setExclusive(True)
+            
+            
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
         self._workspace_list.append(entry)
@@ -243,7 +264,12 @@ class StitcherWidget(BaseWidget):
         try:
             self._scale_data_sets()
         except:
-            mtd.sendLogMessage("Could not scale data\n%s" % sys.exc_value)
+            message = "Could not scale data\n  %s" % sys.exc_value
+            if self._content.scale_to_one_chk.isChecked():
+                message += "\n\nCheck your Q range near the critical edge"
+            QtGui.QMessageBox.warning(self, 
+                "Error scaling data", 
+                message) 
             
     def _pick_specular_ridge(self):
         from LargeScaleStructures import data_stitching
@@ -273,6 +299,16 @@ class StitcherWidget(BaseWidget):
         
         s = Stitcher()
         refID = 0
+        
+        # Get reference cross-section
+        ref_pol = ReflData.OFF_OFF
+        if self._content.off_on_radio.isChecked():
+            ref_pol = ReflData.OFF_ON
+        elif self._content.on_off_radio.isChecked():
+            ref_pol = ReflData.ON_OFF
+        elif self._content.on_on_radio.isChecked():
+            ref_pol = ReflData.ON_ON
+        
         for i in range(len(self._workspace_list)):
             item = self._workspace_list[i]
             data = DataSet(item.name)
@@ -291,8 +327,13 @@ class StitcherWidget(BaseWidget):
                     data.set_scale(scale)
                     item.set_scale(scale)
             
-            
-            s.append(data)
+            ref_data = item.get_user_data(ref_pol)
+            if ref_data is None:
+                QtGui.QMessageBox.warning(self, 
+                    "Invalid choice of reference cross-section", 
+                    "The selected cross-section is empty, please select another one") 
+                return
+            s.append(ref_data)
         
         if s.size()==0:
             mtd.sendLogMessage("No data to scale")
@@ -302,7 +343,7 @@ class StitcherWidget(BaseWidget):
         s.compute()
         
         for item in self._workspace_list:
-            data = item.get_user_data()
+            data = item.get_user_data(ref_pol)
             data.apply_scale()
             scale = data.get_scale()
             item.set_scale(scale)
