@@ -1462,7 +1462,7 @@ class PyAlgLoader(object):
                os.path.getmtime(compiled) >= os.path.getmtime(original):
                 return
             try:               
-                if self._containsPyAlgorithm(original):
+                if self._containsOldAPIAlgorithm(original):
                     # Temporarily insert into path
                     sys.path.insert(0, file_path)
                     if modname in sys.modules:
@@ -1484,7 +1484,7 @@ class PyAlgLoader(object):
             
         return changes
 
-    def _containsPyAlgorithm(self, modfilename):
+    def _containsOldAPIAlgorithm(self, modfilename):
         file = open(modfilename,'r')
         line_count = 0
         alg_found = False
@@ -1492,6 +1492,9 @@ class PyAlgLoader(object):
             line = file.readline()
             # EOF
             if line == '':
+                alg_found = False
+                break
+            if 'mantid' in line and 'mantidsimple' not in line:
                 alg_found = False
                 break
             if line.rfind('PythonAlgorithm') >= 0:

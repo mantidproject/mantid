@@ -51,8 +51,9 @@ def load(path):
     loaded = {}
     if _os.path.isfile(path) and path.endswith('.py'): # Single file
         try:
-            name, module = load_plugin(path)
-            loaded[name] = module
+            if contains_newapi_algorithm(path):
+                name, module = load_plugin(path)
+                loaded[name] = module
         except Exception, exc:
             logger.warning("Failed to load plugin %s. Error: %s" % (path, str(exc)))
     elif _os.path.isdir(path): # Directory
@@ -87,10 +88,39 @@ def load_plugin(plugin_path):
         Load a plugin and return the name & module object
         
          @param plugin_path :: A path that must should point
-         to a .py file that will be loaded. An ValueError is raised if
+         to a .py file that will be loaded. A ValueError is raised if
          path is not a valid plugin path. Any exceptions raised by the 
          import are passed to the caller
     """
     loader = PluginLoader(plugin_path)
     module = loader.run()
     return module.__name__, module
+
+def contains_newapi_algorithm(filename):
+    """
+        Inspects the given file to check whether
+        it contains an algorithm written with this API.
+        The check is simple. If either the import
+        MantidFramework or mantidsimple are discovered then
+        it will not be considered a new API algorithm
+        
+        @param filename :: A full file path pointing to a python file
+        @returns True if a python algorithm written with the new API
+        has been found.
+    """
+    maxlines_to_check = 25
+    file = open(filename,'r')
+    line_count = 0
+    alg_found = True
+    while line_count < maxlines_to_check: 
+        line = file.readline()
+        # EOF
+        if line == '':
+            alg_found = True
+            break
+        if 'MantidFramework' in line or 'mantidsimple' in line:
+            alg_found = False
+            break
+        line_count += 1
+    file.close()
+    return alg_found
