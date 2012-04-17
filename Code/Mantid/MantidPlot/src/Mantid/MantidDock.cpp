@@ -7,6 +7,7 @@
 #include <MantidAPI/IEventWorkspace.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/IMDWorkspace.h>
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidQtAPI/InterfaceManager.h>
@@ -324,7 +325,12 @@ void MantidDockWidget::createWorkspaceMenuActions()
   connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
 
   m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertToMatrixWorkspace()));
+
+  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertMDHistoToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
+  connect(m_convertMDHistoToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertMDHistoToMatrixWorkspace()));
 }
 
 /**
@@ -894,6 +900,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showMDPlot); // A plot of intensity vs bins
   menu->addAction(m_showListData); // Show data in table
+  menu->addAction(m_convertMDHistoToMatrixWorkspace);
   menu->addAction(m_showLogs);
 }
 
@@ -1403,6 +1410,14 @@ void MantidDockWidget::treeSelectionChanged()
 void MantidDockWidget::convertToMatrixWorkspace()
 {
   m_mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace",-1);
+}
+
+/**
+ * Convert selected MDHistoWorkspace to a MatrixWorkspace.
+ */
+void MantidDockWidget::convertMDHistoToMatrixWorkspace()
+{
+  m_mantidUI->executeAlgorithm("ConvertMDHistoToMatrixWorkspace",-1);
 }
 
 //------------ MantidTreeWidget -----------------------//

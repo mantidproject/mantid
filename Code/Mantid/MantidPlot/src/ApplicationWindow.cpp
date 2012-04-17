@@ -8045,6 +8045,14 @@ void ApplicationWindow::selectMultiPeak(MultiLayer* plot, bool showFitPropertyBr
     {
       //Called when setting up usual peakPickerTool
       PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, showFitPropertyBrowser);
+      if ( !ppicker->isInitialized() )
+      {
+        QMessageBox::warning(this,tr("MantidPlot - Warning"),
+            tr("This functionality is not available for the underlying data."));
+        delete ppicker;
+        btnPointer->setOn(true);
+        return;
+      }
       if (xmin != xmax)
       {
         mantidUI->fitFunctionBrowser()->setStartX(xmin);
