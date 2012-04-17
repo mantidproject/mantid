@@ -99,7 +99,6 @@ void RefReduction::init()
   setPropertySettings("DetectorAngle", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
   setPropertySettings("DetectorAngle0", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
   setPropertySettings("DirectPixel", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
-  setPropertySettings("PolarizedData", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
 
   declareProperty("AngleOffset", EMPTY_DBL());
   setPropertySettings("AngleOffset", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_L") );
