@@ -57,5 +57,10 @@ void export_leaf_classes()
         (arg("name"), arg("defaultValue"), arg("direction")=Direction::Input),
          "Declares a named property where the type is taken from the type "
          "of the defaultValue and mapped to an appropriate C++ type")
+
+    .def("getLogger", &AlgorithmWrapper::getLogger, return_value_policy<reference_existing_object>(),
+         "Returns a reference to this algorithm's logger")
+    .def("log", &AlgorithmWrapper::getLogger, return_value_policy<reference_existing_object>(),
+         "Returns a reference to this algorithm's logger") // Traditional name
   ;
 }
