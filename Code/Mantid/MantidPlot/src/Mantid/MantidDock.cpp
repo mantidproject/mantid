@@ -10,7 +10,6 @@
 #include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidQtAPI/InterfaceManager.h>
-#include <MantidDataObjects/MaskWorkspace.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
@@ -44,7 +43,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
 
 Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get("mantidDockWidget");
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
@@ -694,17 +692,7 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
     excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
   }
-  else
-  {
-    if (workspace->id() == "MaskWorkspace")
-    {
-      MaskWorkspace_sptr maskWS = boost::dynamic_pointer_cast<MaskWorkspace>(workspace);
-      data_item = new MantidTreeWidgetItem(QStringList("Masked: "+ QLocale(QLocale::English).toString(double(maskWS->getNumberMasked()), 'd', 0)), m_tree);
-      data_item->setFlags(Qt::NoItemFlags);
-      excludeItemFromSort(data_item);
-      ws_item->addChild(data_item);
-    }
-  }
+
 
   //Extra stuff for EventWorkspace
   Mantid::API::IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace> ( workspace );
