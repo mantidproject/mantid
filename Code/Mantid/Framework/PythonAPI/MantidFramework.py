@@ -1423,10 +1423,6 @@ class PyAlgLoader(object):
         if len(dir_list) == 0: 
             mtd.sendLogMessage('PyAlgLoader.load_modules: no python algorithm directory found')
             return
-
-        # Disable factory updates while everything is (re)imported
-        mtd._observeAlgFactoryUpdates(False,False)
-        
         # Check defined Python algorithm directories and load any modules
         changes = False
         for path in dir_list:
@@ -1434,10 +1430,6 @@ class PyAlgLoader(object):
                 continue
             if self._importAlgorithms(path, refresh):
                 changes = True
-
-        # Now connect the relevant signals to monitor for algorithm factory updates
-        mtd._observeAlgFactoryUpdates(True, (refresh and changes))
-
 #
 # ------- Private methods --------------
 #
