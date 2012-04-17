@@ -15,7 +15,7 @@ namespace Kernel
   {
     /// Forward declare checking function
     template<typename T>
-    bool checkIsEmpty(const T &);
+    DLLExport bool checkIsEmpty(const T &);
 
     /// Specialization for any vector type
     template<typename T>
