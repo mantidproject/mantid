@@ -9,7 +9,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/bases.hpp>
-#include <boost/python/args.hpp>
 #include <boost/python/overloads.hpp>
 
 using Mantid::API::Algorithm;
