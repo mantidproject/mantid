@@ -1477,24 +1477,13 @@ class PyAlgLoader(object):
 
     def _containsOldAPIAlgorithm(self, modfilename):
         file = open(modfilename,'r')
-        line_count = 0
-        alg_found = False
-        while line_count < self.__CHECKLINES__:
-            line = file.readline()
-            # EOF
-            if line == '':
+        alg_found = True
+        for line in reversed(file.readlines()):
+            if 'registerAlgorithm' in line:
                 alg_found = False
                 break
-            if 'mantid' in line and 'mantidsimple' not in line:
-                alg_found = False
-                break
-            if line.rfind('PythonAlgorithm') >= 0:
-                alg_found = True
-                break
-            line_count += 1
         file.close()
         return alg_found
-    
 #-------------------------------------------------------------------------------------------
 ##
 # PyAlgorithm class

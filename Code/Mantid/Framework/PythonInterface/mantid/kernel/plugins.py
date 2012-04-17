@@ -108,19 +108,12 @@ def contains_newapi_algorithm(filename):
         @returns True if a python algorithm written with the new API
         has been found.
     """
-    maxlines_to_check = 25
+    
     file = open(filename,'r')
-    line_count = 0
     alg_found = True
-    while line_count < maxlines_to_check: 
-        line = file.readline()
-        # EOF
-        if line == '':
-            alg_found = True
-            break
-        if 'MantidFramework' in line or 'mantidsimple' in line:
+    for line in reversed(file.readlines()):
+        if 'mtd.registerPyAlgorithm' in line:
             alg_found = False
             break
-        line_count += 1
     file.close()
     return alg_found
