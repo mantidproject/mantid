@@ -499,8 +499,9 @@ This is a windows only feature. the PATH enviromental variable can be set at run
 void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
 {
 #ifdef _WIN32
-  if(this->hasVatesAvailable())
+  if(this->hasVatesAvailable())//TODO: This condition is redundant since Vates will be shipped by default.
   {
+    Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
     //Early check of execute and quit command arguments used by system tests.
     QString str;
     bool b_skipDialog = false;
@@ -513,10 +514,13 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
       }
     }
 
+    //If the ignore property exists and is set to true, then skip the dialog.
+    const std::string paraviewIgnoreProperty = "paraview.ignore";
+    b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString(confService.getString(paraviewIgnoreProperty).c_str()).toInt() == true;
+
     if(this->hasParaviewPath())
     {
       //Already have a path in the properties file, just apply it.
-      Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
       std::string path = confService.getString("paraview.path");
       confService.setParaviewLibraryPath(path);
     }

@@ -58,16 +58,17 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
+  Kernel::ConfigServiceImpl& config = Kernel::ConfigService::Instance();
   // Load plugin libraries if possible
-  std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
+  std::string pluginDir = config.getString("plugins.directory");
   if (pluginDir.length() > 0)
   {
     Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
   }
   // Load Paraview plugin libraries if possible
-  if(Kernel::ConfigService::Instance().quickParaViewCheck())
+  if(config.quickParaViewCheck())
   {
-    const std::string pvPluginDir = Kernel::ConfigService::Instance().getString("pvplugins.directory");
+    const std::string pvPluginDir = config.getString("pvplugins.directory");
     if (pvPluginDir.length() > 0)
     {
       this->g_log.information("Loading PV plugin libraries");

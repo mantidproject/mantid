@@ -42,7 +42,7 @@ void SetUpParaview::initLayout()
   connect(m_uiForm.btn_set, SIGNAL(clicked()), this, SLOT(onSet()));
   connect(m_uiForm.btn_cancel, SIGNAL(clicked()), this, SLOT(reject()));
   connect(m_uiForm.btn_help, SIGNAL(clicked()), this, SLOT(onHelp()));
-  
+  connect(m_uiForm.btn_ignore_paraview, SIGNAL(clicked()), this, SLOT(onIgnoreHenceforth()));
 }
 
 ///On help requested.
@@ -56,21 +56,22 @@ void SetUpParaview::onHelp()
 void SetUpParaview::onSet()
 {
   ConfigServiceImpl& config = ConfigService::Instance();
-  
-  std::cout << "getting location" << m_candidateLocation.toStdString() << std::endl;
   config.setParaviewLibraryPath(m_candidateLocation.toStdString());
-
-  std::cout << "getting paraview path" << std::endl;
   config.setString("paraview.path", m_candidateLocation.toStdString());
-
-  std::cout << "getting file name" << std::endl;
   std::string filename = config.getUserFilename();
   //Save the result so that on the next start up we don't have to bother the user.
-
-  std::cout << "saving" << std::endl;
   config.saveConfig(filename);
+  this->close();
+}
 
-  std::cout << "closing" << std::endl;
+/// Event handler for the ignore paraview henceforth event.
+void SetUpParaview::onIgnoreHenceforth()
+{
+  ConfigServiceImpl& config = ConfigService::Instance();
+  config.setString("paraview.ignore", QString::number(true).toStdString());
+  std::string filename = config.getUserFilename();
+  //Save the result so that on the next start up we don't have to bother the user.
+  config.saveConfig(filename);
   this->close();
 }
 

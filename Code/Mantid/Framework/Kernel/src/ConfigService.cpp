@@ -1730,12 +1730,22 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 }
 
 /*
-Quick check to determine if paraview is installed. We make the assumption 
+Checks to see whether paraview usage is explicitly ignored in the property file then, 
+quick check to determine if paraview is installed. We make the assumption 
 that if the executable paraview binary is on the path that the paraview libraries 
 will also be available on the library path, or equivalent.
+@return True if paraview is available or not disabled.
 */
 bool ConfigServiceImpl::quickParaViewCheck() const
 {
+  const std::string paraviewIgnoreProperty = "paraview.ignore";
+  const bool ignoreParaview = hasProperty(paraviewIgnoreProperty) && atoi(getString(paraviewIgnoreProperty).c_str());
+  if(ignoreParaview)
+  {
+    this->g_log.information("Ignoring ParaView");
+    return false;
+  }
+  
   this->g_log.information("Checking for ParaView");
   bool isAvailable = false;
 

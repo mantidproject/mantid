@@ -24,6 +24,7 @@ private slots:
   void onChoose();
   void onSet();
   void onHelp();
+  void onIgnoreHenceforth();
 private:
   Ui::SetUpParaview m_uiForm;
   QString m_candidateLocation;
