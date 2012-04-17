@@ -4,6 +4,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -111,12 +112,15 @@ namespace Mantid
        */
       ElementType_sptr extractValue(const boost::any & value) const
       {
+        g_log.debug() << "TypedValidator<boost::shared_ptr<T>>::extractValue. Value typeid " << value.type().name() << "\n";
         if( value.type() == typeid(DataItem_sptr) )
         {
+          g_log.debug() << "TypedValidator<boost::shared_ptr<T>>::extractValue. Typeid is DataItem_sptr\n";
           return extractFromDataItem(value);
         }
         else
         {
+          g_log.debug() << "TypedValidator<boost::shared_ptr<T>>::extractValue. Typeid is not a DataItem_sptr\n";
           return extractFromSharedPtr(value);
         }
       }
@@ -152,7 +156,14 @@ namespace Mantid
           throw std::invalid_argument("Value was not a shared_ptr type");
         }
       }
+
+      /// Logger
+      static Logger & g_log;
     };
+
+    /// Initialize logger
+    template<typename T>
+    Logger & TypedValidator<boost::shared_ptr<T> >::g_log = Logger::get("TypedValidator");
   }
 }
 

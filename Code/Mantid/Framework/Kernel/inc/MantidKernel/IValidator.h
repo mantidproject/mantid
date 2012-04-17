@@ -85,6 +85,7 @@ public:
   template <typename TYPE>
   std::string isValid(const TYPE &value) const
   {
+    g_log.debug() << "IValidator::isValid -  Running check for value with typeid " << typeid(value).name() << "\n"; 
     return runCheck(value, IsPtrType<TYPE>());
   }
 
@@ -123,6 +124,7 @@ private:
   template<typename T>
   std::string runCheck(const T & value, const boost::false_type &) const
   {
+    g_log.debug() << "IValidator::runCheck - Type is not a pointer type.\n";
     const T *valuePtr = &value; // Avoid a copy by storing the pointer in the any holder
     return check(boost::any(valuePtr));
   }
@@ -133,6 +135,7 @@ private:
   template<typename T>
   std::string runCheck(const T & value, const boost::true_type &) const
   {
+    g_log.debug() << "IValidator::runCheck - Type is a pointer type\n";
     return runCheckWithDataItemPtr(value, boost::is_convertible<T, DataItem_sptr>());
   }
   /** Calls the validator for a pointer type that is NOT convertible to DataItem_sptr
@@ -142,6 +145,7 @@ private:
   template<typename T>
   std::string runCheckWithDataItemPtr(const T & value, const boost::false_type &) const
   {
+    g_log.debug() << "IValidator::runCheck - Type is not a DataItem_sptr\n";
     return check(boost::any(value));
   }
   /** Calls the validator for a pointer type that IS convertible to DataItem_sptr
@@ -151,9 +155,11 @@ private:
   template<typename T>
   std::string runCheckWithDataItemPtr(const T & value, const boost::true_type &) const
   {
+    g_log.debug() << "IValidator::runCheck - Type is a DataItem_sptr\n"; 
     return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
   }
 
+  static Logger & g_log;
 };
 
 } // namespace Kernel
