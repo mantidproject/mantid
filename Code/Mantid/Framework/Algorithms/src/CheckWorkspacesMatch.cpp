@@ -16,7 +16,6 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include <sstream>
 
 namespace Mantid
@@ -134,8 +133,8 @@ void CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> 
 
 void CheckWorkspacesMatch::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace1","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("Workspace1","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("Workspace2","",Direction::Input));
 
   declareProperty("Tolerance",0.0, "The maximum amount by which values may differ between the workspaces.");
   
@@ -170,130 +169,11 @@ void CheckWorkspacesMatch::exec()
 ///Perform the comparison
 void CheckWorkspacesMatch::doComparison()
 {
-  Workspace_sptr w1 = getProperty("Workspace1");
-  Workspace_sptr w2 = getProperty("Workspace2");
+  MatrixWorkspace_const_sptr ws1 = getProperty("Workspace1");
+  MatrixWorkspace_const_sptr ws2 = getProperty("Workspace2");
+
   // Check that both workspaces are the same type
   bool checkType = getProperty("CheckType");
-  PeaksWorkspace_sptr tws1, tws2;
-  tws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
-  tws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
-  if (checkType)
-  {
-    if ((tws1 && !tws2) ||(!tws1 && tws2))
-    {
-      result = "One workspace is an PeaksWorkspace and the other is not.";
-      return;
-    }
-  }
-  // Check some event-based stuff
-  if (tws1 && tws2)
-  {
-  // Check some table-based stuff
-    if (tws1->getNumberPeaks() != tws2->getNumberPeaks())
-    {
-      result = "Mismatched number of rows.";
-      return;
-    }
-    if (tws1->columnCount() != tws2->columnCount())
-    {
-      result = "Mismatched number of columns.";
-      return;
-    }
-    const double tolerance = getProperty("Tolerance");
-    for (int i =0; i<tws1->getNumberPeaks(); i++)
-    {
-      Peak & peak1 = tws1->getPeaks()[i];
-      Peak & peak2 = tws2->getPeaks()[i];
-      for (size_t j =0; j<tws1->columnCount(); j++)
-      {
-        boost::shared_ptr<const API::Column> col = tws1->getColumn(j);
-        std::string name = col->name();
-        double s1 = 0.0;
-        double s2 = 0.0;
-        if (name == "runnumber")
-        {
-          s1 = double(peak1.getRunNumber());
-          s2 = double(peak2.getRunNumber());
-        }
-        else if (name == "detid")
-        {
-          s1 = double(peak1.getDetectorID());
-          s2 = double(peak2.getDetectorID());
-        }
-        else if (name == "h")
-        {
-          s1 = peak1.getH();
-          s2 = peak2.getH();
-        }
-        else if (name == "k")
-        {
-          s1 = peak1.getK();
-          s2 = peak2.getK();
-        }
-        else if (name == "l")
-        {
-          s1 = peak1.getL();
-          s2 = peak2.getL();
-        }
-        else if (name == "wavelength")
-        {
-          s1 = peak1.getWavelength();
-          s2 = peak2.getWavelength();
-        }
-        else if (name == "energy")
-        {
-          s1 = peak1.getInitialEnergy();
-          s2 = peak2.getInitialEnergy();
-        }
-        else if (name == "tof")
-        {
-          s1 = peak1.getTOF();
-          s2 = peak2.getTOF();
-        }
-        else if (name == "dspacing")
-        {
-          s1 = peak1.getDSpacing();
-          s2 = peak2.getDSpacing();
-        }
-        else if (name == "intens")
-        {
-          s1 = peak1.getIntensity();
-          s2 = peak2.getIntensity();
-        }
-        else if (name == "sigint")
-        {
-          s1 = peak1.getSigmaIntensity();
-          s2 = peak2.getSigmaIntensity();
-        }
-        else if (name == "bincount")
-        {
-          s1 = peak1.getBinCount();
-          s2 = peak2.getBinCount();
-        }
-        else if (name == "row")
-        {
-          s1 = peak1.getRow();
-          s2 = peak2.getRow();
-        }
-        else if (name == "col")
-        {
-          s1 = peak1.getCol();
-          s2 = peak2.getCol();
-        }
-        if (std::abs(s1 - s2) > tolerance)
-        {
-          g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
-          result = "Data mismatch";
-          return;
-        }
-      }
-    }
-    return;
-  }
-  MatrixWorkspace_const_sptr ws1, ws2;
-  ws1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w1);
-  ws2 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w2);
-
   EventWorkspace_const_sptr ews1, ews2;
   ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
   ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
@@ -308,6 +188,7 @@ void CheckWorkspacesMatch::doComparison()
 
   size_t numhist = ws1->getNumberHistograms();
 
+  // Check some event-based stuff
   if (ews1 && ews2)
   {
     prog = new Progress(this, 0.0, 1.0, numhist*5);
