@@ -322,7 +322,7 @@ class SNSPowderReduction2(PythonAlgorithm):
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
-            temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
+            temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent, filterBadPulsesOverride)
             if HAVE_MPI and len(strategy) == 1:
                 alg = GatherWorkspaces(InputWorkspace=temp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
