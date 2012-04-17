@@ -18,7 +18,7 @@ namespace Mantid
        * @return True if the string is considered empty
        */
       template<>
-      bool checkIsEmpty(const std::string & value)
+      DLLExport bool checkIsEmpty(const std::string & value)
       {
         return value.empty();
       }
@@ -28,7 +28,7 @@ namespace Mantid
        * @return True if the value is considered empty, see EmptyValues.h
        */
       template<>
-      bool checkIsEmpty(const double & value)
+      DLLExport bool checkIsEmpty(const double & value)
       {
         if( std::fabs(value - Mantid::EMPTY_DBL()) < 1e-08 ) return true;
         else return false;
@@ -39,7 +39,7 @@ namespace Mantid
        * @return True if the value is considered empty, see EmptyValues.h
        */
       template<>
-      bool checkIsEmpty(const int & value)
+      DLLExport bool checkIsEmpty(const int & value)
       {
         return (value == Mantid::EMPTY_INT());
       }
@@ -49,7 +49,7 @@ namespace Mantid
        * @return True if the value is considered empty, see EmptyValues.h
        */
       template<>
-      bool checkIsEmpty(const long & value)
+      DLLExport bool checkIsEmpty(const long & value)
       {
         return (value == Mantid::EMPTY_LONG());
       }
