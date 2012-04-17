@@ -14,6 +14,7 @@
 
 using Mantid::API::Algorithm;
 using Mantid::PythonInterface::AlgorithmWrapper;
+using Mantid::Kernel::Direction;
 using namespace boost::python;
 
 namespace
@@ -41,20 +42,20 @@ void export_leaf_classes()
   // Export the algorithm wrapper that boost.python makes look like a PythonAlgorithm
   class_<AlgorithmWrapper, bases<Algorithm>, boost::noncopyable>("PythonAlgorithm", "Base class for all Python algorithms")
     .def("declareProperty", (declarePropertyType1)&AlgorithmWrapper::declareProperty,
-          declarePropertyType1_Overload(args("prop", "doc")))
+          declarePropertyType1_Overload((arg("prop"), arg("doc") = "")))
 
     .def("declareProperty", (declarePropertyType2)&AlgorithmWrapper::declareProperty,
-          declarePropertyType2_Overload(args("name", "defaultValue", "validator=None","doc=''","direction=Direction.Input"),
+          declarePropertyType2_Overload((arg("name"), arg("defaultValue"), arg("validator")=object(), arg("doc")="",arg("direction")=Direction::Input),
                                         "Declares a named property where the type is taken from "
                                         "the type of the defaultValue and mapped to an appropriate C++ type"))
 
     .def("declareProperty", (declarePropertyType3)&AlgorithmWrapper::declareProperty,
-         declarePropertyType3_Overload(args("name", "defaultValue", "doc","direction=Direction.Input"),
+         declarePropertyType3_Overload((arg("name"), arg("defaultValue"), arg("doc")="",arg("direction")=Direction::Input),
                                        "Declares a named property where the type is taken from the type "
                                        "of the defaultValue and mapped to an appropriate C++ type"))
 
     .def("declareProperty", (declarePropertyType4)&AlgorithmWrapper::declareProperty,
-         args("name", "defaultValue", "direction"),
+        (arg("name"), arg("defaultValue"), arg("direction")=Direction::Input),
          "Declares a named property where the type is taken from the type "
          "of the defaultValue and mapped to an appropriate C++ type")
   ;

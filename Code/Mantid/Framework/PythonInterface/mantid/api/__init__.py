@@ -30,13 +30,3 @@ import _adsimports
 # Attach operators to workspaces 
 ###############################################################################
 import _workspaceops
-
-###############################################################################
-# Starting the FrameworkManager loads the C++ plugin libraries
-# we need to load in the Python plugins as well
-###############################################################################
-import mantid.kernel.plugins as _plugins
-# Algorithms
-from mantid.kernel import config as _config
-# Disabled for the time being as all algorithms are of the old kind
-#_plugins.load(_config['pythonalgorithm.directories']) 
