@@ -540,12 +540,12 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace)
 double RefReduction::calculateAngleREFL(MatrixWorkspace_sptr workspace)
 {
   Mantid::Kernel::Property* prop = workspace->run().getProperty("ths");
-  Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-  const double ths = *dp;
+  Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+  const double ths = dp->getStatistics().mean;
 
   prop = workspace->run().getProperty("tthd");
-  dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-  const double tthd = *dp;
+  dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+  const double tthd = dp->getStatistics().mean;
 
   double offset = getProperty("AngleOffset");
   if (isEmpty(offset)) offset = 0.0;
