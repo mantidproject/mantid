@@ -117,10 +117,8 @@ void RefReduction::init()
 void RefReduction::exec()
 {
   m_outputWorkspaceCounter = 0;
-    const std::string instrument = getProperty("Instrument");
-    const bool isREF_M = instrument.compare("REF_M")==0;
   // Process each polarization state
-  if (getProperty("PolarizedData") && isREF_M)
+  if (getProperty("PolarizedData"))
   {
     processData(PolStateOffOff);
     processData(PolStateOnOff);
