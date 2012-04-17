@@ -9,7 +9,15 @@ namespace MantidQt
 namespace ImageView
 {
 
-
+/**
+ *  Get a formatted string form of the specified double precision value.
+ *
+ *  @param width     The total number of characters to be used in the 
+ *                   formatted string
+ *  @param precison  The number of significant figures to use 
+ *  @param value     The double precsion number to be formatted
+ *  @param str       String that will be set to the formatted number
+ */
 void IVUtils::Format( int            width,
                       int            precision,
                       double         value,
@@ -26,6 +34,22 @@ void IVUtils::Format( int            width,
 }
 
 
+/**
+ * Find a non-degenerate interval containing all the specified values.
+ * If there are more than one values in the list, min will be set to 
+ * the smallest value and max will be set to the largest value.  If there
+ * is only on value in the list, min will be set to 90% of that value and
+ * max will be set to 110% of that value.  If the only value in the list
+ * is zero, min will be set to -1 and max will be set to 1.  In any case
+ * the interval [min,max] will contain all values in the list and min will
+ * be strictly less than max.
+ *
+ * @param values  List of values to be bounded by min and max.
+ * @param min     Set to be less than or equal to all values in the list
+ *                and strictly less than max.
+ * @param max     Set to be greater than or equal to all values in the list
+ *                and strictly more than max.
+ */
 void IVUtils::FindValidInterval( const QVector<double>  & values,
                                        double           & min,
                                        double           & max )
@@ -52,17 +76,30 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
     {
       max = 1.1 * max;
       min = 0.9 * min;
-    }
-    if ( min > max )    // NOTE: They could be < 0.
-    {
-      double temp = min;
-      min = max;
-      max = temp;
+      if ( min > max )    // NOTE: They could be < 0.
+      {
+        double temp = min;
+        min = max;
+        max = temp;
+      }
     }
   }
 }
 
 
+/**
+ * Calculate a point in [new_min,new_max] by linear interpolation, and
+ * clamp the result to be in the interval [new_min,new_max].
+ * @param min       Left endpoint of original interval
+ * @param max       Right endpoint of original interval
+ * @param val       Reference point in orignal interval
+ * @param new_min   Left endpoint of new interval
+ * @param new_max   Right endpoint of new interval
+ * @param new_val   Point in new interval that is placed in [new_min,new_max]
+ *                  in the same proportion as val is in [min,max].  The 
+ *                  resulting new_val will be clamped to be in the new
+ *                  interval, even if val is outside of the original interval.
+ */
 bool IVUtils::Interpolate( double   min,
                            double   max,
                            double   val,
@@ -79,11 +116,29 @@ bool IVUtils::Interpolate( double   min,
 
 
 /**
- *  Find a new interval [min,max] with values aligned with the underlying
- *  data bin boundaries, and set first_index to the index of the bin, 
+ *  Find a new interval [min,max] with boundaries aligned with the underlying
+ *  data bin boundaries, then set first_index to the index of the bin, 
  *  corresponding to the min value and set the number of steps to the smaller
  *  of the number of steps in the data, and the initial value of the number
  *  of steps.
+ *
+ *  @param global_min   Smallest value covered by the underlying data
+ *  @param global_max   Largest value covered by the underlying data
+ *  @param global_steps Number of uniform bins the underlying data is 
+ *                      divided into on the interval [global_min,global_max].
+ *  @param first_index  This will be set to the bin number containing the
+ *                      specified min value.
+ *  @param min          On input this should be smallest value of interest 
+ *                      in the interval.  This will be adjusted to be the 
+ *                      left bin boundary of the bin containing the specified
+ *                      min value.
+ *  @param max          On input this should be largest value of interest 
+ *                      in the interval.  This will be adjusted to be the 
+ *                      right bin boundary of the bin containing the specified
+ *                      max value, if max is in the interior of a bin.
+ *  @param steps        On input this should be the number of bins desired
+ *                      between the min and max values.  This will be adjusted
+ *                      to be more than the number os steps available.
  */
 bool IVUtils::CalculateInterval( double   global_min,
                                  double   global_max,
@@ -94,29 +149,35 @@ bool IVUtils::CalculateInterval( double   global_min,
                                  size_t & steps )
 {
   double d_index;
+                                         // find bin containing min.......
   Interpolate( global_min, global_max,   min,
                       0.0, (double)global_steps, d_index );
 
-  int min_index = (int)d_index;        // min is coordinate at the left edge of
-                                       // bin at min_index
+  int min_index = (int)floor(d_index);   // min_index is the number of the bin
+                                         // containing min
   if ( min_index < 0 )
     min_index = 0;
-
+                                         // now set min to the value at the 
+                                         // left edge of bin at min_index
   Interpolate( 0.0,        (double)global_steps, (double)min_index,
                global_min, global_max,   min );
 
+                                         // find bin containing max........ 
   Interpolate( global_min, global_max,   max,
                       0.0, (double)global_steps, d_index );
 
-  int max_index = (int)ceil(d_index) - 1;// max is coordinate at the right edge 
-                                         // of bin at max_index.
+  int max_index = (int)ceil(d_index) - 1;// max index is the number of the bin
+                                         // containing max, or with max as
+                                         // right hand endpoint
   if ( max_index >= (int)global_steps )
     max_index = max_index - 1;
 
+                                         // now set max to the value at the
+                                         // right edge of bin max_index
   Interpolate( 0,          (double)global_steps, (double)(max_index + 1),
                global_min, global_max,   max );
 
-  first_index = (int)min_index;
+  first_index = min_index;
 
   size_t source_steps = max_index - min_index + 1;
   if ( steps > source_steps )

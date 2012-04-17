@@ -52,6 +52,8 @@ namespace ImageView
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 {
   public:
+
+     /// Make an ImageDisplay to display with the given widgets and controls 
      ImageDisplay( QwtPlot*       image_plot, 
                    SliderHandler* slider_handler,
                    GraphDisplay*  h_graph,
@@ -60,20 +62,26 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 
      ~ImageDisplay();
 
+     /// Set the source of the image data and information for the table
      void SetDataSource( ImageDataSource* data_source );
 
-     /// Rebuild image from data source, due to resize or scroll bar
+     /// Rebuild image from data source, due to resize or scroll bar movement
      void UpdateImage();
 
+     /// Change the color table used to map intensity to color
      void SetColorScale( std::vector<QRgb> & new_color_table );
 
+     /// Change the control parameter (0...100) used to brighten the image
      void SetIntensity( double control_parameter );
    
+     /// Record the point that the user is currently pointing at with the mouse
      void SetPointedAtPoint( QPoint point );
 
+  private:
+     /// Get the rectangle currently covered by the image in pixel coordinates
      void GetDisplayRectangle( QRect &rect );
 
-  private:
+     /// Show information about the point (x, y) on the image in the table
      void ShowInfoList( double x, double y );
 
      std::vector<QRgb>    color_table;

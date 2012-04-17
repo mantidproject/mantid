@@ -57,11 +57,14 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVConnections: public QWidget
 
 public:
 
-   IVConnections( Ui_MainWindow* ui, 
-                  ImageDisplay*  image_display,
-                  GraphDisplay*  h_graph_display,
-                  GraphDisplay*  v_graph_display );
-   ~IVConnections();
+  /// Construct the object that links the GUI components to the other specifed
+  /// higher level objects.
+  IVConnections( Ui_MainWindow* ui, 
+                 ImageDisplay*  image_display,
+                 GraphDisplay*  h_graph_display,
+                 GraphDisplay*  v_graph_display );
+
+  ~IVConnections();
 
 public slots:
   void somethingChanged();

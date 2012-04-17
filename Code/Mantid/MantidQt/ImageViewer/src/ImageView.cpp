@@ -8,6 +8,16 @@ namespace ImageView
 {
 
 
+/**
+ *  Construct an ImageView to display data from the specified data source.
+ *  The specified ImageDataSource must be constructed elsewhere and passed
+ *  into this ImageView constructor.  Most other components of the ImageView
+ *  are managed by this class.  That is the graphs, image display and other
+ *  parts of the ImageView are constructed here and are deleted when the
+ *  ImageView destructor is called.
+ *
+ *  @param data_source  The source of the data that will be displayed. 
+ */
 ImageView::ImageView( ImageDataSource* data_source )
 {
   ui     = new Ui_MainWindow();

@@ -11,7 +11,16 @@ namespace MantidQt
 namespace ImageView
 {
 
-
+/**
+ *  Construct a GraphDisplay to display selected graph on the specifed plot 
+ *  and to disply information in the specified table.
+ *
+ *  @param graph_plot    The QwtPlot where the graph will be displayed.
+ *  @param graph_table   The QTableWidget where information about a 
+ *                       pointed at location will be displayed.
+ *  @param is_vertical   Flag indicating whether this graph displays the
+ *                       vertical or horizontal cut through the image.
+ */
 GraphDisplay::GraphDisplay( QwtPlot*      graph_plot, 
                             QTableWidget* graph_table,
                             bool          is_vertical )
@@ -39,12 +48,33 @@ GraphDisplay::~GraphDisplay()
 }
 
 
+/**
+ * Set the data source from which the table information will be obtained
+ * (must be set to allow information to be displayed in the table.)
+ *
+ * @param data_source The ImageDataSource that provides information for
+ *                    the table.
+ */
 void GraphDisplay::SetDataSource( ImageDataSource* data_source )
 {
   this->data_source = data_source;
 }
 
 
+/**
+ * Set the actual data that will be displayed on the graph and the 
+ * coordinates on the image corresponding to this data.  The image
+ * coordinates are needed to determine the point of interest, when the
+ * user points at a location on the graph.
+ *
+ * @param xData    Vector of x coordinates of points to plot
+ * @param yData    Vector of y coordinates of points to plot.  This should
+ *                 be the same size as the xData vector.
+ * @param image_x  X-coordinate of point on image that generated the graph
+ *                 data
+ * @param image_y  Y-coordinate of point on image that generated the graph
+ *                 data
+ */
 void GraphDisplay::SetData(const QVector<double> & xData, 
                            const QVector<double> & yData,
                                  double            image_x,
@@ -93,6 +123,12 @@ void GraphDisplay::SetData(const QVector<double> & xData,
 }
 
 
+/**
+ * Show information about the specified point.
+ *
+ * @param point  The point that the user is currently pointing at with 
+ *               the mouse.
+ */
 void GraphDisplay::SetPointedAtPoint( QPoint point )
 {
   double x = graph_plot->invTransform( QwtPlot::xBottom, point.x() );
@@ -100,6 +136,17 @@ void GraphDisplay::SetPointedAtPoint( QPoint point )
   ShowInfoList( x, y );
 }
 
+
+/**
+ *  Get the information about a pointed at location and show it in the
+ *  table.  NOTE: If this is the "horizontal" graph, the relevant coordinates
+ *  are x and the image_y that generated the graph.  If this is the "vertical"
+ *  graph, the relevant coordinates are y and the image_x that generated 
+ *  the graph.
+ *
+ *  @param x  The x coordinate of the pointed at location on the graph.
+ *  @param y  The y coordinate of the pointed at location on the graph.
+ */
 void GraphDisplay::ShowInfoList( double x, double y )
 {
   int n_infos = 0;
@@ -115,6 +162,10 @@ void GraphDisplay::ShowInfoList( double x, double y )
     {
       data_source->GetInfoList( x, image_y, info_list );
     }
+  }
+  else
+  {
+    return;
   }
   n_infos = (int)info_list.size()/2;
   n_rows += n_infos; 

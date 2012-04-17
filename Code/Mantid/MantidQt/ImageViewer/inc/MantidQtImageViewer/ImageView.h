@@ -52,7 +52,10 @@ namespace ImageView
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView 
 {
   public:
+
+     /// Construct an ImageView to display data from the specified data source 
      ImageView( ImageDataSource* data_source );
+
     ~ImageView();
 
   private:

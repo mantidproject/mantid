@@ -9,6 +9,9 @@ namespace ImageView
 {
   
 
+/**
+ * Construct basic plot item with NO data to plot.
+ */
 ImagePlotItem::ImagePlotItem()
 {
   data_array      = 0;
@@ -17,6 +20,15 @@ ImagePlotItem::ImagePlotItem()
 }
 
 
+/**
+ * Specify the data to be plotted and the color table to use.
+ *
+ * @param data_array   The DataArray object containing the data to plot
+ *                     along with information about the array size and 
+ *                     the region covered by the data. 
+ * @param color_table  Vector of RGB colors that determine the mapping 
+ *                     from a data value to a color. 
+ */
 void ImagePlotItem::SetData( DataArray*         data_array, 
                              std::vector<QRgb>* color_table )
 {
@@ -25,12 +37,35 @@ void ImagePlotItem::SetData( DataArray*         data_array,
 }
 
 
+/**
+ *  Set a non-linear look up table that will be used with data values before
+ *  they are mapped to a color.  This is typically used to apply a log type
+ *  scaling so lower level values can be seen better.
+ *
+ *  @param intensity_table  Look up table containing values between 0 and 1
+ *                          that will be used to scale the corresponding
+ *                          image values before mappign to a color index.
+ */
 void ImagePlotItem::SetIntensityTable( std::vector<double>* intensity_table )
 {
   this->intensity_table = intensity_table;
 }
 
 
+/**
+ *  Draw the image (this is called by QWT and must not be called directly.)
+ *
+ *  @param  painter     The QPainter object used by QWT to draw the image
+ *  @param  xMap        The QwtScaleMap used by QWT to map x-values to pixel
+ *                      columns in the actual displayed image
+ *  @param  yMap        The QwtScaleMap used by QWT to map y-values to pixel
+ *                      rows in the actual displayed image
+ *  @param  canvasRect  rectangle containing the pixel region where QWT will 
+ *                      draw the image.  This rectangle is slightly larger
+ *                      than the actual rectangle used for the image.  This
+ *                      parameter is NOT USED by the ImagePlotItem, but is
+ *                      passed in when QWT calls this method. 
+ */
 void ImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & xMap, 
                           const QwtScaleMap & yMap,

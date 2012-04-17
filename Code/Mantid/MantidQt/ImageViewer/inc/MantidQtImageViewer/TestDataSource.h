@@ -46,6 +46,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TestDataSource: public ImageDataSource
 {
   public:
 
+    /// Construct a DataSource object to provide fake data for testing
     TestDataSource( double total_xmin, double total_xmax,
                     double total_ymin, double total_ymax,
                     size_t total_rows, size_t total_cols );
@@ -64,6 +65,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TestDataSource: public ImageDataSource
                               size_t  n_cols,
                               bool    is_log_x );
 
+    /// Get a list containing pairs of strings with information about x,y
     void GetInfoList( double x,
                       double y,
                       std::vector<std::string> &list );

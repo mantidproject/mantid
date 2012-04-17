@@ -7,6 +7,15 @@ namespace MantidQt
 namespace ImageView
 {
 
+/**
+ * Set the specified string as the entry at the specified row and col of
+ * the specified table.
+ *
+ * @param row     The row number where the string should appear.
+ * @param col     The column number where the string should appear.
+ * @param string  The string that is place in the table.
+ * @param table   Pointer to the table
+ */
 void QtUtils::SetTableEntry(       int           row, 
                                    int           col, 
                              const std::string & string,
@@ -18,6 +27,18 @@ void QtUtils::SetTableEntry(       int           row,
 }
 
 
+/**
+ * Format and set the specified double as the entry at the specified row 
+ * and col of the specified table.
+ *
+ * @param row       The row number where the string should appear.
+ * @param col       The column number where the string should appear.
+ * @param width     The number of spaces to use when formatting the value.
+ * @param precison  The number of significant figures to use when formatting
+ *                  the value.
+ * @param value     The number to be formatted and placed in the table.
+ * @param table     Pointer to the table
+ */
 void  QtUtils::SetTableEntry( int           row, 
                               int           col, 
                               int           width,

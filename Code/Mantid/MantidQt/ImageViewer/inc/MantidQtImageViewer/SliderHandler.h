@@ -47,21 +47,23 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler
 {
   public:
 
+    /// Construct object to manage image sliders from the specified UI
     SliderHandler( Ui_MainWindow* iv_ui );
 
+    /// Configure the image sliders for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
                            ImageDataSource* data_source );
 
-    bool VSliderOn();
-
+    /// Return true if the image horizontal slider is enabled.
     bool HSliderOn();
 
-    // NOTE: x_min will be the smaller column number in the array, corresponding
-    //       to lower values on the calibrated x-scale
+    /// Return true if the image vertical slider is enabled.
+    bool VSliderOn();
+
+    /// Get the range of columns to display in the image.
     void GetHSliderInterval( int &x_min, int &x_max );
 
-    // NOTE: y_min will be the smaller row number in the array, corresponding
-    //       to lower values on the calibrated y-scale
+    /// Get the range of rows to display in the image.
     void GetVSliderInterval( int &y_min, int &y_max );
 
   private:
