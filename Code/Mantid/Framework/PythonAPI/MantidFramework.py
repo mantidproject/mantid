@@ -1132,8 +1132,6 @@ class MantidPyFramework(FrameworkManager):
         super(MantidPyFramework, self).__init__()
         self._garbage_collector = WorkspaceGarbageCollector()
         self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector, self)
-        self._pyalg_loader = PyAlgLoader(self)
-        self._pyalg_objs = {}
 
     def runtime_mtdsimple(self, is_runtime=True):
         self.sendLogMessage("DEPRECATION WARNING: mtd.runtime_mtdsimple() is no longer used. Simply remove this line from your code.")
@@ -1190,10 +1188,11 @@ class MantidPyFramework(FrameworkManager):
             self.__gui__ = gui
 
         # Run through init steps 
-        self._pyalg_loader.load_modules(refresh=False)
-        # Ensure the fake Python algorithm functions are overwritten by
-        # the real ones
-        self._importSimpleAPIToMain()
+        if 'mantid.kernel' not in sys.modules:
+            import mantidsimple as _mantidsimple
+            pyalg_loader = PyAlgLoader()
+            pyalg_loader.load_modules(refresh=False)
+            _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
 
         self.__is_initialized = True
 
@@ -1243,14 +1242,6 @@ class MantidPyFramework(FrameworkManager):
         for name in ws_names:
             key_list.append(name)
         return key_list
-
-    def registerPyAlgorithm(self, algorithm):
-        """
-        Register an algorithm into the framework
-        """
-        # Keep the original object alive
-        self._pyalg_objs[algorithm.name()] = algorithm
-        super(MantidPyFramework, self).registerPyAlgorithm(algorithm)
 
     def createAlgorithm(self, name, version=-1):
         """Creates an algorithm object. The object
@@ -1338,15 +1329,6 @@ class MantidPyFramework(FrameworkManager):
             if not path in sys.path:
                 sys.path.append(path)
 
-
-    def _importSimpleAPIToMain(self):
-        import mantidsimple
-        mantidsimple.translate()
-        for name in dir(mantidsimple):
-            if name.startswith('_'):
-                continue
-            setattr(__main__, name, getattr(mantidsimple, name))
-            
     def _refreshPyAlgorithms(self):
         # Reload the modules that have been loaded
         self._pyalg_loader.load_modules(refresh=True)
@@ -1433,21 +1415,17 @@ class PyAlgLoader(object):
 
     __CHECKLINES__ = 100
     
-    def __init__(self, framework):
-        self.framework = framework
-
-
     def load_modules(self, refresh=False):
         """
         Import Python modules containing Python algorithms
         """
         dir_list = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
         if len(dir_list) == 0: 
-            self.framework.sendLogMessage('PyAlgLoader.load_modules: no python algorithm directory found')
+            mtd.sendLogMessage('PyAlgLoader.load_modules: no python algorithm directory found')
             return
 
         # Disable factory updates while everything is (re)imported
-        self.framework._observeAlgFactoryUpdates(False,False)
+        mtd._observeAlgFactoryUpdates(False,False)
         
         # Check defined Python algorithm directories and load any modules
         changes = False
@@ -1458,7 +1436,7 @@ class PyAlgLoader(object):
                 changes = True
 
         # Now connect the relevant signals to monitor for algorithm factory updates
-        self.framework._observeAlgFactoryUpdates(True, (refresh and changes))
+        mtd._observeAlgFactoryUpdates(True, (refresh and changes))
 
 #
 # ------- Private methods --------------
@@ -1484,7 +1462,7 @@ class PyAlgLoader(object):
                os.path.getmtime(compiled) >= os.path.getmtime(original):
                 return
             try:               
-                if self._containsPyAlgorithm(original):
+                if self._containsOldAPIAlgorithm(original):
                     # Temporarily insert into path
                     sys.path.insert(0, file_path)
                     if modname in sys.modules:
@@ -1495,9 +1473,9 @@ class PyAlgLoader(object):
                     # Cleanup system path
                     del sys.path[0]
             except(StandardError), exp:
-                self.framework.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
+                mtd.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
             except:
-                self.framework.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
+                mtd.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
 
         # Find sub-directories     
         for root, dirs, files in os.walk(path):
@@ -1506,7 +1484,7 @@ class PyAlgLoader(object):
             
         return changes
 
-    def _containsPyAlgorithm(self, modfilename):
+    def _containsOldAPIAlgorithm(self, modfilename):
         file = open(modfilename,'r')
         line_count = 0
         alg_found = False
@@ -1514,6 +1492,9 @@ class PyAlgLoader(object):
             line = file.readline()
             # EOF
             if line == '':
+                alg_found = False
+                break
+            if 'mantid' in line and 'mantidsimple' not in line:
                 alg_found = False
                 break
             if line.rfind('PythonAlgorithm') >= 0:
@@ -1991,3 +1972,4 @@ for _file in _files:
     _fullpath = os.path.join(_script_dirs,_file)
     if not 'svn' in _file and os.path.isdir(_fullpath):
         MantidPyFramework._addToPySearchPath(_fullpath)
+

@@ -99,6 +99,7 @@ set ( TEST_PY_FILES
   test/python/ListValidatorTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
+  test/python/MandatoryValidatorTest.py
   test/python/MDHistoWorkspaceTest.py
   test/python/NullValidatorTest.py
   test/python/OrientedLatticeTest.py

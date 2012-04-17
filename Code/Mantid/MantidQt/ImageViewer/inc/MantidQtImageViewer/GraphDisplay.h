@@ -46,32 +46,38 @@ namespace ImageView
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay 
 {
   public:
-     GraphDisplay( QwtPlot*      graph_plot, 
-                   QTableWidget* graph_table,
-                   bool          is_vertical );
 
-    ~GraphDisplay();
+   /// Construct a GraphDisplay to display in the specifed plot and table    
+   GraphDisplay( QwtPlot*      graph_plot, 
+                 QTableWidget* graph_table,
+                 bool          is_vertical );
 
-     void SetDataSource( ImageDataSource* data_source );
+  ~GraphDisplay();
 
-     void SetData( const QVector<double> & xData,
-                   const QVector<double> & yData,
-                         double            image_x,
-                         double            image_y );
+   /// Set the source of information for the table of position information 
+   void SetDataSource( ImageDataSource* data_source );
 
-     void SetPointedAtPoint( QPoint point );
+   /// Set the actual data that will be displayed on the graph
+   void SetData( const QVector<double> & xData,
+                 const QVector<double> & yData,
+                       double            image_x,
+                       double            image_y );
+
+   /// Record the point that the user is currently pointing at with the mouse
+   void SetPointedAtPoint( QPoint point );
 
   private:
-     void ShowInfoList( double x, double y );
+   /// Show information about the point (x, y) on the graph, in the info table
+   void ShowInfoList( double x, double y );
 
-     QwtPlot*          graph_plot;
-     QwtPlotCurve*     curve;
-     QTableWidget*     graph_table;
-     ImageDataSource*  data_source;
+   QwtPlot*          graph_plot;
+   QwtPlotCurve*     curve;
+   QTableWidget*     graph_table;
+   ImageDataSource*  data_source;
 
-     bool    is_vertical;
-     double  image_x;
-     double  image_y;
+   bool    is_vertical;
+   double  image_x;
+   double  image_y;
 };
 
 } // namespace MantidQt 

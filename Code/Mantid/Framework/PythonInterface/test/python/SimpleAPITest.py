@@ -1,7 +1,7 @@
 import unittest
 import sys
 from mantid.api import AlgorithmFactory
-from mantid import mtd,simpleapi
+from mantid import mtd, simpleapi
 
 class SimpleAPITest(unittest.TestCase):
 

@@ -2,7 +2,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/args.hpp>
 
 using Mantid::API::Run;
 using namespace boost::python;

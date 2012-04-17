@@ -3,7 +3,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/args.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
 
@@ -24,9 +23,9 @@ namespace
 void export_AlgorithmManager()
 {
   class_<AlgorithmManagerImpl,boost::noncopyable>("AlgorithmManagerImpl", no_init)
-    .def("create", &AlgorithmManagerImpl::create, create_overloads(args("name", "version"), "Creates a managed algorithm."))
+    .def("create", &AlgorithmManagerImpl::create, create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
     .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
-        createUnmanaged_overloads(args("name", "version"), "Creates an unmanaged algorithm."))
+        createUnmanaged_overloads((arg("name"), arg("version")), "Creates an unmanaged algorithm."))
     .def("Instance", &AlgorithmManager::Instance, return_value_policy<reference_existing_object>(),
         "Returns a reference to the AlgorithmManager singleton")
     .staticmethod("Instance")

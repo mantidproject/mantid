@@ -65,3 +65,25 @@ from api import *
 ###############################################################################
 __version__ = version_str()
 
+###############################################################################
+# Load the Python plugins now everything has started
+#
+# Before the plugins are loaded the simpleapi module is called to create
+# fake error-raising functions for all of the plugins. After the plugins have been 
+# loaded the correction translation is applied to create the "real" simple
+# API functions.
+#
+# Although this seems odd it is necessary so that any PythonAlgorithm 
+# can call any other PythonAlgorithm through the simple API mechanism. If left 
+# to the simple import mechanism then plugins that are loaded later cannot
+# be seen by the earlier ones (chicken & the egg essentially). 
+################################################################################
+import kernel.plugins as _plugins
+import sys as _sys
+import simpleapi as _simpleapi
+
+_simpleapi.mockout_api()
+if 'MantidFramework' not in _sys.modules: # Just while the other API is still around
+    _plugins.load(config['pythonalgorithms.directories'])
+    # Now everything is loaded create the proper definitions
+    _simpleapi.translate()

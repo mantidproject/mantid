@@ -4,7 +4,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/enum.hpp>
-#include <boost/python/args.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/default_call_policies.hpp>
 #include <boost/python/overloads.hpp>

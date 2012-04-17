@@ -43,7 +43,7 @@ void export_MatrixWorkspace()
     //--------------------------------------- Meta information -----------------------------------------------------------------------
     .def("blocksize", &MatrixWorkspace::blocksize, "Returns size of the Y data array")
     .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, "Returns the number of spectra in the workspace")
-    .def("binIndexOf", &MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads(args("xvalue", "workspace_index"),
+    .def("binIndexOf", &MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads((arg("xvalue"), arg("workspace_index")),
          "Returns the index of the bin containing the given xvalue. The workspace_index is optional [default=0]"))
     .def("detectorTwoTheta", &MatrixWorkspace::detectorTwoTheta, "Returns the two theta value for a given detector")
     .def("detectorSignedTwoTheta",&MatrixWorkspace::detectorSignedTwoTheta, "Returns the signed two theta value for given detector")

@@ -6,7 +6,7 @@ algorithms, fit functions etc.
 """
 import os as _os
 import imp as _imp
-from mantid.kernel import Logger, ConfigService
+from mantid.kernel import logger, Logger, ConfigService
 
 
 class PluginLoader(object):
@@ -21,7 +21,7 @@ class PluginLoader(object):
 
     def run(self):
         """
-            Load the module we are pointing at and return
+            Try and load the module we are pointing at and return
             the module object.
             
             Any ImportErrors raised are not caught and are passed
@@ -48,19 +48,22 @@ def load(path):
         will not included modules that will have attempted to be
         reloaded but had not been changed
     """
-    loaded = []
+    loaded = {}
     if _os.path.isfile(path) and path.endswith('.py'): # Single file
-        loader = PluginLoader(path)
-        module = loader.run()
-        loaded.append(module.__name__)
+        try:
+            if contains_newapi_algorithm(path):
+                name, module = load_plugin(path)
+                loaded[name] = module
+        except Exception, exc:
+            logger.warning("Failed to load plugin %s. Error: %s" % (path, str(exc)))
     elif _os.path.isdir(path): # Directory
-        loaded.extend(load_from_dir(path))
+        loaded.update(load_from_dir(path))
     else: # a list 
         if ';' in path:
             path = split(';')
         if type(path) is list: # Call load again for each one
             for p in path: 
-                loaded.extend(load(p))
+                loaded.update(load(p))
 
     return loaded
     
@@ -72,102 +75,52 @@ def load_from_dir(directory):
     """
     if not _os.path.isdir(directory):
         raise RuntimeError("The path given does not point to an existing directory")
-    loaded = []
+    loaded = {}
     for root, dirs, files in _os.walk(directory):
         for f in files:
             filename = _os.path.join(root, f)
-            loaded.extend(load(filename))
+            loaded.update(load(filename))
             
     return loaded
-    
-###############################################################################
-# Backwards compatible loader for PythonAlgorithms written in old style
-# 
-# This will be removed when the old-style API is removed.
-#
-###############################################################################
-class PyAlgLoader(object):
 
-    __CHECKLINES__ = 100
-    
-    def __init__(self):
-        self._logger = Logger.get("PyAlgLoader")
-
-    def load_modules(self, refresh=False):
-        """
-        Import Python modules containing Python algorithms
-        """
-        dir_list = ConfigService["pythonalgorithms.directories"].split(';')
-       
-        # Check defined Python algorithm directories and load any modules
-        changes = False
-        for path in dir_list:
-            if path == '':
-                continue
-            if self._importAlgorithms(path, refresh):
-                changes = True
-
-#
-# ------- Private methods --------------
-#
-    def _importAlgorithms(self, path, refresh):
-        # Make sure the directory doesn't contain a trailing slash
-        path = path.rstrip("/").rstrip("\\")
-        try:
-            files = _os.listdir(path)
-        except(OSError):
-            return False
-        changes = False
+def load_plugin(plugin_path):
+    """
+        Load a plugin and return the name & module object
         
-        def _process_file(file_path, modname):
-            import sys
-            pyext = '.py'
-            if not modname.endswith(pyext):
-                return
-            original = _os.path.join(file_path, modname)
-            modname = modname[:-len(pyext)]
-            compiled = _os.path.join(file_path, modname + '.pyc')
-            if modname in sys.modules and \
-               _os.path.exists(compiled) and \
-               _os.path.getmtime(compiled) >= _os.path.getmtime(original):
-                return
-            try:               
-                if self._containsPyAlgorithm(original):
-                    # Temporarily insert into path
-                    sys.path.insert(0, file_path)
-                    if modname in sys.modules:
-                        reload(sys.modules[modname])
-                    else:
-                        __import__(modname)
-                    changes = True
-                    # Cleanup system path
-                    del sys.path[0]
-            except(StandardError), exp:
-                self._logger.warning('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
-            except:
-                self._logger.warning('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
+         @param plugin_path :: A path that must should point
+         to a .py file that will be loaded. A ValueError is raised if
+         path is not a valid plugin path. Any exceptions raised by the 
+         import are passed to the caller
+    """
+    loader = PluginLoader(plugin_path)
+    module = loader.run()
+    return module.__name__, module
 
-        # Find sub-directories     
-        for root, dirs, files in _os.walk(path):
-            for f in files:
-                _process_file(root, f)
-            
-        return changes
-
-    def _containsPyAlgorithm(self, modfilename):
-        file = open(modfilename,'r')
-        line_count = 0
-        alg_found = False
-        while line_count < self.__CHECKLINES__:
-            line = file.readline()
-            # EOF
-            if line == '':
-                alg_found = False
-                break
-            if line.rfind('PythonAlgorithm') >= 0:
-                alg_found = True
-                break
-            line_count += 1
-        file.close()
-        return alg_found
-   
+def contains_newapi_algorithm(filename):
+    """
+        Inspects the given file to check whether
+        it contains an algorithm written with this API.
+        The check is simple. If either the import
+        MantidFramework or mantidsimple are discovered then
+        it will not be considered a new API algorithm
+        
+        @param filename :: A full file path pointing to a python file
+        @returns True if a python algorithm written with the new API
+        has been found.
+    """
+    maxlines_to_check = 25
+    file = open(filename,'r')
+    line_count = 0
+    alg_found = True
+    while line_count < maxlines_to_check: 
+        line = file.readline()
+        # EOF
+        if line == '':
+            alg_found = True
+            break
+        if 'MantidFramework' in line or 'mantidsimple' in line:
+            alg_found = False
+            break
+        line_count += 1
+    file.close()
+    return alg_found

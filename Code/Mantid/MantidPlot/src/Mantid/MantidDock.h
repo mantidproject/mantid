@@ -76,6 +76,7 @@ private slots:
   void drawColorFillPlot();
   void showDetectorTable();
   void convertToMatrixWorkspace();
+  void convertMDHistoToMatrixWorkspace();
 
 private:
   void createWorkspaceMenuActions();
@@ -126,7 +127,8 @@ private:
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
-  *m_convertToMatrixWorkspace;
+  *m_convertToMatrixWorkspace,
+  *m_convertMDHistoToMatrixWorkspace;
 
   static Mantid::Kernel::Logger& logObject;
 };

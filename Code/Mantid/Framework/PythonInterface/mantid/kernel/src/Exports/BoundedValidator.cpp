@@ -1,6 +1,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/make_constructor.hpp>
+#include <boost/python/default_call_policies.hpp>
 
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::IValidator;
@@ -8,11 +10,33 @@ using namespace boost::python;
 
 namespace
 {
+  /**
+   * Factory function to allow more flexibility in the constructor
+   * @param lower An optional lower bound
+   * @param upper An optional upper bound
+   * @returns A pointer to a new BoundedValidator object
+   */
+  template<typename T>
+  BoundedValidator<T> * createBoundedValidator(object lower = object(), object upper = object())
+  {
+    BoundedValidator<T> * validator = new BoundedValidator<T>();
+    if(!lower.is_none())
+    {
+      validator->setLower(extract<T>(lower));
+    }
+    if(!upper.is_none())
+    {
+      validator->setUpper(extract<T>(upper));
+    }
+    return validator;
+  }
+
   /// A macro for generating exports for each type
   #define EXPORT_BOUNDEDVALIDATOR(ElementType, prefix) \
     class_<BoundedValidator<ElementType>, bases<IValidator>, \
            boost::noncopyable>(#prefix"BoundedValidator") \
-      .def(init<ElementType,ElementType>()) \
+      .def("__init__", make_constructor(&createBoundedValidator<ElementType>, \
+                                        default_call_policies(), (arg("lower")=object(), arg("upper")=object())))\
       .def("setLower", &BoundedValidator<ElementType>::setLower, "Set the lower bound") \
       .def("setUpper", &BoundedValidator<ElementType>::setUpper, "Set the upper bound" ) \
       .def("lower", &BoundedValidator<ElementType>::lower, return_value_policy<copy_const_reference>(), \
@@ -21,7 +45,7 @@ namespace
            "Returns the upper bound" ) \
       .def("setBounds", &BoundedValidator<ElementType>::setBounds, "Set both bounds" ) \
       .def("hasLower", &BoundedValidator<ElementType>::hasLower, "Returns True if a lower bound has been set" ) \
-      .def("hasUpper", &BoundedValidator<ElementType>::hasLower, "Returns True if an upper bound has been set" ) \
+      .def("hasUpper", &BoundedValidator<ElementType>::hasUpper, "Returns True if an upper bound has been set" ) \
     ;
 
 }

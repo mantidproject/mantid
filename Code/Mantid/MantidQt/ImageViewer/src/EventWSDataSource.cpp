@@ -1,5 +1,8 @@
-#include <iostream>
+/**
+ *  File: EventWSDataSource.cpp
+ */
 
+#include <iostream>
 #include <math.h>
 
 #include "MantidQtImageViewer/EventWSDataSource.h"
@@ -16,6 +19,11 @@ namespace MantidQt
 namespace ImageView
 {
 
+/**
+ * Construct a DataSource object around the specifed EventWorkspace.
+ *
+ * @param ev_ws  Shared pointer to the event workspace being "wrapped"
+ */
 EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
@@ -73,6 +81,23 @@ EventWSDataSource::~EventWSDataSource()
 }
 
 
+/**
+ * Get a data array covering the specified range of data, at the specified
+ * resolution.
+ *
+ * @param xmin      Left edge of region to be covered.
+ * @param xmax      Right edge of region to be covered.
+ * @param ymin      Bottom edge of region to be covered.
+ * @param ymax      Top edge of region to be covered.
+ * @param n_rows    Number of rows to return. If the number of rows is less
+ *                  than the actual number of data rows in [ymin,ymax], the 
+ *                  data will be subsampled, and only the specified number 
+ *                  of rows will be returned.
+ * @param n_cols    The event data will be rebinned using the specified
+ *                  number of colums.
+ * @param is_log_x  Flag indicating whether or not the data should be
+ *                  binned logarithmically.  (NOT USED YET)
+ */
 DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
                                             double ymin,   double  ymax,
                                             size_t n_rows, size_t  n_cols,
@@ -124,13 +149,28 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
 }
 
 
+/**
+ * Get a data array covering the full range of data.
+ *
+ * @param is_log_x  Flag indicating whether or not the data should be
+ *                  binned logarithmically.  (NOT USED YET)
+ */
 DataArray * EventWSDataSource::GetDataArray( bool is_log_x )
 {
   return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
                        total_rows, total_cols, is_log_x );
 }
 
-
+/**
+ * Clear the vector of strings and then add pairs of strings giving information
+ * about the specified point, x, y.  The first string in a pair should 
+ * generally be a string describing the value being presented and the second
+ * string should contain the value.
+ *  
+ * @param x    The x-coordinate of the point of interest in the data.
+ * @param y    The y-coordinate of the point of interest in the data.
+ * @param list Vector that will be filled out with the information strings.
+ */
 void EventWSDataSource::GetInfoList( double x, 
                                      double y,
                                      std::vector<std::string> &list )

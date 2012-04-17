@@ -465,9 +465,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Present a file dialog to the user and saves the content of the
             UI in XML format
         """
-        print 'inside _save in reduction_application'
-        print '-> self._filename' 
-        print self._filename
         if self._filename is None:
             self._save_as()
         else:

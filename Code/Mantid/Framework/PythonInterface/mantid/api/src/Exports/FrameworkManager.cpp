@@ -69,7 +69,7 @@ void export_FrameworkManager()
     .def("clearInstruments", &FrameworkManagerImpl::clearInstruments, "Clear memory held by the cached instruments")
     // NOTE: This differs from the C++ FrameworkManager::createAlgorithm to ensure consistency when called within Python
     .def("createAlgorithm", &createAlgorithm, 
-         create_overloads(args("name", "version"), "Creates and initializes an algorithm of the "
+         create_overloads((arg("name"), arg("version")), "Creates and initializes an algorithm of the "
                           "given name and version. If this called from within a Python algorithm "
                           "an unmanaged algorithm is created otherwise it will be a managed algorithm"))
     .def("Instance", &FrameworkManager::Instance, return_value_policy<reference_existing_object>(),

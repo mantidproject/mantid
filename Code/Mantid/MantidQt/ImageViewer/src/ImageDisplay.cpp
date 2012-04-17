@@ -18,7 +18,19 @@ namespace MantidQt
 namespace ImageView
 {
 
-
+/**
+ * Make an ImageDisplay to display with the given widgets and controls.
+ *
+ * @param image_plot      The QwtPlot that will hold the image
+ * @param slider_handler  The object that manages interaction with the
+ *                        horizontal and vertical scroll bars
+ * @param h_graph         The GraphDisplay for the graph showing horizontal
+ *                        cuts through the image at the bottom of the image.
+ * @param v_graph         The GraphDisplay for the graph showing vertical 
+ *                        cuts through the image at the left side of the image.
+ * @param table_widget    The widget where the information about a pointed
+ *                        at location will be displayed.
+ */
 ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                              SliderHandler* slider_handler,
                              GraphDisplay*  h_graph,
@@ -56,10 +68,15 @@ ImageDisplay::~ImageDisplay()
 }
 
 
+/**
+ * Set the data source from which the image and data table information will
+ * be obtained.
+ *
+ * @param data_source The ImageDataSource that provides the array of values
+ *                    and information for the table.
+ */
 void ImageDisplay::SetDataSource( ImageDataSource* data_source )
 {
-//  std::cout << "Start of ImageDisplay::SetData......." << std::endl;
-
   this->data_source = data_source;
   h_graph_display->SetDataSource( data_source );
   v_graph_display->SetDataSource( data_source );
@@ -76,24 +93,16 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   QRect draw_area;
   GetDisplayRectangle( draw_area );
   slider_handler->ConfigureSliders( draw_area, data_source );
-
-//  std::cout << "End of ImageDisplay::SetData" << std::endl;
 }
 
 
-void ImageDisplay::SetIntensity( double control_parameter )
-{
-  size_t DEFAULT_SIZE = 100000;
-  ColorMaps::getIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
-  image_plot_item->SetIntensityTable( &intensity_table );
-  UpdateImage();
-}
-
-
-
+/**
+ *  This will rebuild the image from the data source.  It should be invoked
+ *  when the scroll bar is moved, the plot area is resize or the color or
+ *  intensity tables are changed.
+ */
 void ImageDisplay::UpdateImage()
 {
-//  std::cout << "Start of ImageDisplay::UpdateImage......." << std::endl;
   if ( data_source == 0 || data_array == 0 )
   {
     return;   // no image data to update
@@ -114,7 +123,6 @@ void ImageDisplay::UpdateImage()
 
   if ( slider_handler->VSliderOn() )
   {
-//    std::cout<<"USING VSliderON CODE" <<std::endl;
     int y_min;
     int y_max;
     slider_handler->GetVSliderInterval( y_min, y_max );
@@ -133,7 +141,6 @@ void ImageDisplay::UpdateImage()
 
   if ( slider_handler->HSliderOn() )
   {
-//    std::cout<<"USING HSliderON CODE" <<std::endl;
     int x_min;
     int x_max;
     slider_handler->GetHSliderInterval( x_min, x_max );
@@ -149,7 +156,6 @@ void ImageDisplay::UpdateImage()
     scale_x_min = new_x_min;
     scale_x_max = new_x_max;
   }
-
 
   if ( n_rows > display_rect.height() )
   {
@@ -174,11 +180,17 @@ void ImageDisplay::UpdateImage()
 
   image_plot_item->SetData( data_array, &color_table );
   image_plot->replot();
-
-//  std::cout << "End of ImageDisplay::UpdateImage......." << std::endl;
 }
 
 
+/**
+ *  Change the color table used to map intensity to color. 
+ *
+ *  @param new_color_table  The new color table used to map data values
+ *                          to a RGB color.  This can have any positive 
+ *                          number of values, but will typically have
+ *                          256 entries.
+ */
 void ImageDisplay::SetColorScale( std::vector<QRgb> & new_color_table )
 {
   color_table.resize( new_color_table.size() );
@@ -190,6 +202,33 @@ void ImageDisplay::SetColorScale( std::vector<QRgb> & new_color_table )
 }
 
 
+/**
+ *  Change the control parameter (0...100) used to brighten the image.
+ *  If the control parameter is 0, the mapping from data values to color
+ *  table index will be linear.  As the control parameter is increased 
+ *  the mapping becomes more and more non-linear in a way that emphasizes
+ *  the lower level values.  This is similar to a log intensity scale.
+ *  
+ *  @param control_parameter  This is clamped between 0 (linear) and
+ *                            100 (most emphasis on low intensity values)
+ */
+void ImageDisplay::SetIntensity( double control_parameter )
+{
+  size_t DEFAULT_SIZE = 100000;
+  ColorMaps::getIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
+  image_plot_item->SetIntensityTable( &intensity_table );
+  UpdateImage();
+}
+
+
+/**
+ * Extract data from horizontal and vertical cuts across the image and
+ * show those as graphs in the horizontal and vertical graphs and show
+ * information about the specified point.
+ *
+ * @param point  The point that the user is currently pointing at with 
+ *               the mouse.
+ */
 void ImageDisplay::SetPointedAtPoint( QPoint point )
 {
   double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
@@ -254,6 +293,13 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
 }
 
 
+/**
+ *  Get the information about a pointed at location and show it in the
+ *  table. 
+ *
+ *  @param x  The x coordinate of the pointed at location on the image.
+ *  @param y  The y coordinate of the pointed at location on the image.
+ */
 void ImageDisplay::ShowInfoList( double x, double y )
 {
   std::vector<std::string> info_list;
@@ -285,6 +331,12 @@ void ImageDisplay::ShowInfoList( double x, double y )
 }
 
 
+/**
+ *  Get the rectangle currently covered by the image in pixel coordinates.
+ *
+ *  @param rect  A QRect object that will be filled out with position, width
+ *               and height of the pixel region covered by the image.
+ */
 void ImageDisplay::GetDisplayRectangle( QRect &rect )
 {
   QwtScaleMap xMap = image_plot->canvasMap( QwtPlot::xBottom ); 

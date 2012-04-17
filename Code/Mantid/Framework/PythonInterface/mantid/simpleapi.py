@@ -476,7 +476,35 @@ def translate():
         _algm_object.initialize()
         create_algorithm(name, max(versions), _algm_object)
         create_algorithm_dialog(name, max(versions), _algm_object)
-            
-# Create the algorithm functions on import
-translate()
+
+#==============================================================================
+
+def mockout_api():
+    """
+        Creates fake, error-raising functions for all currently loaded algorithm
+        plugins, including Python algorithms.
+    """
+    def create_fake_function(plugins):
+        def fake_function(*args, **kwargs):
+            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+                               " This is an error in the core setup logic of the mantid module, please contact the development team.")
+        
+        for name in plugins:
+                if name.endswith('.py'):
+                    name = name.rstrip('.py')
+                if name == "Load":
+                    continue
+                fake_function.__name__ = name
+                if name not in globals():
+                    globals()[name] = fake_function
+    #
+    from api import AlgorithmFactory
+    import os
+    cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
+    create_fake_function(cppalgs.keys())
+    
+    directories = _kernel.config["pythonalgorithms.directories"].split(';')
+    for top_dir in directories:
+        for root, dirs, files in os.walk(top_dir):
+            create_fake_function(files)
 

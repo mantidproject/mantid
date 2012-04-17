@@ -96,7 +96,7 @@ void export_Axis()
     .def("getUnit", (const Unit_sptr & (Axis::*)() const) &Axis::unit, return_value_policy<copy_const_reference>(),
          "Returns the unit object for the axis")
     .def("getValue", &Axis::getValue,
-        Axis_getValue(args("index", "vertical_index"), "Returns the value at the given point on the Axis. The vertical axis index [default=0]"))
+        Axis_getValue((arg("index"), arg("vertical_index")), "Returns the value at the given point on the Axis. The vertical axis index [default=0]"))
     .def("extractValues", &extractAxisValues, "Return a numpy array of the axis values")
     .def("setUnit", & Axis::setUnit, "Set the unit for this axis")
     .def("setValue", &Axis::setValue, "Set a value at the given index")

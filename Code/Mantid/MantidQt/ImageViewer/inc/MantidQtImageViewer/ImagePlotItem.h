@@ -51,12 +51,16 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImagePlotItem : public QwtPlotItem
 
 public:
   
+  /// Construct basic plot item with NO data to plot.
   ImagePlotItem();
   
+  /// Specify the data to be plotted and the color table to use
   void SetData( DataArray* data_array, std::vector<QRgb>* color_table );
 
+  /// Set a non-linear lookup table to scale data values before mapping to color
   void SetIntensityTable( std::vector<double>*  intensity_table );
 
+  /// Draw the image (this is called by QWT and must not be called directly.)
   virtual void draw(      QPainter    * painter,
                     const QwtScaleMap & xMap, 
                     const QwtScaleMap & yMap,

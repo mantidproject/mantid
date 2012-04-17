@@ -92,6 +92,9 @@ namespace Mantid
       this->setPropertyGroup("RunMedianDetectorTest", medianDetTestGrp);
       auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double> >();
       mustBePositiveDbl->setLower(0);
+      declareProperty("LevelsUp",0,mustBePosInt,"Levels above pixel that will be used to compute the median.\n"
+                      "If no level is specified, or 0, the median is over the whole instrument.");
+      this->setPropertyGroup("LevelsUp", medianDetTestGrp);
       declareProperty("SignificanceTest", 3.3, mustBePositiveDbl,
                       "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
                       "difference with respect to the median value must also exceed this number of error bars");
@@ -200,6 +203,7 @@ namespace Mantid
         applyMask(countsWS, maskWS);
 
         // get the relavant inputs
+        int parents = getProperty("LevelsUp");
         double significanceTest = getProperty("SignificanceTest");
         double lowThreshold = getProperty("LowThresholdFraction");
         double highThreshold = getProperty("HighThresholdFraction");
@@ -215,6 +219,7 @@ namespace Mantid
         alg->setProperty("EndWorkspaceIndex", maxIndex);
         alg->setProperty("RangeLower", rangeLower);
         alg->setProperty("RangeUpper", rangeUpper);
+        alg->setProperty("LevelsUp",parents);
         alg->setProperty("SignificanceTest", significanceTest);
         alg->setProperty("LowThreshold", lowThreshold);
         alg->setProperty("HighThreshold", highThreshold);
@@ -533,7 +538,8 @@ namespace Mantid
         PARALLEL_CHECK_INTERUPT_REGION
 
         if(medianInput.empty()){
-            throw std::out_of_range(" no single valid histohrams identified in the workspace");
+            g_log.warning("some group has no valid histograms. Will use 0 for median.");
+            medianInput.push_back(0.);
         }
 
         // We need a sorted array to calculate the median

@@ -10,7 +10,17 @@ namespace MantidQt
 namespace ImageView
 {
 
-
+/**
+ * Get a color map of the specified type, with the specified number of 
+ * colors by interpolating between key colors.
+ * @param name         The name of the color scale as listed in the
+ *                     enum ColorMaps::ColorScale
+ * @param n_colors     The number of colors to use when forming the 
+ *                     color map.  The number of colors must be at least 7
+ *                     for some of the constructed color maps.
+ * @param color_table  Vector of colors that will be cleard and filled out 
+ *                     with the requested color map.
+ */
 void ColorMaps::getColorMap( ColorScale          name, 
                              size_t              n_colors,
                              std::vector<QRgb> & color_table )

@@ -48,11 +48,11 @@ namespace MantidQt
 namespace ImageView
 {
 
-
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
 {
   public:
 
+    /// Construct a DataSource object around the specifed EventWorkspace
     EventWSDataSource( EventWorkspace_sptr ev_ws );
 
    ~EventWSDataSource();
@@ -69,6 +69,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
                               size_t  n_cols,
                               bool    is_log_x );
 
+    /// Get a list containing pairs of strings with information about x,y
     void GetInfoList( double x,
                       double y,
                       std::vector<std::string> &list );

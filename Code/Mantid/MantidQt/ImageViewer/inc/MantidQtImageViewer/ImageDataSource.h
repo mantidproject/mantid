@@ -47,17 +47,29 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDataSource
 {
   public:
 
+    /// construct data source with specified total range and data size
     ImageDataSource( double total_xmin, double total_xmax,
                      double total_ymin, double total_ymax,
                      size_t total_rows, size_t total_cols );
 
     virtual ~ImageDataSource();
 
+    /// Get the smallest 'x' value covered by the data
     virtual double GetXMin()    const;
+
+    /// Get the largest 'x' value covered by the data
     virtual double GetXMax()    const;
+
+    /// Get the smallest 'y' value covered by the data
     virtual double GetYMin()    const;
+
+    /// Get the largest 'y' value covered by the data
     virtual double GetYMax()    const;
+
+    /// Get the total number of rows of data
     virtual size_t GetNRows()   const;
+
+    /// Get the total number of columns of data
     virtual size_t GetNCols()   const;
 
     /// Get a DataArray roughly spaning the specified rectangle.  NOTE: The
@@ -74,8 +86,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDataSource
     /// Convenience method to get data covering the full range at max resolution
     virtual DataArray* GetDataArray( bool is_log_x );
 
-    /// Get list of pairs of strings to display in table, with info about data
-    /// at location x, y
+    /// Get list of pairs of strings with info about the data at location x, y
     virtual void GetInfoList( double x, 
                               double y,
                               std::vector<std::string> &list ) = 0;

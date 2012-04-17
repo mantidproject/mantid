@@ -18,12 +18,21 @@ namespace Mantid
   }
   
   /**
+   * Returns what we consider an "empty" long within a property
+   * @returns An flag value
+   */
+  long EMPTY_LONG()
+  {
+    return LONG_MAX;
+  }
+
+  /**
    * Returns what we consider an "empty" double within a property
    * @returns An flag value
    */
   double EMPTY_DBL()
   {
-      return DBL_MAX/2;
+    return DBL_MAX/2;
   }
 
 } // namespace Mantid

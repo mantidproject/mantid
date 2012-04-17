@@ -8,9 +8,10 @@
 /**
     @class ColorMaps 
   
-       This class provides convenient access to several useful color maps
-    for the ImageView data viewer.
- 
+       This class has static methods to construct some useful color scales
+    and to build a lookup table to brighten an image, so low-level 
+    intensities become more visible 
+
     @author Dennis Mikkelson 
     @date   2012-04-03 
      

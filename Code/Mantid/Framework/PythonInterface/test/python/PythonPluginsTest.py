@@ -34,7 +34,7 @@ class PythonPluginsTest(unittest.TestCase):
             plugin = file(filename, 'w')
             plugin.write(__TESTALG__)
             plugin.close()
-                
+
     def tearDown(self):
         try:
             shutil.rmtree(self._testdir)
@@ -46,7 +46,7 @@ class PythonPluginsTest(unittest.TestCase):
         self.assertTrue(len(loaded) > 0)
         expected_name = 'TestPyAlg'
         # Has the name appear in the module dictionary
-        self.assertTrue(expected_name in sys.modules)     
+        self.assertTrue(expected_name in sys.modules)
         # Do we have the registered algorithm
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
         self.assertTrue(expected_name in algs)

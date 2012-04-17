@@ -50,7 +50,15 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
         m_wsName = mcurve->workspaceName();
         m_spec = mcurve->workspaceIndex();
       }
+      else
+      {
+        return;
+      }
     }
+  }
+  else
+  {
+    return;
   }
   m_fitPropertyBrowser->getHandler()->removeAllPlots();
   m_fitPropertyBrowser->setWorkspaceName(m_wsName);

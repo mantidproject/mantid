@@ -45,6 +45,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TrackingPicker : public QwtPlotPicker
   Q_OBJECT
 
 public:
+
+  /// Construct a tracking picker to work with the specified canvas
   TrackingPicker(QwtPlotCanvas* canvas);
 
   /// Disable (or enable) position readout at cursor position, even if
@@ -53,13 +55,12 @@ public:
   void HideReadout( bool hide );
 
 signals:
+  /// This signal will be emitted for each mouse moved event
   void mouseMoved() const;
 
 protected:
 
-  // Unhide base class method (to avoid Intel compiler warning)
-//  using QwtPlotPicker::trackerText;
-
+  /// Override base class method, to emit a mousedMoved() signal for each move
   QwtText trackerText( const QPoint & point ) const;
   QwtText trackerText( const QwtDoublePoint & pos) const;
 

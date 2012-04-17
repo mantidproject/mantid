@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertFromDistribution.cpp
+	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
 	src/ConvertTableToMatrixWorkspace.cpp
 	src/ConvertToDistribution.cpp
@@ -220,6 +221,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
+	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
 	inc/MantidAlgorithms/ConvertTableToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToDistribution.h

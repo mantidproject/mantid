@@ -265,27 +265,5 @@ def translate():
         _algm_object = mtd.createUnmanagedAlgorithm(algorithm[0], max(algorithm[1]))
         create_algorithm(algorithm[0], max(algorithm[1]), _algm_object)
         create_algorithm_dialog(algorithm[0], max(algorithm[1]), _algm_object)
-            
-def fake_python_alg_functions():
-    """
-        Creates fake, no-op functions to fool imports for
-        Python algorithms. The real definitions will
-        be created after all of the algorithms have been registered
-    """
-    def create_fake_function(files):
-        def fake_function():
-            pass
-        for pyfile in files:
-            if pyfile.endswith(".py"):
-                name = pyfile.strip(".py")
-                fake_function.__name__ = name
-                if name not in globals():
-                    globals()[name] = fake_function
-    #
-    directories = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
-    for top in directories:
-        for root, dirs, files in os.walk(top):
-            create_fake_function(files)
 
 translate()
-fake_python_alg_functions()

@@ -563,6 +563,12 @@ void CommandLineInterpreter::simulateUserInput(QString & text, const int offset)
  */
 void CommandLineInterpreter::keyPressEvent(QKeyEvent* event)
 {
+  // Make sure the autocomplete box gets the events if it is active
+  if(isListActive())
+  {
+    ScriptEditor::keyPressEvent(event);
+  }
+
   if(handleKeyPress(event))
   {
     event->accept();

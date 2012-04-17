@@ -10,7 +10,22 @@ namespace MantidQt
 namespace ImageView
 {
 
-
+/**
+ * Construct the object that links the GUI components to the other specifed
+ * higher level objects.  This class just keeps pointers to the parameters.
+ * The objects passed in must be constructed elsewhere and must be deleted
+ * elsewhere, when the ImageViewer is closed.
+ *
+ * @param ui               The object containing the gui components for 
+ *                         the ImageView viewer.
+ * @param image_display    The ImageDisplay object that will dispaly the
+ *                         image
+ * @param h_graph_display  The GraphDisplay object that will display 
+ *                         horizontal cuts through the image
+ * @param v_graph_display  The GraphDisplay object that will display 
+ *                         vertical cuts through the image
+ *
+ */
 IVConnections::IVConnections( Ui_MainWindow* ui, 
                               ImageDisplay*  image_display,
                               GraphDisplay*  h_graph_display,
@@ -168,7 +183,6 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   QObject::connect(iv_ui->actionSpectrum, SIGNAL(triggered()),
                    this, SLOT(spectrum_color_scale()) );
 
-
   h_graph_picker = new TrackingPicker( iv_ui->h_graphPlot->canvas() );
   h_graph_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
   h_graph_picker->setTrackerMode(QwtPicker::ActiveOnly);
@@ -190,6 +204,7 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   QObject::connect( v_graph_picker, SIGNAL(mouseMoved()),
                     this, SLOT(v_graphPicker_moved()) );
 }
+
 
 IVConnections::~IVConnections()
 {

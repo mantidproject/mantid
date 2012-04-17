@@ -1,3 +1,6 @@
+/**
+ * File DataArray.cpp
+ */
 
 #include <iostream>
 
@@ -8,7 +11,26 @@ namespace MantidQt
 namespace ImageView
 {
 
-
+/**
+ * Construct a DataArray "wrapper" around the data and region info.  The 
+ * actual data must be provided in a one-dimensional array, with n_rows*n_cols
+ * entries.  The data corresponds to the "real" region [xmin,xmax]X[ymin,ymax].
+ * Xmin must correspond to the left edge of the first column and xmax must
+ * correspond to the right edge of the last column.  Simiarly, ymin must 
+ * correspond to the outer edge of the first row and ymax must correspond to 
+ * the outer edge of the last row.
+ *
+ * @param xmin       Left edge of data region
+ * @param xmax       Right edge of data region
+ * @param ymin       Bottom edge of data region
+ * @param ymax       Top edge of data region
+ * @param is_log_x   Flag indication whether or not the data is binned
+ *                   logarithmically in the 'x' direction.
+ * @param n_rows     Number of rows in the data array
+ * @param n_cols     Number of columns in the data array
+ * @param data       Pointer to start of memory block holding the actual 
+ *                   data as a list of floats.
+ */
 DataArray::DataArray( double xmin,     double xmax,
                       double ymin,     double ymax,
                       bool   is_log_x,
@@ -38,62 +60,102 @@ DataArray::DataArray( double xmin,     double xmax,
         data_max = value;
       index++;
     }
-/*
-   std::cout << "DataArray Constructor, data_min = " << data_min << std::endl;
-   std::cout << "DataArray Constructor, data_max = " << data_max << std::endl;
-*/
 }
 
+/**
+ * Get the value corresponding to the left edge of the array.
+ */
 double DataArray::GetXMin() const
 {
   return xmin;
 }
 
+/**
+ * Get the value corresponding to the right edge of the array.
+ */
 double DataArray::GetXMax() const
 {
   return xmax;
 }
 
+/**
+ * Get the value corresponding to the bottom edge of the array (outer edge
+ * of first row).
+ */
 double DataArray::GetYMin() const
 {
   return ymin;
 }
 
+/**
+ * Get the value corresponding to the top edge of the array (outer edge
+ * of last row).
+ */
 double DataArray::GetYMax() const
 {
   return ymax;
 }
 
+/**
+ * Check if the returned array is binned logarithmically in 'x'.
+ */
 bool DataArray::GetIsLogX() const
 {
   return is_log_x;
 }
 
+/**
+ * Get smallest value recorded in this DataArray
+ */
 double DataArray::GetDataMin() const
 {
   return data_min;
 }
 
+
+/**
+ * Get largest value recorded in this DataArray
+ */
 double DataArray::GetDataMax() const
 {
   return data_max;
 }
 
+
+/**
+ * Get the actual number of rows in this DataArray
+ *
+ */
 size_t DataArray::GetNRows() const
 {
   return n_rows;
 }
 
+
+/**
+ * Get the actual number of columns in this DataArray
+ */
 size_t DataArray::GetNCols() const
 {
   return n_cols;
 }
 
+
+/**
+ * Get the list of all values, packed in a 1-D array, in row-major order
+ */
 float * DataArray::GetData() const
 {
   return data;
 }
 
+
+/**
+ * Get the value at the specified row and column.  If the row or column
+ * value is outside of the array, a value from the edge of the array
+ * will be returned.  That is, the row and column numbers are "clamped"
+ * to always lie in the range of valid values.
+ */
 double DataArray::GetValue( int row, int col ) const
 {
   if ( row < 0 )
@@ -116,6 +178,12 @@ double DataArray::GetValue( int row, int col ) const
   return data[ row * n_cols + col ];
 }
 
+
+/**
+ * Get the value from the row and column containing the specified point.
+ * If the specified point (x,y) is off the edge of the array, a value
+ * from the edge of the array will be returned. 
+ */
 double DataArray::GetValue( double x, double y ) const
 {
   double relative_x = (x - xmin) / (xmax - xmin);
