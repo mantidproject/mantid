@@ -263,6 +263,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
 
   //Fill the list of possible relative path keys that may require conversion to absolute paths
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
+  m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
