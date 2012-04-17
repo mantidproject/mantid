@@ -64,9 +64,7 @@ class ScriptingEnv : public QObject
   /// Is the environment initialized
   bool isInitialized() const { return d_initialized; }
   /// Query if any code is currently being executed
-  virtual bool isRunning() const { return m_is_running; }
-  /// Set that a script is being executed
-  void setIsRunning(bool running) { m_is_running = running; }
+  //bool isRunning() const { return m_is_running; }
 
   /// Create a script object that is responsible for executing actual code
   virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const = 0;
@@ -125,19 +123,22 @@ protected:
   virtual bool start() { return true; }
   /// Override to perform shutdown code
   virtual void shutdown() {}
+  /// Set that a script is being executed
+   void setIsRunning(bool running) { m_is_running = running; }
+
 
   /// whether the interpreter has been successfully initialized
   bool d_initialized;
   /// the context in which we are running
   ApplicationWindow *d_parent;
-  /// Whether a script is running
-  bool m_is_running;
 
 private:
   /// Private default constructor
   ScriptingEnv();
 
 private:
+  /// Whether a script is running
+  bool m_is_running;
   int d_refcount;
   QString m_languageName;
 };

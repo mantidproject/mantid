@@ -107,11 +107,6 @@ Script *PythonScripting::newScript(const QString &name, QObject * context,
   return new PythonScript(const_cast<PythonScripting*>(this), name, interact, context);
 }
 
-bool PythonScripting::isRunning() const
-{
-  return (m_is_running );
-}
-
 /**
  * Create a code lexer for Python. Ownership of the created object is transferred to the caller.
  */
@@ -378,7 +373,7 @@ const QStringList PythonScripting::fileExtensions() const
 
 void PythonScripting::refreshAlgorithms(bool force)
 {
-  if( (force || !isRunning()) && refresh_allowed==1)
+  if(force || refresh_allowed==1)
   {
     PyRun_SimpleString("mtd._refreshPyAlgorithms()");
   }

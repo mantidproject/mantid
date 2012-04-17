@@ -4843,7 +4843,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
 
   if( m_bad_script_envs.contains(lang) ) 
   {
-    QMessageBox::information(this, "MantidPlot", QString("Previous initialization of ") + lang + QString(" failed, cannot retry."));
+    this->writeErrorToLogWindow("Previous initialization of " + lang + " failed, cannot retry.");
     return false;
   }
 
@@ -4870,7 +4870,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
     {
       delete newEnv;
       m_bad_script_envs.insert(lang);
-      QMessageBox::information(this, "MantidPlot", QString("Failed to initialize ") + lang);
+      QMessageBox::information(this, "MantidPlot", QString("Failed to initialize ") + lang + ". Please contact support.");
       return false;
     }
   }
@@ -4898,7 +4898,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
 void ApplicationWindow::showScriptingLangDialog()
 {
   // If a script is currently active, don't let a new one be selected
-  if( scriptingEnv()->isRunning() )
+  if( scriptingWindow->isExecuting() )
   {
     QMessageBox msg_box;
     msg_box.setText("Cannot change scripting language, a script is still running.");
@@ -9504,9 +9504,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-
-  // Mantid changes here
-
   // don't ask the closing sub-windows: the answer will be ignored
   MDIWindowList windows = getAllWindows();
   foreach(MdiSubWindow* w,windows)
@@ -9514,7 +9511,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     w->confirmClose(false);
   }
 
-  if( scriptingEnv()->isRunning() )
+  if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
     {
@@ -16473,12 +16470,18 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
 bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
     bool quiet, bool redirect)
 {
-  if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
+  if( code.isEmpty() ) return false;
 
   if( m_iface_script == NULL )
   {
-    setScriptingLanguage("Python");
-    m_iface_script = scriptingEnv()->newScript("<Interface>", NULL, Script::NonInteractive);
+    if( setScriptingLanguage("Python") )
+    {
+      m_iface_script = scriptingEnv()->newScript("<Interface>", NULL, Script::NonInteractive);
+    }
+    else
+    {
+      return false;
+    }
 
   }
   if( !quiet )

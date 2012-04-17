@@ -50,8 +50,6 @@ public:
   static ScriptingEnv *constructor(ApplicationWindow *parent);
   /// Destructor
   ~PythonScripting();
-  // Is a Python already executing a script
-  virtual bool isRunning() const;
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
   /// 'Fake' method needed for IPython import
