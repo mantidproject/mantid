@@ -593,6 +593,9 @@ class SNSPowderReduction2(PythonAlgorithm):
                     if mpi.world.rank == 0:
                         ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                         workspacelist.append(str(canRun))
+                else:
+                    ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                    workspacelist.append(str(canRun))
             else:
                 canRun = None
 
@@ -640,6 +643,24 @@ class SNSPowderReduction2(PythonAlgorithm):
                                 vanRun -= vnoiseRun
                                 NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                                 workspacelist.append(str(vnoiseRun))
+                        else:
+                            ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
+                            FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
+                                      Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                            try:
+                                vanDuration = vanRun.getRun().get('duration')
+                                vanDuration = vanDuration.value
+                            except:
+                                vanDuration = 1.
+                            try:
+                                vbackDuration = vnoiseRun.getRun().get('duration')
+                                vbackDuration = vbackDuration.value
+                            except:
+                                vbackDuration = 1.
+                            vnoiseRun *= (vanDuration/vbackDuration)
+                            vanRun -= vnoiseRun
+                            NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                            workspacelist.append(str(vnoiseRun))
                     else:
                         vnoiseRun = None
 
