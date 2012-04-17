@@ -63,7 +63,7 @@ ScriptFileInterpreter * MultiTabScriptInterpreter::interpreterAt(int index)
  */
 bool MultiTabScriptInterpreter::isExecuting()
 {
-  for(int i = 0; i <= count(); ++i)
+  for(int i = 0; i < count(); ++i)
   {
     if(interpreterAt(i)->isExecuting()) return true;
   }

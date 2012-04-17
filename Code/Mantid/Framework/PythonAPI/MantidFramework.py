@@ -1188,11 +1188,10 @@ class MantidPyFramework(FrameworkManager):
             self.__gui__ = gui
 
         # Run through init steps 
-        if 'mantid.kernel' not in sys.modules:
-            import mantidsimple as _mantidsimple
-            pyalg_loader = PyAlgLoader()
-            pyalg_loader.load_modules(refresh=False)
-            _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
+        import mantidsimple as _mantidsimple
+        pyalg_loader = PyAlgLoader()
+        pyalg_loader.load_modules(refresh=False)
+        _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
 
         self.__is_initialized = True
 
