@@ -99,7 +99,7 @@ private:
       //Assume this is where the mantid package is too
       std::string code = "import sys\n"
         "sys.path.append(r'" + propDir + "')\n"
-        "from mantid.api import PythonAlgorithm\n"
+        "from mantid import PythonAlgorithm\n"
         "class PyAlg(PythonAlgorithm):\n"
         "  pass\n";
       PyRun_SimpleString(code.c_str());

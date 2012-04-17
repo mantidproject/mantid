@@ -108,11 +108,10 @@ def contains_newapi_algorithm(filename):
         @returns True if a python algorithm written with the new API
         has been found.
     """
-    
     file = open(filename,'r')
     alg_found = True
     for line in reversed(file.readlines()):
-        if 'mtd.registerPyAlgorithm' in line:
+        if 'registerPyAlgorithm' in line:
             alg_found = False
             break
     file.close()
