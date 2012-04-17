@@ -34,6 +34,9 @@ namespace Mantid
   /// Returns what we consider an "empty" integer
   DLLExport int EMPTY_INT();
 
+  /// Returns what we consider an "empty" long
+  DLLExport long EMPTY_LONG();
+
   /// Return what we consider to be an empty double
   DLLExport double EMPTY_DBL();
 

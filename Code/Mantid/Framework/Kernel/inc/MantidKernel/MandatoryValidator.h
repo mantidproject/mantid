@@ -5,12 +5,41 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
-#include "MantidKernel/EmptyValues.h"
+#include <vector>
 
 namespace Mantid
 {
 namespace Kernel
 {
+  namespace Detail
+  {
+    /// Forward declare checking function
+    template<typename T>
+    bool checkIsEmpty(const T &);
+
+    /// Specialization for any vector type
+    template<typename T>
+    bool checkIsEmpty(const std::vector<T> & value)
+    {
+      return value.empty();
+    }
+
+    /// Defines the concept of emptiness
+    template<typename T>
+    struct IsEmpty
+    {
+      /**
+       * Returns true if the value is considered empty
+       * @param The value to check
+       * @return
+       */
+      static bool check(const T & value)
+      {
+        return checkIsEmpty(value);
+      }
+    };
+  }
+
 /** @class MandatoryValidator MandatoryValidator.h Kernel/MandatoryValidator.h
 
     Validator to check that a property is not left empty.
@@ -54,51 +83,9 @@ private:
    */
   std::string checkValidity(const TYPE& value) const
   {
-    if ( isEmpty(value) ) return "A value must be entered for this parameter";
+    if(Detail::IsEmpty<TYPE>::check(value)) return "A value must be entered for this parameter";
     else return "";
   }
-
-  /**
-   * Checks if a vector is empty
-   * @param value :: A vector of possible values
-   * @returns True if the vector is empty
-   */
-  template <typename T>
-  bool isEmpty(const std::vector<T> & values) const
-  {
-    return values.empty();
-  }
-
-  /**
-   * Checks if a string is empty
-   * @param value :: A test string
-   * @returns True if the vector is empty
-   */
-  bool isEmpty(const std::string & value) const
-  {
-    return value.empty();
-  }
-
-  /**
-   * Checks if an integer is empty
-   * @param value :: A value to test
-   * @returns True if the value is considered empty
-   */
-  bool isEmpty(const int & value) const
-  {
-    return (value == Mantid::EMPTY_INT());
-  }
-  /**
-   * Checks if a double is empty
-   * @param value :: A vector of possible values
-   * @returns True if the value is considered empty
-   */
-  bool isEmpty(const double & value) const
-  {
-    if( std::abs(value - Mantid::EMPTY_DBL()) < 1e-08 ) return true;
-    else return false;
-  }
-
 };
 
 } // namespace Kernel

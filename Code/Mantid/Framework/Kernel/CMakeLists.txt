@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/LogParser.cpp
 	src/Logger.cpp
 	src/MagneticIon.cpp
+	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Matrix.cpp
