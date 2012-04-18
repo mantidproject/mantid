@@ -98,7 +98,7 @@ namespace MantidQt
       QtProperty* createExponential(const QString &);
       QtProperty* createStretchedExp(const QString &);
 
-      void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, size_t, const bool tie=false);
+      void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, const std::string & pref, const bool tie=false);
       QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index);
       std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
       
