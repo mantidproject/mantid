@@ -172,7 +172,7 @@ namespace Algorithms
 
       if (chi2 > maxchi2)
       {
-        g_log.notice() << "Skip Peak " << ipk << ": chi^2 = " << chi2 << " Larger than max. allowed chi^2" << std::endl;
+        g_log.notice() << "Skip Peak " << ipk << " at " << centre << ": chi^2 = " << chi2 << " Larger than max. allowed chi^2" << std::endl;
         continue;
       }
 
@@ -192,14 +192,10 @@ namespace Algorithms
       // 4. Put to output
       std::size_t offset = (left-X.begin());
       std::size_t numY = values.size();
-      PARALLEL_FOR1(dataWS)
       for (std::size_t i = 0; i < numY; i ++)
       {
-        PARALLEL_START_INTERUPT_REGION
         dataWS->dataY(wsindex)[i + offset] += values[i];
-        PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
 
     } // for peak
 
