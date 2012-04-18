@@ -47,21 +47,21 @@ set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PRE
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
                                                     "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
-                                                    "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
+                                                    "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
 #                                                    "scriptpath=\"$(cd \"\${0%/*}\" 2> /dev/null;echo \"$PWD\"/\"\${0##*/}\")\"\n"
 #                                                    "scriptpath=`readlink -f $scriptpath`\n"
 #                                                    "scriptpath=`dirname $scriptpath`\n"
 #                                                    "echo \"script $scriptpath\"\n"
 #                                                    "MANTIDPATH=$scriptpath/${BIN_DIR}\n"
 #                                                    "echo $MANTIDPATH\n"
-#                                                    "PV_PLUGIN_PATH=$scriptpath/${PVPLUGINS_DIR}\n"
+#                                                    "PV_PLUGIN_PATH=$scriptpath/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
                                                     "PATH=$PATH:$MANTIDPATH\n"
                                                     "export MANTIDPATH PV_PLUGIN_PATH PATH\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
-                                                    "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
+                                                    "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\"\n"
                                                     "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
 )
 
@@ -80,7 +80,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
-                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
+                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
                                                              "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "fi\n"
                                                              "if [ -h /etc/profile.d/mantid.sh ]; then\n"
@@ -92,7 +92,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
-                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
+                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
                                                              "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "fi\n"
 )

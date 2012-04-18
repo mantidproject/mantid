@@ -84,7 +84,7 @@
 		    Push \\\"PV_PLUGIN_PATH\\\"
             Push \\\"A\\\"
             Push \\\"HKCU\\\"
-            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
+            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\\${PVPLUGINS_DIR}\\\"
             Call EnvVarUpdate
             Pop  \\\$0
 		
@@ -113,7 +113,7 @@
 		    Push \\\"PV_PLUGIN_PATH\\\"
             Push \\\"R\\\"
             Push \\\"HKCU\\\"
-            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
+            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\\${PVPLUGINS_DIR}\\\"
             Call un.EnvVarUpdate
             Pop  \\\$0
 		

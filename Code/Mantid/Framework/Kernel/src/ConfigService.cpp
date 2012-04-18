@@ -1367,13 +1367,13 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
 void ConfigServiceImpl::setParaViewPluginPath() const
 {
   std::string mantid_loc = this->getDirectoryOfExecutable();
-  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins");
+  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins/pvplugins");
   pv_plugin_path = pv_plugin_path.absolute();
   Poco::File pv_plugin(pv_plugin_path.toString());
   if (!pv_plugin.exists() || !pv_plugin.isDirectory())
   {
     g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");
-    pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins");
+    pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins/pvplugins");
     pv_plugin_path = pv_plugin_path.absolute();
     pv_plugin = Poco::File(pv_plugin_path.toString());
     if (!pv_plugin.exists() || !pv_plugin.isDirectory())
