@@ -192,14 +192,14 @@ namespace Algorithms
       // 4. Put to output
       std::size_t offset = (left-X.begin());
       std::size_t numY = values.size();
-//      PARALLEL_FOR1(dataWS)
+      PARALLEL_FOR1(dataWS)
       for (std::size_t i = 0; i < numY; i ++)
       {
-//        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         dataWS->dataY(wsindex)[i + offset] += values[i];
-//        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-//      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
 
     } // for peak
 
