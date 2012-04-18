@@ -63,6 +63,7 @@ namespace Algorithms
       "Negative width values indicate logarithmic binning.");
 
 
+    this->declareProperty("NumberWidths", 2., "Number of peak width to evaluate each peak for. Default=2.");
     this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
         "Output Workspace to put the calculated data.");
 
@@ -87,6 +88,7 @@ namespace Algorithms
     mInputWS = this->getProperty("InputWorkspace");
     const std::vector<double> mBinParameters = this->getProperty("BinningParameters");
 
+    mNumWidths = this->getProperty("NumberWidths");
     mGeneratePeak = this->getProperty("GeneratePeaks");
     mGenerateBackground = this->getProperty("GenerateBackground");
 
@@ -176,21 +178,28 @@ namespace Algorithms
 
       // 3. Build domain & function
       // TODO Can make this part more smart to sum over only a portion of X range
-      API::FunctionDomain1DVector domain(dataWS->dataX(wsindex));
+      const MantidVec& X = dataWS->dataX(wsindex);
+      std::vector<double>::const_iterator left = std::lower_bound(X.begin(), X.end(), centre - mNumWidths*width);
+      if (left == X.end())
+        left = X.begin();
+      std::vector<double>::const_iterator right = std::lower_bound(left + 1, X.end(), centre + mNumWidths*width);
+      API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
       API::IFunction_sptr mfunc = this->createFunction(peakfunction, height, centre, width,
           a0, a1, a2, mGeneratePeak, mGenerateBackground);
       API::FunctionValues values(domain);
       mfunc->function(domain, values);
 
       // 4. Put to output
-      PARALLEL_FOR1(dataWS)
-      for (int i = 0; i < static_cast<int>(dataWS->dataY(wsindex).size()); i ++)
+      std::size_t offset = (left-X.begin());
+      std::size_t numY = values.size();
+//      PARALLEL_FOR1(dataWS)
+      for (std::size_t i = 0; i < numY; i ++)
       {
-        PARALLEL_START_INTERUPT_REGION
-        dataWS->dataY(wsindex)[i] += values[i];
-        PARALLEL_END_INTERUPT_REGION
+//        PARALLEL_START_INTERUPT_REGION
+        dataWS->dataY(wsindex)[i + offset] += values[i];
+//        PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+//      PARALLEL_CHECK_INTERUPT_REGION
 
     } // for peak
 

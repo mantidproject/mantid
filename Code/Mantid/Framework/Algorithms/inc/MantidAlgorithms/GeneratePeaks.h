@@ -76,6 +76,7 @@ namespace Algorithms
     bool mGeneratePeak;
     bool mGenerateBackground;
     bool mNewWSFromParent;
+    double mNumWidths; ///< How many times the peak width to evaluate the function
 
     API::MatrixWorkspace_const_sptr mInputWS;
 
