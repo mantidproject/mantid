@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/Logger.h"
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -153,7 +153,6 @@ private:
   {
     return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
   }
-
 };
 
 } // namespace Kernel

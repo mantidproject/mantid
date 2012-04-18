@@ -30,9 +30,11 @@ private:
   void getTminData(const bool);
   double m_DIFCref; ///< The reference value for DIFC to filter with
   double m_K; ///< Mystery variable that I'm not sure what it is for
-  Geometry::Instrument_const_sptr m_instrument; //< The instrument
+  Geometry::Instrument_const_sptr m_instrument; ///< The instrument
+  Geometry::IObjComponent_const_sptr m_sample; ///<  The sample
   double m_L1; ///< The instrument initial flightpath
   double m_Tmin; ///< The start of the time-of-flight frame
+  double m_wavelengthMin; ///< The minimum wavelength accessible in the frame
   std::size_t m_numberOfSpectra; ///< The number of spectra in the workspace
   API::Progress* m_progress;   ///< Progress reporting
 };

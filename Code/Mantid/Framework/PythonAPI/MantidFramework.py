@@ -1188,11 +1188,10 @@ class MantidPyFramework(FrameworkManager):
             self.__gui__ = gui
 
         # Run through init steps 
-        if 'mantid.kernel' not in sys.modules:
-            import mantidsimple as _mantidsimple
-            pyalg_loader = PyAlgLoader()
-            pyalg_loader.load_modules(refresh=False)
-            _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
+        import mantidsimple as _mantidsimple
+        pyalg_loader = PyAlgLoader()
+        pyalg_loader.load_modules(refresh=False)
+        _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
 
         self.__is_initialized = True
 
@@ -1423,10 +1422,6 @@ class PyAlgLoader(object):
         if len(dir_list) == 0: 
             mtd.sendLogMessage('PyAlgLoader.load_modules: no python algorithm directory found')
             return
-
-        # Disable factory updates while everything is (re)imported
-        mtd._observeAlgFactoryUpdates(False,False)
-        
         # Check defined Python algorithm directories and load any modules
         changes = False
         for path in dir_list:
@@ -1434,10 +1429,6 @@ class PyAlgLoader(object):
                 continue
             if self._importAlgorithms(path, refresh):
                 changes = True
-
-        # Now connect the relevant signals to monitor for algorithm factory updates
-        mtd._observeAlgFactoryUpdates(True, (refresh and changes))
-
 #
 # ------- Private methods --------------
 #
@@ -1486,24 +1477,13 @@ class PyAlgLoader(object):
 
     def _containsOldAPIAlgorithm(self, modfilename):
         file = open(modfilename,'r')
-        line_count = 0
-        alg_found = False
-        while line_count < self.__CHECKLINES__:
-            line = file.readline()
-            # EOF
-            if line == '':
+        alg_found = True
+        for line in reversed(file.readlines()):
+            if 'registerAlgorithm' in line:
                 alg_found = False
                 break
-            if 'mantid' in line and 'mantidsimple' not in line:
-                alg_found = False
-                break
-            if line.rfind('PythonAlgorithm') >= 0:
-                alg_found = True
-                break
-            line_count += 1
         file.close()
         return alg_found
-    
 #-------------------------------------------------------------------------------------------
 ##
 # PyAlgorithm class

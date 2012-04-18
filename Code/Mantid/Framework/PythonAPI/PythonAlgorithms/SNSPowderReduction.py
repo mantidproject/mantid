@@ -194,6 +194,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Reference total flight path for frame unwrapping. Zero skips the correction")
         self.declareProperty("LowResRef", 0., 
                              Description="Reference DIFC for resolution removal. Zero skips the correction")
+        self.declareProperty("CropWavelengthMin", 0.,
+                             Description="Crop the data at this minimum wavelength. Overrides LowResRef.")
         self.declareProperty("RemovePromptPulseWidth", 0.0,
                              Description="Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
         self.declareProperty("FilterByTimeMin", 0.,
@@ -206,10 +208,6 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
-        self.declareProperty("CropWavelengthMin", 0.,
-                             Description="Crop the data at this minimum wavelength.")
-        self.declareProperty("CropWavelengthMax", 0.,
-                             Description="Crop the data at this maximum wavelength. Data is not cropped unless max > min")
         self.declareProperty("StripVanadiumPeaks", True,
                              Description="Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, Description="Default=7")
@@ -350,14 +348,10 @@ class SNSPowderReduction(PythonAlgorithm):
         if not info.has_dspace:
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
-        if self._cropWavelength is not None:
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="Wavelength", EMode="Elastic")
-            CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp,
-                          XMin=self._cropWavelength[0], XMax=self._cropWavelength[1])
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing", EMode="Elastic")
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
-        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+        wavelengthMin = self.getProperty("CropWavelengthMin")
+        if (LRef > 0.) or (DIFCref > 0.) or (wavelengthMin>0): # super special Jason stuff
             kwargs = {}
             try:
                 if info.tmin > 0:
@@ -369,11 +363,14 @@ class SNSPowderReduction(PythonAlgorithm):
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
             if LRef > 0:
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef, **kwargs)
-            if DIFCref > 0:
+            if DIFCref > 0. or wavelengthMin > 0.:
                 if kwargs.has_key("Tmax"):
                     del kwargs["Tmax"]
-                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
-                                K=3.22, **kwargs)
+                if wavelengthMin > 0.:
+                    RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, MinWavelength=wavelengthMin, **kwargs)
+                else:
+                    RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
+                                    K=3.22, **kwargs)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         if info.has_dspace:
             self.log().information("d-Spacing binning: " + str(binning))
@@ -473,9 +470,6 @@ class SNSPowderReduction(PythonAlgorithm):
         calib = self.getProperty("CalibrationFile")
         self._outDir = self.getProperty("OutputDirectory")
         self._outTypes = self.getProperty("SaveAs")
-        self._cropWavelength = [self.getProperty("CropWavelengthMin"), self.getProperty("CropWavelengthMax")]
-        if self._cropWavelength[0] >= self._cropWavelength[1]:
-            self._cropWavelength = None
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
         preserveEvents = self.getProperty("PreserveEvents")

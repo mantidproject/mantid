@@ -4,6 +4,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
+#include <typeinfo>
 
 namespace Mantid
 {
@@ -111,7 +112,7 @@ namespace Mantid
        */
       ElementType_sptr extractValue(const boost::any & value) const
       {
-        if( value.type() == typeid(DataItem_sptr) )
+        if( value.type() == m_dataitemTypeID )
         {
           return extractFromDataItem(value);
         }
@@ -152,7 +153,13 @@ namespace Mantid
           throw std::invalid_argument("Value was not a shared_ptr type");
         }
       }
+      /// Typeid of DataItem_sptr
+      static const std::type_info & m_dataitemTypeID;
     };
+
+    /// Intialize the DataItem_sptr typeinfo
+    template<typename T>
+    const std::type_info & TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID = typeid(boost::shared_ptr<DataItem>);
   }
 }
 

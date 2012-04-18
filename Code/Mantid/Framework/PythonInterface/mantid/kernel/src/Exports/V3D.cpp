@@ -14,6 +14,9 @@ void export_V3D()
     .def("X", &V3D::X, return_value_policy< copy_const_reference >(), "Returns the X coordinate")
     .def("Y", &V3D::Y, return_value_policy< copy_const_reference >(), "Returns the Y coordinate")
     .def("Z", &V3D::Z, return_value_policy< copy_const_reference >(), "Returns the Z coordinate")
+    .def("getX", &V3D::X, return_value_policy< copy_const_reference >(), "Returns the X coordinate") // Traditional name
+    .def("getY", &V3D::Y, return_value_policy< copy_const_reference >(), "Returns the Y coordinate") // Traditional name
+    .def("getZ", &V3D::Z, return_value_policy< copy_const_reference >(), "Returns the Z coordinate") // Traditional name
     .def("distance", &V3D::distance, "Returns the distance between this vector and another")
     .def("angle", &V3D::angle, "Returns the angle between this vector and another")
     .def("zenith", &V3D::zenith, "Returns the zenith between this vector and another")

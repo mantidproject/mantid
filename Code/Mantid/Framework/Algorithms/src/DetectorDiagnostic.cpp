@@ -538,7 +538,7 @@ namespace Mantid
         PARALLEL_CHECK_INTERUPT_REGION
 
         if(medianInput.empty()){
-            g_log.warning("some group has no valid histograms. Will use 0 for median.");
+            g_log.information("some group has no valid histograms. Will use 0 for median.");
             medianInput.push_back(0.);
         }
 

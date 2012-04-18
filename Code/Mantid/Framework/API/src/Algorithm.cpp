@@ -229,19 +229,22 @@ namespace Mantid
       g_log.setName(this->name());
       try
       {
-        // Invoke init() method of the derived class inside a try/catch clause
         try
         {
           this->init();
         }
         catch(std::runtime_error& ex)
         {
-          g_log.error()<<"Error initializing main algorithm"<<ex.what();
+          g_log.error() << "Error initializing " << this->name() << " algorithm. " << ex.what();
           throw;
         }
 
         // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
         setInitialized();
+      }
+      catch(std::runtime_error& ex)
+      {
+        throw;
       }
       // Unpleasant catch-all! Along with this, Gaudi version catches GaudiException & std::exception
       // but doesn't really do anything except (print fatal) messages.
