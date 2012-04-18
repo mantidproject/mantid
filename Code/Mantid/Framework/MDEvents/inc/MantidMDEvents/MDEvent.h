@@ -296,8 +296,8 @@ namespace MDEvents
 
         // Create the event with signal, error squared,
         // the runIndex, the detectorID, and the centers
-        events.push_back( MDEvent<nd>( float(data[ii]), float(data[ii + 1]),
-            uint16_t(data[ii + 2]), int32_t(data[ii+3]), centers) );
+        events.emplace_back( float(data[ii]), float(data[ii + 1]),
+            uint16_t(data[ii + 2]), int32_t(data[ii+3]), centers );
       }
 
       // Release the memory (all has been COPIED into MDLeanEvent's)
