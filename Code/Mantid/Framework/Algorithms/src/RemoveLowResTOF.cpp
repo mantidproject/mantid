@@ -6,10 +6,12 @@
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include <limits>
 #include <map>
 #include <math.h>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -75,7 +77,7 @@ void RemoveLowResTOF::init()
 
   auto validator = boost::make_shared<BoundedValidator<double> >();
   validator->setLower(0.01);
-  declareProperty("ReferenceDIFC", 0.0, validator,
+  declareProperty("ReferenceDIFC", Mantid::EMPTY_DBL(), validator,
     "The DIFC value for the reference" );
 
   declareProperty("K", 3.22, validator,
@@ -83,6 +85,13 @@ void RemoveLowResTOF::init()
 
   declareProperty("Tmin", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used." );
+  declareProperty("MinWavelength", Mantid::EMPTY_DBL(), validator,
+                  "The minimum wavelength for measurement. This overides all other parameters if specified.");
+
+  // hide things when people cjoose the minimum wavelength
+  setPropertySettings("ReferenceDIFC", new EnabledWhenProperty("MinWavelength", IS_DEFAULT));
+  setPropertySettings("K", new EnabledWhenProperty("MinWavelength", IS_DEFAULT));
+  setPropertySettings("Tmin", new EnabledWhenProperty("MinWavelength", IS_DEFAULT));
 }
 
 void RemoveLowResTOF::exec()
@@ -93,8 +102,8 @@ void RemoveLowResTOF::exec()
   // without the primary flight path the algorithm cannot work
   try {
     m_instrument = m_inputWS->getInstrument();
-    Geometry::IObjComponent_const_sptr sample = m_instrument->getSample();
-    m_L1 = m_instrument->getSource()->getDistance(*sample);
+    m_sample = m_instrument->getSample();
+    m_L1 = m_instrument->getSource()->getDistance(*m_sample);
   }
   catch (NotFoundError &)
   {
@@ -104,6 +113,7 @@ void RemoveLowResTOF::exec()
 
   m_DIFCref = this->getProperty("ReferenceDIFC");
   m_K = this->getProperty("K");
+  m_wavelengthMin = this->getProperty("MinWavelength");
 
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
 
@@ -222,7 +232,7 @@ void RemoveLowResTOF::execEvent()
 double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex)
 {
   const Kernel::V3D& sourcePos = m_instrument->getSource()->getPos();
-  const Kernel::V3D& samplePos = m_instrument->getSample()->getPos();
+  const Kernel::V3D& samplePos = m_sample->getPos();
   const Kernel::V3D& beamline = samplePos - sourcePos;
   double beamline_norm = 2. * beamline.norm();
 
@@ -231,15 +241,35 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex)
   const std::set<detid_t> & detSet = m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
   detNumbers.assign(detSet.begin(), detSet.end());
 
-  std::map<detid_t,double> offsets; // just an empty offsets map
-  double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
-                                     m_instrument, detNumbers, offsets);
+  double tmin = 0.;
+  if (isEmpty(m_wavelengthMin))
+  {
+    std::map<detid_t,double> offsets; // just an empty offsets map
+    double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
+                                               m_instrument, detNumbers, offsets);
 
-  // this is related to the reference tof
-  double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
-  if (sqrtdmin <= 0.)
-    return 0.;
-  double tmin = sqrtdmin * sqrtdmin / dspmap;
+    // this is related to the reference tof
+    double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
+    if (sqrtdmin <= 0.)
+      return 0.;
+    tmin = sqrtdmin * sqrtdmin / dspmap;
+  }
+  else
+  {
+    double l2 = 0;
+    for (std::set<detid_t>::const_iterator it = detSet.begin(); it != detSet.end(); ++it)
+    {
+      l2 += m_instrument->getDetector(*it)->getDistance(*m_sample);
+    }
+    l2 /= detSet.size();
+
+    Kernel::Unit_sptr wavelength = UnitFactory::Instance().create("Wavelength");
+    // unfortunately there isn't a good way to convert a single value
+    std::vector<double> X(1), temp(1);
+    X[0] = m_wavelengthMin;
+    wavelength->toTOF(X, temp, m_L1, l2, 0., 0., 0., 0.);
+    tmin = X[0];
+  }
 
   g_log.debug() << "tmin[" << workspaceIndex << "] " << tmin << "\n";
   return tmin;

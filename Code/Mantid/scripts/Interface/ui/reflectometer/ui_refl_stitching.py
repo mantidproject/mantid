@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_stitching.ui'
 #
-# Created: Tue Apr 10 13:22:26 2012
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Tue Apr 17 12:56:48 2012
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -148,8 +148,35 @@ class Ui_Frame(object):
         self.save_btn.setObjectName("save_btn")
         self.horizontalLayout_2.addWidget(self.save_btn)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
-        spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem5)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        spacerItem5 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem5)
+        self.ref_pol_label = QtGui.QLabel(self.scrollAreaWidgetContents)
+        self.ref_pol_label.setObjectName("ref_pol_label")
+        self.horizontalLayout_5.addWidget(self.ref_pol_label)
+        self.off_off_radio = QtGui.QRadioButton(self.scrollAreaWidgetContents)
+        self.off_off_radio.setMinimumSize(QtCore.QSize(100, 0))
+        self.off_off_radio.setChecked(True)
+        self.off_off_radio.setObjectName("off_off_radio")
+        self.horizontalLayout_5.addWidget(self.off_off_radio)
+        self.on_off_radio = QtGui.QRadioButton(self.scrollAreaWidgetContents)
+        self.on_off_radio.setMinimumSize(QtCore.QSize(100, 0))
+        self.on_off_radio.setObjectName("on_off_radio")
+        self.horizontalLayout_5.addWidget(self.on_off_radio)
+        self.off_on_radio = QtGui.QRadioButton(self.scrollAreaWidgetContents)
+        self.off_on_radio.setMinimumSize(QtCore.QSize(100, 0))
+        self.off_on_radio.setObjectName("off_on_radio")
+        self.horizontalLayout_5.addWidget(self.off_on_radio)
+        self.on_on_radio = QtGui.QRadioButton(self.scrollAreaWidgetContents)
+        self.on_on_radio.setMinimumSize(QtCore.QSize(100, 0))
+        self.on_on_radio.setObjectName("on_on_radio")
+        self.horizontalLayout_5.addWidget(self.on_on_radio)
+        spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem6)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_5)
+        spacerItem7 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem7)
         self.horizontalLayout_6.addLayout(self.verticalLayout_3)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -188,4 +215,9 @@ class Ui_Frame(object):
         self.pick_unity_range_btn.setText(QtGui.QApplication.translate("Frame", "Pick range", None, QtGui.QApplication.UnicodeUTF8))
         self.auto_scale_btn.setText(QtGui.QApplication.translate("Frame", "Auto scale", None, QtGui.QApplication.UnicodeUTF8))
         self.save_btn.setText(QtGui.QApplication.translate("Frame", "Save", None, QtGui.QApplication.UnicodeUTF8))
+        self.ref_pol_label.setText(QtGui.QApplication.translate("Frame", "Reference cross-section:", None, QtGui.QApplication.UnicodeUTF8))
+        self.off_off_radio.setText(QtGui.QApplication.translate("Frame", "Off-Off", None, QtGui.QApplication.UnicodeUTF8))
+        self.on_off_radio.setText(QtGui.QApplication.translate("Frame", "On-Off", None, QtGui.QApplication.UnicodeUTF8))
+        self.off_on_radio.setText(QtGui.QApplication.translate("Frame", "Off-On", None, QtGui.QApplication.UnicodeUTF8))
+        self.on_on_radio.setText(QtGui.QApplication.translate("Frame", "On-On", None, QtGui.QApplication.UnicodeUTF8))
 

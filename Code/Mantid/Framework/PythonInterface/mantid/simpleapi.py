@@ -471,9 +471,12 @@ def translate():
     for name, versions in algs.iteritems():
         if name == "Load":
             continue
-        # Create the algorithm object
-        _algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
-        _algm_object.initialize()
+        try:
+            # Create the algorithm object
+            _algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
+            _algm_object.initialize()
+        except Exception:
+            continue
         create_algorithm(name, max(versions), _algm_object)
         create_algorithm_dialog(name, max(versions), _algm_object)
 

@@ -52,7 +52,6 @@ class muParserScripting: public ScriptingEnv
     muParserScripting(ApplicationWindow *parent) : ScriptingEnv(parent, langName) { d_initialized=true; }
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
-  bool isRunning() const { return true; }
   Script *newScript(const QString &name, QObject * context, const Script::InteractionType) const
   {
     return new muParserScript(const_cast<muParserScripting*>(this), name, context);

@@ -29,22 +29,23 @@ def get_default_python_api():
         return api_version
 
 if __name__ == '__main__':
+    # Make Mantid available
+    from MantidFramework import *
+    # Initialize the Mantid framework
+    mtd.initialise()
+    # For some reason the algorithm definitions are not available within IPython
+    # Adding this fixes that and appears to do no harm elsewhere
+    from mantidsimple import *
     # Make Mantid available without requiring users to import scripts
     _api = get_default_python_api()
-    if _api == 1:
-        # Make Mantid available
-        from MantidFramework import *
-        # Initialize the Mantid framework
-        mtd.initialise()
-        # For some reason the algorithm definitions are not available within IPython
-        # Adding this fixes that and appears to do no harm elsewhere
-        from mantidsimple import *
-    elif _api == 2:
-        # Create simple API
+    if _api == 2:
+        # Put the new one on top
         from mantid import *
-        from mantid.simpleapi import * 
+        from mantid.simpleapi import *
+    elif _api != 1:
+        raise RuntimeError("Unknown Python API version requested: %d" % _api)
     else:
-        raise Runtime("Unknown Python API version requested: %d" % _api)
+        pass
 
     # Import MantidPlot python commands
     from mantidplot import *

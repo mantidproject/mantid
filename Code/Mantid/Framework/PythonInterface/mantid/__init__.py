@@ -83,7 +83,6 @@ import sys as _sys
 import simpleapi as _simpleapi
 
 _simpleapi.mockout_api()
-if 'MantidFramework' not in _sys.modules: # Just while the other API is still around
-    _plugins.load(config['pythonalgorithms.directories'])
-    # Now everything is loaded create the proper definitions
-    _simpleapi.translate()
+_plugins.load(config['pythonalgorithms.directories'])
+# Now everything is loaded create the proper definitions
+_simpleapi.translate()
