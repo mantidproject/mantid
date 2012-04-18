@@ -74,49 +74,49 @@ namespace Mantid
       // The sets will still need to be public
 
       /// return incident energy of run
-      double getEi();
+      double getEi() const;
       /// return psi angle of run
-      double getPsi();
+      double getPsi() const;
       /// return elo, lower energy bound, only used in in simulation of SPE data
       double getElo();
       /// return ehi, upper energy bound
       double getEhi();
       /// return de of run
-      double getDe();
+      double getDe() const;
       /// return x0 of run
-      double getX0();
+      double getX0() const;
       /// return xa of run
-      double getXa();
+      double getXa() const;
       /// return x1 of run
-      double getX1();
+      double getX1() const;
       /// return wa of run (aperture values)
-      double getWa();
+      double getWa() const;
       /// return ha of run
-      double getHa();
+      double getHa() const;
       /// return s1 of run (moderator model values)
-      double getS1();
+      double getS1() const;
       /// return s2 of run
-      double getS2();
+      double getS2() const;
       /// return s3 of run
-      double getS3();
+      double getS3() const;
       /// return s3 of run
-      double getS4();
+      double getS4() const;
       /// return s5 of run
-      double getS5();
+      double getS5() const;
       /// return thetam of run (moderator angle)
-      double getThetam();
+      double getThetam() const;
       /// return modModel of run
-      int getModModel();
+      int getModModel() const;
       /// return pslit of run chopper
-      double getPslit();
+      double getPslit() const;
       /// return radius of run chopper
-      double getRadius();
+      double getRadius() const;
       /// return rho of run chopper
-      double getRho();
-      /// return hz of run chopper
-      double getHz();
+      double getRho() const;
+      /// return angular velocity of run chopper
+      double getAngVel() const;
       /// return tjit of chopper
-      double getTjit();
+      double getTjit() const;
       /// return as of run sample unit cell data
       double getAs();
       /// return bs of run sample
@@ -228,6 +228,8 @@ namespace Mantid
       void setRunLatticeMatrices( const boost::shared_ptr<Mantid::Geometry::OrientedLattice> lattice);
 
       void setTransforms();
+      const Mantid::Kernel::DblMatrix & getSMat() const;
+      const Mantid::Kernel::DblMatrix & getCubInvMat() const;
 
       void readData(const std::string file);
       void writeData(const std::string file);
@@ -283,6 +285,8 @@ namespace Mantid
 
       /// Get the mosaic parameters eta2, eta3 given 2 uniform random variables [0,1]
       void getEta23( const double ranvar1, const double ranvar2, double & eta2, double & eta3) const;
+      /// set Chopper times
+      void setTauChopperSignal();
 
     protected:
       double areaIK(const double x, const double tauF, const double tauS, const double r) const;
@@ -290,7 +294,6 @@ namespace Mantid
       double zeroBrent ( const double a, const double b, const double t /*, double ( *f) ( double x )*/ ) const;
       double tChop(const double pSlit, const double radius, const double rho, const double angVel, const double eI ) const;
       double gsqrChop (const double pSlit, const double radius, const double rho, const double angVel, const double eI) const;
-      void setTauChopperSignal();
 
     private:
       /// @cond
@@ -316,7 +319,6 @@ namespace Mantid
       double m_pslit;
       double m_radius;
       double m_rho;
-      double m_hz;
       double m_angVel;
       double m_tjit;
       double m_as;
@@ -348,12 +350,15 @@ namespace Mantid
       double m_temp;
       double m_eta;
       double m_eta_sig;
-      double m_dtChopEff;
-      double m_tjitSig;
       bool m_moderatorChange;
       bool m_chopChange;
       double m_tauChopperSignal, m_tauChopperEffective;
       mutable double m_tauF, m_tauS, m_r, m_offset;
+      mutable std::vector<double> m_areaToTIKLookup;
+      int m_modLookupRes;
+      void initModTime() const;
+      Mantid::Kernel::DblMatrix m_sMat;
+      Mantid::Kernel::DblMatrix m_cubInvMat;
 
       /// @endcond
 

@@ -45,7 +45,8 @@ namespace Mantid
         /**
         * sqw_broad model 601 from tobyfit
         */
-        void CobaltSpinWaveDSHO::userSqw(const std::vector<double> & params, const std::vector<double> & qE, std::vector<double> & result) const
+        void CobaltSpinWaveDSHO::userSqw(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run, const std::vector<double> & params,
+                                         const std::vector<double> & qE, std::vector<double> & result) const
         //double CobaltSpinWaveDSHO::sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
         //    const double temp, const Kernel::Matrix<double> & ubinv) const
         {
@@ -53,7 +54,7 @@ namespace Mantid
             const double eps = qE[3];
             Mantid::Kernel::V3D qlab=Mantid::Kernel::V3D(qE[0],qE[1],qE[2]);
             const double qsqr = qlab.norm2();
-            const double temp=0.0; //TODO set properly
+            const double temp=run->getTemp();
             // Get Q in r.l.u. using the uBInv matrix for this run:
             //Mantid::Kernel::V3D qrlu = m_runData->uBInv()*qlab;
             const double qh = qlab[0]; //TODO Fix this by using correct transform from lab to hkl
@@ -95,12 +96,12 @@ namespace Mantid
             result.push_back(weight);
         }
         // read parameter values - don't call every time
-        void CobaltSpinWaveDSHO::getParams() const
+        void CobaltSpinWaveDSHO::getParams(std::vector<double> & params) const
         {
-            m_amplitude = getParameter("Amplitude");
-            m_p12SJAA = getParameter("12SJ_AA");
-            m_p12SJAB = getParameter("12SJ_AB");
-            m_gamma = getParameter("Gamma");
+            params.push_back(getParameter("Amplitude"));
+            params.push_back(getParameter("12SJ_AA"));
+            params.push_back(getParameter("12SJ_AB"));
+            params.push_back(getParameter("Gamma"));
         }
     }
 }

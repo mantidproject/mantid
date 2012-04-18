@@ -11,7 +11,7 @@ namespace Mantid
     namespace MDAlgorithms
     {
         /**
-        Foreground simulation using a Cobalt Spin Wave model with DSHO damping
+        Foreground simulation using a Cobalt Spin Wave model with DSHO damping (601 in TF)
         Works out the cobalt acoustic and optic magnon dispersion relations given the momentum transfer
         in r.l.u. (note that Q can be unreduced or reduced) and the exchange constants SJ1, SJ2 (i.e.
         12*S*J1 and 12*S*J2) for nearest neighbour interaction for A-A and A-B respectively. Also
@@ -66,10 +66,10 @@ namespace Mantid
             //        const double temp, const Kernel::Matrix<double> & ubinv) const;
         protected:
             bool userModelIsBroad() const;
-            void userSqw(const std::vector<double> & params, const std::vector<double> & qE, std::vector<double> & result) const;
-
+            void userSqw(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run, const std::vector<double> & params,
+                         const std::vector<double> & qE, std::vector<double> & result) const;
             /// load parameter values into local memory
-            void getParams() const;
+            void getParams(std::vector<double> & params) const;
         private:
             /// model amplitude
             mutable double m_amplitude;

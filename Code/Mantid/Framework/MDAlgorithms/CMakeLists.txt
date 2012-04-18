@@ -111,10 +111,10 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
-	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
+	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertToDetectorFaceMDTest.h	
 	test/ConvertEventsToMDEventsTest.h

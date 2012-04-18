@@ -84,7 +84,7 @@ public:
     TS_ASSERT_DELTA(rParam2->getPslit(),2.28e-3,1e-5);
     TS_ASSERT_DELTA(rParam2->getRadius(),49.e-3,1e-5);
     TS_ASSERT_DELTA(rParam2->getRho(),1300.e-3,1e-5);
-    TS_ASSERT_DELTA(rParam2->getHz(),150.,1e-5);
+    TS_ASSERT_DELTA(rParam2->getAngVel(),150.*2*M_PI,1e-5);
     TS_ASSERT_DELTA(rParam2->getTjit(),0.,1e-5);
 
     TS_ASSERT_DELTA(rParam2->getAs(),3.87,1e-5);
@@ -116,9 +116,9 @@ public:
     TS_ASSERT_DELTA(rParam2->getYk(),1.,1e-5);
     TS_ASSERT_DELTA(rParam2->getYl(),0.,1e-5);
 
-    TS_ASSERT_DELTA(rParam2->getSx(),10.,1e-5);
-    TS_ASSERT_DELTA(rParam2->getSy(),14.,1e-5);
-    TS_ASSERT_DELTA(rParam2->getSz(),18.,1e-5);
+    TS_ASSERT_DELTA(rParam2->getSx(),10.e-3,1e-8);
+    TS_ASSERT_DELTA(rParam2->getSy(),14.e-3,1e-8);
+    TS_ASSERT_DELTA(rParam2->getSz(),18.e-3,1e-8);
 
     TS_ASSERT_EQUALS(rParam2->getIsam(),1);
 
@@ -137,6 +137,18 @@ public:
     TS_ASSERT_DELTA(rParam2->moderatorDepartTime(0.5),-4.4175090026406118e-6,1e-10);
     TS_ASSERT_DELTA(rParam2->moderatorDepartTime(0.25),-1.7249099699136883e-5,1e-10);
     TS_ASSERT_DELTA(rParam2->moderatorDepartTime(0.75),1.24743490059619e-5,1e-10);
+
+    // test lookup table for time - look up is order of magnitude faster and accurate apart
+    // from end points. Table uses 1001 points so each .0005 is a mid point
+    double t0 =rParam2->areaToTIK(0.5005,rParam2->getS1(),rParam2->getS2(),rParam2->getS3());
+    double tl = rParam2->moderatorTimeLookUp(0.5005);
+    TS_ASSERT_DELTA((t0-tl),0,1e-5);
+    t0 =rParam2->areaToTIK(0.9995,rParam2->getS1(),rParam2->getS2(),rParam2->getS3());
+    tl = rParam2->moderatorTimeLookUp(0.9995);
+    TS_ASSERT_DELTA((t0-tl),0,0.095); // this last mid-point is 11% out
+    t0 =rParam2->areaToTIK(0.0005,rParam2->getS1(),rParam2->getS2(),rParam2->getS3());
+    tl = rParam2->moderatorTimeLookUp(0.0005);
+    TS_ASSERT_DELTA((t0-tl),0,0.02); // this first mid point is 59% out but is rarely used
 
     TS_ASSERT_DELTA(rParam2->tridev(0.00),-1.00              ,1e-10);
     TS_ASSERT_DELTA(rParam2->tridev(0.25),-0.2928932188134524,1e-10);
@@ -220,16 +232,67 @@ public:
     TS_ASSERT_DELTA(rParam4->energyResolutionModChop(197., 6.034),7.1622982277,4e-7 )
   }
 
-  void testPrivate()
+  void testUBmatrix()
   {
+    // TF demo data with the U,V vectors rotated to Mantid coords (beam z, y up)
     rParam3 = boost::shared_ptr<RunParam> (new RunParam(
         45., 45., 5., 42.,
         0.5, 10., 7.19, 1.82,
         66.67, 66.67, 13.55314, 50.,
         0., 0., 0., 26.7,
         1, 2.28, 49., 1300.,
-        150., 0., 3., 3.,
-        3., 90., 90., 50.,
+        150., 0., 3.87, 3.87,
+        3.87, 90., 90., 90.,
+        1., 0., 0., 0., 1., 0.,
+        0., 0., 0., 0.,
+        1., 1.,0., -1., 1., 0.,
+        10., 14., 18., 1,
+        10., 0.5
+    ));
+    rParam4 = boost::shared_ptr<RunParam> (new RunParam(
+        447., -90., 0., 0., 0., // ei, psi, elo, ehi, de
+                   10.1, 8.11, 1.9, 70.13, 70.13, //x0,xa,x1,wa,ha
+                   3.31, 0., 0., 0., 0., 32., //s1-5, theta
+                   1, //imod
+                   2.899, 49., 1300., 600., 0.0, //pslit,radius,rho,hz,tjit
+                   2.507, 2.507, 4.069, 90., 90., 120., //as,ab,cs,aa,bb,cc
+                   //1., 0., 0., 0., 0., 1., //uhkl,vhkl
+                   0., 0., 1., 0., 1., 0., // rot to MTF coords
+                   0., 0., 0., 0.511967229831443, // omega, gs,gl,dpsi
+                   0., 0., 0., 0., 0., 0., //xhkjl,yhkl
+                   0., 0., 0., 0, //sxyz, isam
+                   10., 0.0 //temp
+    ));
+    rParam3->setTransforms();
+    TS_ASSERT_DELTA(rParam3->getCubInvMat()[0][0],0.435528,1e-5)
+    TS_ASSERT_DELTA(rParam3->getCubInvMat()[0][2],0.435528,1e-5)
+    TS_ASSERT_DELTA(rParam3->getCubInvMat()[2][1],0.61593,1e-5)
+    TS_ASSERT_DELTA(rParam3->getSMat()[0][2],1.,1e-7)
+    TS_ASSERT_DELTA(rParam3->getSMat()[1][1],1.,1e-7)
+    TS_ASSERT_DELTA(rParam3->getSMat()[2][0],-1.,1e-7)
+    rParam4->setTransforms();
+    TS_ASSERT_DELTA(rParam4->getCubInvMat()[0][0],0.,1e-7)
+    TS_ASSERT_DELTA(rParam4->getCubInvMat()[0][1],-0.399001,1e-5)
+    TS_ASSERT_DELTA(rParam4->getSMat()[0][0],1.,1e-7)
+    /*
+    std::cout << "\ncubinvmat " << rParam3->getCubInvMat() <<"\n";
+    std::cout << "smat " << rParam3->getSMat() <<"\n";
+    std::cout << "cubinvmat " << rParam4->getCubInvMat() <<"\n";
+    std::cout << "smat " << rParam4->getSMat() <<"\n";
+    */
+
+  }
+  void testUPrivate()
+  {
+    // TF demo data with the U,V vectors rotated to Mantid coords (beam z, y up)
+    rParam3 = boost::shared_ptr<RunParam> (new RunParam(
+        45., 45., 5., 42.,
+        0.5, 10., 7.19, 1.82,
+        66.67, 66.67, 13.55314, 50.,
+        0., 0., 0., 26.7,
+        1, 2.28, 49., 1300.,
+        150., 0., 3.87, 3.87,
+        3.87, 90., 90., 90.,
         1., 0., 0., 0.,
         1., 0., 0., 0.,
         0., 0., 1., 1.,
@@ -237,8 +300,25 @@ public:
         10., 14., 18., 1,
         10., 0.5
     ));
+    rParam4 = boost::shared_ptr<RunParam> (new RunParam(
+        45., 45., 5., 42.,
+        0.5, 10., 7.19, 1.82,
+        66.67, 66.67, 13.55314, 50.,
+        0., 0., 0., 26.7,
+        1, 2.28, 49., 1300.,
+        150., 0., 3.87, 3.87,
+        3.87, 90., 90., 90.,
+        0., 0., 1., 1.,
+        0., 0., 0., 0.,
+        0., 0., 1., 0.,
+        1., 1., 0., -1.,
+        10., 14., 18., 1,
+        10., 0.5
+    ));
 
     // experimental testing to be replaced later
+    rParam3->setTransforms();
+    rParam4->setTransforms();
     OrientedLattice myLat;
     boost::shared_ptr<OrientedLattice> oLptr = boost::shared_ptr<OrientedLattice> (new OrientedLattice(3.87,3.87,3.87,90.,90.,90.));
     DblMatrix ub=myLat.getUB(); //ub.print();
