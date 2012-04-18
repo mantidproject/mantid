@@ -1157,6 +1157,11 @@ class MantidPyFramework(FrameworkManager):
         for name in ws_names:
             yield mtd[name]    
 
+    def __contains__(self, key):
+        """Returns true if the key is a known workspace in the ADS
+        """
+        return mtd.workspaceExists(key)
+
     ###########################################################################
     # Framework interface
     ###########################################################################

@@ -91,31 +91,6 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         self._do_exec_time_props_test(simpleapi.LoadRaw)
-        
-    def test_Load_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
-        self._do_exec_time_props_test(simpleapi.Load)
-    
-    def test_Load_call_with_just_filename_executes_correctly(self):
-        try:
-            raw = simpleapi.Load('IRS21360.raw')
-        except RuntimeError:
-            self.fail("Load with a filename should not raise an exception")
-        self.assertEquals(116, raw.getNumberHistograms())
-        mtd.remove('raw')
-
-    def test_Load_call_with_other_args_executes_correctly(self):
-        try:
-            raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
-        except RuntimeError:
-            self.fail("Load with a filename and extra args should not raise an exception")
-        self.assertEquals(1, raw.getNumberHistograms())
-
-    def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
-        try:
-            raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1,Append=True)
-        except RuntimeError:
-            self.fail("Load with a filename and extra args should not raise an exception")
-        self.assertEquals(1, raw.getNumberHistograms())
     
     def test_that_dialog_call_raises_runtime_error(self):
         try:
@@ -131,7 +106,7 @@ If false, then the workspace gets converted to a Workspace2D histogram.
             workspace = simpleapi.ConvertUnits(workspace, Target='Energy')
             return workspace
         
-        raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
+        raw = simpleapi.LoadRaw('IRS21360.raw',SpectrumMax=1)
         raw = convert(raw)
         # If this fails then the function above chose the name of the variabe
         # over the actual object name

@@ -29,6 +29,246 @@ from api import FrameworkManager as _framework
 # Give a user access to this
 from mantid import apiVersion, __gui__
 
+#------------------------ Specialized function calls --------------------------
+
+__SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+
+def specialization_exists(name):
+    """
+        Returns true if a specialization for the given name
+        already exists, false otherwise
+        
+        @param name :: The name of a possible new function
+    """
+    return name in __SPECIALIZED_FUNCTIONS__
+
+def Load(*args, **kwargs):
+    """
+    Load is a more flexible algorithm than other Mantid algorithms.
+    It's aim is to discover the correct loading algorithm for a
+    given file. This flexibility comes at the expense of knowing the
+    properties out right before the file is specified.
+    
+    The argument list for the Load function has to be more flexible to
+    allow this searching to occur. Two arguments must be specified:
+    
+      - Filename :: The name of the file,
+      - OutputWorkspace :: The name of the workspace,
+    
+    either as the first two arguments in the list or as keywords. Any other
+    properties that the Load algorithm has can be specified by keyword only.
+    
+    Some common keywords are:
+     - SpectrumMin,
+     - SpectrumMax,
+     - SpectrumList,
+     - EntryNumber
+    
+    Example:
+      # Simple usage, ISIS NeXus file
+      Load('INSTR00001000.nxs', 'run_ws')
+      
+      # ISIS NeXus with SpectrumMin and SpectrumMax = 1
+      Load('INSTR00001000.nxs', 'run_ws', SpectrumMin=1,SpectrumMax=1)
+      
+      # SNS Event NeXus with precount on
+      Load('INSTR_1000_event.nxs', 'event_ws', Precount=True)
+      
+      # A mix of keyword and non-keyword is also possible
+      Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
+    """
+    filename, = get_mandatory_args('Load', ["Filename"], *args, **kwargs)
+    
+    # Create and execute
+    algm = _framework.createAlgorithm('Load')
+    algm.setProperty('Filename', filename) # Must be set first
+    lhs = _funcreturns.lhs_info(use_object_names=True)
+    # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
+    # then raise a more helpful error than what we would get from an algorithm
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "Load to a variable or use the OutputWorkspace keyword.") 
+    
+    extra_args = get_additional_args(lhs, algm)
+    kwargs.update(extra_args)
+    # Check for any properties that aren't known and warn they will not be used
+    for key in kwargs.keys():
+        if key not in algm:
+            _logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
+            del kwargs[key]
+    _set_properties(algm, **kwargs)
+    algm.execute()
+        
+    # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
+    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','OutputWorkspace_.*'])
+
+# Have a better load signature for autocomplete
+_signature = "\bFilename"
+# Getting the code object for Load
+_f = Load.func_code
+# Creating a new code object nearly identical, but with the two variable names replaced
+# by the property list.
+_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+
+# Replace the code object of the wrapper function
+Load.func_code = _c
+######################################################################
+
+def LoadDialog(*args, **kwargs):
+    """Popup a dialog for the Load algorithm. More help on the Load function
+    is available via help(Load).
+
+    Additional arguments available here (as keyword only) are:
+      - Enable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Message :: An optional message string
+    """
+    arguments = {}
+    filename = None
+    wkspace = None
+    if len(args) == 2:
+        filename = args[0]
+        wkspace = args[1]
+    elif len(args) == 1:
+        if 'Filename' in kwargs:
+            filename = kwargs['Filename']
+            wkspace = args[0]
+        elif 'OutputWorkspace' in kwargs:
+            wkspace = kwargs['OutputWorkspace']
+            filename = args[0]
+    arguments['Filename'] = filename
+    arguments['OutputWorkspace'] = wkspace
+    arguments.update(kwargs)
+    if 'Enable' not in arguments: arguments['Enable']=''
+    if 'Disable' not in arguments: arguments['Disable']=''
+    if 'Message' not in arguments: arguments['Message']=''
+    
+    algm = _framework.createAlgorithm('Load')
+    _set_properties_dialog(algm,**arguments)
+    algm.execute()
+    return algm
+
+#---------------------------- Fit ---------------------------------------------
+
+def Fit(*args, **kwargs):
+    """
+    Fit defines the interface to the fitting framework within Mantid.
+    It can work with arbitrary data sources and therefore some options
+    are only available when the function & workspace type are known.
+    
+    This simple wrapper takes the Function (as a string) & the InputWorkspace
+    as the first two arguments. The remaining arguments must be 
+    specified by keyword.
+    
+    Example:
+      Fit(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
+          StartX='0.05',EndX='1.0',Output="Z1")
+    """
+    Function, InputWorkspace = get_mandatory_args('Fit', ["Function", "InputWorkspace"], *args, **kwargs)
+    # Check for behaviour consistent with old API
+    if type(Function) == str and Function in _ads:
+        raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
+    # Create and execute
+    algm = _framework.createAlgorithm('Fit')
+    algm.setProperty('Function', Function) # Must be set first
+    algm.setProperty('InputWorkspace', InputWorkspace)
+
+    lhs = _funcreturns.lhs_info(use_object_names=True)
+
+    # Check for any properties that aren't known and warn they will not be used
+    for key in kwargs.keys():
+        if key not in algm:
+            _logger.warning("You've passed a property (%s) to Fit() that doesn't apply to this file type." % key)
+            del kwargs[key]
+    _set_properties(algm, **kwargs)
+    algm.execute()
+    
+    return gather_returns('Fit', lhs, algm)
+
+# Have a better load signature for autocomplete
+_signature = "\bFunction, InputWorkspace"
+# Getting the code object for Load
+_f = Fit.func_code
+# Creating a new code object nearly identical, but with the two variable names replaced
+# by the property list.
+_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+
+# Replace the code object of the wrapper function
+Fit.func_code = _c
+
+def FitDialog(*args, **kwargs):
+    """Popup a dialog for the Load algorithm. More help on the Load function
+    is available via help(Load).
+
+    Additional arguments available here (as keyword only) are:
+      - Enable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Message :: An optional message string
+    """
+    arguments = {}
+    try:
+        function, inputworkspace = get_mandatory_args('FitDialog', ['Function', 'InputWorkspace'], *args, **kwargs)
+        arguments['Function'] = function
+        arguments['InputWorkspace'] = inputworkspace
+    except RuntimeError:
+        pass
+    arguments.update(kwargs)
+    if 'Enable' not in arguments: arguments['Enable']=''
+    if 'Disable' not in arguments: arguments['Disable']=''
+    if 'Message' not in arguments: arguments['Message']=''
+    
+    algm = _framework.createAlgorithm('Fit')
+    _set_properties_dialog(algm,**arguments)
+    algm.execute()
+    return algm
+
+
+def get_mandatory_args(func_name, required_args ,*args, **kwargs):
+    """
+    Given a list of required arguments, parse them
+    from the given args & kwargs and raise an error if they
+    are not provided
+    
+        @param func_name :: The name of the function call
+        @param required_args :: A list of names of required arguments
+        @param args :: The positional arguments to check
+        @param kwargs :: The keyword arguments to check
+        
+        @returns A tuple of provided mandatory arguments
+    """
+    def get_argument_value(key, kwargs):
+        try:
+            value = kwargs[key]
+            del kwargs[key]
+            return value
+        except KeyError:
+            raise RuntimeError('%s argument not supplied to %s function' % (str(key), func_name))
+    nrequired = len(required_args)
+    npositional = len(args)
+    
+    if npositional == 0:
+        mandatory_args = []
+        for arg in required_args:
+            mandatory_args.append(get_argument_value(arg, kwargs))
+    elif npositional == nrequired:
+        mandatory_args = args
+    elif npositional < nrequired:
+        mandatory_args = []
+        for value in args:
+            mandatory_args.append(value)
+        # Get rest from keywords
+        for arg in required_args[npositional:]:
+            mandatory_args.append(get_argument_value(arg, kwargs))
+    else:
+        reqd_as_str = ','.join(required_args).strip(",")
+        raise RuntimeError('%s() takes "%s" as positional arguments. Other arguments must be specified by keyword.'
+                           % (func_name, reqd_as_str))
+    return tuple(mandatory_args)
+
+#------------------------ General simple function calls ----------------------
+
 def _is_workspace_property(prop):
     """
         Returns true if the property is a workspace property.
@@ -316,7 +556,6 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
     algorithm_wrapper.__doc__ = "\n\n%s dialog" % algorithm
 
     # Dark magic to get the correct function signature
-    #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
     for p in _algm_object.orderedProperties():
         arg_list.append("%s=None" % p)
@@ -336,128 +575,9 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
         if len(alias)>0:
             globals()["%sDialog" % alias] = algorithm_wrapper
 
-def Load(*args, **kwargs):
-    """
-    Load is a more flexible algorithm than other Mantid algorithms.
-    It's aim is to discover the correct loading algorithm for a
-    given file. This flexibility comes at the expense of knowing the
-    properties out right before the file is specified.
-    
-    The argument list for the Load function has to be more flexible to
-    allow this searching to occur. Two arguments must be specified:
-    
-      - Filename :: The name of the file,
-      - OutputWorkspace :: The name of the workspace,
-    
-    either as the first two arguments in the list or as keywords. Any other
-    properties that the Load algorithm has can be specified by keyword only.
-    
-    Some common keywords are:
-     - SpectrumMin,
-     - SpectrumMax,
-     - SpectrumList,
-     - EntryNumber
-    
-    Example:
-      # Simple usage, ISIS NeXus file
-      Load('INSTR00001000.nxs', 'run_ws')
-      
-      # ISIS NeXus with SpectrumMin and SpectrumMax = 1
-      Load('INSTR00001000.nxs', 'run_ws', SpectrumMin=1,SpectrumMax=1)
-      
-      # SNS Event NeXus with precount on
-      Load('INSTR_1000_event.nxs', 'event_ws', Precount=True)
-      
-      # A mix of keyword and non-keyword is also possible
-      Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
-    """
-    # Small inner function to grab the mandatory arguments and translate possible
-    # exceptions
-    def get_argument_value(key, kwargs):
-        try:
-            value = kwargs[key]
-            del kwargs[key]
-            return value
-        except KeyError:
-            raise RuntimeError('%s argument not supplied to Load function' % str(key))
-    
-    if len(args) == 1:
-        filename = args[0]
-    elif len(args) == 0:
-        filename = get_argument_value('Filename', kwargs)
-    else:
-        raise RuntimeError('Load() takes only the filename as a positional argument. ' + \
-                           'Other arguments must be specified by keyword.')
-    
-    # Create and execute
-    algm = _framework.createAlgorithm('Load')
-    algm.setProperty('Filename', filename) # Must be set first
-    lhs = _funcreturns.lhs_info(use_object_names=True)
-    # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
-    # then raise a more helpful error than what we would get from an algorithm
-    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
-        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
-                           "Load to a variable or use the OutputWorkspace keyword.") 
-    
-    extra_args = get_additional_args(lhs, algm)
-    kwargs.update(extra_args)
-    # Check for any properties that aren't known and warn they will not be used
-    for key in kwargs.keys():
-        if key not in algm:
-            _logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
-            del kwargs[key]
-    _set_properties(algm, **kwargs)
-    algm.execute()
-        
-    # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
-    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','OutputWorkspace_.*'])
-
-# Have a better load signature for autocomplete
-_signature = "\bFilename"
-# Getting the code object for Load
-_f = Load.func_code
-# Creating a new code object nearly identical, but with the two variable names replaced
-# by the property list.
-_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
-       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
-# Replace the code object of the wrapper function
-Load.func_code = _c
-######################################################################
 
 
-def LoadDialog(*args, **kwargs):
-    """Popup a dialog for the Load algorithm. More help on the Load function
-    is available via help(Load).
-
-    Additional arguments available here (as keyword only) are:
-      - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to keep enabled in the dialog
-      - Message :: An optional message string
-    """
-    arguments = {}
-    filename = None
-    wkspace = None
-    if len(args) == 2:
-        filename = args[0]
-        wkspace = args[1]
-    elif len(args) == 1:
-        if 'Filename' in kwargs:
-            filename = kwargs['Filename']
-            wkspace = args[0]
-        elif 'OutputWorkspace' in kwargs:
-            wkspace = kwargs['OutputWorkspace']
-            filename = args[0]
-    arguments['Filename'] = filename
-    arguments['OutputWorkspace'] = wkspace
-    arguments.update(kwargs)
-    if 'Enable' not in arguments: arguments['Enable']=''
-    if 'Disable' not in arguments: arguments['Disable']=''
-    if 'Message' not in arguments: arguments['Message']=''
-    
-    algm = _framework.createAlgorithm('Load')
-    _set_properties_dialog(algm,**arguments)
-    algm.execute()
-    return algm
+#==============================================================================
 
 def translate():
     """
@@ -469,7 +589,7 @@ def translate():
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
     for name, versions in algs.iteritems():
-        if name == "Load":
+        if specialization_exists(name):
             continue
         try:
             # Create the algorithm object
@@ -479,8 +599,6 @@ def translate():
             continue
         create_algorithm(name, max(versions), _algm_object)
         create_algorithm_dialog(name, max(versions), _algm_object)
-
-#==============================================================================
 
 def mockout_api():
     """
@@ -495,7 +613,7 @@ def mockout_api():
         for name in plugins:
                 if name.endswith('.py'):
                     name = name.rstrip('.py')
-                if name == "Load":
+                if specialization_exists(name):
                     continue
                 fake_function.__name__ = name
                 if name not in globals():
