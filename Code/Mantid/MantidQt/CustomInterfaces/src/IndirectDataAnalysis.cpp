@@ -1635,12 +1635,12 @@ void IndirectDataAnalysis::furyfitRun()
   // Create the Fit Algorithm
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
   alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
   alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
-  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("Output", output);
   alg->execute();
 
@@ -1658,14 +1658,16 @@ void IndirectDataAnalysis::furyfitRun()
   m_ffFitCurve->setPen(fitPen);
   m_ffPlot->replot();
 
-  // Do it as we do in Convolution Fit tab
+  // Get params.
   QMap<QString,double> parameters;
-  QStringList parNames = QString::fromStdString(alg->getPropertyValue("ParameterNames")).split(",", QString::SkipEmptyParts);
-  QStringList parVals = QString::fromStdString(alg->getPropertyValue("Parameters")).split(",", QString::SkipEmptyParts);
-  for ( int i = 0; i < parNames.size(); i++ )
-  {
-    parameters[parNames[i]] = parVals[i].toDouble();
-  }
+  std::vector<std::string> parNames = function->getParameterNames();
+  std::vector<double> parVals;
+
+  for( size_t i = 0; i < parNames.size(); ++i )
+    parVals.push_back(function->getParameter(parNames[i]));
+
+  for ( size_t i = 0; i < parNames.size(); ++i )
+    parameters[QString(parNames[i].c_str())] = parVals[i];
 
   m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], parameters["f0.A0"]);
   
@@ -1980,11 +1982,11 @@ void IndirectDataAnalysis::confitRun()
 
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("InputWorkspace", m_cfInputWSName);
   alg->setProperty<int>("WorkspaceIndex", m_uiForm.confit_leSpecNo->text().toInt());
   alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
   alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
-  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("Output", output);
   alg->execute();
 
@@ -2000,14 +2002,16 @@ void IndirectDataAnalysis::confitRun()
   m_cfCalcCurve->setPen(fitPen);
   m_cfPlot->replot();
 
-  // Update parameter values (possibly easier from algorithm properties)
+  // Get params.
   QMap<QString,double> parameters;
-  QStringList parNames = QString::fromStdString(alg->getPropertyValue("ParameterNames")).split(",", QString::SkipEmptyParts);
-  QStringList parVals = QString::fromStdString(alg->getPropertyValue("Parameters")).split(",", QString::SkipEmptyParts);
-  for ( int i = 0; i < parNames.size(); i++ )
-  {
-    parameters[parNames[i]] = parVals[i].toDouble();
-  }
+  std::vector<std::string> parNames = function->getParameterNames();
+  std::vector<double> parVals;
+
+  for( size_t i = 0; i < parNames.size(); ++i )
+    parVals.push_back(function->getParameter(parNames[i]));
+
+  for ( size_t i = 0; i < parNames.size(); ++i )
+    parameters[QString(parNames[i].c_str())] = parVals[i];
 
   // Populate Tree widget with values
   // Background should always be f0
