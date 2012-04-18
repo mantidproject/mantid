@@ -28,7 +28,6 @@ set ( SRC_FILES
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
 	src/Interpolation.cpp
-        src/IValidator.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
 	src/ListValidator.cpp
