@@ -81,6 +81,20 @@
             Call EnvVarUpdate
             Pop  \\\$0
 			
+			Push \\\"PATH\\\"
+            Push \\\"A\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
+            Call EnvVarUpdate
+            Pop  \\\$0
+			
+			Push \\\"PATH\\\"
+            Push \\\"A\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\${PLUGINS_DIR}\\\"
+            Call EnvVarUpdate
+            Pop  \\\$0
+			
 		    Push \\\"PV_PLUGIN_PATH\\\"
             Push \\\"A\\\"
             Push \\\"HKCU\\\"
@@ -100,6 +114,20 @@
             Push \\\"R\\\"
             Push \\\"HKCU\\\"
             Push \\\"$INSTDIR\\\\bin\\\"
+            Call un.EnvVarUpdate
+            Pop  \\\$0
+			
+			Push \\\"PATH\\\"
+            Push \\\"R\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
+            Call un.EnvVarUpdate
+            Pop  \\\$0
+			
+			Push \\\"PATH\\\"
+            Push \\\"R\\\"
+            Push \\\"HKCU\\\"
+            Push \\\"$INSTDIR\\\\${PLUGINS_DIR}\\\"
             Call un.EnvVarUpdate
             Pop  \\\$0
 		
