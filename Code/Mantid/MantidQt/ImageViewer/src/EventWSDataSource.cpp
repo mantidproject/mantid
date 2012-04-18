@@ -33,14 +33,14 @@ EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)ev_ws->getNumberHistograms();
   total_rows = ev_ws->getNumberHistograms();
-  total_cols = 500;              // initially use 1000 bins for event data
+  total_cols = 500;              // initially use 500 bins for event data
 
-  std::cout << "total_xmin = " << total_xmin << std::endl;
-  std::cout << "total_xmax = " << total_xmax << std::endl;
+//  std::cout << "total_xmin = " << total_xmin << std::endl;
+//  std::cout << "total_xmax = " << total_xmax << std::endl;
 
-  if ( total_xmax > 66666 )   
+  if ( total_xmax > 120000 )   
   {
-    total_xmax = 66666;          // hack for now
+    total_xmax = 120000;          // hack for now
     std::cout << "WARNING: max tof too large, set to " 
               << total_xmax << std::endl;
   }

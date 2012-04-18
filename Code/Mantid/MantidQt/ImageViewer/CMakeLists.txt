@@ -13,6 +13,7 @@ set ( SRC_FILES
        src/IVConnections.cpp 
        src/TestDataSource.cpp
        src/EventWSDataSource.cpp
+       src/EventWSImageView.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -32,6 +33,7 @@ set ( INC_FILES
        inc/MantidQtImageViewer/SliderHandler.h
        inc/MantidQtImageViewer/TestDataSource.h
        inc/MantidQtImageViewer/EventWSDataSource.h
+       inc/MantidQtImageViewer/EventWSImageView.h
 )
 
 set ( MOC_FILES 

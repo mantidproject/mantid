@@ -13,8 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 
-#include "MantidQtImageViewer/ImageView.h"
-#include "MantidQtImageViewer/EventWSDataSource.h"
+#include "MantidQtImageViewer/EventWSImageView.h"
 
 using namespace MantidQt;
 using namespace ImageView;
@@ -39,13 +38,6 @@ int main( int argc, char** argv )
   LoadEventNexus ld;
   ld.initialize();
 
-/*
-  std::string file_name  = "/usr2/ARCS_EVENT_NEXUS/ARCS_24000_event.nxs";
-  std::string file_name = "/usr2/JANIK_TOPAZ/TOPAZ_3007_event.nxs";
-  std::string file_name = "/usr2/SAPPHIRE_PROBLEM/TOPAZ_3680_event.nxs";
-  std::string file_name = "/usr2/PG3_3_3_2012/PG3_7453_event.nxs";
-  std::string file_name = "/usr2/PG3_3_3_2012/PG3_7454_event.nxs";
-*/
   ld.setPropertyValue("Filename", file_name );
   std::string outws_name = "EventWS";
   ld.setPropertyValue("OutputWorkspace",outws_name);
@@ -62,8 +54,7 @@ int main( int argc, char** argv )
 
   std::cout << "Got EventWorkspace, making EventWSDataSource..." << std::endl;
 
-  EventWSDataSource* source = new EventWSDataSource( WS );
-  MantidQt::ImageView::ImageView image_view( source );
+  MantidQt::ImageView::EventWSImageView image_view( WS );
 
   return a.exec();
 }

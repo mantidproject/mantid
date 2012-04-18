@@ -2,6 +2,11 @@
 #include  "MantidQtImageViewer/ImageView.h"
 #include  "MantidQtImageViewer/ColorMaps.h"
 
+#include "ui_ImageView.h"
+#include "MantidQtImageViewer/IVConnections.h"
+#include "MantidQtImageViewer/ImageDisplay.h"
+#include "MantidQtImageViewer/SliderHandler.h"
+
 namespace MantidQt
 {
 namespace ImageView
@@ -20,45 +25,54 @@ namespace ImageView
  */
 ImageView::ImageView( ImageDataSource* data_source )
 {
-  ui     = new Ui_MainWindow();
-  window = new QMainWindow();
+  Ui_MainWindow* ui = new Ui_MainWindow();
+  window            = new QMainWindow();
+  saved_ui          = ui; 
 
   ui->setupUi( window );
   window->resize( 1050, 800 );
   window->show();
 
-  slider_handler = new SliderHandler( ui );
+  SliderHandler* slider_handler = new SliderHandler( ui );
+  saved_slider_handler = slider_handler;
 
   h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );
   v_graph = new GraphDisplay( ui->v_graphPlot, ui->v_graph_table, true );
 
-  image_display = new ImageDisplay( ui->imagePlot,
-                                    slider_handler,
-                                    h_graph, v_graph,
-                                    ui->image_table );
+  ImageDisplay* image_display = new ImageDisplay( ui->imagePlot,
+                                                  slider_handler,
+                                                  h_graph, v_graph,
+                                                  ui->image_table );
+  saved_image_display = image_display;
 
-  iv_connections = new IVConnections( ui, image_display, h_graph, v_graph );
+  IVConnections* iv_connections = new IVConnections( ui, image_display, 
+                                                     h_graph, v_graph );
+  saved_iv_connections = iv_connections;
 
   image_display->SetDataSource( data_source );
-
-                                                 // ####### hack for testing
-/*
-  std::vector<double>* intensity_table = new std::vector<double>; 
-  ColorMaps::getIntensityMap( 30, 100000, *intensity_table );
-  image_display->SetIntensityTable( intensity_table );
-*/
 }
 
 
 ImageView::~ImageView()
 {
-  delete  image_display;
-  delete  slider_handler;
+/*        // Why does Mantid seg fault, or show nothing if I delete these objects?
+ 
+  delete  window;
   delete  h_graph;
   delete  v_graph;
+
+  ImageDisplay* image_display = static_cast<ImageDisplay*>(saved_image_display);
+  delete  image_display;
+
+  SliderHandler* slider_handler = static_cast<SliderHandler*>(saved_slider_handler);
+  delete  slider_handler;
+
+  IVConnections* iv_connections = static_cast<IVConnections*>(saved_iv_connections);
   delete  iv_connections;
-  delete  window;
+
+  Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);
   delete  ui;
+*/
 }
 
 
