@@ -242,7 +242,7 @@ class RefLReduction(PythonAlgorithm):
                        YPixelMin=BackfromYpixel,
                        YPixelMax=data_peak[0]-1,
                        NormalizeSum=True)
-                           
+
                 ws_data_bck_1_rebin = ws_data_bck_1 + '_rebin'
                 RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
                                  WorkspaceToMatch=ws_histo_data, 
@@ -281,17 +281,26 @@ class RefLReduction(PythonAlgorithm):
                       Factor=0.5,
                       Operation="Multiply")
                 
+#                nbr_x_range = 1./(Xrange[1]-Xrange[0]+1)
+#                Scale(InputWorkspace=ws_data_bck+'_scale',
+#                      OutputWorkspace=ws_data_bck+'_scale',
+#                      Factor=nbr_x_range,
+#                      Operation="Multiply")
+                
+                print 'ws_histo_data: ' + ws_histo_data
+                print 'ws_data: ' + ws_data
+                
                 Minus(LHSWorkspace=ws_histo_data, 
                       RHSWorkspace=ws_data_bck+'_scale', 
                       OutputWorkspace=ws_data)
 
-                mtd.deleteWorkspace(ws_data_bck+'_scale')
+#                mtd.deleteWorkspace(ws_data_bck+'_scale')
                 mtd.deleteWorkspace(ws_data_bck)
-                mtd.deleteWorkspace(ws_data_bck_1_rebin)
-                mtd.deleteWorkspace(ws_data_bck_2_rebin)
-                mtd.deleteWorkspace(ws_data_bck_1)
+#                mtd.deleteWorkspace(ws_data_bck_1_rebin)
+#                mtd.deleteWorkspace(ws_data_bck_2_rebin)
+#                mtd.deleteWorkspace(ws_data_bck_1)
                 mtd.deleteWorkspace(ws_data_bck_2)
-                mtd.deleteWorkspace(ws_histo_data)
+#                mtd.deleteWorkspace(ws_histo_data)
 
             elif (bBackLeft):
                 
@@ -309,14 +318,14 @@ class RefLReduction(PythonAlgorithm):
                 mtd.deleteWorkspace(ws_data_bck_2_rebin)
                 mtd.deleteWorkspace(ws_data_bck_2)
 
-            mtd.deleteWorkspace(ws_histo_data)
+#            mtd.deleteWorkspace(ws_histo_data)
 
         else:        
         
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
                                      OutputWorkspace=ws_data)
 
-            mtd.deleteWorkspace(ws_histo_data)
+#            mtd.deleteWorkspace(ws_histo_data)
 
                 
         if (NormFlag):
@@ -545,6 +554,9 @@ class RefLReduction(PythonAlgorithm):
                                         geo_correction=False,
                                         q_binning=[q_min,q_step,q_max])
 
+        
+
+        
         print '-> replace special values'
         mt = mtd[ws_data_Q]
         ReplaceSpecialValues(InputWorkspace=ws_data_Q, 
@@ -561,6 +573,21 @@ class RefLReduction(PythonAlgorithm):
             
         print '-> sum spectra'    
         SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
+
+
+
+
+        ReplaceSpecialValues(InputWorkspace=ws_integrated_data, 
+                             NaNValue=0, 
+                             NaNError=0, 
+                             InfinityValue=0, 
+                             InfinityError=0, 
+                             OutputWorkspace='_tmp1')
+        SumSpectra(InputWorkspace='_tmp1', OutputWorkspace='_tmp2')
+
+
+
+
 
         #keep only none zero values
         try:
