@@ -213,11 +213,11 @@ public:
     MantidVec p0_x = peaksws->readX(0);
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
-    TS_ASSERT_DELTA(p0_y[200], 9.0, 1.0E-4);
+    TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
     // b) Peak 1:
     TS_ASSERT_DELTA(p0_x[800], 8.0, 1.0E-8);
-    TS_ASSERT_DELTA(p0_y[800], 27.0, 1.0E-4);
+    TS_ASSERT_DELTA(p0_y[800], 10.0, 1.0E-4);
 
     // c) Peak 2:
     MantidVec p1_x = peaksws->readX(1);
