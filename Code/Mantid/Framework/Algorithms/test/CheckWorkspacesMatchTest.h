@@ -8,13 +8,17 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/CreatePeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::WorkspaceGroup_sptr;
-
-using Mantid::DataObjects::EventWorkspace_sptr;
+using namespace Mantid::Algorithms;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
 {
@@ -59,6 +63,84 @@ public:
     TS_ASSERT( Mantid::API::equals(ws, ws) );
   }
   
+  void testPeaks_matches()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    std::string outWS1Name("CreatePeaks1WorkspaceTest_OutputWS");
+    std::string outWS2Name("CreatePeaks2WorkspaceTest_OutputWS");
+
+    Workspace2D_sptr instws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+
+    CreatePeaksWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InstrumentWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(instws)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWS1Name) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumberOfPeaks", 13) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InstrumentWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(instws)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWS2Name) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumberOfPeaks", 13) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    PeaksWorkspace_sptr pws1, pws2;
+    TS_ASSERT_THROWS_NOTHING( pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(outWS1Name) ) );
+    TS_ASSERT_THROWS_NOTHING( pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(outWS2Name) ) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",boost::dynamic_pointer_cast<Workspace>(pws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<Workspace>(pws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testPeaks_extrapeak()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    std::string outWS3Name("CreatePeaks3WorkspaceTest_OutputWS");
+    std::string outWS4Name("CreatePeaks4WorkspaceTest_OutputWS");
+
+    Workspace2D_sptr instws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+
+    CreatePeaksWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InstrumentWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(instws)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWS3Name) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumberOfPeaks", 13) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InstrumentWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(instws)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWS4Name) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumberOfPeaks", 14) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    PeaksWorkspace_sptr pws1, pws2;
+    TS_ASSERT_THROWS_NOTHING( pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(outWS3Name) ) );
+    TS_ASSERT_THROWS_NOTHING( pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(outWS4Name) ) );
+    TS_ASSERT_EQUALS(pws1->getNumberPeaks(), 13);
+    TS_ASSERT_EQUALS(pws2->getNumberPeaks(), 14);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",boost::dynamic_pointer_cast<Workspace>(pws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<Workspace>(pws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
   void testEvent_matches()
   {
     if ( !checker.isInitialized() ) checker.initialize();
