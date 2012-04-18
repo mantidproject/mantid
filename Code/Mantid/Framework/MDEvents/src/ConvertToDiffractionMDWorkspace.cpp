@@ -356,10 +356,6 @@ namespace MDEvents
           g_log.warning()<<"Lorentz Correction was already done for this workspace.  LorentzCorrection was changed to false." << std::endl;
         }
       }
-      else
-      {
-        run.addProperty<bool>("LorentzCorrection", 1, true);
-      }
     }
 
     m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
