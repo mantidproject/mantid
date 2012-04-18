@@ -57,7 +57,7 @@ namespace Algorithms
         "InputWorkspace (optional) to take information for the instrument, and where to evaluate the x-axis.");
 
     this->declareProperty(
-      new Kernel::ArrayProperty<double>("BinningParameters", boost::make_shared<Kernel::RebinParamsValidator>()),
+      new Kernel::ArrayProperty<double>("BinningParameters", boost::make_shared<Kernel::RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
       "this can be followed by a comma and more widths and last boundary pairs.\n"
       "Negative width values indicate logarithmic binning.");

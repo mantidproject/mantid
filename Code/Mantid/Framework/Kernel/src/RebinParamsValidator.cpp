@@ -4,6 +4,8 @@ namespace Mantid
 {
 namespace Kernel
 {
+RebinParamsValidator::RebinParamsValidator(bool allowEmpty):m_allowEmpty(allowEmpty)
+{}
 
 /** Check on the inputed bin boundaries and widths.
  *  @param value :: The parameter array to check
@@ -12,7 +14,13 @@ namespace Kernel
 std::string RebinParamsValidator::checkValidity( const std::vector<double>& value ) const
 {
   // array must not be empty
-  if ( value.empty() ) return "Enter values for this property";
+  if ( value.empty() )
+  {
+    if (m_allowEmpty) // unless allowed in the constructor
+      return "";
+    else
+      return "Enter values for this property";
+  }
 
   // it must have an odd number of values (and be at least 3 elements long)
   if ( value.size()%2 == 0 )
