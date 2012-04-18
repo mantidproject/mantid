@@ -664,6 +664,15 @@ void ConfigDialog::initMantidPage()
   //Here we only want the default instrument updated if the user clicks Ok/Apply
   disconnect(defInstr, SIGNAL(currentIndexChanged(const QString&)), defInstr, SLOT(updateDefaultInstrument(const QString &)));
 
+  //Ignore paraview.
+  ckIgnoreParaView = new QCheckBox("Ignore ParaView");
+  ckIgnoreParaView->setToolTip("Don't bother me with anything to do with ParaView.\nRequires restart of MantidPlot to take effect.");
+  Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+  const std::string ignoreParaViewProperty = "paraview.ignore";
+  bool ignoreParaView = conf.hasProperty(ignoreParaViewProperty) && bool(atoi(conf.getString(ignoreParaViewProperty).c_str()));
+  ckIgnoreParaView->setChecked(ignoreParaView);
+  grid->addWidget(ckIgnoreParaView, 3, 0);
+
   // Populate boxes
   Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
   QString property = QString::fromStdString(mantid_config.getString("supported.facilities"));
@@ -2066,6 +2075,8 @@ void ConfigDialog::apply()
 
   mantid_config.setString("default.facility", facility->currentText().toStdString());
   mantid_config.setString("default.instrument", defInstr->currentText().toStdString());
+  mantid_config.setString("paraview.ignore", QString::number(ckIgnoreParaView->isChecked()).toStdString());
+
 
   updateDirSearchSettings();
   updateCurveFitSettings();
@@ -2540,3 +2551,4 @@ void ConfigDialog::addParameterDir()
     leParameterDir->setText(dir);
   }
 }
+
