@@ -11,10 +11,11 @@
 
 	#Windows CPACK specifics
 	set( CPACK_GENERATOR "NSIS" )
-	set( CPACK_SET_DESTDIR "ON") 
 	set( CPACK_INSTALL_PREFIX "/")
-	set( CPACK_PACKAGE_INSTALL_DIRECTORY "Mantid${CPACK_PACKAGE_SUFFIX}")
-	set( CPACK_NSIS_INSTALL_ROOT "C:\\\\MantidInstall")
+	set( CPACK_NSIS_DISPLAY_NAME "Mantid${CPACK_PACKAGE_SUFFIX}")
+	set( CPACK_PACKAGE_NAME "Mantid${CPACK_PACKAGE_SUFFIX}" )
+	set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}")
+	set( CPACK_NSIS_INSTALL_ROOT "C:")
 
 	#set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
 	set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/Images\\\\MantidPlot_Icon_32offset.png" )
@@ -152,6 +153,8 @@
 		    RMDir \\\"$INSTDIR\\\\docs\\\"
 	    ")
 	else ()
+	set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}")
+	set( CPACK_NSIS_INSTALL_ROOT "C:")
 	# On install
 	    set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
             CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
