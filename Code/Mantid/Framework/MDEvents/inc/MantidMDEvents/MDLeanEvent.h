@@ -534,11 +534,7 @@ namespace MDEvents
         coord_t * centers = data + ii+2;
 
         // Create the event with signal, error squared, and the centers
-#ifdef _WIN32
         events.push_back( MDLeanEvent<nd>(float(data[ii]), float(data[ii + 1]), centers) );
-#else
-        events.emplace_back( float(data[ii]), float(data[ii + 1]), centers );
-#endif
       }
 
       // Release the memory (all has been COPIED into MDLeanEvent's)
