@@ -265,8 +265,7 @@ namespace Mantid
        boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(),("rot"));
        if( rot)
        {
-         Parameter rotP = (*rot);
-         pmap->addQuat(bank_const.get(), "rot",rotP.value<Quat>());
+         pmap->addQuat(bank_const.get(), "rot",rot->value<Quat>());
        }
 
        vector<double> scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
