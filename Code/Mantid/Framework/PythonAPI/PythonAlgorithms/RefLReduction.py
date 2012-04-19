@@ -281,18 +281,10 @@ class RefLReduction(PythonAlgorithm):
                       Factor=0.5,
                       Operation="Multiply")
                 
-#                nbr_x_range = 1./(Xrange[1]-Xrange[0]+1)
-#                Scale(InputWorkspace=ws_data_bck+'_scale',
-#                      OutputWorkspace=ws_data_bck+'_scale',
-#                      Factor=nbr_x_range,
-#                      Operation="Multiply")
-                
-                print 'ws_histo_data: ' + ws_histo_data
-                print 'ws_data: ' + ws_data
-                
                 Minus(LHSWorkspace=ws_histo_data, 
                       RHSWorkspace=ws_data_bck+'_scale', 
                       OutputWorkspace=ws_data)
+
 
 #                mtd.deleteWorkspace(ws_data_bck+'_scale')
                 mtd.deleteWorkspace(ws_data_bck)
@@ -363,7 +355,8 @@ class RefLReduction(PythonAlgorithm):
                                OutputWorkspace=ws_norm_histo_data)
 
             ws_data_bck = '_' + ws_name + '_NormBckWks'
-            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
+#            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
+            ws_norm_rebinned = ws_name + '_NormRebinnedWks'
             if subtract_norm_bck:
                 
                 print '-> substract background to direct beam'
