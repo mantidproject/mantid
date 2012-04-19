@@ -72,8 +72,6 @@ using namespace Mantid::API;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
-using MantidQt::ImageView::EventWSImageView;
-
 namespace MantidException = Mantid::Kernel::Exception;
 
 MantidUI::MantidUI(ApplicationWindow *aw):
@@ -676,7 +674,7 @@ void MantidUI::showImageViewer()
                AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( evwsp )
     {
-      EventWSImageView image_view( evwsp );
+      MantidQt::ImageView::EventWSImageView image_view( evwsp );
     }
     else
     {
@@ -3387,7 +3385,7 @@ void MantidUI::memoryImage()
   countVirtual(mem,total);
   int colNum = 1024;
   int rowNum = total/1024/colNum;
-  Matrix *m = appWindow()->newMatrix(rowNum,colNum);
+  Matrix::Matrix *m = appWindow()->newMatrix(rowNum,colNum);
   m->setCoordinates(0,colNum,0,rowNum);
   int row = 0;
   int col = 0;
