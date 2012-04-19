@@ -36,6 +36,8 @@
 
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
+  
+  SetOverwrite @CPACK_NSIS_FORCE_OVERWRITE@
 
 @CPACK_NSIS_DEFINES@   
 
