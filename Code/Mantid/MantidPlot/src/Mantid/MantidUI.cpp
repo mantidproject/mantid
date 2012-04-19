@@ -63,7 +63,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidQtImageViewer/EventWSImageView.h"
+// DM_NEEDS_FIX  #include "MantidQtImageViewer/EventWSImageView.h"
 
 
 using namespace std;
@@ -664,9 +664,10 @@ void MantidUI::showVatesSimpleInterface()
   }
 }
 
-
 void MantidUI::showImageViewer()
 {
+    m_appWindow->writeToLogWindow("NOT YET IMPLEMENTED " );    // DM_NEEDS_FIX
+/*  DM_NEEDS_FIX
   QString wsName = getSelectedWorkspaceName();
   try
   {
@@ -690,7 +691,7 @@ void MantidUI::showImageViewer()
   {
     m_appWindow->writeToLogWindow("Exception getting workspace " );
   }
-
+*/
 }
 
 
@@ -3385,7 +3386,7 @@ void MantidUI::memoryImage()
   countVirtual(mem,total);
   int colNum = 1024;
   int rowNum = total/1024/colNum;
-  Matrix::Matrix *m = appWindow()->newMatrix(rowNum,colNum);
+  Matrix *m = appWindow()->newMatrix(rowNum,colNum);
   m->setCoordinates(0,colNum,0,rowNum);
   int row = 0;
   int col = 0;
