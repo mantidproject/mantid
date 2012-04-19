@@ -153,7 +153,6 @@ void MantidCurve::doDraw(QPainter *p,
           const QwtScaleMap &xMap, const QwtScaleMap &yMap,
           const QRect&, MantidQwtWorkspaceData const * const d) const
 {
-  CPUTimer tim;
   int sh = 0;
   if (symbol().style() != QwtSymbol::NoSymbol)
   {
@@ -208,5 +207,4 @@ void MantidCurve::doDraw(QPainter *p,
       xi0 = xi;
     }
   }
-  std::cout << "MantidCurve::doDraw() " << tim << std::endl;
 }
