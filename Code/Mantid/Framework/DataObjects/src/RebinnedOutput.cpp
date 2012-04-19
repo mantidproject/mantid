@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <algorithm>
+#include <iostream>
 
 //using namespace Mantid::Kernel;
 //using namespace Mantid::API;
@@ -88,21 +89,22 @@ namespace DataObjects
    */
   void RebinnedOutput::finalize()
   {
+    g_log.information() << "Starting finalize procedure." << std::endl;
     std::size_t nHist = this->getNumberHistograms();
+    g_log.information() << "Number of histograms: " << nHist << std::endl;
     for (std::size_t i = 0; i < nHist; ++i)
     {
-      MantidVec data = this->dataY(i);
-      MantidVec err = this->dataE(i);
-      MantidVec frac = this->dataF(i);
+      MantidVec &data = this->dataY(i);
+      MantidVec &err = this->dataE(i);
+      MantidVec &frac = this->dataF(i);
       MantidVec frac_sqr(frac.size());
 
       std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                      std::divides<double>());
       std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
                      std::multiplies<double>());
-      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+      std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
                      std::divides<double>());
-
     }
   }
 
