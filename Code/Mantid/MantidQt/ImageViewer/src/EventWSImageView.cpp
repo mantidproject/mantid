@@ -1,3 +1,4 @@
+#include <iostream>
 #include "MantidQtImageViewer/EventWSImageView.h"
 #include "MantidQtImageViewer/EventWSDataSource.h"
 
