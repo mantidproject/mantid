@@ -170,7 +170,7 @@ namespace MantidWidgets
    * @param
    */
   void AlgorithmSelectorWidget::
-  handleAlgorithmFactoryUpdate(const Mantid::API::AlgorithmFactoryUpdateNotification_ptr &)
+  handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
   {
     this->update();
   }

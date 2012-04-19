@@ -58,7 +58,7 @@ namespace MantidWidgets
 
   private:
     /// Callback for AlgorithmFactory update notifications
-    void handleAlgorithmFactoryUpdate(const Mantid::API::AlgorithmFactoryUpdateNotification_ptr &);
+    void handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr);
     /// Observes algorithm factory update notifications
     Poco::NObserver<AlgorithmSelectorWidget,
                     Mantid::API::AlgorithmFactoryUpdateNotification> m_updateObserver;
