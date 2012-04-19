@@ -72,6 +72,9 @@ namespace DataObjects
     /// Create final representation
     void finalize();
 
+    /// Returns a read-only (i.e. const) reference to the specified F array
+    const MantidVec& readF(std::size_t const index) const;
+
   protected:
     /// Called by initialize() in MatrixWorkspace
     virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);

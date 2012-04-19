@@ -82,6 +82,17 @@ namespace DataObjects
   }
 
   /**
+   * Function that returns a fractional area array for a given index. This
+   * returns a const array.
+   * @param index :: the array to fetch
+   * @return the requested fractional area array
+   */
+  const MantidVec &RebinnedOutput::readF(const std::size_t index) const
+  {
+    return this->fracArea[index];
+  }
+
+  /**
    * This function takes the data/error arrays and divides them by the
    * corresponding fractional area array. This creates a representation that
    * is easily visualized. The Rebin and Integration algorithms will have to
