@@ -247,7 +247,11 @@ public:
     if (it!=datamap.end())
     {
       g_log.debug("Data Object '"+ foundName +"' replaced in data service.\n");
+      m_mutex.unlock();
+
       notificationCenter.postNotification(new BeforeReplaceNotification(name,it->second,Tobject));
+
+      m_mutex.lock();
       datamap[foundName] = Tobject;
 
       std::string name_startswith=name.substr(0,2);
@@ -261,8 +265,8 @@ public:
           return;
         }
       }
-      notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
       m_mutex.unlock();
+      notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
     }
     else
     {
