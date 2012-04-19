@@ -26,6 +26,7 @@ def get_wiki_description(algo, version):
     @param algo :: name of the algorithm
     @param version :: version, -1 for latest 
     """
+    global mtd
     source = find_algo_file(algo, version)
     if source == '':
         alg = mtd.createAlgorithm(algo, version)
@@ -269,6 +270,7 @@ def make_redirect(from_page, to_page):
 def do_algorithm(args, algo):
     """ Do the wiki page
     @param algo :: the name of the algorithm, possibly with suffix #"""
+    global mtd
     
     is_latest_version = True
     version = -1;
@@ -375,6 +377,8 @@ if __name__ == "__main__":
         os.environ['MANTIDPATH'] = args.mantidpath
     
     initialize_Mantid(args.mantidpath)
+    global mtd
+    mtd = wiki_tools.mtd
     intialize_files()
     initialize_wiki(args)
   
