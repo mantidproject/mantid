@@ -77,44 +77,44 @@ namespace MantidQt
     */
     void FitDialog::tieStaticWidgets(const bool readHistory)
     {
-      m_staticProperties << "Function" << "InputWorkspace" << "CreateOutput" << "Output"
-        << "MaxIterations" << "Minimizer" << "CostFunction";
-      tie(m_form.leFunction, "Function", m_form.topLayout, readHistory);
-      connect(m_form.leFunction,SIGNAL(editingFinished()),this,SLOT(functionChanged()));
-      // Check input workspace property. If there are available workspaces then
-      // these have been set as allowed values
-      std::set<std::string> workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
-      for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
-      {
-        m_form.cbInputWorkspace->addItem(QString::fromStdString(*itr));
-      }
-      connect(m_form.cbInputWorkspace,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(workspaceChanged(const QString&)));
-      tie(m_form.cbInputWorkspace, "InputWorkspace", m_form.topLayout, readHistory);
+      //m_staticProperties << "Function" << "InputWorkspace" << "CreateOutput" << "Output"
+      //  << "MaxIterations" << "Minimizer" << "CostFunction";
+      //tie(m_form.leFunction, "Function", m_form.topLayout, readHistory);
+      //connect(m_form.leFunction,SIGNAL(editingFinished()),this,SLOT(functionChanged()));
+      //// Check input workspace property. If there are available workspaces then
+      //// these have been set as allowed values
+      //std::set<std::string> workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
+      //for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
+      //{
+      //  m_form.cbInputWorkspace->addItem(QString::fromStdString(*itr));
+      //}
+      //connect(m_form.cbInputWorkspace,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(workspaceChanged(const QString&)));
+      //tie(m_form.cbInputWorkspace, "InputWorkspace", m_form.topLayout, readHistory);
 
-      tie(m_form.chbCreateOutput, "CreateOutput", m_form.bottomLayout, readHistory);
-      tie(m_form.leOutput, "Output", m_form.bottomLayout, readHistory);
-      tie(m_form.leMaxIterations, "MaxIterations", m_form.bottomLayout, readHistory);
+      //tie(m_form.chbCreateOutput, "CreateOutput", m_form.bottomLayout, readHistory);
+      //tie(m_form.leOutput, "Output", m_form.bottomLayout, readHistory);
+      //tie(m_form.leMaxIterations, "MaxIterations", m_form.bottomLayout, readHistory);
 
-      auto values = getAlgorithmProperty("Minimizer")->allowedValues();
-      for( auto itr = values.begin(); itr != values.end(); ++itr )
-      {
-        m_form.cbMinimizer->addItem(QString::fromStdString(*itr));
-      }
-      tie(m_form.cbMinimizer, "Minimizer", m_form.bottomLayout, readHistory);
+      //auto values = getAlgorithmProperty("Minimizer")->allowedValues();
+      //for( auto itr = values.begin(); itr != values.end(); ++itr )
+      //{
+      //  m_form.cbMinimizer->addItem(QString::fromStdString(*itr));
+      //}
+      //tie(m_form.cbMinimizer, "Minimizer", m_form.bottomLayout, readHistory);
 
-      values = getAlgorithmProperty("CostFunction")->allowedValues();
-      for( auto itr = values.begin(); itr != values.end(); ++itr )
-      {
-        m_form.cbCostFunction->addItem(QString::fromStdString(*itr));
-      }
-      tie(m_form.cbCostFunction, "CostFunction", m_form.bottomLayout, readHistory);
-      
-      if (!m_form.leFunction->text().isEmpty())
-      {
-        getAlgorithm()->setPropertyValue("Function",m_form.leFunction->text().toStdString());
-        getAlgorithm()->setPropertyValue("InputWorkspace",m_form.cbInputWorkspace->currentText().toStdString());
-        createDynamicLayout();
-      }
+      //values = getAlgorithmProperty("CostFunction")->allowedValues();
+      //for( auto itr = values.begin(); itr != values.end(); ++itr )
+      //{
+      //  m_form.cbCostFunction->addItem(QString::fromStdString(*itr));
+      //}
+      //tie(m_form.cbCostFunction, "CostFunction", m_form.bottomLayout, readHistory);
+      //
+      //if (!m_form.leFunction->text().isEmpty())
+      //{
+      //  getAlgorithm()->setPropertyValue("Function",m_form.leFunction->text().toStdString());
+      //  getAlgorithm()->setPropertyValue("InputWorkspace",m_form.cbInputWorkspace->currentText().toStdString());
+      //  createDynamicLayout();
+      //}
     }
 
     /**
@@ -123,33 +123,33 @@ namespace MantidQt
     */
     void FitDialog::removeOldInputWidgets()
     {
-      auto layout = m_form.topLayout;
-      layout->setEnabled(false);
-      // Remove the old widgets if necessary
-      if( layout->count() > 4 )
-      {
-        int count = layout->count();
-        while( count > 4 )
-        {
-          QLayoutItem *child = layout->takeAt(count - 1);
-          if( QWidget *w = child->widget() )
-          {
-            w->deleteLater();
-          }
-          else if( QLayout *l = child->layout() )
-          {
-            QLayoutItem *subChild(NULL);
-            while( (subChild = l->takeAt(0)) != NULL )
-            {
-              subChild->widget()->deleteLater();
-            }
-          }
-          count = layout->count();
-        }
-      }
-      layout->setEnabled(true);
-      m_dynamicLabels.clear();
-      m_dynamicEditors.clear();
+      //auto layout = m_form.topLayout;
+      //layout->setEnabled(false);
+      //// Remove the old widgets if necessary
+      //if( layout->count() > 4 )
+      //{
+      //  int count = layout->count();
+      //  while( count > 4 )
+      //  {
+      //    QLayoutItem *child = layout->takeAt(count - 1);
+      //    if( QWidget *w = child->widget() )
+      //    {
+      //      w->deleteLater();
+      //    }
+      //    else if( QLayout *l = child->layout() )
+      //    {
+      //      QLayoutItem *subChild(NULL);
+      //      while( (subChild = l->takeAt(0)) != NULL )
+      //      {
+      //        subChild->widget()->deleteLater();
+      //      }
+      //    }
+      //    count = layout->count();
+      //  }
+      //}
+      //layout->setEnabled(true);
+      //m_dynamicLabels.clear();
+      //m_dynamicEditors.clear();
     }
 
     /**
@@ -157,27 +157,27 @@ namespace MantidQt
     */
     void FitDialog::createDynamicLayout()
     {
-      int index = m_form.topLayout->rowCount();
-      auto properties = getAlgorithm()->getProperties();
-      for(auto prop = properties.begin(); prop != properties.end(); ++prop)
-      {
-        QString propName = QString::fromStdString((**prop).name());
-        if ( !m_staticProperties.contains(propName) && 
-          !m_dynamicLabels.contains(propName) && 
-          (**prop).direction() == Mantid::Kernel::Direction::Input)
-        {
-          untie(propName);
-          QLabel *label = new QLabel(propName,this);
-          QLineEdit *edit = new QLineEdit(this);
-          m_form.topLayout->addWidget(label,index,0);
-          m_form.topLayout->addWidget(edit,index,1);
-          tie(edit, propName, m_form.topLayout, true);
-          m_dynamicLabels.insert(propName,label);
-          m_dynamicEditors.insert(propName,edit);
-          ++index;
-        }
-      }
-      m_form.mainLayout->invalidate();
+      //int index = m_form.topLayout->rowCount();
+      //auto properties = getAlgorithm()->getProperties();
+      //for(auto prop = properties.begin(); prop != properties.end(); ++prop)
+      //{
+      //  QString propName = QString::fromStdString((**prop).name());
+      //  if ( !m_staticProperties.contains(propName) && 
+      //    !m_dynamicLabels.contains(propName) && 
+      //    (**prop).direction() == Mantid::Kernel::Direction::Input)
+      //  {
+      //    untie(propName);
+      //    QLabel *label = new QLabel(propName,this);
+      //    QLineEdit *edit = new QLineEdit(this);
+      //    m_form.topLayout->addWidget(label,index,0);
+      //    m_form.topLayout->addWidget(edit,index,1);
+      //    tie(edit, propName, m_form.topLayout, true);
+      //    m_dynamicLabels.insert(propName,label);
+      //    m_dynamicEditors.insert(propName,edit);
+      //    ++index;
+      //  }
+      //}
+      //m_form.mainLayout->invalidate();
     }
 
     void FitDialog::workspaceChanged(const QString&)

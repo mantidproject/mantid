@@ -4,6 +4,7 @@ set ( SRC_FILES
         src/FindReplaceDialog.cpp
         src/FindDialog.cpp
 	src/FitPropertyBrowser.cpp
+	src/FunctionBrowser.cpp
 	src/ICatAdvancedSearch.cpp
 	src/ICatInvestigation.cpp
 	src/ICatMyDataSearch.cpp
@@ -21,6 +22,7 @@ set ( SRC_FILES
 	src/SafeQwtPlot.cpp
 	src/SaveWorkspaces.cpp
 	src/ScriptEditor.cpp
+	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
 	src/SequentialFitDialog.cpp
 	src/UserFunctionDialog.cpp
@@ -40,6 +42,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
     inc/MantidQtMantidWidgets/ICatInvestigation.h
     inc/MantidQtMantidWidgets/ICatMyDataSearch.h
@@ -58,6 +61,7 @@ set ( MOC_FILES
 	inc/MantidQtMantidWidgets/SafeQwtPlot.h
     inc/MantidQtMantidWidgets/SaveWorkspaces.h
     inc/MantidQtMantidWidgets/ScriptEditor.h
+    inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
@@ -81,6 +85,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
+    inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
 )

@@ -5,7 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtAPI/AlgorithmDialog.h"
-#include "ui_FitDialog.h"
+#include "ui_FitDialog1.h"
 
 //------------------------------------------------------------------------------
 // Qt Forward declarations
