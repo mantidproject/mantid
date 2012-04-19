@@ -63,8 +63,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-// DM_NEEDS_FIX  #include "MantidQtImageViewer/EventWSImageView.h"
-
+#include "MantidQtImageViewer/EventWSImageView.h"
 
 using namespace std;
 
@@ -666,12 +665,10 @@ void MantidUI::showVatesSimpleInterface()
 
 void MantidUI::showImageViewer()
 {
-    m_appWindow->writeToLogWindow("NOT YET IMPLEMENTED " );    // DM_NEEDS_FIX
-/*  DM_NEEDS_FIX
   QString wsName = getSelectedWorkspaceName();
   try
   {
-    EventWorkspace_sptr evwsp = boost::dynamic_pointer_cast<EventWorkspace>(
+    IEventWorkspace_sptr evwsp = boost::dynamic_pointer_cast<IEventWorkspace>(
                AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( evwsp )
     {
@@ -691,7 +688,7 @@ void MantidUI::showImageViewer()
   {
     m_appWindow->writeToLogWindow("Exception getting workspace " );
   }
-*/
+
 }
 
 

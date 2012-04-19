@@ -8,9 +8,9 @@
 #include "MantidQtImageViewer/EventWSDataSource.h"
 #include "MantidQtImageViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/IEventList.h"
 
 using namespace Mantid;
-using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 
@@ -24,7 +24,7 @@ namespace ImageView
  *
  * @param ev_ws  Shared pointer to the event workspace being "wrapped"
  */
-EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
+EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->ev_ws = ev_ws;
@@ -55,9 +55,9 @@ EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
 
   for ( size_t i = 0; i < total_rows; i++ )
   {
-    EventList & list = ev_ws->getEventList(i);
-    list.setX( *x_scale );
-    list.setTofs( *x_scale );
+    IEventList * list = ev_ws->getEventListPtr(i);
+    list->setX( *x_scale );
+    list->setTofs( *x_scale );
   }
 
   new_data = 0;                   // no data loaded yet
@@ -128,9 +128,9 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   size_t index = 0;
   for ( size_t i = first_row; i < first_row + n_rows; i++ )
   {
-    EventList & list = ev_ws->getEventList(i);
-    list.setX( *x_scale );
-    list.setTofs( *x_scale );
+    IEventList * list = ev_ws->getEventListPtr(i);
+    list->setX( *x_scale );
+    list->setTofs( *x_scale );
     const MantidVec & y_vals = ev_ws->readY(i);
     for ( size_t col = 0; col < n_cols; col++ )
     {

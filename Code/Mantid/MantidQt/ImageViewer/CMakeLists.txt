@@ -51,8 +51,6 @@ set ( TEST_PY_FILES
 
 include_directories ( inc )
 include_directories ( ../../Framework/API/inc )
-include_directories ( ../../Framework/DataObjects/inc )
-include_directories ( ../../Framework/DataHandling/inc )
 
 
 ###########################################################################
@@ -78,28 +76,21 @@ add_library ( MantidQtImageViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtImageViewer
-DataObjects DataHandling MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+                        MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 
-if ( WIN32 )
-# Does not work on windows for some reason
-else ()
-
 add_executable ( ImageViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/ImageViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
 target_link_libraries ( ImageViewDemo MantidQtAPI QtPropertyBrowser
-DataObjects DataHandling ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
+                        ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}
 src/ImageViewNxEventFile.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
 target_link_libraries ( ImageViewNxEventFile 
-MantidQtAPI QtPropertyBrowser DataObjects DataHandling ${CORE_MANTIDLIBS}
+                        MantidQtAPI QtPropertyBrowser ${CORE_MANTIDLIBS}
 ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
-endif ()
 
 ###########################################################################
 # Unit tests setup

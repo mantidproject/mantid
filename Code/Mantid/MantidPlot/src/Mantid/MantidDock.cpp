@@ -301,7 +301,7 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showListData = new QAction(tr("List Data"), this);
   connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
-  m_showImageViewer = new QAction(tr("Show Image Viewer(Event workspace only)"), this);
+  m_showImageViewer = new QAction(tr("Show Image Viewer"), this);
   connect(m_showImageViewer, SIGNAL(activated()), m_mantidUI, SLOT(showImageViewer()));
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
@@ -849,7 +849,10 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   m_plotSpecErr->setEnabled ( matrixWS->blocksize() > 1 );
-  menu->addAction(m_showImageViewer); // The 2D image viewer
+  if( boost::dynamic_pointer_cast<const IEventWorkspace>(matrixWS) )
+  {
+    menu->addAction(m_showImageViewer); // The 2D image viewer
+  }
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
   m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );

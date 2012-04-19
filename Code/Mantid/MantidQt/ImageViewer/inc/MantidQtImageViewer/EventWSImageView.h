@@ -3,7 +3,7 @@
 
 #include "MantidQtImageViewer/DllOptionIV.h"
 
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 /**
     @class EventWSDataSource 
@@ -36,10 +36,6 @@
  */
 #include "MantidQtImageViewer/ImageView.h"
 
-using namespace Mantid;
-using namespace DataObjects;
-using namespace Kernel;
-
 namespace MantidQt
 {
 namespace ImageView
@@ -50,7 +46,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSImageView
   public:
 
     /// Construct an image viewer for the specifed EventWorkspace
-    EventWSImageView( EventWorkspace_sptr ev_ws );
+    EventWSImageView( Mantid::API::IEventWorkspace_sptr ev_ws );
 
    ~EventWSImageView();
 
