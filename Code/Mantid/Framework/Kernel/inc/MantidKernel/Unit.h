@@ -76,6 +76,19 @@ public:
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta);
 
+  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
+   *  @param xvalue ::   A single X-value to convert
+   *  @param l1 ::       The source-sample distance (in metres)
+   *  @param l2 ::       The sample-detector distance (in metres)
+   *  @param twoTheta :: The scattering angle (in radians)
+   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *  @param delta ::    Not currently used
+   *  @return the value in TOF units.
+   */
+  double convertSingleToTOF(const double xvalue, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta);
+
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
@@ -87,6 +100,19 @@ public:
    *  @param delta ::    Not currently used
    */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta);
+
+  /** Convert from the time-of-flight to the concrete unit. TOF is in microseconds.
+   *  @param xvalue ::   A single X-value to convert
+   *  @param l1 ::       The source-sample distance (in metres)
+   *  @param l2 ::       The sample-detector distance (in metres)
+   *  @param twoTheta :: The scattering angle (in radians)
+   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *  @param delta ::    Not currently used
+   *  @return the value in these units.
+   */
+  double convertSingleFromTOF(const double xvalue, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta);
 
   /** Initialize the unit to perform conversion using singleToTof() and singleFromTof()
