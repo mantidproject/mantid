@@ -187,9 +187,6 @@ public:
    */
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
-    // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
-
     // Don't permit an empty name for the workspace
     if (name.empty())
     {
@@ -197,6 +194,9 @@ public:
       g_log.debug() << error << std::endl;
       throw std::runtime_error(error);
     }
+
+    // Make DataService access thread-safe
+    m_mutex.lock();
 
     // At the moment, you can't overwrite a workspace (i.e. pass in a name
     // that's already in the map with a pointer to a different workspace).
@@ -206,11 +206,13 @@ public:
     {
       std::string error=" add : Unable to insert Data Object : '"+name+"'";
       g_log.error(error);
+      m_mutex.unlock();
       throw std::runtime_error(error);
     }
     else
     {
       g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
+      m_mutex.unlock();
 
       //check the workspace invisible option set
       std::string name_startswith=name.substr(0,2);
@@ -283,20 +285,24 @@ public:
   void remove( const std::string& name)
   {
     // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    m_mutex.lock();
 
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it==datamap.end())
     {
       g_log.warning(" remove '" + name + "' cannot be found");
+      m_mutex.unlock();
       return;
     }
-
+    m_mutex.unlock();
     notificationCenter.postNotification(new PreDeleteNotification(foundName,it->second));
+    m_mutex.lock();
+
     g_log.information("Data Object '"+ foundName +"' deleted from data service.");
     datamap.erase(it);
-    //API::MemoryManager::Instance().releaseFreeMemory();
+
+    m_mutex.unlock();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
     return;
   }
@@ -306,9 +312,10 @@ public:
   void clear()
   {
     // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    m_mutex.lock();
 
     datamap.clear();
+    m_mutex.unlock();
     notificationCenter.postNotification(new ClearNotification());
     g_log.debug() << typeid(this).name() << " cleared.\n";
   }
