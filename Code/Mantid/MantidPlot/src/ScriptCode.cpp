@@ -3,7 +3,6 @@
 /// Empty code
 ScriptCode::ScriptCode() : m_code(), m_offset()
 {
-
 }
 
 /**
@@ -26,19 +25,12 @@ ScriptCode::ScriptCode(const char * codeStr, const int offset)
 
 /// Code from a QString with zero offset
 ScriptCode::ScriptCode(const QString & codeStr)
-  : m_code(codeStr), m_offset(0)
+  : m_code(codeStr.toStdString()), m_offset(0)
 {
 }
 
 /// Code from a QString with a defined offset
 ScriptCode::ScriptCode(const QString & codeStr, const int offset)
-  : m_code(codeStr), m_offset(offset)
+  : m_code(codeStr.toStdString()), m_offset(offset)
 {
-}
-
-/// Conversion to a QString
-/// @return A String containing the code
-ScriptCode::operator const QString () const
-{
-  return m_code;
 }

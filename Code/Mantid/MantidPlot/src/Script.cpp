@@ -32,11 +32,13 @@
 
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
-  : QObject(), m_env(env), m_name(name) , m_context(context),
-    m_redirectOutput(true), m_reportProgress(false), m_codeOffset(0), m_interactMode(interact),
+  : QObject(), m_env(env), m_name() , m_context(context),
+    m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
     m_execMode(NotExecuting)
 {
   m_env->incref();
+
+  setName(name);
 
   connect(this, SIGNAL(startedSerial(const QString &)), this, SLOT(setExecutingSerialised()));
   connect(this, SIGNAL(startedAsync(const QString &)), this, SLOT(setExecutingAsync()));
@@ -49,7 +51,14 @@ Script::~Script()
   m_env->decref();
 }
 
-///
+/**
+ * Sets a new name for the script
+ */
+void Script::setName(const QString & name)
+{ 
+  m_name = name.toStdString();
+}
+
 /**
  * Compile the code, returning true/false depending on the status
  * @param code Code to compile
@@ -57,8 +66,8 @@ Script::~Script()
  */
 bool Script::compile(const ScriptCode & code)
 {
-  m_codeOffset = code.offset();
-  return this->compileImpl(code);
+  setupCode(code);
+  return this->compileImpl();
 }
 
 /**
@@ -68,22 +77,22 @@ bool Script::compile(const ScriptCode & code)
  */
 QVariant Script::evaluate(const ScriptCode & code)
 {
-  m_codeOffset = code.offset();
-  return this->evaluateImpl(code);
+  setupCode(code);
+  return this->evaluateImpl();
 }
 
 /// Execute the Code, returning false on an error / exception.
 bool Script::execute(const ScriptCode & code)
 {
-  m_codeOffset = code.offset();
-  return this->executeImpl(code);
+  setupCode(code);
+  return this->executeImpl();
 }
 
 /// Execute the code asynchronously, returning immediately after the execution has started
 QFuture<bool> Script::executeAsync(const ScriptCode & code)
 {
-  m_codeOffset = code.offset();
-  return this->executeAsyncImpl(code);
+  setupCode(code);
+  return this->executeAsyncImpl();
 }
 
 
@@ -102,6 +111,14 @@ void Script::setExecutingSerialised()
 void Script::setExecutingAsync()
 {
   m_execMode = Asynchronous;
+}
+
+/**
+ * Sets the offset & code string
+ */
+void Script::setupCode(const ScriptCode & code)
+{
+  m_code = code;
 }
 
 /**

@@ -275,7 +275,7 @@ double* muParserScript::defineVariable(const char *name, double val)
     valptr = new double;
     if (!valptr)
     {
-      emit error(tr("Out of memory"), this->name(), 0);
+      emit error(tr("Out of memory"), "", 0);
       return 0;
     }
     try {
@@ -284,7 +284,7 @@ double* muParserScript::defineVariable(const char *name, double val)
       variables.insert(name, valptr);
     } catch (mu::ParserError &e) {
       delete valptr;
-      emit error(QString(e.GetMsg().c_str()), this->name(), 0);
+      emit error(QString(e.GetMsg().c_str()), "", 0);
       return valptr;
     }
   }
@@ -300,7 +300,7 @@ bool muParserScript::setDouble(double val, const char *name)
     valptr = new double;
     if (!valptr)
     {
-      emit error(tr("Out of memory"), this->name(), 0);
+      emit error(tr("Out of memory"), "", 0);
       return false;
     }
     try {
@@ -309,7 +309,7 @@ bool muParserScript::setDouble(double val, const char *name)
       variables.insert(name, valptr);
     } catch (mu::ParserError &e) {
       delete valptr;
-      emit error(QString(e.GetMsg().c_str()), this->name(), 0);
+      emit error(QString(e.GetMsg().c_str()), "", 0);
       return false;
     }
   }
@@ -396,8 +396,9 @@ double muParserScript::evalSingleLine()
 
 muParserScript *muParserScript::current = NULL;
 
-bool muParserScript::compileImpl(const QString & code)
+bool muParserScript::compileImpl()
 {
+  const QString code = QString::fromStdString(codeString());
   muCode.clear();
   QString muCodeLine = "";
   for (int i=0; i < code.size(); i++)
@@ -451,7 +452,7 @@ bool muParserScript::compileImpl(const QString & code)
     } catch (mu::ParserError &e) {
       if (e.GetCode() != ecVAL_EXPECTED){
         QApplication::restoreOverrideCursor();
-        emit error(e.GetMsg().c_str(), name(), 0);
+        emit error(e.GetMsg().c_str(), "", 0);
         return false;
       }
     }
@@ -459,9 +460,9 @@ bool muParserScript::compileImpl(const QString & code)
   return true;
 }
 
-QVariant muParserScript::evaluateImpl(const QString & code)
+QVariant muParserScript::evaluateImpl()
 {
-  if (!compile(code))
+  if (!compile(scriptCode()))
     return QVariant();
   double val = 0.0;
   try {
@@ -473,15 +474,15 @@ QVariant muParserScript::evaluateImpl(const QString & code)
   } catch (EmptySourceError *) {
     return QVariant("");
   } catch (ParserError &e) {
-    emit error(e.GetMsg().c_str(), name(), 0);
+    emit error(e.GetMsg().c_str(), "", 0);
     return QVariant();
   }
   return QVariant(val);
 }
 
-bool muParserScript::executeImpl(const QString & code)
+bool muParserScript::executeImpl()
 {
-  if (!compile(code))
+  if (!compile(scriptCode()))
     return false;
   try {
     current = this;
@@ -492,7 +493,7 @@ bool muParserScript::executeImpl(const QString & code)
   } catch (EmptySourceError *) {
     return true;
   } catch (mu::ParserError &e) {
-    emit error(e.GetMsg().c_str(), name(), 0);
+    emit error(e.GetMsg().c_str(), "", 0);
     return false;
   }
   return true;
@@ -501,7 +502,7 @@ bool muParserScript::executeImpl(const QString & code)
 /**
  * Execute the script in a seprate thread
  */
-QFuture<bool> muParserScript::executeAsyncImpl(const QString &)
+QFuture<bool> muParserScript::executeAsyncImpl()
 {
   throw std::runtime_error("muParser does not support asynchronous execution");
 }
