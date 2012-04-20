@@ -176,6 +176,7 @@ private:
 
   int m_promptKey;
   int m_continuationKey;
+  int m_currentPromptLineIndex;
 
   QString m_pastedText;
   QTextStream m_pasteQueue;

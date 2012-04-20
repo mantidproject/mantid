@@ -212,6 +212,7 @@ CommandLineInterpreter::CommandLineInterpreter(const ScriptingEnv & environ, QWi
     m_inputBuffer(),m_status(Waiting),
     m_promptKey(markerDefine(QsciScintilla::ThreeRightArrows)),
     m_continuationKey(markerDefine(QsciScintilla::ThreeDots)),
+    m_currentPromptLineIndex(0),
     m_pastedText(), m_pasteQueue(),
     m_copy(NULL), m_cut(NULL), m_paste(NULL), m_saveAs(NULL),
     m_zoomIn(NULL), m_zoomOut(NULL)
@@ -346,9 +347,15 @@ void CommandLineInterpreter::displayError(const QString & messages)
  */
 void CommandLineInterpreter::insertInputPrompt()
 {
+  const int prevPromptLineIndex = m_currentPromptLineIndex;
   append("\n");
-  markerAdd(indexOfLastLine(), m_promptKey);
   moveCursorToStartOfLastLine();
+  m_currentPromptLineIndex = indexOfLastLine();
+  // Order is important. Qscintilla tries to make the markers
+  // follow the cursor so we have to add the new one
+  // then restore the original
+  markerAdd(m_currentPromptLineIndex, m_promptKey);
+  markerAdd(prevPromptLineIndex, m_promptKey);
 }
 
 /**
