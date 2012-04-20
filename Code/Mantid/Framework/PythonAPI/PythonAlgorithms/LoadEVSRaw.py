@@ -12,7 +12,7 @@ class _ContiguousGrouper():
 		self._currentVal = None
 	
 	def __call__(self, val):
-		if self._currentVal is not None and self._currentVal + 1 is not val:
+		if self._currentVal is not None and self._currentVal + 1 != val:
 			self._key += 1
 		self._currentVal = val
 		return self._key
@@ -124,6 +124,11 @@ class Intervals:
 	# So we can type "interval = Intervals( (3, 5), (10, 12) )" and then "interval[3]" returns 10.
 	def __getitem__(self, index):
 		return self.getValues()[index]
+	
+	# Mainly for debugging.
+	def __str__(self):
+		strings = ["(" + str(interval[0]) + ", " + str(interval[1]) + ")" for interval in self._intervals]
+		return ", ".join(strings)
 
 """=================================================================================="""
 """=================================================================================="""
