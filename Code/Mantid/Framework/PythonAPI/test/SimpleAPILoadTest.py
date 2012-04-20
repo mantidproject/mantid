@@ -32,6 +32,10 @@ class SimpleAPILoadTest(unittest.TestCase):
         assertRaisesNothing(self, Load, 'IRS21360.raw', 'raw', SpectrumMax=1)
         self._run_check_and_remove('raw', 1)
 
+    def test_Load_call_with_all_keyword_args_executes_correctly(self):
+        assertRaisesNothing(self, Load, Filename='IRS21360.raw', OutputWorkspace='raw', SpectrumMax=1)
+        self._run_check_and_remove('raw', 1)
+        
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         assertRaisesNothing(self, Load, 'IRS21360.raw', 'raw', SpectrumMax=1,Append=True)
         self._run_check_and_remove('raw', 1)

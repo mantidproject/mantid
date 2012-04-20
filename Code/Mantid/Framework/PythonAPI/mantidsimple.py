@@ -185,6 +185,12 @@ def Load(*args, **kwargs):
     algm = mtd.createAlgorithm('Load')
     algm.setPropertyValue('Filename', filename) # Must be set first
     algm.setPropertyValue('OutputWorkspace', wkspace)
+    # Remove them from the kwargs if they are there so they are not set twice
+    try:
+        del kwargs['Filename']
+        del kwargs['OutputWorkspace']
+    except KeyError:
+        pass
     for key, value in kwargs.iteritems():
         try:
             algm.setPropertyValue(key, _makeString(value).lstrip('? '))
@@ -260,6 +266,11 @@ def Fit(*args, **kwargs):
     algm = mtd.createAlgorithm('Fit')
     algm.setPropertyValue('Function', str(Function)) # Must be set first
     algm.setPropertyValue('InputWorkspace', str(InputWorkspace))
+    try:
+        del kwargs['Function']
+        del kwargs['InputWorkspace']
+    except KeyError:
+        pass
     for key, value in kwargs.iteritems():
         try:
             algm.setPropertyValue(key, _makeString(value).lstrip('? '))

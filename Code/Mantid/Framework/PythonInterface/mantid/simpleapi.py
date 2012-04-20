@@ -82,6 +82,11 @@ def Load(*args, **kwargs):
     # Create and execute
     algm = _framework.createAlgorithm('Load')
     algm.setProperty('Filename', filename) # Must be set first
+    # Remove from keywords so it is not set twice
+    try:
+        del kwargs['Filename']
+    except KeyError:
+        pass
     lhs = _funcreturns.lhs_info(use_object_names=True)
     # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
     # then raise a more helpful error than what we would get from an algorithm
@@ -173,9 +178,14 @@ def Fit(*args, **kwargs):
     algm = _framework.createAlgorithm('Fit')
     algm.setProperty('Function', Function) # Must be set first
     algm.setProperty('InputWorkspace', InputWorkspace)
-
+    # Remove from keywords so it is not set twice
+    try:
+        del kwargs['Function']
+        del kwargs['InputWorkspace']
+    except KeyError:
+        pass
+    
     lhs = _funcreturns.lhs_info(use_object_names=True)
-
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
