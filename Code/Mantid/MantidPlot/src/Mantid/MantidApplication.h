@@ -15,6 +15,8 @@ public:
   MantidApplication(int & argc, char ** argv );
   /// Reimplement notify to catch exceptions from event handlers
   virtual bool notify(QObject * receiver, QEvent * event );
+
+  virtual bool compressEvent(QEvent *event, QObject *receiver, QPostEventList *postedEvents);
 private:
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;

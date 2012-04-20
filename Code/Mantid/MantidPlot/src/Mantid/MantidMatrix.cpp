@@ -1219,7 +1219,7 @@ void MantidMatrix::repaintAll()
 void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   if( wsName != m_strName || !ws.get() ) return;
-
+  std::cout << "MantidMatrix::afterReplaceHandle() called" << std::endl;
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
   emit needWorkspaceChange( new_workspace ); 
 

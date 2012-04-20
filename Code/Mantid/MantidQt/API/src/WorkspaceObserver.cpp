@@ -3,6 +3,9 @@
 //-----------------------------------
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/CPUTimer.h"
+
+using Mantid::Kernel::CPUTimer;
 
 namespace MantidQt
 {
@@ -29,7 +32,12 @@ namespace MantidQt
 
     void ObserverCallback::handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace)
     {
+      // This is called by Qt's event loop, in the thread of the observer (GUI thread).
+      std::cout << "ObserverCallback::handleAfterReplace(" << name << ") " << std::endl;
+      CPUTimer tim;
+      // This call is typically synchronous
       m_observer->afterReplaceHandle(name, workspace);
+      std::cout << "ObserverCallback::handleAfterReplace(" << name << ") " << tim << std::endl;
     }
 
     void ObserverCallback::handleClearADS()
@@ -122,6 +130,9 @@ namespace MantidQt
 
     /**
     * Turn on observations of workspace replacement notifications from the ADS
+    * Uses a QueuedConnection. This puts the call to the SLOT in the event loop queue,
+    * and ensures it is called in the observer's thread.
+    *
     * @param turnOn :: If true observe the notifications, otherwise disable observation [default=true]
     */
     void WorkspaceObserver::observeAfterReplace(bool turnOn)

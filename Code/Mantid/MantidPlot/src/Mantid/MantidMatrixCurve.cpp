@@ -63,7 +63,7 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
 {
   setData(c.data());
   observePostDelete();
-  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
+  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)));
   observeAfterReplace();
   observeADSClear();
 }
@@ -236,11 +236,13 @@ QString MantidMatrixCurve::createCurveName(const boost::shared_ptr<const Mantid:
 void MantidMatrixCurve::dataReset(const QString& wsName)
 {
   if (m_wsName != wsName) return;
+  std::cout << "MantidMatrixCurve::dataReset(" << wsName.toStdString() << ") called " << this->title().text().toStdString() << std::endl;
   const std::string wsNameStd = wsName.toStdString();
   Mantid::API::MatrixWorkspace_sptr mws;
+  Mantid::API::Workspace_sptr base;
   try
   {
-    Mantid::API::Workspace_sptr base =  Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
+    base = Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
     mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
   }
   catch(std::runtime_error&)
@@ -250,6 +252,17 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
     mws = Mantid::API::MatrixWorkspace_sptr();
   }
   if (!mws) return;
+
+//  // Do not reset if the workspace pointer is still the same ???
+//  // This might not handle in-place changes!
+//  if (base == this->m_ws)
+//  {
+//    std::cout << "MantidMatrixCurve::dataReset() skipping since it is the same ws" << std::endl;
+//    return;
+//  }
+
+  // Save for the next time
+  this->m_ws = base;
 
   // Acquire a read-lock on the matrix workspace data
   ReadLock _lock(*mws);
@@ -275,6 +288,7 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
 void MantidMatrixCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   (void) ws;
+  std::cout << "MantidMatrixCurve::afterReplaceHandle(" << wsName << ") called" << std::endl;
 
   invalidateBoundingRect();
   emit resetData(QString::fromStdString(wsName));
