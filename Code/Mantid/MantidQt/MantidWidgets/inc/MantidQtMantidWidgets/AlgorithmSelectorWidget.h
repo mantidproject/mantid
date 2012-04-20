@@ -62,6 +62,8 @@ namespace MantidWidgets
     /// Observes algorithm factory update notifications
     Poco::NObserver<AlgorithmSelectorWidget,
                     Mantid::API::AlgorithmFactoryUpdateNotification> m_updateObserver;
+    // Flag to indicate that we are updating
+    bool m_updateInProgress;
   };
 
   //============================================================================
