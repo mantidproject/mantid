@@ -18,7 +18,6 @@ MantidApplication::MantidApplication(int &argc, char ** argv ) : QApplication(ar
 
 bool MantidApplication::notify( QObject * receiver, QEvent * event )
 {
-//  std::cout << "MantidApplication::notify(" << event->type() << ")" << std::endl;
   bool res = false;
   try
   {
@@ -70,13 +69,6 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
         g_log.fatal("Continue working.");
   }
   return res;
-}
-
-
-bool MantidApplication::compressEvent(QEvent *event, QObject *receiver, QPostEventList *postedEvents)
-{
-//  std::cout << "MantidApplication::compressEvent(" << event->type() << ")" << std::endl;
-  return QApplication::compressEvent(event,receiver,postedEvents);
 }
 
 //=============================================================================

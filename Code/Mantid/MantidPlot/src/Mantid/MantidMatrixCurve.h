@@ -5,7 +5,6 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
-#include "MantidAPI/Workspace.h"
 
 // Forward definitions
 class MantidUI;
@@ -143,10 +142,7 @@ private:
   static QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
                                  const QString& wsName,int index);
 
-  /// Workspace name. If empty the ws isn't in the data service
-  QString m_wsName;
-  /// Last workspace that was plotted.
-  Mantid::API::Workspace_sptr m_ws;
+  QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
   /// workspace index
   int  m_index;
   /// x units

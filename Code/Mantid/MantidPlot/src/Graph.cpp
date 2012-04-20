@@ -3466,7 +3466,6 @@ void Graph::updateVectorsLayout(int curve, const QColor& color, double width,
 
 void Graph::updatePlot()
 {
-  std::cout << "Graph::updatePlot() called " << std::endl;
   if ( isWaterfallPlot() ) updateDataCurves();
 
   if (d_auto_scale && !zoomOn() && d_active_tool==NULL){
