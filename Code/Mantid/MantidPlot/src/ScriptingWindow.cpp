@@ -206,6 +206,25 @@ void ScriptingWindow::setMenuStates(int ntabs)
   m_runMenu->setEnabled(tabsOpen);
 }
 
+/**
+ * Set the state of the execution actions/menu depending on the flag
+ * @param state :: If the true the items are enabled, otherwise the are disabled
+ */
+void ScriptingWindow::setEditActionsDisabled(bool state)
+{
+  m_editMenu->setDisabled(state);
+}
+
+/**
+ * Set the state of the execution actions/menu depending on the flag
+ * @param state :: If the true the items are enabled, otherwise the are disabled
+ */
+void ScriptingWindow::setExecutionActionsDisabled(bool state)
+{
+  m_execSelect->setDisabled(state);
+  m_execAll->setDisabled(state);
+  m_runMenu->setDisabled(state);
+}
 
 /**
  * Maps the QAction to an index in the recent scripts list
@@ -257,11 +276,11 @@ void ScriptingWindow::initMenus()
 
   m_editMenu = menuBar()->addMenu(tr("&Edit"));
   connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
-  connect(m_manager, SIGNAL(executionStateChanged(bool)), m_editMenu, SLOT(setDisabled(bool)));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setEditActionsDisabled(bool)));
 
   m_runMenu = menuBar()->addMenu(tr("E&xecute"));
   connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
-  connect(m_manager, SIGNAL(executionStateChanged(bool)), m_runMenu, SLOT(setDisabled(bool)));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setExecutionActionsDisabled(bool)));
 
   m_windowMenu = menuBar()->addMenu(tr("&Window"));
   connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateWindowMenu()));
@@ -454,6 +473,7 @@ void ScriptingWindow::initExecMenuActions()
 {
   m_execSelect = new QAction(tr("E&xecute Selection"), this);
   connect(m_execSelect, SIGNAL(triggered()), m_manager, SLOT(executeSelection()));
+
   QList<QKeySequence> shortcuts;
   shortcuts << Qt::CTRL + Qt::Key_Return << Qt::CTRL + Qt::Key_Enter;
   m_execSelect->setShortcuts(shortcuts);
