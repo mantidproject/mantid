@@ -174,7 +174,7 @@ public:
   virtual boost::shared_ptr<const Mantid::API::Column> getColumn(size_t index) const = 0;
 
   /// Returns a vector of all column names.
-  virtual std::vector<std::string> getColumnNames() = 0;
+  virtual std::vector<std::string> getColumnNames() const = 0;
 
   /// Number of rows in the workspace.
   virtual size_t rowCount() const = 0;

@@ -227,8 +227,6 @@ void IVConnections::toggle_Hscroll()
   iv_ui->imageHorizontalScrollBar->setVisible( is_on );
   iv_ui->imageHorizontalScrollBar->setEnabled( is_on );
   image_display->UpdateImage();
-
-  std::cout << iv_ui->action_Hscroll->iconText().toStdString() << std::endl;
 }
 
 
@@ -256,10 +254,6 @@ void IVConnections::h_scroll_bar_moved()
 void IVConnections::imageSplitter_moved()
 {
   QList<int> sizes = iv_ui->imageSplitter->sizes();
-/*
-  std::cout << "height 0 = " << sizes[0] << 
-               " height 1 = " << sizes[1] << std::endl;
-*/
   QList<int> vgraph_sizes;
   vgraph_sizes.append( sizes[0] );
   vgraph_sizes.append( 30 );

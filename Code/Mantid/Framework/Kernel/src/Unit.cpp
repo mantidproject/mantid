@@ -119,6 +119,14 @@ void Unit::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const d
 }
 
 
+/** Convert a single value to TOF */
+double Unit::convertSingleToTOF(const double xvalue, const double& l1, const double& l2,
+    const double& twoTheta, const int& emode, const double& efixed, const double& delta)
+{
+  this->initialize(l1,l2, twoTheta, emode, efixed, delta);
+  return this->singleToTOF(xvalue);
+}
+
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data */
 void Unit::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& _l1, const double& _l2,
@@ -131,6 +139,14 @@ void Unit::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
     xdata[i] = this->singleFromTOF(xdata[i]);
 }
 
+
+/** Convert a single value from TOF */
+double Unit::convertSingleFromTOF(const double xvalue, const double& l1, const double& l2,
+    const double& twoTheta, const int& emode, const double& efixed, const double& delta)
+{
+  this->initialize(l1,l2, twoTheta, emode, efixed, delta);
+  return this->singleFromTOF(xvalue);
+}
 
 
 namespace Units

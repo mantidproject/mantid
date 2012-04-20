@@ -7,7 +7,7 @@
 #include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 /**
     @class EventWSDataSource 
@@ -39,10 +39,6 @@
                  <http://doxygen.mantidproject.org>
  */
 
-using namespace Mantid;
-using namespace DataObjects;
-using namespace Kernel;
-
 namespace MantidQt
 {
 namespace ImageView
@@ -53,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
   public:
 
     /// Construct a DataSource object around the specifed EventWorkspace
-    EventWSDataSource( EventWorkspace_sptr ev_ws );
+    EventWSDataSource( Mantid::API::IEventWorkspace_sptr ev_ws );
 
    ~EventWSDataSource();
 
@@ -74,10 +70,10 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
                       double y,
                       std::vector<std::string> &list );
   private:
-    EventWorkspace_sptr  ev_ws;
+    Mantid::API::IEventWorkspace_sptr  ev_ws;
     float*               new_data;
     DataArray*           new_data_array;
-    MantidVec*           x_scale;
+    Mantid::MantidVec*           x_scale;
 };
 
 } // namespace MantidQt 

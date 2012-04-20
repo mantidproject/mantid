@@ -11,6 +11,7 @@
 #include <iostream>
 #include <Poco/NObserver.h>
 #include <vector>
+#include "MantidKernel/MultiThreaded.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -32,6 +33,7 @@ public:
   DumbDataServiceImpl svc;
 
   std::vector<int> vector;
+  Mutex m_vectorMutex;
 
   void setUp()
   {
@@ -85,9 +87,9 @@ public:
   // Handler for an observer, called each time an object is added
   void handleAddNotification(const Poco::AutoPtr<DumbDataServiceImpl::AddNotification> & )
   {
-    // This operation is not thread safe!
-    // So it will segfault if called in parallel.
+    m_vectorMutex.lock();
     vector.push_back(123);
+    m_vectorMutex.unlock();
   }
 
   void test_threadSafety()

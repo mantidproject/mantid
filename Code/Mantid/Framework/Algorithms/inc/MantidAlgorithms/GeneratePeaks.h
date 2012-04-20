@@ -61,24 +61,20 @@ namespace Algorithms
 
     API::MatrixWorkspace_sptr createOutputWorkspace(std::set<specid_t> spectra, std::vector<double> mBinParameters);
 
-    API::IFunction_sptr createFunction(std::string m_peakFuncType, const double height, const double centre,
-        const double sigma, const double a0, const double a1, const double a2, const bool withPeak, const bool withBackground);
+    API::IFunction_sptr createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
+                                       const bool isRaw, const bool withBackground,
+                                       DataObjects::TableWorkspace_const_sptr peakParmsWS,
+                                       const std::size_t bkg_offset, const std::size_t rowNum,
+                                       double &centre, double &fwhm);
 
     void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra);
 
     void generatePeaks(API::MatrixWorkspace_sptr dataWS, DataObjects::TableWorkspace_const_sptr peakparameters,
-       std::string peakfunction);
+       std::string peakfunction, bool newWSFromParent);
 
     double getTableValue(DataObjects::TableWorkspace_const_sptr tableWS, std::string colname, size_t index);
 
     std::map<specid_t, specid_t> mSpectrumMap;
-
-    bool mGeneratePeak;
-    bool mGenerateBackground;
-    bool mNewWSFromParent;
-
-    API::MatrixWorkspace_const_sptr mInputWS;
-
   };
 
 

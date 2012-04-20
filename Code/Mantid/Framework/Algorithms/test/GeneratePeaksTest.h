@@ -67,7 +67,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GeneratePeaks", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
@@ -131,7 +130,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputws));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test02WS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GeneratePeaks", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
@@ -180,7 +178,7 @@ public:
   /*
    * Test to use user-provided binning parameters
    */
-  void test_BackgroundOnly()
+  void test_Background()
   {
     // 1. Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
@@ -193,7 +191,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GeneratePeaks", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
@@ -213,17 +210,17 @@ public:
     MantidVec p0_x = peaksws->readX(0);
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
-    TS_ASSERT_DELTA(p0_y[200], 9.0, 1.0E-4);
+    TS_ASSERT_DELTA(p0_y[200], 10.0, 1.0E-4);
 
     // b) Peak 1:
     TS_ASSERT_DELTA(p0_x[800], 8.0, 1.0E-8);
-    TS_ASSERT_DELTA(p0_y[800], 27.0, 1.0E-4);
+    TS_ASSERT_DELTA(p0_y[800], 20.0, 1.0E-4);
 
     // c) Peak 2:
     MantidVec p1_x = peaksws->readX(1);
     MantidVec p1_y = peaksws->readY(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
-    TS_ASSERT_DELTA(p1_y[400], 4.0, 1.0E-4);
+    TS_ASSERT_DELTA(p1_y[400], 24.0, 1.0E-4);
 
     // 7. Spectrum map
     spec2index_map *themap = peaksws->getSpectrumToWorkspaceIndexMap();

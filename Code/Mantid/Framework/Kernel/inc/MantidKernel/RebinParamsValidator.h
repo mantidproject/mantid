@@ -39,12 +39,13 @@ namespace Kernel
 class MANTID_KERNEL_DLL RebinParamsValidator : public TypedValidator<std::vector<double> >
 {
 public:
-  RebinParamsValidator() {}
+  RebinParamsValidator(bool allowEmpty=false);
   virtual ~RebinParamsValidator() {}
   IValidator_sptr clone() const { return boost::make_shared<RebinParamsValidator>(*this); }
 
 private:
   std::string checkValidity( const std::vector<double> &value ) const;
+  bool m_allowEmpty;
 };
 
 } // namespace Kernel

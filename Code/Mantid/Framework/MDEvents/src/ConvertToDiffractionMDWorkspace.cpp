@@ -139,7 +139,14 @@ namespace MDEvents
         "Correct the weights of events with by multiplying by the Lorentz formula: sin(theta)^2 / lambda^4");
 
     // Box controller properties. These are the defaults
-    this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+    this->initBoxControllerProps("2" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+
+    declareProperty(
+      new PropertyWithValue<int>("MinRecursionDepth", 0),
+      "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 1 = one level of splitting, etc.\n"
+      "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
+      "But setting this property equal to MaxRecursionDepth property is necessary if one wants to generate multiple file based workspaces in order to merge them later\n");
+    setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
     std::vector<double> extents(2,0);
     extents[0]=-50;extents[1]=+50;
@@ -147,7 +154,7 @@ namespace MDEvents
       new ArrayProperty<double>("Extents", extents),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default +-50 in each dimension.");
-
+    setPropertyGroup("Extents", getBoxSettingsGroupName());
   }
 
 
@@ -356,10 +363,6 @@ namespace MDEvents
           g_log.warning()<<"Lorentz Correction was already done for this workspace.  LorentzCorrection was changed to false." << std::endl;
         }
       }
-      else
-      {
-        run.addProperty<bool>("LorentzCorrection", 1, true);
-      }
     }
 
     m_inEventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_inWS);
@@ -451,6 +454,12 @@ namespace MDEvents
       this->setBoxController(bc);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
+
+      // Perform minimum recursion depth splitting
+      int minDepth = this->getProperty("MinRecursionDepth");
+      int maxDepth = this->getProperty("MaxRecursionDepth");
+      if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be <= MaxRecursionDepth ");
+      ws->setMinRecursionDepth(size_t(minDepth));
     }
 
     ws->splitBox();

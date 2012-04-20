@@ -69,7 +69,7 @@ namespace Mantid
        * as the download method I've written is private I can't access that in unit testing.
        * so adding this public method to call the private download method and testing.
        */
-      void testDownload(const std::string& URL,const std::string& fileName);
+      std::string testDownload(const std::string& URL,const std::string& fileName);
 
     private:
       /// Sets documentation strings for this algorithm
@@ -81,17 +81,14 @@ namespace Mantid
       /// get location of data file  or download method
       int doDownload( ICATPortBindingProxy & icat);
 
-      /// This method is used when the download is done over internet
-      void downloadFileOverInternet(const std::string& url,const std::string& fileName);
-
       /// If the extn of the file .raw it returns true
       bool isDataFile(const std::string& fileName);
 
       /// This method saves the downloaded file to disc
-      void saveFiletoDisk(std::istream& rs,const std::string &fileName);
+      std::string saveFiletoDisk(std::istream& rs,const std::string &fileName);
 
       /// This method saves downloaded file to local disk
-      void doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
+      std::string doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
 
       /// This method replaces backwardslash with forward slashes - for linux
       void replaceBackwardSlash(std::string& inputString);

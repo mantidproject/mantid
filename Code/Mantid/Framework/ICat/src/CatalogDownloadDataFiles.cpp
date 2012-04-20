@@ -121,33 +121,19 @@ namespace Mantid
           catalog_sptr->getDownloadURL(*citr1,url);
 
           progress(prog,"downloading over internet...");
-          //now download the files from the data server to the machine where mantid is installed
-          downloadFileOverInternet(url,*citr2);
-          //get the download directory name
-          std::string downloadPath( Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-          std::string downloadedFName=downloadPath+(*citr2);
-          //replace "\" with "/"
-          replaceBackwardSlash(downloadedFName);
-          //set the filelocation property
-          filelocations.push_back(downloadedFName);
+
+          // Download file from the data server to the machine where mantid is installed
+          std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*citr2);
+
+          // replace "\" with "/" before adding to filelocations
+          replaceBackwardSlash(fullPathDownloadedFile);
+          filelocations.push_back(fullPathDownloadedFile);
         }
 
       }
 
       //set the filelocations  property
       setProperty("FileLocations",filelocations);
-
-    }
-
-
-    /**This method calls ICat API downloadDatafile and gets the URL string and uses the URL to down load file server
-     * @param url :: url of the file to download.
-     * @param fileName :: name of the file to be saved to disk
-     */
-    void CatalogDownloadDataFiles::downloadFileOverInternet(const std::string & url,const std::string& fileName)
-    {
-      //download using Poco HttpClient session and save to local disk
-      doDownloadandSavetoLocalDrive(url,fileName);
 
     }
 
@@ -175,9 +161,12 @@ namespace Mantid
     /** This method downloads file over internet using Poco HTTPClientSession
      * @param URL- URL of the file to down load
      * @param fileName ::  file name
+     * @return Full path of where file is saved to
      */
-    void CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
+    std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
     {
+      std::string retVal_FullPath;
+
       clock_t start;
       //use HTTP  Get method to download the data file from the server to local disk
       try
@@ -197,7 +186,7 @@ namespace Mantid
         HTTPResponse res;
         std::istream& rs = session.receiveResponse(res);
         //save file to local disk
-        saveFiletoDisk(rs,fileName);
+        retVal_FullPath = saveFiletoDisk(rs,fileName);
 
         clock_t end=clock();
         float diff = float(end - start)/CLOCKS_PER_SEC;
@@ -210,20 +199,22 @@ namespace Mantid
       }
       catch(Poco::Exception&)
       {
-
         throw std::runtime_error("Can not download the file "+fileName +". Path is invalid for the file.");
       }
 
+      return retVal_FullPath;
     }
 
     /** This method saves the input stream to a file
      * @param rs :: input stream
      * @param fileName :: name of the output file
+     * @return Full path of where file is saved to
      */
-    void CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
+    std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
-      std::string filepath ( Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-      filepath += fileName;
+      Poco::Path defaultSaveDir(Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+      Poco::Path path(defaultSaveDir, fileName);
+      std::string filepath = path.toString();
 
       std::ios_base::openmode mode;
       //if raw/nexus file open it in binary mode else ascii
@@ -236,6 +227,7 @@ namespace Mantid
       //copy the input stream to a file.
       StreamCopier::copyStream(rs, ofs);
 
+      return filepath;
     }
 
     /** This method is used for unit testing purpose.
@@ -245,10 +237,11 @@ namespace Mantid
      * so adding this public method to call the private downlaod method and testing.
      * @param URL :: URL of the file to download
      * @param fileName :: name of the file
+     * @return Full path of where file is saved to
      */
-    void CatalogDownloadDataFiles::testDownload(const std::string& URL,const std::string& fileName)
+    std::string CatalogDownloadDataFiles::testDownload(const std::string& URL,const std::string& fileName)
     {
-      doDownloadandSavetoLocalDrive(URL,fileName);
+      return doDownloadandSavetoLocalDrive(URL,fileName);
 
     }
     /** This method replaces backward slash with forward slash for linux compatibility.

@@ -76,9 +76,8 @@ public:
 
   /// Construct the error message from the stack trace (if one exists)
   QString constructErrorMsg();
-  /// Fix the line number of the syntax errors. This includes the offset
-  /// & a fix for the syntax errors always off by one
-  QString constructSyntaxErrorStr(const QString & originalString);
+  /// Special handle for syntax errors as they have no traceback
+  QString constructSyntaxErrorStr(PyObject *syntaxError);
   /// Convert a traceback to a string
   void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback, 
                       bool root=true);
@@ -139,23 +138,22 @@ private:
 
   // --------------------------- Script compilation/execution  -----------------------------------
   /// Compile the code, returning true if it was successful, false otherwise
-  bool compileImpl(const QString & code);
+  bool compileImpl();
   /// Evaluate the current code and return a result as a QVariant
-  QVariant evaluateImpl(const QString & code);
+  QVariant evaluateImpl();
   /// Execute the current code and return a boolean indicating success/failure
-  bool executeImpl(const QString &);
+  bool executeImpl();
   /// Execute the code asynchronously, returning immediately after the execution has started
-  QFuture<bool> executeAsyncImpl(const QString & code);
+  QFuture<bool> executeAsyncImpl();
 
   /// Performs the call to Python from a string
-  bool executeString(const QString & code);
+  bool executeString();
   /// Executes the code object and returns the result, may be null
   PyObject* executeCompiledCode(PyObject *compiledCode);
   /// Check an object for a result.
   bool checkResult(PyObject *result);
-
   /// Compile to bytecode
-  PyObject * compileToByteCode(const QString &, bool for_eval=true);
+  PyObject * compileToByteCode(bool for_eval=true);
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS

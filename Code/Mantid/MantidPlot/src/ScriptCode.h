@@ -23,15 +23,16 @@ public:
   /// Code from a QString with a defined offset
   ScriptCode(const QString & codeStr, const int offset);
 
-  /// Conversion to a QString
-  operator const QString () const;
-
+  /// Code string
+  inline const std::string & codeString() const { return m_code; }
   /// Return the offset
   inline int offset() const { return m_offset; }
+  /// Is the string empty
+  inline bool isEmpty() const { return m_code.empty(); }
 
 private:
   /// The code string
-  QString m_code;
+  std::string m_code;
   /// The offset within a larger chunk of code
   int m_offset;
 };

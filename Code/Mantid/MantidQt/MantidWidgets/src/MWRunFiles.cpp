@@ -80,6 +80,7 @@ void FindFilesThread::run()
       auto it = filestext.begin();
       for( ; it != filestext.end(); ++it)
       {
+        boost::algorithm::trim(*it);
         std::string result = fileSearcher.getFullPath(*it);
         Poco::File test(result);
         if ( ( ! result.empty() ) && test.exists() )

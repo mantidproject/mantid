@@ -71,6 +71,8 @@ public:
   QString toString(PyObject *object, bool decref = false);
   //Convert a Python list object to a Qt QStringList
   QStringList toStringList(PyObject *py_seq);
+  /// Returns an integer representation of the object. No check is performed to see if it is an integer
+  long toLong(PyObject *object, bool decref = false);
 
   ///Return a list of file extensions for Python
   const QStringList fileExtensions() const;

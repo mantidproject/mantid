@@ -108,7 +108,7 @@ namespace DataObjects
     /// Gets the shared pointer to a column by index - return none-modifyable column.
     API::Column_const_sptr getColumn(size_t index) const;
     /// Returns a vector of all column names.
-    std::vector<std::string> getColumnNames();
+    std::vector<std::string> getColumnNames() const;
     /// Number of rows in the workspace.
     size_t rowCount() const {return m_rowCount;}
     /// Resizes the workspace.

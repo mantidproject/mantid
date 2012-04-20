@@ -251,13 +251,13 @@ void PythonScripting::shutdown()
 QString PythonScripting::toString(PyObject *object, bool decref)
 {
   QString ret;
-  if (!object) return "";
+  if (!object) return ret;
   PyObject *repr = PyObject_Str(object);
   if (decref) 
   {
     Py_DECREF(object);
   }
-  if (!repr) return "";
+  if (!repr) return ret;
   ret = PyString_AsString(repr);
   Py_DECREF(repr);
   return ret;
@@ -280,6 +280,24 @@ QStringList PythonScripting::toStringList(PyObject *py_seq)
   }
   return elements;
 }
+
+/**
+ * Returns an integer representation of the object as a c long. No check is performed to see if it is an integer
+ * @param object :: A PyInt_Type instance
+ * @param decref :: If true then the Py_DECREF will be called on the object. Useful for converting
+ * things straight from functions like PyObject_GetAttrString
+ */
+long PythonScripting::toLong(PyObject *object, bool decref)
+{
+  assert(object);
+  long cvalue = PyInt_AsLong(object);
+  if(decref)
+  {
+    Py_DECREF(object);
+  }
+  return cvalue;
+}
+
 
 bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 {

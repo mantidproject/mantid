@@ -76,6 +76,7 @@ void export_AnalysisDataService()
   register_ptr_to_python<DataItem_wptr>();
 
   class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataServiceImpl", no_init)
+    .def("doesExist", &AnalysisDataServiceImpl::doesExist, "Returns True if the object is found in the service.")
     .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>(),
          "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")

@@ -404,7 +404,7 @@ void ScriptEditor::updateProgressMarker(int lineno, bool error)
   }
   markerDeleteAll();
   // Check the lineno actually exists, -1 means delete
-  if( lineno < 0 || lineno > this->lines() ) return;
+  if( lineno <= 0 || lineno > this->lines() ) return;
 
   ensureLineVisible(lineno);
   markerAdd(m_currentExecLine - 1, m_progressArrowKey);

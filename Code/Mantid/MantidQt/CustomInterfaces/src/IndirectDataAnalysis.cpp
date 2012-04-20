@@ -18,6 +18,8 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/Expression.h"
 
+#include <sstream>
+
 #include <QValidator>
 #include <QIntValidator>
 #include <QDoubleValidator>
@@ -579,6 +581,8 @@ bool IndirectDataAnalysis::validateConfit()
     }
   }
 
+  // Enforce the rule that at least one fit is needed; either a delta function, one or two lorentzian functions,
+  // or both.  (The resolution function must be convolved with a model.)
   if ( m_uiForm.confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
   {
     valid = false;
@@ -829,46 +833,85 @@ Mantid::API::IFunction_sptr IndirectDataAnalysis::furyfitCreateUserFunction(cons
   return result;
 }
 
+namespace
+{
+  ////////////////////////////
+  // Anon Helper functions. //
+  ////////////////////////////
+
+  /**
+   * Takes an index and a name, and constructs a single level parameter name
+   * for use with function ties, etc.
+   *
+   * @param index :: the index of the function in the first level.
+   * @param name  :: the name of the parameter inside the function.
+   *
+   * @returns the constructed function parameter name.
+   */
+  std::string createParName(size_t index, const std::string & name = "")
+  {
+    std::stringstream prefix;
+    prefix << "f" << index << "." << name;
+    return prefix.str();
+  }
+
+  /**
+   * Takes an index, a sub index and a name, and constructs a double level 
+   * (nested) parameter name for use with function ties, etc.
+   *
+   * @param index    :: the index of the function in the first level.
+   * @param subIndex :: the index of the function in the second level.
+   * @param name     :: the name of the parameter inside the function.
+   *
+   * @returns the constructed function parameter name.
+   */
+  std::string createParName(size_t index, size_t subIndex, const std::string & name = "")
+  {
+    std::stringstream prefix;
+    prefix << "f" << index << ".f" << subIndex << "." << name;
+    return prefix.str();
+  }
+}
+
+/**
+ * Creates a function to carry out the fitting in the "ConvFit" tab.  The function consists
+ * of various sub functions, with the following structure:
+ *
+ * Composite
+ *  |
+ *  +-- LinearBackground
+ *  +-- Convolution
+ *      |
+ *      +-- Resolution
+ *      +-- Model (AT LEAST one of the following. Composite if more than one.)
+ *          |
+ *          +-- DeltaFunction (yes/no)
+ *          +-- Lorentzian 1 (yes/no)
+ *          +-- Lorentzian 2 (yes/no)
+ *
+ * @param tie :: whether to tie parameters.
+ *
+ * @returns the composite fitting function.
+ */
 Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(bool tie)
 {
   auto conv = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
-  Mantid::API::CompositeFunction_sptr result( new Mantid::API::CompositeFunction );
-  Mantid::API::CompositeFunction_sptr comp;
-
-  bool singleFunction = false;
-
-  if ( m_uiForm.confit_cbFitType->currentText() == "Two Lorentzians" )
-  {
-    comp.reset( new Mantid::API::CompositeFunction );
-  }
-  else
-  {
-    comp = conv;
-    singleFunction = true;
-  }
-
-  size_t index = 0;
-
-  // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
-  const int bgType = m_uiForm.confit_cbBackground->currentIndex();
-
-  // 1 - CompositeFunction A
-  // - - 1 LinearBackground
-  // - - 2 Convolution Function
-  // - - - - 1 Resolution
-  // - - - - 2 CompositeFunction B
-  // - - - - - - DeltaFunction (yes/no)
-  // - - - - - - Lorentzian 1 (yes/no)
-  // - - - - - - Lorentzian 2 (yes/no)
+  Mantid::API::CompositeFunction_sptr comp( new Mantid::API::CompositeFunction );
 
   Mantid::API::IFunction_sptr func;
+  size_t index = 0;
 
-  // Background
+  // -------------------------------------
+  // --- Composite / Linear Background ---
+  // -------------------------------------
   func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-  index = result->addFunction(func);
+  index = comp->addFunction(func); 
+
+  const int bgType = m_uiForm.confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
+  
   if ( tie  || bgType == 0 || ! m_cfProp["BGA0"]->subProperties().isEmpty() )
   {
-    result->tie("f0.A0", m_cfProp["BGA0"]->valueText().toStdString() );
+    comp->tie("f0.A0", m_cfProp["BGA0"]->valueText().toStdString() );
   }
   else
   {
@@ -877,70 +920,108 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(b
 
   if ( bgType != 2 )
   {
-    result->tie("f0.A1", "0.0");
+    comp->tie("f0.A1", "0.0");
   }
   else
   {
     if ( tie || ! m_cfProp["BGA1"]->subProperties().isEmpty() )
     {
-      result->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() );
+      comp->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() );
     }
     else { func->setParameter("A1", m_cfProp["BGA1"]->valueText().toDouble()); }
   }
 
-  // Resolution
+  // --------------------------------------------
+  // --- Composite / Convolution / Resolution ---
+  // --------------------------------------------
   func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
   index = conv->addFunction(func);
   std::string resfilename = m_uiForm.confit_resInput->getFirstFilename().toStdString();
   Mantid::API::IFunction::Attribute attr(resfilename);
   func->setAttribute("FileName", attr);
 
-  // Delta Function
+  // --------------------------------------------------------
+  // --- Composite / Convolution / Model / Delta Function ---
+  // --------------------------------------------------------
+  size_t subIndex = 0;
+
   if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
   {
     func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
-    index = comp->addFunction(func);
+    index = conv->addFunction(func);
+
     if ( tie || ! m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
     {
-      comp->tie("f0.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() );
+      std::string parName = createParName(index, subIndex, "Height");
+      conv->tie(parName, m_cfProp["DeltaHeight"]->valueText().toStdString() );
     }
-    else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
-  }
 
-  // Lorentzians
+    else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
+    subIndex++;
+  }
+  
+  // -----------------------------------------------------
+  // --- Composite / Convolution / Model / Lorentzians ---
+  // -----------------------------------------------------
+  std::string prefix1;
+  std::string prefix2;
   switch ( m_uiForm.confit_cbFitType->currentIndex() )
   {
   case 0: // No Lorentzians
+
     break;
+
   case 1: // 1 Lorentzian
+
     func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = comp->addFunction(func);
-    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
+    index = conv->addFunction(func);
+
+    // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
+    if( subIndex == 0 ) { prefix1 = createParName(index); }
+    // ... else it's part of a composite function inside Convolution.
+    else { prefix1 = createParName(index, subIndex); }
+
+    populateFunction(func, conv, m_cfProp["Lorentzian1"], prefix1, tie);
+    subIndex++;
     break;
-  case 2: // 2 Lorentzian
+
+  case 2: // 2 Lorentzians
+
     func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = comp->addFunction(func);
-    populateFunction(func, comp, m_cfProp["Lorentzian1"], index, tie);
+    index = conv->addFunction(func);
+
+    // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
+    if( subIndex == 0 ) { prefix1 = createParName(index); }
+    // ... else it's part of a composite function inside Convolution.
+    else { prefix1 = createParName(index, subIndex); }
+
+    populateFunction(func, conv, m_cfProp["Lorentzian1"], prefix1, tie);
+    subIndex++;
+
     func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-    index = comp->addFunction(func);
-    populateFunction(func, comp, m_cfProp["Lorentzian2"], index, tie);
+    index = conv->addFunction(func);
+
+    prefix2 = createParName(index, subIndex); // (Part of a composite.)
+    populateFunction(func, conv, m_cfProp["Lorentzian2"], prefix2, tie);
+
+    // Now prefix1 should be changed to reflect the fact that it is now part of a composite function inside Convolution.
+    prefix1 = createParName(index, subIndex-1);
+
     // Tie PeakCentres together
     if ( ! tie )
     {
-      QString tieL = "f" + QString::number(index-1) + ".PeakCentre";
-      QString tieR = "f" + QString::number(index) + ".PeakCentre";
-      comp->tie(tieL.toStdString(), tieR.toStdString());
+      QString tieL = QString::fromStdString(prefix1 + "PeakCentre");
+      QString tieR = QString::fromStdString(prefix2 + "PeakCentre");
+      conv->tie(tieL.toStdString(), tieR.toStdString());
     }
     break;
   }
 
-  if ( ! singleFunction )
-    conv->addFunction(comp);
-  result->addFunction(conv);
+  comp->addFunction(conv);
 
-  result->applyTies();
+  comp->applyTies();
 
-  return result;
+  return comp;
 }
 
 QtProperty* IndirectDataAnalysis::createLorentzian(const QString & name)
@@ -987,18 +1068,18 @@ QtProperty* IndirectDataAnalysis::createStretchedExp(const QString & name)
   return prop;
 }
 
-void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, size_t index, bool tie)
+void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
 {
   // Get subproperties of group and apply them as parameters on the function object
   QList<QtProperty*> props = group->subProperties();
-  QString pref = "f" + QString::number(index) + ".";
 
   for ( int i = 0; i < props.size(); i++ )
   {
     if ( tie || ! props[i]->subProperties().isEmpty() )
     {
-      QString propName = pref + props[i]->propertyName();
-      comp->tie(propName.toStdString(), props[i]->valueText().toStdString() );
+      std::string name = pref + props[i]->propertyName().toStdString();
+      std::string value = props[i]->valueText().toStdString();
+      comp->tie(name, value );
     }
     else
     {
@@ -1554,12 +1635,12 @@ void IndirectDataAnalysis::furyfitRun()
   // Create the Fit Algorithm
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
   alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
   alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
-  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("Output", output);
   alg->execute();
 
@@ -1577,14 +1658,16 @@ void IndirectDataAnalysis::furyfitRun()
   m_ffFitCurve->setPen(fitPen);
   m_ffPlot->replot();
 
-  // Do it as we do in Convolution Fit tab
+  // Get params.
   QMap<QString,double> parameters;
-  QStringList parNames = QString::fromStdString(alg->getPropertyValue("ParameterNames")).split(",", QString::SkipEmptyParts);
-  QStringList parVals = QString::fromStdString(alg->getPropertyValue("Parameters")).split(",", QString::SkipEmptyParts);
-  for ( int i = 0; i < parNames.size(); i++ )
-  {
-    parameters[parNames[i]] = parVals[i].toDouble();
-  }
+  std::vector<std::string> parNames = function->getParameterNames();
+  std::vector<double> parVals;
+
+  for( size_t i = 0; i < parNames.size(); ++i )
+    parVals.push_back(function->getParameter(parNames[i]));
+
+  for ( size_t i = 0; i < parNames.size(); ++i )
+    parameters[QString(parNames[i].c_str())] = parVals[i];
 
   m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], parameters["f0.A0"]);
   
@@ -1899,11 +1982,11 @@ void IndirectDataAnalysis::confitRun()
 
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("InputWorkspace", m_cfInputWSName);
   alg->setProperty<int>("WorkspaceIndex", m_uiForm.confit_leSpecNo->text().toInt());
   alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
   alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
-  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("Output", output);
   alg->execute();
 
@@ -1919,14 +2002,16 @@ void IndirectDataAnalysis::confitRun()
   m_cfCalcCurve->setPen(fitPen);
   m_cfPlot->replot();
 
-  // Update parameter values (possibly easier from algorithm properties)
+  // Get params.
   QMap<QString,double> parameters;
-  QStringList parNames = QString::fromStdString(alg->getPropertyValue("ParameterNames")).split(",", QString::SkipEmptyParts);
-  QStringList parVals = QString::fromStdString(alg->getPropertyValue("Parameters")).split(",", QString::SkipEmptyParts);
-  for ( int i = 0; i < parNames.size(); i++ )
-  {
-    parameters[parNames[i]] = parVals[i].toDouble();
-  }
+  std::vector<std::string> parNames = function->getParameterNames();
+  std::vector<double> parVals;
+
+  for( size_t i = 0; i < parNames.size(); ++i )
+    parVals.push_back(function->getParameter(parNames[i]));
+
+  for ( size_t i = 0; i < parNames.size(); ++i )
+    parameters[QString(parNames[i].c_str())] = parVals[i];
 
   // Populate Tree widget with values
   // Background should always be f0

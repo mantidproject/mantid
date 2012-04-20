@@ -28,7 +28,7 @@ def run_algorithm(name, **kwargs):
     return alg
 
 # Case difference is to be consistent with the unittest module
-def assertRaisesNothing(testobj, callable, *args): 
+def assertRaisesNothing(testobj, callable, *args, **kwargs): 
     """
         unittest does not have an assertRaisesNothing. This
         provides that functionality
@@ -37,9 +37,10 @@ def assertRaisesNothing(testobj, callable, *args):
             testobj  - A unittest object
             callable - A callable object
             *args    - Positional arguments passed to the callable as they are
+            **kwargs - Keyword arguments, passed on as they are
     """
     try:
-         return callable(*args)
+         return callable(*args, **kwargs)
     except Exception, exc:
         testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s" 
                      % (callable.__name__, str(exc)))

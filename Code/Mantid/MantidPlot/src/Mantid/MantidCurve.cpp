@@ -9,6 +9,9 @@
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
 #include "ErrorBarSettings.h"
+#include "MantidKernel/CPUTimer.h"
+
+using Mantid::Kernel::CPUTimer;
 
 /**
 Constructor

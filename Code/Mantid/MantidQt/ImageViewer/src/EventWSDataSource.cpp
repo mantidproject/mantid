@@ -8,9 +8,9 @@
 #include "MantidQtImageViewer/EventWSDataSource.h"
 #include "MantidQtImageViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/IEventList.h"
 
 using namespace Mantid;
-using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 
@@ -24,7 +24,7 @@ namespace ImageView
  *
  * @param ev_ws  Shared pointer to the event workspace being "wrapped"
  */
-EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
+EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->ev_ws = ev_ws;
@@ -33,33 +33,18 @@ EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)ev_ws->getNumberHistograms();
   total_rows = ev_ws->getNumberHistograms();
-  total_cols = 500;              // initially use 1000 bins for event data
+  total_cols = 2000;             // initially use 2000 bins for event data
 
-  std::cout << "total_xmin = " << total_xmin << std::endl;
-  std::cout << "total_xmax = " << total_xmax << std::endl;
+//  std::cout << "total_xmin = " << total_xmin << std::endl;
+//  std::cout << "total_xmax = " << total_xmax << std::endl;
 
-  if ( total_xmax > 66666 )   
+  if ( total_xmax > 120000 )   
   {
-    total_xmax = 66666;          // hack for now
+    total_xmax = 120000;          // hack for now
     std::cout << "WARNING: max tof too large, set to " 
               << total_xmax << std::endl;
   }
-
-  x_scale = new MantidVec();
-  x_scale->resize(total_cols+1);
-  double dx = (total_xmax - total_xmin)/((double)total_cols + 1.0);
-  for ( size_t i = 0; i < total_cols+1; i++ )
-  {
-    (*x_scale)[i] = total_xmin + (double)i * dx;;
-  }
-
-  for ( size_t i = 0; i < total_rows; i++ )
-  {
-    EventList & list = ev_ws->getEventList(i);
-    list.setX( *x_scale );
-    list.setTofs( *x_scale );
-  }
-
+  x_scale  = 0;                   // no default x_scale
   new_data = 0;                   // no data loaded yet
   new_data_array = 0;             // no DataArray object created yet
 }
@@ -67,14 +52,17 @@ EventWSDataSource::EventWSDataSource( EventWorkspace_sptr ev_ws )
 
 EventWSDataSource::~EventWSDataSource()
 {
-  delete x_scale;
+  if ( x_scale )
+  {
+    delete x_scale;
+  }
 
-  if ( new_data != 0 )
+  if ( new_data )
   {
     delete[] new_data;
   }
 
-  if ( new_data_array != 0 )
+  if ( new_data_array )
   {
     delete new_data_array;
   }
@@ -103,6 +91,15 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
                                             size_t n_rows, size_t  n_cols,
                                             bool   is_log_x )
 {
+/*
+  std::cout << "Start EventWSDataSource::GetDataArray " << std::endl;
+  std::cout << "  xmin   = " << xmin 
+            << "  xmax   = " << xmax 
+            << "  ymin   = " << ymin 
+            << "  ymax   = " << ymax 
+            << "  n_rows = " << n_rows
+            << "  n_cols = " << n_cols << std::endl;
+*/
   size_t first_col;
   IVUtils::CalculateInterval( total_xmin, total_xmax, total_cols,
                               first_col, xmin, xmax, n_cols );
@@ -116,7 +113,10 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   }
   new_data = new float[n_rows * n_cols];
 
-  delete x_scale;
+  if ( x_scale )
+  {
+    delete x_scale;
+  }
   x_scale = new MantidVec();
   x_scale->resize(n_cols+1);
   double dx = (xmax - xmin)/((double)n_cols + 1.0);
@@ -128,9 +128,9 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   size_t index = 0;
   for ( size_t i = first_row; i < first_row + n_rows; i++ )
   {
-    EventList & list = ev_ws->getEventList(i);
-    list.setX( *x_scale );
-    list.setTofs( *x_scale );
+    IEventList * list = ev_ws->getEventListPtr(i);
+    list->setX( *x_scale );
+    list->setTofs( *x_scale );
     const MantidVec & y_vals = ev_ws->readY(i);
     for ( size_t col = 0; col < n_cols; col++ )
     {
@@ -145,6 +145,7 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   }
   new_data_array = new DataArray( xmin, xmax, ymin, ymax,
                                   is_log_x, n_rows, n_cols, new_data);
+
   return new_data_array;
 }
 

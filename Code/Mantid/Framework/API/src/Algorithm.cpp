@@ -412,6 +412,7 @@ namespace Mantid
     */
     bool Algorithm::execute()
     {
+      AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
       {
         DeprecatedAlgorithm * depo = dynamic_cast<DeprecatedAlgorithm *>(this);
         if (depo != NULL)
@@ -1261,7 +1262,6 @@ namespace Mantid
     */
     Poco::ActiveResult<bool> Algorithm::executeAsync()
     {
-      AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
       return m_executeAsync(Poco::Void());
     }
 

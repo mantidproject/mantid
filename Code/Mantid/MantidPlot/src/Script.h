@@ -66,11 +66,9 @@ class Script : public QObject
   /// Returns the envirnoment this script is tied to
   inline ScriptingEnv *environment() { return m_env; }
   /// Returns the identifier for the script.
-  inline const QString name() const { return m_name; }
-  /// Returns the identifier as a C string
-  inline const char * nameAsCStr() const { return m_name.toAscii().data(); }
+  inline const std::string & name() const { return m_name; }
   /// Update the identifier for the object.
-  void setName(const QString &name) { m_name = name; }
+  void setName(const QString &name);
   /// Return the current context
   const QObject * context() const { return m_context; }
   /// Set the context in which the code is to be executed.
@@ -138,27 +136,32 @@ signals:
   
 protected:
   /// Return the true line number by adding the offset
-  inline int getRealLineNo(const int codeLine) const { return codeLine + m_codeOffset; }
-
+  inline int getRealLineNo(const int codeLine) const { return codeLine + m_code.offset(); }
+  /// Return the code string
+  inline const std::string & codeString() const { return m_code.codeString(); }
+  /// Return the script code object
+  inline const ScriptCode & scriptCode() const { return m_code; }
   /// Compile the code, returning true/false depending on the status
-  virtual bool compileImpl(const QString & code) = 0;
+  virtual bool compileImpl() = 0;
   /// Evaluate the Code, returning QVariant() on an error / exception.
-  virtual QVariant evaluateImpl(const QString & code) = 0;
+  virtual QVariant evaluateImpl() = 0;
   /// Execute the Code, returning false on an error / exception.
-  virtual bool executeImpl(const QString & code) = 0;
+  virtual bool executeImpl() = 0;
   /// Execute the code asynchronously, returning immediately after the execution has started
-  virtual QFuture<bool> executeAsyncImpl(const QString & code) = 0;
+  virtual QFuture<bool> executeAsyncImpl() = 0;
 
 private:
+  /// Setup the code from a script code object
+  void setupCode(const ScriptCode & code);
   /// Normalise line endings for the given code. The Python C/API does not seem to like CRLF endings so normalise to just LF
   QString normaliseLineEndings(QString text) const;
 
   ScriptingEnv *m_env;
-  QString m_name;
+  std::string m_name; //Easier to convert to C string
+  ScriptCode m_code;
   QObject *m_context;
   bool m_redirectOutput;
   bool m_reportProgress;
-  int m_codeOffset;
 
   InteractionType m_interactMode;
   ExecutionMode m_execMode;

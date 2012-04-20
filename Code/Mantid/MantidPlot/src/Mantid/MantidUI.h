@@ -340,6 +340,9 @@ public slots:
   // Invoke a grid showing a table of MD summary list data.
   void showListData();
 
+  // ImageViewer
+  void showImageViewer();
+
   // SliceViewer
   void showSliceViewer();
 

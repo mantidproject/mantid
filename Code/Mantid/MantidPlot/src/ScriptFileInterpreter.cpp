@@ -331,18 +331,19 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
 void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, const QString & identifier)
 {
   m_runner = QSharedPointer<Script>(environ.newScript(identifier,this, Script::Interactive));
-  connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
-  connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
-  connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
-  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_messages, SLOT(displayError(const QString &)));
-  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_editor, SLOT(markExecutingLineAsError()));
 
   connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setExecutingStatus()));
-  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(setStoppedStatus()));
-  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), this, SLOT(setStoppedStatus()));
-
+  connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
   connect(m_runner.data(), SIGNAL(started(const QString &)), this, SIGNAL(executionStarted()));
+
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(setStoppedStatus()));
   connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SIGNAL(executionStopped()));
+
+  connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
+
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), m_messages, SLOT(displayError(const QString &)));
+  connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), this, SLOT(setStoppedStatus()));
   connect(m_runner.data(), SIGNAL(error(const QString &,const QString &, int)), this, SIGNAL(executionStopped()));
 
 }
@@ -374,8 +375,7 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString & filename)
  */
 void ScriptFileInterpreter::executeCode(const ScriptCode & code, const Script::ExecutionMode mode)
 {
-  const QString codeStr = code;
-  if( codeStr.isEmpty() ) return;
+  if(code.isEmpty()) return;
   if(mode == Script::Asynchronous)
   {
     m_runner->executeAsync(code);

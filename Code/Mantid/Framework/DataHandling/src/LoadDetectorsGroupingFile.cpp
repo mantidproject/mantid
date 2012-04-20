@@ -230,20 +230,18 @@ namespace DataHandling
     {
       g_log.debug() << "Group ID = " << it->first << std::endl;
 
-      for (size_t i = 0; i < it->second.size()/2; i ++){
-        g_log.debug() << "Detector From = " << it->second[2*i] << ", " << it->second[2*i+1] << std::endl;
+      for (size_t i = 0; i < it->second.size(); i ++){
+        detid_t detid = it->second[i];
+        detid2index_map::iterator itx = indexmap->find(detid);
 
-        for (detid_t detid = it->second[2*i]; detid <= it->second[2*i+1]; detid ++)
+        if (itx != indexmap->end())
         {
-          detid2index_map::iterator itx = indexmap->find(detid);
-          if (itx != indexmap->end()){
-            size_t wsindex = itx->second;
-            mGroupWS->dataY(wsindex)[0] = it->first;
-          } else {
-            g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located" << std::endl;
-          }
-        } // ENDFOR detid (in range)
-      } // ENDFOR each range
+          size_t wsindex = itx->second;
+          mGroupWS->dataY(wsindex)[0] = it->first;
+        } else {
+          g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located" << std::endl;
+        }
+      } // ENDFOR detid (in range)
     } // ENDFOR each group ID
 
     // 3. Clear
@@ -618,7 +616,7 @@ namespace DataHandling
   }
 
   /*
-   * Parse a,b-c,d,... string to a vector
+   * Parse a,b-c,d,... string to a vector in 1-1 mapping
    */
   void LoadGroupXMLFile::parseDetectorIDs(std::string inputstring, std::vector<detid_t>& detids)
   {
@@ -628,16 +626,17 @@ namespace DataHandling
     std::vector<int32_t> pairs;
     this->parseRangeText(inputstring, singles, pairs);
 
-    // 2. Store single detectors... ..., detx, detx, ...
-    for (size_t i = 0; i < singles.size(); i ++){
-      detids.push_back(singles[i]);
+    // 2. Store single detectors... ..., detx,
+    for (size_t i = 0; i < singles.size(); i ++)
+    {
       detids.push_back(singles[i]);
     }
 
-    // 3. Store detectors pairs
-    for (size_t i = 0; i < pairs.size()/2; i ++){
-      detids.push_back(pairs[2*i]);
-      detids.push_back(pairs[2*i+1]);
+    // 3. Store detectors parsed in pairs, det0., det1, ... detN
+    for (size_t i = 0; i < pairs.size()/2; i ++)
+    {
+      for (detid_t detid = pairs[2*i]; detid <= pairs[2*i+1]; detid ++)
+        detids.push_back(detid);
     }
 
     return;

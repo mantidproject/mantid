@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <fstream>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
@@ -249,7 +250,7 @@ public:
 
 		CatalogDownloadDataFiles downloadobj1;
 		clock_t start=clock();
-		downloadobj1.testDownload("http://download.mantidproject.org/videos/Installation.htm","test.htm");
+		std::string fullPathDownloadedFile = downloadobj1.testDownload("http://download.mantidproject.org/videos/Installation.htm","test.htm");
 		clock_t end=clock();
 		float diff = float(end -start)/CLOCKS_PER_SEC;
 
@@ -257,10 +258,11 @@ public:
 
     //delete the file after execution
 		remove("test.htm");
-    // Clean up test files
-//    std::string htmPath = Kernel::ConfigService::Instance().getString("defaultsave.directory") + "/test.htm";
-//    if (Poco::File(htmPath).exists()) Poco::File(htmPath).remove();
-//    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
+
+    // test if fullPathDownloadedFile ok
+    Poco::Path defaultSaveDir(Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+    Poco::Path path(defaultSaveDir, "test.htm");
+    TS_ASSERT( fullPathDownloadedFile == path.toString() );
 	}
 
 private:

@@ -151,6 +151,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( lambda.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 2665.4390, 0.0001 ) //  758.3352
     TS_ASSERT( yy == y )
+
+    TS_ASSERT_DELTA( lambda.convertSingleToTOF(1.5, 1.0,1.0,1.0,1,1.0,1.0), 2665.4390, 0.0001 );
   }
 
   void testWavelength_fromTOF()
@@ -160,6 +162,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( lambda.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], -5.0865, 0.0001 ) // 1.979006
     TS_ASSERT( yy == y )
+
+    TS_ASSERT_DELTA( lambda.convertSingleFromTOF(1000.5, 1.0,1.0,1.0,1,1.0,1.0), -5.0865, 0.0001);
   }
 
   void testWavelength_quickConversions()

@@ -122,6 +122,7 @@ private:
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
+  *m_showImageViewer,
   *m_showSliceViewer,
   *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,

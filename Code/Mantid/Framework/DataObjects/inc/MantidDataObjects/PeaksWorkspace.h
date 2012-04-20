@@ -126,7 +126,7 @@ namespace DataObjects
 
     //---------------------------------------------------------------------------------------------
     /// Returns a vector of all column names.
-    virtual std::vector<std::string> getColumnNames()
+    virtual std::vector<std::string> getColumnNames() const
     {
       return this->columnNames;
     }

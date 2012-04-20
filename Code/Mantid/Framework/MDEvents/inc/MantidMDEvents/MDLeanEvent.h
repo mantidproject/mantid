@@ -534,7 +534,7 @@ namespace MDEvents
         coord_t * centers = data + ii+2;
 
         // Create the event with signal, error squared, and the centers
-        events.push_back( MDLeanEvent<nd>( float(data[ii]), float(data[ii + 1]), centers) );
+        events.push_back( MDLeanEvent<nd>(float(data[ii]), float(data[ii + 1]), centers) );
       }
 
       // Release the memory (all has been COPIED into MDLeanEvent's)

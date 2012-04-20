@@ -63,11 +63,14 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
+#include "MantidQtImageViewer/EventWSImageView.h"
+
 using namespace std;
 
 using namespace Mantid::API;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
+
 namespace MantidException = Mantid::Kernel::Exception;
 
 MantidUI::MantidUI(ApplicationWindow *aw):
@@ -658,6 +661,34 @@ void MantidUI::showVatesSimpleInterface()
   catch (...)
   {
   }
+}
+
+void MantidUI::showImageViewer()
+{
+  QString wsName = getSelectedWorkspaceName();
+  try
+  {
+    IEventWorkspace_sptr evwsp = boost::dynamic_pointer_cast<IEventWorkspace>(
+               AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+    if ( evwsp )
+    {
+      MantidQt::ImageView::EventWSImageView image_view( evwsp );
+    }
+    else
+    {
+      m_appWindow->writeToLogWindow("Only event workspaces are currently supported.");
+      m_appWindow->writeToLogWindow("Please convert to event workspace before using the ImageView.");
+    }
+  }
+    catch (std::runtime_error &e)
+  {
+    throw std::runtime_error(e);
+  }
+  catch (...)
+  {
+    m_appWindow->writeToLogWindow("Exception getting workspace " );
+  }
+
 }
 
 

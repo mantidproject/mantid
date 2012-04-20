@@ -4,12 +4,8 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "ui_ImageView.h"
-#include "MantidQtImageViewer/IVConnections.h"
 #include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/ImageDisplay.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/SliderHandler.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
@@ -59,16 +55,18 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView
     ~ImageView();
 
   private:
-    Ui_MainWindow*   ui;
     QMainWindow*     window;
-    
-    SliderHandler*   slider_handler;
     GraphDisplay*    h_graph;
     GraphDisplay*    v_graph;
-
-    ImageDisplay*   image_display;
-
-    IVConnections*  iv_connections;
+                                 
+    // keep void pointers to the following objects, to avoid having to 
+    // include ui_ImageView.h, which disappears by the time MantidPlot is
+    // being built.  We need the pointers so we can delete them in the 
+    // destructor.  
+    void*            saved_ui;               // Ui_MainWindow*
+    void*            saved_slider_handler;   // SliderHandler*
+    void*            saved_image_display;    // ImageDisplay*
+    void*            saved_iv_connections;   // IVConnections*
 };
 
 } // namespace MantidQt 

@@ -132,6 +132,17 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
         alias = alias.strip()
         if len(alias)>0:
             globals()["%sDialog" % alias] = algorithm_wrapper
+            
+__SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+
+def specialization_exists(name):
+    """
+        Returns true if a specialization for the given name
+        already exists, false otherwise
+        
+        @param name :: The name of a possible new function
+    """
+    return name in __SPECIALIZED_FUNCTIONS__
 
 def Load(*args, **kwargs):
     """
@@ -168,34 +179,7 @@ def Load(*args, **kwargs):
       # A mix of keyword and non-keyword is also possible
       Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
     """
-    # Small inner function to grab the mandatory arguments and translate possible
-    # exceptions
-    def get_argument_value(key, kwargs):
-        try:
-            value = kwargs[key]
-            del kwargs[key]
-            return value
-        except KeyError:
-            raise RuntimeError('%s argument not supplied to Load function' % str(key))
-    
-    if len(args) == 2:
-        filename = args[0]
-        wkspace = args[1]
-    elif len(args) == 1:
-        if 'Filename' in kwargs:
-            wkspace = args[0]
-            filename = get_argument_value('Filename', kwargs)
-        elif 'OutputWorkspace' in kwargs:
-            filename = args[0]
-            wkspace = get_argument_value('OutputWorkspace', kwargs)
-        else:
-            raise RuntimeError('Cannot find "Filename" or "OutputWorkspace" in key word list. '
-                               'Cannot use single positional argument.')
-    elif len(args) == 0:
-        filename = get_argument_value('Filename', kwargs)
-        wkspace = get_argument_value('OutputWorkspace', kwargs)
-    else:
-        raise RuntimeError('Load() takes at most 2 positional arguments, %d found.' % len(args))
+    filename, wkspace = get_mandatory_args('Load', ['Filename', 'OutputWorkspace'], *args, **kwargs)
     
     # Create and execute
     algm = mtd.createAlgorithm('Load')
@@ -253,17 +237,131 @@ def LoadDialog(*args, **kwargs):
     algm.execute()
     return algm
 
+def Fit(*args, **kwargs):
+    """
+    Fit defines the interface to the fitting framework within Mantid.
+    It can work with arbitrary data sources and therefore some options
+    are only available when the function & workspace type are known.
+    
+    This simple wrapper takes the Function (as a string) & the InputWorkspace
+    as the first two arguments. The remaining arguments must be 
+    specified by keyword.
+    
+    Example:
+      Fit(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
+          StartX='0.05',EndX='1.0',Output="Z1")
+    """
+    Function, InputWorkspace = get_mandatory_args('Fit', ["Function", "InputWorkspace"], *args, **kwargs)
+    # Check for behaviour consistent with old API
+    if type(Function) == str and Function in mtd:
+        raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
+    
+    # Create and execute
+    algm = mtd.createAlgorithm('Fit')
+    algm.setPropertyValue('Function', str(Function)) # Must be set first
+    algm.setPropertyValue('InputWorkspace', str(InputWorkspace))
+    for key, value in kwargs.iteritems():
+        try:
+            algm.setPropertyValue(key, _makeString(value).lstrip('? '))
+        except RuntimeError:
+            mtd.sendWarningMessage("You've passed a property (%s) to Fit() that doesn't apply to this workspace type." % key)
+    algm.execute()
+    return algm
+
+# Have a better load signature for autocomplete
+_signature = "\bFunction,InputWorkspace"
+# Getting the code object for Load
+_f = Fit.func_code
+# Creating a new code object nearly identical, but with the two variable names replaced
+# by the property list.
+_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+# Replace the code object of the wrapper function
+Fit.func_code = _c
+
+def FitDialog(*args, **kwargs):
+    """Popup a dialog for the Fit algorithm. More help on the Fit function
+    is available via help(Fit).
+
+    Additional arguments available here (as keyword only) are:
+      - Enable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Message :: An optional message string
+    """
+    arguments = {}
+    try:
+        function, inputworkspace = get_mandatory_args('FitDialog', ['Function', 'InputWorkspace'], *args, **kwargs)
+        arguments['Function'] = function
+        arguments['InputWorkspace'] = inputworkspace
+    except RuntimeError:
+        pass
+    arguments.update(kwargs)
+    if 'Enable' not in arguments: arguments['Enable']=''
+    if 'Disable' not in arguments: arguments['Disable']=''
+    if 'Message' not in arguments: arguments['Message']=''
+    algm = mtd.createAlgorithm('Fit')
+    algm.setPropertiesDialog(**arguments)
+    algm.execute()
+    return algm
+
+def get_mandatory_args(func_name, required_args ,*args, **kwargs):
+    """
+    Given a list of required arguments, parse them
+    from the given args & kwargs and raise an error if they
+    are not provided
+    
+        @param func_name :: The name of the function call
+        @param required_args :: A list of names of required arguments
+        @param args :: The positional arguments to check
+        @param kwargs :: The keyword arguments to check
+        
+        @returns A tuple of provided mandatory arguments
+    """
+    def get_argument_value(key, kwargs):
+        try:
+            value = kwargs[key]
+            del kwargs[key]
+            return value
+        except KeyError:
+            raise RuntimeError('%s argument not supplied to %s function' % (str(key), func_name))
+    nrequired = len(required_args)
+    npositional = len(args)
+    
+    if npositional == 0:
+        mandatory_args = []
+        for arg in required_args:
+            mandatory_args.append(get_argument_value(arg, kwargs))
+    elif npositional == nrequired:
+        mandatory_args = args
+    elif npositional < nrequired:
+        mandatory_args = []
+        for value in args:
+            mandatory_args.append(value)
+        # Get rest from keywords
+        for arg in required_args[npositional:]:
+            mandatory_args.append(get_argument_value(arg, kwargs))
+    else:
+        reqd_as_str = ','.join(required_args).strip(",")
+        raise RuntimeError('%s() takes "%s" as positional arguments. Other arguments must be specified by keyword.'
+                           % (func_name, reqd_as_str))
+    return tuple(mandatory_args)
+
+
+#------------------------------------------------------------------------------
+
 def translate():
     """
         Loop through the algorithms and register a function call 
         for each of them
     """
     for algorithm in mtd._getRegisteredAlgorithms(include_hidden=True):
-        if algorithm[0] == "Load":
+        name = algorithm[0]
+        if specialization_exists(name):
             continue
+        highest_version = max(algorithm[1])
         # Create the algorithm object
-        _algm_object = mtd.createUnmanagedAlgorithm(algorithm[0], max(algorithm[1]))
-        create_algorithm(algorithm[0], max(algorithm[1]), _algm_object)
-        create_algorithm_dialog(algorithm[0], max(algorithm[1]), _algm_object)
+        _algm_object = mtd.createUnmanagedAlgorithm(name, max(algorithm[1]))
+        create_algorithm(name, highest_version, _algm_object)
+        create_algorithm_dialog(name, highest_version, _algm_object)
 
 translate()

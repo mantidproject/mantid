@@ -28,8 +28,10 @@ using namespace Geometry;
 
 void EQSANSPatchSensitivity::init()
 {
-  declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut));
-  declareProperty(new WorkspaceProperty<>("PatchWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
+      "Input sensitivity workspace to be patched");
+  declareProperty(new WorkspaceProperty<>("PatchWorkspace","",Direction::Input),
+      "Workspace defining the patch. Masked detectors will be patched.");
   declareProperty("UseLinearRegression",true,
       "If true, a linear regression will be used instead of computing the average");
   declareProperty("OutputMessage","",Direction::Output);

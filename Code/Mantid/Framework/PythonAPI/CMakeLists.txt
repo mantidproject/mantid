@@ -54,6 +54,8 @@ set ( TEST_PY_FILES
   test/RunPythonScriptTest.py
   test/SANSMaskCommandsTest.py
   test/SANSWorkflowTest.py
+  test/SimpleAPILoadTest.py
+  test/SimpleAPIFitTest.py
   test/SettingsTest.py
   test/WorkspaceGroupTest.py
   test/WorkspaceHistoryTest.py
