@@ -1743,11 +1743,11 @@ bool ConfigServiceImpl::quickParaViewCheck() const
   const bool ignoreParaview = hasProperty(paraviewIgnoreProperty) && atoi(getString(paraviewIgnoreProperty).c_str());
   if(ignoreParaview)
   {
-    this->g_log.information("Ignoring ParaView");
+    this->g_log.debug("Ignoring ParaView");
     return false;
   }
   
-  this->g_log.information("Checking for ParaView");
+  this->g_log.debug("Checking for ParaView");
   bool isAvailable = false;
 
   try
@@ -1771,7 +1771,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
   }
   catch(Poco::SystemException &e)
   {
-    g_log.notice(e.what());
+    g_log.debug(e.what());
     this->g_log.notice("ParaView is not available");
   }
   return isAvailable; 

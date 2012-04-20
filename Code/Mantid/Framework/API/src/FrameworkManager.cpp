@@ -71,17 +71,17 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
     const std::string pvPluginDir = config.getString("pvplugins.directory");
     if (pvPluginDir.length() > 0)
     {
-      this->g_log.information("Loading PV plugin libraries");
+      this->g_log.debug("Loading PV plugin libraries");
       Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pvPluginDir, false);
     }
     else
     {
-      this->g_log.information("No PV plugin library directory");
+      this->g_log.notice("No PV plugin library directory");
     }
   }
   else
   {
-    this->g_log.information("Cannot load paraview libraries");
+    this->g_log.debug("Cannot load paraview libraries");
   }
 
   // Disable reporting errors from Nexus (they clutter up the output).
