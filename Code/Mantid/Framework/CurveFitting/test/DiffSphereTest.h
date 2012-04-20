@@ -147,7 +147,7 @@ public:
     //set the resolution function
     double h = 3.0;  // height
     double a = 1.3;  // 1/(2*sigma^2)
-    auto res = IFunction_sptr( new DiffSphereTest_Gauss() );
+    IFunction_sptr res( new DiffSphereTest_Gauss );
     res->setParameter("c",0);
     res->setParameter("h",h);
     res->setParameter("s",a);
@@ -155,7 +155,7 @@ public:
 
     //set the "structure factor"
     double H=1.5, R=2.6, Q=0.7;
-    auto eds = IFunction_sptr( new ElasticDiffSphere() );
+    IFunction_sptr eds( new ElasticDiffSphere() );
     eds->setParameter("Height",H);
     eds->setParameter("Radius",R);
     eds->setParameter("Q",Q);
@@ -179,9 +179,9 @@ public:
 
   void testInelasticDiffSphere()
   {
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
     // create mock data to test against
     std::string wsName = "InelasticDiffSphereMockData";
     int histogramNumber = 1;
@@ -198,39 +198,31 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
-    // set up DiffSphere fitting function
-    //InelasticDiffSphere* fn = new InelasticDiffSphere();
-    boost::shared_ptr<InelasticDiffSphere> const fn( new InelasticDiffSphere);
+    boost::shared_ptr<InelasticDiffSphere> fn(new InelasticDiffSphere);
     fn->initialize();
-
     //Start with some initial values
-    fn.setParameter("Intensity",0.4);
-    fn.setParameter("Radius",1.1);
-    fn.setParameter("Diffusion",1.2);
-    fn.setParameter("Q",0.7);
-    fn.tie("Q","0.7"); //set tie for Parameter Q, since it's supposed to be a constant
+    fn->setParameter("Intensity",0.4);
+    fn->setParameter("Radius",1.1);
+    fn->setParameter("Diffusion",1.2);
+    fn->setParameter("Q",0.7);
+    fn->tie("Q","0.7"); //set tie for Parameter Q, since it's supposed to be a constant
 
-    //alg2.setPropertyValue("Function",fn->asString());
-
-    alg2.setProperty( "Function",boost::shared_ptr<LogNormal>(new LogNormal) );
-
-    alg2.setProperty( "Function",fn);
+    alg.setProperty( "Function",boost::dynamic_pointer_cast<IFunction>(fn));
     // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","200");
+    alg.setPropertyValue("InputWorkspace", wsName);
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue("StartX","0");
+    alg.setPropertyValue("EndX","200");
 
     // execute fit
-    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( alg2.execute() ) );
+    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( alg.execute() ) );
 
-    TS_ASSERT( alg2.isExecuted() );
+    TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.001,0.001);
-
-    auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    auto out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("Radius"), 2.66 ,0.05);
     TS_ASSERT_DELTA( out->getParameter("Diffusion"), 1.45 ,0.05);
     TS_ASSERT_DELTA( out->getParameter("Q"), 0.7 ,0.001);
@@ -255,9 +247,9 @@ public:
     TS_ASSERT_EQUALS(ids->getParameter("Diffusion"),D);
 
 
-    ds->applyTies(); //elastic parameters are tied to inelastic parameters
+    ds.applyTies(); //elastic parameters are tied to inelastic parameters
     //check the ties were applied correctly
-    ElasticDiffSphere* eds = dynamic_cast<ElasticDiffSphere*>(ds->getFunction(0));
+    auto eds = boost::dynamic_pointer_cast<ElasticDiffSphere>( ds.getFunction(0) );
 
     TS_ASSERT_EQUALS(eds->getParameter("Height"),I);
     TS_ASSERT_EQUALS(eds->getParameter("Q"),Q);
@@ -268,79 +260,39 @@ public:
   //Internal consistency test.
   //First generate data from convolution of a Gaussian and a DiffSphere function.
   //Then reset the DiffSphere parameters and do the fit to recover original parameter values
-
   void testDiffSphere(){
-    double dummy;
-    std::string dummyStr;
-    //Convolution* conv = new Convolution();
-    boost::shared_ptr<Convolution> const conv(new Convolution); //constant pointer
 
-    //set the resolution function as a gaussian
+    //Resolution function is a gaussian
     double h = 3.0;  // height
     double a = 1.3;  // 1/(2*sigma^2)
-
-    DiffSphereTest_Gauss* res = new DiffSphereTest_Gauss();
-
+    boost::shared_ptr<DiffSphereTest_Gauss> res(new DiffSphereTest_Gauss);
     res->setParameter("c",0);
     res->setParameter("h",h);
     res->setParameter("s",a);
-    conv->addFunction(res);
 
-    //set the structure factor as a DiffSphere function
-    double I=2.9, Q=0.7, R=2.3, D=0.45;
-
-    DiffSphere* ds = new DiffSphere();
+    //Structure factor is a DiffSphere model
+    double I=2.9, Q=0.70, R=2.3, D=0.45;
+    boost::shared_ptr<DiffSphere> ds(new DiffSphere);
     ds->setParameter("f1.Intensity",I);  //f0==elastic, f1==inelastic
     ds->setParameter("f1.Q",Q);
     ds->setParameter("f1.Radius",R);
     ds->setParameter("f1.Diffusion",D);
     ds->applyTies(); //elastic parameters are tied to inelastic parameters
 
-    conv->addFunction(ds);
-
     //set up some frequency values centered around zero
     const int N = 117;
     double w[N],w0,dw = 0.13;
     w0=-dw*int(N/2);
     for(int i=0;i<N;i++) w[i] = w0 + i*dw;
-
     FunctionDomain1DView xView(&w[0],N);
     FunctionValues values(xView);
-    //obtain the set of values from the convolution and store in array 'in'
-    conv->functionMW(in,w,N);
 
-    //output the values for checking
-    std::ofstream myfile;
-    myfile.open ("/tmp/junk.dat");
-    //for(int i=0;i<N;i++){
-    //  myfile << w[i] << " " << h*exp(-w[i]*w[i]*a) << " " << in[i] << "\n";
-    //}
-    //myfile.close();
+    auto conv = boost::shared_ptr<Convolution>(new Convolution);
+    conv->addFunction( boost::dynamic_pointer_cast<IFunction>(res) );
+    conv->addFunction( boost::dynamic_pointer_cast<IFunction>(ds) );
+    conv->function(xView,values); //'values' contains the convolution of 'res' and 'ds'
 
-    //Initialize now the parameters to some other values.
-    ds->setParameter("f0.Height",1.0);
-    ds->setParameter("f0.Radius",1.1);
-    ds->setParameter("f0.Q",1.2);
-
-    ds->setParameter("f1.Intensity",1.3);
-    ds->setParameter("f1.Radius",1.4);
-    ds->setParameter("f1.Diffusion",1.5);
-    ds->setParameter("f1.Q",Q); // Q is not a parameter, but a known measurable
-    ds->applyTies();  //update the ties between elastic and inelastic parts
-
-    dummyStr=ds->asString();
-
-    //check the ties were applied correctly
-    DiffSphere* ds2 = dynamic_cast<DiffSphere*>(conv->getFunction(1));
-    TS_ASSERT_EQUALS(ds2->getParameter("f0.Height"),1.3);
-    TS_ASSERT_EQUALS(ds2->getParameter("f0.Radius"),1.4);
-    TS_ASSERT_EQUALS(ds2->getParameter("f0.Q"),0.7);
-    TS_ASSERT_EQUALS(ds2->getParameter("f1.Intensity"),1.3);
-    TS_ASSERT_EQUALS(ds2->getParameter("f1.Radius"),1.4);
-    TS_ASSERT_EQUALS(ds2->getParameter("f1.Diffusion"),1.5);
-    TS_ASSERT_EQUALS(ds2->getParameter("f1.Q"),Q);
-
-    //Set up the workspace
+    //Set up the workspace. Store the result in the convolution as a histogram
     std::string wsName = "ConvGaussDiffSphere";
     int histogramNumber = 1;
     int timechannels = N;
@@ -352,74 +304,52 @@ public:
     const double cc=0.1;
     for(int i=0; i<N; i++){
       x[i] = w[i];
-      y[i] = values.getCalculated(i);
+      y[i] = values.getCalculated(i); //here we store the result of the convolution
       e[i] = cc*values.getCalculated(i);
     }
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D)); //put workspace in the data service
 
+    //Reinitialize now parameters to some other values. The goal is to recover the original
+    //parameters by means of a fit of the model to the histogram stored in the workspace
+    ds->setParameter("f1.Intensity",1.3);
+    ds->setParameter("f1.Radius",1.4);
+    ds->setParameter("f1.Diffusion",1.5);
+    ds->addTies( "f1.Q="+boost::lexical_cast<std::string>(Q) ); //Extra tie to set Q as constant in the fitting. Typical of a QUENS fit
+    ds->applyTies();  //update the ties between elastic and inelastic parts
+
     //Initialize the fitting algorithm
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+    alg.setProperty( "Function", boost::dynamic_pointer_cast<IFunction>(conv) );
 
-    alg2.setProperty("Function",conv);
-    dummyStr=conv->asString();
-    myfile << dummyStr<<"\n\n";
-    dummyStr=alg2.getPropertyValue("Function");
-    myfile << dummyStr<<"\n\n";;
-    myfile.close();
+    //Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace", wsName);
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue( "StartX", boost::lexical_cast<std::string>(w[0]) );
+    alg.setPropertyValue("EndX", boost::lexical_cast<std::string>(w[N-1]) );
 
-    //check alg2 contains the fitting function
-    IFitFunction *out = FunctionFactory::Instance().createInitialized( alg2.getPropertyValue("Function") );
-    CompositeFunction *outCmp = dynamic_cast<CompositeFunction*>(out);
+    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( alg.execute() ) ); //do the fit
 
-    IFunction* outGauss = outCmp->getFunction(0); //DiffSphereTest_Gauss
-    dummy = outGauss->getParameter("c");  //initial=0,   target=0    (reports 0)
-    dummy = outGauss->getParameter("h");  //initial=3.0, target=3.0  (reports 3)
-    dummy = outGauss->getParameter("s");  //initial=1.3, target=1.3  (reports 1.3)
+    //Check the original parameters are recovered.
+    IFunction_sptr algF = alg.getProperty("Function");
+    auto fnConv = boost::dynamic_pointer_cast<Convolution>( algF ) ;
+    IFunction_sptr outGauss = fnConv->getFunction(0);
+    TS_ASSERT_EQUALS(outGauss->getParameter("c"),0.0);
+    TS_ASSERT_EQUALS(outGauss->getParameter("h"),h);
+    TS_ASSERT_EQUALS(outGauss->getParameter("s"),a);
+    auto fnDiffSphere = boost::dynamic_pointer_cast<DiffSphere>( fnConv->getFunction(1) );
+    TS_ASSERT_EQUALS( fnDiffSphere->getParameter("f0.Q"), Q);
+    TS_ASSERT_EQUALS( fnDiffSphere->getParameter("f1.Q"), Q);
+    double tolerance = 1e-03;
+    TS_ASSERT_DELTA( fnDiffSphere->getParameter("f0.Height"), I, I*tolerance);
+    TS_ASSERT_DELTA( fnDiffSphere->getParameter("f0.Radius"), R, R*tolerance);
+    TS_ASSERT_DELTA( fnDiffSphere->getParameter("f1.Intensity"), I, I*tolerance);
+    TS_ASSERT_DELTA( fnDiffSphere->getParameter("f1.Radius"), R, R*tolerance);
+    TS_ASSERT_DELTA( fnDiffSphere->getParameter("f1.Diffusion"), D, D*tolerance);
 
-    CompositeFunction *outDiffSphere = dynamic_cast<CompositeFunction*>(outCmp->getFunction(1));
-    dummy = outDiffSphere->getParameter("f0.Heigth");        //initial=1.3, target=2.3  (reports 1)
-    dummy = outDiffSphere->getParameter("f0.Radius");        //initial=1.4, target=2.3  (reports 1)
-    dummy = outDiffSphere->getParameter("f0.Q");             //initial=0.7, target=0.7  (reports )
-    dummy = outDiffSphere->getParameter("f1.Intensity");     //initial=1.4, target=2.9  (reports )
-    dummy = outDiffSphere->getParameter("f1.Radius");        //initial=1.4, target=2.3  (reports )
-    dummy = outDiffSphere->getParameter("f1.Diffusion");     //initial=1.5, target=0.45 (reports )
-    dummy = outDiffSphere->getParameter("f1.Q");             //initial=0.7  target=0.7  (reports )
-
-    //tie Q ?
-    //simplex algorithm ?
-
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue( "StartX", boost::lexical_cast<std::string>(w[0]) );
-    alg2.setPropertyValue("EndX", boost::lexical_cast<std::string>(w[N-1]) );
-
-    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( alg2.execute() ) );
-
-    /*
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    CompositeFunction *out2 = dynamic_cast<CompositeFunction*>(out);
-    IFunction* outGauss = out2->getFunction(0); //DiffSphereTest_Gauss
-    dummy = outGauss->getParameter("c");  //initial=0,   target=0    (reports 0)
-    dummy = outGauss->getParameter("h");  //initial=3.0, target=3.0  (reports 3)
-    dummy = outGauss->getParameter("s");  //initial=1.3, target=1.3  (reports 1.3)
-
-    IFunction* outDiffSphere = out2->getFunction(1); //DiffSphere function
-    dummy = outDiffSphere->getParameter("f0.Radius");        //initial=1.4, target=2.3  (reports 1)
-    dummy = outDiffSphere->getParameter("f0.Q");             //initial=0.7, target=0.7  (reports )
-    dummy = outDiffSphere->getParameter("f1.Intensity");     //initial=1.4, target=2.9  (reports )
-    dummy = outDiffSphere->getParameter("f1.Radius");        //initial=1.4, target=2.3  (reports )
-    dummy = outDiffSphere->getParameter("f1.Diffusion");     //initial=1.5, target=0.45 (reports )
-    dummy = outDiffSphere->getParameter("f1.Q");             //initial=0.7  target=0.7  (reports )
-     */
-
-    dummy = alg2.getProperty("OutputChi2overDoF");
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    std::string xxs = categories[0];
-    TS_ASSERT( categories.size() == 1 );
+    double dummy = alg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA( dummy, tolerance, tolerance);
 
   } // end of testDiffSphere
 
