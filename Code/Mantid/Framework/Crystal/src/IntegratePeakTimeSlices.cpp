@@ -586,6 +586,7 @@ namespace Mantid
                 fit_alg->setProperty("StartX", 0.0);
                 fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
                 fit_alg->setProperty("MaxIterations", 5000);
+                fit_alg->setProperty( "CreateOutput",true);
 
                 std::string tie = getProperty("Ties");
                 if( tie.length() > (size_t)0)
@@ -597,9 +598,13 @@ namespace Mantid
 
                   double chisq = fit_alg->getProperty("OutputChi2overDoF");
 
-                  params = fit_alg->getProperty("Parameters");
-                  errs = fit_alg->getProperty("Errors");
-                  names = fit_alg->getProperty("ParameterNames");
+                  ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
+                  for( int prm = 0; prm < (int)RRes->rowCount(); prm++ )
+                  {
+                    names.push_back( RRes->getRef< string >( "Name", prm ) );
+                    params.push_back( RRes->getRef< double >( "Value", prm ));
+                    errs.push_back( RRes->getRef< double >( "Error",prm));
+                  }
 
                   ostringstream res;
                   res << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
@@ -1054,18 +1059,6 @@ namespace Mantid
       for (int i = 0; i < NAttributes + 2; i++)
         StatBase.push_back(0);
 
-      Mantid::MantidVecPtr pX;
-
-      Mantid::MantidVec& xRef = pX.access();
-      for (int j = 0; j < NeighborIDs[1]; j++)
-      {
-        xRef.push_back((double)j);
-      }
-
-      Data->setX(0, pX);
-      Data->setX(1, pX);
-      Data->setX(2, pX);
-
       Mantid::MantidVecPtr yvals;
       Mantid::MantidVecPtr errs;
       Mantid::MantidVecPtr xvals;
@@ -1159,6 +1152,18 @@ namespace Mantid
 
         }
         }
+      Mantid::MantidVecPtr pX;
+
+      Mantid::MantidVec& xRef = pX.access();
+      for (int j = 0; j < N+1; j++)
+      {
+        xRef.push_back((double)j);
+      }
+
+      Data->setX(0, pX);
+      Data->setX(1, pX);
+      Data->setX(2, pX);
+
 
      // std::cout<<std::endl<<"N elts="<<N<< ","<<TotBoundaryIntensities<<","<<nBoundaryCells<<std::endl;
       ws->setData(0, yvals, errs);
