@@ -40,7 +40,8 @@
 #include <cstdlib>
 
 #include <map>
-#include "../../Kernel/inc/MantidKernel/Quat.h"
+#include "MantidKernel/Quat.h"
+#include "MantidAPI/FrameworkManager.h"
 using namespace Mantid;
 using namespace DataObjects;
 using namespace Geometry;
@@ -54,7 +55,7 @@ public:
   IntegratePeakCheck()
   {
     Mantid::API::FrameworkManager::Instance();
-    usePoisson = true;
+    usePoisson = false;
   }
 /*
    int* ArryofIDs = new int[500];
@@ -201,7 +202,7 @@ public:
     Peak peak(instP, pixelp->getID(), wavelength);
 
 // --------------- testing for nearest neighborhood -----------------------------------------
-    std::cout<<"----------------------------------------------"<<std::endl;
+/*   std::cout<<"----------------------------------------------"<<std::endl;
     std::cout<< "        Neighbors  "<< std::endl;
     detid2index_map * detid_to_wi_map = wsPtr->getDetectorIDToWorkspaceIndexMap( false );
     Mantid::detid2index_map::iterator it;
@@ -211,7 +212,7 @@ public:
     double CellHeight = bankR->ysize()/bankR->ypixels();
     double CellWidth = bankR->xsize()/bankR->xpixels();
     double neighborRadius = 1.5*MaxPeakRCSpan*max<double>(CellHeight,CellWidth);
-    double Nneighbors =(1.5*MaxPeakRCSpan)*(1.5*MaxPeakRCSpan)*3.1415;//*5 gets more
+    double Nneighbors =(1.5*MaxPeakRCSpan)*(1.5*MaxPeakRCSpan)*3.1415;//  *5 gets more
 
     specid_t CentDetspec = wsPtr->getSpectrum( wsIndx)->getSpectrumNo();
     wsPtr->buildNearestNeighbours(true);
@@ -243,7 +244,7 @@ public:
     std::cout<<std::endl<<"----------------------------------------------"<<std::endl;
     delete detid_to_wi_map;
 
-
+*/
 
 
 //-------------------- end testing for nearest neighborhood ---------------------------
@@ -256,6 +257,7 @@ public:
     double TotIntensity = 0;
     double Background =1.4;
     double corr = 0;//.5*MaxPeakRCSpan/2;
+    std::cout<<"Starting setting up data"<<std::endl;
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++)
       {
@@ -263,7 +265,7 @@ public:
 
         MantidVecPtr dataY;
         MantidVecPtr dataE;
-        double vv= CalcDataNorm( row, col,MaxPeakIntensity,Background,NTimes,PeakCol,PeakRow, MaxPeakRCSpan,MaxPeakRCSpan,
+        double vv= CalcDataRect( row, col,MaxPeakIntensity,Background,NTimes,PeakCol,PeakRow, MaxPeakRCSpan,MaxPeakRCSpan,
             corr, PeakChan,MaxPeakTimeSpan,dataY,  dataE,Q0, 1000.0, 50.0,dQ,  T, instP, bankR);
 
         TotIntensity+= vv;
@@ -282,25 +284,22 @@ public:
        ArryofIDs[0]=6500;
        ArryofIDs[1]=2;
        Kernel::V3D Center = pixelp->getPos();
-       std::cout<<"IntegratePeakCheck G"<<std::endl;
+
        boost::shared_ptr< Geometry::RectangularDetector> comp1 =
                boost::const_pointer_cast< Geometry::RectangularDetector> (bankR);
        boost::shared_ptr<Geometry::IComponent>comp =
            boost::dynamic_pointer_cast<Geometry::IComponent>( comp1);
-       std::cout<<"IntegratePeakCheck H"<<std::endl;
-       std::cout<<"Neighbors="<<getNeighborPixIDs(comp, Center,Radius,ArryofIDs);
-           std::cout<<","<<ArryofIDs[1]<<Center<<std::endl;
-       std::cout<<"IntegratePeakCheck I"<<std::endl;
+
        for( int i=2; i<ArryofIDs[1];i++)
        {
          std::pair< int, int > res = bankR->getXYForDetectorID( ArryofIDs[i]);
-         std::cout<<"("<<res.first<<","<<res.second<<")";
 
        }
-       std::cout<<std::endl;
+
        delete ArryofIDs;
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
 
+    std::cout<<"Ending setting up data"<<std::endl;
     pks->addPeak(peak);
 
     IntegratePeakTimeSlices algP;
@@ -339,7 +338,7 @@ public:
       for( int j=0; j< Twk->rowCount(); j++)
       {
          std::cout<< setw(10)<<T[j+12];
-         for( int i=0;i< Twk->columnCount(); i++)
+         for( int i=0;i+1< Twk->columnCount(); i++)
             std::cout<< setw(10)<<Twk->cell<double>(j,i);
          std::cout<<std::endl;
       }
@@ -525,11 +524,12 @@ private:
 
              dataY.access().push_back(val);
              dataE.access().push_back( sqrt(val));
+
              if ((val - Background) > MaxIntensity * .1)
-             { std::cout<<"("<<row<<","<<col<<",";
+             {// std::cout<<"("<<row<<","<<col<<","<<val<<",";
                double Q = calcQ(bankR, instP, row, col, time0+chan*TperChan);
                dQ = max<double> (dQ, fabs(Q - Q0));
-               std::cout<<","<<dQ<<")";
+               //std::cout<<","<<dQ<<")";
              }
            }
         return TT;

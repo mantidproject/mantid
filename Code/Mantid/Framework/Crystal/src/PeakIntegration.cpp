@@ -114,7 +114,7 @@ namespace Mantid
         peaksW = inPeaksW->clone();
 
 
-      double qspan = 0.01;
+      double qspan = 0.06;
       bool slices = getProperty("FitSlices");
       IC = getProperty("IkedaCarpenterTOF");
       bool matchRun = getProperty("MatchingRunNo");
@@ -123,7 +123,8 @@ namespace Mantid
         if (peaksW->mutableSample().hasOrientedLattice())
         {
           OrientedLattice latt = peaksW->mutableSample().getOrientedLattice();
-          qspan = 1./std::max(latt.a(), std::max(latt.b(),latt.c()))/6.;
+          qspan = 1./std::max(latt.a(), std::max(latt.b(),latt.c()));//1/6*2Pi about 1
+
         }
         else
         {

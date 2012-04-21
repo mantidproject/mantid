@@ -165,6 +165,12 @@ namespace Mantid
                        int   &NCells) const;
       
 
+
+      double mIx, mx, mIy, my;//< For calculating variances
+      double SIxx, SIyy, SIxy, Sxx, Syy, Sxy;//< For calculating variances
+      double TotI, TotN;//< For calculating variances
+
+
       double LastParams[9]; ///< Saves previous/this set of parameters
       
 
@@ -181,14 +187,14 @@ namespace Mantid
 
       
 
-      BoundaryConstraint *BackConstraint; ///< Constraint for background
+     /*BoundaryConstraint* BackConstraint; ///< Constraint for background
 
-      BoundaryConstraint *MeanxConstraint; ///< Constraint using mean x
+      boost::shared_ptr<BoundaryConstraint>MeanxConstraint; ///< Constraint using mean x
 
-      BoundaryConstraint *MeanyConstraint; ///< Constraint using mean y
+      boost::shared_ptr<BoundaryConstraint>MeanyConstraint; ///< Constraint using mean y
 
-      BoundaryConstraint *IntensityConstraint; ///< Constraint using intensity
-
+      boost::shared_ptr<BoundaryConstraint>IntensityConstraint; ///< Constraint using intensity
+     */
       static Kernel::Logger & g_log;
 
 

@@ -20,6 +20,9 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/V3D.h"
+#include "MantidAPI/IAlgorithm.h"
+
+using Mantid::API::IAlgorithm_sptr;
 
 
 
@@ -94,11 +97,11 @@ private:
 
   bool EdgePeak;
 
-  std::string AttributeNames[19];
+  std::string AttributeNames[20];
 
   std::string ParameterNames[7];
 
-  double AttributeValues[19] ;
+  double AttributeValues[20] ;
   double ParameterValues[7] ;
 
   Mantid::detid2index_map * wi_to_detid_map;
@@ -214,6 +217,8 @@ private:
 
 
   bool IsEnoughData(   ) ;
+
+  std::string CalcConstraints( );
 
 
   bool    debug;
