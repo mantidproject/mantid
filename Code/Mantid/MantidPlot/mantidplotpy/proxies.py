@@ -122,12 +122,9 @@ class QtProxyObject(QtCore.QObject):
         """
         self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
                         self._kill_object)
-        print 'testing close and delete'
         if hasattr(self.__obj, 'closeDependants'):
-            print 'closing dependants'
             threadsafe_call(self.__obj.closeDependants)
         if hasattr(self.__obj, 'close'):
-            print 'closing object'
             threadsafe_call(self.__obj.close)
         self._kill_object()
         
@@ -150,7 +147,6 @@ class QtProxyObject(QtCore.QObject):
         the threadsafe call mechanism. Essentially this guarantees
         that when the method is called it wil be on the GUI thread
         """
-        print 'calling attribute',attr
         callable = getattr(self._getHeldObject(), attr)
         return CrossThreadCall(callable)
 
@@ -176,9 +172,6 @@ class QtProxyObject(QtCore.QObject):
         """
         Release the stored instance
         """
-        print "object killed ", self.__obj
-        self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
-                        self._kill_object)
         self.__obj = None
 
     def _swap(self, obj):
