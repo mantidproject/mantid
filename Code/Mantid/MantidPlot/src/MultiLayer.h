@@ -207,6 +207,7 @@ private:
 
 	//! \name Event Handlers
 	//@{
+	void closeEvent(QCloseEvent*);
 	void wheelEvent(QWheelEvent *);
 	void keyPressEvent(QKeyEvent *);
 	bool eventFilter(QObject *object, QEvent *);

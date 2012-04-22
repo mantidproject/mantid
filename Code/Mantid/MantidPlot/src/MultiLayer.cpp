@@ -372,7 +372,9 @@ void MultiLayer::removeLayer()
 
 	int index = graphsList.indexOf(active_graph);
 	graphsList.removeAt(index);
+	active_graph->setAttribute(Qt::WA_DeleteOnClose, false);
 	active_graph->close();
+	delete active_graph;
 	if(index >= graphsList.count())
 		index--;
 
@@ -1066,6 +1068,22 @@ void MultiLayer::keyPressEvent(QKeyEvent * e)
 		emit showContextMenu();
 		return;
 	}
+}
+
+/**
+ * Ensures all layers are removed promptly
+ */
+void MultiLayer::closeEvent(QCloseEvent* e)
+{
+  MdiSubWindow::closeEvent(e);
+  if( e->isAccepted() )
+  {
+    const int nlayers = layers();
+    for(int i = 0; i < nlayers; ++i)
+    {
+      removeLayer();
+    }
+  }
 }
 
 void MultiLayer::wheelEvent ( QWheelEvent * e )
