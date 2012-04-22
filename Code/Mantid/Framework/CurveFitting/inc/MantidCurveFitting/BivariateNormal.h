@@ -144,7 +144,7 @@ namespace Mantid
         return false;
       }
 
-
+      bool CalcVxx, CalcVyy, CalcVxy;
     protected:
       void init();
 

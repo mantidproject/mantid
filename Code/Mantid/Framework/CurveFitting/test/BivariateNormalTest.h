@@ -115,8 +115,10 @@ public:
           else if(sgn2>0)sgn2=-sgn2;else {sgn1=-sgn1+1; sgn2=sgn1;}
           xvals.access().push_back( x );
           yvals.access().push_back( y );
-          data.access().push_back( NormVal(background,intensity,Mcol,
-                                      Mrow,Vx,Vy, Vxy, y, x));
+          double val = NormVal(background,intensity,Mcol,
+              Mrow,Vx,Vy, Vxy, y, x);
+          data.access().push_back( val );
+
         }
 
 
@@ -147,7 +149,7 @@ public:
       NormalFit.setParameter("SSrc", 2.243584414, true);
 
 
-      NormalFit.setAttributeValue("CalcVariances", 1);
+      NormalFit.setAttributeValue("CalcVariances",1);
 
       std::vector<double> out(nCells);
       NormalFit.function1D(out.data(), xx, nCells);
@@ -177,7 +179,7 @@ public:
      NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 
 
-/*     for( int i=0; i< nCells; i+=6)//points
+ /*      for( int i=0; i< nCells; i+=6)//points
       {
         std::cout<<i;
         for( int j=0;j< 7;j++)//params
@@ -200,8 +202,8 @@ public:
           }
        }
 
-
- /*   std::vector<double>out1(nCells);
+/*
+  std::vector<double>out1(nCells);
       std::vector<double>out2(nCells);
       for( size_t param = 0; param < 4; param++ )
       {

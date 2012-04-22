@@ -56,14 +56,14 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-//
+#include <boost/lexical_cast.hpp>
 #include <vector>
 #include "MantidAPI/Algorithm.h"
 #include <algorithm>
 #include <math.h>
 #include <cstdio>
-#include <boost/random/poisson_distribution.hpp>
-
+//#include <boost/random/poisson_distribution.hpp>
+#include "MantidAPI/ISpectrum.h"
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -161,6 +161,8 @@ namespace Mantid
 
       for (int i = 0; i < NParameters; i++)
         ParameterValues[i] = 0;
+
+
     }
 
     /// Destructor
@@ -418,6 +420,7 @@ namespace Mantid
       double Row0 = lastRow;
       double lastCol = COL;
       double Col0 = lastCol;
+      string spec_idList="";
 
       // For quickly looking up workspace index from det id
       wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap( false );
@@ -505,7 +508,7 @@ namespace Mantid
                          std::string("Workspace2D"), 3,NN,NN);
 
               Kernel::V3D CentPos = center+yvec*(Centy-ROW)*CellHeight + xvec*(Centx-COL)*CellWidth;
-              SetUpData1(Data, inpWkSpace,  Chan+dir*t,  R ,CenterDet->getPos());
+              SetUpData1(Data, inpWkSpace,  Chan+dir*t,  R ,CenterDet->getPos(), spec_idList);
               if (AttributeValues[ISSIxx] > 0)
               {
                 if (AttributeValues[IIntensities] > MaxCounts)
@@ -598,7 +601,7 @@ namespace Mantid
 
 
               SetUpData(Data, inpWkSpace, panel, xchan, lastCol,lastRow,Cent,//CentDetspec,//NeighborIDs,
-                                                      neighborRadius, Radius);
+                                                      neighborRadius, Radius, spec_idList);
 
               Data->setName("index0");
 
@@ -647,7 +650,7 @@ namespace Mantid
                   double chisq = fit_alg->getProperty("OutputChi2overDoF");
 
                   ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
-                  for( int prm = 0; prm < (int)RRes->rowCount(); prm++ )
+                  for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
                   {
                     names.push_back( RRes->getRef< string >( "Name", prm ) );
                     params.push_back( RRes->getRef< double >( "Value", prm ));
@@ -656,11 +659,14 @@ namespace Mantid
 
                   ostringstream res;
                   res << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
-                  res<<"  Row,Col Radius="<<lastRow<<","<<lastCol<<","<<neighborRadius<<std::endl;
+                  res<<"  Row,Col Radius=" << lastRow << "," << lastCol <<"," <<neighborRadius << std::endl;
 
                   double sqrtChisq = -1;
                   if (chisq >= 0)
-                    sqrtChisq = sqrt(chisq);
+                    sqrtChisq =(chisq);
+
+                  sqrtChisq = max< double >( sqrtChisq,AttributeValues[IIntensities]/AttributeValues[ISS1] );
+                  sqrtChisq = sqrt( sqrtChisq);
 
                   for (size_t kk = 0; kk < params.size(); kk++)
                   {
@@ -674,7 +680,7 @@ namespace Mantid
 
                   if (isGoodFit(params, errs, names, chisq))
                   {
-                    UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq, time);
+                    UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq, time, spec_idList);
 
                     double TotSliceIntensity = AttributeValues[IIntensities];
                     double TotSliceVariance = AttributeValues[IVariance];
@@ -851,6 +857,7 @@ namespace Mantid
       TabWS->addColumn("double", "Start Col");
       TabWS->addColumn("double", "End Col");
       TabWS->addColumn("double", "TotIntensityError");
+      TabWS->addColumn("str", "SpecIDs");
     }
 
 
@@ -1024,7 +1031,8 @@ namespace Mantid
                                              //int*                            nghbrs,//Not used
                                             // std::map< specid_t, V3D >     &neighbors,
                                              double                        &neighborRadius,//from CentDetspec
-                                             double                         Radius)
+                                             double                         Radius,
+                                             string                     &spec_idList)
     {
      // size_t wsIndx = inpWkSpace->getIndexFromSpectrumNumber(CentDetspec);
 
@@ -1034,13 +1042,13 @@ namespace Mantid
                                    + yvec*(CentY-ROW)*CellHeight;
 
       SetUpData1(Data             , inpWkSpace, chan,
-                 Radius            , CentPos1);
+                 Radius            , CentPos1, spec_idList);
 
       if( AttributeValues[ISSIxx]< 0)// Not enough data
           return;
 
       double  DD = max<double>( sqrt(ParameterValues[IVYY])*CellHeight, sqrt(ParameterValues[IVXX])*CellWidth);
-      double NewRadius= 1.1* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
+      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
       //1.4 is needed to get more background cells. In rectangle the corners were background
 
       NewRadius = min<double>(30*max<double>(CellWidth,CellHeight),NewRadius);
@@ -1081,7 +1089,7 @@ namespace Mantid
         neighborRadius -= DD;
 
       SetUpData1(Data, inpWkSpace, chan,
-                 NewRadius, CentPos );
+                 NewRadius, CentPos, spec_idList );
 
     }
 
@@ -1091,7 +1099,8 @@ namespace Mantid
                                                API::MatrixWorkspace_sptr        const &inpWkSpace,
                                                const int                               chan,
                                                double                      Radius,
-                                               Kernel::V3D                 CentPos
+                                               Kernel::V3D                 CentPos,
+                                               string                     &spec_idList
                                                )
     {
       UNUSED_ARG(g_log);
@@ -1104,7 +1113,7 @@ namespace Mantid
       boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
 
       std::vector<double> StatBase;
-
+      spec_idList.clear();
 
       for (int i = 0; i < NAttributes + 2; i++)
         StatBase.push_back(0);
@@ -1137,6 +1146,10 @@ namespace Mantid
 
      //   }else
      // std::cout<<"-------- data-------"<<std::endl;
+      int jj=0;
+      Mantid::MantidVecPtr pX;
+
+      Mantid::MantidVec& xRef = pX.access();
       for (int i = 2; i < NeighborIDs[1]; i++)
       {
         int DetID = NeighborIDs[i];
@@ -1213,15 +1226,6 @@ namespace Mantid
 
         }
         }
-<<<<<<< Updated upstream
-      Mantid::MantidVecPtr pX;
-
-      Mantid::MantidVec& xRef = pX.access();
-      for (int j = 0; j < N+1; j++)
-      {
-        xRef.push_back((double)j);
-      }
-
 
       Data->setX(0, pX);
       Data->setX(1, pX);
@@ -1419,7 +1423,8 @@ namespace Mantid
                                                   std::vector<double >                 const &errs,
                                                   std::vector<std::string>             const &names,
                                                   const double                               Chisq,
-                                                  const double time)
+                                                  const double time,
+                                                  string                                  spec_idList)
     {
       int Ibk = find("Background", names);
       int IIntensity = find("Intensity", names);
@@ -1477,7 +1482,7 @@ namespace Mantid
       TabWS->getRef<double> (std::string("End Col"), TableRow) = AttributeValues[IStartCol]
           + AttributeValues[INCol] - 1;
       TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = sqrt(AttributeValues[IVariance]);
-
+      TabWS->getRef<string>( std::string("SpecIDs"), TableRow ) = spec_idList;
     }
 
     

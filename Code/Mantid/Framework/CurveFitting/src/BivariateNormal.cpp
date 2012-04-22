@@ -52,10 +52,11 @@ BivariateNormal::BivariateNormal() : API::IFunction1D(), expVals(NULL)
 
 {
   LastParams[IVXX] = -1;
- // g_log.setLevel(7);
-
+//  g_log.setLevel(7);
+   CalcVxx= CalcVyy= CalcVxy= false;
   //BackConstraint = IntensityConstraint= MeanxConstraint = MeanyConstraint = NULL;
   expVals = NULL;
+  CalcVxx = CalcVxy = CalcVyy = false;
 }
 
 BivariateNormal::~BivariateNormal()
@@ -194,7 +195,6 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
 
       double C = -LastParams[IVYY] / 2 / uu;
 
-
       double SIVXX =  coefExp * expVals[x] * (C +
                 -LastParams[IVYY]/uu*  (coefx2 * (c - LastParams[IXMEAN])* (c- LastParams[IXMEAN]) +
               coefxy * (r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN]) + coefy2
@@ -225,6 +225,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
               coefxy * (r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN]) + coefy2
              * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN]))
         +(r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN])/uu)   ;
+
 
       if( !CalcVxx)
          out->set(x, IVXX, SIVXX);
@@ -379,9 +380,6 @@ void BivariateNormal::initCommon()
 
         }
 
-        double mIx, mx, mIy, my;
-
-        double SIxx, SIyy, SIxy, Sxx, Syy, Sxy;
 
 
         mIx = Attrib[S_xint] / Attrib[S_int];
@@ -422,9 +420,7 @@ void BivariateNormal::initCommon()
 
 
         if( getConstraint(1) == NULL)
-        { //boost::shared_ptr<BoundaryConstraint> ic(new BoundaryConstraint(this, "Intensity", 0, maxIntensity));
-          //IntensityConstraint =ic;// new BoundaryConstraint(this, "Intensity", 0, maxIntensity);
-
+        {
           addConstraint(new BoundaryConstraint(this, "Intensity", 0, maxIntensity));
         }
 
@@ -433,8 +429,7 @@ void BivariateNormal::initCommon()
         double maxMeany = MinY * .1 + .9 * MaxY;
 
         if( getConstraint(3) == NULL)
-       {  //boost::shared_ptr<BoundaryConstraint>my(new BoundaryConstraint(this, "Mrow", minMeany, maxMeany));
-          //MeanyConstraint = my;// new BoundaryConstraint(this, "Mrow", minMeany, maxMeany);
+       {
           addConstraint(new BoundaryConstraint(this, "Mrow", minMeany, maxMeany));
 
         }
@@ -442,8 +437,7 @@ void BivariateNormal::initCommon()
         double minMeanx = MinX * .9 + .1 * MaxX;
         double maxMeanx = MinX * .1 + .9 * MaxX;
         if( getConstraint(2)==NULL)
-        {//boost::shared_ptr<BoundaryConstraint>mx(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
-         // MeanxConstraint =mx;// new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx);
+        {
           addConstraint(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
         }
 
@@ -475,6 +469,7 @@ void BivariateNormal::initCommon()
           if (getTie(IVYY) == NULL)
           {
             tie("SSrow", ssyy.str());
+            CalcVxx=true;
 
           }
 
@@ -486,7 +481,7 @@ void BivariateNormal::initCommon()
           if (getTie(IVXX) == NULL)
           {
             tie("SScol", ssxx.str());
-
+            CalcVyy=true;
           }
 
           ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
@@ -497,7 +492,7 @@ void BivariateNormal::initCommon()
           if (getTie(IVXY) == NULL)
           {
             tie("SSrc", ssxy.str());
-
+            CalcVxy = true;
           }
         }
         CommonsOK = true;
@@ -518,25 +513,22 @@ void BivariateNormal::initCommon()
   if (!ParamsOK)
   {
 
-
-    for (size_t i = 0; i < nParams(); i++)
-      LastParams[i] = getParameter(i);
-
-
+        for (size_t i = 0; i < nParams(); i++)
+          LastParams[i] = getParameter(i);
 
         double Varxx = LastParams[IVXX];
 
         if (CalcVxx)
         {
-          Varxx = (SIxx + (getParameter("Mcol") - mIx) * (getParameter("Mcol") - mIx) *
-                TotI - getParameter("Background") * Sxx - getParameter("Background") * (getParameter("Mcol")
+          Varxx = (SIxx + (getParameter("Mcol") - mIx) * (getParameter("Mcol") - mIx) * TotI
+              - getParameter("Background") * Sxx - getParameter("Background") * (getParameter("Mcol")
               - (mx)) * (getParameter("Mcol") - (mx)) * TotN) / (TotI - getParameter("Background")
               * TotN);
-         LastParams[IVXX] =Varxx;
+          LastParams[IVXX] = Varxx;
+
         }
 
-        double Varyy = LastParams[IVYY];
-
+       double Varyy = LastParams[IVYY];
 
         if (CalcVyy)
         {
@@ -544,10 +536,9 @@ void BivariateNormal::initCommon()
               - getParameter("Background") * (Syy) - getParameter("Background") * (getParameter("Mrow")
               - (my)) * (getParameter("Mrow") - (my)) * TotN) / (TotI - getParameter("Background")
               * TotN);
-          LastParams[IVYY] =Varyy;
+          LastParams[IVYY] = Varyy;
         }
         double Varxy = LastParams[IVXY];
-
 
         if (CalcVxy)
         {
@@ -556,10 +547,10 @@ void BivariateNormal::initCommon()
               - (mx)) * (getParameter("Mrow") - (my)) * TotN) / (TotI - getParameter("Background")
               * TotN);
 
-          LastParams[IVXY] =Varxy;
+          LastParams[IVXY] = Varxy;
         }
 
-      }
+  }
 
 
   if (!CommonsOK || !ParamsOK)

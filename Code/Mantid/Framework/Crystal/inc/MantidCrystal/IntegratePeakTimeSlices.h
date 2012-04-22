@@ -126,7 +126,8 @@ private:
                   Kernel::V3D                     &CentNghbr,
 
                   double                        &neighborRadius,//from CentDet
-                  double                         Radius);
+                  double                         Radius,
+                  std::string                    &spec_idList);
 
 
 
@@ -148,12 +149,12 @@ private:
   void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
 
 
-  void SetUpData1( API::MatrixWorkspace_sptr                                    &Data,
-                   API::MatrixWorkspace_sptr                              const &inpWkSpace,
-                   const int                                              chan,
-
-                   double                     Radius,
-                   Kernel::V3D               CentPos  ///< Center on Plane
+  void SetUpData1( API::MatrixWorkspace_sptr      &Data,
+                   API::MatrixWorkspace_sptr     const &inpWkSpace,
+                   const int                     chan,
+                   double                         Radius,
+                   Kernel::V3D                    CentPos , ///< Center on Plane,
+                   std::string                    &spec_idList
 
                    ) ;
 
@@ -173,7 +174,8 @@ private:
                        std::vector<double >                 const &errs,
                        std::vector<std::string>             const &names,
                        const double                               chisq,
-                       const double                              time) ;
+                       const double                              time,
+                       std::string                         spec_idList) ;
 
 
   void updatePeakInformation( std::vector<double >     const &params,
