@@ -278,6 +278,13 @@ void SliceViewer::initMenus()
   connect(m_syncRebinLock, SIGNAL(toggled(bool)), this, SLOT(RebinLock_toggled(bool)));
   m_menuView->addAction(action);
 
+  action = new QAction(QPixmap(), "Refresh Rebin", this);
+  action->setShortcut(Qt::Key_R + Qt::ControlModifier);
+  action->setEnabled(false);
+  connect(action, SIGNAL(triggered()), this, SLOT(rebinParamsChanged()));
+  m_menuView->addAction(action);
+  m_actionRefreshRebin = action;
+
   m_menuView->addSeparator();
 
   QActionGroup* group = new QActionGroup( this );
@@ -861,6 +868,7 @@ void SliceViewer::RebinMode_toggled(bool checked)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
   ui.btnRebinLock->setEnabled(checked);
+  m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
 
   if (!m_rebinMode)

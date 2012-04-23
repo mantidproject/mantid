@@ -245,6 +245,7 @@ private:
   QAction *m_actionNormalizeNone;
   QAction *m_actionNormalizeVolume;
   QAction *m_actionNormalizeNumEvents;
+  QAction *m_actionRefreshRebin;
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
