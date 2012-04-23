@@ -331,6 +331,15 @@ public:
     }
   }
 
+  void testThreadSafety()
+  {
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i < 5000; i++)
+    {
+      AlgorithmManager::Instance().create("AlgTest");
+    }
+  }
+
 
 int m_notificationValue;
 };

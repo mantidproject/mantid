@@ -112,6 +112,8 @@ private:
   int m_max_no_algs; 
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
+  /// Mutex for modifying/accessing the m_managed_algs member.
+  mutable Kernel::Mutex m_managedMutex;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.
