@@ -457,7 +457,7 @@ class DataReflWidget(BaseWidget):
             @param is_running: True if a reduction is running
         """
         super(DataReflWidget, self).is_running(is_running)
-        self.setEnabled(not is_running)
+        #self.setEnabled(not is_running)
         self._summary.plot_count_vs_y_btn.setEnabled(not is_running)
         self._summary.plot_count_vs_y_bck_btn.setEnabled(not is_running)
         self._summary.plot_count_vs_x_btn.setEnabled(not is_running)

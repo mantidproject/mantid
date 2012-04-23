@@ -31,12 +31,11 @@ class REFLReductionScripter(BaseReductionScripter):
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
         script += "import os\n"
+        script += "import time\n"
         script += "from MantidFramework import *\n"
         script += "mtd.initialise(False)\n"
         script += "from mantidsimple import *\n\n"
-                
-        script += "REF_RED_OUTPUT_MESSAGE = ''\n\n"
-        
+                        
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
@@ -47,35 +46,4 @@ class REFLReductionScripter(BaseReductionScripter):
             f.close()
         
         return script
-   
-    def apply(self):
-        """
-            Apply the reduction process
-        """
-        if HAS_MANTID:
-            script = self.to_script(None)
-            try:
-                t0 = time.time()
-                exec script
-                delta_t = time.time()-t0
-                print REF_RED_OUTPUT_MESSAGE
-                print "Reduction time: %5.2g sec" % delta_t
-                # Update scripter
-                for item in self._observers:
-                    if item.state() is not None:
-                        item.state().update()
-            except:
-                # Update scripter [Duplicated code because we can't use 'finally' on python 2.4]
-                for item in self._observers:
-                    if item.state() is not None:
-                        # Things might be broken, so update what we can
-                        try:
-                            item.state().update()
-                        except:
-                            pass
-                raise RuntimeError, sys.exc_value
-        else:
-            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
-        
-
     
