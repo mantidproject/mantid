@@ -5,6 +5,8 @@
 #include <iostream>
 #include <math.h>
 
+#include <QThread>
+
 #include "MantidQtImageViewer/EventWSDataSource.h"
 #include "MantidQtImageViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"
@@ -27,6 +29,8 @@ namespace ImageView
 EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
+  std::cout<< "EventWSDataSource constructor on Thread " <<
+               QThread::currentThreadId() << std::endl;
   this->ev_ws = ev_ws;
   total_xmin = ev_ws->getTofMin(); 
   total_xmax = ev_ws->getTofMax(); 
@@ -91,6 +95,8 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
                                             size_t n_rows, size_t  n_cols,
                                             bool   is_log_x )
 {
+  std::cout<< "EventWSDataSource GetDataArray on Thread " <<
+               QThread::currentThreadId() << std::endl;
 /*
   std::cout << "Start EventWSDataSource::GetDataArray " << std::endl;
   std::cout << "  xmin   = " << xmin 
@@ -176,6 +182,8 @@ void EventWSDataSource::GetInfoList( double x,
                                      double y,
                                      std::vector<std::string> &list )
 {
+  std::cout<< "EventWSDataSource::GetInfoList on Thread " <<
+               QThread::currentThreadId() << std::endl;
   list.clear();
 
   list.push_back("Test X:");

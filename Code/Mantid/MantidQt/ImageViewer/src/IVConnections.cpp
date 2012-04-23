@@ -31,6 +31,8 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
                               GraphDisplay*  h_graph_display,
                               GraphDisplay*  v_graph_display )
 {
+  std::cout<< "IVConnections constructor on Thread " <<
+              QThread::currentThreadId() << std::endl;
   iv_ui = ui;
   this->image_display   = image_display;
   this->h_graph_display = h_graph_display;
@@ -223,6 +225,9 @@ void IVConnections::somethingChanged()
 
 void IVConnections::toggle_Hscroll()
 {
+  std::cout<< "IVConnections toggle_Hscroll on Thread " <<
+              QThread::currentThreadId() << std::endl;
+
   bool is_on = iv_ui->action_Hscroll->isChecked();
   iv_ui->imageHorizontalScrollBar->setVisible( is_on );
   iv_ui->imageHorizontalScrollBar->setEnabled( is_on );
@@ -241,6 +246,9 @@ void IVConnections::toggle_Vscroll()
 
 void IVConnections::v_scroll_bar_moved()
 {
+  std::cout<< "IVConnections v_scroll_bar_moved on Thread " <<
+              QThread::currentThreadId() << std::endl;
+
   image_display->UpdateImage();
 }
 
@@ -253,6 +261,9 @@ void IVConnections::h_scroll_bar_moved()
 
 void IVConnections::imageSplitter_moved()
 {
+  std::cout<< "IVConnections imageSplitter_moved on Thread " <<
+              QThread::currentThreadId() << std::endl;
+
   QList<int> sizes = iv_ui->imageSplitter->sizes();
   QList<int> vgraph_sizes;
   vgraph_sizes.append( sizes[0] );

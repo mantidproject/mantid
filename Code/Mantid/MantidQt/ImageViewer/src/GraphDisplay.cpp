@@ -1,3 +1,5 @@
+
+#include <iostream>
 #include <QtGui>
 #include <QVector>
 #include <QString>
@@ -25,6 +27,8 @@ GraphDisplay::GraphDisplay( QwtPlot*      graph_plot,
                             QTableWidget* graph_table,
                             bool          is_vertical )
 {
+  std::cout<< "GraphDisplay constructor on Thread " <<
+              QThread::currentThreadId() << std::endl;
   this->graph_plot  = graph_plot;
   this->graph_table = graph_table;
   this->data_source = 0;
@@ -57,6 +61,8 @@ GraphDisplay::~GraphDisplay()
  */
 void GraphDisplay::SetDataSource( ImageDataSource* data_source )
 {
+  std::cout<< "GraphDisplay SetDataSource on Thread " <<
+               QThread::currentThreadId() << std::endl;
   this->data_source = data_source;
 }
 
@@ -80,6 +86,8 @@ void GraphDisplay::SetData(const QVector<double> & xData,
                                  double            image_x,
                                  double            image_y )
 {
+  std::cout<< "GraphDisplay SetData on Thread " <<
+              QThread::currentThreadId() << std::endl;
   if ( xData.size() == 0 ||          // ignore invalid data vectors
        yData.size() == 0 ||
        xData.size() != yData.size()    )
@@ -131,6 +139,8 @@ void GraphDisplay::SetData(const QVector<double> & xData,
  */
 void GraphDisplay::SetPointedAtPoint( QPoint point )
 {
+  std::cout<< "GraphDisplay SetPointedAtPoint on Thread " <<
+               QThread::currentThreadId() << std::endl;
   double x = graph_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = graph_plot->invTransform( QwtPlot::yLeft, point.y() );
   ShowInfoList( x, y );
@@ -149,6 +159,8 @@ void GraphDisplay::SetPointedAtPoint( QPoint point )
  */
 void GraphDisplay::ShowInfoList( double x, double y )
 {
+  std::cout<< "GraphDisplay ShowInfoList on Thread " <<
+               QThread::currentThreadId() << std::endl;
   int n_infos = 0;
   int n_rows  = 2;
   std::vector<std::string> info_list;

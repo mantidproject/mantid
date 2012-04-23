@@ -1,6 +1,6 @@
 
 #include <iostream>
-
+#include <QThread>
 #include "MantidQtImageViewer/ImagePlotItem.h"
 
 namespace MantidQt
@@ -32,6 +32,8 @@ ImagePlotItem::ImagePlotItem()
 void ImagePlotItem::SetData( DataArray*         data_array, 
                              std::vector<QRgb>* color_table )
 {
+  std::cout<< "PlotItem SetData on Thread " <<
+              QThread::currentThreadId() << std::endl;
   this->data_array  = data_array;
   this->color_table = color_table;
 }
@@ -71,6 +73,8 @@ void ImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & yMap,
                           const QRect       &       ) const
 {
+  std::cout<< "PlotItem draw on Thread " <<
+              QThread::currentThreadId() << std::endl;
 //std::cout << "ImagePlotItem::draw called =====================" << std::endl;
 
   if ( data_array && color_table )     // if data not yet set, just return
