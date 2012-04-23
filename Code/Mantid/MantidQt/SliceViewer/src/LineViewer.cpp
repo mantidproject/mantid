@@ -256,6 +256,10 @@ void LineViewer::readTextboxes()
 
 //-----------------------------------------------------------------------------------------------
 /** Perform the 1D integration using the current parameters.
+ * Note that the algorithm is executed asynchronously (in the background),
+ * so this method may return before the integrated line
+ * workspace is ready.
+ *
  * @throw std::runtime_error if an error occurs.
  * */
 void LineViewer::apply()
