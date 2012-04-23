@@ -513,6 +513,7 @@ namespace MDEvents
     // To track when to split up boxes
     this->failedDetectorLookupCount = 0;
     size_t eventsAdded = 0;
+    size_t approxEventsInOutput = 0;
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
     if (DODEBUG) g_log.information() << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 
@@ -539,7 +540,17 @@ namespace MDEvents
 
       // Keep a running total of how many events we've added
       eventsAdded += eventsAdding;
-      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes) || (eventsAdded > 1000000))
+      approxEventsInOutput += eventsAdding;
+
+      // Performance depends pretty strongly on WHEN you split the boxes.
+      // This is an empirically-determined way to optimize the splitting calls.
+      // Split when adding 1/16^th as many events as are already in the output,
+      //  (because when the workspace gets very large you should split less often)
+      // But no more often than every 10 million events.
+      size_t comparisonPoint = approxEventsInOutput/16;
+      if (comparisonPoint < 10000000)
+        comparisonPoint = 10000000;
+      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes) || (eventsAdded > (comparisonPoint)))
       {
         if (DODEBUG) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks
