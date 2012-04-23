@@ -92,6 +92,11 @@ namespace DataObjects
     return this->fracArea[index];
   }
 
+  void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F)
+  {
+    this->fracArea[index] = *F;
+  }
+
   /**
    * This function takes the data/error arrays and divides them by the
    * corresponding fractional area array. This creates a representation that
@@ -116,6 +121,9 @@ namespace DataObjects
                      std::multiplies<double>());
       std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
                      std::divides<double>());
+
+      std::copy(frac.begin(), frac.end(), std::ostream_iterator<double>(g_log.information(), " "));
+      g_log.information() << std::endl;
     }
   }
 
