@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid import mtd, WorkspaceGroup, MatrixWorkspace
+from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace
 
 class WorkspaceGroupTest(unittest.TestCase):
   

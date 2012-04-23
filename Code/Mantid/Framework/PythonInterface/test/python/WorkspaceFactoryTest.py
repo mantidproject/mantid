@@ -1,5 +1,5 @@
 import unittest
-from mantid import (WorkspaceFactory, WorkspaceFactoryImpl, MatrixWorkspace,
+from mantid.api import (WorkspaceFactory, WorkspaceFactoryImpl, MatrixWorkspace,
                     ITableWorkspace, IPeaksWorkspace)
 
 class WorkspaceFactoryTest(unittest.TestCase):

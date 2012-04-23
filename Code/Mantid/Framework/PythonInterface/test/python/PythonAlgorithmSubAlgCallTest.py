@@ -21,7 +21,7 @@ class PythonAlgorithmSubAlgCallTest(unittest.TestCase):
     
     def setUp(self):
         __PARENTALG__ = \
-        """from mantid import PythonAlgorithm, registerAlgorithm
+        """from mantid.api import PythonAlgorithm, registerAlgorithm
         
         class ParentAlgorithm(PythonAlgorithm):
         
@@ -35,7 +35,7 @@ class PythonAlgorithmSubAlgCallTest(unittest.TestCase):
         """
         
         __CHILDALG__ = \
-        """from mantid import PythonAlgorithm, registerAlgorithm
+        """from mantid.api import PythonAlgorithm, registerAlgorithm
         
         class ChildAlgorithm(PythonAlgorithm):
         

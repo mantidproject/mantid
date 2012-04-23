@@ -1,6 +1,7 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid import mtd, IPeaksWorkspace, V3D
+from mantid.kernel import V3D
+from mantid.api import mtd, IPeaksWorkspace
 
 class IPeaksWorkspaceTest(unittest.TestCase):
     """

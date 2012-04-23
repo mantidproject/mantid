@@ -4,8 +4,9 @@ such as name, version etc.
 
 import unittest
 import testhelpers
-from mantid import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
-                    AlgorithmManager, registerAlgorithm, Direction)
+from mantid.kernel import Direction
+from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
+                        AlgorithmManager, registerAlgorithm)
 
 ########################### Test classes #####################################
 

@@ -1,6 +1,6 @@
 import unittest
 
-from mantid import Logger
+from mantid.kernel import Logger
 
 class LoggerTest(unittest.TestCase):
   
