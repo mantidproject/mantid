@@ -4,6 +4,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/Run.h"
@@ -116,7 +117,9 @@ namespace WorkspaceCreationHelper
   
   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS, std::string wsname, Mantid::API::Algorithm* alg);
 
+  /// Function to create a fixed RebinnedOutput workspace
+  Mantid::DataObjects::RebinnedOutput_sptr CreateRebinnedOutputWorkspace();
 
-};
+}
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

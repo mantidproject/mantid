@@ -14,6 +14,7 @@
 #include "MantidAPI/Run.h"
 
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -888,5 +889,133 @@ namespace WorkspaceCreationHelper
       return outputWS;
    }
 
+   RebinnedOutput_sptr CreateRebinnedOutput()
+   {
+     RebinnedOutput_sptr outputWS = Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
+     outputWS->setName("rebinOut");
+
+     // Set Q ('y') axis binning
+     MantidVec qbins;
+     qbins.push_back(0.0);
+     qbins.push_back(1.0);
+     qbins.push_back(4.0);
+     MantidVec qaxis;
+     const int numY = static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
+
+     // Initialize the workspace
+     const int numHist = numY - 1;
+     const int numX = 7;
+     outputWS->initialize(numHist, numX, numX - 1);
+
+     // Set the normal units
+     outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+     outputWS->setYUnit("Counts");
+     outputWS->setTitle("Empty_Title");
+
+     // Create the x-axis for histogramming.
+     MantidVecPtr x1;
+     MantidVec& xRef = x1.access();
+     double x0 = -3;
+     xRef.resize(numX);
+     for (int i = 0; i < numX; ++i)
+     {
+       xRef[i] = x0 + i;
+     }
+
+     // Create a numeric axis to replace the default vertical one
+     Axis* const verticalAxis = new NumericAxis(numY);
+     outputWS->replaceAxis(1, verticalAxis);
+
+     // Now set the axis values
+     for (int i = 0; i < numHist; ++i)
+     {
+       outputWS->setX(i, x1);
+       verticalAxis->setValue(i, qaxis[i]);
+     }
+     // One more to set on the 'y' axis
+     verticalAxis->setValue(numHist, qaxis[numHist]);
+
+     // Set the 'y' axis units
+     verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
+     verticalAxis->title() = "|Q|";
+
+     // Set the X axis title (for conversion to MD)
+     outputWS->getAxis(0)->title() = "Energy transfer";
+
+     // Now, setup the data
+     // Q bin #1
+     outputWS->dataY(0)[1] = 2.0;
+     outputWS->dataY(0)[2] = 3.0;
+     outputWS->dataY(0)[3] = 3.0;
+     outputWS->dataY(0)[4] = 2.0;
+     outputWS->dataE(0)[1] = 2.0;
+     outputWS->dataE(0)[2] = 3.0;
+     outputWS->dataE(0)[3] = 3.0;
+     outputWS->dataE(0)[4] = 2.0;
+     outputWS->dataF(0)[1] = 2.0;
+     outputWS->dataF(0)[2] = 3.0;
+     outputWS->dataF(0)[3] = 3.0;
+     outputWS->dataF(0)[4] = 1.0;
+     // Q bin #2
+     outputWS->dataY(0)[1] = 1.0;
+     outputWS->dataY(0)[2] = 3.0;
+     outputWS->dataY(0)[3] = 3.0;
+     outputWS->dataY(0)[4] = 2.0;
+     outputWS->dataY(0)[5] = 2.0;
+     outputWS->dataE(0)[1] = 1.0;
+     outputWS->dataE(0)[2] = 3.0;
+     outputWS->dataE(0)[3] = 3.0;
+     outputWS->dataE(0)[4] = 2.0;
+     outputWS->dataE(0)[5] = 2.0;
+     outputWS->dataF(0)[1] = 1.0;
+     outputWS->dataF(0)[2] = 3.0;
+     outputWS->dataF(0)[3] = 3.0;
+     outputWS->dataF(0)[4] = 1.0;
+     outputWS->dataF(0)[5] = 2.0;
+     // Q bin #3
+     outputWS->dataY(0)[1] = 1.0;
+     outputWS->dataY(0)[2] = 2.0;
+     outputWS->dataY(0)[3] = 3.0;
+     outputWS->dataY(0)[4] = 1.0;
+     outputWS->dataE(0)[1] = 1.0;
+     outputWS->dataE(0)[2] = 2.0;
+     outputWS->dataE(0)[3] = 3.0;
+     outputWS->dataE(0)[4] = 1.0;
+     outputWS->dataF(0)[1] = 1.0;
+     outputWS->dataF(0)[2] = 2.0;
+     outputWS->dataF(0)[3] = 2.0;
+     outputWS->dataF(0)[4] = 1.0;
+     // Q bin #4
+     outputWS->dataY(0)[0] = 1.0;
+     outputWS->dataY(0)[1] = 2.0;
+     outputWS->dataY(0)[2] = 3.0;
+     outputWS->dataY(0)[3] = 2.0;
+     outputWS->dataY(0)[4] = 1.0;
+     outputWS->dataE(0)[0] = 1.0;
+     outputWS->dataE(0)[1] = 2.0;
+     outputWS->dataE(0)[2] = 3.0;
+     outputWS->dataE(0)[3] = 2.0;
+     outputWS->dataE(0)[4] = 1.0;
+     outputWS->dataF(0)[0] = 1.0;
+     outputWS->dataF(0)[1] = 2.0;
+     outputWS->dataF(0)[2] = 3.0;
+     outputWS->dataF(0)[3] = 2.0;
+     outputWS->dataF(0)[4] = 1.0;
+     outputWS->dataF(0)[5] = 1.0;
+
+     // Set representation
+     outputWS->finalize();
+
+     // Make errors squared rooted
+     for (int i = 0; i < numHist; ++i)
+     {
+       for (int j = 0; j < numX - 1; ++j)
+       {
+         outputWS->dataE(i)[j] = std::sqrt(outputWS->dataE(i)[j]);
+       }
+     }
+
+     return outputWS;
+   }
 
 }
