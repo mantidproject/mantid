@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
+	src/AlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -26,6 +27,7 @@ set ( SRC_FILES
 
 set ( MOC_FILES
   inc/MantidQtAPI/AlgorithmDialog.h 
+  inc/MantidQtAPI/AlgorithmRunner.h 
   inc/MantidQtAPI/AlgorithmPropertiesWidget.h
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
@@ -47,8 +49,9 @@ set ( MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-    ${MOC_FILES}
+	${MOC_FILES}
 	inc/MantidQtAPI/AlgorithmInputHistory.h
+	inc/MantidQtAPI/AlgorithmRunner.h
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GraphOptions.h
@@ -141,3 +144,7 @@ endif () # (not for windows)
 ###########################################################################
 
 install ( TARGETS MantidQtAPI DESTINATION ${LIB_DIR} )
+
+set ( TEST_FILES
+	test/AlgorithmRunnerTest.h
+)
