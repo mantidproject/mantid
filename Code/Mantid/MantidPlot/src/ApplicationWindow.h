@@ -225,9 +225,9 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
-  bool runPythonScript(const QString & code, const bool async = false, bool quiet=false, bool redirect=true);
-
-
+  /// Runs an arbitrary lump of python code, return true/false on success/failure.
+  bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
+  
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;
   void updateWindowLists(MdiSubWindow *w);

@@ -16466,8 +16466,12 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
 
 /**
 * Run Python code
+* @param code :: An arbitrary string of python code
+* @param async :: If true the code will be run asynchronously but only if it is called from the GUI thread
+* @param quiet :: If true then no output is produced concerning script start/finished
+* @param redirect :: If true redirect stdout/stderr to script console
 */
-bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
+bool ApplicationWindow::runPythonScript(const QString & code, bool async,
     bool quiet, bool redirect)
 {
   if( code.isEmpty() ) return false;
@@ -16482,7 +16486,6 @@ bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
     {
       return false;
     }
-
   }
   if( !quiet )
   {
@@ -16494,9 +16497,14 @@ bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
     m_iface_script->redirectStdOut(true);
     connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
     connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
-            SLOT(scriptPrint(const QString &)));
+      SLOT(scriptPrint(const QString &)));
+
   }
   bool success(false);
+  if(QApplication::instance()->thread() != QThread::currentThread())
+  {
+    async = false;
+  }
   if(async)
   {
     QFuture<bool> job = m_iface_script->executeAsync(code);
@@ -16504,6 +16512,8 @@ bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
     {
       QCoreApplication::instance()->processEvents();
     }
+    // Ensure the remaining events are processed
+    QCoreApplication::instance()->processEvents();
     success = job.result();
   }
   else
@@ -16513,6 +16523,9 @@ bool ApplicationWindow::runPythonScript(const QString & code, const bool async,
   if (redirect)
   {
     m_iface_script->redirectStdOut(false);
+    disconnect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
+    disconnect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
+      SLOT(scriptPrint(const QString &)));
   }
   if(success && !quiet)
   {
