@@ -51,8 +51,7 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
  * @returns NewMDWorkspaceD -- modified md workspace description, which is compartible with existing MD workspace
  *
 */
-void  
-MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
+void  MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
 {
     if(this->nDims != NewMDWorkspaceD.nDims)
     {
@@ -60,8 +59,29 @@ MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD)
                            boost::lexical_cast<std::string>(NewMDWorkspaceD.nDims);
          throw(std::invalid_argument(ERR)); 
     }
-    //TODO: More thoroogh checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace and Q3d+dE ws
+    if(this->emode<-1)
+    {
+        throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
+    }
+    if(this->emode>0)
+    {
+         volatile double Ei = this->Ei;
+        if(this->Ei!=Ei){
+           std::string ERR = "Workspace description has not been correctly defined, as emode "+boost::lexical_cast<std::string>(this->emode)+" request input energy to be defined";
+           throw(std::invalid_argument(ERR)); 
+        }
+    }
+    //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws
 }
+/** When the workspace has been build from existing MDWrokspace, some target worskpace parameters can not be defined. 
+   examples are emode or input energy, which is actually source workspace parameters
+*/
+void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &SourceMDWSDescr)
+{
+    this->emode = SourceMDWSDescr.emode;
+    this->Ei    = SourceMDWSDescr.Ei;
+}
+
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
  * values vere defined and min values are smaller then mav values */
@@ -129,7 +149,7 @@ std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
 /// empty constructor
 MDWSDescription::MDWSDescription(size_t nDimesnions):
 nDims(nDimesnions),
-emode(-1),
+emode(-2),
 Ei(std::numeric_limits<double>::quiet_NaN()),
 dimMin(nDimesnions,-1),
 dimMax(nDimesnions,1),
