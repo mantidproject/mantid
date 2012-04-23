@@ -37,14 +37,14 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
     # We need to call the debug executable for the debug builds
     add_test (NAME ${_pyunit_testname}_py_Debug CONFIGURATIONS Debug
               COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-              ${PYTHON_EXECUTABLE_DEBUG} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
+              ${PYTHON_EXECUTABLE_DEBUG} -B $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
     add_test (NAME ${_pyunit_testname}_py CONFIGURATIONS Release
               COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-              ${PYTHON_EXECUTABLE} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
+              ${PYTHON_EXECUTABLE} -B $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
   else()
     add_test (NAME ${_pyunit_testname}_py
               COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-              ${PYTHON_EXECUTABLE} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
+              ${PYTHON_EXECUTABLE} -B $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
   endif()
 
   # add all of the individual tests - this introduces a race condition
