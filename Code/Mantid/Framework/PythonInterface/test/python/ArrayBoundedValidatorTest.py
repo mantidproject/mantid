@@ -1,7 +1,8 @@
 import unittest
 import testhelpers
 
-from mantid import FloatArrayBoundedValidator, PythonAlgorithm, FloatArrayProperty
+from mantid.kernel import FloatArrayBoundedValidator, FloatArrayProperty
+from mantid.api import PythonAlgorithm
 
 class ArrayBoundedValidatorTest(unittest.TestCase):
 

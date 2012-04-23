@@ -172,12 +172,15 @@ public:
   {
     // Cost is approximately proportional to the number of events to process.
     m_cost = static_cast<double>(numEvents);
+//    std::cout << "b " << this->cost() << "\n";
   }
 
   //----------------------------------------------------
   // Run the data processing
   void run()
   {
+//    std::cout << "ProcessBank.run(" << entry_name << ")\n"; // REMOVE
+  CPUTimer timer;
     //Local tof limits
     double my_shortest_tof, my_longest_tof;
     my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -338,6 +341,7 @@ public:
       if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
       alg->bad_tofs += badTofs;
     }
+//    std::cout << "ProcessBank.run(" << entry_name << ") ended - " << timer << "\n"; // REMOVE
 
     // Free Memory
     delete [] event_id;
@@ -394,19 +398,23 @@ public:
    * @param alg :: Handle to the main algorithm
    * @param entry_name :: The pathname of the bank to load
    * @param entry_type :: The classtype of the entry to load
+   * @param numEvents :: The number of events in the bank.
    * @param prog :: an optional Progress object
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
    */
   LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
-      Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
+                       const std::size_t numEvents, const bool oldNeXusFileNames,
+                       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
     prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
-    m_oldNexusFileNames(false), m_loadStart(), m_loadSize(), m_event_id(NULL), m_event_time_of_flight(NULL)
+    m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL), m_event_time_of_flight(NULL)
   {
     setMutex(ioMutex);
+    m_cost = static_cast<double>(numEvents);
+//    std::cout << "a " << this->cost() << "\n";
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -493,20 +501,11 @@ public:
    */
   void prepareEventId(::NeXus::File & file, size_t & start_event, size_t & stop_event, std::vector<uint64_t> & event_index)
   {
-
-    m_oldNexusFileNames = false;
-
     // Get the list of pixel ID's
-    try
-    {
-      file.openData("event_id");
-    }
-    catch (::NeXus::Exception& )
-    {
-      //Older files (before Nov 5, 2010) used this field.
+    if (m_oldNexusFileNames)
       file.openData("event_pixel_id");
-      m_oldNexusFileNames = true;
-    }
+    else
+      file.openData("event_id");
 
     // By default, use all available indices
     start_event = 0;
@@ -645,7 +644,8 @@ public:
   //---------------------------------------------------------------------------------------------------
   void run()
   {
-
+//    std::cout << "LoadBankFromDiskTask.run(" << entry_name << ")\n"; // REMOVE
+    CPUTimer timer;
     //The vectors we will be filling
     std::vector<uint64_t> * event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> & event_index = *event_index_ptr;
@@ -736,6 +736,8 @@ public:
       delete event_index_ptr;
       return;
     }
+//    std::cout << "LoadBankFromDiskTask.run(" << entry_name << ") ended - " << timer << "\n"; // REMOVE
+
 
     // No error? Launch a new task to process that data.
     size_t numEvents = m_loadSize[0];
@@ -1055,7 +1057,7 @@ void LoadEventNexus::exec()
   compressTolerance = getProperty("CompressTolerance");
 
   loadlogs = true;
-
+//  NXsetcache(1024000000);//5120000); // increase hdf5 cache size - default is 1,024,000
 //  //Get the limits to the filter
 //  filter_tof_min = getProperty("FilterByTofMin");
 //  filter_tof_max = getProperty("FilterByTofMax");
@@ -1207,9 +1209,12 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   //Now we want to go through all the bankN_event entries
   vector<string> bankNames;
+  vector<std::size_t> bankNumEvents;
   map<string, string> entries = file.getEntries();
   map<string,string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
+  ::NeXus::Info info;
+  bool oldNeXusFileNames(false);
   for (; it != entries.end(); ++it)
   {
     std::string entry_name(it->first);
@@ -1217,6 +1222,23 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     if ( entry_class == classType )
     {
       bankNames.push_back( entry_name );
+      file.openGroup(entry_name, classType);
+      try
+      {
+        if (oldNeXusFileNames)
+          file.openData("event_pixel_id");
+        else
+          file.openData("event_id");
+      }
+      catch (::NeXus::Exception& )
+      {
+        //Older files (before Nov 5, 2010) used this field.
+        file.openData("event_pixel_id");
+        oldNeXusFileNames = true;
+      }
+      bankNumEvents.push_back(static_cast<std::size_t>(file.getInfo().dims[0]));
+      file.closeData();
+      file.closeGroup();
     }
   }
 
@@ -1273,6 +1295,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     }
     bankNames.clear();
     bankNames.push_back( onebank + "_events" );
+    bankNumEvents.clear();
+    bankNumEvents.push_back(1.);
     if( !SingleBankPixelsOnly ) onebank = ""; // Marker to load all pixels 
   }
   else
@@ -1341,12 +1365,14 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
-  ThreadPool pool(scheduler, 8);
+  ThreadPool pool(scheduler);
   Mutex * diskIOMutex = new Mutex();
   for (size_t i=0; i < bankNames.size(); i++)
   {
     // We make tasks for loading
-    pool.schedule( new LoadBankFromDiskTask(this, bankNames[i], classType, prog2, diskIOMutex, scheduler) );
+    if (bankNumEvents[i] > 0)
+      pool.schedule( new LoadBankFromDiskTask(this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
+                                              prog2, diskIOMutex, scheduler) );
   }
   // Start and end all threads
   pool.joinAll();

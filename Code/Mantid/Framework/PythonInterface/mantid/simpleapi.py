@@ -19,15 +19,16 @@
     and assign it to the rebinned variable
     
 """
-import api as _api
-import kernel as _kernel
+import api
+import kernel
 from kernel import funcreturns as _funcreturns
-from kernel import logger as _logger
 from api import AnalysisDataService as _ads
 from api import FrameworkManager as _framework
 
-# Give a user access to this
+# This is a simple API so give access to the aliases by default as well
 from mantid import apiVersion, __gui__
+from kernel._aliases import *
+from api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 
@@ -99,7 +100,7 @@ def Load(*args, **kwargs):
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
-            _logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
+            logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
@@ -189,7 +190,7 @@ def Fit(*args, **kwargs):
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
-            _logger.warning("You've passed a property (%s) to Fit() that doesn't apply to this file type." % key)
+            logger.warning("You've passed a property (%s) to Fit() that doesn't apply to this file type." % key)
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
@@ -289,7 +290,7 @@ def _is_workspace_property(prop):
         @param prop - A property object
         @returns True if the property is considered to be of type workspace
     """
-    if isinstance(prop, _api.IWorkspaceProperty):
+    if isinstance(prop, api.IWorkspaceProperty):
         return True
     if 'Workspace' in prop.name: return True
     # Doesn't look like a workspace property
@@ -404,7 +405,7 @@ def _set_properties(alg_object, *args, **kwargs):
         value = kwargs[key]
         # Anything stored in the ADS must be set by string value
         # if it is not a child algorithm. 
-        if (not alg_object.isChild()) and isinstance(value, _kernel.DataItem):
+        if (not alg_object.isChild()) and isinstance(value, kernel.DataItem):
             alg_object.setPropertyValue(key, value.name())
         else:
             alg_object.setProperty(key, value)
@@ -634,7 +635,7 @@ def mockout_api():
     cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
     create_fake_function(cppalgs.keys())
     
-    directories = _kernel.config["pythonalgorithms.directories"].split(';')
+    directories = kernel.config["pythonalgorithms.directories"].split(';')
     for top_dir in directories:
         for root, dirs, files in os.walk(top_dir):
             create_fake_function(files)

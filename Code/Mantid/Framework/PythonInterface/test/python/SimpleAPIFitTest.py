@@ -5,7 +5,7 @@ import unittest
 import testhelpers
 import platform
 from mantid.simpleapi import Load, Fit, FitDialog
-from mantid import mtd, MatrixWorkspace, ITableWorkspace
+from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 
 class SimpleAPIFitTest(unittest.TestCase):
     

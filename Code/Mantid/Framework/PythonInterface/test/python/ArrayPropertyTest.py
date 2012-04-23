@@ -1,8 +1,9 @@
 """Test the exposed ArrayProperty
 """
 import unittest
-from mantid import (FloatArrayProperty, StringArrayProperty, Direction, 
-                    NullValidator, PythonAlgorithm)
+from mantid.kernel import (FloatArrayProperty, StringArrayProperty, Direction, 
+                           NullValidator)
+from mantid.api import PythonAlgorithm
 import numpy as np
 
 class ArrayPropertyTest(unittest.TestCase):

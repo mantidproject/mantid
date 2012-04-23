@@ -266,12 +266,14 @@ public:
 
     std::string pathOn3 = FileFinder::Instance().getFullPath("IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn3(pathOn3);
+    // Refs #4916 -- The FileFinder findRun() method is revised to continue search using the facility supplied extensions
+    // if the user supplied filename (containg extension) couldn't be found. Regardless of the platform, this test case
+    // would be successful now.
+    TS_ASSERT(file.exists());
 #ifdef _WIN32
-    TS_ASSERT(file.exists());   
     TS_ASSERT(fileOn2.exists()); 
     TS_ASSERT(fileOn3.exists()); 
 #else
-    TS_ASSERT_THROWS_ANYTHING(fileOn.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
 #endif

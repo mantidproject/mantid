@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import can_be_instantiated
-from mantid import IComponent
+from mantid.geometry import IComponent
 
 class IComponentTest(unittest.TestCase):
     

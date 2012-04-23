@@ -1,5 +1,5 @@
 import unittest
-from mantid import ReferenceFrame
+from mantid.geometry import ReferenceFrame
 
 class ReferenceFrameTest(object):
     def test_ReferenceFrame_cannot_be_instantiated(self):
@@ -9,5 +9,6 @@ class ReferenceFrameTest(object):
         expected_attrs = ["pointingAlongBeam", "pointingUp"]
         for att in expected_attrs:
             self.assertTrue(att in attrs)
+            
 if __name__ == '__main__':
     unittest.main()

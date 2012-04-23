@@ -457,7 +457,7 @@ class DataReflWidget(BaseWidget):
             @param is_running: True if a reduction is running
         """
         super(DataReflWidget, self).is_running(is_running)
-        self.setEnabled(not is_running)
+        #self.setEnabled(not is_running)
         self._summary.plot_count_vs_y_btn.setEnabled(not is_running)
         self._summary.plot_count_vs_y_bck_btn.setEnabled(not is_running)
         self._summary.plot_count_vs_x_btn.setEnabled(not is_running)
@@ -751,7 +751,11 @@ class DataReflWidget(BaseWidget):
                 self._summary.angle_offset_edit.setText(str(state.data_sets[0].angle_offset))
                 self._summary.angle_offset_error_edit.setText(str(state.data_sets[0].angle_offset_error))
 
-        self._update_scattering_angle()
+        try:                   
+            self._update_scattering_angle()
+        except:
+            print "Unable to determine scattering angle from data set"
+            
         self._reset_warnings()
         
     def set_editing_state(self, state):
@@ -833,16 +837,19 @@ class DataReflWidget(BaseWidget):
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-                                                
-        self._read_logs()
-        self._update_scattering_angle()
+                             
+        try:                   
+            self._read_logs()
+            self._update_scattering_angle()
+        except:
+            print "Unable to determine scattering angle from data set"
 
     def get_state(self):
         """
             Returns an object with the state of the interface
         """
         m = self.get_editing_state()
-        state = DataSeries()
+        state = DataSeries(data_class=REFMDataSets)
         state_list = []
         
         # Common Q binning

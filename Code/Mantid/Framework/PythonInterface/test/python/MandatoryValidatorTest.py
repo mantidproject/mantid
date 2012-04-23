@@ -1,7 +1,7 @@
 import unittest
 import testhelpers
-from mantid import (FloatArrayProperty, StringMandatoryValidator, FloatArrayMandatoryValidator, 
-                    PythonAlgorithm)
+from mantid.kernel import FloatArrayProperty, StringMandatoryValidator, FloatArrayMandatoryValidator
+from mantid.api import PythonAlgorithm
 
 class MandatoryValidatorTest(unittest.TestCase):
 

@@ -1,8 +1,8 @@
 import unittest
 import testhelpers
 
-from mantid import (StringListValidator, Direction, PythonAlgorithm)
-
+from mantid.kernel import StringListValidator, Direction
+from mantid.api import PythonAlgorithm
 
 class ListValidatorTest(unittest.TestCase):
 

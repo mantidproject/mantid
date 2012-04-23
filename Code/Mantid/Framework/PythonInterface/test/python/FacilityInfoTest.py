@@ -1,5 +1,5 @@
 import unittest
-from mantid import FacilityInfo, InstrumentInfo, ConfigService
+from mantid.kernel import FacilityInfo, InstrumentInfo, ConfigService
 
 class FacilityInfoTest(unittest.TestCase):
 

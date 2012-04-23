@@ -1,5 +1,5 @@
 import unittest
-from mantid import MatrixWorkspace, AnalysisDataService
+from mantid.api import MatrixWorkspace, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from testhelpers import run_algorithm
 import numpy as np

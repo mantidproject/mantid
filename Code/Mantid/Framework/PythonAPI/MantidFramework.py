@@ -1330,7 +1330,7 @@ class MantidPyFramework(FrameworkManager):
         for path in dirs:
             if path.endswith('/') or path.endswith("\\"):
                 path = os.path.dirname(path)
-            if not path in sys.path:
+            if not path in sys.path and not os.path.exists(os.path.join(path, '__init__.py')):
                 sys.path.append(path)
 
     def _refreshPyAlgorithms(self):

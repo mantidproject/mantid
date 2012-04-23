@@ -1,5 +1,5 @@
 import unittest
-from mantid import Instrument
+from mantid.geometry import Instrument
 from testhelpers import can_be_instantiated
 
 class InstrumentTest(object):

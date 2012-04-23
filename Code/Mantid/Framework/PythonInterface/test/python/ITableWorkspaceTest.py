@@ -1,7 +1,7 @@
 import unittest
 from testhelpers import run_algorithm
 from mantid.kernel import std_vector_str
-from mantid import WorkspaceFactory
+from mantid.api import WorkspaceFactory
 
 class ITableWorkspaceTest(unittest.TestCase):
   
