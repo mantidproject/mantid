@@ -12,11 +12,14 @@
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IMDDimension_const_sptr;
+using MantidQt::API::AlgorithmRunner;
 
 namespace MantidQt
 {
@@ -55,6 +58,9 @@ LineViewer::LineViewer(QWidget *parent)
   m_lineOptions = new LinePlotOptions(this);
   m_plotLayout->addWidget(m_lineOptions, 0);
 
+  // To run BinMD in the background
+  m_algoRunner = new AlgorithmRunner();
+  QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(lineIntegrationComplete(bool)));
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
@@ -256,11 +262,12 @@ void LineViewer::apply()
 {
   if (m_allDimsFree)
     throw std::runtime_error("Not currently supported with all dimensions free!");
+  m_algoRunner->cancelRunningAlgorithm();
 
   // BinMD fails on MDHisto.
   IMDHistoWorkspace_sptr mdhws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws);
 
-  std::string outWsName = m_ws->getName() + "_line" ;
+  m_integratedWSName = m_ws->getName() + "_line" ;
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
@@ -284,19 +291,19 @@ void LineViewer::apply()
   // This is the origin = Translation parameter
   VMD origin = m_start;
 
-  IAlgorithm * alg = NULL;
+  IAlgorithm_sptr alg;
   size_t numBins = m_numBins;
   if (adaptive)
   {
-    alg = FrameworkManager::Instance().createAlgorithm("SliceMD");
+    alg = AlgorithmManager::Instance().create("SliceMD");
     // "SplitInto" parameter
     numBins = 2;
   }
   else
-    alg = FrameworkManager::Instance().createAlgorithm("BinMD");
+    alg = AlgorithmManager::Instance().create("BinMD");
 
   alg->setProperty("InputWorkspace", m_ws);
-  alg->setPropertyValue("OutputWorkspace", outWsName);
+  alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
   alg->setProperty("AxisAligned", false);
 
   std::vector<int> OutputBins;
@@ -346,12 +353,28 @@ void LineViewer::apply()
   {
     alg->setProperty("IterateEvents", true);
   }
-  alg->execute();
 
-  if (alg->isExecuted())
+  // Start the algorithm asynchronously
+  m_algoRunner->startAlgorithm(alg);
+
+  // In the mean time, change the title
+  m_plot->setTitle("Integrating Line...");
+}
+
+// ==============================================================================================
+// ================================== SLOTS =====================================================
+// ==============================================================================================
+
+/** Slot called when the line integration algorithm (typically BinMD)
+ * has completed.
+ *
+ * @param error :: true if something went wrong
+ */
+void LineViewer::lineIntegrationComplete(bool error)
+{
+  if (!error)
   {
-    //m_sliceWS = alg->getProperty("OutputWorkspace");
-    m_sliceWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(outWsName);
+    m_sliceWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_integratedWSName);
     this->showFull();
   }
   else
@@ -360,13 +383,7 @@ void LineViewer::apply()
     this->showPreview();
     m_plot->setTitle("Error integrating workspace - see log.");
   }
-
-
 }
-
-// ==============================================================================================
-// ================================== SLOTS =====================================================
-// ==============================================================================================
 
 //-------------------------------------------------------------------------------------------------
 /** Slot called when the start text of a non-free dimensions is changed.
