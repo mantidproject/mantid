@@ -82,7 +82,7 @@ __version__ = kernel.version_str()
 import simpleapi as _simpleapi
 from kernel import plugins as _plugins
 
-_simpleapi.mockout_api()
+#_simpleapi.mockout_api()
 _plugins.load(kernel.config['pythonalgorithms.directories'])
 # Now everything is loaded create the proper definitions
 _simpleapi.translate()
