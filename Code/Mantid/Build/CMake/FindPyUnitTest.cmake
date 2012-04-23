@@ -25,6 +25,7 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   add_custom_target ( ${_pyunit_testname_file}
                       DEPENDS ${_pyunit_outputdir}/__init__.py ${_pyunit_testfiles}
                       COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
+                      COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_outputdir}
                       COMMAND ${PYTHON_EXECUTABLE} ${PYUNITTEST_GEN_EXEC}
                               -o ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                               -d ${_pyunit_outputdir}
