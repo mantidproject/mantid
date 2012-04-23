@@ -99,8 +99,10 @@ private:
     PythonPathHolder(const QString & entry)
       : m_path(entry)
     {
-      if( QFileInfo(m_path).exists() )
+      const QFileInfo filePath(m_path);
+      if( filePath.exists() )
       {
+        m_path = filePath.dirPath(true);
         appendPath(m_path);
       }
     }
@@ -128,7 +130,7 @@ private:
       PyRun_SimpleString(code.toAscii());
     }
   private:
-    const QString m_path;
+    QString m_path;
   };
 
   inline PythonScripting * pythonEnv() const { return m_pythonEnv; }
