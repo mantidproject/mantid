@@ -10,7 +10,7 @@ namespace MDEvents
   * Primary used to obtain existing ws parameters 
 */
 void 
-MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
+MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 {
     this->nDims = pWS->getNumDims();
     // prepare all arrays:
@@ -80,6 +80,11 @@ void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &So
 {
     this->emode = SourceMDWSDescr.emode;
     this->Ei    = SourceMDWSDescr.Ei;
+    if(SourceMDWSDescr.pLatt.get()){
+        this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(*(SourceMDWSDescr.pLatt)));
+    }
+    this->GoniomMatr = SourceMDWSDescr.GoniomMatr;
+
 }
 
 

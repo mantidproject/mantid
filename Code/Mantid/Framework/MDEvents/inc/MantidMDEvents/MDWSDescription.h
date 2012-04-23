@@ -108,8 +108,8 @@ class DLLExport MDWSDescription
 //=======================
       /// constructor
      MDWSDescription(size_t nDimesnions=0);
-     /// function build MD Event description from existing workspace
-     void build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS);
+     /// function builds MD Event description from existing MD event workspace
+     void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
      /// compare two descriptions and select the coplimentary result.
      void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspace);
      /// copy some parameters from the target workspace;

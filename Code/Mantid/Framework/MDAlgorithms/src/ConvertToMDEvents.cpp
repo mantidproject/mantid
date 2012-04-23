@@ -246,12 +246,12 @@ void ConvertToMDEvents::exec()
         // check if we are working in powder mode
         bool is_powder = ParamParser.isPowderMode(algo_id);
 
-        // dimensions are already build 
+        // dimensions are already build, so build MDWS description from existing workspace
         MDEvents::MDWSDescription OLDWSD;
-        OLDWSD.build_from_MDWS(spws);
+        OLDWSD.buildFromMDWS(spws);
 
-        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from 
-        // input workspace
+        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace description
+        // derived from input parameters. 
         OLDWSD.setUpMissingParameters(TWSD);
         // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
         // check inconsistencies
