@@ -909,6 +909,8 @@ void SliceViewer::zoomOutSlot()
  */
 void SliceViewer::zoomRectSlot(const QwtDoubleRect & rect)
 {
+  if ((rect.width() == 0) || (rect.height() == 0))
+    return;
   this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
 }
 
