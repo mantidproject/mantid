@@ -104,4 +104,5 @@ def find_data(file, instrument='', allow_multiple=False):
         pass
 
     # If we didn't find anything, raise an exception
+    mtd.sendErrorMessage("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
     raise RuntimeError, "Could not find a file for %s" % str(file)
