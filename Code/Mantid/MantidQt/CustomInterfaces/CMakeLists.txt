@@ -1,6 +1,6 @@
 set ( SRC_FILES
     src/ConvertToEnergy.cpp
-	src/CreateMDWorkspace.cpp
+#	src/CreateMDWorkspace.cpp
 #	src/CreateMDWorkspaceAlgDialog.cpp	
 	src/EventNexusFileMemento.cpp
 	src/Homer.cpp
@@ -29,7 +29,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
-	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+#	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
 #    inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -58,7 +58,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
-                inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+#                inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
 #                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
@@ -75,7 +75,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
-               inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
+#               inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
 #               inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
