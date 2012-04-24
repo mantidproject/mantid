@@ -37,8 +37,6 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
 {
-  std::cout<< "ImageDisplay constructor on Thread " <<
-               QThread::currentThreadId() << std::endl;
   ColorMaps::getColorMap( ColorMaps::HEAT,
                           256,
                           color_table );
@@ -79,8 +77,6 @@ ImageDisplay::~ImageDisplay()
  */
 void ImageDisplay::SetDataSource( ImageDataSource* data_source )
 {
-  std::cout<< "ImageDisplay SetDataSource on Thread " <<
-               QThread::currentThreadId() << std::endl;
   this->data_source = data_source;
   h_graph_display->SetDataSource( data_source );
   v_graph_display->SetDataSource( data_source );
@@ -119,8 +115,6 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
  */
 void ImageDisplay::UpdateImage()
 {
-  std::cout<< "ImageDisplay UpdateImage on Thread " <<
-               QThread::currentThreadId() << std::endl;
   if ( data_source == 0 || data_array == 0 )
   {
     return;   // no image data to update
@@ -252,8 +246,6 @@ void ImageDisplay::SetIntensity( double control_parameter )
  */
 void ImageDisplay::SetPointedAtPoint( QPoint point )
 {
-  std::cout<< "ImageDisplay SetPointedAtPoint on Thread " <<
-              QThread::currentThreadId() << std::endl;
   double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = image_plot->invTransform( QwtPlot::yLeft, point.y() );
 
