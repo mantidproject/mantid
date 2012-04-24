@@ -229,7 +229,7 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;  
    // class which would convert units
-     UnitsConverter<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
  
 };
 

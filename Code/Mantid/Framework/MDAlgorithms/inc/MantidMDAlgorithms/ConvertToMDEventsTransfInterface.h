@@ -63,7 +63,11 @@ struct CoordTramsformer
      *
      * has to be specialized
     */
-    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes);
+    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes)
+    {       
+       return false;
+    }
+
 
    
     /** template generalizes the code to calculate Y-variables within the detector's loop of processQND workspace
@@ -74,8 +78,10 @@ struct CoordTramsformer
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
-    bool calcYDepCoordinatese(std::vector<coord_t> &Coord,size_t i);
-
+    bool calcYDepCoordinatese(std::vector<coord_t> &Coord,size_t i)
+    {       
+       return false;
+    }
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
      * @param X    -- vector of X workspace values
      * @param i    -- index of external loop, identifying generic y-coordinate
@@ -86,7 +92,10 @@ struct CoordTramsformer
      *
      * has to be specialized
      */
-    bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const;
+    bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {       
+       return false;
+    }
   
  /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
     * given that the input described by sinble value only
@@ -96,7 +105,10 @@ struct CoordTramsformer
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized    */
-    bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const;
+    bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {       
+       return false;
+    }
     /** template generalizes the conversion of single x-variable using unit conversion as the first step 
      * @param X    -- X workspace value
      * 
@@ -104,10 +116,13 @@ struct CoordTramsformer
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized     */
-    bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const;
+    bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {       
+       return false;
+    }
     /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and provides 
       * necessary variables */
-    void setUpTransf(IConvertToMDEventsMethods *);
+    void setUpTransf(IConvertToMDEventsMethods *){};
   
 private: 
   
