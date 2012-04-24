@@ -66,7 +66,7 @@ namespace API
     /*
      * Get number of splitters
      */
-    virtual size_t getNumberSplitters() = 0;
+    virtual size_t getNumberSplitters() const = 0;
 
     /*
      * Remove one entry of a splitter
@@ -75,6 +75,10 @@ namespace API
 
   };
 
+  /// Typedef for a shared pointer to \c TableWorkspace
+  typedef boost::shared_ptr<ISplittersWorkspace> ISplittersWorkspace_sptr;
+  /// Typedef for a shared pointer to \c const \c TableWorkspace
+  typedef boost::shared_ptr<const ISplittersWorkspace> ISplittersWorkspace_const_sptr;
 
 } // namespace API
 } // namespace Mantid

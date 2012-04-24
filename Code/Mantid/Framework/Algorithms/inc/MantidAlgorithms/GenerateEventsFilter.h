@@ -6,6 +6,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidAPI/ISplittersWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -79,13 +81,34 @@ namespace Algorithms
 
     void processInputTime(Kernel::DateAndTime runstarttime);
     void setFilterByTimeOnly();
-    void setFilterByValue();
+    void setFilterByLogValue(std::string logname);
+
+    void processSingleValueFilter(Kernel::TimeSeriesProperty<double>* mlog, double minvalue, double maxvalue,
+        bool filterincrease, bool filterdecrease);
+
+    void processMultipleValueFilters(Kernel::TimeSeriesProperty<double>* mlog, double minvalue, double maxvalue,
+        bool filterincrease, bool filterdecrease);
+
+    void makeFilterByValue(Kernel::TimeSeriesProperty<double>* mlog,
+        Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
+        bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
+        int wsindex);
+
+    void makeMultipleFiltersByValues(Kernel::TimeSeriesProperty<double>* mlog,
+        Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> valueranges,
+        bool centre, bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
+
+    size_t searchValue(std::vector<double> dataranges, double value);
 
     DataObjects::EventWorkspace_const_sptr mEventWS;
-    DataObjects::SplittersWorkspace_sptr mSplitters;
+    // DataObjects::SplittersWorkspace_sptr mSplitters;
+    API::ISplittersWorkspace_sptr mSplitters;
+    API::ITableWorkspace_sptr mFilterInfoWS;
 
     Kernel::DateAndTime mStartTime;
     Kernel::DateAndTime mStopTime;
+
+    double m_convertfactor;
 
   };
 
