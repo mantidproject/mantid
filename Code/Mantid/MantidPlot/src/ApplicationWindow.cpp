@@ -5373,6 +5373,11 @@ void ApplicationWindow::readSettings()
     settings.beginGroup(menu);
     foreach(QString keyName, settings.childKeys())
     {
+      QFileInfo fi(settings.value(keyName).toString());
+      QString baseName = fi.fileName();
+      if (pyqt_interfaces.contains(baseName))
+        continue;
+
       if ( menu.contains("Interfaces")==0 &&
           (user_windows.grep(keyName).size() > 0 || pyqt_interfaces.grep(keyName).size() > 0) )
       {
