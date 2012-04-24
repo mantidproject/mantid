@@ -15,7 +15,7 @@ void RemoteAlg::setName( const string &name)
   m_name = name;
 
   // replace every whitespace char with an underscore
-  for (int i=0; i < m_name.length(); i++)
+  for (unsigned i=0; i < m_name.length(); i++)
   {
     if (isspace( m_name[i]))
       m_name[i] = '_';
