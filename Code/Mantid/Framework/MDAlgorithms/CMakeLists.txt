@@ -125,6 +125,7 @@ set ( TEST_FILES
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
+	test/ConvertToMDEventsTestPerformance.h 	
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
