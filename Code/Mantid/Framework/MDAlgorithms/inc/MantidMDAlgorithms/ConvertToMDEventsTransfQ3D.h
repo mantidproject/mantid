@@ -7,6 +7,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+namespace ConvertToMD
+{
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
@@ -198,7 +200,7 @@ private:
  
 };
 
-
+} // namespace ConvertToMD
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 

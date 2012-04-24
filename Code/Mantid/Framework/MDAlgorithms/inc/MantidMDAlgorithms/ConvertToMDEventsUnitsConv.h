@@ -34,16 +34,16 @@ namespace MDAlgorithms
     
 // How to treat X-coordinates:
 // for Histogram we take centerpiece average
-template<XCoordType TYPE>
+template<ConvertToMD::XCoordType TYPE>
 inline double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
 // for axis type -- just value
 template <>
-inline double XValue<Centered>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
+inline double XValue<ConvertToMD::Centered>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
 // DO UNITS CONVERSION --
 
 
 //  general procedure does nothing (non-converts units)
-template<CnvrtUnits CONV,XCoordType Type> 
+template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type> 
 struct UnitsConverter
 { 
     /** Set up all variables necessary for units conversion at the beginning of the conversion loop
@@ -70,8 +70,8 @@ struct UnitsConverter
 };
 
 // Fast conversion:
-template<XCoordType Type>
-struct UnitsConverter<ConvFast,Type>
+template<ConvertToMD::XCoordType Type>
+struct UnitsConverter<ConvertToMD::ConvFast,Type>
 {
 
     void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
@@ -103,8 +103,8 @@ private:
 };
 
 // Convert from TOF:
-template<XCoordType Type>
-struct UnitsConverter<ConvFromTOF,Type>
+template<ConvertToMD::XCoordType Type>
+struct UnitsConverter<ConvertToMD::ConvFromTOF,Type>
 {
 
     void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
@@ -162,8 +162,8 @@ private:
 };
 
 // Convert By TOF:
-template<XCoordType Type>
-struct UnitsConverter<ConvByTOF,Type>
+template<ConvertToMD::XCoordType Type>
+struct UnitsConverter<ConvertToMD::ConvByTOF,Type>
 {
 
     void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)

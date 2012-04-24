@@ -51,13 +51,15 @@ public:
     /// access to a subalgorithm 
     IConvertToMDEventsMethods * getAlg(const std::string &AlgName);
     /// initiate the subalgorithms and made them availible for getAlg function
-    void init(const ConvertToMDEventsParams &SubAlgDescriptor);
+    void init(const ConvertToMD::ConvertToMDEventsParams &SubAlgDescriptor);
 private:
  //--------------------------------------------------------------------------------------------------   
      /// helper class to orginize metaloop instantiating various subalgorithms 
-     template<QMode Q,size_t N_ALGORITHMS >
+     template<ConvertToMD::QMode Q,size_t N_ALGORITHMS >
      friend class LOOP_ALGS;  
 };
+
+//} // end namespace ConvertToMD
 }
 }
 

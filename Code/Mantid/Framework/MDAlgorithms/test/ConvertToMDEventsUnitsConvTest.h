@@ -12,6 +12,7 @@ using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 
 class TestConvertToMDEventsMethods :public IConvertToMDEventsMethods
@@ -23,7 +24,7 @@ public:
         MDEvents::MDWSDescription TestWS(5);
 
         TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
-        TestWS.emode= MDAlgorithms::Direct;
+        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
 
         boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
         pOutMDWSWrapper->createEmptyMDWS(TestWS);

@@ -10,6 +10,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+namespace ConvertToMD
+{
 /** Helper class describes the possible properties of the algorithm, converting a workspace to a MDEventWorkspace 
   *
   *  It is used to convert user input and data from the workspace into the key, to the appropriate subalgorithm, 
@@ -175,8 +177,8 @@ private:
    static Mantid::Kernel::Logger& convert_log;
 
  };
-
- } // end namespace
- }
+} // end namespace ConvertToMD
+} // end namespace
+}
 
 #endif

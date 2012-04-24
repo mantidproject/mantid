@@ -1,6 +1,10 @@
 #include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
 
 
+
+
+using namespace Mantid::MDAlgorithms::ConvertToMD;
+
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -152,5 +156,6 @@ void ConvertToMDEventsSubalgFactory::init(const ConvertToMDEventsParams &SubAlgD
 
 }
 
+//
 } // endnamespace MDAlgorithms
 } // endnamespace Mantid

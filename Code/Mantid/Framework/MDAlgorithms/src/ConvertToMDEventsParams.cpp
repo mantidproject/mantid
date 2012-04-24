@@ -12,7 +12,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-
+namespace ConvertToMD
+{
 Kernel::Logger& ConvertToMDEventsParams::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 
@@ -684,5 +685,6 @@ native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 
 }
 
+}
 }
 }

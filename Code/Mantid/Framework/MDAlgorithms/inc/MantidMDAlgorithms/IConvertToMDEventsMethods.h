@@ -18,6 +18,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+
 /** class describes the inteface to the methods, which perform conversion from usual workspaces to MDEventWorkspace 
    *
    * @date 07-01-2012
@@ -66,7 +67,7 @@ namespace MDAlgorithms
    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
  
-    template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
+    template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
     friend struct CoordTransformer;
  public:
      // constructor;
@@ -121,7 +122,7 @@ namespace MDAlgorithms
 
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-template<InputWSType WS,QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
+template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
 class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
 { 
 public:
@@ -136,7 +137,6 @@ private:
 };
 
  
-
 } // end namespace MDAlgorithms
 } // end namespace Mantid
 #endif

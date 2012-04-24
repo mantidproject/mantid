@@ -8,6 +8,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+namespace ConvertToMD
+{
 /** Interface to set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
@@ -130,6 +132,7 @@ inline double k_trans<Indir>(double Ei, double E_tr){
     return sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 }
 
+}
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 
