@@ -128,12 +128,13 @@ class ConvertToMDEventsWS: public IConvertToMDEventsMethods
 public:
     ConvertToMDEventsWS();
     /**templated virtual function to set up conversion*/
-    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+    {};
     /**templated virtual function to run conversion itself*/
-    void runConversion(API::Progress *);
+    void runConversion(API::Progress *){};
 private:
     /**templated virtual function to run conversion chunk */
-    virtual size_t conversionChunk(size_t job_ID);
+    virtual size_t conversionChunk(size_t job_ID){};
 };
 
  
