@@ -210,7 +210,7 @@ ConvertToMDEventsMethodsTest ():TestWS(4){
 EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsMethods &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
   
     // set up conversion to Time of flight
-    UNITS_CONVERSION<ConvByTOF,Centered> TOFCONV;
+    UnitsConverter<ConvByTOF,Centered> TOFCONV;
     TOFCONV.setUpConversion(&conv,"TOF");
 
     //Create the event workspace

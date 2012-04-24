@@ -68,7 +68,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h

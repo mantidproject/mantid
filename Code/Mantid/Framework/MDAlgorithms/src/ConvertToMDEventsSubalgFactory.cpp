@@ -41,7 +41,7 @@ ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
 
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
-/** helper class to orginize metaloop instantiating various subalgorithms dealing with particular 
+/** helper class to orginize metaloop instansiating various subalgorithms dealing with particular 
   * workspaces and implementing particular user requests */
 template<QMode Q, size_t AlgoNum>
 class LOOP_ALGS{
@@ -67,7 +67,7 @@ private:
                  CnvrtUnits(CONV),SampleType(SAMPL)>())));
 
 /*#ifdef _DEBUG
-            std::cout<<" Instantiating algorithm with ID: "<<Key<<std::endl;
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 #endif*/
             LOOP_ALGS<Q, AlgoNum-1>::EXEC(AlgoKey,pH);
     }
@@ -140,7 +140,7 @@ class LOOP_ALGS<NoQ,0>{
 */
 void ConvertToMDEventsSubalgFactory::init(const ConvertToMDEventsParams &SubAlgDescriptor)
 {
-    if (alg_selector.empty()) // Instanciate the subalgorithms for different cases
+    if (alg_selector.empty()) // Instansiate the subalgorithms for different cases
     {    
     // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
         LOOP_ALGS<NoQ,NInWSTypes*NConvUintsStates>::EXEC(SubAlgDescriptor,this); 

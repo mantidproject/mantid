@@ -207,7 +207,7 @@ void ConvertToMDEvents::exec()
     std::string dE_mod_req                   = getProperty("dEAnalysisMode");
     //c) other dim property;
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
-    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to hkl
+    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
     std::string convert_to_                  = getProperty("QConversionScales");
 
 
@@ -252,11 +252,10 @@ void ConvertToMDEvents::exec()
 
         // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace description
         // derived from input parameters. 
-        OLDWSD.setUpMissingParameters(TWSD);
-        // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
+        OLDWSD.setUpMissingParameters(TWSD);      
         // check inconsistencies
         OLDWSD.compareDescriptions(TWSD);
-        // make new ws description equal to the old one
+        // reset new ws description name
         TWSD =OLDWSD;
        // set up target coordinate system
         TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,is_powder);

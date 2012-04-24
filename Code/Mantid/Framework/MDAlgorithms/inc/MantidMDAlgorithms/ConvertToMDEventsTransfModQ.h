@@ -1,7 +1,7 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 #define  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 //
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 //
 namespace Mantid
 {
@@ -10,7 +10,7 @@ namespace MDAlgorithms
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
-  * This file defines  specializations of generic coordinate transformation templated to the ModQ case
+  * This particular file defines  specializations of generic coordinate transformation templated to the ModQ case
    *
    * @date 11-10-2011
 
@@ -38,7 +38,7 @@ namespace MDAlgorithms
 
 // ModQ,Inelastic 
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct COORD_TRANSFORMER<ModQ,MODE,CONV,Type,Sample>
+struct CoordTransformer<ModQ,MODE,CONV,Type,Sample>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -100,7 +100,7 @@ struct COORD_TRANSFORMER<ModQ,MODE,CONV,Type,Sample>
         return true;
 
     }
-   // should be actually on ICOORD_TRANSFORMER but there is problem with template-overloaded functions
+   // should be actually on ICoordTransformer but there is problem with template-overloaded functions
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -108,13 +108,13 @@ struct COORD_TRANSFORMER<ModQ,MODE,CONV,Type,Sample>
        return calc1MatrixCoord(X_ev,Coord);
     }
 
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
          return calc1MatrixCoord(X_ev,Coord);
     }   
     // constructor;
-    COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
+    CoordTransformer():pDet(NULL),pHost(NULL){}
     void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -134,12 +134,12 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
     // class which would convert units
-    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
  
 };
 // ModQ,Elastic 
 template<CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct COORD_TRANSFORMER<ModQ,Elastic,CONV,Type,Sample>
+struct CoordTransformer<ModQ,Elastic,CONV,Type,Sample>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -191,7 +191,7 @@ struct COORD_TRANSFORMER<ModQ,Elastic,CONV,Type,Sample>
 
     }
 
-    // should be actually on ICOORD_TRANSFORMER
+    // should be actually on ICoordTransformer
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -199,14 +199,14 @@ struct COORD_TRANSFORMER<ModQ,Elastic,CONV,Type,Sample>
 
        return calc1MatrixCoord(X_ev,Coord);
     }
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
          return calc1MatrixCoord(X_ev,Coord);
     }   
 
     // constructor;
-    COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
+    CoordTransformer():pDet(NULL),pHost(NULL){}
     void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -226,7 +226,7 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;  
    // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+     UnitsConverter<CONV,Type> CONV_UNITS_FROM;
  
 };
 

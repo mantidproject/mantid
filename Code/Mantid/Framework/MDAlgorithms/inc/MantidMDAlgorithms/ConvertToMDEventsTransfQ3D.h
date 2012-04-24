@@ -1,7 +1,7 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_Q3D_TRANSF
 #define  H_CONVERT_TO_MDEVENTS_Q3D_TRANSF
 //
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 //
 namespace Mantid
 {
@@ -10,7 +10,8 @@ namespace MDAlgorithms
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
-  * This file defines  specializations of generic coordinate transformation templated to the 3D momentum conversion case
+  *  This file defines  specializations of generic coordinate transformation templated to the 3D momentum conversion case, 
+  *  Direct/Indirect tramsformatiom. 
   *
   * @date 11-10-2011
 
@@ -34,9 +35,9 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-// Direct/Indirect tramsformatiom, this template describes 3D Q analysis mode. 
+
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type,Sample>
+struct CoordTransformer<Q3D,MODE,CONV,Type,Sample>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -84,7 +85,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type,Sample>
 
          return true;
     }
-    // should be actually on ICOORD_TRANSFORMER
+    // should be actually on ICoordTransformer
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -92,13 +93,17 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type,Sample>
 
        return calc1MatrixCoord(X_ev,Coord);
     }
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+
+    // calculate the transformations using units conversion
+    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
          return calc1MatrixCoord(X_ev,Coord);
     }   
-  
-   COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
+
+   // default constructor
+   CoordTransformer():pDet(NULL),pHost(NULL){}
+   // initiator
    void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -116,13 +121,13 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
    // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
     
 };
 
 // Elastic
 template<CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type,Sample>
+struct CoordTransformer<Q3D,Elastic,CONV,Type,Sample>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -161,7 +166,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type,Sample>
 
          return true;
     }
-    // should be actually on ICOORD_TRANSFORMER
+    // should be actually on ICoordTransformer
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -169,13 +174,13 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type,Sample>
 
        return calc1MatrixCoord(X_ev,Coord);
     }
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
          return calc1MatrixCoord(X_ev,Coord);
     }   
 
-    COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
+    CoordTransformer():pDet(NULL),pHost(NULL){}
     void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -189,7 +194,7 @@ private:
     // pointer to the algoritm, which calls all these transformations
     IConvertToMDEventsMethods *pHost;  
     // class which would convert units
-    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
  
 };
 

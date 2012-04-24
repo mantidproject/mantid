@@ -89,7 +89,7 @@ void testSetUp_and_PreprocessDetectors()
 
 void testConvertFastFromInelasticWS()
 {
-    UNITS_CONVERSION<ConvFast,Histogram> Conv;
+    UnitsConverter<ConvFast,Histogram> Conv;
     TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(pConvMethods.get(),"DeltaE_inWavenumber"));
 
      const MantidVec& X        = ws2D->readX(0);
@@ -102,7 +102,7 @@ void testConvertFastFromInelasticWS()
 void testConvertToTofInelasticWS()
 {
     // Convert to TOF
-    UNITS_CONVERSION<ConvByTOF,Centered> Conv;
+    UnitsConverter<ConvByTOF,Centered> Conv;
     TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(pConvMethods.get(),"TOF"));
 
      const MantidVec& X        = ws2D->readX(0);
@@ -133,7 +133,7 @@ void testConvertToTofInelasticWS()
 
 
      // Convert back;
-     UNITS_CONVERSION<ConvFromTOF,Centered> ConvBack;
+     UnitsConverter<ConvFromTOF,Centered> ConvBack;
 
      TS_ASSERT_THROWS_NOTHING(ConvBack.setUpConversion(pConvMethods.get(),"DeltaE"));
      TS_ASSERT_THROWS_NOTHING(ConvBack.updateConversion(0));

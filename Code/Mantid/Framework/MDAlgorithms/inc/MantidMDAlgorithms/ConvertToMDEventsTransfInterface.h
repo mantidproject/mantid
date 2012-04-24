@@ -1,5 +1,5 @@
-#ifndef  H_CONVERT_TO_MDEVENTS_TRANSF_GENERIC
-#define  H_CONVERT_TO_MDEVENTS_TRANSF_GENERIC
+#ifndef  H_CONVERT_TO_MDEVENTS_TRANSF_INTERFACE
+#define  H_CONVERT_TO_MDEVENTS_TRANSF_INTERFACE
 //
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
@@ -8,10 +8,21 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
+/** Interface to set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
-   *
-   * @date 11-10-2011
+  *
+  ** The template below describes general ingerface to coordinate transformation:
+  *
+  *   Usual transformation constis of 4 steps
+  * 1) Initiate the transformation itself.
+  * 2) set-up, calculation and copying generic multidimensional variables which are not depenent on data
+  * 3) set-up, calculation and copying the multidimensional variables which dependent on detectors id only 
+  * 4) calculation of the multidimensional variables which depend on the data along x-axis of the workspace
+  *    and possibly on detectors parameters. 
+  * 
+  *  Generic template defines interface to 4 functions which perform these four steps. 
+  *
+  * @date 11-10-2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -34,20 +45,8 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/** The template below describes general ingerface to coordinate transformation:
-*
-*   Usual transformation constis of 3 steps
-* 1) set-up, calculation and copying generic multidimensional variables which are not depenent on data
-* 2) set-up, calculation and copying the multidimensional variables which dependent on detectors id only 
-* 3) calculation of the multidimensional variables which depend on the data along x-axis of the workspace
-*    and possibly on detectors parameters. 
-* 
-*  Generic template defines interface to 3 functions which perform these three steps. 
-*/
-
-
 template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
-struct COORD_TRANSFORMER
+struct CoordTramsformer
 {
       
     /**Template defines common interface to common part of the algorithm, where all variables
@@ -62,9 +61,7 @@ struct COORD_TRANSFORMER
      *
      * has to be specialized
     */
-    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
-        UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);throw(Kernel::Exception::NotImplementedError(""));
-        return false;}
+    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes);
 
    
     /** template generalizes the code to calculate Y-variables within the detector's loop of processQND workspace
@@ -75,8 +72,7 @@ struct COORD_TRANSFORMER
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
-    inline bool calcYDepCoordinatese(std::vector<coord_t> &Coord,size_t i){
-        UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
+    bool calcYDepCoordinatese(std::vector<coord_t> &Coord,size_t i);
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
      * @param X    -- vector of X workspace values
@@ -88,11 +84,8 @@ struct COORD_TRANSFORMER
      *
      * has to be specialized
      */
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
-    {
-        UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
-        return false;
-    }
+    bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const;
+  
  /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
     * given that the input described by sinble value only
      * @param X    -- X workspace value
@@ -100,24 +93,23 @@ struct COORD_TRANSFORMER
      * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
-     * has to be specialized
-     */
-
-    inline bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-    {
-          UNUSED_ARG(X); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
-    }
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-    {
-          UNUSED_ARG(X); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
-    }
-
-    inline void setUpTransf(IConvertToMDEventsMethods *){};
+     * has to be specialized    */
+    bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const;
+    /** template generalizes the conversion of single x-variable using unit conversion as the first step 
+     * @param X    -- X workspace value
+     * 
+     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
+     *
+     * has to be specialized     */
+    bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const;
+    /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and provides 
+      * necessary variables */
+    void setUpTransf(IConvertToMDEventsMethods *);
   
-private:
- 
+private: 
   
-}; // end COORD_TRANSFORMER structure:
+}; // end CoordTransformer structure:
 
 ////----------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------

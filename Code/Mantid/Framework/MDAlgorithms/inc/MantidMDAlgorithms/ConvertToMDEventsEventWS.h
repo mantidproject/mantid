@@ -60,9 +60,9 @@ class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEv
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<QMode QX, AnalMode MODEX, CnvrtUnits CONVX,XCoordType XTYPE,SampleType XSample> 
-     friend struct COORD_TRANSFORMER;
+     friend struct CoordTransformer;
      // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,CONV,Centered,Sample> trn; 
+     CoordTransformer<Q,MODE,CONV,Centered,Sample> trn; 
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates
@@ -189,7 +189,7 @@ class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEv
        for (; it != it_end; it++)
        {
          double tof=it->tof();
-         if(!trn.ConvertAndCalcMatrixCoord(tof,locCoord))continue; // skip ND outside the range
+         if(!trn.convertAndCalcMatrixCoord(tof,locCoord))continue; // skip ND outside the range
 
          sig_err.push_back(float(it->weight()));
          sig_err.push_back(float(it->errorSquared()));

@@ -44,7 +44,7 @@ inline double XValue<Centered>(const MantidVec& X,size_t j){return static_cast<d
 
 //  general procedure does nothing (non-converts units)
 template<CnvrtUnits CONV,XCoordType Type> 
-struct UNITS_CONVERSION
+struct UnitsConverter
 { 
     /** Set up all variables necessary for units conversion at the beginning of the conversion loop
      * @param pHost     -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
@@ -71,7 +71,7 @@ struct UNITS_CONVERSION
 
 // Fast conversion:
 template<XCoordType Type>
-struct UNITS_CONVERSION<ConvFast,Type>
+struct UnitsConverter<ConvFast,Type>
 {
 
     void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
@@ -104,7 +104,7 @@ private:
 
 // Convert from TOF:
 template<XCoordType Type>
-struct UNITS_CONVERSION<ConvFromTOF,Type>
+struct UnitsConverter<ConvFromTOF,Type>
 {
 
     void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
@@ -163,7 +163,7 @@ private:
 
 // Convert By TOF:
 template<XCoordType Type>
-struct UNITS_CONVERSION<ConvByTOF,Type>
+struct UnitsConverter<ConvByTOF,Type>
 {
 
     void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)

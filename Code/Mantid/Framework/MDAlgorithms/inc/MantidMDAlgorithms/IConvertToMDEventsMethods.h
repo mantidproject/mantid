@@ -18,7 +18,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** class describes the inteface to the methods, which perfoen the conversion from usual workspaces to MDEventWorkspace 
+/** class describes the inteface to the methods, which perform conversion from usual workspaces to MDEventWorkspace 
    *
    * @date 07-01-2012
 
@@ -43,7 +43,7 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/** TEMPLATES INSTANTIATION: User are welcome to specialize its own specific algorithm 
+/** TEMPLATES INSTANSIATION: Users are welcome to specialize its own specific algorithm 
   *e.g.
    template<> class ConvertToMDEventsWS<ModQ,Elastic,ConvertNo,Centered,CrystalType>::public IConvertToMDEventsMethods
    {
@@ -60,7 +60,6 @@ namespace MDAlgorithms
 */
 
 
-
  class DLLExport IConvertToMDEventsMethods
  {
  protected:
@@ -68,7 +67,7 @@ namespace MDAlgorithms
     /// presumably will be completely inlined
  
     template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
-    friend struct COORD_TRANSFORMER;
+    friend struct CoordTransformer;
  public:
      // constructor;
      IConvertToMDEventsMethods();
@@ -126,23 +125,15 @@ template<InputWSType WS,QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sampl
 class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
 { 
 public:
-    ConvertToMDEventsWS(){};
-    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
-    {
-        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
-    }
-
-    void runConversion(API::Progress *)
-    {
-        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
-    }
+    ConvertToMDEventsWS();
+    /**templated virtual function to set up conversion*/
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+    /**templated virtual function to run conversion itself*/
+    void runConversion(API::Progress *);
 private:
-    virtual size_t conversionChunk(size_t job_ID)
-    {
-        throw(std::logic_error("Generic Conversion inot MD workspace can not be implemented"));
-    }
+    /**templated virtual function to run conversion chunk */
+    virtual size_t conversionChunk(size_t job_ID);
 };
-
 
  
 

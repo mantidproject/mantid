@@ -73,7 +73,7 @@ static void destroySuite(ConvertToMDEventsCoordTransfTest  * suite) { delete sui
 
 void test_CoordTransfNOQ()
 {
-    COORD_TRANSFORMER<NoQ,ANY_Mode,ConvertNo,Histogram,NSampleTypes> Copy;
+    CoordTransformer<NoQ,ANY_Mode,ConvertNo,Histogram,NSampleTypes> Copy;
     Copy.setUpTransf(pConvMethods.get());
     std::vector<coord_t> Coord(4);
 
@@ -90,7 +90,7 @@ void test_CoordTransfNOQ()
 
 void test_CoordTransfQ3DDirect()
 {
-    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histogram,CrystType> ConvFromHisto;
+    CoordTransformer<Q3D,Direct,ConvertNo,Histogram,CrystType> ConvFromHisto;
 
     MDEvents::MDWSDescription TestWS(4);
 
@@ -112,7 +112,7 @@ void test_CoordTransfQ3DDirect()
     size_t nValidSpectra = det_loc.nDetectors();
 
     // helper conversion to TOF
-    UNITS_CONVERSION<ConvByTOF,Histogram> ConvToTOF;
+    UnitsConverter<ConvByTOF,Histogram> ConvToTOF;
     TS_ASSERT_THROWS_NOTHING(ConvToTOF.setUpConversion(pConvMethods.get(),"TOF"));
 
     // set up the run over the Histogram methods
@@ -151,7 +151,7 @@ void test_CoordTransfQ3DDirect()
     }
     // compare with conversion from TOF
 
-    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
+    CoordTransformer<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
 
     // make axis untit to be TOF to be able to work with conversion from TOF
     NumericAxis *pAxis0 = new NumericAxis(specSize); 
@@ -174,7 +174,7 @@ void test_CoordTransfQ3DDirect()
          for (size_t j = 0; j < specSize; ++j)
          {
 
-              TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.ConvertAndCalcMatrixCoord(TOF_data[ic],Coord));
+              TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.convertAndCalcMatrixCoord(TOF_data[ic],Coord));
               // compare with results from TOF
               TS_ASSERT_DELTA(allCoordDir[icc+0],Coord[0],1.e-5);
               TS_ASSERT_DELTA(allCoordDir[icc+1],Coord[1],1.e-5);

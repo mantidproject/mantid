@@ -1,7 +1,7 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_TRANSF_NOQ
 #define  H_CONVERT_TO_MDEVENTS_TRANSF_NOQ
 //
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 //
 namespace Mantid
 {
@@ -43,7 +43,7 @@ namespace MDAlgorithms
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
+struct CoordTransformer<NoQ,MODE,CONV,Type,Sample>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -76,7 +76,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
        Coord[0]=(coord_t)X;
        return true;
     }
-    // should be actually on ICOORD_TRANSFORMER but there is problem with template-overloaded functions
+    // should be actually on ICoordTransformer but there is problem with template-overloaded functions
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -84,14 +84,14 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
 
        return calc1MatrixCoord(X_ev,Coord);
     }
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
          return calc1MatrixCoord(X_ev,Coord);
     }   
 
     // constructor;
-    COORD_TRANSFORMER():pYAxis(NULL),pHost(NULL){} 
+    CoordTransformer():pYAxis(NULL),pHost(NULL){} 
 
     inline void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
@@ -103,7 +103,7 @@ private:
      // pointer to MD workspace convertor
      IConvertToMDEventsMethods *pHost;
 // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+     UnitsConverter<CONV,Type> CONV_UNITS_FROM;
 };
 //
 } // End MDAlgorighms namespace
