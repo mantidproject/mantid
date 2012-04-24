@@ -23,6 +23,7 @@ saving and loading rates, in MB per second.
 #include <stdlib.h>
 #include "MantidKernel/CPUTimer.h"
 #include "MantidAPI/Progress.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -87,6 +88,9 @@ namespace DataHandling
     declareProperty("ChunkSize", 10, "Chunk size for writing/loading, in kb of data");
     declareProperty("NumChunks", 10, "Number of chunks to load or write");
     declareProperty("Compress", true, "For writing: compress the data.");
+    declareProperty("ClearDiskCache", false,
+        "Clear the linux disk cache before loading.\n"
+        "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
 
     std::vector<std::string> types;
     types.push_back("Zeros");
@@ -95,8 +99,9 @@ namespace DataHandling
     declareProperty("FakeData", "Incrementing Numbers", boost::make_shared<StringListValidator>(types) ,
         "For writing: type of fake data to generate.");
 
-    declareProperty("SaveSpeed", 0.0, "The measured rate of saving the file, in MB/sec.", Direction::Output);
-    declareProperty("LoadSpeed", 0.0, "The measured rate of loading the file, in MB/sec.", Direction::Output);
+    declareProperty("CompressionFactor", 0.0, "The size of the file divided by the the size of the data on disk.", Direction::Output);
+    declareProperty("SaveSpeed", 0.0, "The measured rate of saving the file, in MB (of data)/sec.", Direction::Output);
+    declareProperty("LoadSpeed", 0.0, "The measured rate of loading the file, in MB (of data)/sec.", Direction::Output);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -138,8 +143,8 @@ namespace DataHandling
     chunkDims.push_back(int(chunkSize));
 
     // Total size in BYTES
-    double totalSizeMB = double(chunkSize*NumChunks*sizeof(uint32_t)) / (1024.*1024.);
-    g_log.notice() << "File size is " << totalSizeMB << " MB" << std::endl;
+    double dataSizeMB = double(chunkSize*NumChunks*sizeof(uint32_t)) / (1024.*1024.);
+    g_log.notice() << "Data size is " << dataSizeMB << " MB" << std::endl;
 
     // ------------------------ Save a File ----------------------------
     if (!SaveFilename.empty())
@@ -158,11 +163,26 @@ namespace DataHandling
       }
       file.close();
       double seconds = tim.elapsedWallClock(false);
-      double MBperSec = totalSizeMB / seconds;
+      double MBperSec = dataSizeMB / seconds;
       this->setProperty("SaveSpeed", MBperSec);
       g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec" << std::endl;
+
     }
 
+    // Check the size of the file created/loaded
+    Poco::File info(SaveFilename.empty() ? LoadFilename : SaveFilename);
+    double fileSizeMB = double(info.getSize())/(1024.*1024.);
+    g_log.notice() << "File size is " << fileSizeMB << " MB" << std::endl;
+
+    bool ClearDiskCache = this->getProperty("ClearDiskCache");
+    if (ClearDiskCache)
+    {
+      g_log.information() << "Clearing disk cache." << std::endl;
+      if (system("sync ; echo 3 > /proc/sys/vm/drop_caches") != 0)
+        g_log.error("Error clearing disk cache");
+    }
+
+    // ------------------------ Load a File ----------------------------
     if (!LoadFilename.empty())
     {
       ::NeXus::File file(LoadFilename, NXACC_READ);
@@ -181,11 +201,13 @@ namespace DataHandling
       file.close();
 
       double seconds = tim.elapsedWallClock(false);
-      double MBperSec = totalSizeMB / seconds;
+      double MBperSec = dataSizeMB / seconds;
       this->setProperty("LoadSpeed", MBperSec);
       g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec" << std::endl;
     }
 
+    double CompressionFactor = fileSizeMB / dataSizeMB;
+    this->setProperty("CompressionFactor", CompressionFactor);
   }
 
 
