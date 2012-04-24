@@ -63,7 +63,7 @@ namespace Kernel
    */
   float CPUTimer::elapsedWallClock(bool doReset)
   {
-    double retVal = m_wallClockTime.elapsed(false);
+    float retVal = m_wallClockTime.elapsed(false);
     if (doReset) this->reset();
     return retVal;
   }

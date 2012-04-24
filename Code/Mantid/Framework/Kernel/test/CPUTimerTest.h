@@ -23,9 +23,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( CPUTimer timer1; )
     CPUTimer tim1;
     TS_ASSERT_THROWS_NOTHING( tim1.reset(); )
-    TS_ASSERT_THROWS_NOTHING( tim1.elapsed(); )
-    TS_ASSERT_THROWS_NOTHING( tim1.elapsed(true); )
-    TS_ASSERT_THROWS_NOTHING( tim1.elapsed(false); )
+    TS_ASSERT_THROWS_NOTHING( tim1.elapsedCPU(); )
+    TS_ASSERT_THROWS_NOTHING( tim1.elapsedCPU(true); )
+    TS_ASSERT_THROWS_NOTHING( tim1.elapsedCPU(false); )
     TS_ASSERT_THROWS_NOTHING( tim1.CPUfraction(); )
     TS_ASSERT_THROWS_NOTHING( tim1.CPUfraction(true); )
     TS_ASSERT_THROWS_NOTHING( tim1.CPUfraction(false); )
