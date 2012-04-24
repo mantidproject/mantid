@@ -149,9 +149,9 @@ void ConvertToMDEventsSubalgFactory::init(const ConvertToMDEventsParams &SubAlgD
     // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
         LOOP_ALGS<ConvertToMD::NoQ,NInWSTypes*NConvUintsStates>::EXEC(SubAlgDescriptor,this); 
     // MOD Q
-        LOOP_ALGS<ConvertToMD::ModQ,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
+    //   LOOP_ALGS<ConvertToMD::ModQ,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
     // Q3D
-        LOOP_ALGS<ConvertToMD::Q3D,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
+//        LOOP_ALGS<ConvertToMD::Q3D,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
     }
 
 }
