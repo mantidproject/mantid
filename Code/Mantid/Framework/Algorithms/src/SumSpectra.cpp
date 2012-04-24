@@ -258,7 +258,6 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   for (it = indices.begin(); it != indices.end(); ++it)
   {
     int i =  *it;
-    g_log.notice() << "Spectra " << i << std::endl;
     //Don't go outside the range.
     if ((i >= numberOfSpectra) || (i < 0))
     {
