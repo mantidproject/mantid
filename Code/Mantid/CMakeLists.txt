@@ -56,7 +56,7 @@ ENDIF()
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
 
   execute_process(
-      COMMAND /usr/bin/sw_vers -product
+      COMMAND /usr/bin/sw_vers –productVersion
       OUTPUT_VARIABLE OSX_VERSION
       RESULT_VARIABLE OSX_VERSION_STATUS
   )
