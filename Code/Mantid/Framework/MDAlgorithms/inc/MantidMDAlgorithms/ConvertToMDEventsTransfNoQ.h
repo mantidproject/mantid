@@ -45,8 +45,8 @@ namespace ConvertToMD
 // ---->    NoQ
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
-template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct CoordTransformer<NoQ,MODE,CONV,Type,Sample>
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample> 
+struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,Type,Sample>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {

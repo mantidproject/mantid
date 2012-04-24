@@ -38,8 +38,8 @@ namespace ConvertToMD
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct CoordTransformer<Q3D,MODE,CONV,Type,Sample>
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -123,13 +123,13 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
    // class which would convert units
-    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
     
 };
 
 // Elastic
-template<CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct CoordTransformer<Q3D,Elastic,CONV,Type,Sample>
+template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::Q3D,Elastic,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -196,7 +196,7 @@ private:
     // pointer to the algoritm, which calls all these transformations
     IConvertToMDEventsMethods *pHost;  
     // class which would convert units
-    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };
 
