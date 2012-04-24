@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
@@ -9,8 +9,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-bool 
-PreprocessedDetectors::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const
+
+bool ConvToMDPreprocDetectors::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const
 {
     if(det_dir.empty())return false;
 
@@ -18,8 +18,7 @@ PreprocessedDetectors::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)
     return true;
 }
 
-void 
-PreprocessedDetectors::allocDetMemory(size_t nHist)
+void ConvToMDPreprocDetectors::allocDetMemory(size_t nHist)
 {
     this->det_dir.resize(nHist);
     this->det_id.resize(nHist);
@@ -33,8 +32,7 @@ PreprocessedDetectors::allocDetMemory(size_t nHist)
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
-void DLLExport
-processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det_loc,Kernel::Logger& convert_log,API::Progress *pProg)
+void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det_loc,Kernel::Logger& convert_log,API::Progress *pProg)
 {
   convert_log.information()<<" Preprocessing detectors locations in a target reciprocal space\n";
   // 
@@ -113,8 +111,7 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
    pProg->report();
 }
 
-void DLLExport
-buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det_loc)
+void DLLExport buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det_loc)
 {
 
      det_loc.L1 = 1;

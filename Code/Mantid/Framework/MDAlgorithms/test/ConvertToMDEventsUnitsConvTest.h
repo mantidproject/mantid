@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+//#include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
 
@@ -38,7 +38,7 @@ public:
 };
 
 
-class ConvertToMDEventsUnitsConvTest : public CxxTest::TestSuite, public ConvertToMDEvents
+class ConvertToMDEventsUnitsConvTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
 //   static Mantid::Kernel::Logger &g_log;
@@ -80,9 +80,9 @@ void testTOFConversionFails()
 
 void testSetUp_and_PreprocessDetectors()
 {
-    pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
+   // pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
-    TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
+  //  TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
     TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsMethods>(new TestConvertToMDEventsMethods()));
     TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
 

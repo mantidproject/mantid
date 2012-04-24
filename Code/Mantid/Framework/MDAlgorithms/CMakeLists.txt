@@ -13,11 +13,12 @@ set ( SRC_FILES
 #	src/ConvertToMDEvents.cpp
 #	src/ConvertToMDEventsParams.cpp
 #	src/ConvertToMDEventsSubalgFactory.cpp
+	src/IConvertToMDEventsMethods.cpp
+	src/ConvToMDPreprocDetectors.cpp	
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
 	src/GreaterThanMD.cpp
-#	src/IConvertToMDEventsMethods.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
@@ -45,7 +46,6 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
-	src/processDetectorsPositions.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -63,7 +63,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 #	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
@@ -72,12 +71,13 @@ set ( INC_FILES
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
-#	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
@@ -123,7 +123,7 @@ set ( TEST_FILES
 #	test/ConvertToMDEventsParamsTest.h
 #	test/ConvertToMDEventsSubalgFactoryTest.h
 #	test/ConvertToMDEventsTest.h
-#	test/ConvertToMDEventsUnitsConvTest.h
+	test/ConvertToMDEventsUnitsConvTest.h
 #	test/ConvertToQ3DdETest.h
 #	test/ConvertToMDEventsTestPerformance.h 	
 	test/DivideMDTest.h

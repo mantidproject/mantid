@@ -40,7 +40,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-struct PreprocessedDetectors{
+struct ConvToMDPreprocDetectors{
     double L1;                       //< source-sample distance;
     Kernel::V3D   minDetPosition;    //< minimal and
     Kernel::V3D   maxDetPosition;    //< maxinal position for the detectors
@@ -70,9 +70,9 @@ struct PreprocessedDetectors{
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
-void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det,Kernel::Logger& convert_log,API::Progress *pProg);
+void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det,Kernel::Logger& convert_log,API::Progress *pProg);
 /** function builds fake cpectra-detector map and all other detectors position for the case when detector information has been lost */
-void DLLExport buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det);
+void DLLExport buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det);
 } // end MDAlgorithms
 }
 #endif

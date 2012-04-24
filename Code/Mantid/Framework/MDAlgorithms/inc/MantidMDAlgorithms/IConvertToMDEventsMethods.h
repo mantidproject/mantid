@@ -1,6 +1,8 @@
 #ifndef H_ICONVERT_TO_MDEVENTS_METHODS
 #define H_ICONVERT_TO_MDEVENTS_METHODS
 
+#define NO_CONVERSION
+
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -11,8 +13,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
+
+#ifdef NO_CONVERSION 
 #include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+#endif
 
 namespace Mantid
 {
@@ -65,24 +70,26 @@ namespace MDAlgorithms
  protected:
    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
- 
+#ifdef NO_CONVERSION 
     template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
     friend struct CoordTransformer;
+#endif
  public:
      // constructor;
      IConvertToMDEventsMethods();
  
     ///method which initates all main class variables 
-    virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
     virtual ~IConvertToMDEventsMethods(){};
 /**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
     Kernel::Unit_sptr              getAxisUnits()const;
-    PreprocessedDetectors const * pPrepDetectors()const{return pDetLoc;}
     double    getEi()const{return TWS.Ei;}
     int       getEMode()const{return TWS.emode;}
+    ConvToMDPreprocDetectors  const * pPrepDetectors()const{return pDetLoc;}
+
     API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
     std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
 //<------------------
@@ -97,7 +104,7 @@ namespace MDAlgorithms
     //
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
    // pointer to the array of detector's directions in reciprocal space
-    PreprocessedDetectors const *  pDetLoc;
+    ConvToMDPreprocDetectors const *  pDetLoc;
    /// number of target ws dimesnions
     size_t n_dims;
     /// array of variables which describe min limits for the target variables;
@@ -119,7 +126,7 @@ namespace MDAlgorithms
 
 };
 
-
+#ifdef NO_CONVERSION 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
 template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
 class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
@@ -135,7 +142,7 @@ private:
     /**templated virtual function to run conversion chunk */
     virtual size_t conversionChunk(size_t job_ID){return 0;}
 };
-
+#endif
 
 } // end namespace MDAlgorithms
 } // end namespace Mantid
