@@ -92,6 +92,11 @@ namespace DataObjects
     return this->fracArea[index];
   }
 
+  /**
+   * Function that sets the fractional area arrat for a given index.
+   * @param index :: the particular array to set
+   * @param F :: the array contained the information
+   */
   void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F)
   {
     this->fracArea[index] = *F;
@@ -115,6 +120,10 @@ namespace DataObjects
       MantidVec &frac = this->dataF(i);
       MantidVec frac_sqr(frac.size());
 
+      g_log.information() << "Data (" << i << "): ";
+      std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.information(), " "));
+      g_log.information() << std::endl;
+
       std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                      std::divides<double>());
       std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
@@ -122,6 +131,10 @@ namespace DataObjects
       std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
                      std::divides<double>());
 
+      g_log.information() << "Data Final(" << i << "): ";
+      std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.information(), " "));
+      g_log.information() << std::endl;
+      g_log.information() << "FArea (" << i << "): ";
       std::copy(frac.begin(), frac.end(), std::ostream_iterator<double>(g_log.information(), " "));
       g_log.information() << std::endl;
     }

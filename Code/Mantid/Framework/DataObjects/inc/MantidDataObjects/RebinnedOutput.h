@@ -75,6 +75,7 @@ namespace DataObjects
     /// Returns a read-only (i.e. const) reference to the specified F array
     const MantidVec& readF(std::size_t const index) const;
 
+    /// Set the fractional area array for a given index.
     void setF(const std::size_t index, const MantidVecPtr &F);
 
   protected:

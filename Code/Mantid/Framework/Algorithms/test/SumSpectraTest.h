@@ -188,6 +188,43 @@ public:
     TS_ASSERT_EQUALS(input->readX(0).size(), output->readX(0).size());
   }
 
+  void testRebinnedOutputSum()
+  {
+    RebinnedOutput_sptr ws = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+    std::string inName = "rebinTest";
+    std::string outName = "rebin_sum";
+
+    AnalysisDataService::Instance().addOrReplace(inName, ws);
+
+    // Start with a clean algorithm
+    Mantid::Algorithms::SumSpectra alg3;
+    if (!alg3.isInitialized())
+    {
+      alg3.initialize();
+    }
+    // Set the properties
+    alg3.setPropertyValue("InputWorkspace", inName);
+    alg3.setPropertyValue("OutputWorkspace", outName);
+    alg3.setProperty("IncludeMonitors", false);
+    alg3.execute();
+    TS_ASSERT(alg3.isExecuted());
+
+    // Check that things came out correctly
+    RebinnedOutput_sptr output;
+    output = AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(output->blocksize(), 6);
+    // Row with full acceptance
+    TS_ASSERT_EQUALS(output->dataY(0)[1], 1.);
+    TS_ASSERT_DELTA(output->dataE(0)[1], 0.40824829046386296, 1.e-5);
+    TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
+    // Row with limited, but non-zero acceptance, shouldn't have nans!
+    TS_ASSERT_DELTA(output->dataY(0)[5], 0.66666, 1.e-5);
+    TS_ASSERT_DELTA(output->dataE(0)[5], 0.47140452079103173, 1.e-5);
+    TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
+  }
+
 private:
   Mantid::Algorithms::SumSpectra alg;   // Test with range limits
   MatrixWorkspace_sptr inputSpace;
