@@ -1357,7 +1357,7 @@ namespace Crystal
       setPropertySettings("PreProcFilename", new EnabledWhenProperty( "PreProcessInstrument",
           Kernel::IS_NOT_EQUAL_TO, "No PreProcessing"));
       setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
-          Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file"));
+          Kernel::IS_EQUAL_TO, "Apply a LoadParameter.xml type file"));
 
     }
 
