@@ -24,21 +24,20 @@ public:
   static RebinnedOutputTest *createSuite() { return new RebinnedOutputTest(); }
   static void destroySuite( RebinnedOutputTest *suite ) { delete suite; }
 
-  void setUp()
+  RebinnedOutputTest()
   {
-    //ws = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+    ws = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
   }
 
   void testId()
   {
-    TS_ASSERT_EQUALS(1, 1);
-    //TS_ASSERT_EQUALS( ws->id(), "RebinnedOutput" );
+    TS_ASSERT_EQUALS( ws->id(), "RebinnedOutput" );
   }
 
-  void xtestRepresentation()
+  void testRepresentation()
   {
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 4);
-    TS_ASSERT_EQUALS( ws->blocksize(), 6);
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 4 );
+    TS_ASSERT_EQUALS( ws->blocksize(), 6 );
   }
 
 };

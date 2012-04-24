@@ -889,7 +889,7 @@ namespace WorkspaceCreationHelper
       return outputWS;
    }
 
-   RebinnedOutput_sptr CreateRebinnedOutput()
+   RebinnedOutput_sptr CreateRebinnedOutputWorkspace()
    {
      RebinnedOutput_sptr outputWS = Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
      outputWS->setName("rebinOut");
