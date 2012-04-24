@@ -84,7 +84,7 @@ namespace DataHandling
           "The name of the Nexus file to load (optional).\n"
           "Must have been written by NexusTester algorithm.");
 
-    declareProperty("ChunkSize", 10, "Chunk size for writing/loading, in kb");
+    declareProperty("ChunkSize", 10, "Chunk size for writing/loading, in kb of data");
     declareProperty("NumChunks", 10, "Number of chunks to load or write");
     declareProperty("Compress", true, "For writing: compress the data.");
 
@@ -114,7 +114,8 @@ namespace DataHandling
     if (ChunkSizeKb <= 0) throw std::invalid_argument("ChunkSize must be > 0");
     if (NumChunks <= 0) throw std::invalid_argument("NumChunks must be > 0");
 
-    size_t chunkSize = ChunkSizeKb*1024;
+    // Size of the chunk in number of integers
+    size_t chunkSize = ChunkSizeKb*1024 / sizeof(uint32_t);
     // ----------- Generate the fake data -----------------------------
     uint32_t * fakeData = new uint32_t[chunkSize];
     if (FakeDataType == "Zeros")
@@ -136,7 +137,9 @@ namespace DataHandling
     std::vector<int> chunkDims;
     chunkDims.push_back(int(chunkSize));
 
-    size_t totalSize = int(chunkSize)*NumChunks;
+    // Total size in BYTES
+    double totalSizeMB = double(chunkSize*NumChunks*sizeof(uint32_t)) / (1024.*1024.);
+    g_log.notice() << "File size is " << totalSizeMB << " MB" << std::endl;
 
     // ------------------------ Save a File ----------------------------
     if (!SaveFilename.empty())
@@ -154,8 +157,8 @@ namespace DataHandling
         prog.report();
       }
       file.close();
-      double seconds = tim.elapsed(false);
-      double MBperSec = double(totalSize)/(1024.*1024.*seconds);
+      double seconds = tim.elapsedWallClock(false);
+      double MBperSec = totalSizeMB / seconds;
       this->setProperty("SaveSpeed", MBperSec);
       g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec" << std::endl;
     }
@@ -177,8 +180,8 @@ namespace DataHandling
       }
       file.close();
 
-      double seconds = tim.elapsed(false);
-      double MBperSec = double(totalSize)/(1024.*1024.*seconds);
+      double seconds = tim.elapsedWallClock(false);
+      double MBperSec = totalSizeMB / seconds;
       this->setProperty("LoadSpeed", MBperSec);
       g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec" << std::endl;
     }

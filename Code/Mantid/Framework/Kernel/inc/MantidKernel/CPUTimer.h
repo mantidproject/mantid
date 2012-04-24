@@ -22,7 +22,8 @@ namespace Kernel
     CPUTimer();
     ~CPUTimer();
 
-    float elapsed(bool doReset = true);
+    float elapsedCPU(bool doReset = true);
+    float elapsedWallClock(bool doReset = true);
     void reset();
     float CPUfraction(bool doReset = true);
     std::string str();

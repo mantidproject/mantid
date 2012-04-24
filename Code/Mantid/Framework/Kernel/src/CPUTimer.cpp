@@ -42,7 +42,7 @@ namespace Kernel
    * @param doReset :: true to reset the timer
    * @return time in CPU seconds
    */
-  float CPUTimer::elapsed(bool doReset)
+  float CPUTimer::elapsedCPU(bool doReset)
   {
     float retval = 0;
   #ifdef _WIN32
@@ -55,6 +55,20 @@ namespace Kernel
     return retval;
   }
 
+
+  /** Calculate the elapsed wall-clock time, reseting the timer if specified
+   *
+   * @param doReset :: true to reset the timer
+   * @return wall-clock time, in seconds
+   */
+  float CPUTimer::elapsedWallClock(bool doReset)
+  {
+    double retVal = m_wallClockTime.elapsed(false);
+    if (doReset) this->reset();
+    return retVal;
+  }
+
+
   /** Return the fraction of the CPU used (CPUTime/wall-clock time).
    * This can be > 1 on multi-CPU systems.
    *
@@ -65,7 +79,7 @@ namespace Kernel
   {
     // Get the wall-clock time without resetting.
     double wallTime = m_wallClockTime.elapsed(false);
-    double cpuTime = elapsed(false);
+    double cpuTime = elapsedCPU(false);
     if (doReset) this->reset();
     return static_cast<float>((cpuTime / wallTime));
   }
