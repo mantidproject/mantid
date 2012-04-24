@@ -8,8 +8,6 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-namespace ConvertToMD
-{
 /** Interface to set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
@@ -47,7 +45,7 @@ namespace ConvertToMD
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-template<QMode Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample>
+template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
 struct CoordTramsformer
 {
       
@@ -131,23 +129,22 @@ private:
 ////----------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 // the module for the momentum transfer wavevector of the scattered neutrons
-template<AnalMode MODE>
+template<ConvertToMD::AnalMode MODE>
 inline double k_trans(double Ei, double E_tr){
     UNUSED_ARG(Ei);UNUSED_ARG(E_tr);
     throw(Kernel::Exception::NotImplementedError("Generic K_tr should not be implemented"));
 }
 // Direct Inelastic analysis
 template<>
-inline double k_trans<Direct>(double Ei, double E_tr){
+inline double k_trans<ConvertToMD::Direct>(double Ei, double E_tr){
     return sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 }
 // Indirect Inelastic analysis
 template<>
-inline double k_trans<Indir>(double Ei, double E_tr){
+inline double k_trans<ConvertToMD::Indir>(double Ei, double E_tr){
     return sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 }
 
-}
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 
