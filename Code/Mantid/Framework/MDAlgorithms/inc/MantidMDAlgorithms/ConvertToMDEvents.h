@@ -75,7 +75,7 @@ namespace MDAlgorithms
     static Mantid::Kernel::Logger& convert_log;
 
    /// the class which knows about existing subalgorithms and generates alforithm ID as function of input parameters of this algorithm. 
-     ConvertToMDEventsParams ParamParser;   
+    ConvertToMD::ConvertToMDEventsParams ParamParser;   
     /// The class which keeps map of all existing subalgorithms converting to MDEventWorkspace.
     /// It returns the pointer to the subalgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
     ConvertToMDEventsSubalgFactory  subAlgFactory;

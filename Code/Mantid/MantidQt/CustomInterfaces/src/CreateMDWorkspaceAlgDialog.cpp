@@ -17,16 +17,16 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   connect(m_uiForm.buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-  ConvertToMDEventsParams ConvParams;
+  ConvertToMD::ConvertToMDEventsParams ConvParams;
   std::vector<std::string> QModes = ConvParams.getQModes();
   // based on noQ mode being first in the list
-  QString name1(QModes[ModQ].c_str());
+  QString name1(QModes[ConvertToMD::ModQ].c_str());
   m_uiForm.combo_q_dimensions->addItem(name1);
-  QString name2(QModes[Q3D].c_str());
+  QString name2(QModes[ConvertToMD::Q3D].c_str());
   m_uiForm.combo_q_dimensions->addItem(name2);
 
   std::vector<std::string> dEModes = ConvParams.getDEModes();
-  for(size_t i=0;i<ANY_Mode;i++)
+  for(size_t i=0;i<ConvertToMD::ANY_Mode;i++)
   {
       QString name(dEModes[i].c_str());
       m_uiForm.combo_analysis_mode->addItem(name);

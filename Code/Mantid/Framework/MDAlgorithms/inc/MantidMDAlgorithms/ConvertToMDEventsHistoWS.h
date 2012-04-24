@@ -56,15 +56,15 @@ namespace MDAlgorithms
 
 //-----------------------------------------------
 // Method to process rugged Histogram workspace
-template< QMode Q,  AnalMode MODE,  CnvrtUnits CONV, SampleType Sample>
-class ConvertToMDEventsWS< Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
+template<ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
+class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template< QMode XQ, AnalMode XMODE, CnvrtUnits XCONV, XCoordType Type, SampleType XSample>
+     template<ConvertToMD::QMode XQ,ConvertToMD::AnalMode XMODE,ConvertToMD::CnvrtUnits XCONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType XSample>
      friend struct CoordTransformer;
   // the instanciation of the class which does the transformation itself
-     CoordTransformer<Q,MODE,CONV, Histogram,Sample> trn; 
+     CoordTransformer<Q,MODE,CONV,ConvertToMD::Histogram,Sample> trn; 
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:

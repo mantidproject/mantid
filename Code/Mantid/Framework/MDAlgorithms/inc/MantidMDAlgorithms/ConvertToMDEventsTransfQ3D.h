@@ -38,8 +38,8 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-template< AnalMode MODE, CnvrtUnits CONV, XCoordType TYPE, SampleType SAMPLE> 
-struct CoordTransformer< Q3D,MODE,CONV,TYPE,SAMPLE>
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -128,8 +128,8 @@ private:
 };
 
 // Elastic
-template< CnvrtUnits CONV, XCoordType TYPE, SampleType SAMPLE> 
-struct CoordTransformer< Q3D, Elastic,CONV,TYPE,SAMPLE>
+template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::Q3D,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {

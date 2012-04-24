@@ -18,7 +18,7 @@ using namespace Mantid::API;
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDEvents;
-//using namespace Mantid::MDAlgorithms::ConvertToMD;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 class ConvertToMDEventsParamsTest : public CxxTest::TestSuite
 {

@@ -20,7 +20,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDAlgorithms;
-//using namespace Mantid::MDAlgorithms::ConvertToMD;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 class ConvertToMDEventsCoordTestHelper :public IConvertToMDEventsMethods
 {

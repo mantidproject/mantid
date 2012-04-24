@@ -46,7 +46,7 @@ struct PreprocessedDetectors{
     Kernel::V3D   maxDetPosition;    //< maxinal position for the detectors
     /** shared pointer to the base instrument, which was source of the detector's information. If the instrument changed, 
       * the detectors positions should be recalculated. 
-      *  IT IS USER's RESPONSIBLITY TO RECALCULATE THE DETECTOR's PARAMETERS 
+      *  IT IS USER's RESPONIBLITY TO RECALCULATE THE DETECTOR's PARAMETERS 
       *  if the derived instrument have changed in a way, which affects the detectors positions and TOF calculations */
     boost::shared_ptr< const Geometry::Instrument > pBaseInstr; 
     std::vector<Kernel::V3D>  det_dir; //< unit vector pointing from the sample to the detector;

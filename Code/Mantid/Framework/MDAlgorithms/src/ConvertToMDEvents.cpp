@@ -34,7 +34,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-//using namespace Mantid::MDAlgorithms::ConvertToMD;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -88,23 +88,23 @@ ConvertToMDEvents::init()
      declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
               "Unselect this if you want to add new events to the workspace, which already exist. Can be very inefficient for file-based workspaces.");
 
-      Strings Q_modes = ParamParser.getQModes();
+     ConvertToMD::Strings Q_modes = ParamParser.getQModes();
      /// this variable describes default possible ID-s for Q-dimensions   
-     declareProperty("QDimensions",Q_modes[ ModQ],boost::make_shared<StringListValidator>(Q_modes),
+     declareProperty("QDimensions",Q_modes[ConvertToMD::ModQ],boost::make_shared<StringListValidator>(Q_modes),
          "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
          " (No Q analysis, or Q conversion is performed),\n"
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
-      Strings QScales = TWSD.getQScalings();
+     ConvertToMD::Strings QScales = TWSD.getQScalings();
      declareProperty("QConversionScales",QScales[MDEvents::NoScaling], boost::make_shared<StringListValidator>(QScales),
          " This property to normalize three momentums obtained in Q3D mode correspondingly (by sinlge lattice vector,"
          " lattice vectors 2pi/a,2pi/b and 2pi/c or by nothing)\n"
          " currently ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
      /// this variable describes implemented modes for energy transfer analysis
-      Strings dE_modes = ParamParser.getDEModes();
-     declareProperty("dEAnalysisMode",dE_modes[ Direct],boost::make_shared<StringListValidator>(dE_modes),
+     ConvertToMD::Strings dE_modes = ParamParser.getDEModes();
+     declareProperty("dEAnalysisMode",dE_modes[ConvertToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
         " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
         """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                

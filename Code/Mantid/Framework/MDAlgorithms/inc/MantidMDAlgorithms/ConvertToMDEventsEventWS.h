@@ -54,15 +54,15 @@ namespace MDAlgorithms
 */
 
 // Class to process event workspace by direct conversion:
-template< QMode Q,  AnalMode MODE,  CnvrtUnits CONV, SampleType Sample>
-class ConvertToMDEventsWS< EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
+template<ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
+class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template< QMode QX,  AnalMode MODEX,  CnvrtUnits CONVX, XCoordType XTYPE, SampleType XSample> 
+     template<ConvertToMD::QMode QX, ConvertToMD::AnalMode MODEX, ConvertToMD::CnvrtUnits CONVX,ConvertToMD::XCoordType XTYPE,ConvertToMD::SampleType XSample> 
      friend struct CoordTransformer;
      // the instanciation of the class which does the transformation itself
-     CoordTransformer<Q,MODE,CONV, Centered,Sample> trn; 
+     CoordTransformer<Q,MODE,CONV,ConvertToMD::Centered,Sample> trn; 
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates

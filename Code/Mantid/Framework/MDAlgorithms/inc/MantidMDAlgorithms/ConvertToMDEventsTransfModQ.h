@@ -40,8 +40,8 @@ namespace MDAlgorithms
 
 
 // ModQ,Inelastic 
-template< AnalMode MODE, CnvrtUnits CONV, XCoordType TYPE, SampleType SAMPLE> 
-struct CoordTransformer< ModQ,MODE,CONV,TYPE,SAMPLE>
+template<ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV, ConvertToMD::XCoordType TYPE, ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,TYPE,SAMPLE>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -141,8 +141,8 @@ private:
  
 };
 // ModQ,Elastic 
-template< CnvrtUnits CONV, XCoordType TYPE, SampleType SAMPLE> 
-struct CoordTransformer< ModQ, Elastic,CONV,TYPE,SAMPLE>
+template<ConvertToMD::CnvrtUnits CONV, ConvertToMD::XCoordType TYPE, ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::ModQ, ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
