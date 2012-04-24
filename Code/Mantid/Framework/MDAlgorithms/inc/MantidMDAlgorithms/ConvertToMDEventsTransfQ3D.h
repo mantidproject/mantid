@@ -7,8 +7,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-namespace ConvertToMD
-{
+//namespace ConvertToMD
+//{
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
   *
@@ -129,7 +129,7 @@ private:
 
 // Elastic
 template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
-struct CoordTransformer<ConvertToMD::Q3D,Elastic,CONV,TYPE,SAMPLE>
+struct CoordTransformer<ConvertToMD::Q3D,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -200,7 +200,7 @@ private:
  
 };
 
-} // namespace ConvertToMD
+//} // namespace ConvertToMD
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 

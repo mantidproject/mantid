@@ -18,7 +18,6 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-
 /** class describes the inteface to the methods, which perform conversion from usual workspaces to MDEventWorkspace 
    *
    * @date 07-01-2012
@@ -129,15 +128,15 @@ public:
     ConvertToMDEventsWS();
     /**templated virtual function to set up conversion*/
     size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
-    {};
+    {return 0;}
     /**templated virtual function to run conversion itself*/
     void runConversion(API::Progress *){};
 private:
     /**templated virtual function to run conversion chunk */
-    virtual size_t conversionChunk(size_t job_ID){};
+    virtual size_t conversionChunk(size_t job_ID){return 0;}
 };
 
- 
+
 } // end namespace MDAlgorithms
 } // end namespace Mantid
 #endif

@@ -7,8 +7,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-namespace ConvertToMD
-{
+//namespace ConvertToMD
+//{
 
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
@@ -45,8 +45,8 @@ namespace ConvertToMD
 // ---->    NoQ
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
-template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample> 
-struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,Type,Sample>
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -106,10 +106,10 @@ private:
      // pointer to MD workspace convertor
      IConvertToMDEventsMethods *pHost;
 // class which would convert units
-     UnitsConverter<CONV,Type> CONV_UNITS_FROM;
+     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
 };
 //
-} // namespace ConvertToMD
+//} // namespace ConvertToMD
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 

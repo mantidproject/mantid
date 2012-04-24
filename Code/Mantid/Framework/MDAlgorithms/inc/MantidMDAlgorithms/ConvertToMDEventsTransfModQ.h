@@ -7,8 +7,8 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-namespace ConvertToMD
-{
+//namespace ConvertToMD
+//{
 
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
@@ -40,8 +40,8 @@ namespace ConvertToMD
 
 
 // ModQ,Inelastic 
-template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample> 
-struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,Type,Sample>
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,TYPE,SAMPLE>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -137,12 +137,12 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
     // class which would convert units
-    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };
 // ModQ,Elastic 
-template<CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct CoordTransformer<ModQ,Elastic,CONV,Type,Sample>
+template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::ModQ,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -229,11 +229,11 @@ private:
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;  
    // class which would convert units
-    UnitsConverter<CONV,Type> CONV_UNITS_FROM;
+    UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };
 
-}
+//}
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 
