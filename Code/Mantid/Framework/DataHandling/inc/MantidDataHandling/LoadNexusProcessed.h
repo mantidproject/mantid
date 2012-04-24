@@ -112,15 +112,30 @@ namespace Mantid
       void readBinMasking(Mantid::NeXus::NXData & wksp_cls, API::MatrixWorkspace_sptr local_workspace);
 
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
-      void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data, Mantid::NeXus::NXDataSetTyped<double> & errors, int64_t blocksize,
-          int64_t nchannels, int64_t &hist, API::MatrixWorkspace_sptr local_workspace);
+      void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data,
+                     Mantid::NeXus::NXDataSetTyped<double> & errors,
+                     Mantid::NeXus::NXDataSetTyped<double> & farea,
+                     bool hasFArea,
+                     int64_t blocksize, int64_t nchannels, int64_t &hist,
+                     API::MatrixWorkspace_sptr local_workspace);
 
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
-      void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data, Mantid::NeXus::NXDataSetTyped<double> & errors, int64_t blocksize,
-          int64_t nchannels, int64_t &hist,int64_t& wsIndex, API::MatrixWorkspace_sptr local_workspace);
+      void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data,
+                     Mantid::NeXus::NXDataSetTyped<double> & errors,
+                     Mantid::NeXus::NXDataSetTyped<double> & farea,
+                     bool hasFArea,
+                     int64_t blocksize, int64_t nchannels,
+                     int64_t &hist, int64_t& wsIndex,
+                     API::MatrixWorkspace_sptr local_workspace);
       /// Load a block of data into the workspace
-      void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data, Mantid::NeXus::NXDataSetTyped<double> & errors, Mantid::NeXus::NXDouble & xbins,
-          int64_t blocksize, int64_t nchannels, int64_t &hist,int64_t& wsIndex, API::MatrixWorkspace_sptr local_workspace);
+      void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data,
+                     Mantid::NeXus::NXDataSetTyped<double> & errors,
+                     Mantid::NeXus::NXDataSetTyped<double> & farea,
+                     bool hasFArea,
+                     Mantid::NeXus::NXDouble & xbins,
+                     int64_t blocksize, int64_t nchannels,
+                     int64_t &hist, int64_t& wsIndex,
+                     API::MatrixWorkspace_sptr local_workspace);
 
       /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
       void loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, Mantid::NeXus::NXData & data);
