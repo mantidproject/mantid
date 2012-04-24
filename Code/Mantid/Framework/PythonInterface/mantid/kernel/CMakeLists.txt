@@ -30,6 +30,7 @@ set ( EXPORT_FILES
   src/Exports/ArrayLengthValidator.cpp
   src/Exports/ArrayBoundedValidator.cpp
   src/Exports/MandatoryValidator.cpp
+  src/Exports/CompositeValidator.cpp
 )  
 
 set ( SRC_FILES
