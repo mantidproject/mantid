@@ -10,9 +10,9 @@ set ( SRC_FILES
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToDetectorFaceMD.cpp
-	src/ConvertToMDEvents.cpp
-	src/ConvertToMDEventsParams.cpp
-	src/ConvertToMDEventsSubalgFactory.cpp
+#	src/ConvertToMDEvents.cpp
+#	src/ConvertToMDEventsParams.cpp
+#	src/ConvertToMDEventsSubalgFactory.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -62,17 +62,17 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
-	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+#	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -116,16 +116,16 @@ set ( TEST_FILES
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
 	test/CompareMDWorkspacesTest.h
-	test/ConvertEventsToMDEventsTest.h
-	test/ConvertToDetectorFaceMDTest.h
-	test/ConvertToMDEventsCoordTransfTest.h
-	test/ConvertToMDEventsMethodsTest.h
-	test/ConvertToMDEventsParamsTest.h
-	test/ConvertToMDEventsSubalgFactoryTest.h
-	test/ConvertToMDEventsTest.h
-	test/ConvertToMDEventsUnitsConvTest.h
-	test/ConvertToQ3DdETest.h
-	test/ConvertToMDEventsTestPerformance.h 	
+#	test/ConvertEventsToMDEventsTest.h
+#	test/ConvertToDetectorFaceMDTest.h
+#	test/ConvertToMDEventsCoordTransfTest.h
+#	test/ConvertToMDEventsMethodsTest.h
+#	test/ConvertToMDEventsParamsTest.h
+#	test/ConvertToMDEventsSubalgFactoryTest.h
+#	test/ConvertToMDEventsTest.h
+#	test/ConvertToMDEventsUnitsConvTest.h
+#	test/ConvertToQ3DdETest.h
+#	test/ConvertToMDEventsTestPerformance.h 	
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
