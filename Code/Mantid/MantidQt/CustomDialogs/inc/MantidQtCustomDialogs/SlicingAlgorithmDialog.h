@@ -42,6 +42,9 @@ protected:
   /// view
   Ui::Dialog ui; 
 
+  /// Common slice md setup
+  void commonSliceMDSetup(const bool);
+
 protected slots:
 
   void onWorkspaceChanged();

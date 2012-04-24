@@ -416,7 +416,9 @@ namespace MDEvents
 
         // Progress reporting
         if (prog) prog->report();
-
+        // For early cancelling of the loop
+        if (this->m_cancel)
+          break;
       }// for each box in the vector
       PARALLEL_END_INTERUPT_REGION
     } // for each chunk in parallel

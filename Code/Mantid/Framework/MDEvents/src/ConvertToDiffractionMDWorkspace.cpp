@@ -40,6 +40,11 @@ events causing more finely split boxes.
 If your input is a [[Workspace2D]] and you do NOT check ''OneEventPerBin'', then the workspace is converted
 to an [[EventWorkspace]] but with no events for empty bins.
 
+==== Performance Notes ====
+
+* 8-core Intel Xeon 3.2 GHz computer: measured between 4 and 5.5 million events per second (100-200 million event workspace).
+* 32-core AMD Opteron 2.7 GHz computer: measured between 8 and 9 million events per second (400-1000 million event workspaces).
+
 *WIKI*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
