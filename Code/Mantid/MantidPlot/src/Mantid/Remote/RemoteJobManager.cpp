@@ -42,6 +42,8 @@ void MwsRemoteJobManager::saveProperties( int itemNum)
     config.setString( prefix + string( "UserName"), m_userName);
 }
 
+
+
 // Returns true if the job was successfully submitted, false if there was a problem
 // retString will contain the job ID on success or an explanation of the problem on
 // failure.
@@ -70,7 +72,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
 
     json << "{\n ";
     json << "\"commandFile\": \"" << remoteAlg.getExecutable() << "\",\n";
-    json << "\"commandLineArguments\": \"" << remoteAlg.getCmdLineParams() << "\",\n";
+    json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteAlg.getCmdLineParams() )<< "\",\n";
     json << "\"user\": \"" << m_userName << "\",\n";
     json << "\"group\": \"" << remoteAlg.getResourceValue( "group") << "\",\n";
     json << "\"name\": \"" << remoteAlg.getName() << "\",\n";
@@ -95,13 +97,16 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
     Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPRequest::HTTP_1_1);
     req.setContentType( "application/json");
 
-    // Set the Authorization header.  Hard coded for now.  I expect to get rid of it once we've got
-    // the username/password php code installed on the server
-
+    // Set the Authorization header (base64 encoded)
     ostringstream encodedAuth;
     Poco::Base64Encoder encoder( encodedAuth);
-    std::string pwd("bogus_pwd");  // HARD-CODED PASSWORD! NEED TO FIX THIS!
-    encoder << m_userName << ":" << pwd;
+
+    if (m_password.empty())
+    {
+      getPassword();
+    }
+
+    encoder << m_userName << ":" << m_password;
     encoder.close();
 
     req.setCredentials( "Basic", encodedAuth.str());
@@ -123,16 +128,6 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
     // anyway.
 
     std::istream &responseStream = session.receiveResponse( response);
-    //std::ostringstream respBody;
-    std::string respBody;
-    while (!responseStream.eof())
-
-    {
-        // There's got to be a better way to copy the response body into a string....
-        std::string temp;
-        getline(responseStream, temp);
-        respBody += temp;
-    }
 
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_CREATED)
     {
@@ -140,8 +135,16 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
         std::ostringstream respStatus;
         respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
         respStatus << "\n\nReply text:\n";
-        respStatus << respBody;
+        respStatus << responseStream.rdbuf();
         retString = respStatus.str();
+
+        if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+        {
+          // Probably some kind of username/password mismatch.  Clear the password so that
+          // the user can enter it again
+          m_password.clear();
+        }
+
         retVal = false;
     }
     else
@@ -153,6 +156,9 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
         // JSON element that looks something like: {"id":"12345"}
         retString = "UNKNOWN JOB ID";
 
+        std::ostringstream respStream;
+        respStream << responseStream.rdbuf();
+        std::string respBody = respStream.str();
         size_t pos = respBody.find ("\"id\":");
         if (pos != std::string::npos)
         {
@@ -163,6 +169,134 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
     return retVal;
 }
 
+
+// Queries MWS for the status of the specified job.
+// If the query is successfully submitted, it writes the status value to retStatus and
+// returns true.  If there was a problem submitting the query (network is down, for example)
+// it writes an error message to errMsg and returns false;
+bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
+                                     RemoteJob::JobStatus &retStatus,
+                                     string &errMsg)
+{
+
+    /*****************
+      NOTE: There's a lot of redundancy between this function and submitJob().
+      Ought to try to clean it up!
+      ********************************/
+
+
+  bool retVal = false;  // assume failure
+
+  // Open an HTTP connection to the cluster
+  Poco::URI uri(m_serviceBaseUrl);
+  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+
+  std::ostringstream path;
+  path << uri.getPathAndQuery();
+  // Path should be something like "/mws/rest", append "/jobs/<job_id>" to it.
+  path << "/jobs/" << jobId;
+
+  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path.str(), Poco::Net::HTTPRequest::HTTP_1_1);
+  req.setContentType( "application/json");
+
+  // Set the Authorization header (base64 encoded)
+  ostringstream encodedAuth;
+  Poco::Base64Encoder encoder( encodedAuth);
+
+  if (m_password.empty())
+  {
+    getPassword();
+  }
+
+  encoder << m_userName << ":" << m_password;
+  encoder.close();
+
+  req.setCredentials( "Basic", encodedAuth.str());
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+  std::istream &responseStream = session.receiveResponse( response);
+
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+      // D'oh!  The MWS server didn't like our request.
+      std::ostringstream respStatus;
+      respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+      respStatus << "\n\nReply text:\n";
+      respStatus << responseStream.rdbuf();
+      errMsg = respStatus.str();
+
+      if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+      {
+        // Probably some kind of username/password mismatch.  Clear the password so that
+        // the user can enter it again
+        m_password.clear();
+      }
+  }
+  else
+  {
+      // Parse the response body for the state
+      std::string statusString = "UNKNOWN";
+
+      std::ostringstream respStream;
+      respStream << responseStream.rdbuf();
+      std::string respBody = respStream.str();
+      size_t pos = respBody.find ("\"state\":");
+      if (pos != std::string::npos)
+      {
+          statusString = respBody.substr( pos+9, respBody.find('"', pos+9) - (pos+9));
+      }
+
+      // Convert the string into a JobStatus
+      if (statusString == "RUNNING")
+      {
+          retStatus = RemoteJob::JOB_RUNNING;
+          retVal = true;
+      }
+      else if (statusString == "QUEUED")
+      {
+          retStatus = RemoteJob::JOB_QUEUED;
+          retVal = true;
+      }
+      else if (statusString == "COMPLETED")
+      {
+          retStatus = RemoteJob::JOB_COMPLETE;
+          retVal = true;
+      }
+      /* else if what else??? */
+      else
+      {
+          retStatus = RemoteJob::JOB_STATUS_UNKNOWN;
+          errMsg = "Unknown job state: " + statusString;
+      }
+  }
+
+  return retVal;
+}
+
+// puts a \ char in front of any " chars it finds (needed for the JSON stuff)
+std::string MwsRemoteJobManager::escapeQuoteChars( const std::string & str)
+{
+  std::string out;
+  size_t start = 0;
+  size_t end = 0;
+  do {
+    end = str.find('"', start);
+    if (end == std::string::npos)
+    {
+      out += str.substr(start);
+    }
+    else
+    {
+      out += str.substr(start, end-start);
+      out += "\\\"";  // append a single backslash char and a single quote char
+      start = end+1;
+    }
+  } while (end != std::string::npos && start < str.length());
+
+  return out;
+}
 
 // On success, creates a new object and returns pointer to it.  On failure,
 // returns NULL
@@ -189,7 +323,7 @@ RemoteJobManager *RemoteJobManagerFactory::createFromProperties( int itemNum)
     std::string managerType;
     config.getValue( prefix + std::string(".Type"), managerType);
 
-    if ( managerType == "MWS") return RemoteJobManagerFactory::createMwsManager( itemNum);
+    if ( managerType == "MWS") return RemoteJobManagerFactory::createQtMwsManager( itemNum);
     // else if.....
     // else if.....
 
@@ -200,7 +334,7 @@ RemoteJobManager *RemoteJobManagerFactory::createFromProperties( int itemNum)
 }
 
 
-MwsRemoteJobManager *RemoteJobManagerFactory::createMwsManager( int itemNum)
+MwsRemoteJobManager *RemoteJobManagerFactory::createQtMwsManager( int itemNum)
 {
     // There's 4 values that we need:  ConfigFileUrl, DisplayName, ServiceBaseUrl and UserName
 
@@ -242,6 +376,6 @@ MwsRemoteJobManager *RemoteJobManagerFactory::createMwsManager( int itemNum)
         return NULL;
 
     // Validation checks passed.  Create the object
-    return new MwsRemoteJobManager( displayName, configFileUrl, serviceBaseUrl, userName);
+    return new QtMwsRemoteJobManager( displayName, configFileUrl, serviceBaseUrl, userName);
 }
 

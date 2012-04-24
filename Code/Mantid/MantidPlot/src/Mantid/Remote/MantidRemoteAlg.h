@@ -8,6 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "RemoteJob.h"
 #include <QComboBox>
 #include <QDockWidget>
 #include <QPoint>
@@ -55,14 +56,9 @@ public:
     ~RemoteAlgorithmDockWidget();
 public slots:
     void update();
-    void findAlgTextChanged(const QString& text);
-    void treeSelectionChanged();
-    void selectionChanged(const QString& algName);
-//    void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
-    void algorithmStarted(void* alg);
-    void algorithmFinished(void* alg);
     void addNewCluster();
     void clusterChoiceChanged(int index);
+    void showJobs();
     void submitJob();
     
 protected:
@@ -82,7 +78,10 @@ protected:
     QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
     
     // Maps item pointers from m_algList to their associated RemoteAlg objects
-    QHash <QListWidgetItem *, RemoteAlg> m_algorithmHash;  
+    QHash <QListWidgetItem *, RemoteAlg> m_algorithmHash;
+
+    // List of all the jobs we've submitted to any cluster
+    QList <RemoteJob> m_jobList;
 
     friend class MantidUI;
 private:

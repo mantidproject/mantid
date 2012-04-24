@@ -1,9 +1,11 @@
 #include "MantidRemoteAlg.h"
+#include "JobStatusDialog.h"
 #include "../MantidDock.h"
 #include "NewClusterDialog.h"
 #include "../MantidUI.h"
 #include "RemoteJobManager.h"
 #include "RemoteAlg.h"
+#include "RemoteJob.h"
 #include <QtGui>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -81,6 +83,7 @@ QDockWidget(w),m_mantidUI(mui)
 
     QObject::connect( newCluster, SIGNAL( clicked()), this, SLOT( addNewCluster()));
     QObject::connect( submitJob, SIGNAL( clicked()), this, SLOT( submitJob()));
+    QObject::connect( showJobs, SIGNAL( clicked()), this, SLOT( showJobs()));
     QObject::connect( m_clusterCombo, SIGNAL( currentIndexChanged(int)), this, SLOT( clusterChoiceChanged(int)));
 
 
@@ -193,10 +196,12 @@ void RemoteAlgorithmDockWidget::addNewCluster()
   if (theDialog->exec() == QDialog::Accepted)
   {
     // Grab the values the user entered
-    MwsRemoteJobManager *manager = new  MwsRemoteJobManager( theDialog->getDisplayName().toStdString(),
-                                                             theDialog->getConfigFileURL().toString().toStdString(),
-                                                             theDialog->getServiceBaseURL().toString().toStdString(),
-                                                             theDialog->getUserName().toStdString());
+    // ToDo:  This will need to change if we ever implement any other type of job manager!
+    // (Will probably want to use the job manager factory class....)
+    QtMwsRemoteJobManager *manager = new  QtMwsRemoteJobManager( theDialog->getDisplayName().toStdString(),
+                                                                 theDialog->getConfigFileURL().toString().toStdString(),
+                                                                 theDialog->getServiceBaseURL().toString().toStdString(),
+                                                                 theDialog->getUserName().toStdString());
     m_clusterList.append( manager);
     
     // Add the Display name to the combo box
@@ -230,6 +235,22 @@ void RemoteAlgorithmDockWidget::clusterChoiceChanged(int index)
     }
 }
 
+
+// Someone clicked the "Show Jobs" button.  Pop up the dialog.
+void RemoteAlgorithmDockWidget::showJobs()
+{
+    JobStatusDialog *d = new JobStatusDialog;
+    QList<RemoteJob>::iterator it = m_jobList.begin();
+    while (it != m_jobList.end())
+    {
+        d->addRow( *it);
+        it++;
+    }
+
+
+
+    d->exec();
+}
 
 // Someone clicked the "Submit Job" button.  Pop up a dialog to grab any needed inputs
 // then hand everything over to the job manager.
@@ -283,6 +304,11 @@ void RemoteAlgorithmDockWidget::submitJob()
         std::string jobId;
         if ( m_clusterList[ m_clusterCombo->currentIndex()]->submitJob( alg, jobId) == true)
         {
+            // job successfully submitted - save the job ID and pop up a message box saying
+            // everything worked
+            RemoteJob theJob( jobId, m_clusterList[ m_clusterCombo->currentIndex()], RemoteJob::JOB_STATUS_UNKNOWN, alg.getName());
+            m_jobList.append( theJob);
+
             QMessageBox msgBox;
             msgBox.setText(tr("Job submission successful."));
             msgBox.setInformativeText( QString(tr( "Job ID: ")) + QString::fromStdString(jobId));
@@ -303,32 +329,6 @@ void RemoteAlgorithmDockWidget::submitJob()
         
     delete d;
 }
-
-void RemoteAlgorithmDockWidget::findAlgTextChanged(const QString& text)
-{
-  
-}
-
-void RemoteAlgorithmDockWidget::treeSelectionChanged()
-{
-  
-}
-
-void RemoteAlgorithmDockWidget::selectionChanged(const QString& algName)
-{
-  
-}
-
-void RemoteAlgorithmDockWidget::algorithmStarted(void* alg)
-{
-  
-}
-
-void RemoteAlgorithmDockWidget::algorithmFinished(void* alg)
-{
-  
-}
-
 
 void RemoteAlgorithmDockWidget::xmlParseServerAttributes( QDomElement &elm)
 {

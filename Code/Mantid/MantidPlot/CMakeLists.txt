@@ -226,8 +226,10 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
                    src/Mantid/InstrumentWidget/DetXMLFile.cpp
+                   src/Mantid/Remote/JobStatusDialog.cpp
                    src/Mantid/Remote/MantidRemoteAlg.cpp	
                    src/Mantid/Remote/NewClusterDialog.cpp
+                   src/Mantid/Remote/QtMwsRemoteJobManager.cpp
                    src/Mantid/Remote/RemoteAlg.cpp
                    src/Mantid/Remote/RemoteJobManager.cpp
 )
@@ -457,6 +459,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
+                   src/Mantid/Remote/JobStatusDialog.h
                    src/Mantid/Remote/MantidRemoteAlg.h
                    src/Mantid/Remote/NewClusterDialog.h
                    src/Mantid/Remote/RemoteAlg.h
@@ -702,6 +705,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/Projection3D.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
                        src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                       src/Mantid/Remote/JobStatusDialog.h
                        src/Mantid/Remote/MantidRemoteAlg.h
                        src/Mantid/Remote/NewClusterDialog.h
 )
@@ -714,6 +718,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/MantidMDCurveDialog.ui
+               src/Mantid/Remote/JobStatusDialog.ui
                src/Mantid/Remote/NewClusterDialog.ui
 )
 

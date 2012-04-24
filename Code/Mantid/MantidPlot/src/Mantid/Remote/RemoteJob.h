@@ -10,19 +10,33 @@
 
 
 #include <string>
+class RemoteJobManager;
+
 class RemoteJob
 {
 public:
 
-    // At this point, default constructor, copy constructor and assignment operator are all
-    // valid and useful.  If that changes, we'll either need to explicitly implement them
-    // or else declare them private.
+    enum JobStatus { JOB_COMPLETE, JOB_RUNNING, JOB_QUEUED, JOB_ABORTED, JOB_STATUS_UNKNOWN };
+
+    RemoteJob( const std::string & jobId, RemoteJobManager * manager, JobStatus status, const std::string &name)
+        : m_jobId( jobId),
+          m_manager( manager),
+          m_status( status),
+          m_algName( name)  { }
+    // At this point, the default copy constructor and assignment operator are valid and
+    // useful.  If that changes, we'll either need to explicitly implement them or else
+    // declare them private.
     
-    std::string m_jobId;    // Returned by RemoteJobManager::submitJob()
-    int m_status;           // Job is running, held, aborted, etc...  Probably should be an enum
-    std::string m_name;     // A meaningful name that can be displayed in the GUI ("Hello World", "NOMAD Reduce", etc..)
+    std::string m_jobId;            // Returned by RemoteJobManager::submitJob()
+    RemoteJobManager *m_manager;    // Pointer to the job manager that was used to submit the job in the first place
+    JobStatus m_status;             // Job is running, held, aborted, etc...
+    std::string m_algName;          // A meaningful name that can be displayed in the GUI ("Hello World", "NOMAD Reduce", etc..)
+
+    /************************
+    // Not sure if I need these....
     std::string m_stdOut;   // Name (on the remote system) where stdout was written (in case we want to download it)
     std::string m_stdErr;   // Same, but for stderr
+    ******************/
 };
 
 

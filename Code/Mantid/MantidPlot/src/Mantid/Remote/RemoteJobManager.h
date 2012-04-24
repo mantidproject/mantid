@@ -4,11 +4,13 @@
 // Note: I'm deliberately avoiding all Qt classes here just in case this code needs to be used
 // outside of the MantidPlot hierarchy.
 
+#include "RemoteJob.h"
 #include <string>
 
 class RemoteJobManager;         // Top-level abstract class
 class HttpRemoteJobManager;     // Mid-level abstract class. (Not sure we really need this.)
-class MwsRemoteJobManager;      // Concrete class - communicates w/ Moab Web Services
+class MwsRemoteJobManager;      // Abstract class - communicates w/ Moab Web Services
+class QtMwsRemoteJobManager;    // Concrete class - Uses a Qt dialog box to ask for the password for MWS
 //class CondorRemoteJobManager; // Concrete class - communicates w/ Condor.  Doesn't exist & probably never will
 //class GlobusRemoteJobManager; // Concrete class - communicates w/ Globus.  Doesn't exist yet, but the ISIS folks need it
 
@@ -28,20 +30,17 @@ public:
 
     // The basic API: submit a job, abort a job and check on the status of a job
     virtual bool submitJob( const RemoteAlg &remoteAlg, std::string &retString) = 0;
+    virtual bool jobStatus( const std::string &jobId,
+                            RemoteJob::JobStatus &retStatus,
+                            std::string &errMsg) = 0;
+/************
+    TODO: Uncomment these when we're ready to implement
     virtual int abortJob( std::string jobId) = 0;
     virtual bool jobHeld( std::string jobId) = 0;
     virtual bool jobRunning( std::string jobId) = 0;
     virtual bool jobComplete( std::string jobId) = 0;
+***********/
     
-    // This is provided as a standardized means of allowing the user to
-    // enter authentication info.  For the MwsRemoteJobManager, I expect it
-    // to pop up a dialog box asking for user name and password.  For Globus,
-    // it'll probably ask for a certificate...
-    //
-    // NOTE: Actually - I'm not sure about this.  I really want to separate the UI from
-    // the implementation of these classes....
-    virtual void setAuthInfo() = 0;
-
     const std::string & getDisplayName() const { return m_displayName; }
     const std::string & getConfigFileUrl() const { return m_configFileUrl; }
 
@@ -78,6 +77,17 @@ public:
 
 };
 
+/*
+ * Note: MwsRemoteJobManager is abstract!  (getPassword is a pure virtual function).
+ * I don't really like doing this, but I need to ask for a password somehow.  In
+ * MantidPlot, the best way to do that is to use a Qt dialog box.  However,
+ * I really wanted to keep the Qt specific stuff separated.  (There's been some talk
+ * about using MWS in other contexts where Qt may not be available.)
+ * So, my solution is to have most of the implementation here, but create a child
+ * class that implements the getPassword function.  If I ever need to use this
+ * code someplace where Qt is unavailable, I'll have to create another child class
+ * with a different implementation
+ */
 class MwsRemoteJobManager : public HttpRemoteJobManager
 {
 public:
@@ -92,33 +102,49 @@ public:
     virtual const std::string getType() const { return "MWS"; }
 
     virtual bool submitJob( const RemoteAlg &remoteAlg, std::string &retString);
-    // TODO: IMPLEMENT THESE FUNCTIONS FOR REAL!
+    virtual bool jobStatus( const std::string &jobId,
+                            RemoteJob::JobStatus &retStatus,
+                            std::string &errMsg);
+/*******
+    TODO: IMPLEMENT THESE FUNCTIONS FOR REAL!
     virtual int abortJob( std::string jobId) { return 0; }
     virtual bool jobHeld( std::string jobId) { return false; }
     virtual bool jobRunning( std::string jobId) { return false; }
     virtual bool jobComplete( std::string jobId) { return false; }
+*********/
     virtual void saveProperties( int itemNum);
-    virtual void setAuthInfo()
-    {
-        // TODO: Implement this for real!
-        return;
-    }
 
-private:
-    std::string m_serviceBaseUrl;
-    std::string m_userName;
+protected:
+    virtual bool getPassword() = 0; // This needs to be implemented in whatever way makes sense
+                                    // for the environment where it's being used...
+
+    std::string escapeQuoteChars( const std::string & str); // puts a \ char in front of any " chars it finds
+                                                            // (needed for the JSON stuff)
     std::string m_password; // This does  **NOT** get saved in the properties file.  It's merely
                             // a convenient place to hold the password in memory (and I don't
                             // even like doing that, but the alternative is for the user to enter
                             // it every time and that would be way too tedious).  I'm expecting
                             // the GUI to pop up a dialog box asking for it before it's needed.
 
-    std::string m_json; // This will hold the complete json text for the job submission.
-                        // It exists merely for debugging purposes so I can look at the output
-                        // in a debugger....
-
+    std::string m_serviceBaseUrl;
+    std::string m_userName;
 
 };
+
+
+class QtMwsRemoteJobManager : public MwsRemoteJobManager
+{
+public:
+  QtMwsRemoteJobManager( std::string displayName, std::string configFileUrl,
+                       std::string serviceBaseUrl, std::string userName) :
+    MwsRemoteJobManager( displayName, configFileUrl, serviceBaseUrl, userName) { }
+
+  ~QtMwsRemoteJobManager() { }
+
+protected:
+  virtual bool getPassword(); // Will pop up a Qt dialog box to request a password
+};
+
 
 class RemoteJobManagerFactory
 {
@@ -126,7 +152,7 @@ public:
     static RemoteJobManager *createFromProperties( int itemNum);
 
 private:
-    static MwsRemoteJobManager *createMwsManager( int itemNum);
+    static MwsRemoteJobManager *createQtMwsManager( int itemNum);
 
 };
 
