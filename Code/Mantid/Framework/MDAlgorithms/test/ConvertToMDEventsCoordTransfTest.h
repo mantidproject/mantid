@@ -31,7 +31,7 @@ public:
         MDEvents::MDWSDescription TestWS(4);
 
         TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
-        TestWS.emode= MDAlgorithms:: Direct;
+        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
         TestWS.dimMin.assign(4,-3);
         TestWS.dimMax.assign(4,3);
         TestWS.dimNames[1]="phi";
@@ -96,7 +96,7 @@ void test_CoordTransfQ3DDirect()
     MDEvents::MDWSDescription TestWS(4);
 
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
-    TestWS.emode= MDAlgorithms:: Direct;
+    TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
     TestWS.dimMin.assign(4,-3);
     TestWS.dimMax.assign(4,3);
     TestWS.dimNames.assign(4,"Momentum");

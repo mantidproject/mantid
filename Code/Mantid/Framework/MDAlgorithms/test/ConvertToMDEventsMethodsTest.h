@@ -59,7 +59,7 @@ void test_TwoTransfMethods()
     ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvertNo,CrystType> HistoConv;
     
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
-    TestWS.emode= MDAlgorithms:: Direct;
+    TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
     TestWS.dimMin.assign(4,-3);
     TestWS.dimMax.assign(4,3);
     TestWS.dimNames.assign(4,"Momentum");
