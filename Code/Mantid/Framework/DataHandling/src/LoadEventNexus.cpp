@@ -35,6 +35,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidKernel/FunctionTask.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MemoryManager.h"
@@ -1364,7 +1365,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   // Make the thread pool
-  ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
+  ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
   Mutex * diskIOMutex = new Mutex();
   for (size_t i=0; i < bankNames.size(); i++)
