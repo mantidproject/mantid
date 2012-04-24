@@ -65,7 +65,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   string(STRIP ${OSX_VERSION} OSX_VERSION)
 
   if (OSX_VERSION VERSION_LESS 10.6)
-    message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard).")
+    message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard). Your version is ${OSX_VERSION}")
   endif()
 
   if (OSX_VERSION VERSION_GREATER 10.6 OR OSX_VERSION VERSION_EQUAL 10.6)
