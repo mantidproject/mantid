@@ -4,6 +4,9 @@ mtd.initialise()
 from mantidsimple import LoadAscii, ConvertToHistogram
 from reduction import Reducer, ReductionStep, validate_step
 
+# Make sure we can import the UI
+from reduction_application import ReductionGUI
+
 class TestReductionStep(ReductionStep):
     def __init__(self):
         self.some_value = 5
