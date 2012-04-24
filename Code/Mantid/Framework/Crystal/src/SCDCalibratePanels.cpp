@@ -1349,14 +1349,14 @@ namespace Crystal
       declareProperty( "NumIterations",60,"Number of iterations");
 
 
-     setPropertySettings("PanelNamePrefix", new EnabledWhenProperty(this, "PanelGroups",
+     setPropertySettings("PanelNamePrefix", new EnabledWhenProperty( "PanelGroups",
           Kernel::IS_EQUAL_TO, "SpecifyGroups"));
-      setPropertySettings("Grouping", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO,
+      setPropertySettings("Grouping", new EnabledWhenProperty( "PanelGroups", Kernel::IS_EQUAL_TO,
           "SpecifyGroups"));
 
-      setPropertySettings("PreProcFilename", new EnabledWhenProperty(this, "PreProcessInstrument",
+      setPropertySettings("PreProcFilename", new EnabledWhenProperty( "PreProcessInstrument",
           Kernel::IS_NOT_EQUAL_TO, "No PreProcessing"));
-      setPropertySettings("InitialTimeOffset", new EnabledWhenProperty(this, "PreProcessInstrument",
+      setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
           Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file"));
 
     }
