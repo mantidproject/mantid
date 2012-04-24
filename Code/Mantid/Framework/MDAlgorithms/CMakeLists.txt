@@ -17,7 +17,7 @@ set ( SRC_FILES
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
 	src/GreaterThanMD.cpp
-	src/IConvertToMDEventsMethods.cpp
+#	src/IConvertToMDEventsMethods.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
@@ -77,7 +77,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
-	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h
+#	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
