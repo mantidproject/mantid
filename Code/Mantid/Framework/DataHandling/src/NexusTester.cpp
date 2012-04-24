@@ -164,9 +164,8 @@ namespace DataHandling
       file.close();
       double seconds = tim.elapsedWallClock(false);
       double MBperSec = dataSizeMB / seconds;
-      this->setProperty("SaveSpeed", MBperSec);
       g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec" << std::endl;
-
+      this->setProperty("SaveSpeed", MBperSec);
     }
 
     // Check the size of the file created/loaded
@@ -174,12 +173,16 @@ namespace DataHandling
     double fileSizeMB = double(info.getSize())/(1024.*1024.);
     g_log.notice() << "File size is " << fileSizeMB << " MB" << std::endl;
 
+    double CompressionFactor = fileSizeMB / dataSizeMB;
+    this->setProperty("CompressionFactor", CompressionFactor);
+
     bool ClearDiskCache = this->getProperty("ClearDiskCache");
     if (ClearDiskCache)
     {
       g_log.information() << "Clearing disk cache." << std::endl;
       if (system("sync ; echo 3 > /proc/sys/vm/drop_caches") != 0)
         g_log.error("Error clearing disk cache");
+      Poco::Thread::sleep(100);
     }
 
     // ------------------------ Load a File ----------------------------
@@ -203,11 +206,9 @@ namespace DataHandling
       double seconds = tim.elapsedWallClock(false);
       double MBperSec = dataSizeMB / seconds;
       this->setProperty("LoadSpeed", MBperSec);
-      g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec" << std::endl;
+      g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec (data), " << MBperSec*CompressionFactor << " MB/sec (file)" << std::endl;
     }
 
-    double CompressionFactor = fileSizeMB / dataSizeMB;
-    this->setProperty("CompressionFactor", CompressionFactor);
   }
 
 
