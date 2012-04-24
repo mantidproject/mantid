@@ -22,7 +22,7 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDAlgorithms::ConvertToMD;
 
-class ConvertEventsToMDEventsTestPerformance : public CxxTest::TestSuite
+class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
 {
 
    Mantid::API::MatrixWorkspace_sptr inWs2D;
@@ -32,10 +32,9 @@ class ConvertEventsToMDEventsTestPerformance : public CxxTest::TestSuite
    std::auto_ptr<IConvertToMDEventsMethods> pConvMethods;
    PreprocessedDetectors det_loc;
 
-
 public:
-static ConvertEventsToMDEventsTestPerformance *createSuite() { return new ConvertEventsToMDEventsTestPerformance(); }
-static void destroySuite(ConvertEventsToMDEventsTestPerformance * suite) { delete suite; }    
+static ConvertToMDEventsTestPerformance *createSuite() { return new ConvertToMDEventsTestPerformance(); }
+static void destroySuite(ConvertToMDEventsTestPerformance * suite) { delete suite; }    
 
 void test_EventNoUnitsConv()
 {
@@ -43,7 +42,7 @@ void test_EventNoUnitsConv()
 }
 
 
-ConvertEventsToMDEventsTestPerformance()
+ConvertToMDEventsTestPerformance()
 {
    int numHist=100*100;
    Mantid::API::MatrixWorkspace_sptr inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateRandomEventWorkspace(1000, numHist, 0.1));
