@@ -40,8 +40,8 @@ namespace ConvertToMD
 
 
 // ModQ,Inelastic 
-template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct CoordTransformer<ModQ,MODE,CONV,Type,Sample>
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample> 
+struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,Type,Sample>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
