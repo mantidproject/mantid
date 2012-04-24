@@ -66,7 +66,7 @@ namespace MDAlgorithms
    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
  
-    template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
+    template< QMode Q, AnalMode MODE, CnvrtUnits CONV, XCoordType Type, SampleType Sample>
     friend struct CoordTransformer;
  public:
      // constructor;
@@ -121,7 +121,7 @@ namespace MDAlgorithms
 
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
+template< InputWSType WS, QMode Q,  AnalMode MODE,  CnvrtUnits CONV, SampleType Sample>
 class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
 { 
 public:

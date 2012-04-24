@@ -3,7 +3,7 @@
 
 
 
-using namespace Mantid::MDAlgorithms::ConvertToMD;
+//using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 namespace Mantid
 {
