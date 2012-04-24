@@ -62,7 +62,7 @@ class DataSets(BaseScriptElement):
         if for_automated_reduction:
             return self._automated_reduction()
         
-        script = "RefReduction(DataRun=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script = "a = RefReduction(DataRun=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRun=%d,\n" % self.norm_file
         script += "              Instrument='REF_M',\n"
         script += "              PolarizedData=True,\n"
@@ -107,7 +107,7 @@ class DataSets(BaseScriptElement):
         script += "              OutputWorkspacePrefix='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
         
-        #script += "REF_RED_OUTPUT_MESSAGE += a.getPropertyValue('OutputMessage')\n" 
+        script += "print a.getPropertyValue('OutputMessage')\n"
 
         # Save the reduced data
         script += "ws_list = ['reflectivity_%s-Off_Off',\n" % str(self.data_files[0])
