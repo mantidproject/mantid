@@ -9,7 +9,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** NexusTester : TODO: DESCRIPTION
+  /** NexusTester : debugging/performance testing algorithm for nexus file loading and saving.
     
     @date 2012-04-24
 

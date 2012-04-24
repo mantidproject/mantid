@@ -60,7 +60,7 @@ namespace DataHandling
   int NexusTester::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string NexusTester::category() const { return "DataHandling\\NeXus";}
+  const std::string NexusTester::category() const { return "DataHandling\\Nexus";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
@@ -78,10 +78,11 @@ namespace DataHandling
     std::vector<std::string> exts;
     exts.push_back(".nxs");
     declareProperty(new FileProperty("SaveFilename", "", FileProperty::OptionalSave, exts),
-          "The name of the Nexus file to write");
+          "The name of the Nexus file to write.");
 
     declareProperty(new FileProperty("LoadFilename", "", FileProperty::OptionalLoad, exts),
-          "The name of the Nexus file to write");
+          "The name of the Nexus file to load (optional).\n"
+          "Must have been written by NexusTester algorithm.");
 
     declareProperty("ChunkSize", 10, "Chunk size for writing/loading, in kb");
     declareProperty("NumChunks", 10, "Number of chunks to load or write");
@@ -94,8 +95,8 @@ namespace DataHandling
     declareProperty("FakeData", "Incrementing Numbers", boost::make_shared<StringListValidator>(types) ,
         "For writing: type of fake data to generate.");
 
-    declareProperty("SaveSpeed", 0.0, Direction::Output);
-    declareProperty("LoadSpeed", 0.0, Direction::Output);
+    declareProperty("SaveSpeed", 0.0, "The measured rate of saving the file, in MB/sec.", Direction::Output);
+    declareProperty("LoadSpeed", 0.0, "The measured rate of loading the file, in MB/sec.", Direction::Output);
   }
 
   //----------------------------------------------------------------------------------------------
