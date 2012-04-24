@@ -373,6 +373,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="ck_parallel">
+     <property name="text">
+      <string>Parallel</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="btn_help">

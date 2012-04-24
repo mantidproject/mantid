@@ -329,11 +329,26 @@ namespace MantidQt
       }
     }
 
+    /*
+    Perform tasks that are almost identical for derived types except for visibility switch.
+    @isSliceMD. Is the calling method from SliceMD.
+    */
+    void SlicingAlgorithmDialog::commonSliceMDSetup(const bool isSliceMD)
+    {
+      ui.file_backend_layout->setVisible(isSliceMD);
+      ui.ck_max_from_input->setVisible(isSliceMD);
+      ui.lbl_resursion_depth->setVisible(isSliceMD);
+      ui.txt_resursion_depth->setVisible(isSliceMD);
+      ui.ck_parallel->setVisible(!isSliceMD);
+    }
+
     /*---------------------------------------------------------------------------------------------
     SliceMDDialog Methods
     ---------------------------------------------------------------------------------------------*/
     void SliceMDDialog::customiseInitLayout()
     {
+      commonSliceMDSetup(true);
+
       //Tie the widgets to properties
       tie(ui.ck_max_from_input, "TakeMaxRecursionDepthFromInput");
       tie(ui.txt_resursion_depth, "MaxRecursionDepth");
@@ -351,10 +366,9 @@ namespace MantidQt
     void BinMDDialog::customiseInitLayout()
     {
       //Disable the stuff that doesn't relate to BinMD
-      ui.file_backend_layout->setVisible(false);
-      ui.ck_max_from_input->setVisible(false);
-      ui.lbl_resursion_depth->setVisible(false);
-      ui.txt_resursion_depth->setVisible(false);
+      commonSliceMDSetup(false);
+
+      tie(ui.ck_parallel, "Parallel");
     }
 
     /*---------------------------------------------------------------------------------------------
