@@ -4,10 +4,10 @@
 import unittest
 import testhelpers
 from mantid.kernel import IValidator
-from mantid import (WorkspaceUnitValidator, HistogramValidator, 
-                    RawCountValidator, CommonBinsValidator,
-                    SpectraAxisValidator, NumericAxisValidator,
-                    InstrumentValidator)
+from mantid.api import (WorkspaceUnitValidator, HistogramValidator, 
+                        RawCountValidator, CommonBinsValidator,
+                        SpectraAxisValidator, NumericAxisValidator,
+                        InstrumentValidator)
 
 class WorkspaceValidatorsTest(unittest.TestCase):
     

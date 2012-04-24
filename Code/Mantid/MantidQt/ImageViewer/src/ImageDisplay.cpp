@@ -192,6 +192,9 @@ void ImageDisplay::UpdateImage()
 
   image_plot_item->SetData( data_array, &color_table );
   image_plot->replot();
+  image_plot->replot(); // try to get image to appear consistently on Win7
+  image_plot->replot();
+  image_plot->replot();
 }
 
 

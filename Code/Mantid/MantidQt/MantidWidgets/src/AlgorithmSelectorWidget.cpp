@@ -16,7 +16,8 @@ namespace MantidWidgets
    */
   AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
   : QWidget(parent), m_tree(NULL), m_findAlg(NULL), m_execButton(NULL),
-    m_updateObserver(*this, &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate)
+    m_updateObserver(*this, &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
+    m_updateInProgress(false)
   {
     QHBoxLayout * buttonLayout = new QHBoxLayout();
 
@@ -77,8 +78,10 @@ namespace MantidWidgets
   /** Update the lists of algorithms */
   void AlgorithmSelectorWidget::update()
   {
+    m_updateInProgress = true;
     m_findAlg->update();
     m_tree->update();
+    m_updateInProgress = false;
   }
 
 
@@ -172,7 +175,10 @@ namespace MantidWidgets
   void AlgorithmSelectorWidget::
   handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
   {
-    this->update();
+    if(!m_updateInProgress)
+    {
+      this->update();
+    }
   }
 
   //============================================================================

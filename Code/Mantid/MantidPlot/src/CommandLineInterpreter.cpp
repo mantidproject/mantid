@@ -212,6 +212,7 @@ CommandLineInterpreter::CommandLineInterpreter(const ScriptingEnv & environ, QWi
     m_inputBuffer(),m_status(Waiting),
     m_promptKey(markerDefine(QsciScintilla::ThreeRightArrows)),
     m_continuationKey(markerDefine(QsciScintilla::ThreeDots)),
+    m_currentPromptLineIndex(0),
     m_pastedText(), m_pasteQueue(),
     m_copy(NULL), m_cut(NULL), m_paste(NULL), m_saveAs(NULL),
     m_zoomIn(NULL), m_zoomOut(NULL)
@@ -346,9 +347,15 @@ void CommandLineInterpreter::displayError(const QString & messages)
  */
 void CommandLineInterpreter::insertInputPrompt()
 {
+  const int prevPromptLineIndex = m_currentPromptLineIndex;
   append("\n");
-  markerAdd(indexOfLastLine(), m_promptKey);
   moveCursorToStartOfLastLine();
+  m_currentPromptLineIndex = indexOfLastLine();
+  // Order is important. Qscintilla tries to make the markers
+  // follow the cursor so we have to add the new one
+  // then restore the original
+  markerAdd(m_currentPromptLineIndex, m_promptKey);
+  markerAdd(prevPromptLineIndex, m_promptKey);
 }
 
 /**
@@ -559,26 +566,24 @@ void CommandLineInterpreter::simulateUserInput(QString & text, const int offset)
 
 /**
  * Intercept key presses
- * @param event
+ * @param keyPress A Qt key event describing the key press
  */
-void CommandLineInterpreter::keyPressEvent(QKeyEvent* event)
+void CommandLineInterpreter::keyPressEvent(QKeyEvent* keyPress)
 {
   // Make sure the autocomplete box gets the events if it is active
   if(isListActive())
   {
-    ScriptEditor::keyPressEvent(event);
+    ScriptEditor::keyPressEvent(keyPress);
   }
 
-  if(handleKeyPress(event))
+  if(handleKeyPress(keyPress))
   {
-    event->accept();
+    keyPress->accept();
   }
   else
   {
-    moveCursorToEnd();
-    ScriptEditor::keyPressEvent(event);
+    ScriptEditor::keyPressEvent(keyPress);
   }
-
 }
 
 bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
@@ -590,9 +595,11 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
 
   const int key = event->key();
   bool handled(false);
+  bool cursorToEnd(true);
   if(event->matches(QKeySequence::Copy))
   {
     handled = true;
+    cursorToEnd = false;
     copy();
   }
   else if(event->matches(QKeySequence::Paste))
@@ -603,11 +610,13 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   else if(event->matches(QKeySequence::Cut))
   {
     handled = true;
+    cursorToEnd = false;
     cut();
   }
   else if(event->matches(QKeySequence::Find))
   {
     handled = true;
+    cursorToEnd = false;
     showFindDialog();
   }
   else if(key == Qt::Key_Return || key == Qt::Key_Enter)
@@ -615,11 +624,17 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
     handled = true;
     handleReturnKeyPress();
   }
-  else if(key == Qt::Key_Left || key == Qt::Key_Backspace)
+  else if(key == Qt::Key_Left || key == Qt::Key_Direction_L || 
+          key == Qt::Key_Backspace)
   {
+    cursorToEnd = false;
     int index(-1), dummy(-1);
     getCursorPosition(&dummy, &index);
     if(index == 0) handled = true;
+  }
+  else if(key == Qt::Key_Right || key == Qt::Key_Direction_R)
+  {
+    cursorToEnd = false;
   }
   else if (key == Qt::Key_Up)
   {
@@ -633,12 +648,12 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   }
   else if (key == Qt::Key_Delete)
   {
-    // We don't want to move the cursor to just
-    // pass this directly
-    handled = true;
-    ScriptEditor::keyPressEvent(event);
+    cursorToEnd = false;
   }
-
+  if(cursorToEnd)
+  {
+    moveCursorToEnd();
+  }
   return handled;
 }
 
@@ -705,8 +720,7 @@ void CommandLineInterpreter::tryExecute()
 }
 
 /**
- * Execute the given code
- * @param code Run the code asynchronously and return
+ * Execute the code currently in the buffer
  */
 void CommandLineInterpreter::execute()
 {

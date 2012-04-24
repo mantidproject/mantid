@@ -54,6 +54,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 
 
 using namespace Mantid;
@@ -68,6 +69,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using MantidQt::API::AlgorithmRunner;
 
 namespace MantidQt
 {
@@ -78,9 +80,6 @@ namespace SliceViewer
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
-      m_finishedObserver(*this, &SliceViewer::handleAlgorithmFinishedNotification),
-      m_progressObserver(*this, &SliceViewer::handleAlgorithmProgressNotification),
-      m_errorObserver(*this, &SliceViewer::handleAlgorithmErrorNotification),
       m_ws(), m_firstWorkspaceOpen(false),
       m_dimensions(), m_data(NULL),
       m_X(), m_Y(),
@@ -125,7 +124,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
-  QObject::connect(this, SIGNAL(dynamicRebinComplete()), this, SLOT(dynamicRebinCompleteSlot()));
+
+  m_algoRunner = new AlgorithmRunner();
+  QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(dynamicRebinComplete(bool)));
 
   initMenus();
 
@@ -277,6 +278,13 @@ void SliceViewer::initMenus()
   m_syncRebinLock = new SyncedCheckboxes(action, ui.btnRebinLock, true);
   connect(m_syncRebinLock, SIGNAL(toggled(bool)), this, SLOT(RebinLock_toggled(bool)));
   m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Refresh Rebin", this);
+  action->setShortcut(Qt::Key_R + Qt::ControlModifier);
+  action->setEnabled(false);
+  connect(action, SIGNAL(triggered()), this, SLOT(rebinParamsChanged()));
+  m_menuView->addAction(action);
+  m_actionRefreshRebin = action;
 
   m_menuView->addSeparator();
 
@@ -861,6 +869,7 @@ void SliceViewer::RebinMode_toggled(bool checked)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
   ui.btnRebinLock->setEnabled(checked);
+  m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
 
   if (!m_rebinMode)
@@ -909,6 +918,8 @@ void SliceViewer::zoomOutSlot()
  */
 void SliceViewer::zoomRectSlot(const QwtDoubleRect & rect)
 {
+  if ((rect.width() == 0) || (rect.height() == 0))
+    return;
   this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
 }
 
@@ -1902,17 +1913,8 @@ void SliceViewer::rebinParamsChanged()
 {
   if (!m_ws) return;
 
-  // Cancel any currently running rebinning algorithms
-  if (m_asyncRebinAlg)
-  {
-    if (m_asyncRebinAlg->isRunning())
-      m_asyncRebinAlg->cancel();
-    if (m_asyncRebinResult)
-    {
-      m_asyncRebinResult->tryWait(1000);
-      delete m_asyncRebinResult;
-    }
-  }
+  // Cancel pre-existing algo.
+  m_algoRunner->cancelRunningAlgorithm();
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("BinMD");
   alg->setProperty("InputWorkspace", m_ws);
@@ -1974,15 +1976,9 @@ void SliceViewer::rebinParamsChanged()
   alg->setProperty("Parallel", true);
   alg->setPropertyValue("OutputWorkspace", m_overlayWSName);
 
-  // Start asynchronous execution
-  m_asyncRebinAlg = alg;
-  m_asyncRebinResult = new Poco::ActiveResult<bool>(m_asyncRebinAlg->executeAsync());
-
-  // Observe the algorithm
-  alg->addObserver(m_finishedObserver);
-  alg->addObserver(m_errorObserver);
-  alg->addObserver(m_progressObserver);
-
+  // Make the algorithm begin asynchronously
+  m_algoRunner->startAlgorithm(alg);
+  // The dynamicRebinComplete() slot is connected to the runner to plot when complete.
 }
 
 
@@ -1990,9 +1986,21 @@ void SliceViewer::rebinParamsChanged()
 /** Slot called by the observer when the BinMD call has completed.
  * This returns the execution to the main GUI thread, and
  * so can update the GUI.
+ * @param error :: true if the algorithm died with an error.
  */
-void SliceViewer::dynamicRebinCompleteSlot()
+void SliceViewer::dynamicRebinComplete(bool error)
 {
+  // If there was an error, clear the workspace
+  m_overlayWS.reset();
+  if (!error)
+  {
+    if (AnalysisDataService::Instance().doesExist(m_overlayWSName))
+      m_overlayWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_overlayWSName);
+  }
+
+  // Make it so we refresh the display, with this workspace on TOP
+  m_data->setOverlayWorkspace(m_overlayWS);
+
   if (m_overlayWS)
   {
     // Position the outline according to the position of the workspace.
@@ -2010,53 +2018,6 @@ void SliceViewer::dynamicRebinCompleteSlot()
   else
     m_overlayWSOutline->setShown(false);
   this->updateDisplay();
-}
-
-//--------------------------------------------------------------------------------------
-/** Observer called when the BinMD algorithm has completed when
- * dynamic rebinning is on.
- *
- * This is called in a separate (non-GUI) thread and so
- * CANNOT directly change the gui.
- *
- * @param pNf :: finished notification object.
- */
-void SliceViewer::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
-{
-  UNUSED_ARG(pNf);
-  //TODO: Mutex would be a good idea
-  m_overlayWS.reset();
-  if (AnalysisDataService::Instance().doesExist(m_overlayWSName))
-    m_overlayWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_overlayWSName);
-
-  // Make it so we refresh the display, with this workspace on TOP
-  m_data->setOverlayWorkspace(m_overlayWS);
-  emit dynamicRebinComplete();
-}
-
-//--------------------------------------------------------------------------------------
-/** Observer called when the BinMD algorithm has progress to report
- *
- * @param pNf :: notification object
- */
-void SliceViewer::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
-{
-  UNUSED_ARG(pNf);
-  //std::cout << "Progress " << pNf->progress << " !\n";
-}
-
-//--------------------------------------------------------------------------------------
-/** Observer called when the BinMD algorithm has encountered an error.
- * Remove the overlay workspace.
- *
- * @param pNf :: notification object
- */
-void SliceViewer::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
-{
-  UNUSED_ARG(pNf);
-  m_overlayWS.reset();
-  m_data->setOverlayWorkspace(m_overlayWS);
-  emit dynamicRebinComplete();
 }
 
 } //namespace

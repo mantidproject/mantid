@@ -1,6 +1,6 @@
 import unittest
 import testhelpers
-from mantid import NullValidator
+from mantid.kernel import NullValidator
 
 class NullValidatorTest(unittest.TestCase):
 

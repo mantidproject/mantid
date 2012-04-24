@@ -5,7 +5,15 @@
 
 from MantidFramework import *
 from mantidsimple import *
+from mantid.api import AlgorithmFactory
 import os
+
+all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
+if 'GatherWorkspaces' in all_algs:
+    HAVE_MPI = True
+    import boostmpi as mpi
+else:
+    HAVE_MPI = False
 
 COMPRESS_TOL_TOF = .01
 
@@ -202,6 +210,7 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
                              Description="Relative time to stop filtering by in seconds. Applies only to sample.")
+        self.declareProperty("MaxChunkSize", 0.0, Description="Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
         self.declareProperty("FilterCharacterizations", False,
                              Description="Filter the characterization runs using above parameters. This only works for event files.")
         self.declareListProperty("Binning", [0.,0.,0.],
@@ -224,66 +233,117 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
-    def _loadPreNeXusData(self, runnumber, extension, **kwargs):
-        mykwargs = {}
-        if kwargs.has_key("FilterByTimeStart"):
-            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-        if kwargs.has_key("FilterByTimeStop"):
-            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
+    def _loadPreNeXusData(self, runnumber, extension, **chunk):
+        chunkNo = 1
+        if chunk.has_key("ChunkNumber"):
+            chunkNo = int(chunk["ChunkNumber"])
 
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         self.log().debug(filename)
 
-        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
+        name += "_%02d" % (chunkNo)
+        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **chunk)
         wksp = alg['OutputWorkspace']
-
-        # add the logs to it
-        if (str(self._instrument) == "SNAP"):
-            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
 
         return wksp
 
-    def _loadEventNeXusData(self, runnumber, extension, **kwargs):
-        kwargs["Precount"] = True
+    def _loadEventNeXusData(self, runnumber, extension, filterWall=None, **chunk):
+        chunkNo = 1
+        if chunk.has_key("ChunkNumber"):
+            chunkNo = int(chunk["ChunkNumber"])
+        chunk["Precount"] = True
+        if filterWall is not None:
+            if filterWall[0] > 0.:
+                chunk["FilterByTimeStart"] = filterWall[0]
+            if filterWall[1] > 0.:
+                chunk["FilterByTimeStop"] = filterWall[1]
+
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+        name += "_%02d" % (chunkNo)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **chunk)
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
+        name += "_%02d" % 1
         alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
         return alg.workspace()
 
-    def _loadData(self, runnumber, extension, filterWall=None):
-        filter = {}
-        if filterWall is not None:
-            if filterWall[0] > 0.:
-                filter["FilterByTimeStart"] = filterWall[0]
-            if filterWall[1] > 0.:
-                filter["FilterByTimeStop"] = filterWall[1]
-
+    def _loadData(self, runnumber, extension, filterWall=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
 
         if extension.endswith("_event.nxs"):
-            return self._loadEventNeXusData(runnumber, extension, **filter)
+            return self._loadEventNeXusData(runnumber, extension, filterWall, **chunk)
         elif extension.endswith("_histo.nxs"):
             return self._loadHistoNeXusData(runnumber, extension)
-        elif "and" in extension:
-            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat", **filter)
-            RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
-            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat", **filter)
-            Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
-            mtd.deleteWorkspace("tmp")
-            return wksp1;
         else:
-            return self._loadPreNeXusData(runnumber, extension, **filter)
+            return self._loadPreNeXusData(runnumber, extension, **chunk)
+
+    def _getStrategy(self, runnumber, extension):
+        # generate the workspace name
+        wksp = "%s_%d" % (self._instrument, runnumber)
+        strategy = []
+        if HAVE_MPI:
+            comm = mpi.world
+            if self._chunks > 0 and not "histo" in extension and comm.size > 1:
+                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+                for row in Chunks: 
+                    if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
+                        strategy.append(row)
+            elif comm.size > 1:
+                strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
+            else:
+                strategy.append({})
+        else:
+            if self._chunks > 0 and not "histo" in extension:
+                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+                for row in Chunks: strategy.append(row)
+            else:
+                strategy.append({})
+
+        return strategy
+
+    def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
+               normByCurrent=True, filterBadPulsesOverride=True):
+        # generate the workspace name
+        wksp = "%s_%d" % (self._instrument, runnumber)
+        strategy = self._getStrategy(runnumber, extension)
+        firstChunk = True
+        for chunk in strategy:
+            if "ChunkNumber" in chunk:
+                print "Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy))
+            temp = self._loadData(runnumber, extension, filterWall, **chunk)
+            if self._info is None:
+                self._info = self._getinfo(temp)
+            temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent, filterBadPulsesOverride)
+            if HAVE_MPI and len(strategy) == 1:
+                alg = GatherWorkspaces(InputWorkspace=temp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
+                wksp = alg['OutputWorkspace']
+            else:
+                if firstChunk:
+                    alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
+                    wksp = alg['OutputWorkspace']
+                    firstChunk = False
+                else:
+                    wksp += temp
+                    DeleteWorkspace(temp)
+        if HAVE_MPI and len(strategy) > 1:
+            alg = GatherWorkspaces(InputWorkspace=wksp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
+            wksp = alg['OutputWorkspace']
+        if self._chunks > 0 and not "histo" in extension:
+            # When chunks are added, proton charge is summed for all chunks
+            wksp.getRun().integrateProtonCharge()
+            mtd.deleteWorkspace('Chunks')
+        print "Done focussing data"
+
+        return wksp
 
     def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
@@ -474,6 +534,8 @@ class SNSPowderReduction(PythonAlgorithm):
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
         preserveEvents = self.getProperty("PreserveEvents")
         normbycurrent = self.getProperty("NormalizeByCurrent")
+        self._info = None
+        self._chunks = self.getProperty("MaxChunkSize")
 
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
 
@@ -481,9 +543,8 @@ class SNSPowderReduction(PythonAlgorithm):
             samRun = None
             info = None
             for temp in samRuns:
-                temp = self._loadData(temp, SUFFIX, filterWall)
-                tempinfo = self._getinfo(temp)
-                temp = self._focus(temp, calib, tempinfo, filterLogs, preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                temp = self._focusChunks(temp, SUFFIX, filterWall, calib, filterLogs,
+                               preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 if samRun is None:
                     samRun = temp
                     info = tempinfo
@@ -508,15 +569,14 @@ class SNSPowderReduction(PythonAlgorithm):
         for samRun in samRuns:
             # first round of processing the sample
             if not self.getProperty("Sum"):
-                samRun = self._loadData(samRun, SUFFIX, filterWall)
-                info = self._getinfo(samRun)
-                samRun = self._focus(samRun, calib, info, filterLogs, preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                samRun = self._focusChunks(samRun, SUFFIX, filterWall, calib, filterLogs,
+                               preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 workspacelist.append(str(samRun))
 
             # process the container
             canRun = self.getProperty("BackgroundNumber")
             if canRun == 0: # use the version in the info
-                canRun = info.can
+                canRun = self._info.can
             elif canRun < 0: # turn off the correction
                 canRun = 0
             if canRun > 0:
@@ -524,56 +584,83 @@ class SNSPowderReduction(PythonAlgorithm):
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
                 else:
                     if self.getProperty("FilterCharacterizations"):
-                        canRun = self._loadData(canRun, SUFFIX, filterWall)
+                        canRun = self._focusChunks(canRun, SUFFIX, filterWall, calib,
+                               preserveEvents=preserveEvents)
                     else:
-                        canRun = self._loadData(canRun, SUFFIX, (0., 0.))
-                    canRun = self._focus(canRun, calib, info, preserveEvents=preserveEvents)
-                ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-                workspacelist.append(str(canRun))
+                        canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
+                               preserveEvents=preserveEvents)
+                if HAVE_MPI:
+                    if mpi.world.rank == 0:
+                        ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                        workspacelist.append(str(canRun))
+                else:
+                    ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                    workspacelist.append(str(canRun))
             else:
                 canRun = None
 
             # process the vanadium run
             vanRun = self.getProperty("VanadiumNumber")
             if vanRun == 0: # use the version in the info
-                vanRun = info.van
+                vanRun = self._info.van
             elif vanRun < 0: # turn off the correction
                 vanRun = 0
             if vanRun > 0:
                 if mtd.workspaceExists("%s_%d" % (self._instrument, vanRun)):
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                 else:
+                    vnoiseRun = self._info.vnoise # noise run for the vanadium
                     if self.getProperty("FilterCharacterizations"):
-                        vanRun = self._loadData(vanRun, SUFFIX, filterWall)
+                        vanRun = self._focusChunks(vanRun, SUFFIX, filterWall, calib,
+                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
                     else:
-                        vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
-                    vnoiseRun = info.vnoise # noise run for the vanadium
-                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
+                        vanRun = self._focusChunks(vanRun, SUFFIX, (0., 0.), calib,
+                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
 
                     if (vnoiseRun > 0):
                         if self.getProperty("FilterCharacterizations"):
-                            vnoiseRun = self._loadData(vnoiseRun, SUFFIX, filterWall)
+                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, filterWall, calib,
+                               preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
                         else:
-                            vnoiseRun = self._loadData(vnoiseRun, SUFFIX, (0., 0.))
-                        vnoiseRun = self._focus(vnoiseRun, calib, info, preserveEvents=False,
-                                               normByCurrent=False, filterBadPulsesOverride=False)
-                        ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
-                        FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
-                                  Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                        try:
-                            vanDuration = vanRun.getRun().get('duration')
-                            vanDuration = vanDuration.value
-                        except:
-                            vanDuration = 1.
-                        try:
-                            vbackDuration = vnoiseRun.getRun().get('duration')
-                            vbackDuration = vbackDuration.value
-                        except:
-                            vbackDuration = 1.
-                        vnoiseRun *= (vanDuration/vbackDuration)
-                        vanRun -= vnoiseRun
-                        NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                        workspacelist.append(str(vnoiseRun))
+                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, (0., 0.), calib,
+                               preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
+                        if HAVE_MPI:
+                            if mpi.world.rank == 0:
+                                ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
+                                FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
+                                          Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                                try:
+                                    vanDuration = vanRun.getRun().get('duration')
+                                    vanDuration = vanDuration.value
+                                except:
+                                    vanDuration = 1.
+                                try:
+                                    vbackDuration = vnoiseRun.getRun().get('duration')
+                                    vbackDuration = vbackDuration.value
+                                except:
+                                    vbackDuration = 1.
+                                vnoiseRun *= (vanDuration/vbackDuration)
+                                vanRun -= vnoiseRun
+                                NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                                workspacelist.append(str(vnoiseRun))
+                        else:
+                            ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
+                            FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
+                                      Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                            try:
+                                vanDuration = vanRun.getRun().get('duration')
+                                vanDuration = vanDuration.value
+                            except:
+                                vanDuration = 1.
+                            try:
+                                vbackDuration = vnoiseRun.getRun().get('duration')
+                                vbackDuration = vbackDuration.value
+                            except:
+                                vbackDuration = 1.
+                            vnoiseRun *= (vanDuration/vbackDuration)
+                            vanRun -= vnoiseRun
+                            NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                            workspacelist.append(str(vnoiseRun))
                     else:
                         vnoiseRun = None
 
@@ -583,13 +670,17 @@ class SNSPowderReduction(PythonAlgorithm):
                             vbackRun = mtd["%s_%d" % (self._instrument, vbackRun)]
                         else:
                             if self.getProperty("FilterCharacterizations"):
-                                vbackRun = self._loadData(vbackRun, SUFFIX, filterWall)
+                                vbackRun = self._focusChunks(vbackRun, SUFFIX, filterWall, calib,
+                                   preserveEvents=False)
                             else:
-                                vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
-                            vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
+                                vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,
+                                   preserveEvents=False)
                         vanRun -= vbackRun
                         workspacelist.append(str(vbackRun))
 
+                    if HAVE_MPI:
+                        if mpi.world.rank > 0:
+                            return
                     if self.getProperty("StripVanadiumPeaks"):
                         ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                         StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
@@ -602,6 +693,9 @@ class SNSPowderReduction(PythonAlgorithm):
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                if HAVE_MPI:
+                    if mpi.world.rank > 0:
+                        return
                 ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 workspacelist.append(str(vanRun))
             else:
@@ -622,7 +716,7 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 normalized = False
 
-            if not "histo" in self.getProperty("Extension") and preserveEvents:
+            if not "histo" in self.getProperty("Extension") and preserveEvents and HAVE_MPI is False:
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
 
@@ -632,13 +726,19 @@ class SNSPowderReduction(PythonAlgorithm):
                 ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=addMin, ResetValue=0.)
 
             # write out the files
-            self._save(samRun, info, normalized, False)
-            samRun = str(samRun)
+            if HAVE_MPI:
+                if mpi.world.rank == 0:
+                    self._save(samRun, self._info, normalized, False)
+                    samRun = str(samRun)
+            else:
+                self._save(samRun, self._info, normalized, False)
+                samRun = str(samRun)
             mtd.releaseFreeMemory()
 
         # convert everything into d-spacing
         workspacelist = set(workspacelist) # only do each workspace once
-        for wksp in workspacelist:
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
+        if HAVE_MPI is False:
+            for wksp in workspacelist:
+                ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
 
 mtd.registerPyAlgorithm(SNSPowderReduction())

@@ -5,8 +5,8 @@ Python algorithms
 import unittest
 import testhelpers
 
-from mantid import PythonAlgorithm, Direction
-from mantid import IntBoundedValidator, FileProperty, FileAction
+from mantid.kernel import IntBoundedValidator, Direction
+from mantid.api import FileProperty, FileAction, PythonAlgorithm
 
 
 # ======================================================================

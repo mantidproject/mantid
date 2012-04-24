@@ -20,6 +20,9 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/V3D.h"
+#include "MantidAPI/IAlgorithm.h"
+
+using Mantid::API::IAlgorithm_sptr;
 
 
 
@@ -94,11 +97,11 @@ private:
 
   bool EdgePeak;
 
-  std::string AttributeNames[19];
+  std::string AttributeNames[20];
 
   std::string ParameterNames[7];
 
-  double AttributeValues[19] ;
+  double AttributeValues[20] ;
   double ParameterValues[7] ;
 
   Mantid::detid2index_map * wi_to_detid_map;
@@ -123,7 +126,8 @@ private:
                   Kernel::V3D                     &CentNghbr,
 
                   double                        &neighborRadius,//from CentDet
-                  double                         Radius);
+                  double                         Radius,
+                  std::string                    &spec_idList);
 
 
 
@@ -145,12 +149,12 @@ private:
   void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
 
 
-  void SetUpData1( API::MatrixWorkspace_sptr                                    &Data,
-                   API::MatrixWorkspace_sptr                              const &inpWkSpace,
-                   const int                                              chan,
-
-                   double                     Radius,
-                   Kernel::V3D               CentPos  ///< Center on Plane
+  void SetUpData1( API::MatrixWorkspace_sptr      &Data,
+                   API::MatrixWorkspace_sptr     const &inpWkSpace,
+                   const int                     chan,
+                   double                         Radius,
+                   Kernel::V3D                    CentPos , ///< Center on Plane,
+                   std::string                    &spec_idList
 
                    ) ;
 
@@ -170,7 +174,8 @@ private:
                        std::vector<double >                 const &errs,
                        std::vector<std::string>             const &names,
                        const double                               chisq,
-                       const double                              time) ;
+                       const double                              time,
+                       std::string                         spec_idList) ;
 
 
   void updatePeakInformation( std::vector<double >     const &params,
@@ -214,6 +219,8 @@ private:
 
 
   bool IsEnoughData(   ) ;
+
+  std::string CalcConstraints( );
 
 
   bool    debug;

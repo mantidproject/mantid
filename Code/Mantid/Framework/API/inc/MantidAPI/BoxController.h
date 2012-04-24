@@ -396,37 +396,37 @@ namespace API
       m_bytesPerEvent = bytesPerEvent;
     }
 
-    //-----------------------------------------------------------------------------------
-    /** Add a MDBox pointer to the list of boxes to split.
-     * Thread-safe for adding.
-     * No duplicate checking is done!
-     *
-     * @param ptr :: void ptr that casts to a particular MDBox<> * type.
-     */
-    void addBoxToSplit(void * ptr)
-    {
-      m_boxesToSplitMutex.lock();
-      m_boxesToSplit.push_back(ptr);
-      m_boxesToSplitMutex.unlock();
-    }
-
-    //-----------------------------------------------------------------------------------
-    /** Get a reference to the vector of boxes that must be split.
-     * Not thread safe!
-     */
-    std::vector<void *> & getBoxesToSplit()
-    {
-      return m_boxesToSplit;
-    }
-
-    //-----------------------------------------------------------------------------------
-    /** Clears the list of boxes that are big enough to split */
-    void clearBoxesToSplit()
-    {
-      m_boxesToSplitMutex.lock();
-      m_boxesToSplit.clear();
-      m_boxesToSplitMutex.unlock();
-    }
+//    //-----------------------------------------------------------------------------------
+//    /** Add a MDBox pointer to the list of boxes to split.
+//     * Thread-safe for adding.
+//     * No duplicate checking is done!
+//     *
+//     * @param ptr :: void ptr that casts to a particular MDBox<> * type.
+//     */
+//    void addBoxToSplit(void * ptr)
+//    {
+//      m_boxesToSplitMutex.lock();
+//      m_boxesToSplit.push_back(ptr);
+//      m_boxesToSplitMutex.unlock();
+//    }
+//
+//    //-----------------------------------------------------------------------------------
+//    /** Get a reference to the vector of boxes that must be split.
+//     * Not thread safe!
+//     */
+//    std::vector<void *> & getBoxesToSplit()
+//    {
+//      return m_boxesToSplit;
+//    }
+//
+//    //-----------------------------------------------------------------------------------
+//    /** Clears the list of boxes that are big enough to split */
+//    void clearBoxesToSplit()
+//    {
+//      m_boxesToSplitMutex.lock();
+//      m_boxesToSplit.clear();
+//      m_boxesToSplitMutex.unlock();
+//    }
 
     //-----------------------------------------------------------------------------------
   private:
@@ -507,11 +507,11 @@ namespace API
     /// Do we use the DiskBuffer at all?
     bool m_useWriteBuffer;
 
-    /// Vector of pointers to MDBoxes that have grown large enough to split them
-    std::vector<void *> m_boxesToSplit;
-
-    /// Mutex for modifying the m_boxesToSplit member
-    Mantid::Kernel::Mutex m_boxesToSplitMutex;
+//    /// Vector of pointers to MDBoxes that have grown large enough to split them
+//    std::vector<void *> m_boxesToSplit;
+//
+//    /// Mutex for modifying the m_boxesToSplit member
+//    Mantid::Kernel::Mutex m_boxesToSplitMutex;
 
   private:
     /// Number of bytes in a single MDLeanEvent<> of the workspace.

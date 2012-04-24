@@ -97,6 +97,10 @@ private slots:
   void updateWindowFlags();
   /// Update menus based on current tab counts
   void setMenuStates(int nTabs);
+  /// Sets the execution actions based on the flag
+  void setEditActionsDisabled(bool state);
+  /// Sets the execution actions based on the flag
+  void setExecutionActionsDisabled(bool state);
 
   /// Finds the script corresponding to the action and
   /// asks the manager to open it

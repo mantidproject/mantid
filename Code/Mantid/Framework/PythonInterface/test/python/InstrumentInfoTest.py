@@ -1,5 +1,5 @@
 import unittest
-from mantid import InstrumentInfo, ConfigService
+from mantid.kernel import InstrumentInfo, ConfigService
 
 class InstrumentInfoTest(object):
 

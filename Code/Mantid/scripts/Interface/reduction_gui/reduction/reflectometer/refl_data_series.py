@@ -24,10 +24,11 @@ class DataSeries(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script = ""
+        script = "t0=time.time()\n"
         for item in self.data_sets:
             script += item.to_script()
             script += "\n"
+        script += "print \"Reduction time: %g\\n\" % (time.time()-t0)\n"
 
         return script
 

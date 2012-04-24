@@ -242,7 +242,7 @@ namespace Mantid
         // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
         setInitialized();
       }
-      catch(std::runtime_error& ex)
+      catch(std::runtime_error& )
       {
         throw;
       }

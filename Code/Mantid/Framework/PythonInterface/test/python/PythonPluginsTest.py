@@ -4,10 +4,10 @@ import shutil
 import sys
 
 import mantid.kernel.plugins as plugins
-from mantid import AlgorithmFactory, AlgorithmManager
+from mantid.api import AlgorithmFactory, AlgorithmManager
 
 __TESTALG__ = \
-"""from mantid import PythonAlgorithm, registerAlgorithm
+"""from mantid.api import PythonAlgorithm, registerAlgorithm
 
 class TestPyAlg(PythonAlgorithm):
 

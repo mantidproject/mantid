@@ -543,6 +543,7 @@ void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_s
 
 // assign output:
    TargWSDescription.nDims+=other_dim_names.size();   
+   TargWSDescription.emode = eMode;
 
    //TargWSDescription.dimUnits; <- already defined in IdentifyMatrixAlgo;
    TargWSDescription.dimIDs = ws_dimIDs;

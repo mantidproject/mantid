@@ -124,6 +124,7 @@ public:
     double TotIntensity = 0;
 
     detid2index_map * map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
+
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++)
       {
@@ -143,9 +144,9 @@ public:
         {
           double val = max<double> (0.0, MaxRC * (1 - abs(chan - PeakChan) / MaxPeakTimeSpan));
           TotIntensity += val;
-
           T[chan]+=val;
           val += 1.4;
+
 
           dataY.access().push_back(val);
           dataE.access().push_back(sqrt(val));
@@ -179,7 +180,9 @@ public:
 
       algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
       algP.setPropertyValue("OutputWorkspace", "aaa");
-      algP.setProperty("CalculateVariances", true);
+
+      algP.setProperty("CalculateVariances",false);
+
       //algP.setProperty("Ties","Background=1.4");
       algP.execute();
 
@@ -191,9 +194,10 @@ public:
        TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
   
 
-       TS_ASSERT_LESS_THAN(fabs(intensity -59982.9), 100.0);
+       TS_ASSERT_LESS_THAN(fabs(intensity -60340.5), 100.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma -623.577), 1.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -466), 1.0);
+
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
       
@@ -202,34 +206,47 @@ public:
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.42459), .2);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.23611  ), .2);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11173), 20);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11331), 20);
       
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  277), 5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  437), 5);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   195), 1.5);
+
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   76.7824), 1.5);
+
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4137), 10);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4361.8 ), 10);
       
   
 
+
       /*   std::vector<std::string> names = Twk->getColumnNames();
+
       std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
                "  Theoret intensity="<<TotIntensity<<std::endl;
       std::cout<<std::setw(15)<<"Act Int";
       for( int j=12; j< 12+Twk->rowCount();j++)
              std::cout<< setw(12)<<T[j];
       std::cout<<std::endl;
-       for( int i=0; i<Twk->columnCount();i++)
+
+       for( int i=0; i+1<(int)Twk->columnCount();i++)
        {
          std::cout<<std::setw(15)<<names[i];
-       for( int j=0; j< Twk->rowCount();j++)
-       std::cout<< setw(12)<<Twk->cell<double>(j,i);
+       for( int j=0; j< (int)Twk->rowCount();j++)
+       {  std::cout<< setw(12);
+         if( i+1< (int)Twk->columnCount())
+           std::cout <<Twk->cell<double>(j,i);
+         else
+           std::cout <<Twk->cell<string>(j,i)<<"::";
+
+       }
+
        std::cout<<std::endl;
 
        }
+
 
 
   Intensitty=59870.7   sigma=665.098
@@ -306,6 +323,34 @@ ISAWIntensityError     108.136     189.481     271.573     353.892     271.573  
         End Row          33          33          33          33          33          33          33
       Start Col          16          16          16          16          16          16          16
         End Col          38          38          38          38          38          38          38
+==================================================================================
+Circular Regions 4sigs, CalcVar=0(redo of optimization). Constraints on variables added
+Intensitty=60340.5   sigma=466.885  Theoret intensity=60000
+        Act Int        3750        7500       11250       15000       11250        7500        3750
+           Time       19250       19350       19450       19550       19650       19750       19850
+        Channel          12          13          14          15          16          17          18
+     Background     1.41953     1.23611     1.23688     1.23589     1.23688     1.23611     1.41953
+      Intensity     3745.82     7568.01       11331     15097.3       11331     7568.01     3745.82
+           Mcol          27          27          27          27          27          27          27
+           Mrow          22          22          22          22          22          22          22
+          SScol     4.44865     4.45006     4.45015        4.45     4.45015     4.45006     4.44865
+          SSrow     4.44851     4.45003     4.45003     4.45013     4.45003     4.45003     4.44851
+           SSrc 0.000101854 0.000169181 0.000257058 0.000347122 0.000257058 0.000169181 0.000101854
+         NCells         437         437         437         437         437         437         437
+  ChiSqrOverDOF     9.98124     34.0985     76.7824     136.568     76.7824     34.0985     9.98124
+   TotIntensity      4361.8      8111.8     11861.8     15611.8     11861.8      8111.8      4361.8
+BackgroundError    0.175194    0.317447    0.480952    0.242143    0.480952    0.317447    0.175194
+FitIntensityError      38.725     65.9045     103.054     124.116     103.054     65.9045      38.725
+  ISAWIntensity     3741.47     7571.62     11321.3     15071.7     11321.3     7571.62     3741.47
+ISAWIntensityError     104.132     167.022     237.858     165.375     237.858     167.022     104.132
+  TotalBoundary       123.2       123.2       123.2       123.2       123.2       123.2       123.2
+ NBoundaryCells          88          88          88          88          88          88          88
+      Start Row          11          11          11          11          11          11          11
+        End Row          33          33          33          33          33          33          33
+      Start Col          16          16          16          16          16          16          16
+        End Col          38          38          38          38          38          38          38
+TotIntensityError     66.0439     90.0655     108.912     124.947     108.912     90.0655     66.0439
+
 
        */
     } catch (char * s)

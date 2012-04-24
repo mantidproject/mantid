@@ -1,6 +1,6 @@
 import unittest
 import testhelpers
-from mantid import FloatBoundedValidator, IntBoundedValidator
+from mantid.kernel import FloatBoundedValidator, IntBoundedValidator
 
 class BoundedValidatorTest(unittest.TestCase):
 

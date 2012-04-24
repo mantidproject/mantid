@@ -93,7 +93,7 @@ class BaseBeamFinder(ReductionStep):
         pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
         if self._beam_radius is not None:
             self._beam_radius *= pixel_size_x/1000.0
-        beam_center = FindCenterOfMassPosition(workspace,
+        beam_center = FindCenterOfMassPosition(InputWorkspace = workspace,
                                                Output = None,
                                                DirectBeam = direct_beam,
                                                BeamRadius = self._beam_radius)
@@ -503,11 +503,13 @@ class Normalize(ReductionStep):
         if self._normalization_spectrum == reducer.instrument.NORMALIZATION_MONITOR:
             norm_count = mtd[workspace].getRun().getProperty("monitor").value
             # HFIR-specific: If we count for monitor we need to multiply by 1e8
-            Scale(workspace, workspace, 1.0e8/norm_count, 'Multiply')
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, 
+                  Factor=1.0e8/norm_count, Operation='Multiply')
             return "Normalization by monitor: %6.2g counts" % norm_count 
         elif self._normalization_spectrum == reducer.instrument.NORMALIZATION_TIME:
             norm_count = mtd[workspace].getRun().getProperty("timer").value
-            Scale(workspace, workspace, 1.0/norm_count, 'Multiply')
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
+                  Factor=1.0/norm_count, Operation='Multiply')
             return "Normalization by time: %6.2g sec" % norm_count
         else:
             mantid.sendLogMessage("Normalization step did not get a valid normalization option: skipping")
@@ -602,15 +604,21 @@ class WeightedAzimuthalAverage(ReductionStep):
                 PixelAdj=pixel_adj, WavelengthAdj=wl_adj)
         else:
             #Q1D(DetBankWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning, SolidAngleWeighting=False)
-            Q1DWeighted(workspace, output_ws, self._binning,
-                    NPixelDivision=self._nsubpix,
-                    PixelSizeX=pixel_size_x,
-                    PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
-        ReplaceSpecialValues(output_ws, output_ws, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0)
+            Q1DWeighted(InputWorkspace=workspace, 
+                        OutputWorkspace=output_ws, 
+                        OutputBinning=self._binning,
+                        NPixelDivision=self._nsubpix,
+                        PixelSizeX=pixel_size_x,
+                        PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
+        ReplaceSpecialValues(InputWorkspace=output_ws, 
+                             OutputWorkspace=output_ws, 
+                             NaNValue=0.0, NaNError=0.0, 
+                             InfinityValue=0.0, InfinityError=0.0)
                 
         # Q resolution
         if reducer._resolution_calculator is not None:
-            reducer._resolution_calculator(output_ws, output_ws)
+            reducer._resolution_calculator(InputWorkspace=output_ws, 
+                                           OutputWorkspace=output_ws)
             
         # Add output workspace to the list of important output workspaces
         reducer.output_workspaces.append(output_ws)
@@ -1266,7 +1274,8 @@ class SubtractBackground(ReductionStep):
             if reducer._azimuthal_averager is not None:
                 reducer._azimuthal_averager.execute(reducer, "__tmp_bck")
         else:
-            Minus(workspace, "__tmp_bck", workspace)
+            Minus(LHSWorkspace=workspace, RHSWorkspace="__tmp_bck",
+                  OutputWorkspace=workspace)
         if mtd.workspaceExists("__tmp_bck"):
             mtd.deleteWorkspace("__tmp_bck")        
         

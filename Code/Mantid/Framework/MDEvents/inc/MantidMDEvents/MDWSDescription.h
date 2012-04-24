@@ -87,8 +87,8 @@ class DLLExport MDWSDescription
     std::vector<std::string> dimUnits;
     /// if defined, specifies number of bins split in each dimension
     std::vector<size_t> nBins;
-    /** the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in NoQ and powder mode (but used in cryst as powder) 
-       and if no oriented lattice is found in input ws.  Powder mode usage may be reconsiled later, though */
+    /** the enum, specifying the target coordinate system Q in A^-1, hkl etc.. Currently Ignored in NoQ and powder mode (but used in cryst as powder) 
+       Powder mode usage may be reconsiled later, though */
     CoordScaling convert_to_factor;
     /// the matrix to transform momentums of the workspace into target coordinate system, it is constructed from UB matix and W-matrix;
     std::vector<double> rotMatrix;  // can be Quat if not for non-orthogonal lattices
@@ -108,11 +108,12 @@ class DLLExport MDWSDescription
 //=======================
       /// constructor
      MDWSDescription(size_t nDimesnions=0);
-     /// function build MD Event description from existing workspace
-     void build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS);
+     /// function builds MD Event description from existing MD event workspace
+     void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
      /// compare two descriptions and select the coplimentary result.
-     void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspaceD);
-
+     void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspace);
+     /// copy some parameters from the target workspace;
+     void setUpMissingParameters(const MDEvents::MDWSDescription &SourceMDWorkspace);
     /// helper function checks if min values are less them max values and are consistent between each other 
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
     // default does not do any more;

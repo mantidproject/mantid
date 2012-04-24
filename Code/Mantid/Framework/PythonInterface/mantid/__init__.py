@@ -49,24 +49,25 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
     _os.environ['MANTIDPATH'] = _bindir
 
 ###############################################################################
-# Make most things accessible from mantid namespace 
+# Ensure the sub package C libraries are loaded
 ###############################################################################
 import kernel
-from kernel import *
-
 import geometry
-from geometry import *
-
 import api 
-from api import *
+
+###############################################################################
+# Make the aliases form each module accessible in a the mantid namspace
+###############################################################################
+from kernel._aliases import *
+from api._aliases import *
 
 ###############################################################################
 # Make the version string accessible in the standard way
 ###############################################################################
-__version__ = version_str()
+__version__ = kernel.version_str()
 
 ###############################################################################
-# Load the Python plugins now everything has started
+# Load the Python plugins now everything has started.
 #
 # Before the plugins are loaded the simpleapi module is called to create
 # fake error-raising functions for all of the plugins. After the plugins have been 
@@ -78,11 +79,10 @@ __version__ = version_str()
 # to the simple import mechanism then plugins that are loaded later cannot
 # be seen by the earlier ones (chicken & the egg essentially). 
 ################################################################################
-import kernel.plugins as _plugins
-import sys as _sys
 import simpleapi as _simpleapi
+from kernel import plugins as _plugins
 
-_simpleapi.mockout_api()
-_plugins.load(config['pythonalgorithms.directories'])
+#_simpleapi.mockout_api()
+_plugins.load(kernel.config['pythonalgorithms.directories'])
 # Now everything is loaded create the proper definitions
 _simpleapi.translate()

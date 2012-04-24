@@ -24,6 +24,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmHistory.h"
 
@@ -342,6 +343,25 @@ using namespace DataObjects;
         status=NXputslab(fileID, (void*)&(localworkspace->readE(s)[0]),start,asize);
         start[0]++;
       }
+
+      // Fractional area for RebinnedOutput
+      if (localworkspace->id() == "RebinnedOutput")
+      {
+        RebinnedOutput_const_sptr rebin_workspace = boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+        name="frac_area";
+        status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2,
+                              dims_array,m_nexuscompression,asize);
+        status=NXopendata(fileID, name.c_str());
+        start[0]=0;
+        for(size_t i=0;i<nSpect;i++)
+        {
+          int s = spec[i];
+          status=NXputslab(fileID, (void*)&(rebin_workspace->readF(s)[0]),
+                           start, asize);
+          start[0]++;
+        }
+      }
+
       status=NXclosedata(fileID);
     }
 

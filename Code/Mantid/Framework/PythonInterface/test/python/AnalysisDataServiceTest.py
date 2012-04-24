@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid import AnalysisDataService, AnalysisDataServiceImpl, MatrixWorkspace, Workspace
+from mantid.api import AnalysisDataService, AnalysisDataServiceImpl, MatrixWorkspace, Workspace
 from mantid import mtd
 
 class AnalysisDataServiceTest(unittest.TestCase):

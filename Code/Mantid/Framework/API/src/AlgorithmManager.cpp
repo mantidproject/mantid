@@ -4,6 +4,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiThreaded.h"
+
+using Mantid::Kernel::Mutex;
 
 namespace Mantid
 {
@@ -49,6 +52,7 @@ namespace Mantid
     const std::vector<std::pair<std::string,std::string> > 
       AlgorithmManagerImpl::getNamesAndCategories() const
     {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
       std::vector<std::pair<std::string,std::string> > retVector;
 
       for (unsigned int i=0; i < m_managed_algs.size(); ++i)
@@ -75,6 +79,7 @@ namespace Mantid
     */
     IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string& algName, const int& version, bool makeProxy)
     {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
       IAlgorithm_sptr alg;
       try
       {
@@ -133,6 +138,7 @@ namespace Mantid
      */
     void AlgorithmManagerImpl::clear()
     {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
       m_managed_algs.clear();
       return;
     }
@@ -144,6 +150,7 @@ namespace Mantid
      */
     IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
       for( std::deque<IAlgorithm_sptr>::const_iterator a = m_managed_algs.begin();a!=m_managed_algs.end();++a)
       {
         if ((**a).getAlgorithmID() == id) return *a;

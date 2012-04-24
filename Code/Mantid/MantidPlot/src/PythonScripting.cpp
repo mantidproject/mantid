@@ -198,7 +198,6 @@ bool PythonScripting::start()
     }
 
     redirectStdOut(true);
-
     // Add in Mantid paths so that the framework will be found
     // Linux has the libraries in the lib directory at bin/../lib
     using namespace Mantid::Kernel;

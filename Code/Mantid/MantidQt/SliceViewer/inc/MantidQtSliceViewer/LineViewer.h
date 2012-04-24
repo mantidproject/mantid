@@ -12,6 +12,7 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 
 namespace MantidQt
 {
@@ -75,6 +76,7 @@ public slots:
     void on_radNumBins_toggled();
     void textBinWidth_changed();
     void refreshPlot();
+    void lineIntegrationComplete(bool error);
 
 signals:
     /// Signal emitted when the planar width changes
@@ -115,6 +117,9 @@ private:
     /// Widget to choose X plot axis and normalization
     LinePlotOptions * m_lineOptions;
 
+    /// Object for running algorithms in the background
+    MantidQt::API::AlgorithmRunner * m_algoRunner;
+
     // -------------------------- Data Members ----------------------------
 
     /// Workspace being sliced
@@ -122,6 +127,9 @@ private:
 
     /// Workspace of the slice
     Mantid::API::IMDWorkspace_sptr m_sliceWS;
+
+    /// Name of the workspace that was integrated (asynchronously).
+    std::string m_integratedWSName;
 
     /// Start point of the line
     Mantid::Kernel::VMD m_start;

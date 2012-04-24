@@ -245,14 +245,19 @@ void ConvertToMDEvents::exec()
     {  
         // check if we are working in powder mode
         bool is_powder = ParamParser.isPowderMode(algo_id);
-        // dimensions are already build 
-       // MDEvents::MDWSDescription OLDWSD;
-        TWSD.build_from_MDWS(spws);
+
+        // dimensions are already build, so build MDWS description from existing workspace
+        MDEvents::MDWSDescription OLDWSD;
+        OLDWSD.buildFromMDWS(spws);
+
+        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace description
+        // derived from input parameters. 
+        OLDWSD.setUpMissingParameters(TWSD);
         // compare the descriptions which come from existing workspace and select the one, which satisfy existing workspace
-         // check inconsistencies
-        //OLDWSD.compareDescriptions(TWSD);
-        // currently upper operator simplified -- 
-        //TWSD =OLDWSD;
+        // check inconsistencies
+        OLDWSD.compareDescriptions(TWSD);
+        // make new ws description equal to the old one
+        TWSD =OLDWSD;
        // set up target coordinate system
         TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,is_powder);
     

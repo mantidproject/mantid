@@ -1,7 +1,7 @@
 Summary: autoreduce
 Name: autoreduce
-Version: 1
-Release: .1
+Version: 1.1
+Release: 1 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}

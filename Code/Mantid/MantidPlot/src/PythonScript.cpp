@@ -741,7 +741,6 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
   }
   else
   {
-    emit error(constructErrorMsg(), "", 0);
     compiledCode = NULL;
     m_CodeFileObject = NULL;
   }

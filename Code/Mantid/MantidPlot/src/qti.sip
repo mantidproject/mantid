@@ -1262,9 +1262,10 @@ public:
   Graph3D* plotGraph3D(int = 3);
   MultiLayer* plotGraph2D(Graph::CurveType = Graph::ColorMap);
   void goToTab(const QString &);	 
-  void goTo(int,int) /PyName = selectCell/;	     
+  void goTo(int,int) /PyName = selectCell/;
   void goToRow(int) /PyName = selectRow/;
-  void goToColumn(int) /PyName = selectColumn/;	     
+  void goToColumn(int) /PyName = selectColumn/;
+  void closeDependants();
 private:
   MantidMatrix(const MantidMatrix&);
 };

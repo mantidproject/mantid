@@ -146,7 +146,7 @@ private:
   void simulateUserInput(QString & text, const int offset = 0);
 
   /// Intercept key presses
-  void keyPressEvent(QKeyEvent* event);
+  void keyPressEvent(QKeyEvent* keyPress);
   /// Attempt to handle the given key event
   bool handleKeyPress(QKeyEvent* event);
   /// Handles a history request
@@ -176,6 +176,7 @@ private:
 
   int m_promptKey;
   int m_continuationKey;
+  int m_currentPromptLineIndex;
 
   QString m_pastedText;
   QTextStream m_pasteQueue;

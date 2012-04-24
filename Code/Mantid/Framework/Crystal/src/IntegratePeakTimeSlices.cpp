@@ -3,7 +3,7 @@
 
 This algorithm fits a bivariate normal distribution( plus background) to the data on each time slice.  The Fit program uses [[BivariateNormal]] for the Fit Function.
 
-The area used for the fitting is calculated based on the dQ parameter.  A good value for dQ is .1667/largest unit cell length. This parameter dictates the size of the area used to approximate the intensity of the peak. The estimate .1667/ max(a,b,c) assumes |Q|=1/d.
+The area used for the fitting is calculated based on the dQ parameter.  A good value for dQ is 1/largest unit cell length. This parameter dictates the size of the area used to approximate the intensity of the peak. The estimate .1667/ max(a,b,c) assumes |Q|=1/d.
 
 The result is returned in this algorithm's output "Intensity" and "SigmaIntensity" properties. The peak object is NOT CHANGED.
 
@@ -56,14 +56,14 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-//
+#include <boost/lexical_cast.hpp>
 #include <vector>
 #include "MantidAPI/Algorithm.h"
 #include <algorithm>
 #include <math.h>
 #include <cstdio>
-#include <boost/random/poisson_distribution.hpp>
-
+//#include <boost/random/poisson_distribution.hpp>
+#include "MantidAPI/ISpectrum.h"
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -98,7 +98,8 @@ namespace Mantid
 #define IVariance    16
 #define ITotBoundary  17
 #define INBoundary    18
-#define NAttributes  19
+#define IVarBoundary  19
+#define NAttributes  20
 
     //Parameter indicies
 #define IBACK   0
@@ -145,6 +146,7 @@ namespace Mantid
       AttributeNames[16] = "Variance";
       AttributeNames[17] = "TotBoundary";
       AttributeNames[18] = "NBoundary";
+      AttributeNames[19] = "VarianceBoundary";
 
       ParameterNames[0] = "Background";
       ParameterNames[1] = "Intensity";
@@ -159,6 +161,8 @@ namespace Mantid
 
       for (int i = 0; i < NParameters; i++)
         ParameterValues[i] = 0;
+
+
     }
 
     /// Destructor
@@ -190,7 +194,7 @@ namespace Mantid
 
       declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
 
-      declareProperty("CalculateVariances",true,"Calc (co)variances given parameter values versus fit (co)Variances ");
+      declareProperty("CalculateVariances",false,"Calc (co)variances given parameter values versus fit (co)Variances ");
 
       declareProperty("Ties","","Tie parameters(Background,Intensity, Mrow,...) to values/formulas.");
 
@@ -199,6 +203,49 @@ namespace Mantid
       declareProperty("SigmaIntensity",0.0,"Peak Integrated Intensity Error", Direction::Output);
 
 
+    }
+
+    std::string IntegratePeakTimeSlices::CalcConstraints()
+    {
+      double TotIntensity = AttributeValues[IIntensities];
+      double ncells       =AttributeValues[ISS1];
+      double Variance = AttributeValues[IVariance];
+      double TotBoundaryIntensities= AttributeValues[ITotBoundary ];
+      double TotBoundaryVariances = AttributeValues[IVarBoundary];
+      double nBoundaryCells=   AttributeValues[INBoundary];
+      double back = TotBoundaryIntensities/nBoundaryCells;
+      double backVar= TotBoundaryVariances/nBoundaryCells/nBoundaryCells;
+      double IntensVar = Variance +ncells*ncells*backVar;
+      double relError = .15;
+
+      if( ParameterValues[IBACK] != back )
+        relError = .35;
+
+      int N = NParameters;
+      if( getProperty("CalculateVariances"))
+        N = N-3;
+
+
+      ostringstream str;
+      str<< max<double>(0.0, ParameterValues[0]-(1+2*relError)*sqrt(backVar))<<"<Background<"<<(back+(1+2*relError)*sqrt(backVar))
+         <<","<< max<double>(0.0, ParameterValues[1]-(1+2*relError)*sqrt(IntensVar))<<
+         "<Intensity<"<<TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar);
+      for( int i=2; i<N; i++ )
+      {
+        if( i>0)
+          str<<",";
+
+
+        double val = ParameterValues[i];
+
+        double relErr1=.75*relError;
+
+
+        str<<(1-relErr1)*val <<"<"<<ParameterNames[i]<<"<"<<(1+relErr1)*val;
+
+      }
+
+      return str.str();
     }
 
     bool IntegratePeakTimeSlices::getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
@@ -373,6 +420,7 @@ namespace Mantid
       double Row0 = lastRow;
       double lastCol = COL;
       double Col0 = lastCol;
+      string spec_idList="";
 
       // For quickly looking up workspace index from det id
       wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap( false );
@@ -460,7 +508,7 @@ namespace Mantid
                          std::string("Workspace2D"), 3,NN,NN);
 
               Kernel::V3D CentPos = center+yvec*(Centy-ROW)*CellHeight + xvec*(Centx-COL)*CellWidth;
-              SetUpData1(Data, inpWkSpace,  Chan+dir*t,  R ,CenterDet->getPos());
+              SetUpData1(Data, inpWkSpace,  Chan+dir*t,  R ,CenterDet->getPos(), spec_idList);
               if (AttributeValues[ISSIxx] > 0)
               {
                 if (AttributeValues[IIntensities] > MaxCounts)
@@ -553,22 +601,17 @@ namespace Mantid
 
 
               SetUpData(Data, inpWkSpace, panel, xchan, lastCol,lastRow,Cent,//CentDetspec,//NeighborIDs,
-                                                      neighborRadius, Radius);
+                                                      neighborRadius, Radius, spec_idList);
+
+              Data->setName("index0");
 
               ncells = (int) (AttributeValues[ISS1]);
 
               std::vector<double> params;
               std::vector<double> errs;
               std::vector<std::string> names;
-            /*std::cout<<"Attributes="<<std::endl;
-              for( int kk=0; kk<NAttributes;kk++)
-              {
-                std::cout<<"("<<kk<<")="<<AttributeValues[kk];
-              }
 
-              std::cout<<std::endl;
-              */
-               if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
+              if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
               {
 
                 fit_alg = createSubAlgorithm("Fit");
@@ -579,6 +622,7 @@ namespace Mantid
                 SSS += fun_str;
                 g_log.debug(SSS);
 
+                std::string Constraints = CalcConstraints();
                 fit_alg->setPropertyValue("Function", fun_str);
 
                 fit_alg->setProperty("InputWorkspace", Data);
@@ -586,33 +630,48 @@ namespace Mantid
                 fit_alg->setProperty("StartX", 0.0);
                 fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
                 fit_alg->setProperty("MaxIterations", 5000);
+                fit_alg->setProperty( "CreateOutput",true);
+
+
+                fit_alg->setProperty( "Output","out");
+
+                fit_alg->setProperty("MaxIterations", 50);
+
 
                 std::string tie = getProperty("Ties");
                 if( tie.length() > (size_t)0)
                   fit_alg->setProperty("Ties", tie);
-
+                if( Constraints.length() > (size_t)0)
+                  fit_alg->setProperty("Constraints", Constraints);
                 try
                 {
                   fit_alg->executeAsSubAlg();
 
                   double chisq = fit_alg->getProperty("OutputChi2overDoF");
 
-                  params = fit_alg->getProperty("Parameters");
-                  errs = fit_alg->getProperty("Errors");
-                  names = fit_alg->getProperty("ParameterNames");
+                  ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
+                  for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
+                  {
+                    names.push_back( RRes->getRef< string >( "Name", prm ) );
+                    params.push_back( RRes->getRef< double >( "Value", prm ));
+                    errs.push_back( RRes->getRef< double >( "Error",prm));
+                  }
 
                   ostringstream res;
                   res << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
-                  res<<"  Row,Col Radius="<<lastRow<<","<<lastCol<<","<<neighborRadius<<std::endl;
+                  res<<"  Row,Col Radius=" << lastRow << "," << lastCol <<"," <<neighborRadius << std::endl;
 
                   double sqrtChisq = -1;
                   if (chisq >= 0)
-                    sqrtChisq = sqrt(chisq);
+                    sqrtChisq =(chisq);
+
+                  sqrtChisq = max< double >( sqrtChisq,AttributeValues[IIntensities]/AttributeValues[ISS1] );
+                  sqrtChisq = sqrt( sqrtChisq);
 
                   for (size_t kk = 0; kk < params.size(); kk++)
                   {
                     res << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
-                    if (names[kk].substr(0, 2) != string("SS"))
+                   // if (names[kk].substr(0, 2) != string("SS"))
                       res << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
 
                     res << endl;
@@ -621,7 +680,7 @@ namespace Mantid
 
                   if (isGoodFit(params, errs, names, chisq))
                   {
-                    UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq, time);
+                    UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq, time, spec_idList);
 
                     double TotSliceIntensity = AttributeValues[IIntensities];
                     double TotSliceVariance = AttributeValues[IVariance];
@@ -798,6 +857,7 @@ namespace Mantid
       TabWS->addColumn("double", "Start Col");
       TabWS->addColumn("double", "End Col");
       TabWS->addColumn("double", "TotIntensityError");
+      TabWS->addColumn("str", "SpecIDs");
     }
 
 
@@ -913,12 +973,15 @@ namespace Mantid
       double Mx, My, Sxx, Syy, Sxy;
 
       //Variances at background =0. Should be used to nail down initial parameters.
-   //   double Sxx0 = (StatBase[ISSIxx]-StatBase[ISSIx]*StatBase[ISSIx]/ StatBase[IIntensities])
-  //                                   / StatBase[IIntensities];
+    /*  double Sxx0 = (StatBase[ISSIxx]-StatBase[ISSIx]*StatBase[ISSIx]/ StatBase[IIntensities])
+                                    / StatBase[IIntensities];
 
-   //   double Syy0 = (StatBase[ISSIyy]-StatBase[ISSIy]*StatBase[ISSIy]/ StatBase[IIntensities])
-  //                               / StatBase[IIntensities];
-      while (!done && ntimes<8)
+      double Syy0 = (StatBase[ISSIyy]-StatBase[ISSIy]*StatBase[ISSIy]/ StatBase[IIntensities])
+                                 / StatBase[IIntensities];
+    */
+      double RangeX= AttributeValues[INCol]/2;
+      double RangeY = AttributeValues[INRows]/2;
+      while (!done && ntimes < 29)
       {
         Mx = StatBase[ISSIx] - b * StatBase[ISSx];
         My = StatBase[ISSIy] - b * StatBase[ISSy];
@@ -928,11 +991,11 @@ namespace Mantid
         ntimes++;
         done = false;
 
-        if (Sxx <= 0 || Syy <= 0 || Sxy * Sxy / Sxx / Syy > .8)
+        if (Sxx <= RangeX/12 || Syy <= RangeY/12 || Sxy * Sxy / Sxx / Syy > .8)
         {
-          b = b*.6;
+          b = b*.95;
 
-          if (ntimes +1 ==8)
+          if (ntimes +1 == 29)
             b=0;
 
           Den = StatBase[IIntensities] - b * nCells;
@@ -968,7 +1031,8 @@ namespace Mantid
                                              //int*                            nghbrs,//Not used
                                             // std::map< specid_t, V3D >     &neighbors,
                                              double                        &neighborRadius,//from CentDetspec
-                                             double                         Radius)
+                                             double                         Radius,
+                                             string                     &spec_idList)
     {
      // size_t wsIndx = inpWkSpace->getIndexFromSpectrumNumber(CentDetspec);
 
@@ -978,13 +1042,13 @@ namespace Mantid
                                    + yvec*(CentY-ROW)*CellHeight;
 
       SetUpData1(Data             , inpWkSpace, chan,
-                 Radius            , CentPos1);
+                 Radius            , CentPos1, spec_idList);
 
       if( AttributeValues[ISSIxx]< 0)// Not enough data
           return;
 
       double  DD = max<double>( sqrt(ParameterValues[IVYY])*CellHeight, sqrt(ParameterValues[IVXX])*CellWidth);
-      double NewRadius= 1.1* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
+      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
       //1.4 is needed to get more background cells. In rectangle the corners were background
 
       NewRadius = min<double>(30*max<double>(CellWidth,CellHeight),NewRadius);
@@ -1025,7 +1089,7 @@ namespace Mantid
         neighborRadius -= DD;
 
       SetUpData1(Data, inpWkSpace, chan,
-                 NewRadius, CentPos );
+                 NewRadius, CentPos, spec_idList );
 
     }
 
@@ -1034,9 +1098,9 @@ namespace Mantid
     void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr              &Data,
                                                API::MatrixWorkspace_sptr        const &inpWkSpace,
                                                const int                               chan,
-
                                                double                      Radius,
-                                               Kernel::V3D                 CentPos
+                                               Kernel::V3D                 CentPos,
+                                               string                     &spec_idList
                                                )
     {
       UNUSED_ARG(g_log);
@@ -1049,22 +1113,10 @@ namespace Mantid
       boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
 
       std::vector<double> StatBase;
-
+      spec_idList.clear();
 
       for (int i = 0; i < NAttributes + 2; i++)
         StatBase.push_back(0);
-
-      Mantid::MantidVecPtr pX;
-
-      Mantid::MantidVec& xRef = pX.access();
-      for (int j = 0; j < NeighborIDs[1]; j++)
-      {
-        xRef.push_back((double)j);
-      }
-
-      Data->setX(0, pX);
-      Data->setX(1, pX);
-      Data->setX(2, pX);
 
       Mantid::MantidVecPtr yvals;
       Mantid::MantidVecPtr errs;
@@ -1078,6 +1130,7 @@ namespace Mantid
 
       double TotBoundaryIntensities = 0;
       int nBoundaryCells = 0;
+      double TotBoundaryVariances =0;
      // std::map<specid_t, V3D >::iterator it;
      // std::map<detid_t, size_t>::iterator det2wsInxIterator;
 
@@ -1092,6 +1145,11 @@ namespace Mantid
       //  {
 
      //   }else
+     // std::cout<<"-------- data-------"<<std::endl;
+      int jj=0;
+      Mantid::MantidVecPtr pX;
+
+      Mantid::MantidVec& xRef = pX.access();
       for (int i = 2; i < NeighborIDs[1]; i++)
       {
         int DetID = NeighborIDs[i];
@@ -1110,9 +1168,15 @@ namespace Mantid
 
         V3D pixPos = Det->getPos();
 
+
+        if( i > 2)
+          spec_idList +=  "," ;
+
+
+
         if ((pixPos - CentPos).norm() < Radius)
 
-        {
+        { spec_idList +=  boost::lexical_cast<std::string>( inpWkSpace->getSpectrum( workspaceIndex )->getSpectrumNo());
 
           double row = ROW + (pixPos - center).scalar_prod(yvec) / CellHeight;
 
@@ -1134,7 +1198,8 @@ namespace Mantid
           xvalB.push_back((double) col);
           YvalB.push_back((double) row);
 
-          //std::cout<<"("<<row<<","<<col<<","<<intensity<<")";
+          xRef.push_back((double)jj);jj++;
+  
 
 
           updateStats(intensity, variance, row, col, StatBase);
@@ -1144,7 +1209,9 @@ namespace Mantid
           {
             TotBoundaryIntensities += intensity;
             nBoundaryCells++;
-           //  std::cout<<"*";
+
+            TotBoundaryVariances += variance;
+            //if(chan==14)  std::cout<<"*";
           }
 
           if (row < minRow)
@@ -1160,12 +1227,18 @@ namespace Mantid
         }
         }
 
+      Data->setX(0, pX);
+      Data->setX(1, pX);
+      Data->setX(2, pX);
+
+
      // std::cout<<std::endl<<"N elts="<<N<< ","<<TotBoundaryIntensities<<","<<nBoundaryCells<<std::endl;
       ws->setData(0, yvals, errs);
       ws->setData(1, xvals);
       ws->setData(2, Yvals);
 
 
+      ws->setName("index0");
       StatBase[IStartRow] = minRow;
       StatBase[IStartCol] =minCol;
       StatBase[INRows] = maxRow-minRow+1;
@@ -1178,6 +1251,7 @@ namespace Mantid
 
       AttributeValues[ITotBoundary ] = TotBoundaryIntensities;
       AttributeValues[INBoundary] = nBoundaryCells;
+      AttributeValues[IVarBoundary]= TotBoundaryVariances;
 
     }
 
@@ -1229,7 +1303,8 @@ namespace Mantid
       {
 
         sprintf(logInfo, std::string("   Bad Slice- negative chiSq= %7.2f\n").c_str(), chisq);
-        g_log.debug(std::string(logInfo));
+
+          g_log.debug(std::string(logInfo));
         return false;
       }
 
@@ -1241,7 +1316,8 @@ namespace Mantid
 
         sprintf(logInfo, std::string("   Bad Slice. Negative Counts= %7.2f\n").c_str(),
             AttributeValues[IIntensities] - params[Ibk] * ncells);
-        g_log.debug(std::string(logInfo));
+
+           g_log.debug(std::string(logInfo));
         return false;
       }
 
@@ -1255,7 +1331,8 @@ namespace Mantid
             std::string(
                 "   Bad Slice. Fitted Intensity & Observed Intensity(-back) too different. ratio= %7.2f\n").c_str(),
             x);
-        g_log.debug(std::string(logInfo));
+
+          g_log.debug(std::string(logInfo));
         return false;
       }
       bool GoodNums = true;
@@ -1284,7 +1361,8 @@ namespace Mantid
           GoodNums = false;
 
       if (!GoodNums)
-        g_log.debug(
+
+          g_log.debug(
             "   Bad Slice.Some params and errs are out of bounds or relative errors are too high");
 
       if (params[IIntensity] > 0)
@@ -1293,7 +1371,8 @@ namespace Mantid
 
           sprintf(logInfo, std::string("   Bad Slice. rel errors too large= %7.2f\n").c_str(),
               errs[ITINTENS] * sqrt(chisq));
-          g_log.debug(std::string(logInfo));
+
+            g_log.debug(std::string(logInfo));
           return false;
         }
 
@@ -1307,7 +1386,8 @@ namespace Mantid
 
         sprintf(logInfo, std::string("   Bad Slice. Peak too small= %7.2f\n").c_str(),
             maxPeakHeightTheoretical);
-        g_log.debug(std::string(logInfo));
+
+           g_log.debug(std::string(logInfo));
         return false;
       }
 
@@ -1343,7 +1423,8 @@ namespace Mantid
                                                   std::vector<double >                 const &errs,
                                                   std::vector<std::string>             const &names,
                                                   const double                               Chisq,
-                                                  const double time)
+                                                  const double time,
+                                                  string                                  spec_idList)
     {
       int Ibk = find("Background", names);
       int IIntensity = find("Intensity", names);
@@ -1362,6 +1443,7 @@ namespace Mantid
 
       int ncells = (int) (AttributeValues[ISS1]);
       double chisq= max<double>(Chisq, AttributeValues[IIntensities]/max<int>(ncells,1));
+
       TabWS->getRef<double> (std::string("Background"), TableRow) = params[Ibk];
       TabWS->getRef<double> (std::string("Channel"), TableRow) = chan;
 
@@ -1400,7 +1482,7 @@ namespace Mantid
       TabWS->getRef<double> (std::string("End Col"), TableRow) = AttributeValues[IStartCol]
           + AttributeValues[INCol] - 1;
       TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = sqrt(AttributeValues[IVariance]);
-
+      TabWS->getRef<string>( std::string("SpecIDs"), TableRow ) = spec_idList;
     }
 
     
@@ -1475,8 +1557,8 @@ namespace Mantid
 
       if (fabs(Z) < .10) //Not high enough of a peak
       {
-
         sprintf(logInfo, std::string("   Not Enough Data, Peak Height(%7.2f) is too low\n").c_str(), Z);
+
         g_log.debug(std::string(logInfo));
         return false;
       }

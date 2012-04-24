@@ -88,6 +88,7 @@ void ScriptFileInterpreter::showContextMenu(const QPoint & clickPoint)
 void ScriptFileInterpreter::setExecutingStatus()
 {
   m_status->showMessage("Status: Executing...");
+  m_editor->setReadOnly(true);
 }
 
 /**
@@ -96,6 +97,7 @@ void ScriptFileInterpreter::setExecutingStatus()
 void ScriptFileInterpreter::setStoppedStatus()
 {
   m_status->showMessage("Status: Stopped");
+  m_editor->setReadOnly(false);
 }
 
 /**

@@ -35,6 +35,7 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <QFileInfo>
+#include <QDir>
 
 class ScriptingEnv;
 class PythonScripting;
@@ -99,16 +100,28 @@ private:
     PythonPathHolder(const QString & entry)
       : m_path(entry)
     {
-      if( QFileInfo(m_path).exists() )
+      const QFileInfo filePath(m_path);
+      if( filePath.exists() )
       {
-        appendPath(m_path);
+        QDir directory = filePath.absoluteDir();
+        // Check it is not a package
+        if( !QFileInfo(directory, "__init__.py").exists() )
+        {
+          m_path = directory.absolutePath();
+          appendPath(m_path);
+        }
+        else
+        {
+          m_path = "";
+        }
       }
     }
     /// Remove the entry from the path
     ~PythonPathHolder()
     {
-      removePath(m_path);
+      if(!m_path.isEmpty()) removePath(m_path);
     }
+
     void appendPath(const QString & path)
     {
       GlobalInterpreterLock pythonLock;
@@ -128,7 +141,7 @@ private:
       PyRun_SimpleString(code.toAscii());
     }
   private:
-    const QString m_path;
+    QString m_path;
   };
 
   inline PythonScripting * pythonEnv() const { return m_pythonEnv; }

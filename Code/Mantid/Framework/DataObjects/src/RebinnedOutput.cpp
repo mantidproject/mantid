@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <algorithm>
+#include <iostream>
 
 //using namespace Mantid::Kernel;
 //using namespace Mantid::API;
@@ -81,6 +82,22 @@ namespace DataObjects
   }
 
   /**
+   * Function that returns a fractional area array for a given index. This
+   * returns a const array.
+   * @param index :: the array to fetch
+   * @return the requested fractional area array
+   */
+  const MantidVec &RebinnedOutput::readF(const std::size_t index) const
+  {
+    return this->fracArea[index];
+  }
+
+  void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F)
+  {
+    this->fracArea[index] = *F;
+  }
+
+  /**
    * This function takes the data/error arrays and divides them by the
    * corresponding fractional area array. This creates a representation that
    * is easily visualized. The Rebin and Integration algorithms will have to
@@ -88,21 +105,25 @@ namespace DataObjects
    */
   void RebinnedOutput::finalize()
   {
+    g_log.information() << "Starting finalize procedure." << std::endl;
     std::size_t nHist = this->getNumberHistograms();
+    g_log.information() << "Number of histograms: " << nHist << std::endl;
     for (std::size_t i = 0; i < nHist; ++i)
     {
-      MantidVec data = this->dataY(i);
-      MantidVec err = this->dataE(i);
-      MantidVec frac = this->dataF(i);
+      MantidVec &data = this->dataY(i);
+      MantidVec &err = this->dataE(i);
+      MantidVec &frac = this->dataF(i);
       MantidVec frac_sqr(frac.size());
 
       std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                      std::divides<double>());
       std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
                      std::multiplies<double>());
-      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+      std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
                      std::divides<double>());
 
+      std::copy(frac.begin(), frac.end(), std::ostream_iterator<double>(g_log.information(), " "));
+      g_log.information() << std::endl;
     }
   }
 

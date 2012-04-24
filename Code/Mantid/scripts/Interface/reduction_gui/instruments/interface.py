@@ -71,8 +71,11 @@ class InstrumentInterface(object):
             red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
             if os.path.isfile(red_path):
                 self.load_file(red_path)
+            else:
+                self.reset()
         except:
             print "Could not load last reduction\n  %s" % str(traceback.format_exc())
+            self.reset()
         
     def load_file(self, file_name):
         """

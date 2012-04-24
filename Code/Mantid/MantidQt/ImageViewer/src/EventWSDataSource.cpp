@@ -5,6 +5,8 @@
 #include <iostream>
 #include <math.h>
 
+#include <QThread>
+
 #include "MantidQtImageViewer/EventWSDataSource.h"
 #include "MantidQtImageViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"

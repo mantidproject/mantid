@@ -27,6 +27,10 @@ class SimpleAPILoadTest(unittest.TestCase):
         except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEquals(1, raw.getNumberHistograms())
+        
+    def test_Load_call_with_all_keyword_args_executes_correctly(self):
+        raw = Load(Filename='IRS21360.raw', SpectrumMax=1)
+        self.assertEquals(1, raw.getNumberHistograms())
 
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         try:

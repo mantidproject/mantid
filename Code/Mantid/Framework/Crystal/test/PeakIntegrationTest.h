@@ -212,12 +212,12 @@ public:
     //std::cout<<","<<sigIntensity<<","<<slices<<std::endl;
     double intensity0=2697.48;//3682 pref avg
     if( slices)
-      intensity0= 4889.2;
+      intensity0= 2604;
     TS_ASSERT_DELTA(intensity,intensity0, 100.0);
   
     double sig0=97.8525;//141 prev avg
     if( slices)
-      sig0=191.834;
+      sig0=165;
 
 
     TS_ASSERT_DELTA( sigIntensity,sig0, 50.0);
@@ -226,7 +226,7 @@ public:
 
   }
 
-  void xtest_MINITOPAZ()
+  void test_MINITOPAZ()
   {
     do_test_MINITOPAZ(true);
     do_test_MINITOPAZ(false);

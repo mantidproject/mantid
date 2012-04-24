@@ -1,7 +1,8 @@
 import unittest
 import testhelpers
 
-from mantid import FloatArrayLengthValidator, PythonAlgorithm, FloatArrayProperty
+from mantid.kernel import FloatArrayLengthValidator, FloatArrayProperty
+from mantid.api import PythonAlgorithm
 
 class ArrayLengthValidatorTest(unittest.TestCase):
 

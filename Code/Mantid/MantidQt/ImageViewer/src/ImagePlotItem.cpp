@@ -1,6 +1,6 @@
 
 #include <iostream>
-
+#include <QThread>
 #include "MantidQtImageViewer/ImagePlotItem.h"
 
 namespace MantidQt
