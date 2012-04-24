@@ -1,4 +1,4 @@
-from reducer import ReductionStep
+from reduction.reducer import ReductionStep
 from mantidsimple import *
 import string
 import os

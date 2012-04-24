@@ -3,7 +3,7 @@
 import os.path
 
 from mantidsimple import *
-import reducer
+import reduction.reducer as reducer
 import inelastic_indirect_reduction_steps as steps
 
 class MSGReducer(reducer.Reducer):
