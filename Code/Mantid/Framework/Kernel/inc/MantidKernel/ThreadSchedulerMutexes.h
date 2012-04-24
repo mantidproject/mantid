@@ -63,13 +63,13 @@ namespace Kernel
       if (m_supermap.size() > 0)
       {
         //We iterate in reverse as to take the NULL mutex last, even if no mutex is busy
-        SuperMap::reverse_iterator it = m_supermap.rbegin();
-        SuperMap::reverse_iterator it_end = m_supermap.rend();
-        for (; it != it_end; it++)
+        SuperMap::iterator it = m_supermap.begin();
+        SuperMap::iterator it_end = m_supermap.end();
+        for (; it != it_end; ++it)
         {
           // The key is the mutex associated with the inner map
           Mutex * mapMutex = it->first;
-          if (m_mutexes.find(mapMutex) == m_mutexes.end())
+          if ((!mapMutex) || (m_mutexes.empty()) || (m_mutexes.find(mapMutex) == m_mutexes.end()))
           {
             // The mutex of this map is free!
             InnerMap & map = it->second;
