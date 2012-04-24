@@ -13,6 +13,7 @@ The new axis values are taken from the previous X-vector-values for the first sp
 #include "MantidAlgorithms/Transpose.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid
 {
@@ -46,6 +47,10 @@ namespace Mantid
       MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWorkspace = createOutputWorkspace(inputWorkspace);
 
+      // Things to take care of RebinnedOutput workspaces
+      DataObjects::RebinnedOutput_const_sptr inRebinWorkspace = boost::dynamic_pointer_cast<const DataObjects::RebinnedOutput>(inputWorkspace);
+      DataObjects::RebinnedOutput_sptr outRebinWorkspace = boost::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
+
       size_t newNhist = outputWorkspace->getNumberHistograms();
       size_t newXsize = outputWorkspace->readX(0).size();
       size_t newYsize = outputWorkspace->blocksize();
@@ -71,11 +76,26 @@ namespace Mantid
         MantidVec & outY = outputWorkspace->dataY(i);
         MantidVec & outE = outputWorkspace->dataE(i);
 
+        MantidVecPtr F;
+        MantidVec & outF = F.access();
+        if (outRebinWorkspace)
+        {
+          outF.resize(newYsize);
+        }
+
         for(int64_t j = 0; j < int64_t(newYsize); ++j)
         {
           progress.report("Swapping data values");
           outY[j] = inputWorkspace->readY(j)[i];
           outE[j] = inputWorkspace->readE(j)[i];
+          if (outRebinWorkspace)
+          {
+            outF[j] = inRebinWorkspace->dataF(j)[i];
+          }
+        }
+        if (outRebinWorkspace)
+        {
+          outRebinWorkspace->setF(i, F);
         }
 
         PARALLEL_END_INTERUPT_REGION
