@@ -28,7 +28,7 @@ Some features
 //TODO:
 
 //  1. Change xxx --> SCDCalibratePanelsx  where x=0,1,2,3,...
-//  2. Get rid of in analysis data service.
+//  2. Get rid of in analysis data service.NOPE ,deletes too much in MantidPlot
 
 
 #include "MantidCrystal/SCDCalibratePanels.h"
@@ -916,6 +916,7 @@ namespace Crystal
    fit_alg->executeAsSubAlg();
 
    string OutputStatus =fit_alg->getProperty("OutputStatus");
+   g_log.notice() <<"Output Status="<<OutputStatus<<std::endl;
 
    declareProperty(
         new API::WorkspaceProperty<API::ITableWorkspace>
@@ -1345,8 +1346,10 @@ namespace Crystal
       declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "",
           Kernel::Direction::Output), "Workspace of Errors in Q");
 
-      declareProperty( "NumIterations",20,"Number of iterations");
-     /* setPropertySettings("PanelNamePrefix", new EnabledWhenProperty(this, "PanelGroups",
+      declareProperty( "NumIterations",60,"Number of iterations");
+
+
+     setPropertySettings("PanelNamePrefix", new EnabledWhenProperty(this, "PanelGroups",
           Kernel::IS_EQUAL_TO, "SpecifyGroups"));
       setPropertySettings("Grouping", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO,
           "SpecifyGroups"));
@@ -1355,7 +1358,7 @@ namespace Crystal
           Kernel::IS_NOT_EQUAL_TO, "No PreProcessing"));
       setPropertySettings("InitialTimeOffset", new EnabledWhenProperty(this, "PreProcessInstrument",
           Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file"));
-*/
+
     }
 
   void  SCDCalibratePanels::initDocs ()

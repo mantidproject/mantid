@@ -112,8 +112,6 @@ namespace Mantid
 
     void SCDPanelErrors::init()
     {
-      declareParameter("l0", 0.0, "Initial Flight Path");
-      declareParameter("t0", 0.0, "Time offset");
 
       declareParameter("detWidthScale", 1.0, "panel Width");
       declareParameter("detHeightScale", 1.0, "panel Height");
@@ -125,6 +123,9 @@ namespace Mantid
       declareParameter("Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
       declareParameter("Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
       declareParameter("Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
+
+      declareParameter("l0", 0.0, "Initial Flight Path");
+      declareParameter("t0", 0.0, "Time offset");
 
     }
 
@@ -533,7 +534,6 @@ namespace Mantid
           return;
         }
 
-      //cout<<"D"<<endl;
       boost::shared_ptr<DataObjects::PeaksWorkspace> pwks = getPeaks();
 
       Check(pwks, xValues, nData);
@@ -715,16 +715,17 @@ namespace Mantid
 
     double SCDPanelErrors::checkForNonsenseParameters()const
     {
-      double L0= getParameter(0);
-      double T0 = getParameter(1);
-      double Dwdth = getParameter(2);
-      double Dhght = getParameter(3);
-      double x = getParameter(4);
-      double y = getParameter(5);
-      double z = getParameter(6);
-      double rx = getParameter(7);
-      double ry = getParameter(8);
-      double rz = getParameter(9);
+
+      double Dwdth = getParameter(0);
+      double Dhght = getParameter(1);
+      double x = getParameter(2);
+      double y = getParameter(3);
+      double z = getParameter(4);
+      double rx = getParameter(5);
+      double ry = getParameter(6);
+      double rz = getParameter(7);
+      double L0= getParameter(8);
+      double T0 = getParameter(9);
 
        double r =0;
        if( L0 <1 )
@@ -764,6 +765,11 @@ namespace Mantid
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
+      const int StartPos=2;
+      const int StartRot = 5;
+      const int StartLen =0;
+      const int L0param =8;
+      const int T0param =9;
 
       if (nData <= 0)
         return;
@@ -892,6 +898,7 @@ namespace Mantid
 
       InvhklThkl.Invert();
 
+
       Matrix<double> UB(3, 3);
       try
       {
@@ -914,33 +921,38 @@ namespace Mantid
 
       //-------- xyz offset parameters ----------------------
 
+
       vector<V3D> Unrot_dQ[3];
       int pick[3];
       pick[0] = pick[1] = pick[2] = 0;
 
-      for (int param = 4; param <= 6; param++)
+      for (int param = StartPos; param <=StartPos+2; param++)
       {
-        pick[param - 4] = 1;
+        pick[param - StartPos] = 1;
         V3D parxyz(pick[0], pick[1], pick[2]);
-        pick[param - 4] = 0;
+        pick[param - StartPos] = 0;
 
         Matrix<double> Result(3, qlab.size());
 
         for (int peak = 0; peak < (int) qlab.size(); peak++)
         {
+
           double L1 = pos[peak].norm();
           double velMag = (L0 + L1) / time[peak];
           double t1 = time[peak] - L0 / velMag;
+
 
           double dt1 = parxyz.scalar_prod(pos[peak]) * L0 / velMag / velMag / time[peak] / L1;
 
           V3D dQlab;
           V3D vel = pos[peak] / L1 * velMag;
 
+
           double r = (K / t1 * dt1);
           dQlab.setX(vel.scalar_prod(V3D(1, 0, 0)) * r);
           dQlab.setY(vel.scalar_prod(V3D(0, 1, 0)) * r);
           dQlab.setZ(vel.scalar_prod(V3D(0, 0, 1)) * r);
+
 
           r = -K / t1;
           dQlab.setX(dQlab.X() + parxyz.scalar_prod(V3D(1, 0, 0) * r));
@@ -951,16 +963,20 @@ namespace Mantid
 
           dQlab.setZ(dQlab.Z() + K * dvMag);
 
+
           Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
 
-          Unrot_dQ[param - 4].push_back(dQlab);//Save for later calculations
+
+          Unrot_dQ[param - StartPos].push_back(dQlab);//Save for later calculations
+
 
           Result[0][peak] = dQsamp.X();
           Result[1][peak] = dQsamp.Y();
           Result[2][peak] = dQsamp.Z();
         }
+
 
         Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
 
@@ -976,13 +992,14 @@ namespace Mantid
           }
       }
 
+
       //-------------------- Derivatives with respect to rotx,roty, and rotz ---------
-      for (int param = 7; param <= 9; param++)
+      for (int param = StartRot; param <= StartRot+2; param++)
       {
         Matrix<double> Result(3, qlab.size());
         Matrix<double> Rot2dRot(3, 3); //deriv of rot matrix at angle=0
         Rot2dRot.zeroMatrix();
-        int r1 = param - 7;
+        int r1 = param - StartRot;
         int r = (r1 + 1) % 3;
 
         Rot2dRot[r][(r + 1) % 3] = -1;//??? what I wanted not standard formula
@@ -1031,7 +1048,7 @@ namespace Mantid
           }
       }
 
-      int param = 2;//scale width
+      int param = StartLen;//scale width
       Matrix<double> Result(3, qlab.size());
       for (int peak = 0; peak < (int) qlab.size(); peak++)
       {
@@ -1068,7 +1085,7 @@ namespace Mantid
           x++;
         }
 
-      param = 3;//scale Height
+      param = StartLen+1;//scale Height
       Result.zeroMatrix();
       for (int peak = 0; peak < (int) qlab.size(); peak++)
       {
@@ -1107,7 +1124,7 @@ namespace Mantid
           x++;
         }
 
-      param = 0;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
+      param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
       Result.zeroMatrix();
       for (int peak = 0; peak < (int) qlab.size(); peak++)
       {
@@ -1139,7 +1156,7 @@ namespace Mantid
           x++;
         }
 
-      param = 1;//t0 partial unRotQxyz wrt t0 = -unRotQxyz/tof
+      param = T0param;//t0 partial unRotQxyz wrt t0 = -unRotQxyz/tof
       Result.zeroMatrix();
       for (int peak = 0; peak < (int) qlab.size(); peak++)
       {

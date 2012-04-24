@@ -135,13 +135,14 @@ public:
 
     calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t) N);
 
+
     size_t nData = N;
     std::vector<double> out0(N);// = new double[ N ];
     std::vector<double> out1(N);// = new double[ N ];
     std::vector<double> compRes(N);
 
     int params[20] =
-    { 0, 0,0,0,0, 1, 1,1,1,1, 2, 2, 2,2, 2,9, 9, 9, 9, 9 };
+    { 0, 0,0,0,0, 3, 3,3,3,3, 6, 6, 8,8, 8, 8,9, 9, 9, 9 };
 
     int indx[20] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
@@ -149,11 +150,13 @@ public:
 
     int x = 0;
     int prevParam = -1;
+
     for (int i = 0; i < 20; i++)
     {
       int param = params[i];
       if (param !=prevParam)
       {
+
         double sav = calib.getParameter(param);
         calib.setParameter(param, sav + .005);
 
@@ -169,11 +172,10 @@ public:
       int k = indx[x];
       x++;
 
+
       TS_ASSERT_DELTA(Jac->get(k, param), compRes[k], .002);
 
     }
-
-
   }
   ;
 
