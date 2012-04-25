@@ -42,8 +42,8 @@ DECLARE_DIALOG(FitDialog);
  */
 InputWorkspaceWidget::InputWorkspaceWidget(FitDialog* parent, int domainIndex):
 QWidget(parent),
-m_domainIndex(domainIndex),
 m_fitDialog(parent),
+m_domainIndex(domainIndex),
 m_dynamicProperties(NULL)
 {
   m_wsPropName = "InputWorkspace";
@@ -214,7 +214,7 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget* parent):DynamicProp
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()).get());
     if ( ws )
     {
-      m_workspaceIndex->setRange(0, ws->getNumberHistograms());
+      m_workspaceIndex->setRange(0, static_cast<int>(ws->getNumberHistograms()));
       if ( ws->blocksize() > 0 )
       {
         const Mantid::MantidVec& x = ws->readX(0);
@@ -366,7 +366,7 @@ void FitDialog::createInputWorkspaceWidgets()
     for(size_t i = 1; i < nd; ++i)
     {
       QString propName = "InputWorkspace_" + QString::number(i);
-      auto t = new InputWorkspaceWidget( this, i );
+      auto t = new InputWorkspaceWidget( this, static_cast<int>(i) );
       m_form.tabWidget->addTab( t, propName );
       m_tabs << t;
     }

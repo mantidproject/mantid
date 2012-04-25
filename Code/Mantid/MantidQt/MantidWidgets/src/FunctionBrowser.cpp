@@ -885,8 +885,9 @@ QList<FunctionBrowser::AProperty> FunctionBrowser::addConstraintProperties(QtPro
   {// lower < param < upper
     try
     {
-      double d1 = boost::lexical_cast<double>( expr[0].name() );
-      double d2 = boost::lexical_cast<double>( expr[2].name() );
+      // check that the first and third terms are numbers
+      double d1 = boost::lexical_cast<double>( expr[0].name() ); (void)d1;
+      double d2 = boost::lexical_cast<double>( expr[2].name() ); (void)d2;
       if ( expr[1].operator_name() == "<" && expr[2].operator_name() == "<" )
       {
         lowerBoundStr = QString::fromStdString( expr[0].name() );
