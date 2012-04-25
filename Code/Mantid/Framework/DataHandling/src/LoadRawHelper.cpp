@@ -739,6 +739,7 @@ namespace Mantid
 
       runDetails.addProperty("user_name", std::string(localISISRaw->hdr.hd_user, 20));
       runDetails.addProperty("inst_abrv", std::string(localISISRaw->hdr.inst_abrv, 3));
+      runDetails.addProperty("hd_dur", std::string(localISISRaw->hdr.hd_dur, 8));
 
       // Data details on run not the workspace
       runDetails.addProperty("nspectra", static_cast<int>(localISISRaw->t_nsp1));

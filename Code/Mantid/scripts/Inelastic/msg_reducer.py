@@ -3,6 +3,8 @@
 import os.path
 
 from mantidsimple import *
+from mantid.kernel import config
+import MantidFramework
 import reduction.reducer as reducer
 import inelastic_indirect_reduction_steps as steps
 
@@ -23,6 +25,7 @@ class MSGReducer(reducer.Reducer):
     _rebin_string = None
     _fold_multiple_frames = True
     _save_formats = []
+    _info_table_props = None
     
     def __init__(self):
         super(MSGReducer, self).__init__()
@@ -42,10 +45,35 @@ class MSGReducer(reducer.Reducer):
         self._multiple_frames = loadData.is_multiple_frames()
         self._masking_detectors = loadData.get_mask_list()
         
+        if( self._info_table_props is not None ):
+            wsNames = loadData.get_ws_list().keys()
+            wsNameList = ", ".join(wsNames)
+            propsList = ", ".join(self._info_table_props)
+            CreateLogPropertyTable(
+                OutputWorkspace="RunInfo",
+                InputWorkspaces=wsNameList,
+                LogPropertyNames=propsList,
+                GroupPolicy="First")
+        
         if ( self._sum ):
             self._data_files = loadData.get_ws_list()
             
         self._setup_steps()
+    
+    def create_info_table(self):
+        """Sets the names of properties retrieve from the log when creating
+        an info table.
+        """
+        
+        inst_name = config.getInstrument().name()
+        inst = MantidFramework.mtd["__empty_" + inst_name].getInstrument()
+        props = inst.getStringParameter('Workflow.InfoTable')
+        
+        if props:
+            self._info_table_props = props
+        else:
+            mtd.sendErrorMessage("Instrument does not have Workflow.InfoTable " +
+                "defined in its parameter file.  Unable to create info table for runs.")
 
     def set_detector_range(self, start, end):
         """Sets the start and end detector points for the reduction process.

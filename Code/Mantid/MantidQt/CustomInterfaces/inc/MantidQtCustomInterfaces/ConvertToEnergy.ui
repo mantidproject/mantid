@@ -1579,30 +1579,44 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="ind_lbPlotOutput">
+                 <widget class="QCheckBox" name="ckCreateInfoTable">
                   <property name="text">
-                   <string>Plot Output:</string>
+                   <string>Create Info Table</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="ind_cbPlotOutput">
+                 <layout class="QHBoxLayout" name="horizontalLayout_23">
                   <item>
-                   <property name="text">
-                    <string>None</string>
-                   </property>
+                   <widget class="QLabel" name="ind_lbPlotOutput">
+                    <property name="text">
+                     <string>Plot Output:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
                   </item>
                   <item>
-                   <property name="text">
-                    <string>Spectra</string>
-                   </property>
+                   <widget class="QComboBox" name="ind_cbPlotOutput">
+                    <item>
+                     <property name="text">
+                      <string>None</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Spectra</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Contour</string>
+                     </property>
+                    </item>
+                   </widget>
                   </item>
-                  <item>
-                   <property name="text">
-                    <string>Contour</string>
-                   </property>
-                  </item>
-                 </widget>
+                 </layout>
                 </item>
                </layout>
               </item>
@@ -1611,7 +1625,7 @@ p, li { white-space: pre-wrap; }
                 <item>
                  <widget class="QCheckBox" name="ckRenameWorkspace">
                   <property name="text">
-                   <string>Rename workspace</string>
+                   <string>Rename Workspace</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>

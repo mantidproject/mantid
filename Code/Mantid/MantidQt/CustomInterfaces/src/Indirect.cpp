@@ -260,8 +260,12 @@ void Indirect::runConvertToEnergy()
 
   if( m_uiForm.ckCm1Units->isChecked() )
   {
-    pyInput +=
-      "reducer.set_save_to_cm_1(True)\n";
+    pyInput += "reducer.set_save_to_cm_1(True)\n";
+  }
+  
+  if ( m_uiForm.ckCreateInfoTable->isChecked() )
+  {
+    pyInput += "reducer.create_info_table()\n";
   }
 
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
