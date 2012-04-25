@@ -78,6 +78,8 @@ namespace Mantid
       boost::shared_ptr<API::Progress> m_progress;
 
     private:
+      /// Flag for using a RebinnedOutput workspace
+      bool useFractionalArea;
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Initialise the properties

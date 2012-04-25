@@ -14,6 +14,7 @@ The algorithms currently requires the second axis on the workspace to be a numer
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/NumericAxis.h"
@@ -57,6 +58,7 @@ namespace Mantid
     {      
       using Kernel::ArrayProperty;
       using Kernel::Direction;
+      using Kernel::PropertyWithValue;
       using Kernel::RebinParamsValidator;
       using API::WorkspaceProperty;
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
@@ -68,6 +70,9 @@ namespace Mantid
       auto rebinValidator = boost::make_shared<RebinParamsValidator>();
       declareProperty(new ArrayProperty<double>("Axis1Binning", rebinValidator), docString);
       declareProperty(new ArrayProperty<double>("Axis2Binning", rebinValidator), docString);
+      declareProperty(new PropertyWithValue<bool>("UseFractionalArea", false, Direction::Input),
+                      "Flag to turn on the using the fractional area tracking RebinnedOutput workspace\n."
+                      "Default is false.");
     }
 
     /** 
@@ -105,6 +110,8 @@ namespace Mantid
       // Output grid and workspace. Fills in the new X and Y bin vectors
       MantidVecPtr newXBins;
       MantidVec newYBins;
+
+      this->useFractionalArea = getProperty("UseFractionalArea");
       MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, newXBins.access(), newYBins);
 
       //Progress reports & cancellation
@@ -126,13 +133,25 @@ namespace Mantid
           const double x_j = oldXEdges[j];
           const double x_jp1 = oldXEdges[j+1];
           Quadrilateral inputQ = Quadrilateral(x_j, x_jp1, vlo, vhi);
-          rebinToOutput(inputQ, inputWS, i, j, outputWS, newYBins);
+          if (!this->useFractionalArea)
+            {
+              rebinToOutput(inputQ, inputWS, i, j, outputWS, newYBins);
+            }
+          else
+            {
+              rebinToFractionalOutput(inputQ, inputWS, i, j,
+                                      boost::dynamic_pointer_cast<RebinnedOutput>(outputWS),
+                                      newYBins);
+            }
         }
 
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
-
+      if (this->useFractionalArea)
+      {
+        boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize();
+      }
       normaliseOutput(outputWS, inputWS);
       setProperty("OutputWorkspace", outputWS);
     }
@@ -351,7 +370,16 @@ namespace Mantid
       const int newXSize = createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins);
       const int newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newYBins);
       // and now the workspace
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(parent,newYSize-1,newXSize,newXSize-1);
+      MatrixWorkspace_sptr outputWS;
+      if (!this->useFractionalArea)
+        {
+          outputWS = WorkspaceFactory::Instance().create(parent,newYSize-1,newXSize,newXSize-1);
+        }
+      else
+        {
+          outputWS = WorkspaceFactory::Instance().create("RebinnedOutput", newYSize-1, newXSize, newXSize-1);
+          WorkspaceFactory::Instance().initializeFromParent(parent, outputWS, true);
+        }
       Axis* const verticalAxis = new NumericAxis(newYSize);
       // Meta data
       verticalAxis->unit() = parent->getAxis(1)->unit();
