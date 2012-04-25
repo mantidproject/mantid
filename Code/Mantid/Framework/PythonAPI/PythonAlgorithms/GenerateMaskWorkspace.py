@@ -14,7 +14,7 @@ masking and also passed to MaskDetectors to match masking there.
 from MantidFramework import *
 from mantidsimple import *
 
-class GenerateMaskingWorkspace(PythonAlgorithm):
+class GenerateMaskWorkspace(PythonAlgorithm):
 
     def category(self): 
         """ Mantid required
@@ -24,7 +24,7 @@ class GenerateMaskingWorkspace(PythonAlgorithm):
     def name(self):
         """ Mantid required
         """
-        return "GenerateMaskingWorkspace"
+        return "GenerateMaskWorkspace"
 
     def PyInit(self):
         """ Mantid required
@@ -144,4 +144,4 @@ class GenerateMaskingWorkspace(PythonAlgorithm):
 
         return num_failed
 
-mtd.registerPyAlgorithm(GenerateMaskingWorkspace())
+mtd.registerPyAlgorithm(GenerateMaskWorkspace())
