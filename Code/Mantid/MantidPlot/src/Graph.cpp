@@ -3569,6 +3569,9 @@ void Graph::removeCurve(int index)
 
   PlotCurve * c = dynamic_cast<PlotCurve *>(it);
   if (!c) return;
+  disconnect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
+  disconnect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()));
+
   DataCurve * dc = dynamic_cast<DataCurve *>(it);
 
   removeLegendItem(index);
@@ -3602,6 +3605,7 @@ void Graph::removeCurve(int index)
 
   c->aboutToBeDeleted();
   d_plot->removeCurve(c_keys[index]);
+  d_plot->replot();
   n_curves--;
 
   for (int i=index; i<n_curves; i++)
@@ -3621,7 +3625,6 @@ void Graph::removeCurve(int index)
 void Graph::removeCurve(PlotCurve* c)
 {
   removeCurve(curveIndex(c));
-  d_plot->replot();
 }
 
 void Graph::removeLegendItem(int index)
