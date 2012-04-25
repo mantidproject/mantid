@@ -381,7 +381,7 @@ namespace Mantid
         if (!archiveOpt.empty() && archiveOpt != "off" && !facility.archiveSearch().empty())
         {
           std::vector<std::string>::const_iterator it = facility.archiveSearch().begin();
-          for (; it != facility.archiveSearch().end(); it++)
+          for (; it != facility.archiveSearch().end(); ++it)
           {
             g_log.debug() << "get archive search for the facility..." << *it << "\n";
             archs.push_back(ArchiveSearchFactory::Instance().create(*it));
@@ -593,7 +593,7 @@ namespace Mantid
       g_log.debug() << "getArchivePath(" << fName << ")\n";
       std::string path = "";
       std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
-      for (; it != archs.end(); it++)
+      for (; it != archs.end(); ++it)
       {
         try
         {
@@ -632,7 +632,7 @@ namespace Mantid
       for (; ext != extensions.end(); ++ext)
       {
         std::set<std::string>::const_iterator it = filenames.begin();
-        for(; it!=filenames.end(); it++)
+        for(; it!=filenames.end(); ++it)
         {
           path = getFullPath(*it + *ext);
           try
@@ -660,7 +660,7 @@ namespace Mantid
         for (; ext != extensions.end(); ++ext)
         {
           std::set<std::string>::const_iterator it = filenames.begin();
-          for(; it!=filenames.end(); it++)
+          for(; it!=filenames.end(); ++it)
           {
             path = getArchivePath(archs, *it + *ext);
             try
