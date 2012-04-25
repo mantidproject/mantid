@@ -1,7 +1,7 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_TRANSF_INTERFACE
 #define  H_CONVERT_TO_MDEVENTS_TRANSF_INTERFACE
 //
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
 //
 namespace Mantid
@@ -46,7 +46,7 @@ namespace MDAlgorithms
 */
 
 template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType Sample>
-struct CoordTramsformer
+struct CoordTransformer
 {
       
     /**Template defines common interface to common part of the algorithm, where all variables
@@ -60,7 +60,7 @@ struct CoordTramsformer
      * @return true         -- if all Coord are within the range requested by algorithm. false otherwise
      *
      * has to be specialized
-    */
+    */  
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes)
     {       
        return false;
@@ -76,7 +76,8 @@ struct CoordTramsformer
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
-    bool calcYDepCoordinatese(std::vector<coord_t> &Coord,size_t i)
+    //calcYDepCoordinates
+    bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {       
        return false;
     }
@@ -90,6 +91,7 @@ struct CoordTramsformer
      *
      * has to be specialized
      */
+    //calcMatrixCoord(X,i,j,Coord)
     bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {       
        return false;
@@ -120,7 +122,7 @@ struct CoordTramsformer
     }
     /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and provides 
       * necessary variables */
-    void setUpTransf(IConvertToMDEventsMethods *){};
+    void setUpTransf(IConvertToMDEventsWS *){};
   
 private: 
   

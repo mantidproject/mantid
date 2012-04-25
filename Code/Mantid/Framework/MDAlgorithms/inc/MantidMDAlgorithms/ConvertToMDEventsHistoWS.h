@@ -58,23 +58,26 @@ namespace MDAlgorithms
 //-----------------------------------------------
 // Method to process rugged Histogram workspace
 template<ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
-class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
+class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public IConvertToMDEventsWS 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<ConvertToMD::QMode XQ,ConvertToMD::AnalMode XM,ConvertToMD::CnvrtUnits XC,ConvertToMD::XCoordType XT,ConvertToMD::SampleType XS>
      friend struct CoordTransformer;
-  // the instanciation of the class which does the transformation itself
-     CoordTransformer<Q,MODE,CONV,ConvertToMD::Histogram,Sample> trn; 
+
+   // the instanciation of the class which does the transformation itself
+     CoordTransformer<Q,MODE,CONV,ConvertToMD::Histogram,Sample> QE_TRANSF; 
+     // 
+
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
-        size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
+        size_t numSpec=IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
-        trn.setUpTransf(this); 
+        QE_TRANSF.setUpTransf(this); 
 
         return numSpec;
     }
@@ -94,7 +97,7 @@ public:
         // number of dimesnions
         std::vector<coord_t>  Coord(n_dims);             // coordinates for single event
      // if any property dimension is outside of the data range requested, the job is done;
-        if(!trn.calcGenericVariables(Coord,n_dims))return; 
+        if(!QE_TRANSF.calcGenericVariables(Coord,n_dims))return; 
 
         // take at least bufSize amout of data in one run for efficiency
         size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
@@ -119,7 +122,7 @@ public:
             const MantidVec& Error    = inWS2D->readE(iSpctr);
 
             // calculate the coordinates which depend on detector posision 
-            if(!trn.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
+            if(!QE_TRANSF.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
 
          //=> START INTERNAL LOOP OVER THE "TIME"
             for (size_t j = 0; j < specSize; ++j)
@@ -127,7 +130,7 @@ public:
                 // drop emtpy events
                 if(Signal[j]<FLT_EPSILON)continue;
 
-                if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
+                if(!QE_TRANSF.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE BUFFER
                 float ErrSq = float(Error[j]*Error[j]);
 

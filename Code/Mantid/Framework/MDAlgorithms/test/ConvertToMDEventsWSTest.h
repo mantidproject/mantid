@@ -58,7 +58,7 @@ using namespace Mantid::MDAlgorithms::ConvertToMD;
 //};
 
 
-class ConvertToMDEventsMethodsTest : public CxxTest::TestSuite, public ConvertToMDEvents
+class ConvertToMDEventsWSTest : public CxxTest::TestSuite, public ConvertToMDEvents
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
    Mantid::API::MatrixWorkspace_sptr ws_events;
@@ -70,17 +70,17 @@ class ConvertToMDEventsMethodsTest : public CxxTest::TestSuite, public ConvertTo
    MDEvents::MDWSDescription TestWS;
 
 public:
-static ConvertToMDEventsMethodsTest *createSuite() {
-    return new ConvertToMDEventsMethodsTest();    
+static ConvertToMDEventsWSTest *createSuite() {
+    return new ConvertToMDEventsWSTest();    
 }
-static void destroySuite(ConvertToMDEventsMethodsTest  * suite) { delete suite; }    
+static void destroySuite(ConvertToMDEventsWSTest  * suite) { delete suite; }    
 
 void testSetUp_and_PreprocessDetectors()
 {
    pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
     TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsMethods>(new TestConvertToMDEventsMethods()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsWS>(new TestConvertToMDEventsWS()));
     TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
 
 }
@@ -211,7 +211,7 @@ void test_compareTwoBuilds()
 }
 
 // constructor:
-ConvertToMDEventsMethodsTest ():TestWS(4){    
+ConvertToMDEventsWSTest ():TestWS(4){    
 
    std::vector<double> L2(5,5);
    std::vector<double> polar(5,(30./180.)*3.1415926);
@@ -239,7 +239,7 @@ ConvertToMDEventsMethodsTest ():TestWS(4){
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.
-EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsMethods &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
+EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsWS &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
   
     // set up conversion to Time of flight
     UnitsConverter<ConvByTOF,Centered> TOFCONV;

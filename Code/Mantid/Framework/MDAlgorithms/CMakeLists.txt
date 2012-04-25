@@ -63,8 +63,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 #	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
@@ -119,7 +119,7 @@ set ( TEST_FILES
 #	test/ConvertToDetectorFaceMDTest.h	
 #	test/ConvertEventsToMDEventsTest.h
 #	test/ConvertToMDEventsCoordTransfTest.h
-#	test/ConvertToMDEventsMethodsTest.h
+#	test/ConvertToMDEventsWSTest.h
 	test/ConvertToMDEventsParamsTest.h
     test/ConvertToMDEventsSubalgFactoryTest.h
 #	test/ConvertToMDEventsTest.h

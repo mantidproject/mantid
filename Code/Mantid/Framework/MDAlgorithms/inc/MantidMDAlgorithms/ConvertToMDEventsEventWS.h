@@ -72,7 +72,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
-        size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
+        size_t numSpec=IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
 
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
         trn.setUpTransf(this); 

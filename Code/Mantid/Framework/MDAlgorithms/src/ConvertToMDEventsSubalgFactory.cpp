@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
 //#include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
 
 
