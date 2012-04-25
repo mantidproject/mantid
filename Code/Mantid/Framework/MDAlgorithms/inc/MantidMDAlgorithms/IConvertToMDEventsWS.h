@@ -134,19 +134,20 @@ namespace MDAlgorithms
 
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
+/// the template itself should not be instanciated
 template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
 class ConvertToMDEventsWS: public IConvertToMDEventsWS 
 { 
 public:
     ConvertToMDEventsWS(){};
     /**templated virtual function to set up conversion*/
-    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
-    {return 0;}
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+  //  {return 0;}
     /**templated virtual function to run conversion itself*/
-    void runConversion(API::Progress *){};
+    void runConversion(API::Progress *); //{};
 private:
     /**templated virtual function to run conversion chunk */
-    virtual size_t conversionChunk(size_t job_ID){return 0;}
+    virtual size_t conversionChunk(size_t job_ID); //{return 0;}
 };
 
 
