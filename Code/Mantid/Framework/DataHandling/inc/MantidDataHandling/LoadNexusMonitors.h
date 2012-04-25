@@ -84,6 +84,8 @@ namespace Mantid
     size_t nMonitors;
     /// Set to true when instrument geometry was loaded.
     bool instrument_loaded_correctly;
+    /// name of top level NXentry to use
+    std::string m_top_entry_name;
   };
 
   }
