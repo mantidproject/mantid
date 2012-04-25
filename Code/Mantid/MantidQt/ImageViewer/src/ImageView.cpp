@@ -6,6 +6,7 @@
 #include "MantidQtImageViewer/IVConnections.h"
 #include "MantidQtImageViewer/ImageDisplay.h"
 #include "MantidQtImageViewer/SliderHandler.h"
+#include "MantidQtImageViewer/RangeHandler.h"
 
 namespace MantidQt
 {
@@ -35,6 +36,10 @@ ImageView::ImageView( ImageDataSource* data_source )
 
   SliderHandler* slider_handler = new SliderHandler( ui );
   saved_slider_handler = slider_handler;
+
+  RangeHandler* range_handler = new RangeHandler( ui );
+  range_handler->ConfigureRangeControls( data_source );
+  saved_range_handler = range_handler;
 
   h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );
   v_graph = new GraphDisplay( ui->v_graphPlot, ui->v_graph_table, true );
