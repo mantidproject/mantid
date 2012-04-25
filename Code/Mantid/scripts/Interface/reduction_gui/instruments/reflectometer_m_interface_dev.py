@@ -1,5 +1,6 @@
 from interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refm_reduction import DataReflWidget
+from reduction_gui.widgets.output import OutputWidget
 try:
     from reduction_gui.widgets.reflectometer.stitcher import StitcherWidget
     HAS_STITCHER = True
@@ -25,6 +26,8 @@ class REFMInterface(InstrumentInterface):
 
         # data REF_L tab
         self.attach(DataReflWidget(settings = self._settings, name=name))
+        # Reduction output
+        self.attach(OutputWidget(settings = self._settings))
         if HAS_STITCHER:
             self.attach(StitcherWidget(settings = self._settings))
         

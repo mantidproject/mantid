@@ -107,7 +107,10 @@ class DataSets(BaseScriptElement):
         script += "              OutputWorkspacePrefix='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
         
-        script += "print a.getPropertyValue('OutputMessage')\n"
+        script += "output_msg = a.getPropertyValue('OutputMessage')\n"
+        script += "from reduction.command_interface import ReductionSingleton\n"
+        script += "reducer_log = ReductionSingleton()\n"
+        script += "reducer_log.log_text += output_msg\n"
 
         # Save the reduced data
         script += "ws_list = ['reflectivity_%s-Off_Off',\n" % str(self.data_files[0])
