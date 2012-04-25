@@ -107,8 +107,9 @@ namespace DataObjects
    * corresponding fractional area array. This creates a representation that
    * is easily visualized. The Rebin and Integration algorithms will have to
    * undo this in order to properly treat the data.
+   * @param hasSqrdErrors :: does the workspace have squared errors?
    */
-  void RebinnedOutput::finalize()
+  void RebinnedOutput::finalize(bool hasSqrdErrs)
   {
     g_log.information() << "Starting finalize procedure." << std::endl;
     std::size_t nHist = this->getNumberHistograms();
@@ -118,7 +119,6 @@ namespace DataObjects
       MantidVec &data = this->dataY(i);
       MantidVec &err = this->dataE(i);
       MantidVec &frac = this->dataF(i);
-      MantidVec frac_sqr(frac.size());
 
       g_log.information() << "Data (" << i << "): ";
       std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.information(), " "));
@@ -126,11 +126,19 @@ namespace DataObjects
 
       std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                      std::divides<double>());
-      std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
-                     std::multiplies<double>());
-      std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
-                     std::divides<double>());
-
+      if (hasSqrdErrs)
+      {
+        MantidVec frac_sqr(frac.size());
+        std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
+                       std::multiplies<double>());
+        std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
+                       std::divides<double>());
+      }
+      else
+      {
+        std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                       std::divides<double>());
+      }
       g_log.information() << "Data Final(" << i << "): ";
       std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.information(), " "));
       g_log.information() << std::endl;

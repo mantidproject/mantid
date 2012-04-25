@@ -71,6 +71,13 @@ private:
   void init();
   void exec();
 
+  /// Handle logic for a RebinnedOutput worlspace
+  void doRebinnedOutput(API::MatrixWorkspace_sptr outputWorkspace);
+  /// Handle logic for a Workspace2D workspace
+  void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
+                     API::MatrixWorkspace_sptr outputWorkspace);
+
+
   /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;
 
@@ -82,6 +89,8 @@ private:
   int m_MinSpec;
   /// The spectrum to finish the integration at
   int m_MaxSpec;
+  /// Flag for including partial bins
+  bool m_IncPartBins;
 
 };
 

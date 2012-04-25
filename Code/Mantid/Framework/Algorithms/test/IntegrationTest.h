@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -275,6 +276,69 @@ public:
     doTestEvent("inWS", "inWS", 10, 29);
   }
 
+  void doTestRebinned(const std::string RangeLower,
+                      const std::string RangeUpper,
+                      const int StartWorkspaceIndex,
+                      const int EndWorkspaceIndex,
+                      const bool IncludePartialBins,
+                      const int expectedNumHists,
+                      const double expectedVals[])
+  {
+    RebinnedOutput_sptr inWS = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+    std::string inName = inWS->getName();
+    AnalysisDataService::Instance().addOrReplace(inName, inWS);
+    std::string outName = "rebinInt";
+
+    Integration integ;
+    integ.initialize();
+    integ.setPropertyValue("InputWorkspace", inName);
+    integ.setPropertyValue("OutputWorkspace", outName);
+    integ.setPropertyValue("RangeLower", RangeLower);
+    integ.setPropertyValue("RangeUpper", RangeUpper);
+    integ.setProperty("StartWorkspaceIndex", StartWorkspaceIndex);
+    integ.setProperty("EndWorkspaceIndex", EndWorkspaceIndex);
+    integ.setProperty("IncludePartialBins", IncludePartialBins);
+
+    integ.execute();
+    TS_ASSERT( integ.isExecuted() );
+
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outName) );
+    RebinnedOutput_sptr outputWS = boost::dynamic_pointer_cast<RebinnedOutput>(output);
+
+    double tol = 1.e-5;
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), expectedNumHists );
+    TS_ASSERT_DELTA( outputWS->dataY(1)[0], expectedVals[0], tol );
+    TS_ASSERT_DELTA( outputWS->dataE(1)[0], expectedVals[1], tol );
+    TS_ASSERT_EQUALS( outputWS->dataF(1)[0], expectedVals[2] );
+
+    AnalysisDataService::Instance().remove(inName);
+    AnalysisDataService::Instance().remove(outName);
+  }
+
+  void testRebinnedOutput_NoLimits()
+  {
+    const double truth[] = {1.1, 0.33166247903553997, 10.};
+    doTestRebinned("-3.0", "3.0", 0, 3, false, 4, truth);
+  }
+
+  void testRebinnedOutput_RangeLimits()
+  {
+    const double truth[] = {1.125, 0.375, 8.};
+    doTestRebinned("-2.0", "2.0", 0, 3, false, 4, truth);
+  }
+
+  void testRebinnedOutput_WorkspaceIndexLimits()
+  {
+    const double truth[] = {1.1666666666666667, 0.44095855184409843, 6.};
+    doTestRebinned("-3.0", "3.0", 1, 2, false, 2, truth);
+  }
+
+  void testRebinnedOutput_RangeLimitsWithPartialBins()
+  {
+    const double truth[] = {1.103448275862069, 0.37457863762759364, 7.25};
+    doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
+  }
 
 private:
   Integration alg;   // Test with range limits
