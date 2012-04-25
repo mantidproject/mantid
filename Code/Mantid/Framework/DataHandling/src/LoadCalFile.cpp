@@ -25,7 +25,6 @@ The format is
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
 #include <fstream>
-#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include <Poco/Path.h>
 
 using Mantid::Geometry::Instrument_const_sptr;
