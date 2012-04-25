@@ -43,7 +43,7 @@ void export_CompositeValidator()
                                       (arg("validators"))
                                       ))
 
-    .def("add", &CompositeValidator::add, "Add another validator to the list")
+    .def("add", (void (CompositeValidator::*)(IValidator_sptr))&CompositeValidator::add, "Add another validator to the list")
   ;
 }
 
