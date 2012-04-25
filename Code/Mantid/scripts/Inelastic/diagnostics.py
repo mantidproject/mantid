@@ -398,11 +398,11 @@ def get_failed_spectra_list(diag_workspace):
 
     failed_spectra = []
     for i in range(diag_workspace.getNumberHistograms()):
-	try:
+        try:
             det = diag_workspace.getDetector(i)
-	except RuntimeError:
+        except RuntimeError:
             continue
-	if det.isMasked():
+        if det.isMasked():
             failed_spectra.append(diag_workspace.getSpectrum(i).getSpectrumNo())
 
     return failed_spectra
