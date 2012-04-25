@@ -46,9 +46,9 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
     std::cout << "WARNING: max tof too large, set to " 
               << total_xmax << std::endl;
   }
-  x_scale  = 0;                   // no default x_scale
-  new_data = 0;                   // no data loaded yet
-  new_data_array = 0;             // no DataArray object created yet
+
+  x_scale = new MantidVec();      // keep one x_scale, just reset it to
+                                  // different binnings.
 }
 
 
@@ -58,22 +58,13 @@ EventWSDataSource::~EventWSDataSource()
   {
     delete x_scale;
   }
-
-  if ( new_data )
-  {
-    delete[] new_data;
-  }
-
-  if ( new_data_array )
-  {
-    delete new_data_array;
-  }
 }
 
 
 /**
  * Get a data array covering the specified range of data, at the specified
- * resolution.
+ * resolution.  NOTE: The calling code is responsible for deleting the 
+ * DataArray that is constructed in and returned by this method.
  *
  * @param xmin      Left edge of region to be covered.
  * @param xmax      Right edge of region to be covered.
@@ -109,17 +100,9 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   size_t first_row;
   IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
-  if ( new_data )
-  {
-    delete[] new_data;
-  }
-  new_data = new float[n_rows * n_cols];
 
-  if ( x_scale )
-  {
-    delete x_scale;
-  }
-  x_scale = new MantidVec();
+  float* new_data = new float[n_rows * n_cols];   // this is deleted in the
+                                                  // DataArrray destructor
   x_scale->resize(n_cols+1);
   double dx = (xmax - xmin)/((double)n_cols + 1.0);
   for ( size_t i = 0; i < n_cols+1; i++ )
@@ -140,14 +123,10 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
       index++;
     }
   }
-
-  if ( new_data_array )
-  {
-    delete new_data_array;
-  }
-  new_data_array = new DataArray( xmin, xmax, ymin, ymax,
-                                  is_log_x, n_rows, n_cols, new_data);
-
+                                // The calling code is responsible for deleting 
+                                // the DataArray when it is done with it      
+  DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax,
+                                           is_log_x, n_rows, n_cols, new_data);
   return new_data_array;
 }
 

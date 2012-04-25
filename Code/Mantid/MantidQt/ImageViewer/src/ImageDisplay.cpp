@@ -55,7 +55,6 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
   image_table      = table_widget;
 
   data_source     = 0;
-  data_array      = 0;
 
   double DEFAULT_INTENSITY = 30;
   SetIntensity( DEFAULT_INTENSITY );
@@ -88,12 +87,12 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   double scale_x_max = data_source->GetXMax();
   
   int    n_rows = 500;         // get reasonable size initial image data
-  int    n_cols = 500;
+  int    n_cols = 500;     
+                               // data_array is deleted in the ImagePlotItem
   data_array = data_source->GetDataArray( scale_x_min, scale_x_max,
                                           scale_y_min, scale_y_max,
                                           n_rows, n_cols,
                                           false );
-
 
   image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
@@ -115,7 +114,7 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
  */
 void ImageDisplay::UpdateImage()
 {
-  if ( data_source == 0 || data_array == 0 )
+  if ( data_source == 0 )
   {
     return;   // no image data to update
   }
@@ -178,7 +177,8 @@ void ImageDisplay::UpdateImage()
   {
     n_cols = display_rect.width();
   }
-
+                                         // NOTE: The DataArray is deleted
+                                         //       in the ImagePlotItem.
   data_array = data_source->GetDataArray( scale_x_min, scale_x_max, 
                                           scale_y_min, scale_y_max, 
                                           n_rows, n_cols,

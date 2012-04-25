@@ -55,7 +55,7 @@ ImageView::ImageView( ImageDataSource* data_source )
 
 ImageView::~ImageView()
 {
-/*        // Why does Mantid seg fault, or show nothing if I delete these objects?
+/*  // Why does Mantid seg fault, or show nothing if I delete these objects?
  
   delete  window;
   delete  h_graph;
@@ -64,10 +64,12 @@ ImageView::~ImageView()
   ImageDisplay* image_display = static_cast<ImageDisplay*>(saved_image_display);
   delete  image_display;
 
-  SliderHandler* slider_handler = static_cast<SliderHandler*>(saved_slider_handler);
+  SliderHandler* slider_handler = 
+                             static_cast<SliderHandler*>(saved_slider_handler);
   delete  slider_handler;
 
-  IVConnections* iv_connections = static_cast<IVConnections*>(saved_iv_connections);
+  IVConnections* iv_connections = 
+                             static_cast<IVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
   Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);

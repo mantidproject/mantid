@@ -14,7 +14,9 @@ namespace ImageView
  */
 ImagePlotItem::ImagePlotItem()
 {
-  data_array      = 0;
+  buffer_ID       = 0;
+  data_array_0    = 0;
+  data_array_1    = 0;
   color_table     = 0;
   intensity_table = 0;
 }
@@ -22,6 +24,14 @@ ImagePlotItem::ImagePlotItem()
 
 ImagePlotItem::~ImagePlotItem()
 {
+  if ( data_array_0 )
+  {
+    delete data_array_0; 
+  }
+  if ( data_array_1 )
+  {
+    delete data_array_1; 
+  }
 }
 
 
@@ -37,7 +47,28 @@ ImagePlotItem::~ImagePlotItem()
 void ImagePlotItem::SetData( DataArray*         data_array, 
                              std::vector<QRgb>* color_table )
 {
-  this->data_array  = data_array;
+  if ( buffer_ID == 0 )
+  {
+    if ( data_array_1 )         // we must be done using array 1, so delete it
+    {
+      delete data_array_1; 
+    }
+    data_array_1 = data_array;  // put new data in array 1, and switch to it
+                                // leaving array 0 intact for now, in case it's
+                                // being drawn.
+    buffer_ID = 1;
+  }
+  else
+  {
+    if ( data_array_0 )         // we must be done using array 0, so delete it
+    {
+      delete data_array_0;
+    }
+    data_array_0 = data_array;  // put new data in array 0, and switch to it
+                                // leaving array 1 intact for now, in case it's
+                                // being drawn.
+    buffer_ID = 0;
+  }
   this->color_table = color_table;
 }
 
@@ -76,9 +107,19 @@ void ImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & yMap,
                           const QRect       &       ) const
 {
-  if ( !data_array || !color_table )     // if data not yet set, just return
+  if ( !color_table )     // if data not yet set, just return
   {
     return;
+  }
+
+  DataArray* data_array;
+  if ( buffer_ID == 0 )
+  {
+    data_array = data_array_0;
+  }
+  else
+  {
+    data_array = data_array_1;
   }
 
   size_t n_rows = data_array->GetNRows();

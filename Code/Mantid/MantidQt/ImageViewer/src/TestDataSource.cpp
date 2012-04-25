@@ -30,10 +30,7 @@ TestDataSource::TestDataSource( double total_xmin, double total_xmax,
                                 total_ymin, total_ymax,
                                 total_rows, total_cols )
 {
-                                                // initialize pointers to null
-  new_data       = 0;
-  new_data_array = 0;
-                                                // make some test data
+                                        // make some test data in array data[]
   double x;
   double y;
   data = new float[total_rows*total_cols];
@@ -73,20 +70,13 @@ TestDataSource::TestDataSource( double total_xmin, double total_xmax,
 TestDataSource::~TestDataSource()
 {
   delete[] data;
-  if ( new_data )
-  {
-    delete[] new_data;
-  }
-  if ( new_data_array )
-  {
-    delete new_data_array;
-  }
 }
 
 
 /**
  * Get a data array covering the specified range of data, at the specified
- * resolution.
+ * resolution.  NOTE: The calling code is responsible for deleting the 
+ * DataArray that is returned, when it is no longer needed.
  *
  * @param xmin      Left edge of region to be covered.
  * @param xmax      Right edge of region to be covered.
@@ -114,11 +104,8 @@ DataArray * TestDataSource::GetDataArray( double xmin,   double  xmax,
   IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
 
-  if ( new_data )
-  {
-    delete[] new_data;
-  }
-  new_data = new float[n_rows * n_cols];
+  float* new_data = new float[n_rows * n_cols];   // This is deleted in the
+                                                  // DataArray destructor
 
   double x_step = (xmax - xmin) / (double)n_cols;
   double y_step = (ymax - ymin) / (double)n_rows;
@@ -145,21 +132,18 @@ DataArray * TestDataSource::GetDataArray( double xmin,   double  xmax,
       index++;
     } 
   }
-
-  if ( new_data_array )
-  {
-    delete new_data_array;
-  }
-
-  new_data_array = new DataArray( xmin, xmax, ymin, ymax, 
-                                  is_log_x, n_rows, n_cols, new_data);
-
+                                           // The calling code is responsible
+                                           // for deleting the DataArray
+  DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax, 
+                                           is_log_x, n_rows, n_cols, new_data);
   return new_data_array;
 }
 
 
 /**
  * Get a data array covering the full range of data.
+ * NOTE: The calling code is responsible for deleting the DataArray that is
+ * returned, when it is no longer needed.
  *
  * @param is_log_x  Flag indicating whether or not the data should be
  *                  binned logarithmically.  (NOT USED)

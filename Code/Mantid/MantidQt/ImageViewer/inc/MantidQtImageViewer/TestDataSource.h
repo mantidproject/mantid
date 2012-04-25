@@ -41,7 +41,6 @@ namespace MantidQt
 namespace ImageView
 {
 
-
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TestDataSource: public ImageDataSource
 {
   public:
@@ -70,9 +69,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TestDataSource: public ImageDataSource
                       double y,
                       std::vector<std::string> &list );
   private:
-    float* data;
-    float* new_data;
-    DataArray* new_data_array;
+    float* data;    // this is initialized with a block of test data
 };
 
 } // namespace MantidQt 

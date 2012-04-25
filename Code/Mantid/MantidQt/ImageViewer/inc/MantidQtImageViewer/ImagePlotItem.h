@@ -70,7 +70,10 @@ public:
 
 private:
 
-  DataArray*            data_array;        // This class just uses these but
+  int                   buffer_ID;         // set to 0 or 1 to select buffer 
+  DataArray*            data_array_0;      // double buffer the float data
+  DataArray*            data_array_1;        
+                                           // This class just uses these but
   std::vector<QRgb>*    color_table;       // they are created and deleted
   std::vector<double>*  intensity_table;   // in the upper level classes
 
