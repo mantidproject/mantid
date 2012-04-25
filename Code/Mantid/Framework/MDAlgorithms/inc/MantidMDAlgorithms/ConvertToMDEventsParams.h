@@ -39,7 +39,9 @@ namespace ConvertToMD
         File/ change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  /** enum describes if there is need to convert workspace units and different unit conversion modes 
+
+// Two enums below describe possble cases to deal with input workspace units and the treatment of the workspace coordinates
+/** enum describes if there is need to convert workspace units and different unit conversion modes 
    * this modes are identified by algorithm from workpace parameters and user input.  See UnitConversion algorithm for different modes meaning  */
 enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
 {
