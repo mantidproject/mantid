@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
@@ -35,6 +35,28 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDAlgorithms::ConvertToMD;
 
+//class TestConvertToMDEventsMethods :public IConvertToMDEventsMethods
+//{
+//    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
+//public:
+//    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc)
+//    {
+//        MDEvents::MDWSDescription TestWS(5);
+//
+//        TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
+//        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
+//
+//        boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+//        pOutMDWSWrapper->createEmptyMDWS(TestWS);
+//
+//        IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
+//
+//    }
+//    /// method which starts the conversion procedure
+//    void runConversion(API::Progress *){}
+// 
+//};
+
 
 class ConvertToMDEventsMethodsTest : public CxxTest::TestSuite, public ConvertToMDEvents
 {
@@ -44,7 +66,7 @@ class ConvertToMDEventsMethodsTest : public CxxTest::TestSuite, public ConvertTo
 
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pHistoMDWSWrapper;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pEventMDWSWrapper;
-   PreprocessedDetectors det_loc;
+   ConvToMDPreprocDetectors det_loc;
    MDEvents::MDWSDescription TestWS;
 
 public:
@@ -52,6 +74,16 @@ static ConvertToMDEventsMethodsTest *createSuite() {
     return new ConvertToMDEventsMethodsTest();    
 }
 static void destroySuite(ConvertToMDEventsMethodsTest  * suite) { delete suite; }    
+
+void testSetUp_and_PreprocessDetectors()
+{
+   pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
+
+    TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsMethods>(new TestConvertToMDEventsMethods()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
+
+}
 
 void test_TwoTransfMethods()
 {

@@ -68,7 +68,7 @@ bool IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,si
   * @param WSD        -- class describing the target workspace. Only target workspace limints are used by the algorithm at the moment
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
-size_t  IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
         inWS2D= pWS2D;

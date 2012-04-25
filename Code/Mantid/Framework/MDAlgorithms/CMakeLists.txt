@@ -11,7 +11,7 @@ set ( SRC_FILES
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToDetectorFaceMD.cpp
 #	src/ConvertToMDEvents.cpp
-#	src/ConvertToMDEventsParams.cpp
+	src/ConvertToMDEventsParams.cpp
 #	src/ConvertToMDEventsSubalgFactory.cpp
 	src/IConvertToMDEventsMethods.cpp
 	src/ConvToMDPreprocDetectors.cpp	
@@ -65,7 +65,7 @@ set ( INC_FILES
 #	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h

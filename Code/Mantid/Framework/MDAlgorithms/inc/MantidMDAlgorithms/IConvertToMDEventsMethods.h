@@ -1,8 +1,6 @@
 #ifndef H_ICONVERT_TO_MDEVENTS_METHODS
 #define H_ICONVERT_TO_MDEVENTS_METHODS
 
-#define NO_CONVERSION
-
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -11,13 +9,13 @@
 #include "MantidAPI/Progress.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
-#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 
-#ifdef NO_CONVERSION 
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
-#endif
+
 
 namespace Mantid
 {
@@ -70,10 +68,10 @@ namespace MDAlgorithms
  protected:
    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-#ifdef NO_CONVERSION 
-    template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
-    friend struct CoordTransformer;
-#endif
+
+//    template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
+//    friend struct CoordTransformer;
+
  public:
      // constructor;
      IConvertToMDEventsMethods();
@@ -126,23 +124,23 @@ namespace MDAlgorithms
 
 };
 
-#ifdef NO_CONVERSION 
-/// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
-class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
-{ 
-public:
-    ConvertToMDEventsWS();
-    /**templated virtual function to set up conversion*/
-    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
-    {return 0;}
-    /**templated virtual function to run conversion itself*/
-    void runConversion(API::Progress *){};
-private:
-    /**templated virtual function to run conversion chunk */
-    virtual size_t conversionChunk(size_t job_ID){return 0;}
-};
-#endif
+//
+///// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
+//template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
+//class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
+//{ 
+//public:
+//    ConvertToMDEventsWS();
+//    /**templated virtual function to set up conversion*/
+//    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+//    {return 0;}
+//    /**templated virtual function to run conversion itself*/
+//    void runConversion(API::Progress *){};
+//private:
+//    /**templated virtual function to run conversion chunk */
+//    virtual size_t conversionChunk(size_t job_ID){return 0;}
+//};
+
 
 } // end namespace MDAlgorithms
 } // end namespace Mantid

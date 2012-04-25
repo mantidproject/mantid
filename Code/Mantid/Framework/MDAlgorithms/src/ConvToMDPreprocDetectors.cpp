@@ -9,7 +9,34 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-
+/// function sets appropriate energy conversion mode to work with detectors and unit conversion
+void ConvToMDPreprocDetectors::setEmode(int mode)
+{   
+    if(mode<-1||mode>2){
+        std::string Err="Energy conversion mode has to be between -1 and 2 but trying to set: "+boost::lexical_cast<std::string>(mode);
+        throw(std::invalid_argument(Err));
+    }
+    emode = mode;
+}
+/// function sets appropriate energy  to work with detectors and unit conversion
+void ConvToMDPreprocDetectors::setEfix(double Ei)
+{
+    if(Ei<=0){
+        std::string Err="Input neutron's energy can not be negative but equal: "+boost::lexical_cast<std::string>(Ei);
+        throw(std::invalid_argument(Err));
+    }
+    efix  = Ei;
+}
+/// function sets source-sample distance  to work with detectors and unit conversion
+void ConvToMDPreprocDetectors::setL1(double Dist)
+{
+    if(Dist<0){
+        std::string Err="Source-sample distance has to be positive  but equal: "+boost::lexical_cast<std::string>(Dist);
+        throw(std::invalid_argument(Err));
+    }
+    L1  = Dist;
+}
+/// function checks if preprocessed detectors are already calculated
 bool ConvToMDPreprocDetectors::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const
 {
     if(det_dir.empty())return false;
@@ -48,8 +75,9 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
 
   // L1
   try{
-    det_loc.L1 = source->getDistance(*sample);
-    convert_log.debug() << "Source-sample distance: " << det_loc.L1 << std::endl;
+    double L1  = source->getDistance(*sample);
+    det_loc.setL1(L1);
+    convert_log.debug() << "Source-sample distance: " << L1 << std::endl;
   }catch (Exception::NotFoundError &)  {
     convert_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
@@ -114,8 +142,8 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
 void DLLExport buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det_loc)
 {
 
-     det_loc.L1 = 1;
-     double polar(0);
+    det_loc.setL1(1);
+    double polar(0);
     //
     const size_t nHist = inputWS->getNumberHistograms();
     det_loc.allocDetMemory(nHist);
