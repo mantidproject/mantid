@@ -530,65 +530,57 @@ bool IndirectDataAnalysis::validateMsd()
   return valid;
 }
 
-bool IndirectDataAnalysis::validateFury()
+std::string IndirectDataAnalysis::validateFury()
 {
-  bool valid = true;
-
   switch ( m_uiForm.fury_cbInputType->currentIndex() )
   {
-  case 0:
+  case 0: // File
     {
       if ( ! m_uiForm.fury_iconFile->isValid() )
-      {
-        valid = false;
-      }
+        return "Empty or otherwise invalid reduction file field.";
     }
     break;
-  case 1:
+  case 1: // Workspace
     {
       if ( m_uiForm.fury_wsSample->currentText() == "" )
-      {
-        valid = false;
-      }
+        return "No workspace selected.";
     }
     break;
   }
 
   if ( ! m_uiForm.fury_resFile->isValid()  )
-  {
-    valid = false;
-  }
+    return "Invalid or empty resolution file field.";
 
-  return valid;
+  return "";
 }
 
-bool IndirectDataAnalysis::validateConfit()
+/**
+ * Validates the user's inputs in the ConvFit tab.
+ *
+ * @returns an string containing an error message if invalid input detected, else an empty string.
+ */
+std::string IndirectDataAnalysis::validateConfit()
 {
-  bool valid = true;
-
   if ( m_uiForm.confit_cbInputType->currentIndex() == 0 ) // File
   {
     if ( ! m_uiForm.confit_inputFile->isValid() )
-    {
-      valid = false;
-    }
+      return "Empty or otherwise invalid file field.";
   }
   else // Workspace
   {
     if ( m_uiForm.confit_wsSample->currentText() == "" )
-    { 
-      valid = false;
-    }
+      return "No workspace selected.";
   }
+
+  if( ! m_uiForm.confit_resInput->isValid() )
+    return "Invalid or empty resolution file field.";
 
   // Enforce the rule that at least one fit is needed; either a delta function, one or two lorentzian functions,
   // or both.  (The resolution function must be convolved with a model.)
   if ( m_uiForm.confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
-  {
-    valid = false;
-  }
+    return "No fit function has been selected.";
 
-  return valid;
+  return "";
 }
 
 bool IndirectDataAnalysis::validateAbsorptionF2Py()
@@ -1464,9 +1456,10 @@ void IndirectDataAnalysis::msdUpdateRS(QtProperty* prop, double val)
 
 void IndirectDataAnalysis::furyRun()
 {
-  if ( !validateFury() )
+  const std::string error = validateFury();
+  if ( ! error.empty() )
   {
-    showInformationBox("Please check your input.");
+    showInformationBox("Please check your input: " + QString::fromStdString(error));
     return;
   }
 
@@ -1935,9 +1928,10 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
 
 void IndirectDataAnalysis::confitRun()
 {
-  if ( ! validateConfit() )
+  const std::string valid = validateConfit();
+  if ( ! valid.empty() )
   {
-    showInformationBox("Please check your input.");
+    showInformationBox("Please check your input: " + QString::fromStdString(valid));
     return;
   }
 
@@ -2104,6 +2098,7 @@ void IndirectDataAnalysis::confitPlotInput()
   const bool plotGuess = m_uiForm.confit_ckPlotGuess->isChecked();
   m_uiForm.confit_ckPlotGuess->setChecked(false);
 
+  // Find wsname and set m_cfInputWS to point to that workspace.
   switch ( m_uiForm.confit_cbInputType->currentIndex() )
   {
   case 0: // "File"
@@ -2112,7 +2107,10 @@ void IndirectDataAnalysis::confitPlotInput()
       {
         QFileInfo fi(m_uiForm.confit_inputFile->getFirstFilename());
         wsname = fi.baseName().toStdString();
-        if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
+
+        // Load the file if it has not already been loaded.
+        if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName )
+          )
         {
           std::string filename = m_uiForm.confit_inputFile->getFirstFilename().toStdString();
           Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
@@ -2244,6 +2242,13 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
 
 void IndirectDataAnalysis::confitSequential()
 {
+  const std::string valid = validateConfit();
+  if ( ! valid.empty() )
+  {
+    showInformationBox("Please check your input: " + QString::fromStdString(valid));
+    return;
+  }
+
   if ( m_cfInputWS == NULL )
   {
     return;
