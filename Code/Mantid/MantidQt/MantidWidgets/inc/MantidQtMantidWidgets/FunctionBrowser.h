@@ -44,10 +44,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
-namespace 
-{
-  class CreateAttributeProperty;
-}
+class CreateAttributeProperty;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display 

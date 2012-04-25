@@ -437,8 +437,6 @@ void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
   }
 }
 
-namespace
-{
 /**
  * Attribute visitor to create a QtProperty. Depending on the attribute type
  * the appropriate apply() method is used.
@@ -482,8 +480,6 @@ private:
   QtProperty* m_parent;
   QString m_attName;
 };
-
-}
 
 /**
  * Add a attribute property
