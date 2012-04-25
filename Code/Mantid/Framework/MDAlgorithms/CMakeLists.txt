@@ -112,7 +112,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
 	#test/CobaltSWDTest.h
-	test/CreateMDFitWorkspaceTest.h
+	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
 	test/CompareMDWorkspacesTest.h
