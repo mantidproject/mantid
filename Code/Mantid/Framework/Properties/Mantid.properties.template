@@ -48,7 +48,7 @@ colormaps.directory = @COLORMAPS_FOLDER@
 #
 # WARNING: Altering this value will almost certainly break Mantid functionality
 #
-requiredpythonscript.directories = @MANTID_ROOT@/scripts/Inelastic;@MANTID_ROOT@/scripts/LargeScaleStructures;@MANTID_ROOT@/scripts/SANS;@MANTID_ROOT@/scripts
+requiredpythonscript.directories = @MANTID_ROOT@/scripts/Inelastic;@MANTID_ROOT@/scripts/LargeScaleStructures;@MANTID_ROOT@/scripts/Reflectometry;@MANTID_ROOT@/scripts/SANS;@MANTID_ROOT@/scripts
 # Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
 # @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
 
