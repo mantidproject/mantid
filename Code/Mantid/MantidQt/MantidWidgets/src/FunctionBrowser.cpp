@@ -909,7 +909,7 @@ QList<FunctionBrowser::AProperty> FunctionBrowser::addConstraintProperties(QtPro
     size_t paramPos = 0;
     try // find position of the parameter name in expression
     {
-      double d = boost::lexical_cast<double>( expr[1].name() );
+      double d = boost::lexical_cast<double>( expr[1].name() );(void)d;
     }
     catch(...)
     {
