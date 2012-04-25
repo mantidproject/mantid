@@ -1274,7 +1274,7 @@ class MantidPyFramework(FrameworkManager):
                 
                 # Algorithm is being called as part of a Python algorithm.
                 ialg = parentAlg._createSubAlgorithm(ialg, version)
-                ialg.__async__ = False
+                ialg.setChild(False)
                 
                 # Children do not log if the parent is not logging
                 ialg.setLogging( parentAlg.isLogging() )
@@ -1284,8 +1284,7 @@ class MantidPyFramework(FrameworkManager):
                 ialg.setAlwaysStoreInADS(True)
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 
-                ialg.__async__ = HAVE_GUI
-        ialg.setRethrows(True) # Ensure the console rethrows. Async ones rethrow anyway
+        ialg.setRethrows(True)
         return IAlgorithmProxy(ialg, self)
 
     # make what comes out of C++ a little friendlier to use
