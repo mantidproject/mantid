@@ -77,6 +77,7 @@ struct UnitsConverter<ConvertToMD::ConvFast,TYPE>
 
     void setUpConversion(const ConvToMDPreprocDetectors &det, const std::string &units_from,const std::string &units_to)
     {       
+       UNUSED_ARG(det);
        //const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
       const Kernel::Unit_sptr pThisUnit= Kernel::UnitFactory::Instance().create(units_from);
     
