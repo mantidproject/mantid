@@ -45,7 +45,6 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/StartLiveDataDialog.ui
                inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.ui
                inc/MantidQtCustomDialogs/FitDialog.ui
-               inc/MantidQtCustomDialogs/FitDialog1.ui
 )
 
 include_directories ( inc )

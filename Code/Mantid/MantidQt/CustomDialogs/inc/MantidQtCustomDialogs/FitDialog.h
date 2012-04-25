@@ -5,12 +5,13 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtAPI/AlgorithmDialog.h"
-#include "ui_FitDialog1.h"
+#include "ui_FitDialog.h"
 
 //------------------------------------------------------------------------------
 // Qt Forward declarations
 //------------------------------------------------------------------------------
 class QVBoxLayout;
+class QSpinBox;
 
 namespace MantidQt
 {
@@ -24,6 +25,12 @@ namespace MantidQt
 
   namespace CustomDialogs
   {
+
+    //------------------------------------------------------------------------------
+    // Local Forward declarations
+    //------------------------------------------------------------------------------
+    class InputWorkspaceWidget;
+    class DynamicPropertiesWidget;
 
     /** 
       This class gives specialised dialog for the Load algorithm. It requires that the specific 
@@ -81,18 +88,114 @@ namespace MantidQt
       virtual void parseInput();
       /// Tie static widgets to their properties
       void tieStaticWidgets(const bool readHistory);
+      /// Create InputWorkspaceWidgets and populate the tabs of the tab widget
+      void createInputWorkspaceWidgets();
+
+
       /// Clears all of the widgets from the old layout
       void removeOldInputWidgets();
       /// Create
       void createDynamicLayout();
+      /// Return property value stored in history
+      QString getStoredPropertyValue(const QString& propName) const;
+      /// Get allowed values for a property
+      QStringList getAllowedPropertyValues(const QString& propName) const;
+
+      /// Is the function MD?
+      bool isMD() const;
 
     private:
       /// Form
       Ui::FitDialog m_form;
-      /// List of static property names
-      QStringList m_staticProperties;
-      QMap<QString,QWidget*> m_dynamicLabels;
-      QMap<QString,QWidget*> m_dynamicEditors;
+      QList<QWidget*> m_tabs;
+
+      friend class InputWorkspaceWidget;
+    };
+
+    /**
+     * Widget for inputting workspace information. 
+     */
+    class InputWorkspaceWidget: public QWidget
+    {
+      Q_OBJECT
+    public:
+      /// Constructor
+      InputWorkspaceWidget(FitDialog* parent, int domainIndex = 0);
+      /// Return property value stored in history
+      QString getStoredPropertyValue(const QString& propName) const
+      {return m_fitDialog->getStoredPropertyValue(propName);}
+      /// Get allowed values for a property
+      QStringList getAllowedPropertyValues(const QString& propName) const
+      {return m_fitDialog->getAllowedPropertyValues(propName);}
+      /// Get workspace name
+      QString getWorkspaceName() const ;
+      /// Return the domain index
+      int getDomainIndex() const {return m_domainIndex;} 
+      /// Set a property
+      void setPropertyValue(const QString& propName, const QString& propValue);
+      /// Set all workspace properties
+      void setProperties();
+    protected slots:
+      /// Set the dynamic properties
+      void setDynamicProperties();
+    protected:
+      /// Is ws name set?
+      bool isWSNameSet() const;
+      /// Is the workspace MW?
+      bool isMatrixWorkspace() const;
+      /// Is the workspace MD?
+      bool isMDWorkspace() const;
+      /// is current workspace supported by Fit?
+      bool isWorkspaceSupported() const;
+
+      /// Parent FitDialog
+      FitDialog *m_fitDialog;
+      /// In multidomain fitting it is index of domain created from this workspace
+      /// In single domain case == 0
+      int m_domainIndex;
+      /// Name of the property for the input workspace
+      QString m_wsPropName;
+      /// Workspace name widget
+      QComboBox *m_workspaceName;
+      /// Dynamic propeties widget
+      DynamicPropertiesWidget *m_dynamicProperties;
+
+      /// The main layout
+      QVBoxLayout *m_layout;
+    };
+
+    /**
+     * Base class for input workspace's dynamic properties widget
+     */
+    class DynamicPropertiesWidget: public QWidget
+    {
+    public:
+      /// Constructor
+      DynamicPropertiesWidget(InputWorkspaceWidget* parent):QWidget(parent),m_wsWidget(parent){}
+      /// Initialize the child widgets with stored and allowed values
+      virtual void init() = 0;
+      /// Set all workspace properties
+      virtual void setProperties() = 0;
+    protected:
+      /// Parent InputWorkspaceWidget
+      InputWorkspaceWidget *m_wsWidget;
+    };
+
+    /**
+     * Widgets to set properties for a MatrixWorkspace: WorkspaceIndex, StartX, EndX
+     */
+    class MWPropertiesWidget: public DynamicPropertiesWidget
+    {
+    public:
+      MWPropertiesWidget(InputWorkspaceWidget* parent);
+      /// Initialize the child widgets with stored and allowed values
+      virtual void init();
+      /// Set all workspace properties
+      void setProperties();
+    protected:
+      QSpinBox *m_workspaceIndex;
+      QLineEdit *m_startX;
+      QLineEdit *m_endX;
     };
 
   }

@@ -141,14 +141,13 @@ void FunctionBrowser::createBrowser()
   m_attributeDoubleManager = new QtDoublePropertyManager(this);
   m_attributeIntManager = new QtIntPropertyManager(this);
   m_indexManager = new QtStringPropertyManager(this);
-  //m_enumManager = new QtEnumPropertyManager(this);
-  //m_intManager = new QtIntPropertyManager(this);
-  //m_boolManager = new QtBoolPropertyManager(this);
+  m_tieManager = new QtStringPropertyManager(this);
+  m_constraintManager = new QtStringPropertyManager(this);
+
   //m_filenameManager = new QtStringPropertyManager(this);
   //m_formulaManager = new QtStringPropertyManager(this);
 
-  //QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-  //QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
+  // create editor factories
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
@@ -156,21 +155,22 @@ void FunctionBrowser::createBrowser()
   //FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser();
+  // assign factories to property managers
   m_browser->setFactoryForManager(m_parameterManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_attributeDoubleManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_attributeIntManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
-
-  //m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
-  //m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
-  //m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
-  //m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+  m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(currentItemChanged(QtBrowserItem*)));
+  //connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(currentItemChanged(QtBrowserItem*)));
 
+  connect(m_attributeStringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
+  connect(m_attributeDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
+  connect(m_attributeIntManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
 }
 
 /**
@@ -183,6 +183,36 @@ void FunctionBrowser::createActions()
 
   m_actionRemoveFunction = new QAction("Remove function",this);
   connect(m_actionRemoveFunction,SIGNAL(triggered()),this,SLOT(removeFunction()));
+
+  m_actionFixParameter = new QAction("Fix",this);
+  connect(m_actionFixParameter,SIGNAL(triggered()),this,SLOT(fixParameter()));
+
+  m_actionRemoveTie = new QAction("Remove tie",this);
+  connect(m_actionRemoveTie,SIGNAL(triggered()),this,SLOT(removeTie()));
+
+  m_actionAddTie = new QAction("Add tie",this);
+  connect(m_actionAddTie,SIGNAL(triggered()),this,SLOT(addTie()));
+
+  m_actionFromClipboard = new QAction("Copy from clipboard",this);
+  connect(m_actionFromClipboard,SIGNAL(triggered()),this,SLOT(copyFromClipboard()));
+
+  m_actionToClipboard = new QAction("Copy to clipboard",this);
+  connect(m_actionToClipboard,SIGNAL(triggered()),this,SLOT(copyToClipboard()));
+
+  m_actionConstraints = new QAction("Custom",this);
+  connect(m_actionConstraints,SIGNAL(triggered()),this,SLOT(addConstraints()));
+
+  m_actionConstraints10 = new QAction("10%",this);
+  connect(m_actionConstraints10,SIGNAL(triggered()),this,SLOT(addConstraints10()));
+
+  m_actionConstraints50 = new QAction("50%",this);
+  connect(m_actionConstraints50,SIGNAL(triggered()),this,SLOT(addConstraints50()));
+
+  m_actionRemoveConstraints = new QAction("Remove constraints",this);
+  connect(m_actionRemoveConstraints,SIGNAL(triggered()),this,SLOT(removeConstraints()));
+
+  m_actionRemoveConstraint = new QAction("Remove",this);
+  connect(m_actionRemoveConstraint,SIGNAL(triggered()),this,SLOT(removeConstraint()));
 }
 
 /**
@@ -198,10 +228,29 @@ void FunctionBrowser::clear()
  * Set the function in the browser
  * @param funStr :: FunctionFactory function creation string
  */
-void FunctionBrowser::setFunction(QString funStr)
+void FunctionBrowser::setFunction(const QString& funStr)
+{
+  if ( funStr.isEmpty() ) return;
+  try
+  {
+    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( funStr.toStdString() );
+    if ( !fun ) return;
+    this->setFunction(fun);
+  }
+  catch(...)
+  {
+    // error in the input string
+  }
+}
+
+/**
+ * Set the function in the browser
+ * @param fun :: A function
+ */
+void FunctionBrowser::setFunction(Mantid::API::IFunction_sptr fun)
 {
   clear();
-  addFunction(NULL,funStr);
+  addFunction(NULL,fun);
 }
 
 /**
@@ -249,6 +298,55 @@ void FunctionBrowser::removeProperty(QtProperty *prop)
     m_properties.erase(child);
   }
   m_properties.erase(p);
+
+  if ( isFunction(prop) )
+  {
+    m_ties.erase(prop);
+  }
+
+  if ( isTie(prop) )
+  {// 
+    for(auto it = m_ties.begin(); it != m_ties.end(); ++it)
+    {
+      if (it.value().tieProp == prop)
+      {
+        m_ties.erase(it);
+        break;
+      }
+    }
+  }
+
+  if ( isConstraint(prop) )
+  {
+    for(auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
+    {
+      auto& cp = it.value();
+      if ( cp.lower == prop )
+      {
+        if ( !cp.upper )
+        {
+          m_constraints.erase(it);
+        }
+        else
+        {
+          cp.lower = NULL;
+        }
+        break;
+      }
+      else if ( cp.upper == prop )
+      {
+        if ( !cp.lower )
+        {
+          m_constraints.erase(it);
+        }
+        else
+        {
+          cp.upper = NULL;
+        }
+        break;
+      }
+    }
+  }
 
   // remove property from Qt browser
   if (ap.parent)
@@ -298,17 +396,45 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
 }
 
 /**
+ * Set a function.
+ * @param prop :: Property of the function or NULL
+ * @param fun :: A function
+ */
+void FunctionBrowser::setFunction(QtProperty* prop, Mantid::API::IFunction_sptr fun)
+{
+  auto children = prop->subProperties();
+  foreach(QtProperty* child, children)
+  {
+    removeProperty(child);
+  }
+  addAttributeAndParameterProperties(prop, fun);
+}
+
+/**
  * Add a function.
  * @param prop :: Property of the parent composite function or NULL
  * @param funStr :: FunctionFactory function creation string
  */
-void FunctionBrowser::addFunction(QtProperty* prop, QString funStr)
+void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr fun)
 {
-  Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  AProperty funProp = addFunctionProperty(prop, QString::fromStdString(fun->name()));
-
-  addAttributeAndParameterProperties(funProp.prop, fun);
-
+  //Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createInitialized(funStr.toStdString());
+  if ( !prop )
+  {
+    AProperty ap = addFunctionProperty(NULL,QString::fromStdString(fun->name()));
+    setFunction(ap.prop, fun);
+  }
+  else
+  {
+    std::cerr << "add to: " << prop->propertyName().toStdString() << std::endl;
+    Mantid::API::IFunction_sptr parentFun =  getFunction(prop);
+    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(parentFun);
+    if ( !cf )
+    {
+      throw std::runtime_error("FunctionBrowser: CompositeFunction is expected for addFunction");
+    }
+    cf->addFunction(fun);
+    setFunction(prop, cf);
+  }
 }
 
 namespace
@@ -372,13 +498,17 @@ FunctionBrowser::AProperty FunctionBrowser::addAttributeProperty(QtProperty* par
 }
 
 /**
- * Add attribute and parameter properties to a function property
+ * Add attribute and parameter properties to a function property. For a composite function
+ *  adds all member functions' properties
  * @param prop :: A function property
  * @param fun :: Shared pointer to a created function
  */
 void FunctionBrowser::addAttributeAndParameterProperties(QtProperty* prop, Mantid::API::IFunction_sptr fun)
 {
+  // add the function index property
   addIndexProperty(prop);
+
+  // add attribute properties
   auto attributeNames = fun->getAttributeNames();
   for(auto att = attributeNames.begin(); att != attributeNames.end(); ++att)
   {
@@ -388,19 +518,34 @@ void FunctionBrowser::addAttributeAndParameterProperties(QtProperty* prop, Manti
 
   auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (cf)
-  {
+  {// if composite add members
     for(size_t i = 0; i < cf->nFunctions(); ++i)
     {
-      addFunction(prop,QString::fromStdString(cf->getFunction(i)->asString()));
+      AProperty ap = addFunctionProperty(prop,QString::fromStdString(cf->getFunction(i)->name()));
+      addAttributeAndParameterProperties(ap.prop,cf->getFunction(i));
     }
   }
   else
-  {
+  {// if simple add parameters
     for(size_t i = 0; i < fun->nParams(); ++i)
     {
       QString name = QString::fromStdString(fun->parameterName(i));
       double value = fun->getParameter(i);
-      addParameterProperty(prop, name, value);
+      AProperty ap = addParameterProperty(prop, name, value);
+      // if parameter has a tie
+      if (fun->isFixed(i))
+      {
+        auto tie = fun->getTie(i);
+        if (tie)
+        {
+          addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
+        }
+      }
+      auto c = fun->getConstraint(i);
+      if ( c )
+      {
+        addConstraintProperties( ap.prop, QString::fromStdString( c->asString() ) );
+      }
     }
   }
 }
@@ -459,6 +604,25 @@ void FunctionBrowser::updateFunctionIndices(QtProperty* prop, QString index)
 }
 
 /**
+ * Get property of the overall function.
+ */
+FunctionBrowser::AProperty FunctionBrowser::getFunctionProperty()
+{
+  auto props = m_browser->properties();
+  if ( props.isEmpty() )
+  {
+    AProperty ap;
+    ap.item = NULL;
+    ap.parent = NULL;
+    ap.prop = NULL;
+    return ap;
+  }
+  QtProperty* prop = props[0];
+  return m_properties[prop];
+}
+
+
+/**
  * Check if property is a function group
  * @param prop :: Property to check
  */
@@ -504,25 +668,47 @@ bool FunctionBrowser::isAttribute(QtProperty* prop) const
 }
 
 /**
- * Get attribute as a string
+ * Get string attribute
  * @param prop :: An attribute property
  */
-QString FunctionBrowser::getAttribute(QtProperty* prop) const
+std::string FunctionBrowser::getStringAttribute(QtProperty* prop) const
 {
   if (isStringAttribute(prop))
   {
-    return m_attributeStringManager->value(prop);
+    return m_attributeStringManager->value(prop).toStdString();
   }
-  else if (isDoubleAttribute(prop))
-  {
-    return QString::number(m_attributeDoubleManager->value(prop));
-  }
-  else if (isIntAttribute(prop))
-  {
-    return QString::number(m_attributeIntManager->value(prop));
-  }
-  return "";
+  throw std::runtime_error("FunctionBrowser: attribute " + prop->propertyName().toStdString() +
+    " is not string.");
 }
+
+/**
+ * Get double attribute
+ * @param prop :: An attribute property
+ */
+double FunctionBrowser::getDoubleAttribute(QtProperty* prop) const
+{
+  if (isDoubleAttribute(prop))
+  {
+    return m_attributeDoubleManager->value(prop);
+  }
+  throw std::runtime_error("FunctionBrowser: attribute " + prop->propertyName().toStdString() +
+    " is not double.");
+}
+
+/**
+ * Get int attribute
+ * @param prop :: An attribute property
+ */
+int FunctionBrowser::getIntAttribute(QtProperty* prop) const
+{
+  if (isIntAttribute(prop))
+  {
+    return m_attributeIntManager->value(prop);
+  }
+  throw std::runtime_error("FunctionBrowser: attribute " + prop->propertyName().toStdString() +
+    " is not int.");
+}
+
 
 /**
  * Check if property is a function parameter
@@ -537,9 +723,9 @@ bool FunctionBrowser::isParameter(QtProperty* prop) const
  * Get parameter value as a string
  * @param prop :: A parameter property
  */
-QString FunctionBrowser::getParameter(QtProperty* prop) const
+double FunctionBrowser::getParameter(QtProperty* prop) const
 {
-  return QString::number(m_parameterManager->value(prop));
+  return m_parameterManager->value(prop);
 }
 
 /**
@@ -552,21 +738,322 @@ bool FunctionBrowser::isIndex(QtProperty* prop) const
 }
 
 /**
+ * Get the function index for a property
+ * @param prop :: A property
+ */
+QString FunctionBrowser::getIndex(QtProperty* prop) const
+{
+  if ( !prop ) return "";
+  if (isFunction(prop))
+  {
+    auto props = prop->subProperties();
+    if (props.isEmpty()) return "";
+    for(auto it = props.begin(); it != props.end(); ++it)
+    {
+      if ( isIndex(*it) )
+      {
+        return m_indexManager->value(*it);
+      }
+    }
+    return "";
+  }
+
+  auto ap = m_properties[prop];
+  return getIndex(ap.parent); 
+}
+
+
+/**
+ * Add a tie property
+ * @param prop :: Parent parameter property
+ * @param tie :: A tie string
+ */
+FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty* prop, QString tie)
+{
+  if ( !prop )
+  {
+    throw std::runtime_error("FunctionBrowser: null property pointer");
+  }
+  AProperty ap;
+  ap.item = NULL;
+  ap.prop = NULL;
+  ap.parent = NULL;
+
+  if ( !isParameter(prop) ) return ap;
+
+  Mantid::API::Expression expr;
+  expr.parse(tie.toStdString());
+  // Do parameter names include composite function index
+  bool isComposite = false;
+  auto vars = expr.getVariables();
+  for(auto var = vars.begin(); var != vars.end(); ++var)
+  {
+    // nesting level of a particular variable
+    int n = static_cast<int>(std::count(var->begin(),var->end(),'.'));
+    if ( n != 0 )
+    {
+      isComposite = true;
+    }
+  }
+
+  // check that tie has form <paramName>=<expression>
+  if ( expr.name() != "=" )
+  {// prepend "<paramName>="
+    if ( !isComposite )
+    {
+      tie.prepend(prop->propertyName() + "=");
+    }
+    else
+    {
+      QString index = getIndex(prop);
+      tie.prepend(index + prop->propertyName() + "=");
+    }
+  }
+
+  // find the property of the function
+  QtProperty *funProp = isComposite? getFunctionProperty().prop : m_properties[prop].parent;
+
+  QtProperty* tieProp = m_tieManager->addProperty("Tie");
+  m_tieManager->setValue(tieProp, tie);
+  ap = addProperty(prop,tieProp);
+
+  ATie atie;
+  atie.paramProp = prop;
+  atie.tieProp = tieProp;
+  //atie.tie = tie;
+  m_ties.insert(funProp,atie);
+
+  return ap;
+}
+
+/**
+ * Check if a parameter property has a tie
+ * @param prop :: A parameter property
+ */
+bool FunctionBrowser::hasTie(QtProperty* prop) const
+{
+  if ( !prop ) return false;
+  auto children = prop->subProperties();
+  foreach(QtProperty* child, children)
+  {
+    if ( child->propertyName() == "Tie" )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Check if a property is a tie
+ * @param prop :: A property
+ */
+bool FunctionBrowser::isTie(QtProperty* prop) const
+{
+  return prop && dynamic_cast<QtAbstractPropertyManager*>(m_tieManager) == prop->propertyManager();
+}
+
+
+/**
+ * Get a tie for a parameter
+ * @param prop :: A parameter property
+ */
+std::string FunctionBrowser::getTie(QtProperty* prop) const
+{
+  if ( !prop ) return "";
+  auto children = prop->subProperties();
+  foreach(QtProperty* child, children)
+  {
+    if ( child->propertyName() == "Tie" )
+    {
+      return m_tieManager->value(child).toStdString();
+    }
+  }
+  return "";
+}
+
+/** 
+ * Add a constraint property
+ * @param prop :: Parent parameter property
+ * @param constraint :: A constraint string
+ */
+QList<FunctionBrowser::AProperty> FunctionBrowser::addConstraintProperties(QtProperty* prop, QString constraint)
+{
+  if ( !isParameter(prop) ) return QList<FunctionBrowser::AProperty>();
+  QString lowerBoundStr = "";
+  QString upperBoundStr = "";
+  Mantid::API::Expression expr;
+  expr.parse(constraint.toStdString());
+  if ( expr.name() != "==" ) return QList<FunctionBrowser::AProperty>();
+  if ( expr.size() == 3 )
+  {// lower < param < upper
+    try
+    {
+      double d1 = boost::lexical_cast<double>( expr[0].name() );
+      double d2 = boost::lexical_cast<double>( expr[2].name() );
+      if ( expr[1].operator_name() == "<" && expr[2].operator_name() == "<" )
+      {
+        lowerBoundStr = QString::fromStdString( expr[0].name() );
+        upperBoundStr = QString::fromStdString( expr[2].name() );
+      }
+      else // assume that the operators are ">"
+      {
+        lowerBoundStr = QString::fromStdString( expr[2].name() );
+        upperBoundStr = QString::fromStdString( expr[0].name() );
+      }
+    }
+    catch(...)
+    {// error in constraint
+      return QList<FunctionBrowser::AProperty>();
+    }
+  }
+  else if ( expr.size() == 2 )
+  {// lower < param or param > lower etc
+    size_t paramPos = 0;
+    try // find position of the parameter name in expression
+    {
+      double d = boost::lexical_cast<double>( expr[1].name() );
+    }
+    catch(...)
+    {
+      paramPos = 1;
+    }
+    std::string op = expr[1].operator_name();
+    if ( paramPos == 0 )
+    {// parameter goes first
+      if ( op == "<" )
+      {// param < number
+        upperBoundStr = QString::fromStdString( expr[1].name() );
+      }
+      else
+      {// param > number
+        lowerBoundStr = QString::fromStdString( expr[1].name() );
+      }
+    }
+    else
+    {// parameter is second
+      if ( op == "<" )
+      {// number < param
+        lowerBoundStr = QString::fromStdString( expr[0].name() );
+      }
+      else
+      {// number > param
+        upperBoundStr = QString::fromStdString( expr[0].name() );
+      }
+    }
+  }
+
+  // add properties
+  QList<FunctionBrowser::AProperty> plist;
+  AConstraint ac;
+  //ac.constraint = constraint;
+  ac.paramProp = prop;
+  ac.lower = ac.upper = NULL;
+  if ( !lowerBoundStr.isEmpty() )
+  {
+    auto ap = addProperty( prop, m_constraintManager->addProperty("LowerBound") );
+    plist << ap;
+    ac.lower = ap.prop;
+    m_constraintManager->setValue( ac.lower, lowerBoundStr );
+  }
+  if ( !upperBoundStr.isEmpty() )
+  {
+    auto ap = addProperty( prop, m_constraintManager->addProperty("UpperBound") );
+    plist << ap;
+    ac.upper = ap.prop;
+    m_constraintManager->setValue( ac.upper, upperBoundStr );
+  }
+  if ( ac.lower || ac.upper )
+  {
+    m_constraints.insert(m_properties[prop].parent,ac);
+  }
+
+  return plist;
+}
+
+/**
+ * Check if a property is a constraint
+ * @param prop :: Property to check.
+ */
+bool FunctionBrowser::isConstraint(QtProperty* prop) const
+{
+  return prop && dynamic_cast<QtAbstractPropertyManager*>(m_constraintManager) == prop->propertyManager();
+}
+
+/**
+ * Check if a parameter property has a constraint
+ * @param prop :: A parameter property.
+ */
+bool FunctionBrowser::hasConstraint(QtProperty* prop) const
+{
+  return hasLowerBound(prop) || hasUpperBound(prop);
+}
+
+/**
+ * Check if a parameter property has a lower bound
+ * @param prop :: A parameter property.
+ */
+bool FunctionBrowser::hasLowerBound(QtProperty* prop) const
+{
+  if ( !isParameter(prop) ) return false;
+  auto props = prop->subProperties();
+  if ( props.isEmpty() ) return false;
+  foreach(QtProperty* p, props)
+  {
+    if ( dynamic_cast<QtAbstractPropertyManager*>(m_constraintManager) == p->propertyManager() &&
+      p->propertyName() == "LowerBound" ) return true;
+  }
+  return false;
+}
+
+/**
+ * Check if a parameter property has a upper bound
+ * @param prop :: A parameter property.
+ */
+bool FunctionBrowser::hasUpperBound(QtProperty* prop) const
+{
+  if ( !isParameter(prop) ) return false;
+  auto props = prop->subProperties();
+  if ( props.isEmpty() ) return false;
+  foreach(QtProperty* p, props)
+  {
+    if ( dynamic_cast<QtAbstractPropertyManager*>(m_constraintManager) == p->propertyManager() &&
+      p->propertyName() == "UpperBound" ) return true;
+  }
+  return false;
+}
+
+
+
+/**
  * Show a pop up menu.
  */
 void FunctionBrowser::popupMenu(const QPoint &)
 {
+  auto fun = getFunction();
+  if (fun)
+  {
+    std::cerr << fun->asString() << std::endl;
+  }
   auto item = m_browser->currentItem();
   if (!item)
   {
     QMenu context(this);
     context.addAction(m_actionAddFunction);
+    if ( !QApplication::clipboard()->text().isEmpty() )
+    {
+      context.addAction(m_actionFromClipboard);
+    }
+    if ( !m_browser->properties().isEmpty() )
+    {
+      context.addAction(m_actionToClipboard);
+    }
     context.exec(QCursor::pos());
     return;
   }
   QtProperty* prop = item->property();
   if (isFunction(prop))
-  {
+  {// functions
     QMenu context(this);
     Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createFunction(prop->propertyName().toStdString());
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
@@ -575,6 +1062,48 @@ void FunctionBrowser::popupMenu(const QPoint &)
       context.addAction(m_actionAddFunction);
     }
     context.addAction(m_actionRemoveFunction);
+    if ( !QApplication::clipboard()->text().isEmpty() )
+    {
+      context.addAction(m_actionFromClipboard);
+    }
+    if ( !m_browser->properties().isEmpty() )
+    {
+      context.addAction(m_actionToClipboard);
+    }
+    context.exec(QCursor::pos());
+  }
+  else if (isParameter(prop))
+  {// parameters
+    QMenu context(this);
+    if ( hasTie(prop) )
+    {
+      context.addAction(m_actionRemoveTie);
+    }
+    else
+    {
+      context.addAction(m_actionFixParameter);
+      context.addAction(m_actionAddTie);
+    }
+    bool hasLower = hasLowerBound(prop);
+    bool hasUpper = hasUpperBound(prop);
+    if ( !hasLower && !hasUpper )
+    {
+      QMenu *constraintMenu = new QMenu("Constraints",this);
+      constraintMenu->addAction(m_actionConstraints10);
+      constraintMenu->addAction(m_actionConstraints50);
+      constraintMenu->addAction(m_actionConstraints);
+      context.addMenu(constraintMenu);
+    }
+    else
+    {
+      context.addAction(m_actionRemoveConstraints);
+    }
+    context.exec(QCursor::pos());
+  }
+  else if ( isConstraint(prop) )
+  {// constraints
+    QMenu context(this);
+    context.addAction(m_actionRemoveConstraint);
     context.exec(QCursor::pos());
   }
 }
@@ -618,90 +1147,152 @@ void FunctionBrowser::addFunction()
 
   if (newFunction.isEmpty()) return;
 
-  std::cerr << "New fun: " << newFunction.toStdString() << std::endl;
+  // create new function
   auto f = Mantid::API::FunctionFactory::Instance().createFunction(newFunction.toStdString());
+  //newFunction = QString::fromStdString(f->asString());
 
   if (prop)
-  {// there are other function defined
+  {// there are other functions defined
     Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createFunction(prop->propertyName().toStdString());
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf)
     {
-      addFunction(prop,QString::fromStdString(f->asString()));
+      addFunction(prop,f);
     }
     else
     {
-      setFunction(getFunctionString(prop) + ";" + QString::fromStdString(f->asString()));
+      cf.reset(new Mantid::API::CompositeFunction);
+      cf->addFunction(getFunction(prop));
+      cf->addFunction(f);
+      setFunction(cf);
     }
   }
   else
   {// the browser is empty - add first function
-    addFunction(prop,QString::fromStdString(f->asString()));
+    addFunction(NULL,f);
   }
   updateFunctionIndices();
 }
 
 /**
- * Return FunctionFactory function string
+ * Return the function 
  * @param prop :: Function property 
  */
-QString FunctionBrowser::getFunctionString(QtProperty* prop) const
+Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop)
 {
   if (prop == NULL)
-  {
+  {// get overall function
     auto props = m_browser->properties();
-    if (props.isEmpty()) return "";
+    if (props.isEmpty()) return Mantid::API::IFunction_sptr();
     prop = props[0];
   }
-  if (!isFunction(prop)) return "";
-  QString out;
+  if (!isFunction(prop)) return Mantid::API::IFunction_sptr();
+
+  // construct the function 
   auto fun = Mantid::API::FunctionFactory::Instance().createFunction(prop->propertyName().toStdString());
   auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (cf)
   {
-    if (cf->name() != "CompositeFunction")
-    {
-      out += "composite=" + QString::fromStdString(cf->name()) + ";";
-    }
     auto children = prop->subProperties();
     foreach(QtProperty* child, children)
     {
       if (isFunction(child))
       {
-        auto f = Mantid::API::FunctionFactory::Instance().createFunction(child->propertyName().toStdString());
-        bool isComposite = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
-        if (isComposite) out += "(";
-        out += getFunctionString(child);
-        if (isComposite) out += ")";
-        out += ";";
+        auto f = getFunction(child);
+        cf->addFunction(f);
       }
-    }
-    if (out.endsWith(";"))
-    {
-      out.remove(out.length() - 1, 1);
     }
   }
   else
   {
-    out += "name=" + QString::fromStdString(fun->name()) + ",";
     auto children = prop->subProperties();
     foreach(QtProperty* child, children)
     {
-      if (isAttribute(child))
+      if (isStringAttribute(child))
       {
-        out += child->propertyName() + "=" + getAttribute(child) + ",";
+        fun->setAttributeValue(child->propertyName().toStdString(),getStringAttribute(child));
+      }
+      if (isDoubleAttribute(child))
+      {
+        fun->setAttributeValue(child->propertyName().toStdString(),getDoubleAttribute(child));
+      }
+      if (isIntAttribute(child))
+      {
+        fun->setAttributeValue(child->propertyName().toStdString(),getIntAttribute(child));
       }
       else if (isParameter(child))
       {
-        out += child->propertyName() + "=" + getParameter(child) + ",";
+        fun->setParameter(child->propertyName().toStdString(), getParameter(child));
       }
     }
-    if (out.endsWith(","))
+  }
+
+  // add ties
+  {
+    auto from = m_ties.lowerBound(prop);
+    auto to = m_ties.upperBound(prop);
+    QList<QtProperty*> filedTies; // ties can become invalid after some editing
+    for(auto it = from; it != to; ++it)
     {
-      out.remove(out.length() - 1, 1);
+      try
+      {
+        QString tie = m_tieManager->value(it.value().tieProp);
+        fun->addTies(tie.toStdString());
+      }
+      catch(...)
+      {
+        //std::cerr << "tie failed " << it.value().tie.toStdString() << std::endl;
+        filedTies << it.value().tieProp;
+      }
+    }
+    // remove failed ties from the browser
+    foreach(QtProperty* p, filedTies)
+    {
+      removeProperty(p);
     }
   }
-  return out;
+
+  // add constraints
+  {
+    auto from = m_constraints.lowerBound(prop);
+    auto to = m_constraints.upperBound(prop);
+    for(auto it = from; it != to; ++it)
+    {
+      try
+      {
+        QString constraint;
+        auto cp = it.value();
+        if ( cp.lower )
+        {
+          constraint += m_constraintManager->value(cp.lower) + "<" + cp.paramProp->propertyName();
+        }
+        else
+        {
+          constraint += cp.paramProp->propertyName();
+        }
+        if ( cp.upper )
+        {
+          constraint += "<" + m_constraintManager->value(cp.upper) ;
+        }
+        fun->addConstraints(constraint.toStdString());
+      }
+      catch(...)
+      {
+      }
+    }
+  }
+
+  return fun;
+}
+
+/**
+ * Return FunctionFactory function string
+ */
+QString FunctionBrowser::getFunctionString()
+{
+  auto fun = getFunction();
+  if ( !fun ) return "";
+  return QString::fromStdString( fun->asString() );
 }
 
 /**
@@ -716,6 +1307,199 @@ void FunctionBrowser::removeFunction()
   removeProperty(prop);
   updateFunctionIndices();
 }
+
+/**
+ * Fix currently selected parameter
+ */
+void FunctionBrowser::fixParameter()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+  QString tie = QString::number(getParameter(prop));
+  auto ap = addTieProperty(prop, tie);
+  if (ap.prop)
+  {
+    ap.prop->setEnabled(false);
+  }
+}
+
+/**
+ * Unfix currently selected parameter
+ */
+void FunctionBrowser::removeTie()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+  auto children = prop->subProperties();
+  foreach(QtProperty* child, children)
+  {
+    if ( child->propertyName() == "Tie" )
+    {
+      removeProperty(child);
+      return;
+    }
+  }
+}
+
+/**
+ * Add a custom tie to currently selected parameter
+ */
+void FunctionBrowser::addTie()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+
+  bool ok;
+  QString tie = QInputDialog::getText(this, "Add a tie", "Tie:", QLineEdit::Normal, "", &ok);
+  if ( ok && !tie.isEmpty() )
+  {
+    addTieProperty(prop, tie);
+  }
+}
+
+/**
+ * Copy function from the clipboard
+ */
+void FunctionBrowser::copyFromClipboard()
+{
+  QString funStr = QApplication::clipboard()->text();
+  if ( funStr.isEmpty() ) return;
+  try
+  {
+    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( funStr.toStdString() );
+    if ( !fun ) return;
+    this->setFunction(fun);
+  }
+  catch(...)
+  {
+    // text in the clipboard isn't a function definition
+    QMessageBox::warning(this,"MantidPlot - Warning", "Text in the clipboard isn't a function definition"
+      " or contains errors.");
+  }
+}
+
+/**
+ * Copy function to the clipboard
+ */
+void FunctionBrowser::copyToClipboard()
+{
+  auto fun = getFunction();
+  if ( fun ) 
+  {
+    QApplication::clipboard()->setText( QString::fromStdString(fun->asString()) );
+  }
+}
+
+/**
+ * Add both constraints to current parameter
+ */
+void FunctionBrowser::addConstraints()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+  addConstraintProperties(prop,"0<"+prop->propertyName()+"<0");
+}
+
+/**
+ * Add both constraints to current parameter
+ */
+void FunctionBrowser::addConstraints10()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+  double val = getParameter(prop);
+  addConstraintProperties(prop,QString::number(val*0.9)+"<"+prop->propertyName()+"<"+QString::number(val*1.1));
+}
+
+/**
+ * Add both constraints to current parameter
+ */
+void FunctionBrowser::addConstraints50()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+  double val = getParameter(prop);
+  addConstraintProperties(prop,QString::number(val*0.5)+"<"+prop->propertyName()+"<"+QString::number(val*1.5));
+}
+
+/**
+ * Remove both constraints from current parameter
+ */
+void FunctionBrowser::removeConstraints()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isParameter(prop)) return;
+  auto props = prop->subProperties();
+  foreach(QtProperty* p, props)
+  {
+    if ( isConstraint(p) )
+    {
+      removeProperty( p );
+    }
+  }
+}
+
+/**
+ * Remove one constraint from current parameter
+ */
+void FunctionBrowser::removeConstraint()
+{
+  auto item = m_browser->currentItem();
+  if ( !item ) return;
+  QtProperty* prop = item->property();
+  if (!isConstraint(prop)) return;
+  removeProperty( prop );
+}
+
+/**
+ * Slot connected to all function attribute managers. Update the corresponding function.
+ * @param prop :: An attribute property that was changed
+ */
+void FunctionBrowser::attributeChanged(QtProperty* prop)
+{
+  auto funProp = m_properties[prop].parent;
+  if ( !funProp ) return;
+  auto fun = Mantid::API::FunctionFactory::Instance().createFunction(funProp->propertyName().toStdString());
+
+  std::string attName = prop->propertyName().toStdString();
+  if ( isStringAttribute(prop) )
+  {
+    std::string value = getStringAttribute(prop);
+    fun->setAttributeValue(attName, value);
+  }
+  else if ( isDoubleAttribute(prop) )
+  {
+    double value = getDoubleAttribute(prop);
+    fun->setAttributeValue(attName, value);
+  }
+  else if ( isIntAttribute(prop) )
+  {
+    int value = getIntAttribute(prop);
+    fun->setAttributeValue(attName, value);
+  }
+  else
+  {
+    throw std::runtime_error("FunctionBrowser: unknown attribute type.");
+  }
+
+  setFunction(funProp, fun);
+  updateFunctionIndices();
+}
+
 
 } // MantidWidgets
 } // MantidQt
