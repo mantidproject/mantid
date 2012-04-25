@@ -108,10 +108,19 @@ public:
     RebinnedOutput_sptr outputWS;
     outputWS = AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
     TS_ASSERT(outputWS);
+    // Dimensions
+    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->blocksize());
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->blocksize());
+
+    // Value
     TS_ASSERT_EQUALS( outputWS->dataY(3)[1], inputWS->dataY(1)[3] );
     TS_ASSERT_DELTA( outputWS->dataE(3)[1], inputWS->dataE(1)[3], 1.e-5 );
     TS_ASSERT_EQUALS( outputWS->dataF(0).size(), 4 );
     TS_ASSERT_EQUALS( outputWS->dataF(3)[1], inputWS->dataF(1)[3] );
+    // Check a nan
+    bool inNan = isnan(inputWS->dataY(0)[5]);
+    bool outNan = isnan(outputWS->dataY(5)[0]);
+    TS_ASSERT_EQUALS( outNan, inNan );
 
     delete transpose;
   }
