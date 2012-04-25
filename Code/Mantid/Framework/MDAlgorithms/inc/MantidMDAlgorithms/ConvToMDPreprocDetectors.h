@@ -1,7 +1,14 @@
 #ifndef H_CONV2_MDEVENTS_DET_INFO
 #define H_CONV2_MDEVENTS_DET_INFO
 /** This structure is the basis and temporary replacement for future subalgorithm, which calculates 
-   * matrix workspace with various precprocessed detectors parameters
+   * matrix workspace with various precprocessed detectors parameters.
+
+   * The lightweight class below contain 3D uint vectors, pointing to the positions of the detectors
+      This vector used to preprocess and catch the partial positions of the detectors in Q-space
+     to avoid repetative calculations, and (possibly) to write these data as part of the physical compression scheme
+     in a very common situation when the physical instrument does not change in all runs, contributed into MD workspace
+   
+
    * 
    * @date 22-12-2011
 
@@ -30,11 +37,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Progress.h"
-  /** the lightweight class below contain 3D uint vectors, pointing to the positions of the detectors
-      This vector used to preprocess and catch the partial positions of the detectors in Q-space
-      to avoid repetative calculations, and (possibly) to write these data as part of the physical compression scheme
-      in a very common situation when the physical instrument does not change in all runs, contributed into MD workspace
-   */
 namespace Mantid
 {
 namespace MDAlgorithms

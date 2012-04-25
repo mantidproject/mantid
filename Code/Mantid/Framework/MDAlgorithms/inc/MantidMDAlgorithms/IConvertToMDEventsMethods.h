@@ -124,22 +124,22 @@ namespace MDAlgorithms
 
 };
 
-//
-///// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-//template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
-//class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
-//{ 
-//public:
-//    ConvertToMDEventsWS();
-//    /**templated virtual function to set up conversion*/
-//    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
-//    {return 0;}
-//    /**templated virtual function to run conversion itself*/
-//    void runConversion(API::Progress *){};
-//private:
-//    /**templated virtual function to run conversion chunk */
-//    virtual size_t conversionChunk(size_t job_ID){return 0;}
-//};
+
+/// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
+template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
+class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
+{ 
+public:
+    ConvertToMDEventsWS();
+    /**templated virtual function to set up conversion*/
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+    {return 0;}
+    /**templated virtual function to run conversion itself*/
+    void runConversion(API::Progress *){};
+private:
+    /**templated virtual function to run conversion chunk */
+    virtual size_t conversionChunk(size_t job_ID){return 0;}
+};
 
 
 } // end namespace MDAlgorithms

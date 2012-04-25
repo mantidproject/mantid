@@ -67,7 +67,7 @@ set ( INC_FILES
 #	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
@@ -116,11 +116,11 @@ set ( TEST_FILES
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
 	test/CompareMDWorkspacesTest.h
+#	test/ConvertToDetectorFaceMDTest.h	
 #	test/ConvertEventsToMDEventsTest.h
-#	test/ConvertToDetectorFaceMDTest.h
 #	test/ConvertToMDEventsCoordTransfTest.h
 #	test/ConvertToMDEventsMethodsTest.h
-#	test/ConvertToMDEventsParamsTest.h
+	test/ConvertToMDEventsParamsTest.h
 #	test/ConvertToMDEventsSubalgFactoryTest.h
 #	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h

@@ -18,7 +18,7 @@
 #include "MantidMDEvents/MDEvent.h"
 
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
@@ -68,7 +68,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
      // vector to keep generic part of event coordinates
      std::vector<coord_t> Coord;
  public:
-    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);

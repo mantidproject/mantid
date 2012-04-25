@@ -45,7 +45,7 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
+template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType Sample>
 struct CoordTramsformer
 {
       

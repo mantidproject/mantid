@@ -17,10 +17,10 @@
 #include "MantidMDEvents/MDEvent.h"
 
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
 
 namespace Mantid
 {
@@ -68,7 +68,7 @@ class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:
-    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
