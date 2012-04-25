@@ -96,7 +96,9 @@ namespace Mantid
       /// To query whether algorithm is a child. A proxy is always at top level, returns false
       bool isChild() const {return m_isChild;}
       void setAlwaysStoreInADS(const bool ) {}
-      void setChild(const bool val) {m_isChild = val;};
+      void setChild(const bool val) {m_isChild = val;}
+      /// Proxies only manage parent algorithms
+      void enableHistoryRecordingForChild(const bool) {};
       void setRethrows(const bool rethrow);
 
       /** @name PropertyManager methods */
