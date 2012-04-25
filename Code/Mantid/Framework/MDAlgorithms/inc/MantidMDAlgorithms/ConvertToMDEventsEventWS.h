@@ -17,11 +17,12 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
 #include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
 
 
 namespace Mantid
@@ -55,7 +56,7 @@ namespace MDAlgorithms
 
 // Class to process event workspace by direct conversion:
 template<ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
-class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
+class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsWS 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined

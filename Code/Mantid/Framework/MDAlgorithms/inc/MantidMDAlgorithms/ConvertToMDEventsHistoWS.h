@@ -16,8 +16,9 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
 #include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 //#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
 //#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
 //#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
@@ -52,7 +53,7 @@ namespace MDAlgorithms
 */
 
 // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
-#define SPLIT_LEVEL  2048
+#define SPLIT_LEVEL  8192
 
 //-----------------------------------------------
 // Method to process rugged Histogram workspace
@@ -61,7 +62,7 @@ class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<ConvertToMD::QMode XQ,ConvertToMD::AnalMode XMODE,ConvertToMD::CnvrtUnits XCONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType XSample>
+     template<ConvertToMD::QMode XQ,ConvertToMD::AnalMode XM,ConvertToMD::CnvrtUnits XC,ConvertToMD::XCoordType XT,ConvertToMD::SampleType XS>
      friend struct CoordTransformer;
   // the instanciation of the class which does the transformation itself
      CoordTransformer<Q,MODE,CONV,ConvertToMD::Histogram,Sample> trn; 

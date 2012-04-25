@@ -63,7 +63,7 @@ namespace MDAlgorithms
 */
 
 
- class DLLExport IConvertToMDEventsMethods
+ class DLLExport IConvertToMDEventsWS
  {
  protected:
    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
@@ -74,14 +74,14 @@ namespace MDAlgorithms
 
  public:
      // constructor;
-     IConvertToMDEventsMethods();
+     IConvertToMDEventsWS();
  
     ///method which initates all main class variables 
     virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
-    virtual ~IConvertToMDEventsMethods(){};
+    virtual ~IConvertToMDEventsWS(){};
 /**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
     Kernel::Unit_sptr              getAxisUnits()const;
     double    getEi()const{return TWS.Ei;}
@@ -127,10 +127,10 @@ namespace MDAlgorithms
 
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
 template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
-class ConvertToMDEventsWS: public IConvertToMDEventsMethods 
+class ConvertToMDEventsWS: public IConvertToMDEventsWS 
 { 
 public:
-    ConvertToMDEventsWS();
+    ConvertToMDEventsWS(){};
     /**templated virtual function to set up conversion*/
     size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
     {return 0;}

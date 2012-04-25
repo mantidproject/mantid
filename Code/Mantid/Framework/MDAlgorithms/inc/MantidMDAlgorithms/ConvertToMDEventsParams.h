@@ -180,6 +180,7 @@ private:
    static Mantid::Kernel::Logger& convert_log;
 
  };
+
 } // end namespace ConvertToMD
 } // end namespace
 }
