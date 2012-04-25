@@ -25,6 +25,9 @@ class DataSeries(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
         script = "t0=time.time()\n"
+        script += "from reduction.command_interface import ReductionSingleton\n"
+        script += "ReductionSingleton.clean()\n"
+        
         for item in self.data_sets:
             script += item.to_script()
             script += "\n"
