@@ -91,6 +91,12 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         self._do_exec_time_props_test(simpleapi.LoadRaw)
+        
+    def test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
+        wsname = 'test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
+        data = [1.0,2.0,3.0,4.0,5.0]
+        wkspace = simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength')
+        self.assertTrue( wsname in mtd )
     
     def test_that_dialog_call_raises_runtime_error(self):
         try:
