@@ -57,8 +57,11 @@ struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
        }else{        // only one workspace property availible;
            if(!pHost->fillAddProperties(Coord,nd,1))return false;
        }
+       //
+       pHost->getMinMax(dim_min,dim_max);
         // set up units conversion defined by the host algorithm.  
-       CONV_UNITS_FROM.setUpConversion(this->pHost,""); 
+       ConvToMDPreprocDetectors Dummy;
+       CONV_UNITS_FROM.setUpConversion(Dummy,"",""); 
        return true;
     }
 
@@ -66,7 +69,7 @@ struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
     {
         CONV_UNITS_FROM.updateConversion(i);
         if(pYAxis){   
-            if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
+            if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
             Coord[1] = (coord_t)(pYAxis->operator()(i));
         }
         return true;
@@ -74,7 +77,7 @@ struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
 
     inline bool calc1MatrixCoord(const double& X,std::vector<coord_t> &Coord)const
     {
-       if(X<pHost->dim_min[0]||X>=pHost->dim_max[0])return false;
+       if(X<dim_min[0]||X>=dim_max[0])return false;
           
        Coord[0]=(coord_t)X;
        return true;
@@ -96,15 +99,17 @@ struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
     // constructor;
     CoordTransformer():pYAxis(NULL),pHost(NULL){} 
 
-    inline void setUpTransf(IConvertToMDEventsMethods *pConv){
+    inline void setUpTransf(IConvertToMDEventsWS *pConv){
         pHost = pConv;
     }
 private:
    // the variables used for exchange data between different specific parts of the generic ND algorithm:
     // pointer to Y axis of MD workspace
      API::NumericAxis *pYAxis;
+     // min and max values for this conversion
+     std::vector<double> dim_min,dim_max;
      // pointer to MD workspace convertor
-     IConvertToMDEventsMethods *pHost;
+     IConvertToMDEventsWS *pHost;
 // class which would convert units
      UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
 };

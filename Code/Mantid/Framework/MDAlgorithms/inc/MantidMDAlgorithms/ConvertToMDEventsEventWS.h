@@ -19,10 +19,10 @@
 
 #include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
 #include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
 
 
 namespace Mantid
@@ -60,8 +60,6 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<ConvertToMD::QMode QX, ConvertToMD::AnalMode MODEX, ConvertToMD::CnvrtUnits CONVX,ConvertToMD::XCoordType XTYPE,ConvertToMD::SampleType XSample> 
-     friend struct CoordTransformer;
      // the instanciation of the class which does the transformation itself
      CoordTransformer<Q,MODE,CONV,ConvertToMD::Centered,Sample> trn; 
      // the pointer to underlying event workspace
@@ -69,7 +67,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
      // vector to keep generic part of event coordinates
      std::vector<coord_t> Coord;
  public:
-    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);

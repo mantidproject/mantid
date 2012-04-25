@@ -18,10 +18,10 @@
 
 #include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
 #include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
 
 namespace Mantid
 {
@@ -62,9 +62,6 @@ class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<ConvertToMD::QMode XQ,ConvertToMD::AnalMode XM,ConvertToMD::CnvrtUnits XC,ConvertToMD::XCoordType XT,ConvertToMD::SampleType XS>
-     friend struct CoordTransformer;
-
    // the instanciation of the class which does the transformation itself
      CoordTransformer<Q,MODE,CONV,ConvertToMD::Histogram,Sample> QE_TRANSF; 
      // 
@@ -72,7 +69,7 @@ class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:
-    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);

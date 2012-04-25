@@ -51,8 +51,11 @@ struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // 
          rotMat = pHost->getTransfMatrix();
-         CONV_UNITS_FROM.setUpConversion(this->pHost,"DeltaE"); 
+         //
+         const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();          
+         CONV_UNITS_FROM.setUpConversion(*(pHost->getDetectors()),pThisUnit->unitID(),"DeltaE"); 
 
+         pHost->getMinMax(dim_min,dim_max);
      // get pointer to the positions of the detectors
           std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
           pDet = &DetDir[0];
@@ -72,7 +75,7 @@ struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
     inline bool calc1MatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
     {
          Coord[3]    = (coord_t)E_tr;
-         if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
+         if(Coord[3]<dim_min[3]||Coord[3]>=dim_max[3])return false;
 
          // get module of the wavevector for scattered neutrons
          double k_tr = k_trans<MODE>(Ei,E_tr);
@@ -81,9 +84,9 @@ struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
          double  qy  =  -ey*k_tr;
          double  qz  = ki - ez*k_tr;
 
-         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
-         Coord[1]  = (coord_t)(rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
-         Coord[2]  = (coord_t)(rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
+         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);  if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
+         Coord[1]  = (coord_t)(rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz);  if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
+         Coord[2]  = (coord_t)(rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);  if(Coord[2]<dim_min[2]||Coord[2]>=dim_max[2])return false;
 
          return true;
     }
@@ -106,7 +109,7 @@ struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
    // default constructor
    CoordTransformer():pDet(NULL),pHost(NULL){}
    // initiator
-   void setUpTransf(IConvertToMDEventsMethods *pConv){
+   void setUpTransf(IConvertToMDEventsWS *pConv){
         pHost = pConv;
     }
 private:
@@ -121,7 +124,9 @@ private:
     // pointer to the detectors directions
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
-    IConvertToMDEventsMethods *pHost;
+    IConvertToMDEventsWS *pHost;
+    // min and max values for this conversion
+     std::vector<double> dim_min,dim_max;
    // class which would convert units
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
     
@@ -137,12 +142,13 @@ struct CoordTransformer<ConvertToMD::Q3D,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
         if(!pHost->fillAddProperties(Coord,nd,3))return false;
          // 
         rotMat = pHost->getTransfMatrix();
-        //
-        CONV_UNITS_FROM.setUpConversion(this->pHost,"Momentum"); 
+        const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();          
+        CONV_UNITS_FROM.setUpConversion(*(pHost->getDetectors()),pThisUnit->unitID(),"Momentum"); 
         // get pointer to the positions of the detectors
          pDet = &(pHost->pPrepDetectors()->det_dir[0]);
     
-        return true;
+         pHost->getMinMax(dim_min,dim_max);
+         return true;
     }
     //
     inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
@@ -162,9 +168,9 @@ struct CoordTransformer<ConvertToMD::Q3D,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
          double  qy  =  -ey*k0;
          double  qz  = ezm1*k0;
 
-         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
-         Coord[1]  = (coord_t)(rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
-         Coord[2]  = (coord_t)(rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
+         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);  if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
+         Coord[1]  = (coord_t)(rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz);  if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
+         Coord[2]  = (coord_t)(rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);  if(Coord[2]<dim_min[2]||Coord[2]>=dim_max[2])return false;
 
          return true;
     }
@@ -183,7 +189,7 @@ struct CoordTransformer<ConvertToMD::Q3D,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
     }   
 
     CoordTransformer():pDet(NULL),pHost(NULL){}
-    void setUpTransf(IConvertToMDEventsMethods *pConv){
+    void setUpTransf(IConvertToMDEventsWS *pConv){
         pHost = pConv;
     }
 private:
@@ -194,8 +200,10 @@ private:
     // pointer to the beginning of the array with the detectors directions in Q-space
     Kernel::V3D const *pDet;
     // pointer to the algoritm, which calls all these transformations
-    IConvertToMDEventsMethods *pHost;  
-    // class which would convert units
+    IConvertToMDEventsWS *pHost;  
+    // min and max values for this conversion
+     std::vector<double> dim_min,dim_max;
+     // class which would convert units
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };

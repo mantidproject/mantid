@@ -68,7 +68,7 @@ namespace MDAlgorithms
    /// the properties of the requested target MD workpsace:
     MDEvents::MDWSDescription TWSD;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
-   static PreprocessedDetectors det_loc;  
+   static ConvToMDPreprocDetectors det_loc;  
   /// progress reporter
    std::auto_ptr<API::Progress > pProg;
     /// logger -> to provide logging, for MD dataset file operations

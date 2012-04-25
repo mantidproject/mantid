@@ -77,7 +77,7 @@ namespace MDAlgorithms
      IConvertToMDEventsWS();
  
     ///method which initates all main class variables 
-    virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
@@ -94,7 +94,15 @@ namespace MDAlgorithms
 
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
     bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
+    //
+    void getMinMax(std::vector<double> &min,std::vector<double> &max)const
+    {
+        min.assign(dim_min.begin(),dim_min.end());
+        max.assign(dim_max.begin(),dim_max.end());
+    }
+    ConvToMDPreprocDetectors const* getDetectors(){return pDetLoc;}
   protected:
+
    /// pointer to the input workspace;
     Mantid::API::MatrixWorkspace_sptr inWS2D;
     /// the properties of the requested target MD workpsace:
@@ -132,7 +140,7 @@ class ConvertToMDEventsWS: public IConvertToMDEventsWS
 public:
     ConvertToMDEventsWS(){};
     /**templated virtual function to set up conversion*/
-    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
     {return 0;}
     /**templated virtual function to run conversion itself*/
     void runConversion(API::Progress *){};

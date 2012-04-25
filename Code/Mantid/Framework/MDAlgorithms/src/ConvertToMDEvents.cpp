@@ -43,7 +43,7 @@ namespace MDAlgorithms
 // logger for the algorithm workspaces  
 Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
-PreprocessedDetectors ConvertToMDEvents::det_loc;
+ConvToMDPreprocDetectors ConvertToMDEvents::det_loc;
 //
 Mantid::Kernel::Logger & 
 ConvertToMDEvents::getLogger(){return convert_log;}
@@ -309,7 +309,7 @@ void ConvertToMDEvents::exec()
   //DO THE JOB:
 
   // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
-  IConvertToMDEventsMethods * algo =  subAlgFactory.getAlg(algo_id);
+  IConvertToMDEventsWS * algo =  subAlgFactory.getAlg(algo_id);
   // initate conversion and estimate amout of job to dl
   size_t n_steps = algo->setUPConversion(inWS2D,det_loc,TWSD, pWSWrapper);
   // progress reporter

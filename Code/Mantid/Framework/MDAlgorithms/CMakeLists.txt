@@ -10,7 +10,7 @@ set ( SRC_FILES
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToDetectorFaceMD.cpp
-#	src/ConvertToMDEvents.cpp
+	src/ConvertToMDEvents.cpp
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/IConvertToMDEventsWS.cpp
@@ -62,15 +62,15 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
-#	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
-#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
 	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
@@ -116,16 +116,16 @@ set ( TEST_FILES
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
 	test/CompareMDWorkspacesTest.h
-#	test/ConvertToDetectorFaceMDTest.h	
-#	test/ConvertEventsToMDEventsTest.h
-#	test/ConvertToMDEventsCoordTransfTest.h
-#	test/ConvertToMDEventsWSTest.h
+	test/ConvertToDetectorFaceMDTest.h	
+	test/ConvertEventsToMDEventsTest.h
+	test/ConvertToMDEventsCoordTransfTest.h
+	test/ConvertToMDEventsWSTest.h
 	test/ConvertToMDEventsParamsTest.h
     test/ConvertToMDEventsSubalgFactoryTest.h
-#	test/ConvertToMDEventsTest.h
+	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
-#	test/ConvertToQ3DdETest.h
-#	test/ConvertToMDEventsTestPerformance.h 	
+	test/ConvertToQ3DdETest.h
+	test/ConvertToMDEventsTestPerformance.h 	
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h

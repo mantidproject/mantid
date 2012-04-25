@@ -56,13 +56,14 @@ struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,TYPE,SAMPLE>
          // get transformation matrix (needed for CrystalAsPoder mode)
          rotMat = pHost->getTransfMatrix();
          // if workspace is not in DeltaE, initiate units conversion, if not -- empty conversion should be instanciated
-         CONV_UNITS_FROM.setUpConversion(this->pHost,"DeltaE"); 
+         const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();          
+         CONV_UNITS_FROM.setUpConversion(*(pHost->getDetectors()),pThisUnit->unitID(),"DeltaE"); 
+
          // get pointer to the positions of the detectors
           std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
           pDet = &DetDir[0];
+          pHost->getMinMax(dim_min,dim_max);
 
-          dim_min.assign(pHost->dim_min.begin(),pHost->dim_min.end());
-          dim_max.assign(pHost->dim_max.begin(),pHost->dim_max.end());
           // dim_min here is a momentum and it is verified on momentum squared base
           dim_min[0]*=dim_min[0];
           dim_max[0]*=dim_max[0];
@@ -118,7 +119,7 @@ struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,TYPE,SAMPLE>
     }   
     // constructor;
     CoordTransformer():pDet(NULL),pHost(NULL){}
-    void setUpTransf(IConvertToMDEventsMethods *pConv){
+    void setUpTransf(IConvertToMDEventsWS *pConv){
         pHost = pConv;
     }
 private:
@@ -135,7 +136,7 @@ private:
     //
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
-    IConvertToMDEventsMethods *pHost;
+    IConvertToMDEventsWS *pHost;
     // class which would convert units
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
@@ -151,15 +152,15 @@ struct CoordTransformer<ConvertToMD::ModQ, ConvertToMD::Elastic,CONV,TYPE,SAMPLE
         if(!pHost->fillAddProperties(Coord,nd,1))return false;
           // get transformation matrix (needed for CrystalAsPoder mode)
           rotMat = pHost->getTransfMatrix();
-          // 
-          CONV_UNITS_FROM.setUpConversion(this->pHost,"Momentum"); 
+
+          const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();          
+          CONV_UNITS_FROM.setUpConversion(*(pHost->getDetectors()),pThisUnit->unitID(),"Momentum");         
 
          // get pointer to the positions of the detectors
           std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
           pDet = &DetDir[0];     //
-
-          dim_min.assign(pHost->dim_min.begin(),pHost->dim_min.end());
-          dim_max.assign(pHost->dim_max.begin(),pHost->dim_max.end());
+          //
+          pHost->getMinMax(dim_min,dim_max);
           // dim_min here is a momentum and it is verified on momentum squared base
           dim_min[0]*=dim_min[0];
           dim_max[0]*=dim_max[0];
@@ -210,7 +211,7 @@ struct CoordTransformer<ConvertToMD::ModQ, ConvertToMD::Elastic,CONV,TYPE,SAMPLE
 
     // constructor;
     CoordTransformer():pDet(NULL),pHost(NULL){}
-    void setUpTransf(IConvertToMDEventsMethods *pConv){
+    void setUpTransf(IConvertToMDEventsWS *pConv){
         pHost = pConv;
     }
 private:
@@ -227,7 +228,7 @@ private:
     //
     Kernel::V3D const * pDet;
     // Calling Mantid algorithm
-    IConvertToMDEventsMethods *pHost;  
+    IConvertToMDEventsWS *pHost;  
    // class which would convert units
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  

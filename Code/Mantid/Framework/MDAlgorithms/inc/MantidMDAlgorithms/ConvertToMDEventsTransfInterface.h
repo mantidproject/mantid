@@ -9,7 +9,9 @@ namespace Mantid
 namespace MDAlgorithms
 {
 /** Interface to set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
-  * data into from 1 to 4 output dimensions as function of input parameters
+  * data into from 1 to 4 output dimensions as function of input parameters;
+  * 
+  * The class itself should never be instanciated (and this is actually impossible)
   *
   ** The template below describes general ingerface to coordinate transformation:
   *
@@ -61,12 +63,10 @@ struct CoordTransformer
      *
      * has to be specialized
     */  
-    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes)
-    {       
-       return false;
-    }
-
-
+    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes);
+    //{       
+    //   return false;
+    //}
    
     /** template generalizes the code to calculate Y-variables within the detector's loop of processQND workspace
      * @param Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.
@@ -77,10 +77,10 @@ struct CoordTransformer
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
     //calcYDepCoordinates
-    bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
-    {       
-       return false;
-    }
+    bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
+    //{       
+    //   return false;
+   // }
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
      * @param X    -- vector of X workspace values
      * @param i    -- index of external loop, identifying generic y-coordinate
@@ -92,10 +92,10 @@ struct CoordTransformer
      * has to be specialized
      */
     //calcMatrixCoord(X,i,j,Coord)
-    bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
-    {       
-       return false;
-    }
+    bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const;
+    //{       
+    //   return false;
+    //}
   
  /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
     * given that the input described by sinble value only
@@ -105,10 +105,10 @@ struct CoordTransformer
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized    */
-    bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-    {       
-       return false;
-    }
+    bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const;
+    //{       
+    //   return false;
+   // }
     /** template generalizes the conversion of single x-variable using unit conversion as the first step 
      * @param X    -- X workspace value
      * 
@@ -116,13 +116,14 @@ struct CoordTransformer
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized     */
-    bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-    {       
-       return false;
-    }
+    bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const;
+    //{       
+   //    return false;
+   // }
     /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and provides 
       * necessary variables */
-    void setUpTransf(IConvertToMDEventsWS *){};
+    void setUpTransf(IConvertToMDEventsWS *);
+    //{};
   
 private: 
   
