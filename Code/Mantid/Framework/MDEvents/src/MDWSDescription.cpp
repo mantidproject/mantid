@@ -264,7 +264,7 @@ CoordScaling MDWSDescription::getQScaling(const std::string &ScID)const
     CoordScaling theScaling(NCoordScalings);
     for(size_t i=0;i<NCoordScalings;i++)
     {
-        if(QScalingID[i].find(ScID)!=std::string::npos)
+        if(QScalingID[i].compare(ScID)==0)
         {
             theScaling = (CoordScaling)i;
             break;
