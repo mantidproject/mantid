@@ -405,7 +405,10 @@ class SNSPowderReduction(PythonAlgorithm):
         if len(cropkwargs) > 0:
             CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
-        if not info.has_dspace:
+        if info.has_dspace:
+            if binning[0] > 100:
+                self.log().warning("Binning data oddly for d-spacing: %s" % str(binning))
+        else:
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
