@@ -1916,7 +1916,7 @@ class UserFile(ReductionStep):
         elif det_axis == 'RADIUS':
             detector.radius_corr = shift
         elif det_axis == 'SIDE':
-            detector.radius_side = shift
+            detector.side_corr = shift
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
