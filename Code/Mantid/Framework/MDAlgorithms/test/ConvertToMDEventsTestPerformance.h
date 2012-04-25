@@ -29,8 +29,8 @@ class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
    Mantid::API::MatrixWorkspace_sptr inWsEv;
 //   static Mantid::Kernel::Logger &g_log;
    std::auto_ptr<API::Progress > pProg;
-   std::auto_ptr<IConvertToMDEventsMethods> pConvMethods;
-   PreprocessedDetectors det_loc;
+   std::auto_ptr<IConvertToMDEventsWS> pConvMethods;
+   ConvToMDPreprocDetectors det_loc;
 
 public:
 static ConvertToMDEventsTestPerformance *createSuite() { return new ConvertToMDEventsTestPerformance(); }
@@ -38,7 +38,7 @@ static void destroySuite(ConvertToMDEventsTestPerformance * suite) { delete suit
 
 void test_EventNoUnitsConv()
 {
-    pConvMethods = std::auto_ptr<IConvertToMDEventsMethods>(new ConvertToMDEventsWS<EventWSType,Q3D,Direct,ConvertNo,CrystType>());
+    pConvMethods = std::auto_ptr<IConvertToMDEventsWS>(new ConvertToMDEventsWS<EventWSType,Q3D,Direct,ConvertNo,CrystType>());
 }
 
 
