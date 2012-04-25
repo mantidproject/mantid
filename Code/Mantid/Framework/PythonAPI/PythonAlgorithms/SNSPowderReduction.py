@@ -318,7 +318,7 @@ class SNSPowderReduction(PythonAlgorithm):
         firstChunk = True
         for chunk in strategy:
             if "ChunkNumber" in chunk:
-                print "Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy))
+                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy)))
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
@@ -341,7 +341,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
             mtd.deleteWorkspace('Chunks')
-        print "Done focussing data"
+        self.log().information("Done focussing data")
 
         return wksp
 
