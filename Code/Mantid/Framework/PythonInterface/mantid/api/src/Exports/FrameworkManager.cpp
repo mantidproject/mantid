@@ -33,19 +33,23 @@ namespace
   {
     UNUSED_ARG(self);
     IAlgorithm_sptr alg;
+    int async(0);
     if( Mantid::PythonInterface::Environment::isInCallStack("PyExec") )
     {
       alg = AlgorithmManager::Instance().createUnmanaged(name, version);
       alg->initialize();
-      alg->setChild(false); // While workflow algorithm stuff is sorted out #5051,#5157
+      async = 0;
     }
     else
     {
       alg = AlgorithmManager::Instance().create(name, version); // This will be initialized already
+      async = 1;
     }
     alg->setRethrows(true);
 
     PyObject * wrapped = converter::shared_ptr_to_python(alg);
+    // Add an attribute to indicate asynchronous execution
+    PyObject_SetAttrString(wrapped, "__async__", PyBool_FromLong(async));
     return wrapped;
   }
 
