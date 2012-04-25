@@ -7,6 +7,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <QLabel>
 #include <QPushButton>
 #include <QButtonGroup>

@@ -58,6 +58,7 @@ namespace
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser: public QWidget
 {
   Q_OBJECT
+public:
   /// To keep QtProperty and its QtBrowserItem in one place
   struct AProperty
   {
@@ -79,7 +80,6 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser: public QWidget
     QtProperty *upper;   ///< Constraint property
   };
 
-public:
   /// Constructor
   FunctionBrowser(QWidget *parent = NULL);
   /// Destructor
