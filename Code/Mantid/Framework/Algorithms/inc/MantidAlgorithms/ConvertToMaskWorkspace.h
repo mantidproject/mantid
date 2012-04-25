@@ -1,8 +1,8 @@
-#ifndef MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACE_H_
-#define MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACE_H_
+#ifndef MANTID_ALGORITHMS_CONVERTTOMASKWORKSPACE_H_
+#define MANTID_ALGORITHMS_CONVERTTOMASKWORKSPACE_H_
 
-#include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAlgorithms/ConvertToMaskWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
 
 
 namespace Mantid
@@ -10,11 +10,11 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** ConvertToMaskingWorkspace : TODO: DESCRIPTION
+  /** ConvertToMaskWorkspace : Convert a Workspace2D to a MaskWorkspace
     
-    @date 2011-12-29
+    @date 2012-04-25
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -34,18 +34,29 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport ConvertToMaskingWorkspace : public Algorithms::ConvertToMaskWorkspace, public API::DeprecatedAlgorithm
+  class DLLExport ConvertToMaskWorkspace  : public API::Algorithm
   {
   public:
-    ConvertToMaskingWorkspace();
-    virtual ~ConvertToMaskingWorkspace();
-    
-    virtual const std::string name() const {return "ConvertToMaskingWorkspace"; };
+    ConvertToMaskWorkspace();
+    virtual ~ConvertToMaskWorkspace();
+
+    virtual const std::string name() const {return "ConvertToMaskWorkspace"; };
     virtual int version() const {return 1; };
+    virtual const std::string category() const {return "Utility\\Workspaces"; };
+
+  private:
+    virtual void initDocs();
+
+    void init();
+
+    void exec();
+
 
   };
+
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACE_H_ */
+#endif  /* MANTID_ALGORITHMS_CONVERTTOMASKWORKSPACE_H_ */
+

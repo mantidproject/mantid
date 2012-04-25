@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Generate Masking workspace by diagnose white beam data
+Generate Mask workspace by diagnose white beam data
 
 The output of each function is a workspace containing a single bin where:
     0 - denotes a masked spectra and
@@ -132,8 +132,8 @@ class GenerateMaskingWorkspace(PythonAlgorithm):
         origmediantestwsname = mediantestwsname
         # rangetestwsname = "Mask_Range"
         # mediantestwsname = "Mask_Median"
-        ConvertToMaskingWorkspace(InputWorkspace=origrangetestwsname, OutputWorkspace=rangetestwsname)
-        ConvertToMaskingWorkspace(InputWorkspace=origmediantestwsname, OutputWorkspace=mediantestwsname)
+        ConvertToMaskWorkspace(InputWorkspace=origrangetestwsname, OutputWorkspace=rangetestwsname)
+        ConvertToMaskWorkspace(InputWorkspace=origmediantestwsname, OutputWorkspace=mediantestwsname)
         
         BinaryOperateMasks(InputWorkspace1=mtd[rangetestwsname], InputWorkspace2=mtd[mediantestwsname],
                 OperationType="AND", OutputWorkspace=maskingwsname)
