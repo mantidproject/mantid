@@ -1,6 +1,7 @@
 """Defines the rules for translation from API v1 -> v2
 """
 import re
+import mantid
 
 class Rules(object):
         
@@ -55,16 +56,19 @@ class SimpleStringReplace(Rules):
 #########################################################################################
 
 __FUNCTION_CALL_REGEXSTR = r"""(|\w*\s*) # Any variable on the lhs of the function call
-                     (|=)(\s*) # The equals sign
-                     (\w*) # Whitespace directly on the other side of the equals
+                     (|=\s*) # The equals sign including any whitespace on the right
+                     (\w*) # The function name
                      \((.*?)\) # The function call arguments (without the parentheses)
                      (\.workspace\(\)|) # An optional trailing .workspace() call""" 
 
-__FUNCTION_CALL_REGEX__ = re.compile(__FUNCTION_CALL_REGEXSTR, re.VERBOSE) 
+__FUNCTION_CALL_REGEX__ = re.compile(__FUNCTION_CALL_REGEXSTR, re.VERBOSE)
+
+__MANTID_ALGS__ = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
 class SimpleAPIFunctionCallReplace(Rules):
     
     func_regex = __FUNCTION_CALL_REGEX__
+    current_line = None
     
     def __init__(self):
         Rules.__init__(self)
@@ -103,9 +107,89 @@ class SimpleAPIFunctionCallReplace(Rules):
         
     def apply_func_call_rules(self, inputline, match):
         """
-            Apply rules to transform the inputline, with
-            the given regex MatchObject to the new API
+        Apply rules to transform the inputline, with
+        the given regex MatchObject to the new API.
+            @param match :: A re.Match object containing 5 groups:
+                              (1) - A possible variable name or empty string;
+                              (2) - A possible equals sign, with surrounding white space or an empty string;
+                              (3) - The name of the function call;
+                              (4) - The exact string of arguments as passed to the function call;
+                              (5) - A possible .workspace() call or empty string
         """
-        return inputline
+        self.current_line = inputline
+        print match.groups()
+        func_name = self.get_function_name(match)
+        if not self.is_mantid_algorithm(func_name):
+            return inputline
+        lhs_var = self.get_lhs_var_name(match)
+        if lhs_var == "":
+            # Simple case of no return
+            replacement = self.apply_replace_for_no_return(func_name, self.get_function_args(match))
+            
+        
+        
+        return replacement
+        
+    def apply_replace_for_no_return(self, name, arguments):
+        """Takes a function name & arguments from the input
+        and reconstructs the call in the new api"""
+        replacement = name + "()"
+        alg = mantid.api.AlgorithmManager.Instance().createUnmanaged(name)
+        alg.initialize()
+        ordered_names = alg.orderedProperties()
+        
+        keyword_found = False
+        kwargs = {}
+        for index, arg in enumerate(arguments):
+            if type(arg) == tuple:
+                keyword_found = True
+                name = arg[0]
+                value = arg[1]
+            else:
+                if keyword_found == True:
+                    raise ValueError("Found a positional argument after a keyword in line '%s'" % self.current_line)
+                name = ordered_names[index]
+                value = arg
+            print type(value)
+            name = name.strip()
+            value = value.strip()
+            kwargs[name] = value
+        print kwargs
+        return replacement
+        
+    def get_lhs_var_name(self, match):
+        """Returns the lhs variable name from the match or an empty string"""
+        return match.group(1)
     
+    def get_function_name(self, match):
+        """Returns the name of the function called"""
+        name = match.group(3)
+        if name == '':
+            raise ValueError("The regex has returned an empty string for the function name in line '%s'. Check regex" % self.current_line)
+        return name
+
+    def get_function_args(self, match):
+        """Returns the function arguments required for the new API"""
+        argstring = match.group(4)
+        arg_values = self.split_up_argstring(argstring)
+        return arg_values
     
+    def split_up_argstring(self, argstring):
+        """
+        Returns a list of arguments inside the call. 
+        Note that if a tuple is returned as one of the elements of the list this gives the keyword
+        """
+        arg_values = argstring.split(",")
+        arguments = []
+        for item in arg_values:
+            if '=' in item:
+                name, value = item.split("=")
+                arguments.append(tuple([name,value]))
+            else:
+                arguments.append(item)
+        return arguments
+    
+    def is_mantid_algorithm(self, name):
+        """Does the name string match a Mantid algorithm name"""
+        return name in __MANTID_ALGS__
+        

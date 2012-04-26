@@ -6,7 +6,7 @@ import os
 from MigrationTest import MigrationTest
 
 __INPUTSTRING__ = r"""
-LoadRaw("test-file.raw", 'testWS')
+LoadRaw("test-file.raw", 'testWS', SpectrumMax=1)
 """
 
 __EXPECTEDSTRING__ = r"""
