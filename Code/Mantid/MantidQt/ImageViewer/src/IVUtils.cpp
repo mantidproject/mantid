@@ -10,6 +10,27 @@ namespace ImageView
 {
 
 /**
+ * Extract a double from the specified string, if possible.
+ * 
+ * @param text   The string containing a double value
+ * @param value  Set to the value from the string if the conversion
+ *               worked.
+ * @return true if the string could be successfully converted to a double,
+ *         and return false otherwise.
+ */
+bool IVUtils::StringToDouble( std::string  text,
+                              double      &value )
+{
+  std::istringstream strs(text);
+  if ( strs >> value )
+  {
+    return true;
+  }
+  return false;
+}
+
+
+/**
  *  Get a formatted string form of the specified double precision value.
  *
  *  @param width     The total number of characters to be used in the 
@@ -48,7 +69,7 @@ void IVUtils::Format( int            width,
  * @param min     Set to be less than or equal to all values in the list
  *                and strictly less than max.
  * @param max     Set to be greater than or equal to all values in the list
- *                and strictly more than max.
+ *                and strictly more than min.
  */
 void IVUtils::FindValidInterval( const QVector<double>  & values,
                                        double           & min,
@@ -65,7 +86,24 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
     if ( max < val )
       max = val;
   }
-  if ( max == min )
+  FindValidInterval( min, max );
+}
+
+
+/**
+ * Adjust min and max so that min is strictly less than max.  If min > max
+ * the values are swapped.  If min = max != 0, they will be shifted off from 
+ * their initial common value by 10%.  If min = max = 0, they will be set
+ * to -1 and 1, respectively.
+ *
+ * @param min     Set to be strictly less than max. 
+ * @param max     Set to be strictly greater than min.
+ */
+void IVUtils::FindValidInterval( double  & min,
+                                 double  & max )
+{
+
+  if ( max == min )           // adjust values so they are not equal
   {
     if ( min == 0 )
     {
@@ -76,13 +114,14 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
     {
       max = 1.1 * max;
       min = 0.9 * min;
-      if ( min > max )    // NOTE: They could be < 0.
-      {
-        double temp = min;
-        min = max;
-        max = temp;
-      }
     }
+  }
+
+  if ( min > max )            // fix the order
+  {
+    double temp = min;
+    min = max;
+    max = temp;
   }
 }
 

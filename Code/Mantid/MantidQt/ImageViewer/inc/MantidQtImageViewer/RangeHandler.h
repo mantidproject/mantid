@@ -51,11 +51,17 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler
     /// Configure min, max and step controls for the specified data source
     void ConfigureRangeControls( ImageDataSource* data_source );
 
-    /// Get the range of data to display in the image.
-    void GetRange( double &min, double &max, double step );
+    /// Get the range of data to display in the image, from GUI controls
+    void GetRange( double &min, double &max, double &step );
+
+    /// Set the values displayed in the GUI controls
+    void SetRange( double min, double max, double step );
 
   private:
-    Ui_MainWindow*   iv_ui;
+    Ui_MainWindow* iv_ui;
+    double         total_min_x;
+    double         total_max_x;
+    size_t         total_n_steps;
 };
 
 } // namespace MantidQt 

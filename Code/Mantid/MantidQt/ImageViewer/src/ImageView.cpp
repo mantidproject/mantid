@@ -46,6 +46,7 @@ ImageView::ImageView( ImageDataSource* data_source )
 
   ImageDisplay* image_display = new ImageDisplay( ui->imagePlot,
                                                   slider_handler,
+                                                  range_handler,
                                                   h_graph, v_graph,
                                                   ui->image_table );
   saved_image_display = image_display;
@@ -72,6 +73,10 @@ ImageView::~ImageView()
   SliderHandler* slider_handler = 
                              static_cast<SliderHandler*>(saved_slider_handler);
   delete  slider_handler;
+
+  RangeHandler* range_handler = 
+                             static_cast<RangeHandler*>(saved_range_handler);
+  delete  range_handler;
 
   IVConnections* iv_connections = 
                              static_cast<IVConnections*>(saved_iv_connections);

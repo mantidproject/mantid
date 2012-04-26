@@ -45,6 +45,11 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
 {
   public:
 
+    /// Get the double value stored in a string, if possible 
+    static bool StringToDouble( std::string  text,
+                                double      &value );
+                                 
+
     /// Get a formatted string representation of a double
     static void Format( int            width, 
                         int            precision, 
@@ -55,6 +60,10 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
     static void FindValidInterval( const QVector<double>  & values,
                                          double           & min,
                                          double           & max );
+
+    /// Adjust min and max so that min is strictly less than max
+    static void FindValidInterval( double           & min,
+                                   double           & max );
 
     /// find point new_val that is spaced between new_min and new_max in the
     /// same proportion as val is between min and max. Return false if
