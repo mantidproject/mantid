@@ -81,7 +81,7 @@ void testSetUp_and_PreprocessDetectors()
 {
    pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
-    TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
+    TS_ASSERT_THROWS_NOTHING(det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get()));
     TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsWS>(new TestConvertToMDEventsWS()));
     TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
 
@@ -235,7 +235,7 @@ ConvertToMDEventsWSTest ():TestWS(4){
    // set up workpspaces and preprocess detectors
     pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
-    processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get());
+    det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get());
     //pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
     //pConvMethods->setUPConversion(ws2D,det_loc);
   

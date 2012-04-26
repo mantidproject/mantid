@@ -145,7 +145,7 @@ struct CoordTransformer<ConvertToMD::Q3D,ConvertToMD::Elastic,CONV,TYPE,SAMPLE>
         const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();          
         CONV_UNITS_FROM.setUpConversion(*(pHost->getDetectors()),pThisUnit->unitID(),"Momentum"); 
         // get pointer to the positions of the detectors
-         pDet = &(pHost->pPrepDetectors()->det_dir[0]);
+         pDet = &((pHost->pPrepDetectors()->getDetDir())[0]);
     
          pHost->getMinMax(dim_min,dim_max);
          return true;

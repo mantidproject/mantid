@@ -91,7 +91,8 @@ public:
         //
 
         const size_t specSize = this->inWS2D->blocksize();    
-        size_t nValidSpectra  = pDetLoc->det_id.size();
+        // preprocessed detectors associate each spectra with a detector (position)
+        size_t nValidSpectra  = pDetLoc->nDetectors();
 
         // number of dimesnions
         std::vector<coord_t>  Coord(n_dims);             // coordinates for single event
@@ -113,8 +114,8 @@ public:
         //External loop over the spectra:
         for (size_t i = 0; i < nValidSpectra; ++i)
         {
-            size_t iSpctr             = pDetLoc->detIDMap[i];
-            int32_t det_id            = pDetLoc->det_id[i];
+            size_t iSpctr             = pDetLoc->getDetSpectra(i);
+            int32_t det_id            = pDetLoc->getDetID(i);
 
             const MantidVec& X        = inWS2D->readX(iSpctr);
             const MantidVec& Signal   = inWS2D->readY(iSpctr);

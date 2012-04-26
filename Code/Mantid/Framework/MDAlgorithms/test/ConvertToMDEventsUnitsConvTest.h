@@ -132,7 +132,7 @@ ConvertToMDEventsUnitsConvTest (){
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
 
-   buildFakeDetectorsPositions(ws2D,det_loc);
+   det_loc.buildFakeDetectorsPositions(ws2D);
    det_loc.setEfix(10);
    det_loc.setEmode(1);
   

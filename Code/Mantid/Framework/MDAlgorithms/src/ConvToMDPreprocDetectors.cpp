@@ -59,12 +59,12 @@ void ConvToMDPreprocDetectors::allocDetMemory(size_t nHist)
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
-void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det_loc,Kernel::Logger& convert_log,API::Progress *pProg)
+void ConvToMDPreprocDetectors::processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,Kernel::Logger& convert_log,API::Progress *pProg)
 {
   convert_log.information()<<" Preprocessing detectors locations in a target reciprocal space\n";
   // 
   Instrument_const_sptr instrument = inputWS->getInstrument();
-  det_loc.pBaseInstr               = instrument->baseInstrument();
+  this->pBaseInstr               = instrument->baseInstrument();
   //
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
@@ -75,8 +75,7 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
 
   // L1
   try{
-    double L1  = source->getDistance(*sample);
-    det_loc.setL1(L1);
+    this->L1  = source->getDistance(*sample);
     convert_log.debug() << "Source-sample distance: " << L1 << std::endl;
   }catch (Exception::NotFoundError &)  {
     convert_log.error("Unable to calculate source-sample distance");
@@ -85,7 +84,7 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
   //
   const size_t nHist = inputWS->getNumberHistograms();
 
-  det_loc.allocDetMemory(nHist);
+  this->allocDetMemory(nHist);
 
   size_t div=100;
      // Loop over the spectra
@@ -103,14 +102,14 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
     // Check that we aren't dealing with monitor...
     if (spDet->isMonitor())continue;   
 
-     det_loc.spec2detMap[i]= ic;
-     det_loc.det_id[ic]    = spDet->getID();
-     det_loc.detIDMap[ic]  = i;
-     det_loc.L2[ic]        = spDet->getDistance(*sample);
+     this->spec2detMap[i]= ic;
+     this->det_id[ic]    = spDet->getID();
+     this->detIDMap[ic]  = i;
+     this->L2[ic]        = spDet->getDistance(*sample);
      
 
      double polar        =  inputWS->detectorTwoTheta(spDet);
-     det_loc.TwoTheta[ic]=  polar;
+     this->TwoTheta[ic]  =  polar;
      double azim         =  spDet->getPhi();    
 
      double sPhi=sin(polar);
@@ -118,9 +117,9 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
      double ex = sPhi*cos(azim);
      double ey = sPhi*sin(azim);
  
-     det_loc.det_dir[ic].setX(ex);
-     det_loc.det_dir[ic].setY(ey);
-     det_loc.det_dir[ic].setZ(ez);
+     this->det_dir[ic].setX(ex);
+     this->det_dir[ic].setY(ey);
+     this->det_dir[ic].setZ(ez);
 
      ic++;
      if( i%div==0){
@@ -129,44 +128,44 @@ void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS
    }
    // 
    if(ic<nHist){
-       det_loc.det_dir.resize(ic);
-       det_loc.det_id.resize(ic);
-       det_loc.L2.resize(ic);
-       det_loc.TwoTheta.resize(ic);
-       det_loc.detIDMap.resize(ic);
+       this->det_dir.resize(ic);
+       this->det_id.resize(ic);
+       this->L2.resize(ic);
+       this->TwoTheta.resize(ic);
+       this->detIDMap.resize(ic);
    }
    convert_log.information()<<"finished preprocessing detectors locations \n";
    pProg->report();
 }
 
-void DLLExport buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det_loc)
+void ConvToMDPreprocDetectors::buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS)
 {
 
-    det_loc.setL1(1);
+    L1 = 1;
     double polar(0);
     //
     const size_t nHist = inputWS->getNumberHistograms();
-    det_loc.allocDetMemory(nHist);
+    this->allocDetMemory(nHist);
    // Loop over the spectra
    for (size_t i = 0; i < nHist; i++){
 
 
-     det_loc.spec2detMap[i]= i;
-     det_loc.det_id[i]     = (detid_t)i;
-     det_loc.detIDMap[i]   = i;
-     det_loc.L2[i]         = 10;
+     this->spec2detMap[i]= i;
+     this->det_id[i]     = (detid_t)i;
+     this->detIDMap[i]   = i;
+     this->L2[i]         = 10;
      
 
-     det_loc.TwoTheta[i] =  polar;
+     this->TwoTheta[i] =  polar;
 
 
      double ez = 1.;
      double ex = 0.;
      double ey = 0.;
  
-     det_loc.det_dir[i].setX(ex);
-     det_loc.det_dir[i].setY(ey);
-     det_loc.det_dir[i].setZ(ez);
+     this->det_dir[i].setX(ex);
+     this->det_dir[i].setY(ey);
+     this->det_dir[i].setZ(ez);
 
    }
    // 

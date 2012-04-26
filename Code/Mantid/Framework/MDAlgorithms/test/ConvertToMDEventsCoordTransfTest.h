@@ -132,7 +132,7 @@ void test_CoordTransfQ3DDirect()
     std::vector<double> TOF_data(specSize*nValidSpectra);
 
     for (size_t i = 0; i < nValidSpectra; ++i){
-            size_t iSpctr             = det_loc.detIDMap[i];
+            size_t iSpctr             = det_loc.getDetSpectra(i);
             //int32_t det_id            = det_loc.det_id[i];
 
             const MantidVec& X        = ws2D->readX(iSpctr);        
@@ -215,7 +215,7 @@ ConvertToMDEventsCoordTransfTest (){
    // set up workpspaces and preprocess detectors
     pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
-    processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get());
+    det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get());
     pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
     pConvMethods->setUPTestConversion(ws2D,det_loc);
 

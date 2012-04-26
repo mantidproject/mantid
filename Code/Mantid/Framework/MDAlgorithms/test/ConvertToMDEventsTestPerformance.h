@@ -47,6 +47,7 @@ ConvertToMDEventsTestPerformance()
    int numHist=100*100;
    Mantid::API::MatrixWorkspace_sptr inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateRandomEventWorkspace(1000, numHist, 0.1));
    inWsEv->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(numHist) );
+
  
 }
 

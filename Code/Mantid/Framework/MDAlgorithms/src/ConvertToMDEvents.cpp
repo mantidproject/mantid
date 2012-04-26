@@ -265,7 +265,7 @@ void ConvertToMDEvents::exec()
     // Check what to do with detectors:  
     if(TWSD.detInfoLost)
     { // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
-         buildFakeDetectorsPositions(inWS2D,det_loc);
+         det_loc.buildFakeDetectorsPositions(inWS2D);
     }
     else  // preprocess or not the detectors positions
     {
@@ -274,8 +274,8 @@ void ConvertToMDEvents::exec()
             // amount of work:
             const size_t nHist = inWS2D->getNumberHistograms();
             pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
-            processDetectorsPositions(inWS2D,det_loc,convert_log,pProg.get());
-            if(det_loc.det_id.empty()){
+            det_loc.processDetectorsPositions(inWS2D,convert_log,pProg.get());
+            if(det_loc.nDetectors()==0){
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
             }

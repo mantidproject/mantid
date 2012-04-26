@@ -43,7 +43,7 @@ namespace MDAlgorithms
 {
 
 class DLLExport ConvToMDPreprocDetectors{
-public: // temporary
+
     Kernel::V3D   minDetPosition;    //< minimal and
     Kernel::V3D   maxDetPosition;    //< maxinal position for the detectors
     /** shared pointer to the base instrument, which was source of the detector's information. If the instrument changed, 
@@ -58,18 +58,24 @@ public: // temporary
     std::vector<size_t>       detIDMap; //< stores spectra index which corresponds to a valid detector index;
     std::vector<size_t>       spec2detMap; //< stores detector index which corresponds to the workspace index;
     //
-public:
+public:    
     bool isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const;
     bool isDefined(size_t new_size)const{return det_dir.size()==new_size;}
+
     size_t nDetectors()const{return TwoTheta.size();}
+
     std::vector<double>const & getL2()const{return L2;}
     std::vector<double>const & getTwoTheta()const{return TwoTheta;}
     std::vector<size_t>const  & getDetIDMap()const{return detIDMap;}
     std::vector<size_t>const  & getSpec2DetMap()const{return spec2detMap;}
     std::vector<Kernel::V3D>const & getDetDir()const{return det_dir;}
 
-    // function allocates the class detectors memory 
-    void allocDetMemory(size_t nSpectra);
+    /// obtain detector id, which correspond to the spectra index
+    size_t  getWSDet(size_t iws)const{return spec2detMap[iws];}
+    /// obtain spectra id, corrsponing to detector id;
+    size_t  getDetSpectra(size_t i)const{return detIDMap[i];}
+    int32_t getDetID(size_t i)const{return det_id[i];}
+
     int    getEmode()const{return emode;}
     double getEfix()const{return efix;}
     double getL1()const{return L1;}
@@ -77,7 +83,16 @@ public:
     void setEmode(int mode);
     void setEfix(double Ei);
     void setL1(double Dist);
+
+   /** function, does preliminary calculations of the detectors positions to convert results into k-dE space */     
+    void processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS, Kernel::Logger& convert_log,API::Progress *pProg);
+   /** function builds fake cpectra-detector map and all other detectors position for the case when detector information has been lost */
+    void buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS);
+
 private:
+    // function allocates the class detectors memory 
+    void allocDetMemory(size_t nSpectra);
+
    // parameter which describes the conversion mode, used to convert uints using TOF and detector's positions
     int emode;
     // parameter wjocj describes the energy used to convert uints using TOF and detector's positions
@@ -86,11 +101,7 @@ private:
     double L1;                   
 };
 
-/** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
-      and places the resutls into static cash to be used in subsequent calls to this algorithm */
-void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det,Kernel::Logger& convert_log,API::Progress *pProg);
-/** function builds fake cpectra-detector map and all other detectors position for the case when detector information has been lost */
-void DLLExport buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,ConvToMDPreprocDetectors &det);
+
 } // end MDAlgorithms
 }
 #endif

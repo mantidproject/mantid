@@ -64,7 +64,7 @@ namespace MDAlgorithms
 template<ConvertToMD::AnalMode MODE>
 inline double k_trans(double Ei, double E_tr){
     UNUSED_ARG(Ei);UNUSED_ARG(E_tr);
-    throw(Kernel::Exception::NotImplementedError("Generic K_tr should not be implemented"));
+    throw(Kernel::Exception::NotImplementedError("Generic K_tr should not be deployed"));
 }
 // Direct Inelastic analysis
 template<>

@@ -91,8 +91,9 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
          // Get the box controller
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
-              
-        size_t nValidSpectra  = this->pDetLoc->det_id.size();
+        
+        // preprocessed detectors insure that each detector has its own spectra
+        size_t nValidSpectra  = this->pDetLoc->nDetectors();
 
        // if any property dimension is outside of the data range requested, the job is done;
         if(!trn.calcGenericVariables(Coord,this->n_dims))return; 
@@ -101,7 +102,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
         size_t eventsAdded  = 0;
         for (size_t wi=0; wi <nValidSpectra; wi++)
         {     
-           size_t iSpec         = this->pDetLoc->detIDMap[wi];       
+           size_t iSpec         = this->pDetLoc->getDetSpectra(wi);       
 
            eventsAdded         += this->conversionChunk(iSpec);
       // Give this task to the scheduler
@@ -154,13 +155,11 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
    template <class T>
    size_t convertEventList(size_t workspaceIndex)
    {
-//       std::vector<coord_t> locCoord(this->Coord);
-//       if(!trn.calcYDepCoordinates(locCoord,workspaceIndex))return;   // s
-//
+
          Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
          size_t numEvents     = el.getNumberEvents();    
-         size_t  detNum       = this->pDetLoc->spec2detMap[workspaceIndex];
-         uint32_t detID       = this->pDetLoc->det_id[detNum];
+         size_t  detNum       = this->pDetLoc->getWSDet(workspaceIndex);
+         uint32_t detID       = this->pDetLoc->getDetID(detNum);
          uint16_t runIndexLoc = this->runIndex;
 
          std::vector<coord_t>locCoord(this->Coord);
