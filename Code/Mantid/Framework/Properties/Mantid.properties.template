@@ -37,6 +37,12 @@ instrumentDefinition.directory = @MANTID_ROOT@/instrument
 # Where to load parameter definition files from
 parameterDefinition.directory = @MANTID_ROOT@/instrument
 
+# Where to load Grouping files (that are shipped with Mantid) from
+groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
+
+# Where to load Mask files (that are shipped with Mantid) from
+maskFiles.directory = @MANTID_ROOT@/instrument/masks
+
 # Where to load OpenCL kernel files
 openclKernelFiles.directory = @MANTID_ROOT@/Framework/GPUAlgorithms/src
 
