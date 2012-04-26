@@ -652,7 +652,8 @@ namespace Algorithms
     int currindex = -1;
     DateAndTime lastTime, currTime;
     DateAndTime start, stop;
-    double lastValue, currValue;
+    double lastValue = 0.0;
+    double currValue = 0.0;
 
     for (int i = 0; i < mlog->size(); i ++)
     {
