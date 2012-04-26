@@ -36,6 +36,9 @@
 <parameter name="Workflow.GroupingFile" type="string">
   <value val="BASIS_Grouping.xml" />
 </parameter>
+<parameter name="Workflow.MaskFile" type="string">
+  <value val="BASIS_Mask.xml" />
+</parameter>
 <parameter name="Workflow.MonitorArea" >
   <value val="1.276e-3" />
 </parameter>
