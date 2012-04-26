@@ -3,6 +3,7 @@
 #include <QLineEdit>
 
 #include "MantidQtImageViewer/RangeHandler.h"
+#include "MantidQtImageViewer/IVUtils.h"
 
 namespace MantidQt
 {
@@ -27,17 +28,31 @@ RangeHandler::RangeHandler( Ui_MainWindow* iv_ui )
 void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
 {
   
-  double min_x     = data_source->GetXMin();
-  double max_x     = data_source->GetXMax();
-  size_t max_steps = 2000;
+  double min_x   = data_source->GetXMin();
+  double max_x   = data_source->GetXMax();
+  size_t n_steps = 2000;
+
+  double step = (max_x - min_x) / (double)n_steps;
 
   QLineEdit* min_control  = iv_ui->x_min_input;
   QLineEdit* max_control  = iv_ui->x_max_input;
   QLineEdit* step_control = iv_ui->step_input;
 
-  min_control->setText( "Hi min" );
-  max_control->setText( "Hi max" );
-  step_control->setText( "Hi step" );
+  std::string min_text;
+  IVUtils::Format( 7, 1, min_x, min_text );
+  QString q_min_text = QString::fromStdString( min_text );
+
+  std::string max_text;
+  IVUtils::Format( 7, 1, max_x, max_text );
+  QString q_max_text = QString::fromStdString( max_text );
+
+  std::string step_text;
+  IVUtils::Format( 7, 4, step, step_text );
+  QString q_step_text = QString::fromStdString( step_text );
+
+  min_control->setText( q_min_text );
+  max_control->setText( q_max_text );
+  step_control->setText( q_step_text );
 }
 
 
