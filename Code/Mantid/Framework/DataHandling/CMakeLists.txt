@@ -88,6 +88,7 @@ set ( SRC_FILES
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RenameLog.cpp
+	src/RemoveLogs.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
 	src/SaveAscii.cpp
@@ -202,6 +203,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/OrbiterDataArchive.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
+	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
