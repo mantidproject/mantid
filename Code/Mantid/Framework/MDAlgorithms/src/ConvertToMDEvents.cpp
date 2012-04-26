@@ -250,8 +250,8 @@ void ConvertToMDEvents::exec()
         MDEvents::MDWSDescription OLDWSD;
         OLDWSD.buildFromMDWS(spws);
 
-        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace description
-        // derived from input parameters. 
+        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 
+        // and derived from input parameters. 
         OLDWSD.setUpMissingParameters(TWSD);      
         // check inconsistencies
         OLDWSD.compareDescriptions(TWSD);

@@ -45,6 +45,7 @@ namespace MDAlgorithms
 // ---->    NoQ
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
+#ifndef EXCLUDE_Q_TRANSFORMATION_NOQ
 template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
 struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
 {
@@ -113,8 +114,8 @@ private:
 // class which would convert units
      UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
 };
+#endif
 //
-//} // namespace ConvertToMD
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 

@@ -3,7 +3,7 @@
 
 
 #include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
-//#include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsWSInterface.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
 

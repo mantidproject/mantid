@@ -63,6 +63,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h

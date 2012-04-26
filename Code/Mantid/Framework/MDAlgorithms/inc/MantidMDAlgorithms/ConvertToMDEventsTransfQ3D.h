@@ -37,7 +37,7 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
+#ifndef EXCLUDE_Q_TRANSFORMATION_Q3D
 template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
 struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
 {
@@ -207,7 +207,7 @@ private:
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };
-
+#endif
 //} // namespace ConvertToMD
 } // End MDAlgorighms namespace
 } // End Mantid namespace

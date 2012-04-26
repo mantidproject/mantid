@@ -17,9 +17,10 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsWSInterface.h"
 #include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-//#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
+// coordinate transformation
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"

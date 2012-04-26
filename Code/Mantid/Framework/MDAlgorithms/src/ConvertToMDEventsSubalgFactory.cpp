@@ -45,7 +45,7 @@ ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
 
 
 //----------------------------------------------------------------------------------------------
-// AUTOINSTANSIATION OF EXISTING CODE:
+// AUTOINSTANTIATION OF EXISTING CODE:
 /** helper class to orginize metaloop instansiating various subalgorithms dealing with particular 
   * workspaces and implementing particular user requests */
 template<QMode Q, size_t AlgoNum>
@@ -145,7 +145,7 @@ class LOOP_ALGS<ConvertToMD::NoQ,0>{
 */
 void ConvertToMDEventsSubalgFactory::init(const ConvertToMD::ConvertToMDEventsParams &SubAlgDescriptor)
 {
-    if (alg_selector.empty()) // Instansiate the subalgorithms for different cases
+    if (alg_selector.empty()) // Instantiate the subalgorithms for different cases
     {    
     // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
         LOOP_ALGS<NoQ,NInWSTypes*NConvUintsStates>::EXEC(SubAlgDescriptor,this); 

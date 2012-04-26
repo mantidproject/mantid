@@ -7,8 +7,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-//namespace ConvertToMD
-//{
+
 
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
@@ -38,7 +37,7 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
+#ifndef EXCLUDE_Q_TRANSFORMATION_MODQ
 // ModQ,Inelastic 
 template<ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV, ConvertToMD::XCoordType TYPE, ConvertToMD::SampleType SAMPLE> 
 struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,TYPE,SAMPLE>
@@ -233,8 +232,8 @@ private:
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };
+#endif
 
-//}
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 

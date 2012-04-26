@@ -14,8 +14,6 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
 #include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
-
 
 namespace Mantid
 {
@@ -46,21 +44,6 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/** TEMPLATES INSTANSIATION: Users are welcome to specialize its own specific algorithm 
-  *e.g.
-   template<> class ConvertToMDEventsWS<ModQ,Elastic,ConvertNo,Centered,CrystalType>::public IConvertToMDEventsMethods
-   {
-       User specific code for workspace  processed to obtain ModQ in elastic mode, without unit conversion, 
-       implementing something user defined for calculating x-coord and coord transformation, which will be invoked
-       on ws with oriented lattice by writing the templated class and 
-       Overloading the methods:
-   public:
-       size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
-       void runConversion(API::Progress *);
-   private:
-      virtual size_t conversionChunk(size_t job_ID);
-   }
-*/
 
 
  class DLLExport IConvertToMDEventsWS
@@ -102,7 +85,7 @@ namespace MDAlgorithms
     }
     ConvToMDPreprocDetectors const* getDetectors(){return pDetLoc;}
   protected:
-
+   // common variables used by all workspace=related methods are deployed here
    /// pointer to the input workspace;
     Mantid::API::MatrixWorkspace_sptr inWS2D;
     /// the properties of the requested target MD workpsace:
@@ -130,24 +113,6 @@ namespace MDAlgorithms
     */
    virtual size_t conversionChunk(size_t job_ID)=0;
 
-};
-
-
-/// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
-/// the template itself should not be instanciated
-template<ConvertToMD::InputWSType WS,ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
-class ConvertToMDEventsWS: public IConvertToMDEventsWS 
-{ 
-public:
-    ConvertToMDEventsWS(){};
-    /**templated virtual function to set up conversion*/
-    size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , ConvToMDPreprocDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
-  //  {return 0;}
-    /**templated virtual function to run conversion itself*/
-    void runConversion(API::Progress *); //{};
-private:
-    /**templated virtual function to run conversion chunk */
-    virtual size_t conversionChunk(size_t job_ID); //{return 0;}
 };
 
 
