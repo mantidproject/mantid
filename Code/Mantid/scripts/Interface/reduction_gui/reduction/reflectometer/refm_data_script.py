@@ -104,13 +104,13 @@ class DataSets(BaseScriptElement):
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
-        script += "              OutputWorkspacePrefix='reflectivity_%s')" % str(self.data_files[0])
+        script += "              OutputWorkspacePrefix='reflectivity_%s')\n" % str(self.data_files[0])
         script += "\n"
         
         script += "output_msg = a.getPropertyValue('OutputMessage')\n"
         script += "from reduction.command_interface import ReductionSingleton\n"
         script += "reducer_log = ReductionSingleton()\n"
-        script += "reducer_log.log_text += output_msg\n"
+        script += "reducer_log.log_text += output_msg\n\n"
 
         # Save the reduced data
         script += "ws_list = ['reflectivity_%s-Off_Off',\n" % str(self.data_files[0])

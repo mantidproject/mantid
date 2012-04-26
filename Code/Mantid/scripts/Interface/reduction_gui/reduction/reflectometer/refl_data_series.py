@@ -24,7 +24,9 @@ class DataSeries(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script = "t0=time.time()\n"
+        script = "import os\n"
+        script += "import time\n"
+        script += "t0=time.time()\n"
         script += "from reduction.command_interface import ReductionSingleton\n"
         script += "ReductionSingleton.clean()\n"
         

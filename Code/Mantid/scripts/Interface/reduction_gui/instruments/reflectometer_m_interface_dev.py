@@ -7,9 +7,6 @@ try:
 except:
     HAS_STITCHER = False
 
-    
-from reduction_gui.reduction.reflectometer.refl_reduction import REFLReductionScripter
-
 class REFMInterface(InstrumentInterface):
     """
         Defines the widgets for REF_M reduction
@@ -20,11 +17,8 @@ class REFMInterface(InstrumentInterface):
 
         self.ERROR_REPORT_NAME = "refm_error_report.xml"    
         self.LAST_REDUCTION_NAME = ".mantid_last_refm_reduction.xml"    
-        
-        # Scripter object to interface with Mantid 
-        self.scripter = REFLReductionScripter(name=name)        
 
-        # data REF_L tab
+        # data REF_M tab
         self.attach(DataReflWidget(settings = self._settings, name=name))
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
