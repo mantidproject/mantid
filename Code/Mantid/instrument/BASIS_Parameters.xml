@@ -30,6 +30,12 @@
   <!-- This is the step size to optionally rebin the monitor to"-->
   <value val="10.0" />
 </parameter>
+<parameter name="Workflow.GroupingMethod" type="string">
+  <value val="File" />
+</parameter>
+<parameter name="Workflow.GroupingFile" type="string">
+  <value val="BASIS_Grouping.xml" />
+</parameter>
 <parameter name="Workflow.MonitorArea" >
   <value val="1.276e-3" />
 </parameter>
