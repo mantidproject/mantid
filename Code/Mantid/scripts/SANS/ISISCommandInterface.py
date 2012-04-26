@@ -500,7 +500,7 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
 def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
     """
         Adjust detector position away from position defined in IDF. On SANS2D the detector 
-        banks can be moved around. This method allow fine adjustments of detector bank position 
+        banks can be moved around. This method allows fine adjustments of detector bank position 
         in the same way as the DET/CORR userfile command works. Hence please see
         http://www.mantidproject.org/SANS_User_File_Commands#DET for details.
         
@@ -508,7 +508,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
         after this command have been executed (because it is when runs are loaded 
         that components are moved away from the positions set in the IDF)
         
-        @param bank: Must be either 'front' or 'rear'        
+        @param bank: Must be either 'front' or 'rear' (not case sensitive)       
         @param x: shift in mm
         @param y: shift in mm
         @param z: shift in mm
