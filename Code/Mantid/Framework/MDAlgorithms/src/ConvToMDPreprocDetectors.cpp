@@ -36,7 +36,7 @@ void ConvToMDPreprocDetectors::setL1(double Dist)
     }
     L1  = Dist;
 }
-/// function checks if preprocessed detectors are already calculated
+/// function checks if preprocessed detectors are already calculated and the class is actually defined properly
 bool ConvToMDPreprocDetectors::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const
 {
     if(det_dir.empty())return false;
@@ -81,6 +81,9 @@ void ConvToMDPreprocDetectors::processDetectorsPositions(const API::MatrixWorksp
     convert_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
   }
+  // efix
+  this->setEi(inputWS);
+
   //
   const size_t nHist = inputWS->getNumberHistograms();
 
@@ -122,7 +125,7 @@ void ConvToMDPreprocDetectors::processDetectorsPositions(const API::MatrixWorksp
      this->det_dir[ic].setZ(ez);
 
      ic++;
-     if( i%div==0){
+     if(i%div==0){
         pProg->report(i);
      }
    }
@@ -137,12 +140,26 @@ void ConvToMDPreprocDetectors::processDetectorsPositions(const API::MatrixWorksp
    convert_log.information()<<"finished preprocessing detectors locations \n";
    pProg->report();
 }
+/** Function sets up energy of neurtorns used by number of conversion algorithms */
+void ConvToMDPreprocDetectors::setEi(const API::MatrixWorkspace_sptr inputWS)
+{
+  try{
+      Kernel::PropertyWithValue<double>  *pProp(NULL);
+      pProp=dynamic_cast<Kernel::PropertyWithValue<double>  *>(inputWS->run().getProperty("Ei"));
+      efix=(*pProp);
+  }catch(...){
+      efix= std::numeric_limits<double>::quiet_NaN();
+  }
+}
 
 void ConvToMDPreprocDetectors::buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS)
 {
 
     L1 = 1;
     double polar(0);
+    emode = 0;
+    // efix
+    this->setEi(inputWS);
     //
     const size_t nHist = inputWS->getNumberHistograms();
     this->allocDetMemory(nHist);
@@ -169,6 +186,14 @@ void ConvToMDPreprocDetectors::buildFakeDetectorsPositions(const API::MatrixWork
 
    }
    // 
+}
+
+// constructor
+ConvToMDPreprocDetectors::ConvToMDPreprocDetectors():
+emode(-2),
+efix(std::numeric_limits<double>::quiet_NaN()),
+L1(-1)
+{
 }
 
 } // END MDAlgorithms ns

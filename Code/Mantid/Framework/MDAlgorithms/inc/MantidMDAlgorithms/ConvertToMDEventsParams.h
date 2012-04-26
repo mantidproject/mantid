@@ -138,8 +138,20 @@ class DLLExport ConvertToMDEventsParams
    /// function returns default names for dimensions in different Q analysis modes;
    Strings getDefaultQNames(QMode Qmode=ModQ,AnalMode=Direct)const;
     /// constructor
-    ConvertToMDEventsParams(); 
+   ConvertToMDEventsParams(); 
 
+   /// helper function checking if algorithm supposes to work in powder mode
+   bool isPowderMode(const std::string &AlgID)const{ return (getSampleType(AlgID)==PowdType);}
+   /// helper function to obtain input energy of neurtons from input workspace. Will work properly only for the workspace where this energy is defined. 
+   double getEi(API::MatrixWorkspace_const_sptr inMatrixWS)const;
+   /// helper function to obtain the eMode from existing algorithm ID;
+   int getEMode(const std::string &AlgID)const;
+   /// helper function returning Q-mode from existing algorithm ID
+   QMode getQMode(const std::string &AlgID)const;
+   /// helper function returning Sample mode from existing algorithm ID
+   SampleType getSampleType(const std::string &AlgID)const;
+
+//TODO :: make these methods protected for testing. User should not usually deal with them.
   //>---> Parts of the identifyMatrixAlg, separated for unit testing:
   /// indentify input units conversion mode
   std::string parseConvMode(const std::string &Q_MODE_ID,const Strings &ws_dim_unit,const std::string &UnitsToConvert2)const;
@@ -151,31 +163,17 @@ class DLLExport ConvertToMDEventsParams
                                 Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const;
  /// identify what kind of input workspace is there:
   std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS, MDEvents::MDWSDescription &TargWSDescription)const;
+   //<---< Parts of the identifyMatrixAlg;
 
-
-  //<---< Parts of the identifyMatrixAlg;
   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
   std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                 Strings &out_dim_units,MDEvents::MDWSDescription &TargWSDescription);
 
   /** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm */
   void buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,MDEvents::MDWSDescription &TargWSDescription)const;
+
   /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
    void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &addDimNames,Strings &addDimUnits)const;
-
-
-   /// helper function to obtain the eMode from existing algorithm ID;
-   int getEMode(const std::string &AlgID)const;
-   /// helper function returning Q-mode from existing algorithm ID
-   QMode getQMode(const std::string &AlgID)const;
-   /// helper function returning Sample mode from existing algorithm ID
-   SampleType getSampleType(const std::string &AlgID)const;
-   /// helper function checking if algorithm supposes to work in powder mode
-   bool isPowderMode(const std::string &AlgID)const{ return (getSampleType(AlgID)==PowdType);}
-
-
-   /// helper function to obtain input energy of neurtons from input workspace. Will work properly only for the workspace where this energy is defined. 
-   double getEi(API::MatrixWorkspace_const_sptr inMatrixWS)const;
 private:
    static Mantid::Kernel::Logger& convert_log;
 

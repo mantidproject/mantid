@@ -12,6 +12,7 @@
 
 // turn different parts of coordinate transformation code on and off.
 #define EXCLUDE_TRANSFORMATION_INTERFACE
+// this is debugging options below
 //#define EXCLUDE_Q_TRANSFORMATION_MODQ
 //#define EXCLUDE_Q_TRANSFORMATION_NOQ
 //#define EXCLUDE_Q_TRANSFORMATION_Q3D
