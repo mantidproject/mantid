@@ -45,6 +45,37 @@ using namespace Mantid::Geometry;
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 //
+//
+// Class TestCobaltSpinWaveDSHO to get access to functionMD
+//
+namespace Mantid
+{
+  namespace MDAlgorithms
+  {
+    class DLLExport TestCobaltSpinWaveDSHO : public CobaltSpinWaveDSHO
+    {
+    public:
+      TestCobaltSpinWaveDSHO() : CobaltSpinWaveDSHO()
+      {
+      };
+      /// Destructor
+      virtual ~TestCobaltSpinWaveDSHO() {}
+
+      /// overwrite IFunction base class methods
+      std::string name()const{return "TestCobaltSpinWaveDSHO";}
+
+      double wrap_functionMD(const Mantid::API::IMDIterator& r) const
+      { return (functionMD(r)); };
+    };
+    DECLARE_FUNCTION(TestCobaltSpinWaveDSHO)
+  }
+}
+
+
+
+
+
+
 class CobaltSWDTest : public CxxTest::TestSuite
 {
 private:
@@ -172,162 +203,144 @@ public:
         it->next();
         TS_ASSERT_EQUALS( it3->getNumEvents() ,1);
 
-
         TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(testWrkspc3, outnew3) );
+    }
+
+    void testFunction()
+    {
+      // build a workspace with one contributing pixel
+      boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<4>,4> >
+                mdSpace = MDEventsTestHelper::makeMDEWFull<4>(1,-2.0,12.0);
+      // Add one point that corresponds to the centre of detector 40 in HET with ei as set in demo example
+      double pos[4]={-1.728313999,0.,1.04637197,11.75};
+      uint16_t runIndex=1;
+      int32_t detectorId;
+      float signal;
+      float errorsq=1.0;
+      ProgressText * prog = NULL;
+      errorsq=1.0;
+      std::vector<MDEvent<4> > events;
+      signal=static_cast<float>(10.);
+      detectorId=static_cast<int32_t>(40);
+      events.push_back(MDEvent<4> (signal,errorsq,runIndex,detectorId,pos));
+      // add the one event to the workspace
+      mdSpace->addManyEvents(events,prog);
+      // need to do this to update the signal values
+      mdSpace->refreshCache();
+      // check workspace
+      TS_ASSERT_EQUALS(mdSpace->getNumDims(),4);
+      TS_ASSERT_EQUALS(mdSpace->getNPoints(),1);
+      const IMDIterator* it = mdSpace->createIterator();
+      TS_ASSERT_EQUALS( it->getDataSize() ,1);
+      TS_ASSERT_EQUALS( it->getNumEvents() ,1);
+      // test - attempt to invoke bare function
+      // Note that rParam2 data is for demo example from Tobyfit for HET instrument
+      // As only CobaltSpinWaveDSHO model implemented, test data on that BUT this is
+      // not the model used for h demo example.
+      // Note that TF -> Mantid involves axis interchange.
+      rParam2 = boost::shared_ptr<RunParam> (new RunParam(
+          45., 45., 5., 42.,
+          0.5, 10., 7.19, 1.82,
+          66.67, 66.67, 13.55314, 50.,
+          0., 0., 0., 26.7,
+          1, 2.28, 49., 1300.,
+          150., 0., 3.87, 3.87,
+          3.87, 90., 90., 90.,
+          0., 0., 1.,  // u,v to Mantid z beam coords
+          1., 0., 0.,  //
+          0., 0., 0., 0.,
+          1., 0., 1.,  //x,y to mantid z beam coords
+          1., 0., -0., //
+          14., 18., 10., // sample size in Mantid axes
+          1, 10., 0.5
+      ));
+
+      rParam2->setSx(0.); // disable sample shape contribution TODO debug sample shape code
+
+      // For each detector need phi,beta,x2 and detWidth,detHeight,detDepth - values for HET detector 40 from demo example:
+      // deps=0.5 for detector energy width
+      rParam2->setDetInfo(40,Kernel::V3D(0.4461,0.,2.512),Kernel::V3D(0.025,0.300,0.025), 0.5);
+
+      TestCobaltSpinWaveDSHO* fn = new TestCobaltSpinWaveDSHO();
+      fn->initialize();
+      // set parameters for model 601, following example case cobalt from TF - this is not correct
+      // for demo data, but only checking function calculation at this point.
+      fn->setParameter("Amplitude",20.,true);
+      fn->setParameter("12SJ_AA",2.5,true);
+      fn->setParameter("12SJ_AB",9.0,true);
+      fn->setParameter("Gamma",0.5,true);
+      // check default attributes for function
+      int mcLoopMin = fn->getAttribute("MCLoopMin").asInt();
+      TS_ASSERT_EQUALS(mcLoopMin,100)
+      int mcLoopMax = fn->getAttribute("MCLoopMax").asInt();
+      TS_ASSERT_EQUALS(mcLoopMax,1000)
+      double mcTol = fn->getAttribute("MCTol").asDouble();
+      TS_ASSERT_DELTA(mcTol,1e-5,1e-12)
+
+      fn->setRunDataInfo(rParam2);
+      fn->setRunDataInfo(rParam2);
+      fn->setMagneticForm(25,3);
+
+      double result = fn->wrap_functionMD(*it);
+      TS_ASSERT_DELTA(result,0.77,0.11); // result from TF, 100 iterations
+      fn->setAttributeValue("MCLoopMin",1000);
+      fn->setAttributeValue("MCLoopMax",10000);
+      result = fn->wrap_functionMD(*it);
+      TS_ASSERT_DELTA(result,0.704,0.01); // result from TF 10000 iterations
+
+      fn->setAttributeValue("MCLoopMin",2); // Max beats Min
+      fn->setAttributeValue("MCLoopMax",1);
+      result = fn->wrap_functionMD(*it);
+      // check result for one Sobol iteration, where centre point is used (all perturbations zero)
+      TS_ASSERT_DELTA(result,0.22708,1e-5);
+      //
     }
 
     void testWithFit()
     {
-        // test Fit - note that fit is to cell data but that MDCell
-        // returns the sum of point contributions, not average.
-        // As the number of points in a cell varies 1 to 4 this must be taken into
-        // account if comparing the fit to the cell data.
-        Fit alg1;
-        TS_ASSERT_THROWS_NOTHING(alg1.initialize());
-        TS_ASSERT( alg1.isInitialized() );
+      // test Fit - under development, requires more work on SimulateResolution before useful testing
+      Fit alg1;
+      TS_ASSERT_THROWS_NOTHING(alg1.initialize());
+      TS_ASSERT( alg1.isInitialized() );
 
-        // name of workspace to test against
-        std::string wsName = testWrkspc;
-        // RunParam for demo example
-        rParam2 = boost::shared_ptr<RunParam> (new RunParam(
-            45., 45., 5., 42.,
-            0.5, 10., 7.19, 1.82,
-            66.67, 66.67, 13.55314, 50.,
-            0., 0., 0., 26.7,
-            1, 2.28, 49., 1300.,
-            150., 0., 3.87, 3.87,
-            3.87, 90., 90., 90.,
-            0., 0., 1.,  // u,v to Mantid z beam coords
-            1., 0., 0.,  //
-            0., 0., 0., 0.,
-            1., 0., 1.,  //x,y to mantid z beam coords
-            1., 0., -0., //
-            10., 14., 18., 1,
-            10., 0.5
-            ));
+      // name of workspace to test against
+      std::string wsName = testWrkspc;
+      // RunParam for demo example
+      rParam2 = boost::shared_ptr<RunParam> (new RunParam(
+          45., 45., 5., 42.,
+          0.5, 10., 7.19, 1.82,
+          66.67, 66.67, 13.55314, 50.,
+          0., 0., 0., 26.7,
+          1, 2.28, 49., 1300.,
+          150., 0., 3.87, 3.87,
+          3.87, 90., 90., 90.,
+          0., 0., 1.,  // u,v to Mantid z beam coords
+          1., 0., 0.,  //
+          0., 0., 0., 0.,
+          1., 0., 1.,  //x,y to mantid z beam coords
+          1., 0., -0., //
+          14., 18., 10., // sample size in Mantid axes
+          1, 10., 0.5
+      ));
 
-        // set up fitting function
-        CobaltSpinWaveDSHO* fn = new CobaltSpinWaveDSHO();
-        API::IFunction_sptr fun(fn);
+      // set up fitting function
+      CobaltSpinWaveDSHO* fn = new CobaltSpinWaveDSHO();
+      API::IFunction_sptr fun(fn);
 
-        fn->initialize();
-        fn->setRunDataInfo(rParam2);
+      fn->initialize();
+      fn->setRunDataInfo(rParam2);
 
-        //alg1.setPropertyValue("Function",fn->asString());
+      //alg1.setPropertyValue("Function",fn->asString());
+      // Set which spectrum to fit against and initial starting values
+      alg1.setProperty("Function",fun);
+      alg1.setPropertyValue("InputWorkspace", testWrkspc);
 
+      // execute fit
+      //TS_ASSERT_THROWS_NOTHING(
+      //    TS_ASSERT( alg1.execute() )
+      //    )
 
-        // Set which spectrum to fit against and initial starting values
-        alg1.setProperty("Function",fun);
-        alg1.setPropertyValue("InputWorkspace", testWrkspc);
-
-        // execute fit
-        //TS_ASSERT_THROWS_NOTHING(
-        //    TS_ASSERT( alg1.execute() )
-        //    )
-
-        //TS_ASSERT( alg1.isExecuted() );
-
-        /*
-        std::string algStat;
-        algStat = alg1.getPropertyValue("OutputStatus");
-        TS_ASSERT( algStat.compare("success")==0 );
-
-        // test the output from fit is as expected - since 3 variables and 3 data points expect 0 Chi2
-        double chisq = alg1.getProperty("OutputChi2overDoF");
-        TS_ASSERT_DELTA( chisq, 0.0, 0.001 );
-
-        IFunction_sptr out = FunctionFactory::Instance().createInitialized(alg1.getPropertyValue("Function"));
-        TS_ASSERT_DELTA( out->getParameter("Constant"), 1.00 ,0.001);
-        TS_ASSERT_DELTA( out->getParameter("Linear"), 0.00 ,0.001);
-        TS_ASSERT_DELTA( out->getParameter("Quadratic"), 0.00 ,0.001);
-
-        // test with 2nd workspace that has a signal quadratic in energy
-        Fit alg2;
-        TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-        TS_ASSERT( alg2.isInitialized() );
-
-        // Set which spectrum to fit against and initial starting values
-        alg2.setPropertyValue("Function",fn->asString());
-        alg2.setPropertyValue("InputWorkspace", testWrkspc2);
-        alg2.setPropertyValue("Output","out2");
-
-        // execute fit
-        TS_ASSERT_THROWS_NOTHING(
-            TS_ASSERT( alg2.execute() )
-            )
-        TS_ASSERT( alg2.isExecuted() );
-        algStat = alg2.getPropertyValue("OutputStatus");
-        TS_ASSERT( algStat.compare("success")==0 );
-        // test the output from fit is as expected - since 3 variables and 3 data points expect 0 Chi2
-        chisq = alg2.getProperty("OutputChi2overDoF");
-        TS_ASSERT_DELTA( chisq, 0.0, 0.001 );
-
-        // there is no such workspace for Fit as far as I can tell
-        //WS_type outWS = getWS("out3_Workspace");
-
-        TWS_type outParams = getTWS("out2_Parameters");
-        TS_ASSERT(outParams);
-        TS_ASSERT_EQUALS(outParams->rowCount(),4);
-        TS_ASSERT_EQUALS(outParams->columnCount(),3);
-
-        TableRow row = outParams->getFirstRow();
-        TS_ASSERT_EQUALS(row.String(0),"Constant");
-        TS_ASSERT_DELTA(row.Double(1),1.00,0.001);
-
-        row = outParams->getRow(1);
-        TS_ASSERT_EQUALS(row.String(0),"Linear");
-        TS_ASSERT_DELTA(row.Double(1),0.50,0.001);
-
-        row = outParams->getRow(2);
-        TS_ASSERT_EQUALS(row.String(0),"Quadratic");
-        TS_ASSERT_DELTA(row.Double(1),0.10,0.001);
-
-        // test with 3nd workspace that has a signal quadratic in energy plus noise
-        Fit alg3;
-        TS_ASSERT_THROWS_NOTHING(alg3.initialize());
-        TS_ASSERT( alg3.isInitialized() );
-        // Set which spectrum to fit against and initial starting values
-        alg3.setPropertyValue("Function",fn->asString());
-        alg3.setPropertyValue("InputWorkspace", testWrkspc3);
-        alg3.setPropertyValue("Output","out3");
-
-        // execute fit
-        TS_ASSERT_THROWS_NOTHING(
-            TS_ASSERT( alg3.execute() )
-            )
-        TS_ASSERT( alg3.isExecuted() );
-        algStat = alg3.getPropertyValue("OutputStatus");
-        TS_ASSERT( algStat.compare("success")==0 );
-        // test the output from fit is as expected - since 3 variables and 3 data points expect 0 Chi2
-        chisq = alg3.getProperty("OutputChi2overDoF");
-        TS_ASSERT_DELTA( chisq, 0.0, 0.001 );
-
-        // there is no such workspace for Fit as far as I can tell
-        //WS_type outWS = getWS("out3_Workspace");
-
-        TWS_type outParams3 = getTWS("out3_Parameters");
-        TS_ASSERT(outParams3);
-        TS_ASSERT_EQUALS(outParams3->rowCount(),4);
-        TS_ASSERT_EQUALS(outParams3->columnCount(),3);
-
-        row = outParams3->getFirstRow();
-        TS_ASSERT_EQUALS(row.String(0),"Constant");
-        TS_ASSERT_DELTA(row.Double(1),1.00,0.04);
-
-        row = outParams3->getRow(1);
-        TS_ASSERT_EQUALS(row.String(0),"Linear");
-        TS_ASSERT_DELTA(row.Double(1),0.50,0.02);
-
-        row = outParams3->getRow(2);
-        TS_ASSERT_EQUALS(row.String(0),"Quadratic");
-        TS_ASSERT_DELTA(row.Double(1),0.10,0.02);
-
-
-
-        removeWS("out2_Parameters");
-        removeWS("out3_Parameters");
-        */
-
+      //TS_ASSERT( alg1.isExecuted() );
     }
 
     void testTidyUp()

@@ -77,7 +77,7 @@ public:
     TS_ASSERT_DELTA(rParam2->getS3(),0.,1e-5);
     TS_ASSERT_DELTA(rParam2->getS4(),0.,1e-5);
     TS_ASSERT_DELTA(rParam2->getS5(),0.,1e-5);
-    TS_ASSERT_DELTA(rParam2->getThetam(),26.7,1e-5);
+    TS_ASSERT_DELTA(rParam2->getThetam(),26.7*M_PI/180.,1e-5);
     TS_ASSERT_EQUALS(rParam2->getModModel(),1);
 
     // note these are scaled from mm (in) to m (internal).
@@ -349,6 +349,38 @@ public:
     //std::cout << "rot\n";
     //x.getR().print();
     rParam3->setTransforms();
+  }
+  void testDetectorInfo()
+  {
+    rParam3 = boost::shared_ptr<RunParam> (new RunParam(
+        45., 45., 5., 42.,
+        0.5, 10., 7.19, 1.82,
+        66.67, 66.67, 13.55314, 50.,
+        0., 0., 0., 26.7,
+        1, 2.28, 49., 1300.,
+        150., 0., 3.87, 3.87,
+        3.87, 90., 90., 90.,
+        1., 0., 0., 0.,
+        1., 0., 0., 0.,
+        0., 0., 1., 1.,
+        0., -1., 1., 0.,
+        10., 14., 18., 1,
+        10., 0.5
+    ));
+    std::pair<V3D, V3D> det0(V3D(1,2,3), V3D(4,5,6));
+    V3D d1(1,2,3); V3D d2(4,5,6);
+    V3D detPos; V3D detDim;
+    double deps;
+    rParam3->setDetInfo(0,d1,d2,1.0);
+    rParam3->setDetInfo(1,V3D(11,12,13),V3D(14,15,16),1.0);
+    rParam3->setDetInfo(10,V3D(20,21,22),V3D(23,24,25),1.0);
+    rParam3->getDetInfo(0,detPos,detDim,deps);
+    TS_ASSERT_DELTA(detDim[2],6.,1e-10);
+    TS_ASSERT_DELTA(detPos[1],2.,1e-10);
+    TS_ASSERT_DELTA(deps,1.,1e-10);
+    rParam3->getDetInfo(10,detPos,detDim,deps);
+    TS_ASSERT_DELTA(detDim[0],23.,1e-10);
+    TS_ASSERT_DELTA(detPos[2],22.,1e-10);
   }
 
   void testTidyUp()

@@ -56,6 +56,9 @@ namespace Mantid
 
             /// overwrite IFunction base class methods
             std::string name()const{return "QuadEnBackground";}
+            /// This function only for use in inelastic analysis
+            virtual const std::string category() const { return "Inelastic";}
+
         protected:
             /// function to calculate the background at box r, given the energy dependent model applied to MDEvents
             virtual double functionMD(const Mantid::API::IMDIterator& r) const;

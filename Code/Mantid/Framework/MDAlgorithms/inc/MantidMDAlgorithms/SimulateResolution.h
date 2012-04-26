@@ -70,6 +70,20 @@ namespace Mantid
             void setWorkspaceMD(API::WorkspaceGroup_sptr wsGroup);
             /// Create a RunParam pointer - this is a temporary method for testing and will be replaced
             void setRunDataInfo(boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData);
+            /// Set magnetic form factor, function can be access in use SQW
+            void setMagneticForm(const int atomicNo, const int ionisation);
+
+            // Attributes
+            /// Returns the number of attributes associated with the function for now minStep, maxStep, tol for MC
+            size_t nAttributes()const{return 3;}
+            /// Returns a list of attribute names
+            std::vector<std::string> getAttributeNames()const;
+            /// Return a value of attribute attName
+            Attribute getAttribute(const std::string& attName)const;
+            /// Set a value to attribute attName
+            void setAttribute(const std::string& attName,const Attribute& );
+            /// Check if attribute attName exists
+            bool hasAttribute(const std::string& attName)const;
 
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
@@ -102,8 +116,6 @@ namespace Mantid
              */
             double sqwConvolutionMC(const Mantid::API::IMDIterator& it, size_t & event, double & error) const;
 
-            /// Set magnetic form factor, function can be access in use SQW
-            void setMagneticForm(const int atomicNo, const int ionisation);
 
             /// Find magnetic form factor at q^2 point
             double magneticForm(const double qSquared) const;
@@ -208,6 +220,14 @@ namespace Mantid
             // GSL Sobol random number state information
             gsl_qrng *m_qRvec;
             int m_event;
+
+            // Attribute values
+            /// Min MC steps
+            int m_mcLoopMin;
+            /// Max MC steps
+            int m_mcLoopMax;
+            /// MC loop absolute tolerance to exit before Max steps
+            double m_mcTol;
         };
 
     } // namespace MDAlgorithms

@@ -48,6 +48,9 @@ namespace Mantid
       m_mcVarCount.at(6) = 2; //DetectorArea
       m_mcVarCount.at(7) = 1; //DetectorTimeBin
       m_mcVarCount.at(8) = 2; //CrystalMosaic
+      setAttributeValue("MCLoopMin",100);
+      setAttributeValue("MCLoopMax",1000);
+      setAttributeValue("MCTol",1.e-5);
     }
 
     SimulateResolution::~SimulateResolution()
@@ -109,7 +112,7 @@ namespace Mantid
         qE.push_back(it.getInnerPosition(event,index));
 
       /// Pointer to the run parameters for each run which may be included in a cut
-      boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData = m_runData[runID];
+      boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData = m_runData.at(runID);
       // get crystal parameters and ubinv/uinv matrix for run
       //Mantid::Geometry::OrientedLattice& lattice; // = m_mdews->getExperimentInfo(0)->sample().getOrientedLattice();
       //lattice.;
@@ -126,29 +129,28 @@ namespace Mantid
       double gauPre=0.0;
       std::vector<double> params;
       getParams(params);
-      int mcLoopLimit=100,mcLoopMin=10; // test values
-      double mcTol=1e-3;
+      // get attributes - should only do once and store
+      const int mcLoopLimit=getAttribute("MCLoopMax").asInt();
+      const int mcLoopMin=getAttribute("MCLoopMin").asInt();
+      const double mcTol=getAttribute("MCTol").asDouble();
 
-      double phi=0.37538367018968838, beta=2.618430210304493, x2Detector=6.034; // detector angles and distance TEMP as cobalt demo, 1st det TODO set these
-      double eps=qE[3],deps=2.; // TODO define deps - eps is from the energy coord, deps from runData or detector
+      Kernel::V3D detPos,detDim;
+      double deps;
+      runData->getDetInfo(detectorID,detPos,detDim, deps);
+      //double phi=0.37538367018968838, beta=2.618430210304493, x2Detector=6.034; // detector angles and distance TEMP as cobalt demo, 1st det
+      double eps=qE[3];
       Kernel::DblMatrix dMat(3,3), dMatInv(3,3), bMat(6,11);
       // Initialise variables for Monte Carlo loop:
       // Get transformation and resolution matricies, and nominal Q:
       const double wi = sqrt(runData->getEi()/2.0721418);
       const double wf = sqrt((runData->getEi()-eps)/2.0721418);
-      const double detTimeBin = (3.8323960e-4 * x2Detector / (wf*wf*wf)) * deps;
-      std::vector<double> detectorBB = {0.0254, 0.0225, 0.6*0.025}; // TODO - Default for cobalt demo, no good in general
+      const double detTimeBin = (3.8323960e-4 * detPos[2] / (wf*wf*wf)) * deps;
+      //std::vector<double> detectorBB = {0.0254, 0.0225, 0.6*0.025}; // Default for cobalt demo, no good in general
 
-      dMatrix (phi, beta, dMat, dMatInv);
-      bMatrix (wi, wf, runData->getX0(), runData->getXa(), runData->getX1(), x2Detector, runData->getThetam(), runData->getAngVel(),
+      dMatrix (detPos[0], detPos[1], dMat, dMatInv);
+      bMatrix (wi, wf, runData->getX0(), runData->getXa(), runData->getX1(), detPos[2], runData->getThetam(), runData->getAngVel(),
                runData->getSMat(), dMat, bMat);
 
-
-      // MC loop over sample points until accuracy or loop limit reached
-      if(mcLoopMin<1)
-        mcLoopMin=1;
-      if(mcLoopLimit<1)
-        mcLoopLimit=1;
       // get nominal q vector
       std::vector<double> q0;
       for(size_t i=0;i<4;i++)
@@ -165,12 +167,12 @@ namespace Mantid
       // Loop over quasi-random points in 14 dimensional space to determine the resolution effect
       // For each point find the effective Q-E point and evaluate the user scattering function there.
       // Then take average of all as expected scattering.
-      for( int mcStep=0; mcStep<mcLoopLimit; mcStep++)
+      for( int mcStep=1; mcStep<=mcLoopLimit; mcStep++)
       {
         // Get  quasi random point
         gsl_qrng_get( qRvec, ranvec.get() );
         // Get corresponding actual changes in coordinates and time
-        mcYVec(ranvec.get() ,runData, detectorBB, detTimeBin,  yVec, eta2, eta3);
+        mcYVec(ranvec.get() ,runData, detDim, detTimeBin,  yVec, eta2, eta3);
         // Map these changes to the perturbation in Q-E and add with nominal value
         mcMapYtoQEVec(wi,wf, q0, bMat, dMatInv, yVec, eta2, eta3,
                                        perturbQE);
@@ -193,10 +195,10 @@ namespace Mantid
         sum+=weight;
         sumSqr+=weight*weight;
         // check for convergence every mcLoopMin steps, end of loop
-        if( (mcStep % mcLoopMin) ==0 || mcStep==mcLoopLimit-1 )
+        if( (mcStep % mcLoopMin) ==0 || mcStep==mcLoopLimit )
         {
           simSig=sum/mcStep;
-          error=sqrt(fabs( ( sumSqr/mcStep - simSig*simSig ))/mcStep );
+          error=sqrt(fabs( ( sumSqr/mcStep+ - simSig*simSig ))/mcStep );
 
           // break on relative error or very small after mcLoop min iterations
           if(fabs(simSig)>small)
@@ -686,22 +688,22 @@ namespace Mantid
      *       q0                      nominal Q and energy in laboratory frame (Ang^-1, meV)
      *       b_mat                   matrix defined on pg. 112 of T.Perring's thesis (1991)
      *       dinv_mat                matrix to convery components of vector in detector coord frame to laboratory coord frame
-     *       y_vec(1)  = t_m         deviation in departure time from moderator surface
-     *       y_vec(2)  = y_a         y-coordinate of neutron at apperture
-     *       y_vec(3)  = z_a         z-coordinate of neutron at apperture
-     *       y_vec(4)  = t_ch'       deviation in time of arrival at chopper
-     *       y_vec(5)  = x_s         x-coordinate of point of scattering in sample frame
-     *       y_vec(6)  = y_s         y-coordinate of point of scattering in sample frame
-     *       y_vec(7)  = z_s         z-coordinate of point of scattering in sample frame
-     *       y_vec(8)  = x_d         x-coordinate of point of detection in detector frame
-     *       y_vec(9)  = y_d         y-coordinate of point of detection in detector frame
-     *       y_vec(10) = z_d         z-coordinate of point of detection in detector frame
-     *       y_vec(11) = t_d         deviation in detection time of neutron
-     *       eta_2                   standard deviation for in-plane mosaic
-     *       eta_3                   standard deviation for out-of-plane mosaic
+     *       yVec(0)  = t_m         deviation in departure time from moderator surface
+     *       yVec(1)  = y_a         y-coordinate of neutron at apperture
+     *       yVec(2)  = z_a         z-coordinate of neutron at apperture
+     *       yVec(3)  = t_ch'       deviation in time of arrival at chopper
+     *       yVec(4)  = x_s         x-coordinate of point of scattering in sample frame
+     *       yVec(5)  = y_s         y-coordinate of point of scattering in sample frame
+     *       yVec(6)  = z_s         z-coordinate of point of scattering in sample frame
+     *       yVec(7)  = x_d         x-coordinate of point of detection in detector frame
+     *       yVec(8)  = y_d         y-coordinate of point of detection in detector frame
+     *       yVec(9)  = z_d         z-coordinate of point of detection in detector frame
+     *       yVec(10) = t_d         deviation in detection time of neutron
+     *       eta2                   standard deviation for in-plane mosaic
+     *       eta3                   standard deviation for out-of-plane mosaic
      *
      * Output:
-     *       dq(4)
+     *       perturbQE(4)
      *
      */
     void SimulateResolution::mcMapYtoQEVec(const double wi, const double wf, const std::vector<double> & q0, const Kernel::Matrix<double> & bMat,
@@ -711,8 +713,6 @@ namespace Mantid
     {
 
       std::vector<double> xVec(6);
-      UNUSED_ARG(eta2); UNUSED_ARG(eta3);
-      UNUSED_ARG(q0);
       if(perturbQE.size()<4)
           perturbQE.resize(4);
       xVec = bMat * yVec; // About half of terms are zero, might be more efficient to explicit expressions
@@ -724,8 +724,32 @@ namespace Mantid
       perturbQE[0]=xVec[0]-dq[0];
       perturbQE[1]=xVec[1]-dq[1];
       perturbQE[2]=xVec[2]-dq[2];
-      perturbQE[3]=(4.1442836 * ( wi*xVec[0] - wf*xVecTop[0] ));
+      perturbQE[3]=(4.1442836 * ( wi*xVec[2] - wf*xVecTop[2] )); // beam components
       //TODO add eta terms here
+      // Include crystal mosaic if required:
+      if ((eta2 != 0.0) || (eta3 != 0.0))
+      {
+        std::vector<double> q(q0); q[0] += perturbQE[0]; q[1] += perturbQE[1]; q[2] += perturbQE[2];
+        const double small=1e-10;
+        double qmod = sqrt(q[0]*q[0]+q[1]*q[1]+q[2]*q[2]);
+        if (qmod > small)
+        {
+          double qipmod = sqrt(q[0]*q[0] + q[1]*q[1]);
+          if (qipmod > small)
+          {
+            perturbQE[2] -= qipmod*eta2;
+            perturbQE[1] += ( (q[2]*q[1])*eta2 - (q[3]*qmod)*eta3 )/qipmod; // TODO check signs here in transpose from TF to MTF axes
+            perturbQE[0] += ( (q[2]*q[0])*eta2 + (q[2]*qmod)*eta3 )/qipmod;
+          }
+          else
+          {
+            perturbQE[0] += qmod*eta2;
+            perturbQE[1] += qmod*eta3;
+          }
+        }
+      }
+
+
     }
     /**
      * sampleAreaTable function from tobyfit -
@@ -796,6 +820,80 @@ namespace Mantid
         return 1;
 
       return 0;
+    }
+
+    /**
+     * @return A list of attribute names
+     */
+    std::vector<std::string> SimulateResolution::getAttributeNames()const
+    {
+      std::vector<std::string> res;
+      res.push_back("MCLoopMin");
+      res.push_back("MCLoopMax");
+      res.push_back("MCTol");
+      return res;
+    }
+
+    /**
+     * @param attName :: Attribute name. If it is not know exception is thrown.
+     * @return a value of attribute attName
+     */
+    API::IFunction::Attribute SimulateResolution::getAttribute(const std::string& attName)const
+    {
+      if (attName == "MCLoopMin")
+      {
+        return Attribute(m_mcLoopMin);
+      }
+      else if (attName == "MCLoopMax")
+      {
+        return Attribute(m_mcLoopMax);
+      }
+      else if (attName == "MCTol")
+      {
+        return Attribute(m_mcTol);
+      }
+      throw std::invalid_argument("SimulateResolution: Unknown attribute " + attName);
+    }
+
+    /**
+     * @param attName :: The attribute name. If it is not "n" exception is thrown.
+     * @param att :: An int attribute containing the new value. The value cannot be negative.
+     */
+    void SimulateResolution::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
+    {
+      if (attName == "MCLoopMin")
+      {
+        int mcLoopMin = att.asInt();
+        if ( mcLoopMin < 1)
+        {
+          throw std::invalid_argument("SimulateResolution: Must have MCLoopMin>=1.");
+        }
+        m_mcLoopMin = mcLoopMin;
+      }
+      else if (attName == "MCLoopMax")
+      {
+        int mcLoopMax = att.asInt();
+        if ( mcLoopMax < 1)
+        {
+          throw std::invalid_argument("SimulateResolution: Must have MCLoopMax>=1.");
+        }
+        m_mcLoopMax = mcLoopMax;
+      }
+      else if (attName == "MCTol")
+      {
+        double mcTol = att.asDouble();
+        if ( mcTol < 1.e-20 || mcTol > 1.0 )
+        {
+          throw std::invalid_argument("SimulateResolution: Must have 1e-20 < MCTol < 1");
+        }
+        m_mcTol = mcTol;
+      }
+    }
+
+    /// Check if attribute attName exists
+    bool SimulateResolution::hasAttribute(const std::string& attName)const
+    {
+      return attName == "MCLoopMin" || attName == "MCLoopMax" || attName == "MCTol";
     }
 
   } // namespace MDAlgorithms

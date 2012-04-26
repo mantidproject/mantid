@@ -38,7 +38,7 @@ namespace Mantid
         m_ei(ei), m_psi(psi), m_elo(elo),m_ehi(ehi),
         m_de(de), m_x0(x0), m_xa(xa), m_x1(x1),
         m_s1(s1), m_s2(s2),
-        m_s3(s3), m_s4(s4), m_s5(s5), m_thetam(thetam),
+        m_s3(s3), m_s4(s4), m_s5(s5),
         m_modModel(modModel),
         m_as(as), m_bs(bs), m_cs(cs),
         m_aa(aa), m_bb(bb), m_cc(cc),
@@ -57,6 +57,7 @@ namespace Mantid
       setPslit(pslit);
       setRadius(radius);
       setRho(rho);
+      setThetam(thetam),
       setWa(wa);
       setHa(ha);
       setSx(sx);
@@ -159,7 +160,7 @@ namespace Mantid
     void RunParam::setS5(const double val)
     {m_s5=val; m_moderatorChange=true;}
     void RunParam::setThetam(const double val)
-    {m_thetam=val;}
+    {m_thetam=val*M_PI/180.;}
     void RunParam::setModModel(const int val)
     {m_modModel=val; m_moderatorChange=true;}
     /// set pslit of chopper - input mm, internel m
@@ -278,9 +279,28 @@ namespace Mantid
 
       m_cubInvMat = gPsi.getR()*gCorrection.getR()*crystal.getUB()*(2.*M_PI);
       m_cubInvMat.Invert();
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
       // m_uBinv     - transform from scattering plane to r.l.u.
       // yet to implement
+    }
+
+    // Push detector information in - may be replaced with direct read from instrument.
+    // deps may need to an array
+    void RunParam::setDetInfo(const detid_t detId, const Kernel::V3D & position, const Kernel::V3D & dimensions, const double deps)
+    {
+      std::pair<Kernel::V3D, Kernel::V3D> detPair(position,dimensions);
+      m_detIdMap[detId]=detPair;
+      m_deps=deps;
+    }
+    // Get detector information TODO throw error if detId not in map
+    // May be more efficient to store are float array, or access to instrument/detector information
+    void RunParam::getDetInfo(const detid_t detId, Kernel::V3D & position, Kernel::V3D & dimensions, double & deps) const
+    {
+      std::map<detid_t, std::pair<Kernel::V3D, Kernel::V3D>>::const_iterator it;
+      it = m_detIdMap.find(detId);
+      position=(*it).second.first;
+      dimensions=(*it).second.second;
+      deps = m_deps;
     }
 
     // get sample transformation

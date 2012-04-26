@@ -12,6 +12,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/IDetector.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -173,6 +174,8 @@ namespace Mantid
       double getTemp();
       /// return eta of run (Mosaic)
       double getEta();
+      /// return detector position, dimensions
+      void getDetInfo(const detid_t, Kernel::V3D & position, Kernel::V3D & dimensions, double & deps) const;
 
     public:
       void setEi( const double val);
@@ -226,6 +229,7 @@ namespace Mantid
       void setTemp( const double val);
       void setEta( const double val);
       void setRunLatticeMatrices( const boost::shared_ptr<Mantid::Geometry::OrientedLattice> lattice);
+      void setDetInfo(const detid_t, const Kernel::V3D & position, const Kernel::V3D & dimensions, const double deps);
 
       void setTransforms();
       const Mantid::Kernel::DblMatrix & getSMat() const;
@@ -359,6 +363,11 @@ namespace Mantid
       void initModTime() const;
       Mantid::Kernel::DblMatrix m_sMat;
       Mantid::Kernel::DblMatrix m_cubInvMat;
+      // store for detector data - this may be replaced with direct access to detector objects
+      // Two vectors give detector position (x2,phi,beta) and size (width,height,depth)
+      std::map<detid_t, std::pair<Kernel::V3D, Kernel::V3D>> m_detIdMap;
+      // sore for energy width of each detector pixel - for now just one constant - should be peer pixle
+      double m_deps;
 
       /// @endcond
 

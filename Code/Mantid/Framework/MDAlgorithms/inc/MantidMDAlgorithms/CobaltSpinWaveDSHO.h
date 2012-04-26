@@ -61,11 +61,12 @@ namespace Mantid
             std::string name()const{return "CobaltSpinWaveDSHO";}
             /// This function only for use in inelastic analysis
             virtual const std::string category() const { return "Inelastic";}
-            /// sqwBroad returns the expected scattering weight for the given Q,w point
-            //virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
-            //        const double temp, const Kernel::Matrix<double> & ubinv) const;
+
         protected:
+            /// check if model is broad or sharp
             bool userModelIsBroad() const;
+            /// function that returns expected scatter for given point using the defined model with parameters params
+            /// and run parameters.
             void userSqw(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run, const std::vector<double> & params,
                          const std::vector<double> & qE, std::vector<double> & result) const;
             /// load parameter values into local memory

@@ -144,7 +144,7 @@ set ( TEST_FILES
 	test/OrMDTest.h
 	test/PlusMDTest.h
 	test/PowerMDTest.h
-#	test/QuadEnBackgroundTest.h
+	test/QuadEnBackgroundTest.h
 	test/RunParamTest.h
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
