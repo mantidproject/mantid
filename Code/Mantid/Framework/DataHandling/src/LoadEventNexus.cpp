@@ -258,9 +258,13 @@ public:
       if (pulse_i < numPulses-1)
       {
         bool breakOut = false;
+        uint64_t event_index_pulse_i = event_index[pulse_i];
+        uint64_t event_index_pulse_ip1 = event_index[pulse_i+1];
         //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-        while ( !((i+startAt >= event_index[pulse_i]) && (i+startAt < event_index[pulse_i+1])))
+        while ( !((i+startAt >= event_index_pulse_i) && (i+startAt < event_index_pulse_ip1)))
         {
+          event_index_pulse_i = event_index_pulse_ip1;
+          event_index_pulse_ip1 = event_index[pulse_i+1];
           pulse_i++;
           // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
           if (alg->getCancel()) breakOut = true;
@@ -534,7 +538,7 @@ public:
     }
     else
     {
-      for (size_t i=0; i < thisBankPulseTimes->numPulses; i++)
+      for (size_t i=start_event; i < thisBankPulseTimes->numPulses; i++)
       {
         if (thisBankPulseTimes->pulseTimes[i] > alg->filter_time_stop)
         {
