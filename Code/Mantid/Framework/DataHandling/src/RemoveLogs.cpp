@@ -1,7 +1,7 @@
 /*WIKI* 
 
 
-===Remove log file(s)===
+===Removes all logs from workspace===
 
 
 
@@ -40,8 +40,8 @@ DECLARE_ALGORITHM(RemoveLogs)
 /// Sets documentation strings for this algorithm
 void RemoveLogs::initDocs()
 {
-  this->setWikiSummary("Remove log file(s) from a [[workspace]]. ");
-  this->setOptionalMessage("Remove log file(s) from a workspace.");
+  this->setWikiSummary("Remove logs from a [[workspace]]. ");
+  this->setOptionalMessage("Remove logs from a workspace.");
 }
 
 
@@ -85,7 +85,6 @@ void RemoveLogs::exec()
   }
   for (std::vector<std::string>::const_iterator it = logNames.begin(); it != logNames.end(); ++it)
   {
-    std::cout << *it<<"\n";
     localWorkspace->mutableRun().removeLogData(*it);
   }
 

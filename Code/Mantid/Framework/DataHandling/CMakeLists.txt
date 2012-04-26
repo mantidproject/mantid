@@ -314,6 +314,7 @@ set ( TEST_FILES
 	test/OrbiterDataArchiveTest.h
 	test/ProcessDasNexusLogTest.h
 	test/RawFileInfoTest.h
+	test/RemoveLogsTest.h
 	test/RenameLogTest.h
 	test/SNSDataArchiveTest.h
 	test/SaveCSVTest.h
