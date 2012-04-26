@@ -29,7 +29,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="iconSize">
       <size>
@@ -2198,6 +2198,11 @@ p, li { white-space: pre-wrap; }
                   <item>
                    <property name="text">
                     <string>Parallelepiped (SofQW2)</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Parallelepiped/Fractional Area (SofQW3)</string>
                    </property>
                   </item>
                  </widget>
