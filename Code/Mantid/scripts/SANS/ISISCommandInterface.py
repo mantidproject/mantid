@@ -497,6 +497,37 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     ReductionSingleton().mask.set_phi_limit(phimin, phimax, use_mirror)
     
+def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
+    """
+        Adjust detector position away from position defined in IDF. On SANS2D the detector 
+        banks can be moved around. This method allow fine adjustments of detector bank position 
+        in the same way as the DET/CORR userfile command works. Hence please see
+        http://www.mantidproject.org/SANS_User_File_Commands#DET for details.
+        
+        Note, for now, this command will only have an effect on runs loaded 
+        after this command have been executed (because it is when runs are loaded 
+        that components are moved away from the positions set in the IDF)
+        
+        @param bank: Must be either 'front' or 'rear'        
+        @param x: shift in mm
+        @param y: shift in mm
+        @param z: shift in mm
+        @param rot: shift in degrees
+        @param radius: shift in mm
+        @param side: shift in mm
+    """  
+    _printMessage("SetDetectorOffsets(" + str(bank) + ', ' + str(x) 
+                  + ','+str(y) + ',' + str(z) + ',' + str(rot) 
+                  + ',' + str(radius) + ',' + str(side) + ')')
+
+    detector = ReductionSingleton().instrument.getDetector(bank)    
+    detector.x_corr = x
+    detector.y_corr = y
+    detector.z_corr = z
+    detector.rot_corr = rot
+    detector.radius_corr = radius
+    detector.side_corr = side   
+    
 def LimitsPhi(Not, Implemented, use_mirror=True):
     raise NotImplementedError('You must use SetPhiLimit() instead of LimitsPhi, processing stopped')
 

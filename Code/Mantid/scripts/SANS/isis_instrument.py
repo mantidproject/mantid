@@ -648,8 +648,8 @@ class SANS2D(ISISInstrument):
             and information from the sample workspace logs. If the location of the monitor was
             set with TRANS/TRANSPEC=4/SHIFT=... this function does the move instrument
             @param ws: workspace containing the instrument information
-            @param xbeam: x-position of the beam
-            @param ybeam: y-position of the beam
+            @param xbeam: x-position of the beam in meters
+            @param ybeam: y-position of the beam in meters
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
 
