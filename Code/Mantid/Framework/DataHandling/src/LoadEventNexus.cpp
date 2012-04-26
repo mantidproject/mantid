@@ -1365,8 +1365,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
   {
     size_t chunk_events = total_events/totalChunks;
-    size_t start_event = 0;
-    size_t stop_event = start_event + chunk_events;
+    size_t firstChunkEvent = 0;
+    size_t lastChunkEvent = firstChunkEvent + chunk_events;
     std::vector<size_t>::iterator it = bankNumEvents.begin();
     size_t sum_events = *it;
     for (int chunki = 1; chunki <=chunk; chunki++)
@@ -1377,7 +1377,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
         {
           bank0 = banki;
           sum_events += *it;
-          if ( sum_events > start_event) break;
+          if ( sum_events > firstChunkEvent) break;
           std::advance(it, 1);
         }
       }
@@ -1387,7 +1387,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
         {
           bankn = banki;
           sum_events += *it;
-          if ( sum_events > stop_event) break;
+          if ( sum_events > lastChunkEvent) break;
           std::advance(it, 1);
         }
       }
@@ -1395,8 +1395,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       {
         bankn = bankNames.size();
       }
-      start_event += chunk_events;
-      stop_event = start_event + chunk_events;
+      firstChunkEvent += chunk_events;
+      lastChunkEvent = firstChunkEvent + chunk_events;
     }
   }
   for (size_t i=bank0; i < bankn; i++)
