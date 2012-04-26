@@ -42,7 +42,7 @@ namespace Algorithms
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;};
     /// Algorithm's category for identification overriding a virtual method
-    virtual const std::string category() const { return "Diffraction;Transforms\\Masking";}
+    virtual const std::string category() const { return "Transforms\\Masking";}
 
   private:
     /// Sets documentation strings for this algorithm
