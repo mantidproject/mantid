@@ -341,6 +341,13 @@ class SNSPowderReduction(PythonAlgorithm):
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
             mtd.deleteWorkspace('Chunks')
+        if preserveEvents and not "histo" in self.getProperty("Extension"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if normByCurrent:
+            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+            wksp.getRun()['gsas_monitor'] = 1
+
+        self._save(wksp, self._info, False, True)
         print "Done focussing data"
 
         return wksp
@@ -451,13 +458,6 @@ class SNSPowderReduction(PythonAlgorithm):
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning[1]) # reset bin width
-        if preserveEvents and not "histo" in self.getProperty("Extension"):
-            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        if normByCurrent:
-            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
-            wksp.getRun()['gsas_monitor'] = 1
-
-        self._save(wksp, info, False, True)
         return wksp
 
     def _getinfo(self, wksp):
