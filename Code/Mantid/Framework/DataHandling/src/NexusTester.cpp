@@ -88,6 +88,7 @@ namespace DataHandling
     declareProperty("ChunkSize", 10, "Chunk size for writing/loading, in kb of data");
     declareProperty("NumChunks", 10, "Number of chunks to load or write");
     declareProperty("Compress", true, "For writing: compress the data.");
+    declareProperty("HDFCacheSize", 2000000, "HDF cache size, in bytes");
     declareProperty("ClearDiskCache", false,
         "Clear the linux disk cache before loading.\n"
         "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
@@ -189,18 +190,22 @@ namespace DataHandling
     if (!LoadFilename.empty())
     {
       ::NeXus::File file(LoadFilename, NXACC_READ);
+      int HDFCacheSize = getProperty("HDFCacheSize");
+      NXsetcache(HDFCacheSize);
       file.openGroup("FakeDataGroup", "NXdata");
-      file.openData("FakeData");
       Progress prog(this, 0.0, 1.0, NumChunks);
       CPUTimer tim;
 
       for (int i=0; i<NumChunks; i++)
       {
+        file.openData("FakeData");
         std::vector<int> startDims;
         startDims.push_back(i * int(chunkSize));
         file.getSlab(fakeData, startDims, chunkDims);
         prog.report();
+        file.closeData();
       }
+
       file.close();
 
       double seconds = tim.elapsedWallClock(false);

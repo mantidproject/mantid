@@ -282,6 +282,9 @@ namespace MDEvents
       const double wavenumber_in_angstrom_times_tof_in_microsec =
           (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
 
+      //PARALLEL_CRITICAL( convert_tester_output ) { std::cout << "Spectrum " << el.getSpectrumNo() << " beamDir = " << beamDir << " detDir = " << detDir << " Q_dir = " << Q_dir << " conversion factor " << wavenumber_in_angstrom_times_tof_in_microsec << std::endl;  }
+
+
       //g_log.information() << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
       //g_log.information() << Q_dir.norm() << " Qdir norm" << std::endl;
 
