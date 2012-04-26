@@ -72,10 +72,12 @@ void SofQW::createInputProperties(API::Algorithm & alg)
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  alg.declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-
-  alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()));
+  alg.declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
+                      "A Workspace2D with units of energy transfer.");
+  alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+                      "A workspace in units of momentum transfer and energy transfer.");
+  alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()),
+                      "The binning parameters for the momentum transfer axis.");
   
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
