@@ -32,7 +32,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
   // Add functions to each of the categories. If it appears in more than one category then add to both
   // Store in a map. Key = category. Value = vector of fit functions belonging to that category.
   std::map<std::string, std::vector<std::string> > categories;
-  for (int i=0; i<registeredFunctions.size(); ++i)
+  for (size_t i=0; i<registeredFunctions.size(); ++i)
   {
     boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().createFunction(registeredFunctions[i]);
     std::vector<std::string> tempCategories = f->categories();

@@ -652,14 +652,14 @@ namespace Algorithms
     int currindex = -1;
     DateAndTime lastTime, currTime;
     DateAndTime start, stop;
-    double lastValue = 0.0;
+    //double lastValue = 0.0;
     double currValue = 0.0;
 
     for (int i = 0; i < mlog->size(); i ++)
     {
       // a) Init status flags and new entry
       lastTime = currTime;
-      lastValue = currValue;
+      //lastValue = currValue;
       bool breakloop = false;
       bool completehalf = false;
       bool newsplitter = false;
