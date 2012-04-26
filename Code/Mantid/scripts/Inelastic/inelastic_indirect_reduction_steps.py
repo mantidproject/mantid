@@ -755,6 +755,10 @@ class Grouping(ReductionStep):
                     group = 'User'
                 if ( group == 'Fixed' ):
                     self._result_workspaces.append(self._group_fixed(ws))
+                elif (group == 'File' ):
+                    self._grouping_policy =  mtd[ws].getInstrument().getStringParameter(
+                        'Workflow.GroupingFile')[0]              
+                    self._result_workspaces.append(self._group_data(ws))
                 else:
                     self._result_workspaces.append(self._group_data(ws))
             
@@ -823,8 +827,17 @@ class Grouping(ReductionStep):
             GroupDetectors(workspace, workspace, 
                 WorkspaceIndexList=wslist, Behaviour='Average')
         else:
-            GroupDetectors(workspace, workspace, MapFile=grouping,
-                Behaviour='Average')
+            # Assume we have a grouping file.
+            # First lets, find the file...
+            if (os.path.isfile(grouping)):
+                grouping_filename = grouping
+            else:
+                grouping_filename = os.path.join(mtd.getConfigProperty('groupingFiles.directory'),
+                        grouping)
+            # Final check that the Mapfile exists, if not don't run the alg.
+            if os.path.isfile(grouping_filename):
+                GroupDetectors(workspace, workspace, MapFile=grouping_filename, 
+                        Behaviour='Average')
         return workspace
 
 class SaveItem(ReductionStep):
