@@ -49,13 +49,13 @@ namespace Kernel
     Task * task;
 
     // If there are no tasks yet, wait up to m_waitSec for them to come up
-    while (m_scheduler->size() == 0 && m_waitSec > 0.0)
+    while (m_scheduler->empty() && m_waitSec > 0.0)
     {
       Poco::Thread::sleep(10); // millisec
       m_waitSec -= 0.01; // Subtract ten millisec from the time left to wait.
     }
 
-    while (m_scheduler->size() > 0)
+    while (!m_scheduler->empty())
     {
       // Request the task from the scheduler.
       // Will be NULL if not found.

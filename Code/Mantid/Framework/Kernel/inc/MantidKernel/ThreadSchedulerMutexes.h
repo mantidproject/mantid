@@ -160,6 +160,19 @@ namespace Kernel
     }
 
     //-------------------------------------------------------------------------------
+    /// @return true if the queue is empty
+    bool empty()
+    {
+      Mutex::ScopedLock _lock(m_queueLock);
+      SuperMap::iterator it = m_supermap.begin();
+      SuperMap::iterator it_end = m_supermap.end();
+      for (; it != it_end; it++)
+        if (!it->second.empty())
+          return false;
+      return true;
+    }
+
+    //-------------------------------------------------------------------------------
     void clear()
     {
       m_queueLock.lock();
