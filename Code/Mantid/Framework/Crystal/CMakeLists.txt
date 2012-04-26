@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
+        src/TransformHKL.cpp
         src/ShowPossibleCells.cpp
         src/SelectCellOfType.cpp
         src/SelectCellWithForm.cpp
@@ -45,6 +46,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/IndexPeaks.h
+	inc/MantidCrystal/TransformHKL.h
 	inc/MantidCrystal/ShowPossibleCells.h
         inc/MantidCrystal/SelectCellOfType.h
         inc/MantidCrystal/SelectCellWithForm.h
@@ -81,6 +83,7 @@ set ( TEST_FILES
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h
 	test/IndexPeaksTest.h
+	test/TransformHKLTest.h
         test/ShowPossibleCellsTest.h
         test/SelectCellOfTypeTest.h
         test/SelectCellWithFormTest.h
