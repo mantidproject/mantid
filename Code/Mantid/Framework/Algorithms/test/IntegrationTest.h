@@ -304,13 +304,13 @@ public:
 
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outName) );
-    RebinnedOutput_sptr outputWS = boost::dynamic_pointer_cast<RebinnedOutput>(output);
+    Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(output);
+    TS_ASSERT_EQUALS( outputWS->id(), "Workspace2D" );
 
     double tol = 1.e-5;
     TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), expectedNumHists );
     TS_ASSERT_DELTA( outputWS->dataY(1)[0], expectedVals[0], tol );
     TS_ASSERT_DELTA( outputWS->dataE(1)[0], expectedVals[1], tol );
-    TS_ASSERT_EQUALS( outputWS->dataF(1)[0], expectedVals[2] );
 
     AnalysisDataService::Instance().remove(inName);
     AnalysisDataService::Instance().remove(outName);
@@ -318,25 +318,25 @@ public:
 
   void testRebinnedOutput_NoLimits()
   {
-    const double truth[] = {1.1, 0.33166247903553997, 10.};
+    const double truth[] = {6.0, 2.041241452319315};
     doTestRebinned("-3.0", "3.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_RangeLimits()
   {
-    const double truth[] = {1.125, 0.375, 8.};
+    const double truth[] = {5.0, 1.9148542155126762};
     doTestRebinned("-2.0", "2.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_WorkspaceIndexLimits()
   {
-    const double truth[] = {1.1666666666666667, 0.44095855184409843, 6.};
+    const double truth[] = {4.5, 1.8027756377319946};
     doTestRebinned("-3.0", "3.0", 1, 2, false, 2, truth);
   }
 
   void testRebinnedOutput_RangeLimitsWithPartialBins()
   {
-    const double truth[] = {1.103448275862069, 0.37457863762759364, 7.25};
+    const double truth[] = {4.0, 1.4288690166235205};
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 

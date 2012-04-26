@@ -103,20 +103,20 @@ void Integration::exec()
   }
 
   // Create the 2D workspace (with 1 bin) for the output
-  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
+  MatrixWorkspace_sptr outputWorkspace;
   if (localworkspace->id() != "RebinnedOutput")
   {
-    this->doWorkspace2D(localworkspace, outputWorkspace);
+    outputWorkspace = this->doWorkspace2D(localworkspace);
   }
   else
   {
-    this->doRebinnedOutput(outputWorkspace);
+    outputWorkspace = this->doRebinnedOutput();
   }
 
   outputWorkspace->generateSpectraMap();
 
   // Assign it to the output workspace property
-  setProperty("OutputWorkspace",outputWorkspace);
+  setProperty("OutputWorkspace", outputWorkspace);
 
   return;
 }
@@ -126,9 +126,9 @@ void Integration::exec()
  * @param localworkspace :: the input workspace
  * @param outputWorkspace :: the workspace for holding the integration results
  */
-void Integration::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
-                                MatrixWorkspace_sptr outputWorkspace)
+MatrixWorkspace_sptr Integration::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace)
 {
+  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
   bool is_distrib=outputWorkspace->isDistribution();
   Progress progress(this,0,1,m_MaxSpec-m_MinSpec+1);
 
@@ -246,6 +246,8 @@ void Integration::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  return outputWorkspace;
 }
 
 /**
@@ -254,7 +256,7 @@ void Integration::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
  * undone before integrating the data.
  * @param outputWorkspace :: the workspace for holding the integration results
  */
-void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
+MatrixWorkspace_sptr Integration::doRebinnedOutput()
 {
   // Get a mutable copy of the input workspace
   MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
@@ -270,9 +272,9 @@ void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
   alg->setProperty("InfinityError", 0.0);
   alg->executeAsSubAlg();
 
-  // Transform to real workspace types
-  RebinnedOutput_sptr inWS = boost::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
-  RebinnedOutput_sptr outWS = boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+  // Create a Workspace2D instead of a RebinnedOutput
+  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D",m_MaxSpec-m_MinSpec+1,2,1);
+  API::WorkspaceFactory::Instance().initializeFromParent(localworkspace, outputWorkspace, true);
 
   bool is_distrib=outputWorkspace->isDistribution();
   Progress progress(this,0,1,m_MaxSpec-m_MinSpec+1);
@@ -296,17 +298,17 @@ void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
 
     // This is the output
     ISpectrum * outSpec = outputWorkspace->getSpectrum(outWI);
+
     // This is the input
-    ISpectrum * inSpec = localworkspace->getSpectrum(i);
+    const ISpectrum * inSpec = localworkspace->getSpectrum(i);
 
     // Copy spectrum number, detector IDs
     outSpec->copyInfoFrom(*inSpec);
 
     // Retrieve the spectrum into a vector
     const MantidVec& X = inSpec->readX();
-    MantidVec& Y = inSpec->dataY();
-    MantidVec& E = inSpec->dataE();
-    const MantidVec& F = inWS->readF(i);
+    const MantidVec& Y = inSpec->dataY();
+    const MantidVec& E = inSpec->dataE();
 
     // If doing partial bins, we want to set the bin boundaries to the specified values
     // regardless of whether they're 'in range' for this spectrum
@@ -335,16 +337,6 @@ void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
 
     double sumY = 0.0;
     double sumE = 0.0;
-    double sumF = 0.0;
-
-    // Clear out fractional area contribution from arrays
-    std::transform(Y.begin(), Y.end(), F.begin(), Y.begin(),
-                   std::multiplies<double>());
-    std::transform(E.begin(), E.end(), F.begin(), E.begin(),
-                   std::multiplies<double>());
-
-    // Sum the fractional areas
-    sumF = std::accumulate(F.begin()+distmin, F.begin()+distmax, 0.0);
 
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
@@ -379,7 +371,6 @@ void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
         sumY += Y[val_index] * fraction;
         const double eval = E[val_index];
         sumE += eval * eval * fraction * fraction;
-        sumF += F[val_index] * fraction;
       }
       if( highit < X.end() - 1)
       {
@@ -393,7 +384,6 @@ void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
         sumY += Y[distmax] * fraction;
         const double eval = E[distmax];
         sumE += eval * eval * fraction * fraction;
-        sumF += F[distmax] * fraction;
       }
     }
     else
@@ -404,14 +394,13 @@ void Integration::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace)
 
     outSpec->dataY()[0] = sumY;
     outSpec->dataE()[0] = sqrt(sumE);
-    outWS->dataF(outWI)[0] = sumF;
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  outWS->finalize(false);
+  return outputWorkspace;
 }
 
 } // namespace Algorithms
