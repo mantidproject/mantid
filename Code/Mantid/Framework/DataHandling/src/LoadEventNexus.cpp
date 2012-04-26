@@ -544,16 +544,6 @@ public:
       }
     }
 
-    if (alg->chunk != EMPTY_INT()) // We are loading part - work out the event number range
-    {
-      size_t max_events = stop_event - start_event + 1;
-      size_t chunk_events = max_events/alg->totalChunks;
-      start_event += (alg->chunk - 1) * chunk_events;
-      // Need to add any remainder to the final chunk
-      stop_event = start_event + chunk_events;
-      if ( alg->chunk == alg->totalChunks ) stop_event += max_events%alg->totalChunks;
-    }
-
     // Make sure it is within range
     if (stop_event > static_cast<size_t>(dim0))
       stop_event = dim0;
@@ -1211,6 +1201,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   //Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
+  size_t total_events = 0;
   map<string, string> entries = file.getEntries();
   map<string,string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
@@ -1238,6 +1229,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
         oldNeXusFileNames = true;
       }
       bankNumEvents.push_back(static_cast<std::size_t>(file.getInfo().dims[0]));
+      total_events +=static_cast<std::size_t>(file.getInfo().dims[0]);
       file.closeData();
       file.closeGroup();
     }
@@ -1368,7 +1360,46 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
   Mutex * diskIOMutex = new Mutex();
-  for (size_t i=0; i < bankNames.size(); i++)
+  size_t bank0 = 0;
+  size_t bankn = bankNames.size();
+  if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
+  {
+    size_t chunk_events = total_events/totalChunks;
+    size_t start_event = 0;
+    size_t stop_event = start_event + chunk_events;
+    std::vector<size_t>::iterator it = bankNumEvents.begin();
+    size_t sum_events = *it;
+    for (int chunki = 1; chunki <=chunk; chunki++)
+    {
+      if (chunki != 1)
+      {
+        for (size_t banki = bankn; banki < bankNames.size(); banki++)
+        {
+          bank0 = banki;
+          sum_events += *it;
+          if ( sum_events > start_event) break;
+          std::advance(it, 1);
+        }
+      }
+      if (chunki != totalChunks)
+      {
+        for (size_t banki = bank0+1; banki < bankNames.size(); banki++)
+        {
+          bankn = banki;
+          sum_events += *it;
+          if ( sum_events > stop_event) break;
+          std::advance(it, 1);
+        }
+      }
+      else
+      {
+        bankn = bankNames.size();
+      }
+      start_event += chunk_events;
+      stop_event = start_event + chunk_events;
+    }
+  }
+  for (size_t i=bank0; i < bankn; i++)
   {
     // We make tasks for loading
     if (bankNumEvents[i] > 0)

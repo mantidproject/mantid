@@ -71,11 +71,10 @@ private:
   void init();
   void exec();
 
-  /// Handle logic for a RebinnedOutput worlspace
-  API::MatrixWorkspace_sptr doRebinnedOutput();
-  /// Handle logic for a Workspace2D workspace
-  API::MatrixWorkspace_sptr doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace);
-
+  /// Get the input workspace
+  API::MatrixWorkspace_const_sptr getInputWorkspace();
+  /// Create the outputworkspace
+  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS);
 
   /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;

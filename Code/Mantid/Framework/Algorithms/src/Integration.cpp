@@ -80,7 +80,7 @@ void Integration::exec()
   m_IncPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = this->getInputWorkspace();
 
   const int numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
 
@@ -103,34 +103,10 @@ void Integration::exec()
   }
 
   // Create the 2D workspace (with 1 bin) for the output
-  MatrixWorkspace_sptr outputWorkspace;
-  if (localworkspace->id() != "RebinnedOutput")
-  {
-    outputWorkspace = this->doWorkspace2D(localworkspace);
-  }
-  else
-  {
-    outputWorkspace = this->doRebinnedOutput();
-  }
+  MatrixWorkspace_sptr outputWorkspace = this->getOutputWorkspace(localworkspace);
 
-  outputWorkspace->generateSpectraMap();
-
-  // Assign it to the output workspace property
-  setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
-}
-
-/**
- * This function handles the integration logic for a Workspace2D.
- * @param localworkspace :: the input workspace
- * @param outputWorkspace :: the workspace for holding the integration results
- */
-MatrixWorkspace_sptr Integration::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace)
-{
-  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
   bool is_distrib=outputWorkspace->isDistribution();
-  Progress progress(this,0,1,m_MaxSpec-m_MinSpec+1);
+  Progress progress(this, 0, 1, m_MaxSpec-m_MinSpec+1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
 
@@ -182,7 +158,8 @@ MatrixWorkspace_sptr Integration::doWorkspace2D(MatrixWorkspace_const_sptr local
     // If range specified doesn't overlap with this spectrum then bail out
     if ( lowit == X.end() || highit == X.begin() ) continue;
 
-    --highit; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
+    // Upper limit is the bin before, i.e. the last value smaller than MaxRange
+    --highit;
 
     MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax = std::distance(X.begin(),highit);
@@ -190,19 +167,27 @@ MatrixWorkspace_sptr Integration::doWorkspace2D(MatrixWorkspace_const_sptr local
     double sumY = 0.0;
     double sumE = 0.0;
 
-    if (!is_distrib) //Sum the Y, and sum the E in quadrature
+    if (!is_distrib)
     {
-      sumY = std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
-      sumE = std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,VectorHelper::SumSquares<double>());
+      //Sum the Y, and sum the E in quadrature
+      sumY = std::accumulate(Y.begin()+distmin, Y.begin()+distmax, 0.0);
+      sumE = std::accumulate(E.begin()+distmin, E.begin()+distmax, 0.0,
+                             VectorHelper::SumSquares<double>());
     }
-    else // Sum Y*binwidth and Sum the (E*binwidth)^2.
+    else
     {
+      // Sum Y*binwidth and Sum the (E*binwidth)^2.
       std::vector<double> widths(X.size());
-      std::adjacent_difference(lowit,highit+1,widths.begin()); // highit+1 is safe while input workspace guaranteed to be histogram
-      sumY = std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
-      sumE = std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
+      // highit+1 is safe while input workspace guaranteed to be histogram
+      std::adjacent_difference(lowit,highit+1,widths.begin());
+      sumY = std::inner_product(Y.begin()+distmin, Y.begin()+distmax,
+                                widths.begin()+1, 0.0);
+      sumE = std::inner_product(E.begin()+distmin, E.begin()+distmax,
+                                widths.begin()+1, 0.0, std::plus<double>(),
+                                VectorHelper::TimesSquares<double>());
     }
-    // If partial bins are included, set integration range to exact range given and add on contributions from partial bins either side of range.
+    // If partial bins are included, set integration range to exact range
+    // given and add on contributions from partial bins either side of range.
     if( m_IncPartBins )
     {
       if( distmin > 0 )
@@ -247,160 +232,59 @@ MatrixWorkspace_sptr Integration::doWorkspace2D(MatrixWorkspace_const_sptr local
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  return outputWorkspace;
+  outputWorkspace->generateSpectraMap();
+
+  // Assign it to the output workspace property
+  setProperty("OutputWorkspace", outputWorkspace);
+
+  return;
 }
 
 /**
- * This function handles the integration logic for a RebinnedOutput workspace.
- * The workspace needs to be cleaned and fractional area tracking needs to be
- * undone before integrating the data.
- * @param outputWorkspace :: the workspace for holding the integration results
+ * This function gets the input workspace. In the case for a RebinnedOutput
+ * workspace, it must be cleaned before proceeding. Other workspaces are
+ * untouched.
+ * @return the input workspace, cleaned if necessary
  */
-MatrixWorkspace_sptr Integration::doRebinnedOutput()
+MatrixWorkspace_const_sptr Integration::getInputWorkspace()
 {
-  // Get a mutable copy of the input workspace
-  MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
-
-  // First, we need to clean the input workspace for nan's and inf's in order
-  // to treat the data correctly later.
-  IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", localworkspace);
-  alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", localworkspace);
-  alg->setProperty("NaNValue", 0.0);
-  alg->setProperty("NaNError", 0.0);
-  alg->setProperty("InfinityValue", 0.0);
-  alg->setProperty("InfinityError", 0.0);
-  alg->executeAsSubAlg();
-
-  // Create a Workspace2D instead of a RebinnedOutput
-  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create("Workspace2D",m_MaxSpec-m_MinSpec+1,2,1);
-  API::WorkspaceFactory::Instance().initializeFromParent(localworkspace, outputWorkspace, true);
-
-  bool is_distrib=outputWorkspace->isDistribution();
-  Progress progress(this,0,1,m_MaxSpec-m_MinSpec+1);
-
-  const bool axisIsText = localworkspace->getAxis(1)->isText();
-
-  // Loop over spectra
-  PARALLEL_FOR2(localworkspace,outputWorkspace)
-  for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
+  if (temp->id() == "RebinnedOutput")
   {
-    PARALLEL_START_INTERUPT_REGION
-    // Workspace index on the output
-    const int outWI = i - m_MinSpec;
-
-    // Copy Axis values from previous workspace
-    if ( axisIsText )
-    {
-      Mantid::API::TextAxis* newAxis = dynamic_cast<Mantid::API::TextAxis*>(outputWorkspace->getAxis(1));
-      newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
-    }
-
-    // This is the output
-    ISpectrum * outSpec = outputWorkspace->getSpectrum(outWI);
-
-    // This is the input
-    const ISpectrum * inSpec = localworkspace->getSpectrum(i);
-
-    // Copy spectrum number, detector IDs
-    outSpec->copyInfoFrom(*inSpec);
-
-    // Retrieve the spectrum into a vector
-    const MantidVec& X = inSpec->readX();
-    const MantidVec& Y = inSpec->dataY();
-    const MantidVec& E = inSpec->dataE();
-
-    // If doing partial bins, we want to set the bin boundaries to the specified values
-    // regardless of whether they're 'in range' for this spectrum
-    // Have to do this here, ahead of the 'continue' a bit down from here.
-    if ( m_IncPartBins )
-    {
-      outSpec->dataX()[0] = m_MinRange;
-      outSpec->dataX()[1] = m_MaxRange;
-    }
-
-    // Find the range [min,max]
-    MantidVec::const_iterator lowit, highit;
-    if (m_MinRange == EMPTY_DBL()) lowit=X.begin();
-    else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
-
-    if (m_MaxRange == EMPTY_DBL()) highit=X.end();
-    else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
-
-    // If range specified doesn't overlap with this spectrum then bail out
-    if ( lowit == X.end() || highit == X.begin() ) continue;
-
-    --highit; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
-
-    MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
-    MantidVec::difference_type distmax = std::distance(X.begin(),highit);
-
-    double sumY = 0.0;
-    double sumE = 0.0;
-
-    if (!is_distrib) //Sum the Y, and sum the E in quadrature
-    {
-      sumY = std::accumulate(Y.begin()+distmin, Y.begin()+distmax, 0.0);
-      sumE = std::accumulate(E.begin()+distmin, E.begin()+distmax, 0.0,
-                             VectorHelper::SumSquares<double>());
-    }
-    else // Sum Y*binwidth and Sum the (E*binwidth)^2.
-    {
-      std::vector<double> widths(X.size());
-      // highit+1 is safe while input workspace guaranteed to be histogram
-      std::adjacent_difference(lowit, highit+1, widths.begin());
-      sumY = std::inner_product(Y.begin()+distmin, Y.begin()+distmax,
-                                widths.begin()+1, 0.0);
-      sumE = std::inner_product(E.begin()+distmin, E.begin()+distmax,
-                                widths.begin()+1, 0.0, std::plus<double>(),
-                                VectorHelper::TimesSquares<double>());
-    }
-    // If partial bins are included, set integration range to exact range given and add on contributions from partial bins either side of range.
-    if( m_IncPartBins )
-    {
-      if( distmin > 0 )
-      {
-        const double lower_bin = *lowit;
-        const double prev_bin = *(lowit - 1);
-        double fraction = (lower_bin - m_MinRange);
-        if( !is_distrib )
-        {
-          fraction /= (lower_bin - prev_bin);
-        }
-        const MantidVec::size_type val_index = distmin - 1;
-        sumY += Y[val_index] * fraction;
-        const double eval = E[val_index];
-        sumE += eval * eval * fraction * fraction;
-      }
-      if( highit < X.end() - 1)
-      {
-        const double upper_bin = *highit;
-        const double next_bin = *(highit + 1);
-        double fraction = (m_MaxRange - upper_bin);
-        if( !is_distrib )
-        {
-          fraction /= (next_bin - upper_bin);
-        }
-        sumY += Y[distmax] * fraction;
-        const double eval = E[distmax];
-        sumE += eval * eval * fraction * fraction;
-      }
-    }
-    else
-    {
-      outSpec->dataX()[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
-      outSpec->dataX()[1] = *highit;
-    }
-
-    outSpec->dataY()[0] = sumY;
-    outSpec->dataE()[0] = sqrt(sumE);
-
-    progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    // Clean the input workspace in the RebinnedOutput case for nan's and
+    // inf's in order to treat the data correctly later.
+    IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
+    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
+    alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", temp);
+    alg->setProperty("NaNValue", 0.0);
+    alg->setProperty("NaNError", 0.0);
+    alg->setProperty("InfinityValue", 0.0);
+    alg->setProperty("InfinityError", 0.0);
+    alg->executeAsSubAlg();
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  return temp;
+}
 
-  return outputWorkspace;
+/**
+ * This function creates the output workspace. In the case of a RebinnedOutput
+ * workspace, the resulting workspace only needs to be a Workspace2D to handle
+ * the integration. Other workspaces are handled normally.
+ * @return the output workspace
+ */
+MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_const_sptr inWS)
+{
+  if (inWS->id() == "RebinnedOutput")
+  {
+    MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                                          m_MaxSpec-m_MinSpec+1,2,1);
+    API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, true);
+    return outWS;
+  }
+  else
+  {
+    return API::WorkspaceFactory::Instance().create(inWS, m_MaxSpec-m_MinSpec+1,
+                                                    2, 1);
+  }
 }
 
 } // namespace Algorithms
