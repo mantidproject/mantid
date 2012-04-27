@@ -1,13 +1,20 @@
 /*WIKI* 
 
-The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space,
-and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]].
+This algorithm converts from a [[MatrixWorkspace]] (in detector/time-of-flight space) to a
+[[MDEventWorkspace]] containing events in reciprocal space.
 
+The calculations apply only to elastic diffraction experiments.
 The conversion can be done either to Q-space in the lab or sample frame, or to HKL of the crystal.
 
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the [[MDEventWorkspace]],
 use the [[CreateMDWorkspace]] algorithm first.
+
+==== Types of Conversion ====
+
+* '''Q (lab frame)''': this calculates the momentum transfer (ki-kf) for each event is calculated in the experimental lab frame.
+* '''Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
+* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
 
 ==== Lorentz Correction ====
 
@@ -18,6 +25,9 @@ by multiplying its weight by L:
 
 Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventionally called <math>2\theta</math>).
 <math>\lambda</math> is the neutron wavelength in ''Angstroms''.
+
+This correction is also done by the [[AnvredCorrection]] algorithm, and will be set to false if
+that algorithm has been run on the input workspace.
 
 ==== OneEventPerBin option ====
 
@@ -87,8 +97,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void ConvertToDiffractionMDWorkspace::initDocs()
   {
-    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
-    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
+    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
+    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
   }
 
   //----------------------------------------------------------------------------------------------
