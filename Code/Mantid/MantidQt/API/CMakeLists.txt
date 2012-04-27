@@ -105,7 +105,8 @@ if ( CXXTEST_FOUND )
                           ../../Framework/Nexus/inc
                           ../../Framework/TestHelpers/inc
                           ../../Framework/MDEvents/inc
-                          ../../Framework/DataObjects/inc )
+                          ../../Framework/DataObjects/inc
+                          ${QWT_INCLUDE_DIR} ${QT_INCLUDE_DIR} )
     
     # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
     # It will go out of scope at the end of this file so doesn't need un-setting
