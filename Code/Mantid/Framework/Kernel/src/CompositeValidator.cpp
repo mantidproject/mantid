@@ -41,13 +41,14 @@ namespace Mantid
       // empty or single set of allowed values
       if(n_combinations<2)return elem_unique;
       // there is more then one combination and we have to identify its union;
-      for(std::set<std::string>::const_iterator its=elem_unique.begin();its!=elem_unique.end();its++)
+      for(std::set<std::string>::const_iterator its=elem_unique.begin();its!=elem_unique.end();++its)
       {
         std::multiset<std::string>::iterator im = elem_all.find(*its);
         elem_all.erase(im);
       }
       std::set<std::string> rez;
-      for(std::multiset<std::string>::const_iterator im=elem_all.begin();im!=elem_all.end();im++){
+      for(std::multiset<std::string>::const_iterator im=elem_all.begin();im!=elem_all.end();++im)
+      {
         rez.insert(*im);
       }
       return rez;
