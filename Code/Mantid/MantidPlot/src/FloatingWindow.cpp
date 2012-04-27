@@ -24,6 +24,7 @@ QMainWindow(NULL,f),
 #endif
 d_app(appWindow)
 {
+  this->setMinimumSize(100,100);
   setFocusPolicy(Qt::StrongFocus);
   connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
 #ifdef Q_OS_WIN
