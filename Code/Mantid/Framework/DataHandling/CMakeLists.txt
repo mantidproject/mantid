@@ -269,6 +269,7 @@ set ( TEST_FILES
 	test/LoadEmptyInstrumentTest.h
 	test/LoadEventNexusTest.h
 	test/LoadEventPreNexusTest.h
+	test/LoadEventPreNexus2Test.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h
