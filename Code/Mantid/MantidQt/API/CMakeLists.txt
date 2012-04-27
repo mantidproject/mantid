@@ -116,7 +116,7 @@ if ( CXXTEST_FOUND )
     
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( MantidQtAPITest MantidQtAPI MDEvents DataHandling
-    						${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+                ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${QWT_LIBRARIES} ${QT_LIBRARIES})
     add_dependencies( GUITests MantidQtAPITest )
     
     # Add to the 'UnitTests' group in VS
