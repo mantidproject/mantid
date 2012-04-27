@@ -112,7 +112,7 @@ namespace Algorithms
     RebinnedOutput_sptr outputWS = this->setUpOutputWorkspace(inputWS,
                                                  getProperty("QAxisBinning"),
                                                               m_Qout);
-    g_log.notice() << "Workspace type: " << outputWS->id() << std::endl;
+    g_log.debug() << "Workspace type: " << outputWS->id() << std::endl;
     setProperty("OutputWorkspace", outputWS);
     const size_t nEnergyBins = inputWS->blocksize();
     const size_t nHistos = inputWS->getNumberHistograms();
@@ -134,7 +134,7 @@ namespace Algorithms
     }
     else
     {
-      g_log.notice() << "Offset: " << par[0] << std::endl;
+      g_log.debug() << "Offset: " << par[0] << std::endl;
       this->m_detNeighbourOffset = static_cast<int>(par[0]);
       this->getValuesAndWidths(inputWS);
     }
