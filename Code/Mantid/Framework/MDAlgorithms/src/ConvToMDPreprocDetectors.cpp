@@ -207,6 +207,8 @@ void ConvToMDPreprocDetectors::clearAll()
     this->TwoTheta.clear();
     this->detIDMap.clear();
     this->spec2detMap.clear();
+
+    pBaseInstr.reset();
 }
 
 } // END MDAlgorithms ns
