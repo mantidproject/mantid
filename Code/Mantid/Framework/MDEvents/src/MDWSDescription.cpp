@@ -152,15 +152,16 @@ std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
 
 
 /// empty constructor
-MDWSDescription::MDWSDescription(size_t nDimesnions):
-nDims(nDimesnions),
+MDWSDescription::MDWSDescription(size_t nDimensions):
+nDims(nDimensions),
 emode(-2),
 Ei(std::numeric_limits<double>::quiet_NaN()),
-dimMin(nDimesnions,-1),
-dimMax(nDimesnions,1),
-dimNames(nDimesnions,"mdn"),
-dimIDs(nDimesnions,"mdn_"),
-dimUnits(nDimesnions,"Momentum"),
+dimMin(nDimensions,-1),
+dimMax(nDimensions,1),
+dimNames(nDimensions,"mdn"),
+dimIDs(nDimensions,"mdn_"),
+dimUnits(nDimensions,"Momentum"),
+nBins(nDimensions,10),
 convert_to_factor(NoScaling),
 rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error
 Wtransf(3,3,true),
@@ -169,10 +170,10 @@ detInfoLost(false),
 default_dim_ID(nDefaultID),
 QScalingID(NCoordScalings)
 {
-    for(size_t i=0;i<nDimesnions;i++)
+    for(size_t i=0;i<nDimensions;i++)
     {
         dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
-        dimNames[i]=dimNames[i]+boost::lexical_cast<std::string>(i);
+        dimNames[i]= dimNames[i]+boost::lexical_cast<std::string>(i);
     }
 
  // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
