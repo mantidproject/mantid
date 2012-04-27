@@ -126,12 +126,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             # Find the UB matrix using the peaks and known lattice parameters
             FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=10,OutputWorkspace='Peaks',AppendPeaks=True)
             peaksWS = mtd['Peaks']
+            mtd.deleteWorkspace('MD2')
             mtd.releaseFreeMemory()
             CentroidPeaks(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,EdgePixels=self._edge,OutPeaksWorkspace=peaksWS)
-            IntegratePeaksMD(InputWorkspace=wkspMD,PeakRadius='0.12',ReplaceIntensity=True,
-                    BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
-                    PeaksWorkspace=peaksWS,OutputWorkspace=peaksWS)
-            mtd.deleteWorkspace('MD2')
+            PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
 
     def PyExec(self):
         # get generic information
