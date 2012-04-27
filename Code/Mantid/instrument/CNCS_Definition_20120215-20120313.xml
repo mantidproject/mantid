@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2012-04-26 22:10:00" name="CNCS" valid-from="2012-02-15 10:45:00">
-  <!--for runs 44930 to 51070-->
+<instrument valid-to="2012-03-13 23:59:59" name="CNCS" valid-from="2012-02-15 10:45:00">
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
