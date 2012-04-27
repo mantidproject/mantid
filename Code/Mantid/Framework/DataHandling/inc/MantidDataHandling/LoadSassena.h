@@ -46,7 +46,7 @@ namespace Mantid
   {
   public:
     /// Constructor
-    LoadSassena();
+    LoadSassena(): IDataFileChecker(), m_filename(""), GWS(NULL) {};
     /// Virtual Destructor
     virtual ~LoadSassena();
     /// Algorithm's name
@@ -85,8 +85,6 @@ namespace Mantid
     std::string m_filename;
     /// Group workspace being filled
     API::WorkspaceGroup_const_sptr GWS;
-    /// Reference to the logger class
-    static Kernel::Logger& g_log;
 
   }; // class LoadSassena
 
