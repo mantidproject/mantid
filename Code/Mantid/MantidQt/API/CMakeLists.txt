@@ -68,8 +68,14 @@ set ( UI_FILES
 
 set( TEST_FILES
    test/MantidColorMapTest.h
-   test/MantidQwtMatrixWorkspaceDataTest.h
 )
+
+# FIXME: The following test(s) only work on Linux, for some reason.
+if ( NOT WIN32 )
+	set( TEST_FILES ${TEST_FILES}
+   		test/MantidQwtMatrixWorkspaceDataTest.h
+   	)
+endif ()
 
 include_directories ( inc )
 include_directories ( ../MantidWidgets/inc )
@@ -129,9 +135,8 @@ endif ()
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 
-if ( WIN32 )
+if ( NOT WIN32 )
 # Does not work on windows for some reason
-else ()
 
 include_directories ( ../../Framework/MDEvents/inc )
 include_directories ( ../../Framework/DataObjects/inc )
