@@ -1364,6 +1364,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   size_t bankn = bankNames.size();
   if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
   {
+    if (static_cast<size_t>(totalChunks) > bankn)
+      throw std::runtime_error("Reduce number of chunks to equal or less than " + Strings::toString(bankn));
     size_t chunk_events = total_events/totalChunks;
     size_t lastChunkEvent = chunk_events;
     std::vector<size_t>::iterator it = bankNumEvents.begin();
@@ -1378,7 +1380,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       if (chunki != totalChunks)
       {
         // Save a bank for every chunk so there are no chunks with no events
-        for (size_t banki = bank0+1; banki < bankNames.size()-(totalChunks-chunki); banki++)
+        for (size_t banki = bank0+1; banki < bankNames.size()-(totalChunks-chunki)+1; banki++)
         {
           bankn = banki;
           sum_events += *it;
