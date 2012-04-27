@@ -1377,7 +1377,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       }
       if (chunki != totalChunks)
       {
-        for (size_t banki = bank0+1; banki < bankNames.size(); banki++)
+        // Save a bank for every chunk so there are no chunks with no events
+        for (size_t banki = bank0+1; banki < bankNames.size()-(totalChunks-chunki); banki++)
         {
           bankn = banki;
           sum_events += *it;
