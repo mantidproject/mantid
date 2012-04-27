@@ -228,11 +228,6 @@ void MantidQwtIMDWorkspaceData::saveLowestPositiveValue(const double v)
   if (v > 0) m_minPositive = v;
 }
 
-void MantidQwtIMDWorkspaceData::applyOffsets(const double, const double)
-{
-  std::runtime_error("MantidQwtIMDWorkspaceData::applyOffsets not implemented");
-}
-
 bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on)
 {
   m_isDistribution = on;

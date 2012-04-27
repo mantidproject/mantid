@@ -64,8 +64,6 @@ public:
   void saveLowestPositiveValue(const double v);
   bool setAsDistribution(bool on = true);
 
-  void applyOffsets(const double xOffset, const double yOffset);
-
 private:
 
   void cacheLinePlot();

@@ -119,12 +119,6 @@ void MantidQwtMatrixWorkspaceData::saveLowestPositiveValue(const double v)
   if (v > 0) m_minPositive = v;
 }
 
-void MantidQwtMatrixWorkspaceData::applyOffsets(const double xOffset, const double yOffset)
-{
-  std::transform(m_workspace->readX(m_spec).begin(),m_workspace->readX(m_spec).end(),m_X.begin(),std::bind2nd(std::plus<double>(),xOffset));
-  std::transform(m_workspace->readY(m_spec).begin(),m_workspace->readY(m_spec).end(),m_Y.begin(),std::bind2nd(std::plus<double>(),yOffset));
-}
-
 bool MantidQwtMatrixWorkspaceData::setAsDistribution(bool on)
 {
   m_isDistribution = on && m_isHistogram;
