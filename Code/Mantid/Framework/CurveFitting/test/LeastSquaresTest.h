@@ -252,14 +252,14 @@ public:
     //double f0 = costFun->val();
     //std::cerr << "fun=" << f0 << std::endl;
     //const GSLVector& g = costFun->getDeriv();
-    const GSLMatrix& H = costFun->getHessian();
+    //const GSLMatrix& H = costFun->getHessian();
 
     for(size_t i = 0; i < n; ++i)
     {
       double dp = 0.000001;
       double p1 = costFun->getParameter(i) + dp;
       costFun->setParameter(i,p1);
-      double f1 = costFun->val();
+      //double f1 = costFun->val();
       costFun->setParameter(i,p1-dp);
       //std::cerr << "deriv " << i << ' ' << p1 << ' ' << (f1 - f0) / dp << ' ' << g.get(i)  << std::endl;
       //for(size_t j = 0; j <= i; ++j)

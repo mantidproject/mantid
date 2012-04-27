@@ -31,7 +31,7 @@ public:
   virtual bool valid() const {return true;}
   virtual void jumpTo(size_t index);
   virtual bool next();
-  virtual bool next(size_t skip) {return false;}
+  virtual bool next(size_t ) {return false;}
   virtual signal_t getNormalizedSignal() const;
   virtual signal_t getNormalizedError() const;
   virtual signal_t getSignal() const {return 0;}
@@ -44,7 +44,7 @@ public:
   virtual int32_t getInnerDetectorID(size_t ) const {return 0;}
   virtual coord_t getInnerPosition(size_t , size_t ) const {return 0;}
   virtual signal_t getInnerSignal(size_t ) const {return 0;}
-  virtual signal_t getInnerError(size_t QtAPI) const {return 0;}
+  virtual signal_t getInnerError(size_t ) const {return 0;}
   virtual bool getIsMasked() const {return false;}
 };
 
@@ -140,7 +140,7 @@ public:
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
         x[i] = 0.1 * double(i);
-        y[i] =  10.0 + double(is) + (0.5 + 0.1*is) * x[i];
+        y[i] =  10.0 + double(is) + (0.5 + 0.1*double(is)) * x[i];
       }
     }
 

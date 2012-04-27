@@ -45,7 +45,7 @@ public:
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
         x[i] = 0.1 * double(i);
-        y[i] =  (10.0 + double(is)) * exp( -(x[i])/ (0.5*(1 + is)) );
+        y[i] =  (10.0 + double(is)) * exp( -(x[i])/ (0.5*(1 + double(is))) );
       }
     }
 
@@ -166,7 +166,7 @@ public:
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
         x[i] = 0.1 * double(i);
-        y[i] =  (10.0 + double(is)) * exp( -(x[i] + 0.05)/ (0.5*(1 + is)) );
+        y[i] =  (10.0 + double(is)) * exp( -(x[i] + 0.05)/ (0.5*(1 + double(is))) );
       }
       x.back() = x[x.size()-2] + 0.1;
     }
