@@ -101,7 +101,6 @@ namespace Algorithms
     size_t searchValue(std::vector<double> dataranges, double value);
 
     DataObjects::EventWorkspace_const_sptr mEventWS;
-    // DataObjects::SplittersWorkspace_sptr mSplitters;
     API::ISplittersWorkspace_sptr mSplitters;
     API::ITableWorkspace_sptr mFilterInfoWS;
 

@@ -142,7 +142,9 @@ namespace Algorithms
       this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(parname.str(), wsname.str(), Direction::Output), "Output");
       this->setProperty(parname.str(), optws);
 
-      std::cout << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << wsname.str() << std::endl;
+      g_log.debug() << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << parname.str() <<
+          " Workspace name = " << wsname.str() <<
+          " with Number of events = " << optws->getNumberEvents() << std::endl;
     } // ENDFOR
 
 

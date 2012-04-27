@@ -42,11 +42,11 @@ namespace Algorithms
 
     // 0. Input/Output Workspaces
     declareProperty(
-      new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace", "Anonymous", Direction::InOut),
+      new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
       "An input event workspace" );
 
     declareProperty(
-      new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("OutputWorkspace", "", Direction::Output),
+      new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("OutputWorkspace", "Splitters", Direction::Output),
       "The name to use for the output SplittersWorkspace object, i.e., the filter." );
 
     declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>("SplittersInformationWorkspace", "SplitterInfo", Direction::Output),
@@ -124,8 +124,16 @@ namespace Algorithms
   {
     // 1. Get general input and output
     mEventWS = this->getProperty("InputWorkspace");
+    if (!mEventWS)
+    {
+      g_log.error() << "Error! GenerateEventsFilter does not get input EventWorkspace" << std::endl;
+      throw std::invalid_argument("Input workspace is not EventWorkspace.");
+    }
+
+    g_log.debug() << "DB9441 GenerateEventsFilter() Input Event WS = " << mEventWS->getName() << ", Events = "
+        << mEventWS->getNumberEvents() << std::endl;
     Kernel::DateAndTime runstart(mEventWS->run().getProperty("run_start")->value());
-    std::cout << "DB9441 Run Start = " << runstart << " / " << runstart.totalNanoseconds() << std::endl;
+    g_log.debug() << "DB9441 Run Start = " << runstart << " / " << runstart.totalNanoseconds() << std::endl;
 
 
     mSplitters =  boost::shared_ptr<DataObjects::SplittersWorkspace>(new DataObjects::SplittersWorkspace());
@@ -153,14 +161,6 @@ namespace Algorithms
       // b) Set filter by time and log
       setFilterByLogValue(logname);
     }
-
-    /* FIXME Deletet this section before finalizing the code  *
-    for (size_t i = 0; i < mSplitters->getNumberSplitters(); ++i)
-    {
-      Kernel::SplittingInterval split = mSplitters->getSplitter(i);
-      std::cout << split.start().totalNanoseconds() << "\t\t" << split.stop().totalNanoseconds() << "\t\t" << split.index() << std::endl;
-    }
-    **********************************************************/
 
     this->setProperty("OutputWorkspace", mSplitters);
     this->setProperty("SplittersInformationWorkspace", mFilterInfoWS);
@@ -253,7 +253,7 @@ namespace Algorithms
       }
     }
 
-    std::cout << "DB8147 StartTime = " << mStartTime << ", StopTime = " << mStopTime << std::endl;
+    g_log.debug() << "DB8147 StartTime = " << mStartTime << ", StopTime = " << mStopTime << std::endl;
 
     return;
   }
@@ -323,13 +323,6 @@ namespace Algorithms
       g_log.error() << "Log " << logname << " does not exist or is not TimeSeriesProperty in double." << std::endl;
       throw std::invalid_argument("User specified log is not correct");
     }
-
-    /* FIXME  Delete This Section After Debugging
-    std::vector<Kernel::DateAndTime> times = mLog->timesAsVector();
-    std::vector<double> values = mLog->valuesAsVector();
-    for (size_t i = 0; i < times.size(); ++i)
-      std::cout << "DBOP " << times[i].totalNanoseconds() << "\t\t" << values[i] << std::endl;
-    **********************************************/
 
     double minValue = this->getProperty("MinimumLogValue");
     double maxValue = this->getProperty("MaximumLogValue");
@@ -453,14 +446,6 @@ namespace Algorithms
       wsindex ++;
       ++index;
     } // ENDWHILE
-
-    /* FIXME Delete After Debugging *
-    for (size_t i = 0; i < valueranges.size(); ++i)
-    {
-      std::cout << "DBOP " << mlog->firstTime().totalNanoseconds() << "\t\t" << valueranges[i] << std::endl;
-      std::cout << "DBOP " << mlog->lastTime().totalNanoseconds() << "\t\t" << valueranges[i] << std::endl;
-    }
-    *********************************/
 
     // 3. Call
     Kernel::TimeSplitterType splitters;
@@ -727,7 +712,7 @@ namespace Algorithms
         if (correctdir)
         {
           size_t index = searchValue(valueranges, currValue);
-          std::cout << "DBOP Log Index " << i << " Data Range Index = " << index << "  WS Index = " << indexwsindexmap[index/2] << std::endl;
+          g_log.debug() << "DBOP Log Index " << i << " Data Range Index = " << index << "  WS Index = " << indexwsindexmap[index/2] << std::endl;
 
           if (index%2 == 0)
           {
@@ -766,17 +751,17 @@ namespace Algorithms
             }
 
             // c2) Fall out of interval
-            std::cout << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
+            g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
           }
         } // ENDIF NO breakloop AND Correction Direction
         else
         {
-          std::cout << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
+          g_log.debug() << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
         }
       }
       else
       {
-        std::cout << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
+        g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
       // d) Create Splitter
@@ -790,7 +775,7 @@ namespace Algorithms
         {
           split.push_back( SplittingInterval(start, stop, lastindex) );
         }
-        std::cout << "DBOP ...  Add splitter " << split.size()-1 << ":  " << start.totalNanoseconds() << ", "
+        g_log.debug() << "DBOP ...  Add splitter " << split.size()-1 << ":  " << start.totalNanoseconds() << ", "
             << stop.totalNanoseconds() << " ... WSIndex = " << lastindex << std::endl;
 
         // reset

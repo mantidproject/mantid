@@ -82,6 +82,7 @@ set ( SRC_FILES
 	src/FilterBadPulses.cpp
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
+	src/FilterByTime2.cpp
 	src/FilterEvents.cpp
 	src/FilterEventsHighFrequency.cpp
 	src/FindCenterOfMassPosition.cpp
@@ -277,6 +278,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FilterBadPulses.h
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
+	inc/MantidAlgorithms/FilterByTime2.h
 	inc/MantidAlgorithms/FilterEvents.h
 	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition.h
@@ -462,6 +464,7 @@ set ( TEST_FILES
 	test/FFTTest.h
 	test/FilterBadPulsesTest.h
 	test/FilterByLogValueTest.h
+	test/FilterByTime2Test.h
 	test/FilterByTimeTest.h
 	test/FilterEventsHighFrequencyTest.h
 	test/FilterEventsTest.h
@@ -539,8 +542,8 @@ set ( TEST_FILES
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQW2Test.h
+	test/SofQW3Test.h
 	test/SofQWTest.h
-  test/SofQW3Test.h
 	test/SolidAngleTest.h
 	test/SortEventsTest.h
 	test/SpatialGroupingTest.h
