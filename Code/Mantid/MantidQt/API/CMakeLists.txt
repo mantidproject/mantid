@@ -68,7 +68,7 @@ set ( UI_FILES
 
 set( TEST_FILES
    test/MantidColorMapTest.h
-   #test/MantidQwtMatrixWorkspaceDataTest.h
+   test/MantidQwtMatrixWorkspaceDataTest.h
 )
 
 include_directories ( inc )

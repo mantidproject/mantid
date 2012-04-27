@@ -54,12 +54,12 @@ public:
     checkHistogramData(data2, 2.0);
   }
 
-  void test_assigmentOperator()
-  {
-    MantidQwtMatrixWorkspaceData data1(ws, 1, false, false);
-    MantidQwtMatrixWorkspaceData data2 = data1;
-    checkHistogramData(data2, 1.0);
-  }
+//  void test_assigmentOperator()
+//  {
+//    MantidQwtMatrixWorkspaceData data1(ws, 1, false, false);
+//    MantidQwtMatrixWorkspaceData data2 = data1;
+//    checkHistogramData(data2, 1.0);
+//  }
 
   void test_copy()
   {
