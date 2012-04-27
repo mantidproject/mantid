@@ -29,7 +29,7 @@ public:
   static LeastSquaresTest *createSuite() { return new LeastSquaresTest(); }
   static void destroySuite( LeastSquaresTest *suite ) { delete suite; }
 
-  void xtest_With_Simplex()
+  void test_With_Simplex()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
@@ -59,7 +59,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(),"success");
   }
 
-  void xtest_With_BFGS()
+  void test_With_BFGS()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
@@ -89,7 +89,7 @@ public:
 
   }
 
-  void xtest_val_deriv_valAndDeriv()
+  void test_val_deriv_valAndDeriv()
   {
     const double a = 1.0;
     const double b = 2.0;
@@ -130,7 +130,7 @@ public:
     TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
   }
 
-  void xtest_linear_correction_is_good_approximation()
+  void test_linear_correction_is_good_approximation()
   {
     const double a = 1.0;
     const double b = 2.0;
@@ -166,7 +166,7 @@ public:
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 
-  void xtest_Fixing_parameter()
+  void test_Fixing_parameter()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
