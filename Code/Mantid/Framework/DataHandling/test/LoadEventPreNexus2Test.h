@@ -128,7 +128,7 @@ public:
     TS_ASSERT( eventLoader->execute() );
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("cncs"));
+            (AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
 
 
     //Get the start time of all pulses
@@ -160,7 +160,7 @@ public:
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+    eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_cncs");
     eventLoader->setPropertyValue("UseParallelProcessing", parallel);
 
     //Get the event file size
@@ -171,7 +171,7 @@ public:
     TS_ASSERT( eventLoader->execute() );
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("cncs"));
+            (AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
 
     //The # of events = size of the file / 8 bytes (per event)
     //This fails cause of errors in events
@@ -251,7 +251,7 @@ public:
     TS_ASSERT( eventLoader->execute() );
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("cncs_skipped"));
+            (AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs_skipped"));
 
     //Only some of the pixels weretof loaded, because of lot of them are empty
     int numpixels = 2;
@@ -291,7 +291,7 @@ public:
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk1");
     TS_ASSERT( eventLoader->execute() );
     EventWorkspace_sptr chunk1 = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("chunk1"));
+            (AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk1"));
 
     // Load chunk 2 of 2
     eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
@@ -300,7 +300,7 @@ public:
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk2");
     TS_ASSERT( eventLoader->execute() );
     EventWorkspace_sptr chunk2 = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("chunk2"));
+            (AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk2"));
 
     // The number of events should be roughly equal and the sum should be 112266
     TS_ASSERT_EQUALS( chunk1->getNumberEvents(), 56139 )
