@@ -255,12 +255,14 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace()
     // inf's in order to treat the data correctly later.
     IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
-    alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", temp);
+    std::string outName = "_"+temp->getName()+"_clean";
+    alg->setProperty("OutputWorkspace", outName);
     alg->setProperty("NaNValue", 0.0);
     alg->setProperty("NaNError", 0.0);
     alg->setProperty("InfinityValue", 0.0);
     alg->setProperty("InfinityError", 0.0);
     alg->executeAsSubAlg();
+    temp = alg->getProperty("OutputWorkspace");
   }
   return temp;
 }

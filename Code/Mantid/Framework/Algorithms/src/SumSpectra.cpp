@@ -228,19 +228,22 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
 void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
                                   Progress &progress)
 {
-  // Get a mutable copy of the input workspace
-  MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
+  // Get a copy of the input workspace
+  MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
 
   // First, we need to clean the input workspace for nan's and inf's in order
-  // to treat the data correctly later.
+  // to treat the data correctly later. This will create a new private
+  // workspace that will be retrieved as mutable.
   IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", localworkspace);
-  alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", localworkspace);
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
+  std::string outName = "_"+temp->getName()+"_clean";
+  alg->setProperty("OutputWorkspace", outName);
   alg->setProperty("NaNValue", 0.0);
   alg->setProperty("NaNError", 0.0);
   alg->setProperty("InfinityValue", 0.0);
   alg->setProperty("InfinityError", 0.0);
   alg->executeAsSubAlg();
+  MatrixWorkspace_sptr localworkspace = alg->getProperty("OutputWorkspace");
 
   // Transform to real workspace types
   RebinnedOutput_sptr inWS = boost::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
