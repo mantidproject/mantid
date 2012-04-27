@@ -33,10 +33,10 @@ namespace Mantid
         typedef typename ContainerType::value_type DestElementType;
 
         // Check for a container-like object
-        Py_ssize_t length(0);
         try
         {
-         length = len(value);
+         Py_ssize_t length = len(value);
+         UNUSED_ARG(length);
         }
         catch(boost::python::error_already_set&)
         {
