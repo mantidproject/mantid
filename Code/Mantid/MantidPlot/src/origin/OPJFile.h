@@ -56,7 +56,7 @@ struct rect {
 	{
 		return right-left;
 	};
-	rect()
+    rect() : left(0), top(0), right(0), bottom(0)
 	{
 	}
 	rect(short width, short height)
@@ -125,6 +125,7 @@ struct spreadColumn {
 	std::vector <originData> odata;
 	spreadColumn(std::string _name="", int _index=0)
 	:	name(_name)
+    ,   type(NONE)
 	,	value_type(0)
 	,	value_type_specification(0)
 	,	significant_digits(6)
