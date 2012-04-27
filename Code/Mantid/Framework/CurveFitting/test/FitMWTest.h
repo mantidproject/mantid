@@ -41,11 +41,11 @@ public:
     {
       Mantid::MantidVec& x = ws2->dataX(is);
       Mantid::MantidVec& y = ws2->dataY(is);
-      Mantid::MantidVec& e = ws2->dataE(is);
+      //Mantid::MantidVec& e = ws2->dataE(is);
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
-        x[i] = 0.1 * i;
-        y[i] =  (10.0 + is) * exp( -(x[i])/ (0.5*(1 + is)) );
+        x[i] = 0.1 * double(i);
+        y[i] =  (10.0 + double(is)) * exp( -(x[i])/ (0.5*(1 + is)) );
       }
     }
 
@@ -162,11 +162,11 @@ public:
     {
       Mantid::MantidVec& x = ws2->dataX(is);
       Mantid::MantidVec& y = ws2->dataY(is);
-      Mantid::MantidVec& e = ws2->dataE(is);
+      //Mantid::MantidVec& e = ws2->dataE(is);
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
-        x[i] = 0.1 * i;
-        y[i] =  (10.0 + is) * exp( -(x[i] + 0.05)/ (0.5*(1 + is)) );
+        x[i] = 0.1 * double(i);
+        y[i] =  (10.0 + double(is)) * exp( -(x[i] + 0.05)/ (0.5*(1 + is)) );
       }
       x.back() = x[x.size()-2] + 0.1;
     }

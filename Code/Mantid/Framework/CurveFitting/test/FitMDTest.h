@@ -36,23 +36,23 @@ public:
   virtual signal_t getNormalizedError() const;
   virtual signal_t getSignal() const {return 0;}
   virtual signal_t getError() const {return 0;}
-  virtual coord_t * getVertexesArray(size_t & numVertices) const {return NULL;}
-  virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const {return NULL;}
+  virtual coord_t * getVertexesArray(size_t &) const {return NULL;}
+  virtual coord_t * getVertexesArray(size_t &, const size_t , const bool * ) const {return NULL;}
   virtual Mantid::Kernel::VMD getCenter() const ;
   virtual size_t getNumEvents() const {return 0;}
-  virtual uint16_t getInnerRunIndex(size_t index) const {return 0;}
-  virtual int32_t getInnerDetectorID(size_t index) const {return 0;}
-  virtual coord_t getInnerPosition(size_t index, size_t dimension) const {return 0;}
-  virtual signal_t getInnerSignal(size_t index) const {return 0;}
-  virtual signal_t getInnerError(size_t index) const {return 0;}
+  virtual uint16_t getInnerRunIndex(size_t ) const {return 0;}
+  virtual int32_t getInnerDetectorID(size_t ) const {return 0;}
+  virtual coord_t getInnerPosition(size_t , size_t ) const {return 0;}
+  virtual signal_t getInnerSignal(size_t ) const {return 0;}
+  virtual signal_t getInnerError(size_t QtAPI) const {return 0;}
   virtual bool getIsMasked() const {return false;}
 };
 
 class IMDWorkspaceTester: public WorkspaceTester
 {
 public:
-  std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
-    Mantid::Geometry::MDImplicitFunction * function = NULL) const
+  std::vector<IMDIterator*> createIterators(size_t ,
+    Mantid::Geometry::MDImplicitFunction * ) const
   {
     return std::vector<IMDIterator*>(1,new IMDWorkspaceTesterIterator(this));
   }
@@ -136,11 +136,11 @@ public:
     {
       Mantid::MantidVec& x = ws2->dataX(is);
       Mantid::MantidVec& y = ws2->dataY(is);
-      Mantid::MantidVec& e = ws2->dataE(is);
+      //Mantid::MantidVec& e = ws2->dataE(is);
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
-        x[i] = 0.1 * i;
-        y[i] =  10 + is + (0.5 + 0.1*is) * x[i];
+        x[i] = 0.1 * double(i);
+        y[i] =  10.0 + double(is) + (0.5 + 0.1*is) * x[i];
       }
     }
 

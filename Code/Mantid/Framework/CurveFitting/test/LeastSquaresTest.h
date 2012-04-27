@@ -34,7 +34,7 @@ public:
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] = 3.3 * x[i] + 4.4;
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -64,7 +64,7 @@ public:
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] =  9.9 * exp( -(x[i])/0.5 );
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -125,7 +125,7 @@ public:
 
     TS_ASSERT_DELTA(costFun->valDerivHessian(),0.145,1e-10);
     const GSLVector& g = costFun->getDeriv();
-    const GSLMatrix& H = costFun->getHessian();
+    //const GSLMatrix& H = costFun->getHessian();
     TS_ASSERT_DELTA(g.get(0), 1.1, 1e-10);
     TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
   }
@@ -171,7 +171,7 @@ public:
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] =  9.9 * exp( -(x[i])/0.5 );
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -249,9 +249,9 @@ public:
 
     size_t n = costFun->nParams();
     //system("pause");
-    double f0 = costFun->val();
+    //double f0 = costFun->val();
     //std::cerr << "fun=" << f0 << std::endl;
-    const GSLVector& g = costFun->getDeriv();
+    //const GSLVector& g = costFun->getDeriv();
     const GSLMatrix& H = costFun->getHessian();
 
     for(size_t i = 0; i < n; ++i)

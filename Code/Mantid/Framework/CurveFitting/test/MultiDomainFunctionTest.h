@@ -89,10 +89,10 @@ public:
     {
       Mantid::MantidVec& x = ws1->dataX(0);
       Mantid::MantidVec& y = ws1->dataY(0);
-      Mantid::MantidVec& e = ws1->dataE(0);
+      //Mantid::MantidVec& e = ws1->dataE(0);
       for(size_t i = 0; i < ws1->blocksize(); ++i)
       {
-        x[i] =  0.1 * i;
+        x[i] =  0.1 * double(i);
         y[i] =  A0 + A1 + A2 + (B0 + B1 + B2) * x[i];
       }
     }
@@ -102,10 +102,10 @@ public:
     {
       Mantid::MantidVec& x = ws2->dataX(0);
       Mantid::MantidVec& y = ws2->dataY(0);
-      Mantid::MantidVec& e = ws2->dataE(0);
+      //Mantid::MantidVec& e = ws2->dataE(0);
       for(size_t i = 0; i < ws2->blocksize(); ++i)
       {
-        x[i] = 1 + 0.1 * i;
+        x[i] = 1 + 0.1 * double(i);
         y[i] = A0 + A1 + (B0 + B1) * x[i];
       }
     }
@@ -115,10 +115,10 @@ public:
     {
       Mantid::MantidVec& x = ws3->dataX(0);
       Mantid::MantidVec& y = ws3->dataY(0);
-      Mantid::MantidVec& e = ws3->dataE(0);
+      //Mantid::MantidVec& e = ws3->dataE(0);
       for(size_t i = 0; i < ws3->blocksize(); ++i)
       {
-        x[i] = 2 + 0.1 * i;
+        x[i] = 2 + 0.1 * double(i);
         y[i] = A0 + A2 + (B0 + B2) * x[i];
       }
     }
