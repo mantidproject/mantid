@@ -24,6 +24,7 @@
 namespace WorkspaceCreationHelper
 {
 
+
   using namespace Mantid;
   using namespace Mantid::DataObjects;
   using namespace Mantid::Kernel;
@@ -31,6 +32,13 @@ namespace WorkspaceCreationHelper
   using namespace Mantid::Geometry;
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
+  // mock algorighm
+  Kernel::Logger& MockAlgorithm::a_log =Logger::get("test-Algorithms");
+  MockAlgorithm::MockAlgorithm(size_t nSteps)
+  {
+      pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
+  }
+
 
   Workspace2D_sptr Create1DWorkspaceRand(int size)
   {

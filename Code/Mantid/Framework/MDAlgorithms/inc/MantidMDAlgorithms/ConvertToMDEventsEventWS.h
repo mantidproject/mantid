@@ -61,7 +61,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     // the instanciation of the class which does the transformation itself
+     // the instantiation of the class which does the transformation itself
      CoordTransformer<Q,MODE,CONV,ConvertToMD::Centered,Sample> trn; 
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;

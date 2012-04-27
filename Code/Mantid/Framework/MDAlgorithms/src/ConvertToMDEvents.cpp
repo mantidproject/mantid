@@ -64,6 +64,8 @@ void ConvertToMDEvents::initDocs()
  */
 ConvertToMDEvents::~ConvertToMDEvents()
 {
+    // if the algorithm has gone, then the preprocessed detectors should probably too
+    det_loc.clearAll();
 }
 //
 //const double rad2deg = 180.0 / M_PI;

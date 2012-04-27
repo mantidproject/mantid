@@ -193,7 +193,20 @@ ConvToMDPreprocDetectors::ConvToMDPreprocDetectors():
 emode(-2),
 efix(std::numeric_limits<double>::quiet_NaN()),
 L1(-1)
+{}
+// destructor
+void ConvToMDPreprocDetectors::clearAll()
 {
+    emode = -2,
+    efix  = std::numeric_limits<double>::quiet_NaN();
+    L1    = -1;
+
+    this->det_dir.clear();
+    this->det_id.clear();
+    this->L2.clear();
+    this->TwoTheta.clear();
+    this->detIDMap.clear();
+    this->spec2detMap.clear();
 }
 
 } // END MDAlgorithms ns

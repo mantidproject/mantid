@@ -109,6 +109,7 @@ public:
    /** function builds fake cpectra-detector map and all other detectors position for the case when detector information has been lost */
     void buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS);
 
+    void clearAll();
     ConvToMDPreprocDetectors();
 private:
     // function allocates the class detectors memory 
