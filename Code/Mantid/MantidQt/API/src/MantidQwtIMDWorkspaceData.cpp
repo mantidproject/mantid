@@ -213,11 +213,6 @@ size_t MantidQwtIMDWorkspaceData::esize() const
   return m_E.size();
 }
 
-bool MantidQwtIMDWorkspaceData::sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const
-{
-  return workspace.get() == m_workspace.get();
-}
-
 void MantidQwtIMDWorkspaceData::setLogScale(bool on)
 {
   m_logScale = on;

@@ -104,11 +104,6 @@ size_t MantidQwtMatrixWorkspaceData::esize() const
   return m_E.size();
 }
 
-bool MantidQwtMatrixWorkspaceData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
-{
-  return workspace.get() == m_workspace.get();
-}
-
 void MantidQwtMatrixWorkspaceData::setLogScale(bool on)
 {
   m_logScale = on;

@@ -52,8 +52,6 @@ public:
 
   bool isHistogram()const{return m_isHistogram;}
 
-  bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
-
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
   bool logScale()const{return m_logScale;}
