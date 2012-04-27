@@ -127,8 +127,20 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
   findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
-  findpeaks->setProperty<double>("PeakHeightTolerance", 5);
   findpeaks->setProperty<bool>("RawPeakParameters", true);
+
+  int fwhm = getProperty("FWHM");
+  int tolerance = getProperty("Tolerance");
+  std::string backgroundtype = getProperty("BackgroundType");
+  bool highbackground = getProperty("HighBackground");
+  std::vector<double> peakpositions = getProperty("PeakPositions");
+  g_log.debug() << "StripPeaks() calls FindPeaks(): FWHM            = " << fwhm << std::endl;
+  g_log.debug() << "StripPeaks() calls FindPeaks(): Tolerance       = " << tolerance << std::endl;
+  g_log.debug() << "StripPeaks() calls FindPeaks(): HighBackground  = " << highbackground<< std::endl;
+  g_log.debug() << "StripPeaks() calls FindPeaks(): BackgroundType  = " << backgroundtype << std::endl;
+  g_log.debug() << "StripPeaks() calls FindPeaks(): Peak positions: " << std::endl;
+  for (size_t i = 0; i < peakpositions.size(); ++i)
+      g_log.debug() << peakpositions[i] << std::endl;
 
   findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");
@@ -182,7 +194,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     if ( chisq > m_maxChiSq)
     {
       if (chisq != 1.e10)
-        g_log.error() << "Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
+        g_log.error() << "StripPeaks():  Peak Index = " << i << " @ " << centre 
+           << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
       continue;
     }
 
