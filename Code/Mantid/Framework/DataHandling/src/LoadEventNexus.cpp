@@ -173,15 +173,12 @@ public:
   {
     // Cost is approximately proportional to the number of events to process.
     m_cost = static_cast<double>(numEvents);
-//    std::cout << "b " << this->cost() << "\n";
   }
 
   //----------------------------------------------------
   // Run the data processing
   void run()
   {
-//    std::cout << "ProcessBank.run(" << entry_name << ")\n"; // REMOVE
-  CPUTimer timer;
     //Local tof limits
     double my_shortest_tof, my_longest_tof;
     my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -342,7 +339,6 @@ public:
       if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
       alg->bad_tofs += badTofs;
     }
-//    std::cout << "ProcessBank.run(" << entry_name << ") ended - " << timer << "\n"; // REMOVE
 
     // Free Memory
     delete [] event_id;
@@ -415,7 +411,6 @@ public:
   {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
-//    std::cout << "a " << this->cost() << "\n";
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -635,8 +630,6 @@ public:
   //---------------------------------------------------------------------------------------------------
   void run()
   {
-//    std::cout << "LoadBankFromDiskTask.run(" << entry_name << ")\n"; // REMOVE
-    CPUTimer timer;
     //The vectors we will be filling
     std::vector<uint64_t> * event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> & event_index = *event_index_ptr;
@@ -727,8 +720,6 @@ public:
       delete event_index_ptr;
       return;
     }
-//    std::cout << "LoadBankFromDiskTask.run(" << entry_name << ") ended - " << timer << "\n"; // REMOVE
-
 
     // No error? Launch a new task to process that data.
     size_t numEvents = m_loadSize[0];
@@ -1048,7 +1039,6 @@ void LoadEventNexus::exec()
   compressTolerance = getProperty("CompressTolerance");
 
   loadlogs = true;
-//  NXsetcache(1024000000);//5120000); // increase hdf5 cache size - default is 1,024,000
 //  //Get the limits to the filter
 //  filter_tof_min = getProperty("FilterByTofMin");
 //  filter_tof_max = getProperty("FilterByTofMax");
