@@ -209,7 +209,7 @@ bool IVUtils::CalculateInterval( double   global_min,
                                          // containing max, or with max as
                                          // right hand endpoint
   if ( max_index >= (int)global_steps )
-    max_index = max_index - 1;
+    max_index = (int)global_steps - 1;
 
                                          // now set max to the value at the
                                          // right edge of bin max_index

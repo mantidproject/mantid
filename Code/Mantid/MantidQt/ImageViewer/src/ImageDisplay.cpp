@@ -294,6 +294,16 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
   double x_min = data_array->GetXMin();
   double x_max = data_array->GetXMax();
 
+  if ( x < x_min )                      // restrict x to valid range since
+    x = x_min;                          // Qt returns values outside of region
+  else if ( x > x_max )
+    x = x_max;
+
+  if ( y < y_min )                      // restrict y to valid range since
+    y = y_min;                          // Qt returns values outside of region
+  else if ( y > y_max )
+    y = y_max;
+
   double relative_y = (y-y_min)/(y_max-y_min);            //  in 0 to 1
   int    row = (int)(relative_y * (double)n_rows);
   if ( row > (int)n_rows - 1 )

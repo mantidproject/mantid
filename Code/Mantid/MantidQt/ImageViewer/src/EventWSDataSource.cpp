@@ -48,18 +48,11 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
     std::cout << "WARNING: max tof too large, set to " 
               << total_xmax << std::endl;
   }
-
-  x_scale = new MantidVec();      // keep one x_scale, just reset it to
-                                  // different binnings.
 }
 
 
 EventWSDataSource::~EventWSDataSource()
 {
-  if ( x_scale )
-  {
-    delete x_scale;
-  }
 }
 
 
@@ -105,20 +98,24 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
 
   float* new_data = new float[n_rows * n_cols];   // this is deleted in the
                                                   // DataArrray destructor
-  x_scale->resize(n_cols+1);
+  MantidVec x_scale;
+  x_scale.resize(n_cols+1);
   double dx = (xmax - xmin)/((double)n_cols + 1.0);
   for ( size_t i = 0; i < n_cols+1; i++ )
   {
-    (*x_scale)[i] = xmin + (double)i * dx;;
+    x_scale[i] = xmin + (double)i * dx;;
   }
 
+  MantidVec y_vals;
+  MantidVec err;
+  y_vals.resize(n_cols);
+  err.resize(n_cols);
   size_t index = 0;
   for ( size_t i = first_row; i < first_row + n_rows; i++ )
   {
     IEventList * list = ev_ws->getEventListPtr(i);
-    list->setX( *x_scale );
-    list->setTofs( *x_scale );
-    const MantidVec & y_vals = ev_ws->readY(i);
+    y_vals.clear();
+    list->generateHistogram( x_scale, y_vals, err, true );
     for ( size_t col = 0; col < n_cols; col++ )
     {
       new_data[index] = (float)y_vals[col];
