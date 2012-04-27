@@ -86,9 +86,6 @@ BivariateNormal::~BivariateNormal()
    MantidVec D = ws->dataY(0);
    MantidVec X = ws->dataY(1);
    MantidVec Y = ws->dataY(2);
-   bool show=false;
-   if( ws->getName()=="index0")
-     show=true;
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
 
    NCells = std::min<int>((int)nData, NCells);
@@ -105,7 +102,7 @@ BivariateNormal::~BivariateNormal()
    inf << "F Parameters=";
    for (size_t k = 0; k < nParams(); k++)
      inf << "," << getParameter(k);
-   inf << std::endl;
+   inf << "\n";
 
    for (int i = 0; i < NCells; i++)
    {
@@ -133,7 +130,7 @@ BivariateNormal::~BivariateNormal()
      x++;
    }
 
-   inf << std::endl<<"    chiSq =" << chiSq << std::endl;
+   inf << "\n"<<"    chiSq =" << chiSq << "\n";
    g_log.debug(inf.str());
 
  }
@@ -151,7 +148,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   inf << "***Parameters=" ;
   for( size_t k=0; k < nParams();k++)
     inf << "," << getParameter(k);
-  inf << std::endl;
+  inf << "\n";
   g_log.debug( inf.str());
 
   std::vector<double>outt(nData);
