@@ -291,7 +291,6 @@ void FindPeaks::exec()
       m_searchPeakPos = true;
     }
     //Perform fit with fixed start positions.
-    //std::cout << "Number of Centers = " << centers.size() << std::endl;
     this->findPeaksGivenStartingPoints(centers, fitWindows);
   }
   else
@@ -1081,7 +1080,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     a0 = a1 = a2 = 0.;
     bkgdchi2 = -100.;
   }
-  g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2
+  g_log.information() << "(HighBackground) Fit Background:  Chi2 = " << bkgdchi2
                       << " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << "\n";
 
   // const double in_height = Y[i4] - in_bg0;
@@ -1092,7 +1091,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
    */
   double in_height = 0.0;
   std::vector<double> peakxvec, peakyvec, peakevec;
-  for (size_t i = i_min; i <= i_max; i ++)
+  for (size_t i = i_min; i < i_max; i ++)
   {
     double x = X[i];
     double y = Y[i]-(a0+a1*x+a2*x*x);
@@ -1109,15 +1108,17 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     peakyvec.push_back(y);
     peakevec.push_back(z);
   }
+  peakxvec.push_back(X[i_max]);
   API::MatrixWorkspace_sptr peakWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, peakxvec.size(), peakyvec.size());
   // AnalysisDataService::Instance().addOrReplace("PurePeakWorkspace", peakWS);
 
-  for (size_t i = 0; i < peakxvec.size(); ++i)
+  for (size_t i = 0; i < peakyvec.size(); ++i)
   {
     peakWS->dataX(0)[i] = peakxvec[i];
     peakWS->dataY(0)[i] = peakyvec[i];
     peakWS->dataE(0)[i] = peakevec[i];
   }
+  peakWS->dataX(0).back() = peakxvec.back();
 
   double peakxmin = peakxvec[0];
   double peakxmax = peakxvec.back();
