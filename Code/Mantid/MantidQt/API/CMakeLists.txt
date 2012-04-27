@@ -100,7 +100,11 @@ target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIB
 if ( CXXTEST_FOUND )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     # Make the rest of the tests
-    include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
+    include_directories ( ../../Framework/CurveFitting/inc
+                          ../../Framework/DataHandling/inc
+                          ../../Framework/Nexus/inc
+                          ../../Framework/TestHelpers/inc
+                          ../../Framework/MDEvents/inc)
     
     # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
     # It will go out of scope at the end of this file so doesn't need un-setting
