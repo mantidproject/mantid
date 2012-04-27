@@ -1,16 +1,18 @@
 /*WIKI* 
 
 
-Given a PeaksWorkspace with a UB matrix stored with the sample, this algoritm will accept a transformation matrix M, change UB to UB*M-inverse, then re-index the peaks.  This effectively maps each (HKL) vector to M*(HKL). For example, the transformation M(3,3)0,1,0,1,0,0,0,0,-1 will interchange the H and K values and negate L.  This algorithm should allow the usr to perform any required transformation of the Miller indicies, provided that transformation has a positive determinant.  If a transformation with a negative or zero determinant is entered, the algorithm with throw an exception.  The transformation must be specified as a 3x3 matrix in exactly the form shown, with NO SPACES.
+Given a PeaksWorkspace with a UB matrix stored with the sample, this algoritm will accept a 3x3 transformation matrix M, change UB to UB*M-inverse, then re-index the peaks.  This effectively maps each (HKL) vector to M*(HKL). For example, the transformation with elements 0,1,0,1,0,0,0,0,-1 will interchange the H and K values and negate L.  This algorithm should allow the usr to perform any required transformation of the Miller indicies, provided that transformation has a positive determinant.  If a transformation with a negative or zero determinant is entered, the algorithm with throw an exception.  The 9 elements of the transformation must be specified as a comma separated list of numbers.
 
 *WIKI*/
 #include "MantidCrystal/TransformHKL.h"
+#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MatrixProperty.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/Matrix.h"
 #include <cstdio>
 
@@ -51,6 +53,7 @@ namespace Crystal
     this->setWikiSummary( summary );
 
     std::string message("Specify a 3x3 matrix to apply to (HKL) vectors.");
+    message += " as a list of 9 comma separated numbers.";
     message += " Both the UB and HKL values will be updated";
     this->setOptionalMessage( message );
   }
@@ -60,26 +63,33 @@ namespace Crystal
    */
   void TransformHKL::init()
   {
-    this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
-          "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
+    this->declareProperty(
+          new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
+          "Input Peaks Workspace");
 
-    boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
+    boost::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
 
-    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
-          mustBePositive,Direction::Input),"Indexing Tolerance (0.15)");
+    this->declareProperty(
+           new PropertyWithValue<double>("Tolerance",0.15, mustBePositive,Direction::Input),
+           "Indexing Tolerance (0.15)");
 
-    IValidator_sptr validator = IValidator_sptr(new NullValidator);
-    MatrixProperty<double>* prop = new MatrixProperty<double>( "HKL Transform",
-                           validator, Direction::Input);
-    prop->setValue("Matrix(3,3)1,0,0,0,1,0,0,0,1");
-    this->declareProperty( prop, "Specify the 3X3 HKL transform matrix in exactly this form, (NO SPACES)" );
+    std::vector<double>  identity_matrix(9,0.0);
+    identity_matrix[0] = 1;
+    identity_matrix[4] = 1;
+    identity_matrix[8] = 1;
+    auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
+    this->declareProperty(
+          new ArrayProperty<double>("HKL_Transform",identity_matrix,threeBythree),
+          "Specify 3x3 HKL transform matrix as a comma separated list of 9 numbers");
 
-    this->declareProperty(new PropertyWithValue<int>( "NumIndexed", 0,
-          Direction::Output), "Gets set with the number of indexed peaks.");
+    this->declareProperty(
+          new PropertyWithValue<int>( "NumIndexed", 0, Direction::Output),
+          "Gets set with the number of indexed peaks.");
 
-    this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
-          Direction::Output), "Gets set with the average HKL indexing error.");
+    this->declareProperty(
+          new PropertyWithValue<double>( "AverageError", 0.0, Direction::Output),
+          "Gets set with the average HKL indexing error.");
   }
 
   //--------------------------------------------------------------------------
@@ -105,7 +115,8 @@ namespace Crystal
              "ERROR: The stored UB is not a valid orientation matrix");
     }
 
-    DblMatrix hkl_tran = this->getProperty("HKL Transform");
+    std::vector<double> tran_vec = getProperty("HKL_Transform");
+    DblMatrix hkl_tran( tran_vec );
 
     std::ostringstream str_stream;
     str_stream << hkl_tran;
