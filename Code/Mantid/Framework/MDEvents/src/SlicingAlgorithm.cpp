@@ -617,6 +617,32 @@ namespace MDEvents
             "a transformation. There is no transformation saved from "
             + m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
 
+      // Fail if the MDHistoWorkspace was modified by binary operation
+      MDHistoWorkspace_sptr inHisto = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_inWS);
+      if (inHisto)
+      {
+        if (inHisto->getNumExperimentInfo() > 0)
+        {
+          const Run & run = inHisto->getExperimentInfo(0)->run();
+          if (run.hasProperty("mdhisto_was_modified"))
+          {
+            Property  * prop = run.getProperty("mdhisto_was_modified");
+            if (prop)
+            {
+              if (prop->value() == "1")
+              {
+                throw std::runtime_error("This MDHistoWorkspace was modified by a binary operation (e.g. Plus, Minus). "
+                    "It is not currently possible to rebin a modified MDHistoWorkspace because that requires returning to the original "
+                    "(unmodified) MDEventWorkspace, and so would give incorrect results. "
+                    "Instead, you can use SliceMD and perform operations on the resulting "
+                    "MDEventWorkspaces, which preserve all events. "
+                    "You can override this check by removing the 'mdhisto_was_modified' sample log.");
+              }
+            }
+          }
+        }
+      }
+
       g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << m_originalWS->getName() << "'" << std::endl;
     }
 

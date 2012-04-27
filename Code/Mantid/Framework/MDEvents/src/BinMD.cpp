@@ -559,9 +559,10 @@ namespace MDEvents
    */
   void BinMD::exec()
   {
-    // Input MDEventWorkspace
+    // Input MDEventWorkspace/MDHistoWorkspace
     m_inWS = getProperty("InputWorkspace");
     // Look at properties, create either axis-aligned or general transform.
+    // This (can) change m_inWS
     this->createTransform();
 
     // De serialize the implicit function

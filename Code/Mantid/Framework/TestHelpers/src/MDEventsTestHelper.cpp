@@ -12,6 +12,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include <boost/make_shared.hpp>
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;
@@ -240,6 +242,7 @@ namespace MDEventsTestHelper
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
     ws_sptr->setTo(signal, errorSquared, numEvents);
+    ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
     if (!name.empty())
       AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
     return ws_sptr;
