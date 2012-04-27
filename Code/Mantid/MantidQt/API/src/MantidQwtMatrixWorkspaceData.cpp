@@ -88,7 +88,15 @@ double MantidQwtMatrixWorkspaceData::ex(size_t i) const
 
 double MantidQwtMatrixWorkspaceData::e(size_t i) const
 {
-  return m_E[i];
+  if (m_logScale)
+  {
+    if (m_Y[i] <= 0.0)
+      return 0;
+    else
+      return m_E[i];
+  }
+  else
+    return m_E[i];
 }
 
 size_t MantidQwtMatrixWorkspaceData::esize() const

@@ -68,6 +68,7 @@ set ( UI_FILES
 
 set( TEST_FILES
    test/MantidColorMapTest.h
+   test/MantidQwtMatrixWorkspaceDataTest.h
 )
 
 include_directories ( inc )
@@ -98,9 +99,21 @@ target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIB
 
 if ( CXXTEST_FOUND )
   if ( GMOCK_FOUND AND GTEST_FOUND )
+    # Make the rest of the tests
+    include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
+    
+    # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+    # It will go out of scope at the end of this file so doesn't need un-setting
+    set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../Framework/TestHelpers/src/SANSInstrumentCreationHelper.cpp
+                        ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp )
+    
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MantidQtAPITest MantidQtAPI ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( MantidQtAPITest MantidQtAPI MDEvents DataHandling
+    						${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
     add_dependencies( GUITests MantidQtAPITest )
+    
     # Add to the 'UnitTests' group in VS
     set_property( TARGET MantidQtAPITest PROPERTY FOLDER "UnitTests" )
   endif ()
