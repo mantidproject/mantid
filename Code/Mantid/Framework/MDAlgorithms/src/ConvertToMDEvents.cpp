@@ -143,15 +143,14 @@ ConvertToMDEvents::init()
 //TODO:    "If a maximal target workspace range is lower, then one of specified here, the target workspace range will be used instead" );
     
     declareProperty(new ArrayProperty<double>("Uproj"),
-     "Optional: First base vector (in hkl) defining fractional or crystal catrezian coordinate system for neutron diffraction;\n"
-     "If nothing is specified as input, it will try to recover this vector from the input workspace's oriented lattice,\n"
-    " where it should define the initial orientation of the crystal wrt the beam. \n"
-    " If no oriented lattice is not found, the workspace is processed with unit coordinate transformation matrix or in powder mode.\n"); 
+     "Optional: First base vector (in hkl) defining a new coordinate system for neutron scattering;\n"
+     "Default (1,0,0).\n");
     declareProperty(new ArrayProperty<double>("Vproj"),
-    "Optional:  Second base vector (in hkl) defining fractional rystal catrezian coordinate system for neutron diffraction; \n"
-    "If nothing is specified as input, it will try to recover this vector from the input workspace's oriented lattice\n"
-    "and if this fails, proceed as for property u above.");
-
+    "Optional:  Second base vector (in hkl) defining a new coordinate system for neutron scattering;\n"
+    "Default (0,1,0).\n");
+    declareProperty(new ArrayProperty<double>("Wproj"),
+    "Optional:  Third base vector (in hkl) defining a new coordinate system for neutron scattering;\n"
+    "Default (0,0,1).\n");
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
     // additional box controller settings property. 
@@ -223,7 +222,8 @@ void ConvertToMDEvents::exec()
         //identify if u,v are present among input parameters and use defaults if not
         std::vector<double> ut = getProperty("UProj");
         std::vector<double> vt = getProperty("VProj");
-        MsliceProj.getUVsettings(ut,vt);
+        std::vector<double> wt = getProperty("WProj");
+        MsliceProj.getUVsettings(ut,vt,wt);
        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
 
         // set the min and max values for the dimensions from the input porperties

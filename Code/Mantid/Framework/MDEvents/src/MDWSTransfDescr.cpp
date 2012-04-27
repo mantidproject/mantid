@@ -14,7 +14,7 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
 {
   
     Kernel::Matrix<double> mat(3,3,true);
-    Kernel::Matrix<double> umat;
+    Kernel::Matrix<double> ub;
     
 
     bool has_lattice(true);
@@ -30,15 +30,10 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
     }
     //
     if(has_lattice){
-      if(is_uv_default) {
-         // we need to set up u,v for axis caption as it is defined in workspace UB matrix;
-         uProj = TargWSDescription.pLatt->getuVector();
-         vProj = TargWSDescription.pLatt->getvVector();      
-      }
-      umat  = TargWSDescription.pLatt->getU();
+
       TargWSDescription.Wtransf = buildQTrahsf(TargWSDescription);
       // Obtain the transformation matrix to Cartezian related to Crystal
-      mat = TargWSDescription.GoniomMatr*umat*TargWSDescription.Wtransf;
+      mat = TargWSDescription.GoniomMatr*TargWSDescription.Wtransf;
      // and this is the transformation matrix to notional
      //mat = gon*Latt.getUB();
       mat.Invert();
@@ -50,13 +45,9 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
 }
 
 
-
-
-
-
 Kernel::DblMatrix MDWSTransfDescr::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription)const
 {
-    //implements strategy Q=R*U*W*B*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
+    //implements strategy Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
     if(!TargWSDescription.pLatt.get()){      
         throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
     }
@@ -68,16 +59,27 @@ Kernel::DblMatrix MDWSTransfDescr::buildQTrahsf(MDEvents::MDWSDescription &TargW
     // derive rotation from u0,v0 u0||ki to u,v
     if(!is_uv_default)
     {  
-        Kernel::DblMatrix  U0 = TargWSDescription.pLatt->getU();
-        Geometry::OrientedLattice FakeLattice;
-        FakeLattice.setUFromVectors(uProj,vProj);
-        Kernel::DblMatrix  U1  = FakeLattice.getU();
-        // U1 = W*U0? --- rotation from u,v to uProj, vProj
-        Wmat = U1*U0.Invert();
-        // debug
-        //std::vector<double> wr=Wmat.getVector();
+        Wmat[0][0]=uProj[0];
+        Wmat[1][0]=uProj[1];
+        Wmat[2][0]=uProj[2];
+        Wmat[0][1]=vProj[0];
+        Wmat[1][1]=vProj[1];
+        Wmat[2][1]=vProj[2];
+        Wmat[0][2]=wProj[0];
+        Wmat[1][2]=wProj[1];
+        Wmat[2][2]=wProj[2];
     }
-
+    if(ScaleID==OrthogonalHKLScale)
+    {
+        std::vector<Kernel::V3D> dim_directions;
+        std::vector<Kernel::V3D> uv(2);
+        uv[0]=uProj;
+        uv[1]=vProj;
+        dim_directions = Kernel::V3D::makeVectorsOrthogonal(uv);
+        for(size_t i=0;i<3;++i)
+            for (size_t j=0;j<3;++j)
+                Wmat[i][j]=dim_directions[j][i];
+    }
     Kernel::DblMatrix Scale(3,3,true);
     switch (ScaleID)
     {
@@ -95,19 +97,20 @@ Kernel::DblMatrix MDWSTransfDescr::buildQTrahsf(MDEvents::MDWSDescription &TargW
         }
     case OrthogonalHKLScale://< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
         {
-          for(int i=0;i<3;i++) Scale[i][i] = (2*M_PI)/TargWSDescription.pLatt->a(i);          
+          if(TargWSDescription.pLatt.get()) Scale= TargWSDescription.pLatt->getUB()*(2*M_PI);
           break;
         }
     case HKLScale:   //< non-orthogonal system for non-orthogonal lattice
         {
-            if(TargWSDescription.pLatt.get()) Scale = TargWSDescription.pLatt->getB()*(2*M_PI);           
-            break;
+          if(TargWSDescription.pLatt.get()) Scale = TargWSDescription.pLatt->getUB()*(2*M_PI);
+          break;
         }
 
     default: throw(std::invalid_argument("unrecognized conversion mode"));
 
     }
-    return Wmat*Scale;
+
+    return Scale*Wmat;
 }
 
 /** Build meaningful dimension names for different conversion modes
@@ -138,51 +141,46 @@ void MDWSTransfDescr::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDes
        // axis units:
         CoordScaling ScaleID = TargWSDescription.convert_to_factor;
   
-        
-        if(ScaleID==HKLScale)
-        { // axis for HKL case are just along the directions requested
-            dim_names[0]="H";
-            dim_names[1]="K";
-            dim_names[2]="L";
+        dim_names[0]="H";
+        dim_names[1]="K";
+        dim_names[2]="L";
 
-            dim_directions.resize(3);
-            dim_directions[0]=uProj;
-            dim_directions[1]=vProj;
-            dim_directions[2]=uProj.cross_prod(vProj);        
-        }else
-        { // in any other (orthogonal) case, the axis are build around projection vectors (either they are parallel to beam or not)
-          // correct setup of these vectors has been already done
-            dim_names[0]="Qh";
-            dim_names[1]="Qk";
-            dim_names[2]="Ql";
-            // this is highly questionable approach
+        dim_directions.resize(3);
+        dim_directions[0]=uProj;
+        dim_directions[1]=vProj;
+        dim_directions[2]=wProj;
+        if(ScaleID==OrthogonalHKLScale)
+        {
             std::vector<Kernel::V3D> uv(2);
             uv[0]=uProj;
             uv[1]=vProj;
             dim_directions = Kernel::V3D::makeVectorsOrthogonal(uv);
-                //this->buildOrtho3D(Bm,uProj,vProj);
         }
-
         // axis names:
         for(int i=0;i<3;i++)TargWSDescription.dimNames[i]=MDEvents::makeAxisName(dim_directions[i],dim_names);
 
         if (ScaleID == NoScaling)
         {
-              for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "A^-1";     
+            for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "A^-1";
         }
         if(ScaleID==SingleScale)
         {
-                double dMax(-1.e+32);
-                for(int i=0;i<3;i++)dMax =(dMax>LatPar[i])?(dMax):(LatPar[i]);
-                for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(2*M_PI/dMax,1.e-3)+" A^-1";
+            double dMax(-1.e+32);
+            for(int i=0;i<3;i++)dMax =(dMax>LatPar[i])?(dMax):(LatPar[i]);
+            for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(2*M_PI/dMax,1.e-3)+" A^-1";
         }
-        if(ScaleID==OrthogonalHKLScale)
+        if((ScaleID==OrthogonalHKLScale)||(ScaleID==HKLScale))
         {
-                for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(2*M_PI/LatPar[i],1.e-3)+" A^-1";
-        }
-        if(ScaleID==HKLScale)
-        {
-                for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "";
+            //get the length along each of the axes
+            std::vector<double> len;
+            Kernel::V3D x;
+            x=Bm*dim_directions[0];
+            len.push_back(2*M_PI*x.norm());
+            x=Bm*dim_directions[1];
+            len.push_back(2*M_PI*x.norm());
+            x=Bm*dim_directions[2];
+            len.push_back(2*M_PI*x.norm());
+            for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(len[i],1.e-3)+" A^-1";
         }
  
 }
@@ -205,10 +203,10 @@ void MDWSTransfDescr::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDe
 }
 
 //
-void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt)
+void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt, const std::vector<double> &wt)
 {   
 //identify if u,v are present among input parameters and use defaults if not
-    bool u_default(true),v_default(true);
+    bool u_default(true),v_default(true),w_default(true);
     if(!ut.empty()){
         if(ut.size()==3){ u_default =false;
         }else{convert_log.warning() <<" u projection vector specified but its dimensions are not equal to 3, using default values [1,0,0]\n";
@@ -219,7 +217,12 @@ void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::ve
         }else{ convert_log.warning() <<" v projection vector specified but its dimensions are not equal to 3, using default values [0,1,0]\n";
         }
     }
-    if(u_default){  
+    if(!wt.empty()){
+        if(wt.size()==3){ w_default  =false;
+        }else{ convert_log.warning() <<" w projection vector specified but its dimensions are not equal to 3, using default values [0,0,1]\n";
+        }
+    }
+    if(u_default){
         uProj[0] = 1;         uProj[1] = 0;        uProj[2] = 0;
     }else{
         uProj[0] = ut[0];     uProj[1] = ut[1];    uProj[2] = ut[2];
@@ -229,7 +232,12 @@ void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::ve
     }else{
         vProj[0] = vt[0];     vProj[1] = vt[1];    vProj[2] = vt[2];
     }
-    if(u_default&&v_default){
+    if(w_default){
+        wProj[0] = 0;         wProj[1] = 0;        wProj[2] = 1;
+    }else{
+        wProj[0] = wt[0];     wProj[1] = wt[1];    wProj[2] = wt[2];
+    }
+    if(u_default&&v_default&&v_default){
         is_uv_default=true;
     }else{
         is_uv_default=false;
@@ -241,6 +249,7 @@ is_uv_default(true)
 {
     uProj[0] = 1;        uProj[1] = 0;     uProj[2] = 0;
     vProj[0] = 0;        vProj[1] = 1;     vProj[2] = 0;
+    wProj[0] = 0;        wProj[1] = 0;     wProj[2] = 1;
 }
 
 }

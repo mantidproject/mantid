@@ -227,26 +227,38 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
 std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &QNames)
 {
     double eps(1.e-3);
-    Kernel::V3D DirCryst(Dir);
+    Kernel::V3D absDir(fabs(Dir.X()),fabs(Dir.Y()),fabs(Dir.Z()));
+    std::string mainName;
 
-   // DirCryst.toMillerIndexes(eps);
+    if ((absDir[0]>=absDir[1])&&(absDir[0]>=absDir[2]))
+    {
+        mainName=QNames[0];
+    }
+    else if  (absDir[1]>=absDir[2])
+    {
+        mainName=QNames[1];
+    }
+    else
+    {
+        mainName=QNames[2];
+    }
 
     std::string name("["),separator=",";
     for(size_t i=0;i<3;i++){
-        double dist=std::fabs(DirCryst[i]);
+
         if(i==2)separator="]";
-        if(dist<eps){
+        if(absDir[i]<eps){
             name+="0"+separator;
             continue;
         }
         if(Dir[i]<0){
            name+="-";
         }
-        if(std::fabs(dist-1)<eps){
-            name+=QNames[i]+separator;
+        if(std::fabs(absDir[i]-1)<eps){
+            name+=mainName+separator;
             continue;
         }
-        name+= sprintfd(dist,eps)+QNames[i]+separator;
+        name+= sprintfd(absDir[i],eps)+mainName+separator;
     }
 
     return name;
