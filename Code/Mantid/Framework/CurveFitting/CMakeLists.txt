@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/DeltaFunction.cpp
 	src/DiffSphere.cpp
 	src/DerivMinimizer.cpp
+	src/EndErfc.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
@@ -79,6 +80,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DllConfig.h
+	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
