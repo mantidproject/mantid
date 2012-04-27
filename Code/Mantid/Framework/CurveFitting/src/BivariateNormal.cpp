@@ -442,12 +442,12 @@ void BivariateNormal::initCommon()
         }
 
 
- /*//Cannot seem to change penalyt factor for LevenBerg algorithm. Causes
-  *  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams); to seg fault??
+ //Cannot seem to change penalyt factor for LevenBerg algorithm. Causes
+ // *  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams); to seg fault??
     for( int p=0; p < (int)nParams();p++)
         {
-          boost::shared_ptr<IConstraint> constr( getConstraint( p ));
-          if(constr.get())
+          IConstraint* constr = getConstraint( p );
+          if( constr )
           {
             double penalty = constr->getPenaltyFactor() + 10 * MaxD;
             std::cout<<"initCommon G"<<p<<","<<penalty<<std::endl;
@@ -456,7 +456,7 @@ void BivariateNormal::initCommon()
           }
         } std::cout<<"initCommon H"<<std::endl;
 
-*/
+//*/
         if (CalcVariances)
         {
           std::ostringstream ssxx, ssyy, ssxy;
