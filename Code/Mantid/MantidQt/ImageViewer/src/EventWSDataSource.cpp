@@ -35,12 +35,13 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)ev_ws->getNumberHistograms();
   total_rows = ev_ws->getNumberHistograms();
-//  total_cols = 2000;             // initially use 2000 bins for event data
-  total_cols = (int)(total_xmax-total_xmin)/1;    // initially use >= 1 us 
-                                                  // bins for event data
 
-//  std::cout << "total_xmin = " << total_xmin << std::endl;
-//  std::cout << "total_xmax = " << total_xmax << std::endl;
+  total_cols = 1000000;           // Allow up to a million virtual columns.
+                                  // The data will only be rebinned to a 
+                                  // resolution corresponding to the screen.
+                                  // However, this number places a hard limit
+                                  // on the number of virtual columns, which 
+                                  // affects the scroll bar size calculation
 
   if ( total_xmax > 120000 )   
   {
