@@ -91,6 +91,9 @@ void MantidMDCurve::init(Graph* g, bool distr, Graph::CurveType style)
 
 MantidMDCurve::~MantidMDCurve()
 {
+  observePostDelete(false);
+  observeAfterReplace(false);
+  observeADSClear(false);
 }
 
 /**

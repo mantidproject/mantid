@@ -26,6 +26,38 @@ namespace WorkspaceCreationHelper
     inline FibSeries() : x1(1),x2(1) {}
     inline T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
   };
+  /** mock algorithn for doing logging/progress reporting*/
+  class MockAlgorithm  : public Mantid::API::Algorithm
+  {
+  public:
+    MockAlgorithm(size_t nSteps=100);
+    ~MockAlgorithm(){};
+    
+    /// Algorithm's name for identification 
+    virtual const std::string name() const { return "MockAlgorithm";};
+    /// Algorithm's version for identification 
+    virtual int version() const { return 1;};
+    /// Algorithm's category for identification
+    virtual const std::string category() const { return "Test";}  
+
+    Mantid::Kernel::Logger & getLogger(){return a_log;}
+    
+    Mantid::API::Progress *getProgress(){return pProg.get();}
+    void resetProgress(size_t nSteps)
+    {
+        pProg = std::auto_ptr<Mantid::API::Progress >(new Mantid::API::Progress(this,0,1,nSteps));
+    }
+  private:
+      void init(){};
+      void exec(){};
+   /// Sets documentation strings for this algorithm
+      virtual void initDocs(){};
+
+      std::auto_ptr<Mantid::API::Progress > pProg;
+      /// logger -> to provide logging, for MD dataset file operations
+      static Mantid::Kernel::Logger  &a_log;
+
+ };
 
   Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceRand(int size);
   Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceConstant(int size, double value, double error);

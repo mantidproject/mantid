@@ -1,6 +1,6 @@
 Name:           mantid-developer
-Version:        1.0
-Release:        8%{?dist}
+Version:        1.1
+Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -12,7 +12,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: cmake-gui >= 2.8.5
 Requires: boost-devel
 Requires: epel-release 
-Requires: google-perftools-devel
+Requires: gperftools-devel
+Requires: gperftools-libs
 Requires: gcc-c++
 Requires: gsl-devel
 Requires: hdf-devel
@@ -60,6 +61,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Mon Mar 19 2012 Stuart Campbell <campbellsi@ornl.gov>
+- Updated for google-perftools -> gperftools package rename.
+
 * Wed Feb 22 2012 Stuart Campbell <campbellsi@ornl.gov>
 - Added nexus as it is not required by it's devel package.
 

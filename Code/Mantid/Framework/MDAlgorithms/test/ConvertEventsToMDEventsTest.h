@@ -25,7 +25,6 @@ class ConvertEvents2MDEvTestHelper: public ConvertToMDEvents
 {
 public:
     ConvertEvents2MDEvTestHelper(){};
-
 };
 
 //

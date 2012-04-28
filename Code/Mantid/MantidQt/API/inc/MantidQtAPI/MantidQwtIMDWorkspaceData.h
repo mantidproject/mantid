@@ -48,8 +48,6 @@ public:
   double ex(size_t i)const;
   size_t esize()const;
 
-  bool sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const;
-
   void setPreviewMode(bool preview);
   void setPlotAxisChoice(int choice);
   void setNormalization(Mantid::API::MDNormalization choice);
@@ -63,8 +61,6 @@ public:
   bool logScale()const{return m_logScale;}
   void saveLowestPositiveValue(const double v);
   bool setAsDistribution(bool on = true);
-
-  void applyOffsets(const double xOffset, const double yOffset);
 
 private:
 

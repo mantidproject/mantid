@@ -8,7 +8,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+//#include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"

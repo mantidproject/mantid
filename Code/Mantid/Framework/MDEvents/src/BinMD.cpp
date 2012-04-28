@@ -416,7 +416,9 @@ namespace MDEvents
 
         // Progress reporting
         if (prog) prog->report();
-
+        // For early cancelling of the loop
+        if (this->m_cancel)
+          break;
       }// for each box in the vector
       PARALLEL_END_INTERUPT_REGION
     } // for each chunk in parallel
@@ -557,9 +559,10 @@ namespace MDEvents
    */
   void BinMD::exec()
   {
-    // Input MDEventWorkspace
+    // Input MDEventWorkspace/MDHistoWorkspace
     m_inWS = getProperty("InputWorkspace");
     // Look at properties, create either axis-aligned or general transform.
+    // This (can) change m_inWS
     this->createTransform();
 
     // De serialize the implicit function

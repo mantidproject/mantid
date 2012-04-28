@@ -149,21 +149,25 @@ namespace Mantid
 
       // Find the mangled instrument name that includes the modified date
       std::string instrumentNameMangled = parser.getMangledName();
+      g_log.debug() << "Instrument Mangled Name = " << instrumentNameMangled << std::endl;
 
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentNameMangled) )
       {
-        // If it does, just use the one from the one stored there
-        m_instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+          // If it does, just use the one from the one stored there
+          g_log.debug() << "Instrument definition already loaded, using cached version.";
+          m_instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
       }
       else
       {
-        // Really create the instrument
-        Progress * prog = new Progress(this, 0, 1, 100);
-        m_instrument = parser.parseXML(prog);
-        delete prog;
-        // Add to data service for later retrieval
-        InstrumentDataService::Instance().add(instrumentNameMangled, m_instrument);
+          g_log.debug() << "Loading instrument XML...";
+          // Really create the instrument
+          Progress * prog = new Progress(this, 0, 1, 100);
+          m_instrument = parser.parseXML(prog);
+          delete prog;
+          g_log.debug() << "...done!" << std::endl;
+          // Add to data service for later retrieval
+          InstrumentDataService::Instance().add(instrumentNameMangled, m_instrument);
       }
 
 

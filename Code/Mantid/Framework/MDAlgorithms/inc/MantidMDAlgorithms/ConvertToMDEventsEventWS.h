@@ -17,8 +17,10 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsWSInterface.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
+// coordinate transformation
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h"
@@ -54,24 +56,22 @@ namespace MDAlgorithms
 */
 
 // Class to process event workspace by direct conversion:
-template<QMode Q, AnalMode MODE, CnvrtUnits CONV,SampleType Sample>
-class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsMethods 
+template<ConvertToMD::QMode Q, ConvertToMD::AnalMode MODE, ConvertToMD::CnvrtUnits CONV,ConvertToMD::SampleType Sample>
+class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEventsWS 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<QMode QX, AnalMode MODEX, CnvrtUnits CONVX,XCoordType XTYPE,SampleType XSample> 
-     friend struct COORD_TRANSFORMER;
-     // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,CONV,Centered,Sample> trn; 
+     // the instantiation of the class which does the transformation itself
+     CoordTransformer<Q,MODE,CONV,ConvertToMD::Centered,Sample> trn; 
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates
      std::vector<coord_t> Coord;
  public:
-    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
-        size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
+        size_t numSpec=IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
 
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
         trn.setUpTransf(this); 
@@ -91,8 +91,9 @@ class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEv
          // Get the box controller
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
-              
-        size_t nValidSpectra  = this->pDetLoc->det_id.size();
+        
+        // preprocessed detectors insure that each detector has its own spectra
+        size_t nValidSpectra  = this->pDetLoc->nDetectors();
 
        // if any property dimension is outside of the data range requested, the job is done;
         if(!trn.calcGenericVariables(Coord,this->n_dims))return; 
@@ -101,7 +102,7 @@ class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEv
         size_t eventsAdded  = 0;
         for (size_t wi=0; wi <nValidSpectra; wi++)
         {     
-           size_t iSpec         = this->pDetLoc->detIDMap[wi];       
+           size_t iSpec         = this->pDetLoc->getDetSpectra(wi);       
 
            eventsAdded         += this->conversionChunk(iSpec);
       // Give this task to the scheduler
@@ -154,13 +155,11 @@ class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEv
    template <class T>
    size_t convertEventList(size_t workspaceIndex)
    {
-//       std::vector<coord_t> locCoord(this->Coord);
-//       if(!trn.calcYDepCoordinates(locCoord,workspaceIndex))return;   // s
-//
+
          Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
          size_t numEvents     = el.getNumberEvents();    
-         size_t  detNum       = this->pDetLoc->spec2detMap[workspaceIndex];
-         uint32_t detID       = this->pDetLoc->det_id[detNum];
+         size_t  detNum       = this->pDetLoc->getWSDet(workspaceIndex);
+         uint32_t detID       = this->pDetLoc->getDetID(detNum);
          uint16_t runIndexLoc = this->runIndex;
 
          std::vector<coord_t>locCoord(this->Coord);
@@ -189,7 +188,7 @@ class ConvertToMDEventsWS<EventWSType,Q,MODE,CONV,Sample>: public IConvertToMDEv
        for (; it != it_end; it++)
        {
          double tof=it->tof();
-         if(!trn.ConvertAndCalcMatrixCoord(tof,locCoord))continue; // skip ND outside the range
+         if(!trn.convertAndCalcMatrixCoord(tof,locCoord))continue; // skip ND outside the range
 
          sig_err.push_back(float(it->weight()));
          sig_err.push_back(float(it->errorSquared()));

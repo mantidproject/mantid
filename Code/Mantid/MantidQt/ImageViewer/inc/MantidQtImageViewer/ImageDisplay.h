@@ -11,6 +11,7 @@
 #include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/ImagePlotItem.h"
 #include "MantidQtImageViewer/SliderHandler.h"
+#include "MantidQtImageViewer/RangeHandler.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
@@ -56,6 +57,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      /// Make an ImageDisplay to display with the given widgets and controls 
      ImageDisplay( QwtPlot*       image_plot, 
                    SliderHandler* slider_handler,
+                   RangeHandler*  range_handler,
                    GraphDisplay*  h_graph,
                    GraphDisplay*  v_graph,
                    QTableWidget*  table_widget );
@@ -64,6 +66,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 
      /// Set the source of the image data and information for the table
      void SetDataSource( ImageDataSource* data_source );
+
+     /// Rebuild the scroll bars and image due to change of xmin, xmax, step
+     void UpdateRange();
 
      /// Rebuild image from data source, due to resize or scroll bar movement
      void UpdateImage();
@@ -94,6 +99,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      ImagePlotItem*       image_plot_item;
 
      SliderHandler*       slider_handler;
+     RangeHandler*        range_handler;
 
      GraphDisplay*        h_graph_display;
      GraphDisplay*        v_graph_display;

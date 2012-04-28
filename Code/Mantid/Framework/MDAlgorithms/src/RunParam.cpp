@@ -38,9 +38,8 @@ namespace Mantid
         m_ei(ei), m_psi(psi), m_elo(elo),m_ehi(ehi),
         m_de(de), m_x0(x0), m_xa(xa), m_x1(x1),
         m_s1(s1), m_s2(s2),
-        m_s3(s3), m_s4(s4), m_s5(s5), m_thetam(thetam),
+        m_s3(s3), m_s4(s4), m_s5(s5),
         m_modModel(modModel),
-        m_tjit(tjit),
         m_as(as), m_bs(bs), m_cs(cs),
         m_aa(aa), m_bb(bb), m_cc(cc),
         m_uh(uh), m_uk(uk), m_ul(ul),
@@ -48,9 +47,9 @@ namespace Mantid
         m_omega(omega), m_gs(gs), m_gl(gl),
         m_dpsi(dpsi), m_xh(xh), m_xk(xk),
         m_xl(xl), m_yh(yh), m_yk(yk),
-        m_yl(yl), m_sx(sx), m_sy(sy),
-        m_sz(sz), m_isam(isam), m_temp(temp)
+        m_yl(yl), m_isam(isam), m_temp(temp)
     {
+      m_modLookupRes=1000;
       setAa(aa);
       setBb(bb);
       setCc(cc);
@@ -58,10 +57,16 @@ namespace Mantid
       setPslit(pslit);
       setRadius(radius);
       setRho(rho);
+      setThetam(thetam),
       setWa(wa);
       setHa(ha);
+      setSx(sx);
+      setSy(sy);
+      setSz(sz);
       setEta(eta);
       setTauChopperSignal();
+      setTjit(tjit);
+      setTransforms();
     };
 
     RunParam::~RunParam()
@@ -69,28 +74,28 @@ namespace Mantid
 
     const double RunParam::mmTom = 1.e-3;
     /// @cond
-    double RunParam::getEi() {return m_ei;}
-    double RunParam::getPsi() {return m_psi;}
+    double RunParam::getEi() const {return m_ei;}
+    double RunParam::getPsi() const {return m_psi;}
     double RunParam::getElo() {return m_elo;}
     double RunParam::getEhi() {return m_ehi;}
-    double RunParam::getDe() {return m_de;}
-    double RunParam::getX0() {return m_x0;}
-    double RunParam::getXa() {return m_xa;}
-    double RunParam::getX1() {return m_x1;}
-    double RunParam::getWa() {return m_wa;}
-    double RunParam::getHa() {return m_ha;}
-    double RunParam::getS1() {return m_s1;}
-    double RunParam::getS2() {return m_s2;}
-    double RunParam::getS3() {return m_s3;}
-    double RunParam::getS4() {return m_s4;}
-    double RunParam::getS5() {return m_s5;}
-    double RunParam::getThetam() {return m_thetam;}
-    int RunParam::getModModel() {return m_modModel;}
-    double RunParam::getPslit() {return m_pslit;}
-    double RunParam::getRadius() {return m_radius;}
-    double RunParam::getRho() {return m_rho;}
-    double RunParam::getHz() {return m_hz;}
-    double RunParam::getTjit() {return m_tjit;}
+    double RunParam::getDe() const {return m_de;}
+    double RunParam::getX0() const {return m_x0;}
+    double RunParam::getXa() const {return m_xa;}
+    double RunParam::getX1() const {return m_x1;}
+    double RunParam::getWa() const {return m_wa;}
+    double RunParam::getHa() const {return m_ha;}
+    double RunParam::getS1() const {return m_s1;}
+    double RunParam::getS2() const {return m_s2;}
+    double RunParam::getS3() const {return m_s3;}
+    double RunParam::getS4() const {return m_s4;}
+    double RunParam::getS5() const {return m_s5;}
+    double RunParam::getThetam() const {return m_thetam;}
+    int RunParam::getModModel() const {return m_modModel;}
+    double RunParam::getPslit() const {return m_pslit;}
+    double RunParam::getRadius() const {return m_radius;}
+    double RunParam::getRho() const {return m_rho;}
+    double RunParam::getAngVel()const  {return m_angVel;}
+    double RunParam::getTjit() const {return m_tjit;}
     double RunParam::getAs() {return m_as;}
     double RunParam::getBs() {return m_bs;}
     double RunParam::getCs() {return m_cs;}
@@ -155,7 +160,7 @@ namespace Mantid
     void RunParam::setS5(const double val)
     {m_s5=val; m_moderatorChange=true;}
     void RunParam::setThetam(const double val)
-    {m_thetam=val;}
+    {m_thetam=val*M_PI/180.;}
     void RunParam::setModModel(const int val)
     {m_modModel=val; m_moderatorChange=true;}
     /// set pslit of chopper - input mm, internel m
@@ -169,9 +174,9 @@ namespace Mantid
     {m_rho=val*mmTom;m_chopChange=true;}
     /// Set frequency of chopper, internally use angular velocity
     void RunParam::setHz(const double val)
-    {m_hz=val; m_angVel=val*2.*M_PI;m_chopChange=true;}
+    {m_angVel=val*2.*M_PI;m_chopChange=true;}
     void RunParam::setTjit(const double val)
-    {m_tjit=val;m_chopChange=true;}
+    {m_tjit=val/(1.e6*sqrt(log(256.0)));} // convert from uS, FWHH to std dev seconds
     void RunParam::setAs(const double val)
     {m_as=val;}
     void RunParam::setBs(const double val)
@@ -217,11 +222,11 @@ namespace Mantid
     void RunParam::setYl(const double val)
     {m_yl=val;}
     void RunParam::setSx(const double val)
-    {m_sx=val;}
+    {m_sx=mmTom*val;}
     void RunParam::setSy(const double val)
-    {m_sy=val;}
+    {m_sy=mmTom*val;}
     void RunParam::setSz(const double val)
-    {m_sz=val;}
+    {m_sz=mmTom*val;}
     void RunParam::setIsam(const int val)
     {m_isam=val;}
     void RunParam::setTemp(const double val)
@@ -245,8 +250,68 @@ namespace Mantid
     {
       // determine the transformation matrices for this run:
       // m_sampleLab - transform from sample coords to lab coords
+      // This matrix is given by R * M * U * Us'
+      // Where R is the psi rotation matrix, M is the crystal orientation correction matrix, U is from UBcalc on U,V
+      // and Us is from UBcalc on XX,YY
+      Geometry::Goniometer gPsi, gCorrection;
+      gPsi.makeUniversalGoniometer();
+      //const double deg2rad=M_PI/180.;
+      const double rad2deg=180./M_PI;
+      gPsi.setRotationAngle("phi", m_psi); //TF uses psi as scattering angle
+      gCorrection.makeUniversalGoniometer();
+      gCorrection.setRotationAngle("phi",m_dpsi); // TF correction use dphi, gs, gl
+      gCorrection.setRotationAngle("chi",m_gs);
+      gCorrection.setRotationAngle("omega",m_gl);
+      Geometry::OrientedLattice sample(m_as,m_bs,m_cs,m_aa*rad2deg,m_bb*rad2deg,m_cc*rad2deg);
+      Geometry::OrientedLattice crystal(m_as,m_bs,m_cs,m_aa*rad2deg,m_bb*rad2deg,m_cc*rad2deg);
+      crystal.setUFromVectors(Kernel::V3D(m_uh,m_uk,m_ul),Kernel::V3D(m_vh,m_vk,m_vl));
+      Kernel::V3D xv(m_xh,m_xk,m_xl);
+      Kernel::V3D yv(m_yh,m_yk,m_yl);
+      m_sMat.setMem(3,3);
+      if(xv.norm2()>0. && yv.norm2()>0.)
+      {
+        sample.setUFromVectors(xv,yv);
+        m_sMat = gPsi.getR()*gCorrection.getR()*crystal.getU()*sample.getU().Tprime();
+      }
+      else
+        m_sMat.identityMatrix();// = new Mantid::Kernel::DblMatrix t(3,3,true);
+
+
+      m_cubInvMat = gPsi.getR()*gCorrection.getR()*crystal.getUB()*(2.*M_PI);
+      m_cubInvMat.Invert();
+
       // m_uBinv     - transform from scattering plane to r.l.u.
       // yet to implement
+    }
+
+    // Push detector information in - may be replaced with direct read from instrument.
+    // deps may need to an array
+    void RunParam::setDetInfo(const detid_t detId, const Kernel::V3D & position, const Kernel::V3D & dimensions, const double deps)
+    {
+      std::pair<Kernel::V3D, Kernel::V3D> detPair(position,dimensions);
+      m_detIdMap[detId]=detPair;
+      m_deps=deps;
+    }
+    // Get detector information TODO throw error if detId not in map
+    // May be more efficient to store are float array, or access to instrument/detector information
+    void RunParam::getDetInfo(const detid_t detId, Kernel::V3D & position, Kernel::V3D & dimensions, double & deps) const
+    {
+      std::map<detid_t, std::pair<Kernel::V3D, Kernel::V3D>>::const_iterator it;
+      it = m_detIdMap.find(detId);
+      position=(*it).second.first;
+      dimensions=(*it).second.second;
+      deps = m_deps;
+    }
+
+    // get sample transformation
+    const Mantid::Kernel::DblMatrix & RunParam::getSMat() const
+    {
+      return(m_sMat);
+    }
+    // get sample transformation
+    const Mantid::Kernel::DblMatrix & RunParam::getCubInvMat() const
+    {
+      return(m_cubInvMat);
     }
 
     // Set Tau for chopper according to model
@@ -297,14 +362,14 @@ namespace Mantid
      */
     double RunParam::chopperTimeDist(const double ranvar) const
     {
-      return ( m_dtChopEff * tridev(ranvar) );
+      return ( m_tauChopperEffective * tridev(ranvar) );
     }
     /*
      * Get a value for the chopper jitter assuming a triangluar distribution
      */
     double RunParam::chopperJitter(const double ranvar) const
     {
-      return ( m_tjitSig * sqrt(6.) * tridev(ranvar));
+      return ( m_tjit * sqrt(6.) * tridev(ranvar));
     }
 
     /**
@@ -376,11 +441,10 @@ namespace Mantid
      */
     double RunParam::gsqrChop (const double pSlit, const double radius, const double rho, const double angVel, const double eI) const
     {
-
     if ((pSlit == 0.0) || (radius == 0.0) || (rho == 0.0) || (angVel == 0.0) || (eI == 0.0))
     {
-      return(0.0);
-      // TODO throw error
+      //std::cout << "error in gsqr\n";
+      return(0.0);// TODO throw error
     }
 
    // Calculate parameter gam:
@@ -471,11 +535,32 @@ namespace Mantid
 
     /*
      * This should take a random variable [0:1] and use a table lookup to return the function value
-     * At present it just calls the function which is way too expensive. TODO add lookup table
      */
     double RunParam::moderatorTimeLookUp( const double randomVar) const
     {
-      return(areaToTIK(randomVar,m_s1,m_s2,m_s3)); // This is too expensive, need to do table look up as Tobyfit
+      // build lookup table if not present - also need rebuild on parameter change
+      if(m_areaToTIKLookup.empty())
+      {
+        initModTime();
+      }
+      const int scale=static_cast<int>(m_areaToTIKLookup.size())-1;
+      const int r0=static_cast<int> (floor(randomVar*scale));
+      const double frac=randomVar*scale-r0;
+      // linear interpolation
+      return( (1.-frac)*m_areaToTIKLookup[r0]+frac*m_areaToTIKLookup[r0+1] );
+      //return(areaToTIK(randomVar,m_s1,m_s2,m_s3)); // This is too expensive, need to do table look up as Tobyfit
+    }
+    /*
+     * Build a simple lookup table for this model
+     */
+    void RunParam::initModTime() const
+    {
+      double t,f=m_modLookupRes;
+      for(int i=0;i<=m_modLookupRes;i++)
+      {
+        t=(i/f);
+        m_areaToTIKLookup.push_back(areaToTIK(t,m_s1,m_s2,m_s3));
+      }
     }
     /*
      * Returns the value of T such that the integral of a normalised Ikeda-Carpenter function, M(T), from 0 to T = area

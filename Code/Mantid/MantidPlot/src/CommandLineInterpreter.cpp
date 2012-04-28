@@ -570,13 +570,8 @@ void CommandLineInterpreter::simulateUserInput(QString & text, const int offset)
  */
 void CommandLineInterpreter::keyPressEvent(QKeyEvent* keyPress)
 {
-  // Make sure the autocomplete box gets the events if it is active
-  if(isListActive())
-  {
-    ScriptEditor::keyPressEvent(keyPress);
-  }
-
-  if(handleKeyPress(keyPress))
+  // If the autocomplete box is active we don't want to touch the events.
+  if(!isListActive() && handleKeyPress(keyPress))
   {
     keyPress->accept();
   }

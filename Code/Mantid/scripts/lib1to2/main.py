@@ -20,10 +20,11 @@ def main(args):
                       help="Starts the GUI")
                       
     options, args = parser.parse_args(args)
+    backup = not options.nobackups
     if options.gui:
         retcode = gui.start(args, options)
     else:
-        retcode = migrate.run(args, options)
+        retcode = migrate.run(args, backup)
         
     # Any clean up code
     return retcode

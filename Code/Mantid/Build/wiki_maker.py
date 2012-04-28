@@ -275,13 +275,14 @@ def do_algorithm(args, algo):
     is_latest_version = True
     version = -1;
     latest_version = -1
-    if algo.endswith('1'): version = 1
-    if algo.endswith('2'): version = 2
-    if algo.endswith('3'): version = 3
-    if algo.endswith('4'): version = 4
-    if algo.endswith('5'): version = 5
-    if version > 0:
-        algo = algo[:-1]
+    if not args.no_version_check:
+        if algo.endswith('1'): version = 1
+        if algo.endswith('2'): version = 2
+        if algo.endswith('3'): version = 3
+        if algo.endswith('4'): version = 4
+        if algo.endswith('5'): version = 5
+        if version > 0:
+            algo = algo[:-1]
 
     # Find the latest version        
     latest_version = mtd.createAlgorithm(algo, -1).version()
@@ -356,6 +357,9 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,
                         help="Force overwriting the wiki page on the website if different (don't ask the user)")
+
+    parser.add_argument('--no-version-check', dest='no_version_check', action='store_true',
+                        help='Do not perform version check on algorithm name.')
 
     args = parser.parse_args()
     

@@ -68,18 +68,34 @@ namespace Mantid
 
             /// set pointer to runData vector
             void setWorkspaceMD(API::WorkspaceGroup_sptr wsGroup);
-            //void setRunDataInfo(boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData);
+            /// Create a RunParam pointer - this is a temporary method for testing and will be replaced
+            void setRunDataInfo(boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData);
+            /// Set magnetic form factor, function can be access in use SQW
+            void setMagneticForm(const int atomicNo, const int ionisation);
+
+            // Attributes
+            /// Returns the number of attributes associated with the function for now minStep, maxStep, tol for MC
+            size_t nAttributes()const{return 3;}
+            /// Returns a list of attribute names
+            std::vector<std::string> getAttributeNames()const;
+            /// Return a value of attribute attName
+            Attribute getAttribute(const std::string& attName)const;
+            /// Set a value to attribute attName
+            void setAttribute(const std::string& attName,const Attribute& );
+            /// Check if attribute attName exists
+            bool hasAttribute(const std::string& attName)const;
 
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
             virtual double functionMD(const Mantid::API::IMDIterator& r) const;
             /// This is the new more general interface to the user scattering function which can takes different arguments
             /// depending on the sharp/broad setting.
-            virtual void userSqw(const std::vector<double> & params, const std::vector<double> & qE, std::vector<double> & result) const=0;
+            virtual void userSqw(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run, const std::vector<double> & params,
+                                 const std::vector<double> & qE, std::vector<double> & result) const=0;
             /// This method must be overridden by the user to define if a sharp or broad model is provided.
             virtual bool userModelIsBroad() const=0;
             /// This will be over ridden by the user's getParam function
-            virtual void getParams() const = 0;
+            virtual void getParams(std::vector<double> & params) const =0;
 
             /** Perform the convolution calculation for one pixel. May implement other methods
              * besides MC.
@@ -100,8 +116,6 @@ namespace Mantid
              */
             double sqwConvolutionMC(const Mantid::API::IMDIterator& it, size_t & event, double & error) const;
 
-            /// Set magnetic form factor, function can be access in use SQW
-            void setMagneticForm(const int atomicNo, const int ionisation);
 
             /// Find magnetic form factor at q^2 point
             double magneticForm(const double qSquared) const;
@@ -127,20 +141,23 @@ namespace Mantid
             void bMatrix(const double, const double, const double, const double, const double,
                   const double, const double, const double,
                   const Kernel::Matrix<double> & , const Kernel::Matrix<double> & ,
-                  Kernel::Matrix<double> & );
+                  Kernel::Matrix<double> & ) const;
             /// function to build matrices dMat and dinvMat
             void dMatrix(const double , const double , Kernel::Matrix<double> & ,
-                                        Kernel::Matrix<double> & );
+                                        Kernel::Matrix<double> & ) const;
             /// generate a random scaled vector in the selected space of up to 13 dimensions
-            void mcYVec(const double ranvec[], const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run,
-                  std::vector<double> & yVec, double & eta2, double & eta3 ) const;
+            void mcYVec(const double ranvec[], const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run, const std::vector<double> & detectorBB,
+                  const double detTimeBin, std::vector<double> & yVec, double & eta2, double & eta3 ) const;
             /// map from Yvec values to dQ/dE values
-            void mcMapYtoQEVec(const std::vector<double> & yVec,const std::vector<double> & qE,const double eta2, const double eta3,
-                               std::vector<double> & perturbQE) const;
+            void mcMapYtoQEVec(const double wi, const double wf, const std::vector<double> & q0, const Kernel::Matrix<double> & bMat,
+                const Kernel::Matrix<double> & dInvMat, const std::vector<double> & yVec,
+                const double eta2, const double eta3,
+                std::vector<double> & perturbQE) const;
             /// get transform matrices, vectors for reciprocal space
             int rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                        std::vector<double> & arlu, std::vector<double> & angrlu,
                        Kernel::Matrix<double> & dMat );
+
         private:
             /// Pointers to the run data for each run
             std::vector< boost::shared_ptr<MDAlgorithms::RunParam> > m_runData;
@@ -152,7 +169,7 @@ namespace Mantid
             int m_randSeed;
             /// Cached Sample Bounding box size for current detector/instrument, assuming cuboid sample
             std::vector<double> m_sampleBB;
-            std::vector<double> m_detectorBB;
+            double m_detectorDepth, m_detectorWidth, m_detectorHeight;
             // Width of detector timembin
             double m_detectorTimebin;
             /// moderator parameters for current MDPoint
@@ -203,6 +220,14 @@ namespace Mantid
             // GSL Sobol random number state information
             gsl_qrng *m_qRvec;
             int m_event;
+
+            // Attribute values
+            /// Min MC steps
+            int m_mcLoopMin;
+            /// Max MC steps
+            int m_mcLoopMax;
+            /// MC loop absolute tolerance to exit before Max steps
+            double m_mcTol;
         };
 
     } // namespace MDAlgorithms

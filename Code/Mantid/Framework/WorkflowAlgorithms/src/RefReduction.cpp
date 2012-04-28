@@ -83,12 +83,12 @@ void RefReduction::init()
     new ArrayProperty<int>("LowResNormAxisPixelRange"),
     "Pixel range for the normalization peak in the low-res direction");
 
-  declareProperty("TOFMin", EMPTY_DBL());
-  declareProperty("TOFMax", EMPTY_DBL());
+  declareProperty("Theta", EMPTY_DBL(), "Scattering angle (takes precedence over meta data)");
+  declareProperty("TOFMin", EMPTY_DBL(), "Minimum TOF cut");
+  declareProperty("TOFMax", EMPTY_DBL(), "Maximum TOF cut");
 
-  declareProperty("Theta", EMPTY_DBL());
-  declareProperty("TOFStep", 400.0);
-  declareProperty("NBins", EMPTY_INT());
+  declareProperty("TOFStep", 400.0, "Step size of TOF histogram");
+  declareProperty("NBins", EMPTY_INT(), "Number of bins in TOF histogram (takes precedence over TOFStep if given)");
 
   declareProperty("ReflectivityPixel", EMPTY_DBL());
   declareProperty("DetectorAngle", EMPTY_DBL());
@@ -100,7 +100,7 @@ void RefReduction::init()
   setPropertySettings("DetectorAngle0", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
   setPropertySettings("DirectPixel", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
 
-  declareProperty("AngleOffset", EMPTY_DBL());
+  declareProperty("AngleOffset", EMPTY_DBL(), "Scattering angle offset in degrees");
   setPropertySettings("AngleOffset", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_L") );
 
   std::vector<std::string> instrOptions;
@@ -109,13 +109,15 @@ void RefReduction::init()
   declareProperty("Instrument","REF_M",boost::make_shared<StringListValidator>(instrOptions),
     "Instrument to reduce for");
   declareProperty("OutputWorkspacePrefix","reflectivity");
-
+  declareProperty("OutputMessage","",Direction::Output);
 }
 
 /// Execute algorithm
 void RefReduction::exec()
 {
-  m_outputWorkspaceCounter = 0;
+  const std::string instrument = getProperty("Instrument");
+  m_output_message = "------ " + instrument + " reduction ------\n";
+
   // Process each polarization state
   if (getProperty("PolarizedData"))
   {
@@ -126,10 +128,12 @@ void RefReduction::exec()
   } else {
     processData(PolStateNone);
   }
+  setPropertyValue("OutputMessage", m_output_message);
 }
 
 MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
 {
+  m_output_message += "Processing " + polarization + '\n';
   const std::string dataRun = getPropertyValue("DataRun");
   IEventWorkspace_sptr evtWS = loadData(dataRun, polarization);
   MatrixWorkspace_sptr dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
@@ -150,6 +154,9 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     }
     low_res_min = lowResRange[0];
     low_res_max = lowResRange[1];
+    m_output_message + "    |Cropping low-res axis: ["
+        + Poco::NumberFormatter::format(low_res_min) + ", "
+        + Poco::NumberFormatter::format(low_res_max) + "]\n";
   }
 
   // Get peak range
@@ -185,6 +192,8 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     xmin = low_res_min;
     xmax = low_res_max;
   }
+  m_output_message += "    |Scattering angle: "
+      + Poco::NumberFormatter::format(theta,6) + " deg\n";
 
   // Subtract background
   if (getProperty("SubtractSignalBackground"))
@@ -203,6 +212,9 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
 
     dataWS = subtractBackground(dataWS, dataWS,
         peakRange[0], peakRange[1], bckRange[0], bckRange[1], low_res_min, low_res_max);
+    m_output_message += "    |Subtracted background ["
+        + Poco::NumberFormatter::format(bckRange[0]) + ", "
+        + Poco::NumberFormatter::format(bckRange[1]) + "]\n";
   }
 
   // Process normalization run
@@ -230,6 +242,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     repAlg->setProperty("InfinityValue", 0.0);
     repAlg->setProperty("InfinityError", 0.0);
     repAlg->executeAsSubAlg();
+    m_output_message += "Normalization completed\n";
   }
 
   IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.85, 0.95);
@@ -272,11 +285,14 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     declareProperty(new WorkspaceProperty<>("OutputWorkspace2D_"+polarization, "2D_"+wsName, Direction::Output));
     setProperty("OutputWorkspace2D_"+polarization, output2DWS);
   }
+  m_output_message += "Reflectivity calculation completed\n";
   return outputWS;
 }
 
 MatrixWorkspace_sptr RefReduction::processNormalization()
 {
+  m_output_message += "Processing normalization\n";
+
   const std::string normRun = getPropertyValue("NormalizationRun");
   IEventWorkspace_sptr evtWS = loadData(normRun, PolStateNone);
   MatrixWorkspace_sptr normWS = boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
@@ -300,6 +316,9 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
     }
     low_res_min = lowResRange[0];
     low_res_max = lowResRange[1];
+    m_output_message + "    |Cropping low-res axis: ["
+        + Poco::NumberFormatter::format(low_res_min) + ", "
+        + Poco::NumberFormatter::format(low_res_max) + "]\n";
   }
 
   const std::string instrument = getProperty("Instrument");
@@ -335,6 +354,9 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
 
     normWS = subtractBackground(normWS, normWS,
         peakRange[0], peakRange[1], bckRange[0], bckRange[1], low_res_min, low_res_max);
+    m_output_message += "    |Subtracted background ["
+        + Poco::NumberFormatter::format(bckRange[0]) + ", "
+        + Poco::NumberFormatter::format(bckRange[1]) + "]\n";
   }
   IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.6, 0.65);
   refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", normWS);
@@ -368,11 +390,13 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   {
     rawWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(dataRun);
     g_log.notice() << "Found workspace: " << dataRun << std::endl;
+    m_output_message += "    |Input data run is a workspace: " + dataRun + "\n";
   }
   else if (AnalysisDataService::Instance().doesExist(ws_name))
   {
     rawWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws_name);
     g_log.notice() << "Using existing workspace: " << ws_name << std::endl;
+    m_output_message += "    |Found workspace from previous reduction: " + ws_name + "\n";
   }
   else
   {
@@ -387,6 +411,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
 
     if (Poco::File(path).exists()) {
       g_log.notice() << "Found: " << path << std::endl;
+      m_output_message += "    |Loading from " + path + "\n";
       IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadEventNexus", 0, 0.2);
       loadAlg->setProperty("Filename", path);
       if (polarization.compare(PolStateNone)!=0)
@@ -396,34 +421,32 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       if (rawWS->getNumberEvents()==0)
       {
         g_log.notice() << "No data in " << polarization << std::endl;
+        m_output_message += "    |No data for " + polarization + "\n";
         return rawWS;
       }
 
-      m_outputWorkspaceCounter++;
-      std::string ws_prop = "RawWorkspace";
-      Poco::NumberFormatter::append(ws_prop, m_outputWorkspaceCounter, 1);
-
-      declareProperty(new WorkspaceProperty<>(ws_prop, ws_name, Direction::Output));
-      setProperty(ws_prop, rawWS);
+      // Move the detector to the right position
+      if (instrument.compare("REF_M")==0)
+      {
+          double det_distance = rawWS->getInstrument()->getDetector(0)->getPos().Z();
+          Mantid::Kernel::Property* prop = rawWS->run().getProperty("SampleDetDis");
+          Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+          double sdd = dp->getStatistics().mean/1000.0;
+          IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.2, 0.25);
+          mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", rawWS);
+          mvAlg->setProperty("ComponentName", "detector1");
+          mvAlg->setProperty("Z", sdd-det_distance);
+          mvAlg->setProperty("RelativePosition", true);
+          mvAlg->executeAsSubAlg();
+          g_log.notice() << "Ensuring correct Z position: Correction = "
+              << Poco::NumberFormatter::format(sdd-det_distance)
+              << " m" << std::endl;
+      }
+      AnalysisDataService::Instance().addOrReplace(ws_name, rawWS);
     } else {
         g_log.error() << "Could not find a data file for " << dataRun << std::endl;
         throw std::invalid_argument("Could not find a data file for the given input");
     }
-  }
-
-  // Move the detector to the right position
-  if (instrument.compare("REF_M")==0)
-  {
-      double det_distance = rawWS->getInstrument()->getDetector(0)->getPos().Z();
-      Mantid::Kernel::Property* prop = rawWS->run().getProperty("SampleDetDis");
-      Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-      double sdd = dp->getStatistics().mean/1000.0;
-      IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.2, 0.25);
-      mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", rawWS);
-      mvAlg->setProperty("ComponentName", "detector1");
-      mvAlg->setProperty("Z", sdd-det_distance);
-      mvAlg->setProperty("RelativePosition", true);
-      mvAlg->executeAsSubAlg();
   }
 
   // Crop TOF as needed and set binning
@@ -454,6 +477,10 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   rebinAlg->setProperty("PreserveEvents", true);
   rebinAlg->executeAsSubAlg();
   MatrixWorkspace_sptr outputWS = rebinAlg->getProperty("OutputWorkspace");
+  m_output_message += "    |TOF binning: "
+      +  Poco::NumberFormatter::format(tofMin) + " to "
+      +  Poco::NumberFormatter::format(tofMax) + " in steps of "
+      +  Poco::NumberFormatter::format(tofStep) + " microsecs\n";
 
   // Normalise by current
   IAlgorithm_sptr normAlg = createSubAlgorithm("NormaliseByCurrent", 0.3, 0.35);

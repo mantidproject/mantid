@@ -199,6 +199,7 @@ using namespace boost::python;
       .def("isLogging", &API::IAlgorithm::isLogging)
       .def("isExecuted", &API::IAlgorithm::isExecuted)
       .def("setChild", &API::IAlgorithm::setChild)
+      .def("enableHistoryRecordingForChild", &IAlgorithm::enableHistoryRecordingForChild)
       .def("setLogging", &API::IAlgorithm::setLogging)
       .def("setAlwaysStoreInADS", &API::IAlgorithm::setAlwaysStoreInADS)
       .def("setRethrows", &API::IAlgorithm::setRethrows)

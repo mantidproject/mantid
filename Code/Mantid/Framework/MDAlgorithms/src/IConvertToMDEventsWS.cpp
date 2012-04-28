@@ -1,11 +1,11 @@
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
 // logger for loading workspaces  
-   Kernel::Logger& IConvertToMDEventsMethods::convert_log =Kernel::Logger::get("MD-Algorithms");
+   Kernel::Logger& IConvertToMDEventsWS::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 /** Helper function to obtain the units set along X-axis of the input workspace. 
   *
@@ -14,7 +14,7 @@ namespace MDAlgorithms
   *@returns the name(ID) of the unit, specified along X-axis of current workspace
 */
 Kernel::Unit_sptr    
-IConvertToMDEventsMethods::getAxisUnits()const{
+IConvertToMDEventsWS::getAxisUnits()const{
     if(!this->inWS2D.get()){
         convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
         throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
@@ -40,7 +40,7 @@ IConvertToMDEventsMethods::getAxisUnits()const{
 
  */
 
-bool IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
+bool IConvertToMDEventsWS::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
@@ -68,13 +68,17 @@ bool IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,si
   * @param WSD        -- class describing the target workspace. Only target workspace limints are used by the algorithm at the moment
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
-size_t  IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  IConvertToMDEventsWS::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
         inWS2D= pWS2D;
         pWSWrapper = inWSWrapper;
+        
         pDetLoc    = &detLoc;
-     
+        // set values may needed for unit conversion
+        detLoc.setEmode(WSD.emode);
+        detLoc.setEfix(WSD.Ei);
+
         n_dims       = this->pWSWrapper->nDimensions();
         
         dim_min.assign(WSD.dimMin.begin(),WSD.dimMin.end());
@@ -84,7 +88,7 @@ size_t  IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_
         return n_spectra;
 };  
 
-IConvertToMDEventsMethods::IConvertToMDEventsMethods()
+IConvertToMDEventsWS::IConvertToMDEventsWS()
 {}
 
 

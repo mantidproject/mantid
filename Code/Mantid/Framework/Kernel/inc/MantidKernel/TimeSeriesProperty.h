@@ -817,6 +817,10 @@ public:
   }
 
 
+
+
+
+
   //-----------------------------------------------------------------------------------------------
   /**  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values
    * are included.

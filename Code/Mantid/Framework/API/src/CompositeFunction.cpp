@@ -72,6 +72,13 @@ void CompositeFunction::init()
 std::string CompositeFunction::asString()const
 {
   std::ostringstream ostr;
+  
+  // if empty just return function name
+  if (nFunctions() == 0)
+  {
+    return "name=" + name();
+  }
+
   if (name() != "CompositeFunction")
   {
     ostr << "composite=" <<name() << ";";

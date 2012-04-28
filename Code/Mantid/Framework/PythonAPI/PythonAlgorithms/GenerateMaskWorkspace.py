@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Generate Masking workspace by diagnose white beam data
+Generate Mask workspace by diagnose white beam data
 
 The output of each function is a workspace containing a single bin where:
     0 - denotes a masked spectra and
@@ -14,7 +14,7 @@ masking and also passed to MaskDetectors to match masking there.
 from MantidFramework import *
 from mantidsimple import *
 
-class GenerateMaskingWorkspace(PythonAlgorithm):
+class GenerateMaskWorkspace(PythonAlgorithm):
 
     def category(self): 
         """ Mantid required
@@ -24,7 +24,7 @@ class GenerateMaskingWorkspace(PythonAlgorithm):
     def name(self):
         """ Mantid required
         """
-        return "GenerateMaskingWorkspace"
+        return "GenerateMaskWorkspace"
 
     def PyInit(self):
         """ Mantid required
@@ -132,8 +132,8 @@ class GenerateMaskingWorkspace(PythonAlgorithm):
         origmediantestwsname = mediantestwsname
         # rangetestwsname = "Mask_Range"
         # mediantestwsname = "Mask_Median"
-        ConvertToMaskingWorkspace(InputWorkspace=origrangetestwsname, OutputWorkspace=rangetestwsname)
-        ConvertToMaskingWorkspace(InputWorkspace=origmediantestwsname, OutputWorkspace=mediantestwsname)
+        ConvertToMaskWorkspace(InputWorkspace=origrangetestwsname, OutputWorkspace=rangetestwsname)
+        ConvertToMaskWorkspace(InputWorkspace=origmediantestwsname, OutputWorkspace=mediantestwsname)
         
         BinaryOperateMasks(InputWorkspace1=mtd[rangetestwsname], InputWorkspace2=mtd[mediantestwsname],
                 OperationType="AND", OutputWorkspace=maskingwsname)
@@ -144,4 +144,4 @@ class GenerateMaskingWorkspace(PythonAlgorithm):
 
         return num_failed
 
-mtd.registerPyAlgorithm(GenerateMaskingWorkspace())
+mtd.registerPyAlgorithm(GenerateMaskWorkspace())

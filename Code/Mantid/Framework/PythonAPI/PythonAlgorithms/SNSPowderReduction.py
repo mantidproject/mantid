@@ -318,7 +318,7 @@ class SNSPowderReduction(PythonAlgorithm):
         firstChunk = True
         for chunk in strategy:
             if "ChunkNumber" in chunk:
-                print "Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy))
+                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy)))
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
@@ -341,7 +341,14 @@ class SNSPowderReduction(PythonAlgorithm):
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
             mtd.deleteWorkspace('Chunks')
-        print "Done focussing data"
+        if preserveEvents and not "histo" in self.getProperty("Extension"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if normByCurrent:
+            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+            wksp.getRun()['gsas_monitor'] = 1
+
+        self._save(wksp, self._info, False, True)
+        self.log().information("Done focussing data")
 
         return wksp
 
@@ -405,7 +412,10 @@ class SNSPowderReduction(PythonAlgorithm):
         if len(cropkwargs) > 0:
             CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
-        if not info.has_dspace:
+        if info.has_dspace:
+            if binning[0] > 100:
+                self.log().warning("Binning data oddly for d-spacing: %s" % str(binning))
+        else:
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
@@ -451,13 +461,6 @@ class SNSPowderReduction(PythonAlgorithm):
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning[1]) # reset bin width
-        if preserveEvents and not "histo" in self.getProperty("Extension"):
-            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        if normByCurrent:
-            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
-            wksp.getRun()['gsas_monitor'] = 1
-
-        self._save(wksp, info, False, True)
         return wksp
 
     def _getinfo(self, wksp):

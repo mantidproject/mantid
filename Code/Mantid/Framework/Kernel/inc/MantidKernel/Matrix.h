@@ -112,6 +112,7 @@ namespace Mantid
       void setRow(const size_t nRow,const std::vector<T> &newRow);
       void zeroMatrix();      ///< Set the matrix to zero
       void identityMatrix();
+      void setRandom(size_t seedValue=0,double rMin=-1,double rMax=1); ///< initialize random matrix;
       void normVert();         ///< Vertical normalisation
       T Trace() const;         ///< Trace of the matrix
 

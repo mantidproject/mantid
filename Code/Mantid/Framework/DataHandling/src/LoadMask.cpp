@@ -22,7 +22,6 @@ Supporting
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"

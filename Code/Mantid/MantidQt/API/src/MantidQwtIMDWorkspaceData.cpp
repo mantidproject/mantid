@@ -213,11 +213,6 @@ size_t MantidQwtIMDWorkspaceData::esize() const
   return m_E.size();
 }
 
-bool MantidQwtIMDWorkspaceData::sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const
-{
-  return workspace.get() == m_workspace.get();
-}
-
 void MantidQwtIMDWorkspaceData::setLogScale(bool on)
 {
   m_logScale = on;
@@ -226,11 +221,6 @@ void MantidQwtIMDWorkspaceData::setLogScale(bool on)
 void MantidQwtIMDWorkspaceData::saveLowestPositiveValue(const double v)
 {
   if (v > 0) m_minPositive = v;
-}
-
-void MantidQwtIMDWorkspaceData::applyOffsets(const double, const double)
-{
-  std::runtime_error("MantidQwtIMDWorkspaceData::applyOffsets not implemented");
 }
 
 bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on)

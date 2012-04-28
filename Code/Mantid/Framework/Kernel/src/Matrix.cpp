@@ -2,6 +2,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/MersenneTwister.h"
 #include <iomanip>
 #include <iostream>
 
@@ -1744,6 +1745,24 @@ Matrix<T>::print() const
 {
   write(std::cout,10);
   return;
+}
+
+/** set matrix elements ito random values  in the range from  rMin to rMax*/
+template<typename T>
+void 
+Matrix<T>::setRandom(size_t seed,double rMin,double rMax)
+{
+    MersenneTwister rng;
+    rng.setSeed(seed);
+    rng.setRange(rMin,rMax);
+
+    for(size_t i=0;i<nx;i++)
+    {
+        for(size_t j=0;j<ny;j++)
+        {
+            V[i][j] =static_cast<T>(rng.next());
+        }
+    }
 }
 
 template<typename T>

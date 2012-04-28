@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
@@ -17,20 +17,21 @@
 //{
 
 using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDAlgorithms;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 
-class ConvertToMDEventsCoordTestHelper :public IConvertToMDEventsMethods
+class ConvertToMDEventsCoordTestHelper :public IConvertToMDEventsWS
 {
     size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
 public:
-    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
+    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc)
     {
         MDEvents::MDWSDescription TestWS(4);
 
         TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
-        TestWS.emode= MDAlgorithms::Direct;
+        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
         TestWS.dimMin.assign(4,-3);
         TestWS.dimMax.assign(4,3);
         TestWS.dimNames[1]="phi";
@@ -40,15 +41,15 @@ public:
         boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
         pOutMDWSWrapper->createEmptyMDWS(TestWS);
 
-        IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
+        IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
 
     }
-    void resetConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &TestWS){
+    void resetConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &TestWS){
 
         boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
         pOutMDWSWrapper->createEmptyMDWS(TestWS);
 
-        IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
+        IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
 
     }
     /// method which starts the conversion procedure
@@ -62,7 +63,7 @@ class ConvertToMDEventsCoordTransfTest : public CxxTest::TestSuite, public Conve
 //   static Mantid::Kernel::Logger &g_log;
    std::auto_ptr<API::Progress > pProg;
    std::auto_ptr<ConvertToMDEventsCoordTestHelper> pConvMethods;
-   PreprocessedDetectors det_loc;
+   ConvToMDPreprocDetectors det_loc;
 
 public:
 static ConvertToMDEventsCoordTransfTest *createSuite() {
@@ -73,7 +74,7 @@ static void destroySuite(ConvertToMDEventsCoordTransfTest  * suite) { delete sui
 
 void test_CoordTransfNOQ()
 {
-    COORD_TRANSFORMER<NoQ,ANY_Mode,ConvertNo,Histogram,NSampleTypes> Copy;
+    CoordTransformer<NoQ,ANY_Mode,ConvertNo,Histogram,NSampleTypes> Copy;
     Copy.setUpTransf(pConvMethods.get());
     std::vector<coord_t> Coord(4);
 
@@ -90,12 +91,12 @@ void test_CoordTransfNOQ()
 
 void test_CoordTransfQ3DDirect()
 {
-    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histogram,CrystType> ConvFromHisto;
+    CoordTransformer<Q3D,Direct,ConvertNo,Histogram,CrystType> ConvFromHisto;
 
     MDEvents::MDWSDescription TestWS(4);
 
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
-    TestWS.emode= MDAlgorithms::Direct;
+    TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
     TestWS.dimMin.assign(4,-3);
     TestWS.dimMax.assign(4,3);
     TestWS.dimNames.assign(4,"Momentum");
@@ -112,8 +113,10 @@ void test_CoordTransfQ3DDirect()
     size_t nValidSpectra = det_loc.nDetectors();
 
     // helper conversion to TOF
-    UNITS_CONVERSION<ConvByTOF,Histogram> ConvToTOF;
-    TS_ASSERT_THROWS_NOTHING(ConvToTOF.setUpConversion(pConvMethods.get(),"TOF"));
+    UnitsConverter<ConvByTOF,Histogram> ConvToTOF;
+
+    const Kernel::Unit_sptr pThisUnit= pConvMethods->getAxisUnits();          
+    TS_ASSERT_THROWS_NOTHING(ConvToTOF.setUpConversion(*(pConvMethods->getDetectors()),pThisUnit->unitID(),"TOF"););
 
     // set up the run over the Histogram methods
     ConvFromHisto.setUpTransf(pConvMethods.get());
@@ -129,7 +132,7 @@ void test_CoordTransfQ3DDirect()
     std::vector<double> TOF_data(specSize*nValidSpectra);
 
     for (size_t i = 0; i < nValidSpectra; ++i){
-            size_t iSpctr             = det_loc.detIDMap[i];
+            size_t iSpctr             = det_loc.getDetSpectra(i);
             //int32_t det_id            = det_loc.det_id[i];
 
             const MantidVec& X        = ws2D->readX(iSpctr);        
@@ -151,7 +154,7 @@ void test_CoordTransfQ3DDirect()
     }
     // compare with conversion from TOF
 
-    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
+    CoordTransformer<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
 
     // make axis untit to be TOF to be able to work with conversion from TOF
     NumericAxis *pAxis0 = new NumericAxis(specSize); 
@@ -174,7 +177,7 @@ void test_CoordTransfQ3DDirect()
          for (size_t j = 0; j < specSize; ++j)
          {
 
-              TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.ConvertAndCalcMatrixCoord(TOF_data[ic],Coord));
+              TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.convertAndCalcMatrixCoord(TOF_data[ic],Coord));
               // compare with results from TOF
               TS_ASSERT_DELTA(allCoordDir[icc+0],Coord[0],1.e-5);
               TS_ASSERT_DELTA(allCoordDir[icc+1],Coord[1],1.e-5);
@@ -212,7 +215,7 @@ ConvertToMDEventsCoordTransfTest (){
    // set up workpspaces and preprocess detectors
     pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
-    processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get());
+    det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get());
     pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
     pConvMethods->setUPTestConversion(ws2D,det_loc);
 

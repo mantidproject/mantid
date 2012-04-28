@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 Integration sums up spectra in a [[Workspace]] and outputs a [[Workspace]] that contains only 1 value per spectrum (i.e. the sum). The associated errors are added in quadrature.
 The two X values per spectrum are set to the limits of the range over which the spectrum has been integrated. By default, the entire range is integrated and all spectra are included.
@@ -20,6 +20,7 @@ If an [[EventWorkspace]] is used as the input, the output will be a [[MatrixWork
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidAPI/Progress.h"
 #include <cmath>
 
@@ -76,10 +77,10 @@ void Integration::exec()
   m_MaxRange = getProperty("RangeUpper");
   m_MinSpec = getProperty("StartWorkspaceIndex");
   m_MaxSpec = getProperty("EndWorkspaceIndex");
-  const bool incPartBins = getProperty("IncludePartialBins");
+  m_IncPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = this->getInputWorkspace();
 
   const int numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
 
@@ -102,10 +103,10 @@ void Integration::exec()
   }
 
   // Create the 2D workspace (with 1 bin) for the output
-  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
+  MatrixWorkspace_sptr outputWorkspace = this->getOutputWorkspace(localworkspace);
 
   bool is_distrib=outputWorkspace->isDistribution();
-  Progress progress(this,0,1,m_MaxSpec-m_MinSpec+1);
+  Progress progress(this, 0, 1, m_MaxSpec-m_MinSpec+1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
 
@@ -116,7 +117,7 @@ void Integration::exec()
     PARALLEL_START_INTERUPT_REGION
     // Workspace index on the output
     const int outWI = i - m_MinSpec;
-    
+
     // Copy Axis values from previous workspace
     if ( axisIsText )
     {
@@ -140,7 +141,7 @@ void Integration::exec()
     // If doing partial bins, we want to set the bin boundaries to the specified values
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
-    if ( incPartBins )
+    if ( m_IncPartBins )
     {
       outSpec->dataX()[0] = m_MinRange;
       outSpec->dataX()[1] = m_MaxRange;
@@ -156,29 +157,38 @@ void Integration::exec()
 
     // If range specified doesn't overlap with this spectrum then bail out
     if ( lowit == X.end() || highit == X.begin() ) continue;
-    
-    --highit; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
-  
+
+    // Upper limit is the bin before, i.e. the last value smaller than MaxRange
+    --highit;
+
     MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax = std::distance(X.begin(),highit);
 
     double sumY = 0.0;
     double sumE = 0.0;
 
-    if (!is_distrib) //Sum the Y, and sum the E in quadrature
+    if (!is_distrib)
     {
-      sumY = std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
-      sumE = std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,VectorHelper::SumSquares<double>());
+      //Sum the Y, and sum the E in quadrature
+      sumY = std::accumulate(Y.begin()+distmin, Y.begin()+distmax, 0.0);
+      sumE = std::accumulate(E.begin()+distmin, E.begin()+distmax, 0.0,
+                             VectorHelper::SumSquares<double>());
     }
-    else // Sum Y*binwidth and Sum the (E*binwidth)^2.
+    else
     {
+      // Sum Y*binwidth and Sum the (E*binwidth)^2.
       std::vector<double> widths(X.size());
-      std::adjacent_difference(lowit,highit+1,widths.begin()); // highit+1 is safe while input workspace guaranteed to be histogram
-      sumY = std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
-      sumE = std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
+      // highit+1 is safe while input workspace guaranteed to be histogram
+      std::adjacent_difference(lowit,highit+1,widths.begin());
+      sumY = std::inner_product(Y.begin()+distmin, Y.begin()+distmax,
+                                widths.begin()+1, 0.0);
+      sumE = std::inner_product(E.begin()+distmin, E.begin()+distmax,
+                                widths.begin()+1, 0.0, std::plus<double>(),
+                                VectorHelper::TimesSquares<double>());
     }
-    // If partial bins are included, set integration range to exact range given and add on contributions from partial bins either side of range.
-    if( incPartBins )
+    // If partial bins are included, set integration range to exact range
+    // given and add on contributions from partial bins either side of range.
+    if( m_IncPartBins )
     {
       if( distmin > 0 )
       {
@@ -225,9 +235,58 @@ void Integration::exec()
   outputWorkspace->generateSpectraMap();
 
   // Assign it to the output workspace property
-  setProperty("OutputWorkspace",outputWorkspace);
+  setProperty("OutputWorkspace", outputWorkspace);
 
   return;
+}
+
+/**
+ * This function gets the input workspace. In the case for a RebinnedOutput
+ * workspace, it must be cleaned before proceeding. Other workspaces are
+ * untouched.
+ * @return the input workspace, cleaned if necessary
+ */
+MatrixWorkspace_const_sptr Integration::getInputWorkspace()
+{
+  MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
+  if (temp->id() == "RebinnedOutput")
+  {
+    // Clean the input workspace in the RebinnedOutput case for nan's and
+    // inf's in order to treat the data correctly later.
+    IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
+    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
+    std::string outName = "_"+temp->getName()+"_clean";
+    alg->setProperty("OutputWorkspace", outName);
+    alg->setProperty("NaNValue", 0.0);
+    alg->setProperty("NaNError", 0.0);
+    alg->setProperty("InfinityValue", 0.0);
+    alg->setProperty("InfinityError", 0.0);
+    alg->executeAsSubAlg();
+    temp = alg->getProperty("OutputWorkspace");
+  }
+  return temp;
+}
+
+/**
+ * This function creates the output workspace. In the case of a RebinnedOutput
+ * workspace, the resulting workspace only needs to be a Workspace2D to handle
+ * the integration. Other workspaces are handled normally.
+ * @return the output workspace
+ */
+MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_const_sptr inWS)
+{
+  if (inWS->id() == "RebinnedOutput")
+  {
+    MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                                          m_MaxSpec-m_MinSpec+1,2,1);
+    API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, true);
+    return outWS;
+  }
+  else
+  {
+    return API::WorkspaceFactory::Instance().create(inWS, m_MaxSpec-m_MinSpec+1,
+                                                    2, 1);
+  }
 }
 
 } // namespace Algorithms

@@ -1,6 +1,7 @@
 #ifndef H_CONVERT_TO_MDEVENTS_UNITS
 #define H_CONVERT_TO_MDEVENTS_UNITS
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for Units conversion
@@ -34,31 +35,31 @@ namespace MDAlgorithms
     
 // How to treat X-coordinates:
 // for Histogram we take centerpiece average
-template<XCoordType TYPE>
+template<ConvertToMD::XCoordType TYPE>
 inline double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
 // for axis type -- just value
 template <>
-inline double XValue<Centered>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
+inline double XValue<ConvertToMD::Centered>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
 // DO UNITS CONVERSION --
 
 
 //  general procedure does nothing (non-converts units)
-template<CnvrtUnits CONV,XCoordType Type> 
-struct UNITS_CONVERSION
+template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE> 
+struct UnitsConverter
 { 
     /** Set up all variables necessary for units conversion at the beginning of the conversion loop
      * @param pHost     -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
      *                     relevant to the units conversion
      *@param targ_units -- the units we want to convert to 
     */
-    inline void     setUpConversion(IConvertToMDEventsMethods const * const pHost,const std::string &targ_units )
-    {UNUSED_ARG(pHost);UNUSED_ARG(targ_units);}
+    inline void  setUpConversion(const ConvToMDPreprocDetectors &det, const std::string &units_from,const std::string &units_to )
+    {UNUSED_ARG(det);UNUSED_ARG(units_from);UNUSED_ARG(units_to);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
     inline void     updateConversion(size_t i){UNUSED_ARG(i);}
     /// Convert current X variable into the units requested;
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {
-        return XValue<Type>(X,j);
+        return XValue<TYPE>(X,j);
     }
     /// Convert current X variable into the units requested;
     inline double  getXConverted(const double& X)const
@@ -70,15 +71,17 @@ struct UNITS_CONVERSION
 };
 
 // Fast conversion:
-template<XCoordType Type>
-struct UNITS_CONVERSION<ConvFast,Type>
+template<ConvertToMD::XCoordType TYPE>
+struct UnitsConverter<ConvertToMD::ConvFast,TYPE>
 {
 
-    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
+    void setUpConversion(const ConvToMDPreprocDetectors &det, const std::string &units_from,const std::string &units_to)
     {       
-       const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
+       UNUSED_ARG(det);
+       //const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
+      const Kernel::Unit_sptr pThisUnit= Kernel::UnitFactory::Instance().create(units_from);
     
-       if(!pThisUnit->quickConversion(targ_units,factor,power)){
+       if(!pThisUnit->quickConversion(units_to,factor,power)){
            throw(std::logic_error(" should be able to convert units quickly and catch the case of non-conversions before invoking this template"));
        }
       
@@ -88,7 +91,7 @@ struct UNITS_CONVERSION<ConvFast,Type>
     // convert X coordinate using power series
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {
-        double x = XValue<Type>(X,j);
+        double x = XValue<TYPE>(X,j);
         return getXConverted(x);
     }
    // convert X coordinate using power series
@@ -103,30 +106,30 @@ private:
 };
 
 // Convert from TOF:
-template<XCoordType Type>
-struct UNITS_CONVERSION<ConvFromTOF,Type>
+template<ConvertToMD::XCoordType TYPE>
+struct UnitsConverter<ConvertToMD::ConvFromTOF,TYPE>
 {
 
-    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
+    void setUpConversion(const ConvToMDPreprocDetectors &det, const std::string &units_from,const std::string &units_to)
     {       
        // check if axis units are TOF
-       const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
-       if(std::string("TOF").compare(pThisUnit->unitID())!=0){
+       //const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();       
+       if(std::string("TOF").compare(units_from)!=0){
            throw(std::logic_error(" it whould be only TOF here"));
        }
       // create units for this subalgorith to convert to 
-       pWSUnit      = Kernel::UnitFactory::Instance().create(targ_units);
+       pWSUnit      = Kernel::UnitFactory::Instance().create(units_to);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }
    
      // get detectors positions and other data needed for units conversion:
-       pTwoTheta =  &(pHost->pPrepDetectors()->getTwoTheta());      
-       pL2       =  &(pHost->pPrepDetectors()->getL2());
-       L1        =  pHost->pPrepDetectors()->L1;
+       pTwoTheta =  &(det.getTwoTheta());      
+       pL2       =  &(det.getL2());
+       L1        =  det.getL1();
         // get efix
-       efix      =  pHost->getEi();
-       emode     =  pHost->getEMode();
+        efix      =  det.getEfix();
+        emode     =  det.getEmode();
 
        };
     inline void updateConversion(size_t i)
@@ -136,7 +139,7 @@ struct UNITS_CONVERSION<ConvFromTOF,Type>
     }
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {   
-        double x = XValue<Type>(X,j);
+        double x = XValue<TYPE>(X,j);
         return getXConverted(x);
     }
 
@@ -162,31 +165,34 @@ private:
 };
 
 // Convert By TOF:
-template<XCoordType Type>
-struct UNITS_CONVERSION<ConvByTOF,Type>
+template<ConvertToMD::XCoordType TYPE>
+struct UnitsConverter<ConvertToMD::ConvByTOF,TYPE>
 {
 
-    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
+    void setUpConversion(const ConvToMDPreprocDetectors &det, const std::string &units_from,const std::string &units_to)
     {       
 
-       pSourceWSUnit= pHost->getAxisUnits();
+       pSourceWSUnit=     Kernel::UnitFactory::Instance().create(units_from);
+       //pSourceWSUnit= pHost->getAxisUnits();
        if(!pSourceWSUnit){
            throw(std::logic_error(" can not retrieve source workspace units from the input workspacee"));
        }
 
        // get units class, requested by subalgorithm
-       pWSUnit                   = Kernel::UnitFactory::Instance().create(targ_units);
+       pWSUnit                   = Kernel::UnitFactory::Instance().create(units_to);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
        }
 
      // get detectors positions and other data needed for units conversion:
-       pTwoTheta =  &(pHost->pPrepDetectors()->getTwoTheta());      
-       pL2       =  &(pHost->pPrepDetectors()->getL2());
-       L1        =  pHost->pPrepDetectors()->L1;
+       pTwoTheta =  &(det.getTwoTheta());      
+       pL2       =  &(det.getL2());
+
+       L1        =  det.getL1();
        // get efix
-       efix      =  pHost->getEi();
-       emode     =  pHost->getEMode();
+       efix      =  det.getEfix();
+       emode     =  det.getEmode();
+
     };
 
     inline void updateConversion(size_t i)
@@ -198,7 +204,7 @@ struct UNITS_CONVERSION<ConvByTOF,Type>
     //
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {
-        double x = XValue<Type>(X,j);
+        double x = XValue<TYPE>(X,j);
         return getXConverted(x);
     }
     // 

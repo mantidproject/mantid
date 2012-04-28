@@ -53,7 +53,7 @@ private:
   static const int NY_PIXELS;
   static const double PIXEL_SIZE;
 
-  int m_outputWorkspaceCounter;
+  std::string m_output_message;
 
   API::MatrixWorkspace_sptr processData(const std::string polarization);
   API::MatrixWorkspace_sptr processNormalization();

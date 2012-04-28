@@ -50,7 +50,8 @@ namespace Mantid
       std::string getFullPath(const std::string& fName)const;
       std::string getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::set<std::string>& filename, const std::vector<std::string>& extensions)const;
       std::string makeFileName(const std::string& hint, const Kernel::FacilityInfo& facility)const;
-      void setCaseSensitive(const bool cs); 
+      void setCaseSensitive(const bool cs);
+      int getCaseSensitive();
       std::string findRun(const std::string& hint,const std::set<std::string> *exts)const;
       std::string findRun(const std::string& hint,const std::vector<std::string> &exts  = std::vector<std::string>())const;
       std::vector<std::string> findRuns(const std::string& hint)const;

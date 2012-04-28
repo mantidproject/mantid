@@ -293,7 +293,8 @@ std::string Convolution::asString()const
 {
   if (nFunctions() != 2)
   {
-    throw std::runtime_error("Convolution function is incomplete");
+    //throw std::runtime_error("Convolution function is incomplete");
+    return CompositeFunction::asString();
   }
   std::ostringstream ostr;
   ostr<<"composite=Convolution;";

@@ -6,6 +6,7 @@
 #include "MantidQtImageViewer/IVConnections.h"
 #include "MantidQtImageViewer/ImageDisplay.h"
 #include "MantidQtImageViewer/SliderHandler.h"
+#include "MantidQtImageViewer/RangeHandler.h"
 
 namespace MantidQt
 {
@@ -36,11 +37,16 @@ ImageView::ImageView( ImageDataSource* data_source )
   SliderHandler* slider_handler = new SliderHandler( ui );
   saved_slider_handler = slider_handler;
 
+  RangeHandler* range_handler = new RangeHandler( ui );
+  range_handler->ConfigureRangeControls( data_source );
+  saved_range_handler = range_handler;
+
   h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );
   v_graph = new GraphDisplay( ui->v_graphPlot, ui->v_graph_table, true );
 
   ImageDisplay* image_display = new ImageDisplay( ui->imagePlot,
                                                   slider_handler,
+                                                  range_handler,
                                                   h_graph, v_graph,
                                                   ui->image_table );
   saved_image_display = image_display;
@@ -55,7 +61,7 @@ ImageView::ImageView( ImageDataSource* data_source )
 
 ImageView::~ImageView()
 {
-/*        // Why does Mantid seg fault, or show nothing if I delete these objects?
+/*  // Why does Mantid seg fault, or show nothing if I delete these objects?
  
   delete  window;
   delete  h_graph;
@@ -64,10 +70,16 @@ ImageView::~ImageView()
   ImageDisplay* image_display = static_cast<ImageDisplay*>(saved_image_display);
   delete  image_display;
 
-  SliderHandler* slider_handler = static_cast<SliderHandler*>(saved_slider_handler);
+  SliderHandler* slider_handler = 
+                             static_cast<SliderHandler*>(saved_slider_handler);
   delete  slider_handler;
 
-  IVConnections* iv_connections = static_cast<IVConnections*>(saved_iv_connections);
+  RangeHandler* range_handler = 
+                             static_cast<RangeHandler*>(saved_range_handler);
+  delete  range_handler;
+
+  IVConnections* iv_connections = 
+                             static_cast<IVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
   Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);

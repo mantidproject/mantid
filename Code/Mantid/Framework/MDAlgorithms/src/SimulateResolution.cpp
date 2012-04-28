@@ -37,7 +37,7 @@ namespace Mantid
         int seedValue = 12345;
         m_randGen->setSeed(seedValue);
       }
-      m_mcOptVec.resize(9,true);; // 9 MC effects are modelled in current implementation
+      m_mcOptVec.resize(9,true);; // Nine processes are modelled in current implementation
       m_mcVarCount.resize(m_mcOptVec.size());
       m_mcVarCount.at(0) = 1; //LineShape
       m_mcVarCount.at(1) = 2; //Aperture
@@ -48,11 +48,19 @@ namespace Mantid
       m_mcVarCount.at(6) = 2; //DetectorArea
       m_mcVarCount.at(7) = 1; //DetectorTimeBin
       m_mcVarCount.at(8) = 2; //CrystalMosaic
+      setAttributeValue("MCLoopMin",100);
+      setAttributeValue("MCLoopMax",1000);
+      setAttributeValue("MCTol",1.e-5);
     }
 
     SimulateResolution::~SimulateResolution()
     {
       delete m_randGen;
+    }
+    void SimulateResolution::setRunDataInfo(boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData)
+    {
+      // temporary public method at set RunPara data
+      m_runData.push_back(runData);
     }
 
     void SimulateResolution::setWorkspaceMD(WorkspaceGroup_sptr wsGroup)
@@ -62,7 +70,6 @@ namespace Mantid
 
     double SimulateResolution::functionMD(const Mantid::API::IMDIterator& it) const
     {
-      getParams();
 
       // Is runData setup?
       if(m_runData.empty())
@@ -74,6 +81,7 @@ namespace Mantid
       for(size_t j=0; j < it.getNumEvents(); j++)
       {
         // Calculate convolution
+        //RunParam rP; // TODO set from runIndex of internal point
         fgSignal += sqwConvolution(it,j,fgError);
         UNUSED_ARG(fgError);
       }
@@ -104,7 +112,7 @@ namespace Mantid
         qE.push_back(it.getInnerPosition(event,index));
 
       /// Pointer to the run parameters for each run which may be included in a cut
-      boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData = m_runData[runID];
+      boost::shared_ptr<Mantid::MDAlgorithms::RunParam> runData = m_runData.at(runID);
       // get crystal parameters and ubinv/uinv matrix for run
       //Mantid::Geometry::OrientedLattice& lattice; // = m_mdews->getExperimentInfo(0)->sample().getOrientedLattice();
       //lattice.;
@@ -120,16 +128,35 @@ namespace Mantid
       // temp data which will come from runInfo
       double gauPre=0.0;
       std::vector<double> params;
-      int mcLoopLimit=100,mcLoopMin=10; // test values
-      double mcTol=1e-3;
+      getParams(params);
+      // get attributes - should only do once and store
+      const int mcLoopLimit=getAttribute("MCLoopMax").asInt();
+      const int mcLoopMin=getAttribute("MCLoopMin").asInt();
+      const double mcTol=getAttribute("MCTol").asDouble();
 
-      // MC loop over sample points until accuracy or loop limit reached
-      if(mcLoopMin<1)
-        mcLoopMin=1;
-      if(mcLoopLimit<1)
-        mcLoopLimit=1;
+      Kernel::V3D detPos,detDim;
+      double deps;
+      runData->getDetInfo(detectorID,detPos,detDim, deps);
+      //double phi=0.37538367018968838, beta=2.618430210304493, x2Detector=6.034; // detector angles and distance TEMP as cobalt demo, 1st det
+      double eps=qE[3];
+      Kernel::DblMatrix dMat(3,3), dMatInv(3,3), bMat(6,11);
+      // Initialise variables for Monte Carlo loop:
+      // Get transformation and resolution matricies, and nominal Q:
+      const double wi = sqrt(runData->getEi()/2.0721418);
+      const double wf = sqrt((runData->getEi()-eps)/2.0721418);
+      const double detTimeBin = (3.8323960e-4 * detPos[2] / (wf*wf*wf)) * deps;
+      //std::vector<double> detectorBB = {0.0254, 0.0225, 0.6*0.025}; // Default for cobalt demo, no good in general
 
-      const int sizeRanvec=13;
+      dMatrix (detPos[0], detPos[1], dMat, dMatInv);
+      bMatrix (wi, wf, runData->getX0(), runData->getXa(), runData->getX1(), detPos[2], runData->getThetam(), runData->getAngVel(),
+               runData->getSMat(), dMat, bMat);
+
+      // get nominal q vector
+      std::vector<double> q0;
+      for(size_t i=0;i<4;i++)
+        q0.push_back(it.getInnerPosition(event,i));
+
+      const int sizeRanvec=14;
       boost::shared_array<double> ranvec( new double[sizeRanvec]);
       gsl_qrng *qRvec;
       if(m_random==sobol)
@@ -137,12 +164,25 @@ namespace Mantid
       else
         throw std::invalid_argument("Invalid random method");
 
-      for( int mcStep=0; mcStep<mcLoopLimit; mcStep++)
+      // Loop over quasi-random points in 14 dimensional space to determine the resolution effect
+      // For each point find the effective Q-E point and evaluate the user scattering function there.
+      // Then take average of all as expected scattering.
+      for( int mcStep=1; mcStep<=mcLoopLimit; mcStep++)
       {
+        // Get  quasi random point
         gsl_qrng_get( qRvec, ranvec.get() );
-        mcYVec(ranvec.get() ,runData, yVec, eta2, eta3);
-        mcMapYtoQEVec(yVec,qE,eta2,eta3,perturbQE);
-        userSqw(params,perturbQE,result);
+        // Get corresponding actual changes in coordinates and time
+        mcYVec(ranvec.get() ,runData, detDim, detTimeBin,  yVec, eta2, eta3);
+        // Map these changes to the perturbation in Q-E and add with nominal value
+        mcMapYtoQEVec(wi,wf, q0, bMat, dMatInv, yVec, eta2, eta3,
+                                       perturbQE);
+        perturbQE[0] += q0[0];
+        perturbQE[1] += q0[1];
+        perturbQE[2] += q0[2];
+        perturbQE[3] += q0[3];
+
+        // Call user function on new point
+        userSqw(runData, params,perturbQE,result);
         // Models are either broad of sharp and the data returned is different in these cases.
         if(broad)
           weight=result[0];
@@ -155,10 +195,10 @@ namespace Mantid
         sum+=weight;
         sumSqr+=weight*weight;
         // check for convergence every mcLoopMin steps, end of loop
-        if( (mcStep % mcLoopMin) ==0 || mcStep==mcLoopLimit-1 )
+        if( (mcStep % mcLoopMin) ==0 || mcStep==mcLoopLimit )
         {
           simSig=sum/mcStep;
-          error=sqrt(fabs( ( sumSqr/mcStep - simSig*simSig ))/mcStep );
+          error=sqrt(fabs( ( sumSqr/mcStep+ - simSig*simSig ))/mcStep );
 
           // break on relative error or very small after mcLoop min iterations
           if(fabs(simSig)>small)
@@ -299,7 +339,7 @@ namespace Mantid
     void SimulateResolution::bMatrix(const double wi, const double wf, const double x0, const double xa, const double x1,
         const double x2, const double thetam, const double angvel,
         const Kernel::Matrix<double> & sMat, const Kernel::Matrix<double> & dMat,
-        Kernel::Matrix<double> & bMat)
+        Kernel::Matrix<double> & bMat) const
     {
       //double precision wi, wf, x0, xa, x1, x2, thetam, angvel, sMat(3,3), dMat(3,3), bMat(6,11)
       /*
@@ -318,6 +358,7 @@ namespace Mantid
             ! Output:
             !     bMat    matrix elements as defined on p112 of T.Perring's thesis (1991)
        */
+      const size_t nRows=6, nCols=11; // expected size of bMat
 
 
       // Calculate velocities and times:
@@ -328,6 +369,7 @@ namespace Mantid
       const double ti = x0/veli;
       const double tf = x2/velf;
 
+      const Kernel::Matrix<double> ds = dMat*sMat; //TODO fix the sample size terms - they are wrong at present
 
       // Get some coefficients:
       // ----------------------
@@ -346,84 +388,101 @@ namespace Mantid
       const double cp_f = wf/tf;
       const double ct_f = wf/x2;
 
-
+      if(bMat.numCols()<nCols || bMat.numRows()<nRows)
+        throw std::invalid_argument("bMat too small in bMatrix");
       // Calculate the matrix elements:
       //-------------------------------
 
-      bMat [0][0] =  cp_i;
-      bMat [0][1] = -cp_i * gg1;
-      bMat [0][2] =  0.0;
-      bMat [0][3] = -cp_i;
-      bMat [0][4] =  cp_i * gg2 * sMat[1][0];
-      bMat [0][5] =  cp_i * gg2 * sMat[1][1];
-      bMat [0][6] =  cp_i * gg2 * sMat[1][2];
-      bMat [0][7] =  0.0;
-      bMat [0][8] =  0.0;
-      bMat [0][9]=  0.0;
-      bMat [0][10]=  0.0;
+      int beam=2,up=1,horiz=0; // allow for Mantid axes differing to Tobyfit ones
+      bMat [beam][0] =  cp_i;
+      bMat [beam][1] = -cp_i * gg1;
+      bMat [beam][2] =  0.0;
+      bMat [beam][3] = -cp_i;
+      bMat [beam][4] =  cp_i * gg2 * sMat[1][0];
+      bMat [beam][5] =  cp_i * gg2 * sMat[1][1];
+      bMat [beam][6] =  cp_i * gg2 * sMat[1][2];
+      bMat [beam][7] =  0.0;
+      bMat [beam][8] =  0.0;
+      bMat [beam][9] =  0.0;
+      bMat [beam][10]=  0.0;
 
-      bMat [1][0] =  0.0;
-      bMat [1][1] = -ct_i;
-      bMat [1][2] =  0.0;
-      bMat [1][3] =  0.0;
-      bMat [1][4] =  ct_i * sMat[1][0];
-      bMat [1][5] =  ct_i * sMat[1][1];
-      bMat [1][6] =  ct_i * sMat[1][2];
-      bMat [1][7] =  0.0;
-      bMat [1][8] =  0.0;
-      bMat [1][9]=  0.0;
-      bMat [1][10]=  0.0;
+      bMat [horiz][0] =  0.0;
+      bMat [horiz][1] = -ct_i;
+      bMat [horiz][2] =  0.0;
+      bMat [horiz][3] =  0.0;
+      bMat [horiz][4] =  ct_i * sMat[1][0];
+      bMat [horiz][5] =  ct_i * sMat[1][1];
+      bMat [horiz][6] =  ct_i * sMat[1][2];
+      bMat [horiz][7] =  0.0;
+      bMat [horiz][8] =  0.0;
+      bMat [horiz][9] =  0.0;
+      bMat [horiz][10]=  0.0;
 
-      bMat [2][0] =  0.0;
-      bMat [2][1] =  0.0;
-      bMat [2][2] = -ct_i;
-      bMat [2][3] =  0.0;
-      bMat [2][4] =  ct_i * sMat[2][0];
-      bMat [2][5] =  ct_i * sMat[2][1];
-      bMat [2][6] =  ct_i * sMat[2][2];
-      bMat [2][7] =  0.0;
-      bMat [2][8] =  0.0;
-      bMat [2][9]=  0.0;
-      bMat [2][11]=  0.0;
+      bMat [up][0] =  0.0;
+      bMat [up][1] =  0.0;
+      bMat [up][2] = -ct_i;
+      bMat [up][3] =  0.0;
+      bMat [up][4] =  ct_i * sMat[2][0];
+      bMat [up][5] =  ct_i * sMat[2][1];
+      bMat [up][6] =  ct_i * sMat[2][2];
+      bMat [up][7] =  0.0;
+      bMat [up][8] =  0.0;
+      bMat [up][9] =  0.0;
+      bMat [up][10]=  0.0;
 
-      bMat [3][0] =  cp_f * (-x1/x0);
-      bMat [3][1] =  cp_f *  ff1;
-      bMat [3][2] =  0.0;
-      bMat [3][3] =  cp_f * (x0+x1)/x0;
-      bMat [3][4] =  cp_f * ( sMat[0][0]/veli - (dMat[0][0]*sMat[0][0]+dMat[0][1]*sMat[1][0]+dMat[0][2]*sMat[2][0])/velf
-          - ff2*sMat[1][0] );
-      bMat [3][5] =  cp_f * ( sMat[0][1]/veli - (dMat[0][0]*sMat[0][1]+dMat[0][1]*sMat[1][1]+dMat[0][2]*sMat[2][1])/velf
-          - ff2*sMat[1][1] );
-      bMat [3][6] =  cp_f * ( sMat[0][2]/veli - (dMat[0][0]*sMat[0][2]+dMat[0][1]*sMat[1][2]+dMat[0][2]*sMat[2][2])/velf
-          - ff2*sMat[1][2] );
-      bMat [3][7] =  cp_f/velf;
-      bMat [3][8] =  0.0;
-      bMat [3][9]=  0.0;
-      bMat [3][10]= -cp_f;
+      int beamf=beam+3, upf=up+3, horizf=horiz+3; // do output components 3,4,5
+      bMat [beamf][0] =  cp_f * (-x1/x0);
+      bMat [beamf][1] =  cp_f *  ff1;
+      bMat [beamf][2] =  0.0;
+      bMat [beamf][3] =  cp_f * (x0+x1)/x0;
+      /*
+      bMat [beamf][4] =  cp_f * ( sMat[beam][0]/veli - (dMat[0][0]*sMat[0][0]+dMat[0][1]*sMat[1][0]+dMat[0][2]*sMat[2][0])/velf
+          - ff2*sMat[horiz][0] );
+      bMat [beamf][5] =  cp_f * ( sMat[beam][1]/veli - (dMat[0][0]*sMat[0][1]+dMat[0][1]*sMat[1][1]+dMat[0][2]*sMat[2][1])/velf
+          - ff2*sMat[horiz][1] );
+      bMat [beamf][6] =  cp_f * ( sMat[beam][2]/veli - (dMat[0][0]*sMat[0][2]+dMat[0][1]*sMat[1][2]+dMat[0][2]*sMat[2][2])/velf
+          - ff2*sMat[horiz][2] );
+          */
+      bMat [beamf][4] =  cp_f * ( sMat[beam][0]/veli - (ds[2][2])/velf
+          - ff2*sMat[horiz][0] );
+      bMat [beamf][5] =  cp_f * ( sMat[beam][1]/veli - (ds[2][0])/velf
+          - ff2*sMat[horiz][1] );
+      bMat [beamf][6] =  cp_f * ( sMat[beam][2]/veli - (ds[2][1])/velf
+          - ff2*sMat[horiz][2] );
+      bMat [beamf][7] =  cp_f/velf;
+      bMat [beamf][8] =  0.0;
+      bMat [beamf][9] =  0.0;
+      bMat [beamf][10]= -cp_f;
 
-      bMat [4][0] =  0.0;
-      bMat [4][1] =  0.0;
-      bMat [4][2] =  0.0;
-      bMat [4][3] =  0.0;
-      bMat [4][4] = -ct_f * ( dMat[1][0]*sMat[0][0] + dMat[1][1]*sMat[1][0] + dMat[1][2]*sMat[2][0] );
-      bMat [4][5] = -ct_f * ( dMat[1][0]*sMat[0][1] + dMat[1][1]*sMat[1][1] + dMat[1][2]*sMat[2][1] );
-      bMat [4][6] = -ct_f * ( dMat[1][0]*sMat[0][2] + dMat[1][1]*sMat[1][2] + dMat[1][2]*sMat[2][2] );
-      bMat [4][7] =  0.0;
-      bMat [4][8] =  ct_f;
-      bMat [4][9]=  0.0;
-      bMat [4][10]=  0.0;
+      bMat [horizf][0] =  0.0;
+      bMat [horizf][1] =  0.0;
+      bMat [horizf][2] =  0.0;
+      bMat [horizf][3] =  0.0;
+      //bMat [horizf][4] = -ct_f * ( dMat[1][0]*sMat[0][0] + dMat[1][1]*sMat[1][0] + dMat[1][2]*sMat[2][0] );
+      //bMat [horizf][5] = -ct_f * ( dMat[1][0]*sMat[0][1] + dMat[1][1]*sMat[1][1] + dMat[1][2]*sMat[2][1] );
+      //bMat [horizf][6] = -ct_f * ( dMat[1][0]*sMat[0][2] + dMat[1][1]*sMat[1][2] + dMat[1][2]*sMat[2][2] );
+      bMat [horizf][4] = -ct_f * ( ds[0][2] );
+      bMat [horizf][5] = -ct_f * ( ds[0][0] );
+      bMat [horizf][6] = -ct_f * ( ds[0][1] );
+      bMat [horizf][7] =  0.0;
+      bMat [horizf][8] =  ct_f;
+      bMat [horizf][9] =  0.0;
+      bMat [horizf][10]=  0.0;
 
-      bMat [5][0] =  0.0;
-      bMat [5][1] =  0.0;
-      bMat [5][2] =  0.0;
-      bMat [5][3] =  0.0;
-      bMat [5][4] = -ct_f * ( dMat[2][0]*sMat[0][0] + dMat[2][1]*sMat[1][0] + dMat[2][2]*sMat[2][0] );
-      bMat [5][5] = -ct_f * ( dMat[2][0]*sMat[0][1] + dMat[2][1]*sMat[1][1] + dMat[2][2]*sMat[2][1] );
-      bMat [5][6] = -ct_f * ( dMat[2][0]*sMat[0][2] + dMat[2][1]*sMat[1][2] + dMat[2][2]*sMat[2][2] );
-      bMat [5][7] =  0.0;
-      bMat [5][8] =  0.0;
-      bMat [5][9]=  ct_f;
-      bMat [5][10]=  0.0;
+      bMat [upf][0] =  0.0;
+      bMat [upf][1] =  0.0;
+      bMat [upf][2] =  0.0;
+      bMat [upf][3] =  0.0;
+      //bMat [upf][4] = -ct_f * ( dMat[2][0]*sMat[0][0] + dMat[2][1]*sMat[1][0] + dMat[2][2]*sMat[2][0] );
+      //bMat [upf][5] = -ct_f * ( dMat[2][0]*sMat[0][1] + dMat[2][1]*sMat[1][1] + dMat[2][2]*sMat[2][1] );
+      //bMat [upf][6] = -ct_f * ( dMat[2][0]*sMat[0][2] + dMat[2][1]*sMat[1][2] + dMat[2][2]*sMat[2][2] );
+      bMat [upf][4] = -ct_f * ( ds[1][2] );
+      bMat [upf][5] = -ct_f * ( ds[1][0] );
+      bMat [upf][6] = -ct_f * ( ds[1][1] );
+      bMat [upf][7] =  0.0;
+      bMat [upf][8] =  0.0;
+      bMat [upf][9] =  ct_f;
+      bMat [upf][10]=  0.0;
 
     }
 
@@ -432,7 +491,7 @@ namespace Mantid
      */
 
     void SimulateResolution::dMatrix(const double phi, const double beta, Kernel::Matrix<double> & dMat,
-        Kernel::Matrix<double> & dinvMat)
+        Kernel::Matrix<double> & dMatInv) const
     {
 
       /*
@@ -443,6 +502,16 @@ namespace Mantid
             !     dMat    matrix for converting laboratory coordinates to detector coordinates
             !     dinv_mat corresponding inverse matrix
        */
+      Geometry::Goniometer gDet;
+      gDet.makeUniversalGoniometer();
+      //const double deg2rad=M_PI/180.;
+      const double rad2deg=180./M_PI;
+      gDet.setRotationAngle("phi", phi*rad2deg);
+      gDet.setRotationAngle("chi", beta*rad2deg);
+      dMat=gDet.getR();
+      dMatInv=dMat;
+      dMatInv.Invert();
+      /*
       const double cp = cos(phi);
       const double sp = sin(phi);
       const double cb = cos(beta);
@@ -470,7 +539,7 @@ namespace Mantid
       dinvMat[2][0] =  sp*sb;
       dinvMat[2][1] =  cp*sb;
       dinvMat[2][2] =  cb;
-
+*/
 
     }
 
@@ -478,7 +547,7 @@ namespace Mantid
      * mc_yvec function from tobyfit - generate a random point in up to 13 dimensional space
      */
     void SimulateResolution::mcYVec(const double ranvec[], const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run,
-        std::vector<double> & yVec, double & eta2, double & eta3 ) const
+        const std::vector<double> & detectorBB, const double detTimeBin, std::vector<double> & yVec, double & eta2, double & eta3 ) const
     {
       //(irun, det_width, det_height, det_timebin, mc_type, y_vec, eta_2, eta_3)
 
@@ -490,8 +559,7 @@ namespace Mantid
             ! Input:
             !     ranvec            double[13] set of random/quasi random sample points on unit hypercube
             !     irun              run index
-            !     det_width         detector width    (m)
-            !     det_height        detector height    (m)
+            !     detectorBB        detector width, heigh, depth    (m)
             !     det_timebin       time width of detector bin (s)
             !     mc_type           =0 if pseudo-random number generator; =1 if quasi-random (Sobol sequence)
             ! Output:
@@ -513,9 +581,12 @@ namespace Mantid
             ! 03-01-28   TGP   Changed chopper jitter distribution to be triangular: avoids call to GASDEV
             !
        */
+      const size_t nelms=11;
 
       int imc(0);
 
+      if(yVec.size()<nelms)
+         yVec.resize(nelms);
       // Sample over moderator time distribution:
       if (m_mcOptVec[mcLineShape])
       {
@@ -569,18 +640,18 @@ namespace Mantid
       if (m_mcOptVec[mcDetectorDepth])
       { // a rough approximation
         //yVec[8] = 0.6 * det_width * (ranvec(imc) - 0.5); // Introduces error if use false detector parameters e.g.HET rings
-        yVec[7] = 0.6 * 0.025   * (ranvec[imc++] - 0.5);   // Assume detectors are 25mm diameter
+        yVec[7] = 0.6 * detectorBB[2]   * (ranvec[imc++] - 0.5);   // Assume detectors are 25mm diameter
       }
       else
         yVec[7] = 0.0;
 
       if (m_mcOptVec[mcDetectorArea])
       {
-        yVec[8]  = m_detectorBB[0] * (ranvec[imc++] - 0.5); // need to check BB, need width, height
-        yVec[9] = m_detectorBB[2] * (ranvec[imc++] - 0.5);
+        yVec[8] = detectorBB[0] * (ranvec[imc++] - 0.5); // need to check BB, need width, height
+        yVec[9] = detectorBB[1] * (ranvec[imc++] - 0.5);
       }
       else {
-        yVec[8]  = 0.0;
+        yVec[8] = 0.0;
         yVec[9] = 0.0;
       }
 
@@ -589,7 +660,7 @@ namespace Mantid
 
       if (m_mcOptVec[mcDetectorTimeBin])
       {
-        yVec[10] = m_detectorTimebin * (ranvec[imc++] - 0.5);
+        yVec[10] = detTimeBin * (ranvec[imc++] - 0.5);
       }
       else
         yVec[10] = 0.0;
@@ -609,15 +680,76 @@ namespace Mantid
 
     /**
      * Map from yVec to modified qE - null implementation for now
+     * Vectors "y_vec" and "x_vec" are defined on pg. 112 of T.Perring's thesis (1991):
+     * --------------------------------------------------------------------------------
+     * Input:
+     *       wi                      incident wavevector (Ang^-1)
+     *       wf                      final wavevector (Ang^-1)
+     *       q0                      nominal Q and energy in laboratory frame (Ang^-1, meV)
+     *       b_mat                   matrix defined on pg. 112 of T.Perring's thesis (1991)
+     *       dinv_mat                matrix to convery components of vector in detector coord frame to laboratory coord frame
+     *       yVec(0)  = t_m         deviation in departure time from moderator surface
+     *       yVec(1)  = y_a         y-coordinate of neutron at apperture
+     *       yVec(2)  = z_a         z-coordinate of neutron at apperture
+     *       yVec(3)  = t_ch'       deviation in time of arrival at chopper
+     *       yVec(4)  = x_s         x-coordinate of point of scattering in sample frame
+     *       yVec(5)  = y_s         y-coordinate of point of scattering in sample frame
+     *       yVec(6)  = z_s         z-coordinate of point of scattering in sample frame
+     *       yVec(7)  = x_d         x-coordinate of point of detection in detector frame
+     *       yVec(8)  = y_d         y-coordinate of point of detection in detector frame
+     *       yVec(9)  = z_d         z-coordinate of point of detection in detector frame
+     *       yVec(10) = t_d         deviation in detection time of neutron
+     *       eta2                   standard deviation for in-plane mosaic
+     *       eta3                   standard deviation for out-of-plane mosaic
+     *
+     * Output:
+     *       perturbQE(4)
+     *
      */
-    void SimulateResolution::mcMapYtoQEVec(const std::vector<double> & yVec,const std::vector<double> & qE,const double eta2, const double eta3,
-        std::vector<double> & perturbQE) const
+    void SimulateResolution::mcMapYtoQEVec(const double wi, const double wf, const std::vector<double> & q0, const Kernel::Matrix<double> & bMat,
+                               const Kernel::Matrix<double> & dInvMat, const std::vector<double> & yVec,
+                               const double eta2, const double eta3,
+                               std::vector<double> & perturbQE) const
     {
-      UNUSED_ARG(yVec); UNUSED_ARG(qE); UNUSED_ARG(eta2); UNUSED_ARG(eta3);
-      perturbQE.push_back(0.0);
-      perturbQE.push_back(0.0);
-      perturbQE.push_back(0.0);
-      perturbQE.push_back(0.0);
+
+      std::vector<double> xVec(6);
+      if(perturbQE.size()<4)
+          perturbQE.resize(4);
+      xVec = bMat * yVec; // About half of terms are zero, might be more efficient to explicit expressions
+      std::vector<double> xVecTop,dq(3);
+      xVecTop.push_back(xVec[3]);
+      xVecTop.push_back(xVec[4]);
+      xVecTop.push_back(xVec[5]);
+      dq=dInvMat.Tprime()*xVecTop;
+      perturbQE[0]=xVec[0]-dq[0];
+      perturbQE[1]=xVec[1]-dq[1];
+      perturbQE[2]=xVec[2]-dq[2];
+      perturbQE[3]=(4.1442836 * ( wi*xVec[2] - wf*xVecTop[2] )); // beam components
+      //TODO add eta terms here
+      // Include crystal mosaic if required:
+      if ((eta2 != 0.0) || (eta3 != 0.0))
+      {
+        std::vector<double> q(q0); q[0] += perturbQE[0]; q[1] += perturbQE[1]; q[2] += perturbQE[2];
+        const double small=1e-10;
+        double qmod = sqrt(q[0]*q[0]+q[1]*q[1]+q[2]*q[2]);
+        if (qmod > small)
+        {
+          double qipmod = sqrt(q[0]*q[0] + q[1]*q[1]);
+          if (qipmod > small)
+          {
+            perturbQE[2] -= qipmod*eta2;
+            perturbQE[1] += ( (q[2]*q[1])*eta2 - (q[3]*qmod)*eta3 )/qipmod; // TODO check signs here in transpose from TF to MTF axes
+            perturbQE[0] += ( (q[2]*q[0])*eta2 + (q[2]*qmod)*eta3 )/qipmod;
+          }
+          else
+          {
+            perturbQE[0] += qmod*eta2;
+            perturbQE[1] += qmod*eta3;
+          }
+        }
+      }
+
+
     }
     /**
      * sampleAreaTable function from tobyfit -
@@ -688,6 +820,80 @@ namespace Mantid
         return 1;
 
       return 0;
+    }
+
+    /**
+     * @return A list of attribute names
+     */
+    std::vector<std::string> SimulateResolution::getAttributeNames()const
+    {
+      std::vector<std::string> res;
+      res.push_back("MCLoopMin");
+      res.push_back("MCLoopMax");
+      res.push_back("MCTol");
+      return res;
+    }
+
+    /**
+     * @param attName :: Attribute name. If it is not know exception is thrown.
+     * @return a value of attribute attName
+     */
+    API::IFunction::Attribute SimulateResolution::getAttribute(const std::string& attName)const
+    {
+      if (attName == "MCLoopMin")
+      {
+        return Attribute(m_mcLoopMin);
+      }
+      else if (attName == "MCLoopMax")
+      {
+        return Attribute(m_mcLoopMax);
+      }
+      else if (attName == "MCTol")
+      {
+        return Attribute(m_mcTol);
+      }
+      throw std::invalid_argument("SimulateResolution: Unknown attribute " + attName);
+    }
+
+    /**
+     * @param attName :: The attribute name. If it is not "n" exception is thrown.
+     * @param att :: An int attribute containing the new value. The value cannot be negative.
+     */
+    void SimulateResolution::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
+    {
+      if (attName == "MCLoopMin")
+      {
+        int mcLoopMin = att.asInt();
+        if ( mcLoopMin < 1)
+        {
+          throw std::invalid_argument("SimulateResolution: Must have MCLoopMin>=1.");
+        }
+        m_mcLoopMin = mcLoopMin;
+      }
+      else if (attName == "MCLoopMax")
+      {
+        int mcLoopMax = att.asInt();
+        if ( mcLoopMax < 1)
+        {
+          throw std::invalid_argument("SimulateResolution: Must have MCLoopMax>=1.");
+        }
+        m_mcLoopMax = mcLoopMax;
+      }
+      else if (attName == "MCTol")
+      {
+        double mcTol = att.asDouble();
+        if ( mcTol < 1.e-20 || mcTol > 1.0 )
+        {
+          throw std::invalid_argument("SimulateResolution: Must have 1e-20 < MCTol < 1");
+        }
+        m_mcTol = mcTol;
+      }
+    }
+
+    /// Check if attribute attName exists
+    bool SimulateResolution::hasAttribute(const std::string& attName)const
+    {
+      return attName == "MCLoopMin" || attName == "MCLoopMax" || attName == "MCTol";
     }
 
   } // namespace MDAlgorithms

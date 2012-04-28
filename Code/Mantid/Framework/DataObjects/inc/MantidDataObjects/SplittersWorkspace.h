@@ -50,7 +50,7 @@ namespace DataObjects
 
     Kernel::SplittingInterval getSplitter(size_t index);
 
-    size_t getNumberSplitters();
+    size_t getNumberSplitters() const;
 
     bool removeSplitter(size_t);
 

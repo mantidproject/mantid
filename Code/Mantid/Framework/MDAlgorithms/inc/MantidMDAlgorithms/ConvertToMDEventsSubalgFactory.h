@@ -3,9 +3,10 @@
 
 
 #include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
-#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsWSInterface.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
+
 
 namespace Mantid
 {
@@ -43,21 +44,23 @@ namespace MDAlgorithms
 class DLLExport ConvertToMDEventsSubalgFactory
 {
   /// map to select an algorithm as function of the key, which describes it
-    std::map<std::string, IConvertToMDEventsMethods *> alg_selector;
+    std::map<std::string, IConvertToMDEventsWS *> alg_selector;
 public:
     /// constructor
     ConvertToMDEventsSubalgFactory();
     ~ConvertToMDEventsSubalgFactory();
     /// access to a subalgorithm 
-    IConvertToMDEventsMethods * getAlg(const std::string &AlgName);
+    IConvertToMDEventsWS * getAlg(const std::string &AlgName);
     /// initiate the subalgorithms and made them availible for getAlg function
-    void init(const ConvertToMDEventsParams &SubAlgDescriptor);
+    void init(const ConvertToMD::ConvertToMDEventsParams &SubAlgDescriptor);
 private:
  //--------------------------------------------------------------------------------------------------   
      /// helper class to orginize metaloop instantiating various subalgorithms 
-     template<QMode Q,size_t N_ALGORITHMS >
+     template<ConvertToMD::QMode Q,size_t N_ALGORITHMS >
      friend class LOOP_ALGS;  
 };
+
+//} // end namespace ConvertToMD
 }
 }
 

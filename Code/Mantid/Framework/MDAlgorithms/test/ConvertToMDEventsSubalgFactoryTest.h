@@ -12,7 +12,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
-
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 //
 class ConvertToMDEventsSubalgFactoryTest : public CxxTest::TestSuite

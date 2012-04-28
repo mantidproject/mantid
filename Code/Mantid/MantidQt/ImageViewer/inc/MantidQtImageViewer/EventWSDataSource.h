@@ -71,9 +71,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
                       std::vector<std::string> &list );
   private:
     Mantid::API::IEventWorkspace_sptr  ev_ws;
-    float*               new_data;
-    DataArray*           new_data_array;
-    Mantid::MantidVec*           x_scale;
+
 };
 
 } // namespace MantidQt 

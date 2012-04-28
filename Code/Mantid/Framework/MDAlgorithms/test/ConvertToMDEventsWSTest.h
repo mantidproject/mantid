@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
@@ -33,10 +33,32 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
+
+class TestConvertToMDEventsWS :public IConvertToMDEventsWS
+{
+    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
+public:
+    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc)
+    {
+        MDEvents::MDWSDescription TestWS(5);
+
+        TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
+        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
+
+        boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+        pOutMDWSWrapper->createEmptyMDWS(TestWS);
+
+        IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
+
+    }
+    /// method which starts the conversion procedure
+    void runConversion(API::Progress *){}
+ 
+};
 
 
-
-class ConvertToMDEventsMethodsTest : public CxxTest::TestSuite, public ConvertToMDEvents
+class ConvertToMDEventsWSTest : public CxxTest::TestSuite, public ConvertToMDEvents
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
    Mantid::API::MatrixWorkspace_sptr ws_events;
@@ -44,14 +66,26 @@ class ConvertToMDEventsMethodsTest : public CxxTest::TestSuite, public ConvertTo
 
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pHistoMDWSWrapper;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pEventMDWSWrapper;
-   PreprocessedDetectors det_loc;
+   ConvToMDPreprocDetectors det_loc;
    MDEvents::MDWSDescription TestWS;
 
+   std::auto_ptr<TestConvertToMDEventsWS> pConvMethods;
+
 public:
-static ConvertToMDEventsMethodsTest *createSuite() {
-    return new ConvertToMDEventsMethodsTest();    
+static ConvertToMDEventsWSTest *createSuite() {
+    return new ConvertToMDEventsWSTest();    
 }
-static void destroySuite(ConvertToMDEventsMethodsTest  * suite) { delete suite; }    
+static void destroySuite(ConvertToMDEventsWSTest  * suite) { delete suite; }    
+
+void testSetUp_and_PreprocessDetectors()
+{
+   pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
+
+    TS_ASSERT_THROWS_NOTHING(det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsWS>(new TestConvertToMDEventsWS()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
+
+}
 
 void test_TwoTransfMethods()
 {
@@ -59,7 +93,7 @@ void test_TwoTransfMethods()
     ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvertNo,CrystType> HistoConv;
     
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
-    TestWS.emode= MDAlgorithms::Direct;
+    TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
     TestWS.dimMin.assign(4,-3);
     TestWS.dimMax.assign(4,3);
     TestWS.dimNames.assign(4,"Momentum");
@@ -179,7 +213,7 @@ void test_compareTwoBuilds()
 }
 
 // constructor:
-ConvertToMDEventsMethodsTest ():TestWS(4){    
+ConvertToMDEventsWSTest ():TestWS(4){    
 
    std::vector<double> L2(5,5);
    std::vector<double> polar(5,(30./180.)*3.1415926);
@@ -201,17 +235,19 @@ ConvertToMDEventsMethodsTest ():TestWS(4){
    // set up workpspaces and preprocess detectors
     pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
 
-    processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get());
+    det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get());
     //pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
     //pConvMethods->setUPConversion(ws2D,det_loc);
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.
-EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsMethods &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
+EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsWS &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
   
     // set up conversion to Time of flight
-    UNITS_CONVERSION<ConvByTOF,Centered> TOFCONV;
-    TOFCONV.setUpConversion(&conv,"TOF");
+    UnitsConverter<ConvByTOF,Centered> TOFCONV;
+
+    const Kernel::Unit_sptr pThisUnit= conv.getAxisUnits();          
+    TOFCONV.setUpConversion(*(conv.pPrepDetectors()),pThisUnit->unitID(),"TOF");
 
     //Create the event workspace
     EventWorkspace_sptr  outWS = boost::dynamic_pointer_cast<EventWorkspace>(

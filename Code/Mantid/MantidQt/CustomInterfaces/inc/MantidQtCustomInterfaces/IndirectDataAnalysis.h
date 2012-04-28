@@ -80,8 +80,8 @@ namespace MantidQt
       // Validation of user inputs
       bool validateElwin();
       bool validateMsd();
-      bool validateFury();
-      bool validateConfit();
+      std::string validateFury();
+      std::string validateConfit();
       bool validateAbsorptionF2Py();
 
       // Run processes

@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/UnaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -50,6 +51,17 @@ namespace Mantid
       if ( out_work != in_work ) 
       {
         out_work = WorkspaceFactory::Instance().create(in_work);
+        if (out_work->id() == "RebinnedOutput")
+        {
+          RebinnedOutput_const_sptr intemp = boost::dynamic_pointer_cast<const RebinnedOutput>(in_work);
+          RebinnedOutput_sptr outtemp = boost::dynamic_pointer_cast<RebinnedOutput>(out_work);
+          for (size_t i = 0; i < outtemp->getNumberHistograms(); ++i)
+          {
+            MantidVecPtr F;
+            F.access() = intemp->dataF(i);
+            outtemp->setF(i, F);
+          }
+        }
         setProperty(outputPropName(),out_work);
       }
 

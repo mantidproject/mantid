@@ -12,11 +12,12 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-
+namespace ConvertToMD
+{
 Kernel::Logger& ConvertToMDEventsParams::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 
-/** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
+//** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
 int is_member(const std::vector<std::string> &group,const std::string &candidate)
 {
     int num(-1);
@@ -684,5 +685,6 @@ native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 
 }
 
+}
 }
 }

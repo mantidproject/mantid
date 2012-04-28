@@ -102,6 +102,11 @@ public:
       TSM_ASSERT("Algorithm methods were called as expected", testing::Mock::VerifyAndClearExpectations(&alg));
       out = boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve(outName));
       TS_ASSERT( out );
+      auto outHisto = boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+      if (outHisto)
+      {
+        TS_ASSERT( outHisto->getExperimentInfo(0)->run().hasProperty("mdhisto_was_modified") );
+      }
     }
     else
     {

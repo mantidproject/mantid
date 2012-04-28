@@ -10,7 +10,7 @@ namespace ImageView
 {
 
 /**
- *  Construct a SliderHandler object to manage the image sliders from the 
+ *  Construct a SliderHandler object to manage the image scrollbars from the 
  *  specified UI.
  */
 SliderHandler::SliderHandler( Ui_MainWindow* iv_ui )
@@ -20,7 +20,7 @@ SliderHandler::SliderHandler( Ui_MainWindow* iv_ui )
 
 
 /**
- * Configure the image sliders for the specified data and drawing area.
+ * Configure the image scrollbars for the specified data and drawing area.
  *
  * @param draw_area    Rectangle specifiying the region where the image will
  *                     be drawn
@@ -31,50 +31,82 @@ void SliderHandler::ConfigureSliders( QRect            draw_area,
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
   int n_rows = (int)data_source->GetNRows();
-  int min  = 0;
-  int step = draw_area.height();
-  if ( step > n_rows )
-  {
-    step = n_rows;
-  }
-  if ( step <= 0 )
-  {
-    step = 1;
-  }
-
-  int max  = n_rows - step;
-  if ( max <= 0 )
-    max = min;
-  v_scroll->setMinimum( 0 );
-  v_scroll->setMaximum( max );
-  v_scroll->setPageStep( step );
-  v_scroll->setValue( max );
+  ConfigureSlider( v_scroll, n_rows, draw_area.height(), n_rows );
 
   QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
   int n_cols = (int)data_source->GetNCols();
-  min  = 0;
-  step = draw_area.width();
-  if ( step > n_cols )
-  {
-    step = n_cols;
-  }
-  if ( step <= 0 )
-  {
-    step = 1;
-  }
-
-  max  = n_cols - step;
-  if ( max <= 0 )
-    max = min;
-  h_scroll->setMinimum( 0 );
-  h_scroll->setMaximum( max );
-  h_scroll->setPageStep( step );
-  h_scroll->setValue( 0 );
+  ConfigureSlider( h_scroll, n_cols, draw_area.width(), 0 );
 }
 
 
 /**
- * Return true if the image horizontal slider is enabled.
+ *  Public method to configure the horizontal scrollbar to cover the 
+ *  specified range of data columns, displayed in the specified number of
+ *  pixels.  
+ *
+ *  @param n_data_steps  The number of columns in the data that should be 
+ *                       displayed
+ *  @param n_pixels      The number of pixels avaliable to show the data
+ */
+void SliderHandler::ConfigureHSlider( int         n_data_steps,
+                                      int         n_pixels )
+{
+  QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
+  ConfigureSlider( h_scroll, n_data_steps, n_pixels, 0 );
+}
+
+
+/**
+ *  Configure the specified scrollbar to cover the specified range of data
+ *  steps, displayed in the specified number of pixels.  
+ *
+ *  @param scroll_bar    The scroll bar that will be configured
+ *  @param n_data_steps  The number of bins in the data that should be 
+ *                       displayed
+ *  @param n_pixels      The number of pixels avaliable to show the data
+ *  @param val           The initial position of the scrollbar, between 0 and
+ *                       n_data_steps.
+ */
+void SliderHandler::ConfigureSlider( QScrollBar* scroll_bar, 
+                                     int         n_data_steps, 
+                                     int         n_pixels, 
+                                     int         val )
+{
+  int step = n_pixels;
+  if ( step > n_data_steps )
+  {
+    step = n_data_steps;
+  }
+  if ( step <= 0 )
+  {
+    step = 1;
+  }
+
+  int max  = n_data_steps - step;
+  if ( max <= 0 )
+  {
+    max = 0;
+  }
+
+  if ( val < 0 )
+  {
+    val = 0;
+  }
+
+  if ( val > max )
+  {
+    val = max;
+  }
+
+  scroll_bar->setMinimum( 0 );
+  scroll_bar->setMaximum( max );
+  scroll_bar->setPageStep( step );
+  scroll_bar->setValue( val );
+}
+
+
+/**
+ * Return true if the image horizontal scrollbar is enabled.
  */
 bool SliderHandler::HSliderOn()
 {
@@ -83,7 +115,7 @@ bool SliderHandler::HSliderOn()
 
 
 /**
- * Return true if the image vertical slider is enabled.
+ * Return true if the image vertical scrollbar is enabled.
  */
 bool SliderHandler::VSliderOn()
 {

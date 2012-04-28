@@ -29,12 +29,12 @@ public:
   static LeastSquaresTest *createSuite() { return new LeastSquaresTest(); }
   static void destroySuite( LeastSquaresTest *suite ) { delete suite; }
 
-  void xtest_With_Simplex()
+  void test_With_Simplex()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] = 3.3 * x[i] + 4.4;
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -59,12 +59,12 @@ public:
     TS_ASSERT_EQUALS(s.getError(),"success");
   }
 
-  void xtest_With_BFGS()
+  void test_With_BFGS()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] =  9.9 * exp( -(x[i])/0.5 );
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -89,7 +89,7 @@ public:
 
   }
 
-  void xtest_val_deriv_valAndDeriv()
+  void test_val_deriv_valAndDeriv()
   {
     const double a = 1.0;
     const double b = 2.0;
@@ -125,12 +125,12 @@ public:
 
     TS_ASSERT_DELTA(costFun->valDerivHessian(),0.145,1e-10);
     const GSLVector& g = costFun->getDeriv();
-    const GSLMatrix& H = costFun->getHessian();
+    //const GSLMatrix& H = costFun->getHessian();
     TS_ASSERT_DELTA(g.get(0), 1.1, 1e-10);
     TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
   }
 
-  void xtest_linear_correction_is_good_approximation()
+  void test_linear_correction_is_good_approximation()
   {
     const double a = 1.0;
     const double b = 2.0;
@@ -166,12 +166,12 @@ public:
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 
-  void xtest_Fixing_parameter()
+  void test_Fixing_parameter()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] =  9.9 * exp( -(x[i])/0.5 );
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -249,17 +249,17 @@ public:
 
     size_t n = costFun->nParams();
     //system("pause");
-    double f0 = costFun->val();
+    //double f0 = costFun->val();
     //std::cerr << "fun=" << f0 << std::endl;
-    const GSLVector& g = costFun->getDeriv();
-    const GSLMatrix& H = costFun->getHessian();
+    //const GSLVector& g = costFun->getDeriv();
+    //const GSLMatrix& H = costFun->getHessian();
 
     for(size_t i = 0; i < n; ++i)
     {
       double dp = 0.000001;
       double p1 = costFun->getParameter(i) + dp;
       costFun->setParameter(i,p1);
-      double f1 = costFun->val();
+      //double f1 = costFun->val();
       costFun->setParameter(i,p1-dp);
       //std::cerr << "deriv " << i << ' ' << p1 << ' ' << (f1 - f0) / dp << ' ' << g.get(i)  << std::endl;
       //for(size_t j = 0; j <= i; ++j)

@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
+#include <set>
+
 namespace Mantid
 {
 namespace Algorithms
@@ -65,6 +67,12 @@ public:
   virtual const std::string category() const { return "Transforms\\Grouping";}
 
 private:
+  /// Handle logic for RebinnedOutput workspaces
+  void doRebinnedOutput(API::MatrixWorkspace_sptr outputWorkspace,
+                        API::Progress &progress);
+  /// Handle logic for Workspace2D workspaces
+  void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
+                     API::ISpectrum *outSpec, API::Progress &progress);
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
@@ -80,6 +88,10 @@ private:
   bool keepMonitors;
   /// numberOfSpectra in the input
   int numberOfSpectra;
+  /// Blocksize of the input workspace
+  int yLength;
+  /// Set of indicies to sum
+  std::set<int> indices;
 };
 
 } // namespace Algorithm

@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
+	src/ConvertToMaskWorkspace.cpp
 	src/ConvertToMaskingWorkspace.cpp
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
@@ -81,6 +82,7 @@ set ( SRC_FILES
 	src/FilterBadPulses.cpp
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
+	src/FilterByTime2.cpp
 	src/FilterEvents.cpp
 	src/FilterEventsHighFrequency.cpp
 	src/FindCenterOfMassPosition.cpp
@@ -168,7 +170,7 @@ set ( SRC_FILES
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
 	src/SofQW2.cpp
-  src/SofQW3.cpp
+	src/SofQW3.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
 	src/SortEvents.cpp
@@ -228,6 +230,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
+	inc/MantidAlgorithms/ConvertToMaskWorkspace.h
 	inc/MantidAlgorithms/ConvertToMaskingWorkspace.h
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
@@ -275,6 +278,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FilterBadPulses.h
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
+	inc/MantidAlgorithms/FilterByTime2.h
 	inc/MantidAlgorithms/FilterEvents.h
 	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition.h
@@ -363,7 +367,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SofQW2.h
-  inc/MantidAlgorithms/SofQW3.h
+	inc/MantidAlgorithms/SofQW3.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
@@ -421,7 +425,7 @@ set ( TEST_FILES
 	test/ConvertToDistributionTest.h
 	test/ConvertToEventWorkspaceTest.h
 	test/ConvertToHistogramTest.h
-	test/ConvertToMaskingWorkspaceTest.h
+        test/ConvertToMaskWorkspaceTest.h
 	test/ConvertToMatrixWorkspaceTest.h
 	test/ConvertToPointDataTest.h
 	test/ConvertUnitsTest.h
@@ -460,6 +464,7 @@ set ( TEST_FILES
 	test/FFTTest.h
 	test/FilterBadPulsesTest.h
 	test/FilterByLogValueTest.h
+	test/FilterByTime2Test.h
 	test/FilterByTimeTest.h
 	test/FilterEventsHighFrequencyTest.h
 	test/FilterEventsTest.h
@@ -537,8 +542,8 @@ set ( TEST_FILES
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQW2Test.h
+	test/SofQW3Test.h
 	test/SofQWTest.h
-  test/SofQW3Test.h
 	test/SolidAngleTest.h
 	test/SortEventsTest.h
 	test/SpatialGroupingTest.h

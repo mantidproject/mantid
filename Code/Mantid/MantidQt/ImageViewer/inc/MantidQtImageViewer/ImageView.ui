@@ -86,7 +86,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="Step_Label">
             <property name="text">
-             <string>Step (- for Log)</string>
+             <string>Uniform Step</string>
             </property>
            </widget>
           </item>

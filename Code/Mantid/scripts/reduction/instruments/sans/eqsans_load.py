@@ -61,6 +61,8 @@ class LoadRun(ReductionStep):
         loader._use_config_mask = self._use_config_mask
         loader._use_config = self._use_config
         loader._wavelength_step = self._wavelength_step
+        loader._sample_det_dist = self._sample_det_dist
+        loader._sample_det_offset = self._sample_det_offset
         return loader
 
     def set_wavelength_step(self, step):

@@ -191,7 +191,7 @@ void InelasticDiffSphere::function1D(double* out, const double* xValues, const s
 } // end of void DiffSphere::functionMW
 
 /* calNumericalDeriv requires evaluation of four extra functionMW. We can avoid by requiring
- *  the 'Simplex' algorithm, which does not require derivative
+ *  the 'Simplex' algorithm, which does not require derivative. Simplex is called if no functionDerivMW is coded
  *  */
 //void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
 //  calNumericalDeriv(out, xValues, nData);

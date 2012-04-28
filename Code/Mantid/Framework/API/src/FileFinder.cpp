@@ -85,6 +85,15 @@ namespace Mantid
     }
 
     /**
+     * Option to get if file finder should be case sensitive
+     * @return cs :: If case sensitive return true, if not case sensitive return false
+     */
+    int FileFinderImpl::getCaseSensitive()
+    {
+      return globOption;
+    }
+
+    /**
      * Return the full path to the file given its name
      * @param fName :: A full file name (without path) including extension
      * @return The full path if the file exists and can be found in one of the search locations
@@ -372,7 +381,7 @@ namespace Mantid
         if (!archiveOpt.empty() && archiveOpt != "off" && !facility.archiveSearch().empty())
         {
           std::vector<std::string>::const_iterator it = facility.archiveSearch().begin();
-          for (; it != facility.archiveSearch().end(); it++)
+          for (; it != facility.archiveSearch().end(); ++it)
           {
             g_log.debug() << "get archive search for the facility..." << *it << "\n";
             archs.push_back(ArchiveSearchFactory::Instance().create(*it));
@@ -424,16 +433,18 @@ namespace Mantid
       // on platforms where file names ARE case sensitive.
       std::set<std::string> filenames;
       filenames.insert(filename);
-      std::transform(filename.begin(),filename.end(),filename.begin(),toupper);
+      if (globOption == Poco::Glob::GLOB_CASELESS)
+        std::transform(filename.begin(),filename.end(),filename.begin(),toupper);
       filenames.insert(filename);
-      std::transform(filename.begin(),filename.end(),filename.begin(),tolower);
+      if (globOption == Poco::Glob::GLOB_CASELESS)
+        std::transform(filename.begin(),filename.end(),filename.begin(),tolower);
       filenames.insert(filename);
 
       // work through the extensions
       // try the extension that comes with the filename
       if (!extension.empty())
       {
-        g_log.debug() << "Attempt to find files with the extension that comes with the filename" <<  extension << "\n";
+        g_log.debug() << "Attempt to find files with the extension that comes with the filename " <<  extension << "\n";
         std::string path = getPath(archs, filenames, std::vector<std::string>(1, extension));
         if (!path.empty())
         {
@@ -582,7 +593,7 @@ namespace Mantid
       g_log.debug() << "getArchivePath(" << fName << ")\n";
       std::string path = "";
       std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
-      for (; it != archs.end(); it++)
+      for (; it != archs.end(); ++it)
       {
         try
         {
@@ -621,7 +632,7 @@ namespace Mantid
       for (; ext != extensions.end(); ++ext)
       {
         std::set<std::string>::const_iterator it = filenames.begin();
-        for(; it!=filenames.end(); it++)
+        for(; it!=filenames.end(); ++it)
         {
           path = getFullPath(*it + *ext);
           try
@@ -649,7 +660,7 @@ namespace Mantid
         for (; ext != extensions.end(); ++ext)
         {
           std::set<std::string>::const_iterator it = filenames.begin();
-          for(; it!=filenames.end(); it++)
+          for(; it!=filenames.end(); ++it)
           {
             path = getArchivePath(archs, *it + *ext);
             try

@@ -6,6 +6,7 @@ This algorithm loads all monitors found in a NeXus file into a single [[Workspac
 
 *WIKI*/
 #include "MantidDataHandling/LoadNexusMonitors.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
@@ -80,6 +81,7 @@ void LoadNexusMonitors::exec()
 	if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
 	{
 		file.openGroup(it->first, it->second);
+        m_top_entry_name = it->first;
 		break;
 	}
   }
@@ -104,8 +106,6 @@ void LoadNexusMonitors::exec()
     prog2.report();
   }
   this->nMonitors = monitorNames.size();
-
-  // TODO: Sort the monitor names so we can read them in order
 
   // Create the output workspace
   this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
@@ -216,6 +216,17 @@ void LoadNexusMonitors::exec()
   this->runLoadLogs(this->filename, this->WS);
   // Load the instrument
   this->runLoadInstrument(instrumentName, this->WS);
+
+  // Load the meta data, but don't stop on errors
+  g_log.debug() << "Loading metadata" << std::endl;
+  try
+  {
+      LoadEventNexus::loadEntryMetadata(this->filename, WS, m_top_entry_name);
+  }
+  catch (std::exception & e)
+  {
+      g_log.warning() << "Error while loading meta data: " << e.what() << std::endl;
+  }
 
   // Fix the detector IDs/spectrum numbers
   for (size_t i=0; i < WS->getNumberHistograms(); i++)

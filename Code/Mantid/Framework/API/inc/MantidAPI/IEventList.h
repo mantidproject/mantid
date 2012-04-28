@@ -45,6 +45,8 @@ namespace API
     virtual std::size_t getNumberEvents() const = 0;
     /// Get memory size of event list
     virtual size_t getMemorySize() const = 0;
+    /// Get copy of counts and errors, rebinned using on the given X values
+    virtual void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const = 0;
     /// Integrate the event list
     virtual double integrate(const double minX, const double maxX, const bool entireRange) const = 0;
     /// Convert the TOF values

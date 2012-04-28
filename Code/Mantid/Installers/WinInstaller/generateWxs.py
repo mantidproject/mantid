@@ -321,7 +321,7 @@ def createPropertiesFile(filename):
     "parameterDefinition.directory":"parameterDefinition.directory = ../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../scripts/Crystallography;../scripts/Disordered Materials;../scripts/Engineering;\\
 ../scripts/Inelastic;../scripts/Large Scale Structures;../scripts/Molecular Spectroscopy;\\
-../scripts/Muons;../scripts/Neutrinos;../scripts/SANS;../scripts/""",
+../scripts/Muons;../scripts/Neutrinos;../scripts/Reflectometry;../scripts/SANS;../scripts/""",
     "pythonscripts.directory":"pythonscripts.directory = ../scripts",
     "mantidqt.python_interfaces_directory":"mantidqt.python_interfaces_directory = ../scripts",
     "pythonscripts.directories":"pythonscripts.directories = ../scripts",

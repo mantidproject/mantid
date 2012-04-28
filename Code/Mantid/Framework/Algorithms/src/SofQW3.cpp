@@ -1,12 +1,19 @@
 /*WIKI*
+Converts a 2D workspace from units of spectrum number, energy transfer to the
+intensity as a function of momentum transfer and energy. The rebinning is done
+as a weighted sum of overlapping polygons with fractional area tracking. The
+result is stored in a new workspace type: '''RebinnedOutput'''. The new workspace
+presents the data as the fractional counts divided by the fractional area.
+The biggest consequence of this method is that in places where there are no
+counts and no acceptance (no fractional areas), '''nan'''s will result.
 
-
-
-Converts a 2D workspace from units of spectrum number/energy transfer to the intensity as a function of momentum transfer and energy. The rebinning is done as a weighted  sum of overlapping polygons.
-
-
-
- *WIKI*/
+The algorithm operates in non-PSD mode by default. This means that all azimuthal
+angles and widths are forced to zero. PSD mode will determine the azimuthal
+angles and widths from the instrument geometry. This mode is activated by
+placing the following named parameter in a Parameter file: ''detector-neighbour-offset''.
+The integer value of this parameter should be the number of pixels that separates
+two pixels at the same vertical position in adjacent tubes.
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -46,7 +53,7 @@ namespace Algorithms
   /// Default constructor
   SofQW3::SofQW3()
     : Rebin2D(), m_emode(0), m_efixedGiven(false), m_efixed(0.0),
-      m_Qout(), m_thetaPts(), m_thetaWidth(0.0)
+      m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1)
   {
   }
 
@@ -105,7 +112,7 @@ namespace Algorithms
     RebinnedOutput_sptr outputWS = this->setUpOutputWorkspace(inputWS,
                                                  getProperty("QAxisBinning"),
                                                               m_Qout);
-    g_log.notice() << "Workspace type: " << outputWS->id() << std::endl;
+    g_log.debug() << "Workspace type: " << outputWS->id() << std::endl;
     setProperty("OutputWorkspace", outputWS);
     const size_t nEnergyBins = inputWS->blocksize();
     const size_t nHistos = inputWS->getNumberHistograms();
@@ -117,10 +124,22 @@ namespace Algorithms
                                                                     nreports));
 
     // Compute input caches
-    initCachedValues(inputWS);
-    const MantidVec & X = inputWS->readX(0);
+    this->initCachedValues(inputWS);
 
-    this->getValuesAndWidths(inputWS);
+    std::vector<double> par = inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
+    if (par.empty())
+    {
+      // Index theta cache
+      this->initThetaCache(inputWS);
+    }
+    else
+    {
+      g_log.debug() << "Offset: " << par[0] << std::endl;
+      this->m_detNeighbourOffset = static_cast<int>(par[0]);
+      this->getValuesAndWidths(inputWS);
+    }
+
+    const MantidVec & X = inputWS->readX(0);
 
     PARALLEL_FOR2(inputWS, outputWS)
     for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) // signed for openmp
@@ -134,9 +153,21 @@ namespace Algorithms
       }
 
       double theta = this->m_theta[i];
-      double phi = this->m_phi[i];
-      double thetaWidth = this->m_thetaWidths[i];
-      double phiWidth = this->m_phiWidths[i];
+      double phi = 0.0;
+      double thetaWidth = 0.0;
+      double phiWidth = 0.0;
+      // Non-PSD mode
+      if (par.empty())
+      {
+        thetaWidth = this->m_thetaWidth;
+      }
+      // PSD mode
+      else
+      {
+        phi = this->m_phi[i];
+        thetaWidth = this->m_thetaWidths[i];
+        phiWidth = this->m_phiWidths[i];
+      }
 
       double thetaHalfWidth = 0.5 * thetaWidth;
       double phiHalfWidth = 0.5 * phiWidth;
@@ -273,9 +304,6 @@ namespace Algorithms
         m_efixedGiven = true;
       }
     }
-
-    // Index theta cache
-    //initThetaCache(workspace);
   }
 
   /**
@@ -289,7 +317,7 @@ namespace Algorithms
   void SofQW3::initThetaCache(API::MatrixWorkspace_const_sptr workspace)
   {
     const size_t nhist = workspace->getNumberHistograms();
-    m_thetaPts = std::vector<double>(nhist);
+    this->m_theta = std::vector<double>(nhist);
     size_t ndets(0);
     double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
@@ -320,13 +348,13 @@ namespace Algorithms
       // If no detector found, skip onto the next spectrum
       if( !det || det->isMonitor() )
       {
-        m_thetaPts[i] = -1.0; // Indicates a detector to skip
+        this->m_theta[i] = -1.0; // Indicates a detector to skip
       }
       else
       {
         ++ndets;
         const double theta = workspace->detectorTwoTheta(det);
-        m_thetaPts[i] = theta;
+        this->m_theta[i] = theta;
         if( theta < minTheta )
         {
           minTheta = theta;
@@ -338,7 +366,7 @@ namespace Algorithms
       }
     }
 
-    m_thetaWidth = (maxTheta - minTheta)/static_cast<double>(ndets);
+    this->m_thetaWidth = (maxTheta - minTheta)/static_cast<double>(ndets);
     g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth*180.0/M_PI) << " degrees.\n";
   }
 
@@ -379,11 +407,10 @@ namespace Algorithms
       double theta = workspace->detectorTwoTheta(detector);
       double phi = detector->getPhi();
 
-      // WARNING: This only works for BASIS
       specid_t deltaPlus1 = inSpec + 1;
       specid_t deltaMinus1 = inSpec - 1;
-      specid_t deltaPlus45 = inSpec + 45;
-      specid_t deltaMinus45 = inSpec - 45;
+      specid_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
+      specid_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
 
       for (SpectraDistanceMap::iterator it = neighbours.begin();
            it != neighbours.end(); ++it)
@@ -391,7 +418,7 @@ namespace Algorithms
         specid_t spec = it->first;
         g_log.debug() << "Neighbor ID: " << spec << std::endl;
         if (spec == deltaPlus1 || spec == deltaMinus1 ||
-            spec == deltaPlus45 || spec == deltaMinus45)
+            spec == deltaPlusT || spec == deltaMinusT)
         {
           DetConstPtr detector_n = workspace->getDetector(spec - 1);
           double theta_n = workspace->detectorTwoTheta(detector_n);

@@ -1,13 +1,20 @@
 /*WIKI* 
 
-The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space,
-and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]].
+This algorithm converts from a [[MatrixWorkspace]] (in detector/time-of-flight space) to a
+[[MDEventWorkspace]] containing events in reciprocal space.
 
+The calculations apply only to elastic diffraction experiments.
 The conversion can be done either to Q-space in the lab or sample frame, or to HKL of the crystal.
 
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the [[MDEventWorkspace]],
 use the [[CreateMDWorkspace]] algorithm first.
+
+==== Types of Conversion ====
+
+* '''Q (lab frame)''': this calculates the momentum transfer (ki-kf) for each event is calculated in the experimental lab frame.
+* '''Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
+* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
 
 ==== Lorentz Correction ====
 
@@ -18,6 +25,9 @@ by multiplying its weight by L:
 
 Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventionally called <math>2\theta</math>).
 <math>\lambda</math> is the neutron wavelength in ''Angstroms''.
+
+This correction is also done by the [[AnvredCorrection]] algorithm, and will be set to false if
+that algorithm has been run on the input workspace.
 
 ==== OneEventPerBin option ====
 
@@ -39,6 +49,11 @@ events causing more finely split boxes.
 
 If your input is a [[Workspace2D]] and you do NOT check ''OneEventPerBin'', then the workspace is converted
 to an [[EventWorkspace]] but with no events for empty bins.
+
+==== Performance Notes ====
+
+* 8-core Intel Xeon 3.2 GHz computer: measured between 4 and 5.5 million events per second (100-200 million event workspace).
+* 32-core AMD Opteron 2.7 GHz computer: measured between 8 and 9 million events per second (400-1000 million event workspaces).
 
 *WIKI*/
 
@@ -82,8 +97,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void ConvertToDiffractionMDWorkspace::initDocs()
   {
-    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
-    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
+    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
+    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -276,6 +291,9 @@ namespace MDEvents
        * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10; */
       const double wavenumber_in_angstrom_times_tof_in_microsec =
           (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
+
+      //PARALLEL_CRITICAL( convert_tester_output ) { std::cout << "Spectrum " << el.getSpectrumNo() << " beamDir = " << beamDir << " detDir = " << detDir << " Q_dir = " << Q_dir << " conversion factor " << wavenumber_in_angstrom_times_tof_in_microsec << std::endl;  }
+
 
       //g_log.information() << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
       //g_log.information() << Q_dir.norm() << " Qdir norm" << std::endl;

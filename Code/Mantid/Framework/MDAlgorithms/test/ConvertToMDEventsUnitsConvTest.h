@@ -2,9 +2,10 @@
 #define CONVERT2_MDEVENTS_UNITS_CONVERSION_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/NumericAxis.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
 
@@ -12,43 +13,19 @@ using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 
-class TestConvertToMDEventsMethods :public IConvertToMDEventsMethods
-{
-    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
-public:
-    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
-    {
-        MDEvents::MDWSDescription TestWS(5);
-
-        TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
-        TestWS.emode= MDAlgorithms::Direct;
-
-        boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
-        pOutMDWSWrapper->createEmptyMDWS(TestWS);
-
-        IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
-
-    }
-    /// method which starts the conversion procedure
-    void runConversion(API::Progress *){}
- 
-};
 
 
-class ConvertToMDEventsUnitsConvTest : public CxxTest::TestSuite, public ConvertToMDEvents
+class ConvertToMDEventsUnitsConvTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
-//   static Mantid::Kernel::Logger &g_log;
-   std::auto_ptr<API::Progress > pProg;
-   std::auto_ptr<TestConvertToMDEventsMethods> pConvMethods;
-   PreprocessedDetectors det_loc;
+   ConvToMDPreprocDetectors det_loc;
 
 public:
 static ConvertToMDEventsUnitsConvTest *createSuite() {
     return new ConvertToMDEventsUnitsConvTest(); 
-    //g_log = Kernel::Logger::get("MD-Algorithms-Tests");
 }
 static void destroySuite(ConvertToMDEventsUnitsConvTest  * suite) { delete suite; }    
 
@@ -59,6 +36,7 @@ void testSpecialConversionTOF()
     const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
 }
+
 void testTOFConversionFails()
 { 
 
@@ -77,20 +55,12 @@ void testTOFConversionFails()
 }
 
 
-void testSetUp_and_PreprocessDetectors()
-{
-    pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
-
-    TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsMethods>(new TestConvertToMDEventsMethods()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
-
-}
 
 void testConvertFastFromInelasticWS()
 {
-    UNITS_CONVERSION<ConvFast,Histogram> Conv;
-    TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(pConvMethods.get(),"DeltaE_inWavenumber"));
+    UnitsConverter<ConvFast,Histogram> Conv;
+
+    TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(det_loc,"DeltaE","DeltaE_inWavenumber"));
 
      const MantidVec& X        = ws2D->readX(0);
      size_t n_bins = X.size()-1;
@@ -102,8 +72,11 @@ void testConvertFastFromInelasticWS()
 void testConvertToTofInelasticWS()
 {
     // Convert to TOF
-    UNITS_CONVERSION<ConvByTOF,Centered> Conv;
-    TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(pConvMethods.get(),"TOF"));
+    UnitsConverter<ConvByTOF,Centered> Conv;
+    // set diret conversion mode
+    det_loc.setEmode(1);
+    TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(det_loc,"DeltaE","TOF"));
+
 
      const MantidVec& X        = ws2D->readX(0);
      MantidVec E_storage(X.size());
@@ -133,9 +106,9 @@ void testConvertToTofInelasticWS()
 
 
      // Convert back;
-     UNITS_CONVERSION<ConvFromTOF,Centered> ConvBack;
-
-     TS_ASSERT_THROWS_NOTHING(ConvBack.setUpConversion(pConvMethods.get(),"DeltaE"));
+     UnitsConverter<ConvFromTOF,Centered> ConvBack;
+     std::string uintFrom = ws2D->getAxis(0)->unit()->unitID();
+     TS_ASSERT_THROWS_NOTHING(ConvBack.setUpConversion(det_loc,uintFrom,"DeltaE"));
      TS_ASSERT_THROWS_NOTHING(ConvBack.updateConversion(0));
 
      for(size_t i=0;i<n_bins;i++){
@@ -159,6 +132,10 @@ ConvertToMDEventsUnitsConvTest (){
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
 
+   det_loc.buildFakeDetectorsPositions(ws2D);
+   det_loc.setEfix(10);
+   det_loc.setEmode(1);
+  
    Kernel::UnitFactory::Instance().create("TOF");
    Kernel::UnitFactory::Instance().create("Energy");
    Kernel::UnitFactory::Instance().create("DeltaE");

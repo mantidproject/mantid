@@ -261,7 +261,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex)
     {
       l2 += m_instrument->getDetector(*it)->getDistance(*m_sample);
     }
-    l2 /= detSet.size();
+    l2 /= static_cast<double>(detSet.size());
 
     Kernel::Unit_sptr wavelength = UnitFactory::Instance().create("Wavelength");
     // unfortunately there isn't a good way to convert a single value

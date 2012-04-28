@@ -83,12 +83,14 @@ set ( SRC_FILES
 	src/Merge2WorkspaceLogs.cpp
 	src/MonitorLiveData.cpp
 	src/MoveInstrumentComponent.cpp
+	src/NexusTester.cpp
 	src/OrbiterDataArchive.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RenameLog.cpp
+	src/RemoveLogs.cpp
 	src/RotateInstrumentComponent.cpp
-        src/SNSDataArchive.cpp
+	src/SNSDataArchive.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -197,12 +199,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/Merge2WorkspaceLogs.h
 	inc/MantidDataHandling/MonitorLiveData.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
+	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/OrbiterDataArchive.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
+	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
-        inc/MantidDataHandling/SNSDataArchive.h
+	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
@@ -265,6 +269,7 @@ set ( TEST_FILES
 	test/LoadEmptyInstrumentTest.h
 	test/LoadEventNexusTest.h
 	test/LoadEventPreNexusTest.h
+	test/LoadEventPreNexus2Test.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h
@@ -306,11 +311,13 @@ set ( TEST_FILES
 	test/Merge2WorkspaceLogsTest.h
 	test/MonitorLiveDataTest.h
 	test/MoveInstrumentComponentTest.h
+	test/NexusTesterTest.h
 	test/OrbiterDataArchiveTest.h
 	test/ProcessDasNexusLogTest.h
 	test/RawFileInfoTest.h
+	test/RemoveLogsTest.h
 	test/RenameLogTest.h
-        test/SNSDataArchiveTest.h
+	test/SNSDataArchiveTest.h
 	test/SaveCSVTest.h
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h

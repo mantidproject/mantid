@@ -106,6 +106,9 @@ namespace Kernel
     /// Returns the size of the queue
     virtual size_t size() = 0;
 
+    /// Returns true if the queue is empty
+    virtual bool empty() = 0;
+
     /// Empty out the queue
     virtual void clear() = 0;
 
@@ -173,6 +176,13 @@ namespace Kernel
     { clear();
     }
 
+    //-------------------------------------------------------------------------------
+    /// @return true if the queue is empty
+    bool empty()
+    {
+      Mutex::ScopedLock _lock(m_queueLock);
+      return m_queue.empty();
+    }
 
     //-------------------------------------------------------------------------------
     void push(Task * newTask)
@@ -287,6 +297,14 @@ namespace Kernel
     /// Destructor
     virtual ~ThreadSchedulerLargestCost()
     { clear();
+    }
+
+    //-------------------------------------------------------------------------------
+    /// @return true if the queue is empty
+    bool empty()
+    {
+      Mutex::ScopedLock _lock(m_queueLock);
+      return m_map.empty();
     }
 
     //-------------------------------------------------------------------------------

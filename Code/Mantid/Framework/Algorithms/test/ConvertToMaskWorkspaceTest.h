@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACETEST_H_
-#define MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACETEST_H_
+#ifndef MANTID_ALGORITHMS_CONVERTTOMASKWORKSPACETEST_H_
+#define MANTID_ALGORITHMS_CONVERTTOMASKWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidAlgorithms/ConvertToMaskingWorkspace.h"
+#include "MantidAlgorithms/ConvertToMaskWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
@@ -15,18 +15,18 @@ using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class ConvertToMaskingWorkspaceTest : public CxxTest::TestSuite
+class ConvertToMaskWorkspaceTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToMaskingWorkspaceTest *createSuite() { return new ConvertToMaskingWorkspaceTest(); }
-  static void destroySuite( ConvertToMaskingWorkspaceTest *suite ) { delete suite; }
+  static ConvertToMaskWorkspaceTest *createSuite() { return new ConvertToMaskWorkspaceTest(); }
+  static void destroySuite( ConvertToMaskWorkspaceTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    ConvertToMaskingWorkspace convert;
+    ConvertToMaskWorkspace convert;
     TS_ASSERT_THROWS_NOTHING(convert.initialize());
     TS_ASSERT(convert.isInitialized());
   }
@@ -76,7 +76,7 @@ public:
     AnalysisDataService::Instance().add("testin", inputWS);
 
     // 2. Set up and execute
-    ConvertToMaskingWorkspace alg1;
+    ConvertToMaskWorkspace alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     TS_ASSERT_THROWS_NOTHING(alg1.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("OutputWorkspace", "testout"));
@@ -114,4 +114,4 @@ public:
 };
 
 
-#endif /* MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACETEST_H_ */
+#endif /* MANTID_ALGORITHMS_CONVERTTOMASKWORKSPACETEST_H_ */

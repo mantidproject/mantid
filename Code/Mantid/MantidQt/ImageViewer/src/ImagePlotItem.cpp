@@ -14,9 +14,24 @@ namespace ImageView
  */
 ImagePlotItem::ImagePlotItem()
 {
-  data_array      = 0;
+  buffer_ID       = 0;
+  data_array_0    = 0;
+  data_array_1    = 0;
   color_table     = 0;
   intensity_table = 0;
+}
+
+
+ImagePlotItem::~ImagePlotItem()
+{
+  if ( data_array_0 )
+  {
+    delete data_array_0; 
+  }
+  if ( data_array_1 )
+  {
+    delete data_array_1; 
+  }
 }
 
 
@@ -32,7 +47,28 @@ ImagePlotItem::ImagePlotItem()
 void ImagePlotItem::SetData( DataArray*         data_array, 
                              std::vector<QRgb>* color_table )
 {
-  this->data_array  = data_array;
+  if ( buffer_ID == 0 )
+  {
+    if ( data_array_1 )         // we must be done using array 1, so delete it
+    {
+      delete data_array_1; 
+    }
+    data_array_1 = data_array;  // put new data in array 1, and switch to it
+                                // leaving array 0 intact for now, in case it's
+                                // being drawn.
+    buffer_ID = 1;
+  }
+  else
+  {
+    if ( data_array_0 )         // we must be done using array 0, so delete it
+    {
+      delete data_array_0;
+    }
+    data_array_0 = data_array;  // put new data in array 0, and switch to it
+                                // leaving array 1 intact for now, in case it's
+                                // being drawn.
+    buffer_ID = 0;
+  }
   this->color_table = color_table;
 }
 
@@ -71,97 +107,97 @@ void ImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & yMap,
                           const QRect       &       ) const
 {
-//std::cout << "ImagePlotItem::draw called =====================" << std::endl;
-
-  if ( data_array && color_table )     // if data not yet set, just return
+  if ( !color_table )     // if data not yet set, just return
   {
-/*
-    std::cout << "canvasRect width  = " << canvasRect.width()  << std::endl;
-    std::cout << "canvasRect height = " << canvasRect.height() << std::endl;
-*/
-    size_t n_rows = data_array->GetNRows();
-    size_t n_cols = data_array->GetNCols();
-    double min    = data_array->GetDataMin();
-    double max    = data_array->GetDataMax();
-    double x_min  = data_array->GetXMin();
-    double x_max  = data_array->GetXMax();
-    double y_min  = data_array->GetYMin();
-    double y_max  = data_array->GetYMax();
-    float *data   = data_array->GetData();
-/*
-    std::cout << "x_min = " << x_min << std::endl;
-    std::cout << "x_max = " << x_max << std::endl;
-    std::cout << "y_min = " << y_min << std::endl;
-    std::cout << "y_max = " << y_max << std::endl;
-*/
-    int pix_x_min = (int)xMap.transform( x_min );
-    int pix_x_max = (int)xMap.transform( x_max );
-    int pix_y_min = (int)yMap.transform( y_min );
-    int pix_y_max = (int)yMap.transform( y_max );
-/*
-    std::cout << "pix_x_min = " << pix_x_min << std::endl;
-    std::cout << "pix_x_max = " << pix_x_max << std::endl;
-    std::cout << "pix_y_min = " << pix_y_min << std::endl;
-    std::cout << "pix_y_max = " << pix_y_max << std::endl;
-
-    std::cout << "Data Array n_rows = " << n_rows << std::endl;
-*/
-    double scale = ((double)color_table->size()-1)/(max-min);
-    size_t lut_size = 0;
-    double ct_scale = ((double)color_table->size()-1);
-    if ( intensity_table != 0 )
-    {
-      lut_size = intensity_table->size();
-      scale    = ((double)lut_size-1.0) / (max-min);
-      ct_scale = ((double)color_table->size()-1);
-    }
-    double shift = -min * scale;
-    size_t data_index;
-    size_t color_index;
-    size_t lut_index;
-    size_t image_index = 0;
-    unsigned int *rgb_data = new unsigned int[n_rows * n_cols];
-    for ( int row = (int)n_rows-1; row >= 0; row-- )
-    {
-      data_index = row * n_cols;
-      if (intensity_table == 0 )              // use color table directly
-      {
-        for ( int col = 0; col < (int)n_cols; col++ )
-        {
-          color_index = (uint)(data[data_index] * scale + shift);
-          rgb_data[image_index] = (*color_table)[ color_index ];
-          image_index++;
-          data_index++;
-        }
-      }
-      else                                    // go through intensity table
-      {
-        for ( int col = 0; col < (int)n_cols; col++ )
-        {
-          lut_index   = (uint)(data[data_index] * scale + shift);
-          color_index = (uint)((*intensity_table)[lut_index] * ct_scale );
-          rgb_data[image_index] = (*color_table)[ color_index ];
-          image_index++;
-          data_index++;
-        }
-      }
-    }
-
-    uchar *buffer = (uchar*)rgb_data;
-    QImage image( buffer, (int)n_cols, (int)n_rows, QImage::Format_RGB32 );
-    QPixmap pixmap = QPixmap::fromImage(image);
-    delete[] rgb_data;                         // we can delete this, once the
-                                               // pixmap is created !?
-
-    int width  = pix_x_max - pix_x_min + 1;
-    int height = pix_y_min - pix_y_max + 1;    // y-axis is inverted for image
-
-    QPixmap scaled_pixmap = pixmap.scaled( width, height, 
-                                           Qt::IgnoreAspectRatio,
-                                           Qt::FastTransformation);
-
-    painter->drawPixmap( pix_x_min, pix_y_max, scaled_pixmap );
+    return;
   }
+
+  DataArray* data_array;
+  if ( buffer_ID == 0 )
+  {
+    data_array = data_array_0;
+  }
+  else
+  {
+    data_array = data_array_1;
+  }
+
+  size_t n_rows = data_array->GetNRows();
+  size_t n_cols = data_array->GetNCols();
+
+  double min    = data_array->GetDataMin();
+  double max    = data_array->GetDataMax();
+  double x_min  = data_array->GetXMin();
+  double x_max  = data_array->GetXMax();
+  double y_min  = data_array->GetYMin();
+  double y_max  = data_array->GetYMax();
+
+  float *data   = data_array->GetData();
+                                            // find the actual plot region
+                                            // using the scale maps. 
+  int pix_x_min = (int)xMap.transform( x_min );
+  int pix_x_max = (int)xMap.transform( x_max );
+  int pix_y_min = (int)yMap.transform( y_min );
+  int pix_y_max = (int)yMap.transform( y_max );
+
+  double scale = ((double)color_table->size()-1)/(max-min);
+  size_t lut_size = 0;
+  double ct_scale = ((double)color_table->size()-1);
+  if ( intensity_table != 0 )
+  {
+    lut_size = intensity_table->size();
+    scale    = ((double)lut_size-1.0) / (max-min);
+    ct_scale = ((double)color_table->size()-1);
+  }
+  double shift = -min * scale;
+  size_t data_index;
+  size_t color_index;
+  size_t lut_index;
+  size_t image_index = 0;
+
+  unsigned int* rgb_buffer = new unsigned int[n_rows * n_cols];
+
+  for ( int row = (int)n_rows-1; row >= 0; row-- )
+  {
+    data_index = row * n_cols;
+    if (intensity_table == 0 )              // use color table directly
+    {
+      for ( int col = 0; col < (int)n_cols; col++ )
+      {
+        color_index = (uint)(data[data_index] * scale + shift);
+        rgb_buffer[image_index] = (*color_table)[ color_index ];
+        image_index++;
+        data_index++;
+      }
+    }
+    else                                    // go through intensity table
+    {
+      for ( int col = 0; col < (int)n_cols; col++ )
+      {
+        lut_index   = (uint)(data[data_index] * scale + shift);
+        color_index = (uint)((*intensity_table)[lut_index] * ct_scale );
+        rgb_buffer[image_index] = (*color_table)[ color_index ];
+        image_index++;
+        data_index++;
+      }
+    }
+  }
+
+  uchar *buffer = (uchar*)rgb_buffer;
+  QImage image( buffer, (int)n_cols, (int)n_rows, QImage::Format_RGB32 );
+  QPixmap pixmap = QPixmap::fromImage(image);
+
+  int width  = pix_x_max - pix_x_min + 1;
+  int height = pix_y_min - pix_y_max + 1;    // y-axis is inverted for image
+
+  QPixmap scaled_pixmap = pixmap.scaled( width, height, 
+                                         Qt::IgnoreAspectRatio,
+                                         Qt::FastTransformation);
+
+  painter->drawPixmap( pix_x_min, pix_y_max, scaled_pixmap );
+
+  delete[] rgb_buffer;                       // hopefully we can delete this
+                                             // now  
 }
 
 

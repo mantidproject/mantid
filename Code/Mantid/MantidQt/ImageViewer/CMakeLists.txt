@@ -9,6 +9,7 @@ set ( SRC_FILES
        src/GraphDisplay.cpp     
        src/ImageView.cpp      
        src/SliderHandler.cpp
+       src/RangeHandler.cpp
        src/ImageDataSource.cpp  
        src/IVConnections.cpp 
        src/TestDataSource.cpp
@@ -31,6 +32,7 @@ set ( INC_FILES
        inc/MantidQtImageViewer/QtUtils.h
        inc/MantidQtImageViewer/ImageDataSource.h
        inc/MantidQtImageViewer/SliderHandler.h
+       inc/MantidQtImageViewer/RangeHandler.h
        inc/MantidQtImageViewer/TestDataSource.h
        inc/MantidQtImageViewer/EventWSDataSource.h
        inc/MantidQtImageViewer/EventWSImageView.h

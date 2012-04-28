@@ -33,6 +33,7 @@ namespace ImageView
  */
 ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                              SliderHandler* slider_handler,
+                             RangeHandler*  range_handler,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
@@ -43,6 +44,7 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
 
   this->image_plot     = image_plot;
   this->slider_handler = slider_handler;
+  this->range_handler  = range_handler;
 
   image_plot_item = new ImagePlotItem;
   image_plot_item->setXAxis( QwtPlot::xBottom );
@@ -55,7 +57,6 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
   image_table      = table_widget;
 
   data_source     = 0;
-  data_array      = 0;
 
   double DEFAULT_INTENSITY = 30;
   SetIntensity( DEFAULT_INTENSITY );
@@ -88,12 +89,12 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   double scale_x_max = data_source->GetXMax();
   
   int    n_rows = 500;         // get reasonable size initial image data
-  int    n_cols = 500;
+  int    n_cols = 500;     
+                               // data_array is deleted in the ImagePlotItem
   data_array = data_source->GetDataArray( scale_x_min, scale_x_max,
                                           scale_y_min, scale_y_max,
                                           n_rows, n_cols,
                                           false );
-
 
   image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
@@ -107,15 +108,42 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   slider_handler->ConfigureSliders( draw_area, data_source );
 }
 
+/**
+ *  Rebuild the scrollbars and image due to a change in the range xmin, xmax
+ *  or step size.  It should be invoked when the user changes the values in
+ *  the xmin, xmax or step controls.  It should not be called directly from
+ *  other threads.
+ */
+void ImageDisplay::UpdateRange()
+{
+  if ( data_source == 0 )
+  {
+    return;   // no image data to update
+  }
+  double min  = 0;
+  double max  = 0;
+  double step = 0;
+  range_handler->GetRange( min, max, step );
+
+  int n_bins = (int)(( max - min ) / step);
+
+  QRect display_rect;
+  GetDisplayRectangle( display_rect );
+ 
+  slider_handler->ConfigureHSlider( n_bins, display_rect.width() );
+
+  UpdateImage();
+}
 
 /**
  *  This will rebuild the image from the data source.  It should be invoked
  *  when the scroll bar is moved, the plot area is resize or the color or
- *  intensity tables are changed.
+ *  intensity tables are changed.  It should not be called directly from
+ *  other threads.
  */
 void ImageDisplay::UpdateImage()
 {
-  if ( data_source == 0 || data_array == 0 )
+  if ( data_source == 0 )
   {
     return;   // no image data to update
   }
@@ -123,15 +151,20 @@ void ImageDisplay::UpdateImage()
   QRect display_rect;
   GetDisplayRectangle( display_rect );
 
-  
   double scale_y_min = data_source->GetYMin();
   double scale_y_max = data_source->GetYMax();
-
+/*
   double scale_x_min = data_source->GetXMin();
   double scale_x_max = data_source->GetXMax();
+*/
+  double scale_x_min  = 0;
+  double scale_x_max  = 0;
+  double step = 0;
+  range_handler->GetRange( scale_x_min, scale_x_max, step );
 
   int n_rows = (int)data_source->GetNRows();
-  int n_cols = (int)data_source->GetNCols();
+//  int n_cols = (int)data_source->GetNCols();
+  int n_cols = (int)( ( scale_x_max - scale_x_min ) / step  );
 
   if ( slider_handler->VSliderOn() )
   {
@@ -178,7 +211,8 @@ void ImageDisplay::UpdateImage()
   {
     n_cols = display_rect.width();
   }
-
+                                         // NOTE: The DataArray is deleted
+                                         //       in the ImagePlotItem.
   data_array = data_source->GetDataArray( scale_x_min, scale_x_max, 
                                           scale_y_min, scale_y_max, 
                                           n_rows, n_cols,
@@ -259,6 +293,16 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
 
   double x_min = data_array->GetXMin();
   double x_max = data_array->GetXMax();
+
+  if ( x < x_min )                      // restrict x to valid range since
+    x = x_min;                          // Qt returns values outside of region
+  else if ( x > x_max )
+    x = x_max;
+
+  if ( y < y_min )                      // restrict y to valid range since
+    y = y_min;                          // Qt returns values outside of region
+  else if ( y > y_max )
+    y = y_max;
 
   double relative_y = (y-y_min)/(y_max-y_min);            //  in 0 to 1
   int    row = (int)(relative_y * (double)n_rows);

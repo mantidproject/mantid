@@ -2,6 +2,7 @@
 #define  QT_UTILS_H
 
 #include <QTableWidget>
+#include <QLineEdit>
 
 #include "MantidQtImageViewer/DllOptionIV.h"
 
@@ -57,6 +58,16 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER QtUtils
                              int           precision,
                              double        value,
                              QTableWidget* table );
+
+  /// Set the specified string into the specified QLineEdit widget.
+  static void SetText( const std::string & string,
+                             QLineEdit*    q_line_edit );
+
+  /// enter the specified double, formatted, in the QLineEdit control
+  static void SetText( int        width,
+                       int        precision,
+                       double     value,
+                       QLineEdit* q_line_edit );
 };
 
 } // namespace MantidQt 

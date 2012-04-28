@@ -7,6 +7,10 @@ from mantid import mtd
 
 class SimpleAPILoadTest(unittest.TestCase):
     
+    def tearDown(self):
+        """Clear up after each test"""
+        mtd.clear()
+    
     def test_Load_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         try:
             data, monitors = Load('IRS21360.raw', LoadMonitors='Separate')
@@ -19,7 +23,6 @@ class SimpleAPILoadTest(unittest.TestCase):
         except RuntimeError:
             self.fail("Load with a filename should not raise an exception")
         self.assertEquals(116, raw.getNumberHistograms())
-        mtd.remove('raw')
 
     def test_Load_call_with_other_args_executes_correctly(self):
         try:
@@ -38,6 +41,12 @@ class SimpleAPILoadTest(unittest.TestCase):
         except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEquals(1, raw.getNumberHistograms())
+        
+    def test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
+        wsname = 'test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
+        data = [1.0,2.0,3.0,4.0,5.0]
+        wkspace = Load('IRS21360.raw',OutputWorkspace=wsname)
+        self.assertTrue( wsname in mtd )
 
     def test_that_dialog_call_raises_runtime_error(self):
         try:

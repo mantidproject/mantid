@@ -35,10 +35,13 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)ev_ws->getNumberHistograms();
   total_rows = ev_ws->getNumberHistograms();
-  total_cols = 2000;             // initially use 2000 bins for event data
 
-//  std::cout << "total_xmin = " << total_xmin << std::endl;
-//  std::cout << "total_xmax = " << total_xmax << std::endl;
+  total_cols = 1000000;           // Allow up to a million virtual columns.
+                                  // The data will only be rebinned to a 
+                                  // resolution corresponding to the screen.
+                                  // However, this number places a hard limit
+                                  // on the number of virtual columns, which 
+                                  // affects the scroll bar size calculation
 
   if ( total_xmax > 120000 )   
   {
@@ -46,34 +49,18 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
     std::cout << "WARNING: max tof too large, set to " 
               << total_xmax << std::endl;
   }
-  x_scale  = 0;                   // no default x_scale
-  new_data = 0;                   // no data loaded yet
-  new_data_array = 0;             // no DataArray object created yet
 }
 
 
 EventWSDataSource::~EventWSDataSource()
 {
-  if ( x_scale )
-  {
-    delete x_scale;
-  }
-
-  if ( new_data )
-  {
-    delete[] new_data;
-  }
-
-  if ( new_data_array )
-  {
-    delete new_data_array;
-  }
 }
 
 
 /**
  * Get a data array covering the specified range of data, at the specified
- * resolution.
+ * resolution.  NOTE: The calling code is responsible for deleting the 
+ * DataArray that is constructed in and returned by this method.
  *
  * @param xmin      Left edge of region to be covered.
  * @param xmax      Right edge of region to be covered.
@@ -109,45 +96,37 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   size_t first_row;
   IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
-  if ( new_data )
-  {
-    delete[] new_data;
-  }
-  new_data = new float[n_rows * n_cols];
 
-  if ( x_scale )
-  {
-    delete x_scale;
-  }
-  x_scale = new MantidVec();
-  x_scale->resize(n_cols+1);
+  float* new_data = new float[n_rows * n_cols];   // this is deleted in the
+                                                  // DataArrray destructor
+  MantidVec x_scale;
+  x_scale.resize(n_cols+1);
   double dx = (xmax - xmin)/((double)n_cols + 1.0);
   for ( size_t i = 0; i < n_cols+1; i++ )
   {
-    (*x_scale)[i] = xmin + (double)i * dx;;
+    x_scale[i] = xmin + (double)i * dx;;
   }
 
+  MantidVec y_vals;
+  MantidVec err;
+  y_vals.resize(n_cols);
+  err.resize(n_cols);
   size_t index = 0;
   for ( size_t i = first_row; i < first_row + n_rows; i++ )
   {
     IEventList * list = ev_ws->getEventListPtr(i);
-    list->setX( *x_scale );
-    list->setTofs( *x_scale );
-    const MantidVec & y_vals = ev_ws->readY(i);
+    y_vals.clear();
+    list->generateHistogram( x_scale, y_vals, err, true );
     for ( size_t col = 0; col < n_cols; col++ )
     {
       new_data[index] = (float)y_vals[col];
       index++;
     }
   }
-
-  if ( new_data_array )
-  {
-    delete new_data_array;
-  }
-  new_data_array = new DataArray( xmin, xmax, ymin, ymax,
-                                  is_log_x, n_rows, n_cols, new_data);
-
+                                // The calling code is responsible for deleting 
+                                // the DataArray when it is done with it      
+  DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax,
+                                           is_log_x, n_rows, n_cols, new_data);
   return new_data_array;
 }
 

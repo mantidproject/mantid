@@ -95,7 +95,10 @@ namespace Mantid
     /// @param n :: The new length
     void resize(const size_t n)
     {
-      gsl_vector_free(m_vector);
+      if ( m_vector )
+      {
+        gsl_vector_free(m_vector);
+      }
       m_vector = gsl_vector_alloc(n);
     }
 

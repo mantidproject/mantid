@@ -70,6 +70,13 @@ set( TEST_FILES
    test/MantidColorMapTest.h
 )
 
+# FIXME: The following test(s) only work on Linux, for some reason.
+if ( NOT WIN32 )
+	set( TEST_FILES ${TEST_FILES}
+   		test/MantidQwtMatrixWorkspaceDataTest.h
+   	)
+endif ()
+
 include_directories ( inc )
 include_directories ( ../MantidWidgets/inc )
 include_directories ( ../MantidWidgets )
@@ -98,9 +105,27 @@ target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIB
 
 if ( CXXTEST_FOUND )
   if ( GMOCK_FOUND AND GTEST_FOUND )
+    # Make the rest of the tests
+    include_directories ( ../../Framework/CurveFitting/inc
+                          ../../Framework/DataHandling/inc
+                          ../../Framework/Nexus/inc
+                          ../../Framework/TestHelpers/inc
+                          ../../Framework/MDEvents/inc
+                          ../../Framework/DataObjects/inc
+                          ${QWT_INCLUDE_DIR} ${QT_INCLUDE_DIR} )
+    
+    # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+    # It will go out of scope at the end of this file so doesn't need un-setting
+    set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../Framework/TestHelpers/src/SANSInstrumentCreationHelper.cpp
+                        ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp )
+    
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MantidQtAPITest MantidQtAPI ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( MantidQtAPITest MantidQtAPI MDEvents DataHandling
+                ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${QWT_LIBRARIES} ${QT_LIBRARIES})
     add_dependencies( GUITests MantidQtAPITest )
+    
     # Add to the 'UnitTests' group in VS
     set_property( TARGET MantidQtAPITest PROPERTY FOLDER "UnitTests" )
   endif ()
@@ -110,9 +135,8 @@ endif ()
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 
-if ( WIN32 )
+if ( NOT WIN32 )
 # Does not work on windows for some reason
-else ()
 
 include_directories ( ../../Framework/MDEvents/inc )
 include_directories ( ../../Framework/DataObjects/inc )

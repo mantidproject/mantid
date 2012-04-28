@@ -44,7 +44,7 @@ public:
  
   /** helper function which verifies if projection vectors are specified and if their values are correct when present.
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
-    void getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt);
+    void getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,const std::vector<double> &wt);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
@@ -58,7 +58,7 @@ private:
     bool is_uv_default;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
       * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
-    mutable Kernel::V3D uProj,vProj;
+    mutable Kernel::V3D uProj,vProj,wProj;
 
   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& convert_log;

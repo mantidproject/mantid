@@ -52,7 +52,7 @@ namespace Mantid
       /// Typedef for a variate generator tieing together the Mersenne Twister 
       /// algorithm with a uniform disribution
       typedef boost::variate_generator<boost::mt19937&, 
-	boost::uniform_real<double> > uniform_generator;      
+    boost::uniform_real<double> > uniform_generator;      
     
     public:
       /// Default constructor

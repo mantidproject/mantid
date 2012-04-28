@@ -4,7 +4,7 @@
 *WIKI*/
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -49,14 +49,14 @@ namespace Algorithms
     operators.push_back("XOR");
     operators.push_back("NOT");
 
-    declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace1", "", Direction::Input),
-        "SpecialWorkspace2D 1 for binary operation");
-    declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
-        "Optional SpecialWorkspace2D 2 for binary operation");
+    declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("InputWorkspace1", "", Direction::Input),
+        "MaskWorkspace 1 for binary operation");
+    declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
+        "Optional MaskWorkspace 2 for binary operation");
     declareProperty("OperationType", "AND", boost::make_shared<StringListValidator>(operators),
         "Operator for Workspace1 and Workspace2");
-    declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "", Direction::Output),
-        "Output SpecialWorkspace2D as result of binary operation");
+    declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("OutputWorkspace", "", Direction::Output),
+        "Output MaskWorkspace as result of binary operation");
 
     return;
   }
@@ -64,16 +64,16 @@ namespace Algorithms
   void BinaryOperateMasks::exec(){
 
     // 1. Read input
-    DataObjects::SpecialWorkspace2D_const_sptr inputws1 = getProperty("InputWorkspace1");
+    DataObjects::MaskWorkspace_const_sptr inputws1 = getProperty("InputWorkspace1");
     std::string op = getProperty("OperationType");
 
     // 2. Output
-    Mantid::DataObjects::SpecialWorkspace2D_sptr outputws = getProperty("OutputWorkspace");
+    Mantid::DataObjects::MaskWorkspace_sptr outputws = getProperty("OutputWorkspace");
 
     if (outputws != inputws1)
     {
         // if the input and output are not the same, then create a new workspace for the output.
-         outputws = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(API::WorkspaceFactory::Instance().create(inputws1));
+         outputws = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(API::WorkspaceFactory::Instance().create(inputws1));
          outputws->copyFrom(inputws1);
     }
 
@@ -86,7 +86,8 @@ namespace Algorithms
     } else {
         // Binary operation
         // a. 2nd Input
-        DataObjects::SpecialWorkspace2D_const_sptr inputws2 = getProperty("InputWorkspace2");
+        DataObjects::MaskWorkspace_const_sptr inputws2 = getProperty("InputWorkspace2");
+        DataObjects::SpecialWorkspace2D_const_sptr inputws2_special(inputws2);
 
         unsigned int binop;
         if (op == "AND"){
@@ -98,7 +99,7 @@ namespace Algorithms
         } else{
             binop = 1000;
         }
-        outputws->binaryOperation(inputws2, binop);
+        outputws->binaryOperation(inputws2_special, binop);
 
     }
 

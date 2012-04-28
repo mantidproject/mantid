@@ -47,17 +47,21 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler
 {
   public:
 
-    /// Construct object to manage image sliders from the specified UI
+    /// Construct object to manage image scrollbars from the specified UI
     SliderHandler( Ui_MainWindow* iv_ui );
 
-    /// Configure the image sliders for the specified data and drawing area
+    /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
                            ImageDataSource* data_source );
 
-    /// Return true if the image horizontal slider is enabled.
+    /// Configure the horizontal scrollbar to cover the specified range
+    void ConfigureHSlider( int         n_data_steps, 
+                           int         n_pixels );
+
+    /// Return true if the image horizontal scrollbar is enabled.
     bool HSliderOn();
 
-    /// Return true if the image vertical slider is enabled.
+    /// Return true if the image vertical scrollbar is enabled.
     bool VSliderOn();
 
     /// Get the range of columns to display in the image.
@@ -67,6 +71,12 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler
     void GetVSliderInterval( int &y_min, int &y_max );
 
   private:
+    /// Configure the specified scrollbar to cover the specified range
+    void ConfigureSlider( QScrollBar* scroll_bar, 
+                          int         n_data_steps,
+                          int         n_pixels,
+                          int         val );
+
     Ui_MainWindow*   iv_ui;
 };
 

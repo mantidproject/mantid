@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -30,14 +30,14 @@ public:
 
     this->binoperator.initialize();
 
-    // 1. Create SpecialWorkspaces
+    // 1. Create Mask Workspace
     Mantid::Geometry::Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // Mantid::Geometry::Instrument_sptr inst1(new Geometry::Instrument);
-    Mantid::DataObjects::SpecialWorkspace2D_sptr ws1(new  Mantid::DataObjects::SpecialWorkspace2D(inst1));
-    Mantid::DataObjects::SpecialWorkspace2D_const_sptr cws1 = boost::dynamic_pointer_cast<const Mantid::DataObjects::SpecialWorkspace2D>(ws1);
+    Mantid::DataObjects::MaskWorkspace_sptr ws1(new  Mantid::DataObjects::MaskWorkspace(inst1));
+    Mantid::DataObjects::MaskWorkspace_const_sptr cws1 = boost::dynamic_pointer_cast<const Mantid::DataObjects::MaskWorkspace>(ws1);
 
     Mantid::Geometry::Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    Mantid::DataObjects::SpecialWorkspace2D_sptr ws2(new Mantid::DataObjects::SpecialWorkspace2D(inst2));
+    Mantid::DataObjects::MaskWorkspace_sptr ws2(new Mantid::DataObjects::MaskWorkspace(inst2));
 
     std::string ws3name = "BinarySum";
 
@@ -57,8 +57,7 @@ public:
     {
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
 
-      // DataObjects::SpecialWorkspace2D_sptr ws3 = this->binoperator.getProperty("OutputWorkspace");
-      DataObjects::SpecialWorkspace2D_sptr ws3 = AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>(ws3name);
+      DataObjects::MaskWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(ws3name);
 
       TS_ASSERT_EQUALS(ws3->getValue(1), 1);
       TS_ASSERT_EQUALS(ws3->getValue(2), 0);
@@ -80,9 +79,9 @@ public:
   void test_NOTOperation(){
     this->binoperator.initialize();
 
-    // 1. Create SpecialWorkspaces
+    // 1. Create Mask Workspaces
     Mantid::Geometry::Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    Mantid::DataObjects::SpecialWorkspace2D_sptr ws1(new  Mantid::DataObjects::SpecialWorkspace2D(inst1));
+    Mantid::DataObjects::MaskWorkspace_sptr ws1(new  Mantid::DataObjects::MaskWorkspace(inst1));
 
     ws1->setValue(1, 0);
     ws1->setValue(3, 1);
@@ -91,11 +90,11 @@ public:
     std::string ws4name = "BinaryNOTResult";
     this->binoperator.setPropertyValue("OutputWorkspace", ws4name);
     this->binoperator.setPropertyValue("OperationType", "NOT");
-    DataObjects::SpecialWorkspace2D_sptr ws4;
+    DataObjects::MaskWorkspace_sptr ws4;
     try
     {
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
-      ws4 = AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>(ws4name);
+      ws4 = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(ws4name);
 
       if (ws4 == NULL){
         std::cout << "Workspace4 is NULL" << std::endl;
@@ -127,7 +126,7 @@ public:
     try
     {
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
-      DataObjects::SpecialWorkspace2D_sptr ws2 = AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>(ws2name);
+      DataObjects::MaskWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(ws2name);
       for (size_t ih = 0; ih < ws2->getNumberHistograms(); ih ++){
         detid_t tempdetid = ws2->getDetectorID(ih);
         TS_ASSERT_EQUALS(ws2->getValue(tempdetid), 1);
