@@ -53,6 +53,18 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSDataSource: public ImageDataSource
 
    ~EventWSDataSource();
 
+    /// OVERRIDES: Get the smallest 'x' value covered by the data
+    virtual double GetXMin();
+
+    /// OVERRIDES: Get the largest 'x' value covered by the data
+    virtual double GetXMax();
+
+    /// OVERRIDES: Get the largest 'y' value covered by the data
+    virtual double GetYMax();
+
+    /// OVERRIDES: Get the total number of rows of data
+    virtual size_t GetNRows();
+
     /// Get DataArray covering full range of data in x, and y directions
     DataArray * GetDataArray( bool is_log_x );
 

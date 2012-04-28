@@ -38,7 +38,6 @@ ImageView::ImageView( ImageDataSource* data_source )
   saved_slider_handler = slider_handler;
 
   RangeHandler* range_handler = new RangeHandler( ui );
-  range_handler->ConfigureRangeControls( data_source );
   saved_range_handler = range_handler;
 
   h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );

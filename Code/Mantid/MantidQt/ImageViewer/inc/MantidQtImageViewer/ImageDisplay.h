@@ -83,6 +83,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      void SetPointedAtPoint( QPoint point );
 
   private:
+     /// Check if the DataSource has been changed under us
+     bool DataSourceRangeChanged();
+
      /// Get the rectangle currently covered by the image in pixel coordinates
      void GetDisplayRectangle( QRect &rect );
 
@@ -105,6 +108,13 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      GraphDisplay*        v_graph_display;
 
      QTableWidget*        image_table;
+                                           // save current total data range
+                                           // so we can reset the data source
+                                           // if we detect a change of range
+     double               total_y_min;
+     double               total_y_max;
+     double               total_x_min;
+     double               total_x_max;
 };
 
 } // namespace MantidQt 

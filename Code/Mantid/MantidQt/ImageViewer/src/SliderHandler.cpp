@@ -33,9 +33,7 @@ void SliderHandler::ConfigureSliders( QRect            draw_area,
   int n_rows = (int)data_source->GetNRows();
   ConfigureSlider( v_scroll, n_rows, draw_area.height(), n_rows );
 
-  QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
-  int n_cols = (int)data_source->GetNCols();
-  ConfigureSlider( h_scroll, n_cols, draw_area.width(), 0 );
+  ConfigureHSlider( 2000, draw_area.width() );   // initial default, 2000 bins
 }
 
 

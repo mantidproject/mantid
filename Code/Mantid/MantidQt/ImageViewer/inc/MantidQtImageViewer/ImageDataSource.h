@@ -55,22 +55,22 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDataSource
     virtual ~ImageDataSource();
 
     /// Get the smallest 'x' value covered by the data
-    virtual double GetXMin()    const;
+    virtual double GetXMin();
 
     /// Get the largest 'x' value covered by the data
-    virtual double GetXMax()    const;
+    virtual double GetXMax();
 
     /// Get the smallest 'y' value covered by the data
-    virtual double GetYMin()    const;
+    virtual double GetYMin();
 
     /// Get the largest 'y' value covered by the data
-    virtual double GetYMax()    const;
+    virtual double GetYMax();
 
     /// Get the total number of rows of data
-    virtual size_t GetNRows()   const;
+    virtual size_t GetNRows();
 
     /// Get the total number of columns of data
-    virtual size_t GetNCols()   const;
+    virtual size_t GetNCols();
 
     /// Get a DataArray roughly spaning the specified rectangle.  NOTE: The
     /// actual size and number of steps returned in the DataArray will be  

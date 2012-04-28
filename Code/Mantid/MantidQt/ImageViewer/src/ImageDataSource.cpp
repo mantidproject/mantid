@@ -41,7 +41,7 @@ ImageDataSource::~ImageDataSource()
 /**
  * Get the smallest 'x' value covered by the data.
  */
-double ImageDataSource::GetXMin() const
+double ImageDataSource::GetXMin()
 {
   return total_xmin;
 }
@@ -50,7 +50,7 @@ double ImageDataSource::GetXMin() const
 /**
  * Get the largest 'x' value covered by the data.
  */
-double ImageDataSource::GetXMax() const
+double ImageDataSource::GetXMax()
 {
   return total_xmax;
 }
@@ -59,7 +59,7 @@ double ImageDataSource::GetXMax() const
 /**
  * Get the smallest 'y' value covered by the data.
  */
-double ImageDataSource::GetYMin() const
+double ImageDataSource::GetYMin()
 {
   return total_ymin;
 }
@@ -68,7 +68,7 @@ double ImageDataSource::GetYMin() const
 /**
  * Get the largest 'y' value covered by the data.
  */
-double ImageDataSource::GetYMax() const
+double ImageDataSource::GetYMax()
 {
   return total_ymax;
 }
@@ -77,7 +77,7 @@ double ImageDataSource::GetYMax() const
 /**
  * Get the total number of rows the data is divided into
  */
-size_t ImageDataSource::GetNRows() const
+size_t ImageDataSource::GetNRows()
 {
   return total_rows;
 }
@@ -86,7 +86,7 @@ size_t ImageDataSource::GetNRows() const
 /**
  * Get the total number of columns the data is divided into
  */
-size_t ImageDataSource::GetNCols() const
+size_t ImageDataSource::GetNCols()
 {
   return total_cols;
 }

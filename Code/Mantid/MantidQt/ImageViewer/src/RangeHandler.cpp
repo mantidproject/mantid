@@ -68,11 +68,15 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
 
   IVUtils::FindValidInterval( min, max );
 
-  double max_steps = static_cast<double>(total_n_steps) * (max - min)/(total_max_x - total_min_x);
-  if ( (max-min) / step > max_steps )
+  if ( step < 0 )                    // just require step to be > 0, no other
+  {                                  // bounds
+    step = -step;
+  }
+
+  if ( step == 0 )                   // take a default step size
   {
-    step = (total_max_x - total_min_x)/static_cast<double>(total_n_steps);
-  } 
+    step = (total_max_x - total_min_x) / 2000;
+  }
 
   SetRange( min, max, step );
 }

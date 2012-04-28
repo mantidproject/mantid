@@ -177,7 +177,7 @@ bool IVUtils::Interpolate( double   min,
  *                      max value, if max is in the interior of a bin.
  *  @param steps        On input this should be the number of bins desired
  *                      between the min and max values.  This will be adjusted
- *                      to be more than the number os steps available.
+ *                      to be more than the number of steps available.
  */
 bool IVUtils::CalculateInterval( double   global_min,
                                  double   global_max,

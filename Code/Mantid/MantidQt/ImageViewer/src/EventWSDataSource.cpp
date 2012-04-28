@@ -30,30 +30,69 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->ev_ws = ev_ws;
-  total_xmin = ev_ws->getTofMin(); 
-  total_xmax = ev_ws->getTofMax(); 
+
+  total_xmin = ev_ws->getXMin(); 
+  total_xmax = ev_ws->getXMax(); 
+
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)ev_ws->getNumberHistograms();
+
   total_rows = ev_ws->getNumberHistograms();
 
-  total_cols = 1000000;           // Allow up to a million virtual columns.
-                                  // The data will only be rebinned to a 
-                                  // resolution corresponding to the screen.
-                                  // However, this number places a hard limit
-                                  // on the number of virtual columns, which 
-                                  // affects the scroll bar size calculation
+  std::cout << "Xmin = " << ev_ws->getXMin() << std::endl;
+  std::cout << "Xmax = " << ev_ws->getXMax() << std::endl;
 
-  if ( total_xmax > 120000 )   
-  {
-    total_xmax = 120000;          // hack for now
-    std::cout << "WARNING: max tof too large, set to " 
-              << total_xmax << std::endl;
-  }
+  total_cols = 1000000;              // Default data resolution
 }
 
 
 EventWSDataSource::~EventWSDataSource()
 {
+}
+
+
+/**
+ * Get the smallest 'x' value covered by the data.  Must override base class
+ * method, since the DataSource can be changed!
+ */
+double EventWSDataSource::GetXMin()
+{
+  total_xmin = ev_ws->getXMin(); 
+  return total_xmin;
+
+}
+
+
+/**
+ * Get the largest 'x' value covered by the data.  Must override base class
+ * method, since the DataSource can be changed!
+ */
+double EventWSDataSource::GetXMax()
+{
+  total_xmax = ev_ws->getXMax(); 
+  return total_xmax;
+}
+
+
+/**
+ * Get the largest 'y' value covered by the data.  Must override base class
+ * method, since the DataSource can be changed!
+ */
+double EventWSDataSource::GetYMax()
+{
+  total_ymax = (double)ev_ws->getNumberHistograms();
+  return total_ymax;
+}
+
+
+/**
+ * Get the total number of rows the data is divided into.  Must override base
+ * class method, since the DataSource can be changed!
+ */
+size_t EventWSDataSource::GetNRows()
+{
+  total_ymax = (double)ev_ws->getNumberHistograms();
+  return total_rows;
 }
 
 
@@ -164,7 +203,9 @@ void EventWSDataSource::GetInfoList( double x,
   IVUtils::Format(8,3,x,x_str);
   list.push_back(x_str);
 
-  list.push_back("Test Y:");
+  std::string y_label = ev_ws->YUnit();
+  list.push_back(y_label);
+//  list.push_back("Test Y:");
   std::string y_str;
   IVUtils::Format(8,3,y,y_str);
   list.push_back(y_str);

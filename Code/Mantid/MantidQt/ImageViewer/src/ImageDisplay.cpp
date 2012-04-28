@@ -82,17 +82,17 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   h_graph_display->SetDataSource( data_source );
   v_graph_display->SetDataSource( data_source );
 
-  double scale_y_min = data_source->GetYMin();
-  double scale_y_max = data_source->GetYMax();
+  total_y_min = data_source->GetYMin();
+  total_y_max = data_source->GetYMax();
 
-  double scale_x_min = data_source->GetXMin();
-  double scale_x_max = data_source->GetXMax();
+  total_x_min = data_source->GetXMin();
+  total_x_max = data_source->GetXMax();
   
   int    n_rows = 500;         // get reasonable size initial image data
   int    n_cols = 500;     
                                // data_array is deleted in the ImagePlotItem
-  data_array = data_source->GetDataArray( scale_x_min, scale_x_max,
-                                          scale_y_min, scale_y_max,
+  data_array = data_source->GetDataArray( total_x_min, total_x_max,
+                                          total_y_min, total_y_max,
                                           n_rows, n_cols,
                                           false );
 
@@ -102,6 +102,8 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
                                             data_array->GetYMax() );
 
   image_plot_item->SetData( data_array, &color_table );
+
+  range_handler->ConfigureRangeControls( data_source );
 
   QRect draw_area;
   GetDisplayRectangle( draw_area );
@@ -120,13 +122,19 @@ void ImageDisplay::UpdateRange()
   {
     return;   // no image data to update
   }
+
+  if ( DataSourceRangeChanged() )
+  {
+    SetDataSource( data_source );   // re-initialize with the altered source
+  }
+
   double min  = 0;
   double max  = 0;
   double step = 0;
   range_handler->GetRange( min, max, step );
 
-  int n_bins = (int)(( max - min ) / step);
-
+  int n_bins = (int)(( max - min ) / step);   // range controls now determine
+                                              // the number of bins
   QRect display_rect;
   GetDisplayRectangle( display_rect );
  
@@ -148,22 +156,23 @@ void ImageDisplay::UpdateImage()
     return;   // no image data to update
   }
 
+  if ( DataSourceRangeChanged() )
+  {
+    SetDataSource( data_source );   // re-initialize with the altered source
+  }
+
   QRect display_rect;
   GetDisplayRectangle( display_rect );
 
   double scale_y_min = data_source->GetYMin();
   double scale_y_max = data_source->GetYMax();
-/*
-  double scale_x_min = data_source->GetXMin();
-  double scale_x_max = data_source->GetXMax();
-*/
+
   double scale_x_min  = 0;
   double scale_x_max  = 0;
   double step = 0;
   range_handler->GetRange( scale_x_min, scale_x_max, step );
 
   int n_rows = (int)data_source->GetNRows();
-//  int n_cols = (int)data_source->GetNCols();
   int n_cols = (int)( ( scale_x_max - scale_x_min ) / step  );
 
   if ( slider_handler->VSliderOn() )
@@ -424,16 +433,22 @@ void ImageDisplay::GetDisplayRectangle( QRect &rect )
     rect.setBottom( 440 );
     rect.setTop   (   6 );
   }
-/*
-  std::cout << "GetDisplayRect: pix_x_min = " << pix_x_min << std::endl;
-  std::cout << "GetDisplayRect: pix_x_max = " << pix_x_max << std::endl;
-  std::cout << "GetDisplayRect: pix_y_min = " << pix_y_min << std::endl;
-  std::cout << "GetDisplayRect: pix_y_max = " << pix_y_max << std::endl;
-  std::cout << "GetDisplayRect: rect x      = " << rect.x() << std::endl;
-  std::cout << "GetDisplayRect: rect y      = " << rect.y() << std::endl;
-  std::cout << "GetDisplayRect: rect width  = " << rect.width()  << std::endl;
-  std::cout << "GetDisplayRect: rect height = " << rect.height() << std::endl;
-*/
+}
+
+
+bool ImageDisplay::DataSourceRangeChanged()
+{
+  if ( total_y_min != data_source->GetYMin() ||
+       total_y_max != data_source->GetYMax() ||
+       total_x_min != data_source->GetXMin() ||
+       total_x_max != data_source->GetXMax() )
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 
