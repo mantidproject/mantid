@@ -1625,7 +1625,9 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
     if( QFileInfo(scriptPath).exists() ) {
       QString baseName = QFileInfo(scriptPath).baseName();
-      if (getMenuSettingsFlag(itemName))
+      // Need to use "nice" name to check if scripts has been removed by user.
+      QString niceName = baseName.replace("_", " ");
+      if (getMenuSettingsFlag(niceName))
         addUserMenuAction(menuName, baseName, scriptPath);
     }
     else
