@@ -120,15 +120,23 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   QObject::connect( image_picker, SIGNAL(mouseMoved()),
                     this, SLOT(imagePicker_moved()) );
 
-
   QObject::connect(iv_ui->imageSplitter, SIGNAL(splitterMoved(int,int)), 
-                   this, SLOT(imageSplitter_moved()));
+                   this, SLOT(imageSplitter_moved()) );
+
+  QObject::connect(iv_ui->x_min_input, SIGNAL( returnPressed() ),
+                   this, SLOT(range_changed()) );
+
+  QObject::connect(iv_ui->x_max_input, SIGNAL( returnPressed() ),
+                   this, SLOT(range_changed()) );
+
+  QObject::connect(iv_ui->step_input, SIGNAL( returnPressed() ),
+                   this, SLOT(range_changed()) );
 
   QObject::connect(iv_ui->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
-                   this, SLOT(v_scroll_bar_moved() ) );
+                   this, SLOT(v_scroll_bar_moved()) );
 
   QObject::connect(iv_ui->imageHorizontalScrollBar, SIGNAL(valueChanged(int)),
-                   this, SLOT(h_scroll_bar_moved() ) );
+                   this, SLOT(h_scroll_bar_moved()) );
 
   QObject::connect(iv_ui->action_Hscroll, SIGNAL(changed()),
                    this, SLOT(toggle_Hscroll()) );
@@ -215,12 +223,6 @@ IVConnections::~IVConnections()
 }
 
 
-void IVConnections::somethingChanged()
-{
-  std::cout << "somethingChanged() called" << std::endl;
-}
-
-
 void IVConnections::toggle_Hscroll()
 {
   bool is_on = iv_ui->action_Hscroll->isChecked();
@@ -236,6 +238,12 @@ void IVConnections::toggle_Vscroll()
   iv_ui->imageVerticalScrollBar->setVisible( is_on );
   iv_ui->imageVerticalScrollBar->setEnabled( is_on );
   image_display->UpdateImage();
+}
+
+
+void IVConnections::range_changed()
+{
+  image_display->UpdateRange();
 }
 
 

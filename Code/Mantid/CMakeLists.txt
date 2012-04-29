@@ -55,8 +55,8 @@ ENDIF()
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
 
-  execute_process(
-      COMMAND /usr/bin/sw_vers –productVersion
+execute_process(
+      COMMAND /usr/bin/sw_vers -productVersion
       OUTPUT_VARIABLE OSX_VERSION
       RESULT_VARIABLE OSX_VERSION_STATUS
   )
@@ -65,7 +65,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   string(STRIP ${OSX_VERSION} OSX_VERSION)
 
   if (OSX_VERSION VERSION_LESS 10.6)
-    message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard). Your version is ${RESULT_VARIABLE}")
+    message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard).")
   endif()
 
   if (OSX_VERSION VERSION_GREATER 10.6 OR OSX_VERSION VERSION_EQUAL 10.6)

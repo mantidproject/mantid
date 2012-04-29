@@ -455,11 +455,12 @@ void EQSANSLoad::exec()
   // Output log
   m_output_message = "";
 
-  IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadEventNexus", 0, 0.2);
+  IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
   loadAlg->executeAsSubAlg();
-  IEventWorkspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
-  dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
+  Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
+  dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
+  IEventWorkspace_sptr dataWS_tmp = boost::dynamic_pointer_cast<IEventWorkspace>(dataWS_asWks);
 
   // Get the sample-detector distance
   double sdd = 0.0;

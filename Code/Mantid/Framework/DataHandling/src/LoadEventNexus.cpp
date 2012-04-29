@@ -35,6 +35,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidKernel/FunctionTask.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MemoryManager.h"
@@ -172,15 +173,12 @@ public:
   {
     // Cost is approximately proportional to the number of events to process.
     m_cost = static_cast<double>(numEvents);
-//    std::cout << "b " << this->cost() << "\n";
   }
 
   //----------------------------------------------------
   // Run the data processing
   void run()
   {
-//    std::cout << "ProcessBank.run(" << entry_name << ")\n"; // REMOVE
-  CPUTimer timer;
     //Local tof limits
     double my_shortest_tof, my_longest_tof;
     my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -341,7 +339,6 @@ public:
       if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
       alg->bad_tofs += badTofs;
     }
-//    std::cout << "ProcessBank.run(" << entry_name << ") ended - " << timer << "\n"; // REMOVE
 
     // Free Memory
     delete [] event_id;
@@ -414,7 +411,6 @@ public:
   {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
-//    std::cout << "a " << this->cost() << "\n";
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -543,16 +539,6 @@ public:
       }
     }
 
-    if (alg->chunk != EMPTY_INT()) // We are loading part - work out the event number range
-    {
-      size_t max_events = stop_event - start_event + 1;
-      size_t chunk_events = max_events/alg->totalChunks;
-      start_event += (alg->chunk - 1) * chunk_events;
-      // Need to add any remainder to the final chunk
-      stop_event = start_event + chunk_events;
-      if ( alg->chunk == alg->totalChunks ) stop_event += max_events%alg->totalChunks;
-    }
-
     // Make sure it is within range
     if (stop_event > static_cast<size_t>(dim0))
       stop_event = dim0;
@@ -644,8 +630,6 @@ public:
   //---------------------------------------------------------------------------------------------------
   void run()
   {
-//    std::cout << "LoadBankFromDiskTask.run(" << entry_name << ")\n"; // REMOVE
-    CPUTimer timer;
     //The vectors we will be filling
     std::vector<uint64_t> * event_index_ptr = new std::vector<uint64_t>();
     std::vector<uint64_t> & event_index = *event_index_ptr;
@@ -736,8 +720,6 @@ public:
       delete event_index_ptr;
       return;
     }
-//    std::cout << "LoadBankFromDiskTask.run(" << entry_name << ") ended - " << timer << "\n"; // REMOVE
-
 
     // No error? Launch a new task to process that data.
     size_t numEvents = m_loadSize[0];
@@ -1057,7 +1039,6 @@ void LoadEventNexus::exec()
   compressTolerance = getProperty("CompressTolerance");
 
   loadlogs = true;
-//  NXsetcache(1024000000);//5120000); // increase hdf5 cache size - default is 1,024,000
 //  //Get the limits to the filter
 //  filter_tof_min = getProperty("FilterByTofMin");
 //  filter_tof_max = getProperty("FilterByTofMax");
@@ -1210,6 +1191,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   //Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
+  size_t total_events = 0;
   map<string, string> entries = file.getEntries();
   map<string,string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
@@ -1237,6 +1219,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
         oldNeXusFileNames = true;
       }
       bankNumEvents.push_back(static_cast<std::size_t>(file.getInfo().dims[0]));
+      total_events +=static_cast<std::size_t>(file.getInfo().dims[0]);
       file.closeData();
       file.closeGroup();
     }
@@ -1364,10 +1347,49 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   // Make the thread pool
-  ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
+  ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
   Mutex * diskIOMutex = new Mutex();
-  for (size_t i=0; i < bankNames.size(); i++)
+  size_t bank0 = 0;
+  size_t bankn = bankNames.size();
+  if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
+  {
+    if (static_cast<size_t>(totalChunks) > bankn)
+      throw std::runtime_error("Reduce number of chunks to equal or less than " + Strings::toString(bankn));
+    size_t chunk_events = total_events/totalChunks;
+    size_t lastChunkEvent = chunk_events;
+    std::vector<size_t>::iterator it = bankNumEvents.begin();
+    size_t sum_events = *it;
+    std::advance(it, 1);
+    for (int chunki = 1; chunki <=chunk; chunki++)
+    {
+      if (chunki != 1)
+      {
+        bank0 = bankn;
+      }
+      if (chunki != totalChunks)
+      {
+        // Save a bank for every chunk so there are no chunks with no events
+        for (size_t banki = bank0+1; banki < bankNames.size()-(totalChunks-chunki)+1; banki++)
+        {
+          bankn = banki;
+          sum_events += *it;
+          if ( sum_events > lastChunkEvent) 
+          {
+            sum_events -= *it;
+            break;
+          }
+          std::advance(it, 1);
+        }
+      }
+      else
+      {
+        bankn = bankNames.size();
+      }
+      lastChunkEvent += chunk_events;
+    }
+  }
+  for (size_t i=bank0; i < bankn; i++)
   {
     // We make tasks for loading
     if (bankNumEvents[i] > 0)

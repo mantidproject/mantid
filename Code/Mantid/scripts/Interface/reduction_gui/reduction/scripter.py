@@ -381,11 +381,12 @@ class BaseReductionScripter(object):
             Spits out the text of a reduction script with the current state.
             @param file_name: name of the file to write the script to
         """
-        script = "# Reduction script\n"
+        script = "# %s reduction script\n" % self.instrument_name
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
         script += "from MantidFramework import *\n"
         script += "mtd.initialise(False)\n"
+        script += "from mantidsimple import *\n\n"
         script += "\n"
         
         for item in self._observers:

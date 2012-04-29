@@ -138,6 +138,10 @@ time_t utc_mktime(struct tm *utctime)
 DateAndTime::DateAndTime() : _nanoseconds(0)
 {}
 
+/** Copy constructor */
+DateAndTime::DateAndTime(const DateAndTime & rhs) : _nanoseconds(rhs._nanoseconds)
+{}
+
 //------------------------------------------------------------------------------------------------
 /** Construct a date from nanoseconds.
  * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
@@ -221,6 +225,26 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds)
     _nanoseconds = MIN_NANOSECONDS;
   else
     _nanoseconds = static_cast<int64_t>(seconds * 1000000000LL + nanoseconds);
+}
+
+/**
+ * @param rhs The object to copy data from.
+ * @return This pointer.
+ */
+DateAndTime& DateAndTime::operator=(const DateAndTime& rhs)
+{
+  this->_nanoseconds = rhs._nanoseconds;
+  return *this;
+}
+
+/**
+ * @param rhs The object to copy data from.
+ * @return This pointer.
+ */
+DateAndTime& DateAndTime::operator=(const DateAndTime* rhs)
+{
+  this->_nanoseconds = rhs->_nanoseconds;
+  return *this;
 }
 
 //===========================================================================================

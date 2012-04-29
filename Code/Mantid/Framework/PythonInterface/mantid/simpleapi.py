@@ -95,14 +95,14 @@ def Load(*args, **kwargs):
         raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
                            "Load to a variable or use the OutputWorkspace keyword.") 
     
-    extra_args = get_additional_args(lhs, algm)
-    kwargs.update(extra_args)
+    lhs_args = get_args_from_lhs(lhs, algm)
+    final_keywords = merge_keywords_with_lhs(kwargs, lhs_args)
     # Check for any properties that aren't known and warn they will not be used
-    for key in kwargs.keys():
+    for key in final_keywords.keys():
         if key not in algm:
             logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
-            del kwargs[key]
-    _set_properties(algm, **kwargs)
+            del final_keywords[key]
+    _set_properties(algm, **final_keywords)
     algm.execute()
         
     # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
@@ -296,7 +296,7 @@ def _is_workspace_property(prop):
     # Doesn't look like a workspace property
     return False
 
-def get_additional_args(lhs, algm_obj):
+def get_args_from_lhs(lhs, algm_obj):
     """
         Return the extra arguments that are to be passed to the algorithm
         from the information in the lhs tuple. These are basically the names 
@@ -331,6 +331,22 @@ def get_additional_args(lhs, algm_obj):
             ret_names = ret_names[1:]
         i += 1
     return extra_args
+
+def merge_keywords_with_lhs(keywords, lhs_args):
+    """
+        Merges the arguments from the two dictionaries specified
+        by the keywords passed to a function and the lhs arguments
+        that have been parsed. Any value in keywords overrides on
+        in lhs_args.
+        
+        @param keywords :: A dictionary of keywords that has been 
+                           passed to the function call
+        @param lhs_args :: A dictionary of arguments retrieved from the lhs
+                           of the function call
+    """
+    final_keywords = lhs_args
+    final_keywords.update(keywords)
+    return final_keywords
     
 def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     """
@@ -429,9 +445,9 @@ def create_algorithm(algorithm, version, _algm_object):
             del kwargs["Version"]
         algm = _framework.createAlgorithm(algorithm, _version)
         lhs = _funcreturns.lhs_info(use_object_names=True)
-        extra_args = get_additional_args(lhs, algm)
-        kwargs.update(extra_args)
-        _set_properties(algm, *args, **kwargs)
+        lhs_args = get_args_from_lhs(lhs, algm)
+        final_keywords = merge_keywords_with_lhs(kwargs, lhs_args)
+        _set_properties(algm, *args, **final_keywords)
         algm.execute()
         return gather_returns(algorithm, lhs, algm)
         

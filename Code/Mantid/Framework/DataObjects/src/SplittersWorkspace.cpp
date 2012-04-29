@@ -59,7 +59,7 @@ namespace DataObjects
     return splitter;
   }
 
-  size_t SplittersWorkspace::getNumberSplitters()
+  size_t SplittersWorkspace::getNumberSplitters() const
   {
     return this->rowCount();
   }

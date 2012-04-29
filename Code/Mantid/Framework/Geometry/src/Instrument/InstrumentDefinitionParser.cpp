@@ -126,6 +126,11 @@ namespace Geometry
     if (!pDoc)
       throw std::runtime_error("Call InstrumentDefinitionParser::initialize() before getMangledName.");
     std::string lastModified = pRootElem->getAttribute("last-modified");
+    if (lastModified.length() == 0)
+    {
+        g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
+        g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
+    }
     return Poco::Path(m_filename).getFileName() + lastModified;
   }
 

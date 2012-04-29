@@ -13,11 +13,12 @@ set ( SRC_FILES
 	src/ConvertToMDEvents.cpp
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
+	src/IConvertToMDEventsWS.cpp
+	src/ConvToMDPreprocDetectors.cpp	
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
 	src/GreaterThanMD.cpp
-	src/IConvertToMDEventsMethods.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
@@ -45,7 +46,6 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
-	src/processDetectorsPositions.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -63,21 +63,22 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
-	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
@@ -111,20 +112,21 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
-	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
+	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
+	test/ConvertToDetectorFaceMDTest.h	
 	test/ConvertEventsToMDEventsTest.h
-	test/ConvertToDetectorFaceMDTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
-	test/ConvertToMDEventsMethodsTest.h
+	test/ConvertToMDEventsWSTest.h
 	test/ConvertToMDEventsParamsTest.h
-	test/ConvertToMDEventsSubalgFactoryTest.h
+    test/ConvertToMDEventsSubalgFactoryTest.h
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
+	test/ConvertToMDEventsTestPerformance.h 	
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
@@ -143,7 +145,7 @@ set ( TEST_FILES
 	test/OrMDTest.h
 	test/PlusMDTest.h
 	test/PowerMDTest.h
-#	test/QuadEnBackgroundTest.h
+	test/QuadEnBackgroundTest.h
 	test/RunParamTest.h
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h

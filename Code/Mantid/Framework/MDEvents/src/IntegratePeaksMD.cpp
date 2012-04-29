@@ -144,6 +144,10 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
         "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
         "with the peaks' integrated intensities.");
+
+    declareProperty("ReplaceIntensity", true, "Always replace intensity in PeaksWorkspacem (default).\n"
+        "If false, then do not replace intensity if calculated value is 0 (used for SNSSingleCrystalReduction)");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -175,6 +179,8 @@ namespace MDEvents
     double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    /// Replace intensity with 0
+    bool replaceIntensity = getProperty("ReplaceIntensity");
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
 
@@ -258,8 +264,11 @@ namespace MDEvents
 
 
       // Save it back in the peak object.
-      p.setIntensity(signal);
-      p.setSigmaIntensity( sqrt(errorSquared) );
+      if (signal != 0. || replaceIntensity)
+      {
+        p.setIntensity(signal);
+        p.setSigmaIntensity( sqrt(errorSquared) );
+      }
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
           << signal << " (sig^2 " << errorSquared << "), with background "

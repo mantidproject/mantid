@@ -2,12 +2,14 @@
 #define TRANSPOSETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/Transpose.h"
 
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -87,6 +89,43 @@ public:
 
     delete transpose;
   }
+
+  void testRebinnedOutput()
+  {
+    RebinnedOutput_sptr inputWS = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+    std::string inName = inputWS->getName();
+    AnalysisDataService::Instance().addOrReplace(inName, inputWS);
+    std::string outName = "rebinTrans";
+    transpose = new Transpose();
+    if ( !transpose->isInitialized() )
+    {
+      transpose->initialize();
+    }
+    transpose->setPropertyValue("InputWorkspace", inName);
+    transpose->setPropertyValue("OutputWorkspace", outName);
+    TS_ASSERT_THROWS_NOTHING(transpose->execute());
+    TS_ASSERT(transpose->isExecuted());
+
+    RebinnedOutput_sptr outputWS;
+    outputWS = AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    TS_ASSERT(outputWS);
+    // Dimensions
+    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->blocksize());
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->blocksize());
+
+    // Value
+    TS_ASSERT_EQUALS( outputWS->dataY(3)[1], inputWS->dataY(1)[3] );
+    TS_ASSERT_DELTA( outputWS->dataE(3)[1], inputWS->dataE(1)[3], 1.e-5 );
+    TS_ASSERT_EQUALS( outputWS->dataF(0).size(), 4 );
+    TS_ASSERT_EQUALS( outputWS->dataF(3)[1], inputWS->dataF(1)[3] );
+    // Check a nan
+    bool inNan = boost::math::isnan(inputWS->dataY(0)[5]);
+    bool outNan = boost::math::isnan(outputWS->dataY(5)[0]);
+    TS_ASSERT_EQUALS( outNan, inNan );
+
+    delete transpose;
+  }
+
 private:
   Transpose* transpose;
 

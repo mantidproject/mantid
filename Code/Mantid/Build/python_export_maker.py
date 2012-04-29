@@ -49,7 +49,7 @@ def get_frameworkdir(headerfile):
     Returns the Framework directory
     """
     if 'Framework' in headerfile:
-        matches = re.match(r"(.*Framework/).*\.h", headerfile)
+        matches = re.match(r"(.*Framework(/|\\)).*\.h", headerfile)
         if matches:
             frameworkdir = matches.group(1)
         else:
@@ -71,10 +71,12 @@ def get_include(headerfile):
     """
     matches = re.match(r".*inc(/|\\)(Mantid[a-z,A-z]*(/|\\).*\.h)", headerfile)
     if matches:
-        return matches.group(2)
+        includefile = matches.group(2)
     else:
         raise RuntimeError("Unable to determine include path from given header")
-
+    # Make sure the include only has forward slases
+    includefile = includefile.replace("\\", "/")
+    return includefile
 def get_modulepath(frameworkdir, submodule):
     """Creates a path to the requested submodule
     """

@@ -193,7 +193,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     xmax = low_res_max;
   }
   m_output_message += "    |Scattering angle: "
-      + Poco::NumberFormatter::format(theta) + " deg\n";
+      + Poco::NumberFormatter::format(theta,6) + " deg\n";
 
   // Subtract background
   if (getProperty("SubtractSignalBackground"))
@@ -242,6 +242,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     repAlg->setProperty("InfinityValue", 0.0);
     repAlg->setProperty("InfinityError", 0.0);
     repAlg->executeAsSubAlg();
+    m_output_message += "Normalization completed\n";
   }
 
   IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.85, 0.95);
@@ -284,6 +285,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     declareProperty(new WorkspaceProperty<>("OutputWorkspace2D_"+polarization, "2D_"+wsName, Direction::Output));
     setProperty("OutputWorkspace2D_"+polarization, output2DWS);
   }
+  m_output_message += "Reflectivity calculation completed\n";
   return outputWS;
 }
 
@@ -314,6 +316,9 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
     }
     low_res_min = lowResRange[0];
     low_res_max = lowResRange[1];
+    m_output_message + "    |Cropping low-res axis: ["
+        + Poco::NumberFormatter::format(low_res_min) + ", "
+        + Poco::NumberFormatter::format(low_res_max) + "]\n";
   }
 
   const std::string instrument = getProperty("Instrument");
@@ -349,6 +354,9 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
 
     normWS = subtractBackground(normWS, normWS,
         peakRange[0], peakRange[1], bckRange[0], bckRange[1], low_res_min, low_res_max);
+    m_output_message += "    |Subtracted background ["
+        + Poco::NumberFormatter::format(bckRange[0]) + ", "
+        + Poco::NumberFormatter::format(bckRange[1]) + "]\n";
   }
   IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.6, 0.65);
   refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", normWS);

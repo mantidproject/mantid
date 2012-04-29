@@ -291,7 +291,6 @@ void FindPeaks::exec()
       m_searchPeakPos = true;
     }
     //Perform fit with fixed start positions.
-    //std::cout << "Number of Centers = " << centers.size() << std::endl;
     this->findPeaksGivenStartingPoints(centers, fitWindows);
   }
   else
@@ -307,7 +306,7 @@ void FindPeaks::exec()
   setProperty("PeaksList",m_peaks);
 
   return;
-}
+} // END: exec()
 
 
 //=================================================================================================
@@ -824,6 +823,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
 //=================================================================================================
 /** Attempts to fit a candidate peak
+ *  This is the last fitPeak() to call in the fitPeak hierarchy 
  * 
  *  @param input ::    The input workspace
  *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
@@ -974,7 +974,8 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
 void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum,
     const int& i0, const int& i2, const int& i4,
     const unsigned int& i_min, const unsigned int& i_max,
-    const double& in_bg0, const double& in_bg1, const double& in_bg2){
+    const double& in_bg0, const double& in_bg1, const double& in_bg2)
+{
 
   g_log.debug("Fitting A Peak in high-background approach");
 
@@ -1001,6 +1002,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   }
 
   API::MatrixWorkspace_sptr bkgdWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, newX.size(), newY.size());
+  // AnalysisDataService::Instance().addOrReplace("BackgroundWorkspace", bkgdWS);
   MantidVec& wsX = bkgdWS->dataX(0);
   MantidVec& wsY = bkgdWS->dataY(0);
   MantidVec& wsE = bkgdWS->dataE(0);
@@ -1025,7 +1027,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   // c) Set initial fitting parameters
   IFunction_sptr backgroundFunction = this->createFunction(0., 0., 0., in_bg0, in_bg1, in_bg2, false);
-  g_log.debug() << "Background Type = " << m_backgroundType << "  Function: " << backgroundFunction->asString() << std::endl;
+  g_log.information() << "Background Type = " << m_backgroundType << "  Function: " << backgroundFunction->asString() 
+      << "  windowSize = " << windowSize << "  StartX = " << in_centre - windowSize
+      << " EndX = " << in_centre + windowSize << std::endl;
 
   // d) complete fit
   fit->setProperty("Function", backgroundFunction);
@@ -1051,7 +1055,13 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   double mincost = 1.0E10;
   std::vector<double> bestparams, bestRawParams;
 
-  if (fitStatus.compare("success") == 0){
+  g_log.debug() << "(HighBackground) Fit Background Function.  Fit Status = " << fitStatus << std::endl;
+
+  bool allowedfailure = fitStatus.find("cannot") > 0 && fitStatus.find("tolerance") > 0;
+  bkgdchi2 = fit->getProperty("OutputChi2overDoF");
+
+  if (fitStatus.compare("success") == 0 || allowedfailure || bkgdchi2 < 100)
+  {
     a0 = backgroundFunction->getParameter(0);//params[0];
     if (this->backgroundOrder() > 0)
     {
@@ -1061,22 +1071,65 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       }
     }
     bkgdchi2 = fit->getProperty("OutputChi2overDoF");
-  } else {
-    g_log.warning() << "Fit " << m_backgroundType << " Fails For Peak @ " << X[i4] << std::endl;
+  }
+  else
+  {
+    bkgdchi2 = fit->getProperty("OutputChi2overDoF");
+    g_log.warning() << "Fit " << m_backgroundType << " Fails For Peak @ " << X[i4] <<
+        " ; Fit status = " << fitStatus << " . chi2 = " << bkgdchi2 << std::endl;
     a0 = a1 = a2 = 0.;
     bkgdchi2 = -100.;
   }
-  g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2
+  g_log.information() << "(HighBackground) Fit Background:  Chi2 = " << bkgdchi2
                       << " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << "\n";
 
-  const double in_height = Y[i4] - in_bg0;
+  // const double in_height = Y[i4] - in_bg0;
 
   // g) Looping on peak width for the best fit
-  g_log.information() << "Loop From " << minGuessedPeakWidth << " To " << maxGuessedPeakWidth << " with step "
+  /* FIXME  This section might be removed if workspace w/ or w/o background is not the cause
+   *
+   */
+  double in_height = 0.0;
+  std::vector<double> peakxvec, peakyvec, peakevec;
+  for (size_t i = i_min; i < i_max; i ++)
+  {
+    double x = X[i];
+    double y = Y[i]-(a0+a1*x+a2*x*x);
+    if (y < 0)
+      y = 0.0;
+    if (y > in_height)
+      in_height = y;
+    double z;
+    if (y <= 1.0)
+      z = 1.0;
+    else
+      z = sqrt(y);
+    peakxvec.push_back(x);
+    peakyvec.push_back(y);
+    peakevec.push_back(z);
+  }
+  peakxvec.push_back(X[i_max]);
+  API::MatrixWorkspace_sptr peakWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, peakxvec.size(), peakyvec.size());
+  // AnalysisDataService::Instance().addOrReplace("PurePeakWorkspace", peakWS);
+
+  for (size_t i = 0; i < peakyvec.size(); ++i)
+  {
+    peakWS->dataX(0)[i] = peakxvec[i];
+    peakWS->dataY(0)[i] = peakyvec[i];
+    peakWS->dataE(0)[i] = peakevec[i];
+  }
+  peakWS->dataX(0).back() = peakxvec.back();
+
+  double peakxmin = peakxvec[0];
+  double peakxmax = peakxvec.back();
+
+  g_log.information() << "Fit (pure) peak: Loop From (i)" << minGuessedPeakWidth << " To (i)" << maxGuessedPeakWidth << " with step "
       << stepGuessedPeakWidth << "  Over about " << 10*(i0-i2) << " pixels" << std::endl;
 
-  std::string bkgdTies = this->createTies(0. ,0., 0., a0, a1, a2, false);
-  for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
+  // std::string bkgdTies = this->createTies(0. ,0., 0., a0, a1, a2, false);
+  std::string bkgdTies = this->createTies(0. ,0., 0., 0, 0, 0, false);
+  for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth)
+  {
     double in_sigma = (i4 + iwidth < X.size()) ? X[i4 + iwidth] - X[i4] : 0.;// Guess sigma
 
     // a) Set up sub algorithm Fit
@@ -1092,28 +1145,41 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     }
 
     // c) Set initial fitting parameters
-    IFunction_sptr peakAndBackgroundFunction = this->createFunction(in_height, in_centre, in_sigma, a0, a1, a2, true);
+    //** IFunction_sptr peakAndBackgroundFunction = this->createFunction(in_height, in_centre, in_sigma, a0, a1, a2, true);
+    IFunction_sptr peakAndBackgroundFunction = this->createFunction(in_height, in_centre, in_sigma, 0, 0, 0, true);
 
     // d) Complete fit
+    double startx = in_centre - windowSize;
+    if (startx < peakxmin)
+      startx = peakxmin;
+    double endx = in_centre + windowSize;
+    if (endx > peakxmax)
+      endx = peakxmax;
+
     gfit->setProperty("Function", peakAndBackgroundFunction);
-    gfit->setProperty("InputWorkspace", input);
-    gfit->setProperty("WorkspaceIndex", spectrum);
+    //** gfit->setProperty("InputWorkspace", input);
+    gfit->setProperty("InputWorkspace", peakWS);
+    // gfit->setProperty("WorkspaceIndex", spectrum);
+    gfit->setProperty("WorkspaceIndex", 0);
     gfit->setProperty("MaxIterations", 50);
-    gfit->setProperty("StartX", in_centre - windowSize);
-    gfit->setProperty("EndX",   in_centre + windowSize);
+    gfit->setProperty("StartX", startx);
+    gfit->setProperty("EndX",   endx);
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
     gfit->setProperty("Ties", bkgdTies);
 
-    g_log.debug() << "Function: " << peakAndBackgroundFunction->asString() << "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
+    g_log.debug() << "Function (to fit): " << peakAndBackgroundFunction->asString() << "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
     gfit->executeAsSubAlg();
 
     //std::vector<double> params = gfit->getProperty("Parameters");
+    std::string fitpeakstatus = gfit->getProperty("OutputStatus");
     m_peakFunction = gfit->getProperty("Function");
     std::vector<std::string> paramnames = m_peakFunction->getParameterNames();//gfit->getProperty("ParameterNames");
+
+    g_log.information() << "Fit (Pure) Peak Status = " << fitpeakstatus << std::endl;
 
     this->updateFitResults(gfit, bestparams, bestRawParams, mincost, X[i4], in_height);
   } // ENDFOR
@@ -1157,11 +1223,13 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   this->updateFitResults(lastfit, bestparams, bestRawParams, mincost, in_centre, in_height);
 
-  if (bestparams.size() > 1)
+  if (!bestparams.empty())
     this->addRow(spectrum, bestparams, bestRawParams, mincost, (bestparams[0] < X.front() || bestparams[0] > X.back()));
   else
     this->addRow(spectrum, bestparams, bestRawParams, mincost, true);
-} // END-FUNCTION
+
+  return;
+} // END-FUNCTION: fitPeakHighBackground()
 
 /**
  * Add a row to the output table workspace.
@@ -1231,7 +1299,6 @@ void getComponentFunctions(IFunction_sptr compositeFunc, std::vector<double> &ef
     rawParams.push_back(composite->getParameter(i));
   }
 
-
   // get the effective peak parameters
   effParams.resize(6);
   boost::shared_ptr<IPeakFunction> peakFunc;
@@ -1272,14 +1339,16 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
 {
   // check the results of the fit status
   std::string fitStatus = fitAlg->getProperty("OutputStatus");
-  if (fitStatus.compare("success") != 0)
+  bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) && (fitStatus.find("tolerance") < fitStatus.size());
+  if (fitStatus.compare("success") != 0 && !allowedfailure)
   {
-    g_log.debug() << "Fit Status = " << fitStatus << std::endl;
+    g_log.debug() << "Fit Status = " << fitStatus << ".  Not to update fit result" << std::endl;
     return;
   }
 
   // check that chi2 got better
   const double chi2 = fitAlg->getProperty("OutputChi2overDoF");
+  g_log.debug() << "Fit Status = " << fitStatus << ", chi2 = " << chi2 << std::endl;
   if (chi2 > mincost)
   {
     return;
@@ -1292,7 +1361,7 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
   // check the height
   double height = tempEffectiveParams[2];
   if (height <= 0){ // Height must be strictly positive
-    g_log.debug() << "Fitted height = " << height << "\n";
+    g_log.debug() << "Fitted height = " << height << ".  It is a wrong fit!"<< "\n";
     return;
   }
 

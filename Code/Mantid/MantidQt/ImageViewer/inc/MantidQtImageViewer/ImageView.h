@@ -65,6 +65,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView
     // destructor.  
     void*            saved_ui;               // Ui_MainWindow*
     void*            saved_slider_handler;   // SliderHandler*
+    void*            saved_range_handler;    // RangeHandler*
     void*            saved_image_display;    // ImageDisplay*
     void*            saved_iv_connections;   // IVConnections*
 };

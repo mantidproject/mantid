@@ -32,9 +32,9 @@ void test_buildDimNames(){
     TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TargWSDescription));
 
 
-   TS_ASSERT_EQUALS("[Qh,0,0]",TargWSDescription.dimNames[0]);
-   TS_ASSERT_EQUALS("[0,Qk,0]",TargWSDescription.dimNames[1]);
-   TS_ASSERT_EQUALS("[0,0,Ql]",TargWSDescription.dimNames[2]);
+   TS_ASSERT_EQUALS("[H,0,0]",TargWSDescription.dimNames[0]);
+   TS_ASSERT_EQUALS("[0,K,0]",TargWSDescription.dimNames[1]);
+   TS_ASSERT_EQUALS("[0,0,L]",TargWSDescription.dimNames[2]);
    TS_ASSERT_EQUALS("DeltaE",TargWSDescription.dimNames[3]);
     
 
@@ -47,16 +47,18 @@ void testTransfMat1()
      TWS.convert_to_factor=HKLScale;
      std::vector<double> u(3,0);
      std::vector<double> v(3,0);
+     std::vector<double> w(3,0);
      u[0]=1;
      v[2]=1;
+     w[1]=-1;
      std::vector<double> rot;
 
       MDWSTransfDescr MsliceTransf;
-      MsliceTransf.getUVsettings(u,v);     
+      MsliceTransf.getUVsettings(u,v,w);
+
 
       TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix("someDodgyWS",TWS,false));
       TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS));
-
 
       TS_ASSERT_EQUALS("[H,0,0]",TWS.dimNames[0]);
       TS_ASSERT_EQUALS("[0,0,L]",TWS.dimNames[1]);
@@ -68,14 +70,14 @@ void testTransfMat1()
       TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix("someDodgyWS",TWS,false));
       TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS));
 
-      TS_ASSERT_EQUALS("[Qh,0,0]",TWS.dimNames[0]);
-      TS_ASSERT_EQUALS("[0,0,Ql]",TWS.dimNames[1]);
-      TS_ASSERT_EQUALS("[0,-Qk,0]",TWS.dimNames[2]);
+      TS_ASSERT_EQUALS("[H,0,0]",TWS.dimNames[0]);
+      TS_ASSERT_EQUALS("[0,0,L]",TWS.dimNames[1]);
+      TS_ASSERT_EQUALS("[0,-K,0]",TWS.dimNames[2]);
       TS_ASSERT_EQUALS("DeltaE",TWS.dimNames[3]);
 
-      TSM_ASSERT_DELTA(" element 1 should be a/2Pi",TWS.pLatt->a1()/(2*M_PI),rot[2],1.e-6);
-      TSM_ASSERT_DELTA(" element 2 should be -b/2Pi",-TWS.pLatt->a2()/(2*M_PI),rot[4],1.e-6);
-      TSM_ASSERT_DELTA(" element 3 should be c/2Pi",TWS.pLatt->a3()/(2*M_PI),rot[6],1.e-6);
+      TSM_ASSERT_DELTA(" element 1 should be a/2Pi",TWS.pLatt->a1()/(2*M_PI),rot[0],1.e-6);
+      TSM_ASSERT_DELTA(" element 2 should be -b/2Pi",-TWS.pLatt->a2()/(2*M_PI),rot[7],1.e-6);
+      TSM_ASSERT_DELTA(" element 3 should be c/2Pi",TWS.pLatt->a3()/(2*M_PI),rot[5],1.e-6);
 
       for(int i=0;i<9;i++){
           TSM_ASSERT_DELTA(" element: "+boost::lexical_cast<std::string>(i)+" wrong",rot[i],rot1[i],1.e-6);

@@ -28,7 +28,7 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
     }
     this->n_dimensions = (int)WSD.nDims;
 
-    (this->*(wsCreator[n_dimensions]))(WSD.dimNames,WSD.dimUnits,WSD.dimIDs,WSD.dimMin,WSD.dimMax,WSD.nBins);
+    (this->*(wsCreator[n_dimensions]))(WSD.dimNames,WSD.dimIDs,WSD.dimUnits,WSD.dimMin,WSD.dimMax,WSD.nBins);
     // set up the matrix, which convert momentums from Q in orthogonal crystal coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or whatevert
     workspace->setWTransf(WSD.Wtransf);
     return workspace;

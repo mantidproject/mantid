@@ -53,11 +53,11 @@ namespace DataHandling
     std::vector<std::string> exts;
     exts.push_back(".grp");
     this->declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-                                       "A DAVE grpouped data format file that will be created");
+                                       "A DAVE grouped data format file that will be created");
     this->declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     this->declareProperty(new Kernel::PropertyWithValue<bool>("ToMicroEV", false,
         Kernel::Direction::Input),
-        "Transform all energy units from mili eV to micro eV");
+        "Transform all energy units from milli eV to micro eV");
   }
 
   //----------------------------------------------------------------------------------------------

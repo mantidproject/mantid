@@ -88,17 +88,20 @@ double MantidQwtMatrixWorkspaceData::ex(size_t i) const
 
 double MantidQwtMatrixWorkspaceData::e(size_t i) const
 {
-  return m_E[i];
+  if (m_logScale)
+  {
+    if (m_Y[i] <= 0.0)
+      return 0;
+    else
+      return m_E[i];
+  }
+  else
+    return m_E[i];
 }
 
 size_t MantidQwtMatrixWorkspaceData::esize() const
 {
   return m_E.size();
-}
-
-bool MantidQwtMatrixWorkspaceData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
-{
-  return workspace.get() == m_workspace.get();
 }
 
 void MantidQwtMatrixWorkspaceData::setLogScale(bool on)
@@ -109,12 +112,6 @@ void MantidQwtMatrixWorkspaceData::setLogScale(bool on)
 void MantidQwtMatrixWorkspaceData::saveLowestPositiveValue(const double v)
 {
   if (v > 0) m_minPositive = v;
-}
-
-void MantidQwtMatrixWorkspaceData::applyOffsets(const double xOffset, const double yOffset)
-{
-  std::transform(m_workspace->readX(m_spec).begin(),m_workspace->readX(m_spec).end(),m_X.begin(),std::bind2nd(std::plus<double>(),xOffset));
-  std::transform(m_workspace->readY(m_spec).begin(),m_workspace->readY(m_spec).end(),m_Y.begin(),std::bind2nd(std::plus<double>(),yOffset));
 }
 
 bool MantidQwtMatrixWorkspaceData::setAsDistribution(bool on)

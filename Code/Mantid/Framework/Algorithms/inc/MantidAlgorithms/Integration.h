@@ -71,6 +71,11 @@ private:
   void init();
   void exec();
 
+  /// Get the input workspace
+  API::MatrixWorkspace_const_sptr getInputWorkspace();
+  /// Create the outputworkspace
+  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS);
+
   /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;
 
@@ -82,6 +87,8 @@ private:
   int m_MinSpec;
   /// The spectrum to finish the integration at
   int m_MaxSpec;
+  /// Flag for including partial bins
+  bool m_IncPartBins;
 
 };
 

@@ -28,7 +28,7 @@ Some features
 //TODO:
 
 //  1. Change xxx --> SCDCalibratePanelsx  where x=0,1,2,3,...
-//  2. Get rid of in analysis data service.
+//  2. Get rid of in analysis data service.NOPE ,deletes too much in MantidPlot
 
 
 #include "MantidCrystal/SCDCalibratePanels.h"
@@ -168,7 +168,7 @@ namespace Crystal
      set< string >::iterator setIt = pnamesSv.begin();
      int N = 0;
 
-     for(  ;setIt != pnamesSv.end(); setIt++ )
+     for(  ;setIt != pnamesSv.end(); ++setIt )
      {
        string name = (*setIt);
        vector< V3D > posParams = component->getPositionParameter(name , false);
@@ -326,7 +326,7 @@ namespace Crystal
 
     if( Grouping == "OnePanelPerGroup" )
     {
-      for( set< string >::iterator it = AllBankNames.begin(); it != AllBankNames.end(); it++ )
+      for( set< string >::iterator it = AllBankNames.begin(); it != AllBankNames.end(); ++it )
       {
         string bankName = (*it);
         vector< string > vbankName;
@@ -336,7 +336,7 @@ namespace Crystal
 
       }else if( Grouping == "AllPanelsInOneGroup" )
       {  vector< string > vbankName;
-         for( set< string >::iterator it = AllBankNames.begin(); it != AllBankNames.end(); it++ )
+         for( set< string >::iterator it = AllBankNames.begin(); it != AllBankNames.end(); ++it )
             {
               string bankName = (*it);
 
@@ -470,7 +470,7 @@ namespace Crystal
     boost::shared_ptr<ParameterMap> pmap1( new ParameterMap());
 
     for( vector< string >::iterator vit = AllBankNames.begin();
-                                  vit != AllBankNames.end(); vit++ )
+                                  vit != AllBankNames.end(); ++vit )
     {
       string bankName = (*vit);
       updateBankParams( instrument->getComponentByName(bankName), pmap1, pmap0);
@@ -647,10 +647,10 @@ namespace Crystal
 
     vector< string >banksVec;
     vector<vector< string > >::iterator it;
-    for(  it = Groups.begin(); it != Groups.end(); it++ )
+    for(  it = Groups.begin(); it != Groups.end(); ++it )
     {
 
-      for( vector< string >::iterator itt = (*it).begin(); itt!=(*it).end(); itt++ )
+      for( vector< string >::iterator itt = (*it).begin(); itt!=(*it).end(); ++itt )
       {
         banksVec.push_back( (*itt) );
       }
@@ -703,14 +703,14 @@ namespace Crystal
 //------------------- For each Group set up Function, --------------------------
 //---------------Ties, and Constraint Properties for Fit algorithm--------------------
 
-   for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); itv++)
+   for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
    {
      i++;
      string BankNameString = "";
      boost::shared_ptr<const RectangularDetector> bank_rect;
 
     //---------------- Set up list of bank names argument -----------------
-    for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++)
+    for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1)
     {
 
      boost::shared_ptr<const IComponent> bank_cmp = instrument->getComponentByName((*it1));
@@ -916,6 +916,7 @@ namespace Crystal
    fit_alg->executeAsSubAlg();
 
    string OutputStatus =fit_alg->getProperty("OutputStatus");
+   g_log.notice() <<"Output Status="<<OutputStatus<<std::endl;
 
    declareProperty(
         new API::WorkspaceProperty<API::ITableWorkspace>
@@ -1040,12 +1041,12 @@ namespace Crystal
 
 
     i = -1;
-    for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); itv++ )
+    for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
     {
       i++;
       string BankNameString = "";
       boost::shared_ptr<const RectangularDetector> bank_rect;
-     for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++ )
+     for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1 )
      {
 
       string bankName = (*it1);
@@ -1345,17 +1346,19 @@ namespace Crystal
       declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "",
           Kernel::Direction::Output), "Workspace of Errors in Q");
 
-      declareProperty( "NumIterations",20,"Number of iterations");
-     /* setPropertySettings("PanelNamePrefix", new EnabledWhenProperty(this, "PanelGroups",
+      declareProperty( "NumIterations",60,"Number of iterations");
+
+
+     setPropertySettings("PanelNamePrefix", new EnabledWhenProperty( "PanelGroups",
           Kernel::IS_EQUAL_TO, "SpecifyGroups"));
-      setPropertySettings("Grouping", new EnabledWhenProperty(this, "PanelGroups", Kernel::IS_EQUAL_TO,
+      setPropertySettings("Grouping", new EnabledWhenProperty( "PanelGroups", Kernel::IS_EQUAL_TO,
           "SpecifyGroups"));
 
-      setPropertySettings("PreProcFilename", new EnabledWhenProperty(this, "PreProcessInstrument",
+      setPropertySettings("PreProcFilename", new EnabledWhenProperty( "PreProcessInstrument",
           Kernel::IS_NOT_EQUAL_TO, "No PreProcessing"));
-      setPropertySettings("InitialTimeOffset", new EnabledWhenProperty(this, "PreProcessInstrument",
-          Kernel::IS_EQUAL_TO, "Apply LoadParameter.xml type file"));
-*/
+      setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
+          Kernel::IS_EQUAL_TO, "Apply a LoadParameter.xml type file"));
+
     }
 
   void  SCDCalibratePanels::initDocs ()

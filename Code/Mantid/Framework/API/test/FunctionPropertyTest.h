@@ -75,6 +75,23 @@ public:
     TS_ASSERT_EQUALS(fun1_p->getParameter("A"), 3.0);
     TS_ASSERT_EQUALS(fun1_p->getParameter("B"), 2.0);
   }
+
+  void testSharedPointer()
+  {
+    FunctionProperty prop("fun");
+    std::string error;
+    boost::shared_ptr<FunctionPropertyTest_Function> fun_p(new FunctionPropertyTest_Function);
+    TS_ASSERT(fun_p);
+    fun_p->setParameter("A",3);
+    prop = fun_p;
+    boost::shared_ptr<IFunction> fun1_p = prop;
+    TS_ASSERT(fun1_p);
+    TS_ASSERT_EQUALS(fun_p,fun1_p);
+    TS_ASSERT_EQUALS(fun1_p->asString(),"name=FunctionPropertyTest_Function,A=3,B=2");
+    TS_ASSERT_EQUALS(fun1_p->getParameter("A"), 3.0);
+    TS_ASSERT_EQUALS(fun1_p->getParameter("B"), 2.0);
+  }
+
 private:
 };
 

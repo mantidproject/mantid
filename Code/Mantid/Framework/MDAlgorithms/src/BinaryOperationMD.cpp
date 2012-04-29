@@ -180,6 +180,12 @@ namespace MDAlgorithms
       else
         throw std::runtime_error("Unexpected operand workspace type. Expected MDHistoWorkspace or "
             "WorkspaceSingleValue, got " + m_rhs->id());
+
+      // When operating on MDHistoWorkspaces, add a simple flag
+      // that will be checked in BinMD to avoid binning a modified workspace
+      if (m_out_histo->getNumExperimentInfo() == 0) // Create a run if needed
+        m_out_histo->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
+      m_out_histo->getExperimentInfo(0)->mutableRun().addProperty(new PropertyWithValue<std::string>("mdhisto_was_modified", "1"), true);
     }
     else
     {

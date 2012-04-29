@@ -1,6 +1,6 @@
 """*WIKI* 
 
-This algorithm will invert a masking workspace.  It is just a 'NOT' operation on SpecialWorkspace2D.
+This algorithm will invert a mask workspace.  It is just a 'NOT' operation on SpecialWorkspace2D.
 
 *WIKI*"""
 
@@ -21,9 +21,9 @@ class InvertMask(PythonAlgorithm):
 
     def PyInit(self):
         self.declareWorkspaceProperty("InputWorkspace","", Direction=Direction.Input,
-                Description="Masking Workspace (SpecialWorkspace2D) to be inverted")
+                Description="Mask Workspace (MaskWorkspace) to be inverted")
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, 
-                Description="Output Masking Workspace as the inverted one of the input workspace.")
+                Description="Output Mask Workspace as the inverted one of the input workspace.")
       
       
     def PyExec(self):

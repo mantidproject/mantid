@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACE_H_
 #define MANTID_ALGORITHMS_CONVERTTOMASKINGWORKSPACE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAlgorithms/ConvertToMaskWorkspace.h"
 
 
 namespace Mantid
@@ -34,7 +34,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ConvertToMaskingWorkspace : public API::Algorithm
+class DLLExport ConvertToMaskingWorkspace : public Algorithms::ConvertToMaskWorkspace, public API::DeprecatedAlgorithm
   {
   public:
     ConvertToMaskingWorkspace();
@@ -42,17 +42,8 @@ namespace Algorithms
     
     virtual const std::string name() const {return "ConvertToMaskingWorkspace"; };
     virtual int version() const {return 1; };
-    virtual const std::string category() const {return "Utility\\Workspaces"; };
-
-  private:
-    virtual void initDocs();
-
-    void init();
-
-    void exec();
 
   };
-
 
 } // namespace Algorithms
 } // namespace Mantid

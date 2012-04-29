@@ -16,13 +16,12 @@ namespace DataObjects
 
   /** An SpecialWorkspace2D is a specialized Workspace2D where
    * the Y value at each pixel will be used for a special meaning.
-   * Specifically, by GroupingWorkspace and OffsetsWorkspace.
+   * Specifically, by GroupingWorkspace, MaskWorkspace and
+   * OffsetsWorkspace.
    *
    * The workspace has a single pixel per detector, and this cannot
    * be changed.
    * 
-   * @author Janik Zikovsky
-   * @date 2011-05-09
    */
 
 

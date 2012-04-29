@@ -851,6 +851,40 @@ public:
     TS_ASSERT_EQUALS( out, VMD(-10, -10) );
   }
 
+
+  //---------------------------------------------------------------------------------------------
+  /** Modify a MDHistoWorkspace with a binary operation.
+   *  */
+  void test_FailsIfYouModify_a_MDHistoWorkspace()
+  {
+    FrameworkManager::Instance().exec("BinMD", 18,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "0",
+        "BasisVector0", "rx,m, 1.0, 0.0",
+        "BasisVector1", "ry,m, 0.0, 1.0",
+        "ForceOrthogonal", "1",
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
+
+    FrameworkManager::Instance().exec("PlusMD", 6,
+        "LHSWorkspace", "binned0",
+        "RHSWorkspace", "binned0",
+        "OutputWorkspace", "binned0");
+
+    IAlgorithm_sptr alg = FrameworkManager::Instance().exec("BinMD", 18,
+        "InputWorkspace", "binned0",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVector0", "rx,m, 1.0, 0.0",
+        "BasisVector1", "ry,m, 0.0, 1.0",
+        "ForceOrthogonal", "1",
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
+    TSM_ASSERT( "Algorithm threw an error, as expected", !alg->isExecuted())
+  }
 };
 
 

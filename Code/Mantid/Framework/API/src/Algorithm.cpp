@@ -66,8 +66,10 @@ namespace Mantid
     PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
       m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-      m_isExecuted(false),m_isChildAlgorithm(false),m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false),m_rethrow(false),m_algorithmID(this)
+      m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
+      m_alwaysStoreInADS(false),m_runningAsync(false),
+      m_running(false),m_rethrow(false),m_algorithmID(this),
+      m_processGroups(false), m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
     {
     }
 
@@ -132,6 +134,16 @@ namespace Mantid
     {
       m_isChildAlgorithm = isChild;
     }
+
+    /**
+     * Change the state of the history recording flag. Only applicable for
+     * child algorithms. 
+     * @param on :: The new state of the flag
+     */
+     void Algorithm::enableHistoryRecordingForChild(const bool on)
+     {
+       m_recordHistoryForChild = on;
+     }
 
     /** Do we ALWAYS store in the AnalysisDataService? This is set to true
      * for python algorithms' child algorithms
@@ -525,7 +537,7 @@ namespace Mantid
           const float duration = timer.elapsed();
 
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          if (!isChild())
+          if(!isChild() || m_recordHistoryForChild)
             fillHistory(start_time,duration,Algorithm::g_execCount);
 
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
@@ -690,9 +702,10 @@ namespace Mantid
       {
         alg->initialize();
       }
-      catch (std::runtime_error&)
+      catch (std::runtime_error& exc)
       {
         g_log.error() << "Unable to initialise sub-algorithm " << name << std::endl;
+        g_log.error() << exc.what() << "\n";
       }
 
       // If output workspaces are nameless, give them a temporary name to satisfy validator

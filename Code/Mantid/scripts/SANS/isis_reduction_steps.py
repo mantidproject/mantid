@@ -1078,8 +1078,8 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
                       EndWorkspaceIndex   = normalization_spectrum-1)
     
         if reducer.instrument.name() == 'LOQ':
-            RemoveBins(self.output_wksp, self.output_wksp, '19900', '20500',
-                Interpolation="Linear")
+            RemoveBins(self.output_wksp, self.output_wksp, reducer.transmission_calculator.loq_removePromptPeakMin, 
+                       reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
         
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(
@@ -1151,6 +1151,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.calculated_can = None
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
+        # Use for removing LOQ prompt peak from monitors. Units of micro-seconds
+        self.loq_removePromptPeakMin = 19000.0
+        self.loq_removePromptPeakMax = 20500.0       
+        
         
     def _loader(self, reducer):
         """
@@ -1222,7 +1226,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             EndWorkspaceIndex=self._get_index(spectrum2))
 
         if inst.name() == 'LOQ':
-            RemoveBins(tmpWS, tmpWS, 19900, 20500, Interpolation='Linear')
+            RemoveBins(tmpWS, tmpWS, self.loq_removePromptPeakMin, self.loq_removePromptPeakMax, 
+                       Interpolation='Linear')            
 
         for spectra_number in [pre_monitor, post_monitor]:
             back_start, back_end = inst.get_TOFs(spectra_number)
@@ -1670,6 +1675,18 @@ class UserFile(ReductionStep):
             else:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
+        elif upper_line.startswith('FIT/MONITOR'):
+            params = upper_line.split()
+            nparams = len(params)
+            if nparams == 3 and reducer.instrument.name() == 'LOQ':
+                reducer.transmission_calculator.loq_removePromptPeakMin = float(params[1])
+                reducer.transmission_calculator.loq_removePromptPeakMax = float(params[2])               
+            else:
+                if reducer.instrument.name() == 'LOQ':
+                  _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
+                else:
+                  _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')   
+
         elif upper_line == 'SANS2D' or upper_line == 'LOQ':
             self._check_instrument(upper_line, reducer)  
 
@@ -1899,7 +1916,7 @@ class UserFile(ReductionStep):
         elif det_axis == 'RADIUS':
             detector.radius_corr = shift
         elif det_axis == 'SIDE':
-            detector.radius_side = shift
+            detector.side_corr = shift
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 

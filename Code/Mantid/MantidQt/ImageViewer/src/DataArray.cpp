@@ -62,6 +62,14 @@ DataArray::DataArray( double xmin,     double xmax,
     }
 }
 
+DataArray::~DataArray()
+{
+  if ( data )
+  {
+    delete[] data;
+  }
+}
+
 /**
  * Get the value corresponding to the left edge of the array.
  */

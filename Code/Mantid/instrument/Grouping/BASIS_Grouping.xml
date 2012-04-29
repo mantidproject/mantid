@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<detector-grouping instrument='BASIS'>
+  <group ID='1'>
+    <detids>6-48,4111-4153</detids>
+  </group>
+  <group ID='2'>
+    <detids>70-112,4175-4217</detids>
+  </group>
+  <group ID='3'>
+    <detids>134-176,4239-4281</detids>
+  </group>
+  <group ID='4'>
+    <detids>198-240,4303-4345</detids>
+  </group>
+  <group ID='5'>
+    <detids>262-304,4367-4409</detids>
+  </group>
+  <group ID='6'>
+    <detids>326-368,4431-4473</detids>
+  </group>
+  <group ID='7'>
+    <detids>390-432,4495-4537</detids>
+  </group>
+  <group ID='8'>
+    <detids>454-496,4559-4601</detids>
+  </group>
+  <group ID='9'>
+    <detids>518-560,4623-4665</detids>
+  </group>
+  <group ID='10'>
+    <detids>582-624,4687-4729</detids>
+  </group>
+  <group ID='11'>
+    <detids>646-688,4751-4793</detids>
+  </group>
+  <group ID='12'>
+    <detids>710-752,4815-4857</detids>
+  </group>
+  <group ID='13'>
+    <detids>774-816,4879-4921</detids>
+  </group>
+  <group ID='14'>
+    <detids>838-880,4943-4985</detids>
+  </group>
+  <group ID='15'>
+    <detids>902-944,5007-5049</detids>
+  </group>
+  <group ID='16'>
+    <detids>966-1008,5071-5113</detids>
+  </group>
+  <group ID='17'>
+    <detids>1030-1072,5135-5177</detids>
+  </group>
+  <group ID='18'>
+    <detids>1094-1136,5199-5241</detids>
+  </group>
+  <group ID='19'>
+    <detids>1158-1200,5263-5305</detids>
+  </group>
+  <group ID='20'>
+    <detids>1222-1264,5327-5369</detids>
+  </group>
+  <group ID='21'>
+    <detids>1286-1328,5391-5433</detids>
+  </group>
+  <group ID='22'>
+    <detids>1350-1392,5455-5497</detids>
+  </group>
+  <group ID='23'>
+    <detids>1414-1456,5519-5561</detids>
+  </group>
+  <group ID='24'>
+    <detids>1478-1520,5583-5625</detids>
+  </group>
+  <group ID='25'>
+    <detids>1542-1584,5647-5689</detids>
+  </group>
+  <group ID='26'>
+    <detids>1606-1648,5711-5753</detids>
+  </group>
+  <group ID='27'>
+    <detids>1670-1712,5775-5817</detids>
+  </group>
+  <group ID='28'>
+    <detids>1734-1776,5839-5881</detids>
+  </group>
+  <group ID='29'>
+    <detids>1798-1840,5903-5945</detids>
+  </group>
+  <group ID='30'>
+    <detids>1862-1904,5967-6009</detids>
+  </group>
+  <group ID='31'>
+    <detids>1926-1968,6031-6073</detids>
+  </group>
+  <group ID='32'>
+    <detids>1990-2032,6095-6137</detids>
+  </group>
+  <group ID='33'>
+    <detids>2054-2096,6159-6201</detids>
+  </group>
+  <group ID='34'>
+    <detids>2118-2160,6223-6265</detids>
+  </group>
+  <group ID='35'>
+    <detids>2182-2224,6287-6329</detids>
+  </group>
+  <group ID='36'>
+    <detids>2246-2288,6351-6393</detids>
+  </group>
+  <group ID='37'>
+    <detids>2310-2352,6415-6457</detids>
+  </group>
+  <group ID='38'>
+    <detids>2374-2416,6479-6521</detids>
+  </group>
+  <group ID='39'>
+    <detids>2438-2480,6543-6585</detids>
+  </group>
+  <group ID='40'>
+    <detids>2502-2544,6607-6649</detids>
+  </group>
+  <group ID='41'>
+    <detids>2566-2608,6671-6713</detids>
+  </group>
+  <group ID='42'>
+    <detids>2630-2672,6735-6777</detids>
+  </group>
+  <group ID='43'>
+    <detids>2694-2736,6799-6841</detids>
+  </group>
+  <group ID='44'>
+    <detids>2758-2800,6863-6905</detids>
+  </group>
+  <group ID='45'>
+    <detids>2822-2864,6927-6969</detids>
+  </group>
+  <group ID='46'>
+    <detids>2886-2928,6991-7033</detids>
+  </group>
+  <group ID='47'>
+    <detids>2950-2992,7055-7097</detids>
+  </group>
+  <group ID='48'>
+    <detids>3014-3056,7119-7161</detids>
+  </group>
+  <group ID='49'>
+    <detids>3078-3120,7183-7225</detids>
+  </group>
+  <group ID='50'>
+    <detids>3142-3184,7247-7289</detids>
+  </group>
+  <group ID='51'>
+    <detids>3206-3248,7311-7353</detids>
+  </group>
+  <group ID='52'>
+    <detids>3270-3312,7375-7417</detids>
+  </group>
+  <group ID='53'>
+    <detids>3334-3376,7439-7481</detids>
+  </group>
+  <group ID='54'>
+    <detids>3398-3440,7503-7545</detids>
+  </group>
+  <group ID='55'>
+    <detids>3462-3504,7567-7609</detids>
+  </group>
+  <group ID='56'>
+    <detids>3526-3568,7631-7673</detids>
+  </group>
+</detector-grouping>

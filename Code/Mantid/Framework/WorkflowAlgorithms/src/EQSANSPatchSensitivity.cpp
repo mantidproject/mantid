@@ -85,15 +85,19 @@ void EQSANSPatchSensitivity::exec()
       if ( det->isMasked() ) patched_ids.push_back(iDet);
       else
       {
-        double yPosition = det->getPos().Y();
-        totalUnmasked += YErrors[0]*YErrors[0]*YValues[0];
-        errorUnmasked += YErrors[0]*YErrors[0];
-        nUnmasked++;
+        IDetector_const_sptr sensitivityDet = inputWS->getDetector(iDet);
+        if ( !sensitivityDet->isMasked() )
+        {
+          double yPosition = det->getPos().Y();
+          totalUnmasked += YErrors[0]*YErrors[0]*YValues[0];
+          errorUnmasked += YErrors[0]*YErrors[0];
+          nUnmasked++;
 
-        sumXY += yPosition*YValues[0];
-        sumX += yPosition;
-        sumX2 += yPosition*yPosition;
-        sumY += YValues[0];
+          sumXY += yPosition*YValues[0];
+          sumX += yPosition;
+          sumX2 += yPosition*yPosition;
+          sumY += YValues[0];
+        }
       }
     }
 

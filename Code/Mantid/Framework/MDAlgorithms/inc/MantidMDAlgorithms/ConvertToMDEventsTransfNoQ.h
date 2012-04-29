@@ -1,12 +1,15 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_TRANSF_NOQ
 #define  H_CONVERT_TO_MDEVENTS_TRANSF_NOQ
 //
-#include "MantidMDAlgorithms/ConvertToMDEventsTransfGeneric.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h"
 //
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+//namespace ConvertToMD
+//{
+
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into from 1 to 4 output dimensions as function of input parameters
    *
@@ -42,8 +45,9 @@ namespace MDAlgorithms
 // ---->    NoQ
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
-template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type,SampleType Sample> 
-struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
+#ifndef EXCLUDE_Q_TRANSFORMATION_NOQ
+template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
+struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -54,8 +58,11 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
        }else{        // only one workspace property availible;
            if(!pHost->fillAddProperties(Coord,nd,1))return false;
        }
+       //
+       pHost->getMinMax(dim_min,dim_max);
         // set up units conversion defined by the host algorithm.  
-       CONV_UNITS_FROM.setUpConversion(this->pHost,""); 
+       ConvToMDPreprocDetectors Dummy;
+       CONV_UNITS_FROM.setUpConversion(Dummy,"",""); 
        return true;
     }
 
@@ -63,7 +70,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
     {
         CONV_UNITS_FROM.updateConversion(i);
         if(pYAxis){   
-            if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
+            if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
             Coord[1] = (coord_t)(pYAxis->operator()(i));
         }
         return true;
@@ -71,12 +78,12 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
 
     inline bool calc1MatrixCoord(const double& X,std::vector<coord_t> &Coord)const
     {
-       if(X<pHost->dim_min[0]||X>=pHost->dim_max[0])return false;
+       if(X<dim_min[0]||X>=dim_max[0])return false;
           
        Coord[0]=(coord_t)X;
        return true;
     }
-    // should be actually on ICOORD_TRANSFORMER but there is problem with template-overloaded functions
+    // should be actually on ICoordTransformer but there is problem with template-overloaded functions
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -84,27 +91,30 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type,Sample>
 
        return calc1MatrixCoord(X_ev,Coord);
     }
-    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
          return calc1MatrixCoord(X_ev,Coord);
     }   
 
     // constructor;
-    COORD_TRANSFORMER():pYAxis(NULL),pHost(NULL){} 
+    CoordTransformer():pYAxis(NULL),pHost(NULL){} 
 
-    inline void setUpTransf(IConvertToMDEventsMethods *pConv){
+    inline void setUpTransf(IConvertToMDEventsWS *pConv){
         pHost = pConv;
     }
 private:
    // the variables used for exchange data between different specific parts of the generic ND algorithm:
     // pointer to Y axis of MD workspace
      API::NumericAxis *pYAxis;
+     // min and max values for this conversion
+     std::vector<double> dim_min,dim_max;
      // pointer to MD workspace convertor
-     IConvertToMDEventsMethods *pHost;
+     IConvertToMDEventsWS *pHost;
 // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
 };
+#endif
 //
 } // End MDAlgorighms namespace
 } // End Mantid namespace

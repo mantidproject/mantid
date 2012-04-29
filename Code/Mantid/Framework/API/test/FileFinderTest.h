@@ -58,7 +58,7 @@ public:
       "  </facility>"
       "  <facility name=\"SNS\" delimiter=\"_\" FileExtensions=\"_event.nxs,.nxs,.dat\">"
       "    <archive>"
-      "      <archiveSearch plugin=\"ISISDataSearch\" />"
+      "      <archiveSearch plugin=\"SNSDataSearch\" />"
       "    </archive>"
       "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
       "      <technique>Inelastic Spectroscopy</technique>"
@@ -267,6 +267,10 @@ public:
     std::string pathOn3 = FileFinder::Instance().getFullPath("IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn3(pathOn3);
 
+    std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");
+    Poco::File fileOn4(pathOn4);
+
+
     // Refs #4916 -- The FileFinder findRun() method is revised to continue search using the facility supplied extensions
     // if the user supplied filename (containg extension) couldn't be found. Regardless of the platform, this test case
     // would be successful now.
@@ -274,9 +278,11 @@ public:
 #ifdef _WIN32
     TS_ASSERT(fileOn2.exists()); 
     TS_ASSERT(fileOn3.exists()); 
+    TS_ASSERT(fileOn4.exists());
 #else
     TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
+    TS_ASSERT_THROWS_ANYTHING(fileOn4.exists());
 #endif
   }
 

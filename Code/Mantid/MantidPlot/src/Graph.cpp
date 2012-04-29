@@ -116,6 +116,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f) //QwtPlot(parent)
 {	
   setWindowFlags(f);
+  this->setMinimumSize(1,1);
   n_curves=0;
 
   d_waterfall_offset_x = 0;
@@ -3569,6 +3570,9 @@ void Graph::removeCurve(int index)
 
   PlotCurve * c = dynamic_cast<PlotCurve *>(it);
   if (!c) return;
+  disconnect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
+  disconnect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()));
+
   DataCurve * dc = dynamic_cast<DataCurve *>(it);
 
   removeLegendItem(index);
@@ -3602,6 +3606,7 @@ void Graph::removeCurve(int index)
 
   c->aboutToBeDeleted();
   d_plot->removeCurve(c_keys[index]);
+  d_plot->replot();
   n_curves--;
 
   for (int i=index; i<n_curves; i++)
@@ -3621,7 +3626,6 @@ void Graph::removeCurve(int index)
 void Graph::removeCurve(PlotCurve* c)
 {
   removeCurve(curveIndex(c));
-  d_plot->replot();
 }
 
 void Graph::removeLegendItem(int index)

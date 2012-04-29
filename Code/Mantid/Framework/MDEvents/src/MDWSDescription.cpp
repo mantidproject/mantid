@@ -152,15 +152,16 @@ std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
 
 
 /// empty constructor
-MDWSDescription::MDWSDescription(size_t nDimesnions):
-nDims(nDimesnions),
+MDWSDescription::MDWSDescription(size_t nDimensions):
+nDims(nDimensions),
 emode(-2),
 Ei(std::numeric_limits<double>::quiet_NaN()),
-dimMin(nDimesnions,-1),
-dimMax(nDimesnions,1),
-dimNames(nDimesnions,"mdn"),
-dimIDs(nDimesnions,"mdn_"),
-dimUnits(nDimesnions,"Momentum"),
+dimMin(nDimensions,-1),
+dimMax(nDimensions,1),
+dimNames(nDimensions,"mdn"),
+dimIDs(nDimensions,"mdn_"),
+dimUnits(nDimensions,"Momentum"),
+nBins(nDimensions,10),
 convert_to_factor(NoScaling),
 rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error
 Wtransf(3,3,true),
@@ -169,10 +170,10 @@ detInfoLost(false),
 default_dim_ID(nDefaultID),
 QScalingID(NCoordScalings)
 {
-    for(size_t i=0;i<nDimesnions;i++)
+    for(size_t i=0;i<nDimensions;i++)
     {
         dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
-        dimNames[i]=dimNames[i]+boost::lexical_cast<std::string>(i);
+        dimNames[i]= dimNames[i]+boost::lexical_cast<std::string>(i);
     }
 
  // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
@@ -226,26 +227,38 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
 std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &QNames)
 {
     double eps(1.e-3);
-    Kernel::V3D DirCryst(Dir);
+    Kernel::V3D absDir(fabs(Dir.X()),fabs(Dir.Y()),fabs(Dir.Z()));
+    std::string mainName;
 
-   // DirCryst.toMillerIndexes(eps);
+    if ((absDir[0]>=absDir[1])&&(absDir[0]>=absDir[2]))
+    {
+        mainName=QNames[0];
+    }
+    else if  (absDir[1]>=absDir[2])
+    {
+        mainName=QNames[1];
+    }
+    else
+    {
+        mainName=QNames[2];
+    }
 
     std::string name("["),separator=",";
     for(size_t i=0;i<3;i++){
-        double dist=std::fabs(DirCryst[i]);
+
         if(i==2)separator="]";
-        if(dist<eps){
+        if(absDir[i]<eps){
             name+="0"+separator;
             continue;
         }
         if(Dir[i]<0){
            name+="-";
         }
-        if(std::fabs(dist-1)<eps){
-            name+=QNames[i]+separator;
+        if(std::fabs(absDir[i]-1)<eps){
+            name+=mainName+separator;
             continue;
         }
-        name+= sprintfd(dist,eps)+QNames[i]+separator;
+        name+= sprintfd(absDir[i],eps)+mainName+separator;
     }
 
     return name;
@@ -264,7 +277,7 @@ CoordScaling MDWSDescription::getQScaling(const std::string &ScID)const
     CoordScaling theScaling(NCoordScalings);
     for(size_t i=0;i<NCoordScalings;i++)
     {
-        if(QScalingID[i].find(ScID)!=std::string::npos)
+        if(QScalingID[i].compare(ScID)==0)
         {
             theScaling = (CoordScaling)i;
             break;

@@ -15,8 +15,6 @@ class FrameworkManagerTest(unittest.TestCase):
         self.assertTrue(alg.isInitialized())
         self.assertTrue(alg.version(), version)
         self.assertTrue(isinstance(alg, AlgorithmProxy))
-        self.assertTrue(hasattr(alg, '__async__'))
-        self.assertTrue(alg.__async__)
         
     def test_create_algorithm_produces_managed_alg_outside_PyExec_with_async_attr_and_is_true(self):
         alg = FrameworkManager.createAlgorithm("Rebin")
@@ -37,8 +35,6 @@ class FrameworkManagerTest(unittest.TestCase):
                 alg = FrameworkManager.createAlgorithm("Rebin")
                 self._test_obj.assertTrue(alg.isInitialized())
                 self._test_obj.assertFalse(isinstance(alg, AlgorithmProxy))
-                self._test_obj.assertTrue(hasattr(alg, '__async__'))
-                self._test_obj.assertFalse(alg.__async__)
         
         top_level = TestAlg(self)
         top_level.PyExec()

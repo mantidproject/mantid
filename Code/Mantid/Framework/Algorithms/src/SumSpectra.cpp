@@ -13,6 +13,7 @@ The result is stored as a new workspace containing a single spectra.
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid
 {
@@ -79,7 +80,7 @@ void SumSpectra::exec()
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-  const int YLength = static_cast<int>(localworkspace->blocksize());
+  this->yLength = static_cast<int>(localworkspace->blocksize());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
@@ -102,19 +103,19 @@ void SumSpectra::exec()
   }
 
   //Make the set of indices to sum up from the list
-  std::set<int> indices(indices_list.begin(), indices_list.end());
+  this->indices.insert(indices_list.begin(), indices_list.end());
 
   //And add the range too, if any
   if (!isEmpty(m_MaxSpec))
   {
     for (int i = m_MinSpec; i <= m_MaxSpec; i++)
-      indices.insert(i);
+      this->indices.insert(i);
   }
   
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW)
   {
-    this->execEvent(eventW, indices);
+    this->execEvent(eventW, this->indices);
   }
   else
   {
@@ -122,18 +123,15 @@ void SumSpectra::exec()
 
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,
-                                                           1,localworkspace->readX(0).size(),YLength);
+                                                           1,localworkspace->readX(0).size(),this->yLength);
 
-    Progress progress(this,0,1, indices.size());
+    Progress progress(this, 0, 1, this->indices.size());
 
     // This is the (only) output spectrum
     ISpectrum * outSpec = outputWorkspace->getSpectrum(0);
 
     // Copy over the bin boundaries
     outSpec->dataX() = localworkspace->readX(0);
-    // Get references to the output workspaces's data vectors
-    MantidVec& YSum = outSpec->dataY();
-    MantidVec& YError = outSpec->dataE();
 
     //Build a new spectra map
     specid_t newSpectrumNo = m_MinSpec;
@@ -141,50 +139,17 @@ void SumSpectra::exec()
     outSpec->clearDetectorIDs();
     g_log.information() << "Spectra remapping gives single spectra with spectra number: " << newSpectrumNo << "\n";
 
-    // Loop over spectra
-    std::set<int>::iterator it;
-    //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
-    for (it = indices.begin(); it != indices.end(); ++it)
+    if (localworkspace->id() == "RebinnedOutput")
     {
-      int i =  *it;
-      //Don't go outside the range.
-      if ((i >= numberOfSpectra) || (i < 0))
-      {
-        g_log.error() << "Invalid index " << i << " was specified. Sum was aborted.\n";
-        break;
-      }
-
-      try
-      {
-        // Get the detector object for this spectrum
-        Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
-        // Skip monitors, if the property is set to do so
-        if ( !keepMonitors && det->isMonitor() ) continue;
-        // Skip masked detectors
-        if ( det->isMasked() ) continue;
-      }
-      catch(...)
-      {
-        // if the detector not found just carry on
-      }
-
-      // Retrieve the spectrum into a vector
-      const MantidVec& YValues = localworkspace->readY(i);
-      const MantidVec& YErrors = localworkspace->readE(i);
-
-      for (int k = 0; k < YLength; ++k)
-      {
-        YSum[k] += YValues[k];
-        YError[k] += YErrors[k]*YErrors[k];
-      }
-
-      // Map all the detectors onto the spectrum of the output
-      outSpec->addDetectorIDs( localworkspace->getSpectrum(i)->getDetectorIDs() );
-
-      progress.report();
+      this->doRebinnedOutput(outputWorkspace, progress);
+    }
+    else
+    {
+      this->doWorkspace2D(localworkspace, outSpec, progress);
     }
 
     // Pointer to sqrt function
+    MantidVec& YError = outSpec->dataE();
     typedef double (*uf)(double);
     uf rs=std::sqrt;
     //take the square root of all the accumulated squared errors - Assumes Gaussian errors
@@ -193,11 +158,150 @@ void SumSpectra::exec()
     outputWorkspace->generateSpectraMap();
 
     // Assign it to the output workspace property
-    setProperty("OutputWorkspace",outputWorkspace);
+    setProperty("OutputWorkspace", outputWorkspace);
 
   }
 }
 
+/**
+ * This function deals with the logic necessary for summing a Workspace2D.
+ * @param localworkspace the input workspace for summing
+ * @param outSpec the spectrum for the summed output
+ * @param progress the progress indicator
+ */
+void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
+                               ISpectrum *outSpec, Progress &progress)
+{
+  // Get references to the output workspaces's data vectors
+  MantidVec& YSum = outSpec->dataY();
+  MantidVec& YError = outSpec->dataE();
+
+  // Loop over spectra
+  std::set<int>::iterator it;
+  //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  for (it = this->indices.begin(); it != this->indices.end(); ++it)
+  {
+    int i =  *it;
+    //Don't go outside the range.
+    if ((i >= this->numberOfSpectra) || (i < 0))
+    {
+      g_log.error() << "Invalid index " << i << " was specified. Sum was aborted.\n";
+      break;
+    }
+
+    try
+    {
+      // Get the detector object for this spectrum
+      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+      // Skip monitors, if the property is set to do so
+      if ( !keepMonitors && det->isMonitor() ) continue;
+      // Skip masked detectors
+      if ( det->isMasked() ) continue;
+    }
+    catch(...)
+    {
+      // if the detector not found just carry on
+    }
+
+    // Retrieve the spectrum into a vector
+    const MantidVec& YValues = localworkspace->readY(i);
+    const MantidVec& YErrors = localworkspace->readE(i);
+
+    for (int k = 0; k < this->yLength; ++k)
+    {
+      YSum[k] += YValues[k];
+      YError[k] += YErrors[k]*YErrors[k];
+    }
+
+    // Map all the detectors onto the spectrum of the output
+    outSpec->addDetectorIDs( localworkspace->getSpectrum(i)->getDetectorIDs() );
+
+    progress.report();
+  }
+}
+
+/**
+ * This function handles the logic for summing RebinnedOutput workspaces.
+ * @param outputWorkspace the workspace to hold the summed input
+ * @param progress the progress indicator
+ */
+void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
+                                  Progress &progress)
+{
+  // Get a copy of the input workspace
+  MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
+
+  // First, we need to clean the input workspace for nan's and inf's in order
+  // to treat the data correctly later. This will create a new private
+  // workspace that will be retrieved as mutable.
+  IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
+  std::string outName = "_"+temp->getName()+"_clean";
+  alg->setProperty("OutputWorkspace", outName);
+  alg->setProperty("NaNValue", 0.0);
+  alg->setProperty("NaNError", 0.0);
+  alg->setProperty("InfinityValue", 0.0);
+  alg->setProperty("InfinityError", 0.0);
+  alg->executeAsSubAlg();
+  MatrixWorkspace_sptr localworkspace = alg->getProperty("OutputWorkspace");
+
+  // Transform to real workspace types
+  RebinnedOutput_sptr inWS = boost::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
+  RebinnedOutput_sptr outWS = boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+
+  // Get references to the output workspaces's data vectors
+  ISpectrum* outSpec = outputWorkspace->getSpectrum(0);
+  MantidVec& YSum = outSpec->dataY();
+  MantidVec& YError = outSpec->dataE();
+  MantidVec& FracSum = outWS->dataF(0);
+
+  // Loop over spectra
+  std::set<int>::iterator it;
+  //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  for (it = indices.begin(); it != indices.end(); ++it)
+  {
+    int i =  *it;
+    //Don't go outside the range.
+    if ((i >= numberOfSpectra) || (i < 0))
+    {
+      g_log.error() << "Invalid index " << i << " was specified. Sum was aborted.\n";
+      break;
+    }
+
+    try
+    {
+      // Get the detector object for this spectrum
+      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+      // Skip monitors, if the property is set to do so
+      if ( !keepMonitors && det->isMonitor() ) continue;
+      // Skip masked detectors
+      if ( det->isMasked() ) continue;
+    }
+    catch(...)
+    {
+      // if the detector not found just carry on
+    }
+
+    // Retrieve the spectrum into a vector
+    const MantidVec& YValues = localworkspace->readY(i);
+    const MantidVec& YErrors = localworkspace->readE(i);
+    const MantidVec& FracArea = inWS->readF(i);
+
+    for (int k = 0; k < this->yLength; ++k)
+    {
+      YSum[k] += YValues[k] * FracArea[k];
+      YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
+      FracSum[k] += FracArea[k];
+    }
+
+    // Map all the detectors onto the spectrum of the output
+    outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
+
+    progress.report();
+  }
+  // Create the correct representation
+  outWS->finalize();
+}
 
 /** Executes the algorithm
  *@param localworkspace :: the input workspace

@@ -152,6 +152,9 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
 
 MantidMatrixCurve::~MantidMatrixCurve()
 {
+  observePostDelete(false);
+  observeAfterReplace(false);
+  observeADSClear(false);
 }
 
 /**

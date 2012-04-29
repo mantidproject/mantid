@@ -51,6 +51,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
                size_t n_rows,   size_t n_cols,
                float *data );
 
+    ~DataArray();
+
     // Get the smallest 'x' value actually covered by this DataArray
     double GetXMin()    const;
 
@@ -97,9 +99,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
     double data_max;
     size_t n_rows;   
     size_t n_cols;
-    float *data;        // This keeps a local reference to the data array, but
-                        // the array should be allocated and deleted in the
-                        // ImageDataSource
+    float *data;        // This is given a reference to the data block,
+                        // which is allocated in the ImageDataSource,
+                        // but will be deleted in this object's Destructor
 };
 
 } // namespace MantidQt 

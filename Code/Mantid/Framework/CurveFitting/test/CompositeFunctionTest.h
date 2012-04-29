@@ -288,7 +288,7 @@ public:
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      x[i] = 0.1 * i;
+      x[i] = 0.1 * double(i);
       y[i] = 3.3 * x[i] + 4.4;
     }
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
@@ -326,7 +326,7 @@ public:
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
     {
-      double t = 0.1 * i;
+      double t = 0.1 * double(i);
       x[i] = t;
       y[i] = 0.1 * t * t + 3.3 * t + 4.4;
     }

@@ -97,9 +97,7 @@ namespace Mantid
       double m_efixed;
       /// Output Q axis
       std::vector<double> m_Qout;
-      /// Input theta points
-      std::vector<double> m_thetaPts;
-      /// Theta width
+      /// Single value theta width
       double m_thetaWidth;
       /// Array for the two theta angles
       std::vector<double> m_theta;
@@ -109,6 +107,8 @@ namespace Mantid
       std::vector<double> m_thetaWidths;
       /// Array for the azimuthal widths
       std::vector<double> m_phiWidths;
+      /// Offset for finding neighbor in nearest tube
+      int m_detNeighbourOffset;
     };
 
 

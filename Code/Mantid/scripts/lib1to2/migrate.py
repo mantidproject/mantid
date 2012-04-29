@@ -7,12 +7,13 @@ from grammar import Grammar
 import os
 import shutil
 
-def run(files, options=None):
+def run(files, backup=True):
     """
     Runs the migration process
     
         @param files A list of files to migrate
-        @param options A dictionary of options
+        @param backup If true, the files are backed up before running the migration. The
+                      backup file is the filename plus '.mantidbackup'
     """
     if len(files) == 0:
         messages.notify("Nothing to do!")
@@ -20,13 +21,12 @@ def run(files, options=None):
     if type(files) == str:
         files = [files]
 
-    backup = not options.nobackups
     reports = []
     for filename in files:
         script = ScriptFile(filename, backup)
         reports.append(script.migrate())
 
-    messages.notify("\n" + "-"*10 + " Report " + "-"*10)
+    messages.notify("\n" + "="*10 + " Report " + "="*10 + "\n")
     for report in reports:
         messages.notify(str(report))
         

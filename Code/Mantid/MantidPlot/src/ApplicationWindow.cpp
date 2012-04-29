@@ -1629,7 +1629,9 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
     if( QFileInfo(scriptPath).exists() ) {
       QString baseName = QFileInfo(scriptPath).baseName();
-      if (getMenuSettingsFlag(itemName))
+      // Need to use "nice" name to check if scripts has been removed by user.
+      QString niceName = baseName.replace("_", " ");
+      if (getMenuSettingsFlag(niceName))
         addUserMenuAction(menuName, baseName, scriptPath);
     }
     else
@@ -5377,6 +5379,11 @@ void ApplicationWindow::readSettings()
     settings.beginGroup(menu);
     foreach(QString keyName, settings.childKeys())
     {
+      QFileInfo fi(settings.value(keyName).toString());
+      QString baseName = fi.fileName();
+      if (pyqt_interfaces.contains(baseName))
+        continue;
+
       if ( menu.contains("Interfaces")==0 &&
           (user_windows.grep(keyName).size() > 0 || pyqt_interfaces.grep(keyName).size() > 0) )
       {
