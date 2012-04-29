@@ -11,7 +11,7 @@
 /**
     @class ImageView 
   
-      This is the top level class for the ImageView data viewer.  Data is
+      This is the QMainWindow for the ImageView data viewer.  Data is
     displayed in an ImageView, by constructing the ImageView object and
     specifying a particular data source.
  
@@ -45,7 +45,7 @@ namespace ImageView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView : public QMainWindow
 {
   public:
 
@@ -55,7 +55,6 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView
     ~ImageView();
 
   private:
-    QMainWindow*     window;
     GraphDisplay*    h_graph;
     GraphDisplay*    v_graph;
                                  

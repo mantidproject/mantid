@@ -9,11 +9,14 @@ using namespace ImageView;
 EventWSImageView::EventWSImageView( IEventWorkspace_sptr ev_ws )
 {
   EventWSDataSource* source = new EventWSDataSource( ev_ws );
-  image_view = new ImageView( source );
+
+  image_view = new ImageView( source );  // this is the QMainWindow
+                                         // for the viewer.  It is
+                                         // deleted when the window
+                                         // is closed
 }
 
 EventWSImageView::~EventWSImageView()
 {
-  delete image_view;
 }
 

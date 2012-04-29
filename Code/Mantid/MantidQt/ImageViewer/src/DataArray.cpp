@@ -64,6 +64,8 @@ DataArray::DataArray( double xmin,     double xmax,
 
 DataArray::~DataArray()
 {
+//  std::cout << "DataArray destructor called" << std::endl;
+
   if ( data )
   {
     delete[] data;

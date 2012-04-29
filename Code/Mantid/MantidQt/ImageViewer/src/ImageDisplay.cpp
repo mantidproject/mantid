@@ -65,6 +65,7 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
 
 ImageDisplay::~ImageDisplay()
 {
+  // std::cout << "ImageDisplay destructor called" << std::endl;
   delete image_plot_item;
 }
 

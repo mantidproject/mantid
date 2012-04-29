@@ -6,6 +6,7 @@
 #include <QActionGroup>
 
 #include "ui_ImageView.h"
+#include "MantidQtImageViewer/ImageView.h"
 #include "MantidQtImageViewer/TrackingPicker.h"
 #include "MantidQtImageViewer/ImageDisplay.h"
 #include "MantidQtImageViewer/GraphDisplay.h"
@@ -60,6 +61,7 @@ public:
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
   IVConnections( Ui_MainWindow* ui, 
+                 ImageView*     image_view,
                  ImageDisplay*  image_display,
                  GraphDisplay*  h_graph_display,
                  GraphDisplay*  v_graph_display );
@@ -67,6 +69,7 @@ public:
   ~IVConnections();
 
 public slots:
+  void close_viewer();
   void toggle_Hscroll();
   void toggle_Vscroll();
   void range_changed();
@@ -89,6 +92,7 @@ public slots:
 private:
 
   Ui_MainWindow*   iv_ui;
+  ImageView*       iv_main_window;
   ImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;
   GraphDisplay*    v_graph_display;

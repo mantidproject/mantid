@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include  "MantidQtImageViewer/ImageView.h"
 #include  "MantidQtImageViewer/ColorMaps.h"
 
@@ -27,13 +28,16 @@ namespace ImageView
 ImageView::ImageView( ImageDataSource* data_source )
 {
   Ui_MainWindow* ui = new Ui_MainWindow();
-  window            = new QMainWindow();
   saved_ui          = ui; 
+
+  QMainWindow* window = this;
 
   ui->setupUi( window );
   window->resize( 1050, 800 );
   window->show();
-  window->setAttribute(Qt::WA_DeleteOnClose); 
+  window->setAttribute(Qt::WA_DeleteOnClose);  // We just need to close the
+                                               // window to trigger the 
+                                               // destructor and clean up
 
   SliderHandler* slider_handler = new SliderHandler( ui );
   saved_slider_handler = slider_handler;
@@ -51,7 +55,8 @@ ImageView::ImageView( ImageDataSource* data_source )
                                                   ui->image_table );
   saved_image_display = image_display;
 
-  IVConnections* iv_connections = new IVConnections( ui, image_display, 
+  IVConnections* iv_connections = new IVConnections( ui, this, 
+                                                     image_display, 
                                                      h_graph, v_graph );
   saved_iv_connections = iv_connections;
 
@@ -61,9 +66,8 @@ ImageView::ImageView( ImageDataSource* data_source )
 
 ImageView::~ImageView()
 {
-/*  // Why does Mantid seg fault, or show nothing if I delete these objects?
- 
-  delete  window;
+//  std::cout << "ImageView destructor called" << std::endl;
+
   delete  h_graph;
   delete  v_graph;
 
@@ -84,7 +88,6 @@ ImageView::~ImageView()
 
   Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);
   delete  ui;
-*/
 }
 
 

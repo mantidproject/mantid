@@ -27,14 +27,13 @@ namespace ImageView
  *
  */
 IVConnections::IVConnections( Ui_MainWindow* ui, 
+                              ImageView*     iv_main_window,
                               ImageDisplay*  image_display,
                               GraphDisplay*  h_graph_display,
                               GraphDisplay*  v_graph_display )
 {
   iv_ui = ui;
                               // first disable a few un-implemented controls
-  iv_ui->menuFile->setDisabled(true);
-  iv_ui->actionClose->setDisabled(true);
   iv_ui->menuGraph_Selected->setDisabled(true);
   iv_ui->actionClear_Selections->setDisabled(true);
   iv_ui->actionOverlaid->setDisabled(true);
@@ -45,6 +44,10 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->graph_max_slider->setDisabled(true);
   iv_ui->graph_max_label->setDisabled(true);
   iv_ui->label_2->setDisabled(true);
+ 
+  this->iv_main_window = iv_main_window;
+  QObject::connect( iv_ui->actionClose, SIGNAL(triggered()),
+                    this, SLOT(close_viewer()) );
  
                               // now set up the gui components
   this->image_display   = image_display;
@@ -231,10 +234,18 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
 
 IVConnections::~IVConnections()
 {
+  // std::cout << "IVConnections destructor called" << std::endl;
+
   delete image_picker;
   delete h_graph_picker;
   delete v_graph_picker;
   delete color_group;
+}
+
+
+void IVConnections::close_viewer()
+{
+  iv_main_window->close();
 }
 
 

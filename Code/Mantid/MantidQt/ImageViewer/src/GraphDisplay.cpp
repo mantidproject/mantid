@@ -46,6 +46,7 @@ GraphDisplay::GraphDisplay( QwtPlot*      graph_plot,
 
 GraphDisplay::~GraphDisplay()
 {
+  // std::cout << "GraphDisplay destructor called" << std::endl;
   delete curve;
 }
 

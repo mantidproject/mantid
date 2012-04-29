@@ -24,6 +24,8 @@ ImagePlotItem::ImagePlotItem()
 
 ImagePlotItem::~ImagePlotItem()
 {
+  //std::cout << "ImagePlotItem destructor called" << std::endl;
+
   if ( data_array_0 )
   {
     delete data_array_0; 
