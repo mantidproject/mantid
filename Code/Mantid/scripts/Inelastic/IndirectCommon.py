@@ -1,7 +1,19 @@
 from mantidsimple import *
 from mantid import config, logger
-import os.path, math, datetime
+import platform, os.path, math, datetime
 
+def inF2PyCompatibleEnv():
+    '''Returns true if we are in an environment where our Fortran2Python 
+    files are usable, oterwise returns false.'''
+    osEnv = platform.system() + platform.architecture()[0]
+    if osEnv is 'Windows32bit' or osEnv is 'Linux64bit':
+        return True
+    return False
+
+def runF2PyCheck():
+    if not inF2PyCompatibleEnv():
+        raise RuntimeError("F2Py programs NOT available on this platform.")
+    
 def StartTime(prog):
     logger.notice('----------')
     message = 'Program ' + prog +' started @ ' + str(datetime.datetime.now())
@@ -125,4 +137,17 @@ def GetThetaQ(inWS):
         theta.append(twoTheta)						# add angle
         Q.append(k0*math.sin(0.5*twoTheta*d2r))
     return theta,Q
-	
+
+def ExtractFloat(a):                              #extract values from line of ascii
+    extracted = []
+    elements = a.split()							#split line on spaces
+    for n in elements:
+        extracted.append(float(n))
+    return extracted                                 #values as list
+
+def ExtractInt(a):                              #extract values from line of ascii
+    extracted = []
+    elements = a.split()							#split line on spaces
+    for n in elements:
+        extracted.append(int(n))
+    return extracted                                 #values as list
