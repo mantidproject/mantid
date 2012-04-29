@@ -105,7 +105,7 @@ if( SQUISH_FOUND )
 
   # Need to set environmental variables next
   set( SQUISH_ENV_VARS
-    PV_PLUGIN_PATH=$<TARGET_FILE_DIR:${SQUISH_AUT}>/${PVPLUGINS_DIR}
+    PV_PLUGIN_PATH=$<TARGET_FILE_DIR:${SQUISH_AUT}>/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}
     SCRIPTS_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
     SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}:${CMAKE_CURRENT_SOURCE_DIR}/test/common/scripts
   )
@@ -113,4 +113,4 @@ if( SQUISH_FOUND )
 
 endif()
 
-install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )
+install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )

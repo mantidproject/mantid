@@ -58,10 +58,30 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
-  std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
+  Kernel::ConfigServiceImpl& config = Kernel::ConfigService::Instance();
+  // Load plugin libraries if possible
+  std::string pluginDir = config.getString("plugins.directory");
   if (pluginDir.length() > 0)
   {
     Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
+  }
+  // Load Paraview plugin libraries if possible
+  if(config.quickParaViewCheck())
+  {
+    const std::string pvPluginDir = config.getString("pvplugins.directory");
+    if (pvPluginDir.length() > 0)
+    {
+      this->g_log.debug("Loading PV plugin libraries");
+      Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pvPluginDir, false);
+    }
+    else
+    {
+      this->g_log.notice("No PV plugin library directory");
+    }
+  }
+  else
+  {
+    this->g_log.debug("Cannot load paraview libraries");
   }
 
   // Disable reporting errors from Nexus (they clutter up the output).

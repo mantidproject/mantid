@@ -7,6 +7,6 @@ GUI_RESOURCE_FILES ScaleWorkspaceGUI.xml)
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 # Put library into subfolder.
-SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewScaleWorkspaceSMPlugin  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewScaleWorkspaceSMPlugin  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR})
 
-install( TARGETS MantidParaViewScaleWorkspaceSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR})
+install( TARGETS MantidParaViewScaleWorkspaceSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_DIR})

@@ -209,6 +209,9 @@ namespace Mantid
       /// Set the path to the paraview libraries
       void setParaviewLibraryPath(const std::string& path);
 
+      /// Quick check to determine if paraview is available.
+      bool quickParaViewCheck() const;
+
       /// Quick check to determine if vates has been installed.
       bool quickVatesCheck() const;
 

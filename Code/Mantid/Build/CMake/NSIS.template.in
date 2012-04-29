@@ -901,6 +901,13 @@ SectionEnd
 ; "Program Files" for AllUsers, "My Documents" for JustMe...
 
 Function .onInit
+
+  ; Silently uninstall any previous install
+  IfSilent +3
+    ExecWait '"$INSTDIR\uninstall.exe" _?=$INSTDIR'
+	Goto +2
+  ExecWait '"$INSTDIR\uninstall.exe" _?=$INSTDIR /S'
+  
   ; Reads components status for registry
   !insertmacro SectionList "InitSection"
 

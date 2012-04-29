@@ -15,7 +15,11 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 
 # Define the project name.
 project ( Mantid )
-set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used in linux packages and for symlinks")
+set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
+set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
+
+#Set package name here 
+set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
@@ -27,6 +31,7 @@ include ( UseSystemQt4 )
 # Set paths to Third_Party for Windows builds
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
+
 	if ( NOT THIRD_PARTY )
   		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
 	endif ()
@@ -40,6 +45,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	
 	include ( WindowsSetup )
 	
+	# Settings for generating the windows Nullsoft package via CPack
+	include ( WindowsNSIS )	
+	
 ENDIF()
 
 ###########################################################################
@@ -47,7 +55,7 @@ ENDIF()
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
 
-  execute_process(
+execute_process(
       COMMAND /usr/bin/sw_vers -productVersion
       OUTPUT_VARIABLE OSX_VERSION
       RESULT_VARIABLE OSX_VERSION_STATUS
@@ -182,13 +190,11 @@ endif()
 # Keep this in a defaulted-to-off option
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
-  if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  #if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   
     include ( CPackCommon )
     
-    set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
-    set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
-  
+    #set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
     # Mac Packagemaker settings
     set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
@@ -221,5 +227,5 @@ if ( ENABLE_CPACK )
 
     # run cpack configuration
     include ( CPack )
-  ENDIF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  #ENDIF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif ()

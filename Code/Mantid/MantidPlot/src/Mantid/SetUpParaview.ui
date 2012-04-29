@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>559</width>
-    <height>279</height>
+    <height>287</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -138,6 +138,13 @@ This dialog will allow you to complete the second stage.</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btn_ignore_paraview">
+       <property name="text">
+        <string>KEEP IGNORING</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btn_set">
        <property name="text">
         <string>SET</string>
@@ -149,6 +156,8 @@ This dialog will allow you to complete the second stage.</string>
   </layout>
  </widget>
  <resources>
+  <include location="../../../Images/images.qrc"/>
+  <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>

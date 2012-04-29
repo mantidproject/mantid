@@ -25,6 +25,8 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/String.h>
+#include <Poco/PipeStream.h>
+#include <Poco/StreamCopier.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -261,6 +263,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
 
   //Fill the list of possible relative path keys that may require conversion to absolute paths
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
+  m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
@@ -1364,13 +1367,13 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
 void ConfigServiceImpl::setParaViewPluginPath() const
 {
   std::string mantid_loc = this->getDirectoryOfExecutable();
-  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins");
+  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins/pvplugins");
   pv_plugin_path = pv_plugin_path.absolute();
   Poco::File pv_plugin(pv_plugin_path.toString());
   if (!pv_plugin.exists() || !pv_plugin.isDirectory())
   {
     g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");
-    pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins");
+    pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins/pvplugins");
     pv_plugin_path = pv_plugin_path.absolute();
     pv_plugin = Poco::File(pv_plugin_path.toString());
     if (!pv_plugin.exists() || !pv_plugin.isDirectory())
@@ -1728,6 +1731,53 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 }
 
 /*
+Checks to see whether paraview usage is explicitly ignored in the property file then, 
+quick check to determine if paraview is installed. We make the assumption 
+that if the executable paraview binary is on the path that the paraview libraries 
+will also be available on the library path, or equivalent.
+@return True if paraview is available or not disabled.
+*/
+bool ConfigServiceImpl::quickParaViewCheck() const
+{
+  const std::string paraviewIgnoreProperty = "paraview.ignore";
+  const bool ignoreParaview = hasProperty(paraviewIgnoreProperty) && atoi(getString(paraviewIgnoreProperty).c_str());
+  if(ignoreParaview)
+  {
+    this->g_log.debug("Ignoring ParaView");
+    return false;
+  }
+  
+  this->g_log.debug("Checking for ParaView");
+  bool isAvailable = false;
+
+  try
+  {
+    //Try to run "paraview -V", which will succeed if ParaView is installed.
+    std::string cmd("paraview");
+    std::vector<std::string> args;
+    args.push_back("-V");
+    Poco::Pipe outPipe;
+    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, 0);
+    const int rc = ph.wait();
+    if(rc == 1)
+    {
+      isAvailable = true;
+      this->g_log.notice("ParaView is available");
+    }
+    else
+    {
+      this->g_log.notice("ParaView is not available");
+    }
+  }
+  catch(Poco::SystemException &e)
+  {
+    g_log.debug(e.what());
+    this->g_log.notice("ParaView is not available");
+  }
+  return isAvailable; 
+}
+
+/*
 Quick check to determine if VATES is installed.
 @return TRUE if available.
 */
@@ -1753,19 +1803,6 @@ bool ConfigServiceImpl::quickVatesCheck() const
       break;
     }
     ++it;
-  }
-
-  if(!found)
-  {
-    //On windows, the VSI gui is made available on the path.
-    try
-    {
-      Poco::Environment::get("MANTIDPARAVIEWPATH");
-      found = true;
-    }
-    catch(Poco::NotFoundException&)
-    {
-    }
   }
   return found;
 }

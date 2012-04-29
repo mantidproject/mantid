@@ -28,6 +28,9 @@ plugins.directory = @PLUGINS@
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
 plugins.exclude = MantidPythonAPI;dlopen
 
+# Where to find mantid paravie plugin libraries
+pvplugins.directory = @PV_PLUGINS@
+
 # Where to find Mantid Qt plugin libraries
 mantidqt.plugins.directory = @QTPLUGINS@
 

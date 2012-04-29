@@ -377,15 +377,27 @@ install ( TARGETS Kernel DESTINATION ${LIB_DIR} )
 # Create the properties file for the installer
 if ( APPLE )
   set ( MANTID_ROOT ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
+elseif ( WIN32 )
+  set ( MANTID_ROOT .. )
 else ()
   set ( MANTID_ROOT ${CMAKE_INSTALL_PREFIX} )
 endif ()
 
-set ( PLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
-set ( QTPLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qtplugins/mantid )
+if (WIN32)
+  set ( PLUGINS ${MANTID_ROOT}/${PLUGINS_DIR} )
+  set ( QTPLUGINS ${MANTID_ROOT}/${PLUGINS_DIR}/qtplugins/mantid )
+  set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps/ )
+  set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_DIR} )
+else ()
+  set ( PLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
+  set ( QTPLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qtplugins/mantid )
+  set ( COLORMAPS_FOLDER ${CMAKE_INSTALL_PREFIX}/colormaps/ )
+  set ( PV_PLUGINS ${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
+endif ()
+
 set ( PYTHONALGS ${PLUGINS}/PythonAlgs )
 set ( DATADIRS "" )
-set ( COLORMAPS_FOLDER ${CMAKE_INSTALL_PREFIX}/colormaps/ )
+  
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
