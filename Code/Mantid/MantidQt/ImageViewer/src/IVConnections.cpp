@@ -32,6 +32,21 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
                               GraphDisplay*  v_graph_display )
 {
   iv_ui = ui;
+                              // first disable a few un-implemented controls
+  iv_ui->menuFile->setDisabled(true);
+  iv_ui->actionClose->setDisabled(true);
+  iv_ui->menuGraph_Selected->setDisabled(true);
+  iv_ui->actionClear_Selections->setDisabled(true);
+  iv_ui->actionOverlaid->setDisabled(true);
+  iv_ui->actionOffset_Vertically->setDisabled(true);
+  iv_ui->actionOffset_Diagonally->setDisabled(true);
+  iv_ui->actionGraph_Rebinned_Data->setDisabled(true);
+  iv_ui->menuHelp->setDisabled(true);
+  iv_ui->graph_max_slider->setDisabled(true);
+  iv_ui->graph_max_label->setDisabled(true);
+  iv_ui->label_2->setDisabled(true);
+ 
+                              // now set up the gui components
   this->image_display   = image_display;
   this->h_graph_display = h_graph_display;
   this->v_graph_display = v_graph_display;
