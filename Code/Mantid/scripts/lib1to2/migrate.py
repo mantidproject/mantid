@@ -24,7 +24,13 @@ def run(files, backup=True):
     reports = []
     for filename in files:
         script = ScriptFile(filename, backup)
-        reports.append(script.migrate())
+        try:
+            msg = script.migrate()
+        except Exception, exc:
+            msg = str(exc)
+            script.restore_backup()
+            msg += "\nBackup restored."
+        reports.append(msg)
 
     messages.notify("\n" + "="*10 + " Report " + "="*10 + "\n")
     for report in reports:

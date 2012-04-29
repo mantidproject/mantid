@@ -63,6 +63,8 @@ __FUNCTION_CALL_REGEXSTR = r"""(|\w*\s*) # Any variable on the lhs of the functi
 
 __FUNCTION_CALL_REGEX__ = re.compile(__FUNCTION_CALL_REGEXSTR, re.VERBOSE)
 
+__WHITESPACE_REGEX__ = re.compile("(\s*).*")
+
 __MANTID_ALGS__ = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
 class SimpleAPIFunctionCallReplace(Rules):
@@ -117,49 +119,60 @@ class SimpleAPIFunctionCallReplace(Rules):
                               (5) - A possible .workspace() call or empty string
         """
         self.current_line = inputline
-        print match.groups()
         func_name = self.get_function_name(match)
         if not self.is_mantid_algorithm(func_name):
             return inputline
         lhs_var = self.get_lhs_var_name(match)
-        if lhs_var == "":
+        if lhs_var.strip() == "":
             # Simple case of no return
             replacement = self.apply_replace_for_no_return(func_name, self.get_function_args(match))
-            
+        else:
+            raise RuntimeError("No rules implemented for return value from simple API function on line '%s'" % self.current_line)
         
-        
+        replacement = self.fix_indentation(replacement)
         return replacement
         
     def apply_replace_for_no_return(self, name, arguments):
         """Takes a function name & arguments from the input
         and reconstructs the call in the new api"""
-        replacement = name + "()"
         alg = mantid.api.AlgorithmManager.Instance().createUnmanaged(name)
         alg.initialize()
-        ordered_names = alg.orderedProperties()
-        
-        keyword_found = False
-        kwargs = {}
-        for index, arg in enumerate(arguments):
-            if type(arg) == tuple:
-                keyword_found = True
-                name = arg[0]
-                value = arg[1]
-            else:
-                if keyword_found == True:
-                    raise ValueError("Found a positional argument after a keyword in line '%s'" % self.current_line)
-                name = ordered_names[index]
-                value = arg
-            print type(value)
-            name = name.strip()
-            value = value.strip()
-            kwargs[name] = value
-        print kwargs
-        return replacement
+        kwargs = self.transform_all_to_kwargs(alg, arguments)
+        # These will not appear in the final list
+        output_args = alg.outputProperties()
+        # The one that appears in the current argument list as an output needs to go on the LHS of the '='
+        lhs_vars = self.build_lhs_vars(kwargs, output_args)
+        # If the value is not a legal variable name just leave it in the keyword list
+        if lhs_vars != "":
+            lhs_vars += " = "
+        final_argstring = self.build_argstring(kwargs)
+        replacement = '%s%s(%s)'
+        return replacement % (lhs_vars, name, final_argstring)
         
     def get_lhs_var_name(self, match):
         """Returns the lhs variable name from the match or an empty string"""
         return match.group(1)
+
+    def is_lhs_name_legal(self, name):
+        """Returns true if the name given is a legal variable name"""
+        if name is None: 
+            return False
+        return mantid.api._adsimports.is_valid_identifier(name)
+
+    def build_lhs_vars(self, kwargs, output_args):
+        """Returns a list of lhs variables for the input keywords & given output args"""
+        lhs_vars = ""
+        indices_for_removal = []
+        for index, keyvalue in enumerate(kwargs):
+            if keyvalue[0] in output_args:
+                value = keyvalue[1].strip("'\"")
+                if self.is_lhs_name_legal(value):
+                    lhs_vars += value + ","
+                    indices_for_removal.append(index)
+
+        for item in indices_for_removal:
+            kwargs.pop(item)        
+        return lhs_vars.rstrip(",")
     
     def get_function_name(self, match):
         """Returns the name of the function called"""
@@ -188,8 +201,52 @@ class SimpleAPIFunctionCallReplace(Rules):
             else:
                 arguments.append(item)
         return arguments
+
+    def transform_all_to_kwargs(self, alg_obj, arguments):
+        """
+        Transforms an ordered list of arguments to a full keyword list
+        The arguments list is expected to be a list of names or tuples
+        already containing a keyword argument
+        """
+        ordered_names = alg_obj.orderedProperties()        
+        keyword_found = False
+        kwargs = []
+        for index, arg in enumerate(arguments):
+            if type(arg) == tuple:
+                keyword_found = True
+                name = arg[0]
+                value = arg[1]
+            else:
+                if keyword_found == True:
+                    raise ValueError("Found a positional argument after a keyword in line '%s'" % self.current_line)
+                name = ordered_names[index]
+                value = arg
+            name = name.strip()
+            value = value.strip()
+            kwargs.append(tuple([name, value]))
+        
+        return kwargs
+
+    def build_argstring(self, kwargs):
+        """Builds a single string containing the key=value arguments in the list"""
+        argstring = ''
+        for key, value in kwargs:
+            argstring += key + '=' + value + ","
+        return argstring.rstrip(",")
     
     def is_mantid_algorithm(self, name):
         """Does the name string match a Mantid algorithm name"""
         return name in __MANTID_ALGS__
         
+    def fix_indentation(self, replaced_string):
+        """
+        Compare the indentation of the input line
+        with the original line & fix the replaced_string if
+        necessary
+        """
+        matches = __WHITESPACE_REGEX__.match(self.current_line)
+        indent = matches.groups()[0]
+        if indent == '':
+            return replaced_string
+        indent = indent.replace("\t", "    ")
+        return indent + replaced_string

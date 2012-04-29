@@ -33,16 +33,7 @@ def _importAll(mtd):
         mtd['deltax'].
         
         @param mtd The Analysis Data Service Object
-    """
-    def isvalid(name):
-        """
-           Returns True if the given string
-           is a valid variable name in Python
-        """
-        if _keyword.iskeyword(name): return False
-        # If the regex matches it is a valid identifier in Python 2.x
-        return IDENT_REGEX.match(name) is not None
-    
+    """  
     def clean(name):
         """
             Returns a name cleaned up so that it is a valid
@@ -70,12 +61,21 @@ def _importAll(mtd):
     # The name may not be a valid variable name, i.e keyword or operator separated
     for name in ads_names:
         varname = name
-        if not isvalid(varname):
+        if not is_valid_identifier(varname):
             varname = clean(name)
             print ('Warning: "%s" is an invalid identifier, "%s" has been imported instead.' % (name, varname))
         vars[varname] = mtd[name]
     # Update the caller's dictionary
     locals_.update(vars)
+
+def is_valid_identifier(name):
+    """
+    Returns True if the given string
+    is a valid variable name in Python
+    """
+    if _keyword.iskeyword(name): return False
+    # If the regex matches it is a valid identifier in Python 2.x
+    return IDENT_REGEX.match(name) is not None
 
 # Attach to ADS as importAll
 setattr(AnalysisDataServiceImpl, "importAll", _importAll)

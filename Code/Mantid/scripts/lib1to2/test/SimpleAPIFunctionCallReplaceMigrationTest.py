@@ -5,14 +5,6 @@ import os
 
 from MigrationTest import MigrationTest
 
-__INPUTSTRING__ = r"""
-LoadRaw("test-file.raw", 'testWS', SpectrumMax=1)
-"""
-
-__EXPECTEDSTRING__ = r"""
-testWS = LoadRaw("test-file.raw")
-"""
-
 class SimpleAPIFunctionCallReplaceMigrationTest(MigrationTest):
     
     _test_filename = None
@@ -22,11 +14,32 @@ class SimpleAPIFunctionCallReplaceMigrationTest(MigrationTest):
     def tearDown(self):
         """Clean up after a test"""
         self.remove_test_files()
+
+    def test_no_arg_no_indent_is_migrated_correctly(self):
+        inputstring = """LoadRaw("test-file.raw",'testWS',SpectrumMax=1)"""
+        expected = """testWS = LoadRaw(Filename="test-file.raw",SpectrumMax=1)"""
+        self.do_migration(inputstring)
+        self.check_outcome(inputstring, expected)
         
     def test_function_returning_no_args_is_replaced_correctly(self):
-        self.do_migration(__INPUTSTRING__)
-        self.check_outcome(__INPUTSTRING__, __EXPECTEDSTRING__)
-        
+        inputstring = \
+        """
+        def foo():
+            LoadRaw("test-file.raw",'testWS',SpectrumMax=1)
+        """
+        expected = \
+        """
+        def foo():
+            testWS = LoadRaw(Filename="test-file.raw",SpectrumMax=1)
+        """
+        self.do_migration(inputstring)
+        self.check_outcome(inputstring, expected)
+
+    def test_arg_return_on_input_raises_error(self):
+        inputstring = """alg = LoadRaw("test-file.raw",'testWS',SpectrumMax=1)"""
+        expected = """alg = LoadRaw("test-file.raw",'testWS',SpectrumMax=1)"""
+        self.do_migration(inputstring)
+        self.check_outcome(inputstring, expected)
             
 if __name__ == "__main__":
     unittest.main()
