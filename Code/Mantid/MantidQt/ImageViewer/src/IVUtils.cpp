@@ -56,6 +56,32 @@ void IVUtils::Format( int            width,
 
 
 /**
+ *  Push a name, value pair onto a vector of strings.  The value is converted
+ *  to a string using the specified width and precision.
+ *
+ *  @param name      String name that is first pushed on the list
+ *  @param width     The total number of characters to be used when formatting 
+ *                   the value
+ *  @param precison  The number of significant figures to use 
+ *  @param value     The double precsion number to be formatted and pushed on
+ *                   the list
+ *  @param list      The list of strings to which the name,value pair is added.
+ */
+void IVUtils::PushNameValue( const std::string               & name,
+                                   int                         width,
+                                   int                         precision,
+                                   double                      value,
+                                   std::vector<std::string>  & list )
+{
+  list.push_back( name );
+
+  std::string value_str;
+  Format( width, precision, value, value_str );
+  list.push_back( value_str );
+}
+
+
+/**
  * Find a non-degenerate interval containing all the specified values.
  * If there are more than one values in the list, min will be set to 
  * the smallest value and max will be set to the largest value.  If there

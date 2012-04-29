@@ -198,26 +198,15 @@ void EventWSDataSource::GetInfoList( double x,
 {
   list.clear();
 
-  list.push_back("Test X:");
-  std::string x_str;
-  IVUtils::Format(8,3,x,x_str);
-  list.push_back(x_str);
-
-  std::string y_label = ev_ws->YUnit();
-  list.push_back(y_label);
-//  list.push_back("Test Y:");
-  std::string y_str;
-  IVUtils::Format(8,3,y,y_str);
-  list.push_back(y_str);
-
   ISpectrum* spec = ev_ws->getSpectrum( (int)y );
-  double spec_id = spec->getSpectrumNo();
 
-  list.push_back("Spec ID");
-  std::string spec_id_str;
-  IVUtils::Format(8,0,spec_id,spec_id_str);
-  list.push_back( spec_id_str );
+  double spec_id = spec->getSpectrumNo();
+  IVUtils::PushNameValue( "Spec ID", 8, 3, spec_id, list );
+
+  std::string x_label = ev_ws->getAxis(0)->unit()->label();
+  IVUtils::PushNameValue( x_label, 8, 3, x, list );
 }
+
 
 } // namespace MantidQt 
 } // namespace ImageView

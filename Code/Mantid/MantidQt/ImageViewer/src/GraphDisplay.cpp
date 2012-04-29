@@ -152,7 +152,7 @@ void GraphDisplay::SetPointedAtPoint( QPoint point )
 void GraphDisplay::ShowInfoList( double x, double y )
 {
   int n_infos = 0;
-  int n_rows  = 2;
+  int n_rows  = 1;
   std::vector<std::string> info_list;
   if ( data_source != 0 )
   {
@@ -179,16 +179,22 @@ void GraphDisplay::ShowInfoList( double x, double y )
 
   int width = 9;
   int prec  = 3;
-  QtUtils::SetTableEntry( 0, 0, "X", graph_table );
-  QtUtils::SetTableEntry( 0, 1, width, prec, x, graph_table );
 
-  QtUtils::SetTableEntry( 1, 0, "Y", graph_table );
-  QtUtils::SetTableEntry( 1, 1, width, prec, y, graph_table );
+  if ( is_vertical )
+  {
+    QtUtils::SetTableEntry( 0, 0, "Value", graph_table );
+    QtUtils::SetTableEntry( 0, 1, width, prec, x, graph_table );
+  }
+  else
+  {
+    QtUtils::SetTableEntry( 0, 0, "Value", graph_table );
+    QtUtils::SetTableEntry( 0, 1, width, prec, y, graph_table );
+  }
 
   for ( int i = 0; i < n_infos; i++ )
   {
-    QtUtils::SetTableEntry( i+2, 0, info_list[2*i], graph_table );
-    QtUtils::SetTableEntry( i+2, 1, info_list[2*i+1], graph_table );
+    QtUtils::SetTableEntry( i+1, 0, info_list[2*i], graph_table );
+    QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], graph_table );
   }
 
 }

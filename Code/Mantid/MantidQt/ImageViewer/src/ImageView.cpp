@@ -33,6 +33,7 @@ ImageView::ImageView( ImageDataSource* data_source )
   ui->setupUi( window );
   window->resize( 1050, 800 );
   window->show();
+  window->setAttribute(Qt::WA_DeleteOnClose); 
 
   SliderHandler* slider_handler = new SliderHandler( ui );
   saved_slider_handler = slider_handler;

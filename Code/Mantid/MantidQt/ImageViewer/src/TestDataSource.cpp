@@ -171,15 +171,8 @@ void TestDataSource::GetInfoList( double x,
 {
   list.clear();
 
-  list.push_back("Test X:");
-  std::string x_str;
-  IVUtils::Format(8,3,x,x_str);
-  list.push_back(x_str);
-
-  list.push_back("Test Y:");
-  std::string y_str;
-  IVUtils::Format(8,3,y,y_str);
-  list.push_back(y_str);
+  IVUtils::PushNameValue( "Test X", 8, 3, x, list );
+  IVUtils::PushNameValue( "Test Y", 8, 3, y, list );
 }
 
 } // namespace MantidQt 

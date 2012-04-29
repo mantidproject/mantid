@@ -56,6 +56,13 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
                         double         value, 
                         std::string  & str );
 
+    /// push a name, value pair onto a vector of strings
+    static void PushNameValue( const std::string               & name,
+                                     int                         width,
+                                     int                         precision,
+                                     double                      value,
+                                     std::vector<std::string>  & list );
+
     /// find a non-degenerate interval containing all the specified values 
     static void FindValidInterval( const QVector<double>  & values,
                                          double           & min,

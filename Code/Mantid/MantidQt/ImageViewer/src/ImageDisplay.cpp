@@ -235,9 +235,6 @@ void ImageDisplay::UpdateImage()
 
   image_plot_item->SetData( data_array, &color_table );
   image_plot->replot();
-  image_plot->replot(); // try to get image to appear consistently on Win7
-  image_plot->replot();
-  image_plot->replot();
 }
 
 
@@ -374,27 +371,22 @@ void ImageDisplay::ShowInfoList( double x, double y )
   data_source->GetInfoList( x, y, info_list );
   int n_infos = (int)info_list.size() / 2;
 
-  image_table->setRowCount(n_infos + 3);
+  image_table->setRowCount(n_infos + 1);
   image_table->setColumnCount(2);
   image_table->verticalHeader()->hide();
   image_table->horizontalHeader()->hide();
 
   int width = 9;
   int prec  = 3;
-  QtUtils::SetTableEntry( 0, 0, "X", image_table );
-  QtUtils::SetTableEntry( 0, 1, width, prec, x, image_table );
-
-  QtUtils::SetTableEntry( 1, 0, "Y", image_table );
-  QtUtils::SetTableEntry( 1, 1, width, prec, y, image_table );
 
   double value = data_array->GetValue( x, y );
-  QtUtils::SetTableEntry( 2, 0, "Value", image_table );
-  QtUtils::SetTableEntry( 2, 1, width, prec, value, image_table );
+  QtUtils::SetTableEntry( 0, 0, "Value", image_table );
+  QtUtils::SetTableEntry( 0, 1, width, prec, value, image_table );
 
   for ( int i = 0; i < n_infos; i++ )
   {
-    QtUtils::SetTableEntry( i+3, 0, info_list[2*i], image_table );
-    QtUtils::SetTableEntry( i+3, 1, info_list[2*i+1], image_table );
+    QtUtils::SetTableEntry( i+1, 0, info_list[2*i], image_table );
+    QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], image_table );
   }
 }
 
