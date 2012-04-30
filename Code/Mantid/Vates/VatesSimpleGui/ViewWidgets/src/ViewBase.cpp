@@ -520,6 +520,30 @@ void ViewBase::updateUI()
 {
 }
 
+/**
+ * This function checks the current pipeline for a filter with the specified
+ * name. The function works for generic filter names only.
+ * @param name the name of the filter to search for
+ * @return true if the filter is found
+ */
+bool ViewBase::hasFilter(const QString &name)
+{
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  QList<pqPipelineSource *>::Iterator source;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+  for (source = sources.begin(); source != sources.end(); ++source)
+  {
+    const QString sourceName = (*source)->getSMName();
+    if (sourceName.startsWith(name))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

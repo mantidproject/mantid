@@ -17,6 +17,8 @@
 #include <vtkSMProxy.h>
 
 #include <QHBoxLayout>
+#include <QMessageBox>
+#include <QString>
 
 namespace Mantid
 {
@@ -107,6 +109,15 @@ void StandardView::onCutButtonClicked()
 
 void StandardView::onRebinButtonClicked()
 {
+  const QString filterName = "MantidRebinning";
+  if (this->hasFilter(filterName))
+  {
+    QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
+                         QApplication::tr("Please click on the "+filterName+\
+                                          " entry to modify the rebinning "\
+                                          "parameters."));
+    return;
+  }
   if (this->origSrc)
   {
     pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
