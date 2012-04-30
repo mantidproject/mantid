@@ -323,6 +323,10 @@ def do_algorithm(args, algo):
             print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
             page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
 
+    saved_text = open(wiki_page_name+'.txt', 'w')
+    saved_text.write(new_contents)
+    saved_text.close()
+    
 #======================================================================
 if __name__ == "__main__":
     # First, get the config for the last settings
