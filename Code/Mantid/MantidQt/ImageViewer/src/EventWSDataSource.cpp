@@ -39,9 +39,6 @@ EventWSDataSource::EventWSDataSource( IEventWorkspace_sptr ev_ws )
 
   total_rows = ev_ws->getNumberHistograms();
 
-  std::cout << "Xmin = " << ev_ws->getXMin() << std::endl;
-  std::cout << "Xmax = " << ev_ws->getXMax() << std::endl;
-
   total_cols = 1000000;              // Default data resolution
 }
 
@@ -145,15 +142,27 @@ DataArray* EventWSDataSource::GetDataArray( double xmin,   double  xmax,
   {
     x_scale[i] = xmin + (double)i * dx;;
   }
+                                                   // choose spectra from  
+                                                   // required range of 
+                                                   // spectrum indexes 
+  double y_step = (ymax - ymin) / (double)n_rows;
+  double mid_y;
+  double d_y_index;
+  size_t source_row;
 
   MantidVec y_vals;
   MantidVec err;
   y_vals.resize(n_cols);
   err.resize(n_cols);
   size_t index = 0;
-  for ( size_t i = first_row; i < first_row + n_rows; i++ )
+  for ( size_t i = 0; i < n_rows; i++ )
   {
-    IEventList * list = ev_ws->getEventListPtr(i);
+    mid_y = ymin + ((double)i + 0.5) * y_step;
+    IVUtils::Interpolate( total_ymin, total_ymax, mid_y,
+                                 0.0, (double)total_rows, d_y_index );
+    source_row = (size_t)d_y_index;
+
+    IEventList * list = ev_ws->getEventListPtr( source_row );
     y_vals.clear();
     list->generateHistogram( x_scale, y_vals, err, true );
     for ( size_t col = 0; col < n_cols; col++ )
