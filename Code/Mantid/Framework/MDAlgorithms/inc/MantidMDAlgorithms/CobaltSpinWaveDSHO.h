@@ -25,10 +25,7 @@ namespace Mantid
         <LI> Gamma     - inverse lifetime gamma (= energy half-width) </LI>
         </UL>
 
-        @author Ron Fowler
-        @date 07/04/2011
-
-        Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2007-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
         This file is part of Mantid.
 

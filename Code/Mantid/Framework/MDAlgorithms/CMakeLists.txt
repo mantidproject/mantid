@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/IConvertToMDEventsWS.cpp
 	src/ConvToMDPreprocDetectors.cpp	
+        src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -75,6 +76,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
+        inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -127,6 +129,7 @@ set ( TEST_FILES
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTestPerformance.h 	
+        test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h

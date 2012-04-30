@@ -64,14 +64,14 @@ namespace Mantid
           double yl, double sx, double sy,
           double sz, int isam, double temp,
           double eta);
-      /// Constructor which will read from ExperimentInfo
+      /// Constructor which will read from ExperimentInfo TODO
       RunParam(const int runID);
 
       /// Destructor
       ~RunParam();
 
 
-      // These gets are public for now but most will be private when required values are available
+      // These gets are public for now but may change
       // The sets will still need to be public
 
       /// return incident energy of run

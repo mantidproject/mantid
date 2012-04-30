@@ -23,10 +23,8 @@ namespace Mantid
         <LI> Quadratic -  Quadratic coefficient </LI>
         </UL>
 
-        @author Ron Fowler
-        @date 31/03/2011
 
-        Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2007-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
         This file is part of Mantid.
 

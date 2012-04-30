@@ -36,8 +36,6 @@ namespace Mantid
         		declareParameter(extraParams[i],0.0);
         }
 
-        //
-
         // This is a broad model
         bool CobaltSpinWaveDSHO::userModelIsBroad() const
         {return true;};
@@ -47,8 +45,6 @@ namespace Mantid
         */
         void CobaltSpinWaveDSHO::userSqw(const boost::shared_ptr<Mantid::MDAlgorithms::RunParam> run, const std::vector<double> & params,
                                          const std::vector<double> & qE, std::vector<double> & result) const
-        //double CobaltSpinWaveDSHO::sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
-        //    const double temp, const Kernel::Matrix<double> & ubinv) const
         {
 
             const double eps = qE[3];
@@ -56,7 +52,6 @@ namespace Mantid
             const double qsqr = qlab.norm2();
             const double temp=run->getTemp();
             // Get Q in r.l.u. using the uBInv matrix for this run:
-            //Mantid::Kernel::V3D qrlu = m_runData->uBInv()*qlab;
             const Mantid::Kernel::V3D qhkl=run->getCubInvMat()*qlab;
             const double qh = qhkl[0]; //
             const double qk = qhkl[1];
@@ -93,7 +88,6 @@ namespace Mantid
             const double epswacous = (eps*eps-wacous*wacous);
             const double epswoptic = (eps*eps-woptic*woptic);
             const double formtab = magneticForm(qsqr);
-            //UNUSED_ARG(qsqr);
 
             const double weight =  amp * bose(eps,temp) * formtab*formtab *
                 ( sfa * (4.0*gam*wacous)/(M_PI*(epswacous*epswacous+4.*(gam*eps)*(gam*eps))) +
