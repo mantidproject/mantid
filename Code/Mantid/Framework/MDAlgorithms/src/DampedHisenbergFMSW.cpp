@@ -76,7 +76,7 @@ namespace Mantid
       const double js2 = params[3];
       const double js3 = params[4];
       const double gam = params[5];
-      double spin, dampingScale;
+      double spin=0., dampingScale=0.;
       if(m_lovesey )
       {
         spin = params[6];
