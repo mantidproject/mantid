@@ -165,17 +165,57 @@ def findQaxisMinMax(q_axis):
 
     return _q_axis_min_max_index
 
+
+def cleanup_data(InputWorkspace=None,
+                 OutputWorkspace=None,
+                 maxY=256):
+    mti = mtd[InputWorkspace]
+    _tof_axis = mti.readX(0)[:]
+    nbr_tof = shape(_tof_axis)[0]-1
+    
+    tof_range = range(nbr_tof-1)
+    x_range = range(maxY)
+
+    _new_y = zeros((maxY, nbr_tof))
+    _new_e = zeros((maxY, nbr_tof))
+    for px in x_range:
+        for tof in tof_range:
+            _y = mti.readY(px)[tof]
+            if _y != 0:
+                _e = mti.readE(px)[tof]
+                _y2 = _y * _y
+#                if _y < _e:
+                if _y < 0 or _y < _e:
+                    _y = 0.
+                    _e = 0.
+                _new_y[px,tof] = float(_y)
+                _new_e[px,tof] = float(_e)
+
+    _y_error_axis = _new_e.flatten()
+    _y_axis = _new_y.flatten()
+
+    CreateWorkspace(OutputWorkspace=OutputWorkspace,
+                    DataX=_tof_axis,
+                    DataY=_y_axis,
+                    DataE=_y_error_axis,
+                    Nspec=maxY,
+                    UnitX="TOF",
+                    ParentWorkspace=mti)
+
 def createIntegratedWorkspace(mt1, outputWorkspace,
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
-                              maxX=304, maxY=256):
+                              maxX=304, maxY=256,
+                              bCleaning=False):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
     """
 
     _tof_axis = mt1.readX(0)[:]
-
+    nbr_tof = len(_tof_axis)
+    t_range = arange(nbr_tof-1)
+    
     _fromXpixel = min([fromXpixel, toXpixel])
     _toXpixel = max([fromXpixel, toXpixel])
     fromXpixel = _fromXpixel

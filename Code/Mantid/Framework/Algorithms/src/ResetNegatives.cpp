@@ -78,6 +78,7 @@ namespace Algorithms
   /// @copydoc Mantid::API::Algorithm::exec()
   void ResetNegatives::exec()
   {
+
     // get the minimum for each spectrum
     IAlgorithm_sptr alg = this->createSubAlgorithm("Min", 0., .1);
     alg->setPropertyValue("InputWorkspace", this->getPropertyValue("InputWorkspace"));
@@ -145,7 +146,7 @@ namespace Algorithms
     // do the actual work
     if (this->getProperty("AddMinimum"))
     {
-      this->pushMinimum(minWS, outputWS, prog);
+        this->pushMinimum(minWS, outputWS, prog);
     }
     else
     {
@@ -219,8 +220,9 @@ namespace Algorithms
         MantidVec & y = wksp->dataY(i);
         for (MantidVec::iterator it = y.begin(); it != y.end(); ++it)
         {
-          if (*it < 0.)
-            *it = value;
+            if (*it < 0.) {
+              *it = value;
+            }
           else
             *it = fixZero(*it);
         }

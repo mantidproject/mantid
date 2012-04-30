@@ -615,6 +615,9 @@ class DataReflWidget(BaseWidget):
         """
             This is reached by the TOF range switch
         """
+        print 'in _tof_range_clicked'
+        
+        
         self._summary.tof_min_label.setEnabled(is_checked)
         self._summary.data_from_tof.setEnabled(is_checked)
         self._summary.tof_min_label2.setEnabled(is_checked)
@@ -898,8 +901,8 @@ class DataReflWidget(BaseWidget):
         #from TOF and to TOF
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
-        self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
-        self._tof_range_clicked(state.crop_TOF_range)
+        self._summary.tof_range_switch.setChecked(state.TofRangeFlag)
+        self._tof_range_clicked(state.TofRangeFlag)
         
         if hasattr(state, "set_detector_angle"):
             self._summary.det_angle_check.setChecked(state.set_detector_angle)
@@ -1035,7 +1038,7 @@ class DataReflWidget(BaseWidget):
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
-        m.crop_TOF_range = self._summary.tof_range_switch.isChecked()
+        m.TofRangeFlag = self._summary.tof_range_switch.isChecked()
     
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]

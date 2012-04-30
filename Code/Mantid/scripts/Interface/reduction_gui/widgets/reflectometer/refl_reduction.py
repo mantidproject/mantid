@@ -117,8 +117,8 @@ class DataReflWidget(BaseRefWidget):
     def set_editing_state(self, state):
         super(DataReflWidget, self).set_editing_state(state)
                 
-        self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
-        self._tof_range_clicked(state.crop_TOF_range)
+        self._summary.tof_range_switch.setChecked(state.TofRangeFlag)
+        self._tof_range_clicked(state.TofRangeFlag)
                                                 
     def get_state(self):
         """
@@ -182,7 +182,7 @@ class DataReflWidget(BaseRefWidget):
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
-        m.crop_TOF_range = self._summary.tof_range_switch.isChecked()
+        m.TofRangeFlag = self._summary.tof_range_switch.isChecked()
     
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]

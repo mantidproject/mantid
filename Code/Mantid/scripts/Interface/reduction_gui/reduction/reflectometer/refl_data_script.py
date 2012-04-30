@@ -16,7 +16,7 @@ class DataSets(BaseScriptElement):
     DataBackgroundFlag = False
     DataBackgroundRoi = [115, 137,123, 137]
     DataTofRange = [9600., 21600.]
-    crop_TOF_range = True;
+    TofRangeFlag = True
     
     data_x_range_flag = True
     data_x_range = [115,210]
@@ -109,6 +109,7 @@ class DataSets(BaseScriptElement):
         xml += "<back_roi1_to>%s</back_roi1_to>\n" % str(self.DataBackgroundRoi[1])
         xml += "<back_roi2_from>%s</back_roi2_from>\n" % str(self.DataBackgroundRoi[2])
         xml += "<back_roi2_to>%s</back_roi2_to>\n" % str(self.DataBackgroundRoi[3])
+        xml += "<tof_range_flag>%s</tof_range_flag>\n" % str(self.TofRangeFlag)
         xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
         xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
@@ -190,6 +191,8 @@ class DataSets(BaseScriptElement):
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
 
         #from TOF and to TOF
+        self.TofRangeFlag = BaseScriptElement.getBoolElement(instrument_dom, "tof_range_flag", 
+                                                             default=DataSets.TofRangeFlag)
         self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
                              BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range")]
 
@@ -233,6 +236,7 @@ class DataSets(BaseScriptElement):
         self.DataPeakDiscreteSelection = DataSets.DataPeakDiscreteSelection
         self.DataPeakPixels = DataSets.DataPeakPixels
         self.DataTofRange = DataSets.DataTofRange
+        self.TofRangeFlag = DataSets.TofRangeFlag
         self.data_files = DataSets.data_files
         
         self.NormFlag = DataSets.NormFlag
