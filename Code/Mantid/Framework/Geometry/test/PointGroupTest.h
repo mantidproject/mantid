@@ -7,9 +7,7 @@
 #include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
-
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "/usr/lib/gcc/x86_64-redhat-linux/4.4.4/include/stdarg.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
