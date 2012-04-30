@@ -198,9 +198,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareFileProperty("CharacterizationRunsFile", "", FileAction.OptionalLoad,
                                  ['.txt'],
                                  Description="File with characterization runs denoted")
-        self.declareProperty("UnwrapRef", 0., 
-                             Description="Reference total flight path for frame unwrapping. Zero skips the correction")
-        self.declareProperty("LowResRef", 0., 
+        self.declareProperty("LowResRef", 0.,
                              Description="Reference DIFC for resolution removal. Zero skips the correction")
         self.declareProperty("CropWavelengthMin", 0.,
                              Description="Crop the data at this minimum wavelength. Overrides LowResRef.")
@@ -418,10 +416,9 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
-        LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
         wavelengthMin = self.getProperty("CropWavelengthMin")
-        if (LRef > 0.) or (DIFCref > 0.) or (wavelengthMin>0): # super special Jason stuff
+        if (DIFCref > 0.) or (wavelengthMin>0): # super special Jason stuff
             kwargs = {}
             try:
                 if info.tmin > 0:
@@ -431,8 +428,6 @@ class SNSPowderReduction(PythonAlgorithm):
             except:
                 pass
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
-            if LRef > 0:
-                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef, **kwargs)
             if DIFCref > 0. or wavelengthMin > 0.:
                 if kwargs.has_key("Tmax"):
                     del kwargs["Tmax"]
