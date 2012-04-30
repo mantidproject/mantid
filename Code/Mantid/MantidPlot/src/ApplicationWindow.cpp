@@ -514,9 +514,13 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
       }
     }
 
-    //If the ignore property exists and is set to true, then skip the dialog.
-    const std::string paraviewIgnoreProperty = "paraview.ignore";
-    b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString(confService.getString(paraviewIgnoreProperty).c_str()).toInt() == true;
+    //ONLY If skipping is not already selected
+    if(!b_skipDialog)
+    {
+      //If the ignore property exists and is set to true, then skip the dialog.
+      const std::string paraviewIgnoreProperty = "paraview.ignore";
+      b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString(confService.getString(paraviewIgnoreProperty).c_str()).toInt() == true;
+    }
 
     if(this->hasParaviewPath())
     {
