@@ -37,7 +37,7 @@ endfunction()
 set ( macos_exec_path @executable_path/../MacOS )
 set ( plugin_path @executable_path/../../plugins )
 
-change_bundle_dep( ${macos_exec_path}/libMDAlgorithms.dylib ${plugin_path}/libMDAlgorithms.dylib
+change_bundle_dep( ${macos_exec_path}/libMantidMDAlgorithms.dylib ${plugin_path}/libMantidMDAlgorithms.dylib
   ${bundle}/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib )
 
 ####################################################
