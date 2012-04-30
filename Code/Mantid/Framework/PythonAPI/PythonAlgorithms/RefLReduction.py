@@ -15,25 +15,37 @@ class RefLReduction(PythonAlgorithm):
         return 1
 
     def PyInit(self):
-        self.declareListProperty("RunNumbers", [0], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("RunNumbers", [0], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("NormalizationRunNumber", 0, Description="")
-        self.declareListProperty("SignalPeakPixelRange", [126, 134], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("SignalPeakPixelRange", [126, 134], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractSignalBackground", True)
-        self.declareListProperty("SignalBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("SignalBackgroundPixelRange", [123, 137], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("NormFlag", True)
-        self.declareListProperty("NormPeakPixelRange", [127, 133], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("NormPeakPixelRange", [127, 133], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractNormBackground", True)
-        self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("NormBackgroundPixelRange", [123, 137], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("LowResDataAxisPixelRangeFlag", True)
-        self.declareListProperty("LowResDataAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("LowResDataAxisPixelRange", [115, 210], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("LowResNormAxisPixelRangeFlag", True)
-        self.declareListProperty("LowResNormAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("LowResNormAxisPixelRange", [115, 210], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("TOFRange", [9000., 23600.], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("TofRangeFlag", True)
-        self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
-        self.declareProperty("QStep", 0.001, Description="Step-size in Q. Enter a negative value to get a log scale.")
-        self.declareProperty("AngleOffset", 0.0, Description="Angle offset (degrees)")
-        self.declareProperty("AngleOffsetError", 0.0, Description="Angle offset error (degrees)")
+        self.declareProperty("QMin", 0.001, 
+                             Description="Minimum Q-value")
+        self.declareProperty("QStep", 0.001, 
+                             Description="Step-size in Q. Enter a negative value to get a log scale.")
+        self.declareProperty("AngleOffset", 0.0, 
+                             Description="Angle offset (degrees)")
+        self.declareProperty("AngleOffsetError", 0.0, 
+                             Description="Angle offset error (degrees)")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -114,7 +126,7 @@ class RefLReduction(PythonAlgorithm):
             
             for _run in run_numbers:
 
-                ########################################################################
+                ##############################################################
                 # Find full path to event NeXus data file
                 _File = FileFinder.findRuns("REF_L%d" %_run)
                 if len(_File)>0 and os.path.isfile(_File[0]): 
@@ -125,9 +137,11 @@ class RefLReduction(PythonAlgorithm):
                     raise RuntimeError(msg)
                 
                 if not mtd.workspaceExists(ws_event_data):
-                    LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+                    LoadEventNexus(Filename=data_file, 
+                                   OutputWorkspace=ws_event_data)
                 else:
-                    LoadEventNexus(Filename=data_file, OutputWorkspace='tmp')
+                    LoadEventNexus(Filename=data_file, 
+                                   OutputWorkspace='tmp')
                     mt1 = mtd[ws_event_data]
                     mt2 = mtd['tmp']
                     Plus(LHSWorkspace=ws_event_data,
@@ -144,7 +158,8 @@ class RefLReduction(PythonAlgorithm):
                 raise RuntimeError(msg)
 
             if not mtd.workspaceExists(ws_event_data):
-                LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+                LoadEventNexus(Filename=data_file, 
+                               OutputWorkspace=ws_event_data)
         
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
@@ -172,14 +187,17 @@ class RefLReduction(PythonAlgorithm):
                 
         # Keep only range of TOF of interest
         print '-> Crop TOF range'
-        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
+        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], 
+                      XMax=TOFrange[1])
 
         # Normalized by Current (proton charge)
         print '-> Normalize by proton charge'
-        NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
+        NormaliseByCurrent(InputWorkspace=ws_histo_data, 
+                           OutputWorkspace=ws_histo_data)
     
         # Calculation of the central pixel (using weighted average)
-        pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
+        pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], 
+                                                  maxX=maxX, maxY=maxY)
         pixelXtof_1d = pixelXtof_data.sum(axis=1)
         
         # Keep only range of pixels
@@ -402,6 +420,8 @@ class RefLReduction(PythonAlgorithm):
                            OutputWorkspace=ws_data,
                            AddMinimum=0)
 
+            mtd.deleteWorkspace(ws_histo_data+'_1D')
+
 #            SumSpectra(InputWorkspace=ws_data, 
 #                       OutputWorkspace='wks_after_back_subtraction_1d')
         
@@ -430,7 +450,7 @@ class RefLReduction(PythonAlgorithm):
             if len(f)>0 and os.path.isfile(f[0]): 
                 norm_file = f[0]
             else:
-                msg = "RefLReduction: could not find run %d\n" % normalization_run
+                msg = "RefLReduction: could not find run %d\n" %normalization_run
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)
             
@@ -650,13 +670,16 @@ class RefLReduction(PythonAlgorithm):
                                 ParentWorkspace=mtd[ws_norm_histo_data],
                                 NSpec=1)
             
-                #recreate workspace at the end                
-                mt1 = mtd[ws_norm_histo_data+'_1D']
-                mt2 = mtd['background']
+#                #recreate workspace at the end                
+#                mt1 = mtd[ws_norm_histo_data+'_1D']
+#                mt2 = mtd['background']
                                     
                 Minus(LHSWorkspace=ws_norm_histo_data+'_1D',
                       RHSWorkspace='background',
                       OutputWorkspace=ws_norm_rebinned)
+
+                mtd.deleteWorkspace(ws_norm_histo_data+'_1D')
+                mtd.deleteWorkspace('background')
 
                 ResetNegatives(InputWorkspace=ws_norm_rebinned,
                                OutputWorkspace=ws_norm_rebinned,
@@ -686,16 +709,14 @@ class RefLReduction(PythonAlgorithm):
             #Normalization    
             print '-> Sum spectra'       
             SumSpectra(InputWorkspace=ws_norm_rebinned, 
-                       OutputWorkspace=ws_norm_rebinned+'_tmp')
+                       OutputWorkspace=ws_norm_rebinned)
              
             #### divide data by normalize histo workspace
             print '-> Divide data by direct beam'
             Divide(LHSWorkspace=ws_data,
-                   RHSWorkspace=ws_norm_rebinned+'_tmp',
-                   OutputWorkspace=ws_data+'_tmp2')
+                   RHSWorkspace=ws_norm_rebinned,
+                   OutputWorkspace=ws_data)
 
-
-        #This is where I need to move from TOF to Q (not before that)
         #now we can convert to Q
         
         theta = tthd_rad - ths_rad
@@ -758,6 +779,7 @@ class RefLReduction(PythonAlgorithm):
                                             geo_correction=False,
                                             q_binning=[q_min,q_step,q_max])
 
+            mtd.deleteWorkspace(ws_integrated_data)
 
         else:
             ws_data_Q = ws_data + '_Q'
@@ -771,8 +793,10 @@ class RefLReduction(PythonAlgorithm):
                                             source_to_detector=dMD,
                                             sample_to_detector=dSD,
                                             theta=theta,
-                                            geo_correction=False,
+                                            geo_correction=True,
                                             q_binning=[q_min,q_step,q_max])
+
+            mtd.deleteWorkspace(ws_data_scaled)
 
 
         print '-> replace special values'
@@ -791,25 +815,6 @@ class RefLReduction(PythonAlgorithm):
             
         print '-> sum spectra'    
         SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
-#        SumSpectra(InputWorkspace=ws_data_cleaned, OutputWorkspace=output_ws)
-
-#        if (backSubMethod ==1):
-#            ReplaceSpecialValues(InputWorkspace=ws_integrated_data, 
-#                                 NaNValue=0, 
-#                                 NaNError=0, 
-#                                 InfinityValue=0, 
-#                                 InfinityError=0, 
-#                                 OutputWorkspace='_tmp1')
-#            SumSpectra(InputWorkspace='_tmp1', OutputWorkspace='_tmp2')
-#        else:
-#            ReplaceSpecialValues(InputWorkspace=ws_data_scaled, 
-#                                 NaNValue=0, 
-#                                 NaNError=0, 
-#                                 InfinityValue=0, 
-#                                 InfinityError=0, 
-#                                 OutputWorkspace='_tmp1')
-#            SumSpectra(InputWorkspace='_tmp1', OutputWorkspace='_tmp2')
-#            Scale(InputWorkspace='_tmp2',OutputWorkspace='_tmp2_scaled',Factor=(1./(0.18)))
 
         #keep only none zero values
         try:
@@ -861,6 +866,5 @@ class RefLReduction(PythonAlgorithm):
         mtd.deleteWorkspace(ws_norm_event_data)
         
         print
-        
         
 mtd.registerPyAlgorithm(RefLReduction())
