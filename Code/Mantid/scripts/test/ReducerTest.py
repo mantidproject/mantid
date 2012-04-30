@@ -115,6 +115,10 @@ class ReducerTest(unittest.TestCase):
         r.clear_data_files()
         self.assertEqual(len(r._data_files), 0)
 
+    def test_imports(self):
+        import reduction_gui
+        import reduction_application
+        
 
 if __name__ == '__main__':
     unittest.main()
