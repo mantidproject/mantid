@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
+#include "Poco/String.h"
 
 namespace Mantid
 {
@@ -49,11 +50,19 @@ void RefRoi::init()
   declareProperty("YPixelMax", EMPTY_INT(),
       "Upper bound of ROI in Y", Kernel::Direction::Input);
 
-  declareProperty("SumPixels", false);
-  declareProperty("NormalizeSum", false);
-  declareProperty("IntegrateY", true);
-  declareProperty("ConvertToQ", true);
-  declareProperty("ScatteringAngle", 0.0);
+  declareProperty("SumPixels", false, "If true, all the pixels will be summed,"
+      " so that the resulting workspace will be a single histogram");
+  declareProperty("NormalizeSum", false, "If true, and SumPixels is true, the"
+      "resulting histogram will be divided by the number of pixels in the ROI");
+  declareProperty("IntegrateY", true, "If true, the Y direction will be"
+      " considered the low-resolution direction and will be integrated over."
+      " If false, the X direction will be integrated over. The result will be"
+      " a histogram for each of the pixels in the hi-resolution direction of"
+      " the 2D detector");
+  declareProperty("ConvertToQ", true, "If true, the X-axis will be converted"
+      " to momentum transfer");
+  declareProperty("ScatteringAngle", 0.0, "Value of the scattering angle to use"
+      " when converting to Q");
 }
 
 /// Execute algorithm
@@ -127,6 +136,13 @@ void RefRoi::extract2D()
   const MantidVec& XIn0 = inputWS->readX(0);
   if (convert_to_q)
   {
+    // Check that the X-axis is in wavelength units
+    const std::string unit = inputWS->getAxis(0)->unit()->caption();
+    if (Poco::icompare(unit, "Wavelength") != 0) {
+      g_log.error() << "RefRoi expects units of wavelength to convert to Q" << std::endl;
+      throw std::runtime_error("RefRoi expects units of wavelength to convert to Q");
+    }
+
     for (size_t t=0; t<XOut0.size(); t++)
     {
       size_t t_index = XIn0.size()-1-t;
