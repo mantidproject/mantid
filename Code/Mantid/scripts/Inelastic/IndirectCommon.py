@@ -4,13 +4,14 @@ import platform, os.path, math, datetime
 
 def inF2PyCompatibleEnv():
     '''Returns true if we are in an environment where our Fortran2Python 
-    files are usable, oterwise returns false.'''
+    files are usable, otherwise returns false.'''
     osEnv = platform.system() + platform.architecture()[0]
-    if osEnv is 'Windows32bit' or osEnv is 'Linux64bit':
+    if osEnv == 'Windows32bit' or osEnv == 'Linux64bit':
         return True
     return False
 
 def runF2PyCheck():
+    '''Raises exception if not in F2Py compatible env.'''
     if not inF2PyCompatibleEnv():
         raise RuntimeError("F2Py programs NOT available on this platform.")
     
