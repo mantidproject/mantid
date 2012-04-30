@@ -206,5 +206,77 @@ double DataArray::GetValue( double x, double y ) const
 }
 
 
+/**
+ * Clamp x to the interval of x-values covered by this DataArray.
+ * @param x   If x is more than xmax it will be set to xmax. If x is less 
+ *            than xmin, it will be set to xmin.
+ */
+void DataArray::RestrictX( double & x )
+{
+  if ( x > xmax )
+  {
+    x = xmax;
+  }
+  else if ( x < xmin )
+  {
+    x = xmin;
+  }
+}
+
+
+/**
+ * Clamp y to the interval of y-values covered by this DataArray.
+ * @param y   If y is more than ymax it will be set to ymax. If y is less 
+ *            than ymin, it will be set to ymin.
+ */
+void DataArray::RestrictY( double & y )
+{
+  if ( y > ymax )
+  {
+    y = ymax;
+  }
+  else if ( y < ymin )
+  {
+    y = ymin;
+  }
+}
+
+
+/**
+ * Clamp row to a valid row number for this DataArray.
+ * @param row  If row is more than n_rows-1, it is set to n_rows-1.  If
+ *             row < 0 it is set to zero.
+ */
+void DataArray::RestrictRow( int & row )
+{
+  if ( row >= (int)n_rows )
+  {
+    row = (int)n_rows - 1;
+  }
+  else if ( row < 0 )
+  {
+    row = 0;
+  }
+}
+
+
+/**
+ * Clamp col to a valid column number for this DataArray.
+ * @param col  If col is more than n_cols-1, it is set to n_cols-1.  If
+ *             col < 0 it is set to zero.
+ */
+void DataArray::RestrictCol( int & col )
+{
+  if ( col >= (int)n_cols )
+  {
+    col = (int)n_cols - 1;
+  }
+  else if ( col < 0 )
+  {
+    col = 0;
+  }
+}
+
+
 } // namespace MantidQt 
 } // namespace ImageView 

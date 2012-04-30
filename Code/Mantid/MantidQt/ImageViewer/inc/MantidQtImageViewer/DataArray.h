@@ -44,7 +44,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
 {
   public:
 
-    // Construct a DataArray "wrapper" around the data and region info
+    /// Construct a DataArray "wrapper" around the data and region info
     DataArray( double xmin,     double xmax,
                double ymin,     double ymax,
                bool   is_log_x,
@@ -53,42 +53,55 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
 
     ~DataArray();
 
-    // Get the smallest 'x' value actually covered by this DataArray
+    /// Get the smallest 'x' value actually covered by this DataArray
     double GetXMin()    const;
 
-    // Get the largest 'x' value actually covered by this DataArray
+    /// Get the largest 'x' value actually covered by this DataArray
     double GetXMax()    const;
 
-    // Get the smallest 'y' value actually covered by this DataArray
+    /// Get the smallest 'y' value actually covered by this DataArray
     double GetYMin()    const;
 
-    // Get the largest 'y' value actually covered by this DataArray
+    /// Get the largest 'y' value actually covered by this DataArray
     double GetYMax()    const;
 
-    // Check if the returned array is binned logarithmically in 'x'
+    /// Check if the returned array is binned logarithmically in 'x'
     bool   GetIsLogX()  const;
 
-    // Get smallest value recorded in this DataArray
+    /// Get smallest value recorded in this DataArray
     double GetDataMin() const;
 
-    // Get largest value recorded in this DataArray
+    /// Get largest value recorded in this DataArray
     double GetDataMax() const;
 
     // Get the actual number of rows in this DataArray
     size_t GetNRows()   const;
 
-    // Get the actual number of columns in this DataArray
+    /// Get the actual number of columns in this DataArray
     size_t GetNCols()   const;
 
-    // Get simple array containing all values, packed in a 1-D array
+    /// Get simple array containing all values, packed in a 1-D array
     float* GetData()    const;
 
-    // Get the value at the specified row and column
+    /// Get the value at the specified row and column
     double GetValue( int row, int col ) const;
 
-    // Get the value from the row and column containing the specified point
+    /// Get the value from the row and column containing the specified point
     double GetValue( double x, double y ) const;
+
+    /// Clamp x to the interval of x-values covered by this DataArray
+    void RestrictX( double & x );
   
+    /// Clamp y to the interval of y-values covered by this DataArray
+    void RestrictY( double & y );
+
+    /// Clamp row to a valid row number for this DataArray
+    void RestrictRow( int & row );
+
+    /// Clamp col to a valid column number for this DataArray
+    void RestrictCol( int & col );
+
+
   private:
     double xmin; 
     double xmax;

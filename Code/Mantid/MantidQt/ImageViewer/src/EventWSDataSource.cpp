@@ -207,13 +207,24 @@ void EventWSDataSource::GetInfoList( double x,
 {
   list.clear();
 
-  ISpectrum* spec = ev_ws->getSpectrum( (int)y );
+  int row = (int)y;
+  RestrictRow( row );
 
-  double spec_id = spec->getSpectrumNo();
-  IVUtils::PushNameValue( "Spec ID", 8, 3, spec_id, list );
+  ISpectrum* spec = ev_ws->getSpectrum( row );
+
+  double spec_num = spec->getSpectrumNo();
+  IVUtils::PushNameValue( "Spec Num", 8, 0, spec_num, list );
 
   std::string x_label = ev_ws->getAxis(0)->unit()->label();
   IVUtils::PushNameValue( x_label, 8, 3, x, list );
+
+  std::set<detid_t> ids = spec->getDetectorIDs();
+  if ( ids.size() > 0 )
+  {
+    std::set<detid_t>::iterator it = ids.begin();
+    double d_id = (double)*it;
+    IVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
+  }
 }
 
 
