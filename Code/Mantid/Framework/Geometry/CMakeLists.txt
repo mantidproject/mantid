@@ -193,6 +193,7 @@ set ( TEST_FILES
 	test/ComponentParserTest.h
 	test/ComponentTest.h
 	test/ConeTest.h
+	test/ConventionalCellTest.h
 	test/ConvexPolygonTest.h
 	test/CylinderTest.h
 	test/DetectorGroupTest.h
@@ -203,9 +204,6 @@ set ( TEST_FILES
 	test/IMDDimensionFactoryTest.h
 	test/IMDDimensionTest.h
 	test/IndexingUtilsTest.h
-        test/ReducedCellTest.h
-        test/ConventionalCellTest.h
-        test/ScalarUtilsTest.h
 	test/InstrumentDefinitionParserTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
@@ -217,8 +215,8 @@ set ( TEST_FILES
 	test/MDHistoDimensionBuilderTest.h
 	test/MDHistoDimensionTest.h
 	test/MDImplicitFunctionTest.h
+	test/MDPlaneImplicitFunctionTest.h
 	test/MDPlaneTest.h
-        test/MDPlaneImplicitFunctionTest.h
 	test/MapSupportTest.h
 	test/MaterialTest.h
 	test/MathSupportTest.h
@@ -238,10 +236,12 @@ set ( TEST_FILES
 	test/ParameterMapTest.h
 	test/ParametrizedComponentTest.h
 	test/PlaneTest.h
+	test/PointGroupTest.h
 	test/PolygonEdgeTest.h
 	test/QuadrilateralTest.h
 	test/RectangularDetectorPixelTest.h
 	test/RectangularDetectorTest.h
+	test/ReducedCellTest.h
 	test/ReferenceFrameTest.h
 	test/ReflectionConditionTest.h
 	test/RotCounterTest.h
@@ -252,6 +252,7 @@ set ( TEST_FILES
 	test/RulesSurfPointTest.h
 	test/RulesTest.h
 	test/RulesUnionTest.h
+	test/ScalarUtilsTest.h
 	test/ShapeFactoryTest.h
 	test/SphereTest.h
 	test/SurfaceFactoryTest.h
