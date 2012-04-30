@@ -79,6 +79,11 @@ void LoadSassena::init()
  */
 void LoadSassena::exec()
 {
+
+  this->GWS = API::WorkspaceFactory::Instance().create("WorkspaceGroup");
+  // WorkspaceGroup_sptr wsgroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputs_orig[i]);
+  // API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
+  // MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D",numSpectra,energies.size(),numBins));
   this->m_filename = this->getPropertyValue("Filename");
 }
 
