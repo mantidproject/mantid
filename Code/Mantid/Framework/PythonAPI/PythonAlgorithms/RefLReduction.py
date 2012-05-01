@@ -943,8 +943,9 @@ class RefLReduction(PythonAlgorithm):
         if mtd.workspaceExists(ws_data):
             mtd.deleteWorkspace(ws_data)
         
-        if mtd.workspaceExists(ws_norm_event_data):
-            mtd.deleteWorkspace(ws_norm_event_data)
+        if (NormFlag):
+            if mtd.workspaceExists(ws_norm_event_data):
+                mtd.deleteWorkspace(ws_norm_event_data)
         
         print
         
