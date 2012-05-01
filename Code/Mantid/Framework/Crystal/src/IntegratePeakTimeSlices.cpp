@@ -691,7 +691,7 @@ namespace Mantid
 
                     double TotSliceIntensity = AttributeValues[IIntensities];
                     double TotSliceVariance = AttributeValues[IVariance];
-                    std::cout<<"errs="<< errs[0]<<std::endl;
+                    //std::cout<<"errs="<< errs[0]<<std::endl;
                     updatePeakInformation(    params,             errs,           names,
                                               TotVariance,       TotIntensity,
                                               TotSliceIntensity, TotSliceVariance, chisq,
