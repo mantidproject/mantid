@@ -726,9 +726,9 @@ def __doBinPlot(source, indices, error_bars,type):
     
 def __plotBinSingle(workspace, indices, error_bars,type):
     if isinstance(indices, list) or isinstance(indices, tuple):
-        master_graph = __CallPlotFunction(workspace, indices[0], error_bars,type)
+        master_graph = __callPlotBin(workspace, indices[0], error_bars,type)
         for index in indices[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
+            mergePlots(master_graph, __callPlotBin(workspace, index, error_bars,type))
         return master_graph
     else:
         return __callPlotBin(workspace, indices, error_bars,type)
@@ -746,7 +746,7 @@ def __plotBinList(workspace_list, indices, error_bars,type):
     else:
         master_graph = __callPlotBin(workspace_list[0], indices, error_bars,type)
         for workspace in workspace_list[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, indices, error_bars,type))
+            mergePlots(master_graph, __callPlotBin(workspace, indices, error_bars,type))
         return master_graph
 
 def __callPlotBin(workspace, index, error_bars,type):
@@ -754,5 +754,5 @@ def __callPlotBin(workspace, index, error_bars,type):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    return proxies.Graph(threadsafe_call('plotBin',wkspname, index, error_bars,type))
+    return proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotBin,wkspname, index, error_bars,type))
 #------------------------------------------------------------------------------------------
