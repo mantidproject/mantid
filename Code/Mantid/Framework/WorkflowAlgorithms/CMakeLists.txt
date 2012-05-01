@@ -46,7 +46,7 @@ if(UNITY_BUILD)
   enable_unity_build(WorkflowAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-set ( TEST_PY_FILES test/EQSANSQ2DTest.py test/EQSANSSensitivityCorrectionTest.py )
+set ( TEST_PY_FILES test/EQSANSQ2DTest.py )
 
 # Use a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidWorkflowAlgorithms/PrecompiledHeader.h MantidWorkflowAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
