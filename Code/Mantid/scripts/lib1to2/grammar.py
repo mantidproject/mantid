@@ -2,8 +2,7 @@
 Defines the grammar translation from version 1 to version 2 of Mantid's Python API.
 """
 import messages 
-from rules import SimpleStringReplace, SimpleAPIFunctionCallReplace
-        
+import rules
         
 class Grammar(object):
     """
@@ -18,10 +17,10 @@ class Grammar(object):
         Translates the input string, assuming it contains code written in
         version 1 of Mantid's Python API, to version 2 of the PythonAPI
         """
-        string_replace = SimpleStringReplace()
+        string_replace = rules.SimpleStringReplace()
         translated = string_replace.apply(input)
-        
-        api_call_replace = SimpleAPIFunctionCallReplace()
+       
+        api_call_replace = rules.SimpleAPIFunctionCallReplace()
         translated = api_call_replace.apply(translated)
 
         return translated
