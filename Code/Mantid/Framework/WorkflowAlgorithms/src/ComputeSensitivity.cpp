@@ -1,5 +1,13 @@
 /*WIKI* 
-Calculate the EQSANS detector sensitivity.
+Calculate the EQSANS detector sensitivity. This workflow algorithm uses the
+reduction parameters found in the property manager object passed as the
+ReductionProperties parameter to load the given data file, apply all the
+necessary corrections to it and compute the sensitivity correction.
+
+Setting the PatchWorkspace property allows you to patch areas of the
+detector. All masked pixels in the patch workspace will be patched.
+The value assigned to a patched pixel is the average of all unmasked
+pixels in this patched pixel's tube.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -23,8 +31,8 @@ DECLARE_ALGORITHM(ComputeSensitivity)
 /// Sets documentation strings for this algorithm
 void ComputeSensitivity::initDocs()
 {
-  this->setWikiSummary("Calculate EQSANS sensitivity correction.");
-  this->setOptionalMessage("Calculate EQSANS sensitivity correction.");
+  this->setWikiSummary("Workflow to calculate EQSANS sensitivity correction.");
+  this->setOptionalMessage("Workflow to calculate EQSANS sensitivity correction.");
 }
 
 using namespace Kernel;
@@ -36,10 +44,12 @@ void ComputeSensitivity::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, "_event.nxs"),
       "Flood field or sensitivity file.");
-  declareProperty(new WorkspaceProperty<>("PatchWorkspace","", Direction::Input, PropertyMode::Optional));
-  declareProperty("ReductionProperties","__eqsans_reduction_properties", Direction::Input);
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty("OutputMessage","",Direction::Output);
+  declareProperty(new WorkspaceProperty<>("PatchWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Workspace defining the area of the detector to be patched. All masked pixels in this workspace will be patched.");
+  declareProperty("ReductionProperties", "__eqsans_reduction_properties", Direction::Input);
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      "Workspace containing the sensitivity correction.");
+  declareProperty("OutputMessage", "", Direction::Output);
 }
 
 void ComputeSensitivity::exec()
