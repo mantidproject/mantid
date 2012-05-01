@@ -114,7 +114,7 @@ private:
 // class which would convert units
      UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
 };
-#endif
+#endif // EXCLUDE_Q_TRANSFORMATION_NOQ
 //
 } // End MDAlgorighms namespace
 } // End Mantid namespace
