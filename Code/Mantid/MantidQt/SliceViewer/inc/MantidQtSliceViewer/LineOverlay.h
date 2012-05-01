@@ -79,6 +79,8 @@ namespace SliceViewer
     void setShowHandles(bool shown);
     void setShowLine(bool shown);
     void setCreationMode(bool creation);
+    void setAngleSnapMode(bool angleSnap);
+    void setAngleSnap(double snapDegrees);
 
     ///@return the snap-to X interval
     double getSnapX()
@@ -164,6 +166,12 @@ namespace SliceViewer
 
     /// Show the central line?
     bool m_showLine;
+
+    /// If true, then you are in always-snap mode
+    bool m_angleSnapMode;
+
+    /// Angle (in degrees) to snap to.
+    double m_angleSnap;
 
   };
 

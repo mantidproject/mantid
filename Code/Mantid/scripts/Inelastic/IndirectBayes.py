@@ -1,24 +1,51 @@
 # QL main  - does both Res & Data options
 #
-from MantidFramework import *
-from mantidsimple import *
-from mantidplotpy import *
+from mantid.simpleapi import *
+import mantidplot as mp
+from mantid import config, logger, mtd
 from IndirectCommon import *
-import math, MidasLibrary as Lib, os.path
-#
+import platform, math, os.path
+
 operatingenvironment = platform.system()+platform.architecture()[0]
 if ( operatingenvironment == 'Windows32bit' ):
 	import erange_win32 as Er,   QLres_win32 as QLr
 	import QLdata_win32 as QLd,  QLse_win32 as Qse
 	import Quest_win32 as Que,   ResNorm_win32 as resnorm
 	import CEfit_win32 as cefit, SSfit_win32 as ssfit
-elif ( operatingenvironment == 'Linux64bit' ):
-	import erange_lnx64 as Er,   QLres_lnx64 as QLr
-	import QLdata_lnx64 as QLd,  QLse_lnx64 as Qse
-	import Quest_lnx64 as Que,   ResNorm_lnx64 as resnorm
-	import CEfit_lnx64 as cefit, SSfit_lnx64 as ssfit
 else:
 	sys.exit('F2Py Bayes programs NOT available on ' + operatingenvironment)
+
+def PadArray(inarray,nfixed):
+	npt=len(inarray)
+	padding = nfixed-npt
+	outarray=[]
+	outarray.extend(inarray)
+	outarray +=[0]*padding
+	return outarray
+
+def PadXY(Xin,Yin,array_len):
+	X=PadArray(Xin,array_len)
+	Y=PadArray(Yin,array_len)
+	return X,Y
+
+def PadXYE(Xin,Yin,Ein,array_len):
+	X=PadArray(Xin,array_len)
+	Y=PadArray(Yin,array_len)
+	E=PadArray(Ein,array_len)
+	return X,Y,E
+
+def Array2List(n,Array):
+	List = []
+	for m in range(0,n):
+		List.append(Array[m])
+	return List
+
+def Array2Fit(n,Array,nf):
+	List = []
+	for m in range(0,n):
+		off = (nf-1)*n
+		List.append(Array[m+off])
+	return List
 
 def CalcErange(inWS,ns,er,nbin):
 	rscl = 1.0
@@ -32,7 +59,7 @@ def GetXYE(inWS,n,array_len):
 	N = len(Xin)-1							# get no. points from length of x array
 	Yin = mtd[inWS].readY(n)
 	Ein = mtd[inWS].readE(n)
-	X,Y,E = Lib.PadXYE(Xin,Yin,Ein,array_len)
+	X,Y,E = PadXYE(Xin,Yin,Ein,array_len)
 	return N,X,Y,E
 
 def GetResNorm(ngrp):
@@ -45,10 +72,10 @@ def GetResNorm(ngrp):
 		for m in range(0,ngrp):
 			dtnorm.append(1.0)
 			xscale.append(1.0)
-	dtn,xsc = Lib.PadXY(dtnorm,xscale,51)
+	dtn,xsc = PadXY(dtnorm,xscale,51)
 	return dtn,xsc
 	
-def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbose=False):
+def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbose=False,Plot=False):
 	StartTime('QL '+rtype)
 	if rtype == 'Res':
 		rext = 'res'
@@ -80,6 +107,7 @@ def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbos
 	ntc = len(Xin)-1						# no. points from length of x array
 	ngrp = mtd[samWS].getNumberHistograms()       # no. of hist/groups in sample
 	nres = mtd[resWS].getNumberHistograms()       # no. of hist/groups in res
+	theta,Q = GetThetaQ(samWS)
 	if program == 'QL':
 		if nres == 1:
 			prog = 'QLr'                        # res file
@@ -116,14 +144,14 @@ def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbos
 			exit(error)
 		else:
 			for m in range(0,lasc):
-				var = Lib.ExtractFloat(asc[m])
+				var = ExtractFloat(asc[m])
 				Wy.append(var[0])
 				We.append(var[1])
 	else:
 		for m in range(0,ngrp):
 			Wy.append(0.0)
 			We.append(0.0)
-	Wy,We = Lib.PadXY(Wy,We,51)
+	Wy,We = PadXY(Wy,We,51)
 	o_res = fitOp[3]
 	if o_res == 0:
 		dtn,xsc = GetResNorm(ngrp)
@@ -151,7 +179,6 @@ def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbos
 	wrkr.ljust(140,' ')
 	wrk = [wrks, wrkr]
 #
-	theta,Q = GetThetaQ(samWS)
 	if program == 'QL':
 		xprob = []
 		eprob = []
@@ -193,120 +220,130 @@ def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbos
 			message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])
 		if Verbose:
 			logger.notice(message)
-		dataX = Lib.Array2List(nd,xout)
+		dataX = Array2List(nd,xout)
 		dataX.append(2*dataX[nd-1]-dataX[nd-2])
-		dataY = Lib.Array2List(nd,yout)
-		dataE = Lib.Array2List(nd,eout)
-		dataF0 = Lib.Array2Fit(nd,yfit,1)
-		dataF1 = Lib.Array2Fit(nd,yfit,2)
+		dataY = Array2List(nd,yout)
+		dataE = Array2List(nd,eout)
+		dataF0 = Array2Fit(nd,yfit,1)
+		dataF1 = Array2Fit(nd,yfit,2)
 		if program == 'QL':
-			dataF2 = Lib.Array2Fit(nd,yfit,3)
-			dataF3 = Lib.Array2Fit(nd,yfit,4)
+			dataF2 = Array2Fit(nd,yfit,3)
+			dataF3 = Array2Fit(nd,yfit,4)
 		dataG = []
 		for n in range(0,nd):
 			dataG.append(0.0)
 		if m == 0:
-			CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=dataY, DataE=dataE,
+			CreateWorkspace(OutputWorkspace=fname+'_Data', DataX=dataX, DataY=dataY, DataE=dataE,
 				Nspec=1, UnitX='DeltaE')
-			CreateWorkspace(OutputWorkspace='Fit1', DataX=dataX, DataY=dataF1, DataE=dataG,
+			CreateWorkspace(OutputWorkspace=fname+'_Fit1', DataX=dataX, DataY=dataF1, DataE=dataG,
 				Nspec=1, UnitX='DeltaE')
 			if program == 'QL':
-				CreateWorkspace(OutputWorkspace='Fit2', DataX=dataX, DataY=dataF2, DataE=dataG,
+				CreateWorkspace(OutputWorkspace=fname+'_Fit2', DataX=dataX, DataY=dataF2, DataE=dataG,
 					Nspec=1, UnitX='DeltaE')
 		else:
 			CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=dataY, DataE=dataE,
 				Nspec=1, UnitX='DeltaE')
-			ConjoinWorkspaces(InputWorkspace1='Data', InputWorkspace2='__datmp',CheckOverlapping=False)				
+			ConjoinWorkspaces(InputWorkspace1=fname+'_Data', InputWorkspace2='__datmp',CheckOverlapping=False)				
 			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=dataF1, DataE=dataG,
 				Nspec=1, UnitX='DeltaE')
-			ConjoinWorkspaces(InputWorkspace1='Fit1', InputWorkspace2='__f1tmp',CheckOverlapping=False)				
+			ConjoinWorkspaces(InputWorkspace1=fname+'_Fit1', InputWorkspace2='__f1tmp',CheckOverlapping=False)				
 			if program == 'QL':
 				CreateWorkspace(OutputWorkspace='__f2tmp', DataX=dataX, DataY=dataF2, DataE=dataG,
 					Nspec=1, UnitX='DeltaE')
-				ConjoinWorkspaces(InputWorkspace1='Fit2', InputWorkspace2='__f2tmp',CheckOverlapping=False)				
-		Minus(LHSWorkspace='Fit1', RHSWorkspace='Data', OutputWorkspace='Res1')
+				ConjoinWorkspaces(InputWorkspace1=fname+'_Fit2', InputWorkspace2='__f2tmp',CheckOverlapping=False)				
+		Minus(LHSWorkspace=fname+'_Fit1', RHSWorkspace=fname+'_Data', OutputWorkspace=fname+'_Res1')
 		if program == 'QL':
-			Minus(LHSWorkspace='Fit2', RHSWorkspace='Data', OutputWorkspace='Res2')
-			xprob.append(Q[m])
-			eprob.append(0.0)
+			Minus(LHSWorkspace=fname+'_Fit2', RHSWorkspace=fname+'_Data', OutputWorkspace=fname+'_Res2')
 			prob0.append(yprob[0])
 			prob1.append(yprob[1])
 			prob2.append(yprob[2])
-	GroupWorkspaces(InputWorkspaces='Fit1,Res1',OutputWorkspace='Peak1')
 	if program == 'QL':
-		GroupWorkspaces(InputWorkspaces='Fit2,Res2',OutputWorkspace='Peak2')
-		GroupWorkspaces(InputWorkspaces='Data,Peak1,Peak2',OutputWorkspace=fitWS)
-		CreateWorkspace(OutputWorkspace=probWS, DataX=xprob, DataY=prob0, DataE=eprob,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace='__pt1', DataX=xprob, DataY=prob1, DataE=eprob,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace='__pt2', DataX=xprob, DataY=prob2, DataE=eprob,
-			Nspec=1, UnitX='MomentumTransfer')
-		ConjoinWorkspaces(InputWorkspace1=probWS, InputWorkspace2='__pt1',CheckOverlapping=False)				
-		ConjoinWorkspaces(InputWorkspace1=probWS, InputWorkspace2='__pt2',CheckOverlapping=False)				
+		group = fname+'_Data,'+fname+'_Fit1,'+fname+'_Res1,'+fname+'_Fit2,'+fname+'_Res2'
+		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+		xprob = []
+		eprob = []
+		for m in range(0,ngrp):
+			xprob.append(Q[m])
+			eprob.append(0.0)
+		xPr = 3*xprob
+		ePr = 3*eprob
+		yPr = []
+		for m in range(0,len(prob0)):
+			yPr.append(prob0[m])
+		for m in range(0,len(prob1)):
+			yPr.append(prob1[m])
+		for m in range(0,len(prob2)):
+			yPr.append(prob2[m])
+		CreateWorkspace(OutputWorkspace=probWS, DataX=xPr, DataY=yPr, DataE=ePr,
+			Nspec=3, UnitX='MomentumTransfer')
 	if program == 'QSe':
-		GroupWorkspaces(InputWorkspaces='Data,Peak1',OutputWorkspace=fitWS)
+		group = fname+'_Data,'+fname+'_Fit1,'+fname+'_Res1'
+		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 	fit_path = os.path.join(workdir,fitWS+'.nxs')
 	SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
 	if Verbose:
 		logger.notice('Output file created : ' + fit_path)
 	if program == 'QL':
 		C2Fw(prog,samWS)
+		if (Plot != 'None'):
+			QLPlotQL(fname,Plot)
 	if program == 'QSe':
 		C2Se(samWS)
+		if (Plot != 'None'):
+			QLPlotQSe(fname,Plot)
 	EndTime('QL '+rtype)
 
 def LorBlock(a,first,nl):                                 #read Ascii block of Integers
 	line1 = a[first]
 	first += 1
-	val = Lib.ExtractFloat(a[first])               #Q,AMAX,HWHM,BSCL,GSCL
+	val = ExtractFloat(a[first])               #Q,AMAX,HWHM,BSCL,GSCL
 	Q = val[0]
 	AMAX = val[1]
 	HWHM = val[2]
 	BSCL = val[3]
 	GSCL = val[4]
 	first += 1
-	val = Lib.ExtractFloat(a[first])               #A0,A1,A2,A4
+	val = ExtractFloat(a[first])               #A0,A1,A2,A4
 	int0 = [AMAX*val[0]]
 	bgd1 = BSCL*val[1]
 	bgd2 = BSCL*val[2]
 	zero = GSCL*val[3]
 	first += 1
-	val = Lib.ExtractFloat(a[first])                #AI,FWHM first peak
+	val = ExtractFloat(a[first])                #AI,FWHM first peak
 	fw = [2.*HWHM*val[1]]
 	int = [AMAX*val[0]]
 	if nl >= 2:
 		first += 1
-		val = Lib.ExtractFloat(a[first])            #AI,FWHM second peak
+		val = ExtractFloat(a[first])            #AI,FWHM second peak
 		fw.append(2.*HWHM*val[1])
 		int.append(AMAX*val[0])
 	if nl == 3:
 		first += 1
-		val = Lib.ExtractFloat(a[first])            #AI,FWHM third peak
+		val = ExtractFloat(a[first])            #AI,FWHM third peak
 		fw.append(2.*HWHM*val[1])
 		int.append(AMAX*val[0])
 	first += 1
-	val = Lib.ExtractFloat(a[first])                 #SIG0
+	val = ExtractFloat(a[first])                 #SIG0
 	int0.append(val[0])
 	first += 1
-	val = Lib.ExtractFloat(a[first])                  #SIGIK
+	val = ExtractFloat(a[first])                  #SIGIK
 	int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
 	first += 1
-	val = Lib.ExtractFloat(a[first])                  #SIGFK
+	val = ExtractFloat(a[first])                  #SIGFK
 	fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
 	if nl >= 2:                                      # second peak
 		first += 1
-		val = Lib.ExtractFloat(a[first])                  #SIGIK
+		val = ExtractFloat(a[first])                  #SIGIK
 		int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
 		first += 1
-		val = Lib.ExtractFloat(a[first])                  #SIGFK
+		val = ExtractFloat(a[first])                  #SIGFK
 		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
 	if nl == 3:                                       # third peak
 		first += 1
-		val = Lib.ExtractFloat(a[first])                  #SIGIK
+		val = ExtractFloat(a[first])                  #SIGIK
 		int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
 		first += 1
-		val = Lib.ExtractFloat(a[first])                  #SIGFK
+		val = ExtractFloat(a[first])                  #SIGFK
 		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
 	first += 1
 	return first,Q,int0,fw,int                                      #values as list
@@ -325,7 +362,7 @@ def ReadQlFile(prog,sname,nl):
 	var = asc[3].split()							#split line on spaces
 	nspec = var[0]
 	ndat = var[1]
-	var = Lib.ExtractInt(asc[6])
+	var = ExtractInt(asc[6])
 	first = 7
 	Xout = []
 	Yf1 = []
@@ -425,30 +462,30 @@ def C2Fw(prog,sname):
 def SeBlock(a,first):                                 #read Ascii block of Integers
 	line1 = a[first]
 	first += 1
-	val = Lib.ExtractFloat(a[first])               #Q,AMAX,HWHM
+	val = ExtractFloat(a[first])               #Q,AMAX,HWHM
 	Q = val[0]
 	AMAX = val[1]
 	HWHM = val[2]
 	first += 1
-	val = Lib.ExtractFloat(a[first])               #A0
+	val = ExtractFloat(a[first])               #A0
 	int0 = [AMAX*val[0]]
 	first += 1
-	val = Lib.ExtractFloat(a[first])                #AI,FWHM first peak
+	val = ExtractFloat(a[first])                #AI,FWHM first peak
 	fw = [2.*HWHM*val[1]]
 	int = [AMAX*val[0]]
 	first += 1
-	val = Lib.ExtractFloat(a[first])                 #SIG0
+	val = ExtractFloat(a[first])                 #SIG0
 	int0.append(val[0])
 	first += 1
-	val = Lib.ExtractFloat(a[first])                  #SIG3K
+	val = ExtractFloat(a[first])                  #SIG3K
 	int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
 	first += 1
-	val = Lib.ExtractFloat(a[first])                  #SIG1K
+	val = ExtractFloat(a[first])                  #SIG1K
 	fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
 	first += 1
-	be = Lib.ExtractFloat(a[first])                  #EXPBET
+	be = ExtractFloat(a[first])                  #EXPBET
 	first += 1
-	val = Lib.ExtractFloat(a[first])                  #SIG2K
+	val = ExtractFloat(a[first])                  #SIG2K
 	be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
 	first += 1
 	return first,Q,int0,fw,int,be                                      #values as list
@@ -468,7 +505,7 @@ def C2Se(sname):
 	var = asc[3].split()							#split line on spaces
 	nspec = var[0]
 	ndat = var[1]
-	var = Lib.ExtractInt(asc[6])
+	var = ExtractInt(asc[6])
 	first = 7
 	Xout = []
 	Yf = []
@@ -498,7 +535,7 @@ def C2Se(sname):
 	opath = os.path.join(workdir,fname+'_Parameters.nxs')
 	SaveNexusProcessed(InputWorkspace=fname+'_Parameters', Filename=opath)
 
-def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False):
+def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False,Plot=False):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	spath = os.path.join(workdir, samWS+'_'+ana+'_red.nxs')		# path name for sample nxs file
@@ -551,6 +588,18 @@ def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False):
 	nbin = nbins[0]
 	nrbin = nbins[1]
 	theta,Q = GetThetaQ(samWS)
+	Nbet = nbs[0]
+	dataEb = []
+	for n in range(0,Nbet):
+		dataEb.append(0.0)
+	yBet = []
+	Nsig = nbs[1]
+	dataEs = []
+	for n in range(0,Nsig):
+		dataEs.append(0.0)
+	ySig = []
+	rscl = 1.0
+	Qaxis = ''
 	for m in range(0,ngrp):
 		if Verbose:
 			logger.notice('Group ' +str(m)+ ' at angle '+ str(theta[m]))
@@ -560,59 +609,46 @@ def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False):
 		Imin = nout[1]
 		Imax = nout[2]
 		Nb,Xb,Yb,Eb = GetXYE(resWS,0,array_len)
-		Nbet = nbs[0]
-		Nsig = nbs[1]
 		numb = [ngrp, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
-		rscl = 1.0
 		reals = [efix, theta[m], rscl, bnorm]
 		xsout,ysout,xbout,ybout,zpout=Que.quest(numb,Xv,Yv,Ev,reals,fitOp,
 											Xdat,Xb,Yb,wrks,wrkr,lwrk)
-		dataXs = Lib.Array2List(Nsig,xsout)
+		dataXs = Array2List(Nsig,xsout)
 		dataXs.append(2*dataXs[Nsig-1]-dataXs[Nsig-2])
-		dataYs = Lib.Array2List(Nsig,ysout)
-		dataEs = []
+		dataYs = Array2List(Nsig,ysout)
 		for n in range(0,Nsig):
-			dataEs.append(0.0)
-		dataXb = Lib.Array2List(Nbet,xbout)
+			ySig.append(dataYs[n])
+		dataXb = Array2List(Nbet,xbout)
 		dataXb.append(2*dataXb[Nbet-1]-dataXb[Nbet-2])
-		dataYb = Lib.Array2List(Nbet,ybout)
-		dataEb = []
+		dataYb = Array2List(Nbet,ybout)
 		for n in range(0,Nbet):
-			dataEb.append(0.0)
-		sgWS = '__S' +str(m)
-		btWS = '__B' +str(m)
+			yBet.append(dataYb[n])
 		zpWS = fname + '_Zp' +str(m)
-		if m == 0:
-			CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=dataXs, DataY=dataYs, DataE=dataEs,
-				Nspec=1, UnitX='MomentumTransfer')
-			CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=dataXb, DataY=dataYb, DataE=dataEb,
-				Nspec=1, UnitX='MomentumTransfer')
-		else:
-			CreateWorkspace(OutputWorkspace=sgWS, DataX=dataXs, DataY=dataYs, DataE=dataEs,
-				Nspec=1, UnitX='MomentumTransfer')
-#			ConjoinWorkspaces(fname+'_Sigma',sgWS,CheckOverlapping=False)				
-			CreateWorkspace(OutputWorkspace=btWS, DataX=dataXb, DataY=dataYb, DataE=dataEb,
-				Nspec=1, UnitX='MomentumTransfer')
-#			ConjoinWorkspaces(fname+'_Beta',btWS,CheckOverlapping=False)				
-			Lib.conjoincreated([fname+'_Sigma',sgWS], fname + '_Sigma', 'MomentumTransfer')
-			Lib.conjoincreated([fname+'_Beta',btWS], fname + '_Beta', 'MomentumTransfer')
-			DeleteWorkspace(sgWS)
-			DeleteWorkspace(btWS)
+		if (m > 0):
+			Qaxis += ','
+		Qaxis += str(Q[m])
 		for n in range(0,Nsig):
-			dataYzp = Lib.Array2Fit(Nbet,zpout,n)
+			dataYzp = Array2Fit(Nbet,zpout,n)
 			if n == 0:
 				CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXb, DataY=dataYzp, DataE=dataEb,
 					Nspec=1, UnitX='MomentumTransfer')
 			else:
 				CreateWorkspace(OutputWorkspace='__Zpt', DataX=dataXb, DataY=dataYzp, DataE=dataEb,
 					Nspec=1, UnitX='MomentumTransfer')
-#				ConjoinWorkspaces(zpWS,'__Zpt',CheckOverlapping=False)				
 				Lib.conjoincreated([zpWS,'__Zpt'], zpWS, 'MomentumTransfer')
 		if m == 0:
 			groupZ = zpWS
 		else:
 			groupZ = groupZ +','+ zpWS
 	        DeleteWorkspace('__Zpt')
+	xSig = dataXs*ngrp
+	eSig = dataEs*ngrp
+	CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,
+		Nspec=ngrp, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+	xBet = dataXb*ngrp
+	eBet = dataEb*ngrp
+	CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,
+		Nspec=ngrp, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 	group = fname + '_Sigma,'+ fname + '_Beta'
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Fit')
 	fpath = os.path.join(workdir,fname+'_Fit.nxs')
@@ -620,9 +656,14 @@ def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False):
 	GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
 	cpath = os.path.join(workdir,fname+'_Contour.nxs')
 	SaveNexusProcessed(InputWorkspace=fname+'_Contour', Filename=cpath)
+	if Verbose:
+		logger.notice('Output file for Fit : ' + fpath)
+		logger.notice('Output file for Contours : ' + cpath)
+	if (Plot != 'None'):
+		QuestPlot(fname,Plot)
 	EndTime('Quest')
 
-def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False):
+def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False,Plot='None'):
 	StartTime('ResNorm')
 	workdir = config['defaultsave.directory']
 	van = vanWS + '_' + ana
@@ -656,7 +697,7 @@ def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False):
 	Nb = len(Xin)-1											# get no. points from length of x array
 	Yin = mtd[rname].readY(0)
 	Ein = mtd[rname].readE(0)
-	Xb,Yb = Lib.PadXY(Xin,Yin,array_len)
+	Xb,Yb = PadXY(Xin,Yin,array_len)
 	parX = []
 	par1 = []
 	par2 = []
@@ -679,11 +720,11 @@ def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False):
 		par1.append(pfit[0])
 		par2.append(pfit[1])
 		parE.append(0.0)
-		dataX = Lib.Array2List(nd,xout)
+		dataX = Array2List(nd,xout)
 		dataX.append(2*dataX[nd-1]-dataX[nd-2])
-		dataY = Lib.Array2List(nd,yout)
-		dataE = Lib.Array2List(nd,eout)
-		dataF = Lib.Array2List(nd,yfit)
+		dataY = Array2List(nd,yout)
+		dataE = Array2List(nd,eout)
+		dataF = Array2List(nd,yfit)
 		dataG = []
 		for n in range(0,nd):
 			dataG.append(0.0)
@@ -699,11 +740,11 @@ def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False):
 			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=dataF, DataE=dataG,
 				NSpec=1, UnitX='DeltaE')
 			ConjoinWorkspaces(InputWorkspace1='Fit', InputWorkspace2='__f1tmp', CheckOverlapping=False)				
-	CreateWorkspace(OutputWorkspace=vanWS+'_ResNorm_Intensity', DataX=parX, DataY=par1, DataE=parE,
+	CreateWorkspace(OutputWorkspace=van+'_ResNorm_Intensity', DataX=parX, DataY=par1, DataE=parE,
 		NSpec=1, UnitX='MomentumTransfer')
-	CreateWorkspace(OutputWorkspace=vanWS+'_ResNorm_Stretch', DataX=parX, DataY=par2, DataE=parE,
+	CreateWorkspace(OutputWorkspace=van+'_ResNorm_Stretch', DataX=parX, DataY=par2, DataE=parE,
 		NSpec=1, UnitX='MomentumTransfer')
-	group = vanWS + '_ResNorm_Intensity,'+ vanWS + '_ResNorm_Stretch'
+	group = van + '_ResNorm_Intensity,'+ van + '_ResNorm_Stretch'
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=van+'_ResNorm_Paras')
 	par_path = os.path.join(workdir,van+'_ResNorm_Paras.nxs')
 	SaveNexusProcessed(InputWorkspace=van+'_ResNorm_Paras', Filename=par_path)
@@ -713,9 +754,11 @@ def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False):
 	if Verbose:
 		logger.notice('Output file created : ' + par_path)
 		logger.notice('Output file created : ' + fit_path)
+	if (Plot != 'None'):
+		ResNormPlot(van,Plot)
 	EndTime('ResNorm')
 
-def JumpStart(sname,jump,prog,fw,Verbose=False):
+def JumpStart(sname,jump,prog,fw,Verbose=False,Plot=False):
 	StartTime('Jump fit : '+jump+' from '+prog+' ; ')
 	workdir = config['defaultsave.directory']
 	file = sname+'_'+prog+'_Parameters'
@@ -734,7 +777,7 @@ def JumpStart(sname,jump,prog,fw,Verbose=False):
 	nd = len(Xin)-1											# get no. points from length of x array
 	Yin = mtd[samWS].readY(0)
 	Ein = mtd[samWS].readE(0)
-	X,Y,E=Lib.PadXYE(Xin,Yin,Ein,1000)
+	X,Y,E=PadXYE(Xin,Yin,Ein,1000)
 	wrk = workdir + sname +'_'+ jump +'_'+ fw
 	lwrk = len(wrk)
 	wrk.ljust(120,' ')
@@ -755,9 +798,9 @@ def JumpStart(sname,jump,prog,fw,Verbose=False):
 	dataE = []
 	for n in range(0,nout):
 		dataE.append(0.0)
-	dataX = Lib.Array2List(nout,Xout)
+	dataX = Array2List(nout,Xout)
 	dataX.append(2*dataX[nout-1]-dataX[nout-2])
-	dataY = Lib.Array2List(nout,Yout)
+	dataY = Array2List(nout,Yout)
 	ftWS = sname +'_'+ jump + 'fit_' +fw
 	CreateWorkspace(OutputWorkspace=ftWS+'_Fit', DataX=dataX, DataY=dataY, DataE=dataE,
 		Nspec=1, UnitX='MomentumTransfer')
@@ -768,4 +811,53 @@ def JumpStart(sname,jump,prog,fw,Verbose=False):
 	SaveNexusProcessed(InputWorkspace=ftWS, Filename=fit_path)
 	if Verbose:
 		logger.notice('Output file is ' + fit_path)
+	if Plot:
+		JumpPlot(ftWS)
 	EndTime('Jump fit : '+jump+' from '+prog+' ; ')
+
+def JumpPlot(inputWS):
+    j_plot=mp.plotSpectrum(inputWS,0,True)
+
+def ResNormPlot(inputWS,Plot):
+	if (Plot == 'Intensity' or Plot == 'All'):
+		iWS = inputWS + '_ResNorm_Intensity'
+		i_plot=mp.plotSpectrum(iWS,0,False)
+	if (Plot == 'Stretch' or Plot == 'All'):
+		sWS = inputWS + '_ResNorm_Stretch'
+		s_plot=mp.plotSpectrum(sWS,0,False)
+	if (Plot == 'Fit' or Plot == 'All'):
+		fWS = inputWS + '_ResNorm_Fit'
+		f_plot=mp.plotSpectrum(fWS,0,False)
+
+def QLPlotQL(inputWS,Plot):
+	if (Plot == 'Prob' or Plot == 'All'):
+		pWS = inputWS+'_Prob'
+		p_plot=mp.plotSpectrum(pWS,[1,2],False)
+	if (Plot == 'Intensity' or Plot == 'All'):
+		iWS = [inputWS+'_IT11', inputWS+'_IT21', inputWS+'_IT22']
+		i_plot=mp.plotSpectrum(iWS,0,True)
+	if (Plot == 'FwHm' or Plot == 'All'):
+		wWS = [inputWS+'_FW11', inputWS+'_FW21', inputWS+'_FW22']
+		w_plot=mp.plotSpectrum(wWS,0,True)
+	if (Plot == 'Fit' or Plot == 'All'):
+		fWS = [inputWS+'_Data', inputWS+'_Fit1', inputWS+'_Res1']
+		f_plot=mp.plotSpectrum(fWS,0,False)
+
+def QLPlotQSe(inputWS,Plot):
+	if (Plot == 'Intensity' or Plot == 'All'):
+		i_plot=mp.plotSpectrum(inputWS+'_Inty',0,True)
+	if (Plot == 'FwHm' or Plot == 'All'):
+		w_plot=mp.plotSpectrum(inputWS+'_FwHm',0,True)
+	if (Plot == 'Beta' or Plot == 'All'):
+		s_plot=mp.plotSpectrum(inputWS+'_Beta',0,True)
+	if (Plot == 'Fit' or Plot == 'All'):
+		fWS = [inputWS+'_Data', inputWS+'_Fit1', inputWS+'_Res1']
+		f_plot=mp.plotSpectrum(fWS,0,False)
+
+def QuestPlot(inputWS,Plot):
+	if (Plot == 'Sigma' or Plot == 'All'):
+		s_graph = mp.importMatrixWorkspace(inputWS+'_Sigma').plotGraph2D()
+        s_layer = s_graph.activeLayer().setAxisTitle(2, 'Sigma')
+	if (Plot == 'Beta' or Plot == 'All'):
+		b_graph = mp.importMatrixWorkspace(inputWS+'_Beta').plotGraph2D()
+        b_layer = b_graph.activeLayer().setAxisTitle(2, 'Beta')

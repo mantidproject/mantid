@@ -24,7 +24,8 @@ namespace SliceViewer
     m_plot(plot),
     m_snapEnabled(false),
     m_snapX(0.1), m_snapY(0.1), m_snapLength(0),
-    m_shown(true), m_showHandles(true), m_showLine(true)
+    m_shown(true), m_showHandles(true), m_showLine(true),
+    m_angleSnapMode(false), m_angleSnap(45)
   {
     m_creation = true; // Will create with the mouse
     m_rightButton = false;
@@ -156,6 +157,21 @@ namespace SliceViewer
   {
     m_creation = creation;
     this->update();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn angle snap on/off
+   * @param angleSnap :: true for always angle snap. */
+  void LineOverlay::setAngleSnapMode(bool angleSnap)
+  {
+    m_angleSnapMode = angleSnap;
+  }
+
+  /** Sets the angle increments to snap to.
+   * @param snapDegrees :: snap amount, in degrees */
+  void LineOverlay::setAngleSnap(double snapDegrees)
+  {
+    m_angleSnap = snapDegrees;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -395,7 +411,7 @@ namespace SliceViewer
     double length = 0;
 
     // Adjust the current mouse position if needed.
-    if ((m_snapLength > 0) || shiftPressed)
+    if ((m_snapLength > 0) || shiftPressed || m_angleSnapMode)
     {
       // This is the distance between the fixed and dragged point
       QPointF currentDiff;
@@ -406,9 +422,13 @@ namespace SliceViewer
 
       // Limit angles to 45 degree increments with shift pressed
       angle = atan2(currentDiff.y(), currentDiff.x());
-      // Round angle to closest 45 degrees
-      if (shiftPressed)
-        angle = Utils::rounddbl(angle / (M_PI / 4.0)) * (M_PI / 4.0);
+      // Round angle to closest 45 degrees, if in angle snap mode
+      if (shiftPressed || m_angleSnapMode)
+      {
+        // Convert the snap angle from degrees to radians
+        double angleSnapRad = m_angleSnap / (180.0 / M_PI);
+        angle = Utils::rounddbl(angle / angleSnapRad) * angleSnapRad;
+      }
 
       // Round length to m_snapLength, if specified
       length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());

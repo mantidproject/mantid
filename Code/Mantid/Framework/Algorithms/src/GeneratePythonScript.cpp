@@ -170,6 +170,13 @@ std::string GeneratePythonScript::genParamString(
   // See if the the property is an Output workspace.
   bool outputWkspace = false;
 
+  // Fit can create more properties after setting Function and InputWorkspace[_#]
+  if ( algHistName == "Fit" &&
+    (name == "Function" || name.substr(0,14) == "InputWorkspace"))
+  {
+    ialg_Sptr->setPropertyValue(name, value);
+  }
+
   if( ialg_Sptr->existsProperty(name) && direction == Mantid::Kernel::Direction::Output )
   {
     Property *p = ialg_Sptr->getProperty(name);
@@ -181,7 +188,7 @@ std::string GeneratePythonScript::genParamString(
   {
     // If the property name occurs in the unmanaged version of the Algorithm, then
     // we should include it in the parameter list.
-    if( (algHistName == "Load" || ialg_Sptr->existsProperty(name) ) &&
+    if( (algHistName == "Load"  || ialg_Sptr->existsProperty(name) ) &&
       (direction == Direction::Input || direction == Direction::InOut || outputWkspace) )
     {
       if(params.length() != 0)

@@ -394,7 +394,7 @@ void CreateMDWorkspace::addNexusFileClicked()
 
   QStringList::iterator it = fileNames.begin();
   QStringList::const_iterator end = fileNames.end();
-  while(it != fileNames.end())
+  while(it != end)
   {
     std::string name = (*it).toStdString();
     if(!name.empty())
@@ -422,7 +422,7 @@ void CreateMDWorkspace::addEventNexusFileClicked()
 
   QStringList::iterator it = fileNames.begin();
   QStringList::const_iterator end = fileNames.end();
-  while(it != fileNames.end())
+  while(it != end)
   {
     std::string name = (*it).toStdString();
     if(!name.empty())

@@ -77,7 +77,7 @@ enum AnalMode
       ANY_Mode,      //< couples with NoQ, means just copying existing data (may be doing units conversion), also used to terminate AnalMode algorithms initiation metaloop
       NAnalModes
 };
-enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
+enum InputWSType  // Algorithm recognizes 2 input workspace types with different workspace interface and different internal treatment. 
 {
       Ws2DHistoType, //< 2D matirix workspace with the x-axis for each sign
       EventWSType,   //< Event worskapce

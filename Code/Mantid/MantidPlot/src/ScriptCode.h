@@ -31,6 +31,8 @@ public:
   inline bool isEmpty() const { return m_code.empty(); }
 
 private:
+  /// Ensure all code line endings are unix style
+  void convertLineEndingsToUnix();
   /// The code string
   std::string m_code;
   /// The offset within a larger chunk of code

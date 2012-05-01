@@ -1,59 +1,10 @@
-"""Defines the rules for translation from API v1 -> v2
+"""Defines the rules for translation of simple API function calls
+from v1 to v2
 """
+import rules
 import re
+
 import mantid
-
-class Rules(object):
-        
-    def apply(self, text):
-        """
-            Interface for applying the rules
-        """
-        raise NotImplementedError("Derived classes should implement apply()")
-        
-#########################################################################################
-
-__STRINGREPLACEMENTS__ = [
-    (re.compile("from MantidFramework import \*"), "from mantid import *"),
-    (re.compile("import MantidFramework"), "import mantid"),
-    (re.compile("from mantidsimple import \*"), "from mantid.simpleapi import *"),
-    (re.compile("from mantidsimple import"), "from mantid.simpleapi import"),
-    (re.compile("import mantidsimple as"), "import mantid.simpleapi as"),
-    (re.compile("import mantidsimple"), "import mantid.simpleapi as simpleapi"),
-    (re.compile("mantidsimple\."), "simpleapi."),   
-    (re.compile("(MantidFramework\.|)(mtd|mantid)\.initiali[z,s]e\(\)"), ""),
-    (re.compile("MantidFramework\."), "mantid."),
-    (re.compile("\.getSampleDetails"), ".getRun"),
-    (re.compile("mtd\.settings"), "config"),
-    (re.compile("mtd\.getConfigProperty"), "config.getString"),
-    (re.compile("(mtd|mantid).sendLogMessage"), "logger.notice")
-]
-
-class SimpleStringReplace(Rules):
-    """
-        Implements any rules that are simply a matter of matching a pattern
-        and replacing it with a fixed string
-    """
-    _rules = None
-    
-    def __init__(self):
-        Rules.__init__(self)
-        self._rules = __STRINGREPLACEMENTS__
-        
-    def apply(self, text):
-        """
-        Returns a replacement string for the input text
-        with the simple string relpacements definined by the regexes 
-            @param text An input string to match
-            @returns A string containing the replacement or the original text
-                     if no replacement was needed
-        """
-        for pattern, replacement in self._rules:
-            text = pattern.sub(replacement, text)            
-        return text
-
-
-#########################################################################################
 
 __FUNCTION_CALL_REGEXSTR = r"""(|\w*\s*) # Any variable on the lhs of the function call
                      (|=\s*) # The equals sign including any whitespace on the right
@@ -67,13 +18,13 @@ __WHITESPACE_REGEX__ = re.compile("(\s*).*")
 
 __MANTID_ALGS__ = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
-class SimpleAPIFunctionCallReplace(Rules):
+class SimpleAPIFunctionCallReplace(rules.Rules):
     
     func_regex = __FUNCTION_CALL_REGEX__
     current_line = None
     
     def __init__(self):
-        Rules.__init__(self)
+        rules.Rules.__init__(self)
         
     def apply(self, text):
         """
@@ -84,7 +35,6 @@ class SimpleAPIFunctionCallReplace(Rules):
             @returns A string containing the replacement or the original text
                      if no replacement was needed
         """
-        # Now more complex replacements for simple API calls going line by line
         if "\\r\\n" in text:
             eol = "\r\n"
         elif "\\r" in text:
@@ -233,11 +183,7 @@ class SimpleAPIFunctionCallReplace(Rules):
         for key, value in kwargs:
             argstring += key + '=' + value + ","
         return argstring.rstrip(",")
-    
-    def is_mantid_algorithm(self, name):
-        """Does the name string match a Mantid algorithm name"""
-        return name in __MANTID_ALGS__
-        
+       
     def fix_indentation(self, replaced_string):
         """
         Compare the indentation of the input line
@@ -250,3 +196,9 @@ class SimpleAPIFunctionCallReplace(Rules):
             return replaced_string
         indent = indent.replace("\t", "    ")
         return indent + replaced_string
+
+    def is_mantid_algorithm(self, name):
+        """Returns true if the given name is a mantid algorithm"""
+        if name is None: 
+            return False
+        return name in __MANTID_ALGS__

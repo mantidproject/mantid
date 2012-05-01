@@ -215,7 +215,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     bool muon = false;
     for (size_t j=0; j<categories.size(); ++j)
     {
-      if ((categories[j] == "Muon") || (categories[j] == "General") )
+      if ((categories[j] == "Muon") || (categories[j] == "General") || (categories[j] == "Background"))
         muon = true;
     }
     if (muon == true)
@@ -264,32 +264,7 @@ void MuonFitPropertyBrowser::fit()
     std::string funStr;
     if (m_compositeFunction->name() == "MultiBG")
     {
-      //std::string ties;
-      //Mantid::API::Expression funExpr;
-      //funExpr.parse(m_compositeFunction->asString());
-      //funExpr.toList(";");
-      //for(size_t i = 0; i < funExpr.size(); ++i)
-      //{
-      //  const Mantid::API::Expression& e = funExpr[i];
-      //  if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
-      //  {
-      //    ties = e[0].name() + "=(" + e[1].str() + ")";
-      //  }
-      //}
-      //funStr = "composite=MultiBG;";
-      //for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
-      //{
-      //  auto f = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(m_compositeFunction->getFunction(i));
-      //  if (!f) continue;
-      //  funStr += f->asString();
-      //  if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
-      //  {
-      //    funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
-      //      boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
-      //  }
-      //  funStr += ";";
-      //}
-      //funStr += ties;
+      funStr = "";
     }
     else if (m_compositeFunction->nFunctions() > 1)
     {

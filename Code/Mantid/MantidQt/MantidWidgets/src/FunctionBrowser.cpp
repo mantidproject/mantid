@@ -441,10 +441,10 @@ void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
  * Attribute visitor to create a QtProperty. Depending on the attribute type
  * the appropriate apply() method is used.
  */
-class CreateAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<FunctionBrowser::AProperty>
+class CreateAttributePropertyForFunctionBrowser: public Mantid::API::IFunction::ConstAttributeVisitor<FunctionBrowser::AProperty>
 {
 public:
-  CreateAttributeProperty(FunctionBrowser* browser, QtProperty* parent,QString attName)
+  CreateAttributePropertyForFunctionBrowser(FunctionBrowser* browser, QtProperty* parent,QString attName)
     :m_browser(browser),m_parent(parent),m_attName(attName)
   {
     // check that parent is a function property
@@ -489,7 +489,7 @@ private:
  */
 FunctionBrowser::AProperty FunctionBrowser::addAttributeProperty(QtProperty* parent, QString attName, const Mantid::API::IFunction::Attribute& att)
 {
-  CreateAttributeProperty cap(this,parent,attName);
+  CreateAttributePropertyForFunctionBrowser cap(this,parent,attName);
   return att.apply(cap);
 }
 

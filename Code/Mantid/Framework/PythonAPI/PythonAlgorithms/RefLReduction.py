@@ -1,6 +1,6 @@
 from MantidFramework import *
 from mantidsimple import *
-from numpy import zeros, shape
+from numpy import zeros, shape, arange
 import math
 
 class RefLReduction(PythonAlgorithm):
@@ -15,24 +15,37 @@ class RefLReduction(PythonAlgorithm):
         return 1
 
     def PyInit(self):
-        self.declareListProperty("RunNumbers", [0], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("RunNumbers", [0], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("NormalizationRunNumber", 0, Description="")
-        self.declareListProperty("SignalPeakPixelRange", [126, 134], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("SignalPeakPixelRange", [126, 134], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractSignalBackground", True)
-        self.declareListProperty("SignalBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("SignalBackgroundPixelRange", [123, 137], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("NormFlag", True)
-        self.declareListProperty("NormPeakPixelRange", [127, 133], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("NormPeakPixelRange", [127, 133], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractNormBackground", True)
-        self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("NormBackgroundPixelRange", [123, 137], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("LowResDataAxisPixelRangeFlag", True)
-        self.declareListProperty("LowResDataAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("LowResDataAxisPixelRange", [115, 210], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("LowResNormAxisPixelRangeFlag", True)
-        self.declareListProperty("LowResNormAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
-        self.declareProperty("QStep", 0.001, Description="Step-size in Q. Enter a negative value to get a log scale.")
-        self.declareProperty("AngleOffset", 0.0, Description="Angle offset (degrees)")
-        self.declareProperty("AngleOffsetError", 0.0, Description="Angle offset error (degrees)")
+        self.declareListProperty("LowResNormAxisPixelRange", [115, 210], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("TOFRange", [9000., 23600.], 
+                                 Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("TofRangeFlag", True)
+        self.declareProperty("QMin", 0.001, 
+                             Description="Minimum Q-value")
+        self.declareProperty("QStep", 0.001, 
+                             Description="Step-size in Q. Enter a negative value to get a log scale.")
+        self.declareProperty("AngleOffset", 0.0, 
+                             Description="Angle offset (degrees)")
+        self.declareProperty("AngleOffsetError", 0.0, 
+                             Description="Angle offset error (degrees)")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -44,6 +57,8 @@ class RefLReduction(PythonAlgorithm):
         from reduction.instruments.reflectometer import wks_utility
         
         run_numbers = self.getProperty("RunNumbers")
+
+        backSubMethod = 2   #1 uses RefRoi, 2 used own method
 
         mtd.sendLogMessage("RefLReduction: processing %s" % run_numbers)
 
@@ -57,9 +72,14 @@ class RefLReduction(PythonAlgorithm):
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
         # TOF range to consider
-        TOFrange = self.getProperty("TOFRange") #microS
+        TOFrangeFlag = self.getProperty("TofRangeFlag")
+        if (TOFrangeFlag):
+            TOFrange = self.getProperty("TOFRange") #microS
+        else:
+            TOFrange = [0, 200000]
+            
         # Steps for TOF rebin
-        TOFsteps = 50.0
+        TOFsteps = 100.0
 
         # Q binning for output distribution
         q_min = self.getProperty("QMin")
@@ -72,29 +92,24 @@ class RefLReduction(PythonAlgorithm):
         #Due to the frame effect, it's sometimes necessary to narrow the range
         #over which we add all the pixels along the low resolution
         #Parameter
-        DataXrangeFlag = self.getProperty("LowResDataAxisPixelRangeFlag")
-        if DataXrangeFlag:
-            Xrange = self.getProperty("LowResDataAxisPixelRange")
+        data_low_res_flag = self.getProperty("LowResDataAxisPixelRangeFlag")
+        if data_low_res_flag:
+            data_low_res = self.getProperty("LowResDataAxisPixelRange")
         else:
-            Xrange = [0,maxX-1]
+            data_low_res = [0,maxX-1]
 
-        NormXrangeFlag = self.getProperty("LowResNormAxisPixelRangeFlag")
-        if NormXrangeFlag:
-            normXrange = self.getProperty("LowResNormAxisPixelRange")
+        norm_low_res_flag = self.getProperty("LowResNormAxisPixelRangeFlag")
+        if norm_low_res_flag:
+            norm_low_res = self.getProperty("LowResNormAxisPixelRange")
         else:
-            normXrange = [0,maxX-1]
+            norm_low_res = [0,maxX-1]
                 
         h = 6.626e-34  #m^2 kg s^-1
         m = 1.675e-27     #kg
 
         norm_back = self.getProperty("NormBackgroundPixelRange")
-        BackfromYpixel = norm_back[0]
-        BacktoYpixel = norm_back[1]
-
         norm_peak = self.getProperty("NormPeakPixelRange")
-        from_norm_peak = norm_peak[0]
-        to_norm_peak = norm_peak[1]
-        
+
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
@@ -111,7 +126,7 @@ class RefLReduction(PythonAlgorithm):
             
             for _run in run_numbers:
 
-                ########################################################################
+                ##############################################################
                 # Find full path to event NeXus data file
                 _File = FileFinder.findRuns("REF_L%d" %_run)
                 if len(_File)>0 and os.path.isfile(_File[0]): 
@@ -122,9 +137,11 @@ class RefLReduction(PythonAlgorithm):
                     raise RuntimeError(msg)
                 
                 if not mtd.workspaceExists(ws_event_data):
-                    LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+                    LoadEventNexus(Filename=data_file, 
+                                   OutputWorkspace=ws_event_data)
                 else:
-                    LoadEventNexus(Filename=data_file, OutputWorkspace='tmp')
+                    LoadEventNexus(Filename=data_file, 
+                                   OutputWorkspace='tmp')
                     mt1 = mtd[ws_event_data]
                     mt2 = mtd['tmp']
                     Plus(LHSWorkspace=ws_event_data,
@@ -141,7 +158,8 @@ class RefLReduction(PythonAlgorithm):
                 raise RuntimeError(msg)
 
             if not mtd.workspaceExists(ws_event_data):
-                LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+                LoadEventNexus(Filename=data_file, 
+                               OutputWorkspace=ws_event_data)
         
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
@@ -166,17 +184,20 @@ class RefLReduction(PythonAlgorithm):
                       TOFsteps, 
                       TOFrange[1]],
               PreserveEvents=True)
-        
-#        # Keep only range of TOF of interest
-#        print '-> Crop TOF range'
-#        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
+                
+        # Keep only range of TOF of interest
+        print '-> Crop TOF range'
+        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], 
+                      XMax=TOFrange[1])
 
         # Normalized by Current (proton charge)
         print '-> Normalize by proton charge'
-        NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
-
+        NormaliseByCurrent(InputWorkspace=ws_histo_data, 
+                           OutputWorkspace=ws_histo_data)
+    
         # Calculation of the central pixel (using weighted average)
-        pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
+        pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], 
+                                                  maxX=maxX, maxY=maxY)
         pixelXtof_1d = pixelXtof_data.sum(axis=1)
         
         # Keep only range of pixels
@@ -212,12 +233,8 @@ class RefLReduction(PythonAlgorithm):
         # Distance source->center of detector        
         dMD = dSD + dSM
 
-        # Background subtraction
-        BackfromYpixel = data_back[0]
-        BacktoYpixel = data_back[1]
-        
         ws_data = '_' + ws_name + '_DataWks'
-        if subtract_data_bck:
+        if (subtract_data_bck and (backSubMethod == 1)):
 
             print '-> substract background'
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
@@ -226,7 +243,7 @@ class RefLReduction(PythonAlgorithm):
             ws_data_bck = '_' + ws_name + '_DataBckWks'
             
             bBackLeft = False
-            if (BackfromYpixel < (data_peak[0]-1)):
+            if (data_back[0] < (data_peak[0]-1)):
 
                 bBackLeft = True
                 ws_data_bck_1 = ws_data_bck + "_1"
@@ -237,9 +254,9 @@ class RefLReduction(PythonAlgorithm):
                        ConvertToQ=False,
                        IntegrateY=False,
                        SumPixels=True,
-                       XPixelMin=Xrange[0],
-                       XPixelMax=Xrange[1],
-                       YPixelMin=BackfromYpixel,
+                       XPixelMin=data_low_res[0],
+                       XPixelMax=data_low_res[1],
+                       YPixelMin=data_back[0],
                        YPixelMax=data_peak[0]-1,
                        NormalizeSum=True)
 
@@ -249,7 +266,7 @@ class RefLReduction(PythonAlgorithm):
                                  OutputWorkspace=ws_data_bck_1_rebin)
 
             bBackRight = False
-            if ((data_peak[1]+1) < BacktoYpixel):
+            if ((data_peak[1]+1) < data_back[1]):
 
                 bBackRight = True
                 ws_data_bck_2 = ws_data_bck + "_2"
@@ -260,10 +277,10 @@ class RefLReduction(PythonAlgorithm):
                        ConvertToQ=False,
                        IntegrateY=False,
                        SumPixels=True,
-                       XPixelMin=Xrange[0],
-                       XPixelMax=Xrange[1],
+                       XPixelMin=data_low_res[0],
+                       XPixelMax=data_low_res[1],
                        YPixelMin=data_peak[1]+1,
-                       YPixelMax=BacktoYpixel,
+                       YPixelMax=data_back[1],
                        NormalizeSum=True)
             
                 ws_data_bck_2_rebin = ws_data_bck_2 + '_rebin'
@@ -281,26 +298,17 @@ class RefLReduction(PythonAlgorithm):
                       Factor=0.5,
                       Operation="Multiply")
                 
-#                nbr_x_range = 1./(Xrange[1]-Xrange[0]+1)
-#                Scale(InputWorkspace=ws_data_bck+'_scale',
-#                      OutputWorkspace=ws_data_bck+'_scale',
-#                      Factor=nbr_x_range,
-#                      Operation="Multiply")
-                
-                print 'ws_histo_data: ' + ws_histo_data
-                print 'ws_data: ' + ws_data
-                
                 Minus(LHSWorkspace=ws_histo_data, 
                       RHSWorkspace=ws_data_bck+'_scale', 
                       OutputWorkspace=ws_data)
 
-#                mtd.deleteWorkspace(ws_data_bck+'_scale')
+                mtd.deleteWorkspace(ws_data_bck+'_scale')
                 mtd.deleteWorkspace(ws_data_bck)
-#                mtd.deleteWorkspace(ws_data_bck_1_rebin)
-#                mtd.deleteWorkspace(ws_data_bck_2_rebin)
-#                mtd.deleteWorkspace(ws_data_bck_1)
+                mtd.deleteWorkspace(ws_data_bck_1_rebin)
+                mtd.deleteWorkspace(ws_data_bck_2_rebin)
+                mtd.deleteWorkspace(ws_data_bck_1)
                 mtd.deleteWorkspace(ws_data_bck_2)
-#                mtd.deleteWorkspace(ws_histo_data)
+                mtd.deleteWorkspace(ws_histo_data)
 
             elif (bBackLeft):
                 
@@ -318,16 +326,122 @@ class RefLReduction(PythonAlgorithm):
                 mtd.deleteWorkspace(ws_data_bck_2_rebin)
                 mtd.deleteWorkspace(ws_data_bck_2)
 
-#            mtd.deleteWorkspace(ws_histo_data)
+            #cleanup (remove all negatives values
+            ResetNegatives(InputWorkspace=ws_data,
+                           OutputWorkspace=ws_data,
+                           AddMinimum=0)
+            mtd.deleteWorkspace(ws_histo_data)
 
-        else:        
+        if (subtract_data_bck and (backSubMethod == 2)):
+                
+            #integrate over the x axis in the low axis range specified
+            wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
+                                                  ws_histo_data+'_1D',
+                                                  fromXpixel=data_low_res[0],
+                                                  toXpixel=data_low_res[1],
+                                                  fromYpixel=0,
+                                                  toYpixel=255,
+                                                  maxX=maxX,
+                                                  maxY=maxY)
+
+            #for each TOF, get the average counts over the two
+            #background regions (top and bottom)
+            _mt = mtd[ws_histo_data+'_1D']
+            _x_axis = _mt.readX(0)[:]
+            _nbr_tof = len(_x_axis)
+            _tof_range = range(_nbr_tof-1)
+            _back_array = zeros(_nbr_tof-1)
+            _back_array_error = zeros(_nbr_tof-1) 
+            
+            #work on left side
+            _LfromPx = data_back[0]
+            _LtoPx = data_peak[0]
+            #work on right side
+            _RfromPx = data_peak[1]
+            _RtoPx = data_back[1]
+
+            bLeftBack = False            
+            if (_LfromPx < _LtoPx):
+                _Larray = arange(_LtoPx - _LfromPx) + _LfromPx
+                bLeftBack = True
+            
+            bRightBack = False
+            if (_RfromPx < _RtoPx):
+                _Rarray = arange(_RtoPx - _RfromPx) + _RfromPx
+                bRightBack = True
+            
+            if (bLeftBack and bRightBack):
+                _y_px_range = numpy.append(_Larray,_Rarray)
+#                _y_px_range = _y_px_range.flatten()
+            else:
+                if (bLeftBack):
+                    _y_px_range = _Larray
+                else:
+                    _y_px_range = _Rarray
+
+            for i in _tof_range:
+                _sum = 0.
+                _sum_error = 0.
+                _pts_summed = 0.
+                
+                _val = 0.
+                _err = 0.
+                for j in _y_px_range:
+                    _val = float(_mt.readY(int(j))[int(i)])
+                    _err = float(_mt.readE(int(j))[int(i)])
+                    if (_val != 0 and _err !=0):
+                        _new_val = float(_val / _err)
+                        _new_err = 1./_err
+                        _sum += _new_val
+                        _sum_error += _new_err
+
+                if (_val !=0. and _err !=0.):                                        
+                    _back_array[i] = float(_sum / _sum_error)
+                    _back_array_error[i] = float(1./ _sum_error)
+
+            #substract this number from the rest
+            CreateWorkspace(OutputWorkspace='background',
+                            DataX=_x_axis,
+                            DataY=_back_array,
+                            DataE=_back_array_error,
+                            UnitX="TOF",
+                            ParentWorkspace=mtd[ws_histo_data],
+                            NSpec=1)
+
+            #recreate workspace at the end                
+            mt1 = mtd[ws_histo_data+'_1D']
+            mt2 = mtd['background']
+                                    
+            Minus(LHSWorkspace=ws_histo_data+'_1D',
+                  RHSWorkspace='background',
+                  OutputWorkspace=ws_data)
+
+            ResetNegatives(InputWorkspace=ws_data,
+                           OutputWorkspace=ws_data,
+                           AddMinimum=0)
+
+            mtd.deleteWorkspace(ws_histo_data+'_1D')
+
+#            SumSpectra(InputWorkspace=ws_data, 
+#                       OutputWorkspace='wks_after_back_subtraction_1d')
         
-            ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
+        if (not(subtract_data_bck)):
+
+            wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
+                                                  ws_data,
+                                                  fromXpixel=data_low_res[0],
+                                                  toXpixel=data_low_res[1],
+                                                  fromYpixel=data_peak[0],
+                                                  toYpixel=data_peak[1],
+                                                  maxX=maxX,
+                                                  maxY=maxY)     
+            
+            ConvertToMatrixWorkspace(InputWorkspace=ws_data,
                                      OutputWorkspace=ws_data)
 
-#            mtd.deleteWorkspace(ws_histo_data)
 
-                
+            mtd.deleteWorkspace(ws_histo_data)
+
         if (NormFlag):
 
             print '-> normalization file is ' + str(normalization_run)
@@ -336,7 +450,7 @@ class RefLReduction(PythonAlgorithm):
             if len(f)>0 and os.path.isfile(f[0]): 
                 norm_file = f[0]
             else:
-                msg = "RefLReduction: could not find run %d\n" % normalization_run
+                msg = "RefLReduction: could not find run %d\n" %normalization_run
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)
             
@@ -357,14 +471,22 @@ class RefLReduction(PythonAlgorithm):
                           TOFsteps, 
                           TOFrange[1]])
  
+            # Keep only range of TOF of interest
+            print '-> Crop TOF range'
+            CropWorkspace(InputWorkspace=ws_norm_histo_data,
+                          OutputWorkspace=ws_norm_histo_data,
+                          XMin=TOFrange[0], 
+                          XMax=TOFrange[1])
+            
             # Normalized by Current (proton charge)
             print '-> normalized by current direct beam'
             NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, 
                                OutputWorkspace=ws_norm_histo_data)
 
             ws_data_bck = '_' + ws_name + '_NormBckWks'
-            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
-            if subtract_norm_bck:
+#            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
+            ws_norm_rebinned = ws_name + '_NormRebinnedWks'
+            if (subtract_norm_bck and (backSubMethod == 1)):
                 
                 print '-> substract background to direct beam'
                 ConvertToMatrixWorkspace(InputWorkspace=ws_norm_histo_data,
@@ -384,8 +506,8 @@ class RefLReduction(PythonAlgorithm):
                            ConvertToQ=False,
                            IntegrateY=False,
                            SumPixels=True,
-                           XPixelMin=normXrange[0],
-                           XPixelMax=normXrange[1],
+                           XPixelMin=norm_low_res[0],
+                           XPixelMax=norm_low_res[1],
                            YPixelMin=norm_back[0],
                            YPixelMax=norm_peak[0]-1,
                            NormalizeSum=True)
@@ -408,8 +530,8 @@ class RefLReduction(PythonAlgorithm):
                            ConvertToQ=False,
                            IntegrateY=False,
                            SumPixels=True,
-                           XPixelMin=normXrange[0],
-                           XPixelMax=normXrange[1],
+                           XPixelMin=norm_low_res[0],
+                           XPixelMax=norm_low_res[1],
                            YPixelMin=norm_peak[1]+1,
                            YPixelMax=norm_back[1],
                            NormalizeSum=True)
@@ -457,14 +579,111 @@ class RefLReduction(PythonAlgorithm):
                     mtd.deleteWorkspace(ws_norm_bck_2)
                     mtd.deleteWorkspace(ws_norm_histo_data)
 
+                
+                #Here I need to set to zeros all the negative entries
+                ResetNegatives(InputWorkspace=ws_norm_rebinned,
+                               OutputWorkspace=ws_norm_rebinned,
+                               AddMinimum=0)
+
                 wks_utility.createIntegratedWorkspace(mtd[ws_norm_rebinned], 
                                                       ws_norm_rebinned,
-                                                      fromXpixel=normXrange[0],
-                                                      toXpixel=normXrange[1],
-                                                      fromYpixel=BackfromYpixel,
-                                                      toYpixel=BacktoYpixel,
+                                                      fromXpixel=norm_low_res[0],
+                                                      toXpixel=norm_low_res[1],
+                                                      fromYpixel=norm_peak[0],
+                                                      toYpixel=norm_peak[1],
+                                                      maxX=maxX,
+                                                      maxY=maxY,
+                                                      bCleaning=True)
+
+            if (subtract_norm_bck and (backSubMethod == 2)):
+                     
+                #integrate over the x axis in the low axis range specified
+                wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
+                                                      ws_norm_histo_data+'_1D',
+                                                      fromXpixel=norm_low_res[0],
+                                                      toXpixel=norm_low_res[1],
+                                                      fromYpixel=0,
+                                                      toYpixel=255,
                                                       maxX=maxX,
                                                       maxY=maxY)
+
+                #for each TOF, get the average counts over the two
+                #background regions (top and bottom)
+                _mt = mtd[ws_norm_histo_data+'_1D']
+                _x_axis = _mt.readX(0)[:]
+                _nbr_tof = len(_x_axis)
+                _tof_range = range(_nbr_tof-1)
+                _back_array = zeros(_nbr_tof-1)
+                _back_array_error = zeros(_nbr_tof-1) 
+            
+                #work on left side
+                _LfromPx = norm_back[0]
+                _LtoPx = norm_peak[0]
+                #work on right side
+                _RfromPx = norm_peak[1]
+                _RtoPx = norm_back[1]
+
+                bLeftBack = False            
+                if (_LfromPx < _LtoPx):
+                    _Larray = arange(_LtoPx - _LfromPx) + _LfromPx
+                    bLeftBack = True
+            
+                bRightBack = False
+                if (_RfromPx < _RtoPx):
+                    _Rarray = arange(_RtoPx - _RfromPx) + _RfromPx
+                    bRightBack = True
+            
+                if (bLeftBack and bRightBack):
+                    _y_px_range = numpy.append(_Larray,_Rarray)
+                else:
+                    if (bLeftBack):
+                        _y_px_range = _Larray
+                    else:
+                        _y_px_range = _Rarray
+
+                for i in _tof_range:
+                    _sum = 0.
+                    _sum_error = 0.
+                    _pts_summed = 0.
+                
+                    _val = 0.
+                    _err = 0.
+                    for j in _y_px_range:
+                        _val = float(_mt.readY(int(j))[int(i)])
+                        _err = float(_mt.readE(int(j))[int(i)])
+                        if (_val != 0 and _err !=0):
+                            _new_val = float(_val / _err)
+                            _new_err = 1./_err
+                            _sum += _new_val
+                            _sum_error += _new_err
+
+                    if (_val !=0. and _err !=0.):                                        
+                        _back_array[i] = float(_sum / _sum_error)
+                        _back_array_error[i] = float(1./ _sum_error)
+              
+                #substract this number from the rest
+                CreateWorkspace(OutputWorkspace='background',
+                                DataX=_x_axis,
+                                DataY=_back_array,
+                                DataE=_back_array_error,
+                                UnitX="TOF",
+                                ParentWorkspace=mtd[ws_norm_histo_data],
+                                NSpec=1)
+            
+#                #recreate workspace at the end                
+#                mt1 = mtd[ws_norm_histo_data+'_1D']
+#                mt2 = mtd['background']
+                                    
+                Minus(LHSWorkspace=ws_norm_histo_data+'_1D',
+                      RHSWorkspace='background',
+                      OutputWorkspace=ws_norm_rebinned)
+
+                mtd.deleteWorkspace(ws_norm_histo_data+'_1D')
+                mtd.deleteWorkspace('background')
+
+                ResetNegatives(InputWorkspace=ws_norm_rebinned,
+                               OutputWorkspace=ws_norm_rebinned,
+                               AddMinimum=0)
 
             else:
             
@@ -474,10 +693,10 @@ class RefLReduction(PythonAlgorithm):
                 ws_integrated_data = '_' + ws_name + '_IntegratedNormWks'
                 wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
                                                       ws_integrated_data,
-                                                      fromXpixel=normXrange[0],
-                                                      toXpixel=normXrange[1],
-                                                      fromYpixel=BackfromYpixel,
-                                                      toYpixel=BacktoYpixel,
+                                                      fromXpixel=norm_low_res[0],
+                                                      toXpixel=norm_low_res[1],
+                                                      fromYpixel=norm_peak[0],
+                                                      toYpixel=norm_peak[1],
                                                       maxX=maxX,
                                                       maxY=maxY)
             
@@ -486,19 +705,18 @@ class RefLReduction(PythonAlgorithm):
                                  OutputWorkspace=ws_norm_rebinned)
 
                 mtd.deleteWorkspace(ws_integrated_data)
-                
+
             #Normalization    
             print '-> Sum spectra'       
             SumSpectra(InputWorkspace=ws_norm_rebinned, 
                        OutputWorkspace=ws_norm_rebinned)
-
+             
             #### divide data by normalize histo workspace
             print '-> Divide data by direct beam'
             Divide(LHSWorkspace=ws_data,
                    RHSWorkspace=ws_norm_rebinned,
                    OutputWorkspace=ws_data)
 
-        #This is where I need to move from TOF to Q (not before that)
         #now we can convert to Q
         
         theta = tthd_rad - ths_rad
@@ -525,38 +743,62 @@ class RefLReduction(PythonAlgorithm):
                 _Q = _const * math.sin(theta) / (tofm*1e-6)
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
-        
-        ws_integrated_data = '_' + ws_name + '_IntegratedDataWks'
-        print '-> keep only range of pixel of interest'
-        wks_utility.createIntegratedWorkspace(mtd[ws_data_scaled], 
-                                              ws_integrated_data,
-                                              fromXpixel=Xrange[0],
-                                              toXpixel=Xrange[1],
-                                              fromYpixel=BackfromYpixel,
-                                              toYpixel=BacktoYpixel,
-                                              maxX=maxX,
-                                              maxY=maxY)     
 
-        
-#        mtd.deleteWorkspace(ws_data_scaled)
-#        mtd.deleteWorkspace(ws_data)
-        ws_data_Q = ws_data + '_Q'
-        print '-> convert to Q'
-#        wks_utility.convertWorkspaceToQ(ws_data_scaled,
-        wks_utility.convertWorkspaceToQ(ws_integrated_data,
-                                        ws_data_Q,
-                                        fromYpixel=data_peak[0],
-                                        toYpixel=data_peak[1],
-                                        cpix=data_cpix,
-                                        source_to_detector=dMD,
-                                        sample_to_detector=dSD,
-                                        theta=theta,
-                                        geo_correction=False,
-                                        q_binning=[q_min,q_step,q_max])
+        if (backSubMethod == 1):        
+            ws_integrated_data = ws_name + '_IntegratedDataWks'
+            print '-> keep only range of pixel of interest' 
+            
+            wks_utility.createIntegratedWorkspace(mtd[ws_data_scaled], 
+                                                  ws_integrated_data,
+                                                  fromXpixel=data_low_res[0],
+                                                  toXpixel=data_low_res[1],
+                                                  fromYpixel=data_peak[0],
+                                                  toYpixel=data_peak[1],
+                                                  maxX=maxX,
+                                                  maxY=maxY)     
+            
+            ws_data_cleaned = ws_name + '_cleaned'
+#            wks_utility.cleanup_data(InputWorkspace=ws_integrated_data,
+#                                     OutputWorkspace=ws_data_cleaned,
+#                                     maxY=maxY)
 
-        
+            #        mtd.deleteWorkspace(ws_data_scaled)
+            #        mtd.deleteWorkspace(ws_data)
+            ws_data_Q = ws_data + '_Q'
+            print '-> convert to Q'
+            #        wks_utility.convertWorkspaceToQ(ws_data_scaled,
+            wks_utility.convertWorkspaceToQ(ws_integrated_data,
+#            wks_utility.convertWorkspaceToQ(ws_data_cleaned,
+                                            ws_data_Q,
+                                            fromYpixel=data_peak[0],
+                                            toYpixel=data_peak[1],
+                                            cpix=data_cpix,
+                                            source_to_detector=dMD,
+                                            sample_to_detector=dSD,
+                                            theta=theta,
+                                            geo_correction=False,
+                                            q_binning=[q_min,q_step,q_max])
 
-        
+            mtd.deleteWorkspace(ws_integrated_data)
+
+        else:
+            ws_data_Q = ws_data + '_Q'
+            print '-> convert to Q'
+            
+            wks_utility.convertWorkspaceToQ(ws_data_scaled,
+                                            ws_data_Q,
+                                            fromYpixel=data_peak[0],
+                                            toYpixel=data_peak[1],
+                                            cpix=data_cpix,
+                                            source_to_detector=dMD,
+                                            sample_to_detector=dSD,
+                                            theta=theta,
+                                            geo_correction=True,
+                                            q_binning=[q_min,q_step,q_max])
+
+            mtd.deleteWorkspace(ws_data_scaled)
+
+
         print '-> replace special values'
         mt = mtd[ws_data_Q]
         ReplaceSpecialValues(InputWorkspace=ws_data_Q, 
@@ -565,7 +807,7 @@ class RefLReduction(PythonAlgorithm):
                              InfinityValue=0, 
                              InfinityError=0, 
                              OutputWorkspace=ws_data_Q)
-
+        
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
         if mtd.workspaceExists(output_ws):
@@ -573,21 +815,6 @@ class RefLReduction(PythonAlgorithm):
             
         print '-> sum spectra'    
         SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
-
-
-
-
-        ReplaceSpecialValues(InputWorkspace=ws_integrated_data, 
-                             NaNValue=0, 
-                             NaNError=0, 
-                             InfinityValue=0, 
-                             InfinityError=0, 
-                             OutputWorkspace='_tmp1')
-        SumSpectra(InputWorkspace='_tmp1', OutputWorkspace='_tmp2')
-
-
-
-
 
         #keep only none zero values
         try:
@@ -639,6 +866,5 @@ class RefLReduction(PythonAlgorithm):
         mtd.deleteWorkspace(ws_norm_event_data)
         
         print
-        
         
 mtd.registerPyAlgorithm(RefLReduction())

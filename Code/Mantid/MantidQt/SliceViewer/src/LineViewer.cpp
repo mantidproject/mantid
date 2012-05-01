@@ -14,6 +14,7 @@
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -29,6 +30,7 @@ namespace SliceViewer
 
 LineViewer::LineViewer(QWidget *parent)
  : QWidget(parent),
+   g_log(Kernel::Logger::get("LineViewer")),
    m_planeWidth(0),
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
@@ -254,24 +256,88 @@ void LineViewer::readTextboxes()
   m_planeWidth = tempPlaneWidth;
 }
 
-//-----------------------------------------------------------------------------------------------
-/** Perform the 1D integration using the current parameters.
- * Note that the algorithm is executed asynchronously (in the background),
- * so this method may return before the integrated line
- * workspace is ready.
+//----------------------------------------------------------------------------------------
+/** Perform the line integration for a MatrixWorkspace.
+ * Currently only works for horizontal/vertical lines
  *
- * @throw std::runtime_error if an error occurs.
- * */
-void LineViewer::apply()
+ * @param ws :: MatrixWorkspace to integrate
+ */
+IAlgorithm_sptr LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
 {
-  if (m_allDimsFree)
-    throw std::runtime_error("Not currently supported with all dimensions free!");
-  m_algoRunner->cancelRunningAlgorithm();
+  try
+  {
+    if (getPlanarWidth() <= 0)
+      throw std::runtime_error("Planar Width must be > 0");
 
-  // BinMD fails on MDHisto.
-  IMDHistoWorkspace_sptr mdhws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Rebin2D");
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
 
-  m_integratedWSName = m_ws->getName() + "_line" ;
+    // (half-width in the plane)
+    double planeWidth = this->getPlanarWidth();
+    // Length of the line
+    double dx = m_end[m_freeDimX] - m_start[m_freeDimX];
+    double dy = m_end[m_freeDimY] - m_start[m_freeDimY];
+    size_t numBins = m_numBins;
+
+    if (fabs(dx) > fabs(dy))
+    {
+      // Horizontal line
+      double start = m_start[m_freeDimX];
+      double end = m_end[m_freeDimX];
+      if (end < start)
+      {
+        start = end;
+        end = m_start[m_freeDimX];
+      }
+      double vertical = m_start[m_freeDimY];
+      double binWidth = (end-start) / static_cast<double>(numBins);
+      if (binWidth <= 0) return IAlgorithm_sptr();
+
+      alg->setPropertyValue("Axis1Binning",
+          Strings::toString(start) + "," + Strings::toString(binWidth) + "," + Strings::toString(end));
+      alg->setPropertyValue("Axis2Binning",
+          Strings::toString(vertical-planeWidth) + "," + Strings::toString(planeWidth*2) + "," + Strings::toString(vertical+planeWidth));
+      alg->setProperty("Transpose", false);
+    }
+    else
+    {
+      // Vertical line
+      double start = m_start[m_freeDimY];
+      double end = m_end[m_freeDimY];
+      if (end < start)
+      {
+        start = end;
+        end = m_start[m_freeDimY];
+      }
+      double binWidth = (end-start) / static_cast<double>(numBins);
+
+      double vertical = m_start[m_freeDimX];
+      alg->setPropertyValue("Axis1Binning",
+          Strings::toString(vertical-planeWidth) + "," + Strings::toString(planeWidth*2) + "," + Strings::toString(vertical+planeWidth));
+      alg->setPropertyValue("Axis2Binning",
+          Strings::toString(start) + "," + Strings::toString(binWidth) + "," + Strings::toString(end));
+      alg->setProperty("Transpose", true);
+    }
+    return alg;
+  }
+  catch (std::exception & e)
+  {
+    // Log the error
+    g_log.error() << "Invalid property passed to Rebin2D:" << std::endl;
+    g_log.error() << e.what() << std::endl;
+    return IAlgorithm_sptr();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+/** Perform the line integration for a MDWorkspace
+ *
+ * @param ws :: MDHisto or MDEventWorkspace to integrate
+ * @return the algorithm to run
+ */
+IAlgorithm_sptr LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws)
+{
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
@@ -306,7 +372,7 @@ void LineViewer::apply()
   else
     alg = AlgorithmManager::Instance().create("BinMD");
 
-  alg->setProperty("InputWorkspace", m_ws);
+  alg->setProperty("InputWorkspace", ws);
   alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
   alg->setProperty("AxisAligned", false);
 
@@ -328,7 +394,7 @@ void LineViewer::apply()
   // Now each remaining dimension
   std::string dimChars = "012345"; // SlicingAlgorithm::getDimensionChars();
   size_t propNum = 2;
-  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  for (int d=0; d<int(ws->getNumDims()); d++)
   {
     if ((d != m_freeDimX) && (d != m_freeDimY))
     {
@@ -357,13 +423,47 @@ void LineViewer::apply()
   {
     alg->setProperty("IterateEvents", true);
   }
-
-  // Start the algorithm asynchronously
-  m_algoRunner->startAlgorithm(alg);
-
-  // In the mean time, change the title
-  m_plot->setTitle("Integrating Line...");
+  return alg;
 }
+
+//-----------------------------------------------------------------------------------------------
+/** Perform the 1D integration using the current parameters.
+ * Note that the algorithm is executed asynchronously (in the background),
+ * so this method may return before the integrated line
+ * workspace is ready.
+ *
+ * @throw std::runtime_error if an error occurs.
+ * */
+void LineViewer::apply()
+{
+  if (m_allDimsFree)
+    throw std::runtime_error("Not currently supported with all dimensions free!");
+  m_algoRunner->cancelRunningAlgorithm();
+  m_integratedWSName = m_ws->getName() + "_line" ;
+
+  // Different call for
+  MatrixWorkspace_sptr matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
+
+  IAlgorithm_sptr alg;
+  if (matrixWs)
+    alg = this->applyMatrixWorkspace(matrixWs);
+  else
+    alg = this->applyMDWorkspace(m_ws);
+
+  if (alg)
+  {
+    // Start the algorithm asynchronously
+    m_algoRunner->startAlgorithm(alg);
+
+    // In the mean time, change the title
+    m_plot->setTitle("Integrating Line...");
+  }
+  else
+    m_plot->setTitle("Invalid Properties for Rebin Algorithm");
+
+}
+
+
 
 // ==============================================================================================
 // ================================== SLOTS =====================================================
@@ -556,7 +656,7 @@ void LineViewer::setThickness(Mantid::Kernel::VMD width)
 }
 
 /** Set the width of the line in the planar dimension only.
- * Other dimensions' widths will follow unless they were manually changed
+ * Other dimensions' widths will follow unless they wer11e manually changed
  * @param width :: width in the plane. */
 void LineViewer::setPlanarWidth(double width)
 {
@@ -869,11 +969,24 @@ void LineViewer::showPreview()
 void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
-  MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
-      VMD(), VMD(), m_lineOptions->getNormalization());
-  curveData.setPreviewMode(false);
-  curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
-  m_fullCurve->setData(curveData);
+  MatrixWorkspace_const_sptr sliceMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_sliceWS);
+  if (sliceMatrix)
+  {
+    MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, false /*not logScale*/);
+    m_fullCurve->setData(curveData);
+    m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( sliceMatrix->getAxis(0)->unit()->label() ));;
+    m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( sliceMatrix->YUnitLabel() ));;
+  }
+  else
+  {
+    MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
+        VMD(), VMD(), m_lineOptions->getNormalization());
+    curveData.setPreviewMode(false);
+    curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
+    m_fullCurve->setData(curveData);
+    m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
+    m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
+  }
 
   if (m_previewCurve->isVisible())
   {
@@ -884,8 +997,6 @@ void LineViewer::showFull()
   m_fullCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Integrated Line Plot");
-  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
-  m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
 }
 
 //-----------------------------------------------------------------------------

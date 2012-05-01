@@ -1569,8 +1569,7 @@ namespace Mantid
     void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
         Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
     {
-      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
-      //throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+      IMDWorkspace::getLinePlot(start,end,normalize,x,y,e);
     }
 
     //------------------------------------------------------------------------------------
@@ -1584,7 +1583,25 @@ namespace Mantid
     {
       coord_t x = coords[0];
       coord_t y = coords[1];
+
+      // First, find the workspace index
+      NumericAxis * ax1 = dynamic_cast<NumericAxis*>(this->getAxis(1));
+
+      // If a spectra/text axis, just use the Y coord as the workspace index
       size_t wi = size_t(y);
+      if (ax1)
+      {
+        const MantidVec & yVals = ax1->getValues();
+        MantidVec::const_iterator it = std::lower_bound(yVals.begin(), yVals.end(), y);
+        if (it == yVals.end())
+        {
+          // Out of range
+          return std::numeric_limits<double>::quiet_NaN();
+        }
+        // The workspace index is the point in the vector that we found
+        wi = it - yVals.begin();
+      }
+
       if (wi < this->getNumberHistograms())
       {
         const MantidVec & X = this->readX(wi);

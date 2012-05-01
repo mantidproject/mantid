@@ -8,22 +8,65 @@
 #include <QPalette>
 #include <QDirIterator>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include <iostream> 
 
 
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 
+/**
+Is Paraview at this location.
+@return TRUE if determined to be present.
+*/
+bool isParaviewHere(const QString& location)
+{
+  using boost::regex;
+  using boost::regex_search;
+
+  bool found = false;
+  if(!location.isEmpty())
+  {
+    QDirIterator it(location, QDirIterator::NoIteratorFlags);
+    while (it.hasNext())
+    {
+      it.next();
+      QString file =it.fileName();
+      regex expression("^(pqcore)", boost::regex::icase);
+      if(regex_search(file.toStdString(), expression) && it.fileInfo().isFile())
+      {
+        found = true;
+        break;
+      }
+    }
+  }
+  return found;
+}
+
 /// Constructor
-SetUpParaview::SetUpParaview(QWidget *parent) : QDialog(parent)
+SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent), m_from(from)
 {
   m_uiForm.setupUi(this);
 
-  QPalette plt;
-  plt.setColor(QPalette::WindowText, Qt::red);
-  m_uiForm.lbl_message->setPalette(plt);
-
   initLayout();
+
+  m_candidateLocation = QString(ConfigService::Instance().getString("paraview.path").c_str());
+  //Do our best to figure out the location based on where paraview normally sits.
+  if(m_candidateLocation.isEmpty())
+  {
+    const QString predictedLocation = "C:/Program Files (x86)/ParaView 3.10.1/bin";
+    if(isParaviewHere(predictedLocation))
+    {
+      acceptPotentialLocation(predictedLocation);
+    }
+  }
+  else
+  {
+    if(isParaviewHere(m_candidateLocation))
+    {
+      acceptPotentialLocation(m_candidateLocation);
+    }
+  }
 }
 
 /// Destructor
@@ -36,7 +79,12 @@ void SetUpParaview::initLayout()
 {
   clearStatus();
 
-  m_candidateLocation = QString(ConfigService::Instance().getString("paraview.path").c_str());
+  //Until the user has provided a location, they will not be able to set the result.
+  m_uiForm.btn_set->setEnabled(false);
+  
+  QPalette plt;
+  plt.setColor(QPalette::WindowText, Qt::red);
+  m_uiForm.lbl_message->setPalette(plt);
 
   connect(m_uiForm.btn_choose_location, SIGNAL(clicked()), this, SLOT(onChoose()));
   connect(m_uiForm.btn_set, SIGNAL(clicked()), this, SLOT(onSet()));
@@ -61,6 +109,15 @@ void SetUpParaview::onSet()
   std::string filename = config.getUserFilename();
   //Save the result so that on the next start up we don't have to bother the user.
   config.saveConfig(filename);
+
+  //Additional message for mantid menu setup.
+  if(m_from == SetUpParaview::MantidMenu)
+  {
+    QMessageBox msgBox;
+    msgBox.setText("You will need to restart MantidPlot to pick-up these changes.");
+    msgBox.exec();
+  }
+
   this->close();
 }
 
@@ -75,6 +132,29 @@ void SetUpParaview::onIgnoreHenceforth()
   this->close();
 }
 
+/*
+stash location on dialog object and display in ui text box.
+@param location: location to stash before applying.
+*/
+void SetUpParaview::acceptPotentialLocation(const QString& location)
+{
+  m_candidateLocation = location;
+  m_uiForm.txt_location->setText(location);
+  m_uiForm.btn_set->setEnabled(true);
+}
+
+/*
+Handle the rejection of a potential location
+@param location: The rejected location
+*/
+void SetUpParaview::rejectPotentialLocation(const QString& location)
+{
+  m_candidateLocation = "";
+  m_uiForm.txt_location->setText(location); //show the location anyway, good to help the user fix what's wrong
+  m_uiForm.btn_set->setEnabled(false);
+  writeError("Try again. Expected paraview libaries were not found in the location given.");
+}
+
 /// Event handler for the onChoose event.
 void SetUpParaview::onChoose()
 {
@@ -84,30 +164,21 @@ void SetUpParaview::onChoose()
   clearStatus();
   QString temp = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home");
   temp = QDir::fromNativeSeparators(temp);
-  if(!temp.isEmpty())
+  if(isParaviewHere(temp))
   {
-    bool found = false;
-
-    QDirIterator it(temp, QDirIterator::NoIteratorFlags);
-    while (it.hasNext())
+    acceptPotentialLocation(temp);
+  }
+  else
+  {
+    //Try to predict the location, since users usually do not give the full path to the bin directory
+    temp += "/bin";
+    if(isParaviewHere(temp))
     {
-      it.next();
-      QString file =it.fileName();
-      regex expression("^(pqcore)", boost::regex::icase);
-      if(regex_search(file.toStdString(), expression) && it.fileInfo().isFile())
-      {
-        found = true;
-        break;
-      }
-    }
-    if(!found)
-    {
-      writeError("Try again. Expected paraview libaries were not found in the location given.");
+      acceptPotentialLocation(temp);
     }
     else
     {
-      m_candidateLocation = temp;
-      m_uiForm.txt_location->setText(temp);
+      rejectPotentialLocation(temp);
     }
   }
 }

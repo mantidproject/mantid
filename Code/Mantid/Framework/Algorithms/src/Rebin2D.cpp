@@ -73,6 +73,8 @@ namespace Mantid
       declareProperty(new PropertyWithValue<bool>("UseFractionalArea", false, Direction::Input),
                       "Flag to turn on the using the fractional area tracking RebinnedOutput workspace\n."
                       "Default is false.");
+      declareProperty(new PropertyWithValue<bool>("Transpose", false),
+        "Run the Transpose algorithm on the resulting matrix.");
     }
 
     /** 
@@ -153,6 +155,17 @@ namespace Mantid
         boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize();
       }
       normaliseOutput(outputWS, inputWS);
+
+      bool Transpose = this->getProperty("Transpose");
+      if (Transpose)
+      {
+        IAlgorithm_sptr alg = this->createSubAlgorithm("Transpose", 0.9, 1.0);
+        alg->setProperty("InputWorkspace", outputWS);
+        alg->setPropertyValue("OutputWorkspace", "__anonymous");
+        alg->execute();
+        outputWS = alg->getProperty("OutputWorkspace");
+      }
+
       setProperty("OutputWorkspace", outputWS);
     }
 

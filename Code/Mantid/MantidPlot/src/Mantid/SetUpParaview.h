@@ -9,17 +9,20 @@
 *
 */
 
+
 class SetUpParaview : public QDialog
 {
   Q_OBJECT
-
 public:
-  SetUpParaview(QWidget *parent=0);
+  enum StartUpFrom {FirstLaunch, MantidMenu};
+  SetUpParaview(StartUpFrom from, QWidget *parent=0);
   ~SetUpParaview();
 private:
   void initLayout();
   void clearStatus();
   void writeError(const QString& error);
+  void acceptPotentialLocation(const QString& location);
+  void rejectPotentialLocation(const QString& location);
 private slots:
   void onChoose();
   void onSet();
@@ -28,6 +31,7 @@ private slots:
 private:
   Ui::SetUpParaview m_uiForm;
   QString m_candidateLocation;
+  StartUpFrom m_from;
 
 };
 

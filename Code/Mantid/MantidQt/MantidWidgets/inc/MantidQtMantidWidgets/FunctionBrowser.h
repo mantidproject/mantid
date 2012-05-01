@@ -44,7 +44,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
-class CreateAttributeProperty;
+class CreateAttributePropertyForFunctionBrowser;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display 
@@ -252,7 +252,7 @@ protected:
   /// Remove one constraints from current parameter
   QAction *m_actionRemoveConstraint;
 
-  friend class CreateAttributeProperty;
+  friend class CreateAttributePropertyForFunctionBrowser;
 };
 
 

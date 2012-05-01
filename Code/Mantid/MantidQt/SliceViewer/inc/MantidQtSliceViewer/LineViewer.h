@@ -86,8 +86,13 @@ signals:
     /// Signal emitted when changing fixed bin width mode
     void changedFixedBinWidth(bool, double);
 
-
 private:
+    Mantid::API::IAlgorithm_sptr applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+    Mantid::API::IAlgorithm_sptr applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+
+    /// Logger object
+    Mantid::Kernel::Logger & g_log;
+
     // -------------------------- Widgets ----------------------------
 
     /// Auto-generated UI controls.

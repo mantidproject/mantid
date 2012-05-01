@@ -38,6 +38,7 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef EXCLUDE_Q_TRANSFORMATION_Q3D
+// Direct/indirect
 template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
 struct CoordTransformer<ConvertToMD::Q3D,MODE,CONV,TYPE,SAMPLE>
 {
@@ -207,7 +208,7 @@ private:
     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
  
 };
-#endif
+#endif // EXCLUDE_Q_TRANSFORMATION_Q3D
 //} // namespace ConvertToMD
 } // End MDAlgorighms namespace
 } // End Mantid namespace

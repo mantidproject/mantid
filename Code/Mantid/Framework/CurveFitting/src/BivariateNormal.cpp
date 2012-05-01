@@ -447,11 +447,11 @@ void BivariateNormal::initCommon()
           if( constr )
           {
             double penalty = constr->getPenaltyFactor() + 10 * MaxD;
-            std::cout<<"initCommon G"<<p<<","<<penalty<<std::endl;
+            //std::cout<<"initCommon G"<<p<<","<<penalty<<std::endl;
             constr->setPenaltyFactor( penalty );
 
           }
-        } std::cout<<"initCommon H"<<std::endl;
+        } //std::cout<<"initCommon H"<<std::endl;
 
 //*/
         if (CalcVariances)

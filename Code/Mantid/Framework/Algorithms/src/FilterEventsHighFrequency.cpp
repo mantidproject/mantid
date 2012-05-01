@@ -925,7 +925,6 @@ namespace Algorithms
 
       // v. Filter in/out? by VALUE and section as an option
       double msevalue = mSEValues[mindex];
-      bool selected = false;
       int selecttype = 0;
       if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
         if (mSelectedInterval < 0 || section==mSelectedInterval)
@@ -933,7 +932,6 @@ namespace Algorithms
           // Be filtered again by interval
           DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
           newevents.push_back(newevent);
-          selected = true;
           numeventsin ++;
           selecttype = 1;
         }

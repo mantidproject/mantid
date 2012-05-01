@@ -509,8 +509,8 @@ namespace Mantid
       // Else we have multiple loaded workspaces - group them and set the group as output.
       else
       {
-        Mantid::API::IAlgorithm_sptr groupingAlg = 
-          Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces", 1);
+        Mantid::API::IAlgorithm_sptr groupingAlg = this->createSubAlgorithm("GroupWorkspaces",0, 0, true, 1);
+        groupingAlg->setAlwaysStoreInADS(true);
 
         groupingAlg->setProperty("InputWorkspaces",loadedWsNames);
         groupingAlg->setProperty("OutputWorkspace",outputWsName.c_str());
@@ -687,8 +687,9 @@ namespace Mantid
       Mantid::API::IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 1);
 
       // Here, as a workaround for groupworkspaces who's members have names but no
-      // accompanying entries in the ADS, we set the sub algo to not be a child.
-      loadAlg->setChild(false);
+      // accompanying entries in the ADS, we set the sub algo to setAlwaysStoreInADS.
+      //loadAlg->setChild(false);
+      loadAlg->setAlwaysStoreInADS(true);
 
       // Get the list properties for the concrete loader load algorithm
       const std::vector<Kernel::Property*> & props = getProperties();
@@ -756,7 +757,8 @@ namespace Mantid
         return;
 
       Mantid::API::IAlgorithm_sptr renameAlg = createSubAlgorithm("RenameWorkspace", 1);
-      renameAlg->setChild(false);
+      renameAlg->setChild(true); // Must be keep child=true to prevent locking errors
+      renameAlg->setAlwaysStoreInADS(true);
       renameAlg->setPropertyValue("InputWorkspace", oldName);
       renameAlg->setPropertyValue("OutputWorkspace", newName);
       renameAlg->executeAsSubAlg();

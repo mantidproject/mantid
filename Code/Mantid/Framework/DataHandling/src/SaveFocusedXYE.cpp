@@ -112,7 +112,7 @@ void SaveFocusedXYE::exec()
     }
     else if (split == "True")//Several files will be created with names: filename-i.ext
     {
-      number << "-" << i;
+      number << "-" << i + startingbank;
       const std::string file(filename + number.str() + "." + ext);
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
