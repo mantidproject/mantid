@@ -16,7 +16,8 @@ namespace API
   AlgorithmRunner::AlgorithmRunner() :
     m_finishedObserver(*this, &AlgorithmRunner::handleAlgorithmFinishedNotification),
     m_progressObserver(*this, &AlgorithmRunner::handleAlgorithmProgressNotification),
-    m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification)
+    m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification),
+    m_asyncRebinResult(NULL)
   {
   }
     
@@ -44,7 +45,9 @@ namespace API
       {
         m_asyncRebinResult->tryWait(1000);
         delete m_asyncRebinResult;
+        m_asyncRebinResult = NULL;
       }
+      m_asyncRebinAlg.reset();
     }
   }
 

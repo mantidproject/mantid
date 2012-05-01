@@ -1569,8 +1569,7 @@ namespace Mantid
     void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
         Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
     {
-      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
-      //throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+      IMDWorkspace::getLinePlot(start,end,normalize,x,y,e);
     }
 
     //------------------------------------------------------------------------------------
