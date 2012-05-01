@@ -118,5 +118,14 @@ std::vector<double> NumericAxis::createBinBoundaries() const
   return boundaries;
 }
 
+/** Get a const reference to the vector of values in this axis
+ *
+ * @return the values vector
+ */
+const std::vector<double> &  NumericAxis::getValues() const
+{
+  return m_values;
+}
+
 } // namespace API
 } // namespace Mantid
