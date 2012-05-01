@@ -1,6 +1,6 @@
 /*WIKI* 
-
-
+Reflectivity reduction workflow. This workflow algorithm computes the
+specular and off-specular reflectivity for both REFM and REFL instruments.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -52,33 +52,38 @@ using namespace DataObjects;
 
 void RefReduction::init()
 {
-  declareProperty("DataRun", "");
+  declareProperty("DataRun", "", "Run number of the data set to be reduced");
   declareProperty(
     new ArrayProperty<int>("SignalPeakPixelRange"),
     "Pixel range for the signal peak");
 
-  declareProperty("SubtractSignalBackground", false);
+  declareProperty("SubtractSignalBackground", false,
+      "If true, the background will be subtracted from the signal peak");
   declareProperty(
     new ArrayProperty<int>("SignalBackgroundPixelRange"),
     "Pixel range for background around the signal peak");
 
-  declareProperty("CropLowResDataAxis", false);
+  declareProperty("CropLowResDataAxis", false,
+      "If true, the low-resolution pixel range will be limited to the"
+      " range given by the LowResDataAxisPixelRange property");
   declareProperty(
     new ArrayProperty<int>("LowResDataAxisPixelRange"),
     "Pixel range for the signal peak in the low-res direction");
 
-  declareProperty("PerformNormalization", true);
-  declareProperty("NormalizationRun", "");
+  declareProperty("PerformNormalization", true, "If true, the normalization will be performed");
+  declareProperty("NormalizationRun", "", "Run number of the normalization data set");
   declareProperty(
     new ArrayProperty<int>("NormPeakPixelRange"),
     "Pixel range for the normalization peak");
 
-  declareProperty("SubtractNormBackground", false);
+  declareProperty("SubtractNormBackground", false, "It true, the background will be subtracted"
+      " from the normalization peak");
   declareProperty(
     new ArrayProperty<int>("NormBackgroundPixelRange"),
     "Pixel range for background around the normalization peak");
 
-  declareProperty("CropLowResNormAxis", false);
+  declareProperty("CropLowResNormAxis", false, "If true, the low-resolution pixel range"
+      " will be limited to be the range given by the LowResNormAxisPixelRange property");
   declareProperty(
     new ArrayProperty<int>("LowResNormAxisPixelRange"),
     "Pixel range for the normalization peak in the low-res direction");
@@ -94,7 +99,7 @@ void RefReduction::init()
   declareProperty("DetectorAngle", EMPTY_DBL());
   declareProperty("DetectorAngle0", EMPTY_DBL());
   declareProperty("DirectPixel", EMPTY_DBL());
-  declareProperty("PolarizedData", true);
+  declareProperty("PolarizedData", true, "If true, the algorithm will look for polarization states in the data set");
   setPropertySettings("ReflectivityPixel", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
   setPropertySettings("DetectorAngle", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
   setPropertySettings("DetectorAngle0", new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M") );
@@ -108,7 +113,7 @@ void RefReduction::init()
   instrOptions.push_back("REF_M");
   declareProperty("Instrument","REF_M",boost::make_shared<StringListValidator>(instrOptions),
     "Instrument to reduce for");
-  declareProperty("OutputWorkspacePrefix","reflectivity");
+  declareProperty("OutputWorkspacePrefix","reflectivity", "Prefix to give the output workspaces");
   declareProperty("OutputMessage","",Direction::Output);
 }
 
