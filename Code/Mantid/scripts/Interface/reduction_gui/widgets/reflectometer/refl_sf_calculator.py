@@ -66,6 +66,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.waiting_label.hide()
         self._summary.data_run_number_processing.hide()
                 
+        #tof
+        self._summary.tof_min.setValidator(QtGui.QDoubleValidator(self._summary.tof_min))
+        self._summary.tof_max.setValidator(QtGui.QDoubleValidator(self._summary.tof_max))
+        self.connect(self._summary.plot_counts_vs_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_counts_vs_tof)
+                
         self._summary.data_run_number_edit.setValidator(QtGui.QIntValidator(self._summary.data_run_number_edit))
         self._summary.number_of_attenuator.setValidator(QtGui.QIntValidator(self._summary.number_of_attenuator))
         self._summary.data_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_from_pixel))
@@ -89,6 +94,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #Number of attenuator value changed
         call_back = partial(self._edit_event, ctrl=self._summary.number_of_attenuator)
         self.connect(self._summary.number_of_attenuator, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        #tof selection (from and to) changed
+        call_back = partial(self._edit_event, ctrl=self._summary.tof_min)
+        self.connect(self._summary.tof_min, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.tof_max)
+        self.connect(self._summary.tof_max, QtCore.SIGNAL("textChanged(QString)"), call_back)
         #peak selection (from and to) changed
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
@@ -133,6 +143,23 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #TODO: allow log binning
         self._summary.log_scale_chk.hide()
                  
+    def _plot_counts_vs_tof(self):
+        if not IS_IN_MANTIDPLOT:
+            return
+        
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.data_run_number_edit.text())))
+            
+        range_min = float(self._summary.tof_min.text())
+        range_max = float(self._summary.tof_max.text())
+
+        if len(f)>0 and os.path.isfile(f[0]):
+            def call_back(xmin, xmax):
+                self._summary.tof_min.setText("%-d" % float(xmin))
+                self._summary.tof_max.setText("%-d" % float(xmax))
+            data_manipulation.tof_distribution(f[0], call_back,
+                                               range_min=range_min,
+                                               range_max=range_max)
+    
     def _plot_count_vs_y(self, is_peak=True):
         """
             Plot counts as a function of high-resolution pixels
@@ -270,6 +297,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
     
     def _reset_warnings(self):
         self._summary.edited_warning_label.hide()
+        util.set_edited(self._summary.tof_min, False)
+        util.set_edited(self._summary.tof_max, False)
         util.set_edited(self._summary.data_run_number_edit, False)
         util.set_edited(self._summary.incident_medium_combobox, False)
         util.set_edited(self._summary.number_of_attenuator, False)
@@ -322,7 +351,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         for i in range(len(_list)):
             self._summary.incident_medium_combobox.addItem(str(_list[i]))
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
-
+        self._summary.tof_min.setText(str(state.tof_min))
+        self._summary.tof_max.setText(str(state.tof_max))
         self._summary.data_run_number_edit.setText(str(state.data_file))
         self._summary.number_of_attenuator.setText(str(state.number_attenuator))
         self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
@@ -351,7 +381,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
         incident_medium = m.incident_medium_list[m.incident_medium_index_selected]
-        
+                
         for i in range(self._summary.angle_list.count()):
             data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
             # Over-write incident medium with global incident medium
@@ -368,11 +398,15 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #run number
         m.data_file = str(self._summary.data_run_number_edit.text())
         
-        #incident medium
-        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
-                                  for i in range(self._summary.incident_medium_combobox.count())]
-        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
-        
+#        #incident medium
+#        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
+#                                  for i in range(self._summary.incident_medium_combobox.count())]
+#        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+                
+        #tof
+        m.tof_min = self._summary.tof_min.text()
+        m.tof_max = self._summary.tof_max.text()
+
         #number of attenuator
         m.number_attenuator = int(self._summary.number_of_attenuator.text())
 

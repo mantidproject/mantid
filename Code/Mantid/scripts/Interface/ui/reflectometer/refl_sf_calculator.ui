@@ -285,7 +285,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit">
+                  <widget class="QLineEdit" name="tof_min">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>
@@ -342,7 +342,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit_2">
+                  <widget class="QLineEdit" name="tof_max">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>
@@ -380,7 +380,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="plot_count_vs_y_btn_2">
+                  <widget class="QPushButton" name="plot_counts_vs_tof_btn">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>

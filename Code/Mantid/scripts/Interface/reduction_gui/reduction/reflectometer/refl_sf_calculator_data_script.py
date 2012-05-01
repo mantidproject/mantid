@@ -23,6 +23,8 @@ class DataSets(BaseScriptElement):
     s1w = 'N/A'
     s2w = 'N/A'
     scaling_factor_file = 'N/A'
+    tof_min = 0.
+    tof_max = 200000.
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -33,15 +35,25 @@ class DataSets(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
+        
+        
+        
+        
+        
+        
+        
         script = 'Run number: %s \n' % str(self.data_file)
+        script += 'TOF range: \n'
+        script += '   from tof: %s ' % str(self.tof_min)
+        script += ' to tof: %s \n' % str(self.tof_max)
         script += 'Number of attenuator: %s \n' % str(self.number_attenuator)
         script += 'Peak selection \n'
-        script += '    from pixel: %s ' % str(self.peak_selection[0])
-        script += '   to pixel: %s \n' % str(self.peak_selection[1])
+        script += '   from pixel: %s ' % str(self.peak_selection[0])
+        script += ' to pixel: %s \n' % str(self.peak_selection[1])
         script += 'Back flag: %s \n' % str(self.back_flag)
         script += 'Back selection \n'
-        script += '    from pixel: %s ' % str(self.back_selection[0])
-        script += '   to pixel: %s \n' % str(self.back_selection[1])
+        script += '   from pixel: %s ' % str(self.back_selection[0])
+        script += ' to pixel: %s \n' % str(self.back_selection[1])
         script += 'Lammbda requested: %s \n' % str(self.lambda_requested)
         script += 's1h: %s' %str(self.s1h)
         script += ' s2h: %s' %str(self.s2h)
@@ -55,7 +67,6 @@ class DataSets(BaseScriptElement):
         """
             Update transmission from reduction output
         """
-        print 'in update of refl_sf_calculator_data_script'
         pass
 
     def to_xml(self):
@@ -64,6 +75,8 @@ class DataSets(BaseScriptElement):
         """
         xml  = "<RefLSFCalculator>\n"
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
+        xml += "<tof_min>%s</tof_min>\n" % str(self.tof_min)
+        xml += "<tof_max>%s</tof_max>\n" % str(self.tof_max)
         xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>" % str(self.incident_medium_index_selected)
         xml += "<data_file>%s</data_file>" % str(self.data_file)
         xml += "<number_attenuator>%s</number_attenuator>" % str(self.number_attenuator)
@@ -94,11 +107,12 @@ class DataSets(BaseScriptElement):
             Read in data from XML
             @param xml_str: text to read the data from
         """   
-        print 'from_xml element'
-        
         #incident medium
         self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
         self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
+        
+        self.tof_min = BaseScriptElement.getFloatElement(instrument_dom, "tof_min")
+        self.tof_max = BaseScriptElement.getFloatElement(instrument_dom, "tof_max")
         
         #run number
         self.data_file = BaseScriptElement.getIntElement(instrument_dom, "data_file")
@@ -143,4 +157,6 @@ class DataSets(BaseScriptElement):
         self.s2h = DataSets.s2h
         self.s1w = DataSets.s1w
         self.s2w = DataSets.s2w 
+        self.tof_min = DataSets.tof_min
+        self.tof_max = DataSets.tof_max    
         

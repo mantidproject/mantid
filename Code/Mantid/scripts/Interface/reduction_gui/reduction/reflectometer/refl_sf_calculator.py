@@ -55,6 +55,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         if HAS_MANTID:
             script = self.to_script(None)
 
+            print script
+
             try:
                 t0 = time.time()
                 exec script

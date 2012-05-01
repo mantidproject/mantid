@@ -60,7 +60,7 @@ class sfCalculator():
         
         if (tof_range is None):
             self.tof_min = 10000
-            self.tof_max = 20000
+            self.tof_max = 21600
         else:
             self.tof_min = tof_range[0]
             self.tof_max = tof_range[1]
@@ -175,8 +175,10 @@ class sfCalculator():
                   OutputWorkspace='DataWks_1')
         Transpose(InputWorkspace='TransposeHistoFlatDataWks_2',
                   OutputWorkspace='DataWks_2')
-        ConvertToHistogram('DataWks_1', 'DataWks_1')
-        ConvertToHistogram('DataWks_2', 'DataWks_2')
+        ConvertToHistogram(InputWorkspace='DataWks_1', 
+                           OutputWorkspace='DataWks_1')
+        ConvertToHistogram(InputWorkspace='DataWks_2', 
+                           OutputWorkspace='DataWks_2')
         RebinToWorkspace(WorkspaceToRebin='DataWks_1',
                          WorkspacetoMatch='IntegratedDataWks',
                          OutputWorkspace='DataWks_1')
@@ -185,8 +187,12 @@ class sfCalculator():
                          OutputWorkspace='DataWks_2')
         
         
-        WeightedMean('DataWks_1','DataWks_2','DataWks')
-        Minus('IntegratedDataWks', 'DataWks','DataWks')
+        WeightedMean(InputWorkspace1='DataWks_1',
+                     InputWorkspace2='DataWks_2',
+                     OutputWorkspace='DataWks')
+        Minus(LHSWorkspace='IntegratedDataWks', 
+              RHSWorkspace='DataWks',
+              OutputWorkspace='DataWks')
         
         mt3 = mtd['DataWks']
         self._calculateFinalAxis(Workspace=mt3,
@@ -262,7 +268,7 @@ class sfCalculator():
         #normalization by proton charge
         y_axis /= (proton_charge * 1e-12)
 
-        CreateWorkspace(OutputWorkspace,
+        CreateWorkspace(OutputWorkspace=OutputWorkspace,
                         DataX=x_axis,
                         DataY=y_axis,
                         DataE=y_error_axis,
@@ -308,7 +314,7 @@ class sfCalculator():
         This is going to fit the counts_vs_tof with a linear expression and return the a and
         b coefficients (y=a+bx)
         """
-        CreateWorkspace('DataToFit',
+        CreateWorkspace(OutputWorkspace='DataToFit',
                         DataX=self.x_axis_ratio,
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
@@ -611,6 +617,7 @@ def calculate(string_runs=None,
              [...]]
              
         output_path = where the scaling factor files will be written
+        tof_range
         
     """    
     
@@ -622,6 +629,7 @@ def calculate(string_runs=None,
         list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', 
                      '55895', '55896', '55897', '55898', '55899', '55900', 
                      '55901', '55902']
+        list_runs = ['55889', '55890', '55891', '55892', '55893', '55894'] 
         
         nexus_path = '/mnt/hgfs/j35/results/'
         pre = 'REF_L_'
@@ -647,15 +655,16 @@ def calculate(string_runs=None,
         list_attenuator = dico['list_attenuator']
 
     if (list_attenuator is None):
-        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
+#        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
+        list_attenuator = [0, 1, 1, 1, 1,1];
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
-        list_peak_back[9, ] = [128, 136, 120, 145]
-        list_peak_back[11, ] = [125, 140, 115, 150]
-        list_peak_back[10, ] = [128, 136, 120, 145]
-        list_peak_back[13, ] = [120, 145, 105, 155]
-        list_peak_back[12, ] = [125, 140, 115, 150]
+#        list_peak_back[9, ] = [128, 136, 120, 145]
+#        list_peak_back[11, ] = [125, 140, 115, 150]
+#        list_peak_back[10, ] = [128, 136, 120, 145]
+#        list_peak_back[13, ] = [120, 145, 105, 155]
+#        list_peak_back[12, ] = [125, 140, 115, 150]
     
     #####
     #Input file should be as it is here !
