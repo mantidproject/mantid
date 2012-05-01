@@ -84,14 +84,19 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager * algo)const
 // method checks if other properties have chanded and these changes affected MonID property
 bool MonIDPropChanger::isConditionChanged(const IPropertyManager * algo)const
 {
-      // is enabled is based on other properties:
-       if(!is_enabled)return false;
-       // read monitors list from the input workspace
-       API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
-       bool monitors_changed = monitorIdReader(inputWS);
-       if(!monitors_changed)return false;
+  // is enabled is based on other properties:
+  //if(!is_enabled)return false;
 
-       return true;
+  // read monitors list from the input workspace
+  API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
+  bool monitors_changed = monitorIdReader(inputWS);
+
+//       std::cout << "MonIDPropChanger::isConditionChanged() called  ";
+//       std::cout << monitors_changed << std::endl;
+
+  if(!monitors_changed)return false;
+
+  return true;
 }
 // function which modifies the allowed values for the list of monitors. 
 void MonIDPropChanger::applyChanges(const IPropertyManager * algo, Kernel::Property *const pProp)

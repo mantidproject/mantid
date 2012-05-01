@@ -406,10 +406,14 @@ namespace API
           // Delete the old widget
           int row = widget->getGridRow();
           QGridLayout * layout = widget->getGridLayout();
+          widget->setVisible(false);
           widget->deleteLater();
 
           // Create the appropriate widget at this row in the grid.
           widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+
+          // Replace in the list of prop widgets
+          pitr.value() = widget;
 
           // Whenever the value changes in the widget, this fires propertyChanged()
           connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
