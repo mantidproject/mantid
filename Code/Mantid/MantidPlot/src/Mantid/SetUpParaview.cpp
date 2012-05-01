@@ -15,15 +15,20 @@ using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 
 /// Constructor
-SetUpParaview::SetUpParaview(QWidget *parent) : QDialog(parent)
+SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent), m_from(from)
 {
   m_uiForm.setupUi(this);
 
-  QPalette plt;
-  plt.setColor(QPalette::WindowText, Qt::red);
-  m_uiForm.lbl_message->setPalette(plt);
-
   initLayout();
+
+  void tryLocateParaView();
+}
+
+/// Try to locate paraview
+void SetUpParaview::tryLocateParaview()
+{
+  //m_candidateLocation = temp;
+  //m_uiForm.txt_location->setText(temp);
 }
 
 /// Destructor
@@ -35,6 +40,11 @@ SetUpParaview::~SetUpParaview()
 void SetUpParaview::initLayout()
 {
   clearStatus();
+
+  
+  QPalette plt;
+  plt.setColor(QPalette::WindowText, Qt::red);
+  m_uiForm.lbl_message->setPalette(plt);
 
   m_candidateLocation = QString(ConfigService::Instance().getString("paraview.path").c_str());
 
@@ -75,20 +85,19 @@ void SetUpParaview::onIgnoreHenceforth()
   this->close();
 }
 
-/// Event handler for the onChoose event.
-void SetUpParaview::onChoose()
+/**
+Is Paraview at this location.
+@return TRUE if determined to be present.
+*/
+bool isParaviewHere(const QString& location)
 {
   using boost::regex;
   using boost::regex_search;
 
-  clearStatus();
-  QString temp = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home");
-  temp = QDir::fromNativeSeparators(temp);
-  if(!temp.isEmpty())
+  bool found = false;
+  if(!location.isEmpty())
   {
-    bool found = false;
-
-    QDirIterator it(temp, QDirIterator::NoIteratorFlags);
+    QDirIterator it(location, QDirIterator::NoIteratorFlags);
     while (it.hasNext())
     {
       it.next();
@@ -100,14 +109,36 @@ void SetUpParaview::onChoose()
         break;
       }
     }
-    if(!found)
+  }
+  return found;
+}
+
+/// Event handler for the onChoose event.
+void SetUpParaview::onChoose()
+{
+  using boost::regex;
+  using boost::regex_search;
+
+  clearStatus();
+  QString temp = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home");
+  temp = QDir::fromNativeSeparators(temp);
+  if(isParaviewHere(temp))
+  {
+    m_candidateLocation = temp;
+    m_uiForm.txt_location->setText(temp);
+  }
+  else
+  {
+    QString t1 = temp + "/bin";
+    std::cout << t1.toStdString() << std::endl;
+    if(isParaviewHere(t1))
     {
-      writeError("Try again. Expected paraview libaries were not found in the location given.");
+      m_candidateLocation = t1;
+      m_uiForm.txt_location->setText(t1);
     }
     else
     {
-      m_candidateLocation = temp;
-      m_uiForm.txt_location->setText(temp);
+      writeError("Try again. Expected paraview libaries were not found in the location given.");
     }
   }
 }

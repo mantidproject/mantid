@@ -534,7 +534,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
       if(!b_skipDialog)
       {
         //Launch the dialog to set the PV path.
-        SetUpParaview pv;
+        SetUpParaview pv(SetUpParaview::FirstLaunch);
         pv.exec();
       }
     }
