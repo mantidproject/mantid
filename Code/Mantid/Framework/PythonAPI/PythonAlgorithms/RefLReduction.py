@@ -322,35 +322,58 @@ class RefLReduction(PythonAlgorithm):
                       RHSWorkspace=ws_data_bck+'_scale', 
                       OutputWorkspace=ws_data)
 
-                mtd.deleteWorkspace(ws_data_bck+'_scale')
-                mtd.deleteWorkspace(ws_data_bck)
-                mtd.deleteWorkspace(ws_data_bck_1_rebin)
-                mtd.deleteWorkspace(ws_data_bck_2_rebin)
-                mtd.deleteWorkspace(ws_data_bck_1)
-                mtd.deleteWorkspace(ws_data_bck_2)
-                mtd.deleteWorkspace(ws_histo_data)
+                if mtd.workspaceExists(ws_data_bck+'_scale'):
+                    mtd.deleteWorkspace(ws_data_bck+'_scale')
+                
+                if mtd.workspaceExists(ws_data_bck):
+                    mtd.deleteWorkspace(ws_data_bck)
+                
+                if mtd.workspaceExists(ws_data_bck_1_rebin):
+                    mtd.deleteWorkspace(ws_data_bck_1_rebin)
+                
+                if mtd.workspaceExists(ws_data_bck_2_rebin):
+                    mtd.deleteWorkspace(ws_data_bck_2_rebin)
+                
+                if mtd.workspaceExists(ws_data_bck_1):
+                    mtd.deleteWorkspace(ws_data_bck_1)
+                
+                if mtd.workspaceExists(ws_data_bck_2):
+                    mtd.deleteWorkspace(ws_data_bck_2)
+                
+                if mtd.workspaceExists(ws_histo_data):
+                    mtd.deleteWorkspace(ws_histo_data)
 
             elif (bBackLeft):
                 
                 Minus(LHSWorkspace=ws_histo_data,
                       RHSWorkspace=ws_data_bck_1_rebin,
                       OutputWorkspace=ws_data)
-                mtd.deleteWorkspace(ws_data_bck_1_rebin)
-                mtd.deleteWorkspace(ws_data_bck_1)
+                
+                if mtd.workspaceExists(ws_data_bck_1_rebin):
+                    mtd.deleteWorkspace(ws_data_bck_1_rebin)
+                
+                if mtd.workspaceExists(ws_data_bck_1):
+                    mtd.deleteWorkspace(ws_data_bck_1)
                 
             elif (bBackRight):
                 
                 Minus(LHSWorkspace=ws_histo_data,
                       RHSWorkspace=ws_data_bck_2_rebin,
                       OutputWorkspace=ws_data)
-                mtd.deleteWorkspace(ws_data_bck_2_rebin)
-                mtd.deleteWorkspace(ws_data_bck_2)
+
+                if mtd.workspaceExists(ws_data_bck_2_rebin):
+                    mtd.deleteWorkspace(ws_data_bck_2_rebin)
+                
+                if mtd.workspaceExists(ws_data_bck_2):
+                    mtd.deleteWorkspace(ws_data_bck_2)
 
             #cleanup (remove all negatives values
             ResetNegatives(InputWorkspace=ws_data,
                            OutputWorkspace=ws_data,
                            AddMinimum=0)
-            mtd.deleteWorkspace(ws_histo_data)
+            
+            if mtd.workspaceExists(ws_histo_data):
+                mtd.deleteWorkspace(ws_histo_data)
 
         if (subtract_data_bck and (backSubMethod == 2)):
                 
@@ -440,7 +463,8 @@ class RefLReduction(PythonAlgorithm):
                            OutputWorkspace=ws_data,
                            AddMinimum=0)
 
-            mtd.deleteWorkspace(ws_histo_data+'_1D')
+            if mtd.workspaceExists(ws_histo_data+'_1D'):
+                mtd.deleteWorkspace(ws_histo_data+'_1D')
 
 #            SumSpectra(InputWorkspace=ws_data, 
 #                       OutputWorkspace='wks_after_back_subtraction_1d')
@@ -459,8 +483,8 @@ class RefLReduction(PythonAlgorithm):
             ConvertToMatrixWorkspace(InputWorkspace=ws_data,
                                      OutputWorkspace=ws_data)
 
-
-            mtd.deleteWorkspace(ws_histo_data)
+            if mtd.workspaceExists(ws_histo_data):
+                mtd.deleteWorkspace(ws_histo_data)
 
         if (NormFlag):
 
@@ -574,30 +598,54 @@ class RefLReduction(PythonAlgorithm):
                     Minus(LHSWorkspace=ws_norm_histo_data, 
                           RHSWorkspace=ws_norm_bck+'_scale', 
                           OutputWorkspace=ws_norm_rebinned)
-                    mtd.deleteWorkspace(ws_norm_bck_1_rebin)
-                    mtd.deleteWorkspace(ws_norm_bck_2_rebin)
-                    mtd.deleteWorkspace(ws_norm_bck_1)
-                    mtd.deleteWorkspace(ws_norm_bck_2)
-                    mtd.deleteWorkspace(ws_norm_histo_data)
-                    mtd.deleteWorkspace(ws_norm_bck+'_scale')
+                    
+                    if mtd.workspaceExists(ws_norm_bck_1_rebin):
+                        mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+                    
+                    if mtd.workspaceExists(ws_norm_bck_2_rebin):
+                        mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+                    
+                    if mtd.workspaceExists(ws_norm_bck_1):
+                        mtd.deleteWorkspace(ws_norm_bck_1)
+                    
+                    if mtd.workspaceExists(ws_norm_bck_2):
+                        mtd.deleteWorkspace(ws_norm_bck_2)
+                    
+                    if mtd.workspaceExists(ws_norm_histo_data):
+                        mtd.deleteWorkspace(ws_norm_histo_data)
+                    
+                    if mtd.workspaceExists(ws_norm_bck+'_scale'):
+                        mtd.deleteWorkspace(ws_norm_bck+'_scale')
 
                 elif (bBackLeft):
                     
                     Minus(LHSWorkspace=ws_norm_histo_data,
                           RHSWorkspace=ws_norm_bck_1_rebin,
                           OutputWorkspace=ws_norm_rebinned)
-                    mtd.deleteWorkspace(ws_norm_bck_1_rebin)
-                    mtd.deleteWorkspace(ws_norm_bck_1)
-                    mtd.deleteWorkspace(ws_norm_histo_data)
+                    
+                    if mtd.workspaceExists(ws_norm_bck_1_rebin):
+                        mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+                    
+                    if mtd.workspaceExists(ws_norm_bck_1):
+                        mtd.deleteWorkspace(ws_norm_bck_1)
+                        
+                    if mtd.workspaceExists(ws_norm_histo_data):
+                        mtd.deleteWorkspace(ws_norm_histo_data)
 
                 elif (bBackRight):
                     
                     Minus(LHSWorkspace=ws_norm_histo_data,
                           RHSWorkspace=ws_norm_bck_2_rebin,
                           OutputWorkspace=ws_norm_rebinned)
-                    mtd.deleteWorkspace(ws_norm_bck_2_rebin)
-                    mtd.deleteWorkspace(ws_norm_bck_2)
-                    mtd.deleteWorkspace(ws_norm_histo_data)
+                    
+                    if mtd.workspaceExists(ws_norm_bck_2_rebin):
+                        mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+                        
+                    if mtd.workspaceExists(ws_norm_bck_2):
+                        mtd.deleteWorkspace(ws_norm_bck_2)
+                    
+                    if mtd.workspaceExists(ws_norm_histo_data):
+                        mtd.deleteWorkspace(ws_norm_histo_data)
 
                 
                 #Here I need to set to zeros all the negative entries
@@ -698,8 +746,11 @@ class RefLReduction(PythonAlgorithm):
                       RHSWorkspace='background',
                       OutputWorkspace=ws_norm_rebinned)
 
-                mtd.deleteWorkspace(ws_norm_histo_data+'_1D')
-                mtd.deleteWorkspace('background')
+                if mtd.workspaceExists(ws_norm_histo_data+'_1D'):
+                    mtd.deleteWorkspace(ws_norm_histo_data+'_1D')
+                    
+                if mtd.workspaceExists('background'):                    
+                    mtd.deleteWorkspace('background')
 
                 ResetNegatives(InputWorkspace=ws_norm_rebinned,
                                OutputWorkspace=ws_norm_rebinned,
@@ -724,7 +775,8 @@ class RefLReduction(PythonAlgorithm):
                                  WorkspaceToMatch=ws_data,
                                  OutputWorkspace=ws_norm_rebinned)
 
-                mtd.deleteWorkspace(ws_integrated_data)
+                if mtd.workspaceExists(ws_integrated_data):
+                    mtd.deleteWorkspace(ws_integrated_data)
 
             #Normalization    
             print '-> Sum spectra'       
@@ -799,7 +851,8 @@ class RefLReduction(PythonAlgorithm):
                                             geo_correction=False,
                                             q_binning=[q_min,q_step,q_max])
 
-            mtd.deleteWorkspace(ws_integrated_data)
+            if mtd.workspaceExists(ws_integrated_data):
+                mtd.deleteWorkspace(ws_integrated_data)
 
         else:
             ws_data_Q = ws_data + '_Q'
@@ -816,7 +869,8 @@ class RefLReduction(PythonAlgorithm):
                                             geo_correction=True,
                                             q_binning=[q_min,q_step,q_max])
 
-            mtd.deleteWorkspace(ws_data_scaled)
+            if mtd.workspaceExists(ws_data_scaled):
+                mtd.deleteWorkspace(ws_data_scaled)
 
 
         print '-> replace special values'
@@ -880,10 +934,17 @@ class RefLReduction(PythonAlgorithm):
         
         #cleanup all workspace used
         print '-> Cleaning useless workspaces'
-        mtd.deleteWorkspace(ws_event_data)
-        mtd.deleteWorkspace(ws_data_Q)
-        mtd.deleteWorkspace(ws_data)
-        mtd.deleteWorkspace(ws_norm_event_data)
+        if mtd.workspaceExists(ws_event_data):
+            mtd.deleteWorkspace(ws_event_data)
+        
+        if mtd.workspaceExists(ws_data_Q):
+            mtd.deleteWorkspace(ws_data_Q)
+        
+        if mtd.workspaceExists(ws_data):
+            mtd.deleteWorkspace(ws_data)
+        
+        if mtd.workspaceExists(ws_norm_event_data):
+            mtd.deleteWorkspace(ws_norm_event_data)
         
         print
         

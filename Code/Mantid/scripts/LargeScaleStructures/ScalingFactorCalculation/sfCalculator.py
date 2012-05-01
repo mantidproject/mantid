@@ -58,6 +58,8 @@ class sfCalculator():
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
         
+        print '---> initialize calculation'
+        
         if (tof_range is None):
             self.tof_min = 10000
             self.tof_max = 21600
@@ -73,6 +75,9 @@ class sfCalculator():
         self.y_axis_ratio = None
         
     def setNumerator(self, minPeak, maxPeak, minBack, maxBack):
+
+        print '---> set numerator (' + self.numerator + ')'
+        
         if minPeak != 0:
             self.n_peak_pixel_min = minPeak
         if maxPeak != 0 :
@@ -83,6 +88,9 @@ class sfCalculator():
             self.n_back_pixel_max = maxBack
         
     def setDenominator(self, minPeak, maxPeak, minBack, maxBack):
+
+        print '---> set denominator (' + self.denominator + ')'
+
         if minPeak != 0:
             self.d_peak_pixel_min = minPeak
         if maxPeak != 0:
@@ -143,53 +151,63 @@ class sfCalculator():
         rebin(InputWorkspace='EventDataWks',
               OutputWorkspace='HistoDataWks',
               Params=self.rebin_parameters)
+        
         mt2 = mtd['HistoDataWks']
         x_axis = mt2.readX(0)[:]
         self.x_axis = x_axis
-        
+
         self._createIntegratedWorkspace(InputWorkspace=mt2,
                                         OutputWorkspace='IntegratedDataWks',
                                         proton_charge=proton_charge,
                                         from_pixel=self.x_pixel_min,
                                         to_pixel=self.x_pixel_max)
-
         ConvertToHistogram(InputWorkspace='IntegratedDataWks',
                            OutputWorkspace='IntegratedDataWks')
+
         Transpose(InputWorkspace='IntegratedDataWks',
                   OutputWorkspace='TransposeIntegratedDataWks')
+        
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
+        
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks_1',
                        StartX=self.back_pixel_min,
                        EndX=self.peak_pixel_min,
                        Mode='Mean',
                        OutputMode="Return Background")
+        
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks_2',
                        StartX=self.peak_pixel_max,
                        EndX=self.back_pixel_max,
                        Mode='Mean',
                        OutputMode="Return Background")
+        
         Transpose(InputWorkspace='TransposeHistoFlatDataWks_1',
                   OutputWorkspace='DataWks_1')
+        
         Transpose(InputWorkspace='TransposeHistoFlatDataWks_2',
                   OutputWorkspace='DataWks_2')
+        
         ConvertToHistogram(InputWorkspace='DataWks_1', 
                            OutputWorkspace='DataWks_1')
+        
         ConvertToHistogram(InputWorkspace='DataWks_2', 
                            OutputWorkspace='DataWks_2')
+        
         RebinToWorkspace(WorkspaceToRebin='DataWks_1',
                          WorkspacetoMatch='IntegratedDataWks',
                          OutputWorkspace='DataWks_1')
+        
         RebinToWorkspace(WorkspaceToRebin='DataWks_2',
                          WorkspacetoMatch='IntegratedDataWks',
                          OutputWorkspace='DataWks_2')
         
-        
         WeightedMean(InputWorkspace1='DataWks_1',
                      InputWorkspace2='DataWks_2',
                      OutputWorkspace='DataWks')
+
         Minus(LHSWorkspace='IntegratedDataWks', 
               RHSWorkspace='DataWks',
               OutputWorkspace='DataWks')
@@ -246,18 +264,19 @@ class sfCalculator():
         (beta_pixel_nbr here) and
         returns the new workspace handle
         """
+        
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1 
         y_axis = zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
         y_error_axis = zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
         y_range = arange(x_size) + from_pixel
+        
         for x in range(self.beta_pixel_nbr):
             for y in y_range:
                 index = int(self.alpha_pixel_nbr * x + y)
                 y_axis[y, :] += InputWorkspace.readY(index)[:]
                 y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) * 
                                         (InputWorkspace.readE(index)[:]))
-
         
         y_axis = y_axis.flatten()
         y_error_axis = sqrt(y_error_axis)
@@ -502,8 +521,10 @@ def getSlitsValueAndLambda(full_list_runs,
                  lambda requested values
     """
     _nbr_files = len(full_list_runs)
+    print '> Retrieving Slits and Lambda Requested for each file:'
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
+        print '-> ' + _full_file_name
         LoadEventNexus(Filename=_full_file_name,
                        OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
@@ -550,6 +571,8 @@ def calculateAndFit(numerator='',
                     list_peak_back_denominator=None,
                     list_objects=[],
                     tof_range=None):                                       
+    
+    print '--> running calculate and fit algorithm'
 
     cal1 = sfCalculator(numerator=numerator, 
                         denominator=denominator,
@@ -626,9 +649,9 @@ def calculate(string_runs=None,
     #use default string files if not provided
     if (string_runs is None):
         #Input from user
-        list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', 
-                     '55895', '55896', '55897', '55898', '55899', '55900', 
-                     '55901', '55902']
+#        list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', 
+#                     '55895', '55896', '55897', '55898', '55899', '55900', 
+#                     '55901', '55902']
         list_runs = ['55889', '55890', '55891', '55892', '55893', '55894'] 
         
         nexus_path = '/mnt/hgfs/j35/results/'
@@ -709,7 +732,7 @@ def calculate(string_runs=None,
         finalS2W = []
 
         #array of True/False flags that will allow us
-        #to escale the calculation on the first attenuator
+        #to rescale the calculation on the first attenuator
         _first_A = []
         for j in range(len(unique(list_attenuator))):
             _first_A.append(True)
@@ -726,6 +749,7 @@ def calculate(string_runs=None,
         
         for i in range(len(list_runs)):
             
+            print '> Working with index: ' + str(i)
             _attenuator = list_attenuator[i]
 
             if _attenuator == 0:
@@ -739,6 +763,8 @@ def calculate(string_runs=None,
                     index_numerator = i
                     index_denominator = _index_first_A[_attenuator]
             
+                print '-> numerator  : ' + str(list_runs[index_numerator])
+                print '-> denominator: ' + str(list_runs[index_denominator])
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
                                        denominator=list_runs[index_denominator],
                                        list_peak_back_numerator=list_peak_back[index_numerator],
