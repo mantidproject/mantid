@@ -34,7 +34,7 @@
 	install ( FILES ${CMAKE_LIBRARY_PATH}/Python27/python.exe ${CMAKE_LIBRARY_PATH}/Python27/python27.dll DESTINATION bin )
 
 	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats DESTINATION plugins/qtplugins PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-	install ( FILES ${CMAKE_LIBRARY_PATH}/qt.conf DESTINATION bin )
+	install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DESTINATION bin )
 	
 	#Handle includes
 	install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
