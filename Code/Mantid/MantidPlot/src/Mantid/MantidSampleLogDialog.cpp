@@ -322,8 +322,13 @@ void MantidSampleLogDialog::init()
     if (mei)
     {
       if (m_experimentInfoIndex >= mei->getNumExperimentInfo())
-        throw std::runtime_error("ExperimentInfo requested (#" + Strings::toString(m_experimentInfoIndex) + ") is not available. There are " + Strings::toString(mei->getNumExperimentInfo()) + " in the workspace");
-      m_ei = mei->getExperimentInfo(static_cast<uint16_t>(m_experimentInfoIndex) );
+      {
+        std::cerr << "ExperimentInfo requested (#" + Strings::toString(m_experimentInfoIndex) + ") is not available. There are " + Strings::toString(mei->getNumExperimentInfo()) + " in the workspace" << std::endl;
+        // Make a blank experiment info object
+        m_ei = ExperimentInfo_const_sptr(new ExperimentInfo());
+      }
+      else
+        m_ei = mei->getExperimentInfo(static_cast<uint16_t>(m_experimentInfoIndex) );
     }
   }
   if (!m_ei)
