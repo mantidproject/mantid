@@ -1358,6 +1358,8 @@ void ApplicationWindow::initMainMenu()
   help->insertSeparator();
   help->addAction(actionFirstTimeSetup);
   help->insertSeparator();
+  help->addAction(actionSetupParaview);
+  help->insertSeparator();
   help->addAction(actionAbout);
 
   icat = new QMenu(this);
@@ -12589,6 +12591,9 @@ void ApplicationWindow::createActions()
   actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
   connect(actionFirstTimeSetup, SIGNAL(activated()), this, SLOT(showFirstTimeSetup()));
 
+  actionSetupParaview = new QAction(tr("Setup 3D Visualisation"), this);
+  connect(actionSetupParaview, SIGNAL(activated()), this, SLOT(showSetupParaview()));
+
   actionNewProject = new QAction(QIcon(getQPixmap("new_xpm")), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
   connect(actionNewProject, SIGNAL(activated()), this, SLOT(newProject()));
@@ -14643,6 +14648,14 @@ void ApplicationWindow::showMantidConcepts()
 void ApplicationWindow::showalgorithmDescriptions()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Algorithms"));
+}
+
+void ApplicationWindow::showSetupParaview()
+{
+  SetUpParaview* dialog = new SetUpParaview(SetUpParaview::MantidMenu);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  dialog->setFocus();
 }
 
 void ApplicationWindow::showFirstTimeSetup()

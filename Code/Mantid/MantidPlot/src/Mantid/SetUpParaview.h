@@ -21,7 +21,8 @@ private:
   void initLayout();
   void clearStatus();
   void writeError(const QString& error);
-  void tryLocateParaview();
+  void acceptPotentialLocation(const QString& location);
+  void rejectPotentialLocation(const QString& location);
 private slots:
   void onChoose();
   void onSet();

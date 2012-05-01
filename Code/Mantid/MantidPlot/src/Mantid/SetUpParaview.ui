@@ -59,14 +59,15 @@
     <widget class="QLabel" name="lbl_instructions">
      <property name="text">
       <string>&lt;h2&gt;Your Mantid installation is nearly ready to use with 3D visualisation&lt;/h2&gt;
-&lt;h3&gt;Not interested&lt;/h3&gt;
+&lt;h3&gt;Not interested?&lt;/h3&gt;
 &lt;p&gt;&lt;b&gt;If you don't want 3D visualisation at the present time, you may click KEEP IGNORING&lt;/b&gt;.You can enable it later via the help menu.&lt;/p&gt;
-&lt;h3&gt;Prerequisite&lt;/h3&gt;
+&lt;h3&gt;Interested?&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt; Prerequisite: You must install ParaView from &lt;a 
 href=&quot;http://download.mantidproject.org/VatesDownload.psp&quot;&gt;here&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;The install location of ParaView must be set in Mantid ...&lt;/li&gt;
-&lt;/ol&gt;</string>
+&lt;/ol&gt;
+&lt;p&gt;Hint: the usual install location for ParaView is: &lt;i&gt;C:/Program Files (x86)/ParaView 3.10.1/bin&lt;/i&gt;&lt;/p&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
