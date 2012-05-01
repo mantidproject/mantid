@@ -494,7 +494,7 @@ class SNSPowderReduction(PythonAlgorithm):
             SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, 
                     MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
-            SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
+            SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")
 
         # always save python script
         GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
