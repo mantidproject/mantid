@@ -32,26 +32,23 @@ public:
 
   void test_Constructor()
   {
-    /* TODO Make this section back later
-
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT( ! iProp->name().compare("intProp") );
     TS_ASSERT( ! iProp->documentation().compare("") );
     TS_ASSERT( typeid(std::vector<TimeValueUnit<int> > ) == *iProp->type_info()  );
-    //TS_ASSERT( iProp->isDefault() )
+    TS_ASSERT( !iProp->isDefault() )
 
     TS_ASSERT( ! dProp->name().compare("doubleProp") );
     TS_ASSERT( ! dProp->documentation().compare("") );
     TS_ASSERT( typeid(std::vector<TimeValueUnit<double> > ) == *dProp->type_info()  );
-    ///TS_ASSERT( dProp->isDefault() )
+    TS_ASSERT( !dProp->isDefault() )
 
     TS_ASSERT( ! sProp->name().compare("stringProp") );
     TS_ASSERT( ! sProp->documentation().compare("") );
     TS_ASSERT( typeid(std::vector<TimeValueUnit<std::string> > ) == *sProp->type_info()  );
-    //TS_ASSERT( sProp->isDefault() )
+    TS_ASSERT( !sProp->isDefault() )
 
-     *
-     */
+    TS_ASSERT_EQUALS(sProp->isValid(), "");
   }
 
   void test_SetValue()
@@ -292,8 +289,6 @@ public:
 
     delete log;
   }
-
-
 
 
   //----------------------------------------------------------------------------
@@ -878,7 +873,7 @@ public:
   }
 
   /*
-   * Test valueAsMap()
+   * Test valueAsCorrectMap()
    */
   void test_valueAsCorrectMap()
   {
@@ -897,6 +892,52 @@ public:
     times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
     times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
     times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<double> values;
+    values.push_back(1.00);
+    values.push_back(2.00);
+    values.push_back(3.00);
+    values.push_back(4.00);
+
+
+    std::map<Mantid::Kernel::DateAndTime, double>::iterator tit;
+    size_t index = 0;
+    for (tit=tmap.begin(); tit!=tmap.end(); ++tit)
+    {
+      TS_ASSERT_EQUALS(tit->first, times[index]);
+      TS_ASSERT_DELTA(tit->second, values[index], 1.0E-9);
+      index ++;
+    }
+
+    // -1 Clean
+    delete p;
+
+    return;
+  }
+
+
+  /* Test method valueAsVector
+   *
+   */
+  void test_valueAsVector()
+  {
+    // 1. Create property
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:15",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:25",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",4.00) );
+
+    // 2. Get map
+    std::map<Mantid::Kernel::DateAndTime, double> tmap = p->valueAsMap();
+
+    // 3. Check
+    std::vector<Mantid::Kernel::DateAndTime> times;
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:15"));
     times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
