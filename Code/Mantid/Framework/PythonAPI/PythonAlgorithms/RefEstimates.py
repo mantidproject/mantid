@@ -1,3 +1,10 @@
+"""*WIKI* 
+
+Finds the reflectivity peak in a data set and estimates the peak boundaries
+to give the reduction process. 
+
+*WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 import math

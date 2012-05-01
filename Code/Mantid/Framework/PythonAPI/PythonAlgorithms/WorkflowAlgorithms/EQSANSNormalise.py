@@ -70,7 +70,8 @@ class EQSANSNormalise(PythonAlgorithm):
         # Input workspace
         self.declareWorkspaceProperty("InputWorkspace", "", Direction=Direction.InOut, Description="Workspace to be normalised")
         self.declareProperty("NormaliseToBeam", True, Description="If true, the data will also be normalise by the beam profile")
-        self.declareProperty("BeamSpectrumFile", "", Direction=Direction.Input)
+        self.declareProperty("BeamSpectrumFile", "", Direction=Direction.Input,
+                             Description="Beam spectrum to be used for normalisation [takes precedence over default]")
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
     def PyExec(self):

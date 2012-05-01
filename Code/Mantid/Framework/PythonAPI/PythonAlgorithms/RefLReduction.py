@@ -1,3 +1,9 @@
+"""*WIKI* 
+
+Liquids Reflectometer (REFL) reduction
+
+*WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 from numpy import zeros, shape, arange
@@ -16,28 +22,42 @@ class RefLReduction(PythonAlgorithm):
 
     def PyInit(self):
         self.declareListProperty("RunNumbers", [0], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("NormalizationRunNumber", 0, Description="")
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="List of run numbers to process")
+        self.declareProperty("NormalizationRunNumber", 0, 
+                             Description="Run number of the normalization run to use")
         self.declareListProperty("SignalPeakPixelRange", [126, 134], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("SubtractSignalBackground", True)
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="Pixel range defining the data peak")
+        self.declareProperty("SubtractSignalBackground", True,
+                             Description="If true, the background will be subtracted from the data peak")
         self.declareListProperty("SignalBackgroundPixelRange", [123, 137], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("NormFlag", True)
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="Pixel range defining the background")
+        self.declareProperty("NormFlag", True, Description="If true, the data will be normalized")
         self.declareListProperty("NormPeakPixelRange", [127, 133], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("SubtractNormBackground", True)
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="Pixel range defining the normalization peak")
+        self.declareProperty("SubtractNormBackground", True,
+                             Description="If true, the background will be subtracted from the normalization peak")
         self.declareListProperty("NormBackgroundPixelRange", [123, 137], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("LowResDataAxisPixelRangeFlag", True)
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="Pixel range defining the background for the normalization")
+        self.declareProperty("LowResDataAxisPixelRangeFlag", True,
+                             Description="If true, the low-resolution direction of the data will be cropped according to the LowResDataAxisPixelRange property")
         self.declareListProperty("LowResDataAxisPixelRange", [115, 210], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("LowResNormAxisPixelRangeFlag", True)
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="Pixel range to use in the low-resolution direction of the data")
+        self.declareProperty("LowResNormAxisPixelRangeFlag", True,
+                             Description="If true, the low-resolution direction of the normalization run will be cropped according to the LowResNormAxisPixelRange property")
         self.declareListProperty("LowResNormAxisPixelRange", [115, 210], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="Pixel range to use in the low-resolution direction of the normalization run")
         self.declareListProperty("TOFRange", [9000., 23600.], 
-                                 Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("TofRangeFlag", True)
+                                 Validator=ArrayBoundedValidator(Lower=0),
+                                 Description="TOF range to use")
+        self.declareProperty("TofRangeFlag", True,
+                             Description="If true, the TOF will be cropped according to the TOFRange property")
         self.declareProperty("QMin", 0.001, 
                              Description="Minimum Q-value")
         self.declareProperty("QStep", 0.001, 
