@@ -190,7 +190,7 @@ void SliceViewer::saveSettings()
   settings.setValue("ColormapFile", m_currentColorMapFile);
   settings.setValue("LogColorScale", (int)m_colorBar->getLog() );
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
-  settings.setValue("TransparentZeros", m_actionTransparentZeros->isChecked());
+  settings.setValue("TransparentZeros", (m_actionTransparentZeros->isChecked() ? 1 : 0));
   settings.setValue("Normalization", static_cast<int>(this->getNormalization()));
   settings.endGroup();
 }
