@@ -1,5 +1,14 @@
 /*WIKI* 
+Subtract the dark current from an EQSANS data set.
+This workflow algorithm will:
 
+- Properly load the dark current data set
+
+- Normalize the dark current to the data taking period
+
+- Subtract the dark current from the input workspace
+
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*/
 //----------------------------------------------------------------------

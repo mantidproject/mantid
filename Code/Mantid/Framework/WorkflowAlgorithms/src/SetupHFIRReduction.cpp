@@ -1,5 +1,8 @@
 /*WIKI* 
+Create a PropertyManager object setting the reduction options for HFIR SANS.
+The property manager object is then added to the PropertyManagerDataService.
 
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*/
 //----------------------------------------------------------------------

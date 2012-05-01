@@ -1,8 +1,18 @@
 /*WIKI* 
+Workflow algorithm that loads EQSANS event data and applies basic corrections
+to the workspace. Those include:
 
+- Moving the detector at its proper position in Z
 
-Workflow algorithm that loads EQSANS event data, applies TOF corrections, and converts to wavelength.
+- Moving the detector according to the beam center
 
+- Correcting the TOF
+
+- Applying TOF cuts
+
+- Gathering meta-data information such as configuration mask and moderator position
+
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -60,9 +70,9 @@ void EQSANSLoad::init()
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, Direction::Input);
-  declareProperty("HighTOFCut", 0.0, Direction::Input);
-  declareProperty("WavelengthStep", 0.1, Direction::Input);
+  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be loaded into the workspace at load-time");
+  declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when rebinning the data before performing the reduction");
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");

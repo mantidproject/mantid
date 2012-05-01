@@ -1,5 +1,8 @@
 /*WIKI* 
+Create a PropertyManager object setting the reduction options for EQSANS.
+The property manager object is then added to the PropertyManagerDataService.
 
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -37,11 +40,11 @@ void SetupEQSANSReduction::init()
   // Load options
   std::string load_grp = "Load Options";
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, Direction::Input);
-  declareProperty("HighTOFCut", 0.0, Direction::Input);
+  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be loaded into the workspace at load-time");
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
-  declareProperty("SolidAngleCorrection", true, Direction::Input);
+  declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
 
   setPropertyGroup("UseConfigTOFCuts", load_grp);
   setPropertyGroup("LowTOFCut", load_grp);
@@ -99,6 +102,8 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("MaxEfficiency", eff_grp);
   setPropertyGroup("UseDefaultDC", eff_grp);
   setPropertyGroup("SensitivityDarkCurrentFile", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterX", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterY", eff_grp);
   setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
 
   // Outputs

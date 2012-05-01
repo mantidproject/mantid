@@ -1,5 +1,7 @@
 /*WIKI* 
+Computes I(Qx,Qy) for EQSANS data using Qxy to each frame, as appropriate.
 
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*/
 //----------------------------------------------------------------------
