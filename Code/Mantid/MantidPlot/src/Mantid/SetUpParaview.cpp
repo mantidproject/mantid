@@ -8,6 +8,7 @@
 #include <QPalette>
 #include <QDirIterator>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include <iostream> 
 
 
@@ -49,6 +50,7 @@ SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent
 
   initLayout();
 
+  m_candidateLocation = QString(ConfigService::Instance().getString("paraview.path").c_str());
   //Do our best to figure out the location based on where paraview normally sits.
   if(m_candidateLocation.isEmpty())
   {
@@ -56,6 +58,13 @@ SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent
     if(isParaviewHere(predictedLocation))
     {
       acceptPotentialLocation(predictedLocation);
+    }
+  }
+  else
+  {
+    if(isParaviewHere(m_candidateLocation))
+    {
+      acceptPotentialLocation(m_candidateLocation);
     }
   }
 }
@@ -76,8 +85,6 @@ void SetUpParaview::initLayout()
   QPalette plt;
   plt.setColor(QPalette::WindowText, Qt::red);
   m_uiForm.lbl_message->setPalette(plt);
-
-  m_candidateLocation = QString(ConfigService::Instance().getString("paraview.path").c_str());
 
   connect(m_uiForm.btn_choose_location, SIGNAL(clicked()), this, SLOT(onChoose()));
   connect(m_uiForm.btn_set, SIGNAL(clicked()), this, SLOT(onSet()));
@@ -102,6 +109,15 @@ void SetUpParaview::onSet()
   std::string filename = config.getUserFilename();
   //Save the result so that on the next start up we don't have to bother the user.
   config.saveConfig(filename);
+
+  //Additional message for mantid menu setup.
+  if(m_from == SetUpParaview::MantidMenu)
+  {
+    QMessageBox msgBox;
+    msgBox.setText("You will need to restart MantidPlot to pick-up these changes.");
+    msgBox.exec();
+  }
+
   this->close();
 }
 
