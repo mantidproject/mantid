@@ -9562,6 +9562,8 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     delete scriptingWindow;
     scriptingWindow = NULL;
   }
+  /// Ensure interface python references are cleaned up before the interpreter shuts down
+  delete m_iface_script;
 
 	// Emit a shutting_down() signal that can be caught by
 	// independent QMainWindow objects to know when MantidPlot
