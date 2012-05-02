@@ -457,6 +457,10 @@ def importTableWorkspace(name, visible=False):
     """
     return proxies.MDIWindow(threadsafe_call(_qti.app.mantidUI.importTableWorkspace, name,False,visible))
 
+def createPropertyInputDialog(alg_name, preset_values, optional_msg, enabled, disabled):
+    """Raises a property input dialog for an algorithm"""
+    return threadsafe_call(_qti.app.mantidUI.createPropertyInputDialog, alg_name, preset_values, optional_msg, enabled, disabled)
+    
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------
 #-----------------------------------------------------------------------------

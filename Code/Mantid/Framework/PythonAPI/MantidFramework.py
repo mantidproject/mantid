@@ -10,7 +10,7 @@ import opcode
 import __builtin__
 import __main__
 try:
-    import _qti
+    import mantidplot
     import PyQt4.QtCore as qtcore
     HAVE_GUI = True
 except:
@@ -1109,10 +1109,9 @@ class IAlgorithmProxy(ProxyObject):
                 presets += name + '=' + _makeString(value) + '|'
 
         # finally run the configured dialog
-        adapter = _qti.ThreadAdapter(_qti.app, _qti.app.mantidUI)
-        dialog = adapter.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
+        dialog = mantidplot.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
         if dialog == False:
-            sys.exit('Information: Script execution cancelled')
+            sys.exit('Dialog cancel pressed. Script execution halted.')
 
 #---------------------------------------------------------------------------------------
 

@@ -553,10 +553,10 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
             presets += name + '=' + make_str(value) + '|'
 
     # finally run the configured dialog
-    import _qti
-    dialog =  _qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
+    import mantidplot
+    dialog =  mantidplot.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
     if dialog == False:
-        raise RuntimeError('Information: Script execution cancelled')
+        raise RuntimeError('Dialog cancel pressed. Script execution halted.')
 
 def create_algorithm_dialog(algorithm, version, _algm_object):
     """
