@@ -840,7 +840,7 @@ class DataReflWidget(BaseWidget):
             ws_name = "reflectivity"
             ws_list = [n for n in mtd.keys() if n.startswith(ws_name)]
             g = mantidplot.graph(ws_name)
-            if g._getHeldObject() is None and len(ws_list)>0:
+            if g is None and len(ws_list)>0:
                 g = mantidplot.plotSpectrum(ws_list,[0],True)
                 g.setName(ws_name)  
         
