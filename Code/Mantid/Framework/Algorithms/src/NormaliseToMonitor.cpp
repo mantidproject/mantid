@@ -85,7 +85,7 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager * algo)const
 bool MonIDPropChanger::isConditionChanged(const IPropertyManager * algo)const
 {
   // is enabled is based on other properties:
-  //if(!is_enabled)return false;
+  if(!is_enabled)return false;
 
   // read monitors list from the input workspace
   API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
