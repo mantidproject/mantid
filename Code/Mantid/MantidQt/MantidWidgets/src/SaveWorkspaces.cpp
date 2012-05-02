@@ -253,7 +253,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if ( algorithm != "SaveCSV" || algorithm != "SaveNISTDAT" )
+    if ( algorithm != "SaveCSV" && algorithm != "SaveNISTDAT" )
     {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";

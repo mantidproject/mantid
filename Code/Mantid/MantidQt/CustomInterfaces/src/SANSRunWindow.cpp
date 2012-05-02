@@ -308,8 +308,8 @@ void SANSRunWindow::saveWorkspacesDialog()
   m_saveWorkspaces =
     new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats);
   //this dialog sometimes needs to run Python, pass this to Mantidplot via our runAsPythonScript() signal
-  connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&)),
-    this, SIGNAL(runAsPythonScript(const QString&)));
+  connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&, bool)),
+    this, SIGNAL(runAsPythonScript(const QString&, bool)));
   //we need know if we have a pointer to a valid window or not
   connect(m_saveWorkspaces, SIGNAL(closing()),
     this, SLOT(saveWorkspacesClosed()));
