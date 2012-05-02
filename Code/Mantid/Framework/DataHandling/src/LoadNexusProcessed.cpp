@@ -1217,10 +1217,10 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
         //Each colon has a space after it
         std::string prop_name = line.substr(colon + 2, comma - colon - 2);
         colon = line.find(":", comma);
-        comma = line.find(",", colon);
+        comma = line.find(", Default?", colon);
         std::string prop_value = line.substr(colon + 2, comma - colon - 2);
         colon = line.find(":", comma);
-        comma = line.find(",", colon);
+        comma = line.find(", Direction", colon);
         std::string is_def = line.substr(colon + 2, comma - colon - 2);
         colon = line.find(":", comma);
         comma = line.find(",", colon);
