@@ -902,9 +902,12 @@ SectionEnd
 
 Function .onInit
 
-  ; Silently uninstall any previous install
-  IfSilent +2
-    MessageBox MB_OK "Mantid installer will try to run any existing uninstallers first. Please click OK and be patient."
+  IfSilent +5
+    IfFileExists $INSTDIR\uninstall.exe +3 0 
+        MessageBox MB_YESNO "This looks like your first install with the new installer. Have you removed the previous Mantid install?" IDYES NoAbort
+        Abort "Cancelled. Remove old Mantid install then retry."
+      NoAbort:
+    MessageBox MB_OK "Mantid installer will try to run any existing uninstallers first. Please click OK and be patient, the installer will start soon"
   ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
   
   ; Reads components status for registry
