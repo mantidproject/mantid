@@ -16531,10 +16531,6 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool async,
 
   }
   bool success(false);
-  if(QApplication::instance()->thread() != QThread::currentThread())
-  {
-    async = false;
-  }
   if(async)
   {
     QFuture<bool> job = m_iface_script->executeAsync(code);

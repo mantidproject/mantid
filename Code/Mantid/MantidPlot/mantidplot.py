@@ -46,7 +46,9 @@ def runPythonScript(code, async = False, quiet = False, redirect = True):
         @param quiet :: If true no messages reporting status are issued
         @param redirect :: If true then output is redirected to MantidPlot
     """
-    _qti.app.runPythonScript(code, async, quiet, redirect)
+    if async and QtCore.QThread.currentThread() != QtGui.qApp.thread():
+        async = False
+    threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
 def workspace(name):
