@@ -170,8 +170,11 @@ QString InputWorkspaceWidget::getWorkspaceName() const
  */
 void InputWorkspaceWidget::setPropertyValue(const QString& propName, const QString& propValue)
 {
-  m_fitDialog->getAlgorithm()->setPropertyValue(propName.toStdString(),propValue.toStdString());
-  m_fitDialog->storePropertyValue(propName,propValue);
+  if ( m_fitDialog->getAlgorithm()->existsProperty(propName.toStdString()) )
+  {
+    m_fitDialog->getAlgorithm()->setPropertyValue(propName.toStdString(),propValue.toStdString());
+    m_fitDialog->storePropertyValue(propName,propValue);
+  }
 }
 
 /**
@@ -253,9 +256,21 @@ void MWPropertiesWidget::setProperties()
     endXName += suffix;
   }
 
-  m_wsWidget->setPropertyValue(wsIndexName,m_workspaceIndex->text());
-  m_wsWidget->setPropertyValue(startXName,m_startX->text());
-  m_wsWidget->setPropertyValue(endXName,m_endX->text());
+  QString value = m_workspaceIndex->text();
+  if ( !value.isEmpty() )
+  {
+    m_wsWidget->setPropertyValue(wsIndexName,value);
+  }
+  value = m_startX->text();
+  if ( !value.isEmpty() )
+  {
+    m_wsWidget->setPropertyValue(startXName,value);
+  }
+  value = m_endX->text();
+  if ( !value.isEmpty() )
+  {
+    m_wsWidget->setPropertyValue(endXName,value);
+  }
 }
 
 //------------------------------------------------------
