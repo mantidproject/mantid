@@ -645,7 +645,7 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   {
     cursorToEnd = false;
   }
-  if(cursorToEnd)
+  if(cursorToEnd && indexOfCursorLine() != indexOfLastLine())
   {
     moveCursorToEnd();
   }
@@ -657,16 +657,11 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
  */
 void CommandLineInterpreter::handleUpKeyPress()
 {
-  if(indexOfCursorLine() != indexOfLastLine())
-  {
-    moveCursorToEnd();
-  }
-  else if( m_history.hasPrevious() )
+  if(indexOfCursorLine() == indexOfLastLine() && m_history.hasPrevious())
   {
     QString cmd = m_history.getPrevious();
     setText(indexOfLastLine(), cmd);
   }
-  else{}
 }
 
 /**
@@ -674,16 +669,11 @@ void CommandLineInterpreter::handleUpKeyPress()
  */
 void CommandLineInterpreter::handleDownKeyPress()
 {
-  if(indexOfCursorLine() != indexOfLastLine())
-  {
-    moveCursorToEnd();
-  }
-  else if(m_history.hasNext())
+  if(indexOfCursorLine() == indexOfLastLine() && m_history.hasNext())
   {
     QString cmd = m_history.getNext();
     setText(indexOfLastLine(), cmd);
   }
-  else {}
 }
 
 /**
