@@ -522,12 +522,18 @@ namespace Mantid
       {
         try
         {
-          if (!m_isChildAlgorithm) 
+          if (!isChild()) 
           { 
             m_running = true;
-            //count used for defining the algorithm execution order
+          }
+          if(!isChild() || m_recordHistoryForChild)
+          {
+            // count used for defining the algorithm execution order
+            // If history is being recorded we need to count this as a separate algorithm
+            // as the history compares histories by their execution number
             ++Algorithm::g_execCount;
           }
+
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
           // Start a timer
           Timer timer;
