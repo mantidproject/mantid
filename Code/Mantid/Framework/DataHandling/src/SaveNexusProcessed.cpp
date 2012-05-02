@@ -40,6 +40,7 @@ off by default.
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -217,6 +218,7 @@ namespace DataHandling
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
     ITableWorkspace_const_sptr tableWorkspace = boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
 	PeaksWorkspace_const_sptr peaksWorkspace = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
+    SpecialWorkspace2D_const_sptr specialWorkspace = boost::dynamic_pointer_cast<const SpecialWorkspace2D>(inputWorkspace);
 	if(peaksWorkspace) g_log.debug("We have a peaks workspace");
     // check if inputWorkspace is something we know how to save
     if (!matrixWorkspace && !tableWorkspace) {
@@ -227,8 +229,8 @@ namespace DataHandling
 	const std::string workspaceID = inputWorkspace->id();
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
         (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-        !m_eventWorkspace && !tableWorkspace)
-      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace or ITableWorkspace.");
+        !m_eventWorkspace && !tableWorkspace && !specialWorkspace)
+      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace, ITableWorkspace, or SpecialWorkspace2D.");
 
 
     // If no title's been given, use the workspace title field
