@@ -908,7 +908,7 @@ class RefLReduction(PythonAlgorithm):
         
             #if at least one non zero value found
             if data_x != []:
-                print '-> cleanup data (remove 0s)'
+                print '-> cleanup data (remove zeros)'
                 CreateWorkspace(OutputWorkspace=output_ws,
                                 DataX=data_x,
                                 DataY=data_y,

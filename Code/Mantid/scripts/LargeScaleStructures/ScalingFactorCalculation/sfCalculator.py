@@ -615,7 +615,7 @@ def help():
 
 #if __name__ == '__main__':
 def calculate(string_runs=None, 
-              list_attenuator=None, 
+#              list_attenuator=None, 
               list_peak_back=None, 
               output_path=None,
               tof_range=None):  
@@ -630,8 +630,6 @@ def calculate(string_runs=None,
         
         The string runs has to be specified this way:
         string_runs = "run#1:nbr_attenuator, run#2:nbr_attenuator...."
-        
-        list_attenuator: list of attenuators
         
         the list_peak_back is specified this way:
         list_peak_back = 
@@ -653,7 +651,6 @@ def calculate(string_runs=None,
 #                     '55895', '55896', '55897', '55898', '55899', '55900', 
 #                     '55901', '55902']
         list_runs = ['55889', '55890', '55891', '55892', '55893', '55894'] 
-        
         nexus_path = '/mnt/hgfs/j35/results/'
         pre = 'REF_L_'
         nexus_path_pre = nexus_path + pre
@@ -679,7 +676,7 @@ def calculate(string_runs=None,
 
     if (list_attenuator is None):
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-        list_attenuator = [0, 1, 1, 1, 1,1];
+        list_attenuator = [0, 1, 1, 1, 1, 1];
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
