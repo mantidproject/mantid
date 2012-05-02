@@ -6,7 +6,7 @@ def inF2PyCompatibleEnv():
     '''Returns true if we are in an environment where our Fortran2Python 
     files are usable, otherwise returns false.'''
     osEnv = platform.system() + platform.architecture()[0]
-    if osEnv == 'Windows32bit' or osEnv == 'Linux64bit':
+    if osEnv == 'Windows32bit':
         return True
     return False
 
