@@ -80,12 +80,12 @@ class MantidPlotProxiesTest(unittest.TestCase):
        
     def test_closing_layers(self):
         g = newGraph()
-        l0 = g.layer(0)
-        l1 = g.addLayer()
+        l1= g.layer(1)
+        l2 = g.addLayer()
         l_active = g.activeLayer()
         self.try_closing(g, "newGraph()")
-        self.assertTrue(l0._getHeldObject() is None, "Layer object 0 from deleted graph is None")
-        self.assertTrue(l1._getHeldObject() is None, "Layer object 1 from deleted graph is None")
+        self.assertTrue(l1._getHeldObject() is None, "Layer object 0 from deleted graph is None")
+        self.assertTrue(l2._getHeldObject() is None, "Layer object 1 from deleted graph is None")
         self.assertTrue(l_active._getHeldObject() is None, "Active Layer object from deleted graph is None")
 
     def test_closing_Layer_objects(self):
