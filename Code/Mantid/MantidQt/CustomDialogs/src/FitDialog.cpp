@@ -302,6 +302,11 @@ void FitDialog::parseInput()
     storePropertyValue("Function",funStr);
     getAlgorithm()->setPropertyValue("Function",funStr.toStdString());
   }
+  else
+  {
+    // Cannot set any other properties until Function is set
+    return;
+  }
   foreach(QWidget* t, m_tabs)
   {
     auto iww = dynamic_cast<InputWorkspaceWidget*>(t);
