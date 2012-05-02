@@ -39,7 +39,7 @@ class RangeSelector(object):
                              self._call_back)
             g = mantidplot.graph(self._graph)
             
-            if g is not None:
+            if g._getHeldObject is not None:
                 g.close()
                 
             g = mantidplot.plotSpectrum(ws, [0], True)

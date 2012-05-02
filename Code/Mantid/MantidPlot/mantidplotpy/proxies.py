@@ -112,21 +112,19 @@ class QtProxyObject(QtCore.QObject):
         """
         Disconnect the signal
         """
-        if self.__obj is not None:
-            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
-                            self._kill_object)
+        self._disconnect_from_destroyed()
                             
     def close(self):
         """
         Reroute a method call to the the stored object
         """
-        self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
-                        self._kill_object)
+        self._disconnect_from_destroyed()
         if hasattr(self.__obj, 'closeDependants'):
             threadsafe_call(self.__obj.closeDependants)
         if hasattr(self.__obj, 'close'):
             threadsafe_call(self.__obj.close)
         self._kill_object()
+        
         
     def new_proxy(self, classType, callable, *args, **kwargs):
         """
@@ -140,6 +138,14 @@ class QtProxyObject(QtCore.QObject):
             @param *kwargs :: The keyword arguments passed on as given
         """
         return classType(threadsafe_call(callable, *args, **kwargs))
+        
+    def _disconnect_from_destroyed(self):
+        """
+        Disconnects from the wrapped object's destroyed signal
+        """
+        if self.__obj is not None:
+            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                            self._kill_object)
 
     def __getattr__(self, attr):
         """
