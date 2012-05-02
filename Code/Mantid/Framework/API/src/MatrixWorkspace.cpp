@@ -1388,7 +1388,7 @@ namespace Mantid
       {
       }
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_axis.title();}
+      virtual std::string getName() const {return m_axis.unit()->caption();}
 
       /// @return the units of the dimension as a string
       virtual std::string getUnits() const {return m_axis.unit()->label();}
@@ -1444,7 +1444,7 @@ namespace Mantid
       virtual ~MWXDimension(){};
 
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_ws->getAxis(0)->title();}
+      virtual std::string getName() const {return m_ws->getAxis(0)->unit()->caption();}
 
       /// @return the units of the dimension as a string
       virtual std::string getUnits() const {return m_ws->getAxis(0)->unit()->label();}
@@ -1589,6 +1589,7 @@ namespace Mantid
 
       // If a spectra/text axis, just use the Y coord as the workspace index
       size_t wi = size_t(y);
+      double yBinSize = 1.0;
       if (ax1)
       {
         const MantidVec & yVals = ax1->getValues();
@@ -1600,6 +1601,15 @@ namespace Mantid
         }
         // The workspace index is the point in the vector that we found
         wi = it - yVals.begin();
+
+        // Find the size of the bin in Y, if needed
+        if (normalization == VolumeNormalization)
+        {
+          if ((it+1) == yVals.end() && (yVals.size() > 1))
+            yBinSize = *it - *(it-1);
+          else
+            yBinSize = *(it+1) - *it;
+        }
       }
 
       if (wi < this->getNumberHistograms())
@@ -1623,9 +1633,10 @@ namespace Mantid
             case NoNormalization:
               return y;
             case VolumeNormalization:
-              // TODO: calculate the Y size
-              return y / (X[i] - X[i-1]);
+              // Divide the signal by the area
+              return y / (yBinSize*(X[i] - X[i-1]));
             case NumEventsNormalization:
+              // Not yet implemented, may not make sense
               return y;
             }
             // This won't happen

@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidAPI/NumericAxis.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -94,6 +95,21 @@ namespace API
       m_Y = m_ws->readY(m_workspaceIndex);
       m_errorIsCached = false;
       m_center[1] = m_dimY->getX(m_workspaceIndex);
+
+      // Find the vertical bin size
+      m_verticalBinSize = 1.0;
+      NumericAxis * ax1 = dynamic_cast<NumericAxis*>(m_ws->getAxis(1));
+      if (ax1)
+      {
+        const MantidVec & yVals = ax1->getValues();
+        if (yVals.size() > 1)
+        {
+          if (m_workspaceIndex < yVals.size()-1)
+            m_verticalBinSize = yVals[m_workspaceIndex+1] - yVals[m_workspaceIndex];
+          else
+            m_verticalBinSize = yVals[m_workspaceIndex] - yVals[m_workspaceIndex-1];
+        }
+      }
     }
   }
 
@@ -163,8 +179,7 @@ namespace API
     case NoNormalization:
       return m_Y[m_xIndex];
     case VolumeNormalization:
-      // TODO: calculate the Y size
-      return m_Y[m_xIndex] / (m_X[m_xIndex+1] - m_X[m_xIndex]);
+      return m_Y[m_xIndex] / (m_verticalBinSize * (m_X[m_xIndex+1] - m_X[m_xIndex]));
     case NumEventsNormalization:
       return m_Y[m_xIndex];
     }
@@ -181,8 +196,7 @@ namespace API
     case NoNormalization:
       return getError();
     case VolumeNormalization:
-      // TODO: calculate the Y size
-      return getError() / (m_X[m_xIndex+1] - m_X[m_xIndex]);
+      return getError() / (m_verticalBinSize * (m_X[m_xIndex+1] - m_X[m_xIndex]));
     case NumEventsNormalization:
       return getError();
     }

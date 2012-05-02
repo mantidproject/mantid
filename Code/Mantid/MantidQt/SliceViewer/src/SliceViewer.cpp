@@ -294,7 +294,7 @@ void SliceViewer::initMenus()
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
-  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNone()));
   m_actionNormalizeNone = action;
 
   action = new QAction(QPixmap(), "Volume Normalization", this);
@@ -302,14 +302,14 @@ void SliceViewer::initMenus()
   action->setActionGroup(group);
   action->setCheckable(true);
   action->setChecked(true);
-  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationVolume()));
   m_actionNormalizeVolume = action;
 
   action = new QAction(QPixmap(), "Num. Events Normalization", this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
-  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNumEvents()));
   m_actionNormalizeNumEvents = action;
 
 
@@ -522,6 +522,10 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_syncRebinMode->setEnabled(!matrix);
   m_syncRebinLock->setEnabled(!matrix);
 
+  // Go to no normalization by default for MatrixWorkspaces
+  if (matrix)
+    this->setNormalization(Mantid::API::NoNormalization, false /* without updating */ );
+
   // Emit the signal that we changed the workspace
   emit workspaceChanged();
 
@@ -692,28 +696,23 @@ void SliceViewer::setTransparentZeros(bool transparent)
 
 //------------------------------------------------------------------------------------
 /// Slot called when changing the normalization menu
-void SliceViewer::changeNormalization()
-{
-  Mantid::API::MDNormalization normalization;
-  if (m_actionNormalizeNone->isChecked())
-      normalization = Mantid::API::NoNormalization;
-  else if (m_actionNormalizeVolume->isChecked())
-    normalization = Mantid::API::VolumeNormalization;
-  else if (m_actionNormalizeNumEvents->isChecked())
-    normalization = Mantid::API::NumEventsNormalization;
-  else
-    normalization = Mantid::API::NoNormalization;
+void SliceViewer::changeNormalizationNone()
+{ this->setNormalization(Mantid::API::NoNormalization, true); }
 
-  this->setNormalization(normalization);
-}
+void SliceViewer::changeNormalizationVolume()
+{ this->setNormalization(Mantid::API::VolumeNormalization, true); }
+
+void SliceViewer::changeNormalizationNumEvents()
+{ this->setNormalization(Mantid::API::NumEventsNormalization, true); }
 
 
 //------------------------------------------------------------------------------------
 /** Set the normalization mode for viewing the data
  *
  * @param norm :: MDNormalization enum. 0=none; 1=volume; 2=# of events
+ * @param update :: update the displayed image. If false, just sets it and shows the checkboxes.
  */
-void SliceViewer::setNormalization(Mantid::API::MDNormalization norm)
+void SliceViewer::setNormalization(Mantid::API::MDNormalization norm, bool update)
 {
   m_actionNormalizeNone->blockSignals(true);
   m_actionNormalizeVolume->blockSignals(true);
@@ -728,7 +727,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm)
   m_actionNormalizeNumEvents->blockSignals(false);
 
   m_data->setNormalization(norm);
-  this->updateDisplay();
+  if (update) this->updateDisplay();
 }
 
 //------------------------------------------------------------------------------------

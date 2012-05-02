@@ -81,7 +81,7 @@ public:
   void setXYCenter(double x, double y);
   void openFromXML(const QString & xml);
   void toggleLineMode(bool);
-  void setNormalization(Mantid::API::MDNormalization norm);
+  void setNormalization(Mantid::API::MDNormalization norm, bool update=true);
   Mantid::API::MDNormalization getNormalization() const;
 
   /// Dynamic Rebinning-related Python bindings
@@ -121,7 +121,9 @@ public slots:
   void colorRangeChanged();
   void loadColorMapSlot();
   void setTransparentZeros(bool transparent);
-  void changeNormalization();
+  void changeNormalizationNone();
+  void changeNormalizationVolume();
+  void changeNormalizationNumEvents();
 
   // Buttons or actions
   void clearLine();

@@ -974,8 +974,11 @@ void LineViewer::showFull()
   {
     MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, false /*not logScale*/);
     m_fullCurve->setData(curveData);
-    m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( sliceMatrix->getAxis(0)->unit()->label() ));;
-    m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( sliceMatrix->YUnitLabel() ));;
+    Unit_const_sptr unit = sliceMatrix->getAxis(0)->unit();
+    std::string title = unit->caption() + " (" + unit->label() + ")";
+    m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString(title));;
+    title = sliceMatrix->YUnit() + " (" + sliceMatrix->YUnitLabel() + ")";
+    m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString(title));;
   }
   else
   {

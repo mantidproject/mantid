@@ -24,30 +24,34 @@ public:
     boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
     // Matrix with 4 spectra, 5 bins each
     ws->initialize(4,6,5);
+    NumericAxis * ax1 = new NumericAxis(4);
     for (size_t wi=0; wi<4; wi++)
+    {
+      ax1->setValue(wi, double(wi)*2.0);
       for (size_t x=0; x<6; x++)
       {
-        ws->dataX(wi)[x] = double(x);
+        ws->dataX(wi)[x] = double(x)*2.0;
         if (x<5)
         {
           ws->dataY(wi)[x] = double(wi*10 + x);
           ws->dataE(wi)[x] = double((wi*10 + x)*2);
         }
       }
+    }
+    Instrument_sptr inst(new Instrument("TestInstrument"));
+    ws->setInstrument(inst);
+    // We get a 1:1 map by default so the detector ID should match the spectrum number
+    for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
+    {
+      // Create a detector for each spectra
+      Detector * det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
+      inst->add(det);
+      inst->markAsDetector(det);
+      ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+    }
+    ws->replaceAxis(1, ax1);
 
-      Instrument_sptr inst(new Instrument("TestInstrument"));
-      ws->setInstrument(inst);
-      // We get a 1:1 map by default so the detector ID should match the spectrum number
-      for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
-      {
-        // Create a detector for each spectra
-        Detector * det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
-        inst->add(det);
-        inst->markAsDetector(det);
-        ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
-      }
-
-      return ws;
+    return ws;
   }
 
   void test_iterating()
@@ -60,6 +64,18 @@ public:
     it->next();
     TS_ASSERT_DELTA( it->getSignal(), 1.0, 1e-5);
     TS_ASSERT_DELTA( it->getError(), 2.0, 1e-5);
+
+    it->setNormalization(NoNormalization);
+    TS_ASSERT_DELTA( it->getNormalizedSignal(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( it->getNormalizedError(), 2.0, 1e-5);
+    // Area of each bin is 4.0
+    it->setNormalization(VolumeNormalization);
+    TS_ASSERT_DELTA( it->getNormalizedSignal(), 1.0 / 4.0, 1e-5);
+    TS_ASSERT_DELTA( it->getNormalizedError(), 2.0 / 4.0, 1e-5);
+    it->setNormalization(NumEventsNormalization);
+    TS_ASSERT_DELTA( it->getNormalizedSignal(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( it->getNormalizedError(), 2.0, 1e-5);
+
     it->next();
     it->next();
     it->next();
@@ -70,8 +86,8 @@ public:
     // Workspace index 1, x index 1
     TS_ASSERT_DELTA( it->getSignal(), 11.0, 1e-5);
     TS_ASSERT_DELTA( it->getError(), 22.0, 1e-5);
-    TS_ASSERT_DELTA( it->getCenter()[0], 1.5, 1e-5);
-    TS_ASSERT_DELTA( it->getCenter()[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA( it->getCenter()[0], 3.0, 1e-5);
+    TS_ASSERT_DELTA( it->getCenter()[1], 2.0, 1e-5);
   }
 
 
@@ -96,9 +112,9 @@ public:
       TS_ASSERT_DELTA( it->getSignal(), double(i)*10 + 1.0, 1e-5);
       TS_ASSERT_DELTA( it->getError(), double(i)*20 + 2.0, 1e-5);
       // Coordinates at X index = 1
-      TS_ASSERT_DELTA( it->getCenter()[0], 1.5, 1e-5);
+      TS_ASSERT_DELTA( it->getCenter()[0], 3.0, 1e-5);
       // And this coordinate is the spectrum number
-      TS_ASSERT_DELTA( it->getCenter()[1], double(i), 1e-5);
+      TS_ASSERT_DELTA( it->getCenter()[1], double(i*2), 1e-5);
       TS_ASSERT( it->next() );
       TS_ASSERT( it->next() );
       TS_ASSERT( it->next() );
