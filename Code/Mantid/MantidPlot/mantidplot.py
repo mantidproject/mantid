@@ -297,14 +297,19 @@ def plot3D(*args):
         return proxies.Graph3D(threadsafe_call(_qti.app.plot3D, args[0]._getHeldObject(),*args[1:]))
 
 #-----------------------------------------------------------------------------
-def selectMultiPeak(source, showFitPropertyBrowser = True):
+def selectMultiPeak(source, showFitPropertyBrowser = True, xmin = None, xmax = None):
     """Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
     
     Args:
         source: A reference to a MultiLayer with the data to fit.
         showFitPropertyBrowser: Whether to show the FitPropertyBrowser or not.
+        xmin: An optionall minimum X value to select
+        xmax: An optionall maximum X value to select
     """
-    threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
+    if xmin is not None and xmax is not None:
+        threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser, xmin, xmax)
+    else:
+        threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
 
 #-----------------------------------------------------------------------------
 #-------------------------- Project/Folder functions -----------------------

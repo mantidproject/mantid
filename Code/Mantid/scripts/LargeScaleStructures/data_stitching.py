@@ -37,13 +37,12 @@ class RangeSelector(object):
             _qti.app.connect(_qti.app.mantidUI,
                              QtCore.SIGNAL("x_range_update(double,double)"),
                              self._call_back)
-            g = _qti.app.graph(self._graph)
+            g = mantidplot.graph(self._graph)
             
             if g is not None:
                 g.close()
                 
-            g_proxy = mantidplot.plotSpectrum(ws, [0], True)
-            g = g_proxy._getHeldObject()
+            g = mantidplot.plotSpectrum(ws, [0], True)
             g.setName(self._graph)        
             l=g.activeLayer()
             try:
@@ -61,9 +60,9 @@ class RangeSelector(object):
                 l.setScale(2,xmin,xmax)
                 
             if range_min is not None and range_max is not None:
-                _qti.app.selectMultiPeak(g, False, range_min, range_max)            
+                mantidplot.selectMultiPeak(g, False, range_min, range_max)            
             else:
-                _qti.app.selectMultiPeak(g, False)
+                mantidplot.selectMultiPeak(g, False)
     
     @classmethod
     def connect(cls, ws, call_back, xmin=None, xmax=None,

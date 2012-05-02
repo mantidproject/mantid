@@ -18,7 +18,7 @@ try:
     from MantidFramework import *
     mtd.initialise(False)
     from mantidsimple import *
-    import _qti
+    import mantidplot
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
@@ -839,9 +839,9 @@ class DataReflWidget(BaseWidget):
         if False and IS_IN_MANTIDPLOT:
             ws_name = "reflectivity"
             ws_list = [n for n in mtd.keys() if n.startswith(ws_name)]
-            g = _qti.app.graph(ws_name)
-            if g is None and len(ws_list)>0:
-                g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+            g = mantidplot.graph(ws_name)
+            if g._getHeldObject() is None and len(ws_list)>0:
+                g = mantidplot.plotSpectrum(ws_list,[0],True)
                 g.setName(ws_name)  
         
         self._summary.angle_list.clear()
