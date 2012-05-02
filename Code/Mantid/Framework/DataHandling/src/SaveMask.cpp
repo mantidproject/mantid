@@ -107,40 +107,44 @@ namespace DataHandling
     } // for
 
     // d) sort
-    g_log.debug() << "Number of detetors to be masked = " << detid0s.size() << std::endl;
-    std::sort(detid0s.begin(), detid0s.end());
+    g_log.debug() << "Number of detectors to be masked = " << detid0s.size() << std::endl;
 
     // 3. Count workspace to count 1 and 0
     std::vector<detid_t> idx0sts;  // starting point of the pair
     std::vector<detid_t> idx0eds;  // ending point of pair
 
-    detid_t i0st = detid0s[0];
-    detid_t i0ed = detid0s[0];
+    if (detid0s.size() > 0)
+    {
+      std::sort(detid0s.begin(), detid0s.end());
 
-    for (size_t i = 1; i < detid0s.size(); i ++){
+      detid_t i0st = detid0s[0];
+      detid_t i0ed = detid0s[0];
 
-      if (detid0s[i] == detid0s[i-1]+1){
-        // If it is continuous: record the current one
-        i0ed = detid0s[i];
-      } else {
-        // If skip: restart everything
-        // i) record previous result
-        idx0sts.push_back(i0st);
-        idx0eds.push_back(i0ed);
-        // ii) reset the register
-        i0st = detid0s[i];
-        i0ed = detid0s[i];
+      for (size_t i = 1; i < detid0s.size(); i ++){
+
+        if (detid0s[i] == detid0s[i-1]+1){
+          // If it is continuous: record the current one
+          i0ed = detid0s[i];
+        } else {
+          // If skip: restart everything
+          // i) record previous result
+          idx0sts.push_back(i0st);
+          idx0eds.push_back(i0ed);
+          // ii) reset the register
+          i0st = detid0s[i];
+          i0ed = detid0s[i];
+        }
+
+      } // for
+
+      // Complete the registration
+      idx0sts.push_back(i0st);
+      idx0eds.push_back(i0ed);
+
+      for (size_t i = 0; i < idx0sts.size(); i++){
+        g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  " << idx0eds[i] << " to be masked and recorded."<< std::endl;
       }
-
-    } // for
-
-    // Complete the registration
-    idx0sts.push_back(i0st);
-    idx0eds.push_back(i0ed);
-
-    for (size_t i = 0; i < idx0sts.size(); i++){
-      g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  " << idx0eds[i] << " to be masked and recorded."<< std::endl;
-    }
+    } // Only work for detid > 0
 
     // 4. Write out to XML nodes
     // a) Create document and root node
@@ -157,7 +161,8 @@ namespace DataHandling
     // c) Append detid
     // c1. Generate text value
     std::stringstream ss;
-    for (size_t i = 0; i < idx0sts.size(); i ++){
+    for (size_t i = 0; i < idx0sts.size(); i ++)
+    {
       size_t ist = idx0sts[i];
       size_t ied = idx0eds[i];
 
@@ -177,6 +182,7 @@ namespace DataHandling
 
     } // for
     std::string textvalue = ss.str();
+    g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size() << "\n" << textvalue << std::endl;
 
     // c2. Create element
     AutoPtr<Element> pDetid = pDoc->createElement("detids");
