@@ -1386,7 +1386,7 @@ QString MantidUI::findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algori
   //Iterate through the properties and find the first input one
   std::vector<Mantid::Kernel::Property*> props = algorithm->getProperties();
   std::vector<Mantid::Kernel::Property*>::const_iterator pend = props.end();
-  for(std::vector<Mantid::Kernel::Property*>::const_iterator pitr = props.begin(); pitr != props.end(); ++pitr)
+  for(std::vector<Mantid::Kernel::Property*>::const_iterator pitr = props.begin(); pitr != pend; ++pitr)
   {
     Mantid::Kernel::Property *base_prop = *pitr;
     const Mantid::API::IWorkspaceProperty *ws_prop = dynamic_cast<Mantid::API::IWorkspaceProperty*>(base_prop);
