@@ -39,19 +39,6 @@ def PadXYE(Xin,Yin,Ein,array_len):
 	E=PadArray(Ein,array_len)
 	return X,Y,E
 
-def Array2List(n,Array):
-	List = []
-	for m in range(0,n):
-		List.append(Array[m])
-	return List
-
-def Array2Fit(n,Array,nf):
-	List = []
-	for m in range(0,n):
-		off = (nf-1)*n
-		List.append(Array[m+off])
-	return List
-
 def CalcErange(inWS,ns,er,nbin):
 	rscl = 1.0
 	array_len = 4096                           # length of array in Fortran
@@ -225,35 +212,32 @@ def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbos
 			message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])
 		if Verbose:
 			logger.notice(message)
-		dataX = Array2List(nd,xout)
-		dataX.append(2*dataX[nd-1]-dataX[nd-2])
-		dataY = Array2List(nd,yout)
-		dataE = Array2List(nd,eout)
-		dataF0 = Array2Fit(nd,yfit,1)
-		dataF1 = Array2Fit(nd,yfit,2)
+		dataX = xout[:nd]
+		dataX = numpy.append(dataX,2*xout[nd-1]-xout[nd-2])
+		yfit_list = numpy.split(yfit[:4*nd],4)
+		dataF0 = yfit_list[0]
+		dataF1 = yfit_list[1]
 		if program == 'QL':
-			dataF2 = Array2Fit(nd,yfit,3)
-			dataF3 = Array2Fit(nd,yfit,4)
-		dataG = []
-		for n in range(0,nd):
-			dataG.append(0.0)
+			dataF2 = yfit_list[2]
+			dataF3 = yfit_list[3]
+		dataG = numpy.zeros(nd)
 		if m == 0:
-			CreateWorkspace(OutputWorkspace=fname+'_Data', DataX=dataX, DataY=dataY, DataE=dataE,
+			CreateWorkspace(OutputWorkspace=fname+'_Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
 				Nspec=1, UnitX='DeltaE')
-			CreateWorkspace(OutputWorkspace=fname+'_Fit1', DataX=dataX, DataY=dataF1, DataE=dataG,
+			CreateWorkspace(OutputWorkspace=fname+'_Fit1', DataX=dataX, DataY=dataF1[:nd], DataE=dataG,
 				Nspec=1, UnitX='DeltaE')
 			if program == 'QL':
-				CreateWorkspace(OutputWorkspace=fname+'_Fit2', DataX=dataX, DataY=dataF2, DataE=dataG,
+				CreateWorkspace(OutputWorkspace=fname+'_Fit2', DataX=dataX, DataY=dataF2[:nd], DataE=dataG,
 					Nspec=1, UnitX='DeltaE')
 		else:
-			CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=dataY, DataE=dataE,
+			CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
 				Nspec=1, UnitX='DeltaE')
 			ConjoinWorkspaces(InputWorkspace1=fname+'_Data', InputWorkspace2='__datmp',CheckOverlapping=False)				
-			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=dataF1, DataE=dataG,
+			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=dataF1[:nd], DataE=dataG,
 				Nspec=1, UnitX='DeltaE')
 			ConjoinWorkspaces(InputWorkspace1=fname+'_Fit1', InputWorkspace2='__f1tmp',CheckOverlapping=False)				
 			if program == 'QL':
-				CreateWorkspace(OutputWorkspace='__f2tmp', DataX=dataX, DataY=dataF2, DataE=dataG,
+				CreateWorkspace(OutputWorkspace='__f2tmp', DataX=dataX, DataY=dataF2[:nd], DataE=dataG,
 					Nspec=1, UnitX='DeltaE')
 				ConjoinWorkspaces(InputWorkspace1=fname+'_Fit2', InputWorkspace2='__f2tmp',CheckOverlapping=False)				
 		Minus(LHSWorkspace=fname+'_Fit1', RHSWorkspace=fname+'_Data', OutputWorkspace=fname+'_Res1')
@@ -594,15 +578,9 @@ def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False,Plot=False):
 	nrbin = nbins[1]
 	theta,Q = GetThetaQ(samWS)
 	Nbet = nbs[0]
-	dataEb = []
-	for n in range(0,Nbet):
-		dataEb.append(0.0)
-	yBet = []
+	eBet0 = numpy.zeros(Nbet)
 	Nsig = nbs[1]
-	dataEs = []
-	for n in range(0,Nsig):
-		dataEs.append(0.0)
-	ySig = []
+	eSig0 = numpy.zeros(Nsig)
 	rscl = 1.0
 	Qaxis = ''
 	for m in range(0,ngrp):
@@ -618,40 +596,42 @@ def QuestStart(ana,samWS,resWS,nbs,erange,nbins,fitOp,Verbose=False,Plot=False):
 		reals = [efix, theta[m], rscl, bnorm]
 		xsout,ysout,xbout,ybout,zpout=Que.quest(numb,Xv,Yv,Ev,reals,fitOp,
 											Xdat,Xb,Yb,wrks,wrkr,lwrk)
-		dataXs = Array2List(Nsig,xsout)
-		dataXs.append(2*dataXs[Nsig-1]-dataXs[Nsig-2])
-		dataYs = Array2List(Nsig,ysout)
-		for n in range(0,Nsig):
-			ySig.append(dataYs[n])
-		dataXb = Array2List(Nbet,xbout)
-		dataXb.append(2*dataXb[Nbet-1]-dataXb[Nbet-2])
-		dataYb = Array2List(Nbet,ybout)
-		for n in range(0,Nbet):
-			yBet.append(dataYb[n])
+		dataXs = xsout[:Nsig]
+		dataYs = ysout[:Nsig]
+		dataXb = xbout[:Nbet]
+		dataYb = ybout[:Nbet]
 		zpWS = fname + '_Zp' +str(m)
 		if (m > 0):
 			Qaxis += ','
 		Qaxis += str(Q[m])
 		for n in range(0,Nsig):
-			dataYzp = Array2Fit(Nbet,zpout,n)
+			yfit_list = numpy.split(zpout[:Nsig*Nbet],Nsig)
+			dataYzp = yfit_list[n]
 			if n == 0:
-				CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXb, DataY=dataYzp, DataE=dataEb,
+				CreateWorkspace(OutputWorkspace=zpWS, DataX=xbout[:Nbet], DataY=dataYzp[:Nbet], DataE=eBet0,
 					Nspec=1, UnitX='MomentumTransfer')
 			else:
-				CreateWorkspace(OutputWorkspace='__Zpt', DataX=dataXb, DataY=dataYzp, DataE=dataEb,
+				CreateWorkspace(OutputWorkspace='__Zpt', DataX=xbout[:Nbet], DataY=dataYzp[:Nbet], DataE=eBet0,
 					Nspec=1, UnitX='MomentumTransfer')
-				Lib.conjoincreated([zpWS,'__Zpt'], zpWS, 'MomentumTransfer')
+				ConjoinWorkspaces(InputWorkspace1=zpWS, InputWorkspace2='__Zpt', CheckOverlapping=False)				
 		if m == 0:
+			xSig = dataXs
+			ySig = dataYs
+			eSig = eSig0		
+			xBet = dataXb
+			yBet = dataYb
+			eBet = eBet0		
 			groupZ = zpWS
 		else:
+			xSig = numpy.append(xSig,dataXs)
+			ySig = numpy.append(ySig,dataYs)
+			eSig = numpy.append(eSig,eSig0)
+			xBet = numpy.append(xBet,dataXb)
+			yBet = numpy.append(yBet,dataYb)
+			eBet = numpy.append(eBet,eBet0)
 			groupZ = groupZ +','+ zpWS
-	        DeleteWorkspace('__Zpt')
-	xSig = dataXs*ngrp
-	eSig = dataEs*ngrp
 	CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,
 		Nspec=ngrp, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
-	xBet = dataXb*ngrp
-	eBet = dataEb*ngrp
 	CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,
 		Nspec=ngrp, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 	group = fname + '_Sigma,'+ fname + '_Beta'
@@ -725,24 +705,18 @@ def ResNormStart(ana,vanWS,resWS,erange,nbin,Verbose=False,Plot='None'):
 		par1.append(pfit[0])
 		par2.append(pfit[1])
 		parE.append(0.0)
-		dataX = Array2List(nd,xout)
-		dataX.append(2*dataX[nd-1]-dataX[nd-2])
-		dataY = Array2List(nd,yout)
-		dataE = Array2List(nd,eout)
-		dataF = Array2List(nd,yfit)
-		dataG = []
-		for n in range(0,nd):
-			dataG.append(0.0)
+		dataX = xout[:nd]
+		dataX = numpy.append(dataX,2*xout[nd-1]-xout[nd-2])
 		if m == 0:
-			CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=dataY, DataE=dataE,
+			CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
 				NSpec=1, UnitX='DeltaE')
-			CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=dataF, DataE=dataG,
+			CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=yfit[:nd], DataE=numpy.zeros(nd),
 				NSpec=1, UnitX='DeltaE')
 		else:
-			CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=dataY, DataE=dataE,
+			CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
 				NSpec=1, UnitX='DeltaE')
 			ConjoinWorkspaces(InputWorkspace1='Data', InputWorkspace2='__datmp', CheckOverlapping=False)				
-			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=dataF, DataE=dataG,
+			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=yfit[:nd], DataE=numpy.zeros(nd),
 				NSpec=1, UnitX='DeltaE')
 			ConjoinWorkspaces(InputWorkspace1='Fit', InputWorkspace2='__f1tmp', CheckOverlapping=False)				
 	CreateWorkspace(OutputWorkspace=van+'_ResNorm_Intensity', DataX=parX, DataY=par1, DataE=parE,
@@ -800,14 +774,8 @@ def JumpStart(sname,jump,prog,fw,Verbose=False,Plot=False):
 			logger.notice(' Log10[Prob(Singwi-Sjolander|{Data})] = ' +str(res[1]))
 			logger.notice(' Coeff.  A =  ' +str(res[2])+ ' +- ' +str(res[3]))
 			logger.notice(' Coeff.  RR =  ' +str(res[4])+ ' +- ' +str(res[5]))
-	dataE = []
-	for n in range(0,nout):
-		dataE.append(0.0)
-	dataX = Array2List(nout,Xout)
-	dataX.append(2*dataX[nout-1]-dataX[nout-2])
-	dataY = Array2List(nout,Yout)
 	ftWS = sname +'_'+ jump + 'fit_' +fw
-	CreateWorkspace(OutputWorkspace=ftWS+'_Fit', DataX=dataX, DataY=dataY, DataE=dataE,
+	CreateWorkspace(OutputWorkspace=ftWS+'_Fit', DataX=Xout[:nout], DataY=Yout[:nout], DataE=numpy.zeros(nout),
 		Nspec=1, UnitX='MomentumTransfer')
 	CloneWorkspace(InputWorkspace=samWS, OutputWorkspace=ftWS+'_Data')
 	group = ftWS + '_Data,'+ ftWS +'_Fit'
@@ -821,7 +789,8 @@ def JumpStart(sname,jump,prog,fw,Verbose=False,Plot=False):
 	EndTime('Jump fit : '+jump+' from '+prog+' ; ')
 
 def JumpPlot(inputWS):
-    j_plot=mp.plotSpectrum(inputWS,0,True)
+    j_plot=mp.plotSpectrum(inputWS+'_Data',0,True)
+    mp.mergePlots(j_plot,mp.plotSpectrum(inputWS+'_Fit',0,False))
 
 def ResNormPlot(inputWS,Plot):
 	if (Plot == 'Intensity' or Plot == 'All'):
