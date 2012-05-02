@@ -62,8 +62,14 @@ using namespace DataObjects;
 
 void EQSANSLoad::init()
 {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, "_event.nxs"),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load");
+
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("TOF");
+  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input, PropertyMode::Optional, wsValidator),
+        "Input event workspace. Assumed to be unmodified events straight from LoadEventNexus");
+
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Then name of the output EventWorkspace");
   declareProperty("UseConfigBeam", true, "If true, the beam center defined in the configuration file will be used");
@@ -427,6 +433,22 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
 
 void EQSANSLoad::exec()
 {
+  // Verify the validity of the inputs
+  //TODO: this should be done by the new data management algorithm used for
+  // live data reduction (when it's implemented...)
+  const std::string fileName = getPropertyValue("Filename");
+  EventWorkspace_sptr inputEventWS = getProperty("InputWorkspace");
+  if (fileName.size()==0 && !inputEventWS)
+  {
+    g_log.error() << "EQSANSLoad input error: Either a valid file path or an input workspace must be provided" << std::endl;
+    throw std::runtime_error("EQSANSLoad input error: Either a valid file path or an input workspace must be provided");
+  }
+  else if (fileName.size()>0 && inputEventWS)
+  {
+    g_log.error() << "EQSANSLoad input error: Either a valid file path or an input workspace must be provided, but not both" << std::endl;
+    throw std::runtime_error("EQSANSLoad input error: Either a valid file path or an input workspace must be provided, but not both");
+  }
+
   // Read in default TOF cuts
   m_low_TOF_cut = getProperty("LowTOFCut");
   m_high_TOF_cut = getProperty("HighTOFCut");
@@ -460,17 +482,22 @@ void EQSANSLoad::exec()
     reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "EQSANS") );
   }
 
-  const std::string fileName = getPropertyValue("Filename");
-
   // Output log
   m_output_message = "";
 
-  IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0, 0.2);
-  loadAlg->setProperty("Filename", fileName);
-  loadAlg->executeAsSubAlg();
-  Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
-  dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
-  IEventWorkspace_sptr dataWS_tmp = boost::dynamic_pointer_cast<IEventWorkspace>(dataWS_asWks);
+  // Check whether we need to load the data
+
+  if (!inputEventWS)
+  {
+    IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0, 0.2);
+    loadAlg->setProperty("Filename", fileName);
+    loadAlg->executeAsSubAlg();
+    Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
+    dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
+    inputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(dataWS_asWks);
+  } else {
+    dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEventWS);
+  }
 
   // Get the sample-detector distance
   double sdd = 0.0;
@@ -563,7 +590,7 @@ void EQSANSLoad::exec()
   m_output_message += "   Flight path correction ";
   if (!correct_for_flight_path) m_output_message += "NOT ";
   m_output_message += "applied\n";
-  DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS_tmp);
+  DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(inputEventWS);
   IAlgorithm_sptr tofAlg = createSubAlgorithm("EQSANSTofStructure", 0.5, 0.7);
   tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
   tofAlg->setProperty("LowTOFCut", m_low_TOF_cut);
