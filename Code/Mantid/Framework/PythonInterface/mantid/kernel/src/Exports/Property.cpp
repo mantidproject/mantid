@@ -3,6 +3,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/implicit.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
@@ -17,6 +18,8 @@ using namespace boost::python;
 void export_Property()
 {
   register_ptr_to_python<Property*>();
+  register_ptr_to_python<const Property*>();
+  implicitly_convertible<Property*,const Property*>();
 
   // vector of properties
   std_vector_exporter<Property*>::wrap("std_vector_property");

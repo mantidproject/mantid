@@ -17,6 +17,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 
@@ -108,6 +109,9 @@ namespace PythonAPI
   {
     //Pointer 
     register_ptr_to_python<Mantid::Kernel::Property*>();
+    register_ptr_to_python<const Mantid::Kernel::Property*>();
+    implicitly_convertible<Mantid::Kernel::Property*,const Mantid::Kernel::Property*>();
+
     //Vector
     vector_proxy<Mantid::Kernel::Property*>::wrap("stl_vector_property");
 
@@ -178,12 +182,30 @@ namespace PythonAPI
           .add_property("duration", &Mantid::Kernel::TimeSeriesPropertyStatistics::duration)
           ;
 
+    register_ptr_to_python<TimeSeriesProperty<double>*>();
+    register_ptr_to_python<const TimeSeriesProperty<double>*>();
+
     class_<Mantid::Kernel::TimeSeriesProperty<double>, \
            bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
               .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<double>::getStatistics)
               .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
               .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::timesAsVector)
     	      ;
+
+    register_ptr_to_python<TimeSeriesProperty<bool>*>();
+    register_ptr_to_python<const TimeSeriesProperty<bool>*>();
+
+    class_<Mantid::Kernel::TimeSeriesProperty<bool>, \
+           bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_bool", no_init);
+
+    class_<LogFilter,boost::noncopyable>("LogFilter", 
+                                        init<const Property*>("Creates a log filter using the log to be filtered"))
+    .def("data", &LogFilter::data, return_value_policy<return_by_value>(), 
+         "Returns a time series property filtered on current filter property")
+
+    .def("addFilter", &LogFilter::addFilter, "Adds a filter to the current list")
+    ;
+
 
     class_<Mantid::Kernel::DateAndTime>("DateAndTime", no_init)
         .def("__str__", &Mantid::Kernel::DateAndTime::toISO8601String)
