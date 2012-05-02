@@ -16,7 +16,8 @@
 	set( CPACK_PACKAGE_NAME "Mantid${CPACK_PACKAGE_SUFFIX}" )
 	set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}") 
 	set( CPACK_NSIS_INSTALL_ROOT "C:")
-
+    set( CPACK_NSIS_MENU_LINKS "bin\\\\MantidPlot.exe" "MantidPlot")
+	
 	#set( CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
 	set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/Images\\\\MantidPlot_Icon_32offset.png" )
     set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/Images\\\\MantidPlot_Icon_32offset.ico" )

@@ -924,8 +924,8 @@ Function .onInit
   StrCpy $SV_ALLUSERS "JustMe"
   ; if default install dir then change the default
   ; if it is installed for JustMe
-  StrCmp "$IS_DEFAULT_INSTALLDIR" "1" 0 +2
-    StrCpy $INSTDIR "$DOCUMENTS\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
+  ;StrCmp "$IS_DEFAULT_INSTALLDIR" "1" 0 +2
+  ;  StrCpy $INSTDIR "$DOCUMENTS\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 
   ClearErrors
   UserInfo::GetName
