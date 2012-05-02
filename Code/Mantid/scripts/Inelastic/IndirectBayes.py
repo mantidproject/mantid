@@ -12,6 +12,11 @@ if ( operatingenvironment == 'Windows32bit' ):
 	import QLdata_win32 as QLd,  QLse_win32 as Qse
 	import Quest_win32 as Que,   ResNorm_win32 as resnorm
 	import CEfit_win32 as cefit, SSfit_win32 as ssfit
+elif ( operatingenvironment == 'Linux64bit' ):
+	import erange_lnx64 as Er,   QLres_lnx64 as QLr
+	import QLdata_lnx64 as QLd,  QLse_lnx64 as Qse
+	import Quest_lnx64 as Que,   ResNorm_lnx64 as resnorm
+	import CEfit_lnx64 as cefit, SSfit_lnx64 as ssfit
 else:
 	sys.exit('F2Py Bayes programs NOT available on ' + operatingenvironment)
 
