@@ -33,7 +33,7 @@
   ;Name and file
   Name "@CPACK_NSIS_PACKAGE_NAME@"
   OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
-
+  RequestExecutionLevel user
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
 
