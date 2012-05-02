@@ -1,4 +1,5 @@
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/python/class.hpp>
 #include <boost/python/return_by_value.hpp>
 
