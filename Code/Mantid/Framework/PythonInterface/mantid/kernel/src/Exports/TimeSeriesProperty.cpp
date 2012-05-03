@@ -7,26 +7,43 @@ using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
 using namespace boost::python;
 
+namespace
+{
+  /// Defines the getStatistics member for various types
+  #define DEF_GET_STATS(TYPE) DEF_GET_STATS_##TYPE
+  /// Doubles have a get stats member
+  #define DEF_GET_STATS_double .def("getStatistics", &TimeSeriesProperty<double>::getStatistics)
+  /// booleans do not have a get stats member
+  #define DEF_GET_STATS_bool 
+
+  /// Macro to reduce copy-and-paste
+  #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)\
+    register_ptr_to_python<TimeSeriesProperty<TYPE>*>();\
+    register_ptr_to_python<const TimeSeriesProperty<TYPE>*>();\
+    implicitly_convertible<TimeSeriesProperty<TYPE>*,const TimeSeriesProperty<TYPE>*>();\
+    \
+    class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(#Prefix"TimeSeriesProperty", no_init)\
+      .add_property("value", &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector) \
+      .add_property("times", &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector) \
+      .def("valueAsString", &TimeSeriesProperty<TYPE>::value) \
+      .def("size", &TimeSeriesProperty<TYPE>::size)\
+      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime) \
+      .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue) \
+      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime) \
+      .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue) \
+      DEF_GET_STATS(TYPE) \
+      ;
+  ;
+}
+
 void export_TimeSeriesProperty_Double()
 {
-  register_ptr_to_python<TimeSeriesProperty<double>*>();
-  register_ptr_to_python<const TimeSeriesProperty<double>*>();
-  implicitly_convertible<TimeSeriesProperty<double>*,const TimeSeriesProperty<double>*>();
-
-  class_<TimeSeriesProperty<double>, bases<Property>, boost::noncopyable>("FloatTimeSeriesProperty", no_init)
-    .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<double>::getStatistics)
-    .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
-    .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::timesAsVector)
-  ;
+  EXPORT_TIMESERIES_PROP(double, Float);
 }
 
 void export_TimeSeriesProperty_Bool()
 {
-  register_ptr_to_python<TimeSeriesProperty<bool>*>();
-  register_ptr_to_python<const TimeSeriesProperty<bool>*>();
-  implicitly_convertible<TimeSeriesProperty<bool>*,const TimeSeriesProperty<bool>*>();
-
-  class_<TimeSeriesProperty<bool>, bases<Property>, boost::noncopyable>("BoolTimeSeriesProperty", no_init);
+  EXPORT_TIMESERIES_PROP(bool, Bool);
 }
 
 void export_TimeSeriesPropertyStatistics()
