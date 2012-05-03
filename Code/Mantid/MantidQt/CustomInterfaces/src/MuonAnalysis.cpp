@@ -88,7 +88,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
     if (tempFile.exists() && !tempFile.canWrite() ) 
     {
       g_log.information() << "Instrument directory is read only, writing temp grouping to system temp.\n";
-      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"Grouping/tempMuonAnalysisGrouping.xml";
+      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"tempMuonAnalysisGrouping.xml";
     }
     else
     {
