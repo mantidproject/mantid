@@ -645,11 +645,17 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
 
   bool isEvent = false;
+  std::string workspaceType = "Workspace2D";
   std::string group_name = "workspace";
   if (mtd_entry.containsGroup("event_workspace"))
   {
     isEvent = true;
     group_name = "event_workspace";
+  }
+  else if (mtd_entry.containsGroup("offsets_workspace"))
+  {
+    workspaceType = "OffsetsWorkspace";
+    group_name = "offsets_workspace";
   }
 
   // Get workspace characteristics
@@ -706,7 +712,6 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
     size_t total_specs=calculateWorkspacesize(nspectra);
 
     //// Create the 2D workspace for the output
-    std::string workspaceType = "Workspace2D";
     bool hasFracArea = false;
     if (wksp_cls.isValid("frac_area"))
     {
