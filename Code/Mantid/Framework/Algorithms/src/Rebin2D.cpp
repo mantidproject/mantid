@@ -273,7 +273,9 @@ namespace Mantid
             yValue *=  weight;
             double eValue = inputWS->readE(i)[j] * weight;
             const double overlapWidth = overlap.largestX() - overlap.smallestX();
-            if(inputWS->isDistribution())
+            // Don't do the overlap removal if already RebinnedOutput.
+            // This wreaks havoc on the data.
+            if(inputWS->isDistribution() && inputWS->id() != "RebinnedOutput")
             {
               yValue *= overlapWidth;
               eValue *= overlapWidth;
@@ -364,7 +366,9 @@ namespace Mantid
           m_progress->report("Calculating errors");
           const double binWidth = (outputWS->readX(i)[j+1] - outputWS->readX(i)[j]);
           double eValue = std::sqrt(outputE[j]);
-          if( inputWS->isDistribution() )
+          // Don't do this for a RebinnedOutput workspace. The fractions
+          // take care of such things.
+          if( inputWS->isDistribution() && inputWS->id() != "RebinnedOutput")
           {
             outputY[j] /= binWidth;
             eValue /= binWidth;
