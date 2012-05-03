@@ -370,6 +370,7 @@ class DataReflWidget(BaseWidget):
         xml_str += "  <python_version>%s</python_version>\n" % sys.version
         if IS_IN_MANTIDPLOT:
             xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
+        m.data_files = ["0"]
         xml_str += m.to_xml()
         xml_str += "</Reduction>\n"
         
