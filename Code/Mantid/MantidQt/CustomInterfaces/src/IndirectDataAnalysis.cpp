@@ -944,7 +944,7 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(b
 
     if ( tie || ! m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
     {
-      std::string parName = createParName(index, subIndex, "Height");
+      std::string parName = createParName(index, "Height");
       conv->tie(parName, m_cfProp["DeltaHeight"]->valueText().toStdString() );
     }
 
