@@ -310,16 +310,23 @@ private:
           }
           mFilterQuickRef.push_back(std::make_pair(icurlog, numintervals));
         }
-      }
+      } // Filter value is True
       else  if (mFilterQuickRef.size()%4 == 2)
       {
         // b) Filter == False: indicating the end of a quick reference region
         if (icurlog < static_cast<int>(mP.size()))
-          icurlog = this->upperBound(mFilter[ift].first, icurlog, static_cast<int>(mP.size())-1);
+        {
+          int istart;
+          if (icurlog <= 0)
+            istart = 0;
+          else
+            istart = icurlog-1;
+          icurlog = this->upperBound(mFilter[ift].first, istart, static_cast<int>(mP.size())-1);
+        }
 
         if (icurlog < 0)
         {
-          // i.   Some false filter is before the first log entry.  The previous filter does not make sensse
+          // i.   Some false filter is before the first log entry.  The previous filter does not make sense
           if (mFilterQuickRef.size() != 2)
             throw std::logic_error("False filter is before first log entry.  QuickRef size must be 2.");
           mFilterQuickRef.pop_back();
@@ -359,7 +366,7 @@ private:
           mFilterQuickRef.push_back(std::make_pair(lastlog, new_numintervals));
           mFilterQuickRef.push_back(std::make_pair(ift, new_numintervals));
         }
-      }
+      } // Filter value is FALSE
 
     } // ENDFOR
 
@@ -368,6 +375,9 @@ private:
 
     // 6. Re-count size
     countSize();
+
+    for (size_t i = 0; i < mFilterQuickRef.size(); ++i)
+      std::cout << "QuickRef " << i << ": " << mFilterQuickRef[i].first << ", " << mFilterQuickRef[i].second << std::endl;
 
     return;
   }
