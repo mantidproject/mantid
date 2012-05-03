@@ -31,7 +31,7 @@ public:
       delete p;
     }
 
-    void testnthValue()
+    void NtestnthValue()
     {
 
       TS_ASSERT_EQUALS( p->size(), 5 );
@@ -59,7 +59,7 @@ public:
 
     }
 
-    void testF1()
+    void NtestF1()
     {
       TimeSeriesProperty<bool> f("1");
       f.addValue("2007-11-30T16:16:50",true);
@@ -97,7 +97,7 @@ public:
 
     }
 
-    void testF1a()
+    void NtestF1a()
     {
         TimeSeriesProperty<bool> f("1");
         f.addValue("2007-11-30T16:16:50",false);
@@ -119,7 +119,7 @@ public:
 
     }
 
-    void testF12()
+    void NtestF12()
     {
       TimeSeriesProperty<bool> f("1");
       f.addValue("2007-11-30T16:16:50",true);
@@ -159,7 +159,7 @@ public:
 
     }
 
-    void Passed_testF3()
+    void NtestF3()
     {
       TimeSeriesProperty<bool> f("1");
       f.addValue("2007-11-30T16:17:00",false);
@@ -182,7 +182,7 @@ public:
       return;
     }
 
-    void xtestFilterByPeriod() // Test for Wendou to look at
+    void testFilterByPeriod() // Test for Wendou to look at
     {
       TimeSeriesProperty<double> height_log("height_log");
       height_log.addValue("2008-Jun-17 11:10:44", -0.86526);
@@ -251,9 +251,19 @@ public:
       
       LogFilter filter(&height_log);
       filter.addFilter(&period_log); // This throws when it shouldn't
-      //const TimeSeriesProperty<double> *filteredLog = filter.data();
-      //TS_ASSERT_EQUALS(filteredLog->size(), 5)
+      const TimeSeriesProperty<double> *filteredLog = filter.data();
+      TS_ASSERT_EQUALS(filteredLog->size(), 6)
+
+      for (size_t i = 0; i < filteredLog->size(); ++i)
+      {
+        TimeInterval dtime = filteredLog->nthInterval(i);
+        double value = filteredLog->nthValue(i);
+        std::cout << "Filter Interval " << i << " : Time = " << dtime.begin() << " - " << dtime.end() << "\t, Value = " << value << std::endl;
+      }
+
+      return;
     }
+
 
 private:
   std::time_t createTime_t_FromString(const std::string &str)

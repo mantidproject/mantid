@@ -252,6 +252,8 @@ private:
   /*
    * Apply filter
    * Requirement: There is no 2 consecutive 'second' values that are same in mFilter
+   *
+   * It only works with filter starting from TRUE AND having TRUE and FALSE altered
    */
   void applyFilter() const
   {
@@ -270,20 +272,23 @@ private:
       if (mFilter[ift].second)
       {
         // a) Filter == True: indicating the start of a quick reference region
+        int istart = 0;
+        if (icurlog > 0)
+          istart = icurlog-1;
+
         if (icurlog < static_cast<int>(mP.size()))
-          icurlog = this->upperBound(mFilter[ift].first, icurlog, static_cast<int>(mP.size())-1);
+          icurlog = this->upperBound(mFilter[ift].first, istart, static_cast<int>(mP.size())-1);
 
         if (icurlog < 0)
         {
-          // i.   If it is out of lower boundary, add filter time, add 0 time
+          // i. If it is out of lower boundary, add filter time, add 0 time
           if (mFilterQuickRef.size() > 0)
             throw std::logic_error("return log index < 0 only occurs with the first log entry");
 
           mFilterQuickRef.push_back(std::make_pair(ift, 0));
-          mFilterQuickRef.push_back(std::make_pair(0, 1));
+          mFilterQuickRef.push_back(std::make_pair(0, 0));
 
           icurlog = 0;
-
         }
         else if (icurlog >= static_cast<int>(mP.size()))
         {
@@ -300,70 +305,66 @@ private:
           size_t numintervals = 0;
           if (mFilterQuickRef.size() > 0)
           {
-            numintervals = mFilterQuickRef.back().second+1;
+            numintervals = mFilterQuickRef.back().second;
           }
-
+          if (mFilter[ift].first < mP[icurlog].time())
+          {
+            if (icurlog == 0)
+            {
+              throw std::logic_error("Int this case, icurlog won't be zero! ");
+            }
+            icurlog --;
+          }
           mFilterQuickRef.push_back(std::make_pair(ift, numintervals));
+          /* Don't understand
           if (mFilter[ift].first < mP[icurlog].time())
           {
             numintervals ++;
           }
+          */
+          // Note: numintervals inherits from last filter
           mFilterQuickRef.push_back(std::make_pair(icurlog, numintervals));
         }
       } // Filter value is True
       else  if (mFilterQuickRef.size()%4 == 2)
       {
         // b) Filter == False: indicating the end of a quick reference region
-        if (icurlog < static_cast<int>(mP.size()))
-        {
-          int istart;
-          if (icurlog <= 0)
-            istart = 0;
-          else
-            istart = icurlog-1;
-          icurlog = this->upperBound(mFilter[ift].first, istart, static_cast<int>(mP.size())-1);
-        }
+        int ilastlog = icurlog;
 
-        if (icurlog < 0)
+        if (ilastlog < static_cast<int>(mP.size()))
         {
-          // i.   Some false filter is before the first log entry.  The previous filter does not make sense
-          if (mFilterQuickRef.size() != 2)
-            throw std::logic_error("False filter is before first log entry.  QuickRef size must be 2.");
-          mFilterQuickRef.pop_back();
-          mFilterQuickRef.clear();
+          // B1: Last TRUE entry is still within log
+          icurlog = this->upperBound(mFilter[ift].first, icurlog, static_cast<int>(mP.size())-1);
+
+          if (icurlog < 0)
+          {
+            // i.   Some false filter is before the first log entry.  The previous filter does not make sense
+            if (mFilterQuickRef.size() != 2)
+              throw std::logic_error("False filter is before first log entry.  QuickRef size must be 2.");
+            mFilterQuickRef.pop_back();
+            mFilterQuickRef.clear();
+          }
+          else
+          {
+            // ii.  Register the end of a valid log
+            if (ilastlog < 0)
+              throw std::logic_error("LastLog is not expected to be less than 0");
+
+            int delta_numintervals = icurlog - ilastlog;
+            if (delta_numintervals < 0)
+              throw std::logic_error("Havn't considered delta numinterval can be less than 0.");
+
+            size_t new_numintervals = mFilterQuickRef.back().second + static_cast<size_t>(delta_numintervals);
+
+            mFilterQuickRef.push_back(std::make_pair(icurlog, new_numintervals));
+            mFilterQuickRef.push_back(std::make_pair(ift, new_numintervals));
+          }
         }
         else
         {
-          // ii.  Register the end of a valid log
-          int lastlog = icurlog;
-          if (icurlog >= static_cast<int>(mP.size()))
-          {
-            // If the log is outside of upper boundary, register the last log entry
-            lastlog = static_cast<int>(mP.size())-1;
-          }
-          else
-          {
-            // As the log time is same as filter time (false) or lager than , use the previous
-            lastlog = lastlog-1;
-            icurlog = lastlog;
-          }
-          if (lastlog < 0)
-            throw std::logic_error("LastLog is not expected to be less than 0");
-
-          size_t new_numintervals;
-          int delta_numintervals = lastlog- static_cast<int>(mFilterQuickRef.back().first);
-          if (delta_numintervals < 0)
-          {
-            // It means that quick reference is out of log time, and use filter time only
-            lastlog = static_cast<int>(icurlog);
-            new_numintervals = mFilterQuickRef.back().second;
-          }
-          else
-          {
-            new_numintervals = mFilterQuickRef.back().second+static_cast<size_t>(delta_numintervals);
-          }
-
-          mFilterQuickRef.push_back(std::make_pair(lastlog, new_numintervals));
+          // B2. Last TRUE filter's time is already out side of log.
+          size_t new_numintervals = mFilterQuickRef.back().second+1;
+          mFilterQuickRef.push_back(std::make_pair(icurlog-1, new_numintervals));
           mFilterQuickRef.push_back(std::make_pair(ift, new_numintervals));
         }
       } // Filter value is FALSE
@@ -376,10 +377,49 @@ private:
     // 6. Re-count size
     countSize();
 
+    std::cout << "Mysterious QuickRef " << std::endl;
     for (size_t i = 0; i < mFilterQuickRef.size(); ++i)
       std::cout << "QuickRef " << i << ": " << mFilterQuickRef[i].first << ", " << mFilterQuickRef[i].second << std::endl;
 
     return;
+  }
+
+
+  /*
+   * A new algorithm sto find Nth index.  It is simple and leave a lot work to the callers
+   *
+   * Return: the index of the quick reference vector
+   */
+  size_t findNthIndexFromQuickRef(int n) const
+  {
+    size_t index = 0;
+
+    // 1. Do check
+    if (n < 0)
+      throw std::invalid_argument("Unable to take into account negative index. ");
+    else if (mFilterQuickRef.size() == 0)
+      throw std::runtime_error("Quick reference is not established. ");
+
+    // 2. Return...
+    if (static_cast<size_t>(n) >= mFilterQuickRef.back().second)
+    {
+      // 2A.  Out side of boundary
+      index = mFilterQuickRef.size();
+    }
+    else
+    {
+      // 2B. Inside
+      for (size_t i = 0; i < mFilterQuickRef.size(); i+=4)
+      {
+        if (static_cast<size_t>(n) >= mFilterQuickRef[i].second && static_cast<size_t>(n) < mFilterQuickRef[i+3].second)
+        {
+          index = i;
+          break;
+        }
+      }
+    }
+
+    return index;
   }
 
 
@@ -1391,6 +1431,54 @@ public:
         Kernel::DateAndTime t0;
         Kernel::DateAndTime tf;
 
+        size_t refindex = this->findNthIndexFromQuickRef(n);
+        if (refindex + 3 >= mFilterQuickRef.size())
+          throw std::logic_error("nthInterval:  Haven't considered this case.");
+
+        int diff = n - static_cast<int>(mFilterQuickRef[refindex].second);
+        if (diff < 0)
+          throw std::logic_error("nthInterval:  diff cannot be less than 0.");
+
+        // i) start time
+        Kernel::DateAndTime ftime0 = mFilter[mFilterQuickRef[refindex].first].first;
+        size_t iStartIndex = mFilterQuickRef[refindex+1].first+static_cast<size_t>(diff);
+        Kernel::DateAndTime ltime0 = mP[iStartIndex].time();
+        if (iStartIndex == 0 && ftime0 < ltime0)
+        {
+          // a) Special case that True-filter time starts before log time
+          t0 = ltime0;
+        }
+        else if (diff == 0)
+        {
+          // b) First entry... usually start from filter time
+          t0 = ftime0;
+        }
+        else
+        {
+          // c) Not the first entry.. usually in the middle of TRUE filter period.  use log time
+          t0 = ltime0;
+        }
+
+        // ii) end time
+        size_t iStopIndex = iStartIndex + 1;
+        if (iStopIndex >= mP.size())
+        {
+          // a) Last log entry is for the start
+          Kernel::DateAndTime ftimef = mFilter[mFilterQuickRef[refindex+3].first].first;
+          tf = ftimef;
+        }
+        else
+        {
+          // b) Using the earlier value of next log entry and next filter entry
+          Kernel::DateAndTime ltimef = mP[iStopIndex].time();
+          Kernel::DateAndTime ftimef = mFilter[mFilterQuickRef[refindex+3].first].first;
+          if (ltimef < ftimef)
+            tf = ltimef;
+          else
+            tf = ftimef;
+        }
+
+        /*
         std::pair<size_t, int> indcase = this->findNthIndex(n);
 
         if (indcase.second == 1)
@@ -1442,6 +1530,7 @@ public:
           ss << "Case " << indcase.second << " returned from findNthIndex() is not defined" << std::endl;
           throw std::logic_error(ss.str());
         } // END-IF-ELSE Case.Second
+        */
 
         Kernel::TimeInterval dt(t0, tf);
         deltaT = dt;
@@ -1499,8 +1588,18 @@ public:
         Kernel::DateAndTime t0;
         Kernel::DateAndTime tf;
 
-        std::pair<size_t, int> indcase = this->findNthIndex(n);
+        // std::pair<size_t, int> indcase = this->findNthIndex(n);
+        // std::cout << "Index of " << n << "th: = " << indcase.first << ", " << indcase.second << std::endl;
+        size_t refindex = findNthIndexFromQuickRef(n);
+        if (refindex+3 >= mFilterQuickRef.size())
+        {
+          throw std::logic_error("Not consider out of boundary case here. ");
+        }
+        size_t ilog = mFilterQuickRef[refindex+1].first + (n-mFilterQuickRef[refindex].second);
+        value = mP[ilog].value();
+        // std::cout << "Index of " << n << "th: = " << ilog << " --> " << value << std::endl;
 
+        /*
         if (indcase.second == 1)
         {
           // Case 1: Filter-Log
@@ -1537,6 +1636,7 @@ public:
           ss << "findNthIndex return case " << indcase.second << ".  It is not defined!" << std::endl;
           throw std::logic_error(ss.str());
         }
+        */
       } // END-IF-ELSE Cases
     }
 
@@ -1608,6 +1708,56 @@ public:
     std::vector<bool> filtervalues = filter->valuesAsVector();
     mFilter.reserve(filtertimes.size()+1);
 
+    bool lastIsTrue = false;
+    for (size_t i = 0; i < filtertimes.size(); i ++)
+    {
+      if (filtervalues[i] && !lastIsTrue)
+      {
+        // Get a true in filter but last recorded value is for false
+        mFilter.push_back(std::make_pair(filtertimes[i], true));
+        lastIsTrue = true;
+      }
+      else if (!filtervalues[i] && lastIsTrue)
+      {
+        // Get a False in filter but last recorded value is for TRUE
+        mFilter.push_back(std::make_pair(filtertimes[i], false));
+        lastIsTrue = false;
+      }
+    }
+
+    // 2b) Get a clean finish
+    if (filtervalues.back())
+    {
+      DateAndTime lastTime, nextLastT;
+      if (mP.back().time() > filtertimes.back())
+      {
+        // Last log time is later than last filter time
+        lastTime = mP.back().time();
+        if ( mP[mP.size()-2].time() > filtertimes.back() )
+          nextLastT = mP[mP.size()-2].time();
+        else
+          nextLastT = filtertimes.back();
+      }
+      else
+      {
+        // Last log time is no later than last filter time
+        lastTime = filtertimes.back();
+        if (mP.back().time() > filtertimes[filtertimes.size()-1])
+        {
+          nextLastT = mP.back().time();
+        }
+        else
+        {
+          nextLastT = *(filtertimes.rbegin()+1);
+        }
+      }
+
+      time_duration dtime = lastTime - nextLastT;
+
+      mFilter.push_back(std::make_pair(lastTime+dtime, false));
+    }
+
+    /*
     // a) Boundary condition
     if (filtertimes[0] > mP[0].time())
     {
@@ -1655,6 +1805,13 @@ public:
 
       mFilter.push_back(std::make_pair(lastTime+dtime, false));
     }
+    */
+
+    std::cout << "Filter: " << std::endl;
+    for (size_t ift = 0; ift < mFilter.size(); ++ift)
+    {
+      std::cout << "Entry " << ift << ": " << mFilter[ift].first << "\t\t" << mFilter[ift].second << std::endl;
+    }
 
     // 3. Reset flag and do filter
     mFilterApplied = false;
@@ -1691,7 +1848,7 @@ public:
       {
         this->applyFilter();
       }
-      m_size = int(mFilterQuickRef.back().second+1);
+      m_size = int(mFilterQuickRef.back().second);
     }
 
     return;
