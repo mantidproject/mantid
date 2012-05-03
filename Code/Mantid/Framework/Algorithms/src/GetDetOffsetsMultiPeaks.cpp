@@ -477,7 +477,6 @@ namespace Mantid
           peakPosToFit.erase(peakPosToFit.begin() + (*it));
       if (peakPosFitted.size() > 2) Outliers(peakWidFitted, peakPosFitted, chisq, peakPosToFit);
       nparams = peakPosFitted.size();
-      std::cout << s <<"  "<<nparams<<"\n";
       return;
     }
     void GetDetOffsetsMultiPeaks::Outliers(std::vector<double>& data, std::vector<double>& data2, std::vector<double>& data3, std::vector<double>& data4)
