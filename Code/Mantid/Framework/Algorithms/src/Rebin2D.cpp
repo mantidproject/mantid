@@ -22,6 +22,8 @@ The algorithms currently requires the second axis on the workspace to be a numer
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -198,11 +200,16 @@ namespace Mantid
           const V2D ul(X[ei], vhi);
           const Quadrilateral outputQ(ll, lr, ur, ul);
 
+          double yValue = inputWS->readY(i)[j];
+          if (boost::math::isnan(yValue))
+          {
+            continue;
+          }
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            double yValue = inputWS->readY(i)[j] * weight;
+            yValue *= weight;
             double eValue = inputWS->readE(i)[j] * weight;
             const double overlapWidth = overlap.largestX() - overlap.smallestX();
             if(inputWS->isDistribution())
@@ -254,11 +261,16 @@ namespace Mantid
           const V2D ul(X[ei], vhi);
           const Quadrilateral outputQ(ll, lr, ur, ul);
 
+          double yValue = inputWS->readY(i)[j];
+          if (boost::math::isnan(yValue))
+          {
+            continue;
+          }
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            double yValue = inputWS->readY(i)[j] * weight;
+            yValue *=  weight;
             double eValue = inputWS->readE(i)[j] * weight;
             const double overlapWidth = overlap.largestX() - overlap.smallestX();
             if(inputWS->isDistribution())
