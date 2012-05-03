@@ -48,13 +48,6 @@ namespace MDAlgorithms
 
  class DLLExport IConvertToMDEventsWS
  {
- protected:
-   /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
-    /// presumably will be completely inlined
-
-//    template<ConvertToMD::QMode Q,ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType Type,ConvertToMD::SampleType Sample>
-//    friend struct CoordTransformer;
-
  public:
      // constructor;
      IConvertToMDEventsWS();
@@ -66,9 +59,9 @@ namespace MDAlgorithms
     /// virtual destructor
     virtual ~IConvertToMDEventsWS(){};
 /**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
-    Kernel::Unit_sptr              getAxisUnits()const;
-    double    getEi()const{return TWS.Ei;}
-    int       getEMode()const{return TWS.emode;}
+    Kernel::Unit_sptr    getAxisUnits()const;
+    double               getEi()const{return TWS.Ei;}
+    int                  getEMode()const{return TWS.emode;}
     ConvToMDPreprocDetectors  const * pPrepDetectors()const{return pDetLoc;}
 
     API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
@@ -93,7 +86,7 @@ namespace MDAlgorithms
     //
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
    // pointer to the array of detector's directions in reciprocal space
-    ConvToMDPreprocDetectors const *  pDetLoc;
+    ConvToMDPreprocDetectors const * pDetLoc;
    /// number of target ws dimesnions
     size_t n_dims;
     /// array of variables which describe min limits for the target variables;
