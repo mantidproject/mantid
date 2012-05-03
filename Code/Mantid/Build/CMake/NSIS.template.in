@@ -904,7 +904,7 @@ Function .onInit
 
   IfSilent +5
     IfFileExists $INSTDIR\uninstall.exe +3 0 
-        MessageBox MB_YESNO "This looks like your first install with the new installer. Have you removed the previous Mantid install?" IDYES NoAbort
+        MessageBox MB_YESNO "This looks like your first install with the new installer. Have you removed the previous Mantid install?$\r$\n$\r$\nIf you have not yet removed Mantid, click No, which aborts the install, and then remove it using Windows program manager." IDYES NoAbort
         Abort "Cancelled. Remove old Mantid install then retry."
       NoAbort:
     MessageBox MB_OK "Mantid installer will try to run any existing uninstallers first. Please click OK and be patient, the installer will start soon"
