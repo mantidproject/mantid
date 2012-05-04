@@ -4,6 +4,7 @@ set ( SRC_FILES
         src/HFIRLoad.cpp
         src/HFIRInstrument.cpp
         src/EQSANSInstrument.cpp
+        src/SANSBeamFinder.cpp
         src/SANSSolidAngleCorrection.cpp
         src/SANSSensitivityCorrection.cpp
         src/EQSANSDarkCurrentSubtraction.cpp
@@ -25,6 +26,7 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/HFIRLoad.h
         inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
         inc/MantidWorkflowAlgorithms/HFIRInstrument.h
+        inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
         inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
         inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h

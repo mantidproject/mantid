@@ -72,6 +72,7 @@ void EQSANSLoad::init()
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Then name of the output EventWorkspace");
+  declareProperty("NoBeamCenter", false, "If true, the detector will not be moved according to the beam center");
   declareProperty("UseConfigBeam", true, "If true, the beam center defined in the configuration file will be used");
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
@@ -464,6 +465,7 @@ void EQSANSLoad::exec()
   // Read in default beam center
   m_center_x = getProperty("BeamCenterX");
   m_center_y = getProperty("BeamCenterY");
+  const bool noBeamCenter = getProperty("NoBeamCenter");
 
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -482,6 +484,7 @@ void EQSANSLoad::exec()
   {
     AlgorithmProperty *loadProp = new AlgorithmProperty("LoadAlgorithm");
     setPropertyValue("InputWorkspace", "");
+    setProperty("NoBeamCenter", false);
     loadProp->setValue(toString());
     reductionManager->declareProperty(loadProp);
   }
@@ -594,15 +597,28 @@ void EQSANSLoad::exec()
   getSourceSlitSize();
 
   // Move the beam center to its proper position
-  moveToBeamCenter();
-  // Add beam center to reduction properties, as the last beam center position that was used.
-  // This will give us our default position next time.
-  if (!reductionManager->existsProperty("LatestBeamCenterX"))
-    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", m_center_x) );
-  else reductionManager->setProperty("LatestBeamCenterX", m_center_x);
-  if (!reductionManager->existsProperty("LatestBeamCenterY"))
-    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", m_center_y) );
-  else reductionManager->setProperty("LatestBeamCenterY", m_center_y);
+  if (!noBeamCenter)
+  {
+    if (isEmpty(m_center_x) || isEmpty(m_center_y))
+    {
+      if (reductionManager->existsProperty("LatestBeamCenterX") &&
+          reductionManager->existsProperty("LatestBeamCenterY"))
+      {
+        m_center_x = reductionManager->getProperty("LatestBeamCenterX");
+        m_center_y = reductionManager->getProperty("LatestBeamCenterY");
+      }
+    }
+    moveToBeamCenter();
+
+    // Add beam center to reduction properties, as the last beam center position that was used.
+    // This will give us our default position next time.
+    if (!reductionManager->existsProperty("LatestBeamCenterX"))
+      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", m_center_x) );
+    else reductionManager->setProperty("LatestBeamCenterX", m_center_x);
+    if (!reductionManager->existsProperty("LatestBeamCenterY"))
+      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", m_center_y) );
+    else reductionManager->setProperty("LatestBeamCenterY", m_center_y);
+  }
 
   // Modify TOF
   const bool correct_for_flight_path = getProperty("CorrectForFlightPath");

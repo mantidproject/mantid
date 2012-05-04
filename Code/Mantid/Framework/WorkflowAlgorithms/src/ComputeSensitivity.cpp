@@ -74,45 +74,9 @@ void ComputeSensitivity::exec()
   const std::string fileName = getPropertyValue("Filename");
 
   // Find beam center
-  double center_x = EMPTY_DBL();
-  double center_y = EMPTY_DBL();
-  if (reductionManager->existsProperty("LatestBeamCenterX") &&
-      reductionManager->existsProperty("LatestBeamCenterY"))
-  {
-    center_x = reductionManager->getProperty("LatestBeamCenterX");
-    center_y = reductionManager->getProperty("LatestBeamCenterY");
-    g_log.notice() << "No beam center provided: taking last position " << center_x << ", " << center_y << std::endl;
-  }
-
-  if (reductionManager->existsProperty("BeamCenterAlgorithm") &&
-      reductionManager->existsProperty("BeamCenterFile"))
-  {
-    progress(0.1, "Starting beam finder");
-    // Load direct beam file
-    const std::string beamCenterFile = reductionManager->getProperty("BeamCenterFile");
-    IAlgorithm_sptr loadAlg;
-    if (reductionManager->existsProperty("LoadAlgorithm"))
-    {
-      loadAlg = reductionManager->getProperty("LoadAlgorithm");
-      loadAlg->setChild(true);
-      loadAlg->setProperty("Filename", beamCenterFile);
-      loadAlg->execute();
-      MatrixWorkspace_sptr beamCenterWS = loadAlg->getProperty("OutputWorkspace");
-      const std::string outMsg = loadAlg->getPropertyValue("OutputMessage");
-      outputMessage += outMsg;
-
-      IAlgorithm_sptr centerAlg = reductionManager->getProperty("BeamCenterAlgorithm");
-      centerAlg->setChild(true);
-      centerAlg->setProperty("InputWorkspace", beamCenterWS);
-      centerAlg->execute();
-      std::vector<double> centerOfMass = centerAlg->getProperty("CenterOfMass");
-      EQSANSInstrument::getPixelFromCoordinate(centerOfMass[0], centerOfMass[1], beamCenterWS, center_x, center_y);
-    }
-  }
-  else if (isEmpty(center_x) || isEmpty(center_y))
-  {
-    g_log.notice() << "WARNING! No beam center information found!" << std::endl;
-  }
+  IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+  ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+  ctrAlg->execute();
 
   // Set patch information so that the SANS sensitivity algorithm can
   // patch the sensitivity workspace
@@ -132,8 +96,6 @@ void ComputeSensitivity::exec()
     IAlgorithm_sptr effAlg = reductionManager->getProperty("SensitivityAlgorithm");
     effAlg->setChild(true);
     effAlg->setProperty("Filename", fileName);
-    effAlg->setProperty("BeamCenterX", center_x);
-    effAlg->setProperty("BeamCenterY", center_y);
     effAlg->setPropertyValue("OutputSensitivityWorkspace", outputWS);
     effAlg->execute();
     MatrixWorkspace_sptr effWS = effAlg->getProperty("OutputSensitivityWorkspace");
