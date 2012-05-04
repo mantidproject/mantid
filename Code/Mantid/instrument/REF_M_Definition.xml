@@ -1,4 +1,6 @@
-<instrument name="REF_M" valid-from="2011-12-08 11:36:21.935542" valid-to="2100-01-31 23:59:59">
+<instrument name="REF_M" valid-from="1900-12-08 11:36:21.935542" 
+					     valid-to="2100-01-31 23:59:59"
+					     last-modified="2011-12-08 00:00:00">
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
