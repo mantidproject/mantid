@@ -5,6 +5,7 @@
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
 #include <MantidAPI/IEventWorkspace.h>
+#include <MantidAPI/IMaskWorkspace.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/IMDWorkspace.h>
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -700,6 +701,17 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
     data_item->setFlags(Qt::NoItemFlags);
     excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
+  }
+  else
+  {
+    if (workspace->id() == "MaskWorkspace")
+    {
+      IMaskWorkspace_sptr maskWS = boost::dynamic_pointer_cast<IMaskWorkspace>(workspace);
+      data_item = new MantidTreeWidgetItem(QStringList("Masked: " + QLocale(QLocale::English).toString(double(maskWS->getNumberMasked()), 'd', 0)), m_tree);
+      data_item->setFlags(Qt::NoItemFlags);
+      excludeItemFromSort(data_item);
+      ws_item->addChild(data_item);
+    }
   }
 
 

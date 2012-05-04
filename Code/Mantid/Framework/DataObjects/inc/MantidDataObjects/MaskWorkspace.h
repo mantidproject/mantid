@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_MASKWORKSPACE_H
 #define MANTID_DATAOBJECTS_MASKWORKSPACE_H
 
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -11,7 +12,7 @@ namespace Mantid
 namespace DataObjects
 {
 
-    class DLLExport MaskWorkspace : public SpecialWorkspace2D
+    class DLLExport MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace
     {
     public:
         MaskWorkspace();

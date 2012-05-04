@@ -154,6 +154,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h
+	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
