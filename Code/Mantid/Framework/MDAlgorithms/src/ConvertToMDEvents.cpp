@@ -229,7 +229,14 @@ void ConvertToMDEvents::exec()
         std::vector<double> ut = getProperty("UProj");
         std::vector<double> vt = getProperty("VProj");
         std::vector<double> wt = getProperty("WProj");
-        MsliceProj.getUVsettings(ut,vt,wt);
+        try
+        {
+            MsliceProj.getUVsettings(ut,vt,wt);
+        }
+        catch(std::invalid_argument)
+        {
+            g_log.error() << "The projections are coplanar. Will switch to default." << std::endl;
+        }
        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
 
         // set the min and max values for the dimensions from the input porperties

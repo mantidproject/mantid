@@ -39,6 +39,23 @@ void test_buildDimNames(){
     
 
 }
+
+void testCoplanarProjections()
+{
+    MDEvents::MDWSDescription TWS(4);
+    TWS.pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(5*M_PI,M_PI,2*M_PI, 90., 90., 90.));
+    TWS.emode=1;
+    TWS.convert_to_factor=HKLScale;
+    std::vector<double> u(3,0);
+    std::vector<double> v(3,0);
+    std::vector<double> w(3,0);
+    u[0]=1;
+    v[2]=1;
+    w[2]=-1;
+    MDWSTransfDescr MsliceTransf;
+    TS_ASSERT_THROWS_ANYTHING(MsliceTransf.getUVsettings(u,v,w));
+}
+
 void testTransfMat1()
 {
      MDEvents::MDWSDescription TWS(4);
@@ -82,35 +99,6 @@ void testTransfMat1()
       for(int i=0;i<9;i++){
           TSM_ASSERT_DELTA(" element: "+boost::lexical_cast<std::string>(i)+" wrong",rot[i],rot1[i],1.e-6);
       }
-
-
-
-//     Kernel::Matrix<double> U0=TWS.pLatt->setUFromVectors(u,v);
-//     std::vector<double> rot0=U0.getVector();
-//     //ws2D->mutableSample().setOrientedLattice(latt);
-//
-
-////     TWS.is_uv_default=true;
-//     TWS.emode=1;
-//
-//     // get transformation matrix from oriented lattice. 
-//    // std::vector<double> rot=pAlg->getTransfMatrix("TestWS",TWS);
-//  
-//     for(int i=0;i<9;i++){
-//        TS_ASSERT_DELTA(rot0[i],rot[i],1.e-6);
-//     }
-//     Kernel::Matrix<double> rez(rot);
-//     V3D ez = rez*u;
-//     ez.normalize();
-//     V3D ex = rez*v;
-//     ex.normalize();
-//     TS_ASSERT_EQUALS(V3D(0,0,1),ez);
-//     TS_ASSERT_EQUALS(V3D(1,0,0),ex);
-//
-//     // to allow recalculate axis names specific for Q3D mode
-//     TWS.AlgID="WSEventQ3DPowdDirectCnvFromTOF";
-// 
-//
 }
 
 

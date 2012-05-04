@@ -223,24 +223,33 @@ void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::ve
         }
     }
     if(u_default){
-        uProj[0] = 1;         uProj[1] = 0;        uProj[2] = 0;
+        uProj = Kernel::V3D(1.,0.,0.);
     }else{
-        uProj[0] = ut[0];     uProj[1] = ut[1];    uProj[2] = ut[2];
+        uProj = Kernel::V3D(ut[0], ut[1], ut[2]);
     }
     if(v_default){
-        vProj[0] = 0;         vProj[1] = 1;        vProj[2] = 0;
+        vProj = Kernel::V3D(0.,1.,0.);
     }else{
-        vProj[0] = vt[0];     vProj[1] = vt[1];    vProj[2] = vt[2];
+        vProj = Kernel::V3D(vt[0], vt[1], vt[2]);
     }
     if(w_default){
-        wProj[0] = 0;         wProj[1] = 0;        wProj[2] = 1;
+        wProj = Kernel::V3D(0.,0.,1.);
     }else{
-        wProj[0] = wt[0];     wProj[1] = wt[1];    wProj[2] = wt[2];
+        wProj = Kernel::V3D(wt[0], wt[1], wt[2]);
     }
     if(u_default&&v_default&&v_default){
         is_uv_default=true;
     }else{
         is_uv_default=false;
+    }
+    //check if u, v, w are coplanar
+    if (fabs((uProj.cross_prod(vProj)).scalar_prod(wProj))<Kernel::Tolerance)
+    {
+        uProj = Kernel::V3D(1.,0.,0.);
+        vProj = Kernel::V3D(0.,1.,0.);
+        wProj = Kernel::V3D(0.,0.,1.);
+        is_uv_default=true;
+        throw std::invalid_argument("Projections are coplanar");
     }
 }
 //
