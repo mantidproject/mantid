@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_sf_calculator.ui'
 #
-# Created: Tue May  1 06:59:39 2012
+# Created: Fri May  4 12:30:45 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -269,12 +269,12 @@ class Ui_Frame(object):
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setSpacing(0)
         self.horizontalLayout_8.setObjectName("horizontalLayout_8")
-        self.data_background_switch = QtGui.QCheckBox(self.groupBox)
-        self.data_background_switch.setMinimumSize(QtCore.QSize(160, 0))
-        self.data_background_switch.setMaximumSize(QtCore.QSize(160, 16777215))
-        self.data_background_switch.setChecked(True)
-        self.data_background_switch.setObjectName("data_background_switch")
-        self.horizontalLayout_8.addWidget(self.data_background_switch)
+        self.label_14 = QtGui.QLabel(self.groupBox)
+        self.label_14.setMinimumSize(QtCore.QSize(150, 0))
+        self.label_14.setMaximumSize(QtCore.QSize(150, 16777215))
+        self.label_14.setIndent(0)
+        self.label_14.setObjectName("label_14")
+        self.horizontalLayout_8.addWidget(self.label_14)
         self.data_background_from_pixel_label = QtGui.QLabel(self.groupBox)
         self.data_background_from_pixel_label.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
@@ -546,7 +546,7 @@ class Ui_Frame(object):
         self.data_peak_to_pixel.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_count_vs_y_btn.setToolTip(QtGui.QApplication.translate("Frame", "Plot detector counts versus Y pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_count_vs_y_btn.setText(QtGui.QApplication.translate("Frame", "Counts vs Pixel...", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_background_switch.setText(QtGui.QApplication.translate("Frame", "Background                    ", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_14.setText(QtGui.QApplication.translate("Frame", "Background selection", None, QtGui.QApplication.UnicodeUTF8))
         self.data_background_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "from pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.data_background_from_pixel.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.data_background_to_pixel_label.setText(QtGui.QApplication.translate("Frame", "      to pixel  ", None, QtGui.QApplication.UnicodeUTF8))

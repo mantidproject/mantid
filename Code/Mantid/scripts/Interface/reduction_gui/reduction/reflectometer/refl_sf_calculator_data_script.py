@@ -11,12 +11,11 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class DataSets(BaseScriptElement):
 
     data_file = 0
-    incident_medium_list = ['H20','Small Circular SA holder','Large Circular SA holder']
+    incident_medium_list = ['H20']
     incident_medium_index_selected = 0
     number_attenuator = 0
     peak_selection = [0,0]
     back_selection = [0,0]
-    back_flag = True
     lambda_requested = 'N/A'
     s1h = 'N/A'
     s2h = 'N/A'
@@ -35,31 +34,15 @@ class DataSets(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        
-        
-        
-        
-        
-        
-        
         script = 'Run number: %s \n' % str(self.data_file)
-        script += 'TOF range: \n'
-        script += '   from tof: %s ' % str(self.tof_min)
-        script += ' to tof: %s \n' % str(self.tof_max)
+        script += 'Incident medium: %s \n' % str(self.incident_medium_list[self.incident_medium_index_selected])
+        script += 'TOF from: %s \n' % str(self.tof_min)
+        script += 'TOF to: %s \n' % str(self.tof_max)
         script += 'Number of attenuator: %s \n' % str(self.number_attenuator)
-        script += 'Peak selection \n'
-        script += '   from pixel: %s ' % str(self.peak_selection[0])
-        script += ' to pixel: %s \n' % str(self.peak_selection[1])
-        script += 'Back flag: %s \n' % str(self.back_flag)
-        script += 'Back selection \n'
-        script += '   from pixel: %s ' % str(self.back_selection[0])
-        script += ' to pixel: %s \n' % str(self.back_selection[1])
-#        script += 'Lammbda requested: %s \n' % str(self.lambda_requested)
-#        script += 's1h: %s' %str(self.s1h)
-#        script += ' s2h: %s' %str(self.s2h)
-#        script += ' s1w: %s' %str(self.s1w)
-#        script += ' s2w:%s' %str(self.s2w)
-        script += "\n"
+        script += 'Peak from pixel: %s \n' % str(self.peak_selection[0])
+        script += 'Peak to pixel: %s \n' % str(self.peak_selection[1])
+        script += 'Back from pixel: %s \n' % str(self.back_selection[0])
+        script += 'Back to pixel: %s \n' % str(self.back_selection[1])
 
         return script
 
@@ -77,20 +60,19 @@ class DataSets(BaseScriptElement):
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
         xml += "<tof_min>%s</tof_min>\n" % str(self.tof_min)
         xml += "<tof_max>%s</tof_max>\n" % str(self.tof_max)
-        xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>" % str(self.incident_medium_index_selected)
-        xml += "<data_file>%s</data_file>" % str(self.data_file)
-        xml += "<number_attenuator>%s</number_attenuator>" % str(self.number_attenuator)
-        xml += "<peak_selection_from_pixel>%s</peak_selection_from_pixel>" % str(self.peak_selection[0])
-        xml += "<peak_selection_to_pixel>%s</peak_selection_to_pixel>" % str(self.peak_selection[1])
-        xml += "<background_flag>%s</background_flag>" % str(self.back_flag)
-        xml += "<back_selection_from_pixel>%s</back_selection_from_pixel>" % str(self.back_selection[0])
-        xml += "<back_selection_to_pixel>%s</back_selection_to_pixel>" % str(self.back_selection[1])
-        xml += "<lambda_requested>%s</lambda_requested>" % str(self.lambda_requested)
-        xml += "<s1h>%s</s1h>" % str(self.s1h)
-        xml += "<s2h>%s</s2h>" % str(self.s2h)
-        xml += "<s1w>%s</s1w>" % str(self.s1w)
-        xml += "<s2w>%s</s2w>" % str(self.s2w)
-        xml += "<scaling_factor_file>%s</scaling_factor_file>" % str(self.scaling_factor_file)
+        xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
+        xml += "<data_file>%s</data_file>\n" % str(self.data_file)
+        xml += "<number_attenuator>%s</number_attenuator>\n" % str(self.number_attenuator)
+        xml += "<peak_selection_from_pixel>%s</peak_selection_from_pixel>\n" % str(self.peak_selection[0])
+        xml += "<peak_selection_to_pixel>%s</peak_selection_to_pixel>\n" % str(self.peak_selection[1])
+        xml += "<back_selection_from_pixel>%s</back_selection_from_pixel>\n" % str(self.back_selection[0])
+        xml += "<back_selection_to_pixel>%s</back_selection_to_pixel>\n" % str(self.back_selection[1])
+        xml += "<lambda_requested>%s</lambda_requested>\n" % str(self.lambda_requested)
+        xml += "<s1h>%s</s1h>\n" % str(self.s1h)
+        xml += "<s2h>%s</s2h>\n" % str(self.s2h)
+        xml += "<s1w>%s</s1w>\n" % str(self.s1w)
+        xml += "<s2w>%s</s2w>\n" % str(self.s2w)
+        xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "</RefLSFCalculator>\n"
         return xml
 
@@ -125,18 +107,17 @@ class DataSets(BaseScriptElement):
                                BaseScriptElement.getIntElement(instrument_dom, "peak_selection_to_pixel")]
         
         #background flag and selection from and to
-        self.back_flag = BaseScriptElement.getStringElement(instrument_dom, "background_flag")
         self.back_selection = [BaseScriptElement.getIntElement(instrument_dom, "back_selection_from_pixel"),
                                BaseScriptElement.getIntElement(instrument_dom, "back_selection_to_pixel")]
         
         #lambda requested
-        self.lambda_requested = BaseScriptElement.getFloatElement(instrument_dom, "lambda_requested")
+        self.lambda_requested = BaseScriptElement.getStringElement(instrument_dom, "lambda_requested")
         
         #s1h, s2h, s1w, s2w
-        self.s1h = BaseScriptElement.getFloatElement(instrument_dom, "s1h")
-        self.s2h = BaseScriptElement.getFloatElement(instrument_dom, "s1w")
-        self.s1w = BaseScriptElement.getFloatElement(instrument_dom, "s2h")
-        self.s2w = BaseScriptElement.getFloatElement(instrument_dom, "s2w")
+        self.s1h = BaseScriptElement.getStringElement(instrument_dom, "s1h")
+        self.s2h = BaseScriptElement.getStringElement(instrument_dom, "s1w")
+        self.s1w = BaseScriptElement.getStringElement(instrument_dom, "s2h")
+        self.s2w = BaseScriptElement.getStringElement(instrument_dom, "s2w")
         
         #scaling factor file
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
@@ -151,7 +132,6 @@ class DataSets(BaseScriptElement):
         self.number_attenuator = DataSets.number_attenuator
         self.peak_selection = DataSets.peak_selection
         self.back_selection = DataSets.back_selection
-        self.back_flag = DataSets.back_flag
         self.lambda_requested = DataSets.lambda_requested
         self.s1h = DataSets.s1h
         self.s2h = DataSets.s2h

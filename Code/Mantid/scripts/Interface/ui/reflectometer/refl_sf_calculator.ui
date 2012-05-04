@@ -778,24 +778,24 @@ p, li { white-space: pre-wrap; }
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QCheckBox" name="data_background_switch">
+                     <widget class="QLabel" name="label_14">
                       <property name="minimumSize">
                        <size>
-                        <width>160</width>
+                        <width>150</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>160</width>
+                        <width>150</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
-                       <string>Background                    </string>
+                       <string>Background selection</string>
                       </property>
-                      <property name="checked">
-                       <bool>true</bool>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>

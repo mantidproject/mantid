@@ -22,6 +22,94 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
     def __init__(self, name="REFL"):
         super(REFLSFCalculatorScripter, self).__init__(name=name)        
     
+    def create_script(self, script_part2):
+        """
+        This creates the special script for the sfCalculator algorithm
+        """
+        algo = 'sfCalculator.calculate'
+        
+        script_split = script_part2.split('\n')
+        new_script = ''
+        
+        run_number = []
+        attenuator = []
+        
+        peak_from = []
+        peak_to = []
+        back_from = []
+        back_to = []
+        
+        tof_range = ['','']
+        incident_medium = ''
+        
+        for _line in script_split:
+            if _line != '':
+                _line_split = _line.split(':')
+                _arg = _line_split[0]
+                _val = _line_split[1]
+                
+                if _arg == 'Run number':
+                    run_number.append(_val)
+                    continue
+                
+                if _arg == 'TOF from':
+                    if tof_range[0] != '':
+                        tof_range[0] = _val
+                    continue
+                
+                if _arg == 'TOF to':
+                    if tof_range[1] != '':
+                        tof_range[1] = _val
+                    continue
+                        
+                if _arg == 'Incident medium':
+                    if incident_medium != '':
+                        incident_medium = _val
+                    continue
+                    
+                if _arg == 'Number of attenuator':
+                    attenuator.append(_val)
+                    continue
+                
+                if _arg == 'Peak from pixel':
+                    peak_from.append(_val)
+                    continue
+                
+                if _arg == 'Peak to pixel':
+                    peak_from.append(_val)
+                    continue
+                
+                if _arg == 'Back from pixel':
+                    peak_from.append(_val)
+                    continue
+                
+                if _arg == 'Back to pixel':
+                    peak_from.append(_val)
+                    continue
+            
+        run_attenuator = []    
+        for (run,att) in zip(run_number, attenuator):
+            run_attenuator.append(run + ':' + attenuator)
+            
+        list_peak_back = []
+        for (_peak_from, _peak_to, _back_from, _back_to) in zip(peak_from, peak_to, back_from, back_to):
+            list_peak_back.append([_peak_from,_peak_to,_back_from,_back_to])
+            
+        
+        
+            
+            
+                
+
+
+
+        
+    
+    
+    
+    
+        return new_script
+    
     def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
@@ -36,11 +124,14 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         script += "from mantidsimple import *\n\n"
                 
         script += "REF_RED_OUTPUT_MESSAGE = ''\n\n"
-        
+
+        script_part2 = ''
         for item in self._observers:
             if item.state() is not None:
-                script += str(item.state())
-                
+                script_part2 += str(item.state())
+
+        script += self.create_script(script_part2)
+
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(script)
@@ -54,8 +145,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         """        
         if HAS_MANTID:
             script = self.to_script(None)
-
-            print script
 
             try:
                 t0 = time.time()

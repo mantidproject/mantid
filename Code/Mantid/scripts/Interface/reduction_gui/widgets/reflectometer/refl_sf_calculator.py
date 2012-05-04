@@ -81,7 +81,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #Event connections
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"), self.data_run_number_validated)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
-        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
@@ -104,9 +103,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_to_pixel)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
-        #background flag and from/to textEdit changed
-        call_back = partial(self._edit_event, ctrl=self._summary.data_background_switch)
-        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked()"), call_back)
+
+        #data background
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel)
         self.connect(self._summary.data_background_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_to_pixel)
@@ -283,17 +281,17 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         
         self._reset_warnings()
     
-    def _data_background_clicked(self, is_checked):
-        """
-            This is reached when the user clicks the Background switch and will enabled or not
-            the widgets that follow that button
-        """
-        self._summary.data_background_from_pixel.setEnabled(is_checked)
-        self._summary.data_background_from_pixel_label.setEnabled(is_checked)
-        self._summary.data_background_to_pixel.setEnabled(is_checked)
-        self._summary.data_background_to_pixel_label.setEnabled(is_checked)
-        self._summary.plot_count_vs_y_bck_btn.setEnabled(is_checked)
-        self._edit_event(None, self._summary.data_background_switch)
+#    def _data_background_clicked(self, is_checked):
+#        """
+#            This is reached when the user clicks the Background switch and will enabled or not
+#            the widgets that follow that button
+#        """
+#        self._summary.data_background_from_pixel.setEnabled(is_checked)
+#        self._summary.data_background_from_pixel_label.setEnabled(is_checked)
+#        self._summary.data_background_to_pixel.setEnabled(is_checked)
+#        self._summary.data_background_to_pixel_label.setEnabled(is_checked)
+#        self._summary.plot_count_vs_y_bck_btn.setEnabled(is_checked)
+#        self._edit_event(None, self._summary.data_background_switch)
     
     def _reset_warnings(self):
         self._summary.edited_warning_label.hide()
@@ -304,7 +302,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         util.set_edited(self._summary.number_of_attenuator, False)
         util.set_edited(self._summary.data_peak_from_pixel, False)
         util.set_edited(self._summary.data_peak_to_pixel, False)
-        util.set_edited(self._summary.data_background_switch, False)
         util.set_edited(self._summary.data_background_from_pixel, False)
         util.set_edited(self._summary.data_background_to_pixel, False)
     
@@ -359,8 +356,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.data_peak_to_pixel.setText(str(state.peak_selection[1]))
         self._summary.data_background_from_pixel.setText(str(state.back_selection[0]))
         self._summary.data_background_to_pixel.setText(str(state.back_selection[1]))
-        self._summary.data_background_switch.setChecked(bool(state.back_flag))
         self._summary.lambda_request.setText(str(state.lambda_requested))
+        
         self._summary.s1h.setText(str(state.s1h))
         self._summary.s2h.setText(str(state.s2h))
         self._summary.s1w.setText(str(state.s1w))
@@ -413,10 +410,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #peak selection
         m.peak_selection = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
-        
-        #background flag
-        m.back_flag = self._summary.data_background_switch.isChecked()
-
         
         #background
         m.back_selection = [int(self._summary.data_background_from_pixel.text()),
