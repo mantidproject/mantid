@@ -88,7 +88,8 @@ ConvertToMDEvents::init()
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
                   "Name of the output MDEventWorkspace");
      declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
-              "Unselect this if you want to add new events to the workspace, which already exist. Can be very inefficient for file-based workspaces.");
+              "By default, existing Output Workspace will be replaced. Select false if you want to add new events to the workspace, which already exist.\n"
+              " Can be very inefficient for file-based workspaces");
 
      ConvertToMD::Strings Q_modes = ParamParser.getQModes();
      /// this variable describes default possible ID-s for Q-dimensions   
@@ -98,12 +99,16 @@ ConvertToMDEvents::init()
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
-     // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
+
      ConvertToMD::Strings QScales = TWSD.getQScalings();
      declareProperty("QConversionScales",QScales[MDEvents::NoScaling], boost::make_shared<StringListValidator>(QScales),
-         " This property to normalize three momentums obtained in Q3D mode correspondingly (by sinlge lattice vector,"
-         " lattice vectors 2pi/a,2pi/b and 2pi/c or by nothing)\n"
-         " currently ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
+        "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
+        "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
+        "  Q in lattice units -- single scale, where all momentums are divided by the minimal reciprocal lattice vector 2*Pi/Max(a_latt)\n"
+        "                        where a_lat is the maximal lattice parameter\n"
+        "  Orthogonal HKL     -- three Q components are divided by 2pi/a,2pi/b and 2pi/c lattice vectors.\n"
+        "  HKL                 -- converted to HKL (multiplied by B-matrix which is equivalent to Orthogonal HKL for rectilinear lattices.\n" 
+        "This parameter is currently ignored in ""mod|Q|"" and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace.");
      /// this variable describes implemented modes for energy transfer analysis
      ConvertToMD::Strings dE_modes = ParamParser.getDEModes();
      declareProperty("dEAnalysisMode",dE_modes[ConvertToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
@@ -126,10 +131,11 @@ ConvertToMDEvents::init()
 
     declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is defined as: \n"
-        "a) 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
-        "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  Q3D or \n"
-        "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
-        " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
+        "a) 1+delta(dE)+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
+        "b) 3+delta(dE)+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  Q3D or \n\n"
+        "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"     
+         " where delta(dE)==1 in direct and indirect modes and 0 otherwise\n"
+         " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
          " This property contains minimal values for all dimensions.\n"
          " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
          " In case b), the target dimensions for Q3D are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
