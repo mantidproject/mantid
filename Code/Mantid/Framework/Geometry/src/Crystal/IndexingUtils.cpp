@@ -3065,7 +3065,7 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
   }
                                 // if no valid UBs could be formed, return
                                 // false and the original UB
-  if ( UB_list.size() <= 0 )
+  if ( UB_list.empty() )
   {
     newUB = UB;
     return false;

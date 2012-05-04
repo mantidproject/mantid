@@ -396,7 +396,7 @@ void Indirect::setInstSpecificWidget(const std::string & parameterName, QCheckBo
   std::vector<std::string> showParams = instr->getStringParameter(parameterName);
   
   std::string show = "";
-  if(showParams.size() > 0)
+  if(!showParams.empty())
     show = showParams[0];
   
   if(show == "Show")

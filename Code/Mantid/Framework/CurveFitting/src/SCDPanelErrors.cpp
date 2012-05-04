@@ -254,7 +254,7 @@ namespace Mantid
    {
 
        vector<V3D> posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (posv.size() > 0)
+       if (!posv.empty())
        {
         V3D pos = posv[0];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -271,9 +271,9 @@ namespace Mantid
 
        vector<double> scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
        vector<double> scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( scalex.size() > 0)
+       if( !scalex.empty() )
           pmap->addDouble(bank_const.get(),"scalex", scalex[0]);
-       if( scaley.size() > 0)
+       if( !scaley.empty())
           pmap->addDouble(bank_const.get(),"scaley", scaley[0]);
 
        boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
@@ -286,7 +286,7 @@ namespace Mantid
        boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const
     {
       vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-      if (posv.size() > 0)
+      if (!posv.empty())
       {
         V3D pos = posv[0];
         pmap->addDouble(bank_const.get(), "x", pos.X());

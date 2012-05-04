@@ -446,7 +446,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   }
 
   std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
-  bool bUseSignedVersion = parameters.size() > 0 && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+  bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
   function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
 
   // Loop over the histograms (detector spectra)

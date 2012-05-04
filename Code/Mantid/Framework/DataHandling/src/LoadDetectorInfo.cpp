@@ -571,7 +571,7 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
   {
     // check if we dealing with a monitor as these are dealt by a different function
     const std::set<detid_t> & dets = m_workspace->getSpectrum(size_t(specInd))->getDetectorIDs();
-    if ( dets.size() > 0 ) 
+    if ( !dets.empty() )
     {// is it in the monitors list
       if ( m_monitors.find(*dets.begin()) == m_monitors.end() )
       {// it's not a monitor, it's a regular detector 
@@ -661,7 +661,7 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
     // check if we dealing with a monitor as these are dealt by a different function
     const std::set<detid_t> & dets = m_workspace->getSpectrum(specIndex)->getDetectorIDs();
 
-    if ( dets.size() > 0 )
+    if ( !dets.empty() )
     {// is it in the monitors list
       if ( m_monitors.find(*dets.begin()) == m_monitors.end() )
       {// it's not a monitor, it's a regular detector
@@ -717,7 +717,7 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
     // check if we dealing with a monitor as these are dealt by a different function
     const std::set<detid_t> & dets = m_workspace->getSpectrum(specIndex)->getDetectorIDs();
 
-    if ( dets.size() > 0 ) 
+    if ( !dets.empty() )
     {// is it in the monitors list
       if ( m_monitors.find(*dets.begin()) == m_monitors.end() )
       {// it's not a monitor, it's a regular detector

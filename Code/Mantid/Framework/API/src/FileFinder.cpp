@@ -394,7 +394,7 @@ namespace Mantid
       if (!hintPath.getExtension().empty())
       {
         g_log.debug() << "hintPath is not empty, try archive search" << "\n";
-        if (archs.size() != 0 )
+        if (!archs.empty())
         {
           std::string path = getArchivePath(archs, hint);
           if (!path.empty())

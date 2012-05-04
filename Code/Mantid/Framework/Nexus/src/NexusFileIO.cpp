@@ -726,7 +726,7 @@ using namespace DataObjects;
     detid_t * detectorIDs = VectorHelper::iteratorToArray<detid_t>(dets.begin(), dets.end(), dims_array);
 
     // Write out the detector IDs
-    if (dets.size() > 0)
+    if (!dets.empty())
     {
       NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), false );
       delete [] detectorIDs;

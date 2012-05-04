@@ -589,7 +589,7 @@ namespace API
     std::vector<detid_t> detmonIDs;
     detectorIDs = instrument->getDetectorIDs( true );
     detmonIDs = instrument->getDetectorIDs( false );
-    if( detmonIDs.size() > 0 )
+    if( !detmonIDs.empty() )
     {
       // Add detectors group
       file->makeGroup("physical_detectors","NXdetector", true);

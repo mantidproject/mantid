@@ -226,7 +226,7 @@ namespace MDAlgorithms
       if (det->ypixels() > m_numYPixels) m_numYPixels = det->ypixels();
     }
 
-    if (banks.size() == 0)
+    if (banks.empty())
       throw std::runtime_error("No RectangularDetectors with a name like 'bankXX' found in the instrument.");
 
     return banks;

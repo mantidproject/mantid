@@ -233,7 +233,7 @@ namespace Crystal
         int bank = bankMap_it->first;
         std::vector<size_t> & ids = bankMap_it->second;
 
-        if (ids.size() > 0)
+        if (!ids.empty())
         {
           // Write the bank header
           out << "0  NRUN DETNUM    CHI      PHI    OMEGA   MONCNT" << std::endl;

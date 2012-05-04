@@ -136,7 +136,7 @@ void SequentialFitDialog::addFile()
   const std::vector<std::string>& searchDirs =
     Mantid::Kernel::ConfigService::Instance().getDataSearchDirs();
   QString dir;
-  if ( searchDirs.size() == 0 )
+  if ( searchDirs.empty() )
   {
     dir = "";
   }

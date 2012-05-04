@@ -113,7 +113,7 @@ namespace DataHandling
     std::vector<detid_t> idx0sts;  // starting point of the pair
     std::vector<detid_t> idx0eds;  // ending point of pair
 
-    if (detid0s.size() > 0)
+    if (!detid0s.empty())
     {
       std::sort(detid0s.begin(), detid0s.end());
 

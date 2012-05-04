@@ -309,7 +309,7 @@ namespace MDEvents
     { throw std::invalid_argument("Error parsing the Translation parameter: " + std::string(e.what()) ); }
 
     // Default to 0,0,0 when not specified
-    if (translVector.size() == 0)
+    if (translVector.empty())
       translVector.resize(m_inWS->getNumDims(), 0);
     m_translation = VMD(translVector);
 

@@ -219,7 +219,7 @@ void EventWSDataSource::GetInfoList( double x,
   IVUtils::PushNameValue( x_label, 8, 3, x, list );
 
   std::set<detid_t> ids = spec->getDetectorIDs();
-  if ( ids.size() > 0 )
+  if ( !ids.empty() )
   {
     std::set<detid_t>::iterator it = ids.begin();
     double d_id = (double)*it;

@@ -94,7 +94,7 @@ namespace Crystal
    {
 
        vector< V3D > posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (posv.size() > 0)
+       if (!posv.empty())
        {
         V3D pos = posv[ 0 ];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -114,12 +114,12 @@ namespace Crystal
 
        vector< double > scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
        vector< double > scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( scalex.size() > 0)
+       if( !scalex.empty())
           {
          pmap->addDouble(bank_const.get(),"scalex", scalex[ 0 ]);
 
           }
-       if( scaley.size() > 0)
+       if( !scaley.empty())
        {
          pmap->addDouble(bank_const.get(),"scaley", scaley[ 0 ]);
 
@@ -138,7 +138,7 @@ namespace Crystal
     {
       vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
       //cout<<"Source Name="<< bank_const->getName()<<endl;
-      if (posv.size() > 0)
+      if (!posv.empty())
       {
         V3D pos = posv[ 0 ];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -173,7 +173,7 @@ namespace Crystal
        string name = (*setIt);
        vector< V3D > posParams = component->getPositionParameter(name , false);
 
-       if( posParams.size() > 0)
+       if( !posParams.empty())
        {
          N++;
          pmap->addV3D( component.get(), name, posParams[ 0 ]);
@@ -181,7 +181,7 @@ namespace Crystal
 
        vector<Quat> rotParams = component->getRotationParameter(name , false);
 
-       if( rotParams.size() > 0)
+       if( !rotParams.empty())
        {
          N++;
          pmap->addQuat( component.get(), name, rotParams[ 0 ]);
@@ -189,7 +189,7 @@ namespace Crystal
 
        vector< string > strParams = component->getStringParameter(name,false);
 
-       if( strParams.size() > 0)
+       if( !strParams.empty())
        {
          N++;
          pmap->addString( component.get(), name, strParams[ 0 ]);
@@ -430,7 +430,7 @@ namespace Crystal
                 }
             }
           }
-          if( Group0.size() > 0 )
+          if( !Group0.empty())
             Groups.push_back( Group0 );
 
         }
@@ -554,12 +554,12 @@ namespace Crystal
     V3D posI,
         posPre;
 
-    if(RelPosI.size()>0)
+    if(!RelPosI.empty())
       posI = RelPosI[ 0 ];
     else
       posI = bank_rect->getRelativePos();
 
-    if(RelPosPre.size()>0)
+    if(!RelPosPre.empty()>0)
       posPre = RelPosPre[ 0 ];
     else
       posPre = newBank->getRelativePos();
@@ -580,16 +580,16 @@ namespace Crystal
     vector< double > ScaleyI = pmap->getDouble( bankName, "scaley");
     vector< double > ScaleyPre = pmapPre->getDouble( bankName, "scaley");
 
-    if( ScalexI.size()>0)
+    if( !ScalexI.empty())
       scalexI = ScalexI[ 0 ];
 
-    if( ScaleyI.size()>0)
+    if( !ScaleyI.empty())
       scaleyI = ScaleyI[ 0 ];
 
-    if(ScalexPre.size()>0)
+    if(!ScalexPre.empty())
       scalexPre = ScalexPre[ 0 ];
 
-    if( ScaleyPre.size()>0)
+    if( !ScaleyPre.empty())
       scaleyPre = ScaleyPre[ 0 ];
 
     //scaling
@@ -1101,12 +1101,12 @@ namespace Crystal
        vector< double >oldScaley = pmap->getDouble( bank->getName(),string( "scaley" ));
 
        double scalex,scaley;
-       if( oldScalex.size() > 0 )
+       if( !oldScalex.empty() )
          scalex = oldScalex[ 0 ] + result[ prefix+"detWidthScale" ];
        else
          scalex = result[ prefix + "detWidthScale" ];
 
-       if( oldScaley.size() > 0 )
+       if( !oldScaley.empty() > 0 )
          scaley = oldScaley[ 0 ] + result[ prefix + "detHeightScale" ];
        else
          scaley = result[ prefix + "detHeightScale" ];

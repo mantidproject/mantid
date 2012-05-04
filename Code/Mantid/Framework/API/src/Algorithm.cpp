@@ -1047,7 +1047,7 @@ namespace Mantid
       {
         std::vector<Workspace_sptr> & thisGroup = m_groups[i];
         // We're ok with empty groups if the workspace property is optional
-        if (thisGroup.size() == 0 && !m_inputWorkspaceProps[i]->isOptional())
+        if (thisGroup.empty() && !m_inputWorkspaceProps[i]->isOptional())
           throw std::invalid_argument("Empty group passed as input");
         if (thisGroup.size() >= 1)
         {
@@ -1128,7 +1128,7 @@ namespace Mantid
         for (size_t iwp=0; iwp<m_groups.size(); iwp++)
         {
           std::vector<Workspace_sptr> & thisGroup = m_groups[iwp];
-          if (thisGroup.size() > 0)
+          if (!thisGroup.empty())
           {
             // By default (for a single group) point to the first/only workspace
             Workspace_sptr ws = thisGroup[0];

@@ -411,7 +411,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
     if (path.size()==0 || !Poco::File(path).exists())
     {
       std::vector<std::string> paths = FileFinder::Instance().findRuns(instrument+dataRun);
-      if (paths.size()>0) path = paths[0];
+      if (!paths.empty()) path = paths[0];
     }
 
     if (Poco::File(path).exists()) {
