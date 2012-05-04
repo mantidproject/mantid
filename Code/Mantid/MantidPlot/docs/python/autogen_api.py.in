@@ -106,9 +106,12 @@ def generate_api_doc(module, indexfilename):
         @param indexfilename - A file that will contain an index list of the given files
     """
     
-    indexfile = open(indexfilename, 'w')
-    indexfile.write(".. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n")
-    indexfile.write(".. toctree::\n\n")
+    if os.path.exists(indexfilename):
+        indexfile = open(indexfilename, 'a')
+    else:
+        indexfile = open(indexfilename, 'w')
+        indexfile.write(".. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n")
+        indexfile.write(".. toctree::\n\n")
 
     print "Generating %s API docs" % module.__name__
     for name, member in inspect.getmembers(module):
@@ -133,7 +136,13 @@ if __name__ == '__main__':
 
     import mantid
     indexfilename = os.path.join(apidir, 'automantid.txt')
+    if os.path.exists(indexfilename):
+        os.remove(indexfilename)
     generate_api_doc(mantid, indexfilename)
+    generate_api_doc(mantid.kernel, indexfilename)
+    generate_api_doc(mantid.geometry, indexfilename)
+    generate_api_doc(mantid.api, indexfilename)
+
     try:
         import mantidplot
         indexfilename = os.path.join(apidir, 'automantidplot.txt')
