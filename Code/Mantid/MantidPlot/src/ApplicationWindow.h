@@ -1183,6 +1183,9 @@ private:
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 
+  /// Open up the SetupParaview dialog
+  void showSetupParaview();
+
   /// Run the peakPickerTool for the new plot and delete it for the old plot if there was one.
   void runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot);
 
@@ -1449,7 +1452,7 @@ private:
   QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
-  QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup;
+  QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup, *actionSetupParaview;
   QAction *actionGreekMajSymbol, *actionMathSymbol;
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;

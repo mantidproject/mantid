@@ -58,8 +58,8 @@ namespace MantidQt
       m_SANSForm->tcmask4->setDisabled(true);
       m_SANSForm->pmask2->setDisabled(true);
 
-      connect(this, SIGNAL(runAsPythonScript(const QString&)),
-        parForm, SIGNAL(runAsPythonScript(const QString&)));
+      connect(this, SIGNAL(runAsPythonScript(const QString&,bool)),
+        parForm, SIGNAL(runAsPythonScript(const QString&,bool)));
 
       ///connect file finder plugin signal to loadfirstspectrum slot of this class
       connect(m_SANSForm->file_run_edit,SIGNAL(fileEditingFinished()),this,SLOT(loadFirstSpectrum()));

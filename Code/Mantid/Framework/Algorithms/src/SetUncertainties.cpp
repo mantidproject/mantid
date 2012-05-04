@@ -88,7 +88,7 @@ void SetUncertainties::exec()
       std::size_t numE = E.size();
       for (std::size_t j = 0; j < numE; j++)
       {
-        E[j] = sqrt(Y[j]);
+        E[j] = sqrt(fabs(Y[j]));
       }
     }
 

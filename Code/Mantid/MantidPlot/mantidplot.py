@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 import mantidplotpy.proxies as proxies
-from mantidplotpy.proxies import threadsafe_call
+from mantidplotpy.proxies import threadsafe_call, new_proxy
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
@@ -46,7 +46,9 @@ def runPythonScript(code, async = False, quiet = False, redirect = True):
         @param quiet :: If true no messages reporting status are issued
         @param redirect :: If true then output is redirected to MantidPlot
     """
-    _qti.app.runPythonScript(code, async, quiet, redirect)
+    if async and QtCore.QThread.currentThread() != QtGui.qApp.thread():
+        async = False
+    threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
 def workspace(name):
@@ -66,7 +68,7 @@ def table(name):
     Returns:
         A handle to the table.
     """
-    return proxies.MDIWindow(threadsafe_call(_qti.app.table,name))
+    return new_proxy(proxies.MDIWindow, _qti.app.table, name)
 
 def newTable(name=None,rows=30,columns=2):
     """Create a table.
@@ -80,9 +82,9 @@ def newTable(name=None,rows=30,columns=2):
         A handle to the created table.
     """
     if name is None:
-        return proxies.MDIWindow(threadsafe_call(_qti.app.newTable))
+        return new_proxy(proxies.MDIWindow, _qti.app.newTable)
     else:
-        return proxies.MDIWindow(threadsafe_call(_qti.app.newTable,name,rows,columns))
+        return new_proxy(proxies.MDIWindow, _qti.app.newTable, name,rows,columns)
 
 def matrix(name):
     """Get a handle on a matrix.
@@ -93,7 +95,7 @@ def matrix(name):
     Returns:
         A handle to the matrix.
     """
-    return proxies.MDIWindow(threadsafe_call(_qti.app.matrix,name))
+    return new_proxy(proxies.MDIWindow, _qti.app.matrix, name)
 
 def newMatrix(name=None,rows=32,columns=32):
     """Create a matrix (N.B. This is not the same as a 'MantidMatrix').
@@ -107,9 +109,9 @@ def newMatrix(name=None,rows=32,columns=32):
         A handle to the created matrix.
     """
     if name is None:
-        return proxies.MDIWindow(threadsafe_call(_qti.app.newMatrix))
+        return new_proxy(proxies.MDIWindow, _qti.app.newMatrix)
     else:
-        return proxies.MDIWindow(threadsafe_call(_qti.app.newMatrix, name,rows,columns))
+        return new_proxy(proxies.MDIWindow, _qti.app.newMatrix,name,rows,columns)
 
 def graph(name):
     """Get a handle on a graph widget.
@@ -120,7 +122,7 @@ def graph(name):
     Returns:
         A handle to the graph.
     """
-    return proxies.Graph(threadsafe_call(_qti.app.graph, name))
+    return new_proxy(proxies.Graph, _qti.app.graph, name)
 
 def newGraph(name=None,layers=1,rows=1,columns=1):
     """Create a graph window.
@@ -135,9 +137,9 @@ def newGraph(name=None,layers=1,rows=1,columns=1):
         A handle to the created graph widget.
     """
     if name is None:
-        return proxies.Graph(threadsafe_call(_qti.app.newGraph))
+        return new_proxy(proxies.Graph, _qti.app.newGraph)
     else:
-        return proxies.Graph(threadsafe_call(_qti.app.newGraph,name,layers,rows,columns))
+        return new_proxy(proxies.Graph, _qti.app.newGraph,name,layers,rows,columns)
 
 def note(name):
     """Get a handle on a note.
@@ -148,7 +150,7 @@ def note(name):
     Returns:
         A handle to the note.
     """
-    return proxies.MDIWindow(threadsafe_call(_qti.app.note, name))
+    return new_proxy(proxies.MDIWindow, _qti.app.note, name)
 
 def newNote(name=None):
     """Create a note.
@@ -160,9 +162,9 @@ def newNote(name=None):
         A handle to the created note.
     """
     if name is None:
-        return proxies.MDIWindow(threadsafe_call(_qti.app.newNote))
+        return new_proxy(proxies.MDIWindow, _qti.app.newNote)
     else:
-        return proxies.MDIWindow(threadsafe_call(_qti.app.newNote, name))
+        return new_proxy(proxies.MDIWindow, _qti.app.newNote, name)
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
@@ -177,7 +179,7 @@ def plot(source, *args, **kwargs):
         A handle to the created Graph widget.
     """
     if hasattr(source, '_getHeldObject') and isinstance(source._getHeldObject(), QtCore.QObject):
-        return proxies.Graph(threadsafe_call(_qti.app.plot, source._getHeldObject(), *args, **kwargs))
+        return new_proxy(proxies.Graph,_qti.app.plot, source._getHeldObject(), *args, **kwargs)
     else:
         return plotSpectrum(source, *args, **kwargs)
         
@@ -272,7 +274,7 @@ def waterfallPlot(table, columns):
     Returns:
         A handle to the created plot (Layer).
     """
-    return proxies.Graph(threadsafe_call(_qti.app.waterfallPlot, table._getHeldObject(),columns))
+    return new_proxy(proxies.Graph, _qti.app.waterfallPlot, table._getHeldObject(),columns)
 
 #-----------------------------------------------------------------------------
 def importImage(filename):
@@ -284,27 +286,32 @@ def importImage(filename):
     Returns:
         A handle to the matrix containing the image data.
     """
-    return proxies.MDIWindow(threadsafe_call(_qti.app.importImage, filename))
+    return new_proxy(proxies.MDIWindow, _qti.app.importImage, filename)
 
 #-----------------------------------------------------------------------------
 def newPlot3D():
-    return proxies.Graph3D(threadsafe_call(_qti.app.newPlot3D))
+    return new_proxy(proxies.Graph3D, _qti.app.newPlot3D)
 
 def plot3D(*args):
     if isinstance(args[0],str):
-        return proxies.Graph3D(threadsafe_call(_qti.app.plot3D, *args))
+        return new_proxy(proxies.Graph3D, _qti.app.plot3D, *args)
     else:
-        return proxies.Graph3D(threadsafe_call(_qti.app.plot3D, args[0]._getHeldObject(),*args[1:]))
+        return new_proxy(proxies.Graph3D, _qti.app.plot3D, args[0]._getHeldObject(),*args[1:])
 
 #-----------------------------------------------------------------------------
-def selectMultiPeak(source, showFitPropertyBrowser = True):
+def selectMultiPeak(source, showFitPropertyBrowser = True, xmin = None, xmax = None):
     """Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
     
     Args:
         source: A reference to a MultiLayer with the data to fit.
         showFitPropertyBrowser: Whether to show the FitPropertyBrowser or not.
+        xmin: An optionall minimum X value to select
+        xmax: An optionall maximum X value to select
     """
-    threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
+    if xmin is not None and xmax is not None:
+        threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser, xmin, xmax)
+    else:
+        threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
 
 #-----------------------------------------------------------------------------
 #-------------------------- Project/Folder functions -----------------------
@@ -319,7 +326,7 @@ def windows():
 
 def activeFolder():
     """Get a handle to the currently active folder."""
-    return proxies.Folder(threadsafe_call(_qti.app.activeFolder))
+    return new_proxy(proxies.Folder, _qti.app.activeFolder)
 
 # These methods don't seem to work
 #def appendProject(filename, parentFolder=None):
@@ -332,7 +339,7 @@ def activeFolder():
 
 def rootFolder():
     """Get a handle to the top-level folder."""
-    return proxies.Folder(threadsafe_call(_qti.app.rootFolder))
+    return new_proxy(proxies.Folder, _qti.app.rootFolder)
 
 def addFolder(name,parentFolder=None):
     """Create a new folder.
@@ -346,7 +353,7 @@ def addFolder(name,parentFolder=None):
     """
     if parentFolder is not None:
         parentFolder = parentFolder._getHeldObject()
-    return proxies.Folder(threadsafe_call(_qti.app.addFolder, name,parentFolder))
+    return new_proxy(proxies.Folder, _qti.app.addFolder, name,parentFolder)
 
 def deleteFolder(folder):
     """Delete the referenced folder"""
@@ -374,7 +381,7 @@ def copyFolder(source, destination):
 
 def openTemplate(filename):
     """Load a previously saved window template"""
-    return proxies.MDIWindow(threadsafe_call(_qti.app.openTemplate, filename))
+    return new_proxy(proxies.MDIWindow,_qti.app.openTemplate, filename)
 
 def saveAsTemplate(window, filename):
     """Save the characteristics of the given window to file"""
@@ -388,13 +395,13 @@ def setPreferences(layer):
     threadsafe_call(_qti.app.setPreferences, layer._getHeldObject())
 
 def clone(window):
-    return proxies.MDIWindow(threadsafe_call(_qti.app.clone, window._getHeldObject()))
+    return new_proxy(proxies.MDIWindow, _qti.app.clone, window._getHeldObject())
 
 def tableToMatrix(table):
-    return proxies.MDIWindow(threadsafe_call(_qti.app.tableToMatrix, table._getHeldObject()))
+    return new_proxy(proxies.MDIWindow, _qti.app.tableToMatrix, table._getHeldObject())
 
 def matrixToTable(matrix, conversionType=_qti.app.Direct):
-    return proxies.MDIWindow(threadsafe_call(_qti.app.matrixToTable, matrix._getHeldObject(),conversionType))
+    return new_proxy(proxies.MDIWindow, _qti.app.matrixToTable, matrix._getHeldObject(),conversionType)
 
 #-----------------------------------------------------------------------------
 #-------------------------- Wrapped MantidUI functions -----------------------
@@ -402,7 +409,7 @@ def matrixToTable(matrix, conversionType=_qti.app.Direct):
 
 def mergePlots(graph1,graph2):
     """Combine two graphs into a single plot"""
-    return proxies.Graph(threadsafe_call(_qti.app.mantidUI.mergePlots,graph1._getHeldObject(),graph2._getHeldObject()))
+    return new_proxy(proxies.Graph, _qti.app.mantidUI.mergePlots,graph1._getHeldObject(),graph2._getHeldObject())
 
 def convertToWaterfall(graph):
     """Convert a graph (containing a number of plotted spectra) to a waterfall plot"""
@@ -410,7 +417,7 @@ def convertToWaterfall(graph):
 
 def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
-    return proxies.MantidMatrix(threadsafe_call(_qti.app.mantidUI.getMantidMatrix, name))
+    return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
 def getInstrumentView(name, tab=-1):
     """Create an instrument view window based on the given workspace.
@@ -422,7 +429,7 @@ def getInstrumentView(name, tab=-1):
     Returns:
         A handle to the created instrument view widget.
     """
-    return proxies.MDIWindow(threadsafe_call(_qti.app.mantidUI.getInstrumentView, name,tab))
+    return new_proxy(proxies.MDIWindow, _qti.app.mantidUI.getInstrumentView, name,tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
@@ -442,8 +449,8 @@ def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=Fals
         firstIndex = -1
     if lastIndex is None:
         lastIndex = -1
-    return proxies.MantidMatrix(threadsafe_call(_qti.app.mantidUI.importMatrixWorkspace, name,
-                                                firstIndex,lastIndex,showDialog,visible))
+    return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.importMatrixWorkspace, name,
+                             firstIndex,lastIndex,showDialog,visible)
 
 def importTableWorkspace(name, visible=False):
     """Create a MantidPlot table from a table workspace.
@@ -455,8 +462,12 @@ def importTableWorkspace(name, visible=False):
     Returns:
         A handle to the newly created table.
     """
-    return proxies.MDIWindow(threadsafe_call(_qti.app.mantidUI.importTableWorkspace, name,False,visible))
+    return new_proxy(proxies.MDIWindow,_qti.app.mantidUI.importTableWorkspace, name,False,visible)
 
+def createPropertyInputDialog(alg_name, preset_values, optional_msg, enabled, disabled):
+    """Raises a property input dialog for an algorithm"""
+    return threadsafe_call(_qti.app.mantidUI.createPropertyInputDialog, alg_name, preset_values, optional_msg, enabled, disabled)
+    
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------
 #-----------------------------------------------------------------------------
@@ -531,7 +542,10 @@ def getSliceViewer(source, label=""):
         raise Exception("Please specify only one workspace.")
     else:
         svw = threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow, workspace_names[0], label)
-        return proxies.SliceViewerWindowProxy(svw)
+        if svw is not None:
+            return proxies.SliceViewerWindowProxy(svw)
+        else:
+            return None
 
 
 #-----------------------------------------------------------------------------
@@ -726,9 +740,9 @@ def __doBinPlot(source, indices, error_bars,type):
     
 def __plotBinSingle(workspace, indices, error_bars,type):
     if isinstance(indices, list) or isinstance(indices, tuple):
-        master_graph = __CallPlotFunction(workspace, indices[0], error_bars,type)
+        master_graph = __callPlotBin(workspace, indices[0], error_bars,type)
         for index in indices[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
+            mergePlots(master_graph, __callPlotBin(workspace, index, error_bars,type))
         return master_graph
     else:
         return __callPlotBin(workspace, indices, error_bars,type)
@@ -746,7 +760,7 @@ def __plotBinList(workspace_list, indices, error_bars,type):
     else:
         master_graph = __callPlotBin(workspace_list[0], indices, error_bars,type)
         for workspace in workspace_list[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, indices, error_bars,type))
+            mergePlots(master_graph, __callPlotBin(workspace, indices, error_bars,type))
         return master_graph
 
 def __callPlotBin(workspace, index, error_bars,type):
@@ -754,5 +768,5 @@ def __callPlotBin(workspace, index, error_bars,type):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    return proxies.Graph(threadsafe_call('plotBin',wkspname, index, error_bars,type))
+    return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, index, error_bars,type)
 #------------------------------------------------------------------------------------------

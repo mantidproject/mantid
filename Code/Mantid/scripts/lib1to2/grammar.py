@@ -19,6 +19,9 @@ class Grammar(object):
         """
         string_replace = rules.SimpleStringReplace()
         translated = string_replace.apply(input)
+
+        if 'PythonAlgorithm' in input:
+            raise RuntimeError("Migration process cannot handle python algorithms yet.")
        
         api_call_replace = rules.SimpleAPIFunctionCallReplace()
         translated = api_call_replace.apply(translated)

@@ -29,6 +29,7 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidKernel/Statistics.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <iomanip>
@@ -449,9 +450,11 @@ namespace Mantid
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       std::vector<size_t> banned;
+      std::vector<double> peakWidFitted;
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
         double centre = peakslist->getRef<double>("centre",i);
+        double width = peakslist->getRef<double>("width",i);
         if (centre <= minD || centre >= maxD)
         {
             banned.push_back(i);
@@ -466,14 +469,33 @@ namespace Mantid
 
         // Get references to the data
         peakPosFitted.push_back(centre);
+        peakWidFitted.push_back(width);
         chisq.push_back(chi2);
       }
       // delete banned peaks
       for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
           peakPosToFit.erase(peakPosToFit.begin() + (*it));
+      if (peakPosFitted.size() > 2) Outliers(peakWidFitted, peakPosFitted, chisq, peakPosToFit);
       nparams = peakPosFitted.size();
       return;
     }
+    void GetDetOffsetsMultiPeaks::Outliers(std::vector<double>& data, std::vector<double>& data2, std::vector<double>& data3, std::vector<double>& data4)
+    {
+      Statistics stats = getStatistics(data);
+      if(stats.standard_deviation == 0.)return;
+      for (int i = static_cast<int>(data.size())-1; i>=0; i--)
+      {
+        double zscore = std::fabs((data[i] - stats.mean) / stats.standard_deviation);
+        if (zscore > 1.0)
+        {
+        data.erase(data.begin()+i);
+        data2.erase(data2.begin()+i);
+        data3.erase(data3.begin()+i);
+        data4.erase(data4.begin()+i);
+        }
+      }
+    }
+
 
   } // namespace Algorithm
 } // namespace Mantid

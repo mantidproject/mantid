@@ -30,7 +30,6 @@ class CrossThreadCall(QtCore.QObject):
         self.moveToThread(QtGui.qApp.thread())
         self.__callable = callable
         
-        
     def dispatch(self, *args, **kwargs):
         """Dispatches a call to callable with
         the given arguments using QMetaObject.invokeMethod
@@ -90,6 +89,22 @@ def threadsafe_call(callable, *args):
     caller = CrossThreadCall(callable)
     return caller.dispatch(*args)
 
+def new_proxy(classType, callable, *args, **kwargs):
+    """
+    Calls the callable object with the given args and kwargs dealing
+    with possible thread-safety issues.
+    If the returned value is not None it is wrapped in a new proxy of type classType
+        
+        @param classType :: A new proxy class for the return type
+        @param callable :: A python callable object, i.e. a function/method
+        @param *args :: The positional arguments passed on as given
+        @param *kwargs :: The keyword arguments passed on as given
+    """
+    obj = threadsafe_call(callable, *args, **kwargs)
+    if obj is None:
+        return obj
+    return classType(obj)
+
 #-----------------------------------------------------------------------------
 #--------------------------- Proxy Objects -----------------------------------
 #-----------------------------------------------------------------------------
@@ -112,34 +127,26 @@ class QtProxyObject(QtCore.QObject):
         """
         Disconnect the signal
         """
-        if self.__obj is not None:
-            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
-                            self._kill_object)
+        self._disconnect_from_destroyed()
                             
     def close(self):
         """
         Reroute a method call to the the stored object
         """
-        self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
-                        self._kill_object)
+        self._disconnect_from_destroyed()
         if hasattr(self.__obj, 'closeDependants'):
             threadsafe_call(self.__obj.closeDependants)
         if hasattr(self.__obj, 'close'):
             threadsafe_call(self.__obj.close)
         self._kill_object()
         
-    def new_proxy(self, classType, callable, *args, **kwargs):
+    def _disconnect_from_destroyed(self):
         """
-        Calls the callable object with the given args and kwargs dealing
-        with possible thread-safety issues.
-        The return value is wrapped in a new proxy of type classType.
-            
-            @param classType :: A new proxy class for the return type
-            @param callable :: A python callable object, i.e. a function/method
-            @param *args :: The positional arguments passed on as given
-            @param *kwargs :: The keyword arguments passed on as given
+        Disconnects from the wrapped object's destroyed signal
         """
-        return classType(threadsafe_call(callable, *args, **kwargs))
+        if self.__obj is not None:
+            self.disconnect(self.__obj, QtCore.SIGNAL("destroyed()"),
+                            self._kill_object)
 
     def __getattr__(self, attr):
         """
@@ -189,7 +196,7 @@ class MDIWindow(QtProxyObject):
         QtProxyObject.__init__(self,toproxy)
         
     def folder(self):
-        return self.new_proxy(Folder, self._getHeldObject().folder)
+        return new_proxy(Folder, self._getHeldObject().folder)
 
 #-----------------------------------------------------------------------------
 class Graph(MDIWindow):
@@ -200,7 +207,7 @@ class Graph(MDIWindow):
 
     def activeLayer(self):
         """Get a handle to the presently active layer """
-        return self.new_proxy(Layer, self._getHeldObject().activeLayer)
+        return new_proxy(Layer, self._getHeldObject().activeLayer)
 
     def setActiveLayer(self, layer):
         """Set the active layer to that specified.
@@ -216,7 +223,7 @@ class Graph(MDIWindow):
         Args:
             num: The index of the required layer
         """
-        return self.new_proxy(Layer, self._getHeldObject().layer, num)
+        return new_proxy(Layer, self._getHeldObject().layer, num)
 
     def addLayer(self, x=0, y=0, width=None, height=None):
         """Add a layer to the graph.
@@ -235,7 +242,7 @@ class Graph(MDIWindow):
             width=0
         if height is None:
             height=0
-        return self.new_proxy(Layer, self._getHeldObject().addLayer, x,y,width,height)
+        return new_proxy(Layer, self._getHeldObject().addLayer, x,y,width,height)
 
     def insertCurve(self, graph, index):
         """Add a curve from another graph to this one.
@@ -331,7 +338,7 @@ class Layer(QtProxyObject):
                            
         Returns: A handle to the error bar settings object.
         """
-        return self.new_proxy(QtProxyObject, self._getHeldObject().errorBarSettings, curveIndex,errorBarIndex)
+        return new_proxy(QtProxyObject, self._getHeldObject().errorBarSettings, curveIndex,errorBarIndex)
 
     def addHistogram(self, matrix):
         """Add a matrix histogram  to the graph"""
@@ -346,19 +353,19 @@ class Layer(QtProxyObject):
         Returns:
             A handle to the newly created legend widget.
         """
-        return self.new_proxy(QtProxyObject, self._getHeldObject().newLegend, text)
+        return new_proxy(QtProxyObject, self._getHeldObject().newLegend, text)
 
     def legend(self):
         """Get a handle to the layer's legend widget."""
-        return self.new_proxy(QtProxyObject, self._getHeldObject().legend)
+        return new_proxy(QtProxyObject, self._getHeldObject().legend)
 
     def grid(self):
         """Get a handle to the grid object for this layer."""
-        return self.new_proxy(QtProxyObject, self._getHeldObject().grid)
+        return new_proxy(QtProxyObject, self._getHeldObject().grid)
 
     def spectrogram(self):
         """If the layer contains a spectrogram, get a handle to the spectrogram object."""
-        return self.new_proxy(QtProxyObject, self._getHeldObject().spectrogram)
+        return new_proxy(QtProxyObject, self._getHeldObject().spectrogram)
 
 #-----------------------------------------------------------------------------
 class Graph3D(QtProxyObject):
@@ -394,7 +401,7 @@ class Spectrogram(QtProxyObject):
 
     def matrix(self):
         """Get a handle to the data source."""
-        return self.new_proxy(QtProxyObject, self._getHeldObject().matrix)
+        return new_proxy(QtProxyObject, self._getHeldObject().matrix)
 
 #-----------------------------------------------------------------------------
 class Folder(QtProxyObject):
@@ -430,7 +437,7 @@ class Folder(QtProxyObject):
         Returns:
             A handle to the requested folder, or None if no match found.
         """
-        return self.new_proxy(Folder, self._getHeldObject().folder, name,caseSensitive,partialMatch)
+        return new_proxy(Folder, self._getHeldObject().folder, name,caseSensitive,partialMatch)
 
     def findWindow(self, name, searchOnName=True, searchOnLabel=True, caseSensitive=False, partialMatch=True):
         """Get a handle to the first window matching the search criteria.
@@ -445,7 +452,7 @@ class Folder(QtProxyObject):
         Returns:
             A handle to the requested window, or None if no match found.
         """
-        return self.new_proxy(MDIWindow, self._getHeldObject().findWindow, name,searchOnName,searchOnLabel,caseSensitive,partialMatch)
+        return new_proxy(MDIWindow, self._getHeldObject().findWindow, name,searchOnName,searchOnLabel,caseSensitive,partialMatch)
 
     def window(self, name, cls='MdiSubWindow', recursive=False):
         """Get a handle to a named window of a particular type.
@@ -458,7 +465,7 @@ class Folder(QtProxyObject):
         Returns:
             A handle to the window, or None if no match found.
         """
-        return self.new_proxy(MDIWindow, self._getHeldObject().window, name,cls,recursive)
+        return new_proxy(MDIWindow, self._getHeldObject().window, name,cls,recursive)
 
     def table(self, name, recursive=False):
         """Get a handle to the table with the given name.
@@ -467,7 +474,7 @@ class Folder(QtProxyObject):
             name: The name of the table to search for.
             recursive: If True, do a depth-first recursive search (default: False).
         """
-        return self.new_proxy(MDIWindow, self._getHeldObject().table, name,recursive)
+        return new_proxy(MDIWindow, self._getHeldObject().table, name,recursive)
 
     def matrix(self, name, recursive=False):
         """Get a handle to the matrix with the given name.
@@ -476,7 +483,7 @@ class Folder(QtProxyObject):
             name: The name of the matrix to search for.
             recursive: If True, do a depth-first recursive search (default: False).
         """
-        return  self.new_proxy(MDIWindow, self._getHeldObject().matrix, name,recursive)
+        return  new_proxy(MDIWindow, self._getHeldObject().matrix, name,recursive)
 
     def graph(self, name, recursive=False):
         """Get a handle to the graph with the given name.
@@ -485,11 +492,11 @@ class Folder(QtProxyObject):
             name: The name of the graph to search for.
             recursive: If True, do a depth-first recursive search (default: False).
         """
-        return self.new_proxy(Graph, self._getHeldObject().graph, name,recursive)
+        return new_proxy(Graph, self._getHeldObject().graph, name,recursive)
 
     def rootFolder(self):
         """Get the folder at the root of the hierarchy"""
-        return self.new_proxy(Folder, self._getHeldObject().rootFolder)
+        return new_proxy(Folder, self._getHeldObject().rootFolder)
 
 #-----------------------------------------------------------------------------
 class MantidMatrix(MDIWindow):
@@ -507,7 +514,7 @@ class MantidMatrix(MDIWindow):
         Returns:
             A handle to the newly created graph (a Graph3D object)
         """
-        return self.new_proxy(Graph3D, self._getHeldObject().plotGraph3D, style)
+        return new_proxy(Graph3D, self._getHeldObject().plotGraph3D, style)
 
     def plotGraph2D(self, type=16):
         """Create a spectrogram from the workspace data.
@@ -518,7 +525,7 @@ class MantidMatrix(MDIWindow):
         Returns:
             A handle the newly created graph (a Graph object)
         """
-        return self.new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
+        return new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
 
 #-----------------------------------------------------------------------------
 class SliceViewerWindowProxy(QtProxyObject):

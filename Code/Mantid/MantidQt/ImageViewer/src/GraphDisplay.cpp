@@ -134,8 +134,16 @@ void GraphDisplay::SetData(const QVector<double> & xData,
  */
 void GraphDisplay::SetPointedAtPoint( QPoint point )
 {
+  if ( data_source == 0 )
+  {
+    return;
+  }
   double x = graph_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = graph_plot->invTransform( QwtPlot::yLeft, point.y() );
+
+  data_source->RestrictX( x );
+  data_source->RestrictY( y );
+
   ShowInfoList( x, y );
 }
 

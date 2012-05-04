@@ -98,6 +98,7 @@ set ( TEST_PY_FILES
   test/python/InstrumentTest.py
   test/python/ITableWorkspaceTest.py
   test/python/ListValidatorTest.py
+  test/python/LogFilterTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/MandatoryValidatorTest.py

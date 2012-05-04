@@ -60,7 +60,7 @@ def load(path):
         loaded.update(load_from_dir(path))
     else: # a list 
         if ';' in path:
-            path = split(';')
+            path = path.split(';')
         if type(path) is list: # Call load again for each one
             for p in path: 
                 loaded.update(load(p))

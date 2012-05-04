@@ -80,8 +80,25 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
   m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay("")
 {
-  // this should work for now
-  m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
+  try
+  {
+    Poco::File tempFile(ConfigService::Instance().getInstrumentDirectory());
+
+    // If the instrument directory can't be written to... (linux problem)
+    if (tempFile.exists() && !tempFile.canWrite() ) 
+    {
+      g_log.information() << "Instrument directory is read only, writing temp grouping to system temp.\n";
+      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"tempMuonAnalysisGrouping.xml";
+    }
+    else
+    {
+      m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
+    }
+  }
+  catch(...)
+  {
+    g_log.debug() << "Problem writing temp grouping file";
+  }
 }
 
 /// Set up the dialog layout

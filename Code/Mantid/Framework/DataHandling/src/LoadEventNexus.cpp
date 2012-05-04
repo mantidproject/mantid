@@ -312,24 +312,30 @@ public:
     } //(for each event)
 
     //------------ Compress Events (or set sort order) ------------------
-    if (compress || pulsetimesincreasing)
+    // Do it on all the detector IDs we touched
+    std::set<size_t>::iterator it;
+    for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
     {
-      // Do it on all the detector IDs we touched
-      std::set<size_t>::iterator it;
-      for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
+      if (usedDetIds[pixID])
       {
-        if (usedDetIds[pixID])
+        //Find the the workspace index corresponding to that pixel ID
+        size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
+        EventList * el = WS->getEventListPtr(wi);
+        if (compress)
+          el->compressEvents(alg->compressTolerance, el);
+        else
         {
-          //Find the the workspace index corresponding to that pixel ID
-          size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-          EventList * el = WS->getEventListPtr(wi);
-          if (compress)
-            el->compressEvents(alg->compressTolerance, el);
-          else if (pulsetimesincreasing)
+          if (pulsetimesincreasing)
             el->setSortOrder(DataObjects::PULSETIME_SORT);
+          else
+            el->setSortOrder(DataObjects::UNSORTED);
         }
       }
     }
+
+
+    alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ") <<
+        "monotonically increasing pulse times" << std::endl;
 
     //Join back up the tof limits to the global ones
     PARALLEL_CRITICAL(tof_limits)
@@ -1039,21 +1045,6 @@ void LoadEventNexus::exec()
   compressTolerance = getProperty("CompressTolerance");
 
   loadlogs = true;
-//  //Get the limits to the filter
-//  filter_tof_min = getProperty("FilterByTofMin");
-//  filter_tof_max = getProperty("FilterByTofMax");
-//  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
-//  {
-//    //Nothing specified. Include everything
-//    filter_tof_min = -1e20;
-//    filter_tof_max = +1e20;
-//  }
-//  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
-//  {
-//    //Both specified. Keep these values
-//  }
-//  else
-//    throw std::invalid_argument("You must specify both the min and max of time of flight to filter, or neither!");
 
   // Check to see if the monitors need to be loaded later
   bool load_monitors = this->getProperty("LoadMonitors");
@@ -1078,21 +1069,7 @@ void LoadEventNexus::exec()
     if( eventMonitors && this->hasEventMonitors() )
     {
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
-//      // Set filter member variable attributes for
-//      filter_tof_min = getProperty("FilterMonByTofMin");
-//      filter_tof_max = getProperty("FilterMonByTofMax");
-//      if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
-//      {
-//        //Nothing specified. Include everything
-//        filter_tof_min = -1e20;
-//        filter_tof_max = +1e20;
-//      }
-//      else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
-//      {
-//        //Both specified. Keep these values
-//      }
-//      else
-//        throw std::invalid_argument("You must specify both the min and max or neither of time of flight to filter the monitor");
+
       // Perform the load
       loadEvents(&prog, true);
       std::string mon_wsname = this->getProperty("OutputWorkspace");
@@ -1302,6 +1279,11 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   // Cache a map for speed.
   this->makeMapToEventLists();
+
+  // Set all (empty) event lists as sorted by pulse time. That way, calling SortEvents will not try to sort these empty lists.
+  for (size_t i=0; i < WS->getNumberHistograms(); i++)
+    WS->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
+
 
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;

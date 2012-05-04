@@ -514,9 +514,13 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
       }
     }
 
-    //If the ignore property exists and is set to true, then skip the dialog.
-    const std::string paraviewIgnoreProperty = "paraview.ignore";
-    b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString(confService.getString(paraviewIgnoreProperty).c_str()).toInt() == true;
+    //ONLY If skipping is not already selected
+    if(!b_skipDialog)
+    {
+      //If the ignore property exists and is set to true, then skip the dialog.
+      const std::string paraviewIgnoreProperty = "paraview.ignore";
+      b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString(confService.getString(paraviewIgnoreProperty).c_str()).toInt() == true;
+    }
 
     if(this->hasParaviewPath())
     {
@@ -530,7 +534,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
       if(!b_skipDialog)
       {
         //Launch the dialog to set the PV path.
-        SetUpParaview pv;
+        SetUpParaview pv(SetUpParaview::FirstLaunch);
         pv.exec();
       }
     }
@@ -1353,6 +1357,8 @@ void ApplicationWindow::initMainMenu()
   help->addAction(actionHelpBugReports);
   help->insertSeparator();
   help->addAction(actionFirstTimeSetup);
+  help->insertSeparator();
+  help->addAction(actionSetupParaview);
   help->insertSeparator();
   help->addAction(actionAbout);
 
@@ -9558,6 +9564,8 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     delete scriptingWindow;
     scriptingWindow = NULL;
   }
+  /// Ensure interface python references are cleaned up before the interpreter shuts down
+  delete m_iface_script;
 
 	// Emit a shutting_down() signal that can be caught by
 	// independent QMainWindow objects to know when MantidPlot
@@ -12583,6 +12591,9 @@ void ApplicationWindow::createActions()
   actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
   connect(actionFirstTimeSetup, SIGNAL(activated()), this, SLOT(showFirstTimeSetup()));
 
+  actionSetupParaview = new QAction(tr("Setup 3D Visualisation"), this);
+  connect(actionSetupParaview, SIGNAL(activated()), this, SLOT(showSetupParaview()));
+
   actionNewProject = new QAction(QIcon(getQPixmap("new_xpm")), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
   connect(actionNewProject, SIGNAL(activated()), this, SLOT(newProject()));
@@ -14639,6 +14650,14 @@ void ApplicationWindow::showalgorithmDescriptions()
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Algorithms"));
 }
 
+void ApplicationWindow::showSetupParaview()
+{
+  SetUpParaview* dialog = new SetUpParaview(SetUpParaview::MantidMenu);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  dialog->setFocus();
+}
+
 void ApplicationWindow::showFirstTimeSetup()
 {
   FirstTimeSetup *dialog = new FirstTimeSetup(this);
@@ -16512,10 +16531,6 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool async,
 
   }
   bool success(false);
-  if(QApplication::instance()->thread() != QThread::currentThread())
-  {
-    async = false;
-  }
   if(async)
   {
     QFuture<bool> job = m_iface_script->executeAsync(code);

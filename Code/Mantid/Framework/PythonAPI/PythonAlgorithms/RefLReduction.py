@@ -421,6 +421,9 @@ class RefLReduction(PythonAlgorithm):
                     _y_px_range = _Larray
                 else:
                     _y_px_range = _Rarray
+                    _y_px_range = _Larray
+                else:
+                    _y_px_range = _Rarray
 
             for i in _tof_range:
                 _sum = 0.
@@ -479,12 +482,16 @@ class RefLReduction(PythonAlgorithm):
                                                   toYpixel=data_peak[1],
                                                   maxX=maxX,
                                                   maxY=maxY)     
+            ConvertToMatrixWorkspace(InputWorkspace=ws_data,
+                                     OutputWorkspace=ws_data)
             
             ConvertToMatrixWorkspace(InputWorkspace=ws_data,
                                      OutputWorkspace=ws_data)
 
             if mtd.workspaceExists(ws_histo_data):
                 mtd.deleteWorkspace(ws_histo_data)
+
+            mtd.deleteWorkspace(ws_histo_data)
 
         if (NormFlag):
 

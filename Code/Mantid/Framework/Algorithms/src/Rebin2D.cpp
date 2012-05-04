@@ -22,6 +22,8 @@ The algorithms currently requires the second axis on the workspace to be a numer
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -73,6 +75,8 @@ namespace Mantid
       declareProperty(new PropertyWithValue<bool>("UseFractionalArea", false, Direction::Input),
                       "Flag to turn on the using the fractional area tracking RebinnedOutput workspace\n."
                       "Default is false.");
+      declareProperty(new PropertyWithValue<bool>("Transpose", false),
+        "Run the Transpose algorithm on the resulting matrix.");
     }
 
     /** 
@@ -153,6 +157,17 @@ namespace Mantid
         boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize();
       }
       normaliseOutput(outputWS, inputWS);
+
+      bool Transpose = this->getProperty("Transpose");
+      if (Transpose)
+      {
+        IAlgorithm_sptr alg = this->createSubAlgorithm("Transpose", 0.9, 1.0);
+        alg->setProperty("InputWorkspace", outputWS);
+        alg->setPropertyValue("OutputWorkspace", "__anonymous");
+        alg->execute();
+        outputWS = alg->getProperty("OutputWorkspace");
+      }
+
       setProperty("OutputWorkspace", outputWS);
     }
 
@@ -185,11 +200,16 @@ namespace Mantid
           const V2D ul(X[ei], vhi);
           const Quadrilateral outputQ(ll, lr, ur, ul);
 
+          double yValue = inputWS->readY(i)[j];
+          if (boost::math::isnan(yValue))
+          {
+            continue;
+          }
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            double yValue = inputWS->readY(i)[j] * weight;
+            yValue *= weight;
             double eValue = inputWS->readE(i)[j] * weight;
             const double overlapWidth = overlap.largestX() - overlap.smallestX();
             if(inputWS->isDistribution())
@@ -241,14 +261,21 @@ namespace Mantid
           const V2D ul(X[ei], vhi);
           const Quadrilateral outputQ(ll, lr, ur, ul);
 
+          double yValue = inputWS->readY(i)[j];
+          if (boost::math::isnan(yValue))
+          {
+            continue;
+          }
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            double yValue = inputWS->readY(i)[j] * weight;
+            yValue *=  weight;
             double eValue = inputWS->readE(i)[j] * weight;
             const double overlapWidth = overlap.largestX() - overlap.smallestX();
-            if(inputWS->isDistribution())
+            // Don't do the overlap removal if already RebinnedOutput.
+            // This wreaks havoc on the data.
+            if(inputWS->isDistribution() && inputWS->id() != "RebinnedOutput")
             {
               yValue *= overlapWidth;
               eValue *= overlapWidth;
@@ -339,7 +366,9 @@ namespace Mantid
           m_progress->report("Calculating errors");
           const double binWidth = (outputWS->readX(i)[j+1] - outputWS->readX(i)[j]);
           double eValue = std::sqrt(outputE[j]);
-          if( inputWS->isDistribution() )
+          // Don't do this for a RebinnedOutput workspace. The fractions
+          // take care of such things.
+          if( inputWS->isDistribution() && inputWS->id() != "RebinnedOutput")
           {
             outputY[j] /= binWidth;
             eValue /= binWidth;

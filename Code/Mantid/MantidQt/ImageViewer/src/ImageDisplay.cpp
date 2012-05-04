@@ -287,8 +287,16 @@ void ImageDisplay::SetIntensity( double control_parameter )
  */
 void ImageDisplay::SetPointedAtPoint( QPoint point )
 {
+  if ( data_source == 0 || data_array == 0 )
+  { 
+    return;
+  }
+
   double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = image_plot->invTransform( QwtPlot::yLeft, point.y() );
+
+  data_array->RestrictX(x);    // Qt returns values outside of region, so
+  data_array->RestrictY(y);    // we need to keep them valid
 
   float *data   = data_array->GetData();
 
@@ -301,26 +309,10 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
   double x_min = data_array->GetXMin();
   double x_max = data_array->GetXMax();
 
-  if ( x < x_min )                      // restrict x to valid range since
-    x = x_min;                          // Qt returns values outside of region
-  else if ( x > x_max )
-    x = x_max;
-
-  if ( y < y_min )                      // restrict y to valid range since
-    y = y_min;                          // Qt returns values outside of region
-  else if ( y > y_max )
-    y = y_max;
-
   double relative_y = (y-y_min)/(y_max-y_min);            //  in 0 to 1
   int    row = (int)(relative_y * (double)n_rows);
-  if ( row > (int)n_rows - 1 )
-  {
-    row = (int)n_rows - 1;
-  }
-  else if ( row < 0 )
-  {
-    row = 0;
-  }
+
+  data_array->RestrictRow( row );
 
   QVector<double> xData;
   QVector<double> yData;
@@ -335,14 +327,8 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
 
   double relative_x = (x-x_min)/(x_max-x_min);           // in 0 to 1
   int    col = (int)(relative_x * (double)n_cols);
-  if ( col > (int)n_cols - 1 )
-  {
-    col = (int)n_cols - 1;
-  }
-  else if ( col < 0 )
-  {
-    col = 0;
-  }
+
+  data_array->RestrictCol( col );
 
   QVector<double> v_xData;
   QVector<double> v_yData;

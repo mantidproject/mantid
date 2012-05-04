@@ -31,6 +31,7 @@ set ( EXPORT_FILES
   src/Exports/ArrayBoundedValidator.cpp
   src/Exports/MandatoryValidator.cpp
   src/Exports/CompositeValidator.cpp
+  src/Exports/LogFilter.cpp
 )  
 
 set ( SRC_FILES

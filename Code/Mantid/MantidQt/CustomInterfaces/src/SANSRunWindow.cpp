@@ -288,6 +288,7 @@ void SANSRunWindow::setupSaveBox()
 
   //link the save option tick boxes to their save algorithm
   m_savFormats.insert(m_uiForm.saveNex_check, "SaveNexus");
+  m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
   m_savFormats.insert(m_uiForm.saveCSV_check, "SaveCSV");
@@ -307,8 +308,8 @@ void SANSRunWindow::saveWorkspacesDialog()
   m_saveWorkspaces =
     new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats);
   //this dialog sometimes needs to run Python, pass this to Mantidplot via our runAsPythonScript() signal
-  connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&)),
-    this, SIGNAL(runAsPythonScript(const QString&)));
+  connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&, bool)),
+    this, SIGNAL(runAsPythonScript(const QString&, bool)));
   //we need know if we have a pointer to a valid window or not
   connect(m_saveWorkspaces, SIGNAL(closing()),
     this, SLOT(saveWorkspacesClosed()));
@@ -513,6 +514,7 @@ void SANSRunWindow::readSaveSettings(QSettings & valueStore)
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   m_uiForm.saveNex_check->setChecked(valueStore.value("nexus",false).toBool());
   m_uiForm.saveCan_check->setChecked(valueStore.value("canSAS",false).toBool());
+  m_uiForm.saveNIST_Qxy_check->setChecked(valueStore.value("NIST_Qxy",false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
   m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
 }
@@ -559,6 +561,7 @@ void SANSRunWindow::saveSaveSettings(QSettings & valueStore)
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   valueStore.setValue("nexus", m_uiForm.saveNex_check->isChecked());
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
+  valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
   valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
 }

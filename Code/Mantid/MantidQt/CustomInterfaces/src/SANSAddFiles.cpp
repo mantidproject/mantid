@@ -65,8 +65,8 @@ void SANSAddFiles::initLayout()
     SLOT(add2Runs2Add()));
   
   //the runAsPythonScript() signal needs to get to Qtiplot, here it is connected to the parent, which is connected to Qtiplot
-  connect(this, SIGNAL(runAsPythonScript(const QString&)),
-          parForm, SIGNAL(runAsPythonScript(const QString&)));
+  connect(this, SIGNAL(runAsPythonScript(const QString&, bool)),
+          parForm, SIGNAL(runAsPythonScript(const QString&, bool)));
 
   insertListFront("");
 

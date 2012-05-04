@@ -44,7 +44,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
-class CreateAttributeProperty;
+class CreateAttributePropertyForFunctionBrowser;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display 
@@ -129,12 +129,6 @@ protected:
   bool isDoubleAttribute(QtProperty* prop) const;
   /// Check if property is a function attribute
   bool isIntAttribute(QtProperty* prop) const;
-  /// Get string attribute
-  std::string getStringAttribute(QtProperty* prop) const;
-  /// Get double attribute
-  double getDoubleAttribute(QtProperty* prop) const;
-  /// Get int attribute
-  int getIntAttribute(QtProperty* prop) const;
   /// Check if property is a function paramater
   bool isParameter(QtProperty* prop) const;
   /// Get attribute as a string
@@ -214,6 +208,8 @@ protected:
   QtStringPropertyManager *m_tieManager;
   /// Manager for parameter constraint properties
   QtStringPropertyManager *m_constraintManager;
+  /// Manager for Formula attributes
+  QtStringPropertyManager *m_formulaManager;
 
 
   /// Qt property browser which displays properties
@@ -252,7 +248,8 @@ protected:
   /// Remove one constraints from current parameter
   QAction *m_actionRemoveConstraint;
 
-  friend class CreateAttributeProperty;
+  friend class CreateAttributePropertyForFunctionBrowser;
+  friend class SetAttributeFromProperty;
 };
 
 

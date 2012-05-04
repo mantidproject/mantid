@@ -3,4 +3,4 @@
 set ( VERSION_MAJOR 2 )
 
 # The minor version number is the iteration number
-set ( VERSION_MINOR 0 )
+set ( VERSION_MINOR 1 )

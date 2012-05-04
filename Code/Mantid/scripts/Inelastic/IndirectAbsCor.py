@@ -166,4 +166,4 @@ def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
         w_graph = mp.plotSpectrum(workspaces, 0)
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
         a_graph = mp.plotTimeBin(workspaces, 0)
-        a_graph.activeLayer().setAxisTitle(Layer.Bottom, 'Angle')
+        a_graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')

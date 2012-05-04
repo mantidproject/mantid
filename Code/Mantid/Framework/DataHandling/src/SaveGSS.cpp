@@ -333,7 +333,7 @@ namespace Mantid
           if (prop != NULL && (!prop->value().empty()))
           {
             std::stringstream line;
-            line << "Instrument parameter file: "
+            line << "#Instrument parameter file: "
                  << prop->value();
             os << std::setw(80) << std::left << line.str() << "\n";
           }

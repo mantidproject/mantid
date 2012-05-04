@@ -36,7 +36,7 @@
 	install ( FILES ${CMAKE_LIBRARY_PATH}/Python27/python.exe ${CMAKE_LIBRARY_PATH}/Python27/python27.dll DESTINATION bin )
 
 	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats DESTINATION plugins/qtplugins PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-	install ( FILES ${CMAKE_LIBRARY_PATH}/qt.conf DESTINATION bin )
+	install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DESTINATION bin )
 	
 	#Handle includes
 	install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
@@ -62,8 +62,17 @@
 	install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
 	install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/PocoXML.lib ${CMAKE_LIBRARY_PATH}/boost_date_time-vc100-mt-1_43.lib DESTINATION UserAlgorithms)
 	
+	#Copy runtime libraries
+	install (FILES ${CMAKE_LIBRARY_PATH}/CRT/msvcp100.dll ${CMAKE_LIBRARY_PATH}/CRT/msvcr100.dll ${CMAKE_LIBRARY_PATH}/CRT/vcomp100.dll DESTINATION bin)
+	
 	# Copy third party dlls excluding selected Qt ones and debug ones
-	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/ DESTINATION bin FILES_MATCHING PATTERN "*.dll" REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" EXCLUDE PATTERN ".git" EXCLUDE )
+	install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/ DESTINATION bin FILES_MATCHING PATTERN "*.dll" 
+	REGEX "${CMAKE_LIBRARY_PATH}/CRT/*" EXCLUDE 
+	REGEX "${CMAKE_LIBRARY_PATH}/Python27/*" EXCLUDE 
+	REGEX "${CMAKE_LIBRARY_PATH}/qt_plugins/*" EXCLUDE 
+	REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" 
+	EXCLUDE 
+	PATTERN ".git" EXCLUDE )
 	
 	#set(CPACK_NSIS_ON_INIT  "Exec $INSTDIR\\\\Uninstall.exe")
 	

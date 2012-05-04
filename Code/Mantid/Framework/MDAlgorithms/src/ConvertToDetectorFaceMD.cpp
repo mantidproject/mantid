@@ -1,5 +1,37 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+This algorithm takes a a [[MatrixWorkspace]] and converts it into
+a [[MDEventWorkspace]] that can be viewed in the [[SliceViewer]].
+
+The algorithm currently only works for instruments with [[RectangularDetectors]].
+The coordinates of the output workspace are:
+
+* Pixel X coordinate (integer starting at 0)
+* Pixel Y coordinate (integer starting at 0)
+* The center of the bin of the spectrum in that pixel (e.g. time-of-flight)
+
+Each MDEvent created has a weight given by the number of counts in that bin.
+Zero bins are not converted to events (saving memory).
+
+Once created, the [[MDEventWorkspace]] can be viewed in the [[SliceViewer]].
+It can also be rebinned with different parameters using [[BinMD]].
+This allows you to view the data in detector-space. For example,
+you might use this feature to look at your detector's sensitivity as a function
+of position, as well as a function of TOF.
+You can also do line plots of the data.
+See this screenshot for example:
+
+[[File:SliceViewer-DetectorFace.png|500px]]
+
+==== BankNumbers Parameter ====
+
+If your instrument has several [[RectangularDetectors]], you can use the ''BankNumbers'' property
+to specify which one(s) to convert. The algorithm looks for RectangularDetectors with the name 'bankXX'
+where XX is the bank number.
+
+If you specify more than one bank number, then the algorithm will create a 4D MDEventWorkspace.
+The fourth dimension will be equal to the bank number, allowing you to easily pick a bank to view.
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
@@ -73,7 +105,7 @@ namespace MDAlgorithms
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "An input MatrixWorkspace.");
     declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
-        "A list of the bank numbers to convert. If empty, will use all banksMust have at least one entry.");
+        "A list of the bank numbers to convert. If empty, will use all banks.");
 
     // Now the box controller settings
     this->initBoxControllerProps("2", 200, 20);

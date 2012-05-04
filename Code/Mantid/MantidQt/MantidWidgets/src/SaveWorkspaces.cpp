@@ -104,11 +104,13 @@ void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const Q
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
   
   QCheckBox *saveNex = new QCheckBox("Nexus");
+  QCheckBox *saveNIST = new QCheckBox("NIST Qxy");
   QCheckBox *saveCan = new QCheckBox("CanSAS");
   QCheckBox *saveRKH = new QCheckBox("RKH");
   QCheckBox *saveCSV = new QCheckBox("CSV");
   //link the save option tick boxes to their save algorithm
   m_savFormats.insert(saveNex, "SaveNexus");
+  m_savFormats.insert(saveNIST, "SaveNISTDAT");
   m_savFormats.insert(saveCan, "SaveCanSAS1D");
   m_savFormats.insert(saveRKH, "SaveRKH");
   m_savFormats.insert(saveCSV, "SaveCSV");
@@ -125,6 +127,7 @@ void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const Q
 
   QVBoxLayout *ly_saveFormats = new QVBoxLayout;
   ly_saveFormats->addWidget(saveNex);
+  ly_saveFormats->addWidget(saveNIST);
   ly_saveFormats->addWidget(saveCan);
   ly_saveFormats->addWidget(saveRKH);
   ly_saveFormats->addWidget(saveCSV);
@@ -141,6 +144,7 @@ void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const Q
   save->setToolTip(formatsTip);
   cancel->setToolTip(formatsTip);
   saveNex->setToolTip(formatsTip);
+  saveNIST->setToolTip(formatsTip);
   saveCan->setToolTip(formatsTip);
   saveRKH->setToolTip(formatsTip);
   saveCSV->setToolTip(formatsTip);
@@ -249,7 +253,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if ( algorithm != "SaveCSV" )
+    if ( algorithm != "SaveCSV" && algorithm != "SaveNISTDAT" )
     {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";

@@ -92,7 +92,7 @@ namespace Mantid
 
       /// Method to generate a line plot through a MD-workspace
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const = 0;
+          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
 
 
       IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;

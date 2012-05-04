@@ -645,11 +645,17 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
 
   bool isEvent = false;
+  std::string workspaceType = "Workspace2D";
   std::string group_name = "workspace";
   if (mtd_entry.containsGroup("event_workspace"))
   {
     isEvent = true;
     group_name = "event_workspace";
+  }
+  else if (mtd_entry.containsGroup("offsets_workspace"))
+  {
+    workspaceType = "OffsetsWorkspace";
+    group_name = "offsets_workspace";
   }
 
   // Get workspace characteristics
@@ -706,7 +712,6 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
     size_t total_specs=calculateWorkspacesize(nspectra);
 
     //// Create the 2D workspace for the output
-    std::string workspaceType = "Workspace2D";
     bool hasFracArea = false;
     if (wksp_cls.isValid("frac_area"))
     {
@@ -1217,10 +1222,10 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
         //Each colon has a space after it
         std::string prop_name = line.substr(colon + 2, comma - colon - 2);
         colon = line.find(":", comma);
-        comma = line.find(",", colon);
+        comma = line.find(", Default?", colon);
         std::string prop_value = line.substr(colon + 2, comma - colon - 2);
         colon = line.find(":", comma);
-        comma = line.find(",", colon);
+        comma = line.find(", Direction", colon);
         std::string is_def = line.substr(colon + 2, comma - colon - 2);
         colon = line.find(":", comma);
         comma = line.find(",", colon);

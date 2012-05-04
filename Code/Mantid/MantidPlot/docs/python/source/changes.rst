@@ -57,3 +57,38 @@ The major differences in the new API are as follows:
   all of the *qti* functionality but adds protection against crashes from closed windows.
 
 * The *getSampleDetails()* function has been removed. It should be replaced with *getRun()*.
+
+Migration (first cut)
+---------------------
+
+This release includes a script that is able to translate simple scripts from the the old API to the new API. It covers the basics of the replacements mentioned 
+above along with converting some algorithm calls. It will create a backup of the original script with the string *.mantidbackup* appended to it. Currently the script
+does not handle
+
+* old algorithm calls that use a return value, e.g. alg = Load('SomeRunFile.ext','runWS')
+* Python algorithms.
+
+Any script containing the above will raise an error in the migration process and restore the original script from the backup. 
+
+An old API algorithm call that does *NOT* use a return value, such as::
+
+    Load('SomeRunFile.ext','runWS')
+
+which will be translated to::
+
+    runWS = Load(Filename='SomeRunFile.ext')
+    
+along with any of the text replacements mentioned in the previous section
+    
+In order to run the script you will need to use the command line. On Windows: click start, run and type cmd; on OS X and Linux: open a terminal window. To run the script type
+
+    python [MANTIDINSTALL]/scripts/migrate1to2.py file
+    
+where [MANTIDINSTALL] should be replaced by the location of the mantid install:
+
+* Windows: C:/MantidInstall (only the default, please put the actual location)
+* Mac OS X: /Applications/MantidPlot.app
+* Linux: /opt/Mantid
+
+and *file* should be replaced by the path to a single script file.
+

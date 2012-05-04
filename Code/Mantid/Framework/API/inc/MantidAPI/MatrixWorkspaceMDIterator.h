@@ -127,6 +127,10 @@ namespace API
 
     /// Workspace index at which the iterator ends
     size_t m_endWI;
+
+    /// For numeric axes, this is the size of the bin in the vertical direction.
+    /// It is 1.0 for spectrum axes
+    double m_verticalBinSize;
   };
 
 

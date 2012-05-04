@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
+#include "MantidAPI/ExperimentInfo.h"
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -65,7 +66,9 @@ bool IConvertToMDEventsWS::fillAddProperties(std::vector<coord_t> &Coord,size_t 
 /** method which initates all main class variables
   * @param pWS2D      -- shared pointer to input matirx workspace to process
   * @param detLoc     -- class with information about datecotrs, partially transformed for convenient Q calculations
-  * @param WSD        -- class describing the target workspace. Only target workspace limints are used by the algorithm at the moment
+  * @param WSD        -- class describing the target workspace. 
+  *                      the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for  
+  *                      unit conversion (if any) 
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
 size_t  IConvertToMDEventsWS::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
@@ -74,10 +77,16 @@ size_t  IConvertToMDEventsWS::setUPConversion(Mantid::API::MatrixWorkspace_sptr 
         inWS2D= pWS2D;
         pWSWrapper = inWSWrapper;
         
-        pDetLoc    = &detLoc;
+        // Copy ExperimentInfo (instrument, run, sample) to the output WS
+        API::ExperimentInfo_sptr ei(pWS2D->cloneExperimentInfo());
+        runIndex            = pWSWrapper->pWorkspace()->addExperimentInfo(ei);
+
         // set values may needed for unit conversion
         detLoc.setEmode(WSD.emode);
         detLoc.setEfix(WSD.Ei);
+
+        // remember pointer to the preprocessed detectors information
+        pDetLoc    = &detLoc;
 
         n_dims       = this->pWSWrapper->nDimensions();
         

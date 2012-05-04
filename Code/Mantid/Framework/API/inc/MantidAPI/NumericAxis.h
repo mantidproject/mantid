@@ -64,6 +64,7 @@ public:
   std::string label(const std::size_t& index)const;
   /// Create bin boundaries from the point values
   std::vector<double> createBinBoundaries() const;
+  const std::vector<double> & getValues() const;
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis& operator=(const NumericAxis&);

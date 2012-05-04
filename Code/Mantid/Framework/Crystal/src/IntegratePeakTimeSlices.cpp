@@ -165,6 +165,12 @@ namespace Mantid
 
     }
 
+    double SQRT( double  v)
+    {
+      if( v < 0)
+        return -1;
+      return sqrt(v );
+    }
     /// Destructor
     IntegratePeakTimeSlices::~IntegratePeakTimeSlices()
     {
@@ -654,7 +660,8 @@ namespace Mantid
                   {
                     names.push_back( RRes->getRef< string >( "Name", prm ) );
                     params.push_back( RRes->getRef< double >( "Value", prm ));
-                    errs.push_back( RRes->getRef< double >( "Error",prm));
+                    double error = RRes->getRef< double >( "Error",prm);
+                    errs.push_back( error );
                   }
 
                   ostringstream res;
@@ -666,7 +673,7 @@ namespace Mantid
                     sqrtChisq =(chisq);
 
                   sqrtChisq = max< double >( sqrtChisq,AttributeValues[IIntensities]/AttributeValues[ISS1] );
-                  sqrtChisq = sqrt( sqrtChisq);
+                  sqrtChisq = SQRT( sqrtChisq);
 
                   for (size_t kk = 0; kk < params.size(); kk++)
                   {
@@ -684,7 +691,7 @@ namespace Mantid
 
                     double TotSliceIntensity = AttributeValues[IIntensities];
                     double TotSliceVariance = AttributeValues[IVariance];
-
+                    //std::cout<<"errs="<< errs[0]<<std::endl;
                     updatePeakInformation(    params,             errs,           names,
                                               TotVariance,       TotIntensity,
                                               TotSliceIntensity, TotSliceVariance, chisq,
@@ -763,7 +770,8 @@ namespace Mantid
         setProperty("OutputWorkspace", TabWS);
 
         setProperty("Intensity", TotIntensity);
-        setProperty("SigmaIntensity", sqrt(TotVariance));
+        setProperty("SigmaIntensity", SQRT(TotVariance));
+
 
       } catch (std::exception &ss)
       {
@@ -1340,11 +1348,16 @@ namespace Mantid
       for (size_t i = 0; i < errs.size(); i++) //NaN's
         if (errs[i] != errs[i])
           GoodNums = false;
+        else if( errs[i] < 0)
+          GoodNums = false;
         else if (params[i] != params[i])
           GoodNums = false;
 
       if (!GoodNums)
         g_log.debug("   Bad Slice.Some params and errs are not numbers");
+
+      if( !GoodNums)
+        return false;
 
       GoodNums = true;
 
@@ -1354,7 +1367,7 @@ namespace Mantid
       if (params[IIntensity] < 0)
         GoodNums = false;
 
-      double sqrChi = sqrt(chisq);
+      double sqrChi = SQRT(chisq);
 
       if (AttributeValues[IIntensities] > 0)
         if (sqrChi * errs[IIntensity] / AttributeValues[IIntensities] > .2)
@@ -1366,7 +1379,7 @@ namespace Mantid
             "   Bad Slice.Some params and errs are out of bounds or relative errors are too high");
 
       if (params[IIntensity] > 0)
-        if (errs[IIntensity] * sqrt(chisq) / params[IIntensity] > .1)
+        if (errs[IIntensity] * SQRT(chisq) / params[IIntensity] > .1)
         {
 
           sprintf(logInfo, std::string("   Bad Slice. rel errors too large= %7.2f\n").c_str(),
@@ -1411,7 +1424,7 @@ namespace Mantid
       double Variance = TotVariance + (backError * backError * B) * ncells * ncells
           + background * ncells;
        
-      return sqrt(Variance);
+      return SQRT(Variance);
 
     }
 
@@ -1461,7 +1474,7 @@ namespace Mantid
       TabWS->getRef<double> (std::string("ChiSqrOverDOF"), TableRow) = chisq;
 
       TabWS->getRef<double> (std::string("TotIntensity"), TableRow) = AttributeValues[IIntensities];
-      TabWS->getRef<double> (std::string("BackgroundError"), TableRow) = errs[Ibk] * sqrt(chisq);
+      TabWS->getRef<double> (std::string("BackgroundError"), TableRow) = errs[Ibk] * SQRT(chisq);
       TabWS->getRef<double> (std::string("ISAWIntensity"), TableRow) = AttributeValues[IIntensities]
                                                                              - params[Ibk] * ncells;
 
@@ -1481,7 +1494,7 @@ namespace Mantid
       TabWS->getRef<double> (std::string("Start Col"), TableRow) = AttributeValues[IStartCol];
       TabWS->getRef<double> (std::string("End Col"), TableRow) = AttributeValues[IStartCol]
           + AttributeValues[INCol] - 1;
-      TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = sqrt(AttributeValues[IVariance]);
+      TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = SQRT(AttributeValues[IVariance]);
       TabWS->getRef<string>( std::string("SpecIDs"), TableRow ) = spec_idList;
     }
 

@@ -7,7 +7,6 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 import ui.reflectometer.ui_refl_stitching
 
-import _qti
 import mantidplot
 from MantidFramework import *
 mtd.initialise(False)
@@ -377,11 +376,10 @@ class StitcherWidget(BaseWidget):
                 s.get_scaled_data(combined_ws)
 
                 plot_name = '%s: %s' % (self._graph, pol)
-                g = _qti.app.graph(plot_name)
+                g = mantidplot.graph(plot_name)
                 if g is not None:
                     continue
-                g_proxy = mantidplot.plotSpectrum(ws_list, [0], True)
-                g = g_proxy._getHeldObject()
+                g = mantidplot.plotSpectrum(ws_list, [0], True)
                 g.setName(plot_name)
                 l=g.activeLayer()
                 l.logYlinX()

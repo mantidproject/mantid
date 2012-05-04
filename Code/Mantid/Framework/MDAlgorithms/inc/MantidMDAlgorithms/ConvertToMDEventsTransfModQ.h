@@ -63,9 +63,18 @@ struct CoordTransformer<ConvertToMD::ModQ,MODE,CONV,TYPE,SAMPLE>
           pDet = &DetDir[0];
           pHost->getMinMax(dim_min,dim_max);
 
-          // dim_min here is a momentum and it is verified on momentum squared base
+          // dim_min/max here are momentums and they are verified on momentum squared base         
+          if(dim_min[0]<0)dim_min[0]=0;
+          if(dim_max[0]<0)dim_max[0]=0;
+
           dim_min[0]*=dim_min[0];
           dim_max[0]*=dim_max[0];
+          if(std::fabs(dim_min[0]-dim_max[0])<FLT_EPSILON||dim_max[0]<dim_min[0])
+          {
+              std::string ERR = "ModQ inelastic coordinate transformation: Min Q^2 value: "+boost::lexical_cast<std::string>(dim_min[0])+
+                                " is more or equal then Max Q^2 value: "+boost::lexical_cast<std::string>(dim_max[0]);
+              throw(std::invalid_argument(ERR));
+          }
         //
          return true;
     }
