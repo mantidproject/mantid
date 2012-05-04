@@ -76,37 +76,31 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     continue
                 
                 if _arg == 'Peak to pixel':
-                    peak_from.append(_val)
+                    peak_to.append(_val)
                     continue
                 
                 if _arg == 'Back from pixel':
-                    peak_from.append(_val)
+                    back_from.append(_val)
                     continue
                 
                 if _arg == 'Back to pixel':
-                    peak_from.append(_val)
+                    back_to.append(_val)
                     continue
             
         run_attenuator = []    
         for (run,att) in zip(run_number, attenuator):
-            run_attenuator.append(run + ':' + attenuator)
+            run_attenuator.append(run.strip() + ':' + att.strip())
+        join_string = ','
+        script_run_attenuator = join_string.join(run_attenuator)
             
         list_peak_back = []
         for (_peak_from, _peak_to, _back_from, _back_to) in zip(peak_from, peak_to, back_from, back_to):
-            list_peak_back.append([_peak_from,_peak_to,_back_from,_back_to])
-            
+            list_peak_back.append([int(_peak_from),int(_peak_to),int(_back_from),int(_back_to)])
         
-        
-            
-            
-                
-
-
-
-        
-    
-    
-    
+        new_script = algo + '(string_runs=' + script_run_attenuator
+        new_script += ',list_peak_back=' + list_peak_back
+        new_script += ',incident_medium=' + incident_medium
+        new_script += ',tof_range:' + tof_range + ')'
     
         return new_script
     
@@ -131,6 +125,9 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                 script_part2 += str(item.state())
 
         script += self.create_script(script_part2)
+        print script
+        print
+
 
         if file_name is not None:
             f = open(file_name, 'w')
