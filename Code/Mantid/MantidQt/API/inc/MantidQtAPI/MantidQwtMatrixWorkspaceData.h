@@ -11,9 +11,8 @@
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData:  public QObject,  public MantidQwtWorkspaceData
+class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData : public MantidQwtWorkspaceData
 {
-  Q_OBJECT
 public:
   MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
   MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data);

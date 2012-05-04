@@ -33,16 +33,15 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
     Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
     Mantid::API::MDNormalization normalize,
     bool isDistribution)
-  : QObject(),
-  m_workspace(workspace),
-  m_logScale(logScale), m_minPositive(0),
-  m_preview(false),
-  m_start(start),
-  m_end(end),
-  m_normalization(normalize),
-  m_isDistribution(isDistribution),
-  m_transform(NULL),
-  m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance)
+ : m_workspace(workspace),
+   m_logScale(logScale), m_minPositive(0),
+   m_preview(false),
+   m_start(start),
+   m_end(end),
+   m_normalization(normalize),
+   m_isDistribution(isDistribution),
+   m_transform(NULL),
+   m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance)
 {
   if (start.getNumDims() == 1 && end.getNumDims() == 1)
   {
@@ -87,7 +86,6 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
 //-----------------------------------------------------------------------------
 /// Copy constructor
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data)
-  : QObject()
 {
   this->operator =(data);
 }

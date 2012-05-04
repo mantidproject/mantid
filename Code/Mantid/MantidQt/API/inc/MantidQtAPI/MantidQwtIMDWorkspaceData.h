@@ -16,9 +16,8 @@
  * It implements the QwtData interface.
  *
  */
-class EXPORT_OPT_MANTIDQT_API MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
+class EXPORT_OPT_MANTIDQT_API MantidQwtIMDWorkspaceData : public MantidQwtWorkspaceData
 {
-
 public:
 
   /// For PlotAxisChoice, auto-determine it
@@ -26,8 +25,6 @@ public:
   /// For PlotAxisChoice, distance from start of line
   static const int PlotDistance = -1;
 
-  Q_OBJECT
-public:
   MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
       Mantid::Kernel::VMD start = Mantid::Kernel::VMD(), Mantid::Kernel::VMD end = Mantid::Kernel::VMD(),
       Mantid::API::MDNormalization normalize = Mantid::API::NoNormalization,

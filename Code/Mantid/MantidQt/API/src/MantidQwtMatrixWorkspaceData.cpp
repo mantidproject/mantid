@@ -2,22 +2,20 @@
 
 /// Constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
-: QObject(),
-m_workspace(workspace),
-m_spec(specIndex),
-m_X(workspace->readX(specIndex)),
-m_Y(workspace->readY(specIndex)),
-m_E(workspace->readE(specIndex)),
-m_isHistogram(workspace->isHistogramData()),
-m_binCentres(false),
-m_logScale(logScale),
-m_minPositive(0),
-m_isDistribution(distr)
+ : m_workspace(workspace),
+   m_spec(specIndex),
+   m_X(workspace->readX(specIndex)),
+   m_Y(workspace->readY(specIndex)),
+   m_E(workspace->readE(specIndex)),
+   m_isHistogram(workspace->isHistogramData()),
+   m_binCentres(false),
+   m_logScale(logScale),
+   m_minPositive(0),
+   m_isDistribution(distr)
 {}
 
 /// Copy constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data)
-: QObject()
 {
   this->operator =(data);
 }
