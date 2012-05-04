@@ -2,6 +2,9 @@ from MantidFramework import *
 from mantidsimple import *
 from numpy import zeros
 from pylab import *
+import os.path
+
+PRECISION = 0.010
 
 class sfCalculator():      
     
@@ -388,7 +391,35 @@ def recordSettings(a, b, error_a, error_b, name, instance):
     error_b.append(instance.error_b)
     name.append(instance.numerator + '/' + instance.denominator)
 
+
+def variable_value_splitter(variable_value):
+    """
+        This function split the variable that looks like "LambdaRequested:3.75"
+        and returns a dictionnary of the variable name and value        
+    """
+    
+    _split = variable_value.split('=')
+    variable = _split[0]
+    value = float(_split[1])
+    return {'variable':variable, 'value':value}
+
+def isWithinRange(value1, value2):
+    """
+        This function checks if the two values and return true if their
+        difference is <= PRECISION
+    """
+    print 'value1: ' + str(value1)
+    print 'value2: ' + str(value2)
+    
+    
+    diff = abs(float(value1)) - abs(float(value2))
+    if abs(diff) <= PRECISION:
+        return True
+    else:
+        return False
+
 def outputFittingParameters(a, b, error_a, error_b, 
+                            lambda_requested,
                             S1H, S2H, 
                             S1W, S2W, 
                             output_file_name):
@@ -396,6 +427,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     Create an ascii file of the various fittings parameters
     y=a+bx
     1st column: S1H value
+    
     2nd column: S2H value
     3rd column: S1W value
     4rd column: S2W value
@@ -404,21 +436,104 @@ def outputFittingParameters(a, b, error_a, error_b,
     7th column: error_a
     8th column: error_b
     """
-    _content = ['#y=a+bx\n', '#\n',
-                '#S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
-    sz = len(a)
-    for i in range(sz):
-        _line = str(abs(S1H[i])) + ' ' + str(abs(S2H[i])) + ' '
-        _line += str(abs(S1W[i])) + ' ' + str(abs(S2W[i])) + ' '
-        _line += str(a[i]) + ' '
-        _line += str(b[i]) + ' '
-        _line += str(error_a[i]) + ' '
-        _line += str(error_b[i]) + '\n'
-        _content.append(_line)
+
+    bFileExist = False
+    #First we need to check if the file already exist
+    if os.path.isfile(output_file_name):
+        bFileExist = True
     
-    f = open(output_file_name, 'w')
-    f.writelines(_content)
-    f.close()
+    #then if it does, parse the file and check if following infos are
+    #already defined:
+    #  lambda_requested, S1H, S2H, S1W, S2W
+    if (bFileExist):
+        f = open(output_file_name, 'r')
+        text = f.readlines()
+#        split_lines = text.split('\n')
+        split_lines = text
+        
+        
+        entry_list_to_add = []
+        
+        sz = len(a)
+        for i in range(sz):
+
+            _match = False
+        
+            for _line in split_lines:
+                if _line[0] == '#':
+                    continue
+            
+                _line_split = _line.split(' ')
+                _lambdaRequested = variable_value_splitter(_line_split[0])
+                if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
+                    _s1h = variable_value_splitter(_line_split[1])
+                    if (isWithinRange(_s1h['value'], S1H[i])):
+                        _s2h = variable_value_splitter(_line_split[2])
+                        if (isWithinRange(_s2h['value'],S2H[i])):
+                            _s1w = variable_value_splitter(_line_split[3])
+                            if (isWithinRange(_s1w['value'],S1W[i])):
+                                _s2w = variable_value_splitter(_line_split[4])
+                                if (isWithinRange(_s2w['value'],S2W[i])):
+                                    _match = True
+                                    break
+            
+            if _match == False:
+                entry_list_to_add.append(i)
+
+        _content = []
+        for j in entry_list_to_add:
+            
+            _line = 'LambdaRequested=' + str(lambda_requested) + ' '
+            
+            _S1H = "{0:.8f}".format(abs(S1H[j]))
+            _S2H = "{0:.8f}".format(abs(S2H[j]))
+            _S1W = "{0:.8f}".format(abs(S1W[j]))
+            _S2W = "{0:.8f}".format(abs(S2W[j]))
+            _a = "{0:.8f}".format(a[j])
+            _b = "{0:.8f}".format(b[j])
+            _error_a = "{0:.8f}".format(float(error_a[j]))
+            _error_b = "{0:.8f}".format(float(error_b[j]))
+            
+            _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
+            _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+            _line += 'a=' + _a + ' '
+            _line += 'b=' + _b + ' '
+            _line += 'error_a=' + _error_a + ' '
+            _line += 'error_b=' + _error_b + '\n'
+            _content.append(_line)
+    
+        f = open(output_file_name, 'a')
+        f.writelines(_content)
+        f.close()
+        
+    else:
+
+        _content = ['#y=a+bx\n', '#\n',
+                    '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+        sz = len(a)
+        for i in range(sz):
+            _line = 'LambdaRequested=' + str(lambda_requested) + ' '
+            
+            _S1H = "{0:.8f}".format(abs(S1H[i]))
+            _S2H = "{0:.8f}".format(abs(S2H[i]))
+            _S1W = "{0:.8f}".format(abs(S1W[i]))
+            _S2W = "{0:.8f}".format(abs(S2W[i]))
+            _a = "{0:.8f}".format(a[i])
+            _b = "{0:.8f}".format(b[i])
+            _error_a = "{0:.8f}".format(float(error_a[i]))
+            _error_b = "{0:.8f}".format(float(error_b[i]))
+            
+            _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
+            _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+            _line += 'a=' + _a + ' '
+            _line += 'b=' + _b + ' '
+            _line += 'error_a=' + _error_a + ' '
+            _line += 'error_b=' + _error_b + '\n'
+            _content.append(_line)
+    
+        f = open(output_file_name, 'w')
+        f.writelines(_content)
+        f.close()
 
 def createIndividualList(string_list_files):
     """
@@ -617,7 +732,7 @@ def help():
 def calculate(string_runs=None, 
 #              list_attenuator=None, 
               list_peak_back=None, 
-              output_path=None,
+              output_file_name=None,
               tof_range=None):  
     """
     In this current version, the program will automatically calculates
@@ -783,20 +898,21 @@ def calculate(string_runs=None,
             finalS1W.append(S1W[index_numerator])
             finalS2W.append(S2W[index_numerator])
 
-        #output the fitting parameters in an ascii
-        if (output_path is None):
-            output_path = '/home/j35/Desktop/'
-        
+        #output the fitting parameters in an ascii        
         _lambdaRequest = "{0:.2f}".format(lambdaRequest[0][0])
         
-        output_pre = 'SFcalculator_lr' + str(_lambdaRequest)
-        output_ext = '.txt'
-        output_file = output_path + '/' + output_pre + output_ext        
+#        output_pre = 'SFcalculator_lr' + str(_lambdaRequest)
+#        output_ext = '.txt'
+#        output_file = output_path + '/' + output_pre + output_ext        
+        
+        if output_file_name is None:
+            output_file_name = "/home/j35/Desktop/RefLsf.cfg"
         
         outputFittingParameters(a, b, error_a, error_b, 
+                                _lambdaRequest,
                                 finalS1H, finalS2H, 
-                                finalS1W, finalS2W, 
-                                output_file)
+                                finalS1W, finalS2W,
+                                output_file_name)
 
         print 'Done !'
 
