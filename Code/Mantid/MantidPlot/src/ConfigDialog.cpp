@@ -78,6 +78,8 @@ Description          : Preferences dialog
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 
+#include <limits>
+
 
 ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl )
@@ -1154,6 +1156,7 @@ void ConfigDialog::initCurveFittingTab()
 
   grid->addWidget(new QLabel(tr("Peak Radius (in FWHM)")),5,0);
   peakRadius = new QSpinBox();
+  peakRadius->setMaximum(std::numeric_limits<int>::max());
   grid->addWidget(peakRadius, 5,1);
 
   grid->addWidget(new QLabel(tr("Double property decimals")),6,0);
