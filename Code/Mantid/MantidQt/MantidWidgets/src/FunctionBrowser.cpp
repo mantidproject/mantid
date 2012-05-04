@@ -1232,7 +1232,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop)
         }
         catch(std::exception& e)
         {
-          if ( attName == "Formula" && attr.asString().empty() )
+          if ( attName == "Formula" && attr.asString().empty() && children.size() == 1 )
           {
             fun->setAttributeValue("Formula","x");
           }
