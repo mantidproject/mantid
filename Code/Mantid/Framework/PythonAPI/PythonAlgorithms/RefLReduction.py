@@ -421,9 +421,6 @@ class RefLReduction(PythonAlgorithm):
                     _y_px_range = _Larray
                 else:
                     _y_px_range = _Rarray
-                    _y_px_range = _Larray
-                else:
-                    _y_px_range = _Rarray
 
             for i in _tof_range:
                 _sum = 0.
