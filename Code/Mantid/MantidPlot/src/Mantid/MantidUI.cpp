@@ -83,7 +83,8 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
   m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
-  m_appWindow(aw), m_vatesSubWindow(NULL)
+  m_appWindow(aw), m_vatesSubWindow(NULL),
+  g_log(Mantid::Kernel::Logger::get("MantidUI"))
 {
   // To be able to use them in queued signals they need to be registered
   static bool registered_addtional_types = false;
@@ -1617,7 +1618,15 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
   }
   else
   {
-    alg->executeAsync();
+    try
+    {
+      alg->executeAsync();
+    }
+    catch (Poco::NoThreadAvailableException & e)
+    {
+      g_log.error() << "No thread was available to run the " << alg->name() << " algorithm in the background." << std::endl;
+      return false;
+    }
     return true;
   }
 }

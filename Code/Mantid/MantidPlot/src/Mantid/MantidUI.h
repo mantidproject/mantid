@@ -524,6 +524,9 @@ private:
 
   QMdiSubWindow *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
+  /// Logger object
+  Mantid::Kernel::Logger & g_log;
+
 };
 
 
