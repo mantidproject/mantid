@@ -129,7 +129,6 @@ public:
     tsp.addValues(times, values);
     TS_ASSERT_EQUALS( tsp.size(), 1000);
     TS_ASSERT_EQUALS( tsp.nthValue(3), 3.0);
-    //std::cout << tim << " to add " << num << " entries." << std::endl;
 
   }
 
@@ -587,9 +586,7 @@ public:
     TS_ASSERT_EQUALS(p1->lastTime(), tf);
 
     TS_ASSERT_DELTA(p1->getSingleValue(t0), 9.99, 1.0E-8);
-    // std::cout << "\n\n.... .... " << std::endl;
     TS_ASSERT_DELTA(p1->getSingleValue(tf), 110.55, 1.0E-8);
-    // std::cout << "... ... \n\n";
     TS_ASSERT_DELTA(p1->getSingleValue(t1), 19.99, 1.0E-8);
 
     // -1. Clean
@@ -709,7 +706,7 @@ public:
   /*
    * Test countSize()
    */
-  void Ntest_CountSize()
+  void test_CountSize()
   {
     // 1. Create property
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
@@ -721,16 +718,6 @@ public:
     // 2. Check no double entry
     p->countSize();
     TS_ASSERT_EQUALS(p->size() , 4);
-
-    // 3. Add double entry
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
-    p->countSize();
-    TS_ASSERT_EQUALS(p->size() , 3);
-
-    // 4. Add another entry
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",200.00) );
-    p->countSize();
-    TS_ASSERT_EQUALS(p->size() , 2);
 
     // -1. Clean
     delete p;
@@ -797,8 +784,6 @@ public:
       std::vector<Mantid::Kernel::DateAndTime> times1 = p1->timesAsVector();
       for (size_t i=0; i<static_cast<size_t>(p->size()); i++)
       {
-        // std::cout << "p vs p1 " << times0[i] << "  ... " << times1[i] << std::endl;
-
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]), p1->getSingleValue(times1[i]), 1.0E-9);
       }
@@ -1057,7 +1042,7 @@ public:
   /*
    * Test nthInterval()
    */
-  void Ntest_nthInterval()
+  void test_nthInterval()
   {
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
 
@@ -1068,20 +1053,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:05",2.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:15",3.00) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:15",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:55",5.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:35",4.00) );
 
     // 3. Test
-    std::cout << std::endl;
-    /*
-    for (size_t i = 0; i < 6; i ++)
-    {
-      Mantid::Kernel::TimeInterval dt0 = p->nthInterval(i);
-      std::cout << "Interval " << i << ": " <<  dt0.begin() << " --- " << dt0.end()
-          << "  Length = " << dt0.length() << std::endl;
-    }
-    */
-
     Mantid::Kernel::TimeInterval dt0 = p->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
     TS_ASSERT_EQUALS(dt0.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:05"));
@@ -1091,14 +1066,8 @@ public:
     TS_ASSERT_EQUALS(dt1.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:15"));
 
     Mantid::Kernel::TimeInterval dt2 = p->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:35"));
-    TS_ASSERT_EQUALS(dt2.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:55"));
-
-    Mantid::Kernel::TimeInterval dt3 = p->nthInterval(3);
-    TS_ASSERT_EQUALS(dt3.begin(), Mantid::Kernel::DateAndTime("1990-01-01T00:00:00"));
-    TS_ASSERT_EQUALS(dt3.end(), Mantid::Kernel::DateAndTime(0));
-
-
+    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_EQUALS(dt2.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:35"));
 
     // -1 Clean
     delete p;
@@ -1111,8 +1080,6 @@ public:
    */
   void test_filter()
   {
-    std::cout << "\nTest Filter" << std::endl;
-
     // 1. Create a base property
     Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
@@ -1128,10 +1095,6 @@ public:
     std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
-    std::cout << "P1" << std::endl;
-    for (size_t i = 0; i < times.size(); i ++)
-      std::cout << times[i] << " : " << values[i] << std::endl;
-
     // b) Copy size and interval information in order to verify clearFilter()
     size_t origsize = p1->size();
     std::vector<Mantid::Kernel::TimeInterval> dts;
@@ -1139,7 +1102,6 @@ public:
     for (size_t i = 0; i < origsize; i ++)
     {
       dts.push_back(p1->nthInterval(static_cast<int>(i)));
-      // std::cout << i << ":" << dts[i-1] << std::endl;
     }
 
     // 2. Create a filter
@@ -1149,7 +1111,6 @@ public:
     filter->addValue("2007-11-30T16:18:40", true);
     filter->addValue("2007-11-30T16:19:30", false);
 
-    std::cout << "Filter Start... " << std::endl;
     p1->filterWith(filter);
 
     // 4. Formal check (1) Size  (2) Number of Interval
@@ -1246,7 +1207,6 @@ public:
     Mantid::Kernel::TimeInterval dt12 = p1->nthInterval(11);
     TS_ASSERT_EQUALS(dt12.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:20:10"));
     TS_ASSERT_EQUALS(dt12.end(), Mantid::Kernel::DateAndTime("2007-11-30T17:19:30"));
-    std::cout << "11th:  " << dt12.begin() << ", " << dt12.end() << std::endl;
     double v12 = p1->nthValue(11);
     TS_ASSERT_DELTA(v12, 20, 1.0E-8);
 
@@ -1266,8 +1226,6 @@ public:
     */
    void test_filterBoundary2()
    {
-     std::cout << "\nTest Filter (Boundary condition 2)" << std::endl;
-
      // 1. Create a base property
      Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
      std::vector<double> deltaTs;
@@ -1294,7 +1252,7 @@ public:
 
      // 3. Check size
      p1->countSize();
-     TS_ASSERT_EQUALS(p1->size(), 11);
+     TS_ASSERT_EQUALS(p1->size(), 10);
 
      // 4. Check interval
      Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
@@ -1319,8 +1277,6 @@ public:
      */
     void test_filterBoundary3()
     {
-      std::cout << "\nTest Filter (Boundary condition 3)" << std::endl;
-
       // 1. Create a base property
       Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
       std::vector<double> deltaTs;
@@ -1380,8 +1336,6 @@ public:
 
     void test_filterBoundary4()
     {
-      std::cout << "\nTest Filter (Boundary condition 4)" << std::endl;
-
       // 1. Create a base property
       Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
       std::vector<double> deltaTs;
@@ -1406,14 +1360,6 @@ public:
 
       p1->filterWith(filter);
 
-      /*
-      for (size_t i = 0; i < p1->size(); i ++)
-      {
-        Mantid::Kernel::TimeInterval dth = p1->nthInterval(i);
-        std::cout << "Interval " << i << " : " << dth.begin() << ", " << dth.end() << std::endl;
-      }
-      */
-
       // 3. Check size
       p1->countSize();
       TS_ASSERT_EQUALS(p1->size(), 14);
@@ -1424,27 +1370,6 @@ public:
       TS_ASSERT_EQUALS(dt0.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
       double v0 = p1->nthValue(0);
       TS_ASSERT_DELTA(v0, 2, 1.0E-8);
-
-      /*
-      Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-      std::cout << "Interval 2:  " << dt2.begin() << ", " << dt2.end() << std::endl;
-      TS_ASSERT_EQUALS(dt2.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-      TS_ASSERT_EQUALS(dt2.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
-      double v2 = p1->nthValue(2);
-      TS_ASSERT_DELTA(v2, 3, 1.0E-8);
-
-      Mantid::Kernel::TimeInterval dt9 = p1->nthInterval(9);
-      TS_ASSERT_EQUALS(dt9.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:18:30"));
-      TS_ASSERT_EQUALS(dt9.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:18:40"));
-      double v9 = p1->nthValue(9);
-      TS_ASSERT_DELTA(v9, 10, 1.0E-8);
-
-      Mantid::Kernel::TimeInterval dt10 = p1->nthInterval(10);
-      TS_ASSERT_EQUALS(dt10.begin(), Mantid::Kernel::DateAndTime("2007-11-30T16:19:30"));
-      TS_ASSERT_EQUALS(dt10.end(), Mantid::Kernel::DateAndTime("2007-11-30T16:19:40"));
-      double v10 = p1->nthValue(10);
-      TS_ASSERT_DELTA(v10, 16, 1.0E-8);
-      */
 
       // 5. Clear filter
       p1->clearFilter();
