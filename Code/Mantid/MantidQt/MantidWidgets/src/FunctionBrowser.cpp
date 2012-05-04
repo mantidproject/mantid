@@ -143,6 +143,7 @@ void FunctionBrowser::createBrowser()
   m_indexManager = new QtStringPropertyManager(this);
   m_tieManager = new QtStringPropertyManager(this);
   m_constraintManager = new QtStringPropertyManager(this);
+  m_formulaManager = new QtStringPropertyManager(this);
 
   //m_filenameManager = new QtStringPropertyManager(this);
   //m_formulaManager = new QtStringPropertyManager(this);
@@ -152,7 +153,7 @@ void FunctionBrowser::createBrowser()
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
   //StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(this);
-  //FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
+  FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser();
   // assign factories to property managers
@@ -163,6 +164,7 @@ void FunctionBrowser::createBrowser()
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
   m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
@@ -425,8 +427,8 @@ void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
   }
   else
   {
-    std::cerr << "add to: " << prop->propertyName().toStdString() << std::endl;
     Mantid::API::IFunction_sptr parentFun =  getFunction(prop);
+    if ( !parentFun ) return;
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(parentFun);
     if ( !cf )
     {
@@ -457,8 +459,17 @@ protected:
   /// Create string property
   FunctionBrowser::AProperty apply(const std::string& str)const
   {
-    QtProperty* prop = m_browser->m_attributeStringManager->addProperty(m_attName);
-    m_browser->m_attributeStringManager->setValue(prop, QString::fromStdString(str));
+    QtProperty* prop = NULL;
+    if ( m_attName == "Formula" )
+    {
+      prop = m_browser->m_formulaManager->addProperty(m_attName);
+      m_browser->m_formulaManager->setValue(prop, QString::fromStdString(str));
+    }
+    else
+    {
+      prop = m_browser->m_attributeStringManager->addProperty(m_attName);
+      m_browser->m_attributeStringManager->setValue(prop, QString::fromStdString(str));
+    }
     return m_browser->addProperty(m_parent,prop);
   }
   /// Create double property
@@ -479,6 +490,46 @@ private:
   FunctionBrowser* m_browser;
   QtProperty* m_parent;
   QString m_attName;
+};
+
+/**
+ * Attribute visitor to set an attribute from a QtProperty. Depending on the attribute type
+ * the appropriate apply() method is used.
+ */
+class SetAttributeFromProperty: public Mantid::API::IFunction::AttributeVisitor<>
+{
+public:
+  SetAttributeFromProperty(FunctionBrowser* browser, QtProperty* prop)
+    :m_browser(browser),m_prop(prop)
+  {
+  }
+protected:
+  /// Set string attribute
+  void apply(std::string& str)const
+  {
+    QString attName = m_prop->propertyName();
+    if ( attName == "Formula" )
+    {
+      str = m_browser->m_formulaManager->value(m_prop).toStdString();
+    }
+    else
+    {
+      str = m_browser->m_attributeStringManager->value(m_prop).toStdString();
+    }
+  }
+  /// Set double attribute
+  void apply(double& d)const
+  {
+    d = m_browser->m_attributeDoubleManager->value(m_prop);
+  }
+  /// Set int attribute
+  void apply(int& i)const
+  {
+    i = m_browser->m_attributeIntManager->value(m_prop);
+  }
+private:
+  FunctionBrowser* m_browser;
+  QtProperty* m_prop;
 };
 
 /**
@@ -633,7 +684,10 @@ bool FunctionBrowser::isFunction(QtProperty* prop) const
  */
 bool FunctionBrowser::isStringAttribute(QtProperty* prop) const
 {
-  return prop && dynamic_cast<QtAbstractPropertyManager*>(m_attributeStringManager) == prop->propertyManager();
+  return prop && (
+    dynamic_cast<QtAbstractPropertyManager*>(m_attributeStringManager) == prop->propertyManager() ||
+    dynamic_cast<QtAbstractPropertyManager*>(m_formulaManager) == prop->propertyManager()
+    );
 }
 
 /**
@@ -662,49 +716,6 @@ bool FunctionBrowser::isAttribute(QtProperty* prop) const
 {
   return isStringAttribute(prop) || isDoubleAttribute(prop) || isIntAttribute(prop);
 }
-
-/**
- * Get string attribute
- * @param prop :: An attribute property
- */
-std::string FunctionBrowser::getStringAttribute(QtProperty* prop) const
-{
-  if (isStringAttribute(prop))
-  {
-    return m_attributeStringManager->value(prop).toStdString();
-  }
-  throw std::runtime_error("FunctionBrowser: attribute " + prop->propertyName().toStdString() +
-    " is not string.");
-}
-
-/**
- * Get double attribute
- * @param prop :: An attribute property
- */
-double FunctionBrowser::getDoubleAttribute(QtProperty* prop) const
-{
-  if (isDoubleAttribute(prop))
-  {
-    return m_attributeDoubleManager->value(prop);
-  }
-  throw std::runtime_error("FunctionBrowser: attribute " + prop->propertyName().toStdString() +
-    " is not double.");
-}
-
-/**
- * Get int attribute
- * @param prop :: An attribute property
- */
-int FunctionBrowser::getIntAttribute(QtProperty* prop) const
-{
-  if (isIntAttribute(prop))
-  {
-    return m_attributeIntManager->value(prop);
-  }
-  throw std::runtime_error("FunctionBrowser: attribute " + prop->propertyName().toStdString() +
-    " is not int.");
-}
-
 
 /**
  * Check if property is a function parameter
@@ -1027,11 +1038,6 @@ bool FunctionBrowser::hasUpperBound(QtProperty* prop) const
  */
 void FunctionBrowser::popupMenu(const QPoint &)
 {
-  auto fun = getFunction();
-  if (fun)
-  {
-    std::cerr << fun->asString() << std::endl;
-  }
   auto item = m_browser->currentItem();
   if (!item)
   {
@@ -1159,7 +1165,11 @@ void FunctionBrowser::addFunction()
     else
     {
       cf.reset(new Mantid::API::CompositeFunction);
-      cf->addFunction(getFunction(prop));
+      auto f0 = getFunction(prop);
+      if ( f0 )
+      {
+        cf->addFunction(f0);
+      }
       cf->addFunction(f);
       setFunction(cf);
     }
@@ -1196,26 +1206,43 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop)
       if (isFunction(child))
       {
         auto f = getFunction(child);
-        cf->addFunction(f);
+        // if f is null ignore that function
+        if ( f )
+        {
+          cf->addFunction(f);
+        }
       }
     }
   }
   else
   {
+    // loop over the children properties and set parameters and attributes
     auto children = prop->subProperties();
     foreach(QtProperty* child, children)
     {
-      if (isStringAttribute(child))
+      if (isAttribute(child))
       {
-        fun->setAttributeValue(child->propertyName().toStdString(),getStringAttribute(child));
-      }
-      if (isDoubleAttribute(child))
-      {
-        fun->setAttributeValue(child->propertyName().toStdString(),getDoubleAttribute(child));
-      }
-      if (isIntAttribute(child))
-      {
-        fun->setAttributeValue(child->propertyName().toStdString(),getIntAttribute(child));
+        std::string attName = child->propertyName().toStdString();
+        SetAttributeFromProperty setter(this,child);
+        Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
+        attr.apply(setter);
+        try
+        {
+          fun->setAttribute(attName,attr);
+        }
+        catch(std::exception& e)
+        {
+          if ( attName == "Formula" && attr.asString().empty() )
+          {
+            fun->setAttributeValue("Formula","x");
+          }
+          else
+          {
+            QMessageBox::warning(this,"Mantid - Warning","Attribute " + child->propertyName() + 
+              " cannot be set for function " + prop->propertyName() + ":\n" + e.what() );
+            return Mantid::API::IFunction_sptr();
+          }
+        }
       }
       else if (isParameter(child))
       {
@@ -1473,25 +1500,10 @@ void FunctionBrowser::attributeChanged(QtProperty* prop)
   auto fun = Mantid::API::FunctionFactory::Instance().createFunction(funProp->propertyName().toStdString());
 
   std::string attName = prop->propertyName().toStdString();
-  if ( isStringAttribute(prop) )
-  {
-    std::string value = getStringAttribute(prop);
-    fun->setAttributeValue(attName, value);
-  }
-  else if ( isDoubleAttribute(prop) )
-  {
-    double value = getDoubleAttribute(prop);
-    fun->setAttributeValue(attName, value);
-  }
-  else if ( isIntAttribute(prop) )
-  {
-    int value = getIntAttribute(prop);
-    fun->setAttributeValue(attName, value);
-  }
-  else
-  {
-    throw std::runtime_error("FunctionBrowser: unknown attribute type.");
-  }
+  SetAttributeFromProperty setter(this,prop);
+  Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
+  attr.apply(setter);
+  fun->setAttribute(attName,attr);
 
   setFunction(funProp, fun);
   updateFunctionIndices();
