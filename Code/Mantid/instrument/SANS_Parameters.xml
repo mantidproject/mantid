@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "SANS" date = "20th May 2010">
+    
+    <component-link name="SANS">
+    
+		<parameter name="detector-name" type="string">
+		  <value val="detector1"/>
+		</parameter>
+		
+		<parameter name="number-of-x-pixels">
+		  <value val="80"/>
+		</parameter>
+		
+		<parameter name="number-of-y-pixels">
+		  <value val="80"/>
+		</parameter>
+		
+		<parameter name="x-pixel-size">
+		  <value val="9.04"/>
+		</parameter>
+
+		<parameter name="y-pixel-size">
+		  <value val="10.01"/>
+		</parameter>
+
+    </component-link>
+</parameter-file>    

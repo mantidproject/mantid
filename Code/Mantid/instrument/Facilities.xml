@@ -316,6 +316,12 @@
    </instrument> 
 </facility>
 
+<facility name="LENS" FileExtensions=".nxs,.dat,.xml">
+   <instrument name="SANS"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+</facility>
+
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
    <livedata listener="MockILiveListener"/>
