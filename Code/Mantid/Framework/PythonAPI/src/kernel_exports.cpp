@@ -187,10 +187,28 @@ namespace PythonAPI
 
     class_<Mantid::Kernel::TimeSeriesProperty<double>, \
            bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_dbl", no_init)
-              .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<double>::getStatistics)
-              .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
-              .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::timesAsVector)
-    	      ;
+      .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<double>::getStatistics)
+      .add_property("value", &Mantid::Kernel::TimeSeriesProperty<double>::valuesAsVector)
+      .add_property("times", &Mantid::Kernel::TimeSeriesProperty<double>::timesAsVector)
+      .def("valueAsString", &TimeSeriesProperty<double>::value)
+      .def("size", &TimeSeriesProperty<double>::size)
+      .def("firstTime", &TimeSeriesProperty<double>::firstTime)
+      .def("firstValue", &TimeSeriesProperty<double>::firstValue)
+      .def("lastTime", &TimeSeriesProperty<double>::lastTime)
+      .def("lastValue", &TimeSeriesProperty<double>::lastValue)
+      .def("nthValue", &TimeSeriesProperty<double>::nthValue)
+      .def("nthTime", &TimeSeriesProperty<double>::nthTime)
+    ;
+
+    class_<time_duration>("time_duration", no_init)
+    .def("hours", &time_duration::hours, "Returns the normalized number of hours")
+    .def("minutes", &time_duration::minutes, "Returns the normalized number of minutes +/-(0..59)")
+    .def("seconds", &time_duration::seconds, "Returns the normalized number of seconds +/-(0..59)")
+    .def("total_seconds", &time_duration::total_seconds, "Get the total number of seconds truncating any fractional seconds")
+    .def("total_milliseconds", &time_duration::total_milliseconds, "Get the total number of milliseconds truncating any remaining digits")
+    .def("total_microseconds", &time_duration::total_microseconds, "Get the total number of microseconds truncating any remaining digits")
+    .def("total_nanoseconds", &time_duration::total_nanoseconds, "Get the total number of nanoseconds truncating any remaining digits")
+    ;
 
     register_ptr_to_python<TimeSeriesProperty<bool>*>();
     register_ptr_to_python<const TimeSeriesProperty<bool>*>();
@@ -219,6 +237,8 @@ namespace PythonAPI
         .def(self += int64_t())
         .def(self - int64_t())
         .def(self -= int64_t())
+        // cppcheck-suppress duplicateExpression
+        .def(self - self)
         .def("total_nanoseconds", &Mantid::Kernel::DateAndTime::totalNanoseconds)
         .def("totalNanoseconds", &Mantid::Kernel::DateAndTime::totalNanoseconds)
         ;

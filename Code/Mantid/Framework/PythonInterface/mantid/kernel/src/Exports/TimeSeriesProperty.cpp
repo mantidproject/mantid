@@ -31,6 +31,8 @@ namespace
       .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue) \
       .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime) \
       .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue) \
+      .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue) \
+      .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime) \
       DEF_GET_STATS(TYPE) \
       ;
   ;
