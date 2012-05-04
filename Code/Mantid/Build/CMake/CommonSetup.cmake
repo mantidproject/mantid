@@ -211,7 +211,8 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
         Framework/PythonAPI/src/boostpython.cpp
-        MantidPlot/src/origin/OPJFile.h # Third-party header
+        MantidPlot/src/origin/OPJFile.h
+        MantidPlot/src/origin/OPJFile.cpp
       )
 
   # setup the standard arguments

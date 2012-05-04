@@ -242,7 +242,7 @@ void MultiPeakFit::insertPeakFunctionCurve(double *x, double *y, int peak)
 
 void MultiPeakFit::generateFitCurve()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(parent());
 	if (!d_gen_function)
 		d_points = d_n;
 
@@ -395,7 +395,7 @@ QString MultiPeakFit::logFitInfo(int iterations, int status)
 	if (d_peaks == 1)
 		return info;
 
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(parent());
     QLocale locale = app->locale();
 
 	info += tr("Peak") + "\t" + tr("Area") + "\t";

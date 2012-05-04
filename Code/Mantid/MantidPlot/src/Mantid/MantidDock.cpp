@@ -1678,7 +1678,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
         {
           return getLastModified(this) < getLastModified(other_ptr);
         }
-        catch(std::out_of_range e)
+        catch(std::out_of_range &e)
         {
           QMessageBox::warning(m_parent, "Error", e.what());
           return false;

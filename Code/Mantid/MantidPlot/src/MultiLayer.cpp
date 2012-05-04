@@ -169,7 +169,7 @@ Graph *MultiLayer::layer(int num)
     if (index < 0 || index >= graphsList.count())
         return 0;
 
-	return (Graph*) graphsList.at(index);
+    return static_cast<Graph*>(graphsList.at(index));
 }
 
 void MultiLayer::insertCurve(MultiLayer* ml, int i)
@@ -226,13 +226,13 @@ void MultiLayer::activateGraph(LayerButton* button)
 {
 	for (int i=0;i<buttonsList.count();i++)
 	{
-		LayerButton *btn=(LayerButton*)buttonsList.at(i);
+        LayerButton *btn=static_cast<LayerButton*>(buttonsList.at(i));
 		if (btn->isOn())
 			btn->setOn(false);
 
 		if (btn == button)
 		{
-			active_graph = (Graph*) graphsList.at(i);
+            active_graph = static_cast<Graph*>(graphsList.at(i));
 			//active_graph->setFocus();
 			active_graph->raise();//raise layer on top of the layers stack
 			button->setOn(true);
@@ -267,10 +267,10 @@ void MultiLayer::setActiveGraph(Graph* g)
 	active_graph->raise();//raise layer on top of the layers stack
 
 	for(int i=0; i<graphsList.count(); i++){
-		Graph *gr = (Graph *)graphsList.at(i);
+        Graph *gr = static_cast<Graph *>(graphsList.at(i));
 		gr->deselect();
 
-		LayerButton *btn = (LayerButton *)buttonsList.at(i);
+        LayerButton *btn = static_cast<LayerButton *>(buttonsList.at(i));
 		if (gr == g)
 			btn->setOn(true);
 		else
@@ -303,7 +303,7 @@ void MultiLayer::resizeLayers (QResizeEvent *re)
 			QObjectList lst = g->plotWidget()->children();
 			foreach(QObject *o, lst){
 				if (o->isA("LegendWidget"))
-					((LegendWidget *)o)->setFixedCoordinatesMode();
+                    static_cast<LegendWidget *>(o)->setFixedCoordinatesMode();
 			}
 
 			int gx = qRound(g->x()*w_ratio);
@@ -383,12 +383,12 @@ void MultiLayer::removeLayer()
 		return;
 	}
 
-	active_graph=(Graph*) graphsList.at(index);
+    active_graph=static_cast<Graph*>( graphsList.at(index));
 
 	for (i=0;i<(int)graphsList.count();i++){
-		Graph *gr=(Graph *)graphsList.at(i);
+        Graph *gr=static_cast<Graph *>(graphsList.at(i));
 		if (gr == active_graph){
-			LayerButton *button = (LayerButton *)buttonsList.at(i);
+            LayerButton *button = static_cast<LayerButton *>(buttonsList.at(i));
 			button->setOn(TRUE);
 			break;
 		}
@@ -426,7 +426,7 @@ QSize MultiLayer::arrangeLayers(bool userSize)
 
 	for (int i=0; i<layers; i++)
 	{//calculate scales/canvas dimensions reports for each layer and stores them in the above vectors
-		Graph *gr = (Graph *)graphsList.at(i);
+        Graph *gr = static_cast<Graph *>(graphsList.at(i));
 		QwtPlot *plot = gr->plotWidget();
 		QwtPlotLayout *plotLayout=plot->plotLayout();
 		QRect cRect=plotLayout->canvasRect();
@@ -537,7 +537,7 @@ QSize MultiLayer::arrangeLayers(bool userSize)
 						+ gsl_vector_get(maxXBottomHeight, row) - gsl_vector_get(xBottomR, i)));
 
 		//resizes and moves layers
-		Graph *gr = (Graph *)graphsList.at(i);
+        Graph *gr = static_cast<Graph *>(graphsList.at(i));
 		bool autoscaleFonts = false;
 		if (!userSize){//When the user specifies the layer canvas size, the window is resized
 			//and the fonts must be scaled accordingly. If the size is calculated
@@ -657,7 +657,7 @@ QPixmap MultiLayer::canvasPixmap()
     pic.fill();
     QPainter p(&pic);
 	foreach (Graph *g, graphsList){
-		Plot *plot = (Plot *)g->plotWidget();
+        Plot *plot = static_cast<Plot *>(g->plotWidget());
 		plot->print(&p, QRect(g->pos(), plot->size()));
 	}
 	p.end();
@@ -788,7 +788,7 @@ void MultiLayer::exportVector(const QString& fileName, int res, bool color, bool
 
     QPainter paint(&printer);
 	foreach (Graph *g, graphsList){
-        Plot *plot = (Plot *)g->plotWidget();
+        Plot *plot = static_cast<Plot *>(g->plotWidget());
 
         QPoint pos = g->pos();
         pos = QPoint(qRound(x_margin + pos.x()*scaleFactorX), qRound(y_margin + pos.y()*scaleFactorY));
@@ -808,7 +808,7 @@ void MultiLayer::exportSVG(const QString& fname)
 
 	QPainter p(&generator);
 	foreach (Graph *g, graphsList){
-		Plot *plot = (Plot *)g->plotWidget();
+        Plot *plot = static_cast<Plot *>(g->plotWidget());
 		plot->print(&p, QRect(g->pos(), plot->size()));
 	}
 	p.end();
@@ -823,7 +823,7 @@ void MultiLayer::copyAllLayers()
 	}
 
 	foreach (QWidget* g, graphsList)
-		((Graph *)g)->deselectMarker();
+        static_cast<Graph *>(g)->deselectMarker();
 
 	QPixmap pic = canvasPixmap();
 	QImage image = pic.convertToImage();
@@ -893,7 +893,7 @@ void MultiLayer::printAllLayers(QPainter *painter)
 
 		for (int i=0; i<(int)graphsList.count(); i++)
 		{
-			Graph *gr=(Graph *)graphsList.at(i);
+            Graph *gr=static_cast<Graph *>(graphsList.at(i));
 			Plot *myPlot= gr->plotWidget();
 			QPoint pos=gr->pos();
 			pos=QPoint(margin + static_cast<int>(pos.x()*scaleFactorX), margin + static_cast<int>(pos.y()*scaleFactorY));
@@ -914,8 +914,8 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		
 		for (int i=0; i<(int)graphsList.count(); i++)
 		{
-			Graph *gr = (Graph *)graphsList.at(i);
-			Plot *myPlot = (Plot *)gr->plotWidget();
+            Graph *gr = static_cast<Graph *>(graphsList.at(i));
+            Plot *myPlot = static_cast<Plot *>(gr->plotWidget());
 
 			QPoint pos = gr->pos();
 			pos = QPoint(margin + pos.x(), margin + pos.y());
@@ -944,7 +944,7 @@ void MultiLayer::setFonts(const QFont& titleFnt, const QFont& scaleFnt,
 		const QFont& numbersFnt, const QFont& legendFnt)
 {
 	for (int i=0;i<(int)graphsList.count();i++){
-		Graph *gr=(Graph *)graphsList.at(i);
+        Graph *gr=static_cast<Graph *>(graphsList.at(i));
 		QwtPlot *plot=gr->plotWidget();
 
 		QwtText text = plot->title();
@@ -1047,7 +1047,7 @@ void MultiLayer::keyPressEvent(QKeyEvent * e)
     int index = graphsList.indexOf(active_graph) + 1;
 		if (index >= graphsList.size())
 			index = 0;
-		Graph *g = (Graph *)graphsList.at(index);
+        Graph *g = static_cast<Graph *>(graphsList.at(index));
 		if (g)
 			setActiveGraph(g);
 		return;
@@ -1058,7 +1058,7 @@ void MultiLayer::keyPressEvent(QKeyEvent * e)
 		int index = graphsList.indexOf(active_graph) - 1;
 		if (index < 0)
 			index = graphsList.size() - 1;
-		Graph *g = (Graph *)graphsList.at(index);
+        Graph *g = static_cast<Graph *>(graphsList.at(index));
 		if (g)
 			setActiveGraph(g);
 		return;
@@ -1098,7 +1098,7 @@ void MultiLayer::wheelEvent ( QWheelEvent * e )
 	int xMouse=e->x();
 	int yMouse=e->y();
 	for (int i=0;i<(int)graphsList.count();i++){
-		Graph *gr=(Graph *)graphsList.at(i);
+        Graph *gr=static_cast<Graph *>(graphsList.at(i));
 		intSize=gr->plotWidget()->size();
 		aux=gr->pos();
 		if(xMouse>aux.x() && xMouse<(aux.x()+intSize.width())){
@@ -1226,13 +1226,13 @@ void MultiLayer::setLayersNumber(int n)
 	int dn = graphsList.size() - n;
 	if (dn > 0){
 		for (int i = 0; i < dn; i++){//remove layer buttons
-			LayerButton *btn=(LayerButton*)buttonsList.last();
+            LayerButton *btn=static_cast<LayerButton*>(buttonsList.last());
 			if (btn){
 				btn->close();
 				buttonsList.removeLast();
 			}
 
-			Graph *g = (Graph *)graphsList.last();
+            Graph *g = static_cast<Graph *>(graphsList.last());
 			if (g){//remove layers
 				if (g->zoomOn() || g->activeTool())
 					setPointerCursor();
@@ -1249,10 +1249,10 @@ void MultiLayer::setLayersNumber(int n)
 		// check whether the active Graph.has been deleted
 		if(graphsList.indexOf(active_graph) == -1)
 			active_graph=(Graph*) graphsList.last();
-		for (int j=0;j<(int)graphsList.count();j++){
-			Graph *gr=(Graph *)graphsList.at(j);
+        for (int j=0;j<static_cast<int>(graphsList.count());j++){
+            Graph *gr=static_cast<Graph *>(graphsList.at(j));
 			if (gr == active_graph){
-				LayerButton *button=(LayerButton *)buttonsList.at(j);
+                LayerButton *button=static_cast<LayerButton *>(buttonsList.at(j));
 				button->setOn(TRUE);
 				break;
 			}
