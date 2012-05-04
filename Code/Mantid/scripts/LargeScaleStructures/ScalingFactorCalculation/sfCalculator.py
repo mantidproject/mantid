@@ -420,21 +420,23 @@ def isWithinRange(value1, value2):
 
 def outputFittingParameters(a, b, error_a, error_b, 
                             lambda_requested,
+                            incident_medium,
                             S1H, S2H, 
                             S1W, S2W, 
                             output_file_name):
     """
     Create an ascii file of the various fittings parameters
     y=a+bx
-    1st column: S1H value
-    
-    2nd column: S2H value
-    3rd column: S1W value
-    4rd column: S2W value
-    5rd column: a
-    6th column: b
-    7th column: error_a
-    8th column: error_b
+    1st column: incident medium
+    2nd column: lambda requested
+    3rd column: S1H value
+    4th column: S2H value
+    5th column: S1W value
+    6th column: S2W value
+    7th column: a
+    7th column: b
+    8th column: error_a
+    9th column: error_b
     """
 
     bFileExist = False
@@ -464,18 +466,20 @@ def outputFittingParameters(a, b, error_a, error_b,
                     continue
             
                 _line_split = _line.split(' ')
-                _lambdaRequested = variable_value_splitter(_line_split[0])
-                if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
-                    _s1h = variable_value_splitter(_line_split[1])
-                    if (isWithinRange(_s1h['value'], S1H[i])):
-                        _s2h = variable_value_splitter(_line_split[2])
-                        if (isWithinRange(_s2h['value'],S2H[i])):
-                            _s1w = variable_value_splitter(_line_split[3])
-                            if (isWithinRange(_s1w['value'],S1W[i])):
-                                _s2w = variable_value_splitter(_line_split[4])
-                                if (isWithinRange(_s2w['value'],S2W[i])):
-                                    _match = True
-                                    break
+                _incident_medium = _line_split[0]
+                if (_incident_medium == incident_medium):
+                    _lambdaRequested = variable_value_splitter(_line_split[1])
+                    if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
+                        _s1h = variable_value_splitter(_line_split[2])
+                        if (isWithinRange(_s1h['value'], S1H[i])):
+                            _s2h = variable_value_splitter(_line_split[3])
+                            if (isWithinRange(_s2h['value'],S2H[i])):
+                                _s1w = variable_value_splitter(_line_split[4])
+                                if (isWithinRange(_s1w['value'],S1W[i])):
+                                    _s2w = variable_value_splitter(_line_split[5])
+                                    if (isWithinRange(_s2w['value'],S2W[i])):
+                                        _match = True
+                                        break
             
             if _match == False:
                 entry_list_to_add.append(i)
@@ -483,7 +487,8 @@ def outputFittingParameters(a, b, error_a, error_b,
         _content = []
         for j in entry_list_to_add:
             
-            _line = 'LambdaRequested=' + str(lambda_requested) + ' '
+            _line = 'IncidentMedium=' + incident_medium + ' '
+            _line += 'LambdaRequested=' + str(lambda_requested) + ' '
             
             _S1H = "{0:.8f}".format(abs(S1H[j]))
             _S2H = "{0:.8f}".format(abs(S2H[j]))
@@ -512,7 +517,9 @@ def outputFittingParameters(a, b, error_a, error_b,
                     '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
         sz = len(a)
         for i in range(sz):
-            _line = 'LambdaRequested=' + str(lambda_requested) + ' '
+            
+            _line = 'IncidentMedium=' + incident_medium + ' '
+            _line += 'LambdaRequested=' + str(lambda_requested) + ' '
             
             _S1H = "{0:.8f}".format(abs(S1H[i]))
             _S2H = "{0:.8f}".format(abs(S2H[i]))
@@ -733,6 +740,7 @@ def calculate(string_runs=None,
 #              list_attenuator=None, 
               list_peak_back=None, 
               output_file_name=None,
+              incident_medium=None,
               tof_range=None):  
     """
     In this current version, the program will automatically calculates
@@ -788,6 +796,9 @@ def calculate(string_runs=None,
                 raise RuntimeError(msg)
                 
         list_attenuator = dico['list_attenuator']
+
+    if (incident_medium is None):
+        incident_medium = "H20" #default value
 
     if (list_attenuator is None):
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
@@ -910,6 +921,7 @@ def calculate(string_runs=None,
         
         outputFittingParameters(a, b, error_a, error_b, 
                                 _lambdaRequest,
+                                incident_medium,
                                 finalS1H, finalS2H, 
                                 finalS1W, finalS2W,
                                 output_file_name)

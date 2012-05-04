@@ -54,11 +54,11 @@ class DataSets(BaseScriptElement):
         script += 'Back selection \n'
         script += '   from pixel: %s ' % str(self.back_selection[0])
         script += ' to pixel: %s \n' % str(self.back_selection[1])
-        script += 'Lammbda requested: %s \n' % str(self.lambda_requested)
-        script += 's1h: %s' %str(self.s1h)
-        script += ' s2h: %s' %str(self.s2h)
-        script += ' s1w: %s' %str(self.s1w)
-        script += ' s2w:%s' %str(self.s2w)
+#        script += 'Lammbda requested: %s \n' % str(self.lambda_requested)
+#        script += 's1h: %s' %str(self.s1h)
+#        script += ' s2h: %s' %str(self.s2h)
+#        script += ' s1w: %s' %str(self.s1w)
+#        script += ' s2w:%s' %str(self.s2w)
         script += "\n"
 
         return script
