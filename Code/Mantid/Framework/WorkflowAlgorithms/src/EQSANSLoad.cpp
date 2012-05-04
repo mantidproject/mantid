@@ -78,6 +78,7 @@ void EQSANSLoad::init()
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
   declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be loaded into the workspace at load-time");
   declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be loaded into the workspace at load-time");
+  declareProperty("SkipTOFCorrection", false, "IF true, the EQSANS TOF correction will be skipped");
   declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when rebinning the data before performing the reduction");
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
@@ -286,6 +287,13 @@ void EQSANSLoad::readSourceSlitSize(const std::string& line)
 /// Get the source slit size from the slit information of the run properties
 void EQSANSLoad::getSourceSlitSize()
 {
+  if (!dataWS->run().hasProperty("vBeamSlit"))
+  {
+    m_output_message += "   Could not determine source aperture diameter: ";
+    m_output_message += "slit parameters were not found in the run log\n";
+    return;
+  }
+
   int slit1 = -1;
   Mantid::Kernel::Property* prop = dataWS->run().getProperty("vBeamSlit");
   Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
@@ -473,6 +481,7 @@ void EQSANSLoad::exec()
   if (!reductionManager->existsProperty("LoadAlgorithm"))
   {
     AlgorithmProperty *loadProp = new AlgorithmProperty("LoadAlgorithm");
+    setPropertyValue("InputWorkspace", "");
     loadProp->setValue(toString());
     reductionManager->declareProperty(loadProp);
   }
@@ -494,9 +503,19 @@ void EQSANSLoad::exec()
     loadAlg->executeAsSubAlg();
     Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
     dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
-    inputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(dataWS_asWks);
   } else {
-    dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEventWS);
+    MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+    EventWorkspace_sptr outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+    if (inputEventWS != outputEventWS)
+    {
+      IAlgorithm_sptr copyAlg = createSubAlgorithm("CloneWorkspace", 0, 0.2);
+      copyAlg->setProperty("InputWorkspace", inputEventWS);
+      copyAlg->executeAsSubAlg();
+      Workspace_sptr dataWS_asWks = copyAlg->getProperty("OutputWorkspace");
+      dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
+    } else {
+      dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEventWS);
+    }
   }
 
   // Get the sample-detector distance
@@ -526,7 +545,7 @@ void EQSANSLoad::exec()
   mvAlg->setProperty("Z", sdd/1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsSubAlg();
-  g_log.information() << "Moving detector to " << sdd/1000.0 << std::endl;
+  g_log.information() << "Moving detector to " << sdd/1000.0 << " meters" << std::endl;
   m_output_message += "   Detector position: " + Poco::NumberFormatter::format(sdd/1000.0, 3) + " m\n";
 
   // Get the run number so we can find the proper config file
@@ -586,37 +605,60 @@ void EQSANSLoad::exec()
   else reductionManager->setProperty("LatestBeamCenterY", m_center_y);
 
   // Modify TOF
-  bool correct_for_flight_path = getProperty("CorrectForFlightPath");
-  m_output_message += "   Flight path correction ";
-  if (!correct_for_flight_path) m_output_message += "NOT ";
-  m_output_message += "applied\n";
-  DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(inputEventWS);
-  IAlgorithm_sptr tofAlg = createSubAlgorithm("EQSANSTofStructure", 0.5, 0.7);
-  tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
-  tofAlg->setProperty("LowTOFCut", m_low_TOF_cut);
-  tofAlg->setProperty("HighTOFCut", m_high_TOF_cut);
-  tofAlg->setProperty("FlightPathCorrection", correct_for_flight_path);
-  tofAlg->executeAsSubAlg();
-  const double wl_min = tofAlg->getProperty("WavelengthMin");
-  const double wl_max = tofAlg->getProperty("WavelengthMax");
-  const bool frame_skipping = tofAlg->getProperty("FrameSkipping");
-  dataWS->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom", true);
-  dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
-  dataWS->mutableRun().addProperty("is_frame_skipping", int(frame_skipping), true);
-  double wl_combined_max = wl_max;
-  m_output_message += "   Wavelength range: " + Poco::NumberFormatter::format(wl_min, 1)
-      + " - " + Poco::NumberFormatter::format(wl_max, 1);
-  if (frame_skipping)
+  const bool correct_for_flight_path = getProperty("CorrectForFlightPath");
+  const bool skipTOFCorrection = getProperty("SkipTOFCorrection");
+  double wl_min = 0.0;
+  double wl_max = 0.0;
+  double wl_combined_max = 0.0;
+  if (skipTOFCorrection)
   {
-    const double wl_min2 = tofAlg->getProperty("WavelengthMinFrame2");
-    const double wl_max2 = tofAlg->getProperty("WavelengthMaxFrame2");
-    wl_combined_max = wl_max2;
-    dataWS->mutableRun().addProperty("wavelength_min_frame2", wl_min2, "Angstrom", true);
-    dataWS->mutableRun().addProperty("wavelength_max_frame2", wl_max2, "Angstrom", true);
-    m_output_message += " and " + Poco::NumberFormatter::format(wl_min2, 1)
-        + " - " + Poco::NumberFormatter::format(wl_max2, 1) + " Angstrom\n";
-  } else
-    m_output_message += " Angstrom\n";
+    m_output_message += "    Skipping EQSANS TOF correction: assuming a single frame\n";
+    dataWS->mutableRun().addProperty("is_frame_skipping", 0, true);
+    if (correct_for_flight_path)
+    {
+      g_log.error() << "CorrectForFlightPath and SkipTOFCorrection can't be set to true at the same time" << std::endl;
+      m_output_message += "    Skipped flight path correction: see error log\n";
+    }
+  }
+  else
+  {
+    m_output_message += "   Flight path correction ";
+    if (!correct_for_flight_path) m_output_message += "NOT ";
+    m_output_message += "applied\n";
+    DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
+    IAlgorithm_sptr tofAlg = createSubAlgorithm("EQSANSTofStructure", 0.5, 0.7);
+    tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
+    tofAlg->setProperty("LowTOFCut", m_low_TOF_cut);
+    tofAlg->setProperty("HighTOFCut", m_high_TOF_cut);
+    tofAlg->setProperty("FlightPathCorrection", correct_for_flight_path);
+    tofAlg->executeAsSubAlg();
+    wl_min = tofAlg->getProperty("WavelengthMin");
+    wl_max = tofAlg->getProperty("WavelengthMax");
+    if (wl_min != wl_min || wl_max != wl_max)
+    {
+      g_log.error() << "Bad wavelength range" << std::endl;
+      g_log.error() << m_output_message << std::endl;
+    }
+
+    const bool frame_skipping = tofAlg->getProperty("FrameSkipping");
+    dataWS->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom", true);
+    dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
+    dataWS->mutableRun().addProperty("is_frame_skipping", int(frame_skipping), true);
+    wl_combined_max = wl_max;
+    m_output_message += "   Wavelength range: " + Poco::NumberFormatter::format(wl_min, 1)
+        + " - " + Poco::NumberFormatter::format(wl_max, 1);
+    if (frame_skipping)
+    {
+      const double wl_min2 = tofAlg->getProperty("WavelengthMinFrame2");
+      const double wl_max2 = tofAlg->getProperty("WavelengthMaxFrame2");
+      wl_combined_max = wl_max2;
+      dataWS->mutableRun().addProperty("wavelength_min_frame2", wl_min2, "Angstrom", true);
+      dataWS->mutableRun().addProperty("wavelength_max_frame2", wl_max2, "Angstrom", true);
+      m_output_message += " and " + Poco::NumberFormatter::format(wl_min2, 1)
+          + " - " + Poco::NumberFormatter::format(wl_max2, 1) + " Angstrom\n";
+    } else
+      m_output_message += " Angstrom\n";
+  }
 
   // Convert to wavelength
   const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z())*1000.0;
@@ -628,6 +670,17 @@ void EQSANSLoad::exec()
   scAlg->setProperty("Factor", conversion_factor);
   scAlg->executeAsSubAlg();
   dataWS->getAxis(0)->setUnit("Wavelength");
+
+  if (skipTOFCorrection)
+  {
+    DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
+    wl_min = dataWS_evt->getTofMin()*conversion_factor;
+    wl_max = dataWS_evt-> getTofMax()*conversion_factor;
+    wl_combined_max = wl_max;
+    g_log.information() << "Wavelength range: " << wl_min << " to " << wl_max << std::endl;
+    dataWS->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom", true);
+    dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
+  }
 
   // Rebin so all the wavelength bins are aligned
   const bool preserveEvents = getProperty("PreserveEvents");

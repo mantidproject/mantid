@@ -45,6 +45,9 @@ class LoadRun(ReductionStep):
         self._sample_det_dist = None
         self._sample_det_offset = 0
         
+        # Option to skip TOF correction
+        self._skip_tof_correction = False
+        
         # Flag to tell us whether we should do the full reduction with events
         self._keep_events = keep_events
    
@@ -63,8 +66,12 @@ class LoadRun(ReductionStep):
         loader._wavelength_step = self._wavelength_step
         loader._sample_det_dist = self._sample_det_dist
         loader._sample_det_offset = self._sample_det_offset
+        loader._skip_tof_correction = self._skip_tof_correction
         return loader
 
+    def skip_tof_correction(self, skip):
+        self._skip_tof_correction = skip
+        
     def set_wavelength_step(self, step):
         if step is not None and type(step) != int and type(step) != float:
             raise RuntimeError, "LoadRun._wavelength_step expects a float: %s" % str(step)
@@ -166,14 +173,25 @@ class LoadRun(ReductionStep):
             use_config_beam = True            
             
         def _load_data_file(file_name, wks_name):
-            filepath = find_data(file_name, instrument=reducer.instrument.name())
-            l = EQSANSLoad(Filename=filepath, OutputWorkspace=wks_name,
+            # Check whether we are processing an event workspace or whether
+            # we need to load a file
+            if mtd.workspaceExists(file_name):
+                input_ws = file_name
+                filepath = None
+            else:
+                filepath = find_data(file_name, instrument=reducer.instrument.name())
+                input_ws = None
+                
+            l = EQSANSLoad(Filename=filepath,
+                           InputWorkspace=input_ws,
+                           OutputWorkspace=wks_name,
                        UseConfigBeam=use_config_beam,
                        BeamCenterX=pixel_ctr_x,
                        BeamCenterY=pixel_ctr_y,
                        UseConfigTOFCuts=self._use_config_cutoff,
                        LowTOFCut=self._low_TOF_cut,
                        HighTOFCut=self._high_TOF_cut,
+                       SkipTOFCorrection=self._skip_tof_correction,
                        WavelengthStep=self._wavelength_step,
                        UseConfigMask=self._use_config_mask,
                        UseConfig=self._use_config,
