@@ -307,6 +307,9 @@ namespace DataHandling
     outputWS->mutableRun().addLogData(new PropertyWithValue<double>("psi", psi));
     outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>("ki_over_kf_scaling", kikfscaling==1?"true":"false"));
 
+    //Set Goniometer
+
+    outputWS->mutableRun().getGoniometer().pushAxis("psi",0,1,0,psi);
     //generate instrument
 
     Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));

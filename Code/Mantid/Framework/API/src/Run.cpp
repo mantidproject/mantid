@@ -375,15 +375,31 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       if (this->hasProperty(name))
       {
         Property * prop = this->getProperty(name);
+        //try time series property
         TimeSeriesProperty<double> * tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
         if (tsp)
         {
           // Set that angle
           m_goniometer.setRotationAngle(i, tsp->getStatistics().mean);
-          g_log.debug() << "Goniometer angle " << name << " set to " << tsp->firstValue() << std::endl;
+          g_log.debug() << "Goniometer angle " << name << " set to " <<tsp->getStatistics().mean << std::endl;
         }
         else
-          throw std::runtime_error("Sample log for goniometer angle '" + name + "' was not a TimeSeriesProperty<double>.");
+        {
+            //try Property with value
+            PropertyWithValue<double> *pvp=dynamic_cast<PropertyWithValue<double> *>(prop);
+            if (pvp)
+            {
+                // Set that angle
+
+                m_goniometer.setRotationAngle(i, boost::lexical_cast<double>(pvp->value()));
+                g_log.debug() << "Goniometer angle " << name << " set to " <<  boost::lexical_cast<double>(pvp->value()) << std::endl;
+            }
+            else
+            {
+                throw std::runtime_error("Sample log for goniometer angle '" + name + "' was not a TimeSeriesProperty<double> or PropertyWithValue<double>.");
+            }
+        }
+
       }
       else
         throw std::runtime_error("Could not find goniometer angle '" + name + "' in the run sample logs.");
