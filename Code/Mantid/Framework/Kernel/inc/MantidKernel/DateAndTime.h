@@ -34,16 +34,12 @@ class MANTID_KERNEL_DLL DateAndTime
 {
 public:
   explicit DateAndTime();
-  DateAndTime(const DateAndTime & rhs);
   DateAndTime(const int64_t total_nanoseconds);
   explicit DateAndTime(const double seconds, const double nanoseconds);
   explicit DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   explicit DateAndTime(const int64_t seconds, const int64_t nanoseconds);
   DateAndTime(const std::string ISO8601_string);
   DateAndTime(const boost::posix_time::ptime _ptime);
-
-  DateAndTime& operator=(const DateAndTime& rhs);
-  DateAndTime& operator=(const DateAndTime* rhs);
 
   void set_from_ptime(boost::posix_time::ptime _ptime);
   boost::posix_time::ptime to_ptime() const;
