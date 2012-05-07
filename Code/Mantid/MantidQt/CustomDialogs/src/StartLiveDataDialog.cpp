@@ -36,8 +36,25 @@ namespace {
   // this breaks new namespace declaraion rules; need to find a better fix
     template class Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
   #endif /* _WIN32 */
+  /// The specific instantiation of the templated type
+  typedef Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl> LiveDataAlgInputHistory;
+
+  class LiveDataPostProcessingAlgInputHistoryImpl : public AbstractAlgorithmInputHistory
+  {
+  private:
+    LiveDataPostProcessingAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataPostProcessingAlgorithms") {}
+    ~LiveDataPostProcessingAlgInputHistoryImpl() {}
+
+  private:
+    friend struct Mantid::Kernel::CreateUsingNew<LiveDataPostProcessingAlgInputHistoryImpl>;
+  };
+
+  #ifdef _WIN32
+  // this breaks new namespace declaraion rules; need to find a better fix
+    template class Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl>;
+  #endif /* _WIN32 */
     /// The specific instantiation of the templated type
-    typedef Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl> LiveDataAlgInputHistory;
+    typedef Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl> LiveDataPostProcessingAlgInputHistory;
 }
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -63,6 +80,7 @@ StartLiveDataDialog::~StartLiveDataDialog()
 {
   // Save the input history to QSettings
   LiveDataAlgInputHistory::Instance().save();
+  LiveDataPostProcessingAlgInputHistory::Instance().save();
 }
 
 /// Set up the dialog layout
@@ -72,9 +90,10 @@ void StartLiveDataDialog::initLayout()
 
   // To save the history of inputs
   // RJT: I don't much like this, but at least it's safe from a lifetime point of view.
-  AbstractAlgorithmInputHistory * history = &LiveDataAlgInputHistory::Instance();
-  ui.processingAlgo->setInputHistory(history);
-  ui.postAlgo->setInputHistory(history);
+  AbstractAlgorithmInputHistory * history1 = &LiveDataAlgInputHistory::Instance();
+  ui.processingAlgo->setInputHistory(history1);
+  AbstractAlgorithmInputHistory * history2 = &LiveDataPostProcessingAlgInputHistory::Instance();
+  ui.postAlgo->setInputHistory(history2);
 
   // ========== Set previous values from history =============
   fillAndSetComboBox("Instrument", ui.cmbInstrument);
