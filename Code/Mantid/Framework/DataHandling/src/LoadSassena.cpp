@@ -44,6 +44,7 @@ bool LoadSassena::quickFileCheck(const std::string& filePath,size_t nread, const
 
   // If not then let's see if it is a HDF file by checking for the magic cookie
   if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
+
   return false;
 }
 
@@ -54,7 +55,16 @@ bool LoadSassena::quickFileCheck(const std::string& filePath,size_t nread, const
  */
 int LoadSassena::fileCheck(const std::string &filePath)
 {
-  int confidence(50);
+  int confidence(0);
+  H5::H5File file( filePath, H5::H5F_ACC_RDONLY );
+
+  /*
+   * const H5std_string FILE_NAME( "SDS.h5" );
+     const H5std_string DATASET_NAME( "IntArray" );
+     H5File file( FILE_NAME, H5F_ACC_RDONLY );
+     DataSet dataset = file.openDataSet( DATASET_NAME );
+
+   */
   return confidence;
 }
 
