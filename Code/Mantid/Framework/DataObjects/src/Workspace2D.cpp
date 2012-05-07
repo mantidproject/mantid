@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidKernel/VectorHelper.h"
 
 using Mantid::API::ISpectrum;
 
@@ -120,6 +121,36 @@ namespace Mantid
     {
       return data.size();
     }
+
+
+    //---------------------------------------------------------------------------
+    /** Rebin a particulare spectrum to a new histogram bin boundaries.
+     *
+     * @param index :: workspace index to generate
+     * @param X :: input X vector of the bin boundaries.
+     * @param Y :: output vector to be filled with the Y data.
+     * @param E :: output vector to be filled with the Error data (optionally)
+     * @param skipError :: if true, the error vector is NOT calculated.
+     *        CURRENTLY IGNORED, the Error is always calculated.
+     */
+    void Workspace2D::generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
+    {
+      UNUSED_ARG(skipError);
+      if (index >= this->m_noVectors)
+        throw std::range_error("Workspace2D::generateHistogram, histogram number out of range");
+      // output data arrays are implicitly filled by function
+      const ISpectrum * spec = this->getSpectrum(index);
+      const MantidVec & currentX = spec->readX();
+      const MantidVec & currentY = spec->readY();
+      const MantidVec & currentE = spec->readE();
+      if (X.size() <= 1) throw std::runtime_error("Workspace2D::generateHistogram(): X vector must be at least length 2");
+      Y.resize(X.size()-1, 0);
+      E.resize(X.size()-1, 0);
+      // Perform the rebin from the current bins to the new ones
+      Mantid::Kernel::VectorHelper::rebin(currentX,currentY,currentE, X, Y, E,
+          this->isDistribution());
+    }
+
 
   } // namespace DataObjects
 } //NamespaceMantid

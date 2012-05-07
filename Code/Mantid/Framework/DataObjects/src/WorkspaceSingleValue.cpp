@@ -57,6 +57,17 @@ namespace Mantid
       return &data;
     }
     
+    /// Rebin the workspace. Not implemented for this workspace.
+    void WorkspaceSingleValue::generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
+    {
+      UNUSED_ARG(index);
+      UNUSED_ARG(X);
+      UNUSED_ARG(Y);
+      UNUSED_ARG(E);
+      UNUSED_ARG(skipError);
+      throw std::runtime_error("generateHistogram() not implemented for WorkspaceSingleValue.");
+    }
+
 
   } // namespace DataObjects
 } // namespace Mantid

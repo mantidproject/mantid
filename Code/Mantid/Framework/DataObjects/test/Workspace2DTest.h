@@ -166,6 +166,23 @@ public:
     }
   }
 
+  void test_generateHistogram()
+  {
+    Workspace2D_sptr ws = Create2DWorkspaceBinned(2, 5);
+    MantidVec X, Y, E;
+    X.push_back(0.0);
+    X.push_back(0.5);
+    X.push_back(1.0);
+    TS_ASSERT_THROWS_ANYTHING( ws->generateHistogram(2, X, Y, E); );
+    TS_ASSERT_THROWS_NOTHING( ws->generateHistogram(0, X, Y, E); );
+    TS_ASSERT_EQUALS( Y.size(), 2);
+    TS_ASSERT_EQUALS( E.size(), 2);
+    TS_ASSERT_DELTA( Y[0], 1.0, 1e-5);
+    TS_ASSERT_DELTA( Y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA( E[0], 1.0, 1e-5);
+    TS_ASSERT_DELTA( E[1], 1.0, 1e-5);
+  }
+
   void testDataDx()
   {
     TS_ASSERT_EQUALS( ws->readDx(0).size(), 6 );

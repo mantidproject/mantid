@@ -231,7 +231,8 @@ namespace Mantid
       virtual void setData(const std::size_t index, const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E)
       { getSpectrum(index)->setData(Y,E); }
 
-
+      /// Generate the histogram or rebin the existing histogram.
+      virtual void generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const = 0;
 
 
       /// Return a vector with the integrated counts for all spectra withing the given range

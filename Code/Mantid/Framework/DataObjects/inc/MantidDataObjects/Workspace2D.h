@@ -80,6 +80,7 @@ public:
   /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
   virtual const Mantid::API::ISpectrum * getSpectrum(const size_t index) const;
 
+  void generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
   /** sets the monitorWorkspace indexlist
     @param mList :: a vector holding the monitor workspace indexes

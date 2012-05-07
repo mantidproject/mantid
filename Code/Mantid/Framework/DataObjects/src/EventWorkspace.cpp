@@ -703,6 +703,22 @@ namespace DataObjects
     return this->data[index]->ptrX();
   }
 
+  //---------------------------------------------------------------------------
+  /** Using the event data in the event list, generate a histogram of it.
+   *
+   * @param index :: workspace index to generate
+   * @param X :: input X vector of the bin boundaries.
+   * @param Y :: output vector to be filled with the Y data.
+   * @param E :: output vector to be filled with the Error data (optionally)
+   * @param skipError :: if true, the error vector is NOT calculated.
+   *        This may save some processing time.
+   */
+   void EventWorkspace::generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
+  {
+    if (index >= this->m_noVectors)
+      throw std::range_error("EventWorkspace::generateHistogram, histogram number out of range");
+    this->data[index]->generateHistogram(X, Y, E, skipError);
+  }
 
 
   //-----------------------------------------------------------------------------

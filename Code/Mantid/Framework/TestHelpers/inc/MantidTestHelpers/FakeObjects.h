@@ -104,6 +104,7 @@ public:
   size_t blocksize() const {return vec[0].dataY().size();}
   ISpectrum * getSpectrum(const size_t index) { return &vec[index]; }
   const ISpectrum * getSpectrum(const size_t index) const { return &vec[index];; }
+  void generateHistogram(const std::size_t , const MantidVec& , MantidVec& , MantidVec& , bool ) const { }
 
 private:
   std::vector<SpectrumTester> vec;

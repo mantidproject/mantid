@@ -73,6 +73,8 @@ public:
   virtual const ISpectrum * getSpectrum(const size_t index) const {return &m_spectra[index];}
   const std::string id(void) const {return "";}
   void init(const size_t &,const size_t &,const size_t &) { }
+  void generateHistogram(const std::size_t , const MantidVec& , MantidVec& , MantidVec& , bool ) const { }
+
 private:
   std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
   size_t m_blocksize;
