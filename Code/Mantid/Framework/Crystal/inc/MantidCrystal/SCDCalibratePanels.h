@@ -10,6 +10,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace  Mantid::Geometry;

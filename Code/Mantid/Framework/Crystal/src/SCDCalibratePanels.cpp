@@ -3,10 +3,11 @@
 
 This algorithm calibrates sets of Rectangular Detectors in one instrument. The initial path, time offset,
 panel width's, panel height's, panel locations and orientation are all adjusted so the error
-in q from theoretical positions is minimized.
+in q positions from the theoretical q positions is minimized.
 
-Some features
-1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  There height and
+Some features:
+
+1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  Their height and
    widths will all change by the same factor
 
 2) The user can select which quantities to adjust
@@ -15,6 +16,9 @@ Some features
     LoadParameter algorithm.
 
 4) Results from a previous optimization can be applied before another optimization is done.
+
+5) There are several output tables indicating the results of the fit and and peak errors. A new table whose property is
+   "OutputNormalisedCovarianceMatrix" is also  returned directly from a result of the general Fit function.
 
 *WIKI*/
 
@@ -25,10 +29,10 @@ Some features
  *  Created on: Mar 12, 2012
  *      Author: ruth
  */
-//TODO:
+//TODO
 
 //  1. Change xxx --> SCDCalibratePanelsx  where x=0,1,2,3,...
-//  2. Get rid of in analysis data service.NOPE ,deletes too much in MantidPlot
+
 
 
 #include "MantidCrystal/SCDCalibratePanels.h"
@@ -56,7 +60,8 @@ Some features
 #include <math.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include "../../Kernel/inc/MantidKernel/Property.h"
+#include "MantidKernel/Property.h"
+#include "MantidAPI/IFunction.h"
 
 using namespace Mantid::DataObjects;
 using namespace  Mantid::API;
@@ -74,17 +79,16 @@ namespace Crystal
   DECLARE_ALGORITHM(SCDCalibratePanels)
 
   SCDCalibratePanels::SCDCalibratePanels():API::Algorithm()
-                       // ,OnePanelPerGroup("OnePanelPerGroup"),
-                       //  AllPanelsInOneGroup("AllPanelsInOneGroup"), SpecifyGroups("SpecifyGroups")
+
   {
 
-
+     // g_log.setLevel(7);
   }
 
 
   SCDCalibratePanels::~SCDCalibratePanels()
   {
-     //AnalysisDataService::Instance().clear(); No,No,No,No
+
   }
 
 
@@ -94,7 +98,7 @@ namespace Crystal
    {
 
        vector< V3D > posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (!posv.empty())
+       if (posv.size() > 0)
        {
         V3D pos = posv[ 0 ];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -114,12 +118,12 @@ namespace Crystal
 
        vector< double > scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
        vector< double > scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( !scalex.empty())
+       if( scalex.size() > 0)
           {
          pmap->addDouble(bank_const.get(),"scalex", scalex[ 0 ]);
 
           }
-       if( !scaley.empty())
+       if( scaley.size() > 0)
        {
          pmap->addDouble(bank_const.get(),"scaley", scaley[ 0 ]);
 
@@ -138,7 +142,7 @@ namespace Crystal
     {
       vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
       //cout<<"Source Name="<< bank_const->getName()<<endl;
-      if (!posv.empty())
+      if (posv.size() > 0)
       {
         V3D pos = posv[ 0 ];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -173,7 +177,7 @@ namespace Crystal
        string name = (*setIt);
        vector< V3D > posParams = component->getPositionParameter(name , false);
 
-       if( !posParams.empty())
+       if( posParams.size() > 0)
        {
          N++;
          pmap->addV3D( component.get(), name, posParams[ 0 ]);
@@ -181,7 +185,7 @@ namespace Crystal
 
        vector<Quat> rotParams = component->getRotationParameter(name , false);
 
-       if( !rotParams.empty())
+       if( rotParams.size() > 0)
        {
          N++;
          pmap->addQuat( component.get(), name, rotParams[ 0 ]);
@@ -189,7 +193,7 @@ namespace Crystal
 
        vector< string > strParams = component->getStringParameter(name,false);
 
-       if( !strParams.empty())
+       if( strParams.size() > 0)
        {
          N++;
          pmap->addString( component.get(), name, strParams[ 0 ]);
@@ -430,7 +434,7 @@ namespace Crystal
                 }
             }
           }
-          if( !Group0.empty())
+          if( Group0.size() > 0 )
             Groups.push_back( Group0 );
 
         }
@@ -503,7 +507,7 @@ namespace Crystal
       boost::shared_ptr<Algorithm> LoadDetCal = createSubAlgorithm("LoadIsawDetCal" );
 
       LoadDetCal->initialize();
-     // LoadDetCal->setProperty("InputWorkspace",ws);
+     // LoadDetCal->setProperty("InputWorkspace",ws);//Doesn't work
       AnalysisDataService::Instance().addOrReplace("fff", ws);
       LoadDetCal->setProperty("Filename",preprocessFilename);
       LoadDetCal->setProperty(string("TimeOffset"),0.0);
@@ -554,12 +558,12 @@ namespace Crystal
     V3D posI,
         posPre;
 
-    if(!RelPosI.empty())
+    if(RelPosI.size()>0)
       posI = RelPosI[ 0 ];
     else
       posI = bank_rect->getRelativePos();
 
-    if(!RelPosPre.empty()>0)
+    if(RelPosPre.size()>0)
       posPre = RelPosPre[ 0 ];
     else
       posPre = newBank->getRelativePos();
@@ -580,16 +584,16 @@ namespace Crystal
     vector< double > ScaleyI = pmap->getDouble( bankName, "scaley");
     vector< double > ScaleyPre = pmapPre->getDouble( bankName, "scaley");
 
-    if( !ScalexI.empty())
+    if( ScalexI.size()>0)
       scalexI = ScalexI[ 0 ];
 
-    if( !ScaleyI.empty())
+    if( ScaleyI.size()>0)
       scaleyI = ScaleyI[ 0 ];
 
-    if(!ScalexPre.empty())
+    if(ScalexPre.size()>0)
       scalexPre = ScalexPre[ 0 ];
 
-    if( !ScaleyPre.empty())
+    if( ScaleyPre.size()>0)
       scaleyPre = ScaleyPre[ 0 ];
 
     //scaling
@@ -612,7 +616,7 @@ namespace Crystal
 
 
   void  SCDCalibratePanels::exec ()
-  {  cout<<"SCDCalibratePanels exec"<<endl;
+  {
     PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
 
     double a = getProperty("a");
@@ -658,17 +662,20 @@ namespace Crystal
 
  //------------------ Set Up Workspace for IFitFunction Fit---------------
     vector< int >bounds;
-    Workspace2D_sptr   ws = calcWorkspace( peaksWs, banksVec,tolerance,bounds);
+    Workspace2D_sptr   ws = calcWorkspace( peaksWs, banksVec,tolerance, bounds );
     if( ws->getNumberHistograms() < 2)
     {
         g_log.error(" Not enough data to fit parameters ");
         throw std::length_error( " Not enough data to fit parameters " );
     }
 
+
 //----------- Initialize peaksWorkspace, initial parameter values etc.---------
 
     boost::shared_ptr<const Instrument> instrument = peaksWs->getPeak(0).getInstrument();
-    double T0 =  getProperty("InitialTimeOffset");
+    double T0 = 0;
+    if((std::string) getProperty("PreProcessInstrument") == "Apply a LoadParameter.xml type file")
+      T0=  getProperty("InitialTimeOffset");//!*****
 
     double L0 = peaksWs->getPeak(0).getL1();
     boost::shared_ptr<const Instrument> PreCalibinstrument =
@@ -676,7 +683,7 @@ namespace Crystal
                                                    (string) getProperty("PreProcessInstrument"),
                                                    (string) getProperty("PreProcFilename"),
                                                     T0, L0, banksVec);
-
+    g_log.debug()<<"Initial L0,T0="<<L0<<","<<T0<<std::endl;
     AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
 
 
@@ -702,18 +709,45 @@ namespace Crystal
 
 //------------------- For each Group set up Function, --------------------------
 //---------------Ties, and Constraint Properties for Fit algorithm--------------------
+   ostringstream oss (ostringstream::out);
+        oss.precision(4);
+        string BankNameString = "";
+           for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); itv++)
+           {
+             if( itv != Groups.begin())
+               BankNameString +="!";
+             for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++)
+             {
+               if( it1 !=(*itv).begin())
+                 BankNameString +="/";
 
-   for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
+               BankNameString +=(*it1);
+             }
+           }
+       // if( i > 0 ) oss << ";";
+
+        oss << "name=SCDPanelErrors, PeakWorkspaceName=\"xxx\",";
+        oss << "a=" << fixed << a << "," << "b=" << fixed << b << "," << "c=" << fixed << c << "," << "alpha=" << fixed << alpha << "," << "beta=" << fixed << beta
+             << "," << "gamma=" << fixed << gamma << ","<< "NGroups="<<NGroups<<",BankNames ="<<BankNameString<<","
+             <<"startX=-1,endX=-1,";
+      oss<<   "l0=" << fixed << L0 << "," << "t0=" << fixed << T0 ;
+    ostringstream oss1 ( ostringstream::out);
+
+
+    oss1.precision( 4);
+   for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); itv++)
    {
      i++;
-     string BankNameString = "";
+
      boost::shared_ptr<const RectangularDetector> bank_rect;
+     string Gprefix ="f"+ boost::lexical_cast<string>(i)+"_";
 
     //---------------- Set up list of bank names argument -----------------
-    for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1)
-    {
+   // for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++)
+    // if( itv == Groups.begin())
 
-     boost::shared_ptr<const IComponent> bank_cmp = instrument->getComponentByName((*it1));
+     string name=(*itv)[0];
+     boost::shared_ptr<const IComponent> bank_cmp = instrument->getComponentByName(name);
      bank_rect =
           boost::dynamic_pointer_cast<const RectangularDetector>( bank_cmp);
 
@@ -724,101 +758,44 @@ namespace Crystal
       }
 
 
-      if( BankNameString.size() > 0 )
-        BankNameString += "/";  //Fit strips " and commas are separators
-      else//setup initial values
-        CalcInitParams( bank_rect, instrument,  PreCalibinstrument, detWidthScale0
+
+
+     // if( it1 == (*itv).begin())
+       CalcInitParams( bank_rect, instrument,  PreCalibinstrument, detWidthScale0
                 ,detHeightScale0, Xoffset0, Yoffset0, Zoffset0, Xrot0, Yrot0, Zrot0);
 
 
-      BankNameString += (*it1);
 
-    }
 
       // --- set Function property ----------------------
 
-      ostringstream oss (ostringstream::out);
-      oss.precision(4);
+      oss << "," <<  Gprefix<<"detWidthScale=" << fixed << detWidthScale0 << ","
+          << Gprefix<<"detHeightScale=" << fixed << detHeightScale0 << ","
+          <<Gprefix<<"Xoffset=" << Xoffset0 << "," <<Gprefix<< "Yoffset=" << Yoffset0 << "," << Gprefix<<"Zoffset=";
 
-      if( i > 0 ) oss << ";";
-
-      oss << "name=SCDPanelErrors, PeakWorkspaceName=\"xxx\",";
-      oss << "a=" << fixed << a << "," << "b=" << fixed << b << "," << "c=" << fixed << c << "," << "alpha=" << fixed << alpha << "," << "beta=" << fixed << beta
-           << "," << "gamma=" << fixed << gamma << ",";
-
-      oss << "l0=" << fixed << L0 << "," << "t0=" << fixed << T0 << "," << "detWidthScale=" << fixed << detWidthScale0 << ","
-          << "detHeightScale=" << fixed << detHeightScale0 << ","
-          << "Xoffset=" << Xoffset0 << "," << "Yoffset=" << Yoffset0 << "," << "Zoffset=";
-
-      oss     << Zoffset0 << "," << "Xrot=" << Xrot0 << "," << "Yrot=" << Yrot0 << "," << "Zrot=" << Zrot0  << ",";
+      oss     << Zoffset0 << "," << Gprefix<<"Xrot=" << Xrot0 << "," << Gprefix<<"Yrot=" << Yrot0 << "," <<Gprefix<< "Zrot=" << Zrot0 ;
 
       int startX = bounds[ nbanksSoFar ];
       int endXp1 = bounds[ nbanksSoFar + (*itv).size() ];
       if( endXp1-startX < 12)
       {
         g_log.error() << "Bank Group " <<  BankNameString  << " does not have enough peaks for fitting" << endl;
-      //  cout<< "nbanksSoFar, size="<< nbanksSoFar<< ","<< (*itv).size()<< endl;
+
         throw  std::runtime_error("Group " + BankNameString +" does not have enough peaks");
       }
-      oss << "BankNames=" << "\"" << BankNameString << "\"" << ",startX=" << startX << ",endX=" << endXp1-1;
+   //   oss << "BankNames=" << "\"" << BankNameString << "\"" << ",startX=" << startX << ",endX=" << endXp1-1;
       nbanksSoFar = nbanksSoFar + (int)(*itv).size();
 
-
-      FunctionArgument += oss.str();
-
-      string prefix = "";// If there is only one Group
-      string prefix0 = "";// parameter names have no prefix f0.---,f1.----
-      if( NGroups >1)
-      {
-        char ichar[ 3 ] ;
-        sprintf( ichar,"%d",i);
-
-        prefix = "f" + string( ichar) + ".";
-        prefix0 = "f0.";
-      }
-
       //---------- set Ties argument ----------------------------------
-      ostringstream oss1 ( ostringstream::out);
 
-      oss1.precision( 4);
+
       if( i == 0)
       {
         first = true;
 
       }
 
-      if( !use_L0 && i == 0 )
-      {
-        if( !first)
-          oss1 << ",";
 
-        first = false;
-
-        oss1 << prefix0 << "l0=" << fixed << L0;
-      }
-
-      if ( !use_timeOffset && i == 0)
-        {
-          if ( !first)
-            oss1  <<  ",";
-
-          first = false;
-
-          oss1 << prefix0 << "t0=" << T0;
-        }
-
-      if( i > 0)// t0&l0 are tied for all groups
-      {
-        if( !first)
-          oss1 << ",";
-
-        first = false;
-
-        oss1 << prefix << "l0=" << prefix0 << "l0,";
-
-        oss1 << prefix << "t0=" << prefix0 << "t0";
-
-      }
 
       if( !use_PanelWidth)
       {
@@ -827,8 +804,10 @@ namespace Crystal
 
         first = false;
 
-        oss1 << prefix << "detWidthScale=" << fixed << 1.0;
+        oss1 <<Gprefix<<"detWidthScale=" << fixed << detWidthScale0;
       }
+
+
 
       if( !use_PanelHeight)
       {
@@ -837,8 +816,10 @@ namespace Crystal
 
         first = false;
 
-        oss1 << prefix << "detHeightScale=" << fixed << 1.0;
+        oss1 <<  Gprefix<<"detHeightScale=" << fixed << detHeightScale0;
       }
+
+
 
       if( !use_PanelPosition)
       {
@@ -847,10 +828,12 @@ namespace Crystal
 
         first = false;
 
-        oss1 << prefix << "Xoffset=" << 0.0 << "," << prefix
-                     <<"Yoffset=" << 0.0 << "," << prefix
-                     <<"Zoffset=" << 0.0;
+        oss1 <<Gprefix<<"Xoffset=" << Xoffset0 << "," <<
+            Gprefix<<"Yoffset=" <<Yoffset0 << "," <<
+            Gprefix<<"Zoffset=" << Zoffset0;
       }
+
+
 
       if( ! use_PanelOrientation )
       {
@@ -859,35 +842,61 @@ namespace Crystal
 
         first = false;
 
-        oss1 << prefix << "Xrot=" << 0.0 << "," << prefix
-                     <<"Yrot=" << 0.0 << "," << prefix
-                     <<"Zrot=" << 0.0;
+        oss1 << Gprefix<<"Xrot=" << Xrot0 << ","
+                     <<Gprefix<<"Yrot=" << Yrot0<< ","
+                     <<Gprefix<<"Zrot=" << Zrot0;
       }
 
-      TiesArgument += oss1.str();
+
+
+
 
       //--------------- set Constraints Property  -------------------------------
 
       ostringstream oss2 ( ostringstream::out);
-      double maxXYOffset = 10*max< double >( bank_rect->xstep(), bank_rect->ystep());
-      if( i != 0 )
-        oss2  << ",";
 
-      oss2 <<  (.85*L0) << "<" << prefix <<  "l0<"  <<  (1.15*L0 )
-           <<  "," << (.85) << "<" << prefix << "detWidthScale<" << (1.15)
-          << "," << (.85) << "<" << prefix << "detHeightScale<" << (1.15)
-          << ",-5<" << prefix << "t0<5," << -maxXYOffset << "<" << prefix << "Xoffset<" << maxXYOffset
-          << ",-" << maxXYOffset << "<" << prefix << "Yoffset<" << maxXYOffset
-          << ",-" << maxXYOffset << "<" << prefix << "Zoffset<" << maxXYOffset
-          << ",-10<" << prefix << "Xrot<10,-10<"
-          << prefix << "Yrot<10,-10<" << prefix << "Zrot<10";
+
+      double maxXYOffset = 10*max< double >( bank_rect->xstep(), bank_rect->ystep());
+
+
+      if( i == 0)
+        oss2 <<  (.85*L0) << "<" <<  "l0<"  <<  (1.15*L0 ) << ",-5<" <<  "t0<5" ;
+
+      oss2 <<  "," << (.85)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (1.15)*detWidthScale0
+           << "," << (.85)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (1.15)*detHeightScale0
+           <<","<< -maxXYOffset+Xoffset0 << "<" << Gprefix << "Xoffset<" << maxXYOffset+Xoffset0
+          << "," << -maxXYOffset+Yoffset0 << "<" << Gprefix << "Yoffset<" << maxXYOffset+Yoffset0
+          << "," << -maxXYOffset+Zoffset0 << "<" << Gprefix << "Zoffset<" << maxXYOffset+Zoffset0
+          << ",-10<" << Gprefix << "Xrot<10,-10<"
+          << Gprefix << "Yrot<10,-10<" << Gprefix << "Zrot<10";
+
 
       Constraints += oss2.str();
 
-   }//for vector< string > in Groups
 
+}//for vector< string > in Groups
+ // }
+      if(!use_L0)
+       {
+         if( !first)
+                  oss1 << ",";
 
+         first = false;
+         oss1 <<"l0="<<fixed<<L0;
 
+       }
+
+       if(!use_timeOffset)
+       {
+         if( !first)
+                  oss1 << ",";
+
+         first = false;
+         oss1 <<"t0="<<fixed<<T0;
+
+       }
+    FunctionArgument = oss.str();
+    TiesArgument = oss1.str();
    //--------------------- Set up Fit Algorithm and Execute-------------------
    boost::shared_ptr< Algorithm > fit_alg = createSubAlgorithm( "Fit", .2, .9, true );
 
@@ -896,10 +905,12 @@ namespace Crystal
      g_log.error( "Cannot find Fit algorithm");
      throw invalid_argument( "Cannot find Fit algorithm" );
    }
+   g_log.debug()<<"Function="<<FunctionArgument<<std::endl;
 
+   g_log.debug()<<"Constraints="<<Constraints<<std::endl;
    fit_alg->initialize();
    int Niterations =  getProperty( "NumIterations");
-  // fit_alg->setProperty("WorkspaceIndex", 0);
+
    fit_alg->setProperty( "Function",FunctionArgument);
    fit_alg->setProperty( "MaxIterations",Niterations );
    if( TiesArgument.size() > 0)
@@ -914,7 +925,7 @@ namespace Crystal
    fit_alg->setProperty( "Output","out");
 
    fit_alg->executeAsSubAlg();
-
+   g_log.debug()<<"Finished executing algorithm"<<std::endl;
    string OutputStatus =fit_alg->getProperty("OutputStatus");
    g_log.notice() <<"Output Status="<<OutputStatus<<std::endl;
 
@@ -981,8 +992,7 @@ namespace Crystal
 
     for( int g = 0; g < NGroups; g++ )
     {
-      //char GroupName[ 8 ];
-      //sprintf( GroupName,"Group%d\n",g);
+
       std::string GroupName = std::string("Group") + boost::lexical_cast<std::string>(g);
       Result->addColumn( "double",GroupName);
     }
@@ -992,7 +1002,7 @@ namespace Crystal
    for( int p = 0; p < (int)names.size(); p++ )
     {
       string fieldName = names[ p ];
-     size_t dotPos = fieldName.find( '.');
+     size_t dotPos = fieldName.find( '_');
      if( dotPos >= fieldName.size())
        dotPos = 0;
      else
@@ -1044,7 +1054,7 @@ namespace Crystal
     for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
     {
       i++;
-      string BankNameString = "";
+     // string BankNameString = "";
       boost::shared_ptr<const RectangularDetector> bank_rect;
      for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1 )
      {
@@ -1059,14 +1069,10 @@ namespace Crystal
        Quat RelRot = bank->getRelativeRot();
 
        double rotx,roty,rotz;
-       char ichar[ 3 ] ;
-       sprintf( ichar,"%d",i);
-       string prefix = "";
-       if( NGroups > 1)
-       {
-         prefix = "f" + string( ichar)+".";
-       }
-       string istring( ichar);
+
+       string prefix = "f"+boost::lexical_cast<string>(i)+"_";
+
+
         rotx = result[ prefix + "Xrot" ];
 
         roty = result[ prefix + "Yrot" ];
@@ -1101,12 +1107,12 @@ namespace Crystal
        vector< double >oldScaley = pmap->getDouble( bank->getName(),string( "scaley" ));
 
        double scalex,scaley;
-       if( !oldScalex.empty() )
+       if( oldScalex.size() > 0 )
          scalex = oldScalex[ 0 ] + result[ prefix+"detWidthScale" ];
        else
          scalex = result[ prefix + "detWidthScale" ];
 
-       if( !oldScaley.empty() > 0 )
+       if( oldScaley.size() > 0 )
          scaley = oldScaley[ 0 ] + result[ prefix + "detHeightScale" ];
        else
          scaley = result[ prefix + "detHeightScale" ];
@@ -1132,10 +1138,8 @@ namespace Crystal
     V3D sourcePos = source->getPos();
     V3D parentSourcePos = sourcePos-sourceRelPos;
     V3D source2sampleDir = sample->getPos()-source->getPos();
-    string prefix = "";
-    if( NGroups > 1)
-      prefix = "f0.";
-    double scalee = result[ prefix + "l0" ]/source2sampleDir.norm();
+
+    double scalee = result[  "l0" ]/source2sampleDir.norm();
     V3D newsourcePos = sample->getPos()- source2sampleDir*scalee;
     V3D newsourceRelPos = newsourcePos-parentSourcePos;
 
@@ -1168,17 +1172,18 @@ namespace Crystal
 
      SaveDetCal->setProperty( "Filename", DetCalFileName);
      string TT0 = "t0";
-     if( NGroups > 1) TT0 = "f0.t0";
-
      SaveDetCal->setProperty( "TimeOffset",result[ TT0 ]);
 
      SaveDetCal->executeAsSubAlg();
 
+     g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< std::endl;
     }
 
     if( XmlFileName.size() > 0)
     {
       filebuf fb;
+
+
       filebuf* ok = fb.open ( XmlFileName.c_str(),ios::out);
       if( !ok )
         g_log.error() << "could not open file " << XmlFileName << endl;
@@ -1189,6 +1194,7 @@ namespace Crystal
 
       if( !fb.close() )
         g_log.error() << "error in close" << endl;
+
     }
 
    //----------------- Calculate & Create Qerror table------------------
@@ -1201,83 +1207,75 @@ namespace Crystal
     QErrTable->addColumn("int","Peak Column");
 
     //--------------- Create Function argument for the FunctionHandler------------
-    ostringstream qErrFxnInfo (ostringstream::out);
-    qErrFxnInfo.precision(4);
-    qErrFxnInfo <<  "name=SCDPanelErrors,a=" << fixed << a << ",b=" << fixed << b << ",c=" << fixed << c
-                <<",alpha=" << fixed << alpha << ",beta=" << fixed << beta
-                <<",gamma=" << fixed << gamma;
-    qErrFxnInfo <<  ",PeakWorkspaceName=xxx,startX=-1,endX=-1,";
 
-    string CommonString = qErrFxnInfo.str();
+    boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
+                   FunctionFactory::Instance().createFunction("SCDPanelErrors"));
+
+    if( !fit)
+      std::cout<<"Could not create fit function"<<std::endl;
+    fit->setAttribute("a",IFunction::Attribute(a));
+    fit->setAttribute("b",IFunction::Attribute(b));
+    fit->setAttribute("c",IFunction::Attribute(c));
+    fit->setAttribute("alpha",IFunction::Attribute(alpha));
+    fit->setAttribute("beta",IFunction::Attribute(beta));
+    fit->setAttribute("gamma",IFunction::Attribute(gamma));
+    fit->setAttribute("PeakWorkspaceName",IFunction::Attribute("xxx"));
+    fit->setAttribute("startX",IFunction::Attribute(-1));
+    fit->setAttribute("endX",IFunction::Attribute(-1));
+    fit->setAttribute("NGroups",IFunction::Attribute(NGroups));
+    fit->setAttribute("BankNames",IFunction::Attribute(BankNameString));
+
     int TableRow = 0;
-    double chiSq = 0;
-    for( int g = 0; g < NGroups; g++)
-    {
-      ostringstream qErrFxnInfo (ostringstream::out);
-      vector< string > Grp = Groups[ g ];
-      vector< int >limits;
-      DataObjects::Workspace2D_sptr ws = calcWorkspace( peaksWs, Grp, tolerance, limits);
-      string bankNames;
-
-      for( size_t v = 0; v < Grp.size(); v++ )
-        {
-         if( v > 0 ) bankNames += "/";
-         bankNames += Grp[ v ];
-
-        }
-
-      qErrFxnInfo << "BankNames=\"" << bankNames << "\"";
-
-      //Now add parameter values
-      ostringstream prefixStrm( ostringstream::out);
-      prefixStrm << "f" << g << ".";
-      string prefix = prefixStrm.str();
-      if( NGroups <= 1 )
-         prefix = "";
-
-      for( int nm = 0; nm < (int)names.size(); nm++ )
+      double chiSq = 0;
+      for (int g = 0; g < NGroups; g++)
       {
-        if( names[ nm ].compare(0,prefix.length(),prefix) == 0 )
-        {
-          string prm = names[ nm ].substr( prefix.length());
-          double X = params[ nm ];
-          if( fieldBaseNames.find ( ";" + prm + ";") <  138 )
-            qErrFxnInfo << "," << prm << "=" << X;
-        }
 
+        //Now add parameter values
+        ostringstream prefixStrm(ostringstream::out);
+        prefixStrm << "f" << g << "_";
+        string prefix = prefixStrm.str();
+
+        for (int nm = 0; nm < (int) names.size(); nm++)
+        {
+          if (names[nm].compare(0, prefix.length(), prefix) == 0)
+          {
+            string prm = names[nm].substr(prefix.length());
+            if (fieldBaseNames.find(";" + prm + ";") < 155)
+            {
+              fit->setParameter(names[nm], params[nm]);
+
+            }
+          }
+          else if (names[nm] == "l0" || names[nm] == "t0")
+            fit->setParameter(names[nm], params[nm]);
+
+        }
       }
 
-
-      boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
-                FunctionFactory::Instance().createInitialized(CommonString  + qErrFxnInfo.str()));
-      fit->setWorkspace( ws);
+      fit->setWorkspace(ws);
 
       size_t nData = ws->dataX(0).size();
-      vector< double > out( nData);
-      vector< double > xVals = ws->dataX(0);
+      vector<double> out(nData);
+      vector<double> xVals = ws->dataX(0);
 
       //------Call SCDPanelErrors to get the q errors ------------------
-      fit->function1D( out.data(),xVals.data(), nData);
+      fit->function1D(out.data(), xVals.data(), nData);
 
-      for( size_t q = 0; q < nData; q += 3 )
+      for (size_t q = 0; q < nData; q += 3)
       {
-        int pk = (int)xVals[ q ];
-        Peak peak = peaksWs->getPeak( pk );
-        QErrTable->cell< string >(TableRow,0) = peak.getBankName();
-        QErrTable->cell< int >(TableRow,1) = pk;
-        QErrTable->cell< int >(TableRow,2) = peak.getRow();
-        QErrTable->cell< int >(TableRow,4) = peak.getCol();
-        QErrTable->cell< double >(TableRow,3) = sqrt(out[ q ]*out[ q ] +
-            out[ q+1 ]*out[ q+1 ] + out[ q+2 ]*out[ q+2 ]    );
-        chiSq +=out[ q ]*out[ q ] + out[ q+1 ]*out[ q+1 ] + out[ q+2 ]*out[ q+2 ] ;
+        int pk = (int) xVals[q];
+        Peak peak = peaksWs->getPeak(pk);
+        QErrTable->cell<string> (TableRow, 0) = peak.getBankName();
+        QErrTable->cell<int> (TableRow, 1) = pk;
+        QErrTable->cell<int> (TableRow, 2) = peak.getRow();
+        QErrTable->cell<int> (TableRow, 4) = peak.getCol();
+        QErrTable->cell<double> (TableRow, 3) = sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q
+            + 2] * out[q + 2]);
+        chiSq += out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2];
         TableRow++;
       }
+      setProperty("QErrorWorkspace", QErrTable);
 
-
-    }
-
-    setProperty("QErrorWorkspace", QErrTable);
-   // AnalysisDataService::Instance().clear();
 
   }
 

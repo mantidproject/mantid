@@ -11,6 +11,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/Parameter.h"
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
 using namespace std;
@@ -43,7 +44,7 @@ namespace Mantid
     {
       NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-          = startX_set = false;
+          = startX_set = NGroups_set = false;
 
       //g_log.setLevel(7);
 
@@ -61,6 +62,8 @@ namespace Mantid
       PeakName = "";
 
       a = b = c = alpha = beta = gamma = 0;
+
+      NGroups =1;
 
     }
 
@@ -84,10 +87,11 @@ namespace Mantid
       BankNames = Component_name;
 
       tolerance = tolerance1;
+      NGroups = 1;
       NLatticeParametersSet = 0;
       NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-          = startX_set = false;
+          = startX_set = NGroups_set = false;
 
       setAttribute("a", Attribute(ax));
       setAttribute("b", Attribute(bx));
@@ -102,7 +106,6 @@ namespace Mantid
 
       setAttribute("startX", Attribute(-1));
       setAttribute("endX", Attribute(-1));
-
       init();
 
       //g_log.setLevel(7);//debug mode
@@ -113,16 +116,16 @@ namespace Mantid
     void SCDPanelErrors::init()
     {
 
-      declareParameter("detWidthScale", 1.0, "panel Width");
-      declareParameter("detHeightScale", 1.0, "panel Height");
+      declareParameter("f0_detWidthScale", 1.0, "panel Width");
+      declareParameter("f0_detHeightScale", 1.0, "panel Height");
 
-      declareParameter("Xoffset", 0.0, "Panel Center x offset");
-      declareParameter("Yoffset", 0.0, "Panel Center y offset");
-      declareParameter("Zoffset", 0.0, "Panel Center z offset");
+      declareParameter("f0_Xoffset", 0.0, "Panel Center x offset");
+      declareParameter("f0_Yoffset", 0.0, "Panel Center y offset");
+      declareParameter("f0_Zoffset", 0.0, "Panel Center z offset");
 
-      declareParameter("Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
-      declareParameter("Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
-      declareParameter("Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
+      declareParameter("f0_Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
+      declareParameter("f0_Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
+      declareParameter("f0_Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
 
       declareParameter("l0", 0.0, "Initial Flight Path");
       declareParameter("t0", 0.0, "Time offset");
@@ -254,7 +257,7 @@ namespace Mantid
    {
 
        vector<V3D> posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (!posv.empty())
+       if (posv.size() > 0)
        {
         V3D pos = posv[0];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -271,9 +274,9 @@ namespace Mantid
 
        vector<double> scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
        vector<double> scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( !scalex.empty() )
+       if( scalex.size() > 0)
           pmap->addDouble(bank_const.get(),"scalex", scalex[0]);
-       if( !scaley.empty())
+       if( scaley.size() > 0)
           pmap->addDouble(bank_const.get(),"scaley", scaley[0]);
 
        boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
@@ -286,7 +289,7 @@ namespace Mantid
        boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const
     {
       vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-      if (!posv.empty())
+      if (posv.size() > 0)
       {
         V3D pos = posv[0];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -349,12 +352,19 @@ namespace Mantid
         g_log.error("Cannot 'clone' instrument");
         throw logic_error("Cannot clone instrument");
       }
+      std::vector<std::string> GroupBanks;
 
-      std::vector<std::string> bankNames;
-      boost::split(bankNames, BankNames, boost::is_any_of("/"));
+      boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
+      for( int group=0; group < (int)GroupBanks.size(); group++)
+      {
+        string prefix="f"+boost::lexical_cast<std::string>(group)+"_";
+
+        std::vector<std::string> bankNames;
+
+        boost::split(bankNames, GroupBanks[group], boost::is_any_of("/"));
       //Set new settings in the instrument
-      vector<string>::iterator it;
+        vector<string>::iterator it;
 
       for (it = bankNames.begin(); it != bankNames.end(); it++)
       {
@@ -384,11 +394,11 @@ namespace Mantid
 
         Quat Rot0 = bank_const->getRelativeRot();
 
-        Quat Rot = Quat(getParameter("Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) * Rot0;
+        Quat Rot = Quat(getParameter(prefix+"Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) * Rot0;
 
-        Rot = Quat(getParameter("Yrot"), Kernel::V3D(0.0, 1.0, 0.0)) * Rot;
+        Rot = Quat(getParameter(prefix+"Yrot"), Kernel::V3D(0.0, 1.0, 0.0)) * Rot;
 
-        Rot = Quat(getParameter("Zrot"), Kernel::V3D(0.0, 0.0, 1.0)) * Rot;
+        Rot = Quat(getParameter(prefix+"Zrot"), Kernel::V3D(0.0, 0.0, 1.0)) * Rot;
 
         std::string name = bankNm;
 
@@ -399,9 +409,9 @@ namespace Mantid
 
         V3D pos1 = bank->getRelativePos();
 
-        pmap->addPositionCoordinate(bank.get(), string("x"), getParameter("Xoffset") + pos1.X());
-        pmap->addPositionCoordinate(bank.get(), string("y"), getParameter("Yoffset") + pos1.Y());
-        pmap->addPositionCoordinate(bank.get(), string("z"), getParameter("Zoffset") + pos1.Z());
+        pmap->addPositionCoordinate(bank.get(), string("x"), getParameter(prefix+"Xoffset") + pos1.X());
+        pmap->addPositionCoordinate(bank.get(), string("y"), getParameter(prefix+"Yoffset") + pos1.Y());
+        pmap->addPositionCoordinate(bank.get(), string("z"), getParameter(prefix+"Zoffset") + pos1.Z());
 
         //--------------------------- Scale Panel( only for Rectangle Detectors)-------------------------------------
 
@@ -414,8 +424,8 @@ namespace Mantid
 
         if (Rect)
         {
-          double scalex = getParameter("detWidthScale");
-          double scaley = getParameter("detHeightScale");
+          double scalex = getParameter(prefix+"detWidthScale");
+          double scaley = getParameter(prefix+"detHeightScale");
           double scalez = 1;
           string baseName = Rect->base()->getName();
           if (pmapSv->getDouble(baseName, string("scalex")).size() > 0)
@@ -441,7 +451,7 @@ namespace Mantid
 
         }//if Rect
       }//For each bank name
-
+      }//for each group
       //-------------------- Move source(L0)-------------------------------
       boost::shared_ptr<const Geometry::IObjComponent> source = instChange->getSource();
       boost::shared_ptr<const Geometry::IObjComponent> sample = instChange->getSample();
@@ -503,7 +513,7 @@ namespace Mantid
 
     void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const
     {
-
+      g_log.debug()<<"Start function 1D"<<endl;
       int StartX = startX;
       int EndX = endX;
       V3D panelCenter_old;
@@ -636,6 +646,7 @@ namespace Mantid
       {
         for(int i = StartX; i <= EndX; i++)
            out[i]= 10000;
+        g_log.debug()<<"Could Not find a UB matix"<<std::endl;
         return;
       }
 
@@ -652,6 +663,8 @@ namespace Mantid
         out[3 * i + 1+StartX] = err[1];
         out[3 * i + 2+StartX] = err[2];
         chiSq += err[0]*err[0] + err[1]*err[1] + err[2]*err[2] ;
+        if( i < 4)
+          g_log.debug()<<"hkl,q="<<hkl_vectors[i]<<q_vectors[i]<<endl;
 
       }
 
@@ -663,14 +676,14 @@ namespace Mantid
       for (size_t i = 0; i < this->nParams(); i++)
         g_log.debug() << setw(20) << parameterName(i) << setw(20) << getParameter(i) << std::endl;
 
-      g_log.debug() << "      chi Squared=" << chiSq << std::endl;
+      g_log.debug() << "      chi Squared=" <<std::setprecision(12)<< chiSq << std::endl;
 
       //Get values for test program. TODO eliminate
-     // g_log.debug() << "  out[even]=";
-   //   for (size_t i = 0; i < min<size_t> (nData, 30); i++)
-    //    g_log.debug() << out[i] << "  ";
+      g_log.debug() << "  out[evenxx]=";
+     for (size_t i = 0; i < min<size_t> (nData, 30); i++)
+       g_log.debug() << out[i] << "  ";
 
-    //  g_log.debug() << std::endl;
+   //   g_log.debug() << std::endl;
 
     }
 
@@ -694,6 +707,8 @@ namespace Mantid
         const Kernel::DblMatrix U1 = lat.getU();
 
         Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
+        if( dU == Kernel::DblMatrix())
+          std::cout<<"zero dU in CalcDiffDerivFromdQ"<<std::endl;
         Kernel::DblMatrix dUB0 = dU * B0;
 
         Kernel::DblMatrix dQtheor = dUB0 * MhklT;
@@ -764,12 +779,12 @@ namespace Mantid
     }
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
-    {
-      const int StartPos=2;
-      const int StartRot = 5;
-      const int StartLen =0;
-      const int L0param =8;
-      const int T0param =9;
+    { g_log.debug()<<"Start of function Deriv "<<std::endl;
+      int StartPos=2;
+      int StartRot = 5;
+
+      int L0param = (int)parameterIndex("l0");
+      int T0param =(int)parameterIndex("t0");;
 
       if (nData <= 0)
         return;
@@ -795,7 +810,7 @@ namespace Mantid
         for( int i = 0; i< (int)nParams(); i++ )
           for( int k = 0; k<(int)nData;  k++ )
             out->set( k, i, 10 + rr );
-
+        g_log.debug()<<"Nonsense end of function Deriv "<<std::endl;
         return;
       }
 
@@ -919,14 +934,34 @@ namespace Mantid
         throw std::runtime_error("Not enough good points to find Optimized UB");
       }
 
-      //-------- xyz offset parameters ----------------------
+
+
+      map<string, int> bankName2Group;
+      vector<string> Groups;
+      boost::split( Groups, BankNames, boost::is_any_of("!"));
+      for( int gr=0; gr< (int)Groups.size(); gr++)
+      {
+
+
+        vector<string> banknames;
+        boost::split(banknames, Groups[gr],boost::is_any_of("/"));
+        for( vector<string>::iterator it=banknames.begin(); it != banknames.end(); it++)
+          bankName2Group[(*it)]=gr;
+      }
 
 
       vector<V3D> Unrot_dQ[3];
       int pick[3];
       pick[0] = pick[1] = pick[2] = 0;
+      Matrix<double> Result(3, qlab.size());
+    for( int gr=0; gr< (int)NGroups; gr++)
+    {  Unrot_dQ[0].clear(); Unrot_dQ[1].clear(); Unrot_dQ[2].clear();
 
-      for (int param = StartPos; param <=StartPos+2; param++)
+      //-------- xyz offset parameters ----------------------
+      StartPos = (int)parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
+      int startPeak = -1;
+       for (int param = StartPos; param <=StartPos+2; param++)
+
       {
         pick[param - StartPos] = 1;
         V3D parxyz(pick[0], pick[1], pick[2]);
@@ -935,8 +970,17 @@ namespace Mantid
         Matrix<double> Result(3, qlab.size());
 
         for (int peak = 0; peak < (int) qlab.size(); peak++)
-        {
+        if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
+        {   Unrot_dQ[param - StartPos].push_back(V3D(0.0,0.0,0.0));//Save for later calculations
 
+
+        Result[0][peak] = 0;
+        Result[1][peak] = 0;
+        Result[2][peak] = 0;
+
+        }else {
+          if( startPeak < 0)
+            startPeak = peak;
           double L1 = pos[peak].norm();
           double velMag = (L0 + L1) / time[peak];
           double t1 = time[peak] - L0 / velMag;
@@ -978,10 +1022,11 @@ namespace Mantid
         }
 
 
+
         Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
 
-        for (size_t w = 0; w < nData; w++)
-          out->set(w, param, 0.0);
+       // for (size_t w = 0; w < nData; w++)
+      //    out->set(w, param, 0.0);
 
         int x = StartX;
         for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
@@ -994,7 +1039,9 @@ namespace Mantid
 
 
       //-------------------- Derivatives with respect to rotx,roty, and rotz ---------
-      for (int param = StartRot; param <= StartRot+2; param++)
+      StartRot = (int)parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xrot");
+
+      for (int param = StartRot; param <= (int)StartRot+2; param++)
       {
         Matrix<double> Result(3, qlab.size());
         Matrix<double> Rot2dRot(3, 3); //deriv of rot matrix at angle=0
@@ -1006,9 +1053,21 @@ namespace Mantid
         r = (r + 1) % 3;
         Rot2dRot[r][(r + 2) % 3] = +1;//??? what I wanted not standard formula
         Rot2dRot *= M_PI / 180.;
-
+        int zeroRow = -1;
+        int nonzeroRow = -1;
         for (int peak = 0; peak < (int) qlab.size(); peak++)
-        {
+           if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
+            {
+              Result[0][peak] = 0;
+              Result[1][peak] = 0;
+              Result[2][peak] = 0;
+              if( zeroRow < 0)
+                zeroRow = peak;
+
+            }else{
+
+            if( nonzeroRow < 0)
+            nonzeroRow = peak;
           int Nwrt = 3;
           int NderOf = 3;
           Matrix<double> Bas(NderOf, Nwrt); //partial Qxyz wrt xyx
@@ -1016,12 +1075,16 @@ namespace Mantid
 
           for (int rr = 0; rr < NderOf; rr++)
             for (int cc = 0; cc < Nwrt; cc++)
+            {
               Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
+
+            }
 
           V3D dXvec = Rot2dRot * xvec[peak];
           V3D dYvec = Rot2dRot * yvec[peak];
           V3D dxyz2theta = dXvec * (col[peak] - NPanelcols[peak] / 2.0 + .5) + dYvec * (row[peak]
               - NPanelrows[peak] / 2.0 + .5);
+
           //dxyz2theta is partials xyz wrt rot x
           V3D unRotDeriv = Bas * dxyz2theta;
 
@@ -1036,8 +1099,9 @@ namespace Mantid
 
         Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
 
-        for (size_t w = 0; w < nData; w++)
-          out->set(w, param, 0.0);
+        //for (size_t w = 0; w < nData; w++)
+       //   out->set(w, param, 0.0);
+
 
         int x = StartX;
         for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
@@ -1048,10 +1112,19 @@ namespace Mantid
           }
       }
 
-      int param = StartLen;//scale width
-      Matrix<double> Result(3, qlab.size());
+      int param = (int) parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detWidthScale");
+
+
+
       for (int peak = 0; peak < (int) qlab.size(); peak++)
-      {
+        if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
+                           {
+                           Result[0][peak] = 0;
+                           Result[1][peak] = 0;
+                           Result[2][peak] = 0;
+
+                           }
+                   else{
         int Nwrt = 3;
         int NderOf = 3;
         Matrix<double> Bas(NderOf, Nwrt);
@@ -1074,8 +1147,8 @@ namespace Mantid
       }
 
       Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-      for (size_t w = 0; w < nData; w++)
-        out->set(w, param, 0.0);
+     // for (size_t w = 0; w < nData; w++)
+     //   out->set(w, param, 0.0);
 
       int x = StartX;
       for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
@@ -1085,10 +1158,19 @@ namespace Mantid
           x++;
         }
 
-      param = StartLen+1;//scale Height
+      param =  (int)parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detHeightScale");
+
+     // param = StartLen+1;//scale Height
       Result.zeroMatrix();
       for (int peak = 0; peak < (int) qlab.size(); peak++)
-      {
+        if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
+                                        {
+                                        Result[0][peak] = 0;
+                                        Result[1][peak] = 0;
+                                        Result[2][peak] = 0;
+
+                                        }
+                  else{
         int Nwrt = 3;
         int NderOf = 3;
         Matrix<double> Bas(NderOf, Nwrt);
@@ -1123,8 +1205,30 @@ namespace Mantid
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
+  /*  int TestParam = (int)parameterIndex("t0");//"f"+boost::lexical_cast<string>(gr)+"_detHeightScale");
+      std::vector<double>out1(nData);
+      std::vector<double>out2(nData);
+      function1D( out1.data(),xValues, nData);
+      double v = getParameter( TestParam);
+      setParameter( TestParam, v+.001);
+      function1D( out2.data(),xValues, nData);
+      setParameter(TestParam, v);
+      std::cout<<"off for Xrot of group "<<gr<<"=";
+      for( int i=0; i< nData; i++)
+      {
+        double D =( out2[i]-out1[i])/.001;
+        std::cout<<"("<<D<<","<<out->get(i,TestParam) <<")";
+        if(fabs(D-out->get(i,TestParam))>.02)
+          std::cout<<"*";
+      }
+*/
 
-      param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
+
+
+    }//for each group
+
+      int param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
+
       Result.zeroMatrix();
       for (int peak = 0; peak < (int) qlab.size(); peak++)
       {
@@ -1144,11 +1248,11 @@ namespace Mantid
 
       }
 
-      Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
+      Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
       //for (size_t w = 0; w < nData; w++)
       //   out->set(w, param, 0.0);
 
-      x = StartX;
+      int x = StartX;
       for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
         for (int roww = 0; roww < 3; roww++)
         {
@@ -1182,9 +1286,24 @@ namespace Mantid
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
-
-
-
+      g_log.debug()<<"End of function Deriv "<<std::endl;
+   /*      int TestParam = L0param;
+         std::vector<double>out1(nData);
+           std::vector<double>out2(nData);
+           function1D( out1.data(),xValues, nData);
+           double v = getParameter( TestParam);
+           setParameter( TestParam ,v+.001);
+           function1D( out2.data(),xValues, nData);
+           setParameter(TestParam, v);
+          // std::cout<<"off for Xrot of group "<<gr<<"=";
+           for( int i=0; i< nData; i++)
+           {
+             double D =( out2[i]-out1[i])/.001;
+             std::cout<<"("<<D<<","<<out->get(i,TestParam) <<")";
+             if(fabs(D-out->get(i,TestParam))>.02)
+               std::cout<<"*";
+           }
+           */
     }
 
 

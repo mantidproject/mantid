@@ -22,6 +22,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/IFunction.h"
 
 using namespace Mantid;
 using namespace API;
@@ -80,7 +81,7 @@ public:
 
     std::string ComponentName("bank26");
     CurveFitting::SCDPanelErrors calib(Peakws, ComponentName, 14.0, 19.3, 8.6, 90., 105., 90., .12);
-
+    calib.setAttribute("NGroups", IFunction::Attribute(1));
     std::vector<std::string> banks;
     banks.push_back(std::string("bank26"));
 
@@ -113,9 +114,9 @@ public:
     TS_ASSERT( det);
 
 
-    calib.setParameter("detWidthScale", 1.0);
+    calib.setParameter("f0_detWidthScale", 1.0);
 
-    calib.setParameter("detHeightScale", 1.0);
+    calib.setParameter("f0_detHeightScale", 1.0);
     //calib.setParameter("Xoffset",1.0);
     //calib.setParameter("Yrot",90);
 

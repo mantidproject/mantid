@@ -52,11 +52,11 @@ BivariateNormal::BivariateNormal() : API::IFunction1D(), expVals(NULL)
 
 {
   LastParams[IVXX] = -1;
-//  g_log.setLevel(7);
+ // g_log.setLevel(7);
    CalcVxx= CalcVyy= CalcVxy= false;
-  //BackConstraint = IntensityConstraint= MeanxConstraint = MeanyConstraint = NULL;
+  Varx0 = Vary0 = -1;
   expVals = NULL;
-  CalcVxx = CalcVxy = CalcVyy = false;
+
 }
 
 BivariateNormal::~BivariateNormal()
@@ -78,15 +78,19 @@ BivariateNormal::~BivariateNormal()
 
    UNUSED_ARG(xValues);
    UNUSED_ARG(nData);
-
-   double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy;
+   if( nData ==0)
+     return;
+   double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, Varxx,Varxy,Varyy;
    int NCells;
    bool isNaNs;
    API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
    MantidVec D = ws->dataY(0);
    MantidVec X = ws->dataY(1);
    MantidVec Y = ws->dataY(2);
-   initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
+   bool show=false;
+   if( ws->getName()=="index0")
+     show=true;
+   initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells, Varxx,Varxy,Varyy);
 
    NCells = std::min<int>((int)nData, NCells);
 
@@ -102,10 +106,17 @@ BivariateNormal::~BivariateNormal()
    inf << "F Parameters=";
    for (size_t k = 0; k < nParams(); k++)
      inf << "," << getParameter(k);
-   inf << "\n";
+    if( nParams() < 6)
+      inf<<","<<Varxx<<","<<Varyy<<","<<Varxy;
+   inf << std::endl;
+
+   double penalty =0;
 
    for (int i = 0; i < NCells; i++)
    {
+     double pen =0;
+     if( (i-1)%10==0)
+       pen = penalty;
      if (isNaNs)
        out[x] = 10000;
      else
@@ -113,7 +124,7 @@ BivariateNormal::~BivariateNormal()
        double dx = X[i] - Xmean;
        double dy = Y[i] - Ymean;
        out[x] = Background + coefNorm * Intensity * exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy
-           + expCoeffy2 * dy * dy);
+           + expCoeffy2 * dy * dy) + pen;
 
        if (out[x] != out[x])
        {
@@ -123,14 +134,14 @@ BivariateNormal::~BivariateNormal()
 
      }
      double diff = out[x]-D[x];
-   //  inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
-   //      D[x]<<")";
+    // inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
+    //     D[x]<<")";
      chiSq +=diff*diff;
 
      x++;
    }
 
-   inf << "\n"<<"    chiSq =" << chiSq << "\n";
+   inf << std::endl<<"    chiSq =" << chiSq <<"     nData"<<nData<<std::endl;
    g_log.debug(inf.str());
 
  }
@@ -141,22 +152,20 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
 {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);
-
+  if( nData <= (size_t)0)
+    return;
  initCommon();
 
   std::ostringstream inf;
   inf << "***Parameters=" ;
-  for( size_t k=0; k < nParams();k++)
-    inf << "," << getParameter(k);
-  inf << "\n";
+  for( size_t k=0; k < 7;k++)
+    inf << "," << LastParams[k];
+  inf << std::endl;
   g_log.debug( inf.str());
 
-  std::vector<double>outt(nData);
-  function1D(outt.data()  ,xValues,nData);
-  if( nData <=0)
-      return;
 
-  double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
+   double penDeriv =0;
+   double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
 
   API::MatrixWorkspace_const_sptr  ws= getMatrixWorkspace();
   MantidVec X =ws->dataY(1);
@@ -164,11 +173,14 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
 
   for( int x=0; x<NCells; x++)
    {
+      double penaltyDeriv = 0;
+      if( x %10 ==0)
+        penaltyDeriv = penDeriv;
       double r = Y[x];
       double c = X[x];
 
-      out->set(x, IBACK, 1.0);
-      out->set(x, ITINTENS, expVals[x] * coefNorm);
+      out->set(x, IBACK, penaltyDeriv+1.0);
+      out->set(x, ITINTENS,penaltyDeriv+ expVals[x] * coefNorm);
 
       double coefExp = coefNorm * LastParams[ITINTENS];
 
@@ -176,7 +188,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
       double coefx2 = -LastParams[IVYY] /2/ uu;
 
 
-      out->set(x, IXMEAN, coefExp * expVals[x] * (-2*coefx2 * (c - LastParams[IXMEAN]) - coefxy * (r
+      out->set(x, IXMEAN, penaltyDeriv+coefExp * expVals[x] * (-2*coefx2 * (c - LastParams[IXMEAN]) - coefxy * (r
           - LastParams[IYMEAN])));
 
 
@@ -184,8 +196,9 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
 
       double coefy2 = -LastParams[IVXX] / 2/uu;
 
-      out->set(x, IYMEAN, coefExp * expVals[x] * (-coefxy * (c - LastParams[IXMEAN]) - 2*coefy2 * (r
+      out->set(x, IYMEAN, penaltyDeriv+coefExp * expVals[x] * (-coefxy * (c - LastParams[IXMEAN]) - 2*coefy2 * (r
           - LastParams[IYMEAN])));
+
 
 
       coefExp = coefNorm * LastParams[ITINTENS];
@@ -198,7 +211,10 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
                 * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN]))
               -(r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN])/2/uu)   ;
 
-
+     if(LastParams[IVXX] > 1.2*Varx0 && !CalcVariances)
+        SIVXX=0;
+      if( LastParams[IVXX] < .8*Varx0)
+        SIVXX = 0;
       coefExp = coefNorm * LastParams[ITINTENS];
 
       C = -LastParams[IVXX] / 2 / uu;
@@ -212,6 +228,11 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
 
 
 
+      if( LastParams[IVYY] > 1.2*Vary0&& !CalcVariances)
+        SIVYY=0;
+
+      if( LastParams[IVYY] < .8*Vary0)
+        SIVYY = 0;
       coefExp = coefNorm * LastParams[ITINTENS];
 
       C = LastParams[IVXY] / uu;
@@ -224,8 +245,9 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
         +(r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN])/uu)   ;
 
 
-      if( !CalcVxx)
-         out->set(x, IVXX, SIVXX);
+
+      if( !CalcVxx && nParams() >6)
+         out->set(x, IVXX, penaltyDeriv+SIVXX);
       else
       {
        // out->set(x,IVXX,0.0);
@@ -247,8 +269,8 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
         out->set(x,IXMEAN, mxderiv);
 
       }
-      if( !CalcVyy )
-         out->set(x, IVYY, SIVYY);
+      if( !CalcVyy&& nParams() >6 )
+         out->set(x, IVYY,penaltyDeriv+ SIVYY);
       else
       {
        // out->set(x,IVYY, 0.0);
@@ -266,9 +288,9 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
                 - my)*TotN)/(TotI -LastParams[IBACK]*TotN) ;
         out->set(x,IYMEAN, myderiv);
       }
-      if( !CalcVxy)
+      if( !CalcVxy && nParams() >6)
       {
-        out->set(x, IVXY, SIVXY);
+        out->set(x, IVXY,penaltyDeriv+ SIVXY);
 
       }
       else
@@ -295,6 +317,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
 
    }
 
+
 }
 
 void BivariateNormal::init()
@@ -303,9 +326,9 @@ void BivariateNormal::init()
   declareParameter("Intensity" , 0.00);
   declareParameter("Mcol" , 0.00, "Mean column(x) value");
   declareParameter("Mrow" , 0.00, "Mean row(y) value");
-  declareParameter("SScol", 0.00, "Variance of the column(x) values");
-  declareParameter("SSrow", 0.00, "Variance of the row(y) values");
-  declareParameter("SSrc" , 0.00, "Covariance of the column(x) and row(y) values");
+// declareParameter("SScol", 0.00, "Variance of the column(x) values");
+ //declareParameter("SSrow", 0.00, "Variance of the row(y) values");
+ //declareParameter("SSrc" , 0.00, "Covariance of the column(x) and row(y) values");
 
   CalcVariances = false;
 
@@ -433,28 +456,29 @@ void BivariateNormal::initCommon()
 
         double minMeanx = MinX * .9 + .1 * MaxX;
         double maxMeanx = MinX * .1 + .9 * MaxX;
-        if( getConstraint(2)==NULL)
+        if( getConstraint(2)== NULL)
         {
           addConstraint(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
         }
 
 
- //Cannot seem to change penalyt factor for LevenBerg algorithm. Causes
- // *  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams); to seg fault??
+
+ /*//Cannot seem to change penalyt factor for LevenBerg algorithm. Causes
+   //  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams); to seg fault??
     for( int p=0; p < (int)nParams();p++)
         {
-          IConstraint* constr = getConstraint( p );
-          if( constr )
+          boost::shared_ptr<IConstraint> constr( getConstraint( p ));
+          if(constr.get())
           {
             double penalty = constr->getPenaltyFactor() + 10 * MaxD;
-            //std::cout<<"initCommon G"<<p<<","<<penalty<<std::endl;
+            std::cout<<"initCommon G"<<p<<","<<penalty<<std::endl;
             constr->setPenaltyFactor( penalty );
 
           }
-        } //std::cout<<"initCommon H"<<std::endl;
+        } std::cout<<"initCommon H"<<std::endl;
 
-//*/
-        if (CalcVariances)
+*/
+      if (CalcVariances && nParams() >6)
         {
           std::ostringstream ssxx, ssyy, ssxy;
 
@@ -507,15 +531,16 @@ void BivariateNormal::initCommon()
         ParamsOK = false;
 
 
-  if (!ParamsOK)
+ if (!ParamsOK)
   {
 
         for (size_t i = 0; i < nParams(); i++)
           LastParams[i] = getParameter(i);
+  }
+        /*
+        double Varxx;// = LastParams[IVXX];
 
-        double Varxx = LastParams[IVXX];
-
-        if (CalcVxx)
+        if (CalcVxx || nParams() <6)
         {
           Varxx = (SIxx + (getParameter("Mcol") - mIx) * (getParameter("Mcol") - mIx) * TotI
               - getParameter("Background") * Sxx - getParameter("Background") * (getParameter("Mcol")
@@ -523,21 +548,24 @@ void BivariateNormal::initCommon()
               * TotN);
           LastParams[IVXX] = Varxx;
 
-        }
+        }else
+          Varxx = LastParams[IVXX];
 
-       double Varyy = LastParams[IVYY];
+       double Varyy ;//= LastParams[IVYY];
 
-        if (CalcVyy)
+        if (CalcVyy|| nParams() <6)
         {
           Varyy = (SIyy + (getParameter("Mrow") - (mIy)) * (getParameter("Mrow") - (mIy)) * TotI
               - getParameter("Background") * (Syy) - getParameter("Background") * (getParameter("Mrow")
               - (my)) * (getParameter("Mrow") - (my)) * TotN) / (TotI - getParameter("Background")
               * TotN);
           LastParams[IVYY] = Varyy;
-        }
-        double Varxy = LastParams[IVXY];
+        }else
+          Varyy = LastParams[IVYY];
 
-        if (CalcVxy)
+        double Varxy;// = LastParams[IVXY];
+
+        if (CalcVxy|| nParams() <6)
         {
           Varxy = ((SIxy) + (getParameter("Mcol") - (mIx)) * (getParameter("Mrow") - (mIy)) * TotI
               - getParameter("Background") * (Sxy) - getParameter("Background") * (getParameter("Mcol")
@@ -545,17 +573,31 @@ void BivariateNormal::initCommon()
               * TotN);
 
           LastParams[IVXY] = Varxy;
-        }
+        }else
+          Varxy = LastParams[IVXY];
+
 
   }
-
+*/
 
   if (!CommonsOK || !ParamsOK)
   {
 
     int NCells1;
+    double Varxx, Varxy,Varyy;
+
+
     initCoeff( D, X, Y, coefNorm,  expCoeffx2, expCoeffy2,  expCoeffxy,
-                   NCells1);
+                   NCells1, Varxx, Varxy,Varyy);
+
+  //  if( CalcVariances &&  nParams() < 5 && Varx0 < 0 && Vary0 < 0)
+         {
+           Varx0 = Varxx;
+           Vary0 = Varyy;
+         }
+    LastParams[IVXX] = Varxx;
+    LastParams[IVXY] = Varxy;
+    LastParams[IVYY] = Varyy;
 
     delete [] expVals;
     expVals = new double[NCells];
@@ -580,12 +622,15 @@ void BivariateNormal::initCoeff( MantidVec &D,
                                  double &expCoeffx2,
                                  double & expCoeffy2,
                                  double & expCoeffxy,
-                                 int   &NCells) const
+                                 int   &NCells,
+                                 double &Varxx,
+                                 double &Varxy,
+                                 double &Varyy) const
    {
 
-     double Varxx = getParameter( IVXX);
 
-     if( CalcVxx)
+
+     if( CalcVxx ||nParams() <6)
      {
        Varxx = (SIxx +(getParameter("Mcol")- mIx)*(getParameter("Mcol")-mIx)*
 
@@ -593,24 +638,38 @@ void BivariateNormal::initCoeff( MantidVec &D,
              - (mx))*(getParameter("Mcol")-(mx) )*TotN)/(TotI -getParameter("Background")*
             TotN) ;
 
-     }
+       if( Varx0 > 0) Varxx = std::min<double>(Varxx, 1.21*Varx0);
+       if( Varx0 > 0) Varxx = std::max<double>(Varxx, .79*Varx0);
 
-     double Varyy = getParameter( IVYY);
+     }else
+       {
+        Varxx = getParameter( IVXX);
+
+       }
 
 
-     if( CalcVyy)
+
+
+     if( CalcVyy||nParams() <6)
      {
        Varyy = (SIyy +(getParameter("Mrow")- (mIy))*(getParameter("Mrow")- (mIy) )*
        TotI -getParameter("Background")* (Syy) -getParameter("Background")*(getParameter("Mrow")- (my) )*
        (getParameter("Mrow")-
         (my) )* TotN )/( TotI -getParameter("Background")*
             TotN );
+      if( Vary0 > 0) Varyy = std::min<double>(Varyy, 1.21*Vary0);
+      if( Vary0 > 0)Varyy = std::max<double>(Varyy, .79*Vary0);
+
+     }else
+     {
+       Varyy = getParameter( IVYY);
 
      }
-     double Varxy = getParameter( IVXY);
 
 
-     if( CalcVxy)
+
+
+     if( CalcVxy|| nParams() <6)
      {
        Varxy =( (SIxy) +(getParameter("Mcol")- (mIx) )*(getParameter("Mrow") - (mIy) )*
            TotI -getParameter("Background")* (Sxy) -getParameter("Background")*(getParameter("Mcol")- (mx) )*
@@ -618,7 +677,9 @@ void BivariateNormal::initCoeff( MantidVec &D,
         (my) )* TotN)/( TotI -getParameter("Background")*
             TotN);
 
-     }
+     }else
+       Varxy = getParameter( IVXY);
+
      double uu = Varxx* Varyy - Varxy * Varxy;
 
      coefNorm = .5 / M_PI / sqrt(uu);

@@ -126,12 +126,19 @@ namespace Mantid
         int x = value.asInt();
 
         if( x>0)
-
+        {
           CalcVariances = true;
-
+          CalcVxx = CalcVyy = CalcVxy = true;
+        }
         else
-
+        {
           CalcVariances = false;
+          declareParameter("SScol", 0.00, "Variance of the column(x) values");
+          declareParameter("SSrow", 0.00, "Variance of the row(y) values");
+          declareParameter("SSrc" , 0.00, "Covariance of the column(x) and row(y) values");
+          CalcVxx = CalcVyy = CalcVxy = false;
+
+        }
 
       }
 
@@ -162,7 +169,10 @@ namespace Mantid
                        double &expCoeffx2,
                        double & expCoeffy2,
                        double & expCoeffxy,
-                       int   &NCells) const;
+                       int   &NCells,
+                       double &Varxx,
+                       double &Varxy,
+                       double &Varyy) const;
       
 
 
@@ -170,6 +180,7 @@ namespace Mantid
       double SIxx, SIyy, SIxy, Sxx, Syy, Sxy;//< For calculating variances
       double TotI, TotN;//< For calculating variances
 
+      double Varx0, Vary0;//Crude estimate of the variances for bounds on variances
 
       double LastParams[9]; ///< Saves previous/this set of parameters
       

@@ -87,7 +87,7 @@ public:
       BivariateNormal NormalFit;
       NormalFit.initialize();
 
-      TS_ASSERT_EQUALS( NormalFit.nParams(),7);
+    //  TS_ASSERT_EQUALS( NormalFit.nParams(),7);
       TS_ASSERT_EQUALS( NormalFit.nAttributes(),1);
       TS_ASSERT_EQUALS( NormalFit.name() , std::string("BivariateNormal"));
 
@@ -103,10 +103,11 @@ public:
       double Vy =3.3671409085;
       double Vxy = 2.243584414;
 
+      bool CalcVariances = 0;
 
       Mantid::MantidVecPtr xvals, yvals, data;
       int sgn1 = 1;
-      int sgn2 =1;
+      int sgn2 =1;std::cout<<"-------------------------------------"<<std::endl;
       for( int i= 0; i< nCells; i++)
         {
           double x = 195 + sgn1;
@@ -117,10 +118,11 @@ public:
           yvals.access().push_back( y );
           double val = NormVal(background,intensity,Mcol,
               Mrow,Vx,Vy, Vxy, y, x);
+          std::cout<<"("<<y<<","<<x<<","<<val<<")";
           data.access().push_back( val );
 
         }
-
+   std::cout<<std::endl;std::cout<<"-------------------------------------"<<std::endl;
 
       Mantid::MantidVecPtr x_vec_ptr;
       double xx[nCells];
@@ -130,6 +132,7 @@ public:
             x_vec_ptr.access().push_back((double) i );
          }
 
+      NormalFit.setAttributeValue("CalcVariances",CalcVariances);
 
       ws->setX(0,x_vec_ptr);
       ws->setData(0,data);
@@ -139,21 +142,23 @@ public:
 
       NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0 );
 
-
       NormalFit.setParameter("Background", 0.05, true);
       NormalFit.setParameter("Intensity", 562.95, true);
       NormalFit.setParameter("Mcol",195.698196998, true);
       NormalFit.setParameter("Mrow", 44.252065014, true);
-      NormalFit.setParameter("SScol", 5.2438470, true);
-      NormalFit.setParameter("SSrow",3.3671409085, true);
-      NormalFit.setParameter("SSrc", 2.243584414, true);
+      if( !CalcVariances )
+      {
+        NormalFit.setParameter("SScol", 5.2438470, true);
+        NormalFit.setParameter("SSrow",3.3671409085, true);
+        NormalFit.setParameter("SSrc", 2.243584414, true);
+      }
 
 
-      NormalFit.setAttributeValue("CalcVariances",1);
+
 
       std::vector<double> out(nCells);
       NormalFit.function1D(out.data(), xx, nCells);
-
+      std::cout<<"-------------------------------------"<<std::endl;
       for( int i=0; i< nCells; i++)
       {
 
@@ -161,15 +166,16 @@ public:
          double y = yvals.access()[i];
          double d = NormVal(background,intensity,Mcol,
              Mrow,Vx,Vy, Vxy, y, x);
+
          TS_ASSERT_DELTA( d, out[i],.001);
       }
+      std::cout<<"\n-------------------------------------"<<std::endl;
 
-
-    double Res[5][7]={{95.2508,       0.0605304,      -9.80469,      14.2329,     0,     0,      0},
-                      { -5.45129,    0.000499636,      -0.264636,      0.233329,    0,     0,      0},
-                      {5.19915,       0.00688051,        1.1584,        4.0905,     0,     0,      0},
-                     { 1,            1.49829e-13,       2.14182e-10,    -2.1001e-10, 0,    0,     0},
-                     {0.945744,      3.10687e-05,      0.0183605,     0.0324357,    0,    0,      0}};
+    double Res[5][7]={{1,0.0410131,-1.21055,5.93517,-3.04761,-4.03279,3.79245},
+                      { 1,0.00388945,-2.25613,2.63994,0.870333,1.13668,-2.33103},
+                      {1,0.00510336,0.616511,2.78705,-0.31702,0.75513,1.10871},
+                     { 1,4.45298e-08,-5.92569e-05,7.48318e-05,6.66936e-05,0.000106485,-0.000172435},
+                     {1,3.35644e-05,0.00910018,0.0318031,-0.000328676,0.02284,0.0186753}};
 
 
 
@@ -179,7 +185,7 @@ public:
      NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 
 
- /*      for( int i=0; i< nCells; i+=6)//points
+ /*     for( int i=0; i< nCells; i+=6)//points
       {
         std::cout<<i;
         for( int j=0;j< 7;j++)//params

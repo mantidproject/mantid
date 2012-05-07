@@ -204,6 +204,9 @@ private:
                            const double               TotBoundaryIntensities,
                            const int                  nBoundaryCells);
 
+  void CalcVariancesFromData( double background, double meanx, double meany,
+      double &Varxx, double &Varxy, double &Varyy);
+
   double CalculateIsawIntegrateError(const double background,
                                      const double backError,
                                      const double ChiSqOverDOF,
@@ -220,7 +223,7 @@ private:
 
   bool IsEnoughData(   ) ;
 
-  std::string CalcConstraints( );
+  std::string CalcConstraints( std::vector< std::pair<double,double> > & Bounds );
 
 
   bool    debug;

@@ -10,6 +10,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -169,7 +170,7 @@ namespace CurveFitting
 
    size_t   nAttributes () const
     {
-      return (size_t)10;
+      return (size_t)11;
     }
 
 
@@ -186,6 +187,7 @@ namespace CurveFitting
       V.push_back("BankNames");
       V.push_back("startX");
       V.push_back("endX");
+      V.push_back("NGroups");
       return V;
     }
 
@@ -212,6 +214,13 @@ namespace CurveFitting
             {
               return Attribute( PeakName );
             }
+
+          else if( attName =="NGroups")
+          {
+             Attribute A(NGroups);
+
+            return A;
+          }
 
           else
             throw std::invalid_argument("Not a valid attribute namec");
@@ -243,7 +252,7 @@ namespace CurveFitting
 
         double x = 0;
         if(!(attName == "PeakWorkspaceName" || attName=="BankNames" || attName =="startX"
-                            || attName == "endX"))
+                            || attName == "endX" || attName == "NGroups"))
            x =value.asDouble();
 
         if (attName.compare("beta") < 0)
@@ -293,9 +302,37 @@ namespace CurveFitting
              PeakName_set = true;
              NLatticeParametersSet++;
            }
+          }else if( attName == "NGroups")
+          {
+            if( NGroups_set )
+            {
+              g_log.error("Cannot set NGroups more than once");
+              throw new std::invalid_argument("Cannot set NGroups more than once");
+            }
+            NGroups = value.asInt();
+            for (int k = 1; k < NGroups; k++)
+            {
+              std::string prefix = "f"+boost::lexical_cast< std::string >(k) + "_";
+              declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
+              declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
+
+              declareParameter(prefix + "Xoffset", 0.0, "Panel Center x offset");
+              declareParameter(prefix + "Yoffset", 0.0, "Panel Center y offset");
+              declareParameter(prefix + "Zoffset", 0.0, "Panel Center z offset");
+
+              declareParameter(prefix + "Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
+              declareParameter(prefix + "Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
+              declareParameter(prefix + "Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
+            }
+            if( !NGroups_set)
+            {
+              NGroups_set = true;
+              NLatticeParametersSet++;
+            }
           }
           else
             throw std::invalid_argument("Not a valid attribute namef ");
+
         }
         else if (attName == "beta")
         {
@@ -343,7 +380,6 @@ namespace CurveFitting
             gamma_set = true;
             NLatticeParametersSet++;
           }
-
         }else
           throw std::invalid_argument("Not a valid attribute namea "+attName);
 
@@ -376,6 +412,8 @@ namespace CurveFitting
           else if( attName =="PeakWorkspaceName")
                     return true;
 
+          else if( attName == "NGroups")
+                   return true;
           return false;
 
         }
@@ -393,6 +431,8 @@ namespace CurveFitting
 
         else if (attName == "endX")
           return true;
+
+
 
         return false;
       }
@@ -449,11 +489,12 @@ namespace CurveFitting
     boost::shared_ptr< DataObjects::PeaksWorkspace> peaks;
 
     double a,b,c,alpha,beta,gamma;
+    int NGroups;
 
     std::string PeakName;//< SCDPanelErrors{PeakName} is name in the Analysis Data Service where the PeaksWorkspace is stored
 
     bool a_set,b_set,c_set,alpha_set,beta_set,gamma_set,PeakName_set, BankNames_set,
-        startX_set,endX_set;
+        startX_set,endX_set, NGroups_set;
 
     int NLatticeParametersSet;
 
