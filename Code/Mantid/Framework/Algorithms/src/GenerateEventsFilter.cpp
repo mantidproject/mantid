@@ -324,6 +324,9 @@ namespace Algorithms
       throw std::invalid_argument("User specified log is not correct");
     }
 
+    // a) Clear duplicate value
+    mLog->detectEliminateDuplicates();
+
     double minValue = this->getProperty("MinimumLogValue");
     double maxValue = this->getProperty("MaximumLogValue");
     double deltaValue = this->getProperty("LogValueInterval");
@@ -652,6 +655,8 @@ namespace Algorithms
       currTime = mlog->nthTime(i);
       currValue = mlog->nthValue(i);
 
+      // g_log.notice() << "Log Index = " << i << "\t, value = " << currValue << "  time = " << currTime << std::endl;
+
       // b) Filter out by time and direction (optional)
       bool intime = false;
       if (currTime < startTime)
@@ -739,6 +744,7 @@ namespace Algorithms
             else
             {
               // iv.  It is impossible
+              g_log.error() << "Log Index = " << i << "\t value = " << currValue << "\t, Index = " << index << std::endl;
               throw std::runtime_error("Impossible to have currindex == lastindex, while start is not init");
             }
           }

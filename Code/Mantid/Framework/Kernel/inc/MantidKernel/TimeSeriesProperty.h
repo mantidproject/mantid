@@ -1737,6 +1737,47 @@ public:
     return out;
   }
 
+  /*
+   * Detects whether there are duplicated entries (of time) in property
+   * If there is any, keep one of them
+   */
+  void detectEliminateDuplicates()
+  {
+    // 1. Sort if necessary
+    sort();
+
+    // 2. Detect and Remove Duplicated
+    size_t numremoved = 0;
+
+    typename std::vector<TimeValueUnit<TYPE> >::iterator vit;
+    vit = mP.begin()+1;
+    Kernel::DateAndTime prevtime = mP.begin()->time();
+    while (vit != mP.end())
+    {
+      Kernel::DateAndTime currtime = vit->time();
+      if (prevtime == currtime)
+      {
+        // Print out warning
+        g_log.debug() << "Entry @ Time = " << prevtime << "has duplicate time stamp.  Remove entry with Value = " <<
+            (vit-1)->value() << std::endl;
+
+        // A duplicated entry!
+        vit = mP.erase(vit-1);
+
+        numremoved ++;
+      }
+
+      // b) progress
+      prevtime = currtime;
+      ++ vit;
+    }
+
+    // 3. Finish
+    g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << std::endl;
+
+    return;
+  }
+
 private:
 
   /**
@@ -1764,7 +1805,7 @@ private:
   /// Static reference to the logger class
   static Logger& g_log;
 
-};
+}; // END-TimeSeriesProperty
 
 
 template <typename TYPE>
