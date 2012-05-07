@@ -1,6 +1,8 @@
 /*WIKI* 
 Beam finder workflow algorithm for SANS instruments.
 
+The parameters used by this workflow algorithm are set up by [SetupEQSANSReduction].
+
 See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*/
@@ -90,7 +92,6 @@ void SANSBeamFinder::exec()
 {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> m_reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
   {
     m_reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
@@ -136,8 +137,16 @@ void SANSBeamFinder::exec()
     }
 
     // Store for later use
-    m_reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", center_x) );
-    m_reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", center_y) );
+    if (!m_reductionManager->existsProperty("LatestBeamCenterX"))
+      m_reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", center_x) );
+    else
+      m_reductionManager->setProperty("LatestBeamCenterX", center_x);
+
+    if (!m_reductionManager->existsProperty("LatestBeamCenterY"))
+      m_reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", center_y) );
+    else
+      m_reductionManager->setProperty("LatestBeamCenterY", center_y);
+
   }
   else
   {

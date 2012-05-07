@@ -279,7 +279,8 @@ void FindCenterOfMassPosition2::exec()
     setProperty("OutputWorkspace",m_result);
   } else {
     // Store the results using an ArrayProperty
-    declareProperty(new ArrayProperty<double> ("CenterOfMass",boost::make_shared<NullValidator>(),Direction::Output));
+    if (!existsProperty("CenterOfMass"))
+      declareProperty(new ArrayProperty<double> ("CenterOfMass",boost::make_shared<NullValidator>(),Direction::Output));
     std::vector<double> center_of_mass;
     center_of_mass.push_back(center_x);
     center_of_mass.push_back(center_y);

@@ -151,11 +151,14 @@ class DetectorWidget(BaseWidget):
             try:
                 reduction_table_ws = self.options_callback()
                 patch_output = mtd.workspaceExists(patch_ws)
-                c=ComputeSensitivity(Filename=self._content.sensitivity_file_edit.text(),
-                                     ReductionProperties=reduction_table_ws,
-                                     OutputWorkspace="sensitivity",
-                                     PatchWorkspace=patch_ws)
-                print c.getPropertyValue("OutputMessage")
+                
+                filename = self._content.sensitivity_file_edit.text()
+                script = "_, msg = ComputeSensitivity(Filename='%s',\n" % filename
+                script += "                     ReductionProperties='%s',\n" % reduction_table_ws
+                script += "                     OutputWorkspace='sensitivity',\n"
+                script += "                     PatchWorkspace='%s')\n" % patch_ws
+                script += "print msg\n"
+                mantidplot.runPythonScript(script, True)
             except:
                 print "Could not compute sensitivity"
                 print sys.exc_value
@@ -344,6 +347,14 @@ class DetectorWidget(BaseWidget):
             self._content.sensitivity_dark_browse_button.setEnabled(is_checked)
             self._content.sensitivity_dark_plot_button.setEnabled(is_checked)
             self._content.sensitivity_dark_file_label.setEnabled(is_checked)
+            
+        self._content.patch_sensitivity_check.setEnabled(is_checked)
+        if is_checked:
+            self._patch_checked()
+        else:
+            self._content.draw_patch_button.setEnabled(False)
+            self._content.create_sensitivity_button.setEnabled(False)
+
         
     def _sensitivity_browse(self):
         fname = self.data_browse_dialog()

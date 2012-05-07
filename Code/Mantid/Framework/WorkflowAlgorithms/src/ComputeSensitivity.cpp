@@ -55,6 +55,7 @@ void ComputeSensitivity::init()
 void ComputeSensitivity::exec()
 {
   std::string outputMessage = "";
+  progress(0.1, "Setting up sensitivity calculation");
 
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -77,20 +78,22 @@ void ComputeSensitivity::exec()
   IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
   ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
   ctrAlg->execute();
+  progress(0.2, "Computing sensitivity");
 
   // Set patch information so that the SANS sensitivity algorithm can
   // patch the sensitivity workspace
   const std::string patchWSName = getPropertyValue("PatchWorkspace");
   if (patchWSName.size()>0)
   {
-    progress(0.2, "Patch sensitivity parameters found");
     IAlgorithm_sptr patchAlg = createSubAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
-    reductionManager->declareProperty(new AlgorithmProperty("SensitivityPatchAlgorithm"));
+    if (!reductionManager->existsProperty("SensitivityPatchAlgorithm"))
+    {
+      reductionManager->declareProperty(new AlgorithmProperty("SensitivityPatchAlgorithm"));
+    }
     reductionManager->setProperty("SensitivityPatchAlgorithm", patchAlg);
   }
 
-  progress(0.3, "Computing sensitivity");
   if (reductionManager->existsProperty("SensitivityAlgorithm"))
   {
     IAlgorithm_sptr effAlg = reductionManager->getProperty("SensitivityAlgorithm");
