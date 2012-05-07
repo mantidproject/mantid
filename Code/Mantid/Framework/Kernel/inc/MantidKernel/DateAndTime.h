@@ -33,11 +33,11 @@ typedef boost::posix_time::time_duration time_duration;
 class MANTID_KERNEL_DLL DateAndTime
 {
 public:
-  explicit DateAndTime();
+  DateAndTime();
   DateAndTime(const int64_t total_nanoseconds);
-  explicit DateAndTime(const double seconds, const double nanoseconds);
-  explicit DateAndTime(const int32_t seconds, const int32_t nanoseconds);
-  explicit DateAndTime(const int64_t seconds, const int64_t nanoseconds);
+  DateAndTime(const double seconds, const double nanoseconds);
+  DateAndTime(const int32_t seconds, const int32_t nanoseconds);
+  DateAndTime(const int64_t seconds, const int64_t nanoseconds);
   DateAndTime(const std::string ISO8601_string);
   DateAndTime(const boost::posix_time::ptime _ptime);
 
