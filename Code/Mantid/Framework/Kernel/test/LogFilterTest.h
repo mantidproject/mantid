@@ -259,13 +259,6 @@ public:
       const TimeSeriesProperty<double> *filteredLog = filter.data();
       TS_ASSERT_EQUALS(filteredLog->size(), 6)
 
-      for (size_t i = 0; i < filteredLog->size(); ++i)
-      {
-        TimeInterval dtime = filteredLog->nthInterval(i);
-        double value = filteredLog->nthValue(i);
-        std::cout << "Filter Interval " << i << " : Time = " << dtime.begin() << " - " << dtime.end() << "\t, Value = " << value << std::endl;
-      }
-
       return;
     }
 
