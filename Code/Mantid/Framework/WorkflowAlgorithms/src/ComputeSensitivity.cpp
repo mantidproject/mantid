@@ -72,12 +72,20 @@ void ComputeSensitivity::exec()
   }
 
   const std::string outputWS = getPropertyValue("OutputWorkspace");
-  const std::string fileName = getPropertyValue("Filename");
 
   // Find beam center
-  IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
-  ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-  ctrAlg->execute();
+  if (reductionManager->existsProperty("SANSBeamFinderAlgorithm"))
+  {
+    //const std::string algTxt = reductionManager->getPropertyValue("SANSBeamFinderAlgorithm");
+
+    IAlgorithm_sptr ctrAlg = reductionManager->getProperty("SANSBeamFinderAlgorithm");
+    ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    ctrAlg->setChild(true);
+    ctrAlg->execute();
+    std::string outMsg2 = ctrAlg->getPropertyValue("OutputMessage");
+    outputMessage += outMsg2;
+  }
+
   progress(0.2, "Computing sensitivity");
 
   // Set patch information so that the SANS sensitivity algorithm can
@@ -96,14 +104,15 @@ void ComputeSensitivity::exec()
 
   if (reductionManager->existsProperty("SensitivityAlgorithm"))
   {
+    const std::string fileName = getPropertyValue("Filename");
     IAlgorithm_sptr effAlg = reductionManager->getProperty("SensitivityAlgorithm");
     effAlg->setChild(true);
     effAlg->setProperty("Filename", fileName);
     effAlg->setPropertyValue("OutputSensitivityWorkspace", outputWS);
     effAlg->execute();
     MatrixWorkspace_sptr effWS = effAlg->getProperty("OutputSensitivityWorkspace");
-    std::string outMsg2 = effAlg->getPropertyValue("OutputMessage");
     setProperty("OutputWorkspace", effWS);
+    std::string outMsg2 = effAlg->getPropertyValue("OutputMessage");
     outputMessage += outMsg2;
     setProperty("OutputMessage", outputMessage);
   } else {

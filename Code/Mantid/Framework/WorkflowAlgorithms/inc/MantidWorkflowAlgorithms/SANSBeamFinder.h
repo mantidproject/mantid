@@ -59,6 +59,7 @@ private:
   API::MatrixWorkspace_sptr loadBeamFinderFile(const std::string& beamCenterFile);
 
   boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
+  std::string m_output_message;
 
 };
 

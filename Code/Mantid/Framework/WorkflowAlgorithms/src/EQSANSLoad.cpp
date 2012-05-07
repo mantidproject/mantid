@@ -349,7 +349,7 @@ void EQSANSLoad::moveToBeamCenter()
   if (isEmpty(m_center_x) || isEmpty(m_center_y))
   {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    g_log.notice() << "No beam finding method: setting to default ["
+    g_log.information() << "Setting beam center to ["
       << Poco::NumberFormatter::format(m_center_x, 1) << ", "
       << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
     return;

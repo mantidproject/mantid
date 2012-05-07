@@ -28,6 +28,7 @@ an input workspace.
 #include "Poco/File.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
+#include "Poco/NumberFormatter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -200,10 +201,11 @@ void SANSSensitivityCorrection::exec()
         {
           center_x = reductionManager->getProperty("LatestBeamCenterX");
           center_y = reductionManager->getProperty("LatestBeamCenterY");
-          g_log.notice() << "No beam center provided: taking last position " << center_x << ", " << center_y << std::endl;
-          m_output_message += "   |No beam center provided: taking last position\n";
+          m_output_message += "   |Setting beam center to ["
+              + Poco::NumberFormatter::format(center_x, 1) + ", "
+              + Poco::NumberFormatter::format(center_y, 1) + "]\n";
         }
-        else m_output_message += "   |No beam center provided!\n";
+        else m_output_message += "   |No beam center provided: skipping!\n";
       }
 
       const std::string rawFloodWSName = "__flood_data_"+path.getBaseName();

@@ -67,6 +67,7 @@ void SetupEQSANSReduction::init()
   declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass position between each iteration [m]. Default: 0.00125");
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
+  declareProperty("UseDirectBeamMethod", true, "If true, the direct beam method will be used");
   declareProperty("BeamRadius", EMPTY_DBL(),
       "Radius of the beam area used the exclude the beam when calculating "
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
@@ -76,6 +77,7 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("BeamCenterY", center_grp);
   setPropertyGroup("BeamCenterFile", center_grp);
   setPropertyGroup("Tolerance", center_grp);
+  setPropertyGroup("UseDirectBeamMethod", center_grp);
   setPropertyGroup("BeamRadius", center_grp);
 
   // Dark current
@@ -180,14 +182,17 @@ void SetupEQSANSReduction::exec()
   if (calcBeamCenter)
   {
     const std::string beamCenterFile = getProperty("BeamCenterFile");
-    const double tolerance = getProperty("Tolerance");
+    const bool useDirectBeamMethod = getProperty("UseDirectBeamMethod");
     const double beamRadius = getProperty("BeamRadius");
-    IAlgorithm_sptr ctrAlg = createSubAlgorithm("FindCenterOfMassPosition");
-    if (!isEmpty(tolerance)) ctrAlg->setProperty("Tolerance", tolerance);
+
+    IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+    ctrAlg->setProperty("Filename", beamCenterFile);
+    ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeamMethod);
     if (!isEmpty(beamRadius)) ctrAlg->setProperty("BeamRadius", beamRadius);
-    reductionManager->declareProperty(new AlgorithmProperty("BeamCenterAlgorithm"));
-    reductionManager->setProperty("BeamCenterAlgorithm", ctrAlg);
-    reductionManager->declareProperty(new PropertyWithValue<std::string>("BeamCenterFile", beamCenterFile) );
+    ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+
+    reductionManager->declareProperty(new AlgorithmProperty("SANSBeamFinderAlgorithm"));
+    reductionManager->setProperty("SANSBeamFinderAlgorithm", ctrAlg);
   } else {
     reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
     reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
@@ -206,6 +211,7 @@ void SetupEQSANSReduction::exec()
     const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
 
     IAlgorithm_sptr effAlg = createSubAlgorithm("SANSSensitivityCorrection");
+    effAlg->setProperty("Filename", sensitivityFile);
     effAlg->setProperty("UseSampleDC", useSampleDC);
     effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
     effAlg->setProperty("MinEfficiency", minEff);
