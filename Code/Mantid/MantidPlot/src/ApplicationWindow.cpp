@@ -1358,8 +1358,13 @@ void ApplicationWindow::initMainMenu()
   help->insertSeparator();
   help->addAction(actionFirstTimeSetup);
   help->insertSeparator();
+
+  ///The paraview action should only be available on windows
+  #ifdef _WIN32
   help->addAction(actionSetupParaview);
-  help->insertSeparator();
+  help->insertSeparator(); 
+  #endif
+
   help->addAction(actionAbout);
 
   icat = new QMenu(this);
