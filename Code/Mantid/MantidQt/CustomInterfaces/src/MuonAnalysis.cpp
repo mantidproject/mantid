@@ -458,13 +458,22 @@ void MuonAnalysis::runLoadCurrent()
   {
     QString argusDAE = "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
     Poco::File l_path( argusDAE.toStdString() );
-    if ( !l_path.exists() )
+    try
     {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis",
-        QString("Can't load ARGUS Current data since\n") +
-        argusDAE + QString("\n") +
-        QString("does not seem to exist"));
-      return;
+      if ( !l_path.exists() )
+      {
+        QMessageBox::warning(this,"Mantid - MuonAnalysis",
+          QString("Can't load ARGUS Current data since\n") +
+          argusDAE + QString("\n") +
+          QString("does not seem to exist"));
+        return;
+      }
+    }
+    catch(Poco::Exception&)
+    {
+       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
+         "\nto access is down or your computer is not currently connected to the network.");
+       return;
     }
     m_uiForm.mwRunFiles->setUserInput(argusDAE);
     m_uiForm.mwRunFiles->setText("CURRENT RUN");
@@ -489,6 +498,7 @@ void MuonAnalysis::runLoadCurrent()
     {
        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
          "\nto access is down or your computer is not currently connected to the network.");
+       return;
     }
 
     QString psudoDAE;
