@@ -31,11 +31,13 @@ namespace Mantid
 
     // Assumes UB from optimize UB maps hkl to qxyz/2PI. So conversion factors to an from
     // UB ified q's are below.
+     Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
+
 
     static const double UBq2Q(2 * M_PI);
     static const double Q2UBq = 1 / UBq2Q;
 
-    Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
+
 
 
 
@@ -631,11 +633,13 @@ namespace Mantid
         const Kernel::DblMatrix U = lat.getU();
 
         UB0 = U * B0;
-      } catch (std::exception & s)
+      } catch (std::exception & )
       {
+
         badParams = true;
-      } catch (char * s1)
+      } catch (char * )
       {
+
         badParams = true;
       } catch (...)
       {
