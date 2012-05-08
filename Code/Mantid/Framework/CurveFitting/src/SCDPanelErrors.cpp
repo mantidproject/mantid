@@ -1363,5 +1363,152 @@ namespace Mantid
       return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);
     }
 
+      void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & value)
+      {
+        if (!hasAttribute(attName))
+          throw std::invalid_argument("Not a valid attribute namee " + attName);
+
+        double x = 0;
+        if(!(attName == "PeakWorkspaceName" || attName=="BankNames" || attName =="startX"
+                            || attName == "endX" || attName == "NGroups"))
+           x =value.asDouble();
+
+        if (attName.compare("beta") < 0)
+        {
+          if (attName.compare("a") == 0)
+          {
+            a = x;
+            if (!a_set)
+            {
+              a_set = true;
+              NLatticeParametersSet++;
+            }
+          }
+          else if (attName == ("b"))
+          {
+            b = x;
+            if (!b_set)
+            {
+              b_set = true;
+              NLatticeParametersSet++;
+            }
+          }
+          else if (attName == ("BankNames"))
+          {
+            BankNames = value.asString();
+            if (!BankNames_set)
+            {
+              BankNames_set = true;
+              NLatticeParametersSet++;
+            }
+          }
+          else if (attName == ("alpha"))
+          {
+            alpha = x;
+            if (!alpha_set)
+            {
+              alpha_set = true;
+              NLatticeParametersSet++;
+            }
+          }
+          else if( attName =="PeakWorkspaceName")
+          {
+           PeakName= value.asString();
+
+           if( !PeakName_set)
+           {
+             PeakName_set = true;
+             NLatticeParametersSet++;
+           }
+          }else if( attName == "NGroups")
+          {
+            if( NGroups_set )
+            {
+              g_log.error("Cannot set NGroups more than once");
+              throw new std::invalid_argument("Cannot set NGroups more than once");
+            }
+            NGroups = value.asInt();
+            for (int k = 1; k < NGroups; k++)
+            {
+              std::string prefix = "f"+boost::lexical_cast< std::string >(k) + "_";
+              declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
+              declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
+
+              declareParameter(prefix + "Xoffset", 0.0, "Panel Center x offset");
+              declareParameter(prefix + "Yoffset", 0.0, "Panel Center y offset");
+              declareParameter(prefix + "Zoffset", 0.0, "Panel Center z offset");
+
+              declareParameter(prefix + "Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
+              declareParameter(prefix + "Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
+              declareParameter(prefix + "Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
+            }
+            if( !NGroups_set)
+            {
+              NGroups_set = true;
+              NLatticeParametersSet++;
+            }
+          }
+          else
+            throw std::invalid_argument("Not a valid attribute namef ");
+
+        }
+        else if (attName == "beta")
+        {
+          beta = x;
+          if (!beta_set)
+          {
+            beta_set = true;
+            NLatticeParametersSet++;
+          }
+        }
+        else if (attName == "c")
+        {
+          c = x;
+          if (!c_set)
+          {
+            c_set = true;
+            NLatticeParametersSet++;
+          }
+        }
+        else if (attName == "startX")
+        {
+          startX =value.asInt();
+          if (!startX_set)
+          {
+            startX_set = true;
+            NLatticeParametersSet++;
+          }
+
+        }
+        else if (attName == "endX")
+        {
+          endX = value.asInt();
+          if (!endX_set)
+          {
+            endX_set = true;
+            NLatticeParametersSet++;
+          }
+
+        }
+        else if (attName == "gamma")
+        {
+          gamma = x;
+          if (!gamma_set)
+          {
+            gamma_set = true;
+            NLatticeParametersSet++;
+          }
+        }else
+          throw std::invalid_argument("Not a valid attribute namea "+attName);
+
+
+        if (NLatticeParametersSet >= (int)nAttributes())
+        {
+
+          Geometry::UnitCell lat(a, b, c, alpha, beta, gamma);
+          B0 = lat.getB();
+        }
+      }
+
   }
 }
