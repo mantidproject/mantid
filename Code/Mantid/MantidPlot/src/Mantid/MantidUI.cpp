@@ -1622,7 +1622,7 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
     {
       alg->executeAsync();
     }
-    catch (Poco::NoThreadAvailableException & e)
+    catch (Poco::NoThreadAvailableException &)
     {
       g_log.error() << "No thread was available to run the " << alg->name() << " algorithm in the background." << std::endl;
       return false;

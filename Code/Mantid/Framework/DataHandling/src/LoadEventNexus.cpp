@@ -1256,7 +1256,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     bankNames.clear();
     bankNames.push_back( onebank + "_events" );
     bankNumEvents.clear();
-    bankNumEvents.push_back(1.);
+    bankNumEvents.push_back(1);
     if( !SingleBankPixelsOnly ) onebank = ""; // Marker to load all pixels 
   }
   else

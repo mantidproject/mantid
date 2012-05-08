@@ -394,7 +394,7 @@ namespace Algorithms
     }
 
     std::set<specid_t>::iterator pit;
-    size_t icount = 0;
+    specid_t icount = 0;
     for (pit = spectra.begin(); pit != spectra.end(); ++pit)
     {
       mSpectrumMap.insert(std::make_pair(*pit, icount));
