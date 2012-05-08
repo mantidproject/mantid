@@ -676,8 +676,8 @@ namespace Mantid
                 std::string tie = getProperty("Ties");
                 if( tie.length() > (size_t)0)
                   fit_alg->setProperty("Ties", tie);
-               // if( Constraints.length() > (size_t)0)
-               //   fit_alg->setProperty("Constraints", Constraints);
+                if( Constraints.length() > (size_t)0)
+                  fit_alg->setProperty("Constraints", Constraints);
                 try
                 {
                   fit_alg->executeAsSubAlg();

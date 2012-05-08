@@ -194,9 +194,9 @@ public:
        TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
   
 
-       TS_ASSERT_LESS_THAN(fabs(intensity -63000), 1000.0);
+       TS_ASSERT_LESS_THAN(fabs(intensity -60000), 1000.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma -370), 41.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -460), 41.0);
 
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
@@ -206,23 +206,23 @@ public:
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  .397  ), .5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.4  ), .5);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11870), 120);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11300), 120);
       
    
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  437), 5);
     
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   69), 3.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   77), 3.5);
 
     
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4361.8 ), 10);
       
   
 
-
-      /*     std::vector<std::string> names = Twk->getColumnNames();
+      /*
+          std::vector<std::string> names = Twk->getColumnNames();
 
       std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
                "  Theoret intensity="<<TotIntensity<<std::endl;

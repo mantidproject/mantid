@@ -212,12 +212,12 @@ public:
     //std::cout<<","<<sigIntensity<<","<<slices<<std::endl;
     double intensity0=2697.48;//3682 pref avg
     if( slices)
-      intensity0= 2604;
+      intensity0= 5806;
     TS_ASSERT_DELTA(intensity,intensity0, 100.0);
   
     double sig0=97.8525;//141 prev avg
     if( slices)
-      sig0=165;
+      sig0=147;
 
 
     TS_ASSERT_DELTA( sigIntensity,sig0, 50.0);
