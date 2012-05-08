@@ -142,19 +142,19 @@ public:
     std::vector<double> out1(N);// = new double[ N ];
     std::vector<double> compRes(N);
 
-    int params[20] =
+    size_t params[20] =
     { 0, 0,0,0,0, 3, 3,3,3,3, 6, 6, 8,8, 8, 8,9, 9, 9, 9 };
 
-    int indx[20] =
+    size_t indx[20] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
 
     int x = 0;
-    int prevParam = -1;
+    size_t prevParam = 999;
 
-    for (int i = 0; i < 20; i++)
+    for (size_t i = 0; i < 20; i++)
     {
-      int param = params[i];
+      size_t param = params[i];
       if (param !=prevParam)
       {
 
@@ -170,7 +170,7 @@ public:
           compRes[j] = (out0[j] - out1[j]) / .01;
         prevParam = param;
       }
-      int k = indx[x];
+      size_t k = indx[x];
       x++;
 
 

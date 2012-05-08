@@ -12,6 +12,8 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include <boost/lexical_cast.hpp>
+#include <stdio.h>
+#include <math.h>
 
 using namespace Mantid::API;
 using namespace std;
@@ -219,17 +221,17 @@ namespace Mantid
         throw std::invalid_argument("Not enough peaks to fit ");
       }
 
-      if ((startX > (int) nData - 1) || (endX > (int) nData - 1))
+      if ((startX >  (int)nData - 1) || (endX > (int) nData - 1))
       {
         g_log.error("startX and endX attributes are out of range");
         throw std::invalid_argument("startX and endX attributes are out of range");
       }
 
-      int StartX = max<int> (startX, 0);
-      int EndX = endX;
+      size_t StartX = max<size_t> (startX, (size_t)0);
+      size_t EndX = endX;
 
-      if (EndX < 0)
-        EndX = (int) nData - 1;
+      if (endX < 0)
+        EndX =  nData - 1;
 
       if (xValues[StartX] != floor(xValues[StartX]))
       {
@@ -358,7 +360,7 @@ namespace Mantid
 
       boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
-      for( int group=0; group < (int)GroupBanks.size(); group++)
+      for( size_t group=0; group < (size_t)GroupBanks.size(); group++)
       {
         string prefix="f"+boost::lexical_cast<std::string>(group)+"_";
 
@@ -516,14 +518,18 @@ namespace Mantid
     void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const
     {
       g_log.debug()<<"Start function 1D"<<endl;
-      int StartX = startX;
-      int EndX = endX;
+      size_t StartX;
+      size_t EndX;
       V3D panelCenter_old;
       V3D panelCenterNew;
-      if (StartX < 0 || EndX < 0)
+      if (startX < 0 || endX < 0)
       {
         StartX = 0;
-        EndX = (int) nData - 1;
+        EndX =  nData - 1;
+      }else
+      {
+        StartX = (size_t) startX;
+        EndX =(size_t) endX;
       }
 
 
@@ -534,11 +540,11 @@ namespace Mantid
 
       if( r != 0 )
       {
-         for( int i=0;i < (int)nData; i++ )
+         for( size_t i=0;i < nData; i++ )
              out[i]=100 + r;
 
          g_log.debug() << "Parametersxx  for " << BankNames << ">=";
-          for( int i=0; i < (int)nParams(); i++)
+          for( size_t i=0; i < nParams(); i++)
               g_log.debug() << getParameter(i) << ",";
 
           g_log.debug() << endl;
@@ -561,17 +567,17 @@ namespace Mantid
       vector<Kernel::V3D> hkl_vectors;
       vector<Kernel::V3D> q_vectors;
 
-      for (int i = StartX; i <= EndX; i += 3)
+      for (size_t i = StartX; i <= EndX; i += 3)
       {
         double xIndx = xValues[i];
-        if (xIndx != floor(xIndx))
+        if (xIndx != floor(xIndx) || xIndx < 0)
         {
-          g_log.error("Improper workspace set xVals must be integer");
-          throw invalid_argument("Improper workspace. xVals must be integer");
+          g_log.error("Improper workspace set xVals must be positive integers");
+          throw invalid_argument("Improper workspace. xVals must be positive integers");
         }
 
-        int pkIndex = (int) xIndx;
-        if (pkIndex < 0 || pkIndex > (int) pwks->rowCount())
+        size_t pkIndex = (size_t) xIndx;
+        if ( pkIndex >=  pwks->rowCount()) // ||pkIndex < 0
         {
 
           g_log.error("Improper workspace set");
@@ -589,7 +595,7 @@ namespace Mantid
         { hkl.X(), hkl.Y(), hkl.Z() };
 
         bool ok = true;
-        for (int k = 0; k < 3 && ok; k++) //eliminate tolerance cause only those peaks that are
+        for (size_t k = 0; k < 3 && ok; k++) //eliminate tolerance cause only those peaks that are
         // OK should be here
         {
           double off = hkl1[k] - floor(hkl1[k]);
@@ -648,7 +654,7 @@ namespace Mantid
 
       if( badParams)
       {
-        for(int i = StartX; i <= EndX; i++)
+        for(size_t i = StartX; i <= EndX; i++)
            out[i]= 10000;
         g_log.debug()<<"Could Not find a UB matix"<<std::endl;
         return;
@@ -723,7 +729,7 @@ namespace Mantid
       } catch (...)
       {
 
-        for (int i = 0; i < (int)nParams(); i++)
+        for (size_t i = 0; i < nParams(); i++)
           g_log.debug() << getParameter(i) << ",";
 
         g_log.debug() << endl;
@@ -784,11 +790,11 @@ namespace Mantid
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     { g_log.debug()<<"Start of function Deriv "<<std::endl;
-      int StartPos=2;
-      int StartRot = 5;
+     size_t StartPos=2;
+     size_t StartRot = 5;
 
-      int L0param = (int)parameterIndex("l0");
-      int T0param =(int)parameterIndex("t0");;
+      size_t L0param = parameterIndex("l0");
+      size_t T0param = parameterIndex("t0");;
 
       if (nData <= 0)
         return;
@@ -799,20 +805,24 @@ namespace Mantid
       }
 
 
-      int StartX = startX;
-      int EndX = endX;
-      if (StartX < 0 || EndX < 0)
+      size_t StartX ;
+      size_t EndX ;
+      if (startX < 0 || endX < 0)
       {
         StartX = 0;
-        EndX = (int) nData - 1;
+        EndX =  nData - 1;
+      }else
+      {
+        StartX =(size_t)startX;
+        EndX = (size_t) endX;
       }
 
       double rr =checkForNonsenseParameters();
 
       if( rr > 0 )
       {
-        for( int i = 0; i< (int)nParams(); i++ )
-          for( int k = 0; k<(int)nData;  k++ )
+        for( size_t i = 0; i< nParams(); i++ )
+          for(size_t k = 0; k<nData;  k++ )
             out->set( k, i, 10 + rr );
         g_log.debug()<<"Nonsense end of function Deriv "<<std::endl;
         return;
@@ -843,13 +853,14 @@ namespace Mantid
       double velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
       K = 2 * M_PI / ppeak.getWavelength() / velocity;//2pi/lambda = K*velocity
 
-      for (int xval = StartX; xval <= EndX; xval += 3)
+      for (size_t xval = StartX; xval <= EndX; xval += 3)
       {
-        IPeak& peak_old = peaks->getPeak((int) xValues[xval]);
+        double x = floor(xValues[xval]);
+        IPeak& peak_old = peaks->getPeak((int) x);
 
         Peak peak = createNewPeak(peak_old, instrNew);
 
-        peakIndx.push_back((int) xValues[xval]);
+        peakIndx.push_back((int) x);
         qlab.push_back(peak.getQLabFrame());
         qXtal.push_back(peak.getQSampleFrame());
         row.push_back(peak.getRow());
@@ -906,8 +917,8 @@ namespace Mantid
       }
 
       Matrix<double> Mhkl(hkl.size(), 3), InvhklThkl(3, 3);
-      for (int rw = 0; rw < (int) hkl.size(); rw++)
-        for (int cl = 0; cl < 3; cl++)
+      for (size_t rw = 0; rw <  hkl.size(); rw++)
+        for (size_t cl = 0; cl < 3; cl++)
           Mhkl[rw][cl] = hkl[rw][cl];
 
       Matrix<double> MhklT(Mhkl);
@@ -940,10 +951,10 @@ namespace Mantid
 
 
 
-      map<string, int> bankName2Group;
+      map<string, size_t> bankName2Group;
       vector<string> Groups;
       boost::split( Groups, BankNames, boost::is_any_of("!"));
-      for( int gr=0; gr< (int)Groups.size(); gr++)
+      for( size_t gr=0; gr< Groups.size(); gr++)
       {
 
 
@@ -958,13 +969,13 @@ namespace Mantid
       int pick[3];
       pick[0] = pick[1] = pick[2] = 0;
       Matrix<double> Result(3, qlab.size());
-    for( int gr=0; gr< (int)NGroups; gr++)
+    for( size_t gr=0; gr< (size_t)NGroups; gr++)
     {  Unrot_dQ[0].clear(); Unrot_dQ[1].clear(); Unrot_dQ[2].clear();
 
       //-------- xyz offset parameters ----------------------
-      StartPos = (int)parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
-      int startPeak = -1;
-       for (int param = StartPos; param <=StartPos+2; param++)
+      StartPos = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
+    //  int startPeak = -1;
+       for (size_t param = StartPos; param <=StartPos+(size_t)2; param++)
 
       {
         pick[param - StartPos] = 1;
@@ -973,7 +984,7 @@ namespace Mantid
 
         Matrix<double> Result(3, qlab.size());
 
-        for (int peak = 0; peak < (int) qlab.size(); peak++)
+        for (size_t peak = 0; peak <  qlab.size(); peak++)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
         {   Unrot_dQ[param - StartPos].push_back(V3D(0.0,0.0,0.0));//Save for later calculations
 
@@ -983,8 +994,8 @@ namespace Mantid
         Result[2][peak] = 0;
 
         }else {
-          if( startPeak < 0)
-            startPeak = peak;
+         // if( startPeak < 0)
+         //   startPeak = peak;
           double L1 = pos[peak].norm();
           double velMag = (L0 + L1) / time[peak];
           double t1 = time[peak] - L0 / velMag;
@@ -1032,9 +1043,9 @@ namespace Mantid
        // for (size_t w = 0; w < nData; w++)
       //    out->set(w, param, 0.0);
 
-        int x = StartX;
-        for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
-          for (int roww = 0; roww < 3; roww++)
+        size_t x = StartX;
+        for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
+          for (size_t roww = 0; roww < 3; roww++)
           {
             out->set(x, param, Deriv[roww][coll]);
             x++;
@@ -1043,35 +1054,35 @@ namespace Mantid
 
 
       //-------------------- Derivatives with respect to rotx,roty, and rotz ---------
-      StartRot = (int)parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xrot");
+      StartRot = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xrot");
 
-      for (int param = StartRot; param <= (int)StartRot+2; param++)
+      for (size_t param = StartRot; param <= StartRot+2; param++)
       {
         Matrix<double> Result(3, qlab.size());
         Matrix<double> Rot2dRot(3, 3); //deriv of rot matrix at angle=0
         Rot2dRot.zeroMatrix();
-        int r1 = param - StartRot;
-        int r = (r1 + 1) % 3;
+        size_t r1 = param - StartRot;
+        size_t r = (r1 + 1) % 3;
 
         Rot2dRot[r][(r + 1) % 3] = -1;//??? what I wanted not standard formula
         r = (r + 1) % 3;
         Rot2dRot[r][(r + 2) % 3] = +1;//??? what I wanted not standard formula
         Rot2dRot *= M_PI / 180.;
-        int zeroRow = -1;
-        int nonzeroRow = -1;
-        for (int peak = 0; peak < (int) qlab.size(); peak++)
+        //int zeroRow = -1;
+       // int nonzeroRow = -1;
+        for (size_t peak = 0; peak <  qlab.size(); peak++)
            if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
             {
               Result[0][peak] = 0;
               Result[1][peak] = 0;
               Result[2][peak] = 0;
-              if( zeroRow < 0)
-                zeroRow = peak;
+            //  if( zeroRow < 0)
+             //   zeroRow = peak;
 
             }else{
 
-            if( nonzeroRow < 0)
-            nonzeroRow = peak;
+          //  if( nonzeroRow < 0)
+          //  nonzeroRow = peak;
           int Nwrt = 3;
           int NderOf = 3;
           Matrix<double> Bas(NderOf, Nwrt); //partial Qxyz wrt xyx
@@ -1107,8 +1118,8 @@ namespace Mantid
        //   out->set(w, param, 0.0);
 
 
-        int x = StartX;
-        for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
+        size_t x = (size_t)StartX;
+        for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
           for (int roww = 0; roww < 3; roww++)
           {
             out->set(x, param, Deriv[roww][coll]);
@@ -1116,11 +1127,11 @@ namespace Mantid
           }
       }
 
-      int param = (int) parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detWidthScale");
+      size_t param =  parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detWidthScale");
 
 
 
-      for (int peak = 0; peak < (int) qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); peak++)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
                            {
                            Result[0][peak] = 0;
@@ -1154,19 +1165,19 @@ namespace Mantid
      // for (size_t w = 0; w < nData; w++)
      //   out->set(w, param, 0.0);
 
-      int x = StartX;
-      for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
+      size_t x = StartX;
+      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
         for (int roww = 0; roww < 3; roww++)
         {
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
 
-      param =  (int)parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detHeightScale");
+      param =  parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detHeightScale");
 
      // param = StartLen+1;//scale Height
       Result.zeroMatrix();
-      for (int peak = 0; peak < (int) qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); peak++)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
                                         {
                                         Result[0][peak] = 0;
@@ -1203,7 +1214,7 @@ namespace Mantid
         out->set(w, param, 0.0);
 
       x = StartX;
-      for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
+      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
         for (int roww = 0; roww < 3; roww++)
         {
           out->set(x, param, Deriv[roww][coll]);
@@ -1231,10 +1242,10 @@ namespace Mantid
 
     }//for each group
 
-      int param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
+      size_t param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
 
       Result.zeroMatrix();
-      for (int peak = 0; peak < (int) qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); peak++)
       {
 
         double L1 = pos[peak].norm();
@@ -1256,8 +1267,8 @@ namespace Mantid
       //for (size_t w = 0; w < nData; w++)
       //   out->set(w, param, 0.0);
 
-      int x = StartX;
-      for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
+      size_t x = StartX;
+      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
         for (int roww = 0; roww < 3; roww++)
         {
           out->set(x, param, Deriv[roww][coll]);
@@ -1266,7 +1277,7 @@ namespace Mantid
 
       param = T0param;//t0 partial unRotQxyz wrt t0 = -unRotQxyz/tof
       Result.zeroMatrix();
-      for (int peak = 0; peak < (int) qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); peak++)
       {
         double KK = -1 / time[peak];
         V3D unRotDeriv = qlab[peak] * KK;
@@ -1284,7 +1295,7 @@ namespace Mantid
       // for (size_t w = 0; w < nData; w++)
       //   out->set(w, param, 0.0);
       x = StartX;
-      for (int coll = 0; coll < (int) Deriv.numCols(); coll++)
+      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
         for (int roww = 0; roww < 3; roww++)
         {
           out->set(x, param, Deriv[roww][coll]);
@@ -1329,7 +1340,7 @@ namespace Mantid
       for (size_t k = 0; k < bankNames.size(); k++)
         for (size_t j = 0; j < pwks->rowCount(); j++)
         {
-          API::IPeak& peak = pwks->getPeak((int) j);
+          API::IPeak& peak = pwks->getPeak( (int)j);
           if (peak.getBankName().compare(bankNames[k]) == 0)
             if (peak.getH() != 0 || peak.getK() != 0 || peak.getK() != 0)
               if (peak.getH() - floor(peak.getH()) < tolerance || floor(peak.getH() + 1) - peak.getH()
@@ -1472,7 +1483,7 @@ namespace Mantid
         }
         else if (attName == "startX")
         {
-          startX =value.asInt();
+          startX =(size_t)value.asInt();
           if (!startX_set)
           {
             startX_set = true;
@@ -1482,7 +1493,7 @@ namespace Mantid
         }
         else if (attName == "endX")
         {
-          endX = value.asInt();
+          endX = (size_t)value.asInt();
           if (!endX_set)
           {
             endX_set = true;
