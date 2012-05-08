@@ -569,10 +569,11 @@ namespace Mantid
 
       for (size_t i = StartX; i <= EndX; i += 3)
       {
-        double xIndx = xValues[i];
+        double xIndx = (xValues[i]);
         if (xIndx != floor(xIndx) || xIndx < 0)
         {
-          g_log.error("Improper workspace set xVals must be positive integers");
+          g_log.error()<<"Improper workspace set xVals must be positive integers ")
+          <<xIndx<<","<<floor(xIndx)<<std::endl;;
           throw invalid_argument("Improper workspace. xVals must be positive integers");
         }
 
@@ -580,7 +581,7 @@ namespace Mantid
         if ( pkIndex >=  pwks->rowCount()) // ||pkIndex < 0
         {
 
-          g_log.error("Improper workspace set");
+          g_log.error()<<"Improper workspace set "<<pkIndex<<","<<xIndx<<std::endl;
           throw invalid_argument(
               "Improper workspace. xVals correspond to an index in the PeaksWorkspace");
         }
