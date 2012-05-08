@@ -137,7 +137,7 @@ set ( TEST_FILES
 	test/FlatBackgroundTest.h
 	test/GausOscTest.h
 	test/MuonFInteractionTest.h
-	test/SCDPanelErrorsTest.h
+#	test/SCDPanelErrorsTest.h
 	test/StaticKuboToyabeTest.h
 	test/StretchExpMuonTest.h
 	test/BFGSTest.h
