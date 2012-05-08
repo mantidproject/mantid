@@ -150,7 +150,7 @@ endif () # (not for windows)
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtAPI DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 set ( TEST_FILES
 	test/AlgorithmRunnerTest.h

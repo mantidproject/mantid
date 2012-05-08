@@ -372,7 +372,7 @@ add_custom_command ( TARGET Kernel POST_BUILD
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Kernel DESTINATION ${LIB_DIR} )
+install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
 if ( APPLE )

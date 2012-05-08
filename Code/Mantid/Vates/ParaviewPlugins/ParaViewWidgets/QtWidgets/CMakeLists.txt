@@ -45,6 +45,6 @@ add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 # Put library into subfolder.
 #SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewQtWidgets PVPlugins)
 
-install( TARGETS MantidParaViewQtWidgets ${TARGET_TYPE} DESTINATION ${LIB_DIR} )
+install( TARGETS MantidParaViewQtWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 

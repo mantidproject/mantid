@@ -381,4 +381,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS DataHandling DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS DataHandling ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

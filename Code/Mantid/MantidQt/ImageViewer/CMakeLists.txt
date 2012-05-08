@@ -103,6 +103,6 @@ ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtImageViewer DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtImageViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 

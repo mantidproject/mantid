@@ -132,7 +132,7 @@ endif ()
 ###########################################################################
 
 if ( WIN32 )
-  install ( TARGETS DataObjects DESTINATION ${PLUGINS_DIR} )
+  install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
 else()
   install ( TARGETS DataObjects DESTINATION ${LIB_DIR} )
 endif ()

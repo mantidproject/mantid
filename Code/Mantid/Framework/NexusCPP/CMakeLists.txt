@@ -35,4 +35,4 @@ target_link_libraries ( NexusCPP ${NEXUS_C_LIBRARIES} ${POCO_LIBRARIES} )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS NexusCPP DESTINATION ${LIB_DIR} )
+install ( TARGETS NexusCPP ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

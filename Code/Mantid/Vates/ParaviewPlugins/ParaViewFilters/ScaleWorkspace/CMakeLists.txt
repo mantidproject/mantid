@@ -9,4 +9,4 @@ set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "Manti
 # Put library into subfolder.
 SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewScaleWorkspaceSMPlugin  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR})
 
-install( TARGETS MantidParaViewScaleWorkspaceSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_DIR})
+install( TARGETS MantidParaViewScaleWorkspaceSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_DIR})

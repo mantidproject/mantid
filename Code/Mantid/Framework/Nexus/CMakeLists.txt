@@ -40,4 +40,4 @@ target_link_libraries ( Nexus ${MANTIDLIBS} ${NEXUS_C_LIBRARIES} )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Nexus DESTINATION ${LIB_DIR} )
+install ( TARGETS Nexus ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

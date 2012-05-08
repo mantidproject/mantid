@@ -93,4 +93,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS ICat DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS ICat ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

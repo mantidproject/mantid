@@ -87,4 +87,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS WorkflowAlgorithms DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS WorkflowAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

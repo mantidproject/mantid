@@ -142,4 +142,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS CustomInterfaces DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
+install ( TARGETS CustomInterfaces ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )

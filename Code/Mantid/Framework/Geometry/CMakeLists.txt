@@ -341,4 +341,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Geometry DESTINATION ${LIB_DIR} )
+install ( TARGETS Geometry  ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

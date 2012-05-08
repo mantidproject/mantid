@@ -638,4 +638,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Algorithms DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS Algorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

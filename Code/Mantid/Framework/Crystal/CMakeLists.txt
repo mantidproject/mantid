@@ -143,4 +143,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Crystal DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS Crystal ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

@@ -211,4 +211,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDAlgorithms DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS MDAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

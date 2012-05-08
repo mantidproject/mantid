@@ -154,6 +154,6 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtSliceViewer DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtSliceViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 

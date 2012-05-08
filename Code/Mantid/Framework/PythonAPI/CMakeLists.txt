@@ -260,7 +260,7 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS PythonAPI DESTINATION ${BIN_DIR} )
+install ( TARGETS PythonAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR} )
 if ( UNIX )
   install ( TARGETS dlopen DESTINATION ${BIN_DIR} )
 endif ()

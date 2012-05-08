@@ -36,4 +36,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MPIAlgorithms DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS MPIAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

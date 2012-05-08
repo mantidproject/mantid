@@ -4,6 +4,11 @@
 set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
 set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
 
+##########################################################################
+# Set the SYSTEM_PACKAGE_TARGET to RUNTIME, on windows to avoid packaging libs
+###########################################################################
+set (SYSTEM_PACKAGE_TARGET RUNTIME)
+
 set (Boost_NO_SYSTEM_PATHS TRUE)
 
 if ( CMAKE_CL_64 )

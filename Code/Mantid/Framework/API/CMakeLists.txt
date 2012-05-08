@@ -325,4 +325,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS API DESTINATION ${LIB_DIR} )
+install ( TARGETS API ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

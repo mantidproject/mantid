@@ -194,4 +194,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDEvents DESTINATION ${LIB_DIR} )
+install ( TARGETS MDEvents ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

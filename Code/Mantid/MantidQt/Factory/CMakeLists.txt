@@ -47,6 +47,6 @@ target_link_libraries ( MantidQtFactory MantidQtAPI QtPropertyBrowser MantidQtSl
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtFactory DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtFactory ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 

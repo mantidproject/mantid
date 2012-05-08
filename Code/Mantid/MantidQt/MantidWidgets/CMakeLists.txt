@@ -121,4 +121,4 @@ target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidWidgets DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

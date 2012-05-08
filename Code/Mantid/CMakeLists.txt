@@ -9,6 +9,8 @@ else()
   cmake_minimum_required ( VERSION 2.8 )
 endif ()
 
+# System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
+set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")

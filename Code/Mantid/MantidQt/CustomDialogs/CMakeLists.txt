@@ -76,4 +76,4 @@ target_link_libraries ( CustomDialogs MantidQtAPI MantidWidgets )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS CustomDialogs DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
+install ( TARGETS CustomDialogs ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )

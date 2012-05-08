@@ -214,4 +214,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS CurveFitting DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS CurveFitting ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
