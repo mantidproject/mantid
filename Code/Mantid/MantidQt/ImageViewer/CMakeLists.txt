@@ -15,6 +15,8 @@ set ( SRC_FILES
        src/TestDataSource.cpp
        src/EventWSDataSource.cpp
        src/EventWSImageView.cpp
+       src/MatrixWSDataSource.cpp
+       src/MatrixWSImageView.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -36,6 +38,8 @@ set ( INC_FILES
        inc/MantidQtImageViewer/TestDataSource.h
        inc/MantidQtImageViewer/EventWSDataSource.h
        inc/MantidQtImageViewer/EventWSImageView.h
+       inc/MantidQtImageViewer/MatrixWSDataSource.h
+       inc/MantidQtImageViewer/MatrixWSImageView.h
 )
 
 set ( MOC_FILES 

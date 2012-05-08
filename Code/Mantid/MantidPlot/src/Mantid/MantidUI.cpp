@@ -64,6 +64,7 @@
 #include "MantidAPI/MemoryManager.h"
 
 #include "MantidQtImageViewer/EventWSImageView.h"
+#include "MantidQtImageViewer/MatrixWSImageView.h"
 
 using namespace std;
 
@@ -677,8 +678,19 @@ void MantidUI::showImageViewer()
     }
     else
     {
-      m_appWindow->writeToLogWindow("Only event workspaces are currently supported.");
-      m_appWindow->writeToLogWindow("Please convert to event workspace before using the ImageView.");
+      MatrixWorkspace_sptr matwsp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+               AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+      if ( matwsp )
+      {
+        MantidQt::ImageView::MatrixWSImageView image_view( matwsp );
+      }
+      else
+      {
+        m_appWindow->writeToLogWindow(
+                 "Only event or matrix workspaces are currently supported.");
+        m_appWindow->writeToLogWindow(
+                 "Please convert to one of these before using the ImageView.");
+      }
     }
   }
     catch (std::runtime_error &e)

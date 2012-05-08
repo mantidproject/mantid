@@ -861,10 +861,12 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   m_plotSpecErr->setEnabled ( matrixWS->blocksize() > 1 );
+/*
   if( boost::dynamic_pointer_cast<const IEventWorkspace>(matrixWS) )
   {
+*/
     menu->addAction(m_showImageViewer); // The 2D image viewer
-  }
+//  }
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
   m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );

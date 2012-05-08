@@ -18,5 +18,6 @@ EventWSImageView::EventWSImageView( IEventWorkspace_sptr ev_ws )
 
 EventWSImageView::~EventWSImageView()
 {
+  // nothing to do here, since image_view is deleted when the window close
 }
 
