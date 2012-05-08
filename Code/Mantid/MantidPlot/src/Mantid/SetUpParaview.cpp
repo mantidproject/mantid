@@ -106,6 +106,7 @@ void SetUpParaview::onSet()
   ConfigServiceImpl& config = ConfigService::Instance();
   config.setParaviewLibraryPath(m_candidateLocation.toStdString());
   config.setString("paraview.path", m_candidateLocation.toStdString());
+  config.setString("paraview.ignore", "0"); //In case paraview is currently being ignored.
   std::string filename = config.getUserFilename();
   //Save the result so that on the next start up we don't have to bother the user.
   config.saveConfig(filename);
