@@ -572,8 +572,8 @@ namespace Mantid
         double xIndx = (xValues[i]);
         if (xIndx != floor(xIndx) || xIndx < 0)
         {
-          g_log.error()<<"Improper workspace set xVals must be positive integers ")
-          <<xIndx<<","<<floor(xIndx)<<std::endl;;
+          g_log.error()<<"Improper workspace set xVals must be positive integers "
+          <<xIndx<<","<<floor(xIndx)<<std::endl;
           throw invalid_argument("Improper workspace. xVals must be positive integers");
         }
 
