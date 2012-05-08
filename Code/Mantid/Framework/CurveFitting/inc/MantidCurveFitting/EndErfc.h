@@ -49,6 +49,7 @@ namespace Mantid
       std::string name()const{return "EndErfc";}
 
       /// overwrite IFunction base class methods
+      virtual void setActiveParameter(size_t i,double value);
       virtual const std::string category() const { return "Calibrate";}
     protected:
       virtual void function1D(double* out, const double* xValues, const size_t nData)const;

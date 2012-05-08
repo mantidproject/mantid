@@ -46,5 +46,15 @@ namespace Mantid
       }
     }
 
+    void EndErfc::setActiveParameter(size_t i,double value)
+    {
+      size_t j = i;
+
+      if (parameterName(j) == "D" && value < 0.0) 
+        setParameter(j,0.0,false);  // Don't let D become negative
+      else
+        setParameter(j,value,false);
+    }
+
   } // namespace CurveFitting
 } // namespace Mantid
