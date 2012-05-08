@@ -9,7 +9,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -19,6 +21,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDEvents;
 
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
 {
@@ -209,6 +212,42 @@ public:
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT( (!Mantid::API::equals(ews1, ews2)) );
+  }
+
+  void testMDEvents_matches()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeFileBackedMDEW("mdev1", false);
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeFileBackedMDEW("mdev2", false);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHisto_matches()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHist_different_dims()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
   }
 
   void testDifferentSize()

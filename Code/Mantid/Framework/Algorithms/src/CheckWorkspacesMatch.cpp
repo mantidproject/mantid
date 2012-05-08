@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 
 Compares two workspaces for equality. This algorithm is mainly intended for use by Mantid developers as part of the testing process.
@@ -13,6 +13,9 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -290,6 +293,53 @@ void CheckWorkspacesMatch::doComparison()
     }
     return;
   }
+
+  // Check things for IMDEventWorkspaces
+  IMDEventWorkspace_const_sptr mdews1, mdews2;
+  mdews1 = boost::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
+  mdews2 = boost::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
+  if (checkType)
+  {
+    if ((mdews1 && !mdews2) ||(!mdews1 && mdews2))
+    {
+      result = "One workspace is an IMDEventWorkspace and the other is not.";
+      return;
+    }
+  }
+  if (mdews1 && mdews2)
+  {
+    this->checkMDCommon(mdews1, mdews2);
+    if (mdews1->getNPoints() != mdews2->getNPoints())
+    {
+      result = "Mismatch in number of MD events";
+      return;
+    }
+    return;
+  }
+
+  // Check things for MDHistoWorkspaces
+  IMDHistoWorkspace_const_sptr mdhws1, mdhws2;
+  mdhws1 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
+  mdhws2 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
+  if (checkType)
+  {
+    if ((mdhws1 && !mdhws2) ||(!mdhws1 && mdhws2))
+    {
+      result = "One workspace is an IMDHistoWorkspace and the other is not.";
+      return;
+    }
+  }
+  if (mdhws1 && mdhws2)
+  {
+    this->checkMDCommon(mdhws1, mdhws2);
+    if (mdhws1->getNPoints() != mdhws2->getNPoints())
+    {
+      result = "Mismatch in number of MD histogram bins";
+      return;
+    }
+    return;
+  }
+
   MatrixWorkspace_const_sptr ws1, ws2;
   ws1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w1);
   ws2 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w2);
@@ -723,6 +773,18 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
       return false;
     }
   }
+  return true;
+}
+
+bool CheckWorkspacesMatch::checkMDCommon(IMDWorkspace_const_sptr ws1,
+                                         IMDWorkspace_const_sptr ws2)
+{
+  if (ws1->getNumDims() != ws2->getNumDims())
+  {
+    result = "Mismatch in number of reported dimensions";
+    return false;
+  }
+
   return true;
 }
 
