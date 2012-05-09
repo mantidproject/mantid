@@ -139,10 +139,19 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(d_graph,SIGNAL(curveRemoved()),this,SLOT(curveRemoved()));
   connect(d_graph,SIGNAL(modifiedGraph()),this,SLOT(modifiedGraph()));
 
-  m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-    Mantid::API::AnalysisDataService::Instance().retrieve(
-      m_wsName.toStdString()
-    ));
+  try
+  {// if it's a MatrixWorkspace in the ADS
+    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(
+        m_wsName.toStdString()
+      ));
+  }
+  catch(...)
+  {// or it can be a TableWorkspace
+    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      m_fitPropertyBrowser->createMatrixFromTableWorkspace()
+    );
+  }
 }
 
 PeakPickerTool::~PeakPickerTool()
@@ -661,7 +670,9 @@ void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler* h) const
       QStringList formulas = fc->formulas();
       formulas[1] = QString::fromStdString(h->ifun()->asString());
       fc->setFormulas(formulas);
-      fc->loadData();
+      //fc->loadData();
+      auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(m_fitPropertyBrowser->getWorkspace());
+      fc->loadMantidData(ws,m_fitPropertyBrowser->workspaceIndex());
     }
   }
 }
@@ -927,7 +938,8 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
         m_fitPropertyBrowser->workspaceIndex(),
         h->functionName());
       fc->setRange(m_fitPropertyBrowser->startX(),m_fitPropertyBrowser->endX());
-      fc->loadData();
+      auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(m_fitPropertyBrowser->getWorkspace());
+      fc->loadMantidData(ws,m_fitPropertyBrowser->workspaceIndex());
       // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete) from Graph
       d_graph->insertCurve(fc);
       connect(fc,SIGNAL(forgetMe()),h,SLOT(plotRemoved()));

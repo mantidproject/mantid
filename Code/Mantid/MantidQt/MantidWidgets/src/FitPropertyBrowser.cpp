@@ -172,6 +172,7 @@ m_mantidui(mantidui)
   m_boolManager = new QtBoolPropertyManager(w);
   m_filenameManager = new QtStringPropertyManager(w);
   m_formulaManager = new QtStringPropertyManager(w);
+  m_columnManager = new QtEnumPropertyManager(w);
   m_workspace = m_enumManager->addProperty("Workspace");
 }
 
@@ -214,12 +215,14 @@ void FitPropertyBrowser::init()
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
   bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff,plotDiff);
+
+  m_xColumn = m_columnManager->addProperty("XColumn");
+  m_yColumn = m_columnManager->addProperty("YColumn");
+  m_errColumn = m_columnManager->addProperty("ErrColumn");
   
   settingsGroup->addSubProperty(m_workspace);
-  settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
-  
   
   // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
   // Include minimiser and plot difference under a different settings section.
@@ -259,6 +262,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
+  connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -401,6 +405,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+  m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
 }
 
 
@@ -934,12 +939,17 @@ void FitPropertyBrowser::setDefaultBackgroundType(const std::string& fnType)
   setDefaultFunctionType(fnType);
 }
 
-boost::shared_ptr<Mantid::API::Workspace> FitPropertyBrowser::getWorkspace() const
+boost::shared_ptr<Mantid::API::Workspace> FitPropertyBrowser::getWorkspace()const
 {
   std::string wsName = workspaceName();
   if (wsName.empty()) return boost::shared_ptr<Mantid::API::Workspace>();
   try
   {
+    if ( m_settingsGroup->property()->subProperties().contains( m_xColumn ) )
+    {
+      return createMatrixFromTableWorkspace();
+    }
+
     return Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
   }
   catch(...)
@@ -1042,6 +1052,8 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
   if (prop == m_workspace)
   {
     workspaceChange(QString::fromStdString(workspaceName()));
+    setWorkspaceProperties();
+    m_storedWorkspaceName = workspaceName();
   }
   else if (prop->propertyName() == "Type")
   {
@@ -1057,12 +1069,13 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       if (f) setCurrentFunction(f);
       emit functionChanged();
   }
-  else if (prop->propertyName() == "Workspace")
-  {
-      PropertyHandler* h = getHandler()->findHandler(prop);
-      if (!h) return;
-      h->setFunctionWorkspace();
-  }
+  //    Unreachable code
+  //else if (prop->propertyName() == "Workspace")
+  //{
+  //    PropertyHandler* h = getHandler()->findHandler(prop);
+  //    if (!h) return;
+  //    h->setFunctionWorkspace();
+  //}
 }
 
 /** Called when a bool property changed
@@ -1381,6 +1394,13 @@ void FitPropertyBrowser::fit()
     QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
     return;
   }
+
+  auto ws = getWorkspace();
+  if ( !ws )
+  {
+    return;
+  }
+
   try
   {
     m_initialParameters.resize(compositeFunction()->nParams());
@@ -1391,37 +1411,7 @@ void FitPropertyBrowser::fit()
     m_fitActionUndoFit->setEnabled(true);
 
     std::string funStr;
-    if (m_compositeFunction->name() == "MultiBG")
-    {
-      //std::string ties;
-      //Mantid::API::Expression funExpr;
-      //funExpr.parse(*m_compositeFunction);
-      //funExpr.toList(";");
-      //for(size_t i = 0; i < funExpr.size(); ++i)
-      //{
-      //  const Mantid::API::Expression& e = funExpr[i];
-      //  if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
-      //  {
-      //    ties = e[0].name() + "=(" + e[1].str() + ")";
-      //  }
-      //}
-      //funStr = "composite=MultiBG;";
-      //for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
-      //{
-      //  Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(m_compositeFunction->getFunction(i));
-      //  if (!f) continue;
-      //  funStr += f->asString();
-      //  if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
-      //  {
-      //    funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
-      //      boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
-      //  }
-      //  funStr += ";";
-      //}
-      //funStr += ties;
-      funStr = "";
-    }
-    else if (m_compositeFunction->nFunctions() > 1)
+    if (m_compositeFunction->nFunctions() > 1)
     {
       funStr = m_compositeFunction->asString();
     }
@@ -1442,34 +1432,20 @@ void FitPropertyBrowser::fit()
     {
       Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
     }
-    //if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
-    //{
-    //  QMap<QString,QString> algParams;
-    //  algParams["InputWorkspace"] = QString::fromStdString(wsName);
-    //  algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
-    //  algParams["StartX"] = QString::number(startX());
-    //  algParams["EndX"] = QString::number(endX());
-    //  algParams["Output"] = QString::fromStdString(outputName());
-    //  algParams["Function"] = QString::fromStdString(funStr);
-    //  algParams["Minimizer"] = QString::fromStdString(minimizer());
-    //  algParams["CostFunction"] = QString::fromStdString(costFunction());
-    //  emit executeFit("Fit",algParams,this);
-    //}
-    //else
-    //{
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-      alg->initialize();
-      alg->setPropertyValue("Function",funStr);
-      alg->setPropertyValue("InputWorkspace",wsName);
-      alg->setProperty("WorkspaceIndex",workspaceIndex());
-      alg->setProperty("StartX",startX());
-      alg->setProperty("EndX",endX());
-      alg->setPropertyValue("Output",outputName());
-      alg->setPropertyValue("Minimizer",minimizer());
-      alg->setPropertyValue("CostFunction",costFunction());
-      observeFinish(alg);
-      alg->executeAsync();
-    //}
+
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    alg->initialize();
+    alg->setPropertyValue("Function",funStr);
+    //alg->setPropertyValue("InputWorkspace",wsName);
+    alg->setProperty("InputWorkspace",getWorkspace());
+    alg->setProperty("WorkspaceIndex",workspaceIndex());
+    alg->setProperty("StartX",startX());
+    alg->setProperty("EndX",endX());
+    alg->setPropertyValue("Output",outputName());
+    alg->setPropertyValue("Minimizer",minimizer());
+    alg->setPropertyValue("CostFunction",costFunction());
+    observeFinish(alg);
+    alg->executeAsync();
 
   }
   catch(std::exception& e)
@@ -1613,7 +1589,8 @@ void FitPropertyBrowser::postDeleteHandle(const std::string& wsName)
   */
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
-  if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0)
+  if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0 ||
+    dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) != 0)
   {
     return true;
   }
@@ -2739,6 +2716,214 @@ void FitPropertyBrowser::processMultiBGResults()
 
 }
 
+/**
+ * Display properties relevant to the selected workspace:
+ * WorkspaceIndex, StartX, and EndX for a MatrixWorkspace;
+ * XColumn, YColumn, and ErrColumn for a TableWorkspace.
+ */
+void FitPropertyBrowser::setWorkspaceProperties()
+{
+  // remove old properties
+  if ( m_settingsGroup->property()->subProperties().contains(m_workspaceIndex) )
+  {
+    m_settingsGroup->property()->removeSubProperty(m_workspaceIndex);
+  }
+  else if ( m_settingsGroup->property()->subProperties().contains(m_xColumn) )
+  {
+    m_settingsGroup->property()->removeSubProperty(m_xColumn);
+    m_settingsGroup->property()->removeSubProperty(m_yColumn);
+    m_settingsGroup->property()->removeSubProperty(m_errColumn);
+  }
+
+  Mantid::API::Workspace_sptr ws;
+  try
+  {
+    ws = Mantid::API::AnalysisDataService::Instance().retrieve( workspaceName() );
+  }
+  catch(...)
+  {
+    return;
+  }
+  if ( !ws ) return;
+  // if it is a MatrixWorkspace insert WorkspaceIndex
+  auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  if ( mws && !m_settingsGroup->property()->subProperties().contains(m_workspaceIndex) )
+  {
+    m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,m_workspace);
+    return;
+  }
+
+  // if it is a TableWorkspace insert the column properties
+  auto tws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+  if ( tws )
+  {
+    setWorkspaceIndex(0);
+    // insert properties
+    m_settingsGroup->property()->insertSubProperty(m_xColumn,m_workspace);
+    m_settingsGroup->property()->insertSubProperty(m_yColumn,m_xColumn);
+    m_settingsGroup->property()->insertSubProperty(m_errColumn,m_yColumn);
+    if ( workspaceName() == m_storedWorkspaceName ) return;
+    QString xName;
+    QString yName;
+    QString errName;
+    auto names = tws->getColumnNames();
+    QStringList columns;
+    for(size_t i = 0; i < names.size(); ++i)
+    {
+      columns << QString::fromStdString( names[i] );
+      auto col = tws->getColumn( names[i] );
+      if ( xName.isEmpty() && col->getPlotType() == 1 /*X*/ )
+      {
+        xName = QString::fromStdString( names[i] );
+      }
+      if ( yName.isEmpty() && col->getPlotType() == 2 /*Y*/ )
+      {
+        yName = QString::fromStdString( names[i] );
+      }
+      if ( errName.isEmpty() && col->getPlotType() == 5 /*yErr*/ )
+      {
+        errName = QString::fromStdString( names[i] );
+      }
+    }
+    m_columnManager->setEnumNames(m_xColumn, columns);
+    m_columnManager->setEnumNames(m_yColumn, columns);
+    // set the column values
+    if ( !xName.isEmpty() )
+    {
+      m_columnManager->setValue(m_xColumn, columns.indexOf( xName ));
+    }
+    else
+    {
+      foreach(QString name, columns)
+      {
+        if ( name != yName )
+        {
+          m_columnManager->setValue(m_xColumn, columns.indexOf( name ));
+          break;
+        }
+      }
+    }
+    if ( !yName.isEmpty() )
+    {
+      m_columnManager->setValue(m_yColumn, columns.indexOf( yName ));
+    }
+    else
+    {
+      foreach(QString name, columns)
+      {
+        if ( name != xName )
+        {
+          m_columnManager->setValue(m_xColumn, columns.indexOf( name ));
+          break;
+        }
+      }
+    }
+    columns.prepend("");
+    m_columnManager->setEnumNames(m_errColumn, columns);
+    if ( !errName.isEmpty() )
+    {
+      m_columnManager->setValue(m_errColumn, columns.indexOf( errName ));
+    }
+    return;
+  }
+}
+
+/**
+ * Create a MatrixWorkspace from a TableWorkspace. Name of the TableWorkspace is in m_workspace
+ * property, column names to use are in m_xColumn, m_yColumn, and m_errColumn.
+ */
+Mantid::API::Workspace_sptr FitPropertyBrowser::createMatrixFromTableWorkspace()const
+{
+  std::string wsName = workspaceName();
+  try
+  {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+    auto tws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+    if ( !tws ) return boost::shared_ptr<Mantid::API::Workspace>();
+    const size_t rowCount = tws->rowCount();
+    if ( rowCount == 0 )
+    {
+      QMessageBox::critical(NULL, "Mantid - Error","TableWorkspace is empty.");
+      return boost::shared_ptr<Mantid::API::Workspace>();
+    }
+
+    auto columns = tws->getColumnNames();
+
+    // get the x column
+    int ix = m_columnManager->value( m_xColumn );
+    if ( ix >= columns.size() )
+    {
+      QMessageBox::critical(NULL, "Mantid - Error","X column was not found.");
+      return boost::shared_ptr<Mantid::API::Workspace>();
+    }
+    auto xcol = tws->getColumn(columns[ix]);
+
+    // get the y column
+    int iy = m_columnManager->value( m_yColumn );
+    if ( iy >= columns.size() )
+    {
+      QMessageBox::critical(NULL, "Mantid - Error","Y column was not found.");
+      return boost::shared_ptr<Mantid::API::Workspace>();
+    }
+    auto ycol = tws->getColumn(columns[iy]);
+
+    // get the err column
+    int ie = m_columnManager->value( m_errColumn ) - 1; // first entry is empty string
+    if ( ie >= 0 && ie >= columns.size() )
+    {
+      QMessageBox::critical(NULL, "Mantid - Error","Error column was not found.");
+      return boost::shared_ptr<Mantid::API::Workspace>();
+    }
+    auto ecol = ie < 0 ? Mantid::API::Column_sptr() : tws->getColumn(columns[ie]);
+
+    // create the MatrixWorkspace
+    Mantid::API::MatrixWorkspace_sptr mws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1, rowCount, rowCount);
+    Mantid::MantidVec& X = mws->dataX(0);
+    Mantid::MantidVec& Y = mws->dataY(0);
+    Mantid::MantidVec& E = mws->dataE(0);
+    for(size_t row = 0; row < rowCount; ++row)
+    {
+      X[row] = xcol->toDouble( row );
+      Y[row] = ycol->toDouble( row );
+      E[row] = ecol ? ecol->toDouble( row ) : 1.0;
+    }
+
+    return mws;
+  }
+  catch(std::exception& e)
+  {
+    QMessageBox::critical( NULL, "Mantid - Error", e.what() );
+    return boost::shared_ptr<Mantid::API::Workspace>();
+  }
+}
+
+/**
+ * Slot connected to the change signals of properties m_xColumn, m_yColumn, and m_errColumn.
+ * @param prop :: Property that changed.
+ */
+void FitPropertyBrowser::columnChanged(QtProperty* prop)
+{
+  if ( prop == m_xColumn )
+  {// update startX and endX
+    try
+    {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName());
+      auto tws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+      if ( !tws ) return;
+      int i = m_columnManager->value( m_xColumn );
+      if ( i < 0 || i >= tws->rowCount() || tws->rowCount() == 0 ) return;
+      auto col = tws->getColumn( static_cast<size_t>(i) );
+      const double startX = col->toDouble( 0 );
+      const double endX = col->toDouble( tws->rowCount() - 1 );
+      m_doubleManager->setValue( m_startX, startX );
+      m_doubleManager->setValue( m_endX, endX );
+    }
+    catch(...)
+    {
+      // do nothing
+    }
+  }
+}
 
 } // MantidQt
 } // API

@@ -40,6 +40,7 @@ namespace Mantid
     class CompositeFunction;
     class Workspace;
     class ParameterTie;
+    class MatrixWorkspace;
   }
 }
 
@@ -202,6 +203,8 @@ public:
 
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
+  /// Create a MatrixWorkspace from a TableWorkspace
+  Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
 
 public slots:
   virtual void fit();
@@ -254,6 +257,7 @@ private slots:
   virtual void doubleChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
+  void columnChanged(QtProperty* prop);
   void currentItemChanged(QtBrowserItem*);
   void addTie();
   void addTieToFunction();
@@ -314,6 +318,8 @@ protected:
   void updateDecimals();
   /// Sets the workspace to a function
   void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f)const;
+  /// Display properties relevant to the selected workspace
+  void setWorkspaceProperties();
 
   /// Create a double property and set some settings
   QtProperty* addDoubleProperty(const QString& name)const;
@@ -327,6 +333,7 @@ protected:
   QtStringPropertyManager *m_stringManager;
   QtStringPropertyManager *m_filenameManager;
   QtStringPropertyManager *m_formulaManager;
+  QtEnumPropertyManager *m_columnManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -338,6 +345,9 @@ protected:
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_rawData;
+  QtProperty *m_xColumn;
+  QtProperty *m_yColumn;
+  QtProperty *m_errColumn;
 
   /// A copy of the edited function
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
@@ -486,6 +496,9 @@ private:
 
   /// holds effectively a MantidUI for connecting
   QObject* m_mantidui;
+
+  /// store current workspace name
+  std::string m_storedWorkspaceName;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

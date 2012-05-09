@@ -261,3 +261,71 @@ void FunctionCurve::loadData(int points)
     setData(X.data(), Y.data(), points);
   }
 }
+
+/**
+ * Load the data from a MatrixWorkspace if it is a Mantid-type FunctionCurve.
+ * @param ws :: A workspace to load the data from.
+ * @param wi :: An index of a histogram with the data.
+ */
+void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws, size_t wi)
+{
+  if ( !d_variable.isEmpty() || d_formulas.isEmpty() || d_formulas[0] != "Mantid" ) return;
+  if (d_formulas.size() < 2) return;
+
+  QString fnInput = d_formulas[1];
+
+  try
+  {
+
+    if ( wi >= ws->getNumberHistograms() ) return;
+
+    const Mantid::MantidVec& wsX = ws->readX(wi);
+
+    if (d_from < wsX.front())
+    {
+      d_from = wsX.front();
+    }
+    if (d_to > wsX.back())
+    {
+      d_to = wsX.back();
+    }
+
+    std::vector<double> X;
+    X.reserve(wsX.size());
+
+    if (ws->isHistogramData())
+    {
+      for(size_t i = 0; i < ws->blocksize() - 1; i++)
+      {
+        double x = (wsX[i] + wsX[i+1])/2;
+        if (x < d_from) continue;
+        if (x > d_to) break;
+        X.push_back(x);
+      }
+    }
+    else
+    {
+      for(size_t i = 0; i < ws->blocksize(); i++)
+      {
+        double x = wsX[i];
+        if (x < d_from) continue;
+        if (x > d_to) break;
+        X.push_back(x);
+      }
+    }
+
+    // Create the function and initialize it using fnInput which was saved in d_formulas[1]
+    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString());
+    f->setMatrixWorkspace(ws,wi,d_from,d_to);
+    f->applyTies();
+    Mantid::API::FunctionDomain1DVector domain(X);
+    Mantid::API::FunctionValues Y(domain);
+    f->function(domain,Y);
+
+    setData(&X[0], Y.getPointerToCalculated(0), static_cast<int>(X.size()));
+  }
+  catch(...)
+  {
+    return;
+  }
+}

@@ -31,11 +31,14 @@
 
 #include "PlotCurve.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid
 {
   namespace API
   {
     class IFunction;
+    class MatrixWorkspace;
   }
 }
 
@@ -79,6 +82,8 @@ public:
 	QString legend();
 
 	void loadData(int points = 0);
+
+	void loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws, size_t wi);
  
   /// No error bars on this curve: Always return an empty list.
   QList<ErrorBarSettings *> errorBarSettingsList() const {return QList<ErrorBarSettings*>();}
