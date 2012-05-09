@@ -92,6 +92,10 @@ namespace MantidQt
       void setupSlice(); ///< setup the slice miniplot section
 
     private slots:
+      void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
+      void pbRunFinding();  //< Called when the FileFinder starts finding the files.
+      void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
+
       void refreshWSlist();
       void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
       void reflectionSelected(int index); ///< set up parameter file values based on reflection

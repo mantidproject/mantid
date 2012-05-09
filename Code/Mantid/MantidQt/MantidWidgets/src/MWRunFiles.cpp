@@ -551,8 +551,12 @@ void MWRunFiles::findFiles()
 
     // If the thread is running, cancel it.
     if( m_thread->isRunning() )
+    {
       m_thread->exit(-1);
-    
+      m_thread->wait();
+    }
+
+    emit findingFiles();
     // Set the values for the thread, and start it running.
     m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional());
     m_thread->start();

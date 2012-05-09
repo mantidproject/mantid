@@ -83,6 +83,11 @@ void Indirect::initLayout()
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
   connect(m_uiForm.cbIndRebType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
+
+  connect(m_uiForm.ind_runFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+  connect(m_uiForm.ind_runFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+  connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+
   // "Calibration" tab
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
@@ -1004,6 +1009,34 @@ void Indirect::setupSlice()
   connect(m_sltBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
 
   sliceTwoRanges(0, false); // set default value
+}
+
+/**
+ * Called when a user starts to type / edit the runs to load.
+ */
+void Indirect::pbRunEditing()
+{
+  m_uiForm.pbRun->setEnabled(false);
+  m_uiForm.pbRun->setText("Editing...");
+}
+
+/**
+ * Called when the FileFinder starts finding the files.
+ */
+void Indirect::pbRunFinding()
+{
+  m_uiForm.pbRun->setText("Finding files...");
+  m_uiForm.ind_runFiles->setEnabled(false);
+}
+
+/**
+ * Called when the FileFinder has finished finding the files.
+ */
+void Indirect::pbRunFinished()
+{
+  m_uiForm.pbRun->setEnabled(true);
+  m_uiForm.ind_runFiles->setEnabled(true);
+  tabChanged(m_uiForm.tabWidget->currentIndex());
 }
 
 void Indirect::refreshWSlist()
