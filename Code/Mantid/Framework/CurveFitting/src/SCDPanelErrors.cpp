@@ -807,14 +807,33 @@ namespace Mantid
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
       bool ddd = false;
+      size_t StartPos=2;
+      size_t StartRot = 5;
+
+       size_t L0param = parameterIndex("l0");
+       size_t T0param = parameterIndex("t0");
+
+       size_t StartX ;
+       size_t EndX ;
+       double rr;
+       vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
+       vector<V3D> pos, xvec, yvec, hkl, qlab, qXtal;
+       vector<V3D> PanelCenter;
+       vector<double> time;
+       double K, L0;
+
+       string lastBankName = "";
+       V3D last_xvec, last_yvec, last_Center;
+       int last_Nrows, last_Ncols;
+       double velocity;
+       Matrix<double> InvhklThkl(3, 3);
+       Matrix<double> UB(3, 3);
+       map<string, size_t> bankName2Group;
+       vector<string> Groups;
+
 #if defined(_WIN32) && !defined(_WIN64)
     ddd=true;
 #endif
-     size_t StartPos=2;
-     size_t StartRot = 5;
-
-      size_t L0param = parameterIndex("l0");
-      size_t T0param = parameterIndex("t0");;
       CheckSizetMax(StartPos, L0param,T0param,"Start deriv");
       if (nData <= 0)
         return;
@@ -825,8 +844,6 @@ namespace Mantid
       }
 
 
-      size_t StartX ;
-      size_t EndX ;
       if (startX < 0 || endX < 0 || endX < startX)
       {
         StartX = 0;
@@ -839,7 +856,7 @@ namespace Mantid
           EndX = nData -1;
       }
 
-      double rr =checkForNonsenseParameters();
+      rr =checkForNonsenseParameters();
 
       if( rr > 0 )
       {
@@ -854,33 +871,30 @@ namespace Mantid
       peaks = getPeaks();
       Check(peaks, xValues, nData);
 
+
       Instrument_sptr instrNew = getNewInstrument(peaks->getPeak(0));
 
       boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
-      vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
-      vector<V3D> pos, xvec, yvec, hkl, qlab, qXtal;
-      vector<V3D> PanelCenter;
-      vector<double> time;
-      double K, L0;
-
-      string lastBankName = "";
-      V3D last_xvec, last_yvec, last_Center;
-      int last_Nrows, last_Ncols;
 
       V3D SamplePos = instrNew->getSample()->getPos();
       V3D SourcePos = instrNew->getSource()->getPos();
       IPeak & ppeak = peaks->getPeak(0);
       L0 = ppeak.getL1();
 
-      double velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
+      velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
       K = 2 * M_PI / ppeak.getWavelength() / velocity;//2pi/lambda = K*velocity
 
       for (size_t xval = StartX; xval <= EndX; xval += 3)
       {
+
         double x = floor(xValues[xval]);
+        Peak peak;
+        V3D HKL;
+        string thisBankName;
+        Quat Rot;
         IPeak& peak_old = peaks->getPeak((int) x);
 
-        Peak peak = createNewPeak(peak_old, instrNew);
+        peak = createNewPeak(peak_old, instrNew);
 
         peakIndx.push_back((int) x);
         qlab.push_back(peak.getQLabFrame());
@@ -889,12 +903,12 @@ namespace Mantid
         col.push_back(peak.getCol());
         time.push_back(peak.getTOF());
 
-        V3D HKL = peak.getHKL();
+        HKL = peak.getHKL();
         hkl.push_back(V3D(floor(.5 + HKL.X()), floor(.5 + HKL.Y()), floor(.5 + HKL.Z())));
 
         pos.push_back(peak.getDetPos());
 
-        string thisBankName = peak.getBankName();
+        thisBankName = peak.getBankName();
 
         if (thisBankName == lastBankName)
         {
@@ -910,7 +924,7 @@ namespace Mantid
           V3D x_vec(1, 0, 0);
           V3D y_vec(0, 1, 0);
           boost::shared_ptr<const IComponent> panel = instrNew->getComponentByName(thisBankName);
-          Quat Rot = panel->getRotation();
+          Rot = panel->getRotation();
           Rot.rotate(x_vec);
           Rot.rotate(y_vec);
 
@@ -937,8 +951,8 @@ namespace Mantid
           lastBankName = thisBankName;
         }
       }
+      Matrix<double> Mhkl(hkl.size(), 3);
 
-      Matrix<double> Mhkl(hkl.size(), 3), InvhklThkl(3, 3);
       for (size_t rw = 0; rw <  hkl.size(); ++rw)
         for (size_t cl = 0; cl < 3; ++cl)
           Mhkl[rw][cl] = hkl[rw][cl];
@@ -951,7 +965,6 @@ namespace Mantid
       InvhklThkl.Invert();
 
 
-      Matrix<double> UB(3, 3);
       try
       {
         Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
@@ -973,24 +986,21 @@ namespace Mantid
 
 
 
-      map<string, size_t> bankName2Group;
-      vector<string> Groups;
       boost::split( Groups, BankNames, boost::is_any_of("!"));
+
       for( size_t gr=0; gr< Groups.size(); ++gr)
       {
-
-
         vector<string> banknames;
         boost::split(banknames, Groups[gr],boost::is_any_of("/"));
         for( vector<string>::iterator it=banknames.begin(); it != banknames.end(); ++it)
           bankName2Group[(*it)]=gr;
       }
 
-
       vector<V3D> Unrot_dQ[3];
       int pick[3];
       pick[0] = pick[1] = pick[2] = 0;
       Matrix<double> Result(3, qlab.size());
+
       for( size_t gr=0; gr< (size_t)NGroups; ++gr)
       {
         Unrot_dQ[0].clear();
@@ -1005,9 +1015,9 @@ namespace Mantid
       {
         pick[param - StartPos] = 1;
         V3D parxyz(pick[0], pick[1], pick[2]);
+       // if( gr==0 && ddd)
+       //   std::cout<<"pick=["<<pick[0]<<","<<pick[1]<<","<<pick[2]<<"]"<<std::endl;
         pick[param - StartPos] = 0;
-        if( gr==0 && ddd)
-          std::cout<<"pick=["<<pick[0]<<","<<pick[1]<<","<<pick[2]<<","<<std::endl;
         Matrix<double> Result(3, qlab.size());
         CheckSizetMax(gr,param,param,"xyzoffset1 Deriv");
         for (size_t peak = 0; peak <  qlab.size(); ++peak)
@@ -1034,7 +1044,7 @@ namespace Mantid
 
           if(  gr==0 && peak==0 && ddd)
             std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
-              << dt1<<","<<vel<<std::endl;
+              << dt1<<","<<vel<<parxyz<<L0<<pos[peak]<<time[peak]<<std::endl;
           double r = (K / t1 * dt1);
           dQlab.setX(vel.scalar_prod(V3D(1, 0, 0)) * r);
           dQlab.setY(vel.scalar_prod(V3D(0, 1, 0)) * r);
