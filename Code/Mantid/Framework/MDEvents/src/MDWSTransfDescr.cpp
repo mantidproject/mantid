@@ -237,7 +237,7 @@ void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::ve
     }else{
         wProj = Kernel::V3D(wt[0], wt[1], wt[2]);
     }
-    if(u_default&&v_default&&v_default){
+    if(u_default&&v_default&&w_default){
         is_uv_default=true;
     }else{
         is_uv_default=false;
