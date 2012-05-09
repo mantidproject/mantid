@@ -274,7 +274,7 @@ namespace Mantid
    {
 
        vector<V3D> posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (posv.size() > 0)
+       if (!posv.empty())
        {
         V3D pos = posv[0];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -291,9 +291,9 @@ namespace Mantid
 
        vector<double> scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
        vector<double> scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( scalex.size() > 0)
+       if( !scalex.empty())
           pmap->addDouble(bank_const.get(),"scalex", scalex[0]);
-       if( scaley.size() > 0)
+       if( !scaley.empty())
           pmap->addDouble(bank_const.get(),"scaley", scaley[0]);
 
        boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
@@ -306,7 +306,7 @@ namespace Mantid
        boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const
     {
       vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-      if (posv.size() > 0)
+      if (!posv.empty())
       {
         V3D pos = posv[0];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -445,13 +445,13 @@ namespace Mantid
           double scaley = getParameter(prefix+"detHeightScale");
           double scalez = 1;
           string baseName = Rect->base()->getName();
-          if (pmapSv->getDouble(baseName, string("scalex")).size() > 0)
+          if (!pmapSv->getDouble(baseName, string("scalex")).empty())
             scalex *= pmapSv->getDouble(baseName, string("scalex"))[0];
 
-          if (pmapSv->getDouble(baseName, string("scaley")).size() > 0)
+          if (!pmapSv->getDouble(baseName, string("scaley")).empty())
             scaley *= pmapSv->getDouble(baseName, string("scaley"))[0];
 
-          if (pmapSv->getDouble(baseName, string("scalez")).size() > 0)
+          if (!pmapSv->getDouble(baseName, string("scalez")).empty())
             scalez *= pmapSv->getDouble(baseName, string("scalez"))[0];
 
           V3D RectScaleFactor = Rect->getScaleFactor();
@@ -806,7 +806,7 @@ namespace Mantid
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
-      bool ddd = false;
+
       size_t StartPos=2;
       size_t StartRot = 5;
 
@@ -831,9 +831,6 @@ namespace Mantid
        map<string, size_t> bankName2Group;
        vector<string> Groups;
 
-#if defined(_WIN32) && !defined(_WIN64)
-    ddd=true;
-#endif
       CheckSizetMax(StartPos, L0param,T0param,"Start deriv");
       if (nData <= 0)
         return;
@@ -997,8 +994,6 @@ namespace Mantid
       }
 
       vector<V3D> Unrot_dQ[3];
-     // int pick[3];
-     // pick[0] = pick[1] = pick[2] = 0;
       Matrix<double> Result(3, qlab.size());
 
       for( size_t gr=0; gr< (size_t)NGroups; ++gr)
@@ -1009,16 +1004,14 @@ namespace Mantid
 
       //-------- xyz offset parameters ----------------------
        StartPos = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
-    //  int startPeak = -1;
+
        for (size_t param = StartPos; param <=StartPos+(size_t)2; ++param)
 
       {
-        //pick[param - StartPos] = 1;
+
         V3D parxyz(0,0,0);
         parxyz[param-StartPos]=1;
-       // if( gr==0 && ddd)
-       //   std::cout<<"pick=["<<pick[0]<<","<<pick[1]<<","<<pick[2]<<"]"<<std::endl;
-       // pick[param - StartPos] = 0;
+
         Matrix<double> Result(3, qlab.size());
         CheckSizetMax(gr,param,param,"xyzoffset1 Deriv");
         for (size_t peak = 0; peak <  qlab.size(); ++peak)
@@ -1043,9 +1036,9 @@ namespace Mantid
           V3D vel = pos[peak] / L1 * velMag;
 
 
-          if(  gr==0 && peak==0 && ddd)
-            std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
-              << dt1<<","<<vel<<parxyz<<L0<<pos[peak]<<time[peak]<<std::endl;
+        //  if(  gr==0 && peak==0 && ddd)
+       //     std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
+       //       << dt1<<","<<vel<<parxyz<<L0<<pos[peak]<<time[peak]<<std::endl;
           double r = (K / t1 * dt1);
           dQlab.setX(vel.scalar_prod(V3D(1, 0, 0)) * r);
           dQlab.setY(vel.scalar_prod(V3D(0, 1, 0)) * r);
@@ -1061,8 +1054,8 @@ namespace Mantid
 
           dQlab.setZ(dQlab.Z() + K * dvMag);
 
-          if( param== StartPos+1 && gr==0&& peak==0&&ddd)
-                      std::cout<<"ereRot="<<dQlab<<std::endl;
+       //   if( param== StartPos+1 && gr==0&& peak==0&&ddd)
+       //               std::cout<<"ereRot="<<dQlab<<std::endl;
           Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
@@ -1074,8 +1067,8 @@ namespace Mantid
           Result[0][peak] = dQsamp.X();
           Result[1][peak] = dQsamp.Y();
           Result[2][peak] = dQsamp.Z();
-          if( gr==0 && peak <2&&ddd)
-          std::cout<<"Deriv to xyzoffsets wrt "<<param <<dQsamp<<std::endl;
+        //  if( gr==0 && peak <2&&ddd)
+        //  std::cout<<"Deriv to xyzoffsets wrt "<<param <<dQsamp<<std::endl;
         }
 
 
