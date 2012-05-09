@@ -53,16 +53,7 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface
 		bool keyEventFilter(QKeyEvent *ke);
 		QwtPlotCurve *selectedCurve() const { return d_selected_curve; }
 
-        void copySelection();
-        void cutSelection();
-        void pasteSelection();
-        void removePoint();
-        //! Searches the index of the closest point to the given x coordinate
-        int findClosestPoint(QwtPlotCurve *c, double x, bool up);
-
-        virtual int rtti() const {return PlotToolInterface::Rtti_DataPicker;};
-
-        void selectTableRow();
+    virtual int rtti() const {return PlotToolInterface::Rtti_DataPicker;};
 
 	signals:
 		/** Emitted whenever a new message should be presented to the user.
@@ -73,12 +64,8 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface
 		//! Emitted whenever a new data point has been selected.
 		void selected(QwtPlotCurve*, int);
 	protected:
-		void movePoint(const QPoint &cursor);
 		virtual void append(const QPoint &point);
-		virtual void move(const QPoint &point);
-		virtual bool end(bool ok);
 		void setSelection(QwtPlotCurve *curve, int point_index);
-		void moveBy(int dx, int dy);
 	private:
 		ApplicationWindow *d_app;
 		QwtPlotMarker d_selection_marker;

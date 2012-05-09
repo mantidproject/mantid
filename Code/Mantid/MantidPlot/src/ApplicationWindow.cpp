@@ -7412,16 +7412,19 @@ void ApplicationWindow::showCurveWorksheet(Graph *g, int curveIndex)
   if (!it)
     return;
 
-  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+  {
     Spectrogram *sp = dynamic_cast<Spectrogram*>(it);
     if (sp->matrix())
       sp->matrix()->showMaximized();
-  } else if (dynamic_cast<PlotCurve*>(it)->type() == Graph::Function)
+  }
+  else if (dynamic_cast<PlotCurve*>(it)->type() == Graph::Function)
+  {
     g->createTable(dynamic_cast<PlotCurve*>(it));
-  else {
+  }
+  else 
+  {
     showTable(it->title().text());
-    if (g->activeTool() && g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
-      dynamic_cast<DataPickerTool *>(g->activeTool())->selectTableRow();
   }
 }
 
@@ -8331,8 +8334,6 @@ void ApplicationWindow::clearSelection()
     if (g->activeTool()){
       if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
         dynamic_cast<RangeSelectorTool*>(g->activeTool())->clearSelection();
-      else if (g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
-        dynamic_cast<DataPickerTool*>(g->activeTool())->removePoint();
     } else if (g->titleSelected())
       g->removeTitle();
     else if (g->markerSelected())
@@ -8379,10 +8380,6 @@ void ApplicationWindow::copySelection()
       {
         dynamic_cast<RangeSelectorTool*>(g->activeTool())->copySelection();
       }
-      else if (g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
-      {
-        dynamic_cast<DataPickerTool*>(g->activeTool())->copySelection();
-      }
     } else if (g->markerSelected()){
       copyMarker();
     } else
@@ -8421,8 +8418,6 @@ void ApplicationWindow::cutSelection()
     if (g->activeTool()){
       if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
         dynamic_cast<RangeSelectorTool*>(g->activeTool())->cutSelection();
-      else if (g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
-        dynamic_cast<DataPickerTool*>(g->activeTool())->cutSelection();
     } else {
       copyMarker();
       g->removeMarker();
@@ -8505,8 +8500,6 @@ void ApplicationWindow::pasteSelection()
       if (g->activeTool()){
         if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
           dynamic_cast<RangeSelectorTool*>(g->activeTool())->pasteSelection();
-        else if (g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
-          dynamic_cast<DataPickerTool*>(g->activeTool())->pasteSelection();
       } else if (d_text_copy){
         LegendWidget *t = g->insertText(d_text_copy);
         t->move(g->mapFromGlobal(QCursor::pos()));
