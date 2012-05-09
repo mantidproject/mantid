@@ -51,6 +51,11 @@ namespace MDEventsTestHelper
       double signal, double errorSquared,
       size_t * numBins, coord_t * min, coord_t * max,
       std::string name="");
+  /// More general fake n-dimensionsal MDHistoWorkspace
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
+      double signal, double errorSquared,
+      size_t * numBins, coord_t * min, coord_t * max,
+      std::vector<std::string> names, std::string name="");
 
 
   //-------------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 
 Compares two workspaces for equality. This algorithm is mainly intended for use by Mantid developers as part of the testing process.
-    
+
 The data values (X,Y and error) are always checked. The algorithm can also optionally check the axes (this includes the units), the spectra-detector map, the instrument (the name and parameter map) and any bin masking.
 
 In the case of [[EventWorkspace]]s, they are checked to hold identical event lists. Comparisons between an EventList and a Workspace2D always fail.
@@ -20,6 +20,7 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <sstream>
 
 namespace Mantid
@@ -41,7 +42,7 @@ void CheckWorkspacesMatch::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
-
+using namespace Geometry;
 
 /**
  * Process two groups and ensure the Result string is set properly on the final algorithm
@@ -157,7 +158,7 @@ void CheckWorkspacesMatch::exec()
   result.clear();
   this->doComparison();
   
-  if ( result != "") 
+  if ( result != "")
   {
     g_log.notice() << "The workspaces did not match: " << result << std::endl;
   }
@@ -191,7 +192,7 @@ void CheckWorkspacesMatch::doComparison()
   // Check some event-based stuff
   if (tws1 && tws2)
   {
-  // Check some table-based stuff
+    // Check some table-based stuff
     if (tws1->getNumberPeaks() != tws2->getNumberPeaks())
     {
       result = "Mismatched number of rows.";
@@ -308,7 +309,10 @@ void CheckWorkspacesMatch::doComparison()
   }
   if (mdews1 && mdews2)
   {
-    this->checkMDCommon(mdews1, mdews2);
+    if (!this->checkMDCommon(mdews1, mdews2))
+    {
+      return;
+    }
     if (mdews1->getNPoints() != mdews2->getNPoints())
     {
       result = "Mismatch in number of MD events";
@@ -331,12 +335,65 @@ void CheckWorkspacesMatch::doComparison()
   }
   if (mdhws1 && mdhws2)
   {
-    this->checkMDCommon(mdhws1, mdhws2);
+    if (!this->checkMDCommon(mdhws1, mdhws2))
+    {
+        return;
+    }
     if (mdhws1->getNPoints() != mdhws2->getNPoints())
     {
       result = "Mismatch in number of MD histogram bins";
       return;
     }
+
+    // Check the data
+    const double tolerance = getProperty("Tolerance");
+    uint64_t nPoints = mdhws1->getNPoints();
+    bool mismatchedSignal = false;
+    uint64_t mismatchedSignalI = 0;
+    bool mismatchedError = false;
+    uint64_t mismatchedErrorI = 0;
+    for (uint64_t i = 0; i < nPoints; ++i)
+    {
+      if (!mismatchedSignal)
+      {
+        signal_t v1 = mdhws1->getSignalAt(i);
+        signal_t v2 = mdhws2->getSignalAt(i);
+
+        if (std::fabs(v1 - v2) > tolerance)
+        {
+          mismatchedSignal = true;
+          mismatchedSignalI = i;
+        }
+      }
+      if (!mismatchedError)
+      {
+        signal_t v1 = mdhws1->getErrorAt(i);
+        signal_t v2 = mdhws2->getErrorAt(i);
+
+        if (std::fabs(v1 - v2) > tolerance)
+        {
+          mismatchedError = true;
+          mismatchedErrorI = i;
+        }
+      }
+    }
+
+    if (mismatchedSignal)
+    {
+      std::ostringstream mess;
+      mess << "Mismatched signal at index " << mismatchedSignalI;
+      result = mess.str();
+      return;
+    }
+
+    if (mismatchedError)
+    {
+      std::ostringstream mess;
+      mess << "Mismatched error at index " << mismatchedErrorI;
+      result = mess.str();
+      return;
+    }
+
     return;
   }
 
@@ -377,7 +434,7 @@ void CheckWorkspacesMatch::doComparison()
     for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
     {
       PARALLEL_START_INTERUPT_REGION
-      prog->report("EventLists");
+          prog->report("EventLists");
       if (!mismatchedEvent) // This guard will avoid checking unnecessarily
       {
         const EventList &el1 = ews1->getEventList(i);
@@ -392,7 +449,7 @@ void CheckWorkspacesMatch::doComparison()
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    if ( mismatchedEvent)
+        if ( mismatchedEvent)
     {
       std::ostringstream mess;
       mess << "Mismatched event list at workspace index " << mismatchedEventWI;
@@ -424,8 +481,8 @@ void CheckWorkspacesMatch::doComparison()
   {
     if( !checkSample(ws1->sample(), ws2->sample()) ) return;
     if( !checkRunProperties(ws1->run(), ws2->run()) ) return;
-  } 
-      
+  }
+
   return;
 }
 
@@ -463,7 +520,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   for ( int i = 0; i < static_cast<int>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
-    prog->report("Histograms");
+        prog->report("Histograms");
     if (resultBool) // Avoid checking unnecessarily
     {
 
@@ -498,9 +555,9 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  
-  // If all is well, return true
-  return resultBool;
+
+      // If all is well, return true
+      return resultBool;
 }
 
 /// Checks that the axes matches
@@ -542,7 +599,7 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
     Unit_const_sptr ax1_unit = ax1->unit();
     Unit_const_sptr ax2_unit = ax2->unit();
     
-    if ( (ax1_unit == NULL && ax2_unit != NULL) || (ax1_unit != NULL && ax2_unit == NULL) 
+    if ( (ax1_unit == NULL && ax2_unit != NULL) || (ax1_unit != NULL && ax2_unit == NULL)
          || ( ax1_unit && ax1_unit->unitID() != ax2_unit->unitID() ) )
     {
       result = axis_name + " unit mismatch";
@@ -561,7 +618,7 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
   if ( ws1->YUnit() != ws2->YUnit() )
   {
     g_log.debug() << "YUnit strings : WS1 = " << ws1->YUnit() <<
-                                    " WS2 = " << ws2->YUnit() << "\n";
+                     " WS2 = " << ws2->YUnit() << "\n";
     result = "YUnit mismatch";
     return false;
   }
@@ -570,7 +627,7 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
   if ( ws1->isDistribution() != ws2->isDistribution() )
   {
     g_log.debug() << "Distribution flags: WS1 = " << ws1->isDistribution() <<
-                                        " WS2 = " << ws2->isDistribution() << "\n";
+                     " WS2 = " << ws2->isDistribution() << "\n";
     result = "Distribution flag mismatch";
     return false;
   }
@@ -635,14 +692,14 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
   if ( ws1->getInstrument()->getName() != ws2->getInstrument()->getName() )
   {
     g_log.debug() << "Instrument names: WS1 = " << ws1->getInstrument()->getName() <<
-                                      " WS2 = " << ws2->getInstrument()->getName() << "\n";
+                     " WS2 = " << ws2->getInstrument()->getName() << "\n";
     result = "Instrument name mismatch";
     return false;
   }
   
   const Geometry::ParameterMap& ws1_parmap = ws1->instrumentParameters();
   const Geometry::ParameterMap& ws2_parmap = ws2->instrumentParameters();
-    
+
   if ( ws1_parmap.asString() != ws2_parmap.asString() )
   {
     g_log.debug() << "Parameter maps...\n";
@@ -680,7 +737,7 @@ bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API
     {
       g_log.debug() << "Mask lists for spectrum " << i << " do not match\n";
       result = "Masking mismatch";
-      return false;     
+      return false;
     }
   }
   
@@ -779,10 +836,47 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
 bool CheckWorkspacesMatch::checkMDCommon(IMDWorkspace_const_sptr ws1,
                                          IMDWorkspace_const_sptr ws2)
 {
+  // Check is the number of dimensions match
   if (ws1->getNumDims() != ws2->getNumDims())
   {
     result = "Mismatch in number of reported dimensions";
     return false;
+  }
+  // Check the dimension information
+  std::size_t ndims = ws1->getNumDims();
+  for (std::size_t i = 0; i < ndims; ++i)
+  {
+    std::ostringstream axis_name_ss;
+    axis_name_ss << "Axis " << i;
+    std::string axis_name = axis_name_ss.str();
+
+    IMDDimension_const_sptr idim1 = ws1->getDimension(i);
+    IMDDimension_const_sptr idim2 = ws2->getDimension(i);
+    if (idim1->getName() != idim2->getName())
+    {
+      result = axis_name + " name mismatch";
+      return false;
+    }
+    if (idim1->getUnits() != idim2->getUnits())
+    {
+      result = axis_name + " units mismatch";
+      return false;
+    }
+    if (idim1->getMinimum() != idim2->getMinimum())
+    {
+      result = axis_name + " minimum mismatch";
+      return false;
+    }
+    if (idim1->getMaximum() != idim2->getMaximum())
+    {
+      result = axis_name + " maximum mismatch";
+      return false;
+    }
+    if (idim1->getNBins() != idim2->getNBins())
+    {
+      result = axis_name + " number of bins mismatch";
+      return false;
+    }
   }
 
   return true;

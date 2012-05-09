@@ -217,7 +217,6 @@ public:
   void testMDEvents_matches()
   {
     if ( !checker.isInitialized() ) checker.initialize();
-
     MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeFileBackedMDEW("mdev1", false);
     MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeFileBackedMDEW("mdev2", false);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
@@ -226,10 +225,20 @@ public:
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
   }
 
+  void testMDEvents_different_dims()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDEventWorkspace4Lean::sptr mdews1 = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeMDEW<3>(5, -10.0, 10.0, 1);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
   void testMDHisto_matches()
   {
     if ( !checker.isInitialized() ) checker.initialize();
-
     MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
     MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
@@ -241,11 +250,78 @@ public:
   void testMDHist_different_dims()
   {
     if ( !checker.isInitialized() ) checker.initialize();
-
     MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
     MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHist_different_dimnames()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    const int dims = 3;
+    std::size_t numBins[dims] = {10, 10, 10};
+    Mantid::coord_t min[dims] = {0.0, 0.0, 0.0};
+    Mantid::coord_t max[dims] = {10.0, 10.0, 10.0};
+    std::vector<std::string> names;
+    names.push_back("h");
+    names.push_back("k");
+    names.push_back("l");
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(3, 5.0, 1.0, numBins, min, max, names);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHist_different_dimbins()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 5);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHist_different_dimmax()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    Mantid::coord_t max = static_cast<Mantid::coord_t>(10.1);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 10, max);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHist_different_data()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.1, 4);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Tolerance", 1.0e-5 ) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDHist_different_error()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4, 10, 10.0, 1.1);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Tolerance", 1.0e-5 ) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
   }

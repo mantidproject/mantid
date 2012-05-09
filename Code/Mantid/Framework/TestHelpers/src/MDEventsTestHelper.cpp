@@ -265,7 +265,7 @@ namespace MDEventsTestHelper
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
       double signal, double errorSquared,
       size_t * numBins, coord_t * min, coord_t * max,
-      std::string name)
+      std::string name )
   {
     std::vector<std::string> names;
     names.push_back("x");
@@ -273,6 +273,37 @@ namespace MDEventsTestHelper
     names.push_back("z");
     names.push_back("t");
 
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    for (size_t d=0; d<numDims; d++)
+      dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(names[d], names[d], "m", min[d], max[d], numBins[d])));
+
+    Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
+    ws = new Mantid::MDEvents::MDHistoWorkspace(dimensions);
+    Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+    ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
+    if (!name.empty())
+      AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
+    return ws_sptr;
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** Creates a fake MDHistoWorkspace with more options
+   *
+   * @param numDims :: number of dimensions to create. They will range from 0 to max
+   * @param signal :: signal in every point
+   * @param errorSquared :: error squared in every point
+   * @param numBins :: array of # of bins in each dimensions
+   * @param min :: array of min position in each dimension
+   * @param max :: array of max position in each dimension
+   * @param names :: array of names for each dimension
+   * @param name :: optional name
+   * @return the MDHisto
+   */
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
+      double signal, double errorSquared,
+      size_t * numBins, coord_t * min, coord_t * max,
+      std::vector<std::string> names, std::string name )
+  {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
     for (size_t d=0; d<numDims; d++)
       dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(names[d], names[d], "m", min[d], max[d], numBins[d])));
