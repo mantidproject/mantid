@@ -127,6 +127,9 @@ void Indirect::initLayout()
   // nudge "Background Removal" button to display whether it is
   // set to "OFF" or "ON".
   backgroundRemoval();
+  // nudge tabChanged too, so that we start off with a "Run Energy Transfer" button
+  // instead of a "Run" button which then changes when clicking on a different tab.
+  tabChanged(0);
 
   loadSettings();
 
