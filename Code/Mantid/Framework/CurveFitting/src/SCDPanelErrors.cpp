@@ -1032,9 +1032,9 @@ namespace Mantid
           V3D vel = pos[peak] / L1 * velMag;
 
 
-         // if(  gr==0 && peak==0 && ddd)
-         //   std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
-         //     << dt1<<","<<vel<<std::endl;
+          if(  gr==0 && peak==0 && ddd)
+            std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
+              << dt1<<","<<vel<<std::endl;
           double r = (K / t1 * dt1);
           dQlab.setX(vel.scalar_prod(V3D(1, 0, 0)) * r);
           dQlab.setY(vel.scalar_prod(V3D(0, 1, 0)) * r);
