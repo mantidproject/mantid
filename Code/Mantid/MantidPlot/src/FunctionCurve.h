@@ -83,7 +83,7 @@ public:
 
 	void loadData(int points = 0);
 
-	void loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws, size_t wi);
+  void loadMantidData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, size_t wi);
  
   /// No error bars on this curve: Always return an empty list.
   QList<ErrorBarSettings *> errorBarSettingsList() const {return QList<ErrorBarSettings*>();}
