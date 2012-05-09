@@ -116,7 +116,7 @@ namespace Mantid
       setAttribute("endX", Attribute(-1));
       init();
 #if defined(_WIN32) && !defined(_WIN64)
-      g_log.setLevel(7);
+     // g_log.setLevel(7);
 #endif
     // g_log.setLevel(7);
 
@@ -806,6 +806,10 @@ namespace Mantid
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
+      bool ddd = false;
+#if defined(_WIN32) && !defined(_WIN64)
+    ddd=true;
+#endif
      size_t StartPos=2;
      size_t StartRot = 5;
 
@@ -951,13 +955,7 @@ namespace Mantid
       try
       {
         Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
-        g_log.debug()<<"UB=\n";
-        for( int ii=0; ii <3; ++ii)
-        {
-          for( int jj=0; jj<3; ++jj)
-            g_log.debug()<<UB[ii][jj]<<",";
-          g_log.debug()<<std::endl;
-        }
+
       } catch (std::exception & s)
       {
 
@@ -1035,8 +1033,8 @@ namespace Mantid
           V3D vel = pos[peak] / L1 * velMag;
 
 
-          if( param== StartPos+1 && gr==0&& peak==0)
-            g_log.debug()<<"DerivCalc1="<<L1<<","<<velMag<<","<<t1
+          if(  gr==0 && peak==0 && ddd)
+            std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
               << dt1<<","<<vel<<std::endl;
           double r = (K / t1 * dt1);
           dQlab.setX(vel.scalar_prod(V3D(1, 0, 0)) * r);
@@ -1053,8 +1051,8 @@ namespace Mantid
 
           dQlab.setZ(dQlab.Z() + K * dvMag);
 
-          if( param== StartPos+1 && gr==0&& peak==0)
-                      g_log.debug()<<"ereRot="<<dQlab<<std::endl;
+          if( param== StartPos+1 && gr==0&& peak==0&&ddd)
+                      std::cout<<"ereRot="<<dQlab<<std::endl;
           Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
@@ -1066,8 +1064,8 @@ namespace Mantid
           Result[0][peak] = dQsamp.X();
           Result[1][peak] = dQsamp.Y();
           Result[2][peak] = dQsamp.Z();
-          if( gr==0 && peak <2)
-          g_log.debug()<<"Deriv to xyzoffsets wrt "<<param <<dQsamp<<std::endl;
+          if( gr==0 && peak <2&&ddd)
+          std::cout<<"Deriv to xyzoffsets wrt "<<param <<dQsamp<<std::endl;
         }
 
 
