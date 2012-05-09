@@ -997,8 +997,8 @@ namespace Mantid
       }
 
       vector<V3D> Unrot_dQ[3];
-      int pick[3];
-      pick[0] = pick[1] = pick[2] = 0;
+     // int pick[3];
+     // pick[0] = pick[1] = pick[2] = 0;
       Matrix<double> Result(3, qlab.size());
 
       for( size_t gr=0; gr< (size_t)NGroups; ++gr)
@@ -1013,11 +1013,12 @@ namespace Mantid
        for (size_t param = StartPos; param <=StartPos+(size_t)2; ++param)
 
       {
-        pick[param - StartPos] = 1;
-        V3D parxyz(pick[0], pick[1], pick[2]);
+        //pick[param - StartPos] = 1;
+        V3D parxyz(0,0,0);
+        parxyz[param-StartPos]=1;
        // if( gr==0 && ddd)
        //   std::cout<<"pick=["<<pick[0]<<","<<pick[1]<<","<<pick[2]<<"]"<<std::endl;
-        pick[param - StartPos] = 0;
+       // pick[param - StartPos] = 0;
         Matrix<double> Result(3, qlab.size());
         CheckSizetMax(gr,param,param,"xyzoffset1 Deriv");
         for (size_t peak = 0; peak <  qlab.size(); ++peak)
