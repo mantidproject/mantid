@@ -1586,7 +1586,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             decl_fn = self._declareMatrixWorkspace
         elif Type == Workspace:
             decl_fn = self._declareWorkspace
-        elif Type == TableWorkspace:
+        elif Type == ITableWorkspace:
             decl_fn = self._declareTableWorkspace
         else:
             raise TypeError('Unrecognized type of workspace specified for property "' + PropertyName + '"')
