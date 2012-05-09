@@ -53,9 +53,9 @@ namespace Mantid
       NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
           = startX_set = NGroups_set = false;//_WIN32
-#if defined(_WIN32) && !defined(_WIN64)
-      g_log.setLevel(7);
-#endif
+
+     // g_log.setLevel(7);
+
       tolerance = .6;
       startX = endX = -1;
 
@@ -115,8 +115,10 @@ namespace Mantid
       setAttribute("startX", Attribute(-1));
       setAttribute("endX", Attribute(-1));
       init();
+#if defined(_WIN32) && !defined(_WIN64)
+      g_log.setLevel(7);
+#endif
 
-      //g_log.setLevel(7);//debug mode
     }
 
 
