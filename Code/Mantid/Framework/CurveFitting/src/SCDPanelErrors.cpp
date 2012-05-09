@@ -1006,8 +1006,8 @@ namespace Mantid
         pick[param - StartPos] = 1;
         V3D parxyz(pick[0], pick[1], pick[2]);
         pick[param - StartPos] = 0;
-      //  if( param== StartPos+1 && gr==0)
-      //    g_log.debug()<<"pick=["<<pick[0]<<","<<pick[1]<<","<<pick[2]<<","<<std::endl;
+        if( gr==0 && ddd)
+          std::cout<<"pick=["<<pick[0]<<","<<pick[1]<<","<<pick[2]<<","<<std::endl;
         Matrix<double> Result(3, qlab.size());
         CheckSizetMax(gr,param,param,"xyzoffset1 Deriv");
         for (size_t peak = 0; peak <  qlab.size(); ++peak)
@@ -1050,8 +1050,8 @@ namespace Mantid
 
           dQlab.setZ(dQlab.Z() + K * dvMag);
 
-         // if( param== StartPos+1 && gr==0&& peak==0&&ddd)
-          //            std::cout<<"ereRot="<<dQlab<<std::endl;
+          if( param== StartPos+1 && gr==0&& peak==0&&ddd)
+                      std::cout<<"ereRot="<<dQlab<<std::endl;
           Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
