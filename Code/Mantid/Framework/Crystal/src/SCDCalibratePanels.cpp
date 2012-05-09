@@ -98,7 +98,7 @@ namespace Crystal
    {
 
        vector< V3D > posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (posv.size() > 0)
+       if (!posv.empty())
        {
         V3D pos = posv[ 0 ];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -118,12 +118,12 @@ namespace Crystal
 
        vector< double > scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
        vector< double > scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( scalex.size() > 0)
+       if( !scalex.empty())
           {
          pmap->addDouble(bank_const.get(),"scalex", scalex[ 0 ]);
 
           }
-       if( scaley.size() > 0)
+       if( !scaley.empty())
        {
          pmap->addDouble(bank_const.get(),"scaley", scaley[ 0 ]);
 
@@ -142,7 +142,7 @@ namespace Crystal
     {
       vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
       //cout<<"Source Name="<< bank_const->getName()<<endl;
-      if (posv.size() > 0)
+      if (!posv.empty())
       {
         V3D pos = posv[ 0 ];
         pmap->addDouble(bank_const.get(), "x", pos.X());
@@ -177,7 +177,7 @@ namespace Crystal
        string name = (*setIt);
        vector< V3D > posParams = component->getPositionParameter(name , false);
 
-       if( posParams.size() > 0)
+       if( !posParams.empty())
        {
          N++;
          pmap->addV3D( component.get(), name, posParams[ 0 ]);
@@ -185,7 +185,7 @@ namespace Crystal
 
        vector<Quat> rotParams = component->getRotationParameter(name , false);
 
-       if( rotParams.size() > 0)
+       if( !rotParams.empty())
        {
          N++;
          pmap->addQuat( component.get(), name, rotParams[ 0 ]);
@@ -193,7 +193,7 @@ namespace Crystal
 
        vector< string > strParams = component->getStringParameter(name,false);
 
-       if( strParams.size() > 0)
+       if( !strParams.empty())
        {
          N++;
          pmap->addString( component.get(), name, strParams[ 0 ]);
@@ -206,7 +206,7 @@ namespace Crystal
      if( pAssm )
      {
 
-       for( int i=0; i< pAssm->nelements(); i++ )
+       for( int i=0; i< pAssm->nelements(); ++i )
        {
          boost::shared_ptr<IComponent> child = pAssm->getChild(i);
          boost::shared_ptr<const IComponent>childComp = boost::const_pointer_cast<const IComponent>(child);
@@ -272,9 +272,9 @@ namespace Crystal
     bounds.clear();
     bounds.push_back(0);
 
-    for (size_t k = 0; k < bankNames.size(); k++)
+    for (size_t k = 0; k < bankNames.size(); ++k)
     {
-      for (size_t j = 0; j < (size_t)pwks->getNumberPeaks(); j++)
+      for (size_t j = 0; j < (size_t)pwks->getNumberPeaks(); ++j)
          {
            API::IPeak& peak = pwks->getPeak((int) j);
 
@@ -354,7 +354,7 @@ namespace Crystal
         boost::split(GroupA, bankingCode, boost::is_any_of(" ]"));
         set< string > usedInts;
 
-        for( size_t Gr = 0;  Gr < GroupA.size(); Gr++ )
+        for( size_t Gr = 0;  Gr < GroupA.size(); ++Gr )
         {
           string S = GroupA[ Gr ];
 
@@ -372,7 +372,7 @@ namespace Crystal
           boost::split( GroupB, S, boost::is_any_of(","));
 
           vector< string > Group0;
-          for( size_t panelRange = 0; panelRange < GroupB.size(); panelRange++ )
+          for( size_t panelRange = 0; panelRange < GroupB.size(); ++panelRange )
           {
             string rangeOfBanks = GroupB[ panelRange ];
 
@@ -393,12 +393,17 @@ namespace Crystal
 
             if( StrtStopStep.size() == 3)
             {
+              //int s = boost::lexical_cast<int>(StrtStopStep[ 2 ].c_str());
              sscanf( StrtStopStep[ 2 ].c_str(), "%d" ,&step );
+           //  if( s != step)
+           //    std::cout<"ERRRRR1"<<std::endl;
               if( step <=0 ) step = 0;
             }
             if( StrtStopStep.size() >= 1)
-            {
+            {//int s = boost::lexical_cast<int>(StrtStopStep[ 0 ].c_str());
               sscanf( StrtStopStep[ 0 ].c_str(), "%d" ,&start );
+          //    if( s != start)
+          //      std::cout<"ERRRRR2"<<std::endl;
 
               if( start <= 0)
               {
@@ -411,7 +416,9 @@ namespace Crystal
 
             if( StrtStopStep.size() >= 2 )
             { sscanf( StrtStopStep[ 1 ].c_str(), "%d" , &stop );
-
+             // int s = boost::lexical_cast<int>(StrtStopStep[ 1 ].c_str());
+           // if( s != stop)
+            //  std::cout<"ERRRRR3"<<std::endl;
               if( stop <=0 ) stop = start;
             }
 
@@ -434,7 +441,7 @@ namespace Crystal
                 }
             }
           }
-          if( Group0.size() > 0 )
+          if( !Group0.empty())
             Groups.push_back( Group0 );
 
         }
@@ -558,12 +565,12 @@ namespace Crystal
     V3D posI,
         posPre;
 
-    if(RelPosI.size()>0)
+    if(!RelPosI.empty())
       posI = RelPosI[ 0 ];
     else
       posI = bank_rect->getRelativePos();
 
-    if(RelPosPre.size()>0)
+    if(!RelPosPre.empty())
       posPre = RelPosPre[ 0 ];
     else
       posPre = newBank->getRelativePos();
@@ -584,16 +591,16 @@ namespace Crystal
     vector< double > ScaleyI = pmap->getDouble( bankName, "scaley");
     vector< double > ScaleyPre = pmapPre->getDouble( bankName, "scaley");
 
-    if( ScalexI.size()>0)
+    if( !ScalexI.empty())
       scalexI = ScalexI[ 0 ];
 
-    if( ScaleyI.size()>0)
+    if( !ScaleyI.empty())
       scaleyI = ScaleyI[ 0 ];
 
-    if(ScalexPre.size()>0)
+    if(!ScalexPre.empty())
       scalexPre = ScalexPre[ 0 ];
 
-    if( ScaleyPre.size()>0)
+    if( !ScaleyPre.empty())
       scaleyPre = ScaleyPre[ 0 ];
 
     //scaling
@@ -643,7 +650,7 @@ namespace Crystal
 
 //----------------- Set Up Bank Name Vectors -------------------------
     set< string > AllBankNames;
-    for( int i = 0; i < peaksWs->getNumberPeaks(); i++)
+    for( int i = 0; i < peaksWs->getNumberPeaks(); ++i)
       AllBankNames.insert( peaksWs->getPeak(i).getBankName());
 
     vector<vector< string > >Groups;
@@ -712,11 +719,11 @@ namespace Crystal
    ostringstream oss (ostringstream::out);
         oss.precision(4);
         string BankNameString = "";
-           for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); itv++)
+           for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
            {
              if( itv != Groups.begin())
                BankNameString +="!";
-             for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++)
+             for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1)
              {
                if( it1 !=(*itv).begin())
                  BankNameString +="/";
@@ -735,7 +742,7 @@ namespace Crystal
 
 
     oss1.precision( 4);
-   for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); itv++)
+   for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
    {
      i++;
 
@@ -913,7 +920,7 @@ namespace Crystal
 
    fit_alg->setProperty( "Function",FunctionArgument);
    fit_alg->setProperty( "MaxIterations",Niterations );
-   if( TiesArgument.size() > 0)
+   if( !TiesArgument.empty())
        fit_alg->setProperty( "Ties",TiesArgument);
 
    fit_alg->setProperty( "Constraints", Constraints);
@@ -950,7 +957,7 @@ namespace Crystal
     std::vector< double >errs ;
     std::vector< string >names;
 
-    for( int prm = 0; prm < (int)RRes->rowCount(); prm++ )
+    for( int prm = 0; prm < (int)RRes->rowCount(); ++prm )
     {
       names.push_back( RRes->getRef< string >( "Name", prm ) );
       params.push_back( RRes->getRef< double >( "Value", prm ));
@@ -976,7 +983,7 @@ namespace Crystal
 
     map<string,double> result;
 
-    for( size_t i = 0; i < min< size_t >( params.size(), names.size() ); i++ )
+    for( size_t i = 0; i < min< size_t >( params.size(), names.size() ); ++i )
       {
       result[ names[ i ] ] = params[ i ];
 
@@ -990,7 +997,7 @@ namespace Crystal
 
     Result->addColumn( "str","Field");
 
-    for( int g = 0; g < NGroups; g++ )
+    for( int g = 0; g < NGroups; ++g )
     {
 
       std::string GroupName = std::string("Group") + boost::lexical_cast<std::string>(g);
@@ -999,7 +1006,7 @@ namespace Crystal
 
     double sqrtChiSqoverDof = sqrt( chisq);
 
-   for( int p = 0; p < (int)names.size(); p++ )
+   for( int p = 0; p < (int)names.size(); ++p )
     {
       string fieldName = names[ p ];
      size_t dotPos = fieldName.find( '_');
@@ -1107,12 +1114,12 @@ namespace Crystal
        vector< double >oldScaley = pmap->getDouble( bank->getName(),string( "scaley" ));
 
        double scalex,scaley;
-       if( oldScalex.size() > 0 )
+       if( !oldScalex.empty() )
          scalex = oldScalex[ 0 ] + result[ prefix+"detWidthScale" ];
        else
          scalex = result[ prefix + "detWidthScale" ];
 
-       if( oldScaley.size() > 0 )
+       if( !oldScaley.empty() )
          scaley = oldScaley[ 0 ] + result[ prefix + "detHeightScale" ];
        else
          scaley = result[ prefix + "detHeightScale" ];
@@ -1161,7 +1168,7 @@ namespace Crystal
     //-----------------------or xml(for LoadParameterFile) files-----------
     string DetCalFileName = getProperty( "DetCalFilename");
     string XmlFileName = getProperty( "XmlFilename");
-    if( DetCalFileName.size() > 0 )
+    if( !DetCalFileName.empty() )
     {
 
      boost::shared_ptr<Algorithm>SaveDetCal = createSubAlgorithm( "SaveIsawDetCal");
@@ -1179,7 +1186,7 @@ namespace Crystal
      g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< std::endl;
     }
 
-    if( XmlFileName.size() > 0)
+    if( !XmlFileName.empty())
     {
       filebuf fb;
 
@@ -1227,7 +1234,7 @@ namespace Crystal
 
     int TableRow = 0;
       double chiSq = 0;
-      for (int g = 0; g < NGroups; g++)
+      for (int g = 0; g < NGroups; ++g)
       {
 
         //Now add parameter values
@@ -1235,7 +1242,7 @@ namespace Crystal
         prefixStrm << "f" << g << "_";
         string prefix = prefixStrm.str();
 
-        for (int nm = 0; nm < (int) names.size(); nm++)
+        for (int nm = 0; nm < (int) names.size(); ++nm)
         {
           if (names[nm].compare(0, prefix.length(), prefix) == 0)
           {

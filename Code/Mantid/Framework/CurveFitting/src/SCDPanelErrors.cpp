@@ -40,7 +40,11 @@ namespace Mantid
     static const double Q2UBq = 1 / UBq2Q;
 
 
-
+    void CheckSizetMax( size_t v1, size_t v2, size_t v3,std::string ErrMess)
+    {
+      if( v1 > 32000 ||v2 > 32000 ||v3 > 32000 )
+        throw std::invalid_argument("Size_t val very large "+ErrMess);
+    }
 
 
     SCDPanelErrors::SCDPanelErrors() :
@@ -48,10 +52,10 @@ namespace Mantid
     {
       NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-          = startX_set = NGroups_set = false;
-
-      //g_log.setLevel(7);
-
+          = startX_set = NGroups_set = false;//_WIN32
+#if defined(_WIN32) && !defined(_WIN64)
+      g_log.setLevel(7);
+#endif
       tolerance = .6;
       startX = endX = -1;
 
@@ -227,13 +231,19 @@ namespace Mantid
         throw std::invalid_argument("startX and endX attributes are out of range");
       }
 
-      size_t StartX = max<size_t> (startX, (size_t)0);
+      size_t StartX ;
+
+      if( startX < 0)
+        StartX = (size_t)0;
+      else
+        StartX= (size_t)startX;
+
       size_t EndX = endX;
 
       if (endX < 0)
         EndX =  nData - 1;
 
-      if (xValues[StartX] != floor(xValues[StartX]))
+      if (xValues[StartX] != floor(xValues[StartX]) )
       {
         g_log.error("Improper workspace set xVals must be integer");
         throw invalid_argument("Improper workspace. xVals must be integer");
@@ -360,7 +370,7 @@ namespace Mantid
 
       boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
-      for( size_t group=0; group < (size_t)GroupBanks.size(); group++)
+      for( size_t group=0; group < (size_t)GroupBanks.size(); ++group)
       {
         string prefix="f"+boost::lexical_cast<std::string>(group)+"_";
 
@@ -370,7 +380,7 @@ namespace Mantid
       //Set new settings in the instrument
         vector<string>::iterator it;
 
-      for (it = bankNames.begin(); it != bankNames.end(); it++)
+      for (it = bankNames.begin(); it != bankNames.end(); ++it)
       {
         string bankNm = *it;
 
@@ -530,6 +540,8 @@ namespace Mantid
       {
         StartX = (size_t) startX;
         EndX =(size_t) endX;
+        if( EndX >=nData  || EndX < StartX )
+           EndX = nData -1;
       }
 
 
@@ -540,11 +552,11 @@ namespace Mantid
 
       if( r != 0 )
       {
-         for( size_t i=0;i < nData; i++ )
+         for( size_t i=0;i < nData; ++i )
              out[i]=100 + r;
 
          g_log.debug() << "Parametersxx  for " << BankNames << ">=";
-          for( size_t i=0; i < nParams(); i++)
+          for( size_t i=0; i < nParams(); ++i)
               g_log.debug() << getParameter(i) << ",";
 
           g_log.debug() << endl;
@@ -566,7 +578,7 @@ namespace Mantid
 
       vector<Kernel::V3D> hkl_vectors;
       vector<Kernel::V3D> q_vectors;
-
+      CheckSizetMax(StartX,EndX,EndX,"f(x) main loop");
       for (size_t i = StartX; i <= EndX; i += 3)
       {
         double xIndx = (xValues[i]);
@@ -596,7 +608,7 @@ namespace Mantid
         { hkl.X(), hkl.Y(), hkl.Z() };
 
         bool ok = true;
-        for (size_t k = 0; k < 3 && ok; k++) //eliminate tolerance cause only those peaks that are
+        for (size_t k = 0; k < 3 && ok; ++k) //eliminate tolerance cause only those peaks that are
         // OK should be here
         {
           double off = hkl1[k] - floor(hkl1[k]);
@@ -654,8 +666,8 @@ namespace Mantid
       }
 
       if( badParams)
-      {
-        for(size_t i = StartX; i <= EndX; i++)
+      { CheckSizetMax(StartX,EndX,nData,"deriv xyz final");
+        for(size_t i = StartX; i <= EndX; ++i)
            out[i]= 10000;
         g_log.debug()<<"Could Not find a UB matix"<<std::endl;
         return;
@@ -666,7 +678,7 @@ namespace Mantid
 
       double chiSq = 0;// for debug log message
 
-      for (size_t i = 0; i < q_vectors.size(); i++)
+      for (size_t i = 0; i < q_vectors.size(); ++i)
       {
         Kernel::V3D err = q_vectors[i] - UB0 * hkl_vectors[i] * UBq2Q;
 
@@ -674,24 +686,24 @@ namespace Mantid
         out[3 * i + 1+StartX] = err[1];
         out[3 * i + 2+StartX] = err[2];
         chiSq += err[0]*err[0] + err[1]*err[1] + err[2]*err[2] ;
-        if( i < 4)
-          g_log.debug()<<"hkl,q="<<hkl_vectors[i]<<q_vectors[i]<<endl;
-
+       // if( i < 4)
+       //   g_log.debug()<<"hkl,q="<<hkl_vectors[i]<<q_vectors[i]<<endl;
+        CheckSizetMax(i,i,i,"f(x) loop 2");
       }
 
-      for (size_t i = 3 * q_vectors.size(); i < nData; i++)
+      for (size_t i = 3 * q_vectors.size(); i < nData; ++i)
         out[i] = 0;
 
       g_log.debug() << "Parameters" << std::endl;
 
-      for (size_t i = 0; i < this->nParams(); i++)
+      for (size_t i = 0; i < this->nParams(); ++i)
         g_log.debug() << setw(20) << parameterName(i) << setw(20) << getParameter(i) << std::endl;
 
       g_log.debug() << "      chi Squared=" <<std::setprecision(12)<< chiSq << std::endl;
 
       //Get values for test program. TODO eliminate
       g_log.debug() << "  out[evenxx]=";
-     for (size_t i = 0; i < min<size_t> (nData, 30); i++)
+     for (size_t i = 0; i < min<size_t> (nData, 30); ++i)
        g_log.debug() << out[i] << "  ";
 
    //   g_log.debug() << std::endl;
@@ -730,7 +742,7 @@ namespace Mantid
       } catch (...)
       {
 
-        for (size_t i = 0; i < nParams(); i++)
+        for (size_t i = 0; i < nParams(); ++i)
           g_log.debug() << getParameter(i) << ",";
 
         g_log.debug() << endl;
@@ -790,13 +802,13 @@ namespace Mantid
     }
 
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
-    { g_log.debug()<<"Start of function Deriv "<<std::endl;
+    {
      size_t StartPos=2;
      size_t StartRot = 5;
 
       size_t L0param = parameterIndex("l0");
       size_t T0param = parameterIndex("t0");;
-
+      CheckSizetMax(StartPos, L0param,T0param,"Start deriv");
       if (nData <= 0)
         return;
       if (NLatticeParametersSet < (int) nAttributes())
@@ -808,7 +820,7 @@ namespace Mantid
 
       size_t StartX ;
       size_t EndX ;
-      if (startX < 0 || endX < 0)
+      if (startX < 0 || endX < 0 || endX < startX)
       {
         StartX = 0;
         EndX =  nData - 1;
@@ -816,20 +828,22 @@ namespace Mantid
       {
         StartX =(size_t)startX;
         EndX = (size_t) endX;
+        if( EndX >= nData || EndX < StartX)
+          EndX = nData -1;
       }
 
       double rr =checkForNonsenseParameters();
 
       if( rr > 0 )
       {
-        for( size_t i = 0; i< nParams(); i++ )
-          for(size_t k = 0; k<nData;  k++ )
+        for( size_t i = 0; i< nParams(); ++i )
+          for(size_t k = 0; k<nData;  ++k )
             out->set( k, i, 10 + rr );
-        g_log.debug()<<"Nonsense end of function Deriv "<<std::endl;
+
         return;
       }
 
-
+      CheckSizetMax(StartX,EndX,EndX,"Deriv calc StartX,EndX");
       peaks = getPeaks();
       Check(peaks, xValues, nData);
 
@@ -918,8 +932,8 @@ namespace Mantid
       }
 
       Matrix<double> Mhkl(hkl.size(), 3), InvhklThkl(3, 3);
-      for (size_t rw = 0; rw <  hkl.size(); rw++)
-        for (size_t cl = 0; cl < 3; cl++)
+      for (size_t rw = 0; rw <  hkl.size(); ++rw)
+        for (size_t cl = 0; cl < 3; ++cl)
           Mhkl[rw][cl] = hkl[rw][cl];
 
       Matrix<double> MhklT(Mhkl);
@@ -934,7 +948,13 @@ namespace Mantid
       try
       {
         Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
-
+        g_log.debug()<<"UB=\n";
+        for( int ii=0; ii <3; ++ii)
+        {
+          for( int jj=0; jj<3; ++jj)
+            g_log.debug()<<UB[ii][jj]<<",";
+          g_log.debug()<<std::endl;
+        }
       } catch (std::exception & s)
       {
 
@@ -955,13 +975,13 @@ namespace Mantid
       map<string, size_t> bankName2Group;
       vector<string> Groups;
       boost::split( Groups, BankNames, boost::is_any_of("!"));
-      for( size_t gr=0; gr< Groups.size(); gr++)
+      for( size_t gr=0; gr< Groups.size(); ++gr)
       {
 
 
         vector<string> banknames;
         boost::split(banknames, Groups[gr],boost::is_any_of("/"));
-        for( vector<string>::iterator it=banknames.begin(); it != banknames.end(); it++)
+        for( vector<string>::iterator it=banknames.begin(); it != banknames.end(); ++it)
           bankName2Group[(*it)]=gr;
       }
 
@@ -970,13 +990,16 @@ namespace Mantid
       int pick[3];
       pick[0] = pick[1] = pick[2] = 0;
       Matrix<double> Result(3, qlab.size());
-    for( size_t gr=0; gr< (size_t)NGroups; gr++)
-    {  Unrot_dQ[0].clear(); Unrot_dQ[1].clear(); Unrot_dQ[2].clear();
+      for( size_t gr=0; gr< (size_t)NGroups; ++gr)
+      {
+        Unrot_dQ[0].clear();
+        Unrot_dQ[1].clear();
+        Unrot_dQ[2].clear();
 
       //-------- xyz offset parameters ----------------------
-      StartPos = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
+       StartPos = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
     //  int startPeak = -1;
-       for (size_t param = StartPos; param <=StartPos+(size_t)2; param++)
+       for (size_t param = StartPos; param <=StartPos+(size_t)2; ++param)
 
       {
         pick[param - StartPos] = 1;
@@ -984,8 +1007,8 @@ namespace Mantid
         pick[param - StartPos] = 0;
 
         Matrix<double> Result(3, qlab.size());
-
-        for (size_t peak = 0; peak <  qlab.size(); peak++)
+        CheckSizetMax(gr,param,param,"xyzoffset1 Deriv");
+        for (size_t peak = 0; peak <  qlab.size(); ++peak)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
         {   Unrot_dQ[param - StartPos].push_back(V3D(0.0,0.0,0.0));//Save for later calculations
 
@@ -1035,6 +1058,8 @@ namespace Mantid
           Result[0][peak] = dQsamp.X();
           Result[1][peak] = dQsamp.Y();
           Result[2][peak] = dQsamp.Z();
+          if( gr==0 && peak <2)
+          g_log.debug()<<"Deriv to xyzoffsets wrt "<<param <<dQsamp<<std::endl;
         }
 
 
@@ -1045,9 +1070,10 @@ namespace Mantid
       //    out->set(w, param, 0.0);
 
         size_t x = StartX;
-        for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
-          for (size_t roww = 0; roww < 3; roww++)
+        for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
+          for (size_t roww = 0; roww < 3; ++roww)
           {
+            CheckSizetMax(coll,roww,x,"deriv xyz final");
             out->set(x, param, Deriv[roww][coll]);
             x++;
           }
@@ -1057,40 +1083,35 @@ namespace Mantid
       //-------------------- Derivatives with respect to rotx,roty, and rotz ---------
       StartRot = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xrot");
 
-      for (size_t param = StartRot; param <= StartRot+2; param++)
+      for (size_t param = StartRot; param <= StartRot+2; ++param)
       {
         Matrix<double> Result(3, qlab.size());
         Matrix<double> Rot2dRot(3, 3); //deriv of rot matrix at angle=0
         Rot2dRot.zeroMatrix();
-        size_t r1 = param - StartRot;
-        size_t r = (r1 + 1) % 3;
+        int r1 = (int)param - (int)StartRot;
+        int r = (r1 + 1) % 3;
 
-        Rot2dRot[r][(r + 1) % 3] = -1;//??? what I wanted not standard formula
+        Rot2dRot[r][(r + 1) % 3] = -1;
         r = (r + 1) % 3;
-        Rot2dRot[r][(r + 2) % 3] = +1;//??? what I wanted not standard formula
+        Rot2dRot[r][(r + 2) % 3] = +1;
         Rot2dRot *= M_PI / 180.;
-        //int zeroRow = -1;
-       // int nonzeroRow = -1;
-        for (size_t peak = 0; peak <  qlab.size(); peak++)
+
+        for (size_t peak = 0; peak <  qlab.size(); ++peak)
            if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
             {
               Result[0][peak] = 0;
               Result[1][peak] = 0;
               Result[2][peak] = 0;
-            //  if( zeroRow < 0)
-             //   zeroRow = peak;
 
             }else{
-
-          //  if( nonzeroRow < 0)
-          //  nonzeroRow = peak;
+              CheckSizetMax(gr,param,param,"Deriv rot A");
           int Nwrt = 3;
           int NderOf = 3;
           Matrix<double> Bas(NderOf, Nwrt); //partial Qxyz wrt xyx
           Bas.zeroMatrix();
 
-          for (int rr = 0; rr < NderOf; rr++)
-            for (int cc = 0; cc < Nwrt; cc++)
+          for (int rr = 0; rr < NderOf; ++rr)
+            for (int cc = 0; cc < Nwrt; ++cc)
             {
               Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
 
@@ -1109,7 +1130,7 @@ namespace Mantid
 
           V3D RotDeriv = GonMatrix * unRotDeriv;
 
-          for (int kk = 0; kk < 3; kk++)
+          for (int kk = 0; kk < 3; ++kk)
             Result[kk][peak] = RotDeriv[kk];
         }
 
@@ -1119,10 +1140,10 @@ namespace Mantid
        //   out->set(w, param, 0.0);
 
 
-        size_t x = (size_t)StartX;
-        for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
-          for (int roww = 0; roww < 3; roww++)
-          {
+        size_t x = StartX;
+        for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
+          for (int roww = 0; roww < 3; ++roww)
+          { CheckSizetMax(coll,roww,x,"deriv rot final");
             out->set(x, param, Deriv[roww][coll]);
             x++;
           }
@@ -1132,21 +1153,22 @@ namespace Mantid
 
 
 
-      for (size_t peak = 0; peak <  qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); ++peak)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
-                           {
-                           Result[0][peak] = 0;
-                           Result[1][peak] = 0;
-                           Result[2][peak] = 0;
+        {
+          Result[0][peak] = 0;
+          Result[1][peak] = 0;
+          Result[2][peak] = 0;
 
-                           }
-                   else{
+        }
+        else{
+          CheckSizetMax(gr,peak,peak,"deriv detw A");
         int Nwrt = 3;
         int NderOf = 3;
         Matrix<double> Bas(NderOf, Nwrt);
         Bas.zeroMatrix();
-        for (int rr = 0; rr < NderOf; rr++)
-          for (int cc = 0; cc < Nwrt; cc++)
+        for (int rr = 0; rr < NderOf; ++rr)
+          for (int cc = 0; cc < Nwrt; ++cc)
             Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
 
         V3D Xvec = xvec[peak] * (col[peak] - NPanelcols[peak] / 2);//partial xyz wrt widthScale
@@ -1157,7 +1179,7 @@ namespace Mantid
 
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
-        for (int kk = 0; kk < 3; kk++)
+        for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
 
       }
@@ -1167,9 +1189,9 @@ namespace Mantid
      //   out->set(w, param, 0.0);
 
       size_t x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
-        for (int roww = 0; roww < 3; roww++)
-        {
+      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
+        for (int roww = 0; roww < 3; ++roww)
+        { CheckSizetMax(coll,roww,x,"deriv scalew final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
@@ -1178,22 +1200,23 @@ namespace Mantid
 
      // param = StartLen+1;//scale Height
       Result.zeroMatrix();
-      for (size_t peak = 0; peak <  qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); ++peak)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
-                                        {
-                                        Result[0][peak] = 0;
-                                        Result[1][peak] = 0;
-                                        Result[2][peak] = 0;
+        {
+          Result[0][peak] = 0;
+          Result[1][peak] = 0;
+          Result[2][peak] = 0;
 
-                                        }
-                  else{
+         }
+        else{
+         CheckSizetMax(gr,peak,peak,"deriv detH A");
         int Nwrt = 3;
         int NderOf = 3;
         Matrix<double> Bas(NderOf, Nwrt);
         Bas.zeroMatrix();
 
-        for (int rr = 0; rr < NderOf; rr++)
-          for (int cc = 0; cc < Nwrt; cc++)
+        for (int rr = 0; rr < NderOf; ++rr)
+          for (int cc = 0; cc < Nwrt; ++cc)
             Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
 
         V3D Yvec = yvec[peak] * (row[peak] - NPanelrows[peak] / 2);//partial xyz wrt heightScale
@@ -1205,19 +1228,19 @@ namespace Mantid
 
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
-        for (int kk = 0; kk < 3; kk++)
+        for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
 
       }
 
       Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-      for (size_t w = 0; w < nData; w++)
+      for (size_t w = 0; w < nData; ++w)
         out->set(w, param, 0.0);
 
       x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
-        for (int roww = 0; roww < 3; roww++)
-        {
+      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
+        for (int roww = 0; roww < 3; ++roww)
+        { CheckSizetMax(coll,roww,x,"deriv scaleH final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
@@ -1246,7 +1269,7 @@ namespace Mantid
       size_t param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
 
       Result.zeroMatrix();
-      for (size_t peak = 0; peak <  qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); ++peak)
       {
 
         double L1 = pos[peak].norm();
@@ -1259,7 +1282,7 @@ namespace Mantid
         GonMatrix.Invert();
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
-        for (int kk = 0; kk < 3; kk++)
+        for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
 
       }
@@ -1269,16 +1292,16 @@ namespace Mantid
       //   out->set(w, param, 0.0);
 
       size_t x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
-        for (int roww = 0; roww < 3; roww++)
-        {
+      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
+        for (int roww = 0; roww < 3; ++roww)
+        { CheckSizetMax(coll,roww,x,"deriv L0 final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
 
       param = T0param;//t0 partial unRotQxyz wrt t0 = -unRotQxyz/tof
       Result.zeroMatrix();
-      for (size_t peak = 0; peak <  qlab.size(); peak++)
+      for (size_t peak = 0; peak <  qlab.size(); ++peak)
       {
         double KK = -1 / time[peak];
         V3D unRotDeriv = qlab[peak] * KK;
@@ -1287,7 +1310,7 @@ namespace Mantid
         GonMatrix.Invert();
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
-        for (int kk = 0; kk < 3; kk++)
+        for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
 
       }
@@ -1296,13 +1319,13 @@ namespace Mantid
       // for (size_t w = 0; w < nData; w++)
       //   out->set(w, param, 0.0);
       x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); coll++)
-        for (int roww = 0; roww < 3; roww++)
-        {
+      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
+        for (int roww = 0; roww < 3; ++roww)
+        { CheckSizetMax(coll,roww,x,"deriv t0 final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
-      g_log.debug()<<"End of function Deriv "<<std::endl;
+
    /*      int TestParam = L0param;
          std::vector<double>out1(nData);
            std::vector<double>out2(nData);
@@ -1338,8 +1361,8 @@ namespace Mantid
       Mantid::MantidVecPtr yvals;
       Mantid::MantidVec &yvalB = yvals.access();
 
-      for (size_t k = 0; k < bankNames.size(); k++)
-        for (size_t j = 0; j < pwks->rowCount(); j++)
+      for (size_t k = 0; k < bankNames.size(); ++k)
+        for (size_t j = 0; j < pwks->rowCount(); ++j)
         {
           API::IPeak& peak = pwks->getPeak( (int)j);
           if (peak.getBankName().compare(bankNames[k]) == 0)
@@ -1440,7 +1463,7 @@ namespace Mantid
               throw new std::invalid_argument("Cannot set NGroups more than once");
             }
             NGroups = value.asInt();
-            for (int k = 1; k < NGroups; k++)
+            for (int k = 1; k < NGroups; ++k)
             {
               std::string prefix = "f"+boost::lexical_cast< std::string >(k) + "_";
               declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
