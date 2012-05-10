@@ -598,7 +598,7 @@ namespace Mantid
         for (std::set<detid_t>::const_iterator it = detList.begin(); it != detList.end(); ++it)
         {
           int index = *it + offset;
-          if (index >= outSize)
+          if (index < 0 || index >= outSize)
           {
             //throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" + Mantid::Kernel::Strings::toString(*it) + ") is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
             g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" << *it << " at workspace index " << workspaceIndex << ") is invalid." << std::endl;
