@@ -9,7 +9,8 @@ It will create a workspace for each scattering intensity and one workspace for t
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "H5Cpp.h"
+#include <hdf5.h>
+#include <hdf5_hl.h>
 
 namespace Mantid
 {
@@ -56,15 +57,8 @@ bool LoadSassena::quickFileCheck(const std::string& filePath,size_t nread, const
 int LoadSassena::fileCheck(const std::string &filePath)
 {
   int confidence(0);
-  H5::H5File file( filePath, H5::H5F_ACC_RDONLY );
-
-  /*
-   * const H5std_string FILE_NAME( "SDS.h5" );
-     const H5std_string DATASET_NAME( "IntArray" );
-     H5File file( FILE_NAME, H5F_ACC_RDONLY );
-     DataSet dataset = file.openDataSet( DATASET_NAME );
-
-   */
+  hid_t h5file = H5Fopen(filePath.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
+  if (H5LTfind_attribute(h5file,"sassena_version")==1) confidence = 99;
   return confidence;
 }
 
@@ -89,12 +83,38 @@ void LoadSassena::init()
  */
 void LoadSassena::exec()
 {
-
-  this->GWS = API::WorkspaceFactory::Instance().create("WorkspaceGroup");
+  //this->GWS = API::WorkspaceFactory::Instance().create("WorkspaceGroup");
   // WorkspaceGroup_sptr wsgroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputs_orig[i]);
   // API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
   // MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D",numSpectra,energies.size(),numBins));
+
+  //populate m_validSets
+  int nvalidSets = 5;
+  const char* validSets[] = { "fq", "fq0", "fq2", "fqt", "qvectors" };
+  this->m_validSets(validSets, validSets+nvalidSets);
+
   this->m_filename = this->getPropertyValue("Filename");
+  hid_t h5file = H5Fopen(this->m_filename.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
+
+  //find out the sassena version used
+  char *cversion = new char[16];
+  H5LTget_attribute_string( h5file, "/", "sassena_version", cversion );
+  const std::string version(cversion);
+  int iversion=boost::lexical_cast<int>(cversion);
+
+  //determine which loader protocol to use based on the version
+  //to be done at a later time, maybe implement a Version class
+
+  //iterate over the valid sets
+  for(std::vector<const char*>::const_iterator it=this->m_validSets.begin(); it!=this->m_validSets.end(); ++it){
+    if (H5LTfind_dataset(h5file,*it)==1) {
+    /*an implementation of the abstract base loadSet class
+     *
+     */
+
+    }
+  }
+
 }
 
 

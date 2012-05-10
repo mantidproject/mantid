@@ -42,6 +42,14 @@ namespace Mantid
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
+  /* Base class to Load a sassena dataset into a MatrixWorkspace
+   * Derived implementations will load different scattering functions
+
+  class LoadDataSet
+  {
+
+  };
+
   class DLLExport LoadSassena : public API::IDataFileChecker
   {
   public:
@@ -81,6 +89,8 @@ namespace Mantid
     /// Execution code
     void exec();             // Overwrites Algorithm method
 
+    ///valid datasets
+    std::vector<const char*> m_validSets;
     /// name and path of input file
     std::string m_filename;
     /// Group workspace being filled
