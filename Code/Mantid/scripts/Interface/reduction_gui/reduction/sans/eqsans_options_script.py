@@ -97,6 +97,19 @@ class ReductionOptions(BaseOptions):
             
         return script
 
+    def _normalization_options(self):
+        """
+            Generate the normalization portion of the reduction script
+        """
+        if self.normalization==ReductionOptions.NORMALIZATION_NONE:
+            return "NoNormalization()\n"
+        elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
+            if self.use_beam_monitor:
+                return "BeamMonitorNormalization()\n"
+            else:
+                return "TotalChargeNormalization()\n"
+        return ""        
+        
     def to_script(self):
         """
             Generate reduction script
@@ -112,9 +125,6 @@ class ReductionOptions(BaseOptions):
             if self.low_TOF_cut>0 or self.high_TOF_cut>0:
                 script += "SetTOFTailsCutoff(%g, %g)\n" % (self.low_TOF_cut, self.high_TOF_cut)
                 
-        # Flight path correction
-        script += "PerformFlightPathCorrection(%s)\n" % self.correct_for_flight_path
-        
         # Use mask defined in configuration file
         script += "UseConfigMask(%s)\n" % self.use_config_mask
         
@@ -124,9 +134,9 @@ class ReductionOptions(BaseOptions):
 
         if not self.perform_TOF_correction:
             script += "ReductionSingleton().get_data_loader().skip_tof_correction(True)\n"
-            
-        if self.use_beam_monitor:
-            script += "BeamMonitorNormalization()\n"
+        else:
+            # Flight path correction
+            script += "PerformFlightPathCorrection(%s)\n" % self.correct_for_flight_path
             
         return script
             

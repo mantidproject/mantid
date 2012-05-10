@@ -101,12 +101,7 @@ class ReductionOptions(BaseScriptElement):
                 raise RuntimeError, "Dark current subtraction was selected but no sensitivity data file was entered." 
             script += "DarkCurrent(\"%s\")\n" % self.dark_current_data
             
-        if self.normalization==ReductionOptions.NORMALIZATION_NONE:
-            script += "NoNormalization()\n"
-        elif self.normalization==ReductionOptions.NORMALIZATION_TIME:
-            script += "TimeNormalization()\n"
-        elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
-            script += "MonitorNormalization()\n"
+        script += self._normalization_options()
         
         if self.calculate_scale:
             scaling_params = ""
@@ -139,6 +134,18 @@ class ReductionOptions(BaseScriptElement):
         
         return script           
     
+    def _normalization_options(self):
+        """
+            Generate the normalization portion of the reduction script
+        """
+        if self.normalization==ReductionOptions.NORMALIZATION_NONE:
+            return "NoNormalization()\n"
+        elif self.normalization==ReductionOptions.NORMALIZATION_TIME:
+            return "TimeNormalization()\n"
+        elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
+            return "MonitorNormalization()\n"
+        return ""        
+        
     def to_xml(self):
         """
             Create XML from the current data.
