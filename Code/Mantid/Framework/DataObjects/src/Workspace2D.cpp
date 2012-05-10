@@ -124,7 +124,7 @@ namespace Mantid
 
 
     //---------------------------------------------------------------------------
-    /** Rebin a particulare spectrum to a new histogram bin boundaries.
+    /** Rebin a particular spectrum to a new histogram bin boundaries.
      *
      * @param index :: workspace index to generate
      * @param X :: input X vector of the bin boundaries.

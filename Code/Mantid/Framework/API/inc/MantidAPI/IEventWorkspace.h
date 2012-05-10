@@ -45,6 +45,10 @@ namespace API
     virtual double getTofMax() const = 0;
     virtual EventType getEventType() const = 0;
     virtual IEventList * getEventListPtr(const std::size_t workspace_index) = 0;
+    virtual void generateHistogram(const std::size_t index, 
+                                   const MantidVec& X, MantidVec& Y, MantidVec& E, 
+                                   bool skipError = false) const = 0;
+
     virtual void clearMRU() const = 0;
   };
 

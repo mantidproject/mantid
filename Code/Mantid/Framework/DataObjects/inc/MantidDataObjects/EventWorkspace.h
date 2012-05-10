@@ -125,6 +125,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> refX(const std::size_t) const;
 
+  /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
   //------------------------------------------------------------
