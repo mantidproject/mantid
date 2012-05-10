@@ -15,7 +15,7 @@ def run_algorithm(name, **kwargs):
     alg.initialize()
     # Avoid problem that Load needs to set Filename first if it exists
     if name == 'Load' and 'Filename' in kwargs:
-        alg.setProperty('Filename', kwargs['Filename'])
+        alg.setPropertyValue('Filename', kwargs['Filename'])
         del kwargs['Filename']
     if 'child'in kwargs:
         alg.setChild(True)

@@ -103,6 +103,7 @@ set ( TEST_PY_FILES
   test/python/MatrixWorkspaceTest.py
   test/python/MandatoryValidatorTest.py
   test/python/MDHistoWorkspaceTest.py
+  test/python/MultipleFilePropertyTest.py
   test/python/NullValidatorTest.py
   test/python/OrientedLatticeTest.py
   test/python/PythonPluginsTest.py
