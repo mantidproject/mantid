@@ -91,7 +91,7 @@ void LoadSassena::exec()
   //populate m_validSets
   int nvalidSets = 5;
   const char* validSets[] = { "fq", "fq0", "fq2", "fqt", "qvectors" };
-  this->m_validSets(validSets, validSets+nvalidSets);
+  for(int iSet=0; iSet<nvalidSets; iSet++) this->m_validSets.push_back( validSets[iSet] );
 
   this->m_filename = this->getPropertyValue("Filename");
   hid_t h5file = H5Fopen(this->m_filename.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
@@ -100,7 +100,6 @@ void LoadSassena::exec()
   char *cversion = new char[16];
   H5LTget_attribute_string( h5file, "/", "sassena_version", cversion );
   const std::string version(cversion);
-  int iversion=boost::lexical_cast<int>(cversion);
 
   //determine which loader protocol to use based on the version
   //to be done at a later time, maybe implement a Version class

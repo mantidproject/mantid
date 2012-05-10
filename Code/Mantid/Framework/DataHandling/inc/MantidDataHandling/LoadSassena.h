@@ -44,19 +44,20 @@ namespace Mantid
 
   /* Base class to Load a sassena dataset into a MatrixWorkspace
    * Derived implementations will load different scattering functions
-  */
+
   class LoadDataSet
   {
 
   };
+  */
 
   class DLLExport LoadSassena : public API::IDataFileChecker
   {
   public:
     /// Constructor
-    LoadSassena(): IDataFileChecker(), m_filename(""), GWS(NULL) {};
+    LoadSassena(): IDataFileChecker(), m_filename("") {};
     /// Virtual Destructor
-    virtual ~LoadSassena();
+    virtual ~LoadSassena() {}
     /// Algorithm's name
     virtual const std::string name() const { return "LoadSassena"; }
     /// Algorithm's version
@@ -93,8 +94,6 @@ namespace Mantid
     std::vector<const char*> m_validSets;
     /// name and path of input file
     std::string m_filename;
-    /// Group workspace being filled
-    API::WorkspaceGroup_const_sptr GWS;
 
   }; // class LoadSassena
 
