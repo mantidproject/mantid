@@ -21,7 +21,6 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include <sstream>
 
 namespace Mantid
@@ -44,7 +43,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
-using namespace MDEvents;
 
 /**
  * Process two groups and ensure the Result string is set properly on the final algorithm
@@ -311,30 +309,11 @@ void CheckWorkspacesMatch::doComparison()
   }
   if (mdews1 && mdews2)
   {
-    if (!this->checkMDCommon(mdews1, mdews2))
-    {
-      return;
-    }
-    if (mdews1->getNPoints() != mdews2->getNPoints())
-    {
-      result = "Mismatch in number of MD events";
-      return;
-    }
-    if (mdews1->getEventTypeName() != mdews2->getEventTypeName())
-    {
-      result = "Mismatch in event types";
-      return;
-    }
-    /*
-    if (!this->checkMDEvents(mdews1, mdews2))
-    {
-      return;
-    }
-    */
+    this->doMDComparison(w1, w2);
     return;
   }
 
-  // Check things for MDHistoWorkspaces
+  // Check things for IMDHistoWorkspaces
   IMDHistoWorkspace_const_sptr mdhws1, mdhws2;
   mdhws1 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
   mdhws2 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
@@ -348,65 +327,7 @@ void CheckWorkspacesMatch::doComparison()
   }
   if (mdhws1 && mdhws2)
   {
-    if (!this->checkMDCommon(mdhws1, mdhws2))
-    {
-        return;
-    }
-    if (mdhws1->getNPoints() != mdhws2->getNPoints())
-    {
-      result = "Mismatch in number of MD histogram bins";
-      return;
-    }
-
-    // Check the data
-    const double tolerance = getProperty("Tolerance");
-    uint64_t nPoints = mdhws1->getNPoints();
-    bool mismatchedSignal = false;
-    uint64_t mismatchedSignalI = 0;
-    bool mismatchedError = false;
-    uint64_t mismatchedErrorI = 0;
-    for (uint64_t i = 0; i < nPoints; ++i)
-    {
-      if (!mismatchedSignal)
-      {
-        signal_t v1 = mdhws1->getSignalAt(i);
-        signal_t v2 = mdhws2->getSignalAt(i);
-
-        if (std::fabs(v1 - v2) > tolerance)
-        {
-          mismatchedSignal = true;
-          mismatchedSignalI = i;
-        }
-      }
-      if (!mismatchedError)
-      {
-        signal_t v1 = mdhws1->getErrorAt(i);
-        signal_t v2 = mdhws2->getErrorAt(i);
-
-        if (std::fabs(v1 - v2) > tolerance)
-        {
-          mismatchedError = true;
-          mismatchedErrorI = i;
-        }
-      }
-    }
-
-    if (mismatchedSignal)
-    {
-      std::ostringstream mess;
-      mess << "Mismatched signal at index " << mismatchedSignalI;
-      result = mess.str();
-      return;
-    }
-
-    if (mismatchedError)
-    {
-      std::ostringstream mess;
-      mess << "Mismatched error at index " << mismatchedErrorI;
-      result = mess.str();
-      return;
-    }
-
+    this->doMDComparison(w1, w2);
     return;
   }
 
@@ -846,113 +767,22 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   return true;
 }
 
-bool CheckWorkspacesMatch::checkMDCommon(IMDWorkspace_const_sptr ws1,
-                                         IMDWorkspace_const_sptr ws2)
+void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
 {
-  // Check is the number of dimensions match
-  if (ws1->getNumDims() != ws2->getNumDims())
-  {
-    result = "Mismatch in number of reported dimensions";
-    return false;
-  }
-  // Check the dimension information
-  std::size_t ndims = ws1->getNumDims();
-  for (std::size_t i = 0; i < ndims; ++i)
-  {
-    std::ostringstream axis_name_ss;
-    axis_name_ss << "Axis " << i;
-    std::string axis_name = axis_name_ss.str();
+  IMDWorkspace_sptr mdws1, mdws2;
+  mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
+  mdws2 = boost::dynamic_pointer_cast<IMDWorkspace>(w2);
 
-    IMDDimension_const_sptr idim1 = ws1->getDimension(i);
-    IMDDimension_const_sptr idim2 = ws2->getDimension(i);
-    if (idim1->getName() != idim2->getName())
-    {
-      result = axis_name + " name mismatch";
-      return false;
-    }
-    if (idim1->getUnits() != idim2->getUnits())
-    {
-      result = axis_name + " units mismatch";
-      return false;
-    }
-    if (idim1->getMinimum() != idim2->getMinimum())
-    {
-      result = axis_name + " minimum mismatch";
-      return false;
-    }
-    if (idim1->getMaximum() != idim2->getMaximum())
-    {
-      result = axis_name + " maximum mismatch";
-      return false;
-    }
-    if (idim1->getNBins() != idim2->getNBins())
-    {
-      result = axis_name + " number of bins mismatch";
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/*
-template<typename MDE, std::size_t nd>
-bool CheckWorkspacesMatch::checkMDEvents(IMDEventWorkspace_const_sptr ws1, IMDEventWorkspace_const_sptr ws2)
-{
-  typename MDEventWorkspace<MDE, nd>::sptr const ews1 = boost::dynamic_pointer_cast<const MDEventWorkspace<MDE, nd> >(ws1);
-  typename MDEventWorkspace<MDE, nd>::sptr const ews2 = boost::dynamic_pointer_cast<const MDEventWorkspace<MDE, nd> >(ws2);
-
-  MDBoxBase<MDE, nd> *parentBox1 = ews1->getBox();
-  MDBoxBase<MDE, nd> *parentBox2 = ews2->getBox();
-
-  std::vector<MDBoxBase<MDE, nd> *> boxes1;
-  std::vector<MDBoxBase<MDE, nd> *> boxes2;
-
-  parentBox1->getBoxes(boxes1, 1000, true);
-  parentBox2->getBoxes(boxes2, 1000, true);
-
+  IAlgorithm_sptr alg = this->createSubAlgorithm("CompareMDWorkspaces");
+  alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
+  alg->setProperty<IMDWorkspace_sptr>("Workspace2", mdws2);
   const double tolerance = getProperty("Tolerance");
-
-  for (std::size_t i = 0; i < boxes1.size(); ++i)
-  {
-    MDBox<MDE, nd> * box1 = dynamic_cast<MDBox<MDE, nd> *>(boxes1[i]);
-    MDBox<MDE, nd> * box2 = dynamic_cast<MDBox<MDE, nd> *>(boxes2[i]);
-
-    if (box1 && box2)
-    {
-      typename std::vector<MDE> &events1 = box1->getEvents();
-      typename std::vector<MDE> &events2 = box2->getEvents();
-      for(std::size_t j = 0; j < events1.size(); ++j)
-      {
-        if (std::abs(events1[j].getSignal() - events2[j].getSignal()) > tolerance)
-        {
-          std::ostringstream mess;
-          mess << "Event signal mismatch in box " << i << ", event " << j;
-          result = mess.str();
-
-          box1->releaseEvents();
-          box2->releaseEvents();
-          return false;
-        }
-        if (std::abs(events1[j].getErrorSquared() - events2[j].getErrorSquared()) > tolerance)
-        {
-          std::ostringstream mess;
-          mess << "Event squared error mismatch in box " << i << ", event " << j;
-          result = mess.str();
-
-          box1->releaseEvents();
-          box2->releaseEvents();
-          return false;
-        }
-      }
-      box1->releaseEvents();
-      box2->releaseEvents();
-    }
-  }
-
-  return true;
+  alg->setProperty("Tolerance", tolerance);
+  alg->executeAsSubAlg();
+  std::string algResult = alg->getProperty("Result");
+  result = algResult;
 }
-*/
+
 } // namespace Algorithms
 } // namespace Mantid
 
