@@ -30,6 +30,9 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         
         script_split = script_part2.split('\n')
         new_script = ''
+                
+        print 'script is:'
+        print script_split
         
         run_number = []
         attenuator = []
@@ -39,7 +42,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         back_from = []
         back_to = []
         
-        tof_range = ['','']
+        tof_range = [0.0,200000.0]
         incident_medium = ''
         
         for _line in script_split:
@@ -53,17 +56,17 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     continue
                 
                 if _arg == 'TOF from':
-                    if tof_range[0] != '':
-                        tof_range[0] = _val
+                    if tof_range[0] == 0.0:
+                        tof_range[0] = float(_val)
                     continue
                 
                 if _arg == 'TOF to':
-                    if tof_range[1] != '':
-                        tof_range[1] = _val
+                    if tof_range[1] == 200000.0:
+                        tof_range[1] = float(_val)
                     continue
                         
                 if _arg == 'Incident medium':
-                    if incident_medium != '':
+                    if incident_medium.strip() == '':
                         incident_medium = _val
                     continue
                     
@@ -97,10 +100,10 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         for (_peak_from, _peak_to, _back_from, _back_to) in zip(peak_from, peak_to, back_from, back_to):
             list_peak_back.append([int(_peak_from),int(_peak_to),int(_back_from),int(_back_to)])
         
-        new_script = algo + '(string_runs=' + script_run_attenuator
-        new_script += ',list_peak_back=' + list_peak_back
-        new_script += ',incident_medium=' + incident_medium
-        new_script += ',tof_range:' + tof_range + ')'
+        new_script = algo + '(string_runs="' + script_run_attenuator + '"'
+        new_script += ',list_peak_back=' + str(list_peak_back)
+        new_script += ',incident_medium="' + incident_medium.strip() + '"'
+        new_script += ',tof_range=' + str(tof_range) + ')'
     
         return new_script
     
@@ -116,6 +119,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         script += "from MantidFramework import *\n"
         script += "mtd.initialise(False)\n"
         script += "from mantidsimple import *\n\n"
+        script += "import sfCalculator\n"
                 
         script += "REF_RED_OUTPUT_MESSAGE = ''\n\n"
 

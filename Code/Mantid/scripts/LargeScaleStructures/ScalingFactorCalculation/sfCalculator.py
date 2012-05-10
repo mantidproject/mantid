@@ -518,7 +518,7 @@ def outputFittingParameters(a, b, error_a, error_b,
         sz = len(a)
         for i in range(sz):
             
-            _line = 'IncidentMedium=' + incident_medium + ' '
+            _line = 'IncidentMedium=' + incident_medium.strip() + ' '
             _line += 'LambdaRequested=' + str(lambda_requested) + ' '
             
             _S1H = "{0:.8f}".format(abs(S1H[i]))
