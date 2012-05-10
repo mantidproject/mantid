@@ -779,8 +779,12 @@ void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
   const double tolerance = getProperty("Tolerance");
   alg->setProperty("Tolerance", tolerance);
   alg->executeAsSubAlg();
+  bool doesMatch = alg->getProperty("Equals");
   std::string algResult = alg->getProperty("Result");
-  result = algResult;
+  if (!doesMatch)
+  {
+    result = algResult;
+  }
 }
 
 } // namespace Algorithms
