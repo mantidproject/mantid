@@ -204,6 +204,7 @@ public:
     std::vector<int> banks1;
     banks1.push_back(21);
     banks1.push_back(22);
+    banks1.push_back(2200);
     std::vector<int> detids;
     std::string maskfname1("masking01.xml");
     genMaskingFile(maskfname1, detids, banks1);

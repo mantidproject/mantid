@@ -245,7 +245,14 @@ namespace DataHandling
 
       // a) get component
       Geometry::IComponent_const_sptr component = minstrument->getComponentByName(componentnames[i]);
-      g_log.debug() << "Component ID = " << component->getComponentID() << std::endl;
+      if (component)
+        g_log.debug() << "Component ID = " << component->getComponentID() << std::endl;
+      else
+      {
+        // A non-exiting component.  Ignore
+        g_log.warning() << "Component " << componentnames[i] << " does not exist!" << std::endl;
+        continue;
+      }
 
       // b) component -> component assembly --> children (more than detectors)
       boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
