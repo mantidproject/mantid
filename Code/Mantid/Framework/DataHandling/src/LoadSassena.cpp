@@ -75,7 +75,7 @@ void LoadSassena::init()
   // Declare the Filename algorithm property. Mandatory. Sets the path to the file to load.
   this->declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),"A Sassena file");
   // Declare the OutputWorkspace property
-  this->declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
+  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
 }
 
 /**

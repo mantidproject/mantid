@@ -44,7 +44,7 @@ namespace Mantid
 
   /* Base class to Load a sassena dataset into a MatrixWorkspace
    * Derived implementations will load different scattering functions
-
+  */
   class LoadDataSet
   {
 
