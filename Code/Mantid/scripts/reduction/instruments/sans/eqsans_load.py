@@ -70,6 +70,7 @@ class LoadRun(ReductionStep):
         loader._sample_det_dist = self._sample_det_dist
         loader._sample_det_offset = self._sample_det_offset
         loader._skip_tof_correction = self._skip_tof_correction
+        loader._load_monitors = self._load_monitors
         return loader
 
     def load_monitors(self, load_monitors):
