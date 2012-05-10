@@ -6,9 +6,12 @@ using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt;
 using namespace ImageView;
 
-MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_sptr ev_ws )
+/**
+ * Construct an ImageView for the specified matrix workspace
+ */
+MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_sptr mat_ws )
 {
-  MatrixWSDataSource* source = new MatrixWSDataSource( ev_ws );
+  MatrixWSDataSource* source = new MatrixWSDataSource( mat_ws );
 
   image_view = new ImageView( source );  // this is the QMainWindow
                                          // for the viewer.  It is
