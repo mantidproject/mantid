@@ -31,6 +31,7 @@ def diagnose(white_int, **kwargs):
                        simply loaded and integrated. A workspace is assumed to be prepared in it's integrated form
         
         Optional inputs:
+          instrument_name - The name of the instrument (required for hard_masking)
           start_index    - The index to start the diag
           end_index    - The index to finish the diag
           background_int - A workspace, run number or filepath of a sample run that has been integrated over the background region.
@@ -74,12 +75,15 @@ def diagnose(white_int, **kwargs):
     # Hard mask
     hardmask_file = kwargs.get('hard_mask', None)
     if hardmask_file is not None:
-        hard_mask_spectra = common.load_mask(parser.hard_mask)
-        test_results[0][0] = os.path.basename(parser.hard_mask)
-        masking = MaskDetectors(white_int, SpectraList=hard_mask_spectra)
+        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask,
+                 OutputWorkspace='hard_mask_ws')
+        MaskDetectors(white_int, MaskedWorkspace='hard_mask_ws')
         # Find out how many detectors we hard masked
-        hard_mask_spectra = masking['SpectraList'].value
-        test_results[0][1] = len(hard_mask_spectra)
+        alg = ExtractMask('hard_mask_ws',OutputWorkspace='_dummy_ws')
+        DeleteWorkspace('_dummy_ws')
+        masked_list = alg.getProperty('DetectorList').value
+        test_results[0][0] = os.path.basename(parser.hard_mask)
+        test_results[0][1] = len(masked_list)
 
     # White beam Test
     __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 

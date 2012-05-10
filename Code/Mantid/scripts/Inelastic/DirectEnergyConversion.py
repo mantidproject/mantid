@@ -144,7 +144,12 @@ class DirectEnergyConversion(object):
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
-            
+        
+        # If we have a hard_mask, check the instrument name is defined
+        if 'hard_mask' in kwargs:
+            if 'instrument_name' not in kwargs:
+                kwargs['instrument_name'] = self.instr_name
+        
         # Check how we should run diag
         if self.diag_spectra is None:
             # Do the whole lot at once
