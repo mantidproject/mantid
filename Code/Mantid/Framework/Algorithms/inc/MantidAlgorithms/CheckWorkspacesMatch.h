@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -103,8 +104,10 @@ private:
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);
   bool checkRunProperties(const API::Run& run1, const API::Run& run2);
   bool checkMDCommon(API::IMDWorkspace_const_sptr ws1, API::IMDWorkspace_const_sptr ws2);
-  
-
+  /*
+  template<typename MDE, std::size_t nd>
+  bool checkMDEvents(API::IMDEventWorkspace_const_sptr ws1, API::IMDEventWorkspace_const_sptr ws2);
+  */
   std::string result; ///< the result string
 
   API::Progress * prog;

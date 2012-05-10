@@ -16,6 +16,7 @@
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidMDEvents/MDBoxBase.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -225,11 +226,73 @@ public:
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
   }
 
+  void testMDEvents_different_eventtypes()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
   void testMDEvents_different_dims()
   {
     if ( !checker.isInitialized() ) checker.initialize();
     MDEventWorkspace4Lean::sptr mdews1 = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeMDEW<3>(5, -10.0, 10.0, 1);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDEvents_different_dimnames()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B", "X%d");
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDEvents_different_dimmin()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 1.0, 10.0, 1000, "B");
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void testMDEvents_different_numdata()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 5000, "B");
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
+  }
+
+  void xtestMDEvents_different_data()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
+    MDBoxBase<MDLeanEvent<3>, 3> *parentBox = dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
+    std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes;
+    parentBox->getBoxes(boxes, 1000, true);
+    MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
+    std::vector<MDLeanEvent<3> > &events = box->getEvents();
+    const float offset = static_cast<const float>(0.1);
+    events[0].setSignal(events[0].getSignal() + offset);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
     TS_ASSERT( checker.execute() );

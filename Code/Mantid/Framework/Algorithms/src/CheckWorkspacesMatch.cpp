@@ -21,6 +21,7 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 #include <sstream>
 
 namespace Mantid
@@ -43,6 +44,7 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
+using namespace MDEvents;
 
 /**
  * Process two groups and ensure the Result string is set properly on the final algorithm
@@ -318,6 +320,17 @@ void CheckWorkspacesMatch::doComparison()
       result = "Mismatch in number of MD events";
       return;
     }
+    if (mdews1->getEventTypeName() != mdews2->getEventTypeName())
+    {
+      result = "Mismatch in event types";
+      return;
+    }
+    /*
+    if (!this->checkMDEvents(mdews1, mdews2))
+    {
+      return;
+    }
+    */
     return;
   }
 
@@ -882,6 +895,64 @@ bool CheckWorkspacesMatch::checkMDCommon(IMDWorkspace_const_sptr ws1,
   return true;
 }
 
+/*
+template<typename MDE, std::size_t nd>
+bool CheckWorkspacesMatch::checkMDEvents(IMDEventWorkspace_const_sptr ws1, IMDEventWorkspace_const_sptr ws2)
+{
+  typename MDEventWorkspace<MDE, nd>::sptr const ews1 = boost::dynamic_pointer_cast<const MDEventWorkspace<MDE, nd> >(ws1);
+  typename MDEventWorkspace<MDE, nd>::sptr const ews2 = boost::dynamic_pointer_cast<const MDEventWorkspace<MDE, nd> >(ws2);
+
+  MDBoxBase<MDE, nd> *parentBox1 = ews1->getBox();
+  MDBoxBase<MDE, nd> *parentBox2 = ews2->getBox();
+
+  std::vector<MDBoxBase<MDE, nd> *> boxes1;
+  std::vector<MDBoxBase<MDE, nd> *> boxes2;
+
+  parentBox1->getBoxes(boxes1, 1000, true);
+  parentBox2->getBoxes(boxes2, 1000, true);
+
+  const double tolerance = getProperty("Tolerance");
+
+  for (std::size_t i = 0; i < boxes1.size(); ++i)
+  {
+    MDBox<MDE, nd> * box1 = dynamic_cast<MDBox<MDE, nd> *>(boxes1[i]);
+    MDBox<MDE, nd> * box2 = dynamic_cast<MDBox<MDE, nd> *>(boxes2[i]);
+
+    if (box1 && box2)
+    {
+      typename std::vector<MDE> &events1 = box1->getEvents();
+      typename std::vector<MDE> &events2 = box2->getEvents();
+      for(std::size_t j = 0; j < events1.size(); ++j)
+      {
+        if (std::abs(events1[j].getSignal() - events2[j].getSignal()) > tolerance)
+        {
+          std::ostringstream mess;
+          mess << "Event signal mismatch in box " << i << ", event " << j;
+          result = mess.str();
+
+          box1->releaseEvents();
+          box2->releaseEvents();
+          return false;
+        }
+        if (std::abs(events1[j].getErrorSquared() - events2[j].getErrorSquared()) > tolerance)
+        {
+          std::ostringstream mess;
+          mess << "Event squared error mismatch in box " << i << ", event " << j;
+          result = mess.str();
+
+          box1->releaseEvents();
+          box2->releaseEvents();
+          return false;
+        }
+      }
+      box1->releaseEvents();
+      box2->releaseEvents();
+    }
+  }
+
+  return true;
+}
+*/
 } // namespace Algorithms
 } // namespace Mantid
 
