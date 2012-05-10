@@ -115,35 +115,48 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._data_path, '.')
         self.assertEqual(ReductionSingleton()._background_subtracter, None)
         
-        if sys.version_info[0]==2 and sys.version_info[1]<7:
-            def _assertAlmostEqual(first, second, places=None, msg=None, delta=None):
-                if first == second:
-                    # shortcut
+        def _assertAlmostEqual(first, second, places=None, msg=None, delta=None, rel_delta=None):
+            if first == second:
+                # shortcut
+                return
+            if delta is not None and places is not None:
+                raise TypeError("specify delta or places not both")
+    
+            if delta is not None:
+                if abs(first - second) <= delta:
                     return
-                if delta is not None and places is not None:
-                    raise TypeError("specify delta or places not both")
-        
-                if delta is not None:
-                    if abs(first - second) <= delta:
-                        return
-        
-                    standardMsg = '%s != %s within %s delta' % (str(first),
-                                                                str(second),
-                                                                str(delta))
-                else:
-                    if places is None:
-                        places = 7
-        
-                    if round(abs(second-first), places) == 0:
-                        return
-        
-                    standardMsg = '%s != %s within %r places' % (str(first),
+                elif abs(first - second)/abs(second)<rel_delta:
+                    print '\n-----> %s != %s but within %s percent' % (str(first),
                                                                   str(second),
-                                                                  places)
-                raise self.failureException(msg or standardMsg)
-                    
+                                                                  str(rel_delta*100.0))
+                    return
+    
+                standardMsg = '%s != %s within %s delta' % (str(first),
+                                                            str(second),
+                                                            str(delta))
+            else:
+                if places is None:
+                    places = 7
+    
+                if round(abs(second-first), places) == 0:
+                    return
+    
+                standardMsg = '%s != %s within %r places' % (str(first),
+                                                              str(second),
+                                                              places)
+            raise self.failureException(msg or standardMsg)
+        
+        if sys.version_info[0]==2 and sys.version_info[1]<7:            
             self.assertAlmostEqual = _assertAlmostEqual
+        self._assertAlmostEqual =_assertAlmostEqual
                 
+    def _compare_to_reference(self, res, ref, tolerance=0.01):
+        for i in range(len(res)):
+            msg = ''
+            if math.fabs(res[i]-ref[i])>tolerance:
+                msg = ' <--------------'
+            print i, res[i], ref[i], msg
+                                    
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
         #any path that definitely exists on a computer with Mantid installed
@@ -468,7 +481,9 @@ class TestCommands(unittest.TestCase):
         
         res = mtd["BioSANS_exp61_scan0004_0001_Iq"].dataY(0)
         for i in range(len(res)):
-            self.assertAlmostEqual(res[i], ref[i], 5, "result point %d: %g, found %g" % (i, ref[i], res[i]))
+            self._assertAlmostEqual(res[i], ref[i], delta=0.01,
+                                    rel_delta=0.001,
+                                    msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
 
     def test_DC_eff_with_DC(self): 
         #ref = [8328.70241,8506.01586,5118.44441,   0.00000,7774.69442,8455.91783,14509.24224,   0.00000,   0.00000,-27551.42890,-34835.52157,-28076.35417,-32645.28731,-29923.90302,-32544.89749,-34519.58590,-35354.19282,-35242.21670,-37201.40137,-38547.80168,-38708.50152,-38339.04967,-41672.21115,-40898.80246,-41881.33026,-40789.34624,-43124.60460,-43846.74602,-43608.61731,-44050.49270,-44607.80184,-44662.71286,-44125.45576,-45197.75580,-45086.38543,-44502.49049,-45552.66509,-45678.42736,-45347.87980,-45613.96643,-44424.82296,-43888.62587,-44292.95665,-44465.13383,-45647.14865,-44450.82619,-44951.69404,-44597.94666,-43277.63573,-44605.52402,-44004.61793,-43774.86031,-44169.38692,-43970.30050,-43316.88231,-43786.96873,-43355.97746,-42952.99756,-43062.07976,-42184.58157,-42578.47214,-42199.41403,-41700.43004,-41780.97621,-41386.94893,-40865.71000,-40932.98886,-40036.67895,-40214.90469,-39471.74497,-39278.21830,-38383.80488,-38728.91704,-37705.78298,-37327.89414,-36943.11807,-35906.89550,-35399.21901,-34751.80556,-34209.49716,-33271.20006,-32530.08744,-31561.29164,-30906.03234,-29895.47664,-29278.16621,-28248.29021,-27341.79392,-26549.84441,-25476.57298,-24453.63444,-23305.85255,-22332.01538,-21306.01200,-19867.21655,-18795.14216,-17317.28374,-14745.54556,-6037.28367,4125.05228]
@@ -494,7 +509,9 @@ class TestCommands(unittest.TestCase):
         
         res = mtd["BioSANS_exp61_scan0004_0001_Iq"].dataY(0)
         for i in range(len(res)):
-            self.assertAlmostEqual(res[i], ref[i], delta=0.01, msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
+            self._assertAlmostEqual(res[i], ref[i], delta=0.01,
+                                    rel_delta=0.001,
+                                    msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
         
     def test_DC_eff_noDC(self):
         #ref = [7164.60565,7752.68818,5711.05627,   0.00000,5900.87667,8062.67404,   0.00000,   0.00000,-24761.10043,-23989.79632,-27228.05671,-27520.90826,-28702.43297,-30016.08164,-31857.27731,-32831.96025,-33274.36135,-33765.95318,-35208.90831,-37330.42544,-38283.00967,-38157.84654,-40398.13178,-40807.56861,-40981.56490,-40010.58202,-42502.81591,-43001.82289,-42582.26700,-43857.23377,-44163.99857,-44732.14970,-43799.50312,-44791.12989,-44777.68791,-43985.74941,-45468.56174,-45452.90859,-45309.47499,-45759.04142,-43969.71697,-43854.45515,-44260.09016,-44420.83533,-45370.71500,-44500.35745,-45047.70688,-44404.89711,-43526.84357,-44566.97107,-43693.66349,-43741.61517,-44045.48712,-43860.53110,-43371.59488,-43623.05598,-43456.87922,-42905.84855,-42947.82849,-42114.29792,-42493.59647,-41998.37587,-41635.60470,-41808.27092,-41359.04234,-40774.21357,-40842.43155,-40073.84107,-40151.59039,-39504.86741,-39166.91772,-38472.64978,-38668.95577,-37731.30203,-37416.76227,-36798.92809,-35971.80065,-35477.59413,-34782.44503,-34089.54104,-33225.67613,-32520.31544,-31591.39201,-30937.42531,-29962.72283,-29241.95009,-28269.99833,-27317.23101,-26561.76975,-25533.91747,-24418.32912,-23309.34592,-22383.49546,-21298.00468,-19889.28546,-18800.07365,-17315.89420,-14744.66783,-6047.10832,4171.62004]
@@ -520,7 +537,9 @@ class TestCommands(unittest.TestCase):
         
         res = mtd["BioSANS_exp61_scan0004_0001_Iq"].dataY(0)
         for i in range(len(res)):
-            self.assertAlmostEqual(res[i], ref[i], delta=0.01, msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
+            self._assertAlmostEqual(res[i], ref[i], delta=0.01,
+                                    rel_delta=0.001,
+                                    msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
         
     def test_transmission_beam_center(self):
         HFIRSANS()

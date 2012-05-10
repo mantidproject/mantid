@@ -57,6 +57,7 @@ private:
   /// Execution code
   void exec();
   API::MatrixWorkspace_sptr loadBeamFinderFile(const std::string& beamCenterFile);
+  void maskEdges(API::MatrixWorkspace_sptr beamCenterWS, int high, int low, int left, int right);
 
   boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
   std::string m_output_message;

@@ -218,7 +218,7 @@ void SANSSensitivityCorrection::exec()
         if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
         loadAlg->executeAsSubAlg();
         rawFloodWS = loadAlg->getProperty("OutputWorkspace");
-        m_output_message += "   | Loaded " + fileName + "\n";
+        m_output_message += "   | Loaded " + fileName + " (Load algorithm)\n";
       } else {
         IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
         loadAlg->setChild(true);
@@ -263,6 +263,7 @@ void SANSSensitivityCorrection::exec()
           else if (darkCurrentFile.size()>0)
           {
             darkAlg->setProperty("Filename", darkCurrentFile);
+            darkAlg->setProperty("PersistentCorrection", false);
             darkAlg->execute();
             if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
             else dark_result = "   Dark current subtracted\n";
@@ -279,6 +280,7 @@ void SANSSensitivityCorrection::exec()
             darkAlg->setProperty("InputWorkspace", rawFloodWS);
             darkAlg->setProperty("OutputWorkspace", rawFloodWS);
             darkAlg->setProperty("Filename", darkCurrentFile);
+            darkAlg->setProperty("PersistentCorrection", false);
             darkAlg->execute();
             if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
           } else {

@@ -43,8 +43,13 @@ def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
     ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToBeam=normalize_to_beam, BeamSpectrumFile=beam_file)
 
 def MonitorNormalization(normalize_to_beam=True, beam_file=''):
+    print "WARNING: The MonitorNormalization command is being phased out: use TotalChargeNormalization instead"
     TotalChargeNormalization(normalize_to_beam=normalize_to_beam, beam_file=beam_file)
       
+def BeamMonitorNormalization():
+    ReductionSingleton().get_data_loader().load_monitors(True)
+    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToMonitor=True)
+    
 def BeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
     raise RuntimeError, "Transmission measurement using the beam stop hole is no longer supported" 
     

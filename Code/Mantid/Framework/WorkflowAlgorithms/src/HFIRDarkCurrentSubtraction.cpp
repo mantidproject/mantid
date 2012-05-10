@@ -20,6 +20,7 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FileProperty.h"
 #include "Poco/Path.h"
+#include "Poco/String.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
@@ -53,6 +54,8 @@ void HFIRDarkCurrentSubtraction::init()
       "The name of the input event Nexus file to load as dark current.");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty("PersistentCorrection", true,
+      "If true, the algorithm will be persistent and re-used when other data sets are processed");
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputDarkCurrentWorkspace","", Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage","",Direction::Output);
@@ -60,6 +63,7 @@ void HFIRDarkCurrentSubtraction::init()
 
 void HFIRDarkCurrentSubtraction::exec()
 {
+  std::string output_message = "";
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;
@@ -74,7 +78,8 @@ void HFIRDarkCurrentSubtraction::exec()
   }
 
   // If the load algorithm isn't in the reduction properties, add it
-  if (!reductionManager->existsProperty("DarkCurrentAlgorithm"))
+  const bool persistent = getProperty("PersistentCorrection");
+  if (!reductionManager->existsProperty("DarkCurrentAlgorithm") && persistent)
   {
     AlgorithmProperty *algProp = new AlgorithmProperty("DarkCurrentAlgorithm");
     algProp->setValue(toString());
@@ -105,6 +110,7 @@ void HFIRDarkCurrentSubtraction::exec()
   {
     darkWS = reductionManager->getProperty(entryName);
     darkWSName = reductionManager->getPropertyValue(entryName);
+    output_message += darkWSName + '\n';
   } else {
     // Load the dark current if we don't have it already
     if (darkWSName.size()==0)
@@ -113,20 +119,29 @@ void HFIRDarkCurrentSubtraction::exec()
       setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
     }
 
+    IAlgorithm_sptr loadAlg;
     if (!reductionManager->existsProperty("LoadAlgorithm"))
     {
-      IAlgorithm_sptr loadAlg = createSubAlgorithm("HFIRLoad", 0.1, 0.3);
+      loadAlg = createSubAlgorithm("HFIRLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
+      loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->executeAsSubAlg();
-      darkWS = loadAlg->getProperty("OutputWorkspace");
     } else {
-      IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
+      loadAlg = reductionManager->getProperty("LoadAlgorithm");
       loadAlg->setChild(true);
       loadAlg->setProperty("Filename", fileName);
+      loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->setPropertyValue("OutputWorkspace", darkWSName);
       loadAlg->execute();
-      darkWS = loadAlg->getProperty("OutputWorkspace");
     }
+    darkWS = loadAlg->getProperty("OutputWorkspace");
+    output_message += "\n   Loaded " + fileName + "\n";
+    if (loadAlg->existsProperty("OutputMessage"))
+    {
+      std::string msg = loadAlg->getPropertyValue("OutputMessage");
+      output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+    }
+
     setProperty("OutputDarkCurrentWorkspace", darkWS);
     reductionManager->declareProperty(new WorkspaceProperty<>(entryName,"",Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
@@ -159,7 +174,7 @@ void HFIRDarkCurrentSubtraction::exec()
   minusAlg->executeAsSubAlg();
 
   setProperty("OutputWorkspace", outputWS);
-  setProperty("OutputMessage", "Dark current subtracted: "+darkWSName);
+  setProperty("OutputMessage", "Dark current subtracted: "+output_message);
 
   progress.report("Subtracted dark current");
 }

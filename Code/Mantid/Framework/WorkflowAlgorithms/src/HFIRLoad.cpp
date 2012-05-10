@@ -50,8 +50,8 @@ void HFIRLoad::init()
       "The name of the input file to load");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Then name of the output workspace");
-  declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
-  declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
+  declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates");
+  declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates");
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
 

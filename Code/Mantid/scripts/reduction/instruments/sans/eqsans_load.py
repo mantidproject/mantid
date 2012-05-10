@@ -48,6 +48,9 @@ class LoadRun(ReductionStep):
         # Option to skip TOF correction
         self._skip_tof_correction = False
         
+        # Load monitors
+        self._load_monitors = False
+        
         # Flag to tell us whether we should do the full reduction with events
         self._keep_events = keep_events
    
@@ -69,6 +72,9 @@ class LoadRun(ReductionStep):
         loader._skip_tof_correction = self._skip_tof_correction
         return loader
 
+    def load_monitors(self, load_monitors):
+        self._load_monitors = load_monitors
+        
     def skip_tof_correction(self, skip):
         self._skip_tof_correction = skip
         
@@ -199,6 +205,7 @@ class LoadRun(ReductionStep):
                        SampleDetectorDistance=self._sample_det_dist,
                        SampleDetectorDistanceOffset=self._sample_det_offset,
                        PreserveEvents=self._keep_events,
+                       LoadMonitors=self._load_monitors,
                        ReductionProperties=reducer.get_reduction_table_name()
                        )            
             return l.getPropertyValue("OutputMessage")

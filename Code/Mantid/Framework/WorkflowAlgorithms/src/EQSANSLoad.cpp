@@ -87,6 +87,7 @@ void EQSANSLoad::init()
   declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
+  declareProperty("LoadMonitors", true, "If true, the monitor workspace will be loaded");
   declareProperty("OutputMessage","",Direction::Output);
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 
@@ -459,6 +460,7 @@ void EQSANSLoad::exec()
   }
 
   // Read in default TOF cuts
+  const bool skipTOFCorrection = getProperty("SkipTOFCorrection");
   m_low_TOF_cut = getProperty("LowTOFCut");
   m_high_TOF_cut = getProperty("HighTOFCut");
 
@@ -498,14 +500,31 @@ void EQSANSLoad::exec()
   m_output_message = "";
 
   // Check whether we need to load the data
-
   if (!inputEventWS)
   {
-    IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0, 0.2);
+    const bool loadMonitors = getProperty("LoadMonitors");
+    IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadEventNexus", 0, 0.2);
+    loadAlg->setProperty("LoadMonitors", loadMonitors);
+    loadAlg->setProperty("MonitorsAsEvents", false);
     loadAlg->setProperty("Filename", fileName);
-    loadAlg->executeAsSubAlg();
-    Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
+    if (skipTOFCorrection)
+    {
+      if (!isEmpty(m_low_TOF_cut)) loadAlg->setProperty("FilterByTofMin", m_low_TOF_cut);
+      if (!isEmpty(m_high_TOF_cut)) loadAlg->setProperty("FilterByTofMax", m_high_TOF_cut);
+    }
+    loadAlg->execute();
+    IEventWorkspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
     dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
+
+    // Get monitor workspace as necessary
+    std::string mon_wsname = getPropertyValue("OutputWorkspace")+"_monitors";
+    if (loadMonitors && loadAlg->existsProperty("MonitorWorkspace"))
+    {
+      MatrixWorkspace_sptr monWS = loadAlg->getProperty("MonitorWorkspace");
+      declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
+          mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
+      setProperty("MonitorWorkspace", monWS);
+    }
   } else {
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
     EventWorkspace_sptr outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -622,7 +641,6 @@ void EQSANSLoad::exec()
 
   // Modify TOF
   const bool correct_for_flight_path = getProperty("CorrectForFlightPath");
-  const bool skipTOFCorrection = getProperty("SkipTOFCorrection");
   double wl_min = 0.0;
   double wl_max = 0.0;
   double wl_combined_max = 0.0;
@@ -680,23 +698,24 @@ void EQSANSLoad::exec()
   const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z())*1000.0;
   const double conversion_factor = 3.9560346 / (sdd+ssd);
   m_output_message += "   TOF to wavelength conversion factor: " + Poco::NumberFormatter::format(conversion_factor) + "\n";
+
+  if (skipTOFCorrection)
+  {
+    DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
+    wl_min = dataWS_evt->getTofMin()*conversion_factor;
+    wl_max = dataWS_evt->getTofMax()*conversion_factor;
+    wl_combined_max = wl_max;
+    g_log.information() << "Wavelength range: " << wl_min << " to " << wl_max << std::endl;
+    dataWS->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom", true);
+    dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
+  }
+
   IAlgorithm_sptr scAlg = createSubAlgorithm("ScaleX", 0.7, 0.71);
   scAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   scAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   scAlg->setProperty("Factor", conversion_factor);
   scAlg->executeAsSubAlg();
   dataWS->getAxis(0)->setUnit("Wavelength");
-
-  if (skipTOFCorrection)
-  {
-    DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
-    wl_min = dataWS_evt->getTofMin()*conversion_factor;
-    wl_max = dataWS_evt-> getTofMax()*conversion_factor;
-    wl_combined_max = wl_max;
-    g_log.information() << "Wavelength range: " << wl_min << " to " << wl_max << std::endl;
-    dataWS->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom", true);
-    dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
-  }
 
   // Rebin so all the wavelength bins are aligned
   const bool preserveEvents = getProperty("PreserveEvents");

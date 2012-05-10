@@ -165,6 +165,8 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.scale_att_trans_edit.hide()
             self._summary.scale_beam_radius_edit.hide()
             self._summary.scale_chk.hide()
+            self._summary.beam_monitor_chk.hide()
+            self._summary.tof_correction_chk.hide()
             
             # Same thing for sample-detector distance and offset: not yet hooked in
             self._summary.geometry_options_groupbox.hide()
@@ -383,6 +385,9 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.sample_apert_edit.setText(QtCore.QString(str(state.sample_aperture_diameter)))
         self._resolution_clicked(self._summary.resolution_chk.isChecked())
         
+        self._summary.tof_correction_chk.setChecked(state.perform_TOF_correction)
+        self._summary.beam_monitor_chk.setChecked(state.use_beam_monitor)
+        
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
@@ -457,6 +462,9 @@ class SANSInstrumentWidget(BaseWidget):
         # Resolution parameters
         m.compute_resolution = self._summary.resolution_chk.isChecked()
         m.sample_aperture_diameter = util._check_and_get_float_line_edit(self._summary.sample_apert_edit) 
+
+        m.perform_TOF_correction = self._summary.tof_correction_chk.isChecked()
+        m.use_beam_monitor = self._summary.beam_monitor_chk.isChecked()
 
         # Output directory
         m.use_data_directory = self._summary.use_data_dir_radio.isChecked()

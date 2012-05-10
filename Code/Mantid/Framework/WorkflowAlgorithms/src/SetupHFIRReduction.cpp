@@ -12,6 +12,7 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -35,6 +36,18 @@ using namespace DataObjects;
 
 void SetupHFIRReduction::init()
 {
+  declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
+  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
+
+  // Optionally, we can specify the wavelength and wavelength spread and overwrite
+  // the value in the data file (used when the data file is not populated)
+  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double> >();
+  mustBePositive->setLower(0.0);
+  declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
+      "Wavelength value to use when loading the data file (Angstrom).");
+  declareProperty("WavelengthSpread", 0.1, mustBePositive,
+    "Wavelength spread to use when loading the data file (default 0.0)" );
+
   declareProperty("OutputMessage","",Direction::Output);
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
@@ -52,7 +65,24 @@ void SetupHFIRReduction::exec()
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
 
   // Store name of the instrument
-  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "BIOSANS") );
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "HFIRSANS") );
+
+  // Load algorithm
+  const double sdd = getProperty("SampleDetectorDistance");
+  const double sddOffset = getProperty("SampleDetectorDistanceOffset");
+  const double wavelength = getProperty("Wavelength");
+  const double wavelengthSpread = getProperty("WavelengthSpread");
+
+  IAlgorithm_sptr loadAlg = createSubAlgorithm("HFIRLoad");
+  if (!isEmpty(sdd)) loadAlg->setProperty("SampleDetectorDistance", sdd);
+  if (!isEmpty(sddOffset)) loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
+  if (!isEmpty(wavelength))
+  {
+    loadAlg->setProperty("Wavelength", wavelength);
+    loadAlg->setProperty("WavelengthSpread", wavelengthSpread);
+  }
+  reductionManager->declareProperty(new AlgorithmProperty("LoadAlgorithm"));
+  reductionManager->setProperty("LoadAlgorithm", loadAlg);
 
   // Store default dark current algorithm
   IAlgorithm_sptr darkAlg = createSubAlgorithm("HFIRDarkCurrentSubtraction");

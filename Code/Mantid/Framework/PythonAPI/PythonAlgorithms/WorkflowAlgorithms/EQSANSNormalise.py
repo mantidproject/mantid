@@ -72,11 +72,18 @@ class EQSANSNormalise(PythonAlgorithm):
         self.declareProperty("NormaliseToBeam", True, Description="If true, the data will also be normalise by the beam profile")
         self.declareProperty("BeamSpectrumFile", "", Direction=Direction.Input,
                              Description="Beam spectrum to be used for normalisation [takes precedence over default]")
+        self.declareProperty("NormaliseToMonitor", False,
+                             Description="If true, the algorithm will look for a monitor workspace to use")
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
     def PyExec(self):
         workspace = self.getPropertyValue("InputWorkspace")
         normalize_to_beam = self.getProperty("NormaliseToBeam")
+        
+        # If we need to normalise by monitor, skip all other options
+        if self.getProperty("NormaliseToMonitor"):
+            return self._normalise_to_monitor(workspace)
+        
         flux_data_path = None
        
         if normalize_to_beam:
@@ -108,5 +115,17 @@ class EQSANSNormalise(PythonAlgorithm):
             
         NormaliseByCurrent(workspace, workspace)
         self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, str(flux_data_path))) 
+
+    def _normalise_to_monitor(self, workspace):
+        if mtd.workspaceExists(workspace+'_monitors'):
+            ConvertUnits(InputWorkspace=workspace+'_monitors',
+                         OutputWorkspace=workspace+'_monitors_wl', Target="Wavelength")
+            RebinToWorkspace(WorkspaceToRebin=workspace+'_monitors_wl',
+                             WorkspaceToMatch=workspace,
+                             OutputWorkspace=workspace+'_monitors_wl')
+            Divide(workspace, workspace+'_monitors_wl', OutputWorkspace=workspace)
+            self.setProperty("OutputMessage", "Data [%s] normalized to monitor" % (workspace)) 
+        else:
+            self.setProperty("OutputMessage", "Data [%s] NOT normalized to monitor" % (workspace)) 
 
 mtd.registerPyAlgorithm(EQSANSNormalise())

@@ -13,6 +13,17 @@ import warnings
 # Mantid imports
 from mantidsimple import *
     
+class HFIRSetup(ReductionStep):
+    def __init__(self):
+        super(HFIRSetup, self).__init__()
+    
+    def execute(self, reducer, workspace=None):
+        SetupHFIRReduction(SampleDetectorDistance=reducer._data_loader._sample_det_dist,
+                           SampleDetectorDistanceOffset=reducer._data_loader._sample_det_offset,
+                           Wavelength=reducer._data_loader._wavelength,
+                           WavelengthSpread=reducer._data_loader._wavelength_spread,
+                           ReductionProperties=reducer.get_reduction_table_name())
+        
 class BaseBeamFinder(ReductionStep):
     """
         Base beam finder. Holds the position of the beam center
@@ -29,6 +40,8 @@ class BaseBeamFinder(ReductionStep):
         self._beam_center_x = beam_center_x
         self._beam_center_y = beam_center_y
         self._beam_radius = None
+        self._datafile = None
+        self._persistent = True
         
         # Define detector edges to be be masked
         self._x_mask_low = 0
@@ -47,6 +60,10 @@ class BaseBeamFinder(ReductionStep):
         self._y_mask_high = y_high
         return self
         
+    def set_persistent(self, persistent):
+        self._persistent = persistent
+        return self
+        
     def get_beam_center(self):
         """
             Returns the beam center
@@ -55,6 +72,20 @@ class BaseBeamFinder(ReductionStep):
     
     def execute(self, reducer, workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
+        
+    def _find_beam_new(self, direct_beam, reducer, workspace=None):
+        if self._beam_center_x is not None and self._beam_center_y is not None:
+            return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
+        
+        c=SANSBeamFinder(Filename=self._datafile,
+                         UseDirectBeamMethod=direct_beam,
+                         BeamRadius=self._beam_radius,
+                         PersistentCorrection=self._persistent,
+                         ReductionProperties=reducer.get_reduction_table_name())
+        
+        self._beam_center_x = c.getProperty("FoundBeamCenterX").value
+        self._beam_center_y = c.getProperty("FoundBeamCenterY").value
+        return c.getPropertyValue("OutputMessage")
         
     def _find_beam(self, direct_beam, reducer, workspace=None):
         """
@@ -268,6 +299,7 @@ class BeamSpreaderTransmission(BaseTransmission):
                 self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
                                                   InputWorkspace=None, Filename=dark_current,
                                                   OutputWorkspace=None,
+                                                  PersistentCorrection=False,
                                                   ReductionProperties=reducer.get_reduction_table_name())
                 self._dark_current_subtracter.execute(reducer, sample_spreader_ws)
                 self._dark_current_subtracter.execute(reducer, direct_spreader_ws)
@@ -370,6 +402,7 @@ class DirectBeamTransmission(BaseTransmission):
             self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
                                               InputWorkspace=None, Filename=dark_current,
                                               OutputWorkspace=None,
+                                              PersistentCorrection=False,
                                               ReductionProperties=reducer.get_reduction_table_name())
             partial_out = self._dark_current_subtracter.execute(reducer, sample_ws)
             partial_out2 = self._dark_current_subtracter.execute(reducer, empty_ws)
@@ -397,11 +430,6 @@ class DirectBeamTransmission(BaseTransmission):
             raise RuntimeError, "Could not find detector pixels near the beam center: check that the beam center is placed at (0,0)."
         first_det = int(first_det_str)
         
-        empty_mon_ws = "__empty_mon"
-        sample_mon_ws = "__sample_mon"
-        GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
-        GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
-        
         #TODO: check that both workspaces have the same masked spectra
         
         # Get normalization for transmission calculation
@@ -412,8 +440,15 @@ class DirectBeamTransmission(BaseTransmission):
                 norm_option = reducer._normalizer.get_normalization_spectrum()
             self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, norm_option)
             if self._monitor_det_ID<0:
-                reducer._normalizer.execute(reducer, empty_mon_ws)
-                reducer._normalizer.execute(reducer, sample_mon_ws)
+                norm_msg = reducer._normalizer.execute(reducer, empty_ws)
+                output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
+                norm_msg = reducer._normalizer.execute(reducer, sample_ws)
+                output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
+
+        empty_mon_ws = "__empty_mon"
+        sample_mon_ws = "__sample_mon"
+        GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
+        GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
         
         # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
         # as the monitor channel.

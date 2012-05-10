@@ -29,6 +29,12 @@ class ReductionOptions(BaseOptions):
     compute_resolution = True
     sample_aperture_diameter = 10.0
 
+    # Perform EQSANS TOF correction
+    perform_TOF_correction = True
+    
+    # Normalize to beam monitor
+    use_beam_monitor = False
+
     def __init__(self):
         super(ReductionOptions, self).__init__()
         self.reset()
@@ -52,6 +58,9 @@ class ReductionOptions(BaseOptions):
         
         self.compute_resolution = ReductionOptions.compute_resolution
         self.sample_aperture_diameter = ReductionOptions.sample_aperture_diameter
+        
+        self.perform_TOF_correction = True
+        self.use_beam_monitor = False
 
     def options(self):
         """
@@ -113,6 +122,12 @@ class ReductionOptions(BaseOptions):
         if self.compute_resolution:
             script += "Resolution(sample_aperture_diameter=%g)\n" % self.sample_aperture_diameter
 
+        if not self.perform_TOF_correction:
+            script += "ReductionSingleton().get_data_loader().skip_tof_correction(True)\n"
+            
+        if self.use_beam_monitor:
+            script += "BeamMonitorNormalization()\n"
+            
         return script
             
     def to_xml(self):
@@ -135,6 +150,12 @@ class ReductionOptions(BaseOptions):
         # Resolution
         xml += "<ComputeResolution>%s</ComputeResolution>\n" % self.compute_resolution
         xml += "<SampleApertureDiameter>%g</SampleApertureDiameter>\n" % self.sample_aperture_diameter
+
+        # TOF correction
+        xml += "<PerformTOFCorrection>%s</PerformTOFCorrection>\n" % self.perform_TOF_correction
+        # Normalization option
+        xml += "<UseBeamMonitor>%s</UseBeamMonitor>\n" % self.use_beam_monitor
+        
         return xml
     
     def from_xml(self, xml_str):
@@ -171,3 +192,9 @@ class ReductionOptions(BaseOptions):
         self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",
                                                                          default = ReductionOptions.sample_aperture_diameter)
     
+        # TOF correction
+        self.perform_TOF_correction = BaseScriptElement.getBoolElement(dom, "PerformTOFCorrection",
+                                                                       default = ReductionOptions.perform_TOF_correction)
+        # Normalization option
+        self.use_beam_monitor = BaseScriptElement.getBoolElement(dom, "UseBeamMonitor",
+                                                                 default = ReductionOptions.use_beam_monitor)
