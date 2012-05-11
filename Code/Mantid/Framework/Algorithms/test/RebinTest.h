@@ -517,4 +517,32 @@ private:
   }
 
 };
+
+class RebinTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RebinTestPerformance *createSuite() { return new RebinTestPerformance(); }
+  static void destroySuite( RebinTestPerformance *suite ) { delete suite; }
+
+  RebinTestPerformance()
+  {
+    ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(5000,20000);
+  }
+
+  void test_rebin()
+  {
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setProperty("InputWorkspace",ws);
+    rebin.setPropertyValue("OutputWorkspace","out");
+    rebin.setPropertyValue("Params","50,1.77,18801");
+    TS_ASSERT( rebin.execute() );
+  }
+
+private:
+  MatrixWorkspace_sptr ws;
+
+};
 #endif /* REBINTEST */
