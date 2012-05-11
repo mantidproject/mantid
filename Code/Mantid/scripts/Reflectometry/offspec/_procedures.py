@@ -1,7 +1,9 @@
 from math import *
 from mantidsimple import *
-from mantidplot import *
-#import qti as qti
+try:
+  from mantidplot import *
+except ImportError:
+  pass
 import numpy as n
 
 def addRuns(runlist,wname):
@@ -48,7 +50,7 @@ def addRuns(runlist,wname):
         #fname=fname.lower()
         ##fname=str.replace(fname,'.nxs','.raw')
         #Load(fname,"wtemp")
-		Load(str(runlist[0]),"wtemp")
+		Load(str(runlist[i]),"wtemp")
       else:
 		#dae="ndx"+mtd.settings['default.instrument'].lower()
 		dae="ndxoffspec"
@@ -297,16 +299,23 @@ def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,do
 	minSp=int(minSpec)-1
 	maxSp=int(maxSpec)-1
 	reb=gparams[0]+","+gparams[1]+","+gparams[2]
+	if len(gparams) == 5:
+		mapfile=gparams[4]
+	
 	for i in nlist:
-		a1=mantid.getMatrixWorkspace(i+"_1")
+		a1=Mantid.getMatrixWorkspace(i+"_1")
 		nspec=a1.getNumberHistograms()
+		if nspec == 1030:
+			GroupDetectors(InputWorkspace=i,OutputWorkspace=i,MapFile=mapfile)
 		ConvertUnits(i,i,"Wavelength",AlignBins=1)
 		Rebin(i,i,reb)
 		#removeoutlayer(i+"_1")
 		#removeoutlayer(i+"_2")
 		CropWorkspace(i,i+"mon",StartWorkspaceIndex=mon_spec,EndWorkspaceIndex=mon_spec)
-		if nspec > 4:
+		if nspec == 245:
 			CropWorkspace(i,i+"2ddet",StartWorkspaceIndex=4,EndWorkspaceIndex=244)
+		if nspec == 1030:
+			CropWorkspace(i,i+"2ddet",StartWorkspaceIndex=3,EndWorkspaceIndex=124)
 		if int(maxSpec) > int(minSpec):
 			SumSpectra(i,i+"det",StartWorkspaceIndex=minSp,EndWorkspaceIndex=maxSp)
 		else:
@@ -459,8 +468,14 @@ def nrSESANSP0Fn(P0runList,P0nameList,minSpec,maxSpec,upPeriod,downPeriod,gparam
 	minSp=int(minSpec)-1
 	maxSp=int(maxSpec)-1
 	reb=gparams[0]+","+gparams[1]+","+gparams[2]
-		
+	if len(gparams) == 5:
+		mapfile=gparams[4]
+
 	for i in P0nlist:
+		a1=Mantid.getMatrixWorkspace(i+"_1")
+		nspec=a1.getNumberHistograms()
+		if nspec == 1030:
+			GroupDetectors(InputWorkspace=i,OutputWorkspace=i,MapFile=mapfile)
 		ConvertUnits(i,i,"Wavelength",AlignBins=1)
 		Rebin(i,i,reb)
 		CropWorkspace(i,i+"mon",StartWorkspaceIndex=mon_spec,EndWorkspaceIndex=mon_spec)
@@ -667,7 +682,7 @@ def findbin(wksp,val):
 #
 #===========================================================
 #
-def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minSpec,maxSpec,minWavelength,gparams,floodfile=""):
+def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minSpec,maxSpec,minWavelength,gparams,floodfile="",diagnostics="0"):
 	nlistS=parseNameList(nameListShort)
 	rlistS=parseRunList(runListShort)
 	nlistL=parseNameList(nameListLong)
@@ -742,8 +757,9 @@ def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minS
 				a1=findbin(lnames[k],float(minWavelength))
 				MultiplyRange(lnames[k],lnames[k],"0",str(a1),"0.0")
 				WeightedMean(snames[k],lnames[k],nlistComb[i]+"_"+str(k+1))
-				#DeleteWorkspace(snames[k]+"int")
-				#DeleteWorkspace(lnames[k]+"int")
+				if (diagnostics=="0"):
+					DeleteWorkspace(snames[k]+"int")
+					DeleteWorkspace(lnames[k]+"int")
 		else:
 			Integration(nlistS[i]+"norm",nlistS[i]+"int",minWavelength,gparams[2])
 			Integration(nlistL[i]+"norm",nlistL[i]+"int",minWavelength,gparams[2])
@@ -752,18 +768,21 @@ def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minS
 			a1=findbin(nlistL[i]+"norm",float(minWavelength))
 			MultiplyRange(nlistL[i]+"norm",nlistL[i]+"norm","0",str(a1),"0.0")
 			WeightedMean(nlistS[i]+"norm",nlistL[i]+"norm",nlistComb[i])
-			#DeleteWorkspace(nlistS[i]+"int")
-			#DeleteWorkspace(nlistL[i]+"int")
-		#DeleteWorkspace(nlistS[i]+"mon")
-		#DeleteWorkspace(nlistS[i]+"det")
-		##DeleteWorkspace(nlistS[i]+"sum")
-		#DeleteWorkspace(nlistS[i]+"norm")
-		#DeleteWorkspace(nlistS[i])
-		#DeleteWorkspace(nlistL[i]+"mon")
-		#DeleteWorkspace(nlistL[i]+"det")
-		##DeleteWorkspace(nlistL[i]+"sum")
-		#DeleteWorkspace(nlistL[i]+"norm")
-		#DeleteWorkspace(nlistL[i])
+			if (diagnostics=="0"):
+				DeleteWorkspace(nlistS[i]+"int")
+				DeleteWorkspace(nlistL[i]+"int")
+
+			if (diagnostics=="0"):
+				DeleteWorkspace(nlistS[i]+"mon")
+				DeleteWorkspace(nlistS[i]+"det")
+				DeleteWorkspace(nlistS[i]+"sum")
+				DeleteWorkspace(nlistS[i]+"norm")
+				DeleteWorkspace(nlistS[i])
+				DeleteWorkspace(nlistL[i]+"mon")
+				DeleteWorkspace(nlistL[i]+"det")
+				DeleteWorkspace(nlistL[i]+"sum")
+				DeleteWorkspace(nlistL[i]+"norm")
+				DeleteWorkspace(nlistL[i])
 		
 #
 #===========================================================
@@ -1074,6 +1093,7 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
 				a1=2.0*float(incAngles[k])+atan((float(minSpec)-float(specChan))*1.2e-3/3.53)*180.0/pi
 				#print str(2.0*float(incAngles[k]))+" "+str(atan((float(minSpec)-float(specChan))*1.2e-3/3.63)*180.0/pi)+" "+str(a1)
 				RotateInstrumentComponent(wksp+"det","DetectorBench",X="-1.0",Angle=str(a1))
+				floodnorm(wksp+"det",floodfile)
 				GroupDetectors(wksp+"det",wksp+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
 				Divide(wksp+"sum",wksp+"mon",wksp+"norm")
 				Divide(wksp+"det",wksp+"mon",wksp+"detnorm")
@@ -1095,7 +1115,7 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
 					# DeleteWorkspace(wksp+'normPLC')
 					# DeleteWorkspace(wksp+'normt1')
 				ConvertUnits(wksp+"norm",wksp+"RvQ",Target="MomentumTransfer")
-				floodnorm(wksp+"detnorm",floodfile)
+				#floodnorm(wksp+"detnorm",floodfile)
 				DeleteWorkspace(wksp+"sum")
 			DeleteWorkspace(wksp+"mon")
 			DeleteWorkspace(wksp+"det")
