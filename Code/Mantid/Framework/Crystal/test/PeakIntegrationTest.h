@@ -139,7 +139,7 @@ public:
   
 
 
-  void do_test_MINITOPAZ(bool slices)
+  void do_test_MINITOPAZ(bool slices, bool IC)
   {
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
@@ -190,6 +190,7 @@ public:
     alg.setProperty("InPeaksWorkspace", "TOPAZ");
     alg.setProperty("OutPeaksWorkspace", "TOPAZ");
     alg.setProperty("FitSlices", slices);
+    alg.setProperty("IkedaCarpenterTOF", IC);
     alg.setProperty("XMin", -7);
     alg.setProperty("XMax", 7);
     alg.setProperty("YMin", -7);
@@ -210,17 +211,17 @@ public:
     double sigIntensity =peak.getSigmaIntensity();
     //std::cout<<"Peak Intens,sig,slice="<<intensity;
     //std::cout<<","<<sigIntensity<<","<<slices<<std::endl;
-    double intensity0=2697.48;//3682 pref avg
+    double intensity0=4418;
     if( slices)
       intensity0= 5806;
-    TS_ASSERT_DELTA(intensity,intensity0, 100.0);
+    TS_ASSERT_DELTA(intensity,intensity0, 10.0);
   
-    double sig0=97.8525;//141 prev avg
+    double sig0=65;
     if( slices)
       sig0=147;
 
 
-    TS_ASSERT_DELTA( sigIntensity,sig0, 50.0);
+    TS_ASSERT_DELTA( sigIntensity,sig0, 5.0);
   
     AnalysisDataService::Instance().remove("TOPAZ");
 
@@ -228,8 +229,10 @@ public:
 
   void test_MINITOPAZ()
   {
-    do_test_MINITOPAZ(true);
-    do_test_MINITOPAZ(false);
+    do_test_MINITOPAZ(true, false);
+    do_test_MINITOPAZ(false, false);
+    //do_test_MINITOPAZ(true, true);
+    //do_test_MINITOPAZ(false, true);
   }
 
 

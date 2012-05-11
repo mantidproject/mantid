@@ -258,10 +258,8 @@ namespace Mantid
         TOFmax = iTOF;
         if(TOFmax <= TOFmin)continue;
         const int n = TOFmax-TOFmin+1;
-        double bktime = X[TOFmin] + X[TOFmax];
         double pktime = 0.0;
         for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
-        double ratio = pktime/bktime;
 
         if(n >= 8 && IC)//Number of fitting parameters large enough if Ikeda-Carpenter fit
         {
@@ -338,8 +336,7 @@ namespace Mantid
         {
           //Calculate errors correctly for nonPoisson distributions
           for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++) sigI+= E[iTOF]*E[iTOF];
-          I-= ratio*(Y[TOFmin] + Y[TOFmax]);
-          sigI = sqrt(sigI+ratio*ratio*(E[TOFmin]*E[TOFmin] + E[TOFmax]*E[TOFmax]));
+          sigI = sqrt(sigI);
         }
 
         peak.setIntensity(I);
