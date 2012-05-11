@@ -214,7 +214,7 @@ public:
     double intensity0=4418;
     if( slices)
       intensity0= 5806;
-    TS_ASSERT_DELTA(intensity,intensity0, 10.0);
+    TS_ASSERT_DELTA(intensity,intensity0, 100.0);
   
     double sig0=65;
     if( slices)
