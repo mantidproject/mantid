@@ -66,20 +66,31 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-//Add this class to the list of specialised dialogs in this namespace
+namespace IDA
+{
+// Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(IndirectDataAnalysis);
 
+///////////////////////////////////////////////////////////////////////
+// IndirectDataAnalysis
+///////////////////////////////////////////////////////////////////////
+
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_nDec(6), m_valInt(NULL), m_valDbl(NULL), 
-  m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
-  m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdTree(NULL), m_msdDblMng(NULL),
-  m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL), m_furDblMng(NULL),
-  m_furyResFileType(true),
-  m_ffDataCurve(NULL), m_ffFitCurve(NULL),
-  m_cfDataCurve(NULL), m_cfCalcCurve(NULL),
+  UserSubWindow(parent), m_dblEdFac(NULL), m_blnEdFac(NULL), m_stringManager(NULL),
   m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
 {
+  // Allows us to get a handle on a tab using "m_tabs[ELWIN]", for example,
+  // or even m_tabs[
+  m_tabs.insert(std::make_pair(ELWIN,           new Elwin(this)));
+  m_tabs.insert(std::make_pair(MSD_FIT,         new MSDFit(this)));
+  m_tabs.insert(std::make_pair(FURY,            new Fury(this)));
+  m_tabs.insert(std::make_pair(FURY_FIT,        new FuryFit(this)));
+  m_tabs.insert(std::make_pair(CON_FIT,         new ConFit(this)));
+  m_tabs.insert(std::make_pair(ABSORPTION_F2PY, new AbsorptionF2Py(this)));
+  m_tabs.insert(std::make_pair(ABS_COR,         new AbsCor(this)));
 }
+
+const unsigned int IDATab::NUM_DECIMALS = 6;
 
 void IndirectDataAnalysis::closeEvent(QCloseEvent*)
 {
@@ -105,22 +116,15 @@ void IndirectDataAnalysis::initLayout()
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
-  // create validators
-  m_valInt = new QIntValidator(this);
-  m_valDbl = new QDoubleValidator(this);
   // Create Editor Factories
-  m_dblEdFac = new DoubleEditorFactory();
-  m_blnEdFac = new QtCheckBoxFactory();
+  m_dblEdFac = new DoubleEditorFactory(this);
+  m_blnEdFac = new QtCheckBoxFactory(this);
 
-  m_stringManager = new QtStringPropertyManager();
+  m_stringManager = new QtStringPropertyManager(this);
 
-  setupElwin();
-  setupMsd();
-  setupFury();
-  setupFuryFit();
-  setupConFit();
-  setupAbsorptionF2Py();
-  setupAbsCor();
+  auto tab = m_tabs.begin();
+  for( ; tab != m_tabs.end(); ++tab )
+    tab->second->setupTab();
 
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
@@ -142,24 +146,42 @@ void IndirectDataAnalysis::loadSettings()
 
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
-  m_uiForm.elwin_inputFile->readSettings(settings.group());
-  m_uiForm.msd_inputFile->readSettings(settings.group());
-  m_uiForm.fury_iconFile->readSettings(settings.group());
-  m_uiForm.fury_resFile->readSettings(settings.group());
-  m_uiForm.furyfit_inputFile->readSettings(settings.group());
-  m_uiForm.confit_inputFile->readSettings(settings.group());
-  m_uiForm.confit_resInput->readSettings(settings.group());
-  m_uiForm.absp_inputFile->readSettings(settings.group());
-  m_uiForm.abscor_sample->readSettings(settings.group());
-  m_uiForm.abscor_can->readSettings(settings.group());
+  
+  auto tab = m_tabs.begin();
+  for( ; tab != m_tabs.end(); ++tab )
+    tab->second->loadTabSettings(settings);
+
   settings.endGroup();
 }
 
-void IndirectDataAnalysis::setupElwin()
+///////////////////////////////////////////////////////////////////////
+// IDATab
+///////////////////////////////////////////////////////////////////////
+
+Ui::IndirectDataAnalysis & IDATab::uiForm()
+{
+  return m_parent->m_uiForm;
+}
+
+DoubleEditorFactory * IDATab::doubleEditorFactory() 
+{ 
+  return m_parent->m_dblEdFac; 
+}
+
+QtCheckBoxFactory * IDATab::qtCheckBoxFactory() 
+{ 
+  return m_parent->m_blnEdFac; 
+}
+
+///////////////////////////////////////////////////////////////////////
+// Elwin
+///////////////////////////////////////////////////////////////////////
+
+void Elwin::setup()
 {
   // Create QtTreePropertyBrowser object
   m_elwTree = new QtTreePropertyBrowser();
-  m_uiForm.elwin_properties->addWidget(m_elwTree);
+  uiForm().elwin_properties->addWidget(m_elwTree);
 
   // Create Manager Objects
   m_elwDblMng = new QtDoublePropertyManager();
@@ -167,18 +189,18 @@ void IndirectDataAnalysis::setupElwin()
   m_elwGrpMng = new QtGroupPropertyManager();
 
   // Editor Factories
-  m_elwTree->setFactoryForManager(m_elwDblMng, m_dblEdFac);
-  m_elwTree->setFactoryForManager(m_elwBlnMng, m_blnEdFac);
+  m_elwTree->setFactoryForManager(m_elwDblMng, doubleEditorFactory());
+  m_elwTree->setFactoryForManager(m_elwBlnMng, qtCheckBoxFactory());
 
   // Create Properties
   m_elwProp["R1S"] = m_elwDblMng->addProperty("Start");
-  m_elwDblMng->setDecimals(m_elwProp["R1S"], m_nDec);
+  m_elwDblMng->setDecimals(m_elwProp["R1S"], NUM_DECIMALS);
   m_elwProp["R1E"] = m_elwDblMng->addProperty("End");
-  m_elwDblMng->setDecimals(m_elwProp["R1E"], m_nDec);  
+  m_elwDblMng->setDecimals(m_elwProp["R1E"], NUM_DECIMALS);  
   m_elwProp["R2S"] = m_elwDblMng->addProperty("Start");
-  m_elwDblMng->setDecimals(m_elwProp["R2S"], m_nDec);
+  m_elwDblMng->setDecimals(m_elwProp["R2S"], NUM_DECIMALS);
   m_elwProp["R2E"] = m_elwDblMng->addProperty("End");
-  m_elwDblMng->setDecimals(m_elwProp["R2E"], m_nDec);
+  m_elwDblMng->setDecimals(m_elwProp["R2E"], NUM_DECIMALS);
 
   m_elwProp["UseTwoRanges"] = m_elwBlnMng->addProperty("Use Two Ranges");
 
@@ -197,7 +219,7 @@ void IndirectDataAnalysis::setupElwin()
   m_elwPlot = new QwtPlot(this);
   m_elwPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_elwPlot->setAxisFont(QwtPlot::yLeft, this->font());
-  m_uiForm.elwin_plot->addWidget(m_elwPlot);
+  uiForm().elwin_plot->addWidget(m_elwPlot);
   m_elwPlot->setCanvasBackground(Qt::white);
   // We always want one range selector... the second one can be controlled from
   // within the elwinTwoRanges(bool state) function
@@ -216,36 +238,132 @@ void IndirectDataAnalysis::setupElwin()
   
   connect(m_elwDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(elwinUpdateRS(QtProperty*, double)));
   connect(m_elwBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(elwinTwoRanges(QtProperty*, bool)));
-  elwinTwoRanges(0, false);
+  twoRanges(0, false);
 
   // m_uiForm element signals and slots
-  connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
+  connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
 
   // Set any default values
   m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
   m_elwDblMng->setValue(m_elwProp["R1E"], 0.02);
 }
 
-void IndirectDataAnalysis::setupMsd()
+void Elwin::loadSettings(const QSettings & settings)
+{
+  uiForm().elwin_inputFile->readSettings(settings.group());
+}
+
+///////////////////////////////////////////////////////////////////////
+// MSDFit
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+// Fury
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+// FuryFit
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+// ConFit
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+// AbsorptionF2Py
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+// AbsCor
+///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void MSDFit::loadSettings(const QSettings & settings)
+{
+  uiForm().msd_inputFile->readSettings(settings.group());
+}
+
+void Fury::loadSettings(const QSettings & settings)
+{
+  uiForm().fury_iconFile->readSettings(settings.group());
+  uiForm().fury_resFile->readSettings(settings.group());
+}
+
+void FuryFit::loadSettings(const QSettings & settings)
+{
+  uiForm().furyfit_inputFile->readSettings(settings.group());
+}
+
+void ConFit::loadSettings(const QSettings & settings)
+{
+  uiForm().confit_inputFile->readSettings(settings.group());
+  uiForm().confit_resInput->readSettings(settings.group());
+}
+
+void AbsorptionF2Py::loadSettings(const QSettings & settings)
+{
+  uiForm().absp_inputFile->readSettings(settings.group());
+}
+
+void AbsCor::loadSettings(const QSettings & settings)
+{
+  uiForm().abscor_sample->readSettings(settings.group());
+  uiForm().abscor_can->readSettings(settings.group());
+}
+
+
+
+void MSDFit::setup()
 {
   // Tree Browser
   m_msdTree = new QtTreePropertyBrowser();
-  m_uiForm.msd_properties->addWidget(m_msdTree);
+  uiForm().msd_properties->addWidget(m_msdTree);
 
   m_msdDblMng = new QtDoublePropertyManager();
 
-  m_msdTree->setFactoryForManager(m_msdDblMng, m_dblEdFac);
+  m_msdTree->setFactoryForManager(m_msdDblMng, doubleEditorFactory());
 
   m_msdProp["Start"] = m_msdDblMng->addProperty("StartX");
-  m_msdDblMng->setDecimals(m_msdProp["Start"], m_nDec);
+  m_msdDblMng->setDecimals(m_msdProp["Start"], NUM_DECIMALS);
   m_msdProp["End"] = m_msdDblMng->addProperty("EndX");
-  m_msdDblMng->setDecimals(m_msdProp["End"], m_nDec);
+  m_msdDblMng->setDecimals(m_msdProp["End"], NUM_DECIMALS);
 
   m_msdTree->addProperty(m_msdProp["Start"]);
   m_msdTree->addProperty(m_msdProp["End"]);
 
   m_msdPlot = new QwtPlot(this);
-  m_uiForm.msd_plot->addWidget(m_msdPlot);
+  uiForm().msd_plot->addWidget(m_msdPlot);
 
   // Cosmetics
   m_msdPlot->setAxisFont(QwtPlot::xBottom, this->font());
@@ -258,34 +376,34 @@ void IndirectDataAnalysis::setupMsd()
   connect(m_msdRange, SIGNAL(maxValueChanged(double)), this, SLOT(msdMaxChanged(double)));
   connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(msdUpdateRS(QtProperty*, double)));
 
-  connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
+  connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
 }
 
-void IndirectDataAnalysis::setupFury()
+void Fury::setup()
 {
   m_furTree = new QtTreePropertyBrowser();
-  m_uiForm.fury_TreeSpace->addWidget(m_furTree);
+  uiForm().fury_TreeSpace->addWidget(m_furTree);
 
   m_furDblMng = new QtDoublePropertyManager();
 
   m_furPlot = new QwtPlot(this);
-  m_uiForm.fury_PlotSpace->addWidget(m_furPlot);
+  uiForm().fury_PlotSpace->addWidget(m_furPlot);
   m_furPlot->setCanvasBackground(Qt::white);
   m_furPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_furPlot->setAxisFont(QwtPlot::yLeft, this->font());
 
   m_furProp["ELow"] = m_furDblMng->addProperty("ELow");
-  m_furDblMng->setDecimals(m_furProp["ELow"], m_nDec);
+  m_furDblMng->setDecimals(m_furProp["ELow"], NUM_DECIMALS);
   m_furProp["EWidth"] = m_furDblMng->addProperty("EWidth");
-  m_furDblMng->setDecimals(m_furProp["EWidth"], m_nDec);
+  m_furDblMng->setDecimals(m_furProp["EWidth"], NUM_DECIMALS);
   m_furProp["EHigh"] = m_furDblMng->addProperty("EHigh");
-  m_furDblMng->setDecimals(m_furProp["EHigh"], m_nDec);
+  m_furDblMng->setDecimals(m_furProp["EHigh"], NUM_DECIMALS);
 
   m_furTree->addProperty(m_furProp["ELow"]);
   m_furTree->addProperty(m_furProp["EWidth"]);
   m_furTree->addProperty(m_furProp["EHigh"]);
 
-  m_furTree->setFactoryForManager(m_furDblMng, m_dblEdFac);
+  m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
   m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
 
@@ -294,21 +412,21 @@ void IndirectDataAnalysis::setupFury()
   connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(furyMaxChanged(double)));
   connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyUpdateRS(QtProperty*, double)));
   
-  connect(m_uiForm.fury_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.fury_swInput, SLOT(setCurrentIndex(int)));  
-  connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
-  connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
+  connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().fury_swInput, SLOT(setCurrentIndex(int)));  
+  connect(uiForm().fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
+  connect(uiForm().fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
 }
 
-void IndirectDataAnalysis::setupFuryFit()
+void FuryFit::setup()
 {
   m_ffTree = new QtTreePropertyBrowser();
-  m_uiForm.furyfit_properties->addWidget(m_ffTree);
+  uiForm().furyfit_properties->addWidget(m_ffTree);
   
   // Setup FuryFit Plot Window
   m_ffPlot = new QwtPlot(this);
   m_ffPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_ffPlot->setAxisFont(QwtPlot::yLeft, this->font());
-  m_uiForm.furyfit_vlPlot->addWidget(m_ffPlot);
+  uiForm().furyfit_vlPlot->addWidget(m_ffPlot);
   m_ffPlot->setCanvasBackground(QColor(255,255,255));
   
   m_ffRangeS = new MantidQt::MantidWidgets::RangeSelector(m_ffPlot);
@@ -326,19 +444,19 @@ void IndirectDataAnalysis::setupFuryFit()
   m_ffDblMng = new QtDoublePropertyManager();
   m_ffRangeManager = new QtDoublePropertyManager();
   
-  m_ffTree->setFactoryForManager(m_ffDblMng, m_dblEdFac);
-  m_ffTree->setFactoryForManager(m_ffRangeManager, m_dblEdFac);
+  m_ffTree->setFactoryForManager(m_ffDblMng, doubleEditorFactory());
+  m_ffTree->setFactoryForManager(m_ffRangeManager, doubleEditorFactory());
 
   m_ffProp["StartX"] = m_ffRangeManager->addProperty("StartX");
-  m_ffRangeManager->setDecimals(m_ffProp["StartX"], m_nDec);
+  m_ffRangeManager->setDecimals(m_ffProp["StartX"], NUM_DECIMALS);
   m_ffProp["EndX"] = m_ffRangeManager->addProperty("EndX");
-  m_ffRangeManager->setDecimals(m_ffProp["EndX"], m_nDec);
+  m_ffRangeManager->setDecimals(m_ffProp["EndX"], NUM_DECIMALS);
 
   connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyfitRangePropChanged(QtProperty*, double)));
 
   m_ffProp["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
   m_ffProp["BackgroundA0"] = m_ffRangeManager->addProperty("A0");
-  m_ffRangeManager->setDecimals(m_ffProp["BackgroundA0"], m_nDec);
+  m_ffRangeManager->setDecimals(m_ffProp["BackgroundA0"], NUM_DECIMALS);
   m_ffProp["LinearBackground"]->addSubProperty(m_ffProp["BackgroundA0"]);
 
   m_ffProp["Exponential1"] = createExponential("Exponential 1");
@@ -346,27 +464,28 @@ void IndirectDataAnalysis::setupFuryFit()
   
   m_ffProp["StretchedExp"] = createStretchedExp("Stretched Exponential");
 
-  furyfitTypeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
+  typeSelection(uiForm().furyfit_cbFitType->currentIndex());
+
 
   // Connect to PlotGuess checkbox
   connect(m_ffDblMng, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(furyfitPlotGuess(QtProperty*)));
 
   // Signal/slot ui connections
-  connect(m_uiForm.furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
-  connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.furyfit_swInput, SLOT(setCurrentIndex(int)));  
-  connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
+  connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(furyfitPlotInput()));
+  connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
+  connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
+  connect(uiForm().furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
+  connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
+  connect(uiForm().furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // apply validators - furyfit
-  m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
+  uiForm().furyfit_leSpecNo->setValidator(m_intVal);
 
   // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
   m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_ffTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
 }
 
-void IndirectDataAnalysis::setupConFit()
+void ConFit::setup()
 {
   // Create Property Managers
   m_cfGrpMng = new QtGroupPropertyManager();
@@ -375,18 +494,18 @@ void IndirectDataAnalysis::setupConFit()
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
-  m_uiForm.confit_properties->addWidget(m_cfTree);
+  uiForm().confit_properties->addWidget(m_cfTree);
 
   // add factories to managers
-  m_cfTree->setFactoryForManager(m_cfBlnMng, m_blnEdFac);
-  m_cfTree->setFactoryForManager(m_cfDblMng, m_dblEdFac);
+  m_cfTree->setFactoryForManager(m_cfBlnMng, qtCheckBoxFactory());
+  m_cfTree->setFactoryForManager(m_cfDblMng, doubleEditorFactory());
 
   // Create Plot Widget
   m_cfPlot = new QwtPlot(this);
   m_cfPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_cfPlot->setAxisFont(QwtPlot::yLeft, this->font());
   m_cfPlot->setCanvasBackground(Qt::white);
-  m_uiForm.confit_plot->addWidget(m_cfPlot);
+  uiForm().confit_plot->addWidget(m_cfPlot);
 
   // Create Range Selectors
   m_cfRangeS = new MantidQt::MantidWidgets::RangeSelector(m_cfPlot);
@@ -400,18 +519,18 @@ void IndirectDataAnalysis::setupConFit()
   // Populate Property Widget
   m_cfProp["FitRange"] = m_cfGrpMng->addProperty("Fitting Range");
   m_cfProp["StartX"] = m_cfDblMng->addProperty("StartX");
-  m_cfDblMng->setDecimals(m_cfProp["StartX"], m_nDec);
+  m_cfDblMng->setDecimals(m_cfProp["StartX"], NUM_DECIMALS);
   m_cfProp["EndX"] = m_cfDblMng->addProperty("EndX");
-  m_cfDblMng->setDecimals(m_cfProp["EndX"], m_nDec);
+  m_cfDblMng->setDecimals(m_cfProp["EndX"], NUM_DECIMALS);
   m_cfProp["FitRange"]->addSubProperty(m_cfProp["StartX"]);
   m_cfProp["FitRange"]->addSubProperty(m_cfProp["EndX"]);
   m_cfTree->addProperty(m_cfProp["FitRange"]);
 
   m_cfProp["LinearBackground"] = m_cfGrpMng->addProperty("Background");
   m_cfProp["BGA0"] = m_cfDblMng->addProperty("A0");
-  m_cfDblMng->setDecimals(m_cfProp["BGA0"], m_nDec);
+  m_cfDblMng->setDecimals(m_cfProp["BGA0"], NUM_DECIMALS);
   m_cfProp["BGA1"] = m_cfDblMng->addProperty("A1");
-  m_cfDblMng->setDecimals(m_cfProp["BGA1"], m_nDec);
+  m_cfDblMng->setDecimals(m_cfProp["BGA1"], NUM_DECIMALS);
   m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA0"]);
   m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]);
   m_cfTree->addProperty(m_cfProp["LinearBackground"]);
@@ -420,7 +539,7 @@ void IndirectDataAnalysis::setupConFit()
   m_cfProp["DeltaFunction"] = m_cfGrpMng->addProperty("Delta Function");
   m_cfProp["UseDeltaFunc"] = m_cfBlnMng->addProperty("Use");
   m_cfProp["DeltaHeight"] = m_cfDblMng->addProperty("Height");
-  m_cfDblMng->setDecimals(m_cfProp["DeltaHeight"], m_nDec);
+  m_cfDblMng->setDecimals(m_cfProp["DeltaHeight"], NUM_DECIMALS);
   m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["UseDeltaFunc"]);
   m_cfTree->addProperty(m_cfProp["DeltaFunction"]);
 
@@ -441,116 +560,113 @@ void IndirectDataAnalysis::setupConFit()
   // Have HWHM Range linked to Fit Start/End Range
   connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
   m_cfHwhmRange->setRange(-1.0,1.0);
-  confitHwhmUpdateRS(0.02);
+  hwhmUpdateRS(0.02);
 
-  confitTypeSelection(m_uiForm.confit_cbFitType->currentIndex());
-  confitBgTypeSelection(m_uiForm.confit_cbBackground->currentIndex());
+  typeSelection(uiForm().confit_cbFitType->currentIndex());
+  bgTypeSelection(uiForm().confit_cbBackground->currentIndex());
 
   // Replot input automatically when file / spec no changes
-  connect(m_uiForm.confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(confitPlotInput()));
-  connect(m_uiForm.confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(confitPlotInput()));
+  connect(uiForm().confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(confitPlotInput()));
+  connect(uiForm().confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(confitPlotInput()));
   
-  connect(m_uiForm.confit_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.confit_swInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitTypeSelection(int)));
-  connect(m_uiForm.confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(confitBgTypeSelection(int)));
-  connect(m_uiForm.confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(confitPlotInput()));
-  connect(m_uiForm.confit_pbSequential, SIGNAL(clicked()), this, SLOT(confitSequential()));
+  connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().confit_swInput, SLOT(setCurrentIndex(int)));
+  connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitTypeSelection(int)));
+  connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(confitBgTypeSelection(int)));
+  connect(uiForm().confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(confitPlotInput()));
+  connect(uiForm().confit_pbSequential, SIGNAL(clicked()), this, SLOT(confitSequential()));
 
-  m_uiForm.confit_leSpecNo->setValidator(m_valInt);
-  m_uiForm.confit_leSpecMax->setValidator(m_valInt);
+  uiForm().confit_leSpecNo->setValidator(m_intVal);
+  uiForm().confit_leSpecMax->setValidator(m_intVal);
 
   // Context menu
   m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_cfTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
 }
 
-void IndirectDataAnalysis::setupAbsorptionF2Py()
+void AbsorptionF2Py::setup()
 {
   // set signals and slot connections for F2Py Absorption routine
-  connect(m_uiForm.absp_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.absp_swInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(absf2pShape(int)));
-  connect(m_uiForm.absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(absf2pUseCanChecked(bool)));
-  connect(m_uiForm.absp_letc1, SIGNAL(editingFinished()), this, SLOT(absf2pTCSync()));
+  connect(uiForm().absp_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swInput, SLOT(setCurrentIndex(int)));
+  connect(uiForm().absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(absf2pShape(int)));
+  connect(uiForm().absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(absf2pUseCanChecked(bool)));
+  connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(absf2pTCSync()));
   // apply QValidators to items.
-  m_uiForm.absp_lewidth->setValidator(m_valDbl);
-  m_uiForm.absp_leavar->setValidator(m_valDbl);
+  uiForm().absp_lewidth->setValidator(m_dblVal);
+  uiForm().absp_leavar->setValidator(m_dblVal);
   // sample
-  m_uiForm.absp_lesamden->setValidator(m_valDbl);
-  m_uiForm.absp_lesamsigs->setValidator(m_valDbl);
-  m_uiForm.absp_lesamsiga->setValidator(m_valDbl);
+  uiForm().absp_lesamden->setValidator(m_dblVal);
+  uiForm().absp_lesamsigs->setValidator(m_dblVal);
+  uiForm().absp_lesamsiga->setValidator(m_dblVal);
   // can
-  m_uiForm.absp_lecanden->setValidator(m_valDbl);
-  m_uiForm.absp_lecansigs->setValidator(m_valDbl);
-  m_uiForm.absp_lecansiga->setValidator(m_valDbl);
+  uiForm().absp_lecanden->setValidator(m_dblVal);
+  uiForm().absp_lecansigs->setValidator(m_dblVal);
+  uiForm().absp_lecansiga->setValidator(m_dblVal);
   // flat shape
-  m_uiForm.absp_lets->setValidator(m_valDbl);
-  m_uiForm.absp_letc1->setValidator(m_valDbl);
-  m_uiForm.absp_letc2->setValidator(m_valDbl);
+  uiForm().absp_lets->setValidator(m_dblVal);
+  uiForm().absp_letc1->setValidator(m_dblVal);
+  uiForm().absp_letc2->setValidator(m_dblVal);
   // cylinder shape
-  m_uiForm.absp_ler1->setValidator(m_valDbl);
-  m_uiForm.absp_ler2->setValidator(m_valDbl);
-  m_uiForm.absp_ler3->setValidator(m_valDbl);
+  uiForm().absp_ler1->setValidator(m_dblVal);
+  uiForm().absp_ler2->setValidator(m_dblVal);
+  uiForm().absp_ler3->setValidator(m_dblVal);
 
   // "Nudge" color of title of QGroupBox to change.
-  absf2pUseCanChecked(m_uiForm.absp_ckUseCan->isChecked());
+  useCanChecked(uiForm().absp_ckUseCan->isChecked());
 }
 
-void IndirectDataAnalysis::setupAbsCor()
+void AbsCor::setup()
 {
   // Disable Container inputs is "Use Container" is not checked
-  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_lbContainerInputType, SLOT(setEnabled(bool)));
-  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_cbContainerInputType, SLOT(setEnabled(bool)));
-  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_swContainerInput, SLOT(setEnabled(bool)));
+  connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_lbContainerInputType, SLOT(setEnabled(bool)));
+  connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_cbContainerInputType, SLOT(setEnabled(bool)));
+  connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_swContainerInput, SLOT(setEnabled(bool)));
 
-  connect(m_uiForm.abscor_cbSampleInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.abscor_swSampleInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.abscor_cbContainerInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.abscor_swContainerInput, SLOT(setCurrentIndex(int)));
+  connect(uiForm().abscor_cbSampleInputType, SIGNAL(currentIndexChanged(int)), uiForm().abscor_swSampleInput, SLOT(setCurrentIndex(int)));
+  connect(uiForm().abscor_cbContainerInputType, SIGNAL(currentIndexChanged(int)), uiForm().abscor_swContainerInput, SLOT(setCurrentIndex(int)));
 }
 
-bool IndirectDataAnalysis::validateElwin()
+QString Elwin::validate()
 {
-  bool valid = true;
+  if ( ! uiForm().elwin_inputFile->isValid() )
+    return uiForm().elwin_inputFile->getFileProblem();
 
-  if ( ! m_uiForm.elwin_inputFile->isValid() )
-  {
-    valid = false;
-  }
-
-  return valid;
+  return "";
 }
 
-bool IndirectDataAnalysis::validateMsd()
+QString MSDFit::validate()
 {
-  bool valid = true;
+  if ( ! uiForm().msd_inputFile->isValid() )
+    return uiForm().msd_inputFile->getFileProblem();
 
-  if ( ! m_uiForm.msd_inputFile->isValid() )
-  {
-    valid = false;
-  }
-
-  return valid;
+  return "";
 }
 
-std::string IndirectDataAnalysis::validateFury()
+QString Fury::validate()
 {
-  switch ( m_uiForm.fury_cbInputType->currentIndex() )
+  switch ( uiForm().fury_cbInputType->currentIndex() )
   {
   case 0: // File
     {
-      if ( ! m_uiForm.fury_iconFile->isValid() )
+      if ( ! uiForm().fury_iconFile->isValid() )
         return "Empty or otherwise invalid reduction file field.";
     }
     break;
   case 1: // Workspace
     {
-      if ( m_uiForm.fury_wsSample->currentText() == "" )
+      if ( uiForm().fury_wsSample->currentText() == "" )
         return "No workspace selected.";
     }
     break;
   }
 
-  if ( ! m_uiForm.fury_resFile->isValid()  )
+  if ( ! uiForm().fury_resFile->isValid()  )
     return "Invalid or empty resolution file field.";
 
+  return "";
+}
+
+QString FuryFit::validate()
+{
   return "";
 }
 
@@ -559,214 +675,222 @@ std::string IndirectDataAnalysis::validateFury()
  *
  * @returns an string containing an error message if invalid input detected, else an empty string.
  */
-std::string IndirectDataAnalysis::validateConfit()
+QString ConFit::validate()
 {
-  if ( m_uiForm.confit_cbInputType->currentIndex() == 0 ) // File
+  if ( uiForm().confit_cbInputType->currentIndex() == 0 ) // File
   {
-    if ( ! m_uiForm.confit_inputFile->isValid() )
+    if ( ! uiForm().confit_inputFile->isValid() )
       return "Empty or otherwise invalid file field.";
   }
   else // Workspace
   {
-    if ( m_uiForm.confit_wsSample->currentText() == "" )
+    if ( uiForm().confit_wsSample->currentText() == "" )
       return "No workspace selected.";
   }
 
-  if( ! m_uiForm.confit_resInput->isValid() )
+  if( ! uiForm().confit_resInput->isValid() )
     return "Invalid or empty resolution file field.";
 
   // Enforce the rule that at least one fit is needed; either a delta function, one or two lorentzian functions,
   // or both.  (The resolution function must be convolved with a model.)
-  if ( m_uiForm.confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+  if ( uiForm().confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
     return "No fit function has been selected.";
 
   return "";
 }
 
-bool IndirectDataAnalysis::validateAbsorptionF2Py()
+QString AbsorptionF2Py::validate()
 {
-  bool valid = true;
-
+  QStringList invalidInputs;
+  
   // Input (file or workspace)
-  if ( m_uiForm.absp_cbInputType->currentText() == "File" )
+  if ( uiForm().absp_cbInputType->currentText() == "File" )
   {
-    if ( ! m_uiForm.absp_inputFile->isValid() ) { valid = false; }
+    if ( ! uiForm().absp_inputFile->isValid() )
+      invalidInputs.append("Input File");
   }
   else
   {
-    if ( m_uiForm.absp_wsInput->currentText() == "" ) { valid = false; }
+    if ( uiForm().absp_wsInput->currentText() == "" )
+      invalidInputs.append("Input Workspace");
   }
 
-  if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
+  if ( uiForm().absp_cbShape->currentText() == "Flat" )
   {
     // Flat Geometry
-    if ( m_uiForm.absp_lets->text() != "" )
+    if ( uiForm().absp_lets->text() != "" )
     {
-      m_uiForm.absp_valts->setText(" ");
+      uiForm().absp_valts->setText(" ");
     }
     else
     {
-      m_uiForm.absp_valts->setText("*");
-      valid = false;
+      uiForm().absp_valts->setText("*");
+      invalidInputs.append("Thickness");
     }
 
-    if ( m_uiForm.absp_ckUseCan->isChecked() )
+    if ( uiForm().absp_ckUseCan->isChecked() )
     {
-      if ( m_uiForm.absp_letc1->text() != "" )
+      if ( uiForm().absp_letc1->text() != "" )
       {
-        m_uiForm.absp_valtc1->setText(" ");
+        uiForm().absp_valtc1->setText(" ");
       }
       else
       {
-        m_uiForm.absp_valtc1->setText("*");
-        valid = false;
+        uiForm().absp_valtc1->setText("*");
+        invalidInputs.append("Front Thickness");
       }
 
-      if ( m_uiForm.absp_letc2->text() != "" )
+      if ( uiForm().absp_letc2->text() != "" )
       {
-        m_uiForm.absp_valtc2->setText(" ");
+        uiForm().absp_valtc2->setText(" ");
       }
       else
       {
-        m_uiForm.absp_valtc2->setText("*");
-        valid = false;
+        uiForm().absp_valtc2->setText("*");
+        invalidInputs.append("Back Thickness");
       }
     }
   }
 
-  if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
+  if ( uiForm().absp_cbShape->currentText() == "Cylinder" )
   {
     // Cylinder geometry
-    if ( m_uiForm.absp_ler1->text() != "" )
+    if ( uiForm().absp_ler1->text() != "" )
     {
-      m_uiForm.absp_valR1->setText(" ");
+      uiForm().absp_valR1->setText(" ");
     }
     else
     {
-      m_uiForm.absp_valR1->setText("*");
-      valid = false;
+      uiForm().absp_valR1->setText("*");
+      invalidInputs.append("Radius 1");
     }
 
-    if ( m_uiForm.absp_ler2->text() != "" )
+    if ( uiForm().absp_ler2->text() != "" )
     {
-      m_uiForm.absp_valR2->setText(" ");
+      uiForm().absp_valR2->setText(" ");
     }
     else
     {
-      m_uiForm.absp_valR2->setText("*");
-      valid = false;
+      uiForm().absp_valR2->setText("*");
+      invalidInputs.append("Radius 2");
     }
     
     // R3  only relevant when using can
-    if ( m_uiForm.absp_ckUseCan->isChecked() )
+    if ( uiForm().absp_ckUseCan->isChecked() )
     {
-      if ( m_uiForm.absp_ler3->text() != "" )
+      if ( uiForm().absp_ler3->text() != "" )
       {
-        m_uiForm.absp_valR3->setText(" ");
+        uiForm().absp_valR3->setText(" ");
       }
       else
       {
-        m_uiForm.absp_valR3->setText("*");
-        valid = false;
+        uiForm().absp_valR3->setText("*");
+        invalidInputs.append("Radius 3");
       }
     }
   }
 
   // Can angle to beam || Step size
-  if ( m_uiForm.absp_leavar->text() != "" )
+  if ( uiForm().absp_leavar->text() != "" )
   {
-    m_uiForm.absp_valAvar->setText(" ");
+    uiForm().absp_valAvar->setText(" ");
   }
   else
   {
-    m_uiForm.absp_valAvar->setText("*");
-    valid = false;
+    uiForm().absp_valAvar->setText("*");
+    invalidInputs.append("Can Angle to Beam");
   }
 
   // Beam Width
-  if ( m_uiForm.absp_lewidth->text() != "" )
+  if ( uiForm().absp_lewidth->text() != "" )
   {
-    m_uiForm.absp_valWidth->setText(" ");
+    uiForm().absp_valWidth->setText(" ");
   }
   else
   {
-    m_uiForm.absp_valWidth->setText("*");
-    valid = false;
+    uiForm().absp_valWidth->setText("*");
+    invalidInputs.append("Beam Width");
   }
 
   // Sample details
-  if ( m_uiForm.absp_lesamden->text() != "" )
+  if ( uiForm().absp_lesamden->text() != "" )
   {
-    m_uiForm.absp_valSamden->setText(" ");
+    uiForm().absp_valSamden->setText(" ");
   }
   else
   {
-    m_uiForm.absp_valSamden->setText("*");
-    valid = false;
+    uiForm().absp_valSamden->setText("*");
+    invalidInputs.append("Sample Number Density");
   }
 
-  if ( m_uiForm.absp_lesamsigs->text() != "" )
+  if ( uiForm().absp_lesamsigs->text() != "" )
   {
-    m_uiForm.absp_valSamsigs->setText(" ");
+    uiForm().absp_valSamsigs->setText(" ");
   }
   else
   {
-    m_uiForm.absp_valSamsigs->setText("*");
-    valid = false;
+    uiForm().absp_valSamsigs->setText("*");
+    invalidInputs.append("Sample Scattering Cross-Section");
   }
 
-  if ( m_uiForm.absp_lesamsiga->text() != "" )
+  if ( uiForm().absp_lesamsiga->text() != "" )
   {
-    m_uiForm.absp_valSamsiga->setText(" ");
+    uiForm().absp_valSamsiga->setText(" ");
   }
   else
   {
-    m_uiForm.absp_valSamsiga->setText("*");
-    valid = false;
+    uiForm().absp_valSamsiga->setText("*");
+    invalidInputs.append("Sample Absorption Cross-Section");
   }
 
   // Can details (only test if "Use Can" is checked)
-  if ( m_uiForm.absp_ckUseCan->isChecked() )
+  if ( uiForm().absp_ckUseCan->isChecked() )
   {
-    if ( m_uiForm.absp_lecanden->text() != "" )
+    if ( uiForm().absp_lecanden->text() != "" )
     {
-      m_uiForm.absp_valCanden->setText(" ");
+      uiForm().absp_valCanden->setText(" ");
     }
     else
     {
-      m_uiForm.absp_valCanden->setText("*");
-      valid = false;
+      uiForm().absp_valCanden->setText("*");
+      invalidInputs.append("Can Number Density");
     }
 
-    if ( m_uiForm.absp_lecansigs->text() != "" )
+    if ( uiForm().absp_lecansigs->text() != "" )
     {
-      m_uiForm.absp_valCansigs->setText(" ");
+      uiForm().absp_valCansigs->setText(" ");
     }
     else
     {
-      m_uiForm.absp_valCansigs->setText("*");
-      valid = false;
+      uiForm().absp_valCansigs->setText("*");
+      invalidInputs.append("Can Scattering Cross-Section");
     }
 
-    if ( m_uiForm.absp_lecansiga->text() != "" )
+    if ( uiForm().absp_lecansiga->text() != "" )
     {
-      m_uiForm.absp_valCansiga->setText(" ");
+      uiForm().absp_valCansiga->setText(" ");
     }
     else
     {
-      m_uiForm.absp_valCansiga->setText("*");
-      valid = false;
+      uiForm().absp_valCansiga->setText("*");
+      invalidInputs.append("Can Absorption Cross-Section");
     }
   }
 
-  return valid;
+  QString error = "Please check the following inputs: \n" + invalidInputs.join("\n");
+  return error;
 }
 
-Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::furyfitCreateFunction(bool tie)
+QString AbsCor::validate()
+{
+  return "";
+}
+
+Mantid::API::CompositeFunction_sptr FuryFit::createFunction(bool tie)
 {
   Mantid::API::CompositeFunction_sptr result( new Mantid::API::CompositeFunction );
   QString fname;
-  const int fitType = m_uiForm.furyfit_cbFitType->currentIndex();
+  const int fitType = uiForm().furyfit_cbFitType->currentIndex();
 
   Mantid::API::IFunction_sptr func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
   func->setParameter("A0", m_ffDblMng->value(m_ffProp["BackgroundA0"]));
@@ -777,13 +901,13 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::furyfitCreateFunction(
   if ( fitType == 2 ) { fname = "Stretched Exponential"; }
   else { fname = "Exponential 1"; }
 
-  result->addFunction(furyfitCreateUserFunction(fname, tie));
+  result->addFunction(createUserFunction(fname, tie));
 
   if ( fitType == 1 || fitType == 3 )
   {
     if ( fitType == 1 ) { fname = "Exponential 2"; }
     else { fname = "Stretched Exponential"; }
-    result->addFunction(furyfitCreateUserFunction(fname, tie));
+    result->addFunction(createUserFunction(fname, tie));
   }
 
   // Return CompositeFunction object to caller.
@@ -791,7 +915,7 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::furyfitCreateFunction(
   return result;
 }
 
-Mantid::API::IFunction_sptr IndirectDataAnalysis::furyfitCreateUserFunction(const QString & name, bool tie)
+Mantid::API::IFunction_sptr FuryFit::createUserFunction(const QString & name, bool tie)
 {
   Mantid::API::IFunction_sptr result = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");  
   std::string formula;
@@ -885,7 +1009,7 @@ namespace
  *
  * @returns the composite fitting function.
  */
-Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(bool tie)
+Mantid::API::CompositeFunction_sptr ConFit::createFunction(bool tie)
 {
   auto conv = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
   Mantid::API::CompositeFunction_sptr comp( new Mantid::API::CompositeFunction );
@@ -899,7 +1023,7 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(b
   func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
   index = comp->addFunction(func); 
 
-  const int bgType = m_uiForm.confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
+  const int bgType = uiForm().confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
   
   if ( tie  || bgType == 0 || ! m_cfProp["BGA0"]->subProperties().isEmpty() )
   {
@@ -928,7 +1052,7 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(b
   // --------------------------------------------
   func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
   index = conv->addFunction(func);
-  std::string resfilename = m_uiForm.confit_resInput->getFirstFilename().toStdString();
+  std::string resfilename = uiForm().confit_resInput->getFirstFilename().toStdString();
   Mantid::API::IFunction::Attribute attr(resfilename);
   func->setAttribute("FileName", attr);
 
@@ -957,7 +1081,7 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(b
   // -----------------------------------------------------
   std::string prefix1;
   std::string prefix2;
-  switch ( m_uiForm.confit_cbFitType->currentIndex() )
+  switch ( uiForm().confit_cbFitType->currentIndex() )
   {
   case 0: // No Lorentzians
 
@@ -1016,16 +1140,16 @@ Mantid::API::CompositeFunction_sptr IndirectDataAnalysis::confitCreateFunction(b
   return comp;
 }
 
-QtProperty* IndirectDataAnalysis::createLorentzian(const QString & name)
+QtProperty* ConFit::createLorentzian(const QString & name)
 {
   QtProperty* lorentzGroup = m_cfGrpMng->addProperty(name);
   m_cfProp[name+".Height"] = m_cfDblMng->addProperty("Height");
   // m_cfDblMng->setRange(m_cfProp[name+".Height"], 0.0, 1.0); // 0 < Height < 1
   m_cfProp[name+".PeakCentre"] = m_cfDblMng->addProperty("PeakCentre");
   m_cfProp[name+".HWHM"] = m_cfDblMng->addProperty("HWHM");
-  m_cfDblMng->setDecimals(m_cfProp[name+".Height"], m_nDec);
-  m_cfDblMng->setDecimals(m_cfProp[name+".PeakCentre"], m_nDec);
-  m_cfDblMng->setDecimals(m_cfProp[name+".HWHM"], m_nDec);
+  m_cfDblMng->setDecimals(m_cfProp[name+".Height"], NUM_DECIMALS);
+  m_cfDblMng->setDecimals(m_cfProp[name+".PeakCentre"], NUM_DECIMALS);
+  m_cfDblMng->setDecimals(m_cfProp[name+".HWHM"], NUM_DECIMALS);
   m_cfDblMng->setValue(m_cfProp[name+".HWHM"], 0.02);
   lorentzGroup->addSubProperty(m_cfProp[name+".Height"]);
   lorentzGroup->addSubProperty(m_cfProp[name+".PeakCentre"]);
@@ -1033,34 +1157,34 @@ QtProperty* IndirectDataAnalysis::createLorentzian(const QString & name)
   return lorentzGroup;
 }
 
-QtProperty* IndirectDataAnalysis::createExponential(const QString & name)
+QtProperty* FuryFit::createExponential(const QString & name)
 {
   QtProperty* expGroup = m_groupManager->addProperty(name);
   m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
-  m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], m_nDec);
+  m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], NUM_DECIMALS);
   m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
-  m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], m_nDec);
+  m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], NUM_DECIMALS);
   expGroup->addSubProperty(m_ffProp[name+".Intensity"]);
   expGroup->addSubProperty(m_ffProp[name+".Tau"]);
   return expGroup;
 }
 
-QtProperty* IndirectDataAnalysis::createStretchedExp(const QString & name)
+QtProperty* FuryFit::createStretchedExp(const QString & name)
 {
   QtProperty* prop = m_groupManager->addProperty(name);
   m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
   m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
   m_ffProp[name+".Beta"] = m_ffDblMng->addProperty("Beta");
-  m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], m_nDec);
-  m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], m_nDec);
-  m_ffDblMng->setDecimals(m_ffProp[name+".Beta"], m_nDec);
+  m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], NUM_DECIMALS);
+  m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], NUM_DECIMALS);
+  m_ffDblMng->setDecimals(m_ffProp[name+".Beta"], NUM_DECIMALS);
   prop->addSubProperty(m_ffProp[name+".Intensity"]);
   prop->addSubProperty(m_ffProp[name+".Tau"]);
   prop->addSubProperty(m_ffProp[name+".Beta"]);
   return prop;
 }
 
-void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
+void ConFit::populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
 {
   // Get subproperties of group and apply them as parameters on the function object
   QList<QtProperty*> props = group->subProperties();
@@ -1082,7 +1206,7 @@ void IndirectDataAnalysis::populateFunction(Mantid::API::IFunction_sptr func, Ma
   }
 }
 
-QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index)
+QwtPlotCurve* IDATab::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const std::string & workspace, size_t index)
 {
   if ( curve != NULL )
   {
@@ -1119,7 +1243,7 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
  * @returns A pair of doubles indicating the range
  * @throws std::invalid_argument If the curve has too few points (<2) or is NULL
  */
-std::pair<double,double> IndirectDataAnalysis::getCurveRange(QwtPlotCurve* curve)
+std::pair<double,double> IDATab::getCurveRange(QwtPlotCurve* curve)
 {
   if( !curve )
   {
@@ -1136,24 +1260,18 @@ std::pair<double,double> IndirectDataAnalysis::getCurveRange(QwtPlotCurve* curve
 
 void IndirectDataAnalysis::run()
 {
-  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  const unsigned int TAB = m_uiForm.tabWidget->currentIndex();
 
-  if ( tabName == "Elwin" )  { elwinRun(); }
-  else if ( tabName == "MSD Fit" ) { msdRun(); }
-  else if ( tabName == "Fury" ) { furyRun(); }
-  else if ( tabName == "FuryFit" ) { furyfitRun(); }
-  else if ( tabName == "ConvFit" ) { confitRun(); }
-  else if ( tabName == "Calculate Corrections" ) { absf2pRun(); }
-  else if ( tabName == "Apply Corrections" ) { abscorRun(); }
-  else { showInformationBox("This tab does not have a 'Run' action."); }
+  m_tabs[TAB]->runTab();
 }
 
-void IndirectDataAnalysis::fitContextMenu(const QPoint &)
+void IDATab::fitContextMenu(const QPoint &)
 {
+  /*
   QtBrowserItem* item(NULL);
   QtDoublePropertyManager* dblMng(NULL);
 
-  int pageNo = m_uiForm.tabWidget->currentIndex();
+  int pageNo = uiForm().tabWidget->currentIndex();
   if ( pageNo == 3 )
   { // FuryFit
     item = m_ffTree->currentItem();
@@ -1202,11 +1320,13 @@ void IndirectDataAnalysis::fitContextMenu(const QPoint &)
 
   // Show the menu
   menu->popup(QCursor::pos());
+  */
 }
 
-void IndirectDataAnalysis::fixItem()
+void IDATab::fixItem()
 {
-  int pageNo = m_uiForm.tabWidget->currentIndex();
+  /*
+  int pageNo = uiForm().tabWidget->currentIndex();
 
   QtBrowserItem* item(NULL);
   if ( pageNo == 3 )
@@ -1230,14 +1350,16 @@ void IndirectDataAnalysis::fixItem()
 
   m_fixedProps[fixedProp] = prop;
 
-  item->parent()->property()->removeSubProperty(prop);    
+  item->parent()->property()->removeSubProperty(prop);
+  */
 }
 
-void IndirectDataAnalysis::unFixItem()
+void IDATab::unFixItem()
 {
+  /*
   QtBrowserItem* item(NULL);
   
-  int pageNo = m_uiForm.tabWidget->currentIndex();
+  int pageNo = uiForm().tabWidget->currentIndex();
   if ( pageNo == 3 )
   { // FuryFit
     item = m_ffTree->currentItem();
@@ -1260,19 +1382,14 @@ void IndirectDataAnalysis::unFixItem()
   QtProperty* proplbl = prop->subProperties()[0];
   delete proplbl;
   delete prop;
+  */
 }
 
-void IndirectDataAnalysis::elwinRun()
+void Elwin::run()
 {
-  if ( ! validateElwin() )
-  {
-    showInformationBox("Please check your input.");
-    return;
-  }
-
   QString pyInput =
     "from IndirectDataAnalysis import elwin\n"
-    "input = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
+    "input = [r'" + uiForm().elwin_inputFile->getFilenames().join("', r'") + "']\n"
     "eRange = [ " + QString::number(m_elwDblMng->value(m_elwProp["R1S"])) +","+ QString::number(m_elwDblMng->value(m_elwProp["R1E"]));
 
   if ( m_elwBlnMng->value(m_elwProp["UseTwoRanges"]) )
@@ -1282,19 +1399,19 @@ void IndirectDataAnalysis::elwinRun()
 
   pyInput+= "]\n";
 
-  if ( m_uiForm.elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  if ( uiForm().elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";
 
-  if ( m_uiForm.elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  if ( uiForm().elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
   else pyInput += "plot = False\n";
 
-  if ( m_uiForm.elwin_ckSave->isChecked() ) pyInput += "save = True\n";
+  if ( uiForm().elwin_ckSave->isChecked() ) pyInput += "save = True\n";
   else pyInput += "save = False\n";
 
   pyInput +=
     "eq1_ws, eq2_ws = elwin(input, eRange, Save=save, Verbose=verbose, Plot=plot)\n";
 
-  if ( m_uiForm.elwin_ckConcat->isChecked() )
+  if ( uiForm().elwin_ckConcat->isChecked() )
   {
     pyInput += "from IndirectDataAnalysis import concatWSs\n"
       "concatWSs(eq1_ws, 'MomentumTransfer', 'ElwinQResults')\n"
@@ -1305,11 +1422,11 @@ void IndirectDataAnalysis::elwinRun()
 
 }
 
-void IndirectDataAnalysis::elwinPlotInput()
+void Elwin::plotInput()
 {
-  if ( m_uiForm.elwin_inputFile->isValid() )
+  if ( uiForm().elwin_inputFile->isValid() )
   {
-    QString filename = m_uiForm.elwin_inputFile->getFirstFilename();
+    QString filename = uiForm().elwin_inputFile->getFirstFilename();
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
@@ -1321,7 +1438,7 @@ void IndirectDataAnalysis::elwinPlotInput()
     m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, workspace, 0);
     try
     {
-      const std::pair<double, double> range = getCurveRange(m_elwDataCurve);    
+      const std::pair<double, double> range = getCurveRange(m_elwDataCurve);
       m_elwR1->setRange(range.first, range.second);
       // Replot
       m_elwPlot->replot();
@@ -1338,12 +1455,12 @@ void IndirectDataAnalysis::elwinPlotInput()
   }
 }
 
-void IndirectDataAnalysis::elwinTwoRanges(QtProperty*, bool val)
+void Elwin::twoRanges(QtProperty*, bool val)
 {
   m_elwR2->setVisible(val);
 }
 
-void IndirectDataAnalysis::elwinMinChanged(double val)
+void Elwin::minChanged(double val)
 {
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_elwR1 )
@@ -1356,7 +1473,7 @@ void IndirectDataAnalysis::elwinMinChanged(double val)
   }
 }
 
-void IndirectDataAnalysis::elwinMaxChanged(double val)
+void Elwin::maxChanged(double val)
 {
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_elwR1 )
@@ -1369,7 +1486,7 @@ void IndirectDataAnalysis::elwinMaxChanged(double val)
   }
 }
 
-void IndirectDataAnalysis::elwinUpdateRS(QtProperty* prop, double val)
+void Elwin::updateRS(QtProperty* prop, double val)
 {
   if ( prop == m_elwProp["R1S"] ) m_elwR1->setMinimum(val);
   else if ( prop == m_elwProp["R1E"] ) m_elwR1->setMaximum(val);
@@ -1377,27 +1494,21 @@ void IndirectDataAnalysis::elwinUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_elwProp["R2E"] ) m_elwR2->setMaximum(val);
 }
 
-void IndirectDataAnalysis::msdRun()
+void MSDFit::run()
 {
-  if ( ! validateMsd() )
-  {
-    showInformationBox("Please check your input.");
-    return;
-  }
-
   QString pyInput =
     "from IndirectDataAnalysis import msdfit\n"
     "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
     "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
-    "inputs = [r'" + m_uiForm.msd_inputFile->getFilenames().join("', r'") + "']\n";
+    "inputs = [r'" + uiForm().msd_inputFile->getFilenames().join("', r'") + "']\n";
 
-  if ( m_uiForm.msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";
 
-  if ( m_uiForm.msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  if ( uiForm().msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
   else pyInput += "plot = False\n";
 
-  if ( m_uiForm.msd_ckSave->isChecked() ) pyInput += "save = True\n";
+  if ( uiForm().msd_ckSave->isChecked() ) pyInput += "save = True\n";
   else pyInput += "save = False\n";
 
   pyInput +=
@@ -1406,11 +1517,11 @@ void IndirectDataAnalysis::msdRun()
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
-void IndirectDataAnalysis::msdPlotInput()
+void MSDFit::plotInput()
 {
-  if ( m_uiForm.msd_inputFile->isValid() )
+  if ( uiForm().msd_inputFile->isValid() )
   {
-    QString filename = m_uiForm.msd_inputFile->getFirstFilename();
+    QString filename = uiForm().msd_inputFile->getFirstFilename();
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
@@ -1438,55 +1549,48 @@ void IndirectDataAnalysis::msdPlotInput()
   }
 }
 
-void IndirectDataAnalysis::msdMinChanged(double val)
+void MSDFit::minChanged(double val)
 {
   m_msdDblMng->setValue(m_msdProp["Start"], val);
 }
 
-void IndirectDataAnalysis::msdMaxChanged(double val)
+void MSDFit::maxChanged(double val)
 {
   m_msdDblMng->setValue(m_msdProp["End"], val);
 }
 
-void IndirectDataAnalysis::msdUpdateRS(QtProperty* prop, double val)
+void MSDFit::updateRS(QtProperty* prop, double val)
 {
   if ( prop == m_msdProp["Start"] ) m_msdRange->setMinimum(val);
   else if ( prop == m_msdProp["End"] ) m_msdRange->setMaximum(val);
 }
 
-void IndirectDataAnalysis::furyRun()
+void Fury::run()
 {
-  const std::string error = validateFury();
-  if ( ! error.empty() )
-  {
-    showInformationBox("Please check your input: " + QString::fromStdString(error));
-    return;
-  }
-
   QString filenames;
-  switch ( m_uiForm.fury_cbInputType->currentIndex() )
+  switch ( uiForm().fury_cbInputType->currentIndex() )
   {
   case 0:
-    filenames = m_uiForm.fury_iconFile->getFilenames().join("', r'");
+    filenames = uiForm().fury_iconFile->getFilenames().join("', r'");
     break;
   case 1:
-    filenames = m_uiForm.fury_wsSample->currentText();
+    filenames = uiForm().fury_wsSample->currentText();
     break;
   }
 
   QString pyInput =
     "from IndirectDataAnalysis import fury\n"
     "samples = [r'" + filenames + "']\n"
-    "resolution = r'" + m_uiForm.fury_resFile->getFirstFilename() + "'\n"
+    "resolution = r'" + uiForm().fury_resFile->getFirstFilename() + "'\n"
     "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
 
-  if ( m_uiForm.fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  if ( uiForm().fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";
 
-  if ( m_uiForm.fury_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  if ( uiForm().fury_ckPlot->isChecked() ) pyInput += "plot = True\n";
   else pyInput += "plot = False\n";
 
-  if ( m_uiForm.fury_ckSave->isChecked() ) pyInput += "save = True\n";
+  if ( uiForm().fury_ckSave->isChecked() ) pyInput += "save = True\n";
   else pyInput += "save = False\n";
 
   pyInput +=
@@ -1494,7 +1598,7 @@ void IndirectDataAnalysis::furyRun()
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
-void IndirectDataAnalysis::furyResType(const QString& type)
+void Fury::resType(const QString& type)
 {
   QStringList exts;
   if ( type == "RES File" )
@@ -1507,17 +1611,17 @@ void IndirectDataAnalysis::furyResType(const QString& type)
     exts.append("_red.nxs");
     m_furyResFileType = false;
   }
-  m_uiForm.fury_resFile->setFileExtensions(exts);
+  uiForm().fury_resFile->setFileExtensions(exts);
 }
 
-void IndirectDataAnalysis::furyPlotInput()
+void Fury::plotInput()
 {
   std::string workspace;
-  if ( m_uiForm.fury_cbInputType->currentIndex() == 0 )
+  if ( uiForm().fury_cbInputType->currentIndex() == 0 )
   {
-    if ( m_uiForm.fury_iconFile->isValid() )
+    if ( uiForm().fury_iconFile->isValid() )
     {
-      QString filename = m_uiForm.fury_iconFile->getFirstFilename();
+      QString filename = uiForm().fury_iconFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
@@ -1532,9 +1636,9 @@ void IndirectDataAnalysis::furyPlotInput()
       return;
     }
   }
-  else if ( m_uiForm.fury_cbInputType->currentIndex() == 1 )
+  else if ( uiForm().fury_cbInputType->currentIndex() == 1 )
   {
-    workspace = m_uiForm.fury_wsSample->currentText().toStdString();
+    workspace = uiForm().fury_wsSample->currentText().toStdString();
     if ( workspace.empty() )
     {
       showInformationBox("No workspace selected.");
@@ -1555,17 +1659,17 @@ void IndirectDataAnalysis::furyPlotInput()
   }
 }
 
-void IndirectDataAnalysis::furyMaxChanged(double val)
+void Fury::maxChanged(double val)
 {
   m_furDblMng->setValue(m_furProp["EHigh"], val);
 }
 
-void IndirectDataAnalysis::furyMinChanged(double val)
+void Fury::minChanged(double val)
 {
   m_furDblMng->setValue(m_furProp["ELow"], val);
 }
 
-void IndirectDataAnalysis::furyUpdateRS(QtProperty* prop, double val)
+void Fury::updateRS(QtProperty* prop, double val)
 {
   if ( prop == m_furProp["ELow"] )
     m_furRange->setMinimum(val);
@@ -1573,16 +1677,16 @@ void IndirectDataAnalysis::furyUpdateRS(QtProperty* prop, double val)
     m_furRange->setMaximum(val);
 }
 
-void IndirectDataAnalysis::furyfitRun()
+void FuryFit::run()
 {
   // First create the function
-  auto function = furyfitCreateFunction();
+  auto function = createFunction();
 
-  m_uiForm.furyfit_ckPlotGuess->setChecked(false);
+  uiForm().furyfit_ckPlotGuess->setChecked(false);
   
-  const int fitType = m_uiForm.furyfit_cbFitType->currentIndex();
+  const int fitType = uiForm().furyfit_cbFitType->currentIndex();
 
-  if ( m_uiForm.furyfit_ckConstrainIntensities->isChecked() )
+  if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
   {
     switch ( fitType )
     {
@@ -1613,7 +1717,7 @@ void IndirectDataAnalysis::furyfitRun()
     ftype = "s"; break;
   }
 
-  furyfitPlotInput();
+  plotInput();
   if ( m_ffInputWS == NULL )
   {
     return;
@@ -1622,7 +1726,7 @@ void IndirectDataAnalysis::furyfitRun()
   QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
   pyInput = pyInput.arg(QString::fromStdString(m_ffInputWSName));
   QString outputNm = runPythonCode(pyInput).trimmed();
-  outputNm += QString("fury_") + ftype + m_uiForm.furyfit_leSpecNo->text();
+  outputNm += QString("fury_") + ftype + uiForm().furyfit_leSpecNo->text();
   std::string output = outputNm.toStdString();
 
   // Create the Fit Algorithm
@@ -1630,7 +1734,7 @@ void IndirectDataAnalysis::furyfitRun()
   alg->initialize();
   alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
-  alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
+  alg->setProperty("WorkspaceIndex", uiForm().furyfit_leSpecNo->text().toInt());
   alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
@@ -1690,7 +1794,7 @@ void IndirectDataAnalysis::furyfitRun()
     m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Beta"], parameters[fval+"Beta"]);
   }
 
-  if ( m_uiForm.furyfit_ckPlotOutput->isChecked() )
+  if ( uiForm().furyfit_ckPlotOutput->isChecked() )
   {
     QString pyInput = "from mantidplot import *\n"
       "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
@@ -1698,7 +1802,7 @@ void IndirectDataAnalysis::furyfitRun()
   }
 }
 
-void IndirectDataAnalysis::furyfitTypeSelection(int index)
+void FuryFit::typeSelection(int index)
 {
   m_ffTree->clear();
 
@@ -1726,25 +1830,25 @@ void IndirectDataAnalysis::furyfitTypeSelection(int index)
   }
 }
 
-void IndirectDataAnalysis::furyfitPlotInput()
+void FuryFit::plotInput()
 {
   std::string wsname;
 
-  switch ( m_uiForm.furyfit_cbInputType->currentIndex() )
+  switch ( uiForm().furyfit_cbInputType->currentIndex() )
   {
   case 0: // "File"
     {
-      if ( ! m_uiForm.furyfit_inputFile->isValid() )
+      if ( ! uiForm().furyfit_inputFile->isValid() )
       {
         return;
       }
       else
       {
-      QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
+      QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
       wsname = fi.baseName().toStdString();
       if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
       {
-        std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
+        std::string filename = uiForm().furyfit_inputFile->getFirstFilename().toStdString();
         // LoadNexus
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
         alg->initialize();
@@ -1759,7 +1863,7 @@ void IndirectDataAnalysis::furyfitPlotInput()
     break;
   case 1: // Workspace
     {
-      wsname = m_uiForm.furyfit_wsIqt->currentText().toStdString();
+      wsname = uiForm().furyfit_wsIqt->currentText().toStdString();
       try
       {
         m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
@@ -1776,7 +1880,7 @@ void IndirectDataAnalysis::furyfitPlotInput()
   }
   m_ffInputWSName = wsname;
 
-  int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
+  int specNo = uiForm().furyfit_leSpecNo->text().toInt();
 
   m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWSName, specNo);
   try
@@ -1796,22 +1900,22 @@ void IndirectDataAnalysis::furyfitPlotInput()
   }
 }
 
-void IndirectDataAnalysis::furyfitXMinSelected(double val)
+void FuryFit::xMinSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["StartX"], val);
 }
 
-void IndirectDataAnalysis::furyfitXMaxSelected(double val)
+void FuryFit::xMaxSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["EndX"], val);
 }
 
-void IndirectDataAnalysis::furyfitBackgroundSelected(double val)
+void FuryFit::backgroundSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], val);
 }
 
-void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
+void FuryFit::rangePropChanged(QtProperty* prop, double val)
 {
   if ( prop == m_ffProp["StartX"] )
   {
@@ -1827,21 +1931,21 @@ void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
   }
 }
 
-void IndirectDataAnalysis::furyfitSequential()
+void FuryFit::sequential()
 {
-  furyfitPlotInput();
+  plotInput();
   if ( m_ffInputWS == NULL )
   {
     return;
   }
 
-  Mantid::API::CompositeFunction_sptr func = furyfitCreateFunction();
+  Mantid::API::CompositeFunction_sptr func = createFunction();
 
   // Function Ties
   func->tie("f0.A1", "0");
-  if ( m_uiForm.furyfit_ckConstrainIntensities->isChecked() )
+  if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
   {
-    switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+    switch ( uiForm().furyfit_cbFitType->currentIndex() )
     {
     case 0: // 1 Exp
     case 2: // 1 Str
@@ -1861,22 +1965,22 @@ void IndirectDataAnalysis::furyfitSequential()
     "func = r'" + QString::fromStdString(function) + "'\n"
     "startx = " + m_ffProp["StartX"]->valueText() + "\n"
     "endx = " + m_ffProp["EndX"]->valueText() + "\n"
-    "plot = '" + m_uiForm.furyfit_cbPlotOutput->currentText() + "'\n"
+    "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
     "save = ";
-  pyInput += m_uiForm.furyfit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+  pyInput += uiForm().furyfit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
   pyInput += "furyfitSeq(input, func, startx, endx, save, plot)\n";
   
   QString pyOutput = runPythonCode(pyInput);
 }
 
-void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
+void FuryFit::plotGuess(QtProperty*)
 {
-  if ( ! m_uiForm.furyfit_ckPlotGuess->isChecked() || m_ffDataCurve == NULL )
+  if ( ! uiForm().furyfit_ckPlotGuess->isChecked() || m_ffDataCurve == NULL )
   {
     return;
   }
 
-  Mantid::API::CompositeFunction_sptr function = furyfitCreateFunction(true);
+  Mantid::API::CompositeFunction_sptr function = createFunction(true);
 
   // Create the double* array from the input workspace
   const size_t binIndxLow = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["StartX"]));
@@ -1926,16 +2030,9 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   m_ffPlot->replot();
 }
 
-void IndirectDataAnalysis::confitRun()
+void ConFit::run()
 {
-  const std::string valid = validateConfit();
-  if ( ! valid.empty() )
-  {
-    showInformationBox("Please check your input: " + QString::fromStdString(valid));
-    return;
-  }
-
-  confitPlotInput();
+  plotInput();
 
   if ( m_cfDataCurve == NULL )
   {
@@ -1943,13 +2040,13 @@ void IndirectDataAnalysis::confitRun()
     return;
   }
 
-  m_uiForm.confit_ckPlotGuess->setChecked(false);
+  uiForm().confit_ckPlotGuess->setChecked(false);
 
-  Mantid::API::CompositeFunction_sptr function = confitCreateFunction();
+  Mantid::API::CompositeFunction_sptr function = createFunction();
 
   // get output name
   QString ftype = "";
-  switch ( m_uiForm.confit_cbFitType->currentIndex() )
+  switch ( uiForm().confit_cbFitType->currentIndex() )
   {
   case 0:
     ftype += "Delta"; break;
@@ -1960,7 +2057,7 @@ void IndirectDataAnalysis::confitRun()
   default:
     break;
   }
-  switch ( m_uiForm.confit_cbBackground->currentIndex() )
+  switch ( uiForm().confit_cbBackground->currentIndex() )
   {
   case 0:
     ftype += "FixF_s"; break;
@@ -1971,14 +2068,14 @@ void IndirectDataAnalysis::confitRun()
   }
 
   QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + QString::fromStdString(m_cfInputWSName) + QString("')\n")).trimmed();
-  outputNm += QString("conv_") + ftype + m_uiForm.confit_leSpecNo->text();  
+  outputNm += QString("conv_") + ftype + uiForm().confit_leSpecNo->text();  
   std::string output = outputNm.toStdString();
 
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
   alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("InputWorkspace", m_cfInputWSName);
-  alg->setProperty<int>("WorkspaceIndex", m_uiForm.confit_leSpecNo->text().toInt());
+  alg->setProperty<int>("WorkspaceIndex", uiForm().confit_leSpecNo->text().toInt());
   alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
   alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
   alg->setPropertyValue("Output", output);
@@ -2012,7 +2109,7 @@ void IndirectDataAnalysis::confitRun()
   m_cfDblMng->setValue(m_cfProp["BGA0"], parameters["f0.A0"]);
   m_cfDblMng->setValue(m_cfProp["BGA1"], parameters["f0.A1"]);
 
-  int noLorentz = m_uiForm.confit_cbFitType->currentIndex();
+  int noLorentz = uiForm().confit_cbFitType->currentIndex();
 
   int funcIndex = 1;
   QString prefBase = "f1.f";
@@ -2049,7 +2146,7 @@ void IndirectDataAnalysis::confitRun()
   }
 
   // Plot Output
-  if ( m_uiForm.confit_ckPlotOutput->isChecked() )
+  if ( uiForm().confit_ckPlotOutput->isChecked() )
   {
     QString pyInput =
       "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
@@ -2058,7 +2155,7 @@ void IndirectDataAnalysis::confitRun()
 
 }
 
-void IndirectDataAnalysis::confitTypeSelection(int index)
+void ConFit::typeSelection(int index)
 {
   m_cfTree->removeProperty(m_cfProp["Lorentzian1"]);
   m_cfTree->removeProperty(m_cfProp["Lorentzian2"]);
@@ -2080,7 +2177,7 @@ void IndirectDataAnalysis::confitTypeSelection(int index)
   }    
 }
 
-void IndirectDataAnalysis::confitBgTypeSelection(int index)
+void ConFit::bgTypeSelection(int index)
 {
   if ( index == 2 )
   {
@@ -2092,27 +2189,27 @@ void IndirectDataAnalysis::confitBgTypeSelection(int index)
   }
 }
 
-void IndirectDataAnalysis::confitPlotInput()
+void ConFit::plotInput()
 {
   std::string wsname;
-  const bool plotGuess = m_uiForm.confit_ckPlotGuess->isChecked();
-  m_uiForm.confit_ckPlotGuess->setChecked(false);
+  const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
+  uiForm().confit_ckPlotGuess->setChecked(false);
 
   // Find wsname and set m_cfInputWS to point to that workspace.
-  switch ( m_uiForm.confit_cbInputType->currentIndex() )
+  switch ( uiForm().confit_cbInputType->currentIndex() )
   {
   case 0: // "File"
     {
-      if ( m_uiForm.confit_inputFile->isValid() )
+      if ( uiForm().confit_inputFile->isValid() )
       {
-        QFileInfo fi(m_uiForm.confit_inputFile->getFirstFilename());
+        QFileInfo fi(uiForm().confit_inputFile->getFirstFilename());
         wsname = fi.baseName().toStdString();
 
         // Load the file if it has not already been loaded.
         if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName )
           )
         {
-          std::string filename = m_uiForm.confit_inputFile->getFirstFilename().toStdString();
+          std::string filename = uiForm().confit_inputFile->getFirstFilename().toStdString();
           Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
           alg->initialize();
           alg->setPropertyValue("Filename", filename);
@@ -2129,7 +2226,7 @@ void IndirectDataAnalysis::confitPlotInput()
     break;
   case 1: // Workspace
     {
-      wsname = m_uiForm.confit_wsSample->currentText().toStdString();
+      wsname = uiForm().confit_wsSample->currentText().toStdString();
       try
       {
         m_cfInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
@@ -2146,19 +2243,19 @@ void IndirectDataAnalysis::confitPlotInput()
   }
   m_cfInputWSName = wsname;
 
-  int specNo = m_uiForm.confit_leSpecNo->text().toInt();
+  int specNo = uiForm().confit_leSpecNo->text().toInt();
   // Set spectra max value
   size_t specMax = m_cfInputWS->getNumberHistograms();
   if( specMax > 0 ) specMax -= 1;
   if ( specNo < 0 || static_cast<size_t>(specNo) > specMax ) //cast is okay as the first check is for less-than-zero
   {
-    m_uiForm.confit_leSpecNo->setText("0");
+    uiForm().confit_leSpecNo->setText("0");
     specNo = 0;
   }
-  int smCurrent = m_uiForm.confit_leSpecMax->text().toInt();
+  int smCurrent = uiForm().confit_leSpecMax->text().toInt();
   if ( smCurrent < 0 || static_cast<size_t>(smCurrent) > specMax )
   {
-    m_uiForm.confit_leSpecMax->setText(QString::number(specMax));
+    uiForm().confit_leSpecMax->setText(QString::number(specMax));
   }
 
   m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, wsname, specNo);
@@ -2166,7 +2263,7 @@ void IndirectDataAnalysis::confitPlotInput()
   {
     const std::pair<double, double> range = getCurveRange(m_cfDataCurve);    
     m_cfRangeS->setRange(range.first, range.second);
-    m_uiForm.confit_ckPlotGuess->setChecked(plotGuess);
+    uiForm().confit_ckPlotGuess->setChecked(plotGuess);
   }
   catch(std::invalid_argument & exc)
   {
@@ -2174,19 +2271,19 @@ void IndirectDataAnalysis::confitPlotInput()
   }
 }
 
-void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
+void ConFit::plotGuess(QtProperty*)
 {
 
-  if ( ! m_uiForm.confit_ckPlotGuess->isChecked() || m_cfDataCurve == NULL )
+  if ( ! uiForm().confit_ckPlotGuess->isChecked() || m_cfDataCurve == NULL )
   {
     return;
   }
 
-  Mantid::API::CompositeFunction_sptr function = confitCreateFunction(true);
+  Mantid::API::CompositeFunction_sptr function = createFunction(true);
 
   if ( m_cfInputWS == NULL )
   {
-    confitPlotInput();
+    plotInput();
   }
 
   // std::string inputName = m_cfInputWS->getName();  // Unused
@@ -2240,12 +2337,12 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
   m_cfPlot->replot();
 }
 
-void IndirectDataAnalysis::confitSequential()
+void ConFit::sequential()
 {
-  const std::string valid = validateConfit();
-  if ( ! valid.empty() )
+  const QString error = validate();
+  if( ! error.isEmpty() )
   {
-    showInformationBox("Please check your input: " + QString::fromStdString(valid));
+    showInformationBox(error);
     return;
   }
 
@@ -2254,7 +2351,7 @@ void IndirectDataAnalysis::confitSequential()
     return;
   }
 
-  QString bg = m_uiForm.confit_cbBackground->currentText();
+  QString bg = uiForm().confit_cbBackground->currentText();
   if ( bg == "Fixed Flat" )
   {
     bg = "FixF";
@@ -2268,7 +2365,7 @@ void IndirectDataAnalysis::confitSequential()
     bg = "FitL";
   }
 
-  Mantid::API::CompositeFunction_sptr func = confitCreateFunction();
+  Mantid::API::CompositeFunction_sptr func = createFunction();
   std::string function = std::string(func->asString());
   QString stX = m_cfProp["StartX"]->valueText();
   QString enX = m_cfProp["EndX"]->valueText();
@@ -2279,12 +2376,12 @@ void IndirectDataAnalysis::confitSequential()
     "func = r'" + QString::fromStdString(function) + "'\n"
     "startx = " + stX + "\n"
     "endx = " + enX + "\n"
-    "specMin = " + m_uiForm.confit_leSpecNo->text() + "\n"
-    "specMax = " + m_uiForm.confit_leSpecMax->text() + "\n"
-    "plot = '" + m_uiForm.confit_cbPlotOutput->currentText() + "'\n"
+    "specMin = " + uiForm().confit_leSpecNo->text() + "\n"
+    "specMax = " + uiForm().confit_leSpecMax->text() + "\n"
+    "plot = '" + uiForm().confit_cbPlotOutput->currentText() + "'\n"
     "save = ";
   
-  pyInput += m_uiForm.confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+  pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
   
   pyInput +=    
     "bg = '" + bg + "'\n"
@@ -2293,17 +2390,17 @@ void IndirectDataAnalysis::confitSequential()
   QString pyOutput = runPythonCode(pyInput);
 }
 
-void IndirectDataAnalysis::confitMinChanged(double val)
+void ConFit::minChanged(double val)
 {
   m_cfDblMng->setValue(m_cfProp["StartX"], val);
 }
 
-void IndirectDataAnalysis::confitMaxChanged(double val)
+void ConFit::maxChanged(double val)
 {
   m_cfDblMng->setValue(m_cfProp["EndX"], val);
 }
 
-void IndirectDataAnalysis::confitHwhmChanged(double val)
+void ConFit::hwhmChanged(double val)
 {
   const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
   // Always want HWHM to display as positive.
@@ -2317,27 +2414,27 @@ void IndirectDataAnalysis::confitHwhmChanged(double val)
   }
 }
 
-void IndirectDataAnalysis::confitBackgLevel(double val)
+void ConFit::backgLevel(double val)
 {
   m_cfDblMng->setValue(m_cfProp["BGA0"], val);
 }
 
-void IndirectDataAnalysis::confitUpdateRS(QtProperty* prop, double val)
+void ConFit::updateRS(QtProperty* prop, double val)
 {
   if ( prop == m_cfProp["StartX"] ) { m_cfRangeS->setMinimum(val); }
   else if ( prop == m_cfProp["EndX"] ) { m_cfRangeS->setMaximum(val); }
   else if ( prop == m_cfProp["BGA0"] ) { m_cfBackgS->setMinimum(val); }
-  else if ( prop == m_cfProp["Lorentzian 1.HWHM"] ) { confitHwhmUpdateRS(val); }
+  else if ( prop == m_cfProp["Lorentzian 1.HWHM"] ) { hwhmUpdateRS(val); }
 }
 
-void IndirectDataAnalysis::confitHwhmUpdateRS(double val)
+void ConFit::hwhmUpdateRS(double val)
 {
   const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
   m_cfHwhmRange->setMinimum(peakCentre-val);
   m_cfHwhmRange->setMaximum(peakCentre+val);
 }
 
-void IndirectDataAnalysis::confitCheckBoxUpdate(QtProperty* prop, bool checked)
+void ConFit::checkBoxUpdate(QtProperty* prop, bool checked)
 {
   // Add/remove some properties to display only relevant options
   if ( prop == m_cfProp["UseDeltaFunc"] )
@@ -2377,57 +2474,51 @@ void IndirectDataAnalysis::help()
   QDesktopServices::openUrl(QUrl(url));
 }
 
-void IndirectDataAnalysis::absf2pRun()
+void AbsorptionF2Py::run()
 {
-  if ( ! validateAbsorptionF2Py() )
-  {
-    showInformationBox("Invalid input.");
-    return;
-  }
-
   QString pyInput = "import IndirectAbsCor\n";
   
   QString geom;
   QString size;
 
-  if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
+  if ( uiForm().absp_cbShape->currentText() == "Flat" )
   {
     geom = "flt";
-    if ( m_uiForm.absp_ckUseCan->isChecked() ) 
+    if ( uiForm().absp_ckUseCan->isChecked() ) 
     {
-      size = "[" + m_uiForm.absp_lets->text() + ", " +
-      m_uiForm.absp_letc1->text() + ", " +
-      m_uiForm.absp_letc2->text() + "]";
+      size = "[" + uiForm().absp_lets->text() + ", " +
+      uiForm().absp_letc1->text() + ", " +
+      uiForm().absp_letc2->text() + "]";
     }
     else
     {
-      size = "[" + m_uiForm.absp_lets->text() + ", 0.0, 0.0]";
+      size = "[" + uiForm().absp_lets->text() + ", 0.0, 0.0]";
     }
   }
-  else if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
+  else if ( uiForm().absp_cbShape->currentText() == "Cylinder" )
   {
     geom = "cyl";
 
     // R3 only populated when using can. R4 is fixed to 0.0
-    if ( m_uiForm.absp_ckUseCan->isChecked() ) 
+    if ( uiForm().absp_ckUseCan->isChecked() ) 
     {
-      size = "[" + m_uiForm.absp_ler1->text() + ", " +
-        m_uiForm.absp_ler2->text() + ", " +
-        m_uiForm.absp_ler3->text() + ", 0.0 ]";
+      size = "[" + uiForm().absp_ler1->text() + ", " +
+        uiForm().absp_ler2->text() + ", " +
+        uiForm().absp_ler3->text() + ", 0.0 ]";
     }
     else
     {
-      size = "[" + m_uiForm.absp_ler1->text() + ", " +
-        m_uiForm.absp_ler2->text() + ", 0.0, 0.0 ]";
+      size = "[" + uiForm().absp_ler1->text() + ", " +
+        uiForm().absp_ler2->text() + ", 0.0, 0.0 ]";
     }
     
   }
 
-  QString width = m_uiForm.absp_lewidth->text();
+  QString width = uiForm().absp_lewidth->text();
 
-  if ( m_uiForm.absp_cbInputType->currentText() == "File" )
+  if ( uiForm().absp_cbInputType->currentText() == "File" )
   {
-    QString input = m_uiForm.absp_inputFile->getFirstFilename();
+    QString input = uiForm().absp_inputFile->getFirstFilename();
     if ( input == "" ) { return; }
     pyInput +=
     "import os.path as op\n"
@@ -2439,65 +2530,65 @@ void IndirectDataAnalysis::absf2pRun()
   }
   else
   {
-    pyInput += "inputws = '" + m_uiForm.absp_wsInput->currentText() + "'\n";
+    pyInput += "inputws = '" + uiForm().absp_wsInput->currentText() + "'\n";
   }
   
-  if ( m_uiForm.absp_ckUseCan->isChecked() )
+  if ( uiForm().absp_ckUseCan->isChecked() )
   {
     pyInput +=
       "ncan = 2\n"
-      "density = [" + m_uiForm.absp_lesamden->text() + ", " + m_uiForm.absp_lecanden->text() + ", " + m_uiForm.absp_lecanden->text() + "]\n"
-      "sigs = [" + m_uiForm.absp_lesamsigs->text() + "," + m_uiForm.absp_lecansigs->text() + "," + m_uiForm.absp_lecansigs->text() + "]\n"
-      "siga = [" + m_uiForm.absp_lesamsiga->text() + "," + m_uiForm.absp_lecansiga->text() + "," + m_uiForm.absp_lecansiga->text() + "]\n";
+      "density = [" + uiForm().absp_lesamden->text() + ", " + uiForm().absp_lecanden->text() + ", " + uiForm().absp_lecanden->text() + "]\n"
+      "sigs = [" + uiForm().absp_lesamsigs->text() + "," + uiForm().absp_lecansigs->text() + "," + uiForm().absp_lecansigs->text() + "]\n"
+      "siga = [" + uiForm().absp_lesamsiga->text() + "," + uiForm().absp_lecansiga->text() + "," + uiForm().absp_lecansiga->text() + "]\n";
   }
   else
   {
     pyInput +=
       "ncan = 1\n"
-      "density = [" + m_uiForm.absp_lesamden->text() + ", 0.0, 0.0 ]\n"
-      "sigs = [" + m_uiForm.absp_lesamsigs->text() + ", 0.0, 0.0]\n"
-      "siga = [" + m_uiForm.absp_lesamsiga->text() + ", 0.0, 0.0]\n";
+      "density = [" + uiForm().absp_lesamden->text() + ", 0.0, 0.0 ]\n"
+      "sigs = [" + uiForm().absp_lesamsigs->text() + ", 0.0, 0.0]\n"
+      "siga = [" + uiForm().absp_lesamsiga->text() + ", 0.0, 0.0]\n";
   }
 
   pyInput +=
     "geom = '" + geom + "'\n"
     "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
     "size = " + size + "\n"
-    "avar = " + m_uiForm.absp_leavar->text() + "\n"
-    "plotOpt = '" + m_uiForm.absp_cbPlotOutput->currentText() + "'\n"
+    "avar = " + uiForm().absp_leavar->text() + "\n"
+    "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
     "IndirectAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar, plotOpt=plotOpt)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
-void IndirectDataAnalysis::absf2pShape(int index)
+void AbsorptionF2Py::shape(int index)
 {
-  m_uiForm.absp_swShapeDetails->setCurrentIndex(index);
+  uiForm().absp_swShapeDetails->setCurrentIndex(index);
   // Meaning of the "avar" variable changes depending on shape selection
-  if ( index == 0 ) { m_uiForm.absp_lbAvar->setText("Can Angle to Beam"); }
-  else if ( index == 1 ) { m_uiForm.absp_lbAvar->setText("Step Size"); }
+  if ( index == 0 ) { uiForm().absp_lbAvar->setText("Can Angle to Beam"); }
+  else if ( index == 1 ) { uiForm().absp_lbAvar->setText("Step Size"); }
 }
 
-void IndirectDataAnalysis::absf2pUseCanChecked(bool checked)
+void AbsorptionF2Py::useCanChecked(bool checked)
 {
   // Disable thickness fields/labels/asterisks.
-  m_uiForm.absp_lbtc1->setEnabled(checked);
-  m_uiForm.absp_lbtc2->setEnabled(checked);
-  m_uiForm.absp_letc1->setEnabled(checked);
-  m_uiForm.absp_letc2->setEnabled(checked);
-  m_uiForm.absp_valtc1->setVisible(checked);
-  m_uiForm.absp_valtc2->setVisible(checked);
+  uiForm().absp_lbtc1->setEnabled(checked);
+  uiForm().absp_lbtc2->setEnabled(checked);
+  uiForm().absp_letc1->setEnabled(checked);
+  uiForm().absp_letc2->setEnabled(checked);
+  uiForm().absp_valtc1->setVisible(checked);
+  uiForm().absp_valtc2->setVisible(checked);
 
   // Disable R3 field/label/asterisk.
-  m_uiForm.absp_lbR3->setEnabled(checked);
-  m_uiForm.absp_ler3->setEnabled(checked);
-  m_uiForm.absp_valR3->setVisible(checked);
+  uiForm().absp_lbR3->setEnabled(checked);
+  uiForm().absp_ler3->setEnabled(checked);
+  uiForm().absp_valR3->setVisible(checked);
 
   // Disable "Can Details" group and asterisks.
-  m_uiForm.absp_gbCan->setEnabled(checked);
-  m_uiForm.absp_valCanden->setVisible(checked);
-  m_uiForm.absp_valCansigs->setVisible(checked);
-  m_uiForm.absp_valCansiga->setVisible(checked);
+  uiForm().absp_gbCan->setEnabled(checked);
+  uiForm().absp_valCanden->setVisible(checked);
+  uiForm().absp_valCansigs->setVisible(checked);
+  uiForm().absp_valCansiga->setVisible(checked);
   
   // Workaround for "disabling" title of the QGroupBox.
   QPalette palette;
@@ -2512,21 +2603,21 @@ void IndirectDataAnalysis::absf2pUseCanChecked(bool checked)
       QPalette::WindowText,
       QApplication::palette().color(QPalette::Active, QPalette::WindowText));
 
-  m_uiForm.absp_gbCan->setPalette(palette);
+  uiForm().absp_gbCan->setPalette(palette);
 }
 
-void IndirectDataAnalysis::absf2pTCSync()
+void AbsorptionF2Py::tcSync()
 {
-  if ( m_uiForm.absp_letc2->text() == "" )
+  if ( uiForm().absp_letc2->text() == "" )
   {
-    QString val = m_uiForm.absp_letc1->text();
-    m_uiForm.absp_letc2->setText(val);
+    QString val = uiForm().absp_letc1->text();
+    uiForm().absp_letc2->setText(val);
   }
 }
 
-void IndirectDataAnalysis::abscorRun()
+void AbsCor::run()
 {
-  QString geom = m_uiForm.abscor_cbGeometry->currentText();
+  QString geom = uiForm().abscor_cbGeometry->currentText();
   if ( geom == "Flat" )
   {
     geom = "flt";
@@ -2538,28 +2629,28 @@ void IndirectDataAnalysis::abscorRun()
 
   QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
 
-  if ( m_uiForm.abscor_cbSampleInputType->currentText() == "File" )
+  if ( uiForm().abscor_cbSampleInputType->currentText() == "File" )
   {
     pyInput +=
-      "sample = loadNexus(r'" + m_uiForm.abscor_sample->getFirstFilename() + "')\n";
+      "sample = loadNexus(r'" + uiForm().abscor_sample->getFirstFilename() + "')\n";
   }
   else
   {
     pyInput +=
-      "sample = '" + m_uiForm.abscor_wsSample->currentText() + "'\n";
+      "sample = '" + uiForm().abscor_wsSample->currentText() + "'\n";
   }
 
-  if ( m_uiForm.abscor_ckUseCan->isChecked() )
+  if ( uiForm().abscor_ckUseCan->isChecked() )
   {
-    if ( m_uiForm.abscor_cbContainerInputType->currentText() == "File" )
+    if ( uiForm().abscor_cbContainerInputType->currentText() == "File" )
     {
       pyInput +=
-        "container = loadNexus(r'" + m_uiForm.abscor_can->getFirstFilename() + "')\n";
+        "container = loadNexus(r'" + uiForm().abscor_can->getFirstFilename() + "')\n";
     }
     else
     {
       pyInput +=
-        "container = '" + m_uiForm.abscor_wsContainer->currentText() + "'\n";
+        "container = '" + uiForm().abscor_wsContainer->currentText() + "'\n";
     }
   }
   else
@@ -2570,7 +2661,7 @@ void IndirectDataAnalysis::abscorRun()
   pyInput += "geom = '" + geom + "'\n";
 
 
-  if ( m_uiForm.abscor_ckUseCorrections->isChecked() )
+  if ( uiForm().abscor_ckUseCorrections->isChecked() )
   {
     pyInput += "useCor = True\n";
   }
@@ -2583,5 +2674,18 @@ void IndirectDataAnalysis::abscorRun()
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
-} //namespace CustomInterfaces
-} //namespace MantidQt
+void IDATab::showInformationBox(const QString & message)
+{
+  m_parent->showInformationBox(message);
+}
+
+QString IDATab::runPythonCode(const QString & code, bool no_output)
+{
+  return m_parent->runPythonCode(code, no_output);
+}
+
+
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

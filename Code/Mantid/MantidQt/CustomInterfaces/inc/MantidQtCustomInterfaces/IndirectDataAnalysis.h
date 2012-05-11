@@ -29,6 +29,7 @@ namespace MantidQt
     class RangeSelector;
   }
 }
+
 class QwtPlot;
 class QwtPlotCurve;
 class QIntValidator;
@@ -48,204 +49,383 @@ class QtTreePropertyBrowser;
 
 namespace MantidQt
 {
-  namespace CustomInterfaces
+namespace CustomInterfaces
+{
+namespace IDA
+{
+  // The assumption is made elsewhere that the ordering of these enums matches the ordering of the
+  // tabs as they appear in the interface itself.
+  enum TabChoice
   {
-    class IndirectDataAnalysis : public MantidQt::API::UserSubWindow
-    {
-      Q_OBJECT
+    ELWIN,
+    MSD_FIT,
+    FURY,
+    FURY_FIT,
+    CON_FIT,
+    ABSORPTION_F2PY,
+    ABS_COR
+  };
+    
+  // Forward Declaration
+  class IDATab;
+    
+  /**
+   * The IndirectDataAnalysis class is the main class that handles the interface and controls
+   * its tabs.
+   *
+   * Is a friend to the IDATab class.
+   */
+  class IndirectDataAnalysis : public MantidQt::API::UserSubWindow
+  {
+    Q_OBJECT
 
-    public:
-      /// The name of the interface as registered into the factory
-      static std::string name() { return "Indirect Data Analysis"; }
-      /// Default Constructor
-      IndirectDataAnalysis(QWidget *parent = 0);
+    friend class IDATab;
 
-    private:
-      /// Initialize the layout
-      virtual void initLayout();
-      /// init python-dependent sections
-      virtual void initLocalPython();
+  public:
+    /// The name of the interface as registered into the factory
+    static std::string name() { return "Indirect Data Analysis"; }
+    /// Default Constructor
+    IndirectDataAnalysis(QWidget *parent = 0);
 
-      void loadSettings();
+  private:
+    /// Initialize the layout
+    virtual void initLayout();
+    /// Initialize Python-dependent sections
+    virtual void initLocalPython();
 
-      // Tab-specific setup stages (mainly miniplots)
-      void setupElwin();
-      void setupMsd();
-      void setupFury();
-      void setupFuryFit();
-      void setupConFit();
-      void setupAbsorptionF2Py();
-      void setupAbsCor();
 
-      // Validation of user inputs
-      bool validateElwin();
-      bool validateMsd();
-      std::string validateFury();
-      std::string validateConfit();
-      bool validateAbsorptionF2Py();
+    void loadSettings();
 
-      // Run processes
-      void elwinRun();
-      void msdRun();
-      void furyRun();
-      void furyfitRun();
-      void confitRun();
-
-      boost::shared_ptr<Mantid::API::CompositeFunction> furyfitCreateFunction(bool tie=false);
-      boost::shared_ptr<Mantid::API::IFunction> furyfitCreateUserFunction(const QString & name, bool tie=false);
-      boost::shared_ptr<Mantid::API::CompositeFunction> confitCreateFunction(bool tie=false);
-      QtProperty* createLorentzian(const QString &);
-      QtProperty* createExponential(const QString &);
-      QtProperty* createStretchedExp(const QString &);
-
-      void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, const std::string & pref, const bool tie=false);
-      QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index);
-      std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
+    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index);
+    std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
       
-      virtual void closeEvent(QCloseEvent*);
+    virtual void closeEvent(QCloseEvent*);
 
-      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
+    void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
 
-    private slots:
-      void run();
+  private slots:
+    void run();
       
-      // context menu on fitting property browser
-      void fitContextMenu(const QPoint &);
-      void fixItem();
-      void unFixItem();
-
-      // ElasticWindow
-      void elwinPlotInput();
-      void elwinTwoRanges(QtProperty*, bool);
-      void elwinMinChanged(double val);
-      void elwinMaxChanged(double val);
-      void elwinUpdateRS(QtProperty* prop, double val);
-
-      // MSD Fit
-      void msdPlotInput();
-      void msdMinChanged(double val);
-      void msdMaxChanged(double val);
-      void msdUpdateRS(QtProperty* prop, double val);
-
-      // Fourier Transform
-      void furyResType(const QString& type);
-      void furyPlotInput();
-      void furyMinChanged(double val);
-      void furyMaxChanged(double val);
-      void furyUpdateRS(QtProperty* prop, double val);
-
-      // Fourier Transform Fit
-      void furyfitTypeSelection(int index);
-      void furyfitPlotInput();
-      void furyfitXMinSelected(double val);
-      void furyfitXMaxSelected(double val);
-      void furyfitBackgroundSelected(double val);
-      void furyfitRangePropChanged(QtProperty*, double);
-      void furyfitSequential();
-      void furyfitPlotGuess(QtProperty*);
-
-      // Convolution Fit
-      void confitTypeSelection(int index);
-      void confitBgTypeSelection(int index);
-      void confitPlotInput();
-      void confitPlotGuess(QtProperty*);
-      void confitSequential();
-      void confitMinChanged(double);
-      void confitMaxChanged(double);
-      void confitBackgLevel(double);
-      void confitUpdateRS(QtProperty*, double);
-      void confitCheckBoxUpdate(QtProperty*, bool);
-      void confitHwhmChanged(double);
-      void confitHwhmUpdateRS(double);
-
-      // Absorption (F2PY)
-      void absf2pRun();
-      void absf2pShape(int index);
-      void absf2pUseCanChecked(bool checked);
-      void absf2pTCSync();
-
-      // abscor (PolynomialCorrection based)
-      void abscorRun();
+    // Common Elements
+    void openDirectoryDialog();
+    void help();
       
-      // Common Elements
-      void openDirectoryDialog();
-      void help();
-      
-    private:
-      Ui::IndirectDataAnalysis m_uiForm;
-      int m_nDec;
-      QIntValidator* m_valInt;
-      QDoubleValidator* m_valDbl;
+  private:
+    Ui::IndirectDataAnalysis m_uiForm;
+    int NUM_DECIMALS;
+    QIntValidator* m_valInt;
+    QDoubleValidator* m_valDbl;
             
-      QtStringPropertyManager* m_stringManager;
-      // Editor Factories
-      DoubleEditorFactory* m_dblEdFac;
-      QtCheckBoxFactory* m_blnEdFac;
+    QtStringPropertyManager* m_stringManager;
+    // Editor Factories
+    DoubleEditorFactory* m_dblEdFac;
+    QtCheckBoxFactory* m_blnEdFac;
+
+    /// Change Observer for ConfigService (monitors user directories)
+    Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+
+    std::map<unsigned int, IDATab*> m_tabs;
+  };
+
+
+
+  class IDATab : public QWidget
+  {
+    Q_OBJECT
+
+  public:
+    static const unsigned int NUM_DECIMALS;
+
+  public:
+    /// Constructor
+    IDATab(QWidget * parent = 0) : QWidget(parent), m_parent(NULL)
+    {
+      m_parent = dynamic_cast<IndirectDataAnalysis*>(parent);
+    }
+
+    /// Calls overidden setupTab function of child classes.  NVI idiom.
+    void setupTab() { setup(); }
+
+    /// Calls overidden runTab function of child classes.  NVI idiom.
+    void runTab()
+    { 
+      const QString error = validate();
+
+      if( ! error.isEmpty() )
+        showInformationBox(error);
+      else
+        run();
+    }
+
+    void loadTabSettings(const QSettings & settings)
+    {
+      loadSettings(settings);
+    }
+
+  protected:
+    void showInformationBox(const QString & message);
+
+    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const std::string & workspace, size_t index);
+    std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
+
+    /// Run a piece of python code and return any output that was written to stdout
+    QString runPythonCode(const QString & code, bool no_output = false);
+
+    Ui::IndirectDataAnalysis & uiForm();
+    DoubleEditorFactory * doubleEditorFactory();
+    QtCheckBoxFactory * qtCheckBoxFactory();
       
-      // ELASTICWINDOW MINIPLOT (prefix: 'm_elw')
-      QwtPlot* m_elwPlot;
-      MantidWidgets::RangeSelector* m_elwR1;
-      MantidWidgets::RangeSelector* m_elwR2;
-      QwtPlotCurve* m_elwDataCurve;
-      QtTreePropertyBrowser* m_elwTree;
-      QMap<QString, QtProperty*> m_elwProp;
-      QtDoublePropertyManager* m_elwDblMng;
-      QtBoolPropertyManager* m_elwBlnMng;
-      QtGroupPropertyManager* m_elwGrpMng;
+  protected slots:
+    // context menu on fitting property browser
+    void fitContextMenu(const QPoint &);
+    void fixItem();
+    void unFixItem();
 
-      // MSD Fit MiniPlot (prefix: 'm_msd')
-      QwtPlot* m_msdPlot;
-      MantidWidgets::RangeSelector* m_msdRange;
-      QwtPlotCurve* m_msdDataCurve;
-      QtTreePropertyBrowser* m_msdTree;
-      QMap<QString, QtProperty*> m_msdProp;
-      QtDoublePropertyManager* m_msdDblMng;
+  private:
+    /// Overidden by child class.
+    virtual void setup() = 0;
+    /// Overidden by child class.
+    virtual void run() = 0;
+    /// Overidden by child class.
+    virtual QString validate() = 0;
+    /// Overidden by child class.
+    virtual void loadSettings(const QSettings & settings) = 0;
 
-      // Fury Miniplot
-      QwtPlot* m_furPlot;
-      MantidWidgets::RangeSelector* m_furRange;
-      QwtPlotCurve* m_furCurve;
-      QtTreePropertyBrowser* m_furTree;
-      QMap<QString, QtProperty*> m_furProp;
-      QtDoublePropertyManager* m_furDblMng;
-      bool m_furyResFileType;
+    IndirectDataAnalysis * m_parent;
+  };
+    
+  class Elwin : public IDATab
+  {
+    Q_OBJECT
 
-      // Fury Fit Member Variables (prefix 'm_ff')
-      QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
-      QtGroupPropertyManager* m_groupManager;
-      QtDoublePropertyManager* m_ffDblMng;
-      QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
-      QMap<QString, QtProperty*> m_ffProp;
-      QwtPlot* m_ffPlot;
-      QwtPlotCurve* m_ffDataCurve;
-      QwtPlotCurve* m_ffFitCurve;
-      MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
-      MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffInputWS;
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
-      std::string m_ffInputWSName;
-      QString m_furyfitTies;
+  public:
+    Elwin(QWidget * parent = 0) : IDATab(parent) {}
 
-      // Confit (prefix: 'm_cf')
-      QtTreePropertyBrowser* m_cfTree;
-      QwtPlot* m_cfPlot;
-      QMap<QString, QtProperty*> m_cfProp;
-      QMap<QtProperty*, QtProperty*> m_fixedProps;
-      MantidWidgets::RangeSelector* m_cfRangeS;
-      MantidWidgets::RangeSelector* m_cfBackgS;
-      MantidWidgets::RangeSelector* m_cfHwhmRange;
-      QtGroupPropertyManager* m_cfGrpMng;
-      QtDoublePropertyManager* m_cfDblMng;
-      QtBoolPropertyManager* m_cfBlnMng;
-      QwtPlotCurve* m_cfDataCurve;
-      QwtPlotCurve* m_cfCalcCurve;
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
-      std::string m_cfInputWSName;
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
 
-      /// Change Observer for ConfigService (monitors user directories)
-      Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+  private slots:
+    void plotInput();
+    void twoRanges(QtProperty *, bool);
+    void minChanged(double val);
+    void maxChanged(double val);
+    void updateRS(QtProperty * prop, double val);
 
-    };
-  }
-}
+  private:
+    QwtPlot* m_elwPlot;
+    MantidWidgets::RangeSelector* m_elwR1;
+    MantidWidgets::RangeSelector* m_elwR2;
+    QwtPlotCurve* m_elwDataCurve;
+    QtTreePropertyBrowser* m_elwTree;
+    QMap<QString, QtProperty*> m_elwProp;
+    QtDoublePropertyManager* m_elwDblMng;
+    QtBoolPropertyManager* m_elwBlnMng;
+    QtGroupPropertyManager* m_elwGrpMng;
+  };
+    
+  class MSDFit : public IDATab
+  {
+    Q_OBJECT
+
+  public:
+    MSDFit(QWidget * parent = 0) : IDATab(parent) {}
+
+  private slots:
+    void plotInput();
+    void minChanged(double val);
+    void maxChanged(double val);
+    void updateRS(QtProperty* prop, double val);
+
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
+      
+    QwtPlot* m_msdPlot;
+    MantidWidgets::RangeSelector* m_msdRange;
+    QwtPlotCurve* m_msdDataCurve;
+    QtTreePropertyBrowser* m_msdTree;
+    QMap<QString, QtProperty*> m_msdProp;
+    QtDoublePropertyManager* m_msdDblMng;
+  };
+    
+  class Fury : public IDATab
+  {
+    Q_OBJECT
+
+  public:
+    Fury(QWidget * parent = 0) : IDATab(parent) {}
+
+  private slots:
+    void resType(const QString& type);
+    void plotInput();
+    void minChanged(double val);
+    void maxChanged(double val);
+    void updateRS(QtProperty* prop, double val);
+
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
+      
+    QwtPlot* m_furPlot;
+    MantidWidgets::RangeSelector* m_furRange;
+    QwtPlotCurve* m_furCurve;
+    QtTreePropertyBrowser* m_furTree;
+    QMap<QString, QtProperty*> m_furProp;
+    QtDoublePropertyManager* m_furDblMng;
+    bool m_furyResFileType;
+  };
+    
+  class FuryFit : public IDATab
+  {
+    Q_OBJECT
+
+  public:
+    FuryFit(QWidget * parent = 0) : 
+      IDATab(parent), m_intVal(NULL) 
+    {
+      m_intVal = new QIntValidator(this);
+    }
+
+  private slots:
+    void typeSelection(int index);
+    void plotInput();
+    void xMinSelected(double val);
+    void xMaxSelected(double val);
+    void backgroundSelected(double val);
+    void rangePropChanged(QtProperty*, double);
+    void sequential();
+    void plotGuess(QtProperty*);
+
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
+
+    boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);
+    boost::shared_ptr<Mantid::API::IFunction> createUserFunction(const QString & name, bool tie=false);
+    QtProperty* createExponential(const QString &);
+    QtProperty* createStretchedExp(const QString &);
+      
+    QIntValidator * m_intVal;
+
+    QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
+    QtGroupPropertyManager* m_groupManager;
+    QtDoublePropertyManager* m_ffDblMng;
+    QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
+    QMap<QString, QtProperty*> m_ffProp;
+    QwtPlot* m_ffPlot;
+    QwtPlotCurve* m_ffDataCurve;
+    QwtPlotCurve* m_ffFitCurve;
+    MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
+    MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffInputWS;
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
+    std::string m_ffInputWSName;
+    QString m_furyfitTies;
+  };
+    
+  class ConFit : public IDATab
+  {
+    Q_OBJECT
+
+  public:
+    ConFit(QWidget * parent = 0) : 
+      IDATab(parent), m_intVal(NULL) 
+    {
+      m_intVal = new QIntValidator(this);
+    }
+
+  private slots:
+    void typeSelection(int index);
+    void bgTypeSelection(int index);
+    void plotInput();
+    void plotGuess(QtProperty*);
+    void sequential();
+    void minChanged(double);
+    void maxChanged(double);
+    void backgLevel(double);
+    void updateRS(QtProperty*, double);
+    void checkBoxUpdate(QtProperty*, bool);
+    void hwhmChanged(double);
+    void hwhmUpdateRS(double);
+
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
+
+    boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);
+    QtProperty* createLorentzian(const QString &);
+    void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, const std::string & pref, const bool tie=false);
+      
+    QIntValidator * m_intVal;
+      
+    QtTreePropertyBrowser* m_cfTree;
+    QwtPlot* m_cfPlot;
+    QMap<QString, QtProperty*> m_cfProp;
+    QMap<QtProperty*, QtProperty*> m_fixedProps;
+    MantidWidgets::RangeSelector* m_cfRangeS;
+    MantidWidgets::RangeSelector* m_cfBackgS;
+    MantidWidgets::RangeSelector* m_cfHwhmRange;
+    QtGroupPropertyManager* m_cfGrpMng;
+    QtDoublePropertyManager* m_cfDblMng;
+    QtBoolPropertyManager* m_cfBlnMng;
+    QwtPlotCurve* m_cfDataCurve;
+    QwtPlotCurve* m_cfCalcCurve;
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
+    std::string m_cfInputWSName;
+  };
+    
+  class AbsorptionF2Py : public IDATab
+  {
+    Q_OBJECT
+
+  public:
+    AbsorptionF2Py(QWidget * parent = 0) : 
+      IDATab(parent), m_dblVal(NULL) 
+    {
+      m_dblVal = new QDoubleValidator(this);
+    }
+
+  private slots:
+    void shape(int index);
+    void useCanChecked(bool checked);
+    void tcSync();
+
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
+      
+    QDoubleValidator * m_dblVal;
+  };
+    
+  class AbsCor : public IDATab
+  {
+    Q_OBJECT
+
+  public:
+    AbsCor(QWidget * parent = 0) : IDATab(parent) {}
+
+  private:
+    virtual void setup();
+    virtual void run();
+    virtual QString validate();
+    virtual void loadSettings(const QSettings & settings);
+  };
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt
+
 #endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_ */
