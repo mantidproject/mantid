@@ -16,6 +16,7 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -399,6 +400,43 @@ private:
   ConvertUnits alg;
   std::string inputSpace;
   std::string outputSpace;
+};
+
+class ConvertUnitsTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertUnitsTestPerformance *createSuite() { return new ConvertUnitsTestPerformance(); }
+  static void destroySuite( ConvertUnitsTestPerformance *suite ) { delete suite; }
+
+  ConvertUnitsTestPerformance()
+  {
+    FrameworkManager::Instance().exec("Load","Filename=HET15869;OutputWorkspace=hist_tof");
+    FrameworkManager::Instance().exec("Load","Filename=CNCS_7860_event;OutputWorkspace=event_tof");
+  }
+
+  void test_histogram_workspace()
+  {
+    IAlgorithm * alg;
+    alg = FrameworkManager::Instance().exec("ConvertUnits","InputWorkspace=hist_tof;OutputWorkspace=hist_wave;Target=Wavelength");
+    TS_ASSERT( alg->isExecuted() );
+    alg = FrameworkManager::Instance().exec("ConvertUnits","InputWorkspace=hist_wave;OutputWorkspace=hist_dSpacing;Target=dSpacing");
+    TS_ASSERT( alg->isExecuted() );
+  }
+
+  void test_event_workspace()
+  {
+    IAlgorithm * alg;
+    alg = FrameworkManager::Instance().exec("ConvertUnits","InputWorkspace=event_tof;OutputWorkspace=event_wave;Target=Wavelength");
+    TS_ASSERT( alg->isExecuted() );
+    alg = FrameworkManager::Instance().exec("ConvertUnits","InputWorkspace=event_wave;OutputWorkspace=event_dSpacing;Target=dSpacing");
+    TS_ASSERT( alg->isExecuted() );
+  }
+
+private:
+  MatrixWorkspace_sptr histWS;
+  MatrixWorkspace_sptr eventWS;
 };
 
 #endif /*CONVERTUNITSTEST_H_*/
