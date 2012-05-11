@@ -48,17 +48,16 @@ namespace Mantid
     class DLLExport FitMD : public IDomainCreator
     {
     public:
-
+      /// Constructor
+      FitMD(Kernel::IPropertyManager* fit, const std::string& workspacePropertyName)
+        :IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName)){}
       /// Create a domain from the input workspace
       virtual void createDomain(
-        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>&, 
         boost::shared_ptr<API::IFunctionValues>&, size_t i0);
+      /// Return the size of the domain to be created.
+      virtual size_t getDomainSize() const;
     protected:
-      /// Constructor
-      FitMD(API::Algorithm* fit):IDomainCreator(fit){}
-      /// A friend that can create instances of this class
-      friend class Fit;
 
       /// The input IMDWorkspace
       boost::shared_ptr<API::IMDWorkspace> m_IMDWorkspace;

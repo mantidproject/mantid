@@ -18,17 +18,16 @@ namespace CurveFitting
 
   /// Create a domain from the input workspace
   void FitMD::createDomain(
-    const std::vector<std::string>& workspacePropetyNames,
     boost::shared_ptr<API::FunctionDomain>& domain, 
     boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
     UNUSED_ARG(i0);
-    if (workspacePropetyNames.empty())
+    if (m_workspacePropertyNames.empty())
     {
       throw std::runtime_error("Cannot create FunctionDomainMD: no workspace given");
     }
     // get the workspace 
-    API::Workspace_sptr ws = m_fit->getProperty(workspacePropetyNames[0]);
+    API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyNames[0]);
     m_IMDWorkspace = boost::dynamic_pointer_cast<API::IMDWorkspace>(ws);
     if (!m_IMDWorkspace)
     {
@@ -54,6 +53,13 @@ namespace CurveFitting
 
     dmd->reset();
   }
+
+  /// Return the size of the domain to be created.
+  size_t FitMD::getDomainSize() const
+  {
+    return 0;
+  }
+
 
 } // namespace Algorithm
 } // namespace Mantid

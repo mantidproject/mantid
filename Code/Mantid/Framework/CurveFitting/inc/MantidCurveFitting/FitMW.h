@@ -5,10 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid
 {
-
   namespace API
   {
     class FunctionDomain;
@@ -50,23 +50,28 @@ namespace Mantid
     class DLLExport FitMW : public IDomainCreator
     {
     public:
+      /// Constructor
+      FitMW(Kernel::IPropertyManager* fit,const std::string& workspacePropertyName)
+        :IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName)){}
       /// declare properties that specify the dataset within the workspace to fit to.
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);
       /// Create a domain from the input workspace
       virtual void createDomain(
-        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
       void createOutputWorkspace(
         const std::string& baseName,
+        API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
         boost::shared_ptr<API::IFunctionValues> values
         );
+      /// Return the size of the domain to be created.
+      virtual size_t getDomainSize() const;
+      /// Initialize the function
+      virtual void initFunction(API::IFunction_sptr function);
     protected:
-      /// Constructor
-      FitMW(API::Algorithm* fit):IDomainCreator(fit){}
-      /// A friend that can create instances of this class
-      friend class Fit;
+      /// Calculate size and starting iterator in the X array
+      void getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const;
 
       /// Store workspace property name
       std::string m_workspacePropertyName;
@@ -77,8 +82,6 @@ namespace Mantid
       /// Store endX property name
       std::string m_endXPropertyName;
 
-      /// Pointer to the fitting function
-      API::IFunction_sptr m_function;
       /// The input MareixWorkspace
       boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
       /// The workspace index

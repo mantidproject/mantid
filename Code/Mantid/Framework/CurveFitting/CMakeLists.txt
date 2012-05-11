@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
 	src/SCDPanelErrors.cpp
+	src/SeqDomain.cpp
 	src/StaticKuboToyabe.cpp
 	src/SimplexMinimizer.cpp
 	src/SteepestDescentMinimizer.cpp
@@ -120,6 +121,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SCDPanelErrors.h
+	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
@@ -169,6 +171,7 @@ set ( TEST_FILES
 	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
+	test/MultiDomainCreatorTest.h
 	test/MultiDomainFunctionTest.h
 	test/PlotPeakByLogValueTest.h
 	test/PRConjugateGradientTest.h

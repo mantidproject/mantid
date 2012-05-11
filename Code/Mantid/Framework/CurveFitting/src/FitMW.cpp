@@ -2,27 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/FuncMinimizerFactory.h"
-#include "MantidCurveFitting/IFuncMinimizer.h"
-#include "MantidCurveFitting/CostFuncFitting.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EmptyValues.h"
 
-#include <boost/lexical_cast.hpp>
-#include <gsl/gsl_errno.h>
 #include <algorithm>
 
 namespace Mantid
@@ -63,12 +55,10 @@ namespace
 }
 
   using namespace Kernel;
-  using API::WorkspaceProperty;
   using API::Workspace;
   using API::Axis;
   using API::MatrixWorkspace;
   using API::Algorithm;
-  using API::Progress;
   using API::Jacobian;
 
   /**
@@ -81,7 +71,7 @@ namespace
     m_startXPropertyName = "StartX" + suffix;
     m_endXPropertyName = "EndX" + suffix;
 
-    if (addProp && !m_fit->existsProperty(m_workspaceIndexPropertyName))
+    if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName))
     {
       auto mustBePositive = boost::shared_ptr< BoundedValidator<int> >( new BoundedValidator<int>() );
       mustBePositive->setLower(0);
@@ -98,31 +88,29 @@ namespace
 
   /// Create a domain from the input workspace
   void FitMW::createDomain(
-    const std::vector<std::string>& workspacePropetyNames,
     boost::shared_ptr<API::FunctionDomain>& domain, 
     boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
-    if (workspacePropetyNames.empty())
+    if (m_workspacePropertyNames.empty())
     {
       throw std::runtime_error("Cannot create FunctionDomain1DVector: no workspace given");
     }
-    m_workspacePropertyName = workspacePropetyNames[0];
-    // get the function
-    m_function = m_fit->getProperty("Function");
+    m_workspacePropertyName = m_workspacePropertyNames[0];
+
     // get the workspace 
-    API::Workspace_sptr ws = m_fit->getProperty(m_workspacePropertyName);
+    API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
     m_matrixWorkspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
     if (!m_matrixWorkspace)
     {
       throw std::invalid_argument("InputWorkspace must be a MatrixWorkspace.");
     }
-    //m_function->setWorkspace(ws);
-    int index = m_fit->getProperty(m_workspaceIndexPropertyName);
+
+    int index = m_manager->getProperty(m_workspaceIndexPropertyName);
     m_workspaceIndex = static_cast<size_t>(index);
 
     const Mantid::MantidVec& X = m_matrixWorkspace->readX(m_workspaceIndex);
-    double startX = m_fit->getProperty(m_startXPropertyName);
-    double endX = m_fit->getProperty(m_endXPropertyName);
+    double startX = m_manager->getProperty(m_startXPropertyName);
+    double endX = m_manager->getProperty(m_endXPropertyName);
 
     if (X.empty())
     {
@@ -131,6 +119,168 @@ namespace
 
     // find the fitting interval: from -> to
     Mantid::MantidVec::const_iterator from;
+    size_t n = 0;
+    getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
+    Mantid::MantidVec::const_iterator to = from + n;
+
+    // set function domain
+    if (m_matrixWorkspace->isHistogramData())
+    {
+      std::vector<double> x( static_cast<size_t>(to - from) );
+      Mantid::MantidVec::const_iterator it = from;
+      for(size_t i = 0; it != to; ++it,++i)
+      {
+        x[i] = (*it + *(it+1)) / 2;
+      }
+      domain.reset(new API::FunctionDomain1DVector(x));
+      x.clear();
+    }
+    else
+    {
+      domain.reset(new API::FunctionDomain1DVector(from,to));
+    }
+
+    auto values = ivalues ? dynamic_cast<API::FunctionValues*>(ivalues.get()) : new API::FunctionValues(*domain);
+    if (!ivalues)
+    {
+      ivalues.reset(values);
+    }
+    else
+    {
+      values->expand(i0 + domain->size());
+    }
+
+    // set the data to fit to
+    m_startIndex = static_cast<size_t>( from - X.begin() );
+    assert( n == domain->size() );
+    size_t ito = m_startIndex + n;
+    const Mantid::MantidVec& Y = m_matrixWorkspace->readY( m_workspaceIndex );
+    const Mantid::MantidVec& E = m_matrixWorkspace->readE( m_workspaceIndex );
+    if (ito > Y.size())
+    {
+      throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
+    }
+    bool foundZeroOrNegativeError = false;
+    for(size_t i = m_startIndex; i < ito; ++i)
+    {
+      size_t j = i - m_startIndex + i0;
+      values->setFitData( j, Y[i] );
+      double error = E[i];
+      if (error <= 0)
+      {
+        error = 1.0;
+        foundZeroOrNegativeError = true;
+      }
+      values->setFitWeight( j, 1.0 / error );
+    }
+
+  }
+
+  /**
+   * Create an output workspace with the calculated values.
+   * @param domain :: The domain
+   * @param ivalues :: The values
+   */
+  void FitMW::createOutputWorkspace(
+        const std::string& baseName,
+        API::IFunction_sptr function,
+        boost::shared_ptr<API::FunctionDomain> domain,
+        boost::shared_ptr<API::IFunctionValues> ivalues
+    )
+  {
+    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
+    if (!values)
+    {
+      throw std::invalid_argument("Unsupported Function Values found in FitMW");
+    }
+
+    // calculate the values
+    function->function(*domain,*values);
+    const MantidVec& inputX = m_matrixWorkspace->readX(m_workspaceIndex);
+    const MantidVec& inputY = m_matrixWorkspace->readY(m_workspaceIndex);
+    const MantidVec& inputE = m_matrixWorkspace->readE(m_workspaceIndex);
+    size_t nData = ivalues->size();
+
+      size_t histN = m_matrixWorkspace->isHistogramData() ? 1 : 0;
+      API::MatrixWorkspace_sptr ws =
+        Mantid::API::WorkspaceFactory::Instance().create(
+            "Workspace2D",
+            3,
+            nData + histN,
+            nData);
+      ws->setTitle("");
+      ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
+      ws->setYUnit(m_matrixWorkspace->YUnit());
+      ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
+      API::TextAxis* tAxis = new API::TextAxis(3);
+      tAxis->setLabel(0,"Data");
+      tAxis->setLabel(1,"Calc");
+      tAxis->setLabel(2,"Diff");
+      ws->replaceAxis(1,tAxis);
+
+      for(size_t i=0;i<3;i++)
+      {
+        ws->dataX(i).assign( inputX.begin() + m_startIndex, inputX.begin() + m_startIndex + nData + histN );
+      }
+
+      ws->dataY(0).assign( inputY.begin() + m_startIndex, inputY.begin() + m_startIndex + nData);
+      ws->dataE(0).assign( inputE.begin() + m_startIndex, inputE.begin() + m_startIndex + nData );
+
+      MantidVec& Ycal = ws->dataY(1);
+      MantidVec& Ecal = ws->dataE(1);
+      MantidVec& Diff = ws->dataY(2);
+
+      for(size_t i = 0; i < nData; ++i)
+      {
+        Ycal[i] = values->getCalculated(i);
+        Diff[i] = values->getFitData(i) - Ycal[i];
+      }
+
+      SimpleJacobian J(nData,function->nParams());
+      try
+      {
+        function->functionDeriv(*domain,J);
+      }
+      catch(...)
+      {
+        function->calNumericalDeriv(*domain,J);
+      }
+      for(size_t i=0; i<nData; i++)
+      {
+        double err = 0.0;
+        for(size_t j=0;j< function->nParams();++j)
+        {
+          double d = J.get(i,j) * function->getError(j);
+          err += d*d;
+        }
+        Ecal[i] = sqrt(err);
+      }
+
+      declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output Workspace holding resulting simulated spectrum");
+      m_manager->setPropertyValue("OutputWorkspace",baseName+"Workspace");
+      m_manager->setProperty("OutputWorkspace",ws);
+
+  }
+
+  /**
+   * Calculate size and starting iterator in the X array
+   * @param X :: The x array.
+   * @param from :: iterator to the beginning of the fitting data
+   * @param n :: Size of the fitting data
+   * @param isHisto :: True if it's histogram data.
+   */
+  void FitMW::getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const
+  {
+    double startX = m_manager->getProperty(m_startXPropertyName);
+    double endX = m_manager->getProperty(m_endXPropertyName);
+
+    if (X.empty())
+    {
+      throw std::runtime_error("Workspace contains no data.");
+    }
+
+    // find the fitting interval: from -> to
     Mantid::MantidVec::const_iterator to;
 
     bool isXAscending = X.front() < X.back();
@@ -184,159 +334,57 @@ namespace
       }
     }
 
+    n = static_cast<size_t>(to - from);
 
-    API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(m_function.get());
-    if (funMW)
+    if (isHisto)
     {
-      funMW->setMatrixWorkspace(m_matrixWorkspace,m_workspaceIndex,startX,endX);
-    }
-
-    // set function domain
-    if (m_matrixWorkspace->isHistogramData())
-    {
-      if ( X.end() == to ) to = X.end() - 1;
-      std::vector<double> x( static_cast<size_t>(to - from) );
-      Mantid::MantidVec::const_iterator it = from;
-      for(size_t i = 0; it != to; ++it,++i)
+      if ( X.end() == to )
       {
-        x[i] = (*it + *(it+1)) / 2;
+        to = X.end() - 1;
+        --n;
       }
-      domain.reset(new API::FunctionDomain1DVector(x));
-      x.clear();
     }
-    else
-    {
-      domain.reset(new API::FunctionDomain1DVector(from,to));
-    }
-
-    auto values = ivalues ? dynamic_cast<API::FunctionValues*>(ivalues.get()) : new API::FunctionValues(*domain);
-    if (!ivalues)
-    {
-      ivalues.reset(values);
-    }
-    else
-    {
-      values->expand(i0 + domain->size());
-    }
-
-    // set the data to fit to
-    m_startIndex = static_cast<size_t>( from - X.begin() );
-    size_t n = domain->size();
-    size_t ito = m_startIndex + n;
-    const Mantid::MantidVec& Y = m_matrixWorkspace->readY( m_workspaceIndex );
-    const Mantid::MantidVec& E = m_matrixWorkspace->readE( m_workspaceIndex );
-    if (ito > Y.size())
-    {
-      throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
-    }
-    bool foundZeroOrNegativeError = false;
-    for(size_t i = m_startIndex; i < ito; ++i)
-    {
-      size_t j = i - m_startIndex + i0;
-      values->setFitData( j, Y[i] );
-      double error = E[i];
-      if (error <= 0)
-      {
-        error = 1.0;
-        foundZeroOrNegativeError = true;
-      }
-      values->setFitWeight( j, 1.0 / error );
-    }
-
-    if (foundZeroOrNegativeError)
-    {
-      log().debug() << "Zero or negative errors are replaced with 1.0\n";
-    }
-
   }
 
   /**
-   * Create an output workspace with the calculated values.
-   * @param inWS :: The input workspace to the algorithm
-   * @param wi :: The input workspace index.
-   * @param startIndex :: The starting index in the X array where the fit data start
-   * @param domain :: The domain
-   * @param values :: The values
+   * Return the size of the domain to be created.
    */
-  void FitMW::createOutputWorkspace(
-        const std::string& baseName,
-        boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> ivalues
-    )
+  size_t FitMW::getDomainSize() const 
   {
-    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
-    if (!values)
+    API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
+    if (!ws) return 0;
+    auto mws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+    if (!mws) return 0;
+
+    int index = m_manager->getProperty(m_workspaceIndexPropertyName);
+    size_t wi = static_cast<size_t>(index);
+
+    const Mantid::MantidVec& X = m_matrixWorkspace->readX(wi);
+    double startX = m_manager->getProperty(m_startXPropertyName);
+    double endX = m_manager->getProperty(m_endXPropertyName);
+  }
+
+  /**
+   * Initialize the function with the workspace.
+   * @param function :: Function to initialize.
+   */
+  void FitMW::initFunction(API::IFunction_sptr function)
+  {
+    if (!function)
     {
-      throw std::invalid_argument("Unsupported Function Values found in FitMW");
+      throw std::runtime_error("Cannot initialize empty function.");
     }
-
-    // calculate the values
-    m_function->function(*domain,*values);
-    const MantidVec& inputX = m_matrixWorkspace->readX(m_workspaceIndex);
-    const MantidVec& inputY = m_matrixWorkspace->readY(m_workspaceIndex);
-    const MantidVec& inputE = m_matrixWorkspace->readE(m_workspaceIndex);
-    size_t nData = ivalues->size();
-
-      size_t histN = m_matrixWorkspace->isHistogramData() ? 1 : 0;
-      API::MatrixWorkspace_sptr ws =
-        Mantid::API::WorkspaceFactory::Instance().create(
-            "Workspace2D",
-            3,
-            nData + histN,
-            nData);
-      ws->setTitle("");
-      ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
-      ws->setYUnit(m_matrixWorkspace->YUnit());
-      ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
-      API::TextAxis* tAxis = new API::TextAxis(3);
-      tAxis->setLabel(0,"Data");
-      tAxis->setLabel(1,"Calc");
-      tAxis->setLabel(2,"Diff");
-      ws->replaceAxis(1,tAxis);
-
-      for(size_t i=0;i<3;i++)
-      {
-        ws->dataX(i).assign( inputX.begin() + m_startIndex, inputX.begin() + m_startIndex + nData + histN );
-      }
-
-      ws->dataY(0).assign( inputY.begin() + m_startIndex, inputY.begin() + m_startIndex + nData);
-      ws->dataE(0).assign( inputE.begin() + m_startIndex, inputE.begin() + m_startIndex + nData );
-
-      MantidVec& Ycal = ws->dataY(1);
-      MantidVec& Ecal = ws->dataE(1);
-      MantidVec& Diff = ws->dataY(2);
-
-      for(size_t i = 0; i < nData; ++i)
-      {
-        Ycal[i] = values->getCalculated(i);
-        Diff[i] = values->getFitData(i) - Ycal[i];
-      }
-
-      SimpleJacobian J(nData,m_function->nParams());
-      try
-      {
-        m_function->functionDeriv(*domain,J);
-      }
-      catch(...)
-      {
-        m_function->calNumericalDeriv(*domain,J);
-      }
-      for(size_t i=0; i<nData; i++)
-      {
-        double err = 0.0;
-        for(size_t j=0;j< m_function->nParams();++j)
-        {
-          double d = J.get(i,j) * m_function->getError(j);
-          err += d*d;
-        }
-        Ecal[i] = sqrt(err);
-      }
-
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-      m_fit->setPropertyValue("OutputWorkspace",baseName+"Workspace");
-      m_fit->setProperty("OutputWorkspace",ws);
-
+    API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(function.get());
+    if (funMW)
+    {
+      double startX = m_manager->getProperty(m_startXPropertyName);
+      double endX = m_manager->getProperty(m_endXPropertyName);
+      funMW->setMatrixWorkspace( m_matrixWorkspace, m_workspaceIndex, startX, endX);
+    }
+    else
+    {
+      function->setWorkspace(m_matrixWorkspace);
+    }
   }
 
 

@@ -100,6 +100,11 @@ namespace CurveFitting
     }
   }
 
+  /**
+   * Add a new workspace to the fit. The workspace is in the property named workspacePropertyName
+   * @param workspacePropertyName :: A workspace property name (eg InputWorkspace or InputWorkspace_2).
+   *  The property must already exist in the algorithm.
+   */
   void Fit::addWorkspace(const std::string& workspacePropertyName, bool addProperties)
   {
     // get the workspace 
@@ -115,11 +120,11 @@ namespace CurveFitting
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
     {
-      creator = new FitMW(this);
+      creator = new FitMW(this, workspacePropertyName);
     }
     else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
     {
-      creator = new FitMD(this);
+      creator = new FitMD(this, workspacePropertyName);
     }
     else
     {// don't know what to do with this workspace
@@ -130,13 +135,14 @@ namespace CurveFitting
     {
       if (m_workspacePropertyNames.empty())
       {
+        // this defines the function and fills in m_workspacePropertyNames with names of the sort InputWorkspace_#
         setFunction();
       }
       auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(fun);
       if (multiFun)
       {
-        auto multiCreator = new MultiDomainCreator(this,m_workspacePropertyNames.size());
-        multiCreator->setCreator(index,workspacePropertyName,creator);
+        auto multiCreator = new MultiDomainCreator(this,m_workspacePropertyNames);
+        multiCreator->setCreator(index,creator);
         m_domainCreator.reset(multiCreator);
         creator->declareDatasetProperties(suffix,addProperties);
       }
@@ -149,7 +155,6 @@ namespace CurveFitting
     else
     {
       boost::shared_ptr<MultiDomainCreator> multiCreator = boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
-      //MultiDomainCreator* multiCreator = dynamic_cast<MultiDomainCreator*>(m_domainCreator.get());
       if (!multiCreator)
       {
         throw std::runtime_error(std::string("MultiDomainCreator expected, found ") + typeid(*m_domainCreator.get()).name());
@@ -158,7 +163,7 @@ namespace CurveFitting
       {
         creator->declareDatasetProperties(suffix,addProperties);
       }
-      multiCreator->setCreator(index,workspacePropertyName,creator);
+      multiCreator->setCreator(index,creator);
     }
 
   }
@@ -171,7 +176,7 @@ namespace CurveFitting
     auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (multiFun)
     {
-      m_domainCreator.reset(new MultiDomainCreator(this,m_workspacePropertyNames.size()));
+      m_domainCreator.reset(new MultiDomainCreator(this,m_workspacePropertyNames));
     }
     auto props = getProperties();
     for(auto prop = props.begin(); prop != props.end(); ++prop)
@@ -184,11 +189,11 @@ namespace CurveFitting
         if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
             !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
         {
-          creator = new FitMW(this);
+          creator = new FitMW(this, workspacePropertyName);
         }
         else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
         {
-          creator = new FitMD(this);
+          creator = new FitMD(this, workspacePropertyName);
         }
         else
         {// don't know what to do with this workspace
@@ -206,7 +211,7 @@ namespace CurveFitting
         auto multiCreator = boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
         if (multiCreator)
         {
-          multiCreator->setCreator(index,workspacePropertyName,creator);
+          multiCreator->setCreator(index,creator);
         }
       }
     }
@@ -276,7 +281,7 @@ namespace CurveFitting
     }
 
     // do something with the function which may depend on workspace
-    m_domainCreator->initFunction();
+    m_domainCreator->initFunction(m_function);
 
     std::string ties = getPropertyValue("Ties");
     if (!ties.empty())
@@ -291,7 +296,7 @@ namespace CurveFitting
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;
-    m_domainCreator->createDomain(m_workspacePropertyNames,domain,values);
+    m_domainCreator->createDomain(domain,values);
 
     // get the minimizer
     std::string minimizerName = getPropertyValue("Minimizer");
@@ -453,7 +458,7 @@ namespace CurveFitting
       row << "Cost function value" << finalCostFuncVal;      
       setProperty("OutputParameters",result);
 
-      m_domainCreator->createOutputWorkspace(baseName,domain,values);
+      m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
 
     }
 

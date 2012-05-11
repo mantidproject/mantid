@@ -9,11 +9,6 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  Kernel::Logger& IDomainCreator::log() const
-  {
-    return static_cast<Fit*>(m_fit)->g_log;
-  }
-
   /**
    * Declare a property to the algorithm.
    * @param prop :: A new property.
@@ -21,20 +16,19 @@ namespace CurveFitting
    */
   void IDomainCreator::declareProperty(Kernel::Property* prop,const std::string& doc)
   {
-    static_cast<Fit*>(m_fit)->declareProperty(prop,doc);
+    m_manager->declareProperty(prop,doc);
   }
 
   /**
    * Initialize the function with the workspace. Default is to call IFunction::setWorkspace().
    */
-  void IDomainCreator::initFunction()
+  void IDomainCreator::initFunction(API::IFunction_sptr function)
   {
-    API::IFunction_sptr function = m_fit->getProperty("Function");
     if (!function)
     {
       throw std::runtime_error("Cannot initialize empty function.");
     }
-    API::Workspace_sptr workspace = m_fit->getProperty("InputWorkspace");
+    API::Workspace_sptr workspace = m_manager->getProperty("InputWorkspace");
     if (!workspace)
     {
       throw std::runtime_error("Cannot initialize function: workspace undefined.");

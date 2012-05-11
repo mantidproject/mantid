@@ -40,30 +40,31 @@ namespace Mantid
     class DLLExport MultiDomainCreator : public IDomainCreator
     {
       /// A friend that can create instances of this class
-      friend class Fit;
+      //friend class Fit;
+    public:
       /// Constructor
-      MultiDomainCreator(API::Algorithm* fit, size_t n):
-      IDomainCreator(fit),
-      m_creators(n),
-      m_workspacePropertyNames(n)
+      MultiDomainCreator(Kernel::IPropertyManager* fit,const std::vector<std::string>& workspacePropertyNames):
+      IDomainCreator(fit, workspacePropertyNames),
+      m_creators(workspacePropertyNames.size())
       {
       }
 
       /// Create a domain from the input workspace
       virtual void createDomain(
-        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>& domain, 
-        boost::shared_ptr<API::IFunctionValues>& values, size_t i0);
+        boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
 
+      /// Return the size of the domain to be created.
+      virtual size_t getDomainSize() const{return 0;}
       /// Set ith creator
-      /// 
-      void setCreator(size_t i, const std::string& workspacePropetyName,IDomainCreator* creator);
+      void setCreator(size_t i, IDomainCreator* creator);
       bool hasCreator(size_t i) const;
+      /// Get number of creators
+      size_t getNCreators() const {return m_creators.size();}
 
+    protected:
       /// Vector of creators.
       std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
-      /// Workspace property names
-      std::vector<std::string> m_workspacePropertyNames;
     };
 
     

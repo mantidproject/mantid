@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/IFunction.h"
 
 namespace Mantid
@@ -14,7 +14,6 @@ namespace Mantid
   {
     class FunctionDomain;
     class IFunctionValues;
-    class Workspace;
   }
 
   namespace CurveFitting
@@ -52,6 +51,15 @@ namespace Mantid
     class DLLExport IDomainCreator
     {
     public:
+      /// Constructor.
+      /// @param manager :: A property manager which has information about the data source (eg workspace)
+      /// and the function.
+      /// @param workspacePropertyNames :: Property names for workspaces to get the data from.
+      IDomainCreator( Kernel::IPropertyManager* manager,
+        const std::vector<std::string>& workspacePropertyNames ):
+      m_manager(manager),
+      m_workspacePropertyNames(workspacePropertyNames)
+      {}
       /// Virtual destructor
       virtual ~IDomainCreator() {};
 
@@ -60,35 +68,43 @@ namespace Mantid
       /// @param addProp :: If false don't actually declare new properties but do other stuff if needed
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true) 
       {UNUSED_ARG(suffix);UNUSED_ARG(addProp);}
+
       /// Create a domain and values from the input workspace. FunctionValues must be filled with data to fit to.
       /// @param workspacePropetyName :: A name of a workspace property. Domain will be created for this workspace.
       /// @param domain :: Shared pointer to hold the created domain
-      /// @param values :: Shared pointer to hold the created values with set fitting data and weights
+      /// @param values :: Shared pointer to hold the created values with set fitting data and weights.
+      ///  Implementations must check whether it's empty or not. If values pointer is empty create new values instance
+      ///  of an appropriate type otherwise extend it if neccessary.
+      /// @param i0 :: Starting index in values for the fitting data. Implementations must make sure values has enough room
+      ///   for the data from index i0 to the end of the container.
       virtual void createDomain(
-        const std::vector<std::string>& workspacePropetyNames,
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values,
         size_t i0 = 0) = 0;
-      /// Create an output workspace filled with data simulated with the fitting function
+
+      /**
+       * Create an output workspace filled with data simulated with the fitting function.
+       */
       virtual void createOutputWorkspace(
         const std::string& baseName,
+        API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
         boost::shared_ptr<API::IFunctionValues> values) 
-      {UNUSED_ARG(baseName);UNUSED_ARG(domain);UNUSED_ARG(values);}
-      virtual void initFunction();
+      {UNUSED_ARG(baseName);UNUSED_ARG(function);UNUSED_ARG(domain);UNUSED_ARG(values);}
+
+      /// Initialize the function
+      virtual void initFunction(API::IFunction_sptr function);
+
+      /// Return the size of the domain to be created.
+      virtual size_t getDomainSize() const = 0;
 
     protected:
-      /// Constructor.
-      /// @param fit :: Fit algorithm this creator will create domains for
-      IDomainCreator(API::Algorithm* fit):m_fit(fit){}
-      /// A friend that can create instances of this class
-      friend class Fit;
-      /// Log as the algorithm
-      Kernel::Logger& log() const;
       /// Declare a property to the algorithm
       void declareProperty(Kernel::Property* prop,const std::string& doc);
-      /// Pointer to the Fit algorithm
-      API::Algorithm* m_fit;
+      /// Pointer to a property manager
+      Kernel::IPropertyManager* m_manager;
+      /// Property names for workspaces to get the data from
+      std::vector<std::string> m_workspacePropertyNames;
     };
 
     
