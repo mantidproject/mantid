@@ -116,9 +116,13 @@ class DataReflWidget(BaseRefWidget):
 
     def set_editing_state(self, state):
         super(DataReflWidget, self).set_editing_state(state)
-                
-        self._summary.tof_range_switch.setChecked(state.TofRangeFlag)
-        self._tof_range_clicked(state.TofRangeFlag)
+        
+        try:        
+            self._summary.tof_range_switch.setChecked(state.TofRangeFlag)
+            self._tof_range_clicked(state.TofRangeFlag)
+        except:
+            self._summary.tof_range_switch.setChecked(True)
+            self._tof_range_clicked(True)            
                                                 
     def get_state(self):
         """
