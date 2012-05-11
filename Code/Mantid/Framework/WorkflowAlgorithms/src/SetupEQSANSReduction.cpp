@@ -42,16 +42,34 @@ void SetupEQSANSReduction::init()
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
   declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be loaded into the workspace at load-time");
   declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be loaded into the workspace at load-time");
+  declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when rebinning the data before performing the reduction");
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
+  declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
+
+  declareProperty("SkipTOFCorrection", false, "IF true, the EQSANS TOF correction will be skipped");
+  declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
+  declareProperty("LoadMonitors", false, "If true, the monitor workspace will be loaded");
+
   declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
 
   setPropertyGroup("UseConfigTOFCuts", load_grp);
   setPropertyGroup("LowTOFCut", load_grp);
   setPropertyGroup("HighTOFCut", load_grp);
+
+  setPropertyGroup("WavelengthStep", load_grp);
   setPropertyGroup("UseConfigMask", load_grp);
+  setPropertyGroup("UseConfig", load_grp);
   setPropertyGroup("CorrectForFlightPath", load_grp);
+
+  setPropertyGroup("SkipTOFCorrection", load_grp);
+  setPropertyGroup("PreserveEvents", load_grp);
+  setPropertyGroup("LoadMonitors", load_grp);
+
   setPropertyGroup("SolidAngleCorrection", load_grp);
+
+  declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
+  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
 
   // Beam center
   std::string center_grp = "Beam Center";
@@ -140,10 +158,29 @@ void SetupEQSANSReduction::exec()
     loadAlg->setProperty("LowTOFCut", lowTOFCut);
     loadAlg->setProperty("HighTOFCut", highTOFCut);
   }
-  const bool useConfigMask = getProperty("UseConfigMask");
-  loadAlg->setProperty("UseConfigMask", useConfigMask);
+
+  const bool skipTOFCorrection = getProperty("SkipTOFCorrection");
+  loadAlg->setProperty("SkipTOFCorrection", skipTOFCorrection);
+
   const bool correctForFlightPath = getProperty("CorrectForFlightPath");
   loadAlg->setProperty("CorrectForFlightPath", correctForFlightPath);
+
+  const bool preserveEvents = getProperty("PreserveEvents");
+  loadAlg->setProperty("PreserveEvents", preserveEvents);
+  const bool loadMonitors = getProperty("LoadMonitors");
+  loadAlg->setProperty("LoadMonitors", loadMonitors);
+
+  const double sdd = getProperty("SampleDetectorDistance");
+  loadAlg->setProperty("SampleDetectorDistance", sdd);
+  const double sddOffset = getProperty("SampleDetectorDistanceOffset");
+  loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
+  const double wlStep = getProperty("WavelengthStep");
+  loadAlg->setProperty("WavelengthStep", wlStep);
+
+  const bool useConfig = getProperty("UseConfig");
+  loadAlg->setProperty("UseConfig", useConfig);
+  const bool useConfigMask = getProperty("UseConfigMask");
+  loadAlg->setProperty("UseConfigMask", useConfigMask);
   reductionManager->declareProperty(new AlgorithmProperty("LoadAlgorithm"));
   reductionManager->setProperty("LoadAlgorithm", loadAlg);
 

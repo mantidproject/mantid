@@ -28,6 +28,7 @@ def EQSANS(keep_events=True):
     NoSolidAngle()
     AzimuthalAverage()
     ReductionSingleton().set_data_loader(sns_reduction_steps.LoadRun(keep_events=keep_events))
+    ReductionSingleton().set_reduction(sns_reduction_steps.EQSANSSetup())
     
 def FrameSkipping(value=False):
     raise RuntimeError, "The FrameSkipping command is no longer needed and no longer supported" 

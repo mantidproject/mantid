@@ -73,7 +73,7 @@ class BaseBeamFinder(ReductionStep):
     def execute(self, reducer, workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
         
-    def _find_beam_new(self, direct_beam, reducer, workspace=None):
+    def _find_beam(self, direct_beam, reducer, workspace=None):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
         
@@ -87,7 +87,7 @@ class BaseBeamFinder(ReductionStep):
         self._beam_center_y = c.getProperty("FoundBeamCenterY").value
         return c.getPropertyValue("OutputMessage")
         
-    def _find_beam(self, direct_beam, reducer, workspace=None):
+    def _find_beam_scripted(self, direct_beam, reducer, workspace=None):
         """
             Find the beam center.
             @param reducer: Reducer object for which this step is executed

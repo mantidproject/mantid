@@ -17,6 +17,27 @@ from eqsans_load import LoadRun
 from MantidFramework import *
 from mantidsimple import *
     
+class EQSANSSetup(ReductionStep):
+    def __init__(self):
+        super(EQSANSSetup, self).__init__()
+    
+    def execute(self, reducer, workspace=None):
+        # Load options
+        SetupEQSANSReduction(UseConfigTOFCuts = reducer._data_loader._use_config_cutoff,
+                             LowTOFCut = reducer._data_loader._low_TOF_cut,
+                             HighTOFCut = reducer._data_loader._high_TOF_cut,
+                             UseConfigMask = reducer._data_loader._use_config_mask,
+                             CorrectForFlightPath = reducer._data_loader._correct_for_flight_path,
+                             SkipTOFCorrection = reducer._data_loader._skip_tof_correction,
+                             SampleDetectorDistance = reducer._data_loader._sample_det_dist,
+                             SampleDetectorDistanceOffset = reducer._data_loader._sample_det_offset,
+                             PreserveEvents = reducer._data_loader._keep_events,
+                             LoadMonitors = reducer._data_loader._load_monitors,
+                             WavelengthStep = reducer._data_loader._wavelength_step,
+                             UseConfig = reducer._data_loader._use_config,
+                             ReductionProperties=reducer.get_reduction_table_name())
+        return "Reduction parameters set"
+
 class SubtractDarkCurrent(ReductionStep):
     """
         Subtract the dark current from the input workspace.
