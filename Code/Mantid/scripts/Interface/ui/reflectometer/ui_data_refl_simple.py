@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
+# Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Tue May  1 06:40:10 2012
+# Created: Fri May 11 10:41:18 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ class Ui_Frame(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1280, 1383))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1274, 1377))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_7 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
@@ -1184,6 +1184,25 @@ class Ui_Frame(object):
         self.outdir_browse_button.setObjectName("outdir_browse_button")
         self.horizontalLayout_19.addWidget(self.outdir_browse_button)
         self.verticalLayout_8.addLayout(self.horizontalLayout_19)
+        self.horizontalLayout_22 = QtGui.QHBoxLayout()
+        self.horizontalLayout_22.setSpacing(0)
+        self.horizontalLayout_22.setObjectName("horizontalLayout_22")
+        self.outdir_label_2 = QtGui.QLabel(self.groupBox_4)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.outdir_label_2.sizePolicy().hasHeightForWidth())
+        self.outdir_label_2.setSizePolicy(sizePolicy)
+        self.outdir_label_2.setMinimumSize(QtCore.QSize(150, 0))
+        self.outdir_label_2.setMaximumSize(QtCore.QSize(150, 16777215))
+        self.outdir_label_2.setObjectName("outdir_label_2")
+        self.horizontalLayout_22.addWidget(self.outdir_label_2)
+        self.comboBox = QtGui.QComboBox(self.groupBox_4)
+        self.comboBox.setEditable(True)
+        self.comboBox.setObjectName("comboBox")
+        self.comboBox.addItem("")
+        self.horizontalLayout_22.addWidget(self.comboBox)
+        self.verticalLayout_8.addLayout(self.horizontalLayout_22)
         self.verticalLayout_4.addWidget(self.groupBox_4)
         spacerItem18 = QtGui.QSpacerItem(20, 25, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_4.addItem(spacerItem18)
@@ -1333,6 +1352,8 @@ class Ui_Frame(object):
         self.angle_offset_unit_label.setText(QtGui.QApplication.translate("Frame", "  degrees", None, QtGui.QApplication.UnicodeUTF8))
         self.outdir_label.setText(QtGui.QApplication.translate("Frame", "Output directory", None, QtGui.QApplication.UnicodeUTF8))
         self.outdir_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.outdir_label_2.setText(QtGui.QApplication.translate("Frame", "Incident medium", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(0, QtGui.QApplication.translate("Frame", "H20", None, QtGui.QApplication.UnicodeUTF8))
         self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

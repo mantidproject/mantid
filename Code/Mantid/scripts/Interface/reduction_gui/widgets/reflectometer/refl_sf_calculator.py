@@ -44,7 +44,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-                
+        
+        
         self.short_name = name
         self._settings.instrument_name = name
             
@@ -85,6 +86,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
+        self.connect(self._summary.cfg_scaling_factor_file_name_refresh, QtCore.SIGNAL("clicked()"), self.display_preview_config_file)
         
         #Catch edited controls        
         #Incident medium (selection or text changed)
@@ -109,6 +111,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.data_background_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_to_pixel)
         self.connect(self._summary.data_background_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        
+        self.display_preview_config_file()
                 
     def _ref_instrument_selected(self):
         self.instrument_name = "REF_L"
@@ -141,6 +145,16 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #TODO: allow log binning
         self._summary.log_scale_chk.hide()
                  
+    def display_preview_config_file(self):
+        '''
+        Load and display config file
+        '''
+        config_file_name = self._summary.cfg_scaling_factor_file_name.text()
+        f = open(config_file_name,'r')
+        text = f.readlines()
+        _full_text = ''.join(text)
+        self._summary.textBrowser.setText(_full_text)
+
     def _plot_counts_vs_tof(self):
         if not IS_IN_MANTIDPLOT:
             return

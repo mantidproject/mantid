@@ -8,6 +8,7 @@ from MantidFramework import *
 from mantidsimple import *
 from numpy import zeros, shape, arange
 import math
+import sfCalculator
 
 class RefLReduction(PythonAlgorithm):
 
@@ -134,8 +135,10 @@ class RefLReduction(PythonAlgorithm):
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
         #name of the sfCalculator txt file
-        slitsValuePrecision = 0.1       #precision of slits = 10% 
-
+#        slitsValuePrecision = 0.01       #precision of slits = 10% 
+        slitsValuePrecision = sfCalculator.PRECISION
+        sfFile = '/home/j35/Desktop/RefLsf.cfg'
+        
         # Pick a good workspace n    ame
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
@@ -800,11 +803,14 @@ class RefLReduction(PythonAlgorithm):
         AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
         theta += AngleOffset_rad
 
-#        this is where we need to apply the scaling factor
-#        print '-> Apply SF'
-#        ws_data_scaled = wks_utility.applySF(ws_data,
-#                                             slitsValuePrecision)
-        ws_data_scaled = ws_data   #REMOVE_ME
+        #this is where we need to apply the scaling factor
+        print '-> Apply SF'
+        incidentMedium = 'H2O'
+        ws_data_scaled = wks_utility.applySF(ws_data,
+                                             incidentMedium,
+                                             sfFile,
+                                             slitsValuePrecision)
+#        ws_data_scaled = ws_data   #REMOVE_ME
 
         if dMD is not None and theta is not None:
                     

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refl_sf_calculator.ui'
 #
-# Created: Fri May  4 12:30:45 2012
+# Created: Fri May 11 10:39:05 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -485,11 +485,11 @@ class Ui_Frame(object):
         self.cfg_scaling_factor_file_name = QtGui.QLabel(self.scrollAreaWidgetContents)
         self.cfg_scaling_factor_file_name.setObjectName("cfg_scaling_factor_file_name")
         self.horizontalLayout_9.addWidget(self.cfg_scaling_factor_file_name)
-        self.cfg_scaling_factor_file_browse = QtGui.QPushButton(self.scrollAreaWidgetContents)
-        self.cfg_scaling_factor_file_browse.setMaximumSize(QtCore.QSize(90, 16777215))
-        self.cfg_scaling_factor_file_browse.setSizeIncrement(QtCore.QSize(90, 0))
-        self.cfg_scaling_factor_file_browse.setObjectName("cfg_scaling_factor_file_browse")
-        self.horizontalLayout_9.addWidget(self.cfg_scaling_factor_file_browse)
+        self.cfg_scaling_factor_file_name_refresh = QtGui.QPushButton(self.scrollAreaWidgetContents)
+        self.cfg_scaling_factor_file_name_refresh.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.cfg_scaling_factor_file_name_refresh.setSizeIncrement(QtCore.QSize(80, 0))
+        self.cfg_scaling_factor_file_name_refresh.setObjectName("cfg_scaling_factor_file_name_refresh")
+        self.horizontalLayout_9.addWidget(self.cfg_scaling_factor_file_name_refresh)
         self.verticalLayout_4.addLayout(self.horizontalLayout_9)
         self.textBrowser = QtGui.QTextBrowser(self.scrollAreaWidgetContents)
         self.textBrowser.setMinimumSize(QtCore.QSize(0, 400))
@@ -570,6 +570,6 @@ class Ui_Frame(object):
         self.add_dataset_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to add the data set above to the reduction list", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setText(QtGui.QApplication.translate("Frame", "Save to list", None, QtGui.QApplication.UnicodeUTF8))
         self.label_11.setText(QtGui.QApplication.translate("Frame", "Preview of scaling factor file:", None, QtGui.QApplication.UnicodeUTF8))
-        self.cfg_scaling_factor_file_name.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
-        self.cfg_scaling_factor_file_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.cfg_scaling_factor_file_name.setText(QtGui.QApplication.translate("Frame", "/home/j35/Desktop/RefLsf.cfg", None, QtGui.QApplication.UnicodeUTF8))
+        self.cfg_scaling_factor_file_name_refresh.setText(QtGui.QApplication.translate("Frame", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 

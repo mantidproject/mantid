@@ -1507,26 +1507,26 @@ p, li { white-space: pre-wrap; }
                  <item>
                   <widget class="QLabel" name="cfg_scaling_factor_file_name">
                    <property name="text">
-                    <string>N/A</string>
+                    <string>/home/j35/Desktop/RefLsf.cfg</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="cfg_scaling_factor_file_browse">
+                  <widget class="QPushButton" name="cfg_scaling_factor_file_name_refresh">
                    <property name="maximumSize">
                     <size>
-                     <width>90</width>
+                     <width>80</width>
                      <height>16777215</height>
                     </size>
                    </property>
                    <property name="sizeIncrement">
                     <size>
-                     <width>90</width>
+                     <width>80</width>
                      <height>0</height>
                     </size>
                    </property>
                    <property name="text">
-                    <string>Browse...</string>
+                    <string>Refresh</string>
                    </property>
                   </widget>
                  </item>

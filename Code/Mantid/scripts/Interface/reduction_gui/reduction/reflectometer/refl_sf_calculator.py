@@ -31,9 +31,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         script_split = script_part2.split('\n')
         new_script = ''
                 
-        print 'script is:'
-        print script_split
-        
         run_number = []
         attenuator = []
         
