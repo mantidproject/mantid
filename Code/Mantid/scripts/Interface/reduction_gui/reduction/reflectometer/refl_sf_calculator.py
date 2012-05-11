@@ -129,9 +129,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                 script_part2 += str(item.state())
 
         script += self.create_script(script_part2)
-        print script
-        print
-
 
         if file_name is not None:
             f = open(file_name, 'w')
