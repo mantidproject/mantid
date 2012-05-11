@@ -36,7 +36,7 @@ public:
 
 
   /*
-   * (1) Load an existing masking file.
+   * (1) Load an existing masking file.  It is in 1x1
    * (2) Save masking workspace to file.
    * (3) Load the newly saved file, and compare with original masking workspace
    * Notice: the prerequisit is that LoadMask() is correct.
@@ -92,7 +92,6 @@ public:
     cleanfile.remove(false);
 
   }
-
 
 };
 
