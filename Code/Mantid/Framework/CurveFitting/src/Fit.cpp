@@ -280,9 +280,6 @@ namespace CurveFitting
       addWorkspaces();
     }
 
-    // do something with the function which may depend on workspace
-    m_domainCreator->initFunction(m_function);
-
     std::string ties = getPropertyValue("Ties");
     if (!ties.empty())
     {
@@ -297,6 +294,9 @@ namespace CurveFitting
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;
     m_domainCreator->createDomain(domain,values);
+
+    // do something with the function which may depend on workspace
+    m_domainCreator->initFunction(m_function);
 
     // get the minimizer
     std::string minimizerName = getPropertyValue("Minimizer");
