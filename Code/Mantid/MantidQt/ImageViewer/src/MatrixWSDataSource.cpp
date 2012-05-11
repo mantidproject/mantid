@@ -161,8 +161,10 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
     IVUtils::Interpolate( total_ymin, total_ymax, mid_y,
                                  0.0, (double)total_rows, d_y_index );
     source_row = (size_t)d_y_index;
-
     y_vals.clear();
+    err.clear();
+    y_vals.resize(n_cols,0);
+    err.resize(n_cols,0);
 
     mat_ws->generateHistogram( source_row, x_scale, y_vals, err, true );
     for ( size_t col = 0; col < n_cols; col++ )

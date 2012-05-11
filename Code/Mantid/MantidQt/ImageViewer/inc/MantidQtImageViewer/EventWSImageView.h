@@ -2,8 +2,9 @@
 #define EVENT_WS_IMAGE_VIEW_H
 
 #include "MantidQtImageViewer/DllOptionIV.h"
-
 #include "MantidAPI/IEventWorkspace.h"
+
+#include "MantidQtImageViewer/ImageView.h"
 
 /**
     @class EventWSDataSource 
@@ -34,7 +35,6 @@
     Code Documentation is available at 
                  <http://doxygen.mantidproject.org>
  */
-#include "MantidQtImageViewer/ImageView.h"
 
 namespace MantidQt
 {

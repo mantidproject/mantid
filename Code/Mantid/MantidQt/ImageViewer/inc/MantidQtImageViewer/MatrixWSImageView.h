@@ -2,8 +2,9 @@
 #define MATRIX_WS_IMAGE_VIEW_H
 
 #include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidAPI/IEventWorkspace.h"
+#include "MantidQtImageViewer/ImageView.h"
 
 /**
     @class MatrixWSDataSource 
@@ -34,7 +35,6 @@
     Code Documentation is available at 
                  <http://doxygen.mantidproject.org>
  */
-#include "MantidQtImageViewer/ImageView.h"
 
 namespace MantidQt
 {
