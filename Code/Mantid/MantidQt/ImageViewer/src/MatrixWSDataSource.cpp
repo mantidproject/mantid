@@ -163,10 +163,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
     source_row = (size_t)d_y_index;
 
     y_vals.clear();
-/*
-    IEventList * list = ev_ws->getEventListPtr( source_row );
-    list->generateHistogram( x_scale, y_vals, err, true );
-*/
+
     mat_ws->generateHistogram( source_row, x_scale, y_vals, err, true );
     for ( size_t col = 0; col < n_cols; col++ )
     {
@@ -174,17 +171,6 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
       index++;
     }
   }
-  bool all_zero = true;
-  for ( size_t i = 0; i < n_rows*n_cols; i++ )
-  {
-    if ( new_data[i] != 0 )
-      all_zero = false;
-  }
-  if ( all_zero )
-    std::cout << "all entries zero" << std::endl;
-  else
-    std::cout << "Some entries are non-zero" << std::endl;
-
                                 // The calling code is responsible for deleting 
                                 // the DataArray when it is done with it      
   DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax,
