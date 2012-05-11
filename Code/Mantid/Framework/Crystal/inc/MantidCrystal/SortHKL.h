@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -40,10 +41,11 @@ namespace Crystal
     void exec();
     void Outliers(std::vector<double>& data, std::vector<double>& err);
 
+    double round(double d);
+    Kernel::V3D round(Kernel::V3D d);
   };
 
-
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif  /* MANTID_CRYSTAL_SORTHKL_H_ */

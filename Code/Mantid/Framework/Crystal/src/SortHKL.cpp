@@ -86,6 +86,12 @@ namespace Crystal
     if (peaksW != InPeaksW)
       peaksW = InPeaksW->clone();
     
+    int NumberPeaks = peaksW->getNumberPeaks();
+    for (int i = 0; i < NumberPeaks; i++)
+    {
+      V3D hkl1 = round(peaksW->getPeaks()[i].getHKL());
+      peaksW->getPeaks()[i].setHKL(hkl1);
+    }
     //Use the primitive by default
     PointGroup_sptr pointGroup(new PointGroupLaue1());
     //Get it from the property
@@ -96,7 +102,6 @@ namespace Crystal
 
     double Chisq = 0.0;
     std::vector<Peak> &peaks = peaksW->getPeaks();
-    int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
       V3D hkl1 = peaks[i].getHKL();
@@ -106,7 +111,9 @@ namespace Crystal
         V3D hkl2 = peaks[j].getHKL();
         std::string bank2 = peaks[j].getBankName();
         if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
+        {
           peaks[j].setHKL(hkl1);
+        }
       }
     }
 
@@ -210,7 +217,18 @@ namespace Crystal
         }
       }
   }
-
+  V3D SortHKL::round(V3D hkl)
+  {
+          V3D hkl1;
+	  hkl1.setX(round(hkl.X()));
+	  hkl1.setY(round(hkl.Y()));
+	  hkl1.setZ(round(hkl.Z()));
+	  return hkl1;
+  }
+  double SortHKL::round(double d)
+  {
+	  return floor(d + 0.5);
+  }
 
 } // namespace Mantid
 } // namespace Crystal
