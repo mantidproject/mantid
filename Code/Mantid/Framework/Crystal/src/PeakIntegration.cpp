@@ -301,9 +301,11 @@ namespace Mantid
           fit_alg->setProperty("StartX", X[TOFmin]);
           fit_alg->setProperty("EndX", X[TOFmax]);
           fit_alg->setProperty("MaxIterations", 5000);
-          //fit_alg->setProperty("Output", "fit");
+          fit_alg->setProperty("CreateOutput", true);
+          fit_alg->setProperty("Output", "fit");
           fit_alg->executeAsSubAlg();
-          //MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
+          std::string wsname("fit_Workspace");
+          MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
       
           /*double chisq = fit_alg->getProperty("OutputChi2overDoF");
           if(chisq > 0 && chisq < 400 && !haveFit && PeakIntensity < 30.0) // use fit of strong peaks for weak peaks
@@ -317,26 +319,12 @@ namespace Mantid
           }*/
           std::string funct = fit_alg->getPropertyValue("Function");
       
-          //setProperty("OutputWorkspace", ws);
       
           //Evaluate fit at points
-          IFunction_sptr out = FunctionFactory::Instance().createInitialized(funct);
-          IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-          double *x = new double[n];
-          double *y = new double[n];
-          //double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
-          for (iTOF=0; iTOF < n; iTOF++) 
-          {
-            x[iTOF] = X[TOFmin+iTOF];
-            //x[iTOF] = X[TOFmin]+iTOF*dx;
-          }
-          //pk->setMatrixWorkspace(outputW, i);
-          pk->function1D(y,x,n);
+          const Mantid::MantidVec& y = fitWS->readY(1);
       
           //Calculate intensity
           for (iTOF = 0; iTOF < n; iTOF++) if ( !boost::math::isnan(y[iTOF]) && !boost::math::isinf(y[iTOF]))I+= y[iTOF];
-          delete [] x;
-          delete [] y;
         }
         else
           for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++)I+=Y[iTOF];
