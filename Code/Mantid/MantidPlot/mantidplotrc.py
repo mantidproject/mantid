@@ -41,6 +41,9 @@ if __name__ == '__main__':
     if _api == 2:
         # Put the new one on top
         from mantid import *
+        from mantid.kernel import *
+        from mantid.geometry import *
+        from mantid.api import *
         from mantid.simpleapi import *
     elif _api != 1:
         raise RuntimeError("Unknown Python API version requested: %d" % _api)
