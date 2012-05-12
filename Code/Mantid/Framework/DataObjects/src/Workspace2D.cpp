@@ -146,9 +146,21 @@ namespace Mantid
       if (X.size() <= 1) throw std::runtime_error("Workspace2D::generateHistogram(): X vector must be at least length 2");
       Y.resize(X.size()-1, 0);
       E.resize(X.size()-1, 0);
-      // Perform the rebin from the current bins to the new ones
-      Mantid::Kernel::VectorHelper::rebin(currentX,currentY,currentE, X, Y, E,
-          this->isDistribution());
+
+                                                  // Perform the rebin from the current bins to the new ones
+      if ( currentX.size() == currentY.size() )   // First, convert to bin boundaries if needed.  The 
+      {                                           // VectorHelper::rebin, assumes bin boundaries, even if 
+        std::vector<double> histX;                // it is a distribution!
+        histX.resize( currentX.size() + 1 );
+        Mantid::Kernel::VectorHelper::convertToBinBoundary( currentX, histX );
+        Mantid::Kernel::VectorHelper::rebin( histX, currentY, currentE, X, Y, E, 
+                                             this->isDistribution() );
+      }
+      else                                        // assume x_size = y_size + 1
+      {
+        Mantid::Kernel::VectorHelper::rebin( currentX, currentY, currentE, X, Y, E, 
+                                             this->isDistribution() );
+      }
     }
 
 

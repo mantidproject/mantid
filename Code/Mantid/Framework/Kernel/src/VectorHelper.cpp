@@ -332,6 +332,41 @@ void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<doubl
   bin_centres.erase(bin_centres.begin());
 }
 
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * Convert the given set of bin centers into bin boundary values.
+ * NOTE: the first and last bin boundaries are calculated so 
+ * that the first and last bin centers are in the center of the
+ * first and last bins, respectively. For a particular set of
+ * bin centers, this may not be correct, but it is the best that
+ * can be done, lacking any other information.
+ *
+ * @param bin_centres :: A vector of values specifying bin centers.
+ * @param bin_edges   :: An output vector of values specifying bin 
+ *                       boundaries
+ *
+ */
+void convertToBinBoundary(const std::vector<double> & bin_centers, std::vector<double> & bin_edges)
+{
+  const std::vector<double>::size_type n = bin_centers.size();
+  if( bin_edges.size() != ( n + 1 ) )
+  {
+    bin_edges.resize( n + 1 );
+  }
+
+  for( size_t i = 0; i < n - 1; ++i )
+  {
+    bin_edges[i+1] = 0.5*(bin_centers[i] + bin_centers[i+1]);
+  }
+
+  bin_edges[0] = bin_centers[0] - (bin_edges[1] - bin_centers[0]);
+
+  bin_edges[ n ] = bin_centers[ n - 1 ] + 
+                 ( bin_centers[ n - 1 ] - bin_edges[ n - 1 ] );
+}
+
+
 //-------------------------------------------------------------------------------------------------
 /** Assess if all the values in the vector are equal or if there are some different values
 *  @param[in] arra the vector to examine

@@ -55,6 +55,10 @@ namespace VectorHelper
 
   /// Convert an array of bin boundaries to bin centre values.
   void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
+
+  /// Convert an array of bin centers to bin boundary values.
+  void MANTID_KERNEL_DLL convertToBinBoundary(const std::vector<double> & bin_centers, std::vector<double> & bin_edges);
+
   bool MANTID_KERNEL_DLL isConstantValue(const MantidVec &arra);
 
   template <typename NumT>
