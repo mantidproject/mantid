@@ -1309,7 +1309,7 @@ namespace Crystal
       if (FileName.empty())
         return;
 
-      ofstream oss3(FileName);
+      ofstream oss3(FileName.c_str());
       oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
       oss3 << " <parameter-file instrument=\"" << instrument->getName() << "\" date=\""
           << instrument->getValidFromDate().toISO8601String() << "\">" << std::endl;
