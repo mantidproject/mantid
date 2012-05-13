@@ -87,9 +87,7 @@ BivariateNormal::~BivariateNormal()
    MantidVec D = ws->dataY(0);
    MantidVec X = ws->dataY(1);
    MantidVec Y = ws->dataY(2);
-   bool show=false;
-   if( ws->getName()=="index0")
-     show=true;
+
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells, Varxx,Varxy,Varyy);
 
    NCells = std::min<int>((int)nData, NCells);
@@ -134,8 +132,8 @@ BivariateNormal::~BivariateNormal()
 
      }
      double diff = out[x]-D[x];
-    // inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
-    //     D[x]<<")";
+     inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
+         D[x]<<")";
      chiSq +=diff*diff;
 
      x++;

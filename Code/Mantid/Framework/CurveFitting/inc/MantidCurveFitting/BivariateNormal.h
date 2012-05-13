@@ -37,10 +37,10 @@ namespace Mantid
      <LI> SSrc- The covariance of the row and column values in the peak for this time slice </LI>
     </UL>
     
-    There is one attribute( This must be specified)
-    <UL>
+
+    <UL>There is one attribute( This must be specified)
       <LI> CalcVariances - <UL>If true,calculates SScol, SSrow, and SSrc from the experimental data
-                               given Background, Mcol, and Mrow(if the parameter has not been tied)<P>
+                               given Background, Mcol, and Mrow(if the parameter has not been tied)
                                If false, the parameters SScol, SSrow, and SSrc will be fit, unless
                                tied. </UL>
     </UL>

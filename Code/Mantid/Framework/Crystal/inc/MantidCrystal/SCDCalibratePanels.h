@@ -11,9 +11,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/lexical_cast.hpp>
+#include "../../../DataObjects/inc/MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Kernel;
 using namespace  Mantid::Geometry;
+using Mantid::DataObjects::Workspace2D_sptr;
 
 namespace Mantid
 {
@@ -53,18 +55,73 @@ namespace Crystal
    *  @ Roty       The angle in degrees for the rotation in y direction
    *  @ Rotxz      The angle in degrees for the rotation in z direction
    */
-  void Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz);
+  static void Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz);
 
+ /**
+  *  Updates the ParameterMap for NewInstrument to reflect the changes in the
+  *  associated panel information
+  *
+  *  @param bankNames      The names of the banks(panels) that will be updated
+  *
+  *  @param NewInstrument  The instrument whose parameter map will be changed
+  *                         to reflect the new values below
+  *
+  *  @param  pos           The quantity to be added to the current relative
+  *                        position, from old NewInstrument, of the banks in bankNames.
+  *  @param rot            The quantity to be added to the current relative
+  *                        rotations, from old NewInstrument, of the banks in bankNames.
+  *
+  *  @param  DetWScale     The factor to multiply the current detector width,
+  *                        from old NewInstrument, by to get the new detector width
+  *                        for the banks in bankNames.
+  *
+  *  @param   DetHtScale  The factor to multiply the current detector height,
+  *                        from old NewInstrument, by to get the new detector height
+  *                        for the banks in bankNames.
+  *
+  *   @param  pmapOld      The Parameter map from the original instrument( not
+  *                        NewInstrument). "Clones" relevant information into the
+  *                        NewInstrument's parameter map.
+  */
+  static void FixUpBankParameterMap(  std::vector<std::string>const bankNames,
+                                      boost::shared_ptr<const Instrument> NewInstrument,
+                                     V3D const pos,Quat const rot,
+                                     double const DetWScale, double const DetHtScale,
+                                     boost::shared_ptr<const ParameterMap> const pmapOld);
 
   /**
-   * Given a string representation of a set of groups( [] separated list of bank nums separated by
-   * commas or colons( for ranges) , this method will produce a vector of "groups"( vector of bank names).
-   * All bank names will be members of AllBankNames and only used one time.
+   * *  Updates the ParameterMap for NewInstrument to reflect the position of the
+   * source.
+   *
+   * @param NewInstrument  The instrument whose parameter map will be changed
+  *                         to reflect the new source position
+  *
+   * @param L0             The distance from source to sample( should be positive)
+   *
+   * @param  pmapOld     The Parameter map from the original instrument( not
+  *                        NewInstrument). "Clones" relevant information into the
+  *                        NewInstrument's parameter map.
+   */
+  static void FixUpSourceParameterMap( boost::shared_ptr<const Instrument> NewInstrument,
+        double const L0, boost::shared_ptr<const ParameterMap>const  pmapOld) ;
+
+  /**
+   * Given a string representation of a set of groups( [] separated list of
+   * bank nums separated by commas or colons( for ranges) , this method will
+   *  produce a vector of "groups"( vector of bank names). All bank names
+   *  will be members of AllBankNames and only used one time.
+   *
    * @param AllBankNames  -The list of all banks to use
-   * @param Grouping      -Grouping mode (  OnePanelPerGroup, AllPanelsInOneGroup, or SpecifyGroups)
-   * @param bankPrefix    -For SpecifyGroups,the prefix to be affixed to each integer in the bankingCode
-   * @param bankingCode   -A [] separated list of banknums. Between the [..], the bank nums can be separted by
-   *                       commas or : for lists.
+   *
+   * @param Grouping      -Grouping mode (  OnePanelPerGroup, AllPanelsInOneGroup,
+   *                        or SpecifyGroups)
+   *
+   * @param bankPrefix    -For SpecifyGroups,the prefix to be affixed to each
+   *                             integer in the bankingCode
+   *
+   * @param bankingCode   -A [] separated list of banknums. Between the [..],    *
+   *                      the bank nums can be separted by commas or : for lists.
+   *
    * @param Groups       -Contains the result, a vector of vectors of bank names.
    *
    */
@@ -94,20 +151,7 @@ namespace Crystal
                                                std::vector<int>&bounds);
 
 
-  /**
-   * Copies some of the information from pmapSv to pmap
-   * @param pmapSv  - The original ParameterMap
-   * @param pmap    - The new map where some of the entries of pmapSv are transferred
-   * @param component-The component that pmap will be associated with.  These maps
-   *                   use component names, so this just give names.
-   */
-  void updateParams(  boost::shared_ptr<const Geometry::ParameterMap>    pmapSv,
-                      boost::shared_ptr<Geometry::ParameterMap>   pmap,
-                      boost::shared_ptr<const Geometry::IComponent>  component);
 
-  //const std::string OnePanelPerGroup;//("OnePanelPerGroup");
- // const std::string AllPanelsInOneGroup;//("AllPanelsInOneGroup");
-  //const std::string SpecifyGroups;//("SpecifyGroups");
 
   private:
     void exec ();
@@ -170,27 +214,74 @@ namespace Crystal
     /**
      *  Copies positional entries in pmapSv to pmap starting at bank_const
      *  and parents.
+     *
      *  @param  bank_const  the starting component for copying entries.
+     *
      *  @param pmap         the Parameter Map to be updated
+     *
      *  @param pmapSv       the original Parameter Map
      *
      */
-    void updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
+   static void updateBankParams(
+               boost::shared_ptr<const Geometry::IComponent>  bank_const,
                   boost::shared_ptr<Geometry::ParameterMap> pmap,
-                  boost::shared_ptr<const Geometry::ParameterMap>pmapSv) const;
+                  boost::shared_ptr<const Geometry::ParameterMap>pmapSv) ;
 
 
     /**
      *  Copies positional entries in pmapSv to pmap starting at bank_const
      *  and parents.
      *  @param  bank_const  the starting component for copying entries.
-     *  @param pmap         the Parameter Map to be updated
+     *  @param pmap        the Parameter Map to be updated
      *  @param pmapSv       the original Parameter Map
      *
      */
-    void updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+    static void updateSourceParams(
+          boost::shared_ptr<const Geometry::IObjComponent> bank_const,
          boost::shared_ptr<Geometry::ParameterMap> pmap,
-         boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const;
+         boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
+
+    /**
+     * Creates the function and gets values using the current  values for the
+     * parameters and Attributes
+     *
+     * @param ws        The workspace with the predicted qx,qy, and qz values for each
+     *                   peak
+     *
+     * @param nGroups   The number of Groups-Sets of panels
+     * @param names     The names of the variables that have been fit
+     *
+     * @param params    The values of the variables that have been fit
+     * @param BankNameString  The list of all banks to be refined, separated by
+     *                           !(Group separator) or /
+     *
+     * @param out        The result of this function call. It is the error in
+     *                                  qx,qy,and qz for each peak
+     *
+     * @param xVals      The xVals from ws. Here it should be the peak index for the
+     *                    corresponding  qx, qy, or qz
+     *
+     * @param nData      The number of xVals and out values
+     */
+    void  CreateFxnGetValues(Workspace2D_sptr const ws,
+                         int const nGroups, std::vector<std::string> const names,
+                         std::vector<double> const params,
+                         std::string const BankNameString, double *out,
+                         const double *xVals,const size_t nData) const;
+
+    /**
+     * Saves the new instrument to an xml file that can be used with the
+     * LoadParameterFile Algorithm. If the filename is empty, nothing gets done.
+     *
+     * @parm FileName     The filename to save this information to
+     *
+     * @param Groups      The names of the banks in each group whose values are
+     *                         to be saved to the file
+     *
+     * @param instrument   The instrument with the new values for the banks in Groups
+     */
+    void SaveXmlFile(std::string const FileName, std::vector<std::vector< std::string > >const Groups,
+           Instrument_const_sptr const instrument) const;
 
   };
 

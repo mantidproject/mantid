@@ -25,30 +25,32 @@ namespace CurveFitting
     given hkl's and current q positions of the peak.
 
     <UL>The Parameters
-       <LI>l0- the initial Flight path in units from Peak.getL1
-      <LI>t0-Time offset in the same units returned with Peak.getTOF);
-      <LI>detWidthScale-panel Width in the same units returned with Peak.getDetPos().norm().
-      <LI>detHeightScale-panel Height in the same units returned with Peak.getDetPos().norm()
-      <LI>Xoffset-Panel Center x offset in the same units returned with Peak.getDetPos().norm()
-      <LI>Yoffset-Panel Center y offset in the same units returned with Peak.getDetPos().norm()
-      <LI>Zoffset-Panel Center z offset in the same units returned with Peak.getDetPos().norm()
-      <LI>Xrot-Rotation(degrees) Panel Center in x axis direction");
-      <LI>Yrot-Rotation(degrees) Panel Center in y axis direction");
-      <LI>Zrot-Rotation(degrees) Panel Center in z axis direction");
+       <LI>l0- the initial Flight path in units from Peak.getL1</LI>
+      <LI>t0-Time offset in the same units returned with Peak.getTOF);</LI>
+      <LI>f*_detWidthScale-panel Width in the same units returned with Peak.getDetPos().norm().</LI>
+      <LI>f*_detHeightScale-panel Height in the same units returned with Peak.getDetPos().norm()</LI>
+      <LI>f*_Xoffset-Panel Center x offset in the same units returned with Peak.getDetPos().norm()</LI>
+      <LI>f*_Yoffset-Panel Center y offset in the same units returned with Peak.getDetPos().norm()</LI>
+      <LI>f*_Zoffset-Panel Center z offset in the same units returned with Peak.getDetPos().norm()</LI>
+      <LI>f*_Xrot-Rotation(degrees) Panel Center in x axis direction</LI>
+      <LI>f*_Yrot-Rotation(degrees) Panel Center in y axis direction</LI>
+      <LI>f*_Zrot-Rotation(degrees) Panel Center in z axis direction</LI>
 
     </UL>
-    Note that the order of rotations are z first, then y then x.
+   <UL> Note that the order of rotations are z first, then y then x.</UL>
 
     <UL> Attributes
-      <LI>a,b,c,alpha,beta,gamma- The lattice parameters. The angles are in degrees
-      <LI>PeakWorkspaceName- The name of where the PeaksWorkspace is stored in the AnalysisDataService
+      <LI>a,b,c,alpha,beta,gamma- The lattice parameters. The angles are in degrees</LI>
+      <LI>PeakWorkspaceName- The name of where the PeaksWorkspace is stored in the AnalysisDataService</LI>
       <LI>BankNames- The comma separated "list" of panel names that this IFitFunction uses. The parameters
-                      apply uniformly to every bank. That is all panels will be moved, rotated the same.
+                      apply uniformly to every bank. That is all panels will be moved, rotated the same</LI>.
       <LI>startX - -1 is default. If a composite function is used, startX is the index in the xValues( from functionMW)
-                   of the starting xvalues that this function changes.
+                   of the starting xvalues that this function changes.</LI>
      <LI>endX-1 is default. If a composite function is used, endX is the index in xValues( from functionMW)
                    of the last xvalues that this function changes. This function only changes xValue between startX and
-                   endX inclusive. See workspace information below.
+                   endX inclusive. See workspace information below</LI>.
+      <LI> nGroups  The number of groups( determines and creates parameters
+                      f*_xxxx. where * is 0,1,2,3, etc.)</LI>
      </UL>
 
      <UL> The workspace should be a Workspace2D where only one histogram is used.<P>
@@ -121,11 +123,11 @@ namespace CurveFitting
 
     void function1D  (double *out, const double *xValues, const size_t nData)const ;
 
-   void functionDeriv1D (API::Jacobian *out, const double *xValues, const size_t nData);
+   void functionDeriv1D (API::Jacobian* out, const double *xValues, const size_t nData);
 
    /**
     * Copies some of the information from pmapSv to pmap
-    * @param component-The component that pmap will be associated with.  These maps
+    * @param bank_const-The component that pmap will be associated with.  These maps
     *                   use component names, so this just give names.
     * @param pmap    - The new map where some of the entries of pmapSv are transferred
     * @param pmapSv  - The original ParameterMap
@@ -136,7 +138,7 @@ namespace CurveFitting
 
    /**
      * Copies some of the information from pmapSv to pmap
-     * @param component-The component that pmap will be associated with.  These maps
+     * @param bank_const-The component that pmap will be associated with.  These maps
      *                   use component names, so this just give names.
      * @param pmap    - The new map where some of the entries of pmapSv are transferred
      * @param pmapSv  - The original ParameterMap
@@ -320,7 +322,7 @@ namespace CurveFitting
 
     /**
      * Gets the new instrument by applying parameters values to the old instrument
-     * @param pwks  A PeaksWorkspace.  Only used to get an old instrument from the 1st peak.
+     * @param peak  A peak.  Only used to get an old instrument from the 1st peak.
      *
      * @return A new instrument with the parameters applied.
      */

@@ -30,7 +30,7 @@ Some features:
  *      Author: ruth
  */
 //TODO
-
+//  Rotate should also rotate around centroid of Group
 //  1. Change xxx --> SCDCalibratePanelsx  where x=0,1,2,3,...
 
 
@@ -55,6 +55,7 @@ Some features:
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include <boost/algorithm/string/trim.hpp>
 #include <iostream>
 #include <fstream>
 #include <math.h>
@@ -92,133 +93,8 @@ namespace Crystal
   }
 
 
-  void SCDCalibratePanels::updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
-                boost::shared_ptr<Geometry::ParameterMap> pmap,
-                boost::shared_ptr<const Geometry::ParameterMap>pmapSv)const
-   {
 
-       vector< V3D > posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (!posv.empty())
-       {
-        V3D pos = posv[ 0 ];
-        pmap->addDouble(bank_const.get(), "x", pos.X());
-        pmap->addDouble(bank_const.get(), "y", pos.Y());
-        pmap->addDouble(bank_const.get(), "z", pos.Z());
-        pmap->addV3D(bank_const.get(), "pos", pos);
-
-       }
-
-       boost::shared_ptr< Parameter > rot = pmapSv->get(bank_const.get(),("rot"));
-       if( rot)
-       {
-         pmap->addQuat(bank_const.get(), "rot",rot->value<Quat>());
-
-
-       }
-
-       vector< double > scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
-       vector< double > scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( !scalex.empty())
-          {
-         pmap->addDouble(bank_const.get(),"scalex", scalex[ 0 ]);
-
-          }
-       if( !scaley.empty())
-       {
-         pmap->addDouble(bank_const.get(),"scaley", scaley[ 0 ]);
-
-       }
-
-       boost::shared_ptr< const Geometry::IComponent > parent = bank_const->getParent();
-       if( parent )
-       {
-         updateBankParams( parent, pmap, pmapSv);
-       }
-
-   }
-
-   void SCDCalibratePanels::updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
-       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const
-    {
-      vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
-      //cout<<"Source Name="<< bank_const->getName()<<endl;
-      if (!posv.empty())
-      {
-        V3D pos = posv[ 0 ];
-        pmap->addDouble(bank_const.get(), "x", pos.X());
-        pmap->addDouble(bank_const.get(), "y", pos.Y());
-        pmap->addDouble(bank_const.get(), "z", pos.Z());
-        pmap->addV3D(bank_const.get(), "pos", pos);
-      }
-
-      boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), "rot");
-      if (rot)
-        pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-    }
-
-
-  //Deprecated
-  void SCDCalibratePanels::updateParams(  boost::shared_ptr<const Geometry::ParameterMap>    pmapSv,
-                       boost::shared_ptr<Geometry::ParameterMap>   pmap,
-                       boost::shared_ptr<const IComponent>  component)
-   {
-    boost::shared_ptr<const ICompAssembly>pAssm= boost::dynamic_pointer_cast<const ICompAssembly>(component);
-
-    if( !pAssm)
-       return;//has no children. We are optimizing panels not pixels
-
-     set< string > pnamesSv = component->getParameterNames( false );
-
-     set< string >::iterator setIt = pnamesSv.begin();
-     int N = 0;
-
-     for(  ;setIt != pnamesSv.end(); ++setIt )
-     {
-       string name = (*setIt);
-       vector< V3D > posParams = component->getPositionParameter(name , false);
-
-       if( !posParams.empty())
-       {
-         N++;
-         pmap->addV3D( component.get(), name, posParams[ 0 ]);
-       }
-
-       vector<Quat> rotParams = component->getRotationParameter(name , false);
-
-       if( !rotParams.empty())
-       {
-         N++;
-         pmap->addQuat( component.get(), name, rotParams[ 0 ]);
-       }
-
-       vector< string > strParams = component->getStringParameter(name,false);
-
-       if( !strParams.empty())
-       {
-         N++;
-         pmap->addString( component.get(), name, strParams[ 0 ]);
-       }
-
-     }
-
-
-
-     if( pAssm )
-     {
-
-       for( int i=0; i< pAssm->nelements(); ++i )
-       {
-         boost::shared_ptr<IComponent> child = pAssm->getChild(i);
-         boost::shared_ptr<const IComponent>childComp = boost::const_pointer_cast<const IComponent>(child);
-
-         updateParams( pmapSv, pmap,childComp);
-       }
-     }
-   }
-
-
-
-  void  SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz)
+ void  SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz)
     {
       Quat R(Q);
       R.normalize();
@@ -349,24 +225,22 @@ namespace Crystal
 
          Groups.push_back(vbankName);
       }else if( Grouping == "SpecifyGroups" )
-      {
+      {//TODO catch lexical cast throws , tell where error is
+        boost::trim(bankingCode);
+
         vector< string > GroupA;
-        boost::split(GroupA, bankingCode, boost::is_any_of(" ]"));
+        boost::split(GroupA, bankingCode, boost::is_any_of("]"));
         set< string > usedInts;
 
         for( size_t Gr = 0;  Gr < GroupA.size(); ++Gr )
         {
           string S = GroupA[ Gr ];
 
-          while( S.length()>0 && (S.at(0)==' '|| S.at(0)==','))
-                     S = S.erase(0,1);
-          if( S.length()>0  &&  S.at(0)=='[' )
-            S = S.erase(0,1);
-
-          while( S.length()>0 && (S.at(S.length()-1)==' '||S.at(S.length()-1)==','))
-              S = S.erase(S.length()-1);
-          if( S.length() > 0 ) if(  S.at(S.length()-1) == ']' )
-            S = S.erase(S.length()-1);
+          boost::trim(S);
+          if( S.empty()) break;
+          if( S[0]=='[')
+              S.erase(0, 1);
+          boost::trim(S);
 
           vector< string >GroupB;
           boost::split( GroupB, S, boost::is_any_of(","));
@@ -376,13 +250,11 @@ namespace Crystal
           {
             string rangeOfBanks = GroupB[ panelRange ];
 
-            while( rangeOfBanks.length()>0 && rangeOfBanks.at(0)==' ')
-              rangeOfBanks = rangeOfBanks.erase(0,1);
-            while( rangeOfBanks.length() > 0 && rangeOfBanks.at(rangeOfBanks.length()-1) == ' ')
-              rangeOfBanks = rangeOfBanks.erase( rangeOfBanks.length() - 1 );
+            boost::trim(rangeOfBanks);
 
             vector< string > StrtStopStep;
             boost::split( StrtStopStep, rangeOfBanks, boost::is_any_of(":") );
+
             if( StrtStopStep.size() > 3 )
             {
               g_log.error("Improper use of : in " + rangeOfBanks);
@@ -393,17 +265,15 @@ namespace Crystal
 
             if( StrtStopStep.size() == 3)
             {
-              //int s = boost::lexical_cast<int>(StrtStopStep[ 2 ].c_str());
-             sscanf( StrtStopStep[ 2 ].c_str(), "%d" ,&step );
-           //  if( s != step)
-           //    std::cout<"ERRRRR1"<<std::endl;
+              boost::trim(StrtStopStep[2]);
+              step = boost::lexical_cast<int>(StrtStopStep[ 2 ]);
+
               if( step <=0 ) step = 0;
             }
             if( StrtStopStep.size() >= 1)
-            {//int s = boost::lexical_cast<int>(StrtStopStep[ 0 ].c_str());
-              sscanf( StrtStopStep[ 0 ].c_str(), "%d" ,&start );
-          //    if( s != start)
-          //      std::cout<"ERRRRR2"<<std::endl;
+            {
+              boost::trim(StrtStopStep[0]);
+              start = boost::lexical_cast<int>(StrtStopStep[ 0 ].c_str());
 
               if( start <= 0)
               {
@@ -415,10 +285,10 @@ namespace Crystal
             stop = start;
 
             if( StrtStopStep.size() >= 2 )
-            { sscanf( StrtStopStep[ 1 ].c_str(), "%d" , &stop );
-             // int s = boost::lexical_cast<int>(StrtStopStep[ 1 ].c_str());
-           // if( s != stop)
-            //  std::cout<"ERRRRR3"<<std::endl;
+            {
+              boost::trim(StrtStopStep[1]);
+              stop = boost::lexical_cast<int>(StrtStopStep[ 1 ].c_str());
+
               if( stop <=0 ) stop = start;
             }
 
@@ -426,10 +296,9 @@ namespace Crystal
             {
               ostringstream oss (ostringstream::out);
               oss<<bankPrefix<<ind;
-              //const int NN = bankPrefix.length() + 4 ;
+
               string bankName = oss.str();
 
-              //sprintf(bankName, "%s%d", bankPrefix.c_str(), (int)ind);
               string postName = bankName.substr(bankPrefix.length());
 
 
@@ -613,11 +482,9 @@ namespace Crystal
 
     rotI.inverse();
     Quat ChgRot = rotPre*rotI;
-   // cout<< ChgRot<< endl;
+
     Quat2RotxRotyRotz(ChgRot,Xrot0,Yrot0,Zrot0);
 
- //  cout<<  "Initial params for "<<bankName<<"="<<detWidthScale0<<","<<detHeightScale0<<","<<Xoffset0
- //      <<","<<Yoffset0<<","<<Zoffset0<<","<<Xrot0<<","<<Yrot0<<","<<Zrot0<<endl;
   }
 
 
@@ -749,9 +616,6 @@ namespace Crystal
      boost::shared_ptr<const RectangularDetector> bank_rect;
      string Gprefix ="f"+ boost::lexical_cast<string>(i)+"_";
 
-    //---------------- Set up list of bank names argument -----------------
-   // for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); it1++)
-    // if( itv == Groups.begin())
 
      string name=(*itv)[0];
      boost::shared_ptr<const IComponent> bank_cmp = instrument->getComponentByName(name);
@@ -1044,125 +908,39 @@ namespace Crystal
 
     boost::shared_ptr<ParameterMap> pmap( new ParameterMap());
     boost::shared_ptr<const ParameterMap> pmapOld = instrument->getParameterMap();
-    //updateParams( pmapOld, pmap, boost::dynamic_pointer_cast<const IComponent>(instrument));
-
     boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
 
-
     string instName = instrument->getName();
-
-    ostringstream oss3 ( ostringstream::out);
-    oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
-    oss3 << " <parameter-file instrument=\"" << instName << "\" date=\"" <<
-         instrument->getValidFromDate().toISO8601String() <<  "\">" << std::endl;
-
 
     i = -1;
     for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
     {
       i++;
-     // string BankNameString = "";
+
       boost::shared_ptr<const RectangularDetector> bank_rect;
-     for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1 )
-     {
+      double rotx,roty,rotz;
 
-      string bankName = (*it1);
-
-
-       oss3 << "<component-link name=\"" << bankName << "\">" << std::endl;
-
-       boost::shared_ptr<const IComponent> bank = NewInstrument->getComponentByName( bankName);
-       updateBankParams( bank, pmap, pmapOld);
-       Quat RelRot = bank->getRelativeRot();
-
-       double rotx,roty,rotz;
-
-       string prefix = "f"+boost::lexical_cast<string>(i)+"_";
+      string prefix = "f"+boost::lexical_cast<string>(i)+"_";
 
 
-        rotx = result[ prefix + "Xrot" ];
+      rotx = result[ prefix + "Xrot" ];
 
-        roty = result[ prefix + "Yrot" ];
-        rotz = result[ prefix + "Zrot" ];
-        Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotx,V3D( 0,0,1))*RelRot;
-        Quat2RotxRotyRotz( newRelRot, rotx,roty,rotz);
+      roty = result[ prefix + "Yrot" ];
+      rotz = result[ prefix + "Zrot" ];
 
-       pmap->addRotationParam( bank.get(),string( "rotx"), rotx);
-       pmap->addRotationParam( bank.get(),string( "roty"), roty);
-       pmap->addRotationParam( bank.get(),string( "rotz"), rotz);
-       pmap->addQuat( bank.get(),"rot",newRelRot);//Should not have had to do this???
+      Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotx,V3D( 0,0,1));//*RelRot;
 
-       oss3 << "  <parameter name =\"rotx\"><value val=\"" << rotx << "\" /> </parameter>" << std::endl;
-       oss3 << "  <parameter name =\"roty\"><value val=\"" << roty << "\" /> </parameter>" << std::endl;
-       oss3 << "  <parameter name =\"rotz\"><value val=\"" << rotz << "\" /> </parameter>" << std::endl;
+      FixUpBankParameterMap( (*itv),
+                              NewInstrument,
+                              V3D(result[ prefix + "Xoffset" ], result[ prefix + "Yoffset" ],result[ prefix + "Zoffset" ]),
+                              newRelRot,
+                              result[ prefix+"detWidthScale" ],
+                              result[ prefix+"detHeightScale" ],
+                              pmapOld);
 
-
-       V3D pos1 = bank->getRelativePos();
-
-       pmap->addPositionCoordinate( bank.get(), string("x"), result[ prefix + "Xoffset" ] + pos1.X());
-       pmap->addPositionCoordinate( bank.get(), string("y"),result[ prefix + "Yoffset" ] + pos1.Y());
-       pmap->addPositionCoordinate( bank.get(), string("z"),result[ prefix + "Zoffset" ]+ pos1.Z());
-
-       oss3 << "  <parameter name =\"x\"><value val=\"" << result[ prefix + "Xoffset" ] + pos1.X() << "\" /> </parameter>" << std::endl;
-
-       oss3 << "  <parameter name =\"y\"><value val=\"" << result[ prefix + "Yoffset" ] + pos1.Y() << "\" /> </parameter>" << std::endl;
-
-       oss3 << "  <parameter name =\"z\"><value val=\"" << result[ prefix + "Zoffset" ]+ pos1.Z() << "\" /> </parameter>" << std::endl;
-
-
-       vector< double >oldScalex = pmap->getDouble( bank->getName(),string( "scalex" ));
-       vector< double >oldScaley = pmap->getDouble( bank->getName(),string( "scaley" ));
-
-       double scalex,scaley;
-       if( !oldScalex.empty() )
-         scalex = oldScalex[ 0 ] + result[ prefix+"detWidthScale" ];
-       else
-         scalex = result[ prefix + "detWidthScale" ];
-
-       if( !oldScaley.empty() )
-         scaley = oldScaley[ 0 ] + result[ prefix + "detHeightScale" ];
-       else
-         scaley = result[ prefix + "detHeightScale" ];
-
-       pmap->addDouble( bank.get(), string( "scalex"), scalex );
-       pmap->addDouble( bank.get(), string( "scaley"), scaley );
-
-       oss3 << "  <parameter name =\"scalex\"><value val=\"" << scalex << "\" /> </parameter>" << std::endl;
-       oss3 << "  <parameter name =\"scaley\"><value val=\"" << scaley << "\" /> </parameter>" << std::endl;
-       oss3 << "</component-link>" << std::endl;
-
-
-    }//For @ bank
     }//For @ group
 
-
-    //-------------------Set moderator position for L0---------------------------------
-    IObjComponent_const_sptr source = NewInstrument->getSource();
-    updateSourceParams( source, pmap, pmapOld);
-    oss3 << "<component-link name=\"" << source->getName() << "\">" << std::endl;
-    IObjComponent_const_sptr sample = NewInstrument->getSample();
-    V3D sourceRelPos = source->getRelativePos();
-    V3D sourcePos = source->getPos();
-    V3D parentSourcePos = sourcePos-sourceRelPos;
-    V3D source2sampleDir = sample->getPos()-source->getPos();
-
-    double scalee = result[  "l0" ]/source2sampleDir.norm();
-    V3D newsourcePos = sample->getPos()- source2sampleDir*scalee;
-    V3D newsourceRelPos = newsourcePos-parentSourcePos;
-
-    pmap->addPositionCoordinate( source.get(), string( "x"), newsourceRelPos.X());
-    pmap->addPositionCoordinate( source.get(), string( "y"), newsourceRelPos.Y());
-    pmap->addPositionCoordinate( source.get(), string( "z"),newsourceRelPos.Z());
-    oss3 << "  <parameter name =\"x\"><value val=\"" <<  newsourceRelPos.X() << "\" /> </parameter>" << std::endl;
-
-    oss3 << "  <parameter name =\"y\"><value val=\"" <<  newsourceRelPos.Y() << "\" /> </parameter>" << std::endl;
-
-    oss3 << "  <parameter name =\"z\"><value val=\"" << newsourceRelPos.Z() << "\" /> </parameter>" << std::endl;
-
-
-    oss3 << "</component-link>" << std::endl;
-
-    oss3 << "</parameter-file>" <<  std::endl;
+  FixUpSourceParameterMap( NewInstrument, result["l0"], pmapOld);
 
     //---------------------- Save new instrument to DetCal-------------
     //-----------------------or xml(for LoadParameterFile) files-----------
@@ -1185,24 +963,8 @@ namespace Crystal
 
      g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< std::endl;
     }
+    SaveXmlFile(  XmlFileName, Groups,NewInstrument);
 
-    if( !XmlFileName.empty())
-    {
-      filebuf fb;
-
-
-      filebuf* ok = fb.open ( XmlFileName.c_str(),ios::out);
-      if( !ok )
-        g_log.error() << "could not open file " << XmlFileName << endl;
-
-      ostream os( &fb );
-
-      os << oss3.str();
-
-      if( !fb.close() )
-        g_log.error() << "error in close" << endl;
-
-    }
 
    //----------------- Calculate & Create Qerror table------------------
 
@@ -1215,73 +977,29 @@ namespace Crystal
 
     //--------------- Create Function argument for the FunctionHandler------------
 
-    boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
-                   FunctionFactory::Instance().createFunction("SCDPanelErrors"));
 
-    if( !fit)
-      std::cout<<"Could not create fit function"<<std::endl;
-    fit->setAttribute("a",IFunction::Attribute(a));
-    fit->setAttribute("b",IFunction::Attribute(b));
-    fit->setAttribute("c",IFunction::Attribute(c));
-    fit->setAttribute("alpha",IFunction::Attribute(alpha));
-    fit->setAttribute("beta",IFunction::Attribute(beta));
-    fit->setAttribute("gamma",IFunction::Attribute(gamma));
-    fit->setAttribute("PeakWorkspaceName",IFunction::Attribute("xxx"));
-    fit->setAttribute("startX",IFunction::Attribute(-1));
-    fit->setAttribute("endX",IFunction::Attribute(-1));
-    fit->setAttribute("NGroups",IFunction::Attribute(NGroups));
-    fit->setAttribute("BankNames",IFunction::Attribute(BankNameString));
+    size_t nData = ws->dataX(0).size();
+    vector<double> out(nData);
+    vector<double> xVals = ws->dataX(0);
+
+    CreateFxnGetValues( ws,NGroups, names,params,BankNameString, out.data(),xVals.data(),nData);
 
     int TableRow = 0;
-      double chiSq = 0;
-      for (int g = 0; g < NGroups; ++g)
-      {
+    for (size_t q = 0; q < nData; q += 3)
+    {
+      int pk = (int) xVals[q];
+      Peak peak = peaksWs->getPeak(pk);
+      QErrTable->cell<string> (TableRow, 0) = peak.getBankName();
+      QErrTable->cell<int> (TableRow, 1) = pk;
+      QErrTable->cell<int> (TableRow, 2) = peak.getRow();
+      QErrTable->cell<int> (TableRow, 4) = peak.getCol();
+      QErrTable->cell<double> (TableRow, 3) = sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q
+          + 2] * out[q + 2]);
+      //chiSq += out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2];
+      TableRow++;
+    }
 
-        //Now add parameter values
-        ostringstream prefixStrm(ostringstream::out);
-        prefixStrm << "f" << g << "_";
-        string prefix = prefixStrm.str();
-
-        for (int nm = 0; nm < (int) names.size(); ++nm)
-        {
-          if (names[nm].compare(0, prefix.length(), prefix) == 0)
-          {
-            string prm = names[nm].substr(prefix.length());
-            if (fieldBaseNames.find(";" + prm + ";") < 155)
-            {
-              fit->setParameter(names[nm], params[nm]);
-
-            }
-          }
-          else if (names[nm] == "l0" || names[nm] == "t0")
-            fit->setParameter(names[nm], params[nm]);
-
-        }
-      }
-
-      fit->setWorkspace(ws);
-
-      size_t nData = ws->dataX(0).size();
-      vector<double> out(nData);
-      vector<double> xVals = ws->dataX(0);
-
-      //------Call SCDPanelErrors to get the q errors ------------------
-      fit->function1D(out.data(), xVals.data(), nData);
-
-      for (size_t q = 0; q < nData; q += 3)
-      {
-        int pk = (int) xVals[q];
-        Peak peak = peaksWs->getPeak(pk);
-        QErrTable->cell<string> (TableRow, 0) = peak.getBankName();
-        QErrTable->cell<int> (TableRow, 1) = pk;
-        QErrTable->cell<int> (TableRow, 2) = peak.getRow();
-        QErrTable->cell<int> (TableRow, 4) = peak.getCol();
-        QErrTable->cell<double> (TableRow, 3) = sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q
-            + 2] * out[q + 2]);
-        chiSq += out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2];
-        TableRow++;
-      }
-      setProperty("QErrorWorkspace", QErrTable);
+    setProperty("QErrorWorkspace", QErrTable);
 
 
   }
@@ -1292,6 +1010,7 @@ namespace Crystal
     {
       declareProperty(new WorkspaceProperty<PeaksWorkspace> ("PeakWorkspace", "",
           Kernel::Direction::Input), "Workspace of Peaks");
+
       vector< string > choices;
       choices.push_back("OnePanelPerGroup");
       choices.push_back("AllPanelsInOneGroup");
@@ -1338,16 +1057,19 @@ namespace Crystal
 
       declareProperty("PreProcessInstrument", "No PreProcessing", boost::make_shared<
           Kernel::StringListValidator>(preProcessOptions), "Select PreProcessing info");
+
       vector< string > exts2;
       exts2.push_back(".DetCal");
       exts2.push_back(".xml");
       declareProperty(new FileProperty("PreProcFilename", "", FileProperty::Save, exts2),
           "Path to file with preprocessing information");
+
       declareProperty("InitialTimeOffset", 0.0, "Initial time offset when using xml files");
 
 
       declareProperty(new WorkspaceProperty<TableWorkspace> ("ResultWorkspace", "",
           Kernel::Direction::Output), "Workspace of Results");
+
       declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "",
           Kernel::Direction::Output), "Workspace of Errors in Q");
 
@@ -1356,15 +1078,18 @@ namespace Crystal
 
      setPropertySettings("PanelNamePrefix", new EnabledWhenProperty( "PanelGroups",
           Kernel::IS_EQUAL_TO, "SpecifyGroups"));
+
       setPropertySettings("Grouping", new EnabledWhenProperty( "PanelGroups", Kernel::IS_EQUAL_TO,
           "SpecifyGroups"));
 
       setPropertySettings("PreProcFilename", new EnabledWhenProperty( "PreProcessInstrument",
           Kernel::IS_NOT_EQUAL_TO, "No PreProcessing"));
+
       setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
           Kernel::IS_EQUAL_TO, "Apply a LoadParameter.xml type file"));
 
     }
+
 
   void  SCDCalibratePanels::initDocs ()
   {
@@ -1372,6 +1097,298 @@ namespace Crystal
     this->setOptionalMessage("Panel parameters, L0 and T0 are optimized to minimize errors between theoretical and actual q values for the peaks");
 
   }
+
+  void  SCDCalibratePanels::CreateFxnGetValues(Workspace2D_sptr const ws,
+                                              int const NGroups,
+                                               std::vector<std::string>const names,
+                                               std::vector<double>const params,
+                                               std::string const BankNameString,
+                                               double *out,
+                                               const double *xVals,
+                                               const size_t nData)const
+  {
+    boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
+                    FunctionFactory::Instance().createFunction("SCDPanelErrors"));
+     if( !fit)
+       std::cout<<"Could not create fit function"<<std::endl;
+
+     fit->setAttribute("a",IFunction::Attribute((double)getProperty("a")));
+     fit->setAttribute("b",IFunction::Attribute((double)getProperty("b")));
+     fit->setAttribute("c",IFunction::Attribute((double)getProperty("c")));
+     fit->setAttribute("alpha",IFunction::Attribute((double)getProperty("alpha")));
+     fit->setAttribute("beta",IFunction::Attribute((double)getProperty("beta")));
+     fit->setAttribute("gamma",IFunction::Attribute((double)getProperty("gamma")));
+     fit->setAttribute("PeakWorkspaceName",IFunction::Attribute("xxx"));
+     fit->setAttribute("startX",IFunction::Attribute(-1));
+     fit->setAttribute("endX",IFunction::Attribute(-1));
+     fit->setAttribute("NGroups",IFunction::Attribute(NGroups));
+     fit->setAttribute("BankNames", IFunction::Attribute(BankNameString));
+
+
+     std::string fieldBase[8]={"detWidth","detHeight","Xoffset","Yoffset","Zoffset",
+                       "Xrot","Yrot","Zrot"};
+     set<string>FieldB(fieldBase, fieldBase+8);
+
+     for (int g = 0; g < NGroups; ++g)
+     {
+       //Now add parameter values
+       ostringstream prefixStrm(ostringstream::out);
+       prefixStrm << "f" << g << "_";
+       string prefix = prefixStrm.str();
+
+       for (int nm = 0; nm < (int) names.size(); ++nm)
+       {
+         if (names[nm].compare(0, prefix.length(), prefix) == 0)
+         {
+           string prm = names[nm].substr(prefix.length());
+           if (FieldB.find( prm ) != FieldB.end())
+           {
+             fit->setParameter(names[nm], params[nm]);
+
+           }
+         }
+         else if (names[nm] == "l0" || names[nm] == "t0")
+           fit->setParameter(names[nm], params[nm]);
+       }
+     }
+
+     fit->setWorkspace(ws);
+
+       //------Call SCDPanelErrors to get the q errors ------------------
+     fit->function1D(out, xVals, nData);
+
+
+  }
+
+
+  void SCDCalibratePanels::updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
+                                             boost::shared_ptr<Geometry::ParameterMap> pmap,
+                                             boost::shared_ptr<const Geometry::ParameterMap>pmapSv)
+   {
+       vector< V3D > posv= pmapSv->getV3D( bank_const->getName(),"pos");
+
+       if (!posv.empty())
+       {
+        V3D pos = posv[ 0 ];
+        pmap->addDouble(bank_const.get(), "x", pos.X());
+        pmap->addDouble(bank_const.get(), "y", pos.Y());
+        pmap->addDouble(bank_const.get(), "z", pos.Z());
+        pmap->addV3D(bank_const.get(), "pos", pos);
+
+       }
+
+       boost::shared_ptr< Parameter > rot = pmapSv->get(bank_const.get(),("rot"));
+       if( rot)
+       {
+         pmap->addQuat(bank_const.get(), "rot",rot->value<Quat>());
+
+
+       }
+
+       vector< double > scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
+       vector< double > scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
+       if( !scalex.empty())
+          {
+         pmap->addDouble(bank_const.get(),"scalex", scalex[ 0 ]);
+
+          }
+       if( !scaley.empty())
+       {
+         pmap->addDouble(bank_const.get(),"scaley", scaley[ 0 ]);
+
+       }
+
+       boost::shared_ptr< const Geometry::IComponent > parent = bank_const->getParent();
+       if( parent )
+       {
+         updateBankParams( parent, pmap, pmapSv);
+       }
+
+   }
+
+
+   void SCDCalibratePanels::updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv)
+    {
+      vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
+
+      if (!posv.empty())
+      {
+        V3D pos = posv[ 0 ];
+        pmap->addDouble(bank_const.get(), "x", pos.X());
+        pmap->addDouble(bank_const.get(), "y", pos.Y());
+        pmap->addDouble(bank_const.get(), "z", pos.Z());
+        pmap->addV3D(bank_const.get(), "pos", pos);
+      }
+
+      boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), "rot");
+      if (rot)
+        pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
+    }
+
+
+  void SCDCalibratePanels::FixUpSourceParameterMap( boost::shared_ptr<const Instrument> NewInstrument,
+                                                   double const L0,
+                                                   boost::shared_ptr<const ParameterMap> const pmapOld)
+    {
+      boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
+      IObjComponent_const_sptr source = NewInstrument->getSource();
+      updateSourceParams(source, pmap, pmapOld);
+
+      IObjComponent_const_sptr sample = NewInstrument->getSample();
+      V3D sourceRelPos = source->getRelativePos();
+      V3D sourcePos = source->getPos();
+      V3D parentSourcePos = sourcePos - sourceRelPos;
+      V3D source2sampleDir = sample->getPos() - source->getPos();
+
+      double scalee = L0 / source2sampleDir.norm();
+      V3D newsourcePos = sample->getPos() - source2sampleDir * scalee;
+      V3D newsourceRelPos = newsourcePos - parentSourcePos;
+
+      pmap->addPositionCoordinate(source.get(), string( "x" ), newsourceRelPos.X());
+      pmap->addPositionCoordinate(source.get(), string( "y" ), newsourceRelPos.Y());
+      pmap->addPositionCoordinate(source.get(), string( "z" ), newsourceRelPos.Z());
+    }
+
+
+
+  void SCDCalibratePanels::FixUpBankParameterMap(std::vector<std::string> const bankNames,
+        boost::shared_ptr<const Instrument> NewInstrument, V3D const pos, Quat const rot, double const DetWScale,
+        double const DetHtScale, boost::shared_ptr<const ParameterMap> const pmapOld)
+    {
+      boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
+
+      for (vector<string>::const_iterator it1 = bankNames.begin(); it1 != bankNames.end(); ++it1)
+      {
+
+        const string bankName = (*it1);
+
+        boost::shared_ptr<const IComponent> bank = NewInstrument->getComponentByName(bankName);
+        updateBankParams(bank, pmap, pmapOld);
+        Quat RelRot = bank->getRelativeRot();
+        Quat newRelRot = rot * RelRot;
+        double rotx, roty, rotz;
+        Quat2RotxRotyRotz(newRelRot, rotx, roty, rotz);
+
+        pmap->addRotationParam(bank.get(), string("rotx"), rotx);
+        pmap->addRotationParam(bank.get(), string("roty"), roty);
+        pmap->addRotationParam(bank.get(), string("rotz"), rotz);
+        pmap->addQuat(bank.get(), "rot", newRelRot);//Should not have had to do this???
+
+
+        V3D pos1 = bank->getRelativePos();
+
+        pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X());
+        pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y());
+        pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z());
+
+        vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
+        vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
+
+        double scalex, scaley;
+        if (!oldScalex.empty())
+          scalex = oldScalex[0] + DetWScale;
+        else
+          scalex = DetWScale;
+
+        if (!oldScaley.empty())
+          scaley = oldScaley[0] + DetHtScale;
+        else
+          scaley = DetHtScale;
+
+        pmap->addDouble(bank.get(), string("scalex"), scalex);
+        pmap->addDouble(bank.get(), string("scaley"), scaley);
+
+      }//For @ bank
+    }
+
+
+    void SCDCalibratePanels::SaveXmlFile(std::string const FileName, vector<vector<string> > const Groups,
+        Instrument_const_sptr const instrument)const
+    {
+      if (FileName.empty())
+        return;
+
+      ofstream oss3(FileName);
+      oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
+      oss3 << " <parameter-file instrument=\"" << instrument->getName() << "\" date=\""
+          << instrument->getValidFromDate().toISO8601String() << "\">" << std::endl;
+      ParameterMap_sptr pmap = instrument->getParameterMap();
+
+      for (std::vector<vector<string>>::const_iterator it = Groups.begin(); it != Groups.end(); ++it)
+      for( std::vector<string>::const_iterator it1=(*it).begin(); it1 !=(*it).end(); ++it1)
+      {
+        string bankName = (*it1);
+
+        oss3 << "<component-link name=\"" << bankName << "\">" << std::endl;
+
+        boost::shared_ptr<const IComponent> bank = instrument->getComponentByName(bankName);
+
+        Quat RelRot = bank->getRelativeRot();
+
+        double rotx, roty, rotz;
+
+        SCDCalibratePanels::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
+
+        oss3 << "  <parameter name =\"rotx\"><value val=\"" << rotx << "\" /> </parameter>" << std::endl;
+        oss3 << "  <parameter name =\"roty\"><value val=\"" << roty << "\" /> </parameter>" << std::endl;
+        oss3 << "  <parameter name =\"rotz\"><value val=\"" << rotz << "\" /> </parameter>" << std::endl;
+
+        V3D pos1 = bank->getRelativePos();
+
+        oss3 << "  <parameter name =\"x\"><value val=\"" << pos1.X() << "\" /> </parameter>"
+            << std::endl;
+
+        oss3 << "  <parameter name =\"y\"><value val=\"" << pos1.Y() << "\" /> </parameter>"
+            << std::endl;
+
+        oss3 << "  <parameter name =\"z\"><value val=\"" << pos1.Z() << "\" /> </parameter>"
+            << std::endl;
+
+        vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
+        vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
+
+        double scalex, scaley;
+        if (!oldScalex.empty())
+          scalex = oldScalex[0];
+        else
+          scalex = 1;
+
+        if (!oldScaley.empty())
+          scaley = oldScaley[0];
+        else
+          scaley = 1;
+
+        oss3 << "  <parameter name =\"scalex\"><value val=\"" << scalex << "\" /> </parameter>"
+            << std::endl;
+        oss3 << "  <parameter name =\"scaley\"><value val=\"" << scaley << "\" /> </parameter>"
+            << std::endl;
+        oss3 << "</component-link>" << std::endl;
+      }//For @ bank
+
+        IObjComponent_const_sptr source = instrument->getSource();
+
+        oss3 << "<component-link name=\"" << source->getName() << "\">" << std::endl;
+        IObjComponent_const_sptr sample = instrument->getSample();
+        V3D sourceRelPos = source->getRelativePos();
+
+        oss3 << "  <parameter name =\"x\"><value val=\"" << sourceRelPos.X() << "\" /> </parameter>" << std::endl;
+
+        oss3 << "  <parameter name =\"y\"><value val=\"" << sourceRelPos.Y() << "\" /> </parameter>" << std::endl;
+
+        oss3 << "  <parameter name =\"z\"><value val=\"" << sourceRelPos.Z() << "\" /> </parameter>" << std::endl;
+
+        oss3 << "</component-link>" << std::endl;
+
+        oss3 << "</parameter-file>" << std::endl;
+
+        oss3.flush();
+        oss3.close();
+
+      }
+
+
+
 
 
 }//namespace Crystal

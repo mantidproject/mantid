@@ -235,7 +235,7 @@ namespace Mantid
 
     };
 
-    std::string IntegratePeakTimeSlices::CalcConstraints( vector< pair<double,double> > & Bounds)
+    std::string IntegratePeakTimeSlices::CalcConstraints( std::vector< std::pair<double,double> > & Bounds)
     {
       double TotIntensity = AttributeValues[IIntensities];
       double ncells       =AttributeValues[ISS1];

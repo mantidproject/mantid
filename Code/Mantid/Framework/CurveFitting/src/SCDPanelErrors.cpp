@@ -116,9 +116,10 @@ namespace Mantid
       setAttribute("endX", Attribute(-1));
       init();
 #if defined(_WIN32) && !defined(_WIN64)
+
      // g_log.setLevel(7);
 #endif
-    // g_log.setLevel(7);
+      //g_log.setLevel(7);
 
     }
 
@@ -207,7 +208,7 @@ namespace Mantid
     }
 
 
-    void SCDPanelErrors::Check(PeaksWorkspace_sptr & pkwsp, const double *xValues, const size_t nData) const
+    void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData) const
     {
       if (NLatticeParametersSet < (int) nAttributes())
       {
@@ -335,7 +336,7 @@ namespace Mantid
       }
       boost::shared_ptr<Geometry::Instrument> instChange(new Geometry::Instrument());
 
-      bool isParameterized = false;
+
 
 
       if (!instSave->isParametrized())
@@ -345,14 +346,12 @@ namespace Mantid
         boost::shared_ptr<Geometry::Instrument> Pinsta(new Geometry::Instrument(instSave, pmap));
 
         instChange = Pinsta;
-        isParameterized = true;
-
       }
       else //catch(...)
       {
 
 
-        isParameterized = true;
+
 
         boost::shared_ptr<const IComponent> inst3 = boost::dynamic_pointer_cast<const IComponent>(
             instSave);
@@ -417,7 +416,7 @@ namespace Mantid
 
         Rot = Quat(getParameter(prefix+"Zrot"), Kernel::V3D(0.0, 0.0, 1.0)) * Rot;
 
-        std::string name = bankNm;
+
 
         pmap->addQuat(bank.get(), "rot", Rot);
 
@@ -689,8 +688,7 @@ namespace Mantid
         out[3 * i + 1+StartX] = err[1];
         out[3 * i + 2+StartX] = err[2];
         chiSq += err[0]*err[0] + err[1]*err[1] + err[2]*err[2] ;
-       // if( i < 4)
-       //   g_log.debug()<<"hkl,q="<<hkl_vectors[i]<<q_vectors[i]<<endl;
+
         CheckSizetMax(i,i,i,"f(x) loop 2");
       }
 
@@ -706,10 +704,10 @@ namespace Mantid
 
       //Get values for test program. TODO eliminate
       g_log.debug() << "  out[evenxx]=";
-     for (size_t i = 0; i < min<size_t> (nData, 30); ++i)
+      for (size_t i = 0; i < min<size_t> (nData, 30); ++i)
        g_log.debug() << out[i] << "  ";
 
-   //   g_log.debug() << std::endl;
+     g_log.debug() << std::endl;
 
     }
 
