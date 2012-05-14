@@ -25,6 +25,10 @@ struct Statistics
 
 template<typename TYPE>
 Statistics getStatistics(const std::vector<TYPE>& data, const bool sorted=false);
+template<typename TYPE>
+std::vector<double> getZscore(const std::vector<TYPE>& data, const bool sorted=false);
+template<typename TYPE>
+std::vector<double> getModifiedZscore(const std::vector<TYPE>& data, const bool sorted=false);
 
 } // namespace Kernel
 } // namespace Mantid

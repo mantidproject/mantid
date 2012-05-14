@@ -86,6 +86,57 @@ namespace Mantid
         }
       }
     }
+    /**
+     * There are enough special cases in determining the Z score where it useful to
+     * put it in a single function.
+     */
+    template<typename TYPE>
+    std::vector<double> getZscore(const vector<TYPE>& data, const bool sorted)
+    {
+      if (data.size() < 3)
+      {
+    	  std::vector<double>Zscore(data.size(),0.);
+    	  return Zscore;
+      }
+      std::vector<double> Zscore;
+      double tmp;
+      Statistics stats = getStatistics(data, sorted);
+      if(stats.standard_deviation == 0.)return Zscore;
+      typename vector<TYPE>::const_iterator it = data.begin();
+      for (; it != data.end(); ++it)
+      {
+    	tmp = static_cast<double> (*it);
+        Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
+      }
+      return Zscore;
+    }
+    /**
+     * There are enough special cases in determining the modified Z score where it useful to
+     * put it in a single function.
+     */
+    template<typename TYPE>
+    std::vector<double> getModifiedZscore(const vector<TYPE>& data, const bool sorted)
+    {
+      std::vector<double>Zscore, MADvec;
+      double tmp;
+      size_t num_data = data.size(); // cache since it is frequently used
+      double median = getMedian(data, num_data, sorted);
+      typename vector<TYPE>::const_iterator it = data.begin();
+      for (; it != data.end(); ++it)
+      {
+    	tmp = static_cast<double> (*it);
+        MADvec.push_back(fabs(tmp - median));
+      }
+      double MAD = getMedian(MADvec, num_data, sorted);
+      MADvec.empty();
+      it = data.begin();
+      for (; it != data.end(); ++it)
+      {
+    	tmp = static_cast<double> (*it);
+        Zscore.push_back(0.6745*fabs((tmp - median) / MAD));
+      }
+      return Zscore;
+    }
 
     /**
      * Determine the statistics for a vector of data. If it is sorted then let the
@@ -138,9 +189,14 @@ namespace Mantid
       return getNanStatistics();
     }
 
+
     // -------------------------- concrete instantiations
     template DLLExport Statistics getStatistics<double> (const vector<double> &, const bool);
     template DLLExport Statistics getStatistics<int32_t> (const vector<int32_t> &, const bool);
+    template DLLExport std::vector<double> getZscore<double> (const vector<double> &, const bool);
+    template DLLExport std::vector<double> getZscore<int32_t> (const vector<int32_t> &, const bool);
+    template DLLExport std::vector<double> getModifiedZscore<double> (const vector<double> &, const bool);
+    template DLLExport std::vector<double> getModifiedZscore<int32_t> (const vector<int32_t> &, const bool);
 
   } // namespace Kernel
 } // namespace Mantid
