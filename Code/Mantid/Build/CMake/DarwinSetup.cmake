@@ -42,7 +42,19 @@ set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 
 
 install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )
-install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4 DESTINATION ${BIN_DIR} )
+# Explicitly specify which PyQt libraries we want because just taking the whole
+# directory will swell the install kit unnecessarily.
+install ( FILES /Library/Python/2.6/site-packages/PyQt4/Qt.so
+                /Library/Python/2.6/site-packages/PyQt4/QtCore.so
+                /Library/Python/2.6/site-packages/PyQt4/QtGui.so
+                /Library/Python/2.6/site-packages/PyQt4/QtOpenGL.so
+                /Library/Python/2.6/site-packages/PyQt4/QtSql.so
+                /Library/Python/2.6/site-packages/PyQt4/QtSvg.so
+                /Library/Python/2.6/site-packages/PyQt4/QtXml.so
+                /Library/Python/2.6/site-packages/PyQt4/__init__.py
+          DESTINATION ${BIN_DIR}/PyQt4 )
+install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4/uic DESTINATION ${BIN_DIR}/PyQt4 )
+
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
