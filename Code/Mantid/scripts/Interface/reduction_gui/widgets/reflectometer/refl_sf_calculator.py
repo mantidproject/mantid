@@ -150,9 +150,13 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         Load and display config file
         '''
         config_file_name = self._summary.cfg_scaling_factor_file_name.text()
-        f = open(config_file_name,'r')
-        text = f.readlines()
-        _full_text = ''.join(text)
+        
+        if os.path.isfile(config_file_name):
+            f = open(config_file_name,'r')
+            text = f.readlines()
+            _full_text = ''.join(text)
+        else:
+            _full_text = 'File not found !'
         self._summary.textBrowser.setText(_full_text)
 
     def _plot_counts_vs_tof(self):

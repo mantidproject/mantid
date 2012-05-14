@@ -774,6 +774,8 @@ def applySF(InputWorkspace,
                                                           s2w_value,
                                                           valuePrecision)):
                                     
+                                    
+                                    print '--> Found a perfect match'
                                     a = float(sfFactorTable[i][6])
                                     b = float(sfFactorTable[i][7])  
                                     a_error = float(sfFactorTable[i][8])
