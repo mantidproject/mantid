@@ -54,7 +54,12 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-
+// Template to check if a variable equal to NaN
+template <class T>
+inline bool isNaN(T val){
+    volatile T buf=val;
+    return (val!=buf);
+}
 /// Templated interface to the workspace conversion algorithm. Every template parameter refers to different conversion possibilities
 #ifndef EXCLUDE_CONVERT_WORKSPACE_INTERFACE
 

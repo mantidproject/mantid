@@ -127,8 +127,8 @@ public:
          //=> START INTERNAL LOOP OVER THE "TIME"
             for (size_t j = 0; j < specSize; ++j)
             {
-                // drop emtpy events
-                if(Signal[j]<FLT_EPSILON)continue;
+                // drop NaN events
+                if(isNaN(Signal[j]))continue;
 
                 if(!QE_TRANSF.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE BUFFER
