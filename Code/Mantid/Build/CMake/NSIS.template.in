@@ -41,6 +41,66 @@
 
   !include Sections.nsh
 
+;------------------------------------
+; Mantid functions and macros
+
+Var STR_HAYSTACK
+Var STR_NEEDLE
+Var STR_CONTAINS_VAR_1
+Var STR_CONTAINS_VAR_2
+Var STR_CONTAINS_VAR_3
+Var STR_CONTAINS_VAR_4
+Var STR_RETURN_VAR
+ 
+Function StrContains
+  Exch $STR_NEEDLE
+  Exch 1
+  Exch $STR_HAYSTACK
+  ; Uncomment to debug
+  ;MessageBox MB_OK 'STR_NEEDLE = $STR_NEEDLE STR_HAYSTACK = $STR_HAYSTACK '
+    StrCpy $STR_RETURN_VAR ""
+    StrCpy $STR_CONTAINS_VAR_1 -1
+    StrLen $STR_CONTAINS_VAR_2 $STR_NEEDLE
+    StrLen $STR_CONTAINS_VAR_4 $STR_HAYSTACK
+    loop:
+      IntOp $STR_CONTAINS_VAR_1 $STR_CONTAINS_VAR_1 + 1
+      StrCpy $STR_CONTAINS_VAR_3 $STR_HAYSTACK $STR_CONTAINS_VAR_2 $STR_CONTAINS_VAR_1
+      StrCmp $STR_CONTAINS_VAR_3 $STR_NEEDLE found
+      StrCmp $STR_CONTAINS_VAR_1 $STR_CONTAINS_VAR_4 str_contains_done
+      Goto loop
+    found:
+      StrCpy $STR_RETURN_VAR $STR_NEEDLE
+      Goto str_contains_done
+    str_contains_done:
+   Pop $STR_NEEDLE ;Prevent "invalid opcode" errors and keep the
+   Exch $STR_RETURN_VAR  
+FunctionEnd
+ 
+!macro _StrContainsConstructor OUT NEEDLE HAYSTACK
+  Push "${HAYSTACK}"
+  Push "${NEEDLE}"
+  Call StrContains
+  Pop "${OUT}"
+!macroend
+ 
+!define StrContains '!insertmacro "_StrContainsConstructor"'  
+  
+!macro HandleRunningMantid process message
+	nsExec::ExecToStack  "tasklist /NH /FI $\"STATUS eq RUNNING$\" /FI $\"IMAGENAME eq ${process}$\""
+    Pop $0
+	Pop $1 ;ouput of ExecToStack
+	${StrContains} $0 ${process} "$1"
+      StrCmp $0 ${process} found 
+      Goto notrunning
+    found:
+      MessageBox MB_OK '${message}' 
+	  Abort 
+    notrunning:
+!macroend
+  
+;end Mantid functions and macros  
+;-------------------------------------
+  
 ;--- Component support macros: ---
 ; The code for the add/remove functionality is from:
 ;   http://nsis.sourceforge.net/Add/Remove_Functionality
@@ -901,6 +961,8 @@ SectionEnd
 ; "Program Files" for AllUsers, "My Documents" for JustMe...
 
 Function .onInit
+ 
+!insertmacro HandleRunningMantid "MantidPlot.exe" "Shut down Mantid and try again."
 
   IfSilent +5
     IfFileExists $INSTDIR\uninstall.exe +3 0 
@@ -983,6 +1045,7 @@ FunctionEnd
 !insertmacro _IncludeStrFunction StrRep
 
 ; ---------------------------------- Macro Definitions ----------------------------------------
+
 !macro _EnvVarUpdateConstructor ResultVar EnvVarName Action Regloc PathString
   Push "${EnvVarName}"
   Push "${Action}"
