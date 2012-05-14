@@ -2851,7 +2851,7 @@ Mantid::API::Workspace_sptr FitPropertyBrowser::createMatrixFromTableWorkspace()
 
     // get the x column
     int ix = m_columnManager->value( m_xColumn );
-    if ( ix >= columns.size() )
+    if ( ix >= static_cast<int>(columns.size()) )
     {
       QMessageBox::critical(NULL, "Mantid - Error","X column was not found.");
       return boost::shared_ptr<Mantid::API::Workspace>();
@@ -2860,7 +2860,7 @@ Mantid::API::Workspace_sptr FitPropertyBrowser::createMatrixFromTableWorkspace()
 
     // get the y column
     int iy = m_columnManager->value( m_yColumn );
-    if ( iy >= columns.size() )
+    if ( iy >= static_cast<int>(columns.size()) )
     {
       QMessageBox::critical(NULL, "Mantid - Error","Y column was not found.");
       return boost::shared_ptr<Mantid::API::Workspace>();
@@ -2869,7 +2869,7 @@ Mantid::API::Workspace_sptr FitPropertyBrowser::createMatrixFromTableWorkspace()
 
     // get the err column
     int ie = m_columnManager->value( m_errColumn ) - 1; // first entry is empty string
-    if ( ie >= 0 && ie >= columns.size() )
+    if ( ie >= 0 && ie >= static_cast<int>(columns.size()) )
     {
       QMessageBox::critical(NULL, "Mantid - Error","Error column was not found.");
       return boost::shared_ptr<Mantid::API::Workspace>();
@@ -2911,7 +2911,7 @@ void FitPropertyBrowser::columnChanged(QtProperty* prop)
       auto tws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
       if ( !tws ) return;
       int i = m_columnManager->value( m_xColumn );
-      if ( i < 0 || i >= tws->rowCount() || tws->rowCount() == 0 ) return;
+      if ( i < 0 || i >= static_cast<int>(tws->rowCount()) || tws->rowCount() == 0 ) return;
       auto col = tws->getColumn( static_cast<size_t>(i) );
       const double startX = col->toDouble( 0 );
       const double endX = col->toDouble( tws->rowCount() - 1 );

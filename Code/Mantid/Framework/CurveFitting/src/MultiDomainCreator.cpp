@@ -42,7 +42,6 @@ namespace CurveFitting
       {
         throw std::runtime_error("Missing domain creator");
       }
-      auto i = static_cast<size_t>(c - m_creators.begin());
       API::FunctionDomain_sptr domain;
       (**c).createDomain(domain,values,i0);
       jointDomain->addDomain(domain);
