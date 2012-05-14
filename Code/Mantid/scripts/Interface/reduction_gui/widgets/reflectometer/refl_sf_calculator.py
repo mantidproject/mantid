@@ -87,6 +87,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.cfg_scaling_factor_file_name_refresh, QtCore.SIGNAL("clicked()"), self.display_preview_config_file)
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
         
         #Catch edited controls        
         #Incident medium (selection or text changed)
@@ -145,6 +146,16 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #TODO: allow log binning
         self._summary.log_scale_chk.hide()
                  
+    def browse_config_file_name(self):
+        '''
+        Define configuration file name
+        '''
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select config file name", "", "(*.cfg)")
+        if (str(file_name).strip() != ''):
+            self._summary.cfg_scaling_factor_file_name.setText(file_name)
+            self.display_preview_config_file()
+    
+    
     def display_preview_config_file(self):
         '''
         Load and display config file

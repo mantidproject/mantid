@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/reflectometer/refl_sf_calculator.ui'
+# Form implementation generated from reading ui file 'refl_sf_calculator.ui'
 #
-# Created: Fri May 11 10:39:05 2012
+# Created: Mon May 14 10:40:27 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(1023, 880)
+        Frame.resize(1037, 923)
         Frame.setFrameShape(QtGui.QFrame.NoFrame)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_5 = QtGui.QVBoxLayout(Frame)
@@ -23,7 +23,7 @@ class Ui_Frame(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 984, 897))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1013, 899))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_7 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
@@ -483,20 +483,31 @@ class Ui_Frame(object):
         self.label_11.setObjectName("label_11")
         self.horizontalLayout_9.addWidget(self.label_11)
         self.cfg_scaling_factor_file_name = QtGui.QLabel(self.scrollAreaWidgetContents)
+        self.cfg_scaling_factor_file_name.setText("")
         self.cfg_scaling_factor_file_name.setObjectName("cfg_scaling_factor_file_name")
         self.horizontalLayout_9.addWidget(self.cfg_scaling_factor_file_name)
+        self.cfg_scaling_factor_file_name_browse = QtGui.QPushButton(self.scrollAreaWidgetContents)
+        self.cfg_scaling_factor_file_name_browse.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.cfg_scaling_factor_file_name_browse.setSizeIncrement(QtCore.QSize(80, 0))
+        self.cfg_scaling_factor_file_name_browse.setObjectName("cfg_scaling_factor_file_name_browse")
+        self.horizontalLayout_9.addWidget(self.cfg_scaling_factor_file_name_browse)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_9)
+        self.textBrowser = QtGui.QTextBrowser(self.scrollAreaWidgetContents)
+        self.textBrowser.setMinimumSize(QtCore.QSize(0, 350))
+        self.textBrowser.setObjectName("textBrowser")
+        self.verticalLayout_4.addWidget(self.textBrowser)
+        self.horizontalLayout_10 = QtGui.QHBoxLayout()
+        self.horizontalLayout_10.setObjectName("horizontalLayout_10")
+        spacerItem16 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_10.addItem(spacerItem16)
         self.cfg_scaling_factor_file_name_refresh = QtGui.QPushButton(self.scrollAreaWidgetContents)
         self.cfg_scaling_factor_file_name_refresh.setMaximumSize(QtCore.QSize(80, 16777215))
         self.cfg_scaling_factor_file_name_refresh.setSizeIncrement(QtCore.QSize(80, 0))
         self.cfg_scaling_factor_file_name_refresh.setObjectName("cfg_scaling_factor_file_name_refresh")
-        self.horizontalLayout_9.addWidget(self.cfg_scaling_factor_file_name_refresh)
-        self.verticalLayout_4.addLayout(self.horizontalLayout_9)
-        self.textBrowser = QtGui.QTextBrowser(self.scrollAreaWidgetContents)
-        self.textBrowser.setMinimumSize(QtCore.QSize(0, 400))
-        self.textBrowser.setObjectName("textBrowser")
-        self.verticalLayout_4.addWidget(self.textBrowser)
-        spacerItem16 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem16)
+        self.horizontalLayout_10.addWidget(self.cfg_scaling_factor_file_name_refresh)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_10)
+        spacerItem17 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem17)
         self.horizontalLayout_11.addLayout(self.verticalLayout_4)
         self.verticalLayout_3.addLayout(self.horizontalLayout_11)
         self.horizontalLayout_6.addLayout(self.verticalLayout_3)
@@ -570,6 +581,6 @@ class Ui_Frame(object):
         self.add_dataset_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to add the data set above to the reduction list", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setText(QtGui.QApplication.translate("Frame", "Save to list", None, QtGui.QApplication.UnicodeUTF8))
         self.label_11.setText(QtGui.QApplication.translate("Frame", "Preview of scaling factor file:", None, QtGui.QApplication.UnicodeUTF8))
-        self.cfg_scaling_factor_file_name.setText(QtGui.QApplication.translate("Frame", "/home/j35/Desktop/RefLsf.cfg", None, QtGui.QApplication.UnicodeUTF8))
+        self.cfg_scaling_factor_file_name_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.cfg_scaling_factor_file_name_refresh.setText(QtGui.QApplication.translate("Frame", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 

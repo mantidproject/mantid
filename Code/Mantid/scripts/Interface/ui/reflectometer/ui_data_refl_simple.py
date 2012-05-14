@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Fri May 11 10:41:18 2012
+# Created: Mon May 14 10:22:04 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
