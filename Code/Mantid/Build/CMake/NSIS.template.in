@@ -965,7 +965,8 @@ Function .onInit
 !insertmacro HandleRunningMantid "MantidPlot.exe" "MantidPlot appears to be running. Shut down MantidPlot and try again."
 
   IfSilent +5
-    IfFileExists $INSTDIR\uninstall.exe +3 0 
+    IfFileExists $INSTDIR\uninstall.exe +4 0 ;If there is an uninstall.exe, then the machine is already using the new installers, which is fine, so continue
+	  IfFileExists $INSTDIR\*.* 0 +3 ; The user appears not to have the uninstaller.exe and already has a MantidInstall directory, indicates old installer is present
         MessageBox MB_YESNO "This looks like your first install with the new installer. Have you removed the previous Mantid install?$\r$\n$\r$\nIf you have not yet removed Mantid, click No, which aborts the install, and then remove it using Windows program manager." IDYES NoAbort
         Abort "Cancelled. Remove old Mantid install then retry."
       NoAbort:
