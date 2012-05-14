@@ -53,6 +53,8 @@ public:
   virtual size_t getNDomains() const;
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const;
+  /// Add new domain creator
+  void addCreator( IDomainCreator_sptr creator );
 protected:
   /// Current index
   mutable size_t m_currentIndex;

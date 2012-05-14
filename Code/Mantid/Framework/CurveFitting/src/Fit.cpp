@@ -63,13 +63,37 @@ namespace CurveFitting
     {
       setFunction();
     }
-    if (propName.size() >= 14 && propName.substr(0,14) == "InputWorkspace")
+    else if (propName.size() >= 14 && propName.substr(0,14) == "InputWorkspace")
     {
       if (getPointerToProperty("Function")->isDefault())
       {
         throw std::invalid_argument("Function must be set before InputWorkspace");
       }
       addWorkspace(propName);
+    }
+    else if (propName == "DomainType")
+    {
+      std::string domainType = getPropertyValue( "DomainType" );
+      if ( domainType != "Simple" && !getPointerToProperty("Function")->isDefault() )
+      {
+        throw std::invalid_argument("DomainType must be set before Function");
+      }
+      if ( domainType == "Simple" )
+      {
+        m_domainType = IDomainCreator::Simple;
+      }
+      else if ( domainType == "Sequential" )
+      {
+        m_domainType = IDomainCreator::Sequential;
+      }
+      else if ( domainType == "Parallel" )
+      {
+        m_domainType = IDomainCreator::Parallel;
+      }
+      else
+      {
+        m_domainType = IDomainCreator::Simple;
+      }
     }
   }
 
@@ -120,7 +144,7 @@ namespace CurveFitting
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
     {
-      creator = new FitMW(this, workspacePropertyName);
+      creator = new FitMW(this, workspacePropertyName, m_domainType);
     }
     else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
     {
@@ -189,7 +213,7 @@ namespace CurveFitting
         if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
             !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
         {
-          creator = new FitMW(this, workspacePropertyName);
+          creator = new FitMW(this, workspacePropertyName, m_domainType);
         }
         else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
         {
@@ -225,6 +249,14 @@ namespace CurveFitting
     declareProperty(new API::FunctionProperty("Function"),"Parameters defining the fitting function and its initial values");
 
     declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Kernel::Direction::Input), "Name of the input Workspace");
+
+    std::vector<std::string> domainTypes;
+    domainTypes.push_back( "Simple" );
+    domainTypes.push_back( "Sequential" );
+    domainTypes.push_back( "Parallel" );
+    declareProperty("DomainType","Simple",
+      Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(domainTypes)),
+      "The type of function domain to use: Simple, Sequential, or Parallel.", Kernel::Direction::Input);
 
     declareProperty("Ties","", Kernel::Direction::Input);
     declareProperty("Constraints","", Kernel::Direction::Input);

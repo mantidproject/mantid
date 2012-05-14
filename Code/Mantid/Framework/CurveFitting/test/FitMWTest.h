@@ -4,13 +4,16 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
 
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
 #include <sstream>
 
@@ -205,6 +208,104 @@ public:
 
   }
 
+  void test_create_SeqDomain()
+  {
+    MatrixWorkspace_sptr ws2(new WorkspaceTester);
+    ws2->initialize(2,11,10);
+
+    for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
+    {
+      Mantid::MantidVec& x = ws2->dataX(is);
+      Mantid::MantidVec& y = ws2->dataY(is);
+      //Mantid::MantidVec& e = ws2->dataE(is);
+      for(size_t i = 0; i < ws2->blocksize(); ++i)
+      {
+        x[i] = 0.1 * double(i);
+        if ( i < 3 )
+        {
+          y[i] =  1.0;
+        }
+        else if ( i < 6 )
+        {
+          y[i] =  2.0;
+        }
+        else if ( i < 9 )
+        {
+          y[i] =  3.0;
+        }
+        else
+        {
+          y[i] =  4.0;
+        }
+      }
+      x.back() = x[x.size()-2] + 0.1;
+    }
+
+    FunctionDomain_sptr domain;
+    IFunctionValues_sptr values;
+
+    FitMW fitmw(FitMW::Sequential);
+    fitmw.setWorkspace( ws2 );
+    fitmw.setWorkspaceIndex( 0 );
+    fitmw.setMaxSize(3);
+    fitmw.createDomain( domain, values );
+
+    SeqDomain* seq = dynamic_cast<SeqDomain*>(domain.get());
+    TS_ASSERT( seq );
+    TS_ASSERT_EQUALS(seq->getNDomains(), 4);
+    TS_ASSERT_EQUALS(seq->size(), 10);
+
+    FunctionDomain_sptr d;
+    IFunctionValues_sptr v;
+    seq->getDomainAndValues( 0, d, v );
+    TS_ASSERT_EQUALS( d->size(), 3 );
+    TS_ASSERT_EQUALS( v->size(), 3 );
+    auto d1d = static_cast<Mantid::API::FunctionDomain1D*>(d.get());
+    auto v1d = static_cast<Mantid::API::FunctionValues*>(v.get());
+    TS_ASSERT( d1d );
+    TS_ASSERT_DELTA( (*d1d)[0], 0.05, 1e-13 );
+    TS_ASSERT_DELTA( (*d1d)[1], 0.15, 1e-13 );
+    TS_ASSERT_DELTA( (*d1d)[2], 0.25, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(0), 1.0, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(1), 1.0, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(2), 1.0, 1e-13 );
+    v.reset();
+    seq->getDomainAndValues( 1, d, v );
+    TS_ASSERT_EQUALS( d->size(), 3 );
+    TS_ASSERT_EQUALS( v->size(), 3 );
+    d1d = static_cast<Mantid::API::FunctionDomain1D*>(d.get());
+    v1d = static_cast<Mantid::API::FunctionValues*>(v.get());
+    TS_ASSERT( d1d );
+    TS_ASSERT_DELTA( (*d1d)[0], 0.35, 1e-13 );
+    TS_ASSERT_DELTA( (*d1d)[1], 0.45, 1e-13 );
+    TS_ASSERT_DELTA( (*d1d)[2], 0.55, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(0), 2.0, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(1), 2.0, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(2), 2.0, 1e-13 );
+    v.reset();
+    seq->getDomainAndValues( 2, d, v );
+    TS_ASSERT_EQUALS( d->size(), 3 );
+    TS_ASSERT_EQUALS( v->size(), 3 );
+    d1d = static_cast<Mantid::API::FunctionDomain1D*>(d.get());
+    v1d = static_cast<Mantid::API::FunctionValues*>(v.get());
+    TS_ASSERT( d1d );
+    TS_ASSERT_DELTA( (*d1d)[0], 0.65, 1e-13 );
+    TS_ASSERT_DELTA( (*d1d)[1], 0.75, 1e-13 );
+    TS_ASSERT_DELTA( (*d1d)[2], 0.85, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(0), 3.0, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(1), 3.0, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(2), 3.0, 1e-13 );
+    v.reset();
+    seq->getDomainAndValues( 3, d, v );
+    TS_ASSERT_EQUALS( d->size(), 1 );
+    TS_ASSERT_EQUALS( v->size(), 1 );
+    d1d = static_cast<Mantid::API::FunctionDomain1D*>(d.get());
+    v1d = static_cast<Mantid::API::FunctionValues*>(v.get());
+    TS_ASSERT( d1d );
+    TS_ASSERT_DELTA( (*d1d)[0], 0.95, 1e-13 );
+    TS_ASSERT_DELTA( v1d->getFitData(0), 4.0, 1e-13 );
+
+  }
 
 };
 

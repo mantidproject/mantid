@@ -36,10 +36,20 @@ void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, A
   if ( i >= m_creators.size() ) throw std::range_error("Function domain index is out of range.");
   if ( !m_domain || i != m_currentIndex )
   {
-    m_creators[i]->createDomain(m_domain, m_values);
+    m_creators[i]->createDomain(domain, values);
   }
   m_currentIndex = 0;
 }
+
+/**
+ * Add new domain creator
+ * @param creator :: A shared pointer to a new creator.
+ */
+void SeqDomain::addCreator( IDomainCreator_sptr creator )
+{
+  m_creators.push_back( creator );
+}
+
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -51,8 +51,11 @@ namespace Mantid
     {
     public:
       /// Constructor
-      FitMW(Kernel::IPropertyManager* fit,const std::string& workspacePropertyName)
-        :IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName)){}
+      FitMW(Kernel::IPropertyManager* fit,
+        const std::string& workspacePropertyName, 
+        DomainType domainType = Simple);
+      /// Constructor
+      FitMW(DomainType domainType = Simple);
       /// declare properties that specify the dataset within the workspace to fit to.
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);
       /// Create a domain from the input workspace
@@ -69,9 +72,24 @@ namespace Mantid
       virtual size_t getDomainSize() const;
       /// Initialize the function
       virtual void initFunction(API::IFunction_sptr function);
+      /// Set the workspace
+      /// @param ws :: workspace to set.
+      void setWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) {m_matrixWorkspace = ws;} 
+      /// Set the workspace index
+      /// @param wi :: workspace index to set.
+      void setWorkspaceIndex(size_t wi) {m_workspaceIndex = wi;} 
+      /// Set the startX and endX
+      /// @param startX :: Start of the domain
+      /// @param endX :: End of the domain
+      void setRange(double startX, double endX){m_startX = startX; m_endX = endX;}
+      /// Set max size for Sequantial and Parallel domains
+      /// @param maxSize :: Maximum size of each simple domain
+      void setMaxSize(size_t maxSize){m_maxSize = maxSize;}
     protected:
       /// Calculate size and starting iterator in the X array
       void getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const;
+      /// Set all parameters
+      void setParameters()const;
 
       /// Store workspace property name
       std::string m_workspacePropertyName;
@@ -81,11 +99,19 @@ namespace Mantid
       std::string m_startXPropertyName;
       /// Store endX property name
       std::string m_endXPropertyName;
+      /// Store maxSize property name
+      std::string m_maxSizePropertyName;
 
       /// The input MareixWorkspace
-      boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
+      mutable boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
       /// The workspace index
-      size_t m_workspaceIndex;
+      mutable size_t m_workspaceIndex;
+      /// startX
+      mutable double m_startX;
+      /// endX
+      mutable double m_endX;
+      /// Max size for seq domain
+      mutable size_t m_maxSize;
       size_t m_startIndex;
     };
 

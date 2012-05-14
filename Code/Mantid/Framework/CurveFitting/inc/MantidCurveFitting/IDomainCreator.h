@@ -51,14 +51,19 @@ namespace Mantid
     class DLLExport IDomainCreator
     {
     public:
+      /// Type of domain to create.
+      enum DomainType { Simple, Sequential, Parallel };
       /// Constructor.
       /// @param manager :: A property manager which has information about the data source (eg workspace)
       /// and the function.
       /// @param workspacePropertyNames :: Property names for workspaces to get the data from.
+      /// @ param domainType :: Type of domain to create: Simple, Sequential, or Parallel.
       IDomainCreator( Kernel::IPropertyManager* manager,
-        const std::vector<std::string>& workspacePropertyNames ):
-      m_manager(manager),
-      m_workspacePropertyNames(workspacePropertyNames)
+        const std::vector<std::string>& workspacePropertyNames,
+        DomainType domainType = Simple):
+      m_manager( manager ),
+      m_workspacePropertyNames( workspacePropertyNames ),
+      m_domainType( domainType )
       {}
       /// Virtual destructor
       virtual ~IDomainCreator() {};
@@ -105,7 +110,12 @@ namespace Mantid
       Kernel::IPropertyManager* m_manager;
       /// Property names for workspaces to get the data from
       std::vector<std::string> m_workspacePropertyNames;
+      /// Domain type
+      DomainType m_domainType;
     };
+
+    /// Typedef for a shared pointer to IDomainCreator.
+    typedef boost::shared_ptr<IDomainCreator> IDomainCreator_sptr;
 
     
   } // namespace CurveFitting

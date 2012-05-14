@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Jacobian.h"
+#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
@@ -30,19 +31,31 @@ double CostFuncLeastSquares::val() const
 
   m_value = 0.0;
 
-  auto compDomain = boost::dynamic_pointer_cast<API::CompositeDomain>(m_domain);
+  auto seqDomain = boost::dynamic_pointer_cast<SeqDomain>(m_domain);
 
-  auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
-  if (!simpleValues)
+  if (seqDomain)
   {
-    throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    API::FunctionDomain_sptr domain;
+    API::IFunctionValues_sptr values;
+    const size_t n = seqDomain->getNDomains();
+    for(size_t i = 0; i < n; ++i)
+    {
+      seqDomain->getDomainAndValues( i, domain, values );
+      auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+      if (!simpleValues)
+      {
+        throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      }
+      addVal( domain, simpleValues );
+    }
   }
-
-  //if (compDomain)
-  //{
-  //}
-  //else
+  else
   {
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
+    if (!simpleValues)
+    {
+      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    }
     addVal(m_domain,simpleValues);
   }
 
@@ -154,19 +167,31 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     m_hessian.zero();
   }
 
-  auto compDomain = boost::dynamic_pointer_cast<API::CompositeDomain>(m_domain);
+  auto seqDomain = boost::dynamic_pointer_cast<SeqDomain>(m_domain);
 
-  auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
-  if (!simpleValues)
+  if (seqDomain)
   {
-    throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    API::FunctionDomain_sptr domain;
+    API::IFunctionValues_sptr values;
+    const size_t n = seqDomain->getNDomains();
+    for(size_t i = 0; i < n; ++i)
+    {
+      seqDomain->getDomainAndValues( i, domain, values );
+      auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+      if (!simpleValues)
+      {
+        throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      }
+      addValDerivHessian(domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+    }
   }
-
-  //if (compDomain)
-  //{
-  //}
-  //else
+  else
   {
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
+    if (!simpleValues)
+    {
+      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    }
     addValDerivHessian(m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
   }
 

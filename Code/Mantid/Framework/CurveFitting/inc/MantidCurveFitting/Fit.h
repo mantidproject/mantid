@@ -29,6 +29,7 @@ namespace Mantid
     <UL>
       <LI>Function - The fitting function</LI>
       <LI>InputWorkspace - First input workspace with the data</LI>
+      <LI>DomainType - The type of function domain to use: Simple, Sequential, or Parallel</LI>
       <LI>Ties - Optional parameter ties</LI>
       <LI>Constraints - Optional parameter constraints</LI>
       <LI>MaxIterations - Max number of iterations, default 500</LI>
@@ -86,7 +87,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Fit() : API::Algorithm() {};
+      Fit() : API::Algorithm(),m_domainType(IDomainCreator::Simple) {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
       /// Algorithm's version for identification overriding a virtual method
@@ -109,12 +110,12 @@ namespace Mantid
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;
-      ///// Pointer 
-      //API::Workspace_const_sptr m_workspace;
       /// Pointer to a domain creator
       boost::shared_ptr<IDomainCreator> m_domainCreator;
       friend class IDomainCreator;
       std::vector<std::string> m_workspacePropertyNames;
+      /// Keep the domain type
+      IDomainCreator::DomainType m_domainType;
 
     };
 

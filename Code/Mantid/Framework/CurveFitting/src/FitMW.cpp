@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -62,6 +63,69 @@ namespace
   using API::Jacobian;
 
   /**
+   * Constructor.
+   * @param fit :: Property manager with properties defining the domain to be created
+   * @param workspacePropertyName :: Name of the workspace property.
+   * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
+   */
+  FitMW::FitMW(Kernel::IPropertyManager* fit,
+    const std::string& workspacePropertyName, 
+    FitMW::DomainType domainType):
+  IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
+  m_startX(EMPTY_DBL()),
+  m_endX(EMPTY_DBL())
+  {
+    if (m_workspacePropertyNames.empty())
+    {
+      throw std::runtime_error("Cannot create FunctionDomain1DVector: no workspace given");
+    }
+    m_workspacePropertyName = m_workspacePropertyNames[0];
+  }
+
+  /**
+   * Constructor. Methods setWorkspace, setWorkspaceIndex and setRange must be called
+   * set up the creator.
+   * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
+   */
+  FitMW::FitMW(FitMW::DomainType domainType):
+  IDomainCreator(NULL,std::vector<std::string>(),domainType),
+  m_startX(EMPTY_DBL()),
+  m_endX(EMPTY_DBL()),
+  m_maxSize(10)
+  {
+  }
+
+
+  /**
+   * Set all parameters
+   */
+  void FitMW::setParameters() const
+  {
+    // if property manager is set overwrite any set parameters
+    if ( m_manager )
+    {
+
+      // get the workspace 
+      API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
+      m_matrixWorkspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+      if (!m_matrixWorkspace)
+      {
+        throw std::invalid_argument("InputWorkspace must be a MatrixWorkspace.");
+      }
+
+      int index = m_manager->getProperty(m_workspaceIndexPropertyName);
+      m_workspaceIndex = static_cast<size_t>(index);
+      m_startX = m_manager->getProperty(m_startXPropertyName);
+      m_endX = m_manager->getProperty(m_endXPropertyName);
+      if ( m_domainType != Simple )
+      {
+        const int maxSizeInt = m_manager->getProperty( m_maxSizePropertyName );
+        m_maxSize = static_cast<size_t>( maxSizeInt );
+      }
+    }
+  }
+
+  /**
    * Declare properties that specify the dataset within the workspace to fit to.
    * @param domainIndex :: Index of created domain in a composite domain or 0 in single domain case
    */
@@ -70,6 +134,7 @@ namespace
     m_workspaceIndexPropertyName = "WorkspaceIndex" + suffix;
     m_startXPropertyName = "StartX" + suffix;
     m_endXPropertyName = "EndX" + suffix;
+    m_maxSizePropertyName = "MaxSize" + suffix;
 
     if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName))
     {
@@ -83,6 +148,11 @@ namespace
       declareProperty(new PropertyWithValue<double>(m_endXPropertyName, EMPTY_DBL()),
         "A value in, or on the high x boundary of, the last bin the fitting range\n"
         "(default the highest value of x)" );
+      if ( m_domainType != Simple )
+      {
+        declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName,0, mustBePositive->clone()),
+                        "The maximum number of values per a simple domain.");
+      }
     }
   }
 
@@ -91,26 +161,9 @@ namespace
     boost::shared_ptr<API::FunctionDomain>& domain, 
     boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
-    if (m_workspacePropertyNames.empty())
-    {
-      throw std::runtime_error("Cannot create FunctionDomain1DVector: no workspace given");
-    }
-    m_workspacePropertyName = m_workspacePropertyNames[0];
-
-    // get the workspace 
-    API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
-    m_matrixWorkspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
-    if (!m_matrixWorkspace)
-    {
-      throw std::invalid_argument("InputWorkspace must be a MatrixWorkspace.");
-    }
-
-    int index = m_manager->getProperty(m_workspaceIndexPropertyName);
-    m_workspaceIndex = static_cast<size_t>(index);
+    setParameters();
 
     const Mantid::MantidVec& X = m_matrixWorkspace->readX(m_workspaceIndex);
-    double startX = m_manager->getProperty(m_startXPropertyName);
-    double endX = m_manager->getProperty(m_endXPropertyName);
 
     if (X.empty())
     {
@@ -122,6 +175,30 @@ namespace
     size_t n = 0;
     getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
     Mantid::MantidVec::const_iterator to = from + n;
+
+    if ( m_domainType != Simple )
+    {
+      if ( m_maxSize < n )
+      {
+        SeqDomain* seqDomain = new SeqDomain;
+        domain.reset( seqDomain );
+        size_t m = 0;
+        while( m < n )
+        {
+          // create a simple creator
+          FitMW* creator = new FitMW;
+          creator->setWorkspace( m_matrixWorkspace );
+          creator->setWorkspaceIndex( m_workspaceIndex );
+          size_t k = m + m_maxSize;
+          if ( k > n ) k = n;
+          creator->setRange( *(from + m), *(from + k - 1) );
+          seqDomain->addCreator( IDomainCreator_sptr( creator ) );
+          m = k;
+        }
+        return;
+      }
+      // else continue with simple domain
+    }
 
     // set function domain
     if (m_matrixWorkspace->isHistogramData())
@@ -272,13 +349,12 @@ namespace
    */
   void FitMW::getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const
   {
-    double startX = m_manager->getProperty(m_startXPropertyName);
-    double endX = m_manager->getProperty(m_endXPropertyName);
-
     if (X.empty())
     {
       throw std::runtime_error("Workspace contains no data.");
     }
+
+    setParameters();
 
     // find the fitting interval: from -> to
     Mantid::MantidVec::const_iterator to;
@@ -287,50 +363,50 @@ namespace
 
     if (isXAscending)
     {
-      if (startX == EMPTY_DBL() && endX == EMPTY_DBL())
+      if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL())
       {
-        startX = X.front();
+        m_startX = X.front();
         from = X.begin();
-        endX = X.back();
+        m_endX = X.back();
         to = X.end();
       }
-      else if (startX == EMPTY_DBL() || endX == EMPTY_DBL())
+      else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL())
       {
         throw std::invalid_argument("Both StartX and EndX must be given to set fitting interval.");
       }
       else
       {
-        if (startX > endX)
+        if (m_startX > m_endX)
         {
-          std::swap(startX,endX);
+          std::swap(m_startX,m_endX);
         }
-        from = std::lower_bound(X.begin(),X.end(),startX);
-        to = std::upper_bound(from,X.end(),endX);
+        from = std::lower_bound(X.begin(),X.end(),m_startX);
+        to = std::upper_bound(from,X.end(),m_endX);
       }
     }
     else // x is descending
     {
-      if (startX == EMPTY_DBL() && endX == EMPTY_DBL())
+      if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL())
       {
-        startX = X.front();
+        m_startX = X.front();
         from = X.begin();
-        endX = X.back();
+        m_endX = X.back();
         to = X.end();
       }
-      else if (startX == EMPTY_DBL() || endX == EMPTY_DBL())
+      else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL())
       {
         throw std::invalid_argument("Both StartX and EndX must be given to set fitting interval.");
       }
       else
       {
-        if (startX < endX)
+        if (m_startX < m_endX)
         {
-          std::swap(startX,endX);
+          std::swap(m_startX,m_endX);
         }
         //from = std::lower_bound(X.begin(),X.end(),startX,([](double x1,double x2)->bool{return x1 > x2;}));
         //to = std::upper_bound(from,X.end(),endX,([](double x1,double x2)->bool{return x1 > x2;}));
-        from = std::lower_bound(X.begin(),X.end(),startX,greaterIsLess);
-        to = std::upper_bound(from,X.end(),endX,greaterIsLess);
+        from = std::lower_bound(X.begin(),X.end(),m_startX,greaterIsLess);
+        to = std::upper_bound(from,X.end(),m_endX,greaterIsLess);
       }
     }
 
@@ -351,17 +427,12 @@ namespace
    */
   size_t FitMW::getDomainSize() const 
   {
-    API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
-    if (!ws) return 0;
-    auto mws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
-    if (!mws) return 0;
-
-    int index = m_manager->getProperty(m_workspaceIndexPropertyName);
-    size_t wi = static_cast<size_t>(index);
-
-    const Mantid::MantidVec& X = m_matrixWorkspace->readX(wi);
-    double startX = m_manager->getProperty(m_startXPropertyName);
-    double endX = m_manager->getProperty(m_endXPropertyName);
+    setParameters();
+    const Mantid::MantidVec& X = m_matrixWorkspace->readX(m_workspaceIndex);
+    size_t n = 0;
+    Mantid::MantidVec::const_iterator from;
+    getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
+    return n;
   }
 
   /**
@@ -370,6 +441,7 @@ namespace
    */
   void FitMW::initFunction(API::IFunction_sptr function)
   {
+    setParameters();
     if (!function)
     {
       throw std::runtime_error("Cannot initialize empty function.");
@@ -377,9 +449,7 @@ namespace
     API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(function.get());
     if (funMW)
     {
-      double startX = m_manager->getProperty(m_startXPropertyName);
-      double endX = m_manager->getProperty(m_endXPropertyName);
-      funMW->setMatrixWorkspace( m_matrixWorkspace, m_workspaceIndex, startX, endX);
+      funMW->setMatrixWorkspace( m_matrixWorkspace, m_workspaceIndex, m_startX, m_endX);
     }
     else
     {
