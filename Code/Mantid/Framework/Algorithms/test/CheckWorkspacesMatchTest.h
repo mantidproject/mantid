@@ -291,7 +291,7 @@ public:
     parentBox->getBoxes(boxes, 1000, true);
     MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
     std::vector<MDLeanEvent<3> > &events = box->getEvents();
-    const float offset = static_cast<const float>(0.1);
+    const float offset = 0.1f;
     events[0].setSignal(events[0].getSignal() + offset);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
@@ -309,7 +309,7 @@ public:
     parentBox->getBoxes(boxes, 1000, true);
     MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
     std::vector<MDLeanEvent<3> > &events = box->getEvents();
-    const float offset = static_cast<const float>(0.1);
+    const float offset = 0.1f;
     events[0].setErrorSquared(events[0].getErrorSquared() + offset);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
