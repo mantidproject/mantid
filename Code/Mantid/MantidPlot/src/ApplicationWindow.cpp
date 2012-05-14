@@ -1360,10 +1360,10 @@ void ApplicationWindow::initMainMenu()
   help->insertSeparator();
 
   ///The paraview action should only be available on windows
-  #ifdef _WIN32
+#ifdef _WIN32
   help->addAction(actionSetupParaview);
   help->insertSeparator(); 
-  #endif
+#endif
 
   help->addAction(actionAbout);
 
