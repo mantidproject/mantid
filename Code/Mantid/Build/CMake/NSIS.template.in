@@ -962,7 +962,7 @@ SectionEnd
 
 Function .onInit
  
-!insertmacro HandleRunningMantid "MantidPlot.exe" "Shut down Mantid and try again."
+!insertmacro HandleRunningMantid "MantidPlot.exe" "MantidPlot appears to be running. Shut down MantidPlot and try again."
 
   IfSilent +5
     IfFileExists $INSTDIR\uninstall.exe +3 0 
