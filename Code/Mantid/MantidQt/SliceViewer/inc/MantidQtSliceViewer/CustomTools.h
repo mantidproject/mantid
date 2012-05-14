@@ -4,6 +4,8 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_picker_machine.h>
+#include <QMouseEvent>
 /*
  * CustomTools.h
  *
@@ -20,15 +22,34 @@ namespace SliceViewer
 
 
 //========================================================================
+class PickerMachine : public QwtPickerMachine
+{
+public:
+  virtual QwtPickerMachine::CommandList transition(
+      const QwtEventPattern &, const QEvent *e)
+  {
+    QwtPickerMachine::CommandList cmdList;
+    if ( e->type() == QEvent::MouseMove )
+    cmdList += Move;
+
+    return cmdList;
+  }
+};
+
 /** Picker for looking at the data under the mouse */
 class CustomPicker : public QwtPlotPicker
 {
   Q_OBJECT
 
 public:
-  CustomPicker(int xAxis, int yAxis, QwtPlotCanvas* canvas)
-  : QwtPlotPicker(xAxis, yAxis, 0, NoRubberBand, AlwaysOn, canvas)
-  {}
+  CustomPicker(int xAxis, int yAxis, QwtPlotCanvas* canvas);
+  void widgetMouseMoveEvent(QMouseEvent *e);
+  void widgetLeaveEvent(QEvent *);
+
+  virtual QwtPickerMachine *stateMachine(int) const
+  {
+    return new PickerMachine;
+  }
 
 signals:
   void mouseMoved(double /*x*/, double /*y*/) const;
