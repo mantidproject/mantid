@@ -145,6 +145,33 @@ public:
   }
 
 
+  /** Run SaveMD with the MDHistoWorkspace */
+  void doTestHisto(MDHistoWorkspace_sptr ws)
+  {
+    std::string filename = "SaveMDTestHisto.nxs";
+
+    SaveMD alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", ws) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UpdateFileBackEnd", true) );
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    filename = alg.getPropertyValue("Filename");
+    TSM_ASSERT( "File was indeed created", Poco::File(filename).exists());
+//    if (Poco::File(filename).exists())
+//      Poco::File(filename).remove();
+  }
+
+  void test_histo2()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
+    doTestHisto(ws);
+  }
+
+
 };
 
 

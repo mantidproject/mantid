@@ -21,6 +21,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <Poco/File.h>
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -53,8 +54,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void SaveMD::initDocs()
   {
-    this->setWikiSummary("Save a MDEventWorkspace to a .nxs file.");
-    this->setOptionalMessage("Save a MDEventWorkspace to a .nxs file.");
+    this->setWikiSummary("Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.");
+    this->setOptionalMessage("Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ namespace MDEvents
    */
   void SaveMD::init()
   {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace or MDHistoWorkspace.");
 
     std::vector<std::string> exts;
     exts.push_back(".nxs");
@@ -90,7 +91,7 @@ namespace MDEvents
    * @param ws :: MDEventWorkspace of the given type
    */
   template<typename MDE, size_t nd>
-  void SaveMD::doSave(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::string filename = getPropertyValue("Filename");
     bool update = getProperty("UpdateFileBackEnd");
@@ -434,14 +435,100 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
+  /** Save a MDHistoWorkspace to a .nxs file
+   *
+   * @param ws :: MDHistoWorkspace to save
+   */
+  void SaveMD::doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws)
+  {
+    std::string filename = getPropertyValue("Filename");
+
+    // Erase the file if it exists
+    Poco::File oldFile(filename);
+    if (oldFile.exists())
+      oldFile.remove();
+
+    // Create a new file in HDF5 mode.
+    ::NeXus::File * file;
+    file = new ::NeXus::File(filename, NXACC_CREATE5);
+
+    // The base entry. Named so as to distinguish from other workspace types.
+    file->makeGroup("MDHistoWorkspace", "NXentry", true);
+
+    // Save all the ExperimentInfos
+    for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
+    {
+      ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
+      std::string groupName = "experiment" + Strings::toString(i);
+      if (ei)
+      {
+        // Can't overwrite entries. Just add the new ones
+        file->makeGroup(groupName, "NXgroup", true);
+        file->putAttr("version", 1);
+        ei->saveExperimentInfoNexus(file);
+        file->closeGroup();
+      }
+    }
+
+    // Save each dimension, as their XML representation
+    for (size_t d=0; d<ws->getNumDims(); d++)
+    {
+      std::ostringstream mess;
+      mess << "dimension" << d;
+      file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
+    }
+
+    // Check that the typedef has not been changed. The NeXus types would need changing if it does!
+    assert(sizeof(signal_t) == sizeof(double));
+
+    // Number of data points
+    int nPoints = static_cast<int>(ws->getNPoints());
+
+    file->makeData("signal", ::NeXus::FLOAT64, nPoints, true);
+    file->putData(ws->getSignalArray());
+    file->closeData();
+
+    file->makeData("errors_squared", ::NeXus::FLOAT64, nPoints, true);
+    file->putData(ws->getErrorSquaredArray());
+    file->closeData();
+
+    file->makeData("num_events", ::NeXus::FLOAT64, nPoints, true);
+    file->putData(ws->getNumEventsArray());
+    file->closeData();
+
+    file->makeData("mask", ::NeXus::INT8, nPoints, true);
+    file->putData(ws->getMaskArray());
+    file->closeData();
+
+
+    // TODO: Links to original workspace???
+
+    file->closeGroup();
+    file->close();
+
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
   void SaveMD::exec()
   {
-    IMDEventWorkspace_sptr ws = getProperty("InputWorkspace");
+    IMDWorkspace_sptr ws = getProperty("InputWorkspace");
+    IMDEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+    MDHistoWorkspace_sptr histoWS =  boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
 
-    // Wrapper to cast to MDEventWorkspace then call the function
-    CALL_MDEVENT_FUNCTION(this->doSave, ws);
+    if (eventWS)
+    {
+      // Wrapper to cast to MDEventWorkspace then call the function
+      CALL_MDEVENT_FUNCTION(this->doSaveEvents, eventWS);
+    }
+    else if (histoWS)
+    {
+      this->doSaveHisto(histoWS);
+    }
+    else
+      throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
   }
 
 
