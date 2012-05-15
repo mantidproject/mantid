@@ -2331,6 +2331,20 @@ void SANSRunWindow::handleDefSaveClick()
     QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;
     if ( (*alg) == "SaveRKH" )
       saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"', Append=False)\n";
+    else if ( (*alg) == "SaveCanSAS1D" )
+    {
+      saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"', DetectorNames=";
+      Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
+      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+      if ( matrix_workspace )
+      {
+        if ( matrix_workspace->getInstrument()->getName() == "SANS2D" )
+          saveCommand += "'front-detector, rear-detector'";
+        if ( matrix_workspace->getInstrument()->getName() == "LOQ" )
+          saveCommand += "'HAB, main-detector-bank'";      
+      }  
+      saveCommand += ")\n";
+    }
     else
       saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"')\n";
   }
