@@ -59,7 +59,8 @@ class DataSets(BaseScriptElement):
             Create XML from the current data.
         """
         xml  = "<RefLSFCalculator>\n"
-        xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
+#        xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
+        xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<tof_min>%s</tof_min>\n" % str(self.tof_min)
         xml += "<tof_max>%s</tof_max>\n" % str(self.tof_max)
         xml += "<sf_factor_file>%s</sf_factor_file>\n" % str(self.sf_factor_file)
@@ -93,7 +94,7 @@ class DataSets(BaseScriptElement):
             @param xml_str: text to read the data from
         """   
         #incident medium
-        self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
+        self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")        
         self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         
         self.tof_min = BaseScriptElement.getFloatElement(instrument_dom, "tof_min")

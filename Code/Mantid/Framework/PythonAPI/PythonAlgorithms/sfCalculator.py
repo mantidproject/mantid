@@ -1,7 +1,7 @@
 from MantidFramework import *
 from mantidsimple import *
 from numpy import zeros
-from pylab import *
+#from pylab import *
 import os.path
 
 PRECISION = 0.010
