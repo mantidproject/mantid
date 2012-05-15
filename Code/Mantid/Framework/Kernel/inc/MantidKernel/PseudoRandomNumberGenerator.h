@@ -36,7 +36,7 @@ namespace Mantid
      * that takes an initial seed and produces a set of numbers. It specialises
      * the interface for a general random number generator.
      */
-    class PseudoRandomNumberGenerator : NDRandomNumberGenerator
+    class MANTID_KERNEL_DLL PseudoRandomNumberGenerator : NDRandomNumberGenerator
     {
     public:
       /// Set the random number seed
