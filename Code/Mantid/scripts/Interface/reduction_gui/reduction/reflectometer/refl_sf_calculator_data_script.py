@@ -21,10 +21,9 @@ class DataSets(BaseScriptElement):
     s2h = 'N/A'
     s1w = 'N/A'
     s2w = 'N/A'
-    scaling_factor_file = 'N/A'
+    scaling_factor_file = ''
     tof_min = 0.
     tof_max = 200000.
-    sf_factor_file = ''
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -40,7 +39,7 @@ class DataSets(BaseScriptElement):
         script += 'Incident medium index: %s \n' % str(self.incident_medium_index_selected)
         script += 'TOF from: %s \n' % str(self.tof_min)
         script += 'TOF to: %s \n' % str(self.tof_max)
-        script += 'sfConfigFile: %s \n' %str(self.sf_factor_file)
+        script += 'Scaling factor file: %s \n' %str(self.scaling_factor_file)
         script += 'Number of attenuator: %s \n' % str(self.number_attenuator)
         script += 'Peak from pixel: %s \n' % str(self.peak_selection[0])
         script += 'Peak to pixel: %s \n' % str(self.peak_selection[1])
@@ -64,7 +63,6 @@ class DataSets(BaseScriptElement):
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<tof_min>%s</tof_min>\n" % str(self.tof_min)
         xml += "<tof_max>%s</tof_max>\n" % str(self.tof_max)
-        xml += "<sf_factor_file>%s</sf_factor_file>\n" % str(self.sf_factor_file)
         xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
         xml += "<data_file>%s</data_file>\n" % str(self.data_file)
         xml += "<number_attenuator>%s</number_attenuator>\n" % str(self.number_attenuator)
@@ -100,10 +98,7 @@ class DataSets(BaseScriptElement):
         
         self.tof_min = BaseScriptElement.getFloatElement(instrument_dom, "tof_min")
         self.tof_max = BaseScriptElement.getFloatElement(instrument_dom, "tof_max")
-        
-        #sf scaling factor file
-        self.sf_factor_file = BaseScriptElement.getStringElement(instrument_dom, "sf_factor_file")
-        
+                
         #run number
         self.data_file = BaseScriptElement.getIntElement(instrument_dom, "data_file")
         
@@ -147,5 +142,5 @@ class DataSets(BaseScriptElement):
         self.s2w = DataSets.s2w 
         self.tof_min = DataSets.tof_min
         self.tof_max = DataSets.tof_max   
-        self.sf_factor_file = DataSets.sf_factor_file 
+        self.scaling_factor_file = DataSets.scaling_factor_file 
         

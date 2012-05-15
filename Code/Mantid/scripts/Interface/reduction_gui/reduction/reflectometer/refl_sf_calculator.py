@@ -43,6 +43,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         incident_medium = ''
         incident_medium_index = -1
         
+        scaling_factor_file = ''
+        
         print 'in create_script'
         print script_split
         
@@ -51,6 +53,10 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                 _line_split = _line.split(':')
                 _arg = _line_split[0]
                 _val = _line_split[1]
+                
+                if _arg == 'Scaling factor file':
+                    if scaling_factor_file == '':
+                        scaling_factor_file = _val.strip()
                 
                 if _arg == 'Run number':
                     run_number.append(_val)
@@ -112,6 +118,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         incident_medium_list = incident_medium.split(',')
         incident_medium = incident_medium_list[incident_medium_index]
         new_script += ',incident_medium="' + incident_medium.strip() + '"'
+        
+        new_script += ',output_file_name="' + scaling_factor_file + '"'
 
         new_script += ',tof_range=' + str(tof_range) + ')'
     

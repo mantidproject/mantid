@@ -314,6 +314,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 _tof_max = self._summary.tof_max.text()
                 state.tof_min = _tof_min
                 state.tof_max = _tof_max
+
+                state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text().strip()
                 
                 #incident medium
                 _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
@@ -409,7 +411,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.tof_min.setText(str(state.tof_min))
         self._summary.tof_max.setText(str(state.tof_max))
     
-        self._summary.cfg_scaling_factor_file_name.setText(str(state.sf_factor_file))
+        self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
         self._summary.data_run_number_edit.setText(str(state.data_file))
         self._summary.number_of_attenuator.setText(str(state.number_attenuator))
         self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
