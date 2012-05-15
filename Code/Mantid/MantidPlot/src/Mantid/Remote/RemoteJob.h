@@ -37,6 +37,9 @@ public:
     std::string m_stdOut;   // Name (on the remote system) where stdout was written (in case we want to download it)
     std::string m_stdErr;   // Same, but for stderr
     ******************/
+
+private:
+    RemoteJob();  // Left unimplemented to ensure nobody can call the default constructor
 };
 
 

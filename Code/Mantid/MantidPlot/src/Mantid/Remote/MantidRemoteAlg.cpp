@@ -330,7 +330,7 @@ void RemoteAlgorithmDockWidget::submitJob()
     delete d;
 }
 
-void RemoteAlgorithmDockWidget::xmlParseServerAttributes( QDomElement &elm)
+void RemoteAlgorithmDockWidget::xmlParseServerAttributes( QDomElement & /* elm */)
 {
     // We don't actually do anything with the server attributes yet...
     return;
