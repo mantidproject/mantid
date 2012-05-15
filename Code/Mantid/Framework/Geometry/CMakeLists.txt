@@ -310,7 +310,7 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
+target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} )
 
 if (NOT NO_OPENCASCADE)
   target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )

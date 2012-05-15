@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/RandomNumberGenerator.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidMDAlgorithms/RunParam.h"
 
 #include "MantidKernel/Tolerance.h"
@@ -68,7 +68,7 @@ namespace Mantid
       /// Reset random number generators
       void resetRandomNumbers();
       /// A pointer to the random number generator
-      Kernel::RandomNumberGenerator *m_randGen;
+      Kernel::PseudoRandomNumberGenerator *m_randGen;
       /// Sample S(Q,eps) function from tobyfit
       double sqwBroad601(const std::vector<double> &, const std::vector<double> & ,
                   const double, const Kernel::Matrix<double> & );

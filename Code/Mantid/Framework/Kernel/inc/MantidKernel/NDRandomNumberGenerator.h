@@ -1,20 +1,22 @@
-#ifndef MANTID_KERNEL_RANDOMNUMBERGENERATOR_H_
-#define MANTID_KERNEL_RANDOMNUMBERGENERATOR_H_
+#ifndef MANTID_KERNEL_NDRANDOMNUMBERGENERATOR_H_
+#define MANTID_KERNEL_NDRANDOMNUMBERGENERATOR_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include "DllConfig.h"
+#include <vector>
 
 namespace Mantid
 {
   namespace Kernel
   {
     /** 
-      This class defines an interface for random number generators. 
+      This class defines an interface for N dimensional random number generators.
+      A call to next produces N points in an ND space
 
       @author Martyn Gigg, Tessella plc
-      @date 19/11/2007
+      @date 19/05/2012
 
       Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
       
@@ -36,20 +38,16 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MANTID_KERNEL_DLL RandomNumberGenerator
+    class MANTID_KERNEL_DLL NDRandomNumberGenerator
     {
-
     public:
       /// Virtual destructor to ensure that all inheriting classes have one
-      virtual ~RandomNumberGenerator() {};
-      /// Set the random number seed
-      virtual void setSeed(size_t seedValue) = 0;
-      /// Sets the range of the subsequent calls to next;
-      virtual void setRange(double start, double end) = 0;
-      /// Generate the next random number in the sequence within the given range.
-      virtual double next() = 0;
+      virtual ~NDRandomNumberGenerator() {};
+      /// Generate the next set of values that form a point in ND space
+      virtual std::vector<double> nextPoint() = 0;
+      /// Reset the generator
+      virtual void reset() = 0;
     };
-    
   }
 }
 

@@ -20,14 +20,11 @@ namespace DataHandling
 
   /// Constructor
   TestDataListener::TestDataListener() : ILiveListener(),
-      m_buffer(), m_rand(new Kernel::MersenneTwister),
+      m_buffer(), m_rand(new Kernel::MersenneTwister(Kernel::DateAndTime::getCurrentTime().totalNanoseconds(),40000,60000)),
       m_changeStatusAfter(0), m_newStatus(ILiveListener::EndRun)
   {
     // Set up the first workspace buffer
     this->createEmptyWorkspace();
-    // Set a sample tof range
-    m_rand->setRange(40000,60000);
-    m_rand->setSeed(Kernel::DateAndTime::getCurrentTime().totalNanoseconds());
 
     m_timesCalled = 0;
     m_dataReset = false;
@@ -105,8 +102,8 @@ namespace DataHandling
     EventList & el2 = m_buffer->getEventList(1);
     for (int i = 0; i < 100; ++i)
     {
-      el1.addEventQuickly(TofEvent(m_rand->next()));
-      el2.addEventQuickly(TofEvent(m_rand->next()));
+      el1.addEventQuickly(TofEvent(m_rand->nextValue()));
+      el2.addEventQuickly(TofEvent(m_rand->nextValue()));
     }
 
     // Copy the workspace pointer to a temporary variable

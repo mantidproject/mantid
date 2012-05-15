@@ -33,9 +33,8 @@ namespace Mantid
       m_magForm = boost::shared_ptr<MDAlgorithms::MagneticFormFactor>( new MagneticFormFactor(0,0,500) );
       if( !m_randGen )
       {
-        m_randGen = new Kernel::MersenneTwister;
         int seedValue = 12345;
-        m_randGen->setSeed(seedValue);
+        m_randGen = new Kernel::MersenneTwister(seedValue);
       }
       m_mcOptVec.resize(9,true);; // Nine processes are modelled in current implementation
       m_mcVarCount.resize(m_mcOptVec.size());
@@ -233,7 +232,7 @@ namespace Mantid
         point.resize(m_randSize);
       if(m_random==mTwister) {
         for(size_t i=0;i<point.size();i++)
-          point[i]=m_randGen->next();
+          point[i]=m_randGen->nextValue();
       }
       else
       {
@@ -260,8 +259,9 @@ namespace Mantid
       else //Non Sobol random numbers
       {
         if( !m_randGen )
-          m_randGen = new Kernel::MersenneTwister;
-        m_randGen->setSeed(m_randSeed);
+          m_randGen = new Kernel::MersenneTwister(m_randSeed);
+        else
+          m_randGen->setSeed(m_randSeed);
       }
     }
 

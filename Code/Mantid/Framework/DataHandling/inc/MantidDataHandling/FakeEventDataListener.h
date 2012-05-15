@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/RandomNumberGenerator.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <Poco/Timer.h>
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
@@ -56,7 +56,7 @@ namespace Mantid
       void generateEvents(Poco::Timer&);
 
       DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
-      Kernel::RandomNumberGenerator * m_rand; ///< Used in generation of random events
+      Kernel::PseudoRandomNumberGenerator * m_rand; ///< Used in generation of random events
       Poco::Timer m_timer; ///< Used to call the event-generating function on a schedule
       int m_datarate;     ///< The data rate to (attempt to) generate in events/sec
       int m_callbackloop; ///< Number of times to loop within each generateEvents() call

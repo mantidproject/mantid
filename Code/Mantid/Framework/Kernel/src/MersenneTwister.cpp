@@ -13,30 +13,47 @@ namespace Mantid
     //------------------------------------------------------------------------------
     
     /**
-     * Default constructor. Sets the range to [0.0,1.0]
+     * Constructor taking a seed value. Sets the range to [0.0,1.0]
+     * @param seedValue :: The initial seed
      */
-    MersenneTwister::MersenneTwister() : 
-      m_generator(), m_uniform_dist(0.0, 1.0)
+    MersenneTwister::MersenneTwister(const size_t seedValue) :
+      m_generator(), m_uniform_dist(), m_currentSeed(0)
     {
+      setSeed(seedValue);
+      setRange(0.0, 1.0);
+    }
+
+    /**
+     * Constructor taking a seed value and a range
+     * @param seedValue :: The initial seed
+     * @param start :: The minimum value a generated number should take
+     * @param end :: The maximum value a generated number should take
+     */
+    MersenneTwister::MersenneTwister(const size_t seedValue, const double start, const double end) :
+      m_generator(), m_uniform_dist(), m_currentSeed()
+    {
+      setSeed(seedValue);
+      setRange(start,end);
     }
 
     /**
      * (Re-)seed the generator
      * @param seedValue :: A seed for the generator
      */
-    void MersenneTwister::setSeed(size_t seedValue)
+    void MersenneTwister::setSeed(const size_t seedValue)
     {
       // Bug in earlier versions of this implementation meant
       // that a unsigned int could not be past to the seed function
-      m_generator.seed((boost::mt19937::result_type)seedValue);
+      m_currentSeed = (boost::mt19937::result_type)seedValue;
+      m_generator.seed(m_currentSeed);
     }
 
     /**
-     * Sets the range of the subsequent calls to next() 
-     * @param start :: The lowest value a call to next() will produce
-     * @param end :: The largest value a call to next() will produce
+     * Sets the range of the subsequent calls to nextValue() 
+     * @param start :: The lowest value a call to nextValue() will produce
+     * @param end :: The largest value a call to nextValue() will produce
      */
-    void MersenneTwister::setRange(double start, double end)
+    void MersenneTwister::setRange(const double start, const double end)
     {
       m_uniform_dist = uniform_double(start,end);
     }
@@ -46,12 +63,20 @@ namespace Mantid
      * the Mersenne Twister 19937 algorithm.
      * @returns The next number in the pseudo-random sequence
      */
-    double MersenneTwister::next()
+    double MersenneTwister::nextValue()
     {
       /// A variate generator to combine a random number generator with a distribution
-      uniform_generator uniform_rand(m_generator, m_uniform_dist);      
+      uniform_generator uniform_rand(m_generator, m_uniform_dist);
       // There is no reason why this call shouldn't be considered const
       return uniform_rand();
+    }
+
+    /**
+     * Resets the generator using the value given at the last call to setSeed
+     */
+    void MersenneTwister::reset()
+    {
+      setSeed(m_currentSeed);
     }
 
   }
