@@ -101,7 +101,11 @@ namespace Mantid
       std::vector<double> Zscore;
       double tmp;
       Statistics stats = getStatistics(data, sorted);
-      if(stats.standard_deviation == 0.)return Zscore;
+      if(stats.standard_deviation == 0.)
+      {
+    	  std::vector<double>Zscore(data.size(),0.);
+    	  return Zscore;
+      }
       typename vector<TYPE>::const_iterator it = data.begin();
       for (; it != data.end(); ++it)
       {
@@ -117,7 +121,7 @@ namespace Mantid
     template<typename TYPE>
     std::vector<double> getModifiedZscore(const vector<TYPE>& data, const bool sorted)
     {
-      std::vector<double>Zscore, MADvec;
+      std::vector<double>MADvec;
       double tmp;
       size_t num_data = data.size(); // cache since it is frequently used
       double median = getMedian(data, num_data, sorted);
@@ -128,7 +132,13 @@ namespace Mantid
         MADvec.push_back(fabs(tmp - median));
       }
       double MAD = getMedian(MADvec, num_data, sorted);
+      if(MAD == 0.)
+      {
+    	  std::vector<double>Zscore(data.size(),0.);
+    	  return Zscore;
+      }
       MADvec.empty();
+      std::vector<double> Zscore;
       it = data.begin();
       for (; it != data.end(); ++it)
       {
