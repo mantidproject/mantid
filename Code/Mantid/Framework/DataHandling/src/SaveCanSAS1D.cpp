@@ -72,6 +72,7 @@ void SaveCanSAS1D::init()
                   boost::make_shared<Kernel::StringListValidator>(radiation_source));
   declareProperty("Append", false, "If true the output file is not overwritten but appended to"); 
   declareProperty("Process", "", "Text to append to Process section");
+  declareProperty("DetectorNames","", "Which detectors to store information about, where the name must match the name given for a detector in the instrument definition file");
 }
 /** Is called when the input workspace was actually a group, it sets the
  *  for all group members after the first so that the whole group is saved
@@ -531,61 +532,52 @@ void SaveCanSAS1D::createSASSourceElement(std::string& sasSource )
   sasSource+="\n\t\t\t</SASsource>";
 
 }
-/** This method creates an XML element named "SASdetector"
- *  @param sasDet :: string for sasdetector element in the xml
+/** This method creates XML elements named "SASdetector". This method
+    appends ot sasDet.
+ *  @param sasDet :: string for one or more sasdetector elements
  */
 void SaveCanSAS1D::createSASDetectorElement(std::string& sasDet)
 {
-  sasDet="\n\t\t\t<SASdetector>";
-  //outFile<<sasDet;
+  const std::string detectorNames = getProperty("DetectorNames");
 
-  std::string detectorName ;
-  Geometry::IDetector_const_sptr detgroup;
-  try
+  if ( detectorNames.empty() )
+    return;
+
+  std::list<std::string> detList;
+  boost::algorithm::split(detList, detectorNames, std::bind2nd(std::equal_to<char>(), ','));
+  for( std::list<std::string>::const_iterator itr = detList.begin(); itr != detList.end(); ++itr )
   {
-    // Get the detector object (probably a group) that goes with the result spectrum
-    detgroup = m_workspace->getDetector(0);
-    const int id = detgroup->getID(); //id of the first detector in the group
-    // Now make sure we've got an individual detector object
-    Geometry::IDetector_const_sptr det = m_workspace->getInstrument()->getDetector(id);
-    // Get all its ancestors
-    const std::vector<boost::shared_ptr<const IComponent> > ancs = det->getAncestors();
-    // The one we want is the penultimate one
-    // Shouldn't ever happen, but protect against detector having no ancestors
-    if (ancs.size() > 1)
-      detectorName = ancs[ancs.size()-2]->getName();
+    std::string detectorName = *itr;
+    boost::algorithm::trim(detectorName);
+
+    // get first component with name detectorName in IDF
+    boost::shared_ptr<const IComponent> comp = m_workspace->getInstrument()->getComponentByName(detectorName);
+    if (comp != boost::shared_ptr<const IComponent>() )
+    {  
+      sasDet += "\n\t\t\t<SASdetector>";
+
+      std::string sasDetname="\n\t\t\t\t<name>";
+      sasDetname+=detectorName;
+      sasDetname+="</name>";
+      sasDet+=sasDetname;
+
+      std::string sasDetUnit="\n\t\t\t\t<SDD unit=\"m\">";
+
+      std::stringstream sdd;
+      double distance = comp->getDistance(*m_workspace->getInstrument()->getSample());
+      sdd << distance;
+
+      sasDetUnit+=sdd.str();
+      sasDetUnit+="</SDD>";
+
+      sasDet+=sasDetUnit;
+      sasDet+="\n\t\t\t</SASdetector>";
+    }
     else
-      detectorName = det->getName();
-    //look for xml special characters and replace with entity refrence
-    searchandreplaceSpecialChars(detectorName);
+    {
+      g_log.notice() << "Detector with name " << detectorName << " does not exist in the instrument of the workspace: " << m_workspace->name() << std::endl;
+    }
   }
-  catch(Kernel::Exception::NotFoundError&)
-  {
-    throw;
-  }
-  catch(std::runtime_error& )
-  {
-    throw ;
-  }
-
-  std::string sasDetname="\n\t\t\t\t<name>";
-  sasDetname+=detectorName;
-  sasDetname+="</name>";
-  sasDet+=sasDetname;
-
-  //outFile<<sasDetname;
-  std::string sasDetUnit="\n\t\t\t\t<SDD unit=\"m\">";
-
-  std::stringstream sdd;
-  double distance = detgroup->getDistance(*m_workspace->getInstrument()->getSample());
-  sdd << distance;
-
-  sasDetUnit+=sdd.str();
-  sasDetUnit+="</SDD>";
-  //outFile<<sasDetUnit;
-  sasDet+=sasDetUnit;
-  sasDet+="\n\t\t\t</SASdetector>";
-  //outFile<<sasDet;
 }
 
 /** This method creates an XML element named "SASprocess"

@@ -159,6 +159,7 @@ public:
     TS_ASSERT( savealg.isInitialized() );
     savealg.setPropertyValue("InputWorkspace", "SaveCanSAS1DTest_group");
     savealg.setPropertyValue("Filename", m_filename);
+    savealg.setPropertyValue("DetectorNames", "HAB");
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
     TS_ASSERT( savealg.isExecuted() );
 
