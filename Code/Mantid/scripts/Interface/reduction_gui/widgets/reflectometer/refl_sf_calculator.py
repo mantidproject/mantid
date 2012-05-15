@@ -105,6 +105,10 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_to_pixel)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        #name of output file changed
+        call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
+
 
         #data background
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel)
@@ -315,7 +319,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 state.tof_min = _tof_min
                 state.tof_max = _tof_max
 
-                state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text().strip()
+                state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
                 #incident medium
                 _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
@@ -362,6 +366,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         util.set_edited(self._summary.data_peak_to_pixel, False)
         util.set_edited(self._summary.data_background_from_pixel, False)
         util.set_edited(self._summary.data_background_to_pixel, False)
+        util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
     
     def _angle_changed(self):
         

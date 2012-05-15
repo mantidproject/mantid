@@ -45,8 +45,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         
         scaling_factor_file = ''
         
-        print 'in create_script'
-        print script_split
+#        print 'in create_script'
+#        print script_split
         
         for _line in script_split:
             if _line != '':
