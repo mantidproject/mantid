@@ -40,6 +40,7 @@ double CostFuncLeastSquares::val() const
     const size_t n = seqDomain->getNDomains();
     for(size_t i = 0; i < n; ++i)
     {
+      values.reset();
       seqDomain->getDomainAndValues( i, domain, values );
       auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
       if (!simpleValues)
@@ -82,7 +83,7 @@ double CostFuncLeastSquares::val() const
 void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)const
 {
   m_function->function(*domain,*values);
-  size_t ny = m_values->size();
+  size_t ny = values->size();
 
   double retVal = 0.0;
 
@@ -176,6 +177,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     const size_t n = seqDomain->getNDomains();
     for(size_t i = 0; i < n; ++i)
     {
+      values.reset();
       seqDomain->getDomainAndValues( i, domain, values );
       auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
       if (!simpleValues)
@@ -241,7 +243,8 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
       }
       ++i;
     }
-    m_dirtyHessian = false;
+    // clear the dirty flag if hessian was actually calculated
+    m_dirtyHessian = m_hessian.isEmpty();
   }
 
   return m_value;
@@ -263,7 +266,7 @@ void CostFuncLeastSquares::addValDerivHessian(
 {
   UNUSED_ARG(evalDeriv);
   size_t np = m_function->nParams();  // number of parameters 
-  size_t ny = m_domain->size(); // number of data points
+  size_t ny = domain->size(); // number of data points
   Jacobian jacobian(ny,np);
   if (evalFunction)
   {

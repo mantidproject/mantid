@@ -21,6 +21,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 
+#include <limits>
+
 using namespace MantidQt::API;
 
 namespace MantidQt
@@ -163,6 +165,17 @@ QString InputWorkspaceWidget::getWorkspaceName() const
   return m_workspaceName->currentText();
 }
 
+/// Set workspace name
+void InputWorkspaceWidget::setWorkspaceName(const QString& wsName)
+{
+  int i = m_workspaceName->findText( wsName );
+  if ( i >= 0 )
+  {
+    m_workspaceName->setCurrentIndex( i );
+  }
+}
+
+
 /**
  * Set a property
  * @param propName :: Property name
@@ -209,6 +222,19 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget* parent):DynamicProp
   layout->addWidget(new QLabel("EndX"),2,0);
   layout->addWidget(m_endX,2,1);
 
+  if ( parent->getDomainType() > 0 )
+  {
+    m_maxSize = new QSpinBox(this);
+    m_maxSize->setMinimum(1);
+    m_maxSize->setMaximum(std::numeric_limits<int>::max());
+    layout->addWidget(new QLabel("Maximum size"),3,0);
+    layout->addWidget(m_maxSize,3,1);
+  }
+  else
+  {
+    m_maxSize = NULL;
+  }
+
   QString wsName = parent->getWorkspaceName();
   if ( wsName.isEmpty() ) return;
   try
@@ -246,6 +272,7 @@ void MWPropertiesWidget::setProperties()
   QString wsIndexName = "WorkspaceIndex";
   QString startXName = "StartX";
   QString endXName = "EndX";
+  QString maxSizeName = "MaxSize";
 
   int domainIndex = m_wsWidget->getDomainIndex();
   if ( domainIndex > 0 )
@@ -254,6 +281,7 @@ void MWPropertiesWidget::setProperties()
     wsIndexName += suffix;
     startXName += suffix;
     endXName += suffix;
+    maxSizeName += suffix;
   }
 
   QString value = m_workspaceIndex->text();
@@ -270,6 +298,12 @@ void MWPropertiesWidget::setProperties()
   if ( !value.isEmpty() )
   {
     m_wsWidget->setPropertyValue(endXName,value);
+  }
+
+  if ( m_wsWidget->getDomainType() > 0 )
+  {
+    value = m_maxSize->text();
+    m_wsWidget->setPropertyValue(maxSizeName, value);
   }
 }
 
@@ -298,6 +332,7 @@ void FitDialog::initLayout()
 */
 void FitDialog::saveInput()
 {
+  storePropertyValue("DomainType",getDomainTypeString());
   QString funStr = m_form.function->getFunctionString();
   if ( !funStr.isEmpty() )
   {
@@ -311,6 +346,9 @@ void FitDialog::saveInput()
  */
 void FitDialog::parseInput()
 {
+  int domainType = getDomainType();
+  storePropertyValue("DomainType",getDomainTypeString());
+  getAlgorithm()->setPropertyValue("DomainType",getDomainTypeString().toStdString());
   QString funStr = m_form.function->getFunctionString();
   if ( !funStr.isEmpty() )
   {
@@ -338,26 +376,58 @@ void FitDialog::parseInput()
 */
 void FitDialog::tieStaticWidgets(const bool readHistory)
 {
-
   QString funValue = getStoredPropertyValue("Function");
   if ( !funValue.isEmpty() )
   {
     m_form.function->setFunction(funValue);
   }
 
-  //m_staticProperties << "Function" << "InputWorkspace" << "CreateOutput" << "Output"
-  //  << "MaxIterations" << "Minimizer" << "CostFunction";
-
   tie(m_form.chbCreateOutput, "CreateOutput", m_form.staticLayout, readHistory);
   tie(m_form.leOutput, "Output", m_form.staticLayout, readHistory);
   tie(m_form.leMaxIterations, "MaxIterations", m_form.staticLayout, readHistory);
 
-  m_form.cbMinimizer->addItems(getAllowedPropertyValues("Minimizer"));
-  tie(m_form.cbMinimizer, "Minimizer", m_form.staticLayout, readHistory);
-
   m_form.cbCostFunction->addItems(getAllowedPropertyValues("CostFunction"));
   tie(m_form.cbCostFunction, "CostFunction", m_form.staticLayout, readHistory);
 
+  m_form.cbDomainType->addItems(getAllowedPropertyValues("DomainType"));
+  //tie(m_form.cbDomainType, "DomainType", m_form.staticLayout, readHistory);
+  connect(m_form.cbDomainType,SIGNAL(currentIndexChanged(int)),this,SLOT(domainTypeChanged()));
+  QString domainTypeValue = getStoredPropertyValue("DomainType");
+  if ( !domainTypeValue.isEmpty() )
+  {
+    m_form.cbDomainType->setCurrentText( domainTypeValue );
+  }
+
+  // this creates input workspace widgets and adjusts minimizers list
+  // according to the domain type
+  domainTypeChanged();
+
+  // read value from history
+  tie(m_form.cbMinimizer, "Minimizer", m_form.staticLayout, readHistory);
+
+  auto value = getStoredPropertyValue("InputWorkspace");
+  setWorkspaceName(0, value );
+}
+
+/**
+ * Update user interface when domain type changes.
+ */
+void FitDialog::domainTypeChanged()
+{
+  getAlgorithm()->setPropertyValue("DomainType",getDomainTypeString().toStdString());
+  auto minimizerList = getAllowedPropertyValues("Minimizer");
+  if ( getDomainType() != 0 )
+  {
+    minimizerList.remove( "Levenberg-Marquardt" );
+  }
+  QString currentMinimizer = m_form.cbMinimizer->currentText();
+  m_form.cbMinimizer->clear();
+  m_form.cbMinimizer->addItems(minimizerList);
+  int index = m_form.cbMinimizer->findText( currentMinimizer );
+  if ( index >= 0 )
+  {
+    m_form.cbMinimizer->setCurrentText( currentMinimizer );
+  }
   createInputWorkspaceWidgets();
 }
 
@@ -367,12 +437,26 @@ void FitDialog::tieStaticWidgets(const bool readHistory)
 void FitDialog::createInputWorkspaceWidgets()
 {
   m_form.tabWidget->clear();
+  QStringList wsNames;
   foreach(QWidget* t, m_tabs)
   {
+    auto tab = dynamic_cast<InputWorkspaceWidget*>( t );
+    if ( tab )
+    {
+      wsNames << tab->getWorkspaceName() ;
+    }
+    else
+    {
+      wsNames << "";
+    }
     delete t;
   }
   m_tabs.clear();
   auto tab = new InputWorkspaceWidget(this,0);
+  if ( !wsNames.isEmpty() )
+  {
+    tab->setWorkspaceName( wsNames[0] );
+  }
   m_form.tabWidget->addTab(tab,"InputWorkspace");
   m_tabs << tab;
 
@@ -387,12 +471,27 @@ void FitDialog::createInputWorkspaceWidgets()
     {
       QString propName = "InputWorkspace_" + QString::number(i);
       auto t = new InputWorkspaceWidget( this, static_cast<int>(i) );
+      if ( wsNames.size() > i )
+      {
+        tab->setWorkspaceName( wsNames[i] );
+      }
       m_form.tabWidget->addTab( t, propName );
       m_tabs << t;
     }
   }
 }
 
+/**
+ * Set i-th workspace name
+ * @param i :: Tab index
+ * @param wsName :: A workspace name to try to set.
+ */
+void FitDialog::setWorkspaceName( int i, const QString& wsName )
+{
+  if ( i < 0 || i >= m_form.tabWidget->count() ) return;
+  auto tab = dynamic_cast<InputWorkspaceWidget*>( m_form.tabWidget->widget( i ) );
+  if ( tab ) tab->setWorkspaceName( wsName );
+}
 
 /**
 * Clear the old widgets for a new Loader type
@@ -540,6 +639,35 @@ bool FitDialog::isMD() const
   return isFunctionMD(fun);
 }
 
+/**
+ * Get the domain type: Simple, Sequential, or Parallel
+ */
+int FitDialog::getDomainType() const
+{
+  QString type = m_form.cbDomainType->currentText();
+  if ( type == "Simple" )
+  {
+    return 0;
+  }
+  else if ( type == "Sequential" )
+  {
+    return 1;
+  }
+  else if ( type == "Parallel" )
+  {
+    return 2;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+/// Get the domain type: Simple, Sequential, or Parallel
+QString FitDialog::getDomainTypeString() const
+{
+  return m_form.cbDomainType->currentText();
+}
 
 } // CustomDialogs
 } // MantidQt

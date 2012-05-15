@@ -73,28 +73,41 @@ namespace CurveFitting
     }
     else if (propName == "DomainType")
     {
-      std::string domainType = getPropertyValue( "DomainType" );
-      if ( domainType != "Simple" && !getPointerToProperty("Function")->isDefault() )
-      {
-        throw std::invalid_argument("DomainType must be set before Function");
-      }
-      if ( domainType == "Simple" )
-      {
-        m_domainType = IDomainCreator::Simple;
-      }
-      else if ( domainType == "Sequential" )
-      {
-        m_domainType = IDomainCreator::Sequential;
-      }
-      else if ( domainType == "Parallel" )
-      {
-        m_domainType = IDomainCreator::Parallel;
-      }
-      else
-      {
-        m_domainType = IDomainCreator::Simple;
-      }
+      setDomainType();
     }
+  }
+
+  /**
+   * Read domain type property and cache the value
+   */
+  void Fit::setDomainType()
+  {
+    std::string domainType = getPropertyValue( "DomainType" );
+    if ( domainType == "Simple" )
+    {
+      m_domainType = IDomainCreator::Simple;
+    }
+    else if ( domainType == "Sequential" )
+    {
+      m_domainType = IDomainCreator::Sequential;
+    }
+    else if ( domainType == "Parallel" )
+    {
+      m_domainType = IDomainCreator::Parallel;
+    }
+    else
+    {
+      m_domainType = IDomainCreator::Simple;
+    }
+    Kernel::Property* prop = getPointerToProperty("Minimizer");
+    auto minimizerProperty = dynamic_cast<Kernel::PropertyWithValue<std::string>*>( prop );
+    std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
+    if ( m_domainType != IDomainCreator::Simple )
+    {
+      auto it = std::find(minimizerOptions.begin(), minimizerOptions.end(), "Levenberg-Marquardt");
+      minimizerOptions.erase( it );
+    }
+    minimizerProperty->replaceValidator( Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)) );
   }
 
   void Fit::setFunction()
@@ -140,6 +153,7 @@ namespace CurveFitting
 
     API::IFunction_sptr fun = getProperty("Function");
     IDomainCreator* creator = NULL;
+    setDomainType();
 
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
@@ -197,6 +211,7 @@ namespace CurveFitting
    */
   void Fit::addWorkspaces()
   {
+    setDomainType();
     auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (multiFun)
     {

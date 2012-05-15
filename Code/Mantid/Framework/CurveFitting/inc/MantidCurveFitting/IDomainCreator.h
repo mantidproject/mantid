@@ -52,7 +52,7 @@ namespace Mantid
     {
     public:
       /// Type of domain to create.
-      enum DomainType { Simple, Sequential, Parallel };
+      enum DomainType { Simple = 0, Sequential, Parallel };
       /// Constructor.
       /// @param manager :: A property manager which has information about the data source (eg workspace)
       /// and the function.
