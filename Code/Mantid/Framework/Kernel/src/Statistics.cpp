@@ -121,6 +121,11 @@ namespace Mantid
     template<typename TYPE>
     std::vector<double> getModifiedZscore(const vector<TYPE>& data, const bool sorted)
     {
+      if (data.size() < 3)
+      {
+    	  std::vector<double>Zscore(data.size(),0.);
+    	  return Zscore;
+      }
       std::vector<double>MADvec;
       double tmp;
       size_t num_data = data.size(); // cache since it is frequently used
