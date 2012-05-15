@@ -78,7 +78,7 @@ namespace
   {
     if (m_workspacePropertyNames.empty())
     {
-      throw std::runtime_error("Cannot create FunctionDomain1DVector: no workspace given");
+      throw std::runtime_error("Cannot create FitMW: no workspace given");
     }
     m_workspacePropertyName = m_workspacePropertyNames[0];
   }

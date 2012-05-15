@@ -96,10 +96,6 @@ namespace MantidQt
       /// Get the domain type: Simple, Sequential, or Parallel
       QString getDomainTypeString() const;
 
-      /// Clears all of the widgets from the old layout
-      void removeOldInputWidgets();
-      /// Create
-      void createDynamicLayout();
       /// Return property value stored in history
       QString getStoredPropertyValue(const QString& propName) const;
       /// Get allowed values for a property
@@ -206,6 +202,21 @@ namespace MantidQt
       QSpinBox *m_workspaceIndex;
       QLineEdit *m_startX;
       QLineEdit *m_endX;
+      QSpinBox *m_maxSize;
+    };
+
+    /**
+     * Widgets to set properties for a IMDWorkspace: MaxSize
+     */
+    class MDPropertiesWidget: public DynamicPropertiesWidget
+    {
+    public:
+      MDPropertiesWidget(InputWorkspaceWidget* parent);
+      /// Initialize the child widgets with stored and allowed values
+      void init() {}
+      /// Set all workspace properties
+      void setProperties();
+    protected:
       QSpinBox *m_maxSize;
     };
 

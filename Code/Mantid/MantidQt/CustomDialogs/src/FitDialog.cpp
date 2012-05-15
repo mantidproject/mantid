@@ -140,18 +140,20 @@ void InputWorkspaceWidget::setDynamicProperties()
   
   if ( m_fitDialog->isMD() )
   {
-    // empty space
-    m_layout->insertWidget(1, new QLabel(" ") );
+    if ( isMDWorkspace() )
+    {
+      m_dynamicProperties = new MDPropertiesWidget(this);
+      m_layout->insertWidget( 1, m_dynamicProperties );
+    }
+    else
+    {
+      m_layout->insertWidget(1, new QLabel("MD Workspace is expected") );
+    }
   }
   else if ( isMatrixWorkspace() )
   {
     m_dynamicProperties = new MWPropertiesWidget(this);
     m_layout->insertWidget( 1, m_dynamicProperties );
-  }
-  else if ( isMDWorkspace() )
-  {
-    // empty space
-    m_layout->insertWidget(1, new QLabel(" ") );
   }
   else
   {
@@ -303,6 +305,51 @@ void MWPropertiesWidget::setProperties()
   if ( m_wsWidget->getDomainType() > 0 )
   {
     value = m_maxSize->text();
+    m_wsWidget->setPropertyValue(maxSizeName, value);
+  }
+}
+
+//------------------------------------------------------
+// MDPropertiesWidget methods
+//------------------------------------------------------
+/**
+ * Constructor.
+ * @param parent :: Parent InputWorkspaceWidget tab.
+ */
+MDPropertiesWidget::MDPropertiesWidget(InputWorkspaceWidget* parent):DynamicPropertiesWidget(parent)
+{
+  if ( parent->getDomainType() > 0 )
+  {
+    auto layout = new QGridLayout(this);
+    m_maxSize = new QSpinBox(this);
+    m_maxSize->setMinimum(1);
+    m_maxSize->setMaximum(std::numeric_limits<int>::max());
+    layout->addWidget(new QLabel("Maximum size"),3,0);
+    layout->addWidget(m_maxSize,3,1);
+  }
+  else
+  {
+    m_maxSize = NULL;
+  }
+}
+
+/**
+ * Set all workspace properties
+ */
+void MDPropertiesWidget::setProperties()
+{
+  QString maxSizeName = "MaxSize";
+
+  int domainIndex = m_wsWidget->getDomainIndex();
+  if ( domainIndex > 0 )
+  {
+    QString suffix = "_" + QString::number(domainIndex);
+    maxSizeName += suffix;
+  }
+
+  if ( m_wsWidget->getDomainType() > 0 )
+  {
+    QString value = m_maxSize->text();
     m_wsWidget->setPropertyValue(maxSizeName, value);
   }
 }
@@ -473,7 +520,7 @@ void FitDialog::createInputWorkspaceWidgets()
       auto t = new InputWorkspaceWidget( this, static_cast<int>(i) );
       if ( wsNames.size() > i )
       {
-        tab->setWorkspaceName( wsNames[i] );
+        tab->setWorkspaceName( wsNames[static_cast<int>(i)] );
       }
       m_form.tabWidget->addTab( t, propName );
       m_tabs << t;
@@ -493,74 +540,9 @@ void FitDialog::setWorkspaceName( int i, const QString& wsName )
   if ( tab ) tab->setWorkspaceName( wsName );
 }
 
-/**
-* Clear the old widgets for a new Loader type
-* @param layout :: The layout containing the child layouts/widgets
-*/
-void FitDialog::removeOldInputWidgets()
-{
-  //auto layout = m_form.topLayout;
-  //layout->setEnabled(false);
-  //// Remove the old widgets if necessary
-  //if( layout->count() > 4 )
-  //{
-  //  int count = layout->count();
-  //  while( count > 4 )
-  //  {
-  //    QLayoutItem *child = layout->takeAt(count - 1);
-  //    if( QWidget *w = child->widget() )
-  //    {
-  //      w->deleteLater();
-  //    }
-  //    else if( QLayout *l = child->layout() )
-  //    {
-  //      QLayoutItem *subChild(NULL);
-  //      while( (subChild = l->takeAt(0)) != NULL )
-  //      {
-  //        subChild->widget()->deleteLater();
-  //      }
-  //    }
-  //    count = layout->count();
-  //  }
-  //}
-  //layout->setEnabled(true);
-  //m_dynamicLabels.clear();
-  //m_dynamicEditors.clear();
-}
-
-/**
-* Create the dynamic widgets for the concrete loader
-*/
-void FitDialog::createDynamicLayout()
-{
-  //int index = m_form.topLayout->rowCount();
-  //auto properties = getAlgorithm()->getProperties();
-  //for(auto prop = properties.begin(); prop != properties.end(); ++prop)
-  //{
-  //  QString propName = QString::fromStdString((**prop).name());
-  //  if ( !m_staticProperties.contains(propName) && 
-  //    !m_dynamicLabels.contains(propName) && 
-  //    (**prop).direction() == Mantid::Kernel::Direction::Input)
-  //  {
-  //    untie(propName);
-  //    QLabel *label = new QLabel(propName,this);
-  //    QLineEdit *edit = new QLineEdit(this);
-  //    m_form.topLayout->addWidget(label,index,0);
-  //    m_form.topLayout->addWidget(edit,index,1);
-  //    tie(edit, propName, m_form.topLayout, true);
-  //    m_dynamicLabels.insert(propName,label);
-  //    m_dynamicEditors.insert(propName,edit);
-  //    ++index;
-  //  }
-  //}
-  //m_form.mainLayout->invalidate();
-}
-
 void FitDialog::workspaceChanged(const QString&)
 {
   this->setPropertyValues();
-  removeOldInputWidgets();
-  createDynamicLayout();
 }
 
 void FitDialog::functionChanged()
