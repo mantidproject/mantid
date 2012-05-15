@@ -543,6 +543,7 @@ class SNSPowderReduction(PythonAlgorithm):
             for temp in samRuns:
                 temp = self._focusChunks(temp, SUFFIX, filterWall, calib, filterLogs,
                                preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                tempinfo = self._getinfo(temp)
                 if samRun is None:
                     samRun = temp
                     info = tempinfo
