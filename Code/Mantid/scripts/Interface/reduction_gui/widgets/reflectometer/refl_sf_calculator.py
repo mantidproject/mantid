@@ -323,9 +323,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 _incident_medium_string = (',').join(_incident_medium_list)
                 state.incident_medium_list = [_incident_medium_string]
                 
-                print 'in add_data, state.incident_medium_list'
-                print state.incident_medium_list
-                
                 state.incident_medium_index_selected = _incident_medium_index_selected
                 
                 current_item.setData(QtCore.Qt.UserRole, state)
@@ -366,8 +363,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
     
     def _angle_changed(self):
         
-        print 'inside _angle_changed'
-        
         if self._summary.angle_list.count()==0:
             return
         self._summary.angle_list.setEnabled(False)  
@@ -403,9 +398,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
     def set_editing_state(self, state):
     #    super(DataReflSFCalculatorWidget, self).set_editing_state(state)
 
-        print 'in set_editing_state, state.incident_medium_list: '
-        print state.incident_medium_list
-                
         self._summary.incident_medium_combobox.clear() 
         _incident_medium_str = str(state.incident_medium_list[0])
         
