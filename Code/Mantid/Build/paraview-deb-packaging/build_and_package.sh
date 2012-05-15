@@ -68,7 +68,7 @@ check_and_create_dir "build"
 cd build
 
 # Ensure that the PV libaries end up in lib, and not some subdirectory there of
-cmake_args="-DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DPV_INSTALL_LIB_DIR=lib"
+cmake_args="-DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DPV_INSTALL_LIB_DIR=lib -DPARAVIEW_INSTALL_THIRD_PARTY_LIBRARIES=OFF"
 
 cmake ${cmake_args} ../${PV_NAME}
 
