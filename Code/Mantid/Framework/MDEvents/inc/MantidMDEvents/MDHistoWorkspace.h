@@ -146,6 +146,12 @@ namespace MDEvents
       return m_numEvents;
     }
 
+    /** @return the direct pointer to the array of mask bits (bool). For speed/testing */
+    bool * getMaskArray()
+    {
+      return m_masks;
+    }
+
     void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);

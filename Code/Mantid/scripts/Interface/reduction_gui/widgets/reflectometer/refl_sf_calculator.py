@@ -45,7 +45,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
         
-        
         self.short_name = name
         self._settings.instrument_name = name
             
@@ -117,6 +116,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 
     def _ref_instrument_selected(self):
         self.instrument_name = "REF_L"
+                
         self._summary.center_pix_radio.hide()
         self._summary.center_pix_edit.hide()
         self._summary.angle_radio.hide()
@@ -154,8 +154,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         if (str(file_name).strip() != ''):
             self._summary.cfg_scaling_factor_file_name.setText(file_name)
             self.display_preview_config_file()
-    
-    
+        
     def display_preview_config_file(self):
         '''
         Load and display config file
@@ -290,16 +289,35 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             self._summary.data_run_number_processing.hide()
         
     def _add_data(self):
+        
+        print 'inside _add_data'
+        
         state = self.get_editing_state()
+#        state = self.get_state()
         in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         if (run_numbers == ''):
             return
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
+               
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
+
+            #loop over all the already defined states and give all of them the
+            #same tof_min, tof_max and incident_medium list and index selected
+            i=0
+            while i < self._summary.angle_list.count():
+                #print self._summary.angle_list.item(i)
+                current_item = self._summary.angle_list.item(i)
+                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+                _tof_min = self._summary.tof_min.text()
+                _tof_max = self._summary.tof_max.text()
+                state.tof_min = _tof_min
+                state.tof_max = _tof_max
+                current_item.setData(QtCore.Qt.UserRole, state)
+                i+=1
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -379,6 +397,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
         self._summary.tof_min.setText(str(state.tof_min))
         self._summary.tof_max.setText(str(state.tof_max))
+    
+        self._summary.cfg_scaling_factor_file_name.setText(str(state.sf_factor_file))
         self._summary.data_run_number_edit.setText(str(state.data_file))
         self._summary.number_of_attenuator.setText(str(state.number_attenuator))
         self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
@@ -404,9 +424,12 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #common incident medium
         m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
                                 for i in range(self._summary.incident_medium_combobox.count())]
+        
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
-
+        
         incident_medium = m.incident_medium_list[m.incident_medium_index_selected]
+
+        m.sf_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
         for i in range(self._summary.angle_list.count()):
             data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
@@ -424,11 +447,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #run number
         m.data_file = str(self._summary.data_run_number_edit.text())
         
-#        #incident medium
-#        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
-#                                  for i in range(self._summary.incident_medium_combobox.count())]
-#        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
-                
+        #incident medium
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
+                                  for i in range(self._summary.incident_medium_combobox.count())]
+        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+
         #tof
         m.tof_min = self._summary.tof_min.text()
         m.tof_max = self._summary.tof_max.text()

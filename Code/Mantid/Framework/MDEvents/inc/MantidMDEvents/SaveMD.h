@@ -58,7 +58,10 @@ namespace MDEvents
 
     /// Helper method
     template<typename MDE, size_t nd>
-    void doSave(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    /// Save the MDHistoWorkspace.
+    void doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
 
   };
 
