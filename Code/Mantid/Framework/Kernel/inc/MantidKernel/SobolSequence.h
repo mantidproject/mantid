@@ -41,7 +41,7 @@ namespace Mantid
      * Defines a generator that produces quasi-random numbers according
      * to a Sobol sequence http://en.wikipedia.org/wiki/Sobol_sequence
      */
-    class SobolSequence : public QuasiRandomNumberSequence
+    class MANTID_KERNEL_DLL SobolSequence : public QuasiRandomNumberSequence
     {
     public:
       /// Constructor taking the number of dimensions

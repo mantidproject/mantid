@@ -36,7 +36,7 @@ namespace Mantid
      * progressively covers a d-dimensional space with a set of points that are
      * uniformly distributed.
      */
-    class QuasiRandomNumberSequence : NDRandomNumberGenerator
+    class MANTID_KERNEL_DLL QuasiRandomNumberSequence : NDRandomNumberGenerator
     {
     };
   }
