@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
+#include "MantidCurveFitting/EmptyValues.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -150,7 +151,7 @@ namespace
         "(default the highest value of x)" );
       if ( m_domainType != Simple )
       {
-        declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName,0, mustBePositive->clone()),
+        declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName,1, mustBePositive->clone()),
                         "The maximum number of values per a simple domain.");
       }
     }
@@ -195,6 +196,7 @@ namespace
           seqDomain->addCreator( IDomainCreator_sptr( creator ) );
           m = k;
         }
+        ivalues.reset( new EmptyValues( n ) );
         return;
       }
       // else continue with simple domain
@@ -268,7 +270,8 @@ namespace
     auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
     if (!values)
     {
-      throw std::invalid_argument("Unsupported Function Values found in FitMW");
+      //throw std::invalid_argument("Unsupported Function Values found in FitMW");
+      return;
     }
 
     // calculate the values

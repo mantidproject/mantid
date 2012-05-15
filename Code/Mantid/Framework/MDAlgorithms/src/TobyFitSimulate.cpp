@@ -4,7 +4,6 @@
 #include "MantidMDAlgorithms/TobyFitSimulate.h"
 #include <math.h>
 
-// @todo: This needs a factory (copied from MC Absorbtion algo)
 #include "MantidKernel/MersenneTwister.h"
 
 #include <gsl/gsl_errno.h>
@@ -76,7 +75,7 @@ namespace Mantid
         {
             if(!m_sobol) {
                 for(int i=0;i<count;i++)
-                    point[i]=m_randGen->next();
+                    point[i]=m_randGen->nextValue();
             }
         }
 
@@ -87,8 +86,7 @@ namespace Mantid
         {
             if( !m_randGen )
             {
-                m_randGen = new Kernel::MersenneTwister;
-                m_randGen->setSeed(m_randSeed);
+                m_randGen = new Kernel::MersenneTwister(m_randSeed);
             }
         }   
 

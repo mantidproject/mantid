@@ -5,7 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/RandomNumberGenerator.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidGeometry/IComponent.h"
 
 namespace Mantid
@@ -126,7 +126,7 @@ namespace Mantid
       //@}      
       
       /// A pointer to the random number generator
-      Kernel::RandomNumberGenerator *m_randGen;
+      Kernel::PseudoRandomNumberGenerator *m_randGen;
     };
 
   }

@@ -1752,15 +1752,13 @@ template<typename T>
 void 
 Matrix<T>::setRandom(size_t seed,double rMin,double rMax)
 {
-    MersenneTwister rng;
-    rng.setSeed(seed);
-    rng.setRange(rMin,rMax);
+    MersenneTwister rng(seed, rMin, rMax);
 
     for(size_t i=0;i<nx;i++)
     {
         for(size_t j=0;j<ny;j++)
         {
-            V[i][j] =static_cast<T>(rng.next());
+            V[i][j] =static_cast<T>(rng.nextValue());
         }
     }
 }

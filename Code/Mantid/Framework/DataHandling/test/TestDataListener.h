@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/RandomNumberGenerator.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid
 {
@@ -34,7 +34,7 @@ namespace Mantid
 
     private:
       DataObjects::EventWorkspace_sptr m_buffer;
-      Kernel::RandomNumberGenerator * m_rand;
+      Kernel::PseudoRandomNumberGenerator * m_rand;
 
       void createEmptyWorkspace();
 

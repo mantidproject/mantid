@@ -17,7 +17,7 @@ namespace DataHandling
 
   /// Constructor
   FakeEventDataListener::FakeEventDataListener() : ILiveListener(),
-      m_buffer(), m_rand(new Kernel::MersenneTwister), m_timer(), m_callbackloop(1),
+      m_buffer(), m_rand(new Kernel::MersenneTwister(5489)), m_timer(), m_callbackloop(1),
       m_runNumber(1)
   {
     if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.datarate",m_datarate) )
@@ -125,8 +125,8 @@ namespace DataHandling
     Mutex::ScopedLock _lock(m_mutex);
     for (long i = 0; i < m_callbackloop; ++i)
     {
-      m_buffer->getEventList(0).addEventQuickly(DataObjects::TofEvent(m_rand->next()));
-      m_buffer->getEventList(1).addEventQuickly(DataObjects::TofEvent(m_rand->next()));
+      m_buffer->getEventList(0).addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
+      m_buffer->getEventList(1).addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
     }
 
     return;
