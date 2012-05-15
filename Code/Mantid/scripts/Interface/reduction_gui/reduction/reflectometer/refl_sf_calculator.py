@@ -41,6 +41,10 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         
         tof_range = [0.0,200000.0]
         incident_medium = ''
+        incident_medium_index = -1
+        
+        print 'in create_script'
+        print script_split
         
         for _line in script_split:
             if _line != '':
@@ -66,6 +70,10 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     if incident_medium.strip() == '':
                         incident_medium = _val
                     continue
+                
+                if _arg == 'Incident medium index':
+                    if incident_medium_index == -1:
+                        incident_medium_index = int(_val)
                     
                 if _arg == 'Number of attenuator':
                     attenuator.append(_val)
@@ -99,7 +107,12 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         
         new_script = algo + '(string_runs="' + script_run_attenuator + '"'
         new_script += ',list_peak_back=' + str(list_peak_back)
+        
+        #retrieve right incident medium
+        incident_medium_list = incident_medium.split(',')
+        incident_medium = incident_medium_list[incident_medium_index]
         new_script += ',incident_medium="' + incident_medium.strip() + '"'
+
         new_script += ',tof_range=' + str(tof_range) + ')'
     
         return new_script
@@ -140,6 +153,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         """        
         if HAS_MANTID:
             script = self.to_script(None)
+
+            print script
 
             try:
                 t0 = time.time()

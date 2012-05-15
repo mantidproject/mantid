@@ -37,6 +37,7 @@ class DataSets(BaseScriptElement):
         """
         script = 'Run number: %s \n' % str(self.data_file)
         script += 'Incident medium: %s \n' % str(self.incident_medium_list[self.incident_medium_index_selected])
+        script += 'Incident medium index: %s \n' % str(self.incident_medium_index_selected)
         script += 'TOF from: %s \n' % str(self.tof_min)
         script += 'TOF to: %s \n' % str(self.tof_max)
         script += 'sfConfigFile: %s \n' %str(self.sf_factor_file)
