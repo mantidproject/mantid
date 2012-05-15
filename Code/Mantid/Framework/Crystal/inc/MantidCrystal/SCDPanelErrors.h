@@ -1,10 +1,10 @@
-#ifndef MANTID_CURVEFITTING_SCDPANELERRORS_H_
-#define MANTID_CURVEFITTING_SCDPANELERRORS_H_
+#ifndef MANTID_CRYSTAL_SCDPANELERRORS_H_
+#define MANTID_CRYSTAL_SCDPANELERRORS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/DllConfig.h"
+//#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace Crystal
 {
 
   /**
@@ -24,7 +24,8 @@ namespace CurveFitting
     known lattice parameters for the sample  and an estimate of U from the UB matrix that best fits the
     given hkl's and current q positions of the peak.
 
-    <UL>The Parameters
+The Parameters
+    <UL>
        <LI>l0- the initial Flight path in units from Peak.getL1</LI>
       <LI>t0-Time offset in the same units returned with Peak.getTOF);</LI>
       <LI>f*_detWidthScale-panel Width in the same units returned with Peak.getDetPos().norm().</LI>
@@ -37,30 +38,34 @@ namespace CurveFitting
       <LI>f*_Zrot-Rotation(degrees) Panel Center in z axis direction</LI>
 
     </UL>
+
    <UL> Note that the order of rotations are z first, then y then x.</UL>
 
-    <UL> Attributes
+     Attributes
+    <UL>
       <LI>a,b,c,alpha,beta,gamma- The lattice parameters. The angles are in degrees</LI>
       <LI>PeakWorkspaceName- The name of where the PeaksWorkspace is stored in the AnalysisDataService</LI>
-      <LI>BankNames- The comma separated "list" of panel names that this IFitFunction uses. The parameters
-                      apply uniformly to every bank. That is all panels will be moved, rotated the same</LI>.
+      <LI>BankNames- The ! separated "list" of / separated panel names that this IFitFunction uses. The parameters
+                      apply uniformly to every bank in a Group(separated by !). That is all panels will be
+                      in a given group will be moved, rotated the same</LI>.
       <LI>startX - -1 is default. If a composite function is used, startX is the index in the xValues( from functionMW)
                    of the starting xvalues that this function changes.</LI>
-     <LI>endX-1 is default. If a composite function is used, endX is the index in xValues( from functionMW)
+     <LI>endX     -1 is default. If a composite function is used, endX is the index in xValues( from functionMW)
                    of the last xvalues that this function changes. This function only changes xValue between startX and
                    endX inclusive. See workspace information below</LI>.
       <LI> nGroups  The number of groups( determines and creates parameters
-                      f*_xxxx. where * is 0,1,2,3, etc.)</LI>
+                      f*_xxxx. where * is 1,2,3, etc.)</LI>
      </UL>
 
-     <UL> The workspace should be a Workspace2D where only one histogram is used.<P>
+     <UL>
+         <LI>The workspace should be a Workspace2D where only one histogram is used.<P>
           A second or third histogram may have to be around to get things to work.<P>
           Each peak from the PeaksWorkspace that is used by this function, will have 3 consecutive
           x values from the xData( these correspond to the xValues's from functionMW).  The xvalues for all three
           will be the index into the PeaksWorkspace. Their yvalues will be 0. The order is not important except when
           using this as a part of a Composite fucntion, the x value indicies associatied with this function( peaks associated
           with this function) are consecutive.  The first of the 3 x values associated with one peak correspond to the components
-          wrt xyz of the errors in the q values for this peak at the given parameters.
+          wrt xyz of the errors in the q values for this peak at the given parameters.</LI>
 
      </UL>
     @author Ruth Mikkelson, SNS ORNL
@@ -125,43 +130,7 @@ namespace CurveFitting
 
    void functionDeriv1D (API::Jacobian* out, const double *xValues, const size_t nData);
 
-   /**
-    * Copies some of the information from pmapSv to pmap
-    * @param bank_const-The component that pmap will be associated with.  These maps
-    *                   use component names, so this just give names.
-    * @param pmap    - The new map where some of the entries of pmapSv are transferred
-    * @param pmapSv  - The original ParameterMap
-    */
-   void updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
-                 boost::shared_ptr<Geometry::ParameterMap> pmap,
-                 boost::shared_ptr<const Geometry::ParameterMap>pmapSv)const;
 
-   /**
-     * Copies some of the information from pmapSv to pmap
-     * @param bank_const-The component that pmap will be associated with.  These maps
-     *                   use component names, so this just give names.
-     * @param pmap    - The new map where some of the entries of pmapSv are transferred
-     * @param pmapSv  - The original ParameterMap
-     */
-   void updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
-       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const;
-
-   /**
-    * Given the derivative of Qrot wrt to some parameter, this calculates the final derivative
-    * for the Error in Qrot, by estimating the theoretical dQrot.
-    * @param DerivQ -a 3xnpeaks matrix of derivatives of Qrot wrt to a parameter
-    *
-    * @param Mhkl  -a npeaksx3 matrix of the hkl values
-    *
-    * @param MhklT -The 3xnpeaks matrix that is the Transpoxe of Mhkl
-    *
-    * @param InvhklThkl - THE 3x3 matrix that is = inverse ( MhklT*Mhkl)
-    *
-    * @param UB          -THE 3x3 matrix that best maps the hkl values to their associated rot q values
-    *                     divide bty 2PI.
-    *
-    * @return The derivative of the Error in Qrot
-    */
    Kernel::Matrix<double> CalcDiffDerivFromdQ(  Kernel::Matrix<double>const &  DerivQ,
                                                 Kernel::Matrix<double>const &  Mhkl,
                                                 Kernel::Matrix<double>const &  MhklT,
@@ -370,4 +339,4 @@ namespace CurveFitting
 }
 }
 
-#endif /*MANTID_CURVEFITTING_SCDPANELERRORS_H_*/
+#endif /*MANTID_CRYSTAL_SCDPANELERRORS_H_*/

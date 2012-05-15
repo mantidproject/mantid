@@ -4,7 +4,8 @@
  *  Created on: Feb 27, 2012
  *      Author: ruth
  */
-#include "MantidCurveFitting/SCDPanelErrors.h"
+#include "MantidCrystal/SCDPanelErrors.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -26,7 +27,7 @@ using namespace Mantid::Kernel::Units;
 
 namespace Mantid
 {
-  namespace CurveFitting
+  namespace Crystal
   {
 
     DECLARE_FUNCTION(SCDPanelErrors)
@@ -144,47 +145,6 @@ namespace Mantid
 
     }
 
-    /**
-     * If the workspace is a Peaks workspace, all peaks in the peaks will be fit. Make sure
-     * that ALL the peaks are in the desired banks and that ALL the peaks have hkl values
-     * are within the desired distance from an integer.
-     */
-    /*  void SCDPanelErrors::setWorkspace(boost::shared_ptr<const Workspace> ws, bool copyData)
-     {
-
-     boost::shared_ptr<const PeaksWorkspace> pks1= boost::dynamic_pointer_cast<const PeaksWorkspace>(ws);
-
-     if( !pks1)
-     {
-     IFunctionMW::setWorkspace( ws, copyData);
-     return;
-     }
-
-     boost::shared_ptr<PeaksWorkspace>pks2(pks1->clone());
-     boost::shared_ptr<PeaksWorkspace>pwks;
-     pwks= pks2;
-     peaks= pks2;
-     set<string> bankNames;
-     for(int i=0; i< (int) pwks->rowCount();i++)
-     {
-     IPeak & pk =pwks->getPeak(i);
-     string namee = pk.getBankName();
-     bankNames.insert( namee );
-     }
-
-     set<string>::iterator it;
-     vector<string> Bnames;
-     for( it = bankNames.begin(); it !=bankNames.end(); it++)
-     {
-     Bnames.push_back( (*it));
-     }
-
-     DataObjects::Workspace2D_sptr  wspc= calcWorkspace( pwks,Bnames,.6);
-     IFunctionMW::setWorkspace( wspc , false);
-
-     }
-
-     */
 
 
 
@@ -269,58 +229,6 @@ namespace Mantid
     }
 
 
-   void SCDPanelErrors::updateBankParams( boost::shared_ptr<const Geometry::IComponent>  bank_const,
-                boost::shared_ptr<Geometry::ParameterMap> pmap,
-                boost::shared_ptr<const Geometry::ParameterMap>pmapSv)const
-   {
-
-       vector<V3D> posv= pmapSv->getV3D( bank_const->getName(),"pos");
-       if (!posv.empty())
-       {
-        V3D pos = posv[0];
-        pmap->addDouble(bank_const.get(), "x", pos.X());
-        pmap->addDouble(bank_const.get(), "y", pos.Y());
-        pmap->addDouble(bank_const.get(), "z", pos.Z());
-        pmap->addV3D(bank_const.get(), "pos", pos);
-       }
-
-       boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(),("rot"));
-       if( rot)
-       {
-         pmap->addQuat(bank_const.get(), "rot",rot->value<Quat>());
-       }
-
-       vector<double> scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
-       vector<double> scaley = pmapSv->getDouble(bank_const->getName(),"scaley");
-       if( !scalex.empty())
-          pmap->addDouble(bank_const.get(),"scalex", scalex[0]);
-       if( !scaley.empty())
-          pmap->addDouble(bank_const.get(),"scaley", scaley[0]);
-
-       boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
-       if( parent)
-         updateBankParams( parent, pmap, pmapSv);
-
-   }
-
-   void SCDPanelErrors::updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
-       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv) const
-    {
-      vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-      if (!posv.empty())
-      {
-        V3D pos = posv[0];
-        pmap->addDouble(bank_const.get(), "x", pos.X());
-        pmap->addDouble(bank_const.get(), "y", pos.Y());
-        pmap->addDouble(bank_const.get(), "z", pos.Z());
-        pmap->addV3D(bank_const.get(), "pos", pos);
-      }
-
-      boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), "rot");
-      if (rot)
-        pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-    }
-
 
     Instrument_sptr SCDPanelErrors::getNewInstrument(const DataObjects::Peak & peak) const
     {
@@ -377,114 +285,25 @@ namespace Mantid
         string prefix="f"+boost::lexical_cast<std::string>(group)+"_";
 
         std::vector<std::string> bankNames;
+        Quat rot= Quat(getParameter(prefix+"Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) *
+                   Quat(getParameter(prefix+"Yrot"), Kernel::V3D(0.0, 1.0, 0.0)) *
+                     Quat(getParameter(prefix+"Zrot"), Kernel::V3D(0.0, 0.0, 1.0));
 
         boost::split(bankNames, GroupBanks[group], boost::is_any_of("/"));
-      //Set new settings in the instrument
-        vector<string>::iterator it;
 
-      for (it = bankNames.begin(); it != bankNames.end(); ++it)
-      {
-        string bankNm = *it;
+        SCDCalibratePanels::FixUpBankParameterMap(  bankNames,
+                                             instChange,
+                                             V3D(getParameter(prefix+"Xoffset"),
+                                                 getParameter(prefix+"Yoffset"),
+                                                    getParameter(prefix+"Zoffset")),
+                                                rot,
+                                            getParameter( prefix+"detWidthScale"),
+                                            getParameter( prefix+"detHeightScale"),
+                                            pmapSv);
 
-        //---------------------Now get Panel-----------------------------
-
-        boost::shared_ptr<const Geometry::IComponent> bank_const =
-            instChange->getComponentByName(bankNm);
-        updateBankParams( bank_const, pmap, pmapSv);
-        if (!bank_const)
-        {
-          g_log.error() << "No component named " << bankNm << std::endl;
-          throw invalid_argument("No component named " + bankNm);
-        }
-
-        boost::shared_ptr<const Geometry::Component> bank = boost::dynamic_pointer_cast<
-            const Geometry::Component>(bank_const);
-
-        if (!bank)
-        {
-          g_log.error() << "No non const component named " << bankNm << std::endl;
-          throw invalid_argument("No nonconst component named " + bankNm);
-        }
-
-        //------------------------ Rotate Panel------------------------
-
-        Quat Rot0 = bank_const->getRelativeRot();
-
-        Quat Rot = Quat(getParameter(prefix+"Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) * Rot0;
-
-        Rot = Quat(getParameter(prefix+"Yrot"), Kernel::V3D(0.0, 1.0, 0.0)) * Rot;
-
-        Rot = Quat(getParameter(prefix+"Zrot"), Kernel::V3D(0.0, 0.0, 1.0)) * Rot;
-
-
-
-        pmap->addQuat(bank.get(), "rot", Rot);
-
-        //-------------------------Move Panel ------------------------
-
-
-        V3D pos1 = bank->getRelativePos();
-
-        pmap->addPositionCoordinate(bank.get(), string("x"), getParameter(prefix+"Xoffset") + pos1.X());
-        pmap->addPositionCoordinate(bank.get(), string("y"), getParameter(prefix+"Yoffset") + pos1.Y());
-        pmap->addPositionCoordinate(bank.get(), string("z"), getParameter(prefix+"Zoffset") + pos1.Z());
-
-        //--------------------------- Scale Panel( only for Rectangle Detectors)-------------------------------------
-
-        boost::shared_ptr<const Geometry::RectangularDetector> Rect = boost::dynamic_pointer_cast<
-            const Geometry::RectangularDetector>(bank);
-
-        Kernel::V3D scale = bank->getScaleFactor();
-        if (scale != Kernel::V3D(1.0, 1.0, 1.0))
-          pmap->addV3D(bank.get(), "sca", scale);
-
-        if (Rect)
-        {
-          double scalex = getParameter(prefix+"detWidthScale");
-          double scaley = getParameter(prefix+"detHeightScale");
-          double scalez = 1;
-          string baseName = Rect->base()->getName();
-          if (!pmapSv->getDouble(baseName, string("scalex")).empty())
-            scalex *= pmapSv->getDouble(baseName, string("scalex"))[0];
-
-          if (!pmapSv->getDouble(baseName, string("scaley")).empty())
-            scaley *= pmapSv->getDouble(baseName, string("scaley"))[0];
-
-          if (!pmapSv->getDouble(baseName, string("scalez")).empty())
-            scalez *= pmapSv->getDouble(baseName, string("scalez"))[0];
-
-          V3D RectScaleFactor = Rect->getScaleFactor();
-
-          if (RectScaleFactor.X() == 0 || RectScaleFactor.Y() == 0 || RectScaleFactor.Z() == 0)
-            RectScaleFactor = V3D(1, 1, 1);
-
-          V3D scale(scalex, scaley, 1.0);
-
-          pmap->addDouble(bank.get(), "scalex", scalex * RectScaleFactor.X());
-          pmap->addDouble(bank.get(), "scaley", scaley * RectScaleFactor.Y());
-          pmap->addDouble(bank.get(), "scalez", scalez * RectScaleFactor.Z());
-          pmap->addV3D(bank.get(), "scale", scale * RectScaleFactor);
-
-        }//if Rect
-      }//For each bank name
       }//for each group
-      //-------------------- Move source(L0)-------------------------------
-      boost::shared_ptr<const Geometry::IObjComponent> source = instChange->getSource();
-      boost::shared_ptr<const Geometry::IObjComponent> sample = instChange->getSample();
-      updateSourceParams( source, pmap, pmapSv);
-      updateSourceParams( sample, pmap, pmapSv);
 
-      //For L0 change the source position
-      Kernel::V3D sourcePos1 = source->getPos();
-      Kernel::V3D ParentPos = sourcePos1 - source->getRelativePos();
-      Kernel::V3D samplePos = sample->getPos();
-      Kernel::V3D direction = (sourcePos1 - samplePos);
-      sourcePos1 = samplePos + direction * getParameter("l0") / direction.norm();
-      Kernel::V3D sourceRelPos1 = sourcePos1 - ParentPos;
-
-      pmap->addPositionCoordinate(source.get(), string("x"), sourceRelPos1.X());
-      pmap->addPositionCoordinate(source.get(), string("y"), sourceRelPos1.Y());
-      pmap->addPositionCoordinate(source.get(), string("z"), sourceRelPos1.Z());
+      SCDCalibratePanels::FixUpSourceParameterMap( instChange, getParameter("l0"), pmapSv) ;
 
       return instChange;
     }

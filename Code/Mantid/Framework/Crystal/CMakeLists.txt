@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/SaveIsawPeaks.cpp
 	src/SaveIsawUB.cpp
 	src/SavePeaksFile.cpp
+	src/SCDPanelErrors.cpp
 	src/SCDCalibratePanels.cpp
 	src/SetGoniometer.cpp
 	src/SetUB.cpp
@@ -66,6 +67,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SavePeaksFile.h
+	inc/MantidCrystal/SCDPanelErrors.h
 	inc/MantidCrystal/SCDCalibratePanels.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetUB.h
@@ -101,6 +103,7 @@ set ( TEST_FILES
 	test/SaveIsawPeaksTest.h
 	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
+	test/SCDPanelErrorsTest.h
 	test/SCDCalibratePanelsTest.h
 	test/SetGoniometerTest.h
 	test/SetUBTest.h
