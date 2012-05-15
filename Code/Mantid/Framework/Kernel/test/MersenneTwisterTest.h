@@ -46,7 +46,7 @@ public:
     MersenneTwister randGen(1);
     randGen.setSeed(39857239);
     assertSequenceCorrectForSeed_39857239(randGen);
-    randGen.reset();
+    randGen.restart();
     assertSequenceCorrectForSeed_39857239(randGen);
   }
 

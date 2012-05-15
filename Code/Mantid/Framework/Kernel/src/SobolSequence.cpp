@@ -38,7 +38,7 @@ namespace Mantid
     /**
      * Reset state back to the start of the sequence
      */
-    void SobolSequence::reset()
+    void SobolSequence::restart()
     {
       if(m_gslGenerator)
       {

@@ -68,7 +68,7 @@ namespace Mantid
       /// Generate the next random number in the sequence within the given range, (default=[0.0,1.0]).
       virtual double nextValue();
       /// Resets the generator
-      virtual void reset();
+      virtual void restart();
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(MersenneTwister);

@@ -17,7 +17,7 @@ private:
     {
       return std::vector<double>();
     }
-    void reset()
+    void restart()
     {
     }
   };
@@ -34,7 +34,7 @@ public:
   void test_That_Reset_Does_Nothing()
   {
     FakeNDRandomNumberGenerator rand_gen;
-    TS_ASSERT_THROWS_NOTHING(rand_gen.reset());
+    TS_ASSERT_THROWS_NOTHING(rand_gen.restart());
   }
 
 };

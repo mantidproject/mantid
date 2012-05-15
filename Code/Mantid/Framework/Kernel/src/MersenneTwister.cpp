@@ -74,7 +74,7 @@ namespace Mantid
     /**
      * Resets the generator using the value given at the last call to setSeed
      */
-    void MersenneTwister::reset()
+    void MersenneTwister::restart()
     {
       setSeed(m_currentSeed);
     }

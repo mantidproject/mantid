@@ -44,6 +44,7 @@ set ( SRC_FILES
 	src/MersenneTwister.cpp
 	src/MultiFileNameParser.cpp
 	src/MultiFileValidator.cpp
+	src/NDPseudoRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
@@ -155,6 +156,7 @@ set ( INC_FILES
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/MultiFileValidator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -251,6 +253,7 @@ set ( TEST_FILES
 	test/MutexTest.h
 	test/NeutronAtomTest.h
 	test/NDRandomNumberGeneratorTest.h
+	test/NDPseudoRandomNumberGeneratorTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
 	test/ProgressTextTest.h

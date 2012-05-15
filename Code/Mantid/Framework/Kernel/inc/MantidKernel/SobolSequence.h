@@ -51,7 +51,7 @@ namespace Mantid
       /// Returns the next value in the sequence
       std::vector<double> nextPoint();
       /// Reset the sequence
-      void reset();
+      void restart();
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(SobolSequence);

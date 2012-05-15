@@ -45,8 +45,8 @@ namespace Mantid
       virtual ~NDRandomNumberGenerator() {};
       /// Generate the next set of values that form a point in ND space
       virtual std::vector<double> nextPoint() = 0;
-      /// Reset the generator
-      virtual void reset() = 0;
+      /// Resets the generator
+      virtual void restart() = 0;
     };
   }
 }
