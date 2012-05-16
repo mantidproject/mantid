@@ -168,6 +168,8 @@ public:
 #else
                 n_coordinates=0;
                 n_buf_events=0;
+                n_added_events=0;
+                UNUSED_ARG(lastNumBoxes);
 #endif       
             } // end spectra loop
       
