@@ -173,7 +173,7 @@ void WorkspaceHistory::saveNexus(::NeXus::File * file) const
   time_t now;
   time(&now);
   strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
-  file->makeGroup("MantidEnvironment", "NXNote", true);
+  file->makeGroup("MantidEnvironment", "NXnote", true);
   file->writeData("author", "mantid");
   file->openData("author");
   file->putAttr("date", std::string(buffer));
@@ -204,7 +204,7 @@ void WorkspaceHistory::saveNexus(::NeXus::File * file) const
     std::stringstream algNumber;
     algNumber << "MantidAlgorithm_" << num;
 
-    file->makeGroup(algNumber.str(), "NXNote", true);
+    file->makeGroup(algNumber.str(), "NXnote", true);
     file->writeData("author", std::string("mantid"));
     file->writeData("description", std::string("Mantid Algorithm data"));
     file->writeData("data", m_Iter->second);
@@ -285,10 +285,9 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
     std::string entryName = it->first;
     if( entryName.find("MantidAlgorithm") != std::string::npos )
     {
-      file->openGroup(entryName, "NXprocess");
+      file->openGroup(entryName, "NXnote");
       std::string rawData;
       file->readData("data", rawData);
-      file->closeData();
       file->closeGroup();
 
       // Split into separate lines
@@ -321,6 +320,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
       if( !Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time, start_timedate, tzdiff))
       {
         g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+        file->closeGroup();
         return;
       }
       //Get the duration
@@ -329,6 +329,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
       if ( dur < 0.0 )
       {
         g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+        file->closeGroup();
         return;
       }
       //Convert the timestamp to time_t to DateAndTime
@@ -362,6 +363,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
       this->addHistory(alg_hist);
     }
   }
+  file->closeGroup();
 }
 
 
