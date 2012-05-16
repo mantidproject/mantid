@@ -91,8 +91,6 @@ namespace Mantid
       /// read values and errors for spectra
       int getSpectra(MantidVec& values, MantidVec& errors, const int& spectra) const;
 
-      /// write the algorithm and environment information
-      int writeNexusProcessedProcess(const API::Workspace_const_sptr& localworkspace) const;
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
 

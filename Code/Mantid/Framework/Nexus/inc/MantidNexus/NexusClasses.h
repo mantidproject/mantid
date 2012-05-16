@@ -79,9 +79,6 @@ namespace Mantid
     /// Default block size for reading and writing processed files
     const int g_processed_blocksize = 8;
 
-    /// Formatting string for DateTime objects within the AlgorithmHistory objects
-    const std::string g_processed_datetime = std::string("%Y-%b-%d %H:%M:%S");
-
     /**  Nexus attributes. The type of each attribute is NX_CHAR
     */
     class DLLExport NXAttributes

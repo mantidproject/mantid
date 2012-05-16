@@ -71,14 +71,6 @@ namespace Mantid
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-      /// specifies the order that algorithm data is listed in workspaces' histories
-      enum AlgorithmHist
-      {
-        NAME = 0,                          //< algorithms name
-        EXEC_TIME = 1,                     //< when the algorithm was run
-        EXEC_DUR = 2,                      //< execution time for the algorithm
-        PARAMS = 3                         //< the algorithm's parameters
-      };
 
       /// Overwrites Algorithm method.
       void init();

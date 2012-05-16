@@ -6,9 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <ctime>
 #include <list>
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -78,6 +80,10 @@ public:
   /// Pretty print the entire history
   void printSelf(std::ostream&, const int indent  = 0) const;
 
+  void saveNexus(::NeXus::File * file) const;
+  void loadNexus(::NeXus::File * file);
+
+
 private:
   /// Private, unimplemented copy assignment operator
   WorkspaceHistory& operator=(const WorkspaceHistory& );
@@ -87,6 +93,9 @@ private:
   /// The algorithms which have been called on the workspace
   AlgorithmHistories m_algorithms;
   
+  /// Reference to the logger class
+  Kernel::Logger& g_log;
+
 };
 
 MANTID_API_DLL std::ostream& operator<<(std::ostream&, const WorkspaceHistory&);

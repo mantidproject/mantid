@@ -956,55 +956,55 @@ using namespace DataObjects;
   }
 
 
-  /** Write the algorithm and environment information.
-   *  @param localworkspace :: The workspace
-   *  @return 0 on success
-   */
-  int NexusFileIO::writeNexusProcessedProcess(const API::Workspace_const_sptr& localworkspace) const
-  {
-    // Write Process section
-    NXstatus status;
-    status=NXmakegroup(fileID,"process","NXprocess");
-    if(status==NX_ERROR)
-      return(2);
-    status=NXopengroup(fileID,"process","NXprocess");
-    //Mantid:API::Workspace xxx;
-    const API::WorkspaceHistory history=localworkspace->getHistory();
-    std::stringstream output,algorithmNumber;
-    EnvironmentHistory envHist;
-
-    //dump output to sting
-    output << envHist;
-    char buffer [25];
-    time_t now;
-    time(&now);
-    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
-    writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
-    typedef std::map <std::size_t,std::string> orderedHistMap;
-    orderedHistMap ordMap;
-    for(std::size_t i=0;i<history.size();i++)
-    {
-      std::stringstream algNumber,algData;
-      const API::AlgorithmHistory & entry = history.getAlgorithmHistory(i);
-      entry.printSelf(algData);
-
-      //get execute count
-      std::size_t nexecCount=entry.execCount();
-      //order by execute count
-      ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
-    }
-    int num=0;
-    std::map <std::size_t,std::string>::iterator m_Iter;
-    for (m_Iter=ordMap.begin( );m_Iter!=ordMap.end( );++m_Iter)
-    {
-      ++num;
-      std::stringstream algNumber;
-      algNumber << "MantidAlgorithm_" << num;
-      writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",m_Iter->second);
-    }
-    status=NXclosegroup(fileID);
-    return(0);
-  }
+//  /** Write the algorithm and environment information.
+//   *  @param localworkspace :: The workspace
+//   *  @return 0 on success
+//   */
+//  int NexusFileIO::writeNexusProcessedProcess(const API::Workspace_const_sptr& localworkspace) const
+//  {
+//    // Write Process section
+//    NXstatus status;
+//    status=NXmakegroup(fileID,"process","NXprocess");
+//    if(status==NX_ERROR)
+//      return(2);
+//    status=NXopengroup(fileID,"process","NXprocess");
+//    //Mantid:API::Workspace xxx;
+//    const API::WorkspaceHistory history=localworkspace->getHistory();
+//    std::stringstream output,algorithmNumber;
+//    EnvironmentHistory envHist;
+//
+//    //dump output to sting
+//    output << envHist;
+//    char buffer [25];
+//    time_t now;
+//    time(&now);
+//    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
+//    writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
+//    typedef std::map <std::size_t,std::string> orderedHistMap;
+//    orderedHistMap ordMap;
+//    for(std::size_t i=0;i<history.size();i++)
+//    {
+//      std::stringstream algNumber,algData;
+//      const API::AlgorithmHistory & entry = history.getAlgorithmHistory(i);
+//      entry.printSelf(algData);
+//
+//      //get execute count
+//      std::size_t nexecCount=entry.execCount();
+//      //order by execute count
+//      ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
+//    }
+//    int num=0;
+//    std::map <std::size_t,std::string>::iterator m_Iter;
+//    for (m_Iter=ordMap.begin( );m_Iter!=ordMap.end( );++m_Iter)
+//    {
+//      ++num;
+//      std::stringstream algNumber;
+//      algNumber << "MantidAlgorithm_" << num;
+//      writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",m_Iter->second);
+//    }
+//    status=NXclosegroup(fileID);
+//    return(0);
+//  }
 
   int NexusFileIO::findMantidWSEntries() const
   {
