@@ -33,7 +33,7 @@ class BaseRefWidget(BaseWidget):
 
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):      
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
-
+        
         self.short_name = name
         self._settings.instrument_name = name
             
@@ -146,8 +146,15 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.det_angle_offset_check)
         self.connect(self._summary.det_angle_offset_check, QtCore.SIGNAL("clicked()"), call_back)
  
+         #name of output file changed
+        call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
+
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
+
+        #scaling factor configuration file 
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
 
         # Output directory
         self._summary.outdir_edit.setText(os.path.expanduser('~'))
@@ -180,6 +187,16 @@ class BaseRefWidget(BaseWidget):
         if output_dir:
             self._summary.outdir_edit.setText(output_dir)   
         
+    def browse_config_file_name(self):
+        '''
+        Define configuration file name
+        '''
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
+        if (str(file_name).strip() != ''):
+            if os.path.isfile(file_name):
+                self._summary.cfg_scaling_factor_file_name.setText(file_name)
+#            self.display_preview_config_file()
+
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
         
@@ -226,6 +243,8 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.det_angle_offset_edit, False)
         util.set_edited(self._summary.direct_pixel_check, False)
         util.set_edited(self._summary.direct_pixel_edit, False)
+        util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
+        
     
     def _det_angle_offset_chk_changed(self):
         is_checked = self._summary.det_angle_offset_check.isChecked()

@@ -109,7 +109,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
 
-
         #data background
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel)
         self.connect(self._summary.data_background_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)

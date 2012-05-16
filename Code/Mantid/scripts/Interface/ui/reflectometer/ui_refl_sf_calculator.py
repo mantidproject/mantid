@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'refl_sf_calculator.ui'
 #
-# Created: Mon May 14 12:30:34 2012
+# Created: Wed May 16 06:09:10 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
