@@ -89,9 +89,11 @@ namespace Mantid
     void init();             // Overwrites Algorithm method.
     /// Execution code
     void exec();             // Overwrites Algorithm method
+    /// Loads one dataset
+    void loadSet(const std::string& version, const std::string& setName);
 
     ///valid datasets
-    std::vector<const char*> m_validSets;
+    std::vector<std::string> m_validSets;
     /// name and path of input file
     std::string m_filename;
 
