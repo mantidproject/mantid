@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Wed May 16 07:30:07 2012
+# Created: Wed May 16 10:19:43 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -110,11 +110,11 @@ class Ui_Frame(object):
         self.outdir_label_2.setMaximumSize(QtCore.QSize(150, 16777215))
         self.outdir_label_2.setObjectName("outdir_label_2")
         self.horizontalLayout_22.addWidget(self.outdir_label_2)
-        self.comboBox = QtGui.QComboBox(self.scrollAreaWidgetContents)
-        self.comboBox.setEditable(True)
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItem("")
-        self.horizontalLayout_22.addWidget(self.comboBox)
+        self.incident_medium_combobox = QtGui.QComboBox(self.scrollAreaWidgetContents)
+        self.incident_medium_combobox.setEditable(True)
+        self.incident_medium_combobox.setObjectName("incident_medium_combobox")
+        self.incident_medium_combobox.addItem("")
+        self.horizontalLayout_22.addWidget(self.incident_medium_combobox)
         self.verticalLayout_4.addLayout(self.horizontalLayout_22)
         self.groupBox = QtGui.QGroupBox(self.scrollAreaWidgetContents)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
@@ -1287,7 +1287,7 @@ class Ui_Frame(object):
         self.refm_radio.setText(QtGui.QApplication.translate("Frame", "Magnetic Reflectometer (REF_M)", None, QtGui.QApplication.UnicodeUTF8))
         self.refl_radio.setText(QtGui.QApplication.translate("Frame", "Liquids Reflectometer (REF_L)", None, QtGui.QApplication.UnicodeUTF8))
         self.outdir_label_2.setText(QtGui.QApplication.translate("Frame", "Incident medium", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(0, QtGui.QApplication.translate("Frame", "H20", None, QtGui.QApplication.UnicodeUTF8))
+        self.incident_medium_combobox.setItemText(0, QtGui.QApplication.translate("Frame", "H20", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Data Set", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Frame", "Run number", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Frame", "Peak selection", None, QtGui.QApplication.UnicodeUTF8))

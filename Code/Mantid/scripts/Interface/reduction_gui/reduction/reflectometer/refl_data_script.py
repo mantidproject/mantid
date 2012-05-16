@@ -44,6 +44,13 @@ class DataSets(BaseScriptElement):
     angle_offset = 0.0
     angle_offset_error = 0.0
 
+    #scaling factor file
+    scaling_factor_file = ''
+
+    #incident medium list and selected value
+    incident_medium_list = ['H2O']
+    incident_medium_index_selected = 0
+
     def __init__(self):
         super(DataSets, self).__init__()
         self.reset()
@@ -53,6 +60,8 @@ class DataSets(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
+
+        print 'entering to_script'
 
         if for_automated_reduction:
             script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
@@ -71,6 +80,7 @@ class DataSets(BaseScriptElement):
         script += "              LowResNormAxisPixelRangeFlag=%s,\n" % str(self.norm_x_range_flag)
         script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
+        script += "              IncidentMediumSelected=%s,\n" % str(self.incident_medium_list[self.incident_medium_index_selected])
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
 
@@ -78,6 +88,10 @@ class DataSets(BaseScriptElement):
         if self.angle_offset != 0.0:
             script += "              AngleOffset=%s,\n" % str(self.angle_offset)
             script += "              AngleOffsetError=%s,\n" % str(self.angle_offset_error)
+           
+        # sf configuration file
+        if self.scaling_factor_file != '':
+            script += "scaling_factor_file=%s,\n" % str(self.scaling_factor_file)   
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
@@ -86,6 +100,8 @@ class DataSets(BaseScriptElement):
         else:
             script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
+
+        print 'leaving to_script'
 
         return script
 
@@ -138,6 +154,13 @@ class DataSets(BaseScriptElement):
         xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
         xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
         
+        # scaling factor file name
+        xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
+        
+        #incident medium
+        xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
+        xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
+
         xml += "</RefLData>\n"
 
         return xml
@@ -226,6 +249,16 @@ class DataSets(BaseScriptElement):
         self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
         self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error)        
         
+        self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
+        
+        #incident medium selected
+        if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:        
+            self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
+            self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
+        else:
+            self.incident_medium_list = ['H2O']
+            self.incident_medium_index_selected = 0
+        
     def reset(self):
         """
             Reset state
@@ -257,4 +290,12 @@ class DataSets(BaseScriptElement):
         # Angle offset
         self.angle_offset = DataSets.angle_offset
         self.angle_offset_error = DataSets.angle_offset_error
+        
+        #scaling factor file
+        self.scaling_factor_file = DataSets.scaling_factor_file
+        
+        #incident medium selected
+        self.incident_medium_list = DataSets.incident_medium_list
+        self.incident_medium_index_selected = DataSets.incident_medium_index_selected
+
         

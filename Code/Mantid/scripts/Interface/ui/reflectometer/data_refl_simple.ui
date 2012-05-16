@@ -234,7 +234,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QComboBox" name="comboBox">
+                  <widget class="QComboBox" name="incident_medium_combobox">
                    <property name="editable">
                     <bool>true</bool>
                    </property>

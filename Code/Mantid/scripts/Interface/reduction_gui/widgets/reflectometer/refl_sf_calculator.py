@@ -312,7 +312,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             while i < self._summary.angle_list.count():
                 #print self._summary.angle_list.item(i)
                 current_item = self._summary.angle_list.item(i)
+                
+                print type(current_item.data(QtCore.Qt.UserRole))
+                
                 state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+               
                 _tof_min = self._summary.tof_min.text()
                 _tof_max = self._summary.tof_max.text()
                 state.tof_min = _tof_min

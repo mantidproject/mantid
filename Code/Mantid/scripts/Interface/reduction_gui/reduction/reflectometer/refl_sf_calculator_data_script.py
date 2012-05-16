@@ -11,7 +11,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class DataSets(BaseScriptElement):
 
     data_file = 0
-    incident_medium_list = ['H20']
+    incident_medium_list = ['H2O']
     incident_medium_index_selected = 0
     number_attenuator = 0
     peak_selection = [0,0]
