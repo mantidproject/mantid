@@ -35,11 +35,11 @@ using namespace Mantid::Geometry;
 
 Mantid::Kernel::Logger& RemoteTaskDockWidget::logObject=Mantid::Kernel::Logger::get("remoteTaskDockWidget");
 
-//----------------- RemoteAlgorithmTaskWidget --------------------//
+//----------------- RemoteTaskDockWidget --------------------//
 RemoteTaskDockWidget::RemoteTaskDockWidget(MantidUI *mui, ApplicationWindow *w):
 QDockWidget(w),m_mantidUI(mui)
 {
-    logObject.warning("Inside RemoteAlgorithmTaskWidget constructor");
+    logObject.warning("Inside RemoteTaskDockWidget constructor");
 
     setWindowTitle(tr("Remote Tasks"));
     setObjectName("exploreRemoteTasks"); // this is needed for QMainWindow::restoreState()
@@ -165,8 +165,8 @@ void RemoteTaskDockWidget::update()
           {
             if (e.tagName() == "server_attributes" )
                 xmlParseServerAttributes( e);
-            else if (e.tagName() == "algorithm")
-                xmlParseAlgorithm( e);
+            else if (e.tagName() == "task")
+                xmlParseTask( e);
             else
             {
                 QMessageBox msgBox;
@@ -220,7 +220,7 @@ void RemoteTaskDockWidget::clusterChoiceChanged(int index)
     if (request.url().isValid())
     {
         m_configReply = m_netManager->get(request);
-        // update() function will parse the downloaded XML file and populate the algorithm tree
+        // update() function will parse the downloaded XML file and populate the task list
         QObject::connect(m_configReply, SIGNAL(finished()), this, SLOT(update()));
     }
     else
@@ -337,7 +337,7 @@ void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement & /* elm */)
 }
 
 
-void RemoteTaskDockWidget::xmlParseAlgorithm( QDomElement &elm)
+void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
 {
 
     RemoteTask task;

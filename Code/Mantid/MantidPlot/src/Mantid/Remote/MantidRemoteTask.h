@@ -48,7 +48,7 @@ protected:
     
 
     void xmlParseServerAttributes( QDomElement &elm);
-    void xmlParseAlgorithm( QDomElement &elm);
+    void xmlParseTask( QDomElement &elm);
     
     QComboBox *m_clusterCombo;
     QListWidget *m_taskList;  // Lists the tasks that can be launched on the cluster

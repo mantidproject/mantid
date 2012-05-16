@@ -15,14 +15,14 @@ class RemoteTask
 {
 public:
     
-    RemoteTask( const std::string &algName = "", const std::string &executable = "") :
-        m_executable( executable) { setName( algName);}
+    RemoteTask( const std::string &taskName = "", const std::string &executable = "") :
+        m_executable( executable) { setName( taskName);}
     
     // At this point, the default copy constructor and assignment operator are all
     // valid and useful.  If that changes, we'll either need to explicitly implement them
     // or else declare them private.
     
-    // Getter funcs for algorithm name and executable
+    // Getter funcs for task name and executable
     const std::string & getName() const { return m_name; }
     const std::string & getExecutable() const { return m_executable; }
     
@@ -92,14 +92,14 @@ public:
         // Note: We're deliberately NOT checking m_userSuppliedParamValues.  Those
         // strings get filled in just before the job is submitted
         
-        // The only things that are really necessary are the algorithm name and the
+        // The only things that are really necessary are the task name and the
         // executable name.  (MWS also requires the the number of nodes, but other job
         // managers might not. Perhaps we create an MWSRemoteTask subclass?)
         return (m_name.length() > 0 && m_executable.length() > 0);
     }
     
 private:
-    std::string m_name;         // The name of the algorithm.  Is sent over to the cluster (which will probably
+    std::string m_name;         // The name of the task.  Is sent over to the cluster (which will probably
                                 // use it for naming the files for stdout and stderr).
     std::string m_executable;  // The name of the program to run.  Probably something like /usr/bin/mpirun...
     std::vector<std::string> m_cmdLineParams;
