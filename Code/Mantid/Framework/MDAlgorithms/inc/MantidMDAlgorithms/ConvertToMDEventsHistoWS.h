@@ -144,7 +144,7 @@ public:
                 }
                 //allCoord.insert(itc,Coord.begin(),Coord.end());
                 //std::advance(itc,n_dims);
-
+#ifndef _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
                 n_buf_events++;
                 if(n_buf_events>=buf_size){
                    pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
@@ -165,7 +165,10 @@ public:
                     }
                     pProg->report(i);
                 }
-       
+#else
+                n_coordinates=0;
+                n_buf_events=0;
+#endif       
             } // end spectra loop
       
         } // end detectors loop;

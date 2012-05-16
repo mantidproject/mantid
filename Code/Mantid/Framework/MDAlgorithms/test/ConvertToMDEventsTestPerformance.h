@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <iostream>
 
+// this preprocessor definition disables "ADD TO MD WORKSPACE" operations and should be enabled if this is necessary. (for debug purposes only!)
+#define _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
@@ -25,6 +27,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDAlgorithms::ConvertToMD;
+
 
 class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
 {
@@ -150,5 +153,6 @@ WSD(4)
 }
 
 };
-
+// undef preprocessor symbol which removes add to mdWS operation to avoid possible side effect to other code.
+#undef _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
 #endif
