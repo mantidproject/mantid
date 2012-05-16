@@ -69,7 +69,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-        src/LoadSassena.cpp
+#        src/LoadSassena.cpp
 	src/LoadSNSEventNexus.cpp
 	src/LoadSNSNexus.cpp
 	src/LoadSNSspec.cpp
@@ -186,7 +186,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
-	inc/MantidDataHandling/LoadSassena.h
+#	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSNSEventNexus.h
 	inc/MantidDataHandling/LoadSNSNexus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -361,11 +361,13 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-find_package ( HDF5 COMPONENTS HL REQUIRED )
+#find_package ( HDF5 COMPONENTS HL REQUIRED )
 
-include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
+#include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
+include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${HDF5_LIBRARIES})
+#target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${HDF5_LIBRARIES})
+target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus)
 
 if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc )
