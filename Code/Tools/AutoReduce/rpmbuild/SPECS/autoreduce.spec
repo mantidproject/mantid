@@ -1,13 +1,16 @@
 Summary: autoreduce
 Name: autoreduce
 Version: 1.1
-Release: 1 
+Release: 2 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}
 License: Unknown
 Source: autoreduce.tgz
-Requires: libNeXus.so.0()(64bit) libc.so.6()(64bit) libc.so.6(GLIBC_2.2.5)(64bit) 
+Requires: libNeXus.so.0()(64bit) libc.so.6()(64bit) libc.so.6(GLIBC_2.2.5)(64bit)
+Requires: mantid 
+Requires: mantidunstable 
+Requires: mantidnightly
 %define debug_package %{nil}
 
 

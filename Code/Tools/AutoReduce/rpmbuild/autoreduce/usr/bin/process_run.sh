@@ -85,7 +85,13 @@ echo
 
 # Reduce raw data
 echo "--------Reducing data--------"
-redCommand="python /SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
+reduce_script="/SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
+if [ ! -f $reduce_script ];
+then
+  echo "$reduce_script does not exist, exiting..."
+  exit
+fi
+redCommand="python $reduce_script"
 echo $redCommand $nexusFile $redOutDir
 echo $redCommand $nexusFile $redOutDir  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
