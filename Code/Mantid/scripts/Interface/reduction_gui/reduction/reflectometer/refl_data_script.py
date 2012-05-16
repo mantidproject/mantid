@@ -61,8 +61,6 @@ class DataSets(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
 
-        print 'entering to_script'
-
         if for_automated_reduction:
             script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
         else:
@@ -80,7 +78,11 @@ class DataSets(BaseScriptElement):
         script += "              LowResNormAxisPixelRangeFlag=%s,\n" % str(self.norm_x_range_flag)
         script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
-        script += "              IncidentMediumSelected=%s,\n" % str(self.incident_medium_list[self.incident_medium_index_selected])
+        
+        _incident_medium_str = str(self.incident_medium_list[0])
+        _list = _incident_medium_str.split(',')
+                
+        script += "              IncidentMediumSelected='%s',\n" % str(_list[self.incident_medium_index_selected])
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
 
@@ -91,7 +93,7 @@ class DataSets(BaseScriptElement):
            
         # sf configuration file
         if self.scaling_factor_file != '':
-            script += "scaling_factor_file=%s,\n" % str(self.scaling_factor_file)   
+            script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)   
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
@@ -100,8 +102,6 @@ class DataSets(BaseScriptElement):
         else:
             script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
-
-        print 'leaving to_script'
 
         return script
 
@@ -256,6 +256,7 @@ class DataSets(BaseScriptElement):
             self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
             self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         else:
+
             self.incident_medium_list = ['H2O']
             self.incident_medium_index_selected = 0
         

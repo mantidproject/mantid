@@ -633,8 +633,6 @@ class BaseRefWidget(BaseWidget):
 
     def _add_data(self):
         
-        print 'entering _add_data'
-        
         state = self.get_editing_state()
         in_list = False
         # Check whether it's already in the list
@@ -685,8 +683,6 @@ class BaseRefWidget(BaseWidget):
         
         self._reset_warnings()
 
-        print 'leaving _add_data'
-
     def _angle_changed(self):
         if self._summary.angle_list.count()==0:
             return
@@ -705,8 +701,6 @@ class BaseRefWidget(BaseWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-        
-        print 'entering set_state'
         
         self._summary.angle_list.clear()
         if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
@@ -732,16 +726,17 @@ class BaseRefWidget(BaseWidget):
 
         self._reset_warnings()
         
-        print 'leaving set_state'
-        
     def set_editing_state(self, state):
-
-        print 'entering set_editing_state'
 
         self._summary.q_min_edit.setText(str(state.q_min))
         self._summary.log_scale_chk.setChecked(state.q_step<0)
 
-        print state.q_step
+        self._summary.incident_medium_combobox.clear() 
+        _incident_medium_str = str(state.incident_medium_list[0])
+        _list = _incident_medium_str.split(',')
+        for i in range(len(_list)):
+            self._summary.incident_medium_combobox.addItem(str(_list[i]))
+        self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
 
         #Peak from/to pixels
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
@@ -798,5 +793,3 @@ class BaseRefWidget(BaseWidget):
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-
-        print 'leaving set_editing_state'

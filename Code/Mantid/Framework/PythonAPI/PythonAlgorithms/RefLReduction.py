@@ -69,6 +69,12 @@ class RefLReduction(PythonAlgorithm):
                              Description="Angle offset error (degrees)")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
+        #scaling factor file
+        self.declareProperty("ScalingFactorFile", "", 
+                             Description="Scaling Factor configuration file")
+        #incident medium
+        self.declareProperty("IncidentMediumSelected", "",
+                             Description="Incident medium used for those runs")
 
     def PyExec(self):
         
@@ -137,8 +143,9 @@ class RefLReduction(PythonAlgorithm):
         #name of the sfCalculator txt file
 #        slitsValuePrecision = 0.01       #precision of slits = 10% 
         slitsValuePrecision = sfCalculator.PRECISION
-        sfFile = '/home/j35/Desktop/RefLsf.cfg'
-        
+        sfFile = self.getProperty("ScalingFactorFile")
+        incidentMedium = self.getProperty("IncidentMediumSelected")
+                
         # Pick a good workspace n    ame
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
@@ -804,14 +811,21 @@ class RefLReduction(PythonAlgorithm):
         theta += AngleOffset_rad
 
         #this is where we need to apply the scaling factor
-        print '-> Apply SF'
-        incidentMedium = 'H2O'
-        ws_data_scaled = wks_utility.applySF(ws_data,
-                                             incidentMedium,
-                                             sfFile,
-                                             slitsValuePrecision)
-#        ws_data_scaled = ws_data   #REMOVE_ME
-
+        sfFile = self.getProperty("ScalingFactorFile")
+        incidentMedium = self.getProperty("IncidentMediumSelected")
+        if os.path.isfile(sfFile):
+            print '-> Apply automatic SF!'        
+            print '--> using SF config file: ' + sfFile
+            ws_data_scaled = wks_utility.applySF(ws_data,
+                                                 incidentMedium,
+                                                 sfFile,
+                                                 slitsValuePrecision)
+            
+        else:
+            print '-> Automatic SF not applied!'
+            print '--> unknown or no SF config file defined !'
+            ws_data_scaled = ws_data
+            
         if dMD is not None and theta is not None:
                     
             _tof_axis = mtd[ws_data].readX(0)

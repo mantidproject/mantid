@@ -412,6 +412,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         _incident_medium_str = str(state.incident_medium_list[0])
         
         _list = _incident_medium_str.split(',')
+        
         for i in range(len(_list)):
             self._summary.incident_medium_combobox.addItem(str(_list[i]))
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)

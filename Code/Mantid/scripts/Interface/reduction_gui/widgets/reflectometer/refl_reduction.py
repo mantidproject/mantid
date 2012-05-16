@@ -128,8 +128,6 @@ class DataReflWidget(BaseRefWidget):
         """
             Returns an object with the state of the interface
         """
-        print 'entering get_state'
-        
         m = self.get_editing_state()
         state = DataSeries(data_class=REFLDataSets)
         state_list = []
@@ -159,14 +157,9 @@ class DataReflWidget(BaseRefWidget):
             state_list.append(data)
         state.data_sets = state_list
         
-        print 'leaving get_state'
-
-        return state
-    
+        return state    
     
     def get_editing_state(self):
-        
-        print 'entering get_editing_state'
         
         m = REFLDataSets()
         
@@ -225,8 +218,4 @@ class DataReflWidget(BaseRefWidget):
         m.theta = float(self._summary.angle_edit.text())
         m.use_center_pixel = False
 
-        print 'leaving get_editing_state'
-
         return m
-    
-    
