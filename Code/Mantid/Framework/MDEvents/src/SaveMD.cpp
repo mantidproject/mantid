@@ -147,6 +147,9 @@ namespace MDEvents
       // Write out some general information like # of dimensions
       file->writeData("dimensions", int32_t(nd));
       file->putAttr("event_type", MDE::getTypeName());
+
+      // Save the algorithm history under "process"
+      ws->getHistory().saveNexus(file);
     }
 
     // Save each NEW ExperimentInfo to a spot in the file
@@ -455,6 +458,9 @@ namespace MDEvents
     // The base entry. Named so as to distinguish from other workspace types.
     file->makeGroup("MDHistoWorkspace", "NXentry", true);
 
+    // Save the algorithm history under "process"
+    ws->getHistory().saveNexus(file);
+
     // Save all the ExperimentInfos
     for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
     {
@@ -469,6 +475,9 @@ namespace MDEvents
         file->closeGroup();
       }
     }
+
+    // Write out some general information like # of dimensions
+    file->writeData("dimensions", int32_t(ws->getNumDims()));
 
     // Save each dimension, as their XML representation
     for (size_t d=0; d<ws->getNumDims(); d++)

@@ -276,7 +276,16 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
   };
 
 
-  file->openGroup("process", "NXprocess");
+  // Warn but continue if the group does not exist.
+  try
+  {
+    file->openGroup("process", "NXprocess");
+  }
+  catch (std::exception & )
+  {
+    g_log.warning() << "Error opening the algorithm history field 'process'. Workspace will have no history." << "\n";
+    return;
+  }
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
 

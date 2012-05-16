@@ -44,12 +44,14 @@ namespace MDEvents
         Mantid::Geometry::MDHistoDimension_sptr dimT=Mantid::Geometry::MDHistoDimension_sptr());
 
     MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
+    MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
     MDHistoWorkspace(const MDHistoWorkspace & other);
 
     virtual ~MDHistoWorkspace();
 
     void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
+    void init(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
     void cacheValues();
 
