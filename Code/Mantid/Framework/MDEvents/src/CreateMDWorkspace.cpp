@@ -186,7 +186,7 @@ namespace MDEvents
       g_log.notice() << "Running SaveMD" << std::endl;
       IAlgorithm_sptr alg = createSubAlgorithm("SaveMD");
       alg->setPropertyValue("Filename", filename);
-      alg->setProperty("InputWorkspace", out);
+      alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(out));
       alg->executeAsSubAlg();
       // And now re-load it with this file as the backing.
       g_log.notice() << "Running LoadMD" << std::endl;
@@ -196,7 +196,9 @@ namespace MDEvents
       alg->setPropertyValue("Memory", getPropertyValue("Memory"));
       alg->executeAsSubAlg();
       // Replace the workspace with the loaded, file-backed one
-      out = alg->getProperty("OutputWorkspace");
+      IMDWorkspace_sptr temp;
+      temp = alg->getProperty("OutputWorkspace");
+      out = boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
     }
 
     // Save it on the output.

@@ -714,7 +714,7 @@ namespace MDAlgorithms
     loader->setProperty("FileBackEnd", false);
     loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
     loader->executeAsSubAlg();
-    IMDEventWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
+    IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
     // Call the templated method
     CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);

@@ -210,7 +210,7 @@ namespace MDEvents
       alg->setPropertyValue("Memory", getPropertyValue("Memory"));
       alg->executeAsSubAlg();
       // Replace the workspace with the loaded, file-backed one
-      IMDEventWorkspace_sptr temp;
+      IMDWorkspace_sptr temp;
       temp = alg->getProperty("OutputWorkspace");
       outWS = boost::dynamic_pointer_cast<MDEventWorkspace<OMDE, ond> >(temp);
     }

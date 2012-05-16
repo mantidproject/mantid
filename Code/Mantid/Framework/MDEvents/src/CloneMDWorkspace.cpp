@@ -128,7 +128,7 @@ namespace MDEvents
       alg->executeAsSubAlg();
 
       // Set the output workspace to this
-      IMDEventWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+      IMDWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
       this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(outWS) );
     }
     else
