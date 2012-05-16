@@ -155,7 +155,6 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UpdateFileBackEnd", true) );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
