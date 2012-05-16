@@ -16,7 +16,8 @@ class QtMwsRemoteJobManager;    // Concrete class - Uses a Qt dialog box to ask 
 
 class RemoteJobManagerFactory;  // Knows how to create the various concrete classes
 
-class RemoteAlg;                // Holds info about a particular remote algorithm (executable name, cmd line params, etc...)
+class RemoteTask;               // Holds info about a particular remote task (executable name, cmd line params, etc...
+                                // See comments in remotetask.h)
 
 
 class RemoteJobManager
@@ -29,7 +30,7 @@ public:
     virtual ~RemoteJobManager() { }
 
     // The basic API: submit a job, abort a job and check on the status of a job
-    virtual bool submitJob( const RemoteAlg &remoteAlg, std::string &retString) = 0;
+    virtual bool submitJob( const RemoteTask &remoteTask, std::string &retString) = 0;
     virtual bool jobStatus( const std::string &jobId,
                             RemoteJob::JobStatus &retStatus,
                             std::string &errMsg) = 0;
@@ -101,7 +102,7 @@ public:
     // Returns the type of job manager it actually is (MWS, Globus, etc..)
     virtual const std::string getType() const { return "MWS"; }
 
-    virtual bool submitJob( const RemoteAlg &remoteAlg, std::string &retString);
+    virtual bool submitJob( const RemoteTask &remoteTask, std::string &retString);
     virtual bool jobStatus( const std::string &jobId,
                             RemoteJob::JobStatus &retStatus,
                             std::string &errMsg);

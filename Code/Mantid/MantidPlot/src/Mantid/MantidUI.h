@@ -33,7 +33,7 @@ class ScriptingEnv;
 class MantidMatrix;
 class MantidDockWidget;
 class AlgorithmDockWidget;
-class RemoteAlgorithmDockWidget;
+class RemoteTaskDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
 namespace MantidQt
@@ -500,7 +500,7 @@ private:
   ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
   MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
-  RemoteAlgorithmDockWidget *m_exploreRemoteAlgorithms;   // Dock window for using remote algorithms
+  RemoteTaskDockWidget *m_exploreRemoteTasks;   // Dock window for using remote tasks
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;        // Dock window to set fit function properties
 
   QAction *actionCopyRowToTable;
@@ -512,7 +512,7 @@ private:
   QAction *actionCopyColumnToGraphErr;
   QAction *actionToggleMantid;
   QAction *actionToggleAlgorithms;
-  QAction *actionToggleRemoteAlgorithms;
+  QAction *actionToggleRemoteTasks;
   QAction *actionToggleFitFunction;
   QAction *actionCopyDetectorsToTable;
   QAction *actionCopyValues;

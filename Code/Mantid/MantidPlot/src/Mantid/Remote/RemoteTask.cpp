@@ -1,4 +1,4 @@
-#include "RemoteAlg.h"
+#include "RemoteTask.h"
 
 #include <sstream>
 #include <string>
@@ -7,7 +7,7 @@ using namespace std;
 
 // sets the m_name member, replacing all whitespace with '_' chars.  (Moab, and
 // possibly other job managers, doesn't allow spaces in job names.)
-void RemoteAlg::setName( const string &name)
+void RemoteTask::setName( const string &name)
 {
   if (name.length() == 0)
     return;
@@ -26,7 +26,7 @@ void RemoteAlg::setName( const string &name)
 // Queries the user for any user-supplied params and builds up the complete
 // list of command line paramters from user's responses and the list of 'fixed'
 // parameters.  Returns it all in a single string.
-string RemoteAlg::getCmdLineParams() const
+string RemoteTask::getCmdLineParams() const
 {
 
     ostringstream params;
@@ -56,7 +56,7 @@ string RemoteAlg::getCmdLineParams() const
 
 // Retrieves the specified resource value.  Will check the user-supplied params
 // substitute the user-supplied value if required.
-string RemoteAlg::getResourceValue (const string &name) const
+string RemoteTask::getResourceValue (const string &name) const
 {
     // First, look up the value.
     // Note: We can't do this the easy way because map::operator[] is not const (see

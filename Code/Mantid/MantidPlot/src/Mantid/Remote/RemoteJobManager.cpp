@@ -1,5 +1,5 @@
 #include "RemoteJobManager.h"
-#include "RemoteAlg.h"
+#include "RemoteTask.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <Poco/Base64Encoder.h>
@@ -47,7 +47,7 @@ void MwsRemoteJobManager::saveProperties( int itemNum)
 // Returns true if the job was successfully submitted, false if there was a problem
 // retString will contain the job ID on success or an explanation of the problem on
 // failure.
-bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retString)
+bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retString)
 {
     /**************************************************************************
      * The minimal JSON text needed to submit a job looks something like this:
@@ -71,13 +71,13 @@ bool MwsRemoteJobManager::submitJob( const RemoteAlg &remoteAlg, string &retStri
     std::ostringstream json;
 
     json << "{\n ";
-    json << "\"commandFile\": \"" << remoteAlg.getExecutable() << "\",\n";
-    json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteAlg.getCmdLineParams() )<< "\",\n";
+    json << "\"commandFile\": \"" << remoteTask .getExecutable() << "\",\n";
+    json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteTask .getCmdLineParams() )<< "\",\n";
     json << "\"user\": \"" << m_userName << "\",\n";
-    json << "\"group\": \"" << remoteAlg.getResourceValue( "group") << "\",\n";
-    json << "\"name\": \"" << remoteAlg.getName() << "\",\n";
+    json << "\"group\": \"" << remoteTask .getResourceValue( "group") << "\",\n";
+    json << "\"name\": \"" << remoteTask .getName() << "\",\n";
     json << "\"requirements\": [{\n";
-    json << "\t\"requiredProcessorCountMinimum\": \"" << remoteAlg.getResourceValue("nodes") << "\"}]\n";  // don't forget the , before the \n if this is no longer the last line in the json
+    json << "\t\"requiredProcessorCountMinimum\": \"" << remoteTask .getResourceValue("nodes") << "\"}]\n";  // don't forget the , before the \n if this is no longer the last line in the json
     //json << "\"standardErrorFilePath\": \"/home/" + user + "\",\n";
     //json << "\"standardOutputFilePath\": \"/home/" + user + "\"\n";
     json << "}";

@@ -1,10 +1,10 @@
-#include "MantidRemoteAlg.h"
+#include "MantidRemoteTask.h"
 #include "JobStatusDialog.h"
 #include "../MantidDock.h"
 #include "NewClusterDialog.h"
 #include "../MantidUI.h"
 #include "RemoteJobManager.h"
-#include "RemoteAlg.h"
+#include "RemoteTask.h"
 #include "RemoteJob.h"
 #include <QtGui>
 #include <QtNetwork/QNetworkAccessManager>
@@ -33,16 +33,16 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 
-Mantid::Kernel::Logger& RemoteAlgorithmDockWidget::logObject=Mantid::Kernel::Logger::get("remoteAlgorithmDockWidget");
+Mantid::Kernel::Logger& RemoteTaskDockWidget::logObject=Mantid::Kernel::Logger::get("remoteTaskDockWidget");
 
-//----------------- RemoteAlgorithmDockWidget --------------------//
-RemoteAlgorithmDockWidget::RemoteAlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
+//----------------- RemoteAlgorithmTaskWidget --------------------//
+RemoteTaskDockWidget::RemoteTaskDockWidget(MantidUI *mui, ApplicationWindow *w):
 QDockWidget(w),m_mantidUI(mui)
 {
-    logObject.warning("Inside RemoteAlgorithmDockWidget constructor");
+    logObject.warning("Inside RemoteAlgorithmTaskWidget constructor");
 
-    setWindowTitle(tr("Remote Algorithms"));
-    setObjectName("exploreRemoteAlgorithms"); // this is needed for QMainWindow::restoreState()
+    setWindowTitle(tr("Remote Tasks"));
+    setObjectName("exploreRemoteTasks"); // this is needed for QMainWindow::restoreState()
     setMinimumHeight(150);
     setMinimumWidth(200);
     w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
@@ -53,8 +53,8 @@ QDockWidget(w),m_mantidUI(mui)
     m_clusterCombo->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     QPushButton *newCluster = new QPushButton( tr("New Cluster"), f);
     QLabel *statusLabel = new QLabel( tr(""), f);  // Status is blank until user chooses a cluster
-    m_algList = new QListWidget();
-    m_algList->setSelectionMode( QAbstractItemView::SingleSelection);
+    m_taskList = new QListWidget();
+    m_taskList->setSelectionMode( QAbstractItemView::SingleSelection);
     
     
     QPushButton *submitJob = new QPushButton( tr("Submit Job"), f);
@@ -72,12 +72,12 @@ QDockWidget(w),m_mantidUI(mui)
     vbLayout->addWidget(chooseLabel);
     vbLayout->addLayout(hbLayout);
     vbLayout->addWidget(statusLabel);
-    vbLayout->addWidget(m_algList);
+    vbLayout->addWidget(m_taskList);
     vbLayout->addLayout(hbLayoutForButtons);
     
     f->setLayout(vbLayout);
 
-    m_algList->addItem( new QListWidgetItem( tr("Update() hasn't been called yet.")));
+    m_taskList->addItem( new QListWidgetItem( tr("Update() hasn't been called yet.")));
 
     m_netManager = new QNetworkAccessManager();
 
@@ -111,7 +111,7 @@ QDockWidget(w),m_mantidUI(mui)
 
 }
 
-RemoteAlgorithmDockWidget::~RemoteAlgorithmDockWidget()
+RemoteTaskDockWidget::~RemoteTaskDockWidget()
 {
     // save the cluster info in the combo box to the user config file
     // (Replace the values in the config file with what's in the combo box.)
@@ -136,10 +136,10 @@ RemoteAlgorithmDockWidget::~RemoteAlgorithmDockWidget()
    delete m_netManager;
 }
 
-void RemoteAlgorithmDockWidget::update()
+void RemoteTaskDockWidget::update()
 {
-    m_algList->clear();
-    m_algorithmHash.clear();
+    m_taskList->clear();
+    m_taskHash.clear();
 
     if (m_configReply)
     {
@@ -190,7 +190,7 @@ void RemoteAlgorithmDockWidget::update()
 
 // Shows a dialog box for the user to enter info about a cluster.  Adds that cluster to the
 // combo box.
-void RemoteAlgorithmDockWidget::addNewCluster()
+void RemoteTaskDockWidget::addNewCluster()
 {
   NewClusterDialog *theDialog = new NewClusterDialog();
   if (theDialog->exec() == QDialog::Accepted)
@@ -210,7 +210,7 @@ void RemoteAlgorithmDockWidget::addNewCluster()
   
 }
 
-void RemoteAlgorithmDockWidget::clusterChoiceChanged(int index)
+void RemoteTaskDockWidget::clusterChoiceChanged(int index)
 {
     // connect to the cluster and download the XML config file
     QNetworkRequest request;
@@ -237,7 +237,7 @@ void RemoteAlgorithmDockWidget::clusterChoiceChanged(int index)
 
 
 // Someone clicked the "Show Jobs" button.  Pop up the dialog.
-void RemoteAlgorithmDockWidget::showJobs()
+void RemoteTaskDockWidget::showJobs()
 {
     JobStatusDialog *d = new JobStatusDialog;
     QList<RemoteJob>::iterator it = m_jobList.begin();
@@ -254,31 +254,31 @@ void RemoteAlgorithmDockWidget::showJobs()
 
 // Someone clicked the "Submit Job" button.  Pop up a dialog to grab any needed inputs
 // then hand everything over to the job manager.
-void RemoteAlgorithmDockWidget::submitJob()
+void RemoteTaskDockWidget::submitJob()
 {
     QDialog *d = new QDialog;
     
-    QListWidgetItem *selectedAlg = m_algList->currentItem();
-    d->setWindowTitle( tr("Submit Job: ") + selectedAlg->text());
+    QListWidgetItem *selectedTask = m_taskList->currentItem();
+    d->setWindowTitle( tr("Submit Job: ") + selectedTask->text());
     QDialogButtonBox *bb = new QDialogButtonBox( QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     QVBoxLayout *vbLayout = new QVBoxLayout();
     
     QString clusterName = QString::fromStdString( m_clusterList[ m_clusterCombo->currentIndex()]->getDisplayName());
     vbLayout->addWidget( new QLabel( tr( "Submit job to ") + clusterName));
     
-    RemoteAlg &alg = m_algorithmHash[ selectedAlg];
+    RemoteTask &task = m_taskHash[ selectedTask];
     QList <QLineEdit *> editList;
-    if (alg.getNumUserSuppliedParams() > 0)
+    if (task.getNumUserSuppliedParams() > 0)
     {
         // Need to add labels and text inputs to the dialog so the user can fill in
         // the necessary parameters.  If the user has already entered values (ie, from
         // a previous job), we'll pre-load the edit boxes with those values.
               
         QFormLayout *form = new QFormLayout;
-        for (unsigned i = 0; i < alg.getNumUserSuppliedParams(); i++)
+        for (unsigned i = 0; i < task.getNumUserSuppliedParams(); i++)
         {
-            QLabel *label = new QLabel( QString::fromStdString(alg.getUserSuppliedParamName( i)));
-            QLineEdit *edit = new QLineEdit( QString::fromStdString(alg.getUserSuppliedParamValue( i)));
+            QLabel *label = new QLabel( QString::fromStdString(task.getUserSuppliedParamName( i)));
+            QLineEdit *edit = new QLineEdit( QString::fromStdString(task.getUserSuppliedParamValue( i)));
             form->addRow( label, edit);
             editList.append( edit);  // save the pointers so we can access them below
         }
@@ -298,15 +298,15 @@ void RemoteAlgorithmDockWidget::submitJob()
         // First off, save the values for any user-specified params
         for (int i=0; i < editList.size(); i++)
         {
-            alg.setUserSuppliedParamValue( i, editList[i]->text().toStdString());
+            task.setUserSuppliedParamValue( i, editList[i]->text().toStdString());
         }
 
         std::string jobId;
-        if ( m_clusterList[ m_clusterCombo->currentIndex()]->submitJob( alg, jobId) == true)
+        if ( m_clusterList[ m_clusterCombo->currentIndex()]->submitJob( task, jobId) == true)
         {
             // job successfully submitted - save the job ID and pop up a message box saying
             // everything worked
-            RemoteJob theJob( jobId, m_clusterList[ m_clusterCombo->currentIndex()], RemoteJob::JOB_STATUS_UNKNOWN, alg.getName());
+            RemoteJob theJob( jobId, m_clusterList[ m_clusterCombo->currentIndex()], RemoteJob::JOB_STATUS_UNKNOWN, task.getName());
             m_jobList.append( theJob);
 
             QMessageBox msgBox;
@@ -330,18 +330,18 @@ void RemoteAlgorithmDockWidget::submitJob()
     delete d;
 }
 
-void RemoteAlgorithmDockWidget::xmlParseServerAttributes( QDomElement & /* elm */)
+void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement & /* elm */)
 {
     // We don't actually do anything with the server attributes yet...
     return;
 }
 
 
-void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
+void RemoteTaskDockWidget::xmlParseAlgorithm( QDomElement &elm)
 {
 
-    RemoteAlg alg;
-    QString algDisplayName;  // Shows up in the GUI
+    RemoteTask task;
+    QString taskDisplayName;  // Shows up in the GUI
     
     QDomNode n = elm.firstChild();
     while (!n.isNull())
@@ -351,13 +351,13 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
       {
         if (e.tagName() == "name" )
         {
-            algDisplayName = e.text();
-            alg.setName( algDisplayName.toStdString());
+            taskDisplayName = e.text();
+            task.setName( taskDisplayName.toStdString());
         }
         
         else if (e.tagName() == "executable")
         {
-            alg.setExecutable(e.text().toStdString());
+            task.setExecutable(e.text().toStdString());
         }
         
         else if (e.tagName() == "parameter_list")
@@ -370,7 +370,7 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
                 {
                     if (e2.tagName() == "parameter")
                     {
-                        alg.appendCmdLineParam(e2.text().toStdString());
+                        task.appendCmdLineParam(e2.text().toStdString());
                     }
                     else
                     {
@@ -400,7 +400,7 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
                         {
                             QString name = e2.attribute( "name");
                             QString id = e2.attribute( "id");
-                            alg.appendUserSuppliedParam( name.toStdString(), id.toStdString());
+                            task.appendUserSuppliedParam( name.toStdString(), id.toStdString());
                         }
                         else
                         {
@@ -439,7 +439,7 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
                         {
                             QString name = e2.attribute( "name");
                             QString value = e2.attribute( "value");
-                            alg.appendResource( name.toStdString(), value.toStdString());
+                            task.appendResource( name.toStdString(), value.toStdString());
                         }
                         else
                         {
@@ -476,19 +476,19 @@ void RemoteAlgorithmDockWidget::xmlParseAlgorithm( QDomElement &elm)
       n = n.nextSibling();
     }
 
-    // Add to the view and the algorithm hash table
-    if (alg.isValid())
+    // Add to the view and the task hash table
+    if (task.isValid())
     {
-        QListWidgetItem *algItem;
-        algItem = new QListWidgetItem( algDisplayName);  // algDisplayName is set at the same time as alg::m_name, so if alg is valid, so is algDisplayName...
-        m_algList->addItem( algItem);       
-        m_algorithmHash[algItem] = alg;
+        QListWidgetItem *taskItem;
+        taskItem = new QListWidgetItem( taskDisplayName);  // algDisplayName is set at the same time as alg::m_name, so if alg is valid, so is algDisplayName...
+        m_taskList->addItem( taskItem);
+        m_taskHash[taskItem] = task;
         
-        if (m_algList->count() == 1)
+        if (m_taskList->count() == 1)
         {
             // If this is the first item to be added, select it (thus ensuring
             // that there's always a selected item).
-            m_algList->setCurrentItem( algItem);
+            m_taskList->setCurrentItem( taskItem);
         }
     }
 }

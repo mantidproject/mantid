@@ -1,5 +1,9 @@
-#ifndef REMOTEALG_H
-#define REMOTEALG_H
+#ifndef REMOTETASK_H
+#define REMOTETASK_H
+
+#include <string>
+#include <vector>
+#include <map>
 
 /*
  * This class contains most of the info needed to submit a remote job (executable, command line param, etc..)
@@ -7,14 +11,11 @@
  * Notably absent is any kind of username & password info.  Presumably the GUI will ask the user for that.
  */
 
-#include <string>
-#include <vector>
-#include <map>
-class RemoteAlg
+class RemoteTask
 {
 public:
     
-    RemoteAlg( const std::string &algName = "", const std::string &executable = "") :
+    RemoteTask( const std::string &algName = "", const std::string &executable = "") :
         m_executable( executable) { setName( algName);}
     
     // At this point, the default copy constructor and assignment operator are all
@@ -93,7 +94,7 @@ public:
         
         // The only things that are really necessary are the algorithm name and the
         // executable name.  (MWS also requires the the number of nodes, but other job
-        // managers might not. Perhaps we create an MWSRemoteAlg subclass?)
+        // managers might not. Perhaps we create an MWSRemoteTask subclass?)
         return (m_name.length() > 0 && m_executable.length() > 0);
     }
     

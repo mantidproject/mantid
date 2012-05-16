@@ -1,5 +1,5 @@
-#ifndef MANTIDREMOTEALG_H
-#define MANTIDREMOTEALG_H
+#ifndef MANTIDREMOTETASK_H
+#define MANTIDREMOTETASK_H
 
 //#include "MantidAPI/ExperimentInfo.h"
 //#include "MantidAPI/IMDEventWorkspace.h"
@@ -25,16 +25,16 @@ class QNetworkAccessManager;
 class QNetworkReply;
 
 class RemoteJobManager;
-class RemoteAlg;
+class RemoteTask;
 
-// Note: This is based closely on the AlgorithmDockWidget.  It might be
-// better to have it actually inherit from that instead of QDockWidget...
-class RemoteAlgorithmDockWidget: public QDockWidget
+// Note: This supposed to look and feel like the AlgorithmDockWidget.  It doesn't have
+// enough in common with it to make inheriting from it useful, though.
+class RemoteTaskDockWidget: public QDockWidget
 {
     Q_OBJECT
 public:
-    RemoteAlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
-    ~RemoteAlgorithmDockWidget();
+    RemoteTaskDockWidget(MantidUI *mui, ApplicationWindow *w);
+    ~RemoteTaskDockWidget();
 public slots:
     void update();
     void addNewCluster();
@@ -51,15 +51,15 @@ protected:
     void xmlParseAlgorithm( QDomElement &elm);
     
     QComboBox *m_clusterCombo;
-    QListWidget *m_algList;
+    QListWidget *m_taskList;  // Lists the tasks that can be launched on the cluster
 
     QNetworkAccessManager *m_netManager;
     QNetworkReply * m_configReply;
     
     QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
     
-    // Maps item pointers from m_algList to their associated RemoteAlg objects
-    QHash <QListWidgetItem *, RemoteAlg> m_algorithmHash;
+    // Maps item pointers from m_taskList to their associated RemoteTask objects
+    QHash <QListWidgetItem *, RemoteTask> m_taskHash;
 
     // List of all the jobs we've submitted to any cluster
     QList <RemoteJob> m_jobList;

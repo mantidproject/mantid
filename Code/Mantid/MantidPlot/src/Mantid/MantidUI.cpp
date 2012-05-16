@@ -2,7 +2,7 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
-#include "Remote/MantidRemoteAlg.h"
+#include "Remote/MantidRemoteTask.h"
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
@@ -111,7 +111,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 
   m_exploreMantid = new MantidDockWidget(this,aw);
   m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
-  m_exploreRemoteAlgorithms = new RemoteAlgorithmDockWidget(this,aw);
+  m_exploreRemoteTasks = new RemoteTaskDockWidget(this,aw);
 
   actionCopyRowToTable = new QAction(this);
   actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
@@ -240,9 +240,9 @@ void MantidUI::addMenuItems(QMenu *menu)
   actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
   menu->addAction(actionToggleAlgorithms);
   
-  actionToggleRemoteAlgorithms = m_exploreRemoteAlgorithms->toggleViewAction();
-  actionToggleRemoteAlgorithms->setShortcut( tr("Ctrl+Shift+R") );
-  menu->addAction(actionToggleRemoteAlgorithms);
+  actionToggleRemoteTasks = m_exploreRemoteTasks->toggleViewAction();
+  actionToggleRemoteTasks->setShortcut( tr("Ctrl+Shift+R") );
+  menu->addAction(actionToggleRemoteTasks);
 
   if (m_fitFunction)
   {
