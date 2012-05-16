@@ -393,7 +393,7 @@ void FitDialog::saveInput()
  */
 void FitDialog::parseInput()
 {
-  int domainType = getDomainType();
+  //int domainType = getDomainType();
   storePropertyValue("DomainType",getDomainTypeString());
   getAlgorithm()->setPropertyValue("DomainType",getDomainTypeString().toStdString());
   QString funStr = m_form.function->getFunctionString();
@@ -514,13 +514,13 @@ void FitDialog::createInputWorkspaceWidgets()
   {
     // number of domains that the function expects
     size_t nd = multid->getMaxIndex();
-    for(size_t i = 1; i < nd; ++i)
+    for(int i = 1; i < static_cast<int>(nd); ++i)
     {
       QString propName = "InputWorkspace_" + QString::number(i);
-      auto t = new InputWorkspaceWidget( this, static_cast<int>(i) );
-      if ( wsNames.size() > i )
+      auto t = new InputWorkspaceWidget( this, i );
+      if ( wsNames.size() > (i) )
       {
-        tab->setWorkspaceName( wsNames[static_cast<int>(i)] );
+        tab->setWorkspaceName( wsNames[i] );
       }
       m_form.tabWidget->addTab( t, propName );
       m_tabs << t;

@@ -41,6 +41,7 @@ namespace CurveFitting
    */
   void FitMD::declareDatasetProperties(const std::string& suffix,bool addProp)
   {
+    UNUSED_ARG( addProp );
     if ( m_domainType != Simple )
     {
       m_maxSizePropertyName = "MaxSize" + suffix;
