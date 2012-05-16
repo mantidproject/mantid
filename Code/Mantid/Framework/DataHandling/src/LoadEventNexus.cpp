@@ -247,7 +247,6 @@ public:
 
     // Which detector IDs were touched?
     std::vector<bool> usedDetIds(alg->eventid_max+1, false);
-
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
     {
@@ -1098,18 +1097,32 @@ void LoadEventNexus::exec()
  */
 void LoadEventNexus::makeMapToEventLists()
 {
-  // To avoid going out of range in the vector, this is the MAX index that can go into it
-  eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) + pixelID_to_wi_offset;
-
-  // Make an array where index = pixel ID
-  // Set the value to the 0th workspace index by default
-  eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
-
-  for (size_t j=size_t(pixelID_to_wi_offset); j<pixelID_to_wi_vector.size(); j++)
+  if( this->event_id_is_spec )
   {
-    size_t wi = pixelID_to_wi_vector[j];
-    // Save a POINTER to the vector<tofEvent>
-    eventVectors[j-pixelID_to_wi_offset] = &WS->getEventList(wi).getEvents();
+    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.back()) - pixelID_to_wi_offset;
+    eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
+    for (size_t j=0; j<pixelID_to_wi_vector.size(); j++)
+    {
+      size_t wi = pixelID_to_wi_vector[j];
+      // Save a POINTER to the vector<tofEvent>
+      eventVectors[j-pixelID_to_wi_offset] = &WS->getEventList(wi).getEvents();
+    }
+  }
+  else
+  {
+    // To avoid going out of range in the vector, this is the MAX index that can go into it
+    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) + pixelID_to_wi_offset;
+    
+    // Make an array where index = pixel ID
+    // Set the value to the 0th workspace index by default
+    eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
+    
+    for (size_t j=size_t(pixelID_to_wi_offset); j<pixelID_to_wi_vector.size(); j++)
+    {
+      size_t wi = pixelID_to_wi_vector[j];
+      // Save a POINTER to the vector<tofEvent>
+      eventVectors[j-pixelID_to_wi_offset] = &WS->getEventList(wi).getEvents();
+    }
   }
 }
 
@@ -1180,8 +1193,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     std::string entry_class(it->second);
     if ( entry_class == classType )
     {
-      bankNames.push_back( entry_name );
       file.openGroup(entry_name, classType);
+      bankNames.push_back( entry_name );
       try
       {
         if (oldNeXusFileNames)
@@ -1191,9 +1204,19 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       }
       catch (::NeXus::Exception& )
       {
-        //Older files (before Nov 5, 2010) used this field.
-        file.openData("event_pixel_id");
-        oldNeXusFileNames = true;
+        // Older files (before Nov 5, 2010) used this field.
+        try
+        {
+          file.openData("event_pixel_id");
+          oldNeXusFileNames = true;
+        }
+        catch(::NeXus::Exception&)
+        {
+          // Some groups have neither indicating there are not events here
+          file.closeGroup();
+          bankNumEvents.push_back(0);
+          continue;
+        }
       }
       bankNumEvents.push_back(static_cast<std::size_t>(file.getInfo().dims[0]));
       total_events +=static_cast<std::size_t>(file.getInfo().dims[0]);
