@@ -224,6 +224,7 @@ namespace Mantid
             fit->setPropertyValue("EndX",getPropertyValue("EndX"));
             fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
             fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
+            fit->setProperty("CalcErrors",true);
             fit->execute();
             ifun = fit->getProperty("Function");
             chi2 = fit->getProperty("OutputChi2overDoF");

@@ -312,6 +312,9 @@ namespace CurveFitting
       "(default is false)." );
     declareProperty("Output", "",
       "A base name for the output workspaces (if not given default names will be created)." );
+    declareProperty("CalcErrors", false,
+      "Set to true to calcuate errors when output isn't created "
+      "(default is false)." );
   }
 
   /** Executes the algorithm
@@ -403,11 +406,6 @@ namespace CurveFitting
 
     setProperty("OutputChi2overDoF",finalCostFuncVal);
 
-    // Calculate the covariance matrix and the errors.
-    GSLMatrix covar;
-    costFunc->calCovarianceMatrix(covar);
-    costFunc->calFittingErrors(covar);
-
     // fit ended, creating output
 
     // get the workspace 
@@ -418,6 +416,19 @@ namespace CurveFitting
     if ( !baseName.empty() )
     {
       doCreateOutput = true;
+    }
+    bool doCalcErrors = getProperty("CalcErrors");
+    if ( doCreateOutput )
+    {
+      doCalcErrors = true;
+    }
+
+    GSLMatrix covar;
+    if ( doCalcErrors )
+    {
+      // Calculate the covariance matrix and the errors.
+      costFunc->calCovarianceMatrix(covar);
+      costFunc->calFittingErrors(covar);
     }
 
     if (doCreateOutput)
