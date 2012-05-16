@@ -403,6 +403,11 @@ namespace CurveFitting
 
     setProperty("OutputChi2overDoF",finalCostFuncVal);
 
+    // Calculate the covariance matrix and the errors.
+    GSLMatrix covar;
+    costFunc->calCovarianceMatrix(covar);
+    costFunc->calFittingErrors(covar);
+
     // fit ended, creating output
 
     // get the workspace 
@@ -426,11 +431,6 @@ namespace CurveFitting
         }
       }
       baseName += "_";
-
-      // Calculate the covariance matrix and the errors.
-      GSLMatrix covar;
-      costFunc->calCovarianceMatrix(covar);
-      costFunc->calFittingErrors(covar);
 
         declareProperty(
           new API::WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
