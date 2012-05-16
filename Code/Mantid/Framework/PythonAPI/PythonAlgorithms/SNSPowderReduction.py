@@ -568,6 +568,7 @@ class SNSPowderReduction(PythonAlgorithm):
         for samRun in samRuns:
             # first round of processing the sample
             if not self.getProperty("Sum"):
+                self._info = None
                 samRun = self._focusChunks(samRun, SUFFIX, filterWall, calib, filterLogs,
                                preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 workspacelist.append(str(samRun))
