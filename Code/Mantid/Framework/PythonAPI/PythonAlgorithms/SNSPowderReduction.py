@@ -231,58 +231,26 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
-    def _loadPreNeXusData(self, runnumber, extension, **chunk):
-        chunkNo = 1
-        if chunk.has_key("ChunkNumber"):
-            chunkNo = int(chunk["ChunkNumber"])
-
-        # generate the workspace name
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-        self.log().debug(filename)
-
-        name += "_%02d" % (chunkNo)
-        alg = Load(Filename=filename, OutputWorkspace=name, **chunk)
-        wksp = alg['OutputWorkspace']
-
-        return wksp
-
-    def _loadEventNeXusData(self, runnumber, extension, filterWall=None, **chunk):
-        chunkNo = 1
-        if chunk.has_key("ChunkNumber"):
-            chunkNo = int(chunk["ChunkNumber"])
-        chunk["Precount"] = True
-        if filterWall is not None:
-            if filterWall[0] > 0.:
-                chunk["FilterByTimeStart"] = filterWall[0]
-            if filterWall[1] > 0.:
-                chunk["FilterByTimeStop"] = filterWall[1]
-
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        name += "_%02d" % (chunkNo)
-        alg = Load(Filename=filename, OutputWorkspace=name, **chunk)
-        return alg.workspace()
-
-    def _loadHistoNeXusData(self, runnumber, extension):
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        name += "_%02d" % 1
-        alg = Load(Filename=filename, OutputWorkspace=name)
-        return alg.workspace()
-
     def _loadData(self, runnumber, extension, filterWall=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
+        
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+        name += "_%02d" % (int(chunk["ChunkNumber"]))        
 
         if extension.endswith("_event.nxs"):
-            return self._loadEventNeXusData(runnumber, extension, filterWall, **chunk)
+            chunk["Precount"] = True
+            if filterWall is not None:
+                if filterWall[0] > 0.:
+                    chunk["FilterByTimeStart"] = filterWall[0]
+                if filterWall[1] > 0.:
+                    chunk["FilterByTimeStop"] = filterWall[1]
         elif extension.endswith("_histo.nxs"):
-            return self._loadHistoNeXusData(runnumber, extension)
-        else:
-            return self._loadPreNeXusData(runnumber, extension, **chunk)
+            chunk = {}
+            
+        alg = Load(Filename=filename, OutputWorkspace=name, **chunk)
+        return alg.workspace()
 
     def _getStrategy(self, runnumber, extension):
         # generate the workspace name
