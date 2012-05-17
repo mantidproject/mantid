@@ -13,11 +13,11 @@ import mantidsimple
 ## List of user commands ######################################################
 def DirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
+    ReductionSingleton().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile))
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_masked_edges(1,1,1,1))
+    ReductionSingleton().set_beam_finder(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius))
 
 def SetBeamCenter(x,y):
     ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))
@@ -45,11 +45,11 @@ def SetSensitivityBeamCenter(x,y):
     
 def SensitivityDirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1).set_persistent(False))
+    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
 
 def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_masked_edges(1,1,1,1).set_persistent(False))
+    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_persistent(False))
     
 def NoSensitivityCorrection():
     ReductionSingleton().set_sensitivity_correcter(None)
@@ -127,7 +127,7 @@ def TransmissionDirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
     if ReductionSingleton().get_transmission() is None:
         raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
-    ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1).set_persistent(False))
+    ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
 
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
@@ -264,7 +264,7 @@ def BckTransmissionDirectBeamCenter(datafile):
         raise RuntimeError, "A background hasn't been defined."
     if ReductionSingleton().get_background().get_transmission_calculator() is None:
         raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
-    ReductionSingleton().get_background().get_transmission_calculator().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1).set_persistent(False))
+    ReductionSingleton().get_background().get_transmission_calculator().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
 
 
 def BckTransmissionDarkCurrent(dark_current=None):

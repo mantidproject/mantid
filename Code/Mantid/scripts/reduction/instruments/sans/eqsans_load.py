@@ -175,9 +175,9 @@ class LoadRun(ReductionStep):
 
         # Load data
         use_config_beam = False
-        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
-        if pixel_ctr_x == 0.0 and pixel_ctr_y == 0.0:
-            use_config_beam = True            
+        #[pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        #if pixel_ctr_x == 0.0 and pixel_ctr_y == 0.0:
+        #    use_config_beam = True            
             
         def _load_data_file(file_name, wks_name):
             # Check whether we are processing an event workspace or whether
@@ -192,23 +192,23 @@ class LoadRun(ReductionStep):
             l = EQSANSLoad(Filename=filepath,
                            InputWorkspace=input_ws,
                            OutputWorkspace=wks_name,
-                       UseConfigBeam=use_config_beam,
-                       BeamCenterX=pixel_ctr_x,
-                       BeamCenterY=pixel_ctr_y,
-                       UseConfigTOFCuts=self._use_config_cutoff,
-                       LowTOFCut=self._low_TOF_cut,
-                       HighTOFCut=self._high_TOF_cut,
-                       SkipTOFCorrection=self._skip_tof_correction,
-                       WavelengthStep=self._wavelength_step,
-                       UseConfigMask=self._use_config_mask,
-                       UseConfig=self._use_config,
-                       CorrectForFlightPath=self._correct_for_flight_path,
-                       SampleDetectorDistance=self._sample_det_dist,
-                       SampleDetectorDistanceOffset=self._sample_det_offset,
-                       PreserveEvents=self._keep_events,
-                       LoadMonitors=self._load_monitors,
-                       ReductionProperties=reducer.get_reduction_table_name()
-                       )            
+                           UseConfigBeam=use_config_beam,
+                           BeamCenterX=None,
+                           BeamCenterY=None,
+                           UseConfigTOFCuts=self._use_config_cutoff,
+                           LowTOFCut=self._low_TOF_cut,
+                           HighTOFCut=self._high_TOF_cut,
+                           SkipTOFCorrection=self._skip_tof_correction,
+                           WavelengthStep=self._wavelength_step,
+                           UseConfigMask=self._use_config_mask,
+                           UseConfig=self._use_config,
+                           CorrectForFlightPath=self._correct_for_flight_path,
+                           SampleDetectorDistance=self._sample_det_dist,
+                           SampleDetectorDistanceOffset=self._sample_det_offset,
+                           PreserveEvents=self._keep_events,
+                           LoadMonitors=self._load_monitors,
+                           ReductionProperties=reducer.get_reduction_table_name()
+                           )            
             return l.getPropertyValue("OutputMessage")
         
         # Check whether we have a list of files that need merging

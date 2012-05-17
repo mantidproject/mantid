@@ -127,7 +127,9 @@ void HFIRDarkCurrentSubtraction::exec()
       loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->executeAsSubAlg();
     } else {
-      loadAlg = reductionManager->getProperty("LoadAlgorithm");
+      IAlgorithm_sptr loadAlg0 = reductionManager->getProperty("LoadAlgorithm");
+      const std::string loadString = loadAlg0->toString();
+      loadAlg = Algorithm::fromString(loadString);
       loadAlg->setChild(true);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->setProperty("ReductionProperties", reductionManagerName);
