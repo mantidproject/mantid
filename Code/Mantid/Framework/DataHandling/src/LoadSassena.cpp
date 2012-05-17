@@ -145,7 +145,7 @@ void LoadSassena::exec()
   //iterate over the valid sets
   for(std::vector<std::string>::const_iterator it=this->m_validSets.begin(); it!=this->m_validSets.end(); ++it){
     setName = *it;
-    if (H5LTfind_dataset(h5file,setName.c_str())==1)
+    if(H5LTfind_dataset(h5file,setName.c_str())==1)
     {
       if(setName == "fq" || setName == "fq0" || setName == "fq2")
       /* create workspace to store the structure factor.
@@ -155,12 +155,12 @@ void LoadSassena::exec()
         DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", 2, nq, nq));
         wsName = gwsName + std::string(".") + setName;
         ws->setTitle(wsName);
-        ws->dataX(0) = qvmod;  //X-axis values are the modulus of the q vector
-        ws->dataX(1) = qvmod;
         double* buf = new double[nq*2];
         status = H5LTread_dataset_double(h5file,setName.c_str(),buf);
-        MantidVec& re = ws->dataY(0);
-        MantidVec& im = ws->dataY(1);
+        MantidVec& re = ws->dataY(0); // store the real part
+        ws->dataX(0) = qvmod;  //X-axis values are the modulus of the q vector
+        MantidVec& im = ws->dataY(1); // store the imaginary part
+        ws->dataX(1) = qvmod;
         double* curr = buf;
         for(int iq=0; iq<nq; iq++){
           re[iq]=curr[0];
@@ -168,7 +168,6 @@ void LoadSassena::exec()
           curr += 2;
         }
         delete buf;
-
         this->registerWorkspace(gws,setName,ws, "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
       }
 
@@ -176,20 +175,19 @@ void LoadSassena::exec()
       //Create one workspace to hold the real part and another to hold the imaginary part
       {
         double dt = 1.0; //time unit increment;
-        status = H5LTget_dataset_ndims( h5file, setName.c_str(), rank ); //rank = (nq,nt,2)
-        int nt = rank[1];
+        status = H5LTget_dataset_ndims( h5file, setName.c_str(), rank );
+        status = H5LTget_dataset_info( h5file, setName.c_str(), dims, &class_id, &type_size ); //dims = {nq,nt,2}
+        int nt = static_cast<int>( dims[1] ); //number of time points
         double* buf = new double[nq*nt*2];
         status = H5LTread_dataset_double(h5file,setName.c_str(),buf);
 
         DataObjects::Workspace2D_sptr wsRe = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, nt, nt));
         const std::string wsReName = gwsName + std::string(".") + setName + std::string(".Re");
         wsRe->setTitle(wsReName);
-        wsRe->getAxis(0)->setUnit("TOF");
 
         DataObjects::Workspace2D_sptr wsIm = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, nt, nt));
         const std::string wsImName = gwsName + std::string(".") + setName + std::string(".Im");
         wsIm->setTitle(wsImName);
-        wsIm->getAxis(0)->setUnit("TOF");
 
         double* curr = buf;
         for(int iq=0; iq<nq; iq++)
@@ -200,10 +198,10 @@ void LoadSassena::exec()
           MantidVec& imY = wsIm->dataY(iq);
           for(int it=0; it<nt; it++)
           {
-            reX[it] = it*dt;
-            imX[it] = it*dt;
-            reY[it] = *curr;
+            reX[it] = it*dt;  // time point for the real part
+            reY[it] = *curr;  // real part of the intermediate structure factor
             curr ++;
+            imX[it] = it*dt;
             imY[it] = *curr;
             curr ++;
           }
@@ -211,9 +209,9 @@ void LoadSassena::exec()
         delete buf;
         this->registerWorkspace(gws,wsReName,wsRe, "X-axis: time; Y-axis: real part of intermediate structure factor");
         this->registerWorkspace(gws,wsImName,wsIm, "X-axis: time; Y-axis: imaginary part of intermediate structure factor");
-      }
-    }
-  }
+      } // end of else if(setName == "fqt")
+    } // end of if(H5LTfind_dataset...
+  }// end of iterate over the valid sets
 
   this->setProperty( "OutputWorkspace", gws ); //register the groupWorkspace in the analysis data service
 
