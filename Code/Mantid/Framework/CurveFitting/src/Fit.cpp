@@ -162,7 +162,7 @@ namespace CurveFitting
     }
     else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
     {
-      creator = new FitMD(this, workspacePropertyName);
+      creator = new FitMD(this, workspacePropertyName, m_domainType);
     }
     else
     {// don't know what to do with this workspace
@@ -232,7 +232,7 @@ namespace CurveFitting
         }
         else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
         {
-          creator = new FitMD(this, workspacePropertyName);
+          creator = new FitMD(this, workspacePropertyName, m_domainType);
         }
         else
         {// don't know what to do with this workspace

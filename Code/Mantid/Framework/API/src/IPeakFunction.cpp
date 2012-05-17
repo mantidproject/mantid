@@ -59,7 +59,10 @@ IPeakFunction::IPeakFunction()
   int peakRadius;
   if ( Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",peakRadius) )
   {
-    setPeakRadius(peakRadius);
+    if ( peakRadius != s_peakRadius )
+    {
+      setPeakRadius(peakRadius);
+    }
   }
 }
 

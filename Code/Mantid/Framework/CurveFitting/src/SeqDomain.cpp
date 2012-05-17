@@ -36,9 +36,13 @@ void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, A
   if ( i >= m_creators.size() ) throw std::range_error("Function domain index is out of range.");
   if ( !m_domain || i != m_currentIndex )
   {
-    m_creators[i]->createDomain(domain, values);
+    m_domain.reset();
+    m_values.reset();
+    m_creators[i]->createDomain(m_domain, m_values);
+    m_currentIndex = i;
   }
-  m_currentIndex = 0;
+  domain = m_domain;
+  values = m_values;
 }
 
 /**

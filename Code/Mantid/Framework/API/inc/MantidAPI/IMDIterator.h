@@ -50,6 +50,7 @@ class IMDWorkspace;
   {
   public:
     IMDIterator();
+    virtual ~IMDIterator(){}
 
     void setNormalization(Mantid::API::MDNormalization normalization);
     Mantid::API::MDNormalization getNormalization() const;
