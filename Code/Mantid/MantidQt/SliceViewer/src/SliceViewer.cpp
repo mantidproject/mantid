@@ -1174,7 +1174,7 @@ QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
   for (int i=0; i < int(iterators.size()); i++)
   {
     IMDIterator * it = iterators[i];
-    QwtDoubleInterval range = this->getRange(iterators[i]);
+    QwtDoubleInterval range = this->getRange(it);
     intervals[i] = range;
     delete it;
   }
@@ -1270,6 +1270,7 @@ void SliceViewer::findRangeSlice()
 
   // Iterate through the slice
   std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS, function);
+  delete function;
   m_colorRangeSlice = getRange(iterators);
   // In case of failure, use the full range instead
   if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))

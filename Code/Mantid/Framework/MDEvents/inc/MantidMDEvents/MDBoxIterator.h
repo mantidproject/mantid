@@ -32,7 +32,7 @@ namespace MDEvents
         SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function = NULL);
     MDBoxIterator(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end);
     void init(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end);
-    ~MDBoxIterator();
+    virtual ~MDBoxIterator();
 
     /// Return a pointer to the current box pointed to by the iterator.
     MDBoxBase<MDE,nd> * getBox() const

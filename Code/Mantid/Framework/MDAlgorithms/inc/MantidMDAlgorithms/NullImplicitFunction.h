@@ -45,7 +45,7 @@ namespace Mantid
         {
         public:
             NullImplicitFunction();
-            ~NullImplicitFunction();
+            virtual ~NullImplicitFunction();
             virtual std::string getName() const;
             virtual std::string toXMLString() const;
             //----------------------MDImplicit function methods ------------

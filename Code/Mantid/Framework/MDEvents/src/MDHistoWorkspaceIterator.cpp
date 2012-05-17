@@ -18,7 +18,7 @@ namespace MDEvents
   /** Constructor
    *
    * @param workspace :: MDHistoWorkspace_sptr being iterated
-   * @param function :: The implicit function to use
+   * @param function :: The implicit function to use. Becomes owned by this object.
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function,
@@ -31,7 +31,7 @@ namespace MDEvents
   /** Constructor
    *
    * @param workspace :: MDHistoWorkspace_sptr being iterated
-   * @param function :: The implicit function to use
+   * @param function :: The implicit function to use. Becomes owned by this object.
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
@@ -44,7 +44,7 @@ namespace MDEvents
   /** Constructor
    *
    * @param workspace :: MDHistoWorkspace_sptr being iterated
-   * @param function :: The implicit function to use
+   * @param function :: The implicit function to use. Becomes owned by this object.
    * @param skippingPolicy :: The skipping policy to use
    * @return
    */
@@ -58,7 +58,7 @@ namespace MDEvents
   /** Constructor
    *
    * @param workspace :: MDHistoWorkspace_sptr being iterated
-   * @param function :: The implicit function to use
+   * @param function :: The implicit function to use. Becomes owned by this object.
    * @param skippingPolicy :: The skipping policy to use
    * @return
    */
@@ -139,6 +139,7 @@ namespace MDEvents
     delete [] m_indexMax;
 
     if (m_function) delete m_function;
+    m_function = NULL;
   }
   
 

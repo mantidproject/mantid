@@ -387,7 +387,7 @@ namespace MDEvents
   /** Create IMDIterators from this MDHistoWorkspace
    *
    * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
-   * @param function :: implicit function to limit range
+   * @param function :: implicit function to limit range. NOT owned by this method call.
    * @return MDHistoWorkspaceIterator vector
    */
   std::vector<Mantid::API::IMDIterator*> MDHistoWorkspace::createIterators(size_t suggestedNumCores,
@@ -407,7 +407,13 @@ namespace MDEvents
       size_t end = ((i+1) * numElements) / numCores;
       if (end > numElements)
         end = numElements;
-      out.push_back(new MDHistoWorkspaceIterator(this, function, begin, end));
+
+      // Clone the MDImplicitFunction if necessary.
+      Mantid::Geometry::MDImplicitFunction * clonedFunction = function;
+      if (function)
+        clonedFunction = new Mantid::Geometry::MDImplicitFunction(*function);
+
+      out.push_back(new MDHistoWorkspaceIterator(this, clonedFunction, begin, end));
     }
     return out;
   }
