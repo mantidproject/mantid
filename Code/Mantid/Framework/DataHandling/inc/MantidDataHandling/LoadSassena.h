@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -81,6 +82,10 @@ namespace Mantid
      * @return a confidence level indicator between 0 and 100
      */
     int fileCheck(const std::string& filePath);
+
+  protected:
+    /// Add a workspace to the group and register in the analysis data service
+    void registerWorkspace(API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &description);
 
   private:
     /// Sets documentation strings for this algorithm
