@@ -290,21 +290,18 @@ class SNSPowderReduction(PythonAlgorithm):
         strategy = []
         if HAVE_MPI:
             comm = mpi.world
-            if self._chunks > 0 and not "histo" in extension and comm.size > 1:
-                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-                for row in Chunks: 
-                    if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
-                        strategy.append(row)
-            elif comm.size > 1:
-                strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
+            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+            # What about no chunks for parallel?
+            if len(Chunks) == 1:
+            	strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
             else:
-                strategy.append({})
+            	for row in Chunks:
+			 if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
+				 strategy.append(row)
+
         else:
-            if self._chunks > 0 and not "histo" in extension:
-                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-                for row in Chunks: strategy.append(row)
-            else:
-                strategy.append({})
+            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+            for row in Chunks: strategy.append(row)
 
         return strategy
 
@@ -335,10 +332,10 @@ class SNSPowderReduction(PythonAlgorithm):
         if HAVE_MPI and len(strategy) > 1:
             alg = GatherWorkspaces(InputWorkspace=wksp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
             wksp = alg['OutputWorkspace']
-        if self._chunks > 0 and not "histo" in extension:
+        if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
-            mtd.deleteWorkspace('Chunks')
+        mtd.deleteWorkspace('Chunks')
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if normByCurrent:
