@@ -256,7 +256,6 @@ class DataSets(BaseScriptElement):
             self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
             self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         else:
-
             self.incident_medium_list = ['H2O']
             self.incident_medium_index_selected = 0
         
