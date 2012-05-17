@@ -284,6 +284,10 @@ namespace Mantid
         // MDHistoWorkspace case.
         this->loadHisto();
       }
+      if(!fileBacked)
+      {
+        delete file;
+      }
     }
 
 
@@ -327,6 +331,8 @@ namespace Mantid
       this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws, ::NeXus::FLOAT64);
       this->loadSlab("num_events", ws->getNumEventsArray(), ws, ::NeXus::FLOAT64);
       this->loadSlab("mask", ws->getMaskArray(), ws, ::NeXus::INT8);
+
+      file->close();
 
       // Save to output
       setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
