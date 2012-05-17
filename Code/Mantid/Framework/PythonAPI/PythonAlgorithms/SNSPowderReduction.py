@@ -237,7 +237,8 @@ class SNSPowderReduction(PythonAlgorithm):
         
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
-        name += "_%02d" % (int(chunk["ChunkNumber"]))        
+        if (len(chunk) > 1):
+            name += "_%02d" % (int(chunk["ChunkNumber"]))        
 
         if extension.endswith("_event.nxs"):
             chunk["Precount"] = True
