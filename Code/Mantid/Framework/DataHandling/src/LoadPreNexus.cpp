@@ -100,15 +100,13 @@ namespace DataHandling
     UNUSED_ARG(header);
 
     std::string ext = extension(filePath);
-    return (ext.rfind("_runinfo.xml") != std::string::npos);
+    return (filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0);
   }
 
   /// @copydoc Mantid::API::IDataFileChecker::fileCheck
   int LoadPreNexus::fileCheck(const std::string& filePath)
   {
-    std::string ext = extension(filePath);
-
-    if (ext.rfind("_runinfo.xml") != std::string::npos)
+    if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
       return 80;
     else
       return 0;

@@ -242,7 +242,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.log().debug(filename)
 
         name += "_%02d" % (chunkNo)
-        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **chunk)
+        alg = Load(Filename=filename, OutputWorkspace=name, **chunk)
         wksp = alg['OutputWorkspace']
 
         return wksp
@@ -262,7 +262,7 @@ class SNSPowderReduction(PythonAlgorithm):
         filename = name + extension
 
         name += "_%02d" % (chunkNo)
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **chunk)
+        alg = Load(Filename=filename, OutputWorkspace=name, **chunk)
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
@@ -270,7 +270,7 @@ class SNSPowderReduction(PythonAlgorithm):
         filename = name + extension
 
         name += "_%02d" % 1
-        alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
+        alg = Load(Filename=filename, OutputWorkspace=name)
         return alg.workspace()
 
     def _loadData(self, runnumber, extension, filterWall=None, **chunk):
