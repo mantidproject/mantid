@@ -12,9 +12,6 @@ set ( SRC_FILES
        src/RangeHandler.cpp
        src/ImageDataSource.cpp  
        src/IVConnections.cpp 
-       src/TestDataSource.cpp
-       src/EventWSDataSource.cpp
-       src/EventWSImageView.cpp
        src/MatrixWSDataSource.cpp
        src/MatrixWSImageView.cpp
        src/ArrayDataSource.cpp
@@ -25,7 +22,6 @@ set ( INC_FILES
        inc/MantidQtImageViewer/ColorMaps.h
        inc/MantidQtImageViewer/ImageDisplay.h
        inc/MantidQtImageViewer/IVConnections.h
-       inc/MantidQtImageViewer/TestDataSource.h
        inc/MantidQtImageViewer/DataArray.h
        inc/MantidQtImageViewer/ImagePlotItem.h
        inc/MantidQtImageViewer/IVUtils.h
@@ -36,9 +32,6 @@ set ( INC_FILES
        inc/MantidQtImageViewer/ImageDataSource.h
        inc/MantidQtImageViewer/SliderHandler.h
        inc/MantidQtImageViewer/RangeHandler.h
-       inc/MantidQtImageViewer/TestDataSource.h
-       inc/MantidQtImageViewer/EventWSDataSource.h
-       inc/MantidQtImageViewer/EventWSImageView.h
        inc/MantidQtImageViewer/MatrixWSDataSource.h
        inc/MantidQtImageViewer/MatrixWSImageView.h
        inc/MantidQtImageViewer/ArrayDataSource.h
