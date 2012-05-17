@@ -166,8 +166,14 @@ void GraphDisplay::SetPointedAtPoint( QPoint point )
   double x = graph_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = graph_plot->invTransform( QwtPlot::yLeft, point.y() );
 
-  data_source->RestrictX( x );
-  data_source->RestrictY( y );
+  if ( is_vertical )             // x can be anywhere on graph, y must be
+  {                              // a valid data source position, vertically
+    data_source->RestrictY( y );
+  }
+  else                           // y can be anywhere on graph, x must be
+  {                              // a valid data source position, horizontally
+    data_source->RestrictX( x );
+  }
 
   ShowInfoList( x, y );
 }
