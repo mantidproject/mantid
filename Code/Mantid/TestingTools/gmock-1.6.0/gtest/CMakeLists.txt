@@ -67,13 +67,11 @@ link_directories(${gtest_BINARY_DIR}/src)
 # Google Test libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
-<<<<<<< HEAD
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set ( cxx_strict "/MD ${cxx_strict}")
 endif()
-=======
-set ( cxx_strict "/MD ${cxx_strict}")
->>>>>>> c29f2b9... refs #5345. prototype on win64
+
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
 #cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 #target_link_libraries(gtest_main gtest)
