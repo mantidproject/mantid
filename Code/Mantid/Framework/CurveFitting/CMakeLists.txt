@@ -48,7 +48,7 @@ set ( SRC_FILES
 	src/Quadratic.cpp
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
-	src/SCDPanelErrors.cpp
+#	src/SCDPanelErrors.cpp
 	src/SeqDomain.cpp
 	src/StaticKuboToyabe.cpp
 	src/SimplexMinimizer.cpp
@@ -81,6 +81,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DllConfig.h
+	inc/MantidCurveFitting/EmptyValues.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
@@ -120,7 +121,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
-	inc/MantidCurveFitting/SCDPanelErrors.h
+#	inc/MantidCurveFitting/SCDPanelErrors.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -141,7 +142,7 @@ set ( TEST_FILES
 	test/FlatBackgroundTest.h
 	test/GausOscTest.h
 	test/MuonFInteractionTest.h
-	test/SCDPanelErrorsTest.h
+	#test/SCDPanelErrorsTest.h
 	test/StaticKuboToyabeTest.h
 	test/StretchExpMuonTest.h
 	test/BFGSTest.h

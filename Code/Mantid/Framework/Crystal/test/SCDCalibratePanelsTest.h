@@ -90,18 +90,18 @@ public:
      TS_ASSERT_DELTA(0.998187,Results->cell<double>(2,1),.01);
      TS_ASSERT_DELTA(-0.416479,Results->cell<double>(9,1),.01);
      TS_ASSERT_DELTA(-0.298888,Results->cell<double>(8,1),.01);
-     TS_ASSERT_DELTA(10.1843,Results->cell<double>(17,1),.01);
+     TS_ASSERT_DELTA(0.212273,Results->cell<double>(17,1),.01);
 
- /* for( int i=0; i<(int)Results->rowCount(); i++)
+     /* for( int i=0; i<(int)Results->rowCount(); i++)
      {
 
        std::cout<<"row "<<i<<"="<<Results->cell<double>(i,1)<<std::endl;
      }
-row 0=0.000433048  row 1=-4.99949  row 2=0.998187 row 3=1.00001  row 4=1.07244e-07
+row 0=18.0095  row 1=-4.99949  row 2=0.998187 row 3=1.00001  row 4=1.07244e-07
 row 5=-0.000569398 row 6=-0.000179413  row 7=-0.103256  row 8=-0.298888
-row 9=-0.416479  row 10=0  row 11=123.147  row 12=13.8142  row 13=13.8264
-row 14=4.53658  row 15=1.69236 row 16=3.34122  row 17=10.1843  row 18=15.5436 row 19=53.7939
-
+row 9=-0.416479 row 10=0.129725 row 11=2.56685 row 12=0.287941 row 13=0.288195
+row 14=0.0945599 row 15=0.0352754 row 16=0.0696436 row 17=0.212273 row 18=0.323982
+row 19=1.12121
 */
    }
 

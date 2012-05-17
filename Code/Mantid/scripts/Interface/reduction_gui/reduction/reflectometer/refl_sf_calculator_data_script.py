@@ -11,7 +11,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class DataSets(BaseScriptElement):
 
     data_file = 0
-    incident_medium_list = ['H20']
+    incident_medium_list = ['H2O']
     incident_medium_index_selected = 0
     number_attenuator = 0
     peak_selection = [0,0]
@@ -21,7 +21,7 @@ class DataSets(BaseScriptElement):
     s2h = 'N/A'
     s1w = 'N/A'
     s2w = 'N/A'
-    scaling_factor_file = 'N/A'
+    scaling_factor_file = ''
     tof_min = 0.
     tof_max = 200000.
 
@@ -36,8 +36,10 @@ class DataSets(BaseScriptElement):
         """
         script = 'Run number: %s \n' % str(self.data_file)
         script += 'Incident medium: %s \n' % str(self.incident_medium_list[self.incident_medium_index_selected])
+        script += 'Incident medium index: %s \n' % str(self.incident_medium_index_selected)
         script += 'TOF from: %s \n' % str(self.tof_min)
         script += 'TOF to: %s \n' % str(self.tof_max)
+        script += 'Scaling factor file: %s \n' %str(self.scaling_factor_file)
         script += 'Number of attenuator: %s \n' % str(self.number_attenuator)
         script += 'Peak from pixel: %s \n' % str(self.peak_selection[0])
         script += 'Peak to pixel: %s \n' % str(self.peak_selection[1])
@@ -57,7 +59,8 @@ class DataSets(BaseScriptElement):
             Create XML from the current data.
         """
         xml  = "<RefLSFCalculator>\n"
-        xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
+#        xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
+        xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<tof_min>%s</tof_min>\n" % str(self.tof_min)
         xml += "<tof_max>%s</tof_max>\n" % str(self.tof_max)
         xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
@@ -90,12 +93,12 @@ class DataSets(BaseScriptElement):
             @param xml_str: text to read the data from
         """   
         #incident medium
-        self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
+        self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")        
         self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         
         self.tof_min = BaseScriptElement.getFloatElement(instrument_dom, "tof_min")
         self.tof_max = BaseScriptElement.getFloatElement(instrument_dom, "tof_max")
-        
+                
         #run number
         self.data_file = BaseScriptElement.getIntElement(instrument_dom, "data_file")
         
@@ -138,5 +141,6 @@ class DataSets(BaseScriptElement):
         self.s1w = DataSets.s1w
         self.s2w = DataSets.s2w 
         self.tof_min = DataSets.tof_min
-        self.tof_max = DataSets.tof_max    
+        self.tof_max = DataSets.tof_max   
+        self.scaling_factor_file = DataSets.scaling_factor_file 
         

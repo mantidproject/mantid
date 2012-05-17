@@ -1,7 +1,6 @@
 from MantidFramework import *
 from mantidsimple import *
-from numpy import zeros
-from pylab import *
+from numpy import zeros, unique, arange, sqrt
 import os.path
 
 PRECISION = 0.010
@@ -913,7 +912,7 @@ def calculate(string_runs=None,
 #        output_ext = '.txt'
 #        output_file = output_path + '/' + output_pre + output_ext        
         
-        if output_file_name is None:
+        if (output_file_name is None) or (output_file_name == ''):
             output_file_name = "/home/j35/Desktop/RefLsf.cfg"
         
         outputFittingParameters(a, b, error_a, error_b, 

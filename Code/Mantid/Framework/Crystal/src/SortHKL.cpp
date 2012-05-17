@@ -205,16 +205,21 @@ namespace Crystal
   }
   void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& sig2)
   {
-      Statistics stats = getStatistics(data);
-      if(stats.standard_deviation == 0.)return;
-      for (int i = static_cast<int>(data.size())-1; i>=0; i--)
+      std::vector<double> Zscore = getZscore(data);
+      std::vector<size_t> banned;
+      for (size_t i = 0; i < data.size(); ++i)
       {
-        double zscore = std::fabs((data[i] - stats.mean) / stats.standard_deviation);
-        if (zscore > 3.0)
+        if (Zscore[i] > 3.0)
         {
-          data.erase(data.begin()+i);
-          sig2.erase(sig2.begin()+i);
+          banned.push_back(i);
+          continue;
         }
+      }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
+          data.erase(data.begin() + (*it));
+          sig2.erase(sig2.begin() + (*it));
       }
   }
   V3D SortHKL::round(V3D hkl)

@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/RandomNumberGenerator.h"
 
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"

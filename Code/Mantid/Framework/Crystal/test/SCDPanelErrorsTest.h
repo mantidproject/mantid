@@ -10,12 +10,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-//#include "MantidCurveFitting/SCDPanelErrors.h"
+#include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidCurveFitting/SCDPanelErrors.h"
+#include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -80,12 +80,12 @@ public:
     AnalysisDataService::Instance().remove("TOPAZ_3007");
 
     std::string ComponentName("bank26");
-    CurveFitting::SCDPanelErrors calib(Peakws, ComponentName, 14.0, 19.3, 8.6, 90., 105., 90., .12);
+    Crystal::SCDPanelErrors calib(Peakws, ComponentName, 14.0, 19.3, 8.6, 90., 105., 90., .12);
     calib.setAttribute("NGroups", IFunction::Attribute(1));
     std::vector<std::string> banks;
     banks.push_back(std::string("bank26"));
 
-    DataObjects::Workspace2D_sptr ws = SCDPanelErrors::calcWorkspace(Peakws, banks, .12);
+    DataObjects::Workspace2D_sptr ws = Crystal::SCDPanelErrors::calcWorkspace(Peakws, banks, .12);
     calib.setWorkspace(ws);
 
     const int N = (int) ws->dataX(0).size();

@@ -157,14 +157,21 @@ class DataReflWidget(BaseRefWidget):
             state_list.append(data)
         state.data_sets = state_list
         
-        return state
+        return state    
     
     def get_editing_state(self):
+        
         m = REFLDataSets()
         
         #Peak from/to pixels
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())] 
+        
+        #incident medium
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
+                                  for i in range(self._summary.incident_medium_combobox.count())]
+        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+        
         
         m.data_x_range = [int(self._summary.x_min_edit.text()),
                      int(self._summary.x_max_edit.text())]

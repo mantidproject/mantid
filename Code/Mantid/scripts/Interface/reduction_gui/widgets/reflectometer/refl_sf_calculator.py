@@ -45,7 +45,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
         
-        
         self.short_name = name
         self._settings.instrument_name = name
             
@@ -87,6 +86,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.cfg_scaling_factor_file_name_refresh, QtCore.SIGNAL("clicked()"), self.display_preview_config_file)
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
         
         #Catch edited controls        
         #Incident medium (selection or text changed)
@@ -105,6 +105,9 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_to_pixel)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        #name of output file changed
+        call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
 
         #data background
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel)
@@ -116,6 +119,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 
     def _ref_instrument_selected(self):
         self.instrument_name = "REF_L"
+                
         self._summary.center_pix_radio.hide()
         self._summary.center_pix_edit.hide()
         self._summary.angle_radio.hide()
@@ -145,6 +149,15 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #TODO: allow log binning
         self._summary.log_scale_chk.hide()
                  
+    def browse_config_file_name(self):
+        '''
+        Define configuration file name
+        '''
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select config file name", "", "(*.cfg)")
+        if (str(file_name).strip() != ''):
+            self._summary.cfg_scaling_factor_file_name.setText(file_name)
+            self.display_preview_config_file()
+        
     def display_preview_config_file(self):
         '''
         Load and display config file
@@ -279,16 +292,50 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             self._summary.data_run_number_processing.hide()
         
     def _add_data(self):
+        
         state = self.get_editing_state()
+#        state = self.get_state()
         in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         if (run_numbers == ''):
             return
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
+               
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
+
+            #loop over all the already defined states and give all of them the
+            #same tof_min, tof_max and incident_medium list and index selected
+            i=0
+            while i < self._summary.angle_list.count():
+                #print self._summary.angle_list.item(i)
+                current_item = self._summary.angle_list.item(i)
+                
+                print type(current_item.data(QtCore.Qt.UserRole))
+                
+                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+               
+                _tof_min = self._summary.tof_min.text()
+                _tof_max = self._summary.tof_max.text()
+                state.tof_min = _tof_min
+                state.tof_max = _tof_max
+
+                state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+                
+                #incident medium
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
+                                          for j in range(self._summary.incident_medium_combobox.count())]
+                _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+                
+                _incident_medium_string = (',').join(_incident_medium_list)
+                state.incident_medium_list = [_incident_medium_string]
+                
+                state.incident_medium_index_selected = _incident_medium_index_selected
+                
+                current_item.setData(QtCore.Qt.UserRole, state)
+                i+=1
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -322,8 +369,10 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         util.set_edited(self._summary.data_peak_to_pixel, False)
         util.set_edited(self._summary.data_background_from_pixel, False)
         util.set_edited(self._summary.data_background_to_pixel, False)
+        util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
     
     def _angle_changed(self):
+        
         if self._summary.angle_list.count()==0:
             return
         self._summary.angle_list.setEnabled(False)  
@@ -358,16 +407,20 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
 
     def set_editing_state(self, state):
     #    super(DataReflSFCalculatorWidget, self).set_editing_state(state)
-                
-        self._summary.incident_medium_combobox.clear() 
 
+        self._summary.incident_medium_combobox.clear() 
         _incident_medium_str = str(state.incident_medium_list[0])
+        
         _list = _incident_medium_str.split(',')
+        
         for i in range(len(_list)):
             self._summary.incident_medium_combobox.addItem(str(_list[i]))
         self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
+        
         self._summary.tof_min.setText(str(state.tof_min))
         self._summary.tof_max.setText(str(state.tof_max))
+    
+        self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
         self._summary.data_run_number_edit.setText(str(state.data_file))
         self._summary.number_of_attenuator.setText(str(state.number_attenuator))
         self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
@@ -393,9 +446,12 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #common incident medium
         m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
                                 for i in range(self._summary.incident_medium_combobox.count())]
+        
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
-
+        
         incident_medium = m.incident_medium_list[m.incident_medium_index_selected]
+
+        m.sf_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
         for i in range(self._summary.angle_list.count()):
             data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
@@ -413,11 +469,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         #run number
         m.data_file = str(self._summary.data_run_number_edit.text())
         
-#        #incident medium
-#        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
-#                                  for i in range(self._summary.incident_medium_combobox.count())]
-#        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
-                
+        #incident medium
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i) 
+                                  for i in range(self._summary.incident_medium_combobox.count())]
+        m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+
         #tof
         m.tof_min = self._summary.tof_min.text()
         m.tof_max = self._summary.tof_max.text()

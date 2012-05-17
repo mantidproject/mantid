@@ -52,6 +52,17 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Constructor given a vector of dimensions
+   * @param dimensions :: vector of MDHistoDimension; no limit to how many.
+   */
+  MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions)
+  : IMDHistoWorkspace(),
+    numDimensions(0)
+  {
+    this->init(dimensions);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Copy constructor
    *
    * @param other :: MDHistoWorkspace to copy from.
@@ -101,8 +112,18 @@ namespace MDEvents
   void MDHistoWorkspace::init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
   {
     std::vector<IMDDimension_sptr> dim2;
-    for (size_t i=0; i<dimensions.size(); i++) dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
-    MDGeometry::initGeometry(dim2);
+    for (size_t i=0; i<dimensions.size(); i++)
+      dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
+    this->init(dim2);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor helper method
+   * @param dimensions :: vector of IMDDimension; no limit to how many.
+   */
+  void MDHistoWorkspace::init(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions)
+  {
+    MDGeometry::initGeometry(dimensions);
     this->cacheValues();
 
     // Allocate the linear arrays

@@ -188,7 +188,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.det_angle_offset_check, QtCore.SIGNAL("clicked()"), call_back)
  
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
-        self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
+        self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)        
 
         # Output directory
         self._summary.outdir_edit.setText(os.path.expanduser('~'))

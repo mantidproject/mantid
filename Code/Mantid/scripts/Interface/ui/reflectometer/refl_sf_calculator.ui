@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1023</width>
-    <height>880</height>
+    <width>1037</width>
+    <height>923</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>984</width>
-        <height>897</height>
+        <width>1013</width>
+        <height>899</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -1507,9 +1507,55 @@ p, li { white-space: pre-wrap; }
                  <item>
                   <widget class="QLabel" name="cfg_scaling_factor_file_name">
                    <property name="text">
-                    <string>/home/j35/Desktop/RefLsf.cfg</string>
+                    <string/>
                    </property>
                   </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="cfg_scaling_factor_file_name_browse">
+                   <property name="maximumSize">
+                    <size>
+                     <width>80</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="sizeIncrement">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Browse...</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QTextBrowser" name="textBrowser">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>350</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <item>
+                  <spacer name="horizontalSpacer_5">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
                  </item>
                  <item>
                   <widget class="QPushButton" name="cfg_scaling_factor_file_name_refresh">
@@ -1531,16 +1577,6 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                 </layout>
-               </item>
-               <item>
-                <widget class="QTextBrowser" name="textBrowser">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>400</height>
-                  </size>
-                 </property>
-                </widget>
                </item>
                <item>
                 <spacer name="verticalSpacer">

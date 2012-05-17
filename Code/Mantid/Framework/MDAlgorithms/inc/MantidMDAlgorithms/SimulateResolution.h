@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidKernel/RandomNumberGenerator.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -128,7 +128,7 @@ namespace Mantid
             /// Reset random number generators
             void resetRandomNumbers();
             /// A pointer to the random number generator
-            Kernel::RandomNumberGenerator *m_randGen;
+            Kernel::PseudoRandomNumberGenerator *m_randGen;
             /// function to evaluate y/(1-exp(-y)) including y=0 and large -ve y
             double pop(const double) const;
             /// function to calculate bose factor

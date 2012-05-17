@@ -67,7 +67,6 @@ private:
   std::string m_backType;
   std::string m_peakType;
   double m_maxChiSq;
-  void Outliers(std::vector<double>& data, std::vector<double>& data2, std::vector<double>& data3, std::vector<double>& data4);
 };
 
 } // namespace Algorithm

@@ -127,8 +127,8 @@ public:
          //=> START INTERNAL LOOP OVER THE "TIME"
             for (size_t j = 0; j < specSize; ++j)
             {
-                // drop emtpy events
-                if(Signal[j]<FLT_EPSILON)continue;
+                // drop NaN events
+                if(isNaN(Signal[j]))continue;
 
                 if(!QE_TRANSF.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE BUFFER
@@ -144,7 +144,7 @@ public:
                 }
                 //allCoord.insert(itc,Coord.begin(),Coord.end());
                 //std::advance(itc,n_dims);
-
+#ifndef _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
                 n_buf_events++;
                 if(n_buf_events>=buf_size){
                    pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
@@ -165,7 +165,12 @@ public:
                     }
                     pProg->report(i);
                 }
-       
+#else
+                n_coordinates=0;
+                n_buf_events=0;
+                n_added_events=0;
+                UNUSED_ARG(lastNumBoxes);
+#endif       
             } // end spectra loop
       
         } // end detectors loop;

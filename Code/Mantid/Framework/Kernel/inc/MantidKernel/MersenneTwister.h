@@ -4,7 +4,9 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "RandomNumberGenerator.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/ClassMacros.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -15,7 +17,7 @@ namespace Mantid
   {
     /** 
       This implements the the Mersenne Twister 19937 pseudo-random number 
-      generator algorithm as a specialzation of the RandomNumberGenerator
+      generator algorithm as a specialzation of the PseudoRandomNumberGenerator
       interface.
 
       Further documentation can be found here:
@@ -45,30 +47,39 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MANTID_KERNEL_DLL MersenneTwister : public RandomNumberGenerator
+    class MANTID_KERNEL_DLL MersenneTwister : public PseudoRandomNumberGenerator
     {
       /// Typedef for a uniform distribution of doubles
       typedef boost::uniform_real<double> uniform_double;
-      /// Typedef for a variate generator tieing together the Mersenne Twister 
+      /// Typedef for a variate generator tying together the Mersenne Twister
       /// algorithm with a uniform disribution
-      typedef boost::variate_generator<boost::mt19937&, 
-    boost::uniform_real<double> > uniform_generator;      
+      typedef boost::variate_generator<boost::mt19937&,
+                                       boost::uniform_real<double> > uniform_generator;
     
     public:
-      /// Default constructor
-      MersenneTwister();
+      /// Construct the generator with an initial seed. It can be reseeded using setSeed.
+      explicit MersenneTwister(const size_t seedValue);
+      /// Construct the generator with an initial seed and range.
+      MersenneTwister(const size_t seedValue, const double start, const double end);
       /// Set the random number seed
-      virtual void setSeed(size_t seed);
+      virtual void setSeed(const size_t seed);
       /// Sets the range of the subsequent calls to next 
-      virtual void setRange(double start, double end);
+      virtual void setRange(const double start, const double end);
       /// Generate the next random number in the sequence within the given range, (default=[0.0,1.0]).
-      virtual double next();
+      virtual double nextValue();
+      /// Resets the generator
+      virtual void restart();
 
     private:
+      DISABLE_DEFAULT_CONSTRUCT(MersenneTwister);
+      DISABLE_COPY_AND_ASSIGN(MersenneTwister);
+
       /// The boost Mersenne Twister generator
       boost::mt19937 m_generator;
       /// A boost distribution class to produce uniform numbers between a range
       uniform_double m_uniform_dist;
+      /// The current seed
+      boost::mt19937::result_type m_currentSeed;
     };
 
   }

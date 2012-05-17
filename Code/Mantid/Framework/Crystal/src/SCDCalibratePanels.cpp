@@ -270,17 +270,17 @@ namespace Crystal
 
               if( step <=0 ) step = 0;
             }
+            start = -1;
             if( StrtStopStep.size() >= 1)
             {
               boost::trim(StrtStopStep[0]);
               start = boost::lexical_cast<int>(StrtStopStep[ 0 ].c_str());
 
-              if( start <= 0)
-              {
-
-                g_log.error( "Improper use of : in " +  rangeOfBanks );
-                throw invalid_argument("Improper use of : in " + rangeOfBanks );
-              }
+            }
+            if( start <= 0)
+            {
+              g_log.error( "Improper use of : in " +  rangeOfBanks );
+              throw invalid_argument("Improper use of : in " + rangeOfBanks );
             }
             stop = start;
 
@@ -745,8 +745,8 @@ namespace Crystal
       Constraints += oss2.str();
 
 
-}//for vector< string > in Groups
- // }
+      }//for vector< string > in Groups
+
       if(!use_L0)
        {
          if( !first)
@@ -780,6 +780,7 @@ namespace Crystal
 
    g_log.debug()<<"Constraints="<<Constraints<<std::endl;
    fit_alg->initialize();
+
    int Niterations =  getProperty( "NumIterations");
 
    fit_alg->setProperty( "Function",FunctionArgument);
@@ -796,7 +797,9 @@ namespace Crystal
    fit_alg->setProperty( "Output","out");
 
    fit_alg->executeAsSubAlg();
-   g_log.debug()<<"Finished executing algorithm"<<std::endl;
+
+   g_log.debug()<<"Finished executing Fit algorithm"<<std::endl;
+
    string OutputStatus =fit_alg->getProperty("OutputStatus");
    g_log.notice() <<"Output Status="<<OutputStatus<<std::endl;
 
@@ -820,12 +823,16 @@ namespace Crystal
     std::vector< double >params;
     std::vector< double >errs ;
     std::vector< string >names;
+    double sigma= sqrt(chisq);
+
+    if( chisq < 0 ||  chisq != chisq)
+      sigma = -1;
 
     for( int prm = 0; prm < (int)RRes->rowCount(); ++prm )
     {
       names.push_back( RRes->getRef< string >( "Name", prm ) );
       params.push_back( RRes->getRef< double >( "Value", prm ));
-      errs.push_back( RRes->getRef< double >( "Error",prm));
+      errs.push_back( sigma* RRes->getRef< double >( "Error",prm));
     }
 
     //------------------- Report chi^2 value --------------------
@@ -926,6 +933,7 @@ namespace Crystal
       rotx = result[ prefix + "Xrot" ];
 
       roty = result[ prefix + "Yrot" ];
+
       rotz = result[ prefix + "Zrot" ];
 
       Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotx,V3D( 0,0,1));//*RelRot;
@@ -969,11 +977,18 @@ namespace Crystal
    //----------------- Calculate & Create Qerror table------------------
 
     TableWorkspace_sptr QErrTable( new TableWorkspace(ws->dataX(0).size()/3));
-    QErrTable->addColumn("str","Bank Name");
+    QErrTable->addColumn("int","Bank Number");
     QErrTable->addColumn("int","Peak Number");
     QErrTable->addColumn("int","Peak Row");
     QErrTable->addColumn("double","Error in Q");
     QErrTable->addColumn("int","Peak Column");
+    QErrTable->addColumn("int","Run Number");
+    QErrTable->addColumn("double","wl");
+    QErrTable->addColumn("double","tof");
+    QErrTable->addColumn("double","d-spacing");
+    QErrTable->addColumn("double","L2");
+    QErrTable->addColumn("double","Scat");
+    QErrTable->addColumn("double","y");
 
     //--------------- Create Function argument for the FunctionHandler------------
 
@@ -984,18 +999,46 @@ namespace Crystal
 
     CreateFxnGetValues( ws,NGroups, names,params,BankNameString, out.data(),xVals.data(),nData);
 
+
+    string prevBankName ="";
+    int BankNumDef = 200;
     int TableRow = 0;
     for (size_t q = 0; q < nData; q += 3)
     {
       int pk = (int) xVals[q];
       Peak peak = peaksWs->getPeak(pk);
-      QErrTable->cell<string> (TableRow, 0) = peak.getBankName();
+
+      string bankName =peak.getBankName();
+      size_t pos = bankName.find_last_not_of("0123456789");
+      int bankNum;
+      if( pos < bankName.size())
+        bankNum = boost::lexical_cast<int>(bankName.substr(pos+1));
+      else if( bankName == prevBankName)
+        bankNum = BankNumDef;
+      else
+      {
+        prevBankName = bankName;
+        BankNumDef ++;
+        bankNum = BankNumDef;
+      }
+
+      QErrTable->cell<int> (TableRow, 0) = bankNum ;
       QErrTable->cell<int> (TableRow, 1) = pk;
       QErrTable->cell<int> (TableRow, 2) = peak.getRow();
       QErrTable->cell<int> (TableRow, 4) = peak.getCol();
       QErrTable->cell<double> (TableRow, 3) = sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q
           + 2] * out[q + 2]);
       //chiSq += out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2];
+
+      QErrTable->cell<int>(TableRow,5) = peak.getRunNumber();
+      QErrTable->cell<double>(TableRow,6) = peak.getWavelength();
+      QErrTable->cell<double>(TableRow,7) = peak.getTOF();
+      QErrTable->cell<double>(TableRow,8) = peak.getDSpacing();
+
+      QErrTable->cell<double>(TableRow,9) = peak.getL2();
+      QErrTable->cell<double>(TableRow,10) = peak.getScattering();
+      QErrTable->cell<double>(TableRow,11) = peak.getDetPos().Y();
+
       TableRow++;
     }
 
@@ -1105,7 +1148,7 @@ namespace Crystal
                                                std::string const BankNameString,
                                                double *out,
                                                const double *xVals,
-                                               const size_t nData)const
+                                               const size_t nData)        const
   {
     boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
                     FunctionFactory::Instance().createFunction("SCDPanelErrors"));

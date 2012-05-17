@@ -107,6 +107,8 @@ namespace Mantid
       void setFunction();
       void addWorkspace(const std::string& workspaceNameProperty, bool addProperties = true);
       void addWorkspaces();
+      /// Read domain type property and cache the value
+      void setDomainType();
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;

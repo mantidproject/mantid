@@ -56,6 +56,7 @@ namespace DataHandling
 class DLLExport SaveFocusedXYE : public API::Algorithm
 {
 public:
+  enum HeaderType {XYE, MAUD};
   /// (Empty) Constructor
   SaveFocusedXYE() : API::Algorithm(){}
   /// Virtual destructor
@@ -76,8 +77,28 @@ private:
   void exec();
   /// Write the header information
   void writeHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
+  /// Write the header information in default "XYE" format
+  void writeXYEHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
+  /// Write the header information in MAUD format
+  void writeMAUDHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
+  /// Write spectra header
+  void writeSpectraHeader(std::ostream& os, size_t index1, size_t index2, 
+    double flightPath, double tth, const std::string& caption);
+  /// Write spectra XYE header
+  void writeXYESpectraHeader(std::ostream& os, size_t index1, size_t index2, 
+    double flightPath, double tth, const std::string& caption);
+  /// Write spectra MAUD header
+  void writeMAUDSpectraHeader(std::ostream& os, size_t index1, size_t index2, 
+    double flightPath, double tth, const std::string& caption);
+  /// Determine the focused position for the supplied spectrum.
+  void getFocusedPos(API::MatrixWorkspace_const_sptr wksp, const size_t spectrum, double &l1, double &l2,
+    double &tth);
+
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+
+  /// Header type
+  HeaderType m_headerType;
 };
 
 }

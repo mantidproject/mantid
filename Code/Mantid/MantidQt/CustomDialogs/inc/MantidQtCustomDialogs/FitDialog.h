@@ -79,6 +79,9 @@ namespace MantidQt
       //void helpClicked();
       void workspaceChanged(const QString&);
       void functionChanged();
+      /// Create InputWorkspaceWidgets and populate the tabs of the tab widget
+      void createInputWorkspaceWidgets();
+      void domainTypeChanged();
 
     private:
       /// Initialize the layout
@@ -88,18 +91,17 @@ namespace MantidQt
       virtual void parseInput();
       /// Tie static widgets to their properties
       void tieStaticWidgets(const bool readHistory);
-      /// Create InputWorkspaceWidgets and populate the tabs of the tab widget
-      void createInputWorkspaceWidgets();
+      /// Get the domain type: Simple, Sequential, or Parallel
+      int getDomainType() const;
+      /// Get the domain type: Simple, Sequential, or Parallel
+      QString getDomainTypeString() const;
 
-
-      /// Clears all of the widgets from the old layout
-      void removeOldInputWidgets();
-      /// Create
-      void createDynamicLayout();
       /// Return property value stored in history
       QString getStoredPropertyValue(const QString& propName) const;
       /// Get allowed values for a property
       QStringList getAllowedPropertyValues(const QString& propName) const;
+      /// Set i-th workspace name
+      void setWorkspaceName( int i, const QString& wsName );
 
       /// Is the function MD?
       bool isMD() const;
@@ -129,12 +131,16 @@ namespace MantidQt
       {return m_fitDialog->getAllowedPropertyValues(propName);}
       /// Get workspace name
       QString getWorkspaceName() const ;
+      /// Set workspace name
+      void setWorkspaceName(const QString& wsName);
       /// Return the domain index
       int getDomainIndex() const {return m_domainIndex;} 
       /// Set a property
       void setPropertyValue(const QString& propName, const QString& propValue);
       /// Set all workspace properties
       void setProperties();
+      /// Get the domain type: Simple, Sequential, or Parallel
+      int getDomainType() const {return m_fitDialog->getDomainType();}
     protected slots:
       /// Set the dynamic properties
       void setDynamicProperties();
@@ -196,6 +202,22 @@ namespace MantidQt
       QSpinBox *m_workspaceIndex;
       QLineEdit *m_startX;
       QLineEdit *m_endX;
+      QSpinBox *m_maxSize;
+    };
+
+    /**
+     * Widgets to set properties for a IMDWorkspace: MaxSize
+     */
+    class MDPropertiesWidget: public DynamicPropertiesWidget
+    {
+    public:
+      MDPropertiesWidget(InputWorkspaceWidget* parent);
+      /// Initialize the child widgets with stored and allowed values
+      void init() {}
+      /// Set all workspace properties
+      void setProperties();
+    protected:
+      QSpinBox *m_maxSize;
     };
 
   }

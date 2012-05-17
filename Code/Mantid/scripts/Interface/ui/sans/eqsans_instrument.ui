@@ -188,6 +188,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QCheckBox" name="beam_monitor_chk">
+              <property name="toolTip">
+               <string>Select to normalize to the beam monitor data</string>
+              </property>
+              <property name="statusTip">
+               <string>Select to normalize to the beam monitor data</string>
+              </property>
               <property name="text">
                <string>Normalize to beam monitor</string>
               </property>
@@ -239,6 +245,9 @@
               <property name="toolTip">
                <string>Enter a scaling factor to be multiplied to I(Q).</string>
               </property>
+              <property name="statusTip">
+               <string>Enter a scaling factor to be multiplied to I(Q).</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -261,6 +270,9 @@
             <item>
              <widget class="QCheckBox" name="scale_chk">
               <property name="toolTip">
+               <string>Check to calculate the absolute scale factor using the direct beam method.</string>
+              </property>
+              <property name="statusTip">
                <string>Check to calculate the absolute scale factor using the direct beam method.</string>
               </property>
               <property name="text">
@@ -316,6 +328,9 @@
                </size>
               </property>
               <property name="toolTip">
+               <string>Enter a valid file path for a direct beam data file.</string>
+              </property>
+              <property name="statusTip">
                <string>Enter a valid file path for a direct beam data file.</string>
               </property>
              </widget>
@@ -390,6 +405,9 @@
               <property name="toolTip">
                <string>Select to overright the beam diameter.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to overright the beam diameter.</string>
+              </property>
               <property name="text">
                <string>Beam spot diameter [mm]</string>
               </property>
@@ -410,6 +428,9 @@
                </size>
               </property>
               <property name="toolTip">
+               <string>Enter the diameter around the beam center to include when measuring the total beam signal, in mm.</string>
+              </property>
+              <property name="statusTip">
                <string>Enter the diameter around the beam center to include when measuring the total beam signal, in mm.</string>
               </property>
              </widget>
@@ -460,6 +481,9 @@
               <property name="toolTip">
                <string>Enter the attenuator transmission from the Attenuator Efficiency Chart.</string>
               </property>
+              <property name="statusTip">
+               <string>Enter the attenuator transmission from the Attenuator Efficiency Chart.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -496,6 +520,9 @@
               <property name="toolTip">
                <string>Select to specify a dark current data set.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to specify a dark current data set.</string>
+              </property>
               <property name="text">
                <string>Dark current file</string>
               </property>
@@ -522,6 +549,9 @@
                </size>
               </property>
               <property name="toolTip">
+               <string>Enter a valid file path to be used for the dark current data.</string>
+              </property>
+              <property name="statusTip">
                <string>Enter a valid file path to be used for the dark current data.</string>
               </property>
              </widget>
@@ -598,6 +628,9 @@
               <property name="toolTip">
                <string>Select to perform a solid angle correction.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to perform a solid angle correction.</string>
+              </property>
               <property name="text">
                <string>Perform solid angle correction</string>
               </property>
@@ -640,6 +673,9 @@
               <property name="toolTip">
                <string>Select to compute the Q resolution.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to compute the Q resolution.</string>
+              </property>
               <property name="text">
                <string>Q resolution</string>
               </property>
@@ -679,6 +715,9 @@
                </size>
               </property>
               <property name="toolTip">
+               <string>Enter a value for the sample aperture diameter in mm.</string>
+              </property>
+              <property name="statusTip">
                <string>Enter a value for the sample aperture diameter in mm.</string>
               </property>
              </widget>
@@ -736,6 +775,9 @@
               <property name="toolTip">
                <string>Enter TOF range to discard at the low end of the TOF spectrum.</string>
               </property>
+              <property name="statusTip">
+               <string>Enter TOF range to discard at the low end of the TOF spectrum.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -768,6 +810,9 @@
               <property name="toolTip">
                <string>Enter TOF range to discard at the high end of the TOF spectrum.</string>
               </property>
+              <property name="statusTip">
+               <string>Enter TOF range to discard at the high end of the TOF spectrum.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -789,7 +834,10 @@
             <item>
              <widget class="QCheckBox" name="tof_cut_chk">
               <property name="toolTip">
-               <string>Check to use to TOF cut information from the configuration file, as applicable.</string>
+               <string>Select to use to TOF cut information from the configuration file, as applicable.</string>
+              </property>
+              <property name="statusTip">
+               <string>Select to use to TOF cut information from the configuration file, as applicable.</string>
               </property>
               <property name="text">
                <string>Use configuration file</string>
@@ -814,6 +862,12 @@
             </item>
             <item>
              <widget class="QCheckBox" name="tof_correction_chk">
+              <property name="toolTip">
+               <string>Select to perform the EQSANS TOF correction</string>
+              </property>
+              <property name="statusTip">
+               <string>Select to perform the EQSANS TOF correction</string>
+              </property>
               <property name="text">
                <string>Correct TOF</string>
               </property>
@@ -906,6 +960,9 @@
               <property name="toolTip">
                <string>Enter the number of Q bins for the output I(Q) distribution.</string>
               </property>
+              <property name="statusTip">
+               <string>Enter the number of Q bins for the output I(Q) distribution.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -927,6 +984,9 @@
             <item>
              <widget class="QRadioButton" name="lin_binning_radio">
               <property name="toolTip">
+               <string>Select to use linear binning for I(Q).</string>
+              </property>
+              <property name="statusTip">
                <string>Select to use linear binning for I(Q).</string>
               </property>
               <property name="text">
@@ -955,6 +1015,9 @@
                </size>
               </property>
               <property name="toolTip">
+               <string>Select to use logarithmic binning for I(Q).</string>
+              </property>
+              <property name="statusTip">
                <string>Select to use logarithmic binning for I(Q).</string>
               </property>
               <property name="layoutDirection">
@@ -1000,6 +1063,9 @@
               <property name="toolTip">
                <string>Select to write the output files in the data directory.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to write the output files in the data directory.</string>
+              </property>
               <property name="text">
                <string>Use data directory</string>
               </property>
@@ -1013,6 +1079,9 @@
               <property name="toolTip">
                <string>Select to choose where to write the output files.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to choose where to write the output files.</string>
+              </property>
               <property name="text">
                <string>Select</string>
               </property>
@@ -1024,6 +1093,9 @@
             <item>
              <widget class="QLineEdit" name="output_dir_edit">
               <property name="toolTip">
+               <string>Output directory for reduced data.</string>
+              </property>
+              <property name="statusTip">
                <string>Output directory for reduced data.</string>
               </property>
              </widget>
@@ -1138,6 +1210,9 @@ Values can be selected by hand by checking the boxes below.</string>
               <property name="toolTip">
                <string>Select to set the detector distance offset.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to set the detector distance offset.</string>
+              </property>
               <property name="whatsThis">
                <string/>
               </property>
@@ -1163,11 +1238,17 @@ Values can be selected by hand by checking the boxes below.</string>
               <property name="toolTip">
                <string>Enter the detector distance offset in mm.</string>
               </property>
+              <property name="statusTip">
+               <string>Enter the detector distance offset in mm.</string>
+              </property>
              </widget>
             </item>
             <item row="1" column="0">
              <widget class="QCheckBox" name="sample_dist_chk">
               <property name="toolTip">
+               <string>Select to force the sample-detector distance.</string>
+              </property>
+              <property name="statusTip">
                <string>Select to force the sample-detector distance.</string>
               </property>
               <property name="text">
@@ -1198,6 +1279,9 @@ Values can be selected by hand by checking the boxes below.</string>
               <property name="toolTip">
                <string>Enter the value of the sample-to-detector distance in mm.</string>
               </property>
+              <property name="statusTip">
+               <string>Enter the value of the sample-to-detector distance in mm.</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1220,6 +1304,9 @@ Values can be selected by hand by checking the boxes below.</string>
           <item>
            <widget class="QCheckBox" name="config_mask_chk">
             <property name="toolTip">
+             <string>Select to mask detectors as specified in the configuration file, as applicable.</string>
+            </property>
+            <property name="statusTip">
              <string>Select to mask detectors as specified in the configuration file, as applicable.</string>
             </property>
             <property name="text">
@@ -1255,6 +1342,9 @@ The mask information is saved separately so that your data file will NOT be modi
               <property name="toolTip">
                <string>Select to apply the mask built from the specified data file.</string>
               </property>
+              <property name="statusTip">
+               <string>Select to apply the mask built from the specified data file.</string>
+              </property>
               <property name="text">
                <string>Mask file</string>
               </property>
@@ -1269,6 +1359,9 @@ The mask information is saved separately so that your data file will NOT be modi
                </size>
               </property>
               <property name="toolTip">
+               <string>Enter a file to be used to create your mask.</string>
+              </property>
+              <property name="statusTip">
                <string>Enter a file to be used to create your mask.</string>
               </property>
              </widget>

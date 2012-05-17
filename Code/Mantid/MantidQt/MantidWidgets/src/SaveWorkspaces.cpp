@@ -258,6 +258,24 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
+    if ( algorithm == "SaveCanSAS1D" )
+    {
+      saveCommands += ", DetectorNames=";
+      Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(wspaces[j]->text().toStdString());
+      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+      if ( matrix_workspace )
+      {
+        if ( matrix_workspace->getInstrument()->getName() == "SANS2D" )
+          saveCommands += "'front-detector, rear-detector'";
+        if ( matrix_workspace->getInstrument()->getName() == "LOQ" )
+          saveCommands += "'HAB, main-detector-bank'";        
+      }
+      else
+      {
+        //g_log.wa
+      }
+
+    }
     //finally finish the algorithm call
     saveCommands += ")\n";
   }

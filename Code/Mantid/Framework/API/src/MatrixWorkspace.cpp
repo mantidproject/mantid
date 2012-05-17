@@ -477,8 +477,8 @@ namespace Mantid
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
 
       // Find the min/max spectra IDs
-      specid_t min = 0;
-      specid_t max = 0;
+      specid_t min = std::numeric_limits<specid_t>::max(); // So that any number will be less than this
+      specid_t max = -std::numeric_limits<specid_t>::max(); // So that any number will be greater than this
       size_t length = ax->length();
       for (size_t i=0; i < length; i++)
       {

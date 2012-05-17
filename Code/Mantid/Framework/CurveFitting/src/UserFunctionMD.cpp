@@ -13,7 +13,7 @@ namespace Mantid
     // Subscribe the function into the factory.
     DECLARE_FUNCTION(UserFunctionMD);
 
-    /// Default conatructor
+    /// Default constructor
     UserFunctionMD::UserFunctionMD()
     {
       m_vars.resize(4);
@@ -23,6 +23,14 @@ namespace Mantid
       {
         m_parser.DefineVar(m_varNames[i],&m_vars[i]);
       }
+    }
+
+    /** 
+     * @return A list of attribute names
+     */
+    std::vector<std::string> UserFunctionMD::getAttributeNames()const
+    {
+      return std::vector<std::string>(1,"Formula");
     }
 
     /// Has attribute "Formula"

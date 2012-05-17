@@ -305,6 +305,8 @@ protected:
   bool m_parallelException;
   /// Reference to the logger class
   Kernel::Logger& g_log;
+
+  friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   // ------------------ For WorkspaceGroups ------------------------------------

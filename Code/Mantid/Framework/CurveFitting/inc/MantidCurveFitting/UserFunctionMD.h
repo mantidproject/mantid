@@ -46,6 +46,7 @@ namespace Mantid
       UserFunctionMD();
       std::string name() const {return "UserFunctionMD";}
 
+      std::vector<std::string> getAttributeNames()const;
       bool hasAttribute(const std::string& attName)const;
       Attribute getAttribute(const std::string& attName)const;
       void setAttribute(const std::string& attName,const Attribute& attr);

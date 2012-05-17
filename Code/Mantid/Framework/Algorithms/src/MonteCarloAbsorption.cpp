@@ -255,9 +255,9 @@ namespace Mantid
       int nattempts(0);
       while( nattempts < MaxRandPointAttempts )
       {
-        const double x = m_bbox_halflength*(2.0*m_randGen->next() - 1.0);
-        const double y = m_bbox_halfwidth*(2.0*m_randGen->next() - 1.0);
-        const double z = m_bbox_halfheight*(2.0*m_randGen->next() - 1.0);
+        const double x = m_bbox_halflength*(2.0*m_randGen->nextValue() - 1.0);
+        const double y = m_bbox_halfwidth*(2.0*m_randGen->nextValue() - 1.0);
+        const double z = m_bbox_halfheight*(2.0*m_randGen->nextValue() - 1.0);
         scatterPoint(x,y,z);
         ++nattempts;
         if( m_sampleShape->isValid(scatterPoint) ||
@@ -433,9 +433,8 @@ namespace Mantid
     {
       if( !m_randGen )
       {
-        m_randGen = new Kernel::MersenneTwister;
-        int seedValue = getProperty("SeedValue");
-        m_randGen->setSeed(seedValue);
+        const int seedValue = getProperty("SeedValue");
+        m_randGen = new Kernel::MersenneTwister(seedValue);
       }
       
       m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();

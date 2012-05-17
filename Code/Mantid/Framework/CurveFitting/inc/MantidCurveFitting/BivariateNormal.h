@@ -42,7 +42,7 @@ namespace Mantid
       <LI> CalcVariances - <UL>If true,calculates SScol, SSrow, and SSrc from the experimental data
                                given Background, Mcol, and Mrow(if the parameter has not been tied)
                                If false, the parameters SScol, SSrow, and SSrc will be fit, unless
-                               tied. </UL>
+                               tied. </LI>
     </UL>
 
 

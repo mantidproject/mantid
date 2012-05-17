@@ -455,47 +455,55 @@ namespace Mantid
       {
         double centre = peakslist->getRef<double>("centre",i);
         double width = peakslist->getRef<double>("width",i);
-        if (centre <= minD || centre >= maxD)
-        {
-            banned.push_back(i);
-            continue;
-        }
         double chi2 = peakslist->getRef<double>("chi2",i);
-        if (chi2 > m_maxChiSq)
-        {
-          banned.push_back(i);
-          continue;
-        }
 
         // Get references to the data
         peakPosFitted.push_back(centre);
         peakWidFitted.push_back(width);
         chisq.push_back(chi2);
       }
+      for (size_t i = 0; i < peakslist->rowCount(); ++i)
+      {
+        if (peakPosFitted[i] <= minD || peakPosFitted[i] >= maxD)
+        {
+            banned.push_back(i);
+            continue;
+        }
+        if (chisq[i] > m_maxChiSq)
+        {
+          banned.push_back(i);
+          continue;
+        }
+      }
       // delete banned peaks
       for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
           peakPosToFit.erase(peakPosToFit.begin() + (*it));
-      if (peakPosFitted.size() > 2) Outliers(peakWidFitted, peakPosFitted, chisq, peakPosToFit);
+          peakPosFitted.erase(peakPosFitted.begin() + (*it));
+          peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          chisq.erase(chisq.begin() + (*it));
+      }
+      banned.clear();
+      std::vector<double> Zscore = getZscore(peakWidFitted);
+      for (size_t i = 0; i < peakWidFitted.size(); ++i)
+      {
+        if (Zscore[i] > 1.0)
+        {
+          banned.push_back(i);
+          continue;
+        }
+      }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
+          peakPosFitted.erase(peakPosFitted.begin() + (*it));
+          peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          chisq.erase(chisq.begin() + (*it));
+      }
       nparams = peakPosFitted.size();
       return;
     }
-    void GetDetOffsetsMultiPeaks::Outliers(std::vector<double>& data, std::vector<double>& data2, std::vector<double>& data3, std::vector<double>& data4)
-    {
-      Statistics stats = getStatistics(data);
-      if(stats.standard_deviation == 0.)return;
-      for (int i = static_cast<int>(data.size())-1; i>=0; i--)
-      {
-        double zscore = std::fabs((data[i] - stats.mean) / stats.standard_deviation);
-        if (zscore > 1.0)
-        {
-        data.erase(data.begin()+i);
-        data2.erase(data2.begin()+i);
-        data3.erase(data3.begin()+i);
-        data4.erase(data4.begin()+i);
-        }
-      }
-    }
-
 
   } // namespace Algorithm
 } // namespace Mantid

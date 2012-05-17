@@ -47,12 +47,11 @@ class DataSeries(BaseScriptElement):
         """
             Create XML from the current data.
         """
-
         xml  = "<DataSeries>\n"
         for item in self.data_sets:
             xml += item.to_xml()
         xml += "</DataSeries>\n"
-        
+
         return xml
 
     def from_xml(self, xml_str):

@@ -33,7 +33,7 @@ class BaseRefWidget(BaseWidget):
 
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):      
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
-
+        
         self.short_name = name
         self._settings.instrument_name = name
             
@@ -146,8 +146,26 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.det_angle_offset_check)
         self.connect(self._summary.det_angle_offset_check, QtCore.SIGNAL("clicked()"), call_back)
  
+        call_back = partial(self._edit_event, ctrl=self._summary.q_min_edit)
+        self.connect(self._summary.q_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.q_step_edit)
+        self.connect(self._summary.q_step_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
+        self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
+ 
+        #Incident medium (selection or text changed)
+        call_back = partial(self._edit_event, ctrl=self._summary.incident_medium_combobox)
+        self.connect(self._summary.incident_medium_combobox, QtCore.SIGNAL("editTextChanged(QString)"), call_back)
+ 
+         #name of output file changed
+        call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
+
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
+
+        #scaling factor configuration file 
+        self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
 
         # Output directory
         self._summary.outdir_edit.setText(os.path.expanduser('~'))
@@ -180,6 +198,16 @@ class BaseRefWidget(BaseWidget):
         if output_dir:
             self._summary.outdir_edit.setText(output_dir)   
         
+    def browse_config_file_name(self):
+        '''
+        Define configuration file name
+        '''
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
+        if (str(file_name).strip() != ''):
+            if os.path.isfile(file_name):
+                self._summary.cfg_scaling_factor_file_name.setText(file_name)
+#            self.display_preview_config_file()
+
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
         
@@ -226,6 +254,8 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.det_angle_offset_edit, False)
         util.set_edited(self._summary.direct_pixel_check, False)
         util.set_edited(self._summary.direct_pixel_edit, False)
+        util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
+        util.set_edited(self._summary.incident_medium_combobox, False)
     
     def _det_angle_offset_chk_changed(self):
         is_checked = self._summary.det_angle_offset_check.isChecked()
@@ -602,7 +632,7 @@ class BaseRefWidget(BaseWidget):
                                                range_max=range_max)
 
     def _add_data(self):
-        print 'inside _add_data'
+        
         state = self.get_editing_state()
         in_list = False
         # Check whether it's already in the list
@@ -611,6 +641,38 @@ class BaseRefWidget(BaseWidget):
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
+
+            #loop over all the already defined states and give all of them the
+            #same Qmin, Qsteps, Angle offset, scaling factor config file name
+            #and incident medium
+            i=0
+            while i < self._summary.angle_list.count():
+                
+                current_item = self._summary.angle_list.item(i)
+                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+                
+                _q_min = self._summary.q_min_edit.text()
+                state.q_min = float(_q_min)
+                _q_step = self._summary.q_step_edit.text()
+                if self._summary.log_scale_chk.isChecked():
+                    _q_step = '-' + _q_step
+                state.q_step = float(_q_step)
+        
+                state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+                
+                #incident medium
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
+                                          for j in range(self._summary.incident_medium_combobox.count())]
+                _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+                
+                _incident_medium_string = (',').join(_incident_medium_list)
+                state.incident_medium_list = [_incident_medium_string]
+                
+                state.incident_medium_index_selected = _incident_medium_index_selected
+                
+                current_item.setData(QtCore.Qt.UserRole, state)
+                i+=1        
+        
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -639,6 +701,7 @@ class BaseRefWidget(BaseWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
+        
         self._summary.angle_list.clear()
         if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
             pass
@@ -652,9 +715,9 @@ class BaseRefWidget(BaseWidget):
             self.set_editing_state(state.data_sets[0])
             self._summary.angle_list.setCurrentRow(0, QtGui.QItemSelectionModel.Select)
             
-            # Common Q binning
-            self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
-            self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
+#            # Common Q binning
+#            self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
+#            self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
             
             # Common angle offset
             if hasattr(state.data_sets[0], "angle_offset"):
@@ -664,6 +727,16 @@ class BaseRefWidget(BaseWidget):
         self._reset_warnings()
         
     def set_editing_state(self, state):
+
+        self._summary.q_min_edit.setText(str(state.q_min))
+        self._summary.log_scale_chk.setChecked(state.q_step<0)
+
+        self._summary.incident_medium_combobox.clear() 
+        _incident_medium_str = str(state.incident_medium_list[0])
+        _list = _incident_medium_str.split(',')
+        for i in range(len(_list)):
+            self._summary.incident_medium_combobox.addItem(str(_list[i]))
+        self._summary.incident_medium_combobox.setCurrentIndex(state.incident_medium_index_selected)
 
         #Peak from/to pixels
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))

@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/lexical_cast.hpp>
-#include "../../../DataObjects/inc/MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Kernel;
 using namespace  Mantid::Geometry;
@@ -21,6 +21,33 @@ namespace Mantid
 {
 namespace Crystal
 {
+  /** SCDCalibratePanels calibrates instrument parameters for Rectangular Detectors
+
+      @author Ruth Mikkelson(adapted from Isaw's Calibration code)
+      @date   Mar 12, 2012
+
+      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory &
+                       NScD Oak Ridge National Laboratory
+
+      This file is part of Mantid.
+
+      Mantid is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation; either version 3 of the License, or
+      (at your option) any later version.
+
+      Mantid is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+      File change history is stored at:
+      <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+      Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
 
   class SCDCalibratePanels: public Mantid::API::Algorithm
   {
@@ -152,6 +179,36 @@ namespace Crystal
 
 
 
+  /**
+   *  Copies positional entries in pmapSv to pmap starting at bank_const
+   *  and parents.
+   *
+   *  @param  bank_const  the starting component for copying entries.
+   *
+   *  @param pmap         the Parameter Map to be updated
+   *
+   *  @param pmapSv       the original Parameter Map
+   *
+   */
+ static void updateBankParams(
+             boost::shared_ptr<const Geometry::IComponent>  bank_const,
+                boost::shared_ptr<Geometry::ParameterMap> pmap,
+                boost::shared_ptr<const Geometry::ParameterMap>pmapSv) ;
+
+
+  /**
+   *  Copies positional entries in pmapSv to pmap starting at bank_const
+   *  and parents.
+   *  @param  bank_const  the starting component for copying entries.
+   *  @param pmap        the Parameter Map to be updated
+   *  @param pmapSv       the original Parameter Map
+   *
+   */
+  static void updateSourceParams(
+        boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+       boost::shared_ptr<Geometry::ParameterMap> pmap,
+       boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
+
 
   private:
     void exec ();
@@ -210,36 +267,6 @@ namespace Crystal
                             double & detWidthScale0,double &detWidthHeight0,
                             double &Xoffset0,double &Yoffset0,double &Zoffset0,
                             double &Xrot0,double &Yrot0,double &Zrot0);
-
-    /**
-     *  Copies positional entries in pmapSv to pmap starting at bank_const
-     *  and parents.
-     *
-     *  @param  bank_const  the starting component for copying entries.
-     *
-     *  @param pmap         the Parameter Map to be updated
-     *
-     *  @param pmapSv       the original Parameter Map
-     *
-     */
-   static void updateBankParams(
-               boost::shared_ptr<const Geometry::IComponent>  bank_const,
-                  boost::shared_ptr<Geometry::ParameterMap> pmap,
-                  boost::shared_ptr<const Geometry::ParameterMap>pmapSv) ;
-
-
-    /**
-     *  Copies positional entries in pmapSv to pmap starting at bank_const
-     *  and parents.
-     *  @param  bank_const  the starting component for copying entries.
-     *  @param pmap        the Parameter Map to be updated
-     *  @param pmapSv       the original Parameter Map
-     *
-     */
-    static void updateSourceParams(
-          boost::shared_ptr<const Geometry::IObjComponent> bank_const,
-         boost::shared_ptr<Geometry::ParameterMap> pmap,
-         boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
     /**
      * Creates the function and gets values using the current  values for the

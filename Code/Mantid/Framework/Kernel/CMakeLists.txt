@@ -1,5 +1,5 @@
 set ( SRC_FILES
-    src/ANN_complete.cpp
+	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
 	src/ArrayProperty.cpp
@@ -44,6 +44,7 @@ set ( SRC_FILES
 	src/MersenneTwister.cpp
 	src/MultiFileNameParser.cpp
 	src/MultiFileValidator.cpp
+	src/NDPseudoRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
@@ -53,12 +54,14 @@ set ( SRC_FILES
 	src/PropertyManager.cpp
 	src/PropertyManagerOwner.cpp
 	src/PropertyWithValue.cpp
+	src/PseudoRandomNumberGenerator.cpp
 	src/Quat.cpp
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
+	src/SobolSequence.cpp
 	src/Statistics.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
@@ -152,6 +155,8 @@ set ( INC_FILES
 	inc/MantidKernel/MultiFileNameParser.h
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/MultiFileValidator.h
+	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -163,14 +168,16 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManager.h
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyWithValue.h
+	inc/MantidKernel/PseudoRandomNumberGenerator.h
 	inc/MantidKernel/Quat.h
-	inc/MantidKernel/RandomNumberGenerator.h
+	inc/MantidKernel/QuasiRandomNumberSequence.h
 	inc/MantidKernel/ReadLock.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
+	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
@@ -245,6 +252,8 @@ set ( TEST_FILES
 	test/MultiFileValidatorTest.h
 	test/MutexTest.h
 	test/NeutronAtomTest.h
+	test/NDRandomNumberGeneratorTest.h
+	test/NDPseudoRandomNumberGeneratorTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
 	test/ProgressTextTest.h
@@ -253,12 +262,12 @@ set ( TEST_FILES
 	test/PropertyTest.h
 	test/PropertyWithValueTest.h
 	test/QuatTest.h
-	test/RandomNumberGeneratorTest.h
 	test/ReadLockTest.h
 	test/RebinHistogramTest.h
 	test/RebinParamsValidatorTest.h
 	test/RegexStringsTest.h
 	test/SignalChannelTest.h
+	test/SobolSequenceTest.h
 	test/StatisticsTest.h
 	test/StringsTest.h
 	test/TaskTest.h
@@ -287,6 +296,7 @@ if(UNITY_BUILD)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
+include_directories ( ${GSL_INCLUDE_DIR} )
 
 # Add a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER ( inc/MantidKernel/PrecompiledHeader.h MantidKernel src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
@@ -298,7 +308,7 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Kernel ${MANTIDLIBS} )
+target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()

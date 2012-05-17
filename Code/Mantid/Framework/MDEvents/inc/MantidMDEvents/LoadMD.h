@@ -68,13 +68,24 @@ namespace MDEvents
     template<typename MDE, size_t nd>
     void doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
-    void loadExperimentInfos(Mantid::API::IMDEventWorkspace_sptr ws);
+    void loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
+
+    void loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
+    void loadHisto();
+
+    void loadDimensions();
 
     /// Open file handle
     ::NeXus::File * file;
 
     /// Name of that file
     std::string m_filename;
+
+    /// Number of dimensions in loaded file
+    size_t m_numDims;
+
+    /// Each dimension object loaded.
+    std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
 
   };
 

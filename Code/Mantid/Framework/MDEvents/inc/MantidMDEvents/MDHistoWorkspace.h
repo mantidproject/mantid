@@ -44,12 +44,14 @@ namespace MDEvents
         Mantid::Geometry::MDHistoDimension_sptr dimT=Mantid::Geometry::MDHistoDimension_sptr());
 
     MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
+    MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
     MDHistoWorkspace(const MDHistoWorkspace & other);
 
     virtual ~MDHistoWorkspace();
 
     void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
+    void init(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
     void cacheValues();
 
@@ -144,6 +146,12 @@ namespace MDEvents
     signal_t * getNumEventsArray()
     {
       return m_numEvents;
+    }
+
+    /** @return the direct pointer to the array of mask bits (bool). For speed/testing */
+    bool * getMaskArray()
+    {
+      return m_masks;
     }
 
     void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);

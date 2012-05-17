@@ -324,7 +324,9 @@ namespace DataHandling
         nexusFile->writeNexusTableWorkspace(tableWorkspace,"table_workspace");
     }  // finish table workspace specifics
  
-    nexusFile->writeNexusProcessedProcess(inputWorkspace);
+	  // Switch to the Cpp API for the algorithm history
+	  inputWorkspace->getHistory().saveNexus(cppFile);
+
     nexusFile->closeNexusFile();
 
     delete nexusFile;

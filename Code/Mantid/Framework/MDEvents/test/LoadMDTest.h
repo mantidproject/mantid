@@ -458,8 +458,68 @@ public:
     catch (...)
     { /* ignore windows error */ }
 
-
   }
+
+
+
+  /** Run SaveMD with the MDHistoWorkspace */
+  void doTestHisto(MDHistoWorkspace_sptr ws)
+  {
+    std::string filename = "SaveMDTestHisto.nxs";
+
+    SaveMD alg1;
+    TS_ASSERT_THROWS_NOTHING( alg1.initialize() )
+    TS_ASSERT( alg1.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg1.setProperty("InputWorkspace", ws) );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("Filename", filename) );
+    alg1.execute();
+    TS_ASSERT( alg1.isExecuted() );
+    filename = alg1.getPropertyValue("Filename");
+
+    LoadMD alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "loaded") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    MDHistoWorkspace_sptr newWS;
+    TS_ASSERT_THROWS_NOTHING( newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("loaded") );
+    TS_ASSERT(newWS); if (!newWS) return;
+
+    TS_ASSERT_EQUALS( ws->getNPoints(), newWS->getNPoints());
+    TS_ASSERT_EQUALS( ws->getNumDims(), newWS->getNumDims());
+    for (size_t i=0; i<ws->getNPoints(); i++)
+    {
+      TS_ASSERT_DELTA(ws->getSignalAt(i), newWS->getSignalAt(i), 1e-6);
+      TS_ASSERT_DELTA(ws->getErrorAt(i), newWS->getErrorAt(i), 1e-6);
+      TS_ASSERT_DELTA(ws->getNumEventsAt(i), newWS->getNumEventsAt(i), 1e-6);
+      TS_ASSERT_DELTA(ws->getIsMaskedAt(i), newWS->getIsMaskedAt(i), 1e-6);
+    }
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
+  void test_histo2() 
+  {
+    // Fails on windows with file access error
+#ifndef _WIN32
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
+    doTestHisto(ws);
+#endif
+  }
+
+  void test_histo3()
+  {
+  // Fails on windows with file access error
+#ifndef _WIN32
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 3, 4, 10.0, 3.5, "histo3", 4.5);
+    doTestHisto(ws);
+#endif
+  }
+
 
 };
 

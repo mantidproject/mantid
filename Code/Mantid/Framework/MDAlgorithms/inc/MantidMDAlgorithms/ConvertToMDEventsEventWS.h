@@ -210,8 +210,9 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public I
 //
       // Add them to the MDEW
        size_t n_added_events = run_index.size();
+#ifndef _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
        pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
-
+#endif
        return n_added_events;
    }
 
