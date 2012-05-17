@@ -20,8 +20,10 @@ set ( SRC_FILES
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
-	src/MDTransfQ3D.cpp
-	src/MDTransfNoQ.cpp
+	src/ConvToMDEventsBase.cpp
+	src/ConvToMDPreprocDet.cpp
+#	src/MDTransfQ3D.cpp
+#	src/MDTransfNoQ.cpp
 	src/MDTransfModQ.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
@@ -90,9 +92,11 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MDWSDescription.h
 	inc/MantidMDEvents/MDWSTransfDescr.h
-	inc/MantidMDEvents/IMDTansform.h
-	inc/MantidMDEvents/MDTransfQ3D.h
-	inc/MantidMDEvents/MDTransfNoQ.h
+	inc/MantidMDEvents/ConvToMDEventsBase.h	
+	inc/MantidMDEvents/ConvToMDPreprocDet.h
+	inc/MantidMDEvents/MDTransfInterface.h
+#	inc/MantidMDEvents/MDTransfQ3D.h
+#	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfModQ.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
