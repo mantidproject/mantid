@@ -1,10 +1,6 @@
 #ifndef H_IMD_TRANSFORMATION
 #define H_IMD_TRANSFORMATION
-#include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
-#include "MantidMDEvents/MDWSDescription.h"
-#include "MantidAPI/MatrixWorkspace.h"
+
 
 namespace Mantid
 {
@@ -12,19 +8,11 @@ namespace MDEvents
 {
 /** Interface to set of sub-classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into MD events.
-* The inferface provide information for two tasks. 
-* 1) Definition of target MD workspace properties and 
-* 2) Calculation of MD coordinates for single measurement 
-
-1) First task resolved during algorithm initialization and defines the number of dimensions, coordinate system, dimension units and ID-s etc.
-  This information is used when creating the target MD workspace or checking if existing MD workspace can be used as target for the selected subalgorithm
-
-2) Second task achieved during conversion itself. The subclass will works with input workpsace and convert a single point of the input ws into 
-   the vector of MD coordinates.  
-  * MD coordinates are stored in the vector of n-dimensions* 
-
-  *   Usual transformation occurs in 4 stages
   *
+  * its output is the vector of n-dimensions which contains the values of n-coorinates in n-dimensional space
+  * 
+  *
+  *   Usual transformation constis of 4 steps
   * 1) Initiate the transformation itself.
   * 2) set-up, calculation and copying generic multidimensional variables which are not depenent on data (logs)
   * 3) set-up, calculation and copying the multidimensional variables which dependent on detectors id only 
@@ -54,17 +42,29 @@ namespace MDEvents
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+// forvard declaration for a class, which provides all necessary parameters for the workspace
+class ConvToMDEventsBase;
+
+namespace ConvertToMD
+{
+    /* enum describes known eneergy conversion/analysis modes
+    *  It is important to assign enums proper numbers, as direct correspondence between enums and their emodes 
+    *  used by the external units conversion algorithms within the Mantid, so the agreement should be the stame     
+    */
+    enum EModes
+    {
+          Elastic = 0,  //< int emode = 0; Elastic analysis
+          Direct  = 1,  //< emode=1; Direct inelastic analysis mode
+          Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
+          No_DE         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion)
+    };
+}
+
 
 class MDTransfInterface
 {
 public:
-    /**The method returns the name, under which the transformation would be known to a user */
-    virtual const std::string transfID()const=0;
- /** MD transformation can often be used together with energy analysis mode; This function should be overloaded 
-       if the transformation indeed can do the energy analysis */
-    virtual std::vector<std::string> getEmodes()const{return std::vector<std::string>(1,std::string("No dE"));}
- 
-//***************> the method below involwed in the calculations of MD coordinates
+      
     /** Method deployed out of the loop and calculates all variables needed within the loop.
      * In addition it calculates the property-dependant coordinates, which do not depend on workspace
      *
@@ -75,6 +75,7 @@ public:
      *
      * @return true         -- if all Coord are within the range requested by the conversion algorithm. false otherwise
     */  
+
     virtual bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes)=0;
    
     /** generalizes the code to calculate Y-variables within the detector's loop of the  workspace
@@ -99,12 +100,12 @@ public:
     virtual bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
-       double X_ev =double(0.5*(X[j]+X[j+1])); // ! POSSIBLE FACTORY HERE !!! if the histogram interpolation is different
+       double X_ev =double(0.5*(X[j]+X[j+1])); // ! POSSIBLE FACTORY HERE !!! if this histohram interpolation is different
        return calcMatrixCoord(X_ev,Coord);
     }
   
  /**  The method to calculate all remaining coordinates, defined within the inner loop
-    *  given that the input described by sinble value only
+    * given that the input described by sinble value only
      * @param X    -- X workspace value
      * 
      * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
@@ -112,36 +113,12 @@ public:
      * */
     virtual bool calcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const=0;
 
-    /* clone method allowing to provide the copy of the particular class */
-    virtual MDTransfInterface * clone() const = 0;
-    // destructor
+    /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and can provide
+      * all necessary variables necessary for the conversion */
+    virtual void initialize(const ConvToMDEventsBase &)=0;
+  
     virtual ~MDTransfInterface(){};
-    /** set up transformation from the class, which can provide all variables necessary for the conversion */
-    virtual void initialize(const MDWSDescription &)=0;
-
-//***************> the methods below are mainly involved in defining the target workspace properties. 
-//                 Thay also can be involwed in the preparation to calculations of MD coordinates 
-// WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
-
-    /** returns the unit ID for the input units, the particular transformation expects. 
-     if one wants the transformation to be meaningful, the X-coordinates of input workspace 
-     used by the transformation have to be expressed in the uinits  with ID, returned by this method */
-    virtual const std::string inputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const=0;
-    /** The transformation generates output MD events in particular units. This method returns these Units ID-s */ 
-    virtual std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
-
-      /** when one builds MD workspace, he needs a dimension names/ID-s which can be different for different Q-transformatons and in different E-mode 
-       The position of each dimID in the output vector should correspond the position of each coordinate in the Coord vector     */
-    virtual std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
-
-    /** return the number of dimensions, calculated by the transformation from the workspace. This number is usually varies from 1 to 4
-      * and depends on emode and possibly on some WS parameters.     */
-    virtual unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const=0;
-    
 }; 
-
-typedef boost::shared_ptr<MDTransfInterface>       MDTransf_sptr; 
-typedef boost::shared_ptr<const MDTransfInterface> MDTransf_const_sptr; 
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace
