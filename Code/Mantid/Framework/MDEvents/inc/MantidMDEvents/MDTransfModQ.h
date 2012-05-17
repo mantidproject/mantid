@@ -1,11 +1,12 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 #define  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 //
-#include "MantidMDEvents/MDTransform.h"
+#include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
 //
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 
@@ -41,69 +42,19 @@ namespace MDAlgorithms
 
 
 
-class DLLExport MDTransfModQInelastic: public IMDTransformation
-{ 
-    public:
-    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
-    //
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)   
-    inline bool calc1MatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
-    {
-       UNUSED_ARG(i);
-       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
-       return calc1MatrixCoord(X_ev,Coord);
-    }
 
-    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-    {
-         double X_ev = CONV_UNITS_FROM.getXConverted(X);
-         return calc1MatrixCoord(X_ev,Coord);
-    }   
-    // constructor;
-    CoordTransformer():pDet(NULL),pHost(NULL){}
-    void setUpTransf(IConvertToMDEventsWS *pConv){
-        pHost = pConv;
-    }
-private:
-    // the energy of the incident neutrons
-    double Ei;
-    // the wavevector of incident neutrons
-    double ki;
-    //  directions to the detectors 
-    double ex,ey,ez;
-    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
-    std::vector<double> rotMat;
-    // min-max values, some modified to work with squared values:
-    std::vector<double> dim_min,dim_max;
-    //
-    Kernel::V3D const *pDet;
-    // Calling Mantid algorithm
-    IConvertToMDEventsWS *pHost;
-    // class which would convert units
-    UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
- 
-};
 // ModQ,Elastic 
-class DLLExport MDTransfModQElastic: public IMDTransformation
+class DLLExport MDTransfModQElastic: public MDTransfInterface
 { 
-    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
-    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
-    inline bool calc1MatrixCoord(const double& k0,std::vector<coord_t> &Coord)const
-
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
-    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-
+public:
+    bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
+    bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
+    bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
-    MDTransfModQElastic():pDet(NULL),pHost(NULL){}
-    void setUpTransf(IConvertToMDEventsWS *pConv){
-        pHost = pConv;
-    }
-private:
-    // the energy of the incident neutrons
-    double Ei;
-    // the wavevector of incident neutrons
-    double ki;
+    MDTransfModQElastic():pDet(NULL),pHost(NULL),nMatrixDim(1){}
+    void initialize(const ConvToMDEventsBase &Conv);
+
+protected:
     //  directions to the detectors 
     double ex,ey,ez;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
@@ -112,11 +63,27 @@ private:
     std::vector<double> dim_min,dim_max;
     //
     Kernel::V3D const * pDet;
-    // Calling Mantid algorithm
-    IConvertToMDEventsWS *pHost;  
-   // class which would convert units
-    UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
+    // The pointer to the class, which drives this conversion and provides all necessary values for variables
+    ConvToMDEventsBase const* pHost;
+    // number of dimensions, calculated from matrix workspace
+    int nMatrixDim;
+    
  
+};
+
+class DLLExport MDTransfModQInelastic: public MDTransfModQElastic
+{ 
+public:
+     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
+     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
+     void initialize(const ConvToMDEventsBase &Conv);
+private:
+    // the energy of the incident neutrons
+    double Ei;
+    // the wavevector of incident neutrons
+    double ki;
+    // energy conversion mode
+    ConvertToMD::EModes emode;
 };
 
 } // End MDAlgorighms namespace
