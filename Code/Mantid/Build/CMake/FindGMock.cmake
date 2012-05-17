@@ -3,19 +3,24 @@
 # GMOCK_FOUND If false, do not try to use Google Mock
 
 find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h 
-  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/include
-        ${PROJECT_SOURCE_DIR}/../TestingTools/include
+  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.6.0/include
+        ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.6.0/include
 )
 
-find_library ( GMOCK_LIB NAMES gmock
-  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/lib
-        ${PROJECT_SOURCE_DIR}/../TestingTools/lib
-)
+#
+#find_library ( GMOCK_LIB NAMES gmock
+#  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/lib
+#        ${PROJECT_SOURCE_DIR}/../TestingTools/lib
+#)
 
-find_library ( GMOCK_LIB_DEBUG NAMES gmock_d gmock
-  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/lib
-        ${PROJECT_SOURCE_DIR}/../TestingTools/lib
-)
+#find_library ( GMOCK_LIB_DEBUG NAMES gmock_d gmock
+#  PATHS ${PROJECT_SOURCE_DIR}/TestingTools/lib
+#        ${PROJECT_SOURCE_DIR}/../TestingTools/lib
+#)
+
+SET(GMOCK_LIB gmock)
+SET(GMOCK_LIB_DEBUG gmock)
+
 
 set ( GMOCK_LIBRARIES optimized ${GMOCK_LIB} debug ${GMOCK_LIB_DEBUG} )
 

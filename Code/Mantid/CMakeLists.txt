@@ -161,6 +161,8 @@ if (PYUNITTEST_FOUND)
   add_subdirectory ( scripts )
 endif ()
 
+add_subdirectory ( TestingTools )
+
 # Collect all tests together
 add_custom_target ( AllTests ) 
 add_dependencies ( AllTests FrameworkTests )
