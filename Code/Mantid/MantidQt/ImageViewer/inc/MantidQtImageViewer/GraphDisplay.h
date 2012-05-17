@@ -63,6 +63,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
                        double            image_x,
                        double            image_y );
 
+   /// Set flag indicating whether or not to use a log scale on the x-axis
+   void SetLogX( bool is_log_x );
+
    /// Record the point that the user is currently pointing at with the mouse
    void SetPointedAtPoint( QPoint point );
 
@@ -76,6 +79,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
    ImageDataSource*  data_source;
 
    bool    is_vertical;
+   bool    is_log_x;
    double  image_x;
    double  image_y;
 };

@@ -3,6 +3,7 @@
 #include <QtGui>
 #include <QVector>
 #include <QString>
+#include <qwt_scale_engine.h>
 
 #include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/QtUtils.h"
@@ -30,10 +31,11 @@ GraphDisplay::GraphDisplay( QwtPlot*      graph_plot,
   this->graph_plot  = graph_plot;
   this->graph_table = graph_table;
   this->data_source = 0;
-  
   this->is_vertical = is_vertical;
-  image_x = 0;
-  image_y = 0;
+
+  is_log_x = false;
+  image_x  = 0;
+  image_y  = 0;
 
   if ( is_vertical )
   {
@@ -61,6 +63,18 @@ GraphDisplay::~GraphDisplay()
 void GraphDisplay::SetDataSource( ImageDataSource* data_source )
 {
   this->data_source = data_source;
+}
+
+
+/**
+ * Set flag indicating whether or not to use a log scale on the x-axis
+ *
+ * @param is_log_x  Pass in true to use a log scale on the x-axis and false
+ *                  to use a linear scale. 
+ */
+void GraphDisplay::SetLogX( bool is_log_x )
+{
+  this->is_log_x = is_log_x;
 }
 
 
@@ -117,6 +131,17 @@ void GraphDisplay::SetData(const QVector<double> & xData,
     IVUtils::FindValidInterval( yData, min_y, max_y );
     graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
     graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x );
+  }
+
+  if ( is_log_x )
+  {
+    QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
+    graph_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
+  }
+  else
+  {
+    QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
+    graph_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
   }
 
   curve->setData( xData, yData );

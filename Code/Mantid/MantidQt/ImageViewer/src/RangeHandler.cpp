@@ -36,7 +36,7 @@ void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
   double default_step = (total_max_x - total_min_x)/(double)total_n_steps;
   if ( total_n_steps > 2000 )
   {
-    default_step = (total_max_x - total_min_x)/2000;
+    default_step = (total_max_x - total_min_x)/2000.0;
   }
 
   SetRange( total_min_x, total_max_x, default_step );
@@ -55,6 +55,7 @@ void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
  *                to display.  This will be adjusted so that it is larger
  *                than min by an integer number of steps.  
  * @param step    This is size of the step to use between min and max.
+ *                If it is less than zero, a log scale is requested.
  */
 void RangeHandler::GetRange( double &min, double &max, double &step )
 {
@@ -66,16 +67,20 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
   IVUtils::StringToDouble(  max_control->text().toStdString(), max );
   IVUtils::StringToDouble(  step_control->text().toStdString(), step );
 
-  IVUtils::FindValidInterval( min, max );
-
-  if ( step < 0 )                    // just require step to be > 0, no other
-  {                                  // bounds
-    step = -step;
+                                 // just require step to be non-zero, no other
+                                 // bounds. If zero, take a default step size  
+  if ( step == 0 ) 
+  {
+    step = (total_max_x - total_min_x) / 2000.0;
   }
 
-  if ( step == 0 )                   // take a default step size
+  if ( step > 0 )
   {
-    step = (total_max_x - total_min_x) / 2000;
+    IVUtils::FindValidInterval( min, max );
+  }
+  else
+  {
+    IVUtils::FindValidLogInterval( min, max );
   }
 
   SetRange( min, max, step );
@@ -83,12 +88,13 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
 
 
 /**
- * Adjust the values to be consistent with the avaliable data and 
+ * Adjust the values to be consistent with the available data and 
  * diplay them in the controls.
  *
  * @param min     This is the x value at the left edge of the first bin.
  * @param max     This is an x value at the right edge of the last bin.
- * @param step    This is size of the step to use between min and max.
+ * @param step    This is size of the step to use between min and max. 
+ *                If it is less than zero, a log scale is requested.
  */
 void RangeHandler::SetRange( double min, double max, double step )
 {
@@ -98,19 +104,15 @@ void RangeHandler::SetRange( double min, double max, double step )
   {
     min = total_min_x;
   }
+
   if ( max > total_max_x )
   {
     max = total_max_x;
   }
 
-  if ( step < 0 )
-  {
-    step = -step;
-  }
-
   if ( step == 0 )
   {
-    step = (max-min)/(double)total_n_steps;
+    step = (max-min)/2000.0;
   }
 
   QtUtils::SetText( 8, 2, min, iv_ui->x_min_input );

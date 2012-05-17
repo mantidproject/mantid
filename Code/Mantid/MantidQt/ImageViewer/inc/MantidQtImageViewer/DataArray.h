@@ -66,7 +66,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
     double GetYMax()    const;
 
     /// Check if the returned array is binned logarithmically in 'x'
-    bool   GetIsLogX()  const;
+    bool IsLogX()  const;
 
     /// Get smallest value recorded in this DataArray
     double GetDataMin() const;

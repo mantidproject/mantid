@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QString>
 #include <qimage.h>
+#include <qwt_scale_engine.h>
 
 #include "MantidQtImageViewer/ImageDisplay.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
@@ -129,16 +130,21 @@ void ImageDisplay::UpdateRange()
     SetDataSource( data_source );   // re-initialize with the altered source
   }
 
+  QRect display_rect;
+  GetDisplayRectangle( display_rect );
+                                           // range controls now determine
+                                           // the number of bins
   double min  = 0;
   double max  = 0;
   double step = 0;
   range_handler->GetRange( min, max, step );
 
-  int n_bins = (int)(( max - min ) / step);   // range controls now determine
-                                              // the number of bins
-  QRect display_rect;
-  GetDisplayRectangle( display_rect );
- 
+  int n_bins = IVUtils::NumSteps( min, max, step );
+  if ( n_bins == 0 )
+  {
+    return;
+  }
+
   slider_handler->ConfigureHSlider( n_bins, display_rect.width() );
 
   UpdateImage();
@@ -170,11 +176,17 @@ void ImageDisplay::UpdateImage()
 
   double scale_x_min  = 0;
   double scale_x_max  = 0;
-  double step = 0;
-  range_handler->GetRange( scale_x_min, scale_x_max, step );
+  double x_step = 0;
+  range_handler->GetRange( scale_x_min, scale_x_max, x_step );
 
   int n_rows = (int)data_source->GetNRows();
-  int n_cols = (int)( ( scale_x_max - scale_x_min ) / step  );
+  int n_cols = IVUtils::NumSteps( scale_x_min, scale_x_max, x_step );
+                                     // This works for linear or log scales
+
+  if ( n_rows == 0 )
+  {
+    return;
+  }
 
   if ( slider_handler->VSliderOn() )
   {
@@ -198,15 +210,26 @@ void ImageDisplay::UpdateImage()
   {
     int x_min;
     int x_max;
-    slider_handler->GetHSliderInterval( x_min, x_max );
-
+    slider_handler->GetHSliderInterval( x_min, x_max );  
+                            // NOTE: The interval [xmin,xmax] is always
+                            // found linearly.  For log_x, we need to adjust it
     double new_x_min = 0;
     double new_x_max = 0;
 
-    IVUtils::Interpolate( 0, n_cols, x_min,
-                          scale_x_min, scale_x_max, new_x_min );
-    IVUtils::Interpolate( 0, n_cols, x_max,
-                          scale_x_min, scale_x_max, new_x_max );
+    if ( x_step > 0 )       // linear scale, so interpolate linearly
+    {
+      IVUtils::Interpolate( 0, n_cols, x_min,
+                            scale_x_min, scale_x_max, new_x_min );
+      IVUtils::Interpolate( 0, n_cols, x_max,
+                            scale_x_min, scale_x_max, new_x_max );
+    }
+    else                    // log scale, so interpolate "logarithmically"
+    {
+      IVUtils::LogInterpolate( 0, n_cols, x_min,
+                               scale_x_min, scale_x_max, new_x_min );
+      IVUtils::LogInterpolate( 0, n_cols, x_max,
+                               scale_x_min, scale_x_max, new_x_max );
+    }
 
     scale_x_min = new_x_min;
     scale_x_max = new_x_max;
@@ -221,15 +244,27 @@ void ImageDisplay::UpdateImage()
   {
     n_cols = display_rect.width();
   }
+
+  bool is_log_x = ( x_step < 0 );
                                          // NOTE: The DataArray is deleted
                                          //       in the ImagePlotItem.
   data_array = data_source->GetDataArray( scale_x_min, scale_x_max, 
                                           scale_y_min, scale_y_max, 
                                           n_rows, n_cols,
-                                          false );
+                                          is_log_x );
 
   image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
+  if ( is_log_x )
+  {
+    QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
+    image_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
+  }
+  else
+  {
+    QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
+    image_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
+  }
 
   image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
                                             data_array->GetYMax() );
@@ -319,10 +354,18 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
   double x_val;
   for ( size_t col = 0; col < n_cols; col++ )
   {
-    x_val = (double)col/(double)(n_cols-1) * (x_max-x_min) + x_min; 
+    if ( data_array->IsLogX() )
+    {
+      x_val = x_min * exp( (double)col/double(n_cols-1)*log(x_max/x_min));
+    }
+    else
+    {
+      x_val = (double)col/(double)(n_cols-1) * (x_max-x_min) + x_min; 
+    }
     xData.push_back( x_val );
     yData.push_back( data[ row * n_cols + col ] );
   }
+  h_graph_display->SetLogX( data_array->IsLogX() );
   h_graph_display->SetData( xData, yData, x, y );
 
   double relative_x = (x-x_min)/(x_max-x_min);           // in 0 to 1

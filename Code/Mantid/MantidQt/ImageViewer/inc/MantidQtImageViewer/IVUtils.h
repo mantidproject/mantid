@@ -72,7 +72,13 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
     static void FindValidInterval( double           & min,
                                    double           & max );
 
-    /// find point new_val that is spaced between new_min and new_max in the
+    /// Adjust min and max so they can be used to form a log scale
+    static void FindValidLogInterval( double  & min, double  & max );
+
+    /// Find the number of steps from min to max on a linear or log scale
+    static int NumSteps( double min, double max, double step );
+
+    /// Find point new_val that is spaced between new_min and new_max in the
     /// same proportion as val is between min and max. Return false if
     /// new_val is outside [new_min,new_max].
     static bool Interpolate( double   min,
@@ -81,6 +87,15 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
                              double   new_min,
                              double   new_max,
                              double & new_val );
+
+    /// Find the value in [new_min,new_max] on a logarithmic scale that
+    /// would correspond to the point val on a linear scale on [min,max]. 
+    static bool LogInterpolate( double   min,
+                                double   max,
+                                double   val,
+                                double   new_min,
+                                double   new_max,
+                                double & new_val );
 
     /// adjust the values defining a subinterval to match the boundaries of
     /// the global data. (Currently only for uniformly spaced bins.)
