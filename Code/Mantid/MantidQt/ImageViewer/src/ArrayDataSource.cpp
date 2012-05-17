@@ -70,7 +70,9 @@ ArrayDataSource::~ArrayDataSource()
  * @param n_cols    The event data will be rebinned using the specified
  *                  number of colums.
  * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically in the X-direction.  (NOT USED)
+ *                  binned logarithmically in the X-direction.  This
+ *                  DataSource does not support rebinning to a log axis, so
+ *                  the DataArray is always returned with is_log_x = false. 
  */
 DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
                                            double ymin,   double  ymax,
@@ -114,7 +116,7 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
     } 
   }
                                            // The calling code is responsible
-                                           // for deleting the DataArray
+  is_log_x = false;                        // for deleting the DataArray
   DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax, 
                                            is_log_x, n_rows, n_cols, new_data);
   return new_data_array;
@@ -127,10 +129,13 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
  * returned, when it is no longer needed.
  *
  * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically.  (NOT USED)
+ *                  binned logarithmically.  This DataSource does not 
+ *                  support rebinning to a log axis, so the DataArray is 
+ *                  always returned with is_log_x = false.
  */
 DataArray * ArrayDataSource::GetDataArray( bool is_log_x )
 {
+  is_log_x = false;
   return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
                        total_rows, total_cols, is_log_x );
 }

@@ -253,6 +253,10 @@ void ImageDisplay::UpdateImage()
                                           n_rows, n_cols,
                                           is_log_x );
 
+  is_log_x = data_array->IsLogX();       // Data source might not be able to
+                                         // provide log binned data, so check
+                                         // if log binned data was returned.
+
   image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
   if ( is_log_x )
