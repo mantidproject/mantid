@@ -7,13 +7,17 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
+
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidMDEvents/MDTransfFactory.h"
 
 namespace Mantid
 {
@@ -59,13 +63,14 @@ namespace MDEvents
     /// virtual destructor
     virtual ~ConvToMDEventsBase(){};
 /**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
-    Kernel::Unit_sptr    getAxisUnits()const;
+ 
     double               getEi()const{return TWS.Ei;}
     int                  getEMode()const{return TWS.emode;}
     ConvToMDPreprocDet   const * pPrepDetectors()const{return pDetLoc;}
-
-    API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
     std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
+
+//   Kernel::Unit_sptr    getAxisUnits()const;
+//   API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
 //<------------------
 
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
@@ -73,30 +78,30 @@ namespace MDEvents
     //
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const
     {
-        min.assign(dim_min.begin(),dim_min.end());
-        max.assign(dim_max.begin(),dim_max.end());
+        min.assign(TWS.dimMin.begin(),TWS.dimMin.end());
+        max.assign(TWS.dimMax.begin(),TWS.dimMax.end());
     }
     ConvToMDPreprocDet const* getDetectors(){return pDetLoc;}
   protected:
-   // common variables used by all workspace=related methods are deployed here
-   /// pointer to the input workspace;
-    Mantid::API::MatrixWorkspace_sptr inWS2D;
-    /// the properties of the requested target MD workpsace:
-    MDEvents::MDWSDescription TWS;
-    //
-   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
+   // pointer to input matrix workspace;
+   API::MatrixWorkspace_const_sptr inWS2D;
+   // common variables used by all workspace-related methods are specified here
+   // the description of the requested target MD workpsace:
+   MDEvents::MDWSDescription TWS;
+   // pointer to the class, which keeps target workspace and provides functions adding additional MD events to it. 
+   boost::shared_ptr<MDEventWSWrapper> pWSWrapper;
    // pointer to the array of detector's directions in reciprocal space
-    ConvToMDPreprocDet const * pDetLoc;
+   ConvToMDPreprocDet const * pDetLoc;
+   // shared pointer to the converter, which convertd WS coordinates to MD coordinates
+   MDTransf_sptr      pQConverter;
    /// number of target ws dimesnions
-    size_t n_dims;
-    /// array of variables which describe min limits for the target variables;
-    std::vector<double> dim_min;
-    /// the array of variables which describe max limits for the target variables;
-    std::vector<double> dim_max;
-    /// index of current run(workspace) for MD WS combining
-    uint16_t runIndex;
-   /// logger -> to provide logging, for MD dataset file operations
-    static Mantid::Kernel::Logger& convert_log;
+   size_t n_dims;
+   // index of current run(workspace). Used for MD WS combining
+   uint16_t runIndex;
+   // logger -> to provide logging, for MD dataset file operations
+   static Mantid::Kernel::Logger& convert_log;
+   // vector to keep MD coordinates of single event 
+   std::vector<coord_t> Coord;
  private:
     /** internal function which do one peace of work, which should be performed by one thread 
       *
