@@ -5,7 +5,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
-// define function, which adds 
+// register the function, which adds 
 DECLARE_MD_TRANSF(MDTransfModQElastic);
 DECLARE_MD_TRANSF(MDTransfModQInelastic);
 
@@ -14,35 +14,14 @@ DECLARE_MD_TRANSF(MDTransfModQInelastic);
 //**********************************************************************************************************************
 
 bool MDTransfModQElastic::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
-{
-      
-        // 1 coordinate (|Q|) came from workspace, all additional defined by  properties:
+{      
+        // in Elastic case, 1  coordinate (|Q|) came from workspace
+        // in inelastic 2 coordinates (|Q| dE) came from workspace. All other are defined by properties. 
+        // nMatrixDim is either 1 in elastic case or 2 in inelastic
         if(!pHost->fillAddProperties(Coord,nd,nMatrixDim))return false;
-         // get transformation matrix (needed for CrystalAsPoder mode)
-         rotMat = pHost->getTransfMatrix();
-
-         // get pointer to the positions of the detectors
-         std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
-         pDet = &DetDir[0];     //
-         //
-         pHost->getMinMax(dim_min,dim_max);
-         // dim_min/max here are momentums and they are verified on momentum squared base         
-         if(dim_min[0]<0)dim_min[0]=0;
-         if(dim_max[0]<0)dim_max[0]=0;
-
-         // dim_min here is a momentum and it is verified on momentum squared base
-         dim_min[0]*=dim_min[0];
-         dim_max[0]*=dim_max[0];
-         if(std::fabs(dim_min[0]-dim_max[0])<FLT_EPSILON||dim_max[0]<dim_min[0])
-         {
-            std::string ERR = "ModQ coordinate transformation: Min Q^2 value: "+boost::lexical_cast<std::string>(dim_min[0])+
-                              " is more or equal then Max Q^2 value: "+boost::lexical_cast<std::string>(dim_max[0]);
-            throw(std::invalid_argument(ERR));
-         }
-
-         return true;
+        return true;
 }
-    //
+//
 bool MDTransfModQElastic::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
 {
         UNUSED_ARG(Coord); 
@@ -51,7 +30,7 @@ bool MDTransfModQElastic::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t
         ez = (pDet+i)->Z();
         return true;
 }
-    //
+//
 bool MDTransfModQElastic::calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const
 {
    
@@ -73,26 +52,33 @@ bool MDTransfModQElastic::calcMatrixCoord(const double& k0,std::vector<coord_t> 
 void MDTransfModQElastic::initialize(const ConvToMDEventsBase &Conv)
 {      
         pHost      = &Conv;
+        // get transformation matrix (needed for CrystalAsPoder mode)
+        rotMat = pHost->getTransfMatrix();
+
+        // get pointer to the positions of the detectors
+        std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
+        pDet = &DetDir[0];     //
+        //
+        pHost->getMinMax(dim_min,dim_max);
+         // dim_min/max here are momentums and they are verified on momentum squared base         
+        if(dim_min[0]<0)dim_min[0]=0;
+        if(dim_max[0]<0)dim_max[0]=0;
+
+         // dim_min here is a momentum and it is verified on momentum squared base
+         dim_min[0]*=dim_min[0];
+         dim_max[0]*=dim_max[0];
+         if(std::fabs(dim_min[0]-dim_max[0])<FLT_EPSILON||dim_max[0]<dim_min[0])
+         {
+            std::string ERR = "ModQ coordinate transformation: Min Q^2 value: "+boost::lexical_cast<std::string>(dim_min[0])+
+                              " is more or equal then Max Q^2 value: "+boost::lexical_cast<std::string>(dim_max[0]);
+            throw(std::invalid_argument(ERR));
+         }
+
 }
 
 //**********************************************************************************************************************
 //***************************************************   INELASTIC  *****************************************************
 //**********************************************************************************************************************
-
-
-bool MDTransfModQInelastic::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
-{
-
-    /// 2 coordinates (|Q|, DeltaE) came from workspace, are interconnnected all additional defined by  properties, 
-   /// here we copy these values into Coord vector
-    if(!MDTransfModQElastic::calcGenericVariables(Coord, nd))return false;
-     // energy 
-     Ei  =  pHost->getEi();
-    // the wave vector of incident neutrons;
-     ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
-
-     return true;
-}
     
 bool MDTransfModQInelastic::calcMatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
 {
@@ -124,8 +110,13 @@ bool MDTransfModQInelastic::calcMatrixCoord(const double& E_tr,std::vector<coord
 
 void MDTransfModQInelastic::initialize(const ConvToMDEventsBase &Conv)
 { 
-        pHost      = &Conv;
+        MDTransfModQElastic::initialize(Conv);
+
         emode      = (ConvertToMD::EModes)pHost->getEMode();
+       // energy needed in inelastic case
+        Ei  =  pHost->getEi();
+       // the wave vector of incident neutrons;
+        ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
 }
 
 } // End MDAlgorighms namespace

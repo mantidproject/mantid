@@ -1,5 +1,5 @@
 #include "MantidMDEvents/ConvToMDEventsBase.h"
-#include "MantidAPI/ExperimentInfo.h"
+
 namespace Mantid
 {
 namespace MDEvents
@@ -14,19 +14,19 @@ namespace MDEvents
   *
   *@returns the name(ID) of the unit, specified along X-axis of current workspace
 */
-Kernel::Unit_sptr    
-ConvToMDEventsBase::getAxisUnits()const{
-    if(!this->inWS2D.get()){
-        convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
-        throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
-    }
-    API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(0));
-    if(!pAxis){
-        convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
-        throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
-    }
-    return this->inWS2D->getAxis(0)->unit();
-}
+//Kernel::Unit_sptr    
+//ConvToMDEventsBase::getAxisUnits()const{
+//    if(!this->inWS2D.get()){
+//        convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
+//        throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
+//    }
+//    API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(0));
+//    if(!pAxis){
+//        convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
+//        throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
+//    }
+//    return this->inWS2D->getAxis(0)->unit();
+//}
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates for 
     the particular workspace.
 
@@ -74,7 +74,7 @@ bool ConvToMDEventsBase::fillAddProperties(std::vector<coord_t> &Coord,size_t nd
 size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
-        inWS2D= pWS2D;
+        // set up output MD workspace wrapper
         pWSWrapper = inWSWrapper;
         
         // Copy ExperimentInfo (instrument, run, sample) to the output WS
@@ -89,9 +89,13 @@ size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, 
         pDetLoc    = &detLoc;
 
         n_dims       = this->pWSWrapper->nDimensions();
-        
-        dim_min.assign(WSD.dimMin.begin(),WSD.dimMin.end());
-        dim_max.assign(WSD.dimMax.begin(),WSD.dimMax.end());
+       // allocate space for single MDEvent coordinates 
+        Coord.resize(this->n_dims);
+
+        // retrieve the class which does the conversion of workspace data into MD WS coordinates;
+        pQConverter = MDTransfFactory::Instance().create(TWS.AlgID);
+
+        inWS2D = pWS2D;
         
         size_t n_spectra =inWS2D->getNumberHistograms();
         return n_spectra;
