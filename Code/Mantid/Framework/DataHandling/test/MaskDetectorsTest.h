@@ -113,11 +113,10 @@ public:
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
     }
 
-    if (!asMaskWorkspace){
+    if (!asMaskWorkspace)
+    {
       space->setInstrument(instr);
       space->generateSpectraMap();
-
-      std::cout << "another way of find number of detectors = " << space->getInstrument()->getDetectorIDs().size() << std::endl;
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);
@@ -138,12 +137,6 @@ public:
       Detector *d = new Detector("det", i, 0);
       instr->markAsDetector(d);
     }
-
-    /*
-    std::cout << "Here 2) Test... # Detectors = " << instr->getDetectorIDs(true).size() << std::endl;
-    for (size_t i = 0; i < instr->getDetectorIDs().size(); ++i)
-      std::cout << "Detector " << i << "... with ID = " << instr->getDetectorIDs()[i] << std::endl;
-      */
 
     // 2. Workspace
     MatrixWorkspace_sptr space;
@@ -179,21 +172,6 @@ public:
       x.access().push_back(0.0);
       x.access().push_back(10.0);
       spaceEvent->setAllX(x);
-
-      /* TODO Remove me after testing!
-      Mantid::Geometry::Instrument_const_sptr ins = spaceEvent->getInstrument();
-      std::vector<int> detids = ins->getDetectorIDs();
-      std::cout << "Instrument has " << detids.size() << " detectors. " << std::endl;
-      for (size_t idet = 0; idet < detids.size(); ++idet)
-        std::cout << "Detector " << idet << ": ID = " << detids[idet] << std::endl;
-
-      detid2index_map *map = spaceEvent->getDetectorIDToWorkspaceIndexMap(false);
-      std::cout << "DetID -> Index Map... Size = " << map->size() << std::endl;
-      for (detid2index_map::iterator mit = map->begin(); mit != map->end(); ++mit)
-      {
-        std::cout << "Key = " << mit->first << " : Value = " << mit->second << std::endl;
-      }
-      --------------------------------*/
     }
     else if (!asMaskWorkspace)
     {
@@ -225,12 +203,8 @@ public:
 
     if (!asMaskWorkspace)
     {
-      std::cout << "Here. Test... # Detectors = " << instr->getDetectorIDs().size() << std::endl;
-
       space->setInstrument(instr);
       space->generateSpectraMap();
-
-      std::cout << "another way of find number of detectors = " << space->getInstrument()->getDetectorIDs().size() << std::endl;
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);
@@ -491,8 +465,6 @@ public:
   //---------------------------------------------------------------------------------------------
   void test_GroupedDetectors()
   {
-    std::cout << "\n=== Test Grouped Detectors ===\n" << std::endl;
-
     // 1. Genearte an EventWorkspace
     bool event = true;
     std::string name = "GroupedDetectorsSpace";

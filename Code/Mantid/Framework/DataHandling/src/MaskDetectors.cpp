@@ -139,15 +139,6 @@ void MaskDetectors::exec()
     mMaskWS = createMaskWorkspace(WS->getInstrument());
   }
   g_log.debug() << "MaskDetectors():  Internal mask workspace size = " << mMaskWS->getNumberHistograms() << std::endl;
-  /* TODO Delete this section after testing */
-  Geometry::Instrument_const_sptr inpinstrument = WS->getInstrument();
-  Geometry::Instrument_const_sptr maskinstrument = mMaskWS->getInstrument();
-  g_log.notice() << "MaskDetectors() DB1054 InputWorkspacer Instrument : " << inpinstrument->getName() << " Detectors = "
-      << inpinstrument->getDetectorIDs(true).size() << std::endl;
-  g_log.notice() << "MaskDetectors() DB1054 MaskWorkspacer  Instrument : " << maskinstrument->getName() << " Detectors = "
-      << maskinstrument->getDetectorIDs(true).size() << std::endl;
-  /*----------------------------------------*/
-
 
   // 5. Apply spectra/workspace indices
   if ( ! spectraList.empty() )
@@ -179,16 +170,6 @@ void MaskDetectors::exec()
         numdeleted ++;
       }
     }
-    /*
-    for (vit = indexList.begin()+1; vit != indexList.end(); ++vit)
-    {
-      if (*vit == *(vit-1))
-      {
-        vit = indexList.erase(vit);
-        numdeleted ++;
-      }
-    }
-    */
     if (numdeleted > 0)
     {
       g_log.debug() << "MaskDetectors():  " << numdeleted << " input workspace indices are duplicated and thus deleted. " << std::endl;
@@ -215,89 +196,7 @@ void MaskDetectors::exec()
 
   // 8. Apply Mask to input
   maskWorkspace(WS);
-
-  /*
-  // End dealing with spectraList
-  else if ( ! detectorList.empty() )
-  {
-    // Convert from detectors to workspace indexes
-    // This call can be way too slow! Go back to the old way pending improving that
-    //    WS->getIndicesFromDetectorIDs(detectorList, indexList);
-    std::vector<specid_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
-    fillIndexListFromSpectra(indexList,mySpectraList,WS);
-  }
-  // If we have a workspace that could contain masking,copy that in too
-
-  if( prevMasking )
-  {
-    DataObjects::MaskWorkspace_const_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
-    if (maskWS)
-    {
-      if (maskWS->getInstrument()->getDetectorIDs().size() != WS->getInstrument()->getDetectorIDs().size())
-      {
-        throw std::runtime_error("Size mismatch between input Workspace and MaskWorkspace");
-      }
-
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name() << ")" << std::endl;
-      appendToIndexListFromMaskWS(indexList, maskWS);
-    }
-    else
-    {
-      // Check the provided workspace has the same number of spectra as the input
-      if(prevMasking->getNumberHistograms() > WS->getNumberHistograms() )
-      {
-        g_log.error() << "Input workspace has " << WS->getNumberHistograms() << " histograms   vs. " <<
-            "Input masking workspace has " << prevMasking->getNumberHistograms() << " histograms. " << std::endl;
-        throw std::runtime_error("Size mismatch between two input workspaces.");
-      }
-      appendToIndexListFromWS(indexList,prevMasking);
-    }
-  }
   
-  // Need to get hold of the parameter map
-  Geometry::ParameterMap& pmap = WS->instrumentParameters();
-  
-  // If explicitly given a list of detectors to mask, just mark those.
-  // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
-  std::vector<detid_t>::const_iterator it;
-  Instrument_const_sptr instrument = WS->getInstrument();
-  if ( !detectorList.empty() )
-  {
-    for (it = detectorList.begin(); it != detectorList.end(); ++it)
-    {
-      try
-      {
-        if ( const Geometry::ComponentID det = instrument->getDetector(*it)->getComponentID() )
-        {
-          pmap.addBool(det,"masked",true);
-        }
-      }
-      catch(Kernel::Exception::NotFoundError &e)
-      {
-        g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
-      }
-    }
-  }
-  
-  if ( indexList.empty() )
-  {
-      g_log.warning("No spectra affected.");
-      return;
-  }
-  
-  // Get a reference to the spectra-detector map to get hold of detector ID's
-  double prog=0.0;
-  std::vector<size_t>::const_iterator wit;
-  for (wit = indexList.begin(); wit != indexList.end(); ++wit)
-  {
-    WS->maskWorkspaceIndex(*wit);
-
-    //Progress
-    prog+= (1.0/static_cast<int>(indexList.size()));
-    progress(prog);
-  }
-  */
-
   // 9. Finalize
   // a) Event workspace to clear MRU
   if (eventWS)
@@ -441,12 +340,6 @@ void MaskDetectors::applyIndexListToMaskWorkspace(API::MatrixWorkspace_sptr inpW
     g_log.error() << "MaskDetectors() Unable to get DetectorIDToWorkspaceIndex map()! " << std::endl;
     throw std::runtime_error("Unable to getDetectorIDtoWorkspaceIndexMap.");
   }
-  g_log.notice() << "MaskDetectors DB614 det2index map size = " << map->size() << std::endl;
-  detid2index_map::iterator testiter;
-  std::set<size_t> wsset_test;
-  for (testiter = map->begin(); testiter != map->end(); ++testiter)
-    wsset_test.insert(testiter->second);
-  g_log.notice() << "MaskDetectors() DB623:  In DetID -> WS Index Map.  Total " << wsset_test.size() << " individual ws indices." << std::endl;
 
   // 2. Apply
   double prog=0.0;
@@ -598,11 +491,6 @@ void MaskDetectors::maskWorkspace(API::MatrixWorkspace_sptr inpWS)
 
   Geometry::Instrument_const_sptr instrument = inpWS->getInstrument();
   Geometry::ParameterMap& pmap = inpWS->instrumentParameters();
-
-  size_t nummask = 0;
-  for (size_t im = 0; im < mMaskWS->getNumberHistograms(); ++ im)
-    if (mMaskWS->dataY(im)[0] > 0.0) nummask ++;
-  g_log.notice() << "DB1123 In 'maskDetector': There are " << nummask << " detectors to mask among " << mMaskWS->getNumberHistograms() << std::endl;
 
   // FIXME Efficiency + Correctness if grouped detectors
   double prog = 0.25;
