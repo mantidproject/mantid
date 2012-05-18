@@ -1,14 +1,18 @@
 #include "MantidMDEvents/MDTransfModQ.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
-
+// define function, which adds 
+DECLARE_MD_TRANSF(MDTransfModQElastic);
+DECLARE_MD_TRANSF(MDTransfModQInelastic);
 
 //**********************************************************************************************************************
 //***************************************************   ELASTIC   ******************************************************
 //**********************************************************************************************************************
+
 bool MDTransfModQElastic::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
 {
       
@@ -67,8 +71,7 @@ bool MDTransfModQElastic::calcMatrixCoord(const double& k0,std::vector<coord_t> 
 }
 
 void MDTransfModQElastic::initialize(const ConvToMDEventsBase &Conv)
-{
-        nMatrixDim = 1;
+{      
         pHost      = &Conv;
 }
 
@@ -120,9 +123,7 @@ bool MDTransfModQInelastic::calcMatrixCoord(const double& E_tr,std::vector<coord
 }
 
 void MDTransfModQInelastic::initialize(const ConvToMDEventsBase &Conv)
-{
-      // inelastic workspace provides two variables
-        nMatrixDim = 2;
+{ 
         pHost      = &Conv;
         emode      = (ConvertToMD::EModes)pHost->getEMode();
 }

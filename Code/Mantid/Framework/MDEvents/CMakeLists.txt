@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
+	src/MDTransfFactory.cpp
 	src/ConvToMDEventsBase.cpp
 	src/ConvToMDPreprocDet.cpp
 #	src/MDTransfQ3D.cpp
@@ -96,6 +97,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDWSTransfDescr.h
 	inc/MantidMDEvents/ConvToMDEventsBase.h	
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
+	inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
 #	inc/MantidMDEvents/MDTransfQ3D.h
 #	inc/MantidMDEvents/MDTransfNoQ.h
