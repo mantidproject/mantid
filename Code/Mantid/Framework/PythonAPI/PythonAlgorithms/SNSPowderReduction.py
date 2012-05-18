@@ -237,8 +237,11 @@ class SNSPowderReduction(PythonAlgorithm):
         
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
-        if (len(chunk) > 1):
+        # EMPTY_INT() from C++
+        if int(chunk["ChunkNumber"]) < 2147483647:
             name += "_%02d" % (int(chunk["ChunkNumber"]))        
+        else:
+            name += "_%02d" % 0
 
         if extension.endswith("_event.nxs"):
             chunk["Precount"] = True
