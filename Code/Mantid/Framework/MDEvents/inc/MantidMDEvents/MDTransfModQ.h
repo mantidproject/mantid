@@ -86,7 +86,6 @@ public:
      /// function returns the ID, this transformation is known by
      const std::string transfID()const; 
 
-     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
      bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
      void initialize(const ConvToMDEventsBase &Conv);
      // constructor
