@@ -126,6 +126,8 @@ public:
     virtual ~MDTransfInterface(){};
 }; 
 
+typedef boost::shared_ptr<MDTransfInterface> MDTransf_sptr; 
+
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 
