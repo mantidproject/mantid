@@ -15,6 +15,7 @@ set ( SRC_FILES
        src/MatrixWSDataSource.cpp
        src/MatrixWSImageView.cpp
        src/ArrayDataSource.cpp
+       src/ErrorHandler.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -35,6 +36,7 @@ set ( INC_FILES
        inc/MantidQtImageViewer/MatrixWSDataSource.h
        inc/MantidQtImageViewer/MatrixWSImageView.h
        inc/MantidQtImageViewer/ArrayDataSource.h
+       inc/MantidQtImageViewer/ErrorHandler.h
 )
 
 set ( MOC_FILES 

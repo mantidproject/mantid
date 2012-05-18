@@ -5,6 +5,7 @@
 #include "MantidQtImageViewer/RangeHandler.h"
 #include "MantidQtImageViewer/QtUtils.h"
 #include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtImageViewer/ErrorHandler.h"
 
 namespace MantidQt
 {
@@ -63,24 +64,40 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
   QLineEdit* max_control  = iv_ui->x_max_input;
   QLineEdit* step_control = iv_ui->step_input;
 
-  IVUtils::StringToDouble(  min_control->text().toStdString(), min );
-  IVUtils::StringToDouble(  max_control->text().toStdString(), max );
-  IVUtils::StringToDouble(  step_control->text().toStdString(), step );
+  if ( !IVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
+  {
+    ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
+  }
+  if ( !IVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
+  {
+    ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
+  }
+  if ( !IVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
+  {
+    ErrorHandler::Error("Step is not a NUMBER! Value reset.");
+  }
 
                                  // just require step to be non-zero, no other
                                  // bounds. If zero, take a default step size  
   if ( step == 0 ) 
   {
+    ErrorHandler::Error("Step = 0, resetting to default step");
     step = (total_max_x - total_min_x) / 2000.0;
   }
 
   if ( step > 0 )
   {
-    IVUtils::FindValidInterval( min, max );
+    if ( !IVUtils::FindValidInterval( min, max ) )
+    {
+      ErrorHandler::Warning( "[Min,Max] interval invalid, values adjusted" );
+    }
   }
   else
   {
-    IVUtils::FindValidLogInterval( min, max );
+    if ( !IVUtils::FindValidLogInterval( min, max ) )
+    {
+      ErrorHandler::Warning("[Min,Max] log interval invalid, values adjusted");
+    }
   }
 
   SetRange( min, max, step );
@@ -98,20 +115,26 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
  */
 void RangeHandler::SetRange( double min, double max, double step )
 {
-  IVUtils::FindValidInterval( min, max );
-
-  if ( min < total_min_x )
+  if ( !IVUtils::FindValidInterval( min, max ) )
   {
+    ErrorHandler::Warning( "[Min,Max] interval invalid, values adjusted" );
+  }
+
+  if ( min < total_min_x || min > total_max_x )
+  {
+    ErrorHandler::Warning("X Min out of range, resetting to range min.");
     min = total_min_x;
   }
 
-  if ( max > total_max_x )
+  if ( max < total_min_x || max > total_max_x )
   {
+    ErrorHandler::Warning("X Max out of range, resetting to range max.");
     max = total_max_x;
   }
 
   if ( step == 0 )
   {
+    ErrorHandler::Error("Step = 0, resetting to default step");
     step = (max-min)/2000.0;
   }
 
