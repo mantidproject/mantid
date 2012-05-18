@@ -1,4 +1,6 @@
 set ( SRC_FILES
+	src/ADARAPackets.cc
+	src/ADARAParser.cc
 	src/CompressEvents.cpp
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
@@ -92,6 +94,7 @@ set ( SRC_FILES
 	src/RemoveLogs.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
+	src/SNSLiveEventDataListener.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -117,6 +120,7 @@ set ( SRC_FILES
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
+	src/SNSLiveEventDataListener.cpp
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
@@ -125,6 +129,9 @@ set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
         src/LoadDAE/isisds_command.cpp)
 
 set ( INC_FILES
+	inc/MantidDataHandling/ADARA.h
+	inc/MantidDataHandling/ADARAPackets.h
+	inc/MantidDataHandling/ADARAParser.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
@@ -234,6 +241,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/SNSLiveEventDataListener.h
 	inc/MantidDataHandling/StartLiveData.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
@@ -341,6 +349,7 @@ set ( TEST_FILES
 	test/SaveSPETest.h
 	test/SaveToSNSHistogramNexusTest.h
 	test/SetScalingPSDTest.h
+	test/SNSLiveEventDataListenerTest.h
 	test/StartLiveDataTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
