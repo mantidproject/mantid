@@ -95,6 +95,7 @@ class DLLExport MDWSDescription
 
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
+    /// the string describes 
 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
     Kernel::DblMatrix Wtransf; 

@@ -22,6 +22,8 @@ set ( SRC_FILES
 	src/LoadSQW.cpp
 	src/MDTransfFactory.cpp
 	src/ConvToMDEventsBase.cpp
+	src/ConvToMDEventsEvents.cpp
+	src/ConvToMDEventsHisto.cpp
 	src/ConvToMDPreprocDet.cpp
 #	src/MDTransfQ3D.cpp
 #	src/MDTransfNoQ.cpp
@@ -96,6 +98,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDWSDescription.h
 	inc/MantidMDEvents/MDWSTransfDescr.h
 	inc/MantidMDEvents/ConvToMDEventsBase.h	
+	inc/MantidMDEvents/ConvToMDEventsEvents.h
+	inc/MantidMDEvents/ConvToMDEventsHisto.h	
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
 	inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
