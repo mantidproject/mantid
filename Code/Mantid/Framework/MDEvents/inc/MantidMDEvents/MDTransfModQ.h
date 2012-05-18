@@ -3,6 +3,7 @@
 //
 #include "MantidMDEvents/MDTransfInterface.h"
 #include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/MDTransfFactory.h"
 //
 namespace Mantid
 {
@@ -47,11 +48,17 @@ namespace MDEvents
 class DLLExport MDTransfModQElastic: public MDTransfInterface
 { 
 public:
+   /// elastic transformation expects momentum
+    std::string usedUnitID()const{return "Momentum";}
+    /// id for the 
+    const std::string transfID()const;//{return "ModQElastic";}
+
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
     MDTransfModQElastic():pDet(NULL),pHost(NULL),nMatrixDim(1){}
+    //
     void initialize(const ConvToMDEventsBase &Conv);
 
 protected:
@@ -65,7 +72,7 @@ protected:
     Kernel::V3D const * pDet;
     // The pointer to the class, which drives this conversion and provides all necessary values for variables
     ConvToMDEventsBase const* pHost;
-    // number of dimensions, calculated from matrix workspace
+    // number of dimensions, calculated from a matrix workspace
     int nMatrixDim;
     
  
@@ -74,9 +81,16 @@ protected:
 class DLLExport MDTransfModQInelastic: public MDTransfModQElastic
 { 
 public:
+     /// inelastic transformation expects energy transfer to be correct
+     std::string usedUnitID()const{return "DeltaE";}
+     /// function returns the ID, this transformation is known by
+     const std::string transfID()const; 
+
      bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
      bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
      void initialize(const ConvToMDEventsBase &Conv);
+     // constructor
+     MDTransfModQInelastic():MDTransfModQElastic(){nMatrixDim  = 2;}
 private:
     // the energy of the incident neutrons
     double Ei;

@@ -1,6 +1,7 @@
 #ifndef H_IMD_TRANSFORMATION
 #define H_IMD_TRANSFORMATION
-
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid
 {
@@ -42,7 +43,7 @@ namespace MDEvents
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-// forvard declaration for a class, which provides all necessary parameters for the workspace
+// forvard declaration for a class, which would provide all necessary parameters for the transformation
 class ConvToMDEventsBase;
 
 namespace ConvertToMD
@@ -64,7 +65,12 @@ namespace ConvertToMD
 class MDTransfInterface
 {
 public:
-      
+    /** the function returns the unit ID for the input units, the particular transformation expects. 
+     if one wants the transformation to be meaningful, Input X-coordinates
+     used by the transformation have to be expressed in the uinits  specified */
+    virtual std::string usedUnitID()const=0;
+    /**The function describes transformation */
+    virtual const std::string transfID()const=0;
     /** Method deployed out of the loop and calculates all variables needed within the loop.
      * In addition it calculates the property-dependant coordinates, which do not depend on workspace
      *
@@ -100,7 +106,7 @@ public:
     virtual bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
-       double X_ev =double(0.5*(X[j]+X[j+1])); // ! POSSIBLE FACTORY HERE !!! if this histohram interpolation is different
+       double X_ev =double(0.5*(X[j]+X[j+1])); // ! POSSIBLE FACTORY HERE !!! if the histogram interpolation is different
        return calcMatrixCoord(X_ev,Coord);
     }
   
