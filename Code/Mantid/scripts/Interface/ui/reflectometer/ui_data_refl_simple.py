@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Wed May 16 10:19:43 2012
+# Created: Fri May 18 11:57:23 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -114,6 +114,10 @@ class Ui_Frame(object):
         self.incident_medium_combobox.setEditable(True)
         self.incident_medium_combobox.setObjectName("incident_medium_combobox")
         self.incident_medium_combobox.addItem("")
+        self.incident_medium_combobox.addItem("")
+        self.incident_medium_combobox.addItem("")
+        self.incident_medium_combobox.addItem("")
+        self.incident_medium_combobox.addItem("")
         self.horizontalLayout_22.addWidget(self.incident_medium_combobox)
         self.verticalLayout_4.addLayout(self.horizontalLayout_22)
         self.groupBox = QtGui.QGroupBox(self.scrollAreaWidgetContents)
@@ -136,8 +140,12 @@ class Ui_Frame(object):
         self.horizontalLayout.addWidget(self.label)
         self.data_run_number_edit = QtGui.QLineEdit(self.groupBox)
         self.data_run_number_edit.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.data_run_number_edit.setText("")
         self.data_run_number_edit.setObjectName("data_run_number_edit")
         self.horizontalLayout.addWidget(self.data_run_number_edit)
+        self.label_3 = QtGui.QLabel(self.groupBox)
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout.addWidget(self.label_3)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setSpacing(0)
@@ -1287,9 +1295,14 @@ class Ui_Frame(object):
         self.refm_radio.setText(QtGui.QApplication.translate("Frame", "Magnetic Reflectometer (REF_M)", None, QtGui.QApplication.UnicodeUTF8))
         self.refl_radio.setText(QtGui.QApplication.translate("Frame", "Liquids Reflectometer (REF_L)", None, QtGui.QApplication.UnicodeUTF8))
         self.outdir_label_2.setText(QtGui.QApplication.translate("Frame", "Incident medium", None, QtGui.QApplication.UnicodeUTF8))
-        self.incident_medium_combobox.setItemText(0, QtGui.QApplication.translate("Frame", "H20", None, QtGui.QApplication.UnicodeUTF8))
+        self.incident_medium_combobox.setItemText(0, QtGui.QApplication.translate("Frame", "Air (2\")", None, QtGui.QApplication.UnicodeUTF8))
+        self.incident_medium_combobox.setItemText(1, QtGui.QApplication.translate("Frame", "Air (3\")", None, QtGui.QApplication.UnicodeUTF8))
+        self.incident_medium_combobox.setItemText(2, QtGui.QApplication.translate("Frame", "Si", None, QtGui.QApplication.UnicodeUTF8))
+        self.incident_medium_combobox.setItemText(3, QtGui.QApplication.translate("Frame", "Sapphire", None, QtGui.QApplication.UnicodeUTF8))
+        self.incident_medium_combobox.setItemText(4, QtGui.QApplication.translate("Frame", "Quartz", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Data Set", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Frame", "Run number", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("Frame", "ex: 70977   or  70977,70980", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Frame", "Peak selection", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "from pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_from_pixel.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))

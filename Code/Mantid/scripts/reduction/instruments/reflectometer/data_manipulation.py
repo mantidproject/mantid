@@ -55,9 +55,9 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             type = 'Background'
         ws_output_base =  type + " - " + basename
         if is_pixel_y is False:
-            x_title = "Y pixel"
-        else:
             x_title = "X pixel"
+        else:
+            x_title = "Y pixel"
     else:
         ws_output_base = "Counts vs Y pixel - %s" % basename
         x_title = "Y pixel"

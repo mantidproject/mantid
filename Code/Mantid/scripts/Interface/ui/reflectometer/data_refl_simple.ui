@@ -240,7 +240,27 @@ p, li { white-space: pre-wrap; }
                    </property>
                    <item>
                     <property name="text">
-                     <string>H20</string>
+                     <string>Air (2&quot;)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Air (3&quot;)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Si</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Sapphire</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Quartz</string>
                     </property>
                    </item>
                   </widget>
