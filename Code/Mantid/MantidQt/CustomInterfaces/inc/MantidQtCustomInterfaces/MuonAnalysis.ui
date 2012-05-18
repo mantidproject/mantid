@@ -207,12 +207,12 @@
                 </item>
                 <item>
                  <property name="text">
-                  <string>From file</string>
+                  <string>From Data File</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>Choose table</string>
+                  <string>From Disk</string>
                  </property>
                 </item>
                </widget>
