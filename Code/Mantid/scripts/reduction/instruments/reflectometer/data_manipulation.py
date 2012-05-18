@@ -47,17 +47,18 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     """
     basename = os.path.basename(file_path)
     ws_base = "__%s" % basename
+    
     ws_output_base = ''
     if (instrument == 'REFL'):
         if isPeak:
             type = 'Peak'
         else:
             type = 'Background'
-        ws_output_base =  type + " - " + basename
         if is_pixel_y is False:
             x_title = "X pixel"
         else:
             x_title = "Y pixel"
+        ws_output_base =  type + " - " + basename + " - " + x_title 
     else:
         ws_output_base = "Counts vs Y pixel - %s" % basename
         x_title = "Y pixel"
