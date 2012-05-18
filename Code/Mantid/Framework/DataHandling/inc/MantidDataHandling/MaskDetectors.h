@@ -70,6 +70,18 @@ private:
                                 const API::MatrixWorkspace_sptr WS);
   void appendToIndexListFromWS(std::vector<size_t>& indexList, const API::MatrixWorkspace_sptr maskedWorkspace);
   void appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::MaskWorkspace_const_sptr maskedWorkspace);
+
+  DataObjects::MaskWorkspace_sptr createMaskWorkspace(Geometry::Instrument_const_sptr instrument);
+
+  void applyIndexListToMaskWorkspace(API::MatrixWorkspace_sptr inpWS, std::vector<size_t> indexList);
+
+  void applyDetectorListToMaskWorkspace(API::MatrixWorkspace_sptr inpWS, std::vector<detid_t> detectorList);
+
+  void applyWorkspaceToMaskWorkspace(API::MatrixWorkspace_sptr maskedWorkspace);
+
+  void maskWorkspace(API::MatrixWorkspace_sptr inpWS);
+
+  DataObjects::MaskWorkspace_sptr mMaskWS;
 };
 
 } // namespace DataHandling
