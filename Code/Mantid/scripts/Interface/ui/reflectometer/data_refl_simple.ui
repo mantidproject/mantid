@@ -294,6 +294,16 @@ p, li { white-space: pre-wrap; }
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_3">
+                      <property name="text">
+                       <string>ex: 70977   or  70977,70980</string>
+                      </property>
                      </widget>
                     </item>
                    </layout>
