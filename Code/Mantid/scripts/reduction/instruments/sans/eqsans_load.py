@@ -175,14 +175,15 @@ class LoadRun(ReductionStep):
 
         # Load data
         use_config_beam = False
-        #[pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
-        #if pixel_ctr_x == 0.0 and pixel_ctr_y == 0.0:
-        #    use_config_beam = True            
+        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if pixel_ctr_x == 0.0 and pixel_ctr_y == 0.0:
+            use_config_beam = True            
             
         def _load_data_file(file_name, wks_name):
             # Check whether we are processing an event workspace or whether
             # we need to load a file
-            if mtd.workspaceExists(file_name):
+            if mtd.workspaceExists(file_name) \
+                and mtd[file_name].getAxis(0).getUnit().name()=="TOF":
                 input_ws = file_name
                 filepath = None
             else:
@@ -239,7 +240,7 @@ class LoadRun(ReductionStep):
             beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
             if type(reducer._beam_finder) is BaseBeamFinder:
                 reducer.set_beam_finder(BaseBeamFinder(beam_center_x, beam_center_y))
-                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
+                mantid.sendLogMessage("Setting beam center to [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
         
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
