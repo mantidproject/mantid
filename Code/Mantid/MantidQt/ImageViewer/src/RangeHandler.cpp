@@ -122,13 +122,13 @@ void RangeHandler::SetRange( double min, double max, double step )
 
   if ( min < total_min_x || min > total_max_x )
   {
-    ErrorHandler::Warning("X Min out of range, resetting to range min.");
+//    ErrorHandler::Warning("X Min out of range, resetting to range min.");
     min = total_min_x;
   }
 
   if ( max < total_min_x || max > total_max_x )
   {
-    ErrorHandler::Warning("X Max out of range, resetting to range max.");
+//    ErrorHandler::Warning("X Max out of range, resetting to range max.");
     max = total_max_x;
   }
 

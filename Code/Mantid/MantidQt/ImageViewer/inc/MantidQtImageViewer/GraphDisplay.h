@@ -63,6 +63,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
                        double            image_x,
                        double            image_y );
 
+   /// Set up axes using the specified scale factor and replot the graph 
+   void SetRangeScale( double range_scale );
+
    /// Set flag indicating whether or not to use a log scale on the x-axis
    void SetLogX( bool is_log_x );
 
@@ -82,6 +85,11 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
    bool    is_log_x;
    double  image_x;
    double  image_y;
+   double  range_scale;         // fraction of data range to be graphed  
+   double  min_x,
+           max_x;
+   double  min_y,
+           max_y;
 };
 
 } // namespace MantidQt 
