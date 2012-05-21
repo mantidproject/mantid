@@ -1218,7 +1218,8 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
     { 
 
       exec_script += importCommand + "('" + m_uiForm.mask_table->item(row, 2)->text() 
-         + "')\n"; 
+         + "')\n";
+      continue; 
     } 
     
     temp = importCommand + "('MASK";
