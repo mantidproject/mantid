@@ -91,6 +91,42 @@ namespace Mantid
         throw std::invalid_argument("Unknown NeXus file format found in file '" + filename + "'");
       }
 
+      ///Use frequency start for Monitor19 and Special1_19 logs with "No Time" for SNAP
+      try
+      {
+          file.openGroup("DASlogs", "NXgroup");
+          file.openGroup("frequency", "NXlog");
+          file.openData("time");
+
+		  //----- Start time is an ISO8601 string date and time. ------
+		  try
+		  {
+			file.getAttr("start", freqStart);
+
+		  }
+		  catch (::NeXus::Exception &)
+		  {
+			//Some logs have "offset" instead of start
+			try
+			{
+			  file.getAttr("offset", freqStart);
+			}
+			catch (::NeXus::Exception &)
+			{
+			  g_log.warning() << "Log entry has no start time indicated.\n";
+			  file.closeData();
+			  throw;
+			}
+		  }
+		  file.closeData();
+		  file.closeGroup();
+		  file.closeGroup();
+      }
+      catch (::NeXus::Exception&)
+      {
+        // No time. This is not an SNS SNAP file
+      }
+
       // print out the entry level fields
       std::map<std::string,std::string> entries = file.getEntries();
       std::map<std::string,std::string>::const_iterator iend = entries.end();
@@ -453,6 +489,11 @@ namespace Mantid
           throw;
         }
       }
+      if (start.compare("No Time") == 0)
+      {
+          start = freqStart;
+      }
+
       //Convert to date and time
       Kernel::DateAndTime start_time = Kernel::DateAndTime(start);
       std::string time_units;

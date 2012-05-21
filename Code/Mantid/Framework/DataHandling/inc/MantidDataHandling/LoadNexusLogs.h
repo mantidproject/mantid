@@ -95,6 +95,9 @@ namespace Mantid
                                           const std::string & prop_name) const;
       ///Progress reporting object
       boost::shared_ptr<API::Progress> m_progress;
+
+      ///Use frequency start for Monitor19 and Special1_19 logs with "No Time" for SNAP
+      std::string freqStart;
     };
 
   } // namespace DataHandling
