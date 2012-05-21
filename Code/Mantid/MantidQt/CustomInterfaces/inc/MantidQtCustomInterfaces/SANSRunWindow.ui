@@ -62,7 +62,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -797,6 +797,40 @@
        <string>Analysis Details</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_13">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="label_23">
+           <property name="text">
+            <string>Account for gravity</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="gravity_check">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
@@ -833,53 +867,27 @@
               </property>
              </spacer>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Radius (mm)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="qxy_lb">
-              <property name="text">
-               <string>Qxy (A^-1)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="rad_min">
+            <item row="0" column="2">
+             <widget class="QLabel" name="limits_min_lbl">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="maximumSize">
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
+              <property name="text">
+               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QLineEdit" name="rad_max">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
+            <item row="0" column="3">
              <widget class="QLabel" name="limits_max_lbl">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -899,8 +907,31 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="5" column="2">
-             <widget class="QLineEdit" name="qy_max">
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Radius (mm)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="rad_min">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="rad_max">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -915,14 +946,105 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="5" column="3">
-             <widget class="QLabel" name="qy_step_lbl">
+            <item row="2" column="0">
+             <widget class="QLabel" name="wavlength_lb">
+              <property name="toolTip">
+               <string>Controls the output from convert to wavelength</string>
+              </property>
+              <property name="text">
+               <string>Wavelength (A)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2" colspan="2">
+             <widget class="QStackedWidget" name="wav_stack">
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="lineWidth">
+               <number>1</number>
+              </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="page_7">
+               <layout class="QGridLayout" name="gridLayout_21">
+                <property name="margin">
+                 <number>0</number>
+                </property>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="wav_min">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Start and end wavelengths used by convert to wavelengh</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QLineEdit" name="wav_max">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="page_8">
+               <layout class="QHBoxLayout" name="horizontalLayout_18">
+                <property name="margin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="wavRanges">
+                  <property name="toolTip">
+                   <string>Comma separated list of wavelength ranges. One reduction
+will always be done between the first and last ranges the
+intermediate ranges are there for comparison</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="wavRanVal_lb">
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                  <property name="textFormat">
+                   <enum>Qt::AutoText</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item row="2" column="4">
+             <widget class="QLabel" name="wav_step_lbl">
               <property name="text">
                <string>step</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="4">
+            <item row="2" column="5">
              <widget class="QLineEdit" name="wav_dw">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -941,23 +1063,7 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="5" column="4">
-             <widget class="QLineEdit" name="qy_dqy">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="5">
+            <item row="2" column="6">
              <widget class="QComboBox" name="wav_dw_opt">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -996,42 +1102,7 @@ p, li { white-space: pre-wrap; }
               </item>
              </widget>
             </item>
-            <item row="5" column="5">
-             <widget class="QComboBox" name="qy_dqy_opt">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <item>
-               <property name="text">
-                <string>Linear</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="limits_min_lbl">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" colspan="5">
+            <item row="3" column="0" colspan="6">
              <widget class="QStackedWidget" name="q_stack">
               <property name="autoFillBackground">
                <bool>false</bool>
@@ -1148,7 +1219,7 @@ p, li { white-space: pre-wrap; }
               </widget>
              </widget>
             </item>
-            <item row="3" column="5">
+            <item row="3" column="6">
              <widget class="QComboBox" name="q_dq_opt">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -1188,23 +1259,68 @@ p, li { white-space: pre-wrap; }
               </item>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="wavlength_lb">
-              <property name="toolTip">
-               <string>Controls the output from convert to wavelength</string>
-              </property>
+            <item row="5" column="0">
+             <widget class="QLabel" name="qxy_lb">
               <property name="text">
-               <string>Wavelength (A)</string>
+               <string>Qxy (A^-1)</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="1">
-             <widget class="QLineEdit" name="trans_min"/>
+            <item row="5" column="3">
+             <widget class="QLineEdit" name="qy_max">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
-            <item row="6" column="2">
-             <widget class="QLineEdit" name="trans_max"/>
+            <item row="5" column="4">
+             <widget class="QLabel" name="qy_step_lbl">
+              <property name="text">
+               <string>step</string>
+              </property>
+             </widget>
             </item>
-            <item row="6" column="5">
+            <item row="5" column="5">
+             <widget class="QLineEdit" name="qy_dqy">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="6">
+             <widget class="QComboBox" name="qy_dqy_opt">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text">
+                <string>Linear</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="6" column="6">
              <widget class="QComboBox" name="trans_opt">
               <item>
                <property name="text">
@@ -1216,107 +1332,31 @@ p, li { white-space: pre-wrap; }
                 <string>Linear</string>
                </property>
               </item>
+             </widget>
+            </item>
+            <item row="6" column="0" colspan="3">
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
-               <property name="text">
-                <string>Off</string>
-               </property>
+               <widget class="QCheckBox" name="transFitOnOff">
+                <property name="text">
+                 <string>Trans Fit</string>
+                </property>
+               </widget>
               </item>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QStackedWidget" name="wav_stack">
-              <property name="autoFillBackground">
-               <bool>false</bool>
-              </property>
-              <property name="lineWidth">
-               <number>1</number>
-              </property>
-              <property name="currentIndex">
-               <number>0</number>
-              </property>
-              <widget class="QWidget" name="page_7">
-               <layout class="QGridLayout" name="gridLayout_21">
-                <property name="margin">
-                 <number>0</number>
+              <item>
+               <widget class="QCheckBox" name="transFit_ck">
+                <property name="text">
+                 <string>Use</string>
                 </property>
-                <item row="0" column="1">
-                 <widget class="QLineEdit" name="wav_min">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>70</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="toolTip">
-                   <string>Start and end wavelengths used by convert to wavelengh</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="2">
-                 <widget class="QLineEdit" name="wav_max">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>70</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="page_8">
-               <layout class="QHBoxLayout" name="horizontalLayout_18">
-                <property name="margin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <widget class="QLineEdit" name="wavRanges">
-                  <property name="toolTip">
-                   <string>Comma separated list of wavelength ranges. One reduction
-will always be done between the first and last ranges the
-intermediate ranges are there for comparison</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="wavRanVal_lb">
-                  <property name="text">
-                   <string>*</string>
-                  </property>
-                  <property name="textFormat">
-                   <enum>Qt::AutoText</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </widget>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="2" column="3">
-             <widget class="QLabel" name="wav_step_lbl">
-              <property name="text">
-               <string>step</string>
-              </property>
-             </widget>
+            <item row="6" column="4">
+             <widget class="QLineEdit" name="trans_max"/>
             </item>
-            <item row="6" column="0">
-             <widget class="QCheckBox" name="transFit_ck">
-              <property name="text">
-               <string>Trans Fit (A)</string>
-              </property>
-             </widget>
+            <item row="6" column="3">
+             <widget class="QLineEdit" name="trans_min"/>
             </item>
            </layout>
           </widget>
@@ -1740,40 +1780,6 @@ intermediate ranges are there for comparison</string>
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="0" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QLabel" name="label_23">
-           <property name="text">
-            <string>Account for gravity</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="gravity_check">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
@@ -3773,8 +3779,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>q_dq</tabstop>
   <tabstop>q_rebin</tabstop>
   <tabstop>q_dq_opt</tabstop>
-  <tabstop>trans_min</tabstop>
-  <tabstop>trans_max</tabstop>
   <tabstop>trans_opt</tabstop>
   <tabstop>wav_min</tabstop>
   <tabstop>wav_max</tabstop>
