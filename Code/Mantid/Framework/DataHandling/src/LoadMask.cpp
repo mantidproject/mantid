@@ -26,6 +26,7 @@ Supporting
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <fstream>
 
@@ -101,6 +102,10 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("OutputWorkspace", "Masking", Direction::Output),
         "Output Masking Workspace");
 
+    declareProperty(
+        new ArrayProperty<detid_t>("ToMaskDetectorIDsList", boost::make_shared<NullValidator>(), Direction::Output),
+        "A comma separated list or array containing a list of detector ID's to mask." );
+
     return;
   }
 
@@ -140,7 +145,7 @@ namespace DataHandling
     }
 
     // 3. Translate and set geometry
-    g_log.information() << "To Mask: " << std::endl;
+    g_log.debug() << "To Mask: " << std::endl;
     std::vector<int32_t> maskdetids;
     std::vector<int32_t> maskdetidpairsL;
     std::vector<int32_t> maskdetidpairsU;
@@ -150,7 +155,7 @@ namespace DataHandling
     // this->spectrumToDetectors(mask_specid_pair_low, mask_specid_pair_up, maskdetids);
     this->detectorToDetectors(mask_detid_single, mask_detid_pair_low, mask_detid_pair_up, maskdetids, maskdetidpairsL, maskdetidpairsU);
 
-    g_log.information() << "To UnMask: " << std::endl;
+    g_log.debug() << "To UnMask: " << std::endl;
     std::vector<int32_t> unmaskdetids;
     std::vector<int32_t> unmaskdetidpairsL;
     std::vector<int32_t> unmaskdetidpairsU;
@@ -160,12 +165,14 @@ namespace DataHandling
     this->detectorToDetectors(unmask_detid_single, unmask_detid_pair_low, unmask_detid_pair_up, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
 
     // 4. Apply
-
     this->initDetectors();
     this->processMaskOnDetectors(true, maskdetids, maskdetidpairsL, maskdetidpairsU);
     this->processMaskOnWorkspaceIndex(true, mask_specid_pair_low, mask_specid_pair_up);
-
     this->processMaskOnDetectors(false, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
+
+    // 5. Output
+
+    this->setProperty("ToMaskDetectorIDsList", maskdetids);
 
     return;
   }
@@ -235,8 +242,8 @@ namespace DataHandling
    *  -
    */
   void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
-      std::vector<int32_t>& detectors){
-
+      std::vector<int32_t>& detectors)
+  {
     Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
 
     for (size_t i = 0; i < componentnames.size(); i ++){
@@ -400,30 +407,21 @@ namespace DataHandling
    */
   void LoadMask::detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
       std::vector<int32_t>& detectors,
-      std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
+      std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup)
+  {
     UNUSED_ARG(detectorpairslow)
     UNUSED_ARG(detectorpairsup)
 
-    /*
-    for (size_t i = 0; i < singles.size(); i ++){
-      g_log.information() << "Detector " << singles[i] << std::endl;
-    }
-    for (size_t i = 0; i < pairslow.size(); i ++){
-      g_log.information() << "Detector " << pairslow[i] << "  To " << pairsup[i] << std::endl;
-    }
-    */
     for (size_t i = 0; i < singles.size(); i ++){
       detectors.push_back(singles[i]);
     }
-    for (size_t i = 0; i < pairslow.size(); i ++){
-      for (int32_t j = 0; j < pairsup[i]-pairslow[i]+1; j ++){
+    for (size_t i = 0; i < pairslow.size(); i ++)
+    {
+      for (int32_t j = 0; j < pairsup[i]-pairslow[i]+1; j ++)
+      {
         int32_t detid = pairslow[i]+j;
         detectors.push_back(detid);
       }
-      /*
-      detectorpairslow.push_back(pairslow[i]);
-      detectorpairsup.push_back(pairsup[i]);
-      */
     }
 
     return;
@@ -634,19 +632,26 @@ namespace DataHandling
     this->parseRangeText(inputstr, singles, pairs);
 
     // 2. Set to data storage
-    if (tomask){
-      for (size_t i = 0; i < singles.size(); i ++){
+    if (tomask)
+    {
+      for (size_t i = 0; i < singles.size(); i ++)
+      {
         mask_detid_single.push_back(singles[i]);
       }
-      for (size_t i = 0; i < pairs.size()/2; i ++){
+      for (size_t i = 0; i < pairs.size()/2; i ++)
+      {
         mask_detid_pair_low.push_back(pairs[2*i]);
         mask_detid_pair_up.push_back(pairs[2*i+1]);
       }
-    } else {
-      for (size_t i = 0; i < singles.size(); i ++){
+    }
+    else
+    {
+      for (size_t i = 0; i < singles.size(); i ++)
+      {
         unmask_detid_single.push_back(singles[i]);
       }
-      for (size_t i = 0; i < pairs.size()/2; i ++){
+      for (size_t i = 0; i < pairs.size()/2; i ++)
+      {
         unmask_detid_pair_low.push_back(pairs[2*i]);
         unmask_detid_pair_up.push_back(pairs[2*i+1]);
       }
@@ -713,7 +718,8 @@ namespace DataHandling
     return;
   }
 
-  void LoadMask::splitString(std::string inputstr, std::vector<std::string>& strings, std::string sep){
+  void LoadMask::splitString(std::string inputstr, std::vector<std::string>& strings, std::string sep)
+  {
 
     // std::vector<std::string> SplitVec;
     boost::split(strings, inputstr, boost::is_any_of(sep), boost::token_compress_on);
