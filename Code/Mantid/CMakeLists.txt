@@ -143,8 +143,6 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/API )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/SliceViewer )
 
-add_subdirectory ( MantidPlot )
-
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
@@ -157,6 +155,8 @@ set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to
 if ( MAKE_VATES )
   add_subdirectory ( Vates )
 endif ( MAKE_VATES )
+
+add_subdirectory ( MantidPlot )
 
 # python unit tests
 if (PYUNITTEST_FOUND)

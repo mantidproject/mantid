@@ -30,15 +30,18 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
-set ( CMAKE_INSTALL_NAME_DIR ${CMAKE_LIBRARY_PATH} )
-
 set ( CMAKE_INSTALL_PREFIX /Applications )
 set ( INBUNDLE MantidPlot.app/ )
+# We know exactly where this has to be on Darwin
+set ( PARAVIEW_APP_DIR "/Applications/ParaView 3.10.1.app" )
+set ( PARAVIEW_APP_BIN_DIR "${PARAVIEW_APP_DIR}/Contents/MacOS" )
+set ( PARAVIEW_APP_LIB_DIR "${PARAVIEW_APP_DIR}/Contents/Libraries" )
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
 set ( PLUGINS_DIR MantidPlot.app/plugins )
 set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
+set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
 
 install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )

@@ -19,8 +19,8 @@ target_link_libraries( MantidParaViewRebinningTransformObjectPanel
 MantidParaViewQtWidgets )
 
 # Put library into subfolder.
-SET_TARGET_OUTPUT_DIRECTORY( MantidParaViewRebinningTransformObjectPanel  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY( MantidParaViewRebinningTransformObjectPanel  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
 
-install( TARGETS MantidParaViewRebinningTransformObjectPanel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_DIR} )
+install( TARGETS MantidParaViewRebinningTransformObjectPanel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
 
 

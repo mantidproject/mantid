@@ -32,12 +32,13 @@ endif ( USE_TCMALLOC )
 ###########################################################################
 # Set installation variables
 ###########################################################################
-
 set ( BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
 set ( PLUGINS_DIR plugins )
 set ( PVPLUGINS_DIR pvplugins )
+set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
+
 
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/Mantid CACHE PATH "Install path" FORCE )
