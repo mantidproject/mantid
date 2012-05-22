@@ -133,6 +133,7 @@ def initialize_Mantid(mantidpath):
     global mantid_initialized
     if mantid_initialized:   return
     sys.path.append(mantidpath)
+    sys.path.append( os.path.join(mantidpath, 'bin') )
     sys.path.append(os.getcwd())
     sys.path.append( os.path.join( os.getcwd(), 'bin') )
     try:
