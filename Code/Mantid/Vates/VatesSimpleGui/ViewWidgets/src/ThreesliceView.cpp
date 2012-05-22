@@ -21,6 +21,8 @@
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
+#include <QMessageBox>
+
 #include <iostream>
 
 namespace Mantid
@@ -141,9 +143,26 @@ void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
 
 void ThreeSliceView::makeThreeSlice()
 {
-  this->origSrc = pqActiveObjects::instance().activeSource();
+  pqPipelineSource *src = NULL;
+  src = pqActiveObjects::instance().activeSource();
 
-  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+
+  // Do not allow overplotting PeaksWorkspaces
+  if (this->isPeaksWorkspace(src))
+  {
+    QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
+                         QApplication::tr("Threeslice mode does not allow "\
+                                          "overlay of PeaksWorkspaces"));
+    // Need to destroy source since we tried to load it and set the active
+    // back to something. In this case we'll choose the original source
+    builder->destroy(src);
+    pqActiveObjects::instance().setActiveSource(this->origSrc);
+    return;
+  }
+
+  this->origSrc = src;
+
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
