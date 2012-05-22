@@ -51,6 +51,8 @@ public:
     WorkspaceGroup_sptr group = makeGroup();
     Workspace_sptr ws1 = group->getItem(1);
     TS_ASSERT_EQUALS( ws1->name(), "ws1");
+    Workspace_sptr ws11 = group->getItem("ws1");
+    TS_ASSERT_EQUALS( ws1, ws11 );
   }
 
   void test_remove()
