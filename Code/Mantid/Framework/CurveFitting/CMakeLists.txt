@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
 	src/MultiDomainCreator.cpp
+	src/ParDomain.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunction.cpp
@@ -115,6 +116,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/MultiDomainCreator.h
+	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunction.h

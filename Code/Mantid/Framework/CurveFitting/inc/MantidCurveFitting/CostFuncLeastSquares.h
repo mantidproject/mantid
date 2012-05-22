@@ -12,6 +12,9 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  class SeqDomain;
+  class ParDomain;
+
 /** Cost function for least squares
 
     @author Anders Markvardsen, ISIS, RAL
@@ -82,6 +85,7 @@ protected:
     API::FunctionValues_sptr values
     )const;
   void addValDerivHessian(
+    API::IFunction_sptr function,
     API::FunctionDomain_sptr domain,
     API::FunctionValues_sptr values,
     bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
@@ -95,6 +99,9 @@ private:
   mutable bool m_pushed;
   mutable double m_pushedValue;
   mutable GSLVector m_pushedParams;
+
+  friend class SeqDomain;
+  friend class ParDomain;
 
 };
 

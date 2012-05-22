@@ -230,7 +230,7 @@ public:
   //---------------------------------------------------------//
 
   /// Constructor
-  IFunction():m_handler(NULL){}
+  IFunction():m_isParallel(false),m_handler(NULL){}
   /// Virtual destructor
   virtual ~IFunction();
 
@@ -238,6 +238,8 @@ public:
   virtual std::string name()const = 0;
   /// Writes itself into a string
   virtual std::string asString()const;
+  /// Virtual copy constructor
+  virtual boost::shared_ptr<IFunction> clone() const;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {UNUSED_ARG(ws);}
@@ -375,6 +377,11 @@ public:
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
 
+  /// Set the parallel hint
+  void setParallel(bool on) {m_isParallel = on;}
+  /// Get the parallel hint
+  bool isParallel() const {return m_isParallel;}
+
   /// Set a function handler
   void setHandler(FunctionHandler* handler);
   /// Return the handler
@@ -408,6 +415,8 @@ protected:
   FunctionValues m_minusStep;
   /// Values storage for numeric derivatives
   FunctionValues m_plusStep;
+  /// Flag to hint that the function is being used in parallel computations
+  bool m_isParallel;
 
   /// Pointer to a function handler
   FunctionHandler* m_handler;

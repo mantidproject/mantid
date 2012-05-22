@@ -9,6 +9,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunctionWithLocation.h"
@@ -17,6 +18,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
@@ -45,6 +47,14 @@ namespace API
     {
       delete m_handler;
     }
+  }
+
+  /**
+   * Virtual copy constructor
+   */
+  boost::shared_ptr<IFunction> IFunction::clone() const
+  {
+    return FunctionFactory::Instance().createInitialized( this->asString() );
   }
 
 /** Base class implementation calculates the derivatives numerically.
@@ -540,21 +550,36 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
     size_t nParam = nParams();
     size_t nData = domain.size();
 
-    // allocate memory if not already done
-    if (m_minusStep.size() != domain.size())
-    {
-      m_minusStep.reset(domain);
-      m_plusStep.reset(domain);
-    }
+    FunctionValues minusStep(domain);
+    FunctionValues plusStep(domain);
+    std::vector<double> params(nParam);
 
-    applyTies(); // just in case
-    function(domain,m_minusStep);
+    // allocate memory if not already done
+    //if (m_minusStep.size() != domain.size())
+    //{
+    //  m_minusStep.reset(domain);
+    //  m_plusStep.reset(domain);
+    //}
+
+    PARALLEL_CRITICAL(numeric_deriv)
+    {
+      applyTies(); // just in case
+      function(domain,minusStep);
+      for (size_t iP = 0; iP < nParam; iP++)
+      {
+        if ( isActive(iP) )
+        {
+          params[iP] = activeParameter(iP);
+        }
+      }
+    }
 
     for (size_t iP = 0; iP < nParam; iP++)
     {
       if ( isActive(iP) )
       {
-        const double& val = activeParameter(iP);
+        //const double& val = activeParameter(iP);
+        const double& val = params[iP];
         if (fabs(val) < cutoff)
         {
           step = epsilon;
@@ -565,17 +590,20 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
         }
 
         double paramPstep = val + step;
-        setActiveParameter(iP, paramPstep);
-        applyTies(); 
-        function(domain,m_plusStep);
+
+        PARALLEL_CRITICAL(numeric_deriv)
+        {
+          setActiveParameter(iP, paramPstep);
+          applyTies(); 
+          function(domain,plusStep);
+          setActiveParameter(iP, val);
+        }
 
         step = paramPstep - val;
-        setActiveParameter(iP, val);
-
         for (size_t i = 0; i < nData; i++) 
         {
           jacobian.set(i,iP, 
-            (m_plusStep.getCalculated(i) - m_minusStep.getCalculated(i))/step);
+            (plusStep.getCalculated(i) - minusStep.getCalculated(i))/step);
         }
       }
     }

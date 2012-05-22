@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunctionMD.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/MultiThreaded.h"
+
 #include <boost/tokenizer.hpp>
 
 namespace Mantid
@@ -88,12 +90,29 @@ namespace Mantid
     {
       size_t n = m_dimensions.size();
       Kernel::VMD center = r.getCenter();
-      for(size_t i = 0; i < n; ++i)
+      double val = 0.0;
+      PARALLEL_CRITICAL(function)
       {
-        m_vars[i] = center[i];
+        for(size_t i = 0; i < n; ++i)
+        {
+          m_vars[i] = center[i];
+        }
+        //std::cerr << m_vars[0] << ',' << m_vars[1] << ' ' << m_parser.Eval() << std::endl;
+        try
+        {
+          val = m_parser.Eval();
+        }
+        catch(mu::Parser::exception_type &e)
+        {
+          std::cerr << "Message:  " << e.GetMsg() << "\n";
+          std::cerr << "Formula:  " << e.GetExpr() << "\n";
+          std::cerr << "Token:    " << e.GetToken() << "\n";
+          std::cerr << "Position: " << e.GetPos() << "\n";
+          std::cerr << "Errc:     " << e.GetCode() << "\n";
+          throw;
+        }
       }
-      //std::cerr << m_vars[0] << ',' << m_vars[1] << ' ' << m_parser.Eval() << std::endl;
-      return m_parser.Eval();
+      return val;
     }
     /** Static callback function used by MuParser to initialize variables implicitly
     @param varName :: The name of a new variable

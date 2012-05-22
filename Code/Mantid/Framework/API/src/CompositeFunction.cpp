@@ -23,33 +23,32 @@ using std::size_t;
 DECLARE_FUNCTION(CompositeFunction)
 
 /// Copy contructor
-CompositeFunction::CompositeFunction(const CompositeFunction& f):
-//m_nActive(f.m_nParams),
-m_nParams(f.m_nParams),
-m_iConstraintFunction(0)
-{
-  m_functions.assign(f.m_functions.begin(),f.m_functions.end());
-  //m_activeOffsets.assign(f.m_activeOffsets.begin(),f.m_activeOffsets.end());
-  m_paramOffsets.assign(f.m_paramOffsets.begin(),f.m_paramOffsets.end());
-}
-
-///Assignment operator
-CompositeFunction& CompositeFunction::operator=(const CompositeFunction& f)
-{
-  //m_nActive = f.m_nActive;
-  m_nParams = f.m_nParams;
-  m_functions.assign(f.m_functions.begin(),f.m_functions.end());
-  //m_activeOffsets.assign(f.m_activeOffsets.begin(),f.m_activeOffsets.end());
-  m_paramOffsets.assign(f.m_paramOffsets.begin(),f.m_paramOffsets.end());
-  m_iConstraintFunction = f.m_iConstraintFunction;
-  return *this;
-}
+//CompositeFunction::CompositeFunction(const CompositeFunction& f):
+////m_nActive(f.m_nParams),
+//m_nParams(f.m_nParams),
+//m_iConstraintFunction(0)
+//{
+//  m_functions.assign(f.m_functions.begin(),f.m_functions.end());
+//  //m_activeOffsets.assign(f.m_activeOffsets.begin(),f.m_activeOffsets.end());
+//  m_paramOffsets.assign(f.m_paramOffsets.begin(),f.m_paramOffsets.end());
+//}
+//
+/////Assignment operator
+//CompositeFunction& CompositeFunction::operator=(const CompositeFunction& f)
+//{
+//  //m_nActive = f.m_nActive;
+//  m_nParams = f.m_nParams;
+//  m_functions.assign(f.m_functions.begin(),f.m_functions.end());
+//  //m_activeOffsets.assign(f.m_activeOffsets.begin(),f.m_activeOffsets.end());
+//  m_paramOffsets.assign(f.m_paramOffsets.begin(),f.m_paramOffsets.end());
+//  m_iConstraintFunction = f.m_iConstraintFunction;
+//  return *this;
+//}
 
 ///Destructor
 CompositeFunction::~CompositeFunction()
 {
 }
-
 
 /// Function initialization. Declare function parameters in this method.
 void CompositeFunction::init()

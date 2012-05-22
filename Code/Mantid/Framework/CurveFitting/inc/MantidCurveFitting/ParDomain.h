@@ -1,28 +1,20 @@
-#ifndef MANTID_CURVEFITTING_SEQDOMAIN_H_
-#define MANTID_CURVEFITTING_SEQDOMAIN_H_
+#ifndef MANTID_CURVEFITTING_PARDOMAIN_H_
+#define MANTID_CURVEFITTING_PARDOMAIN_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/FunctionValues.h"
-
-#include "MantidCurveFitting/IDomainCreator.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-
-#include <stdexcept>
-#include <vector>
-#include <algorithm>
+#include "MantidCurveFitting/SeqDomain.h"
 
 namespace Mantid
 {
 namespace CurveFitting
 {
-/** An implementation of CompositeDomain.
+/** 
+    An implementation of SeqDomain for parallel cost function and derivatives computation.
 
     @author Roman Tolchenov, Tessella plc
-    @date 15/11/2011
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -44,38 +36,19 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL SeqDomain: public API::FunctionDomain
+class MANTID_CURVEFITTING_DLL ParDomain: public SeqDomain
 {
 public:
-  SeqDomain():API::FunctionDomain(),m_currentIndex(0){}
-  virtual ~SeqDomain(){}
-  /// Return the number of points in the domain
-  virtual size_t size() const;
-  /// Return the number of parts in the domain
-  virtual size_t getNDomains() const;
+  ParDomain():SeqDomain(){}
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const;
-  /// Add new domain creator
-  void addCreator( IDomainCreator_sptr creator );
   /// Calculate the value of a least squares cost function
   virtual void leastSquaresVal(const CostFuncLeastSquares& leastSquares);
   /// Calculate the value, first and second derivatives of a least squares cost function
   virtual void leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian);
-  /// Create an instance of SeqDomain in one of two forms: either SeqDomain for sequential domain creation
-  /// or ParDomain for parallel calculations
-  static SeqDomain* create(IDomainCreator::DomainType type);
-protected:
-  /// Current index
-  mutable size_t m_currentIndex;
-  /// Currently active domain.
-  mutable std::vector< API::FunctionDomain_sptr > m_domain;
-  /// Currently active values.
-  mutable std::vector< API::IFunctionValues_sptr > m_values;
-  /// Domain creators.
-  std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_SEQDOMAIN_H_*/
+#endif /*MANTID_CURVEFITTING_PARDOMAIN_H_*/

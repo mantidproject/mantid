@@ -35,20 +35,7 @@ double CostFuncLeastSquares::val() const
 
   if (seqDomain)
   {
-    API::FunctionDomain_sptr domain;
-    API::IFunctionValues_sptr values;
-    const size_t n = seqDomain->getNDomains();
-    for(size_t i = 0; i < n; ++i)
-    {
-      values.reset();
-      seqDomain->getDomainAndValues( i, domain, values );
-      auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-      if (!simpleValues)
-      {
-        throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
-      }
-      addVal( domain, simpleValues );
-    }
+    seqDomain->leastSquaresVal(*this);
   }
   else
   {
@@ -93,6 +80,7 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
     retVal += val * val;
   }
   
+  PARALLEL_ATOMIC
   m_value += 0.5 * retVal;
 
 }
@@ -172,20 +160,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 
   if (seqDomain)
   {
-    API::FunctionDomain_sptr domain;
-    API::IFunctionValues_sptr values;
-    const size_t n = seqDomain->getNDomains();
-    for(size_t i = 0; i < n; ++i)
-    {
-      values.reset();
-      seqDomain->getDomainAndValues( i, domain, values );
-      auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-      if (!simpleValues)
-      {
-        throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
-      }
-      addValDerivHessian(domain,simpleValues,evalFunction,evalDeriv,evalHessian);
-    }
+    seqDomain->leastSquaresValDerivHessian(*this,evalFunction,evalDeriv,evalHessian);
   }
   else
   {
@@ -194,7 +169,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     {
       throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
     }
-    addValDerivHessian(m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+    addValDerivHessian(m_function,m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
   }
 
   // Add constraints penaly
@@ -253,6 +228,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 /**
  * Update the cost function, derivatives and hessian by adding values calculated
  * on a domain.
+ * @param function :: Function to use to calculate the value and the derivatives
  * @param domain :: The domain.
  * @param values :: The fit function values
  * @param evalFunction :: Flag to evaluate the function
@@ -260,19 +236,20 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
  * @param evalHessian :: Flag to evaluate the Hessian
  */
 void CostFuncLeastSquares::addValDerivHessian(
+  API::IFunction_sptr function,
   API::FunctionDomain_sptr domain,
   API::FunctionValues_sptr values,
   bool evalFunction , bool evalDeriv, bool evalHessian) const
 {
   UNUSED_ARG(evalDeriv);
-  size_t np = m_function->nParams();  // number of parameters 
+  size_t np = function->nParams();  // number of parameters 
   size_t ny = domain->size(); // number of data points
   Jacobian jacobian(ny,np);
   if (evalFunction)
   {
-    m_function->function(*domain,*values);
+    function->function(*domain,*values);
   }
-  m_function->functionDeriv(*domain,jacobian);
+  function->functionDeriv(*domain,jacobian);
 
   size_t iActiveP = 0;
   double fVal = 0.0;
@@ -291,8 +268,8 @@ void CostFuncLeastSquares::addValDerivHessian(
   }
   for(size_t ip = 0; ip < np; ++ip)
   {
-    if ( !m_function->isActive(ip) ) continue;
-    double d = m_der.get(iActiveP);
+    if ( !function->isActive(ip) ) continue;
+    double d = 0.0;
     for(size_t i = 0; i < ny; ++i)
     {
       double calc = values->getCalculated(i);
@@ -305,13 +282,18 @@ void CostFuncLeastSquares::addValDerivHessian(
         fVal += y * y;
       }
     }
-    m_der.set(iActiveP, d);
+    PARALLEL_CRITICAL(der_set)
+    {
+      double der = m_der.get(iActiveP);
+      m_der.set(iActiveP, der + d);
+    }
     //std::cerr << "der " << ip << ' ' << der[iActiveP] << std::endl;
     ++iActiveP;
   }
 
   if (evalFunction)
   {
+    PARALLEL_ATOMIC
     m_value += 0.5 * fVal;
   }
 
@@ -322,22 +304,26 @@ void CostFuncLeastSquares::addValDerivHessian(
   size_t i1 = 0; // active parameter index
   for(size_t i = 0; i < np; ++i) // over parameters
   {
-    if ( !m_function->isActive(i) ) continue;
+    if ( !function->isActive(i) ) continue;
     size_t i2 = 0; // active parameter index
     for(size_t j = 0; j <= i; ++j) // over ~ half of parameters
     {
-      if ( !m_function->isActive(j) ) continue;
-      double d = m_hessian.get(i1,i2);
+      if ( !function->isActive(j) ) continue;
+      double d = 0.0;
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
         double w = values->getFitWeight(k);
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
-      m_hessian.set(i1,i2,d);
-      //std::cerr << "hess " << i1 << ' ' << i2 << std::endl;
-      if (i1 != i2)
+      PARALLEL_CRITICAL(hessian_set)
       {
-        m_hessian.set(i2,i1,d);
+        double h = m_hessian.get(i1,i2);
+        m_hessian.set(i1,i2, h + d);
+        //std::cerr << "hess " << i1 << ' ' << i2 << std::endl;
+        if (i1 != i2)
+        {
+          m_hessian.set(i2,i1,h + d);
+        }
       }
       ++i2;
     }

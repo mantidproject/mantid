@@ -181,7 +181,7 @@ namespace
     {
       if ( m_maxSize < n )
       {
-        SeqDomain* seqDomain = new SeqDomain;
+        SeqDomain* seqDomain = SeqDomain::create( m_domainType );
         domain.reset( seqDomain );
         size_t m = 0;
         while( m < n )
