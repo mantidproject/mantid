@@ -1646,8 +1646,10 @@ class UserFile(ReductionStep):
             det_specif = upper_line[4:]
             if det_specif.startswith('CORR'):
                 self._readDetectorCorrections(upper_line[8:], reducer)
+            elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
+                self._readFrontRescaleShiftSetup(upper_line[4:], reducer)                
             else:
-                # This checks whether the type is correct and issues warnings if it is not
+                # for /DET/FRONT and /DET/REAR commands
                 reducer.instrument.setDetector(det_specif)
         
         elif upper_line.startswith('GRAVITY'):
@@ -1919,6 +1921,48 @@ class UserFile(ReductionStep):
             detector.side_corr = shift
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
+
+    def _readFrontRescaleShiftSetup(self, details, reducer):
+        """
+            Handle user commands of the type DET/RESCALE r and DET/RESCALE/FIT q1 q2 
+            which are used to scale+constant background shift front detector so that
+            data from the front and rear detectors can be merged
+             
+            @param details: the contents of the line after DET/
+            @param reducer: the object that contains all the settings
+        """     
+        values = details.split() 
+        detector = reducer.instrument.getDetector('FRONT')
+        if details.startwith('RESCALE'):
+            if 'FIT' in details:
+                if len(values) == 1:
+                    detector.rescaleAndShift.fitRescale = True 
+                elif len(values) == 3: 
+                    detector.rescaleAndShift.fitRescale = True
+                    detector.rescaleAndShift.qMin = float(values[1])
+                    detector.rescaleAndShift.qMax = float(values[2])
+                else:
+                    _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE/FIT [q1 q2]")
+            else:
+                if len(values) == 2:
+                    detector.rescale = float(values[1])
+                else:
+                    _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
+        elif details.startwith('SHIFT'):
+            if 'FIT' in details:
+                if len(values) == 1:
+                    detector.rescaleAndShift.fitShift = True 
+                elif len(values) == 3: 
+                    detector.rescaleAndShift.fitShift = True
+                    detector.rescaleAndShift.qMin = float(values[1])
+                    detector.rescaleAndShift.qMax = float(values[2])
+                else:
+                    _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/SHIFT/FIT [q1 q2]")
+            else:
+                if len(values) == 2:
+                    detector.shift = float(values[1])
+                else:
+                    _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
 
     def _read_back_line(self, arguments, reducer):
         """
