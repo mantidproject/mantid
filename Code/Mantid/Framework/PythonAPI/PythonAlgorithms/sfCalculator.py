@@ -448,37 +448,42 @@ def outputFittingParameters(a, b, error_a, error_b,
 #        split_lines = text.split('\n')
         split_lines = text
         
-        
         entry_list_to_add = []
         
-        sz = len(a)
-        for i in range(sz):
-
-            _match = False
+        try:
         
-            for _line in split_lines:
-                if _line[0] == '#':
-                    continue
+            sz = len(a)
+            for i in range(sz):
+
+                _match = False
+        
+                for _line in split_lines:
+                    if _line[0] == '#':
+                        continue
             
-                _line_split = _line.split(' ')
-                _incident_medium = variable_value_splitter(_line_split[0])
+                    _line_split = _line.split(' ')
+                    _incident_medium = variable_value_splitter(_line_split[0])
                 
-                if (_incident_medium['value'].strip() == incident_medium.strip()):
-                    _lambdaRequested = variable_value_splitter(_line_split[1])
-                    if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
-                        _s1h = variable_value_splitter(_line_split[2])
-                        if (isWithinRange(_s1h['value'], S1H[i])):
-                            _s2h = variable_value_splitter(_line_split[3])
-                            if (isWithinRange(_s2h['value'],S2H[i])):
-                                _s1w = variable_value_splitter(_line_split[4])
-                                if (isWithinRange(_s1w['value'],S1W[i])):
-                                    _s2w = variable_value_splitter(_line_split[5])
-                                    if (isWithinRange(_s2w['value'],S2W[i])):
-                                        _match = True
-                                        break
+                    if (_incident_medium['value'].strip() == incident_medium.strip()):
+                        _lambdaRequested = variable_value_splitter(_line_split[1])
+                        if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
+                            _s1h = variable_value_splitter(_line_split[2])
+                            if (isWithinRange(_s1h['value'], S1H[i])):
+                                _s2h = variable_value_splitter(_line_split[3])
+                                if (isWithinRange(_s2h['value'],S2H[i])):
+                                    _s1w = variable_value_splitter(_line_split[4])
+                                    if (isWithinRange(_s1w['value'],S1W[i])):
+                                        _s2w = variable_value_splitter(_line_split[5])
+                                        if (isWithinRange(_s2w['value'],S2W[i])):
+                                            _match = True
+                                            break
             
-            if _match == False:
-                entry_list_to_add.append(i)
+                if _match == False:
+                    entry_list_to_add.append(i)
+
+        except:
+            
+            pass
 
         _content = []
         for j in entry_list_to_add:
@@ -735,8 +740,8 @@ def help():
 def calculate(string_runs=None, 
 #              list_attenuator=None, 
               list_peak_back=None, 
-              output_file_name=None,
               incident_medium=None,
+              output_file_name=None,
               tof_range=None):  
     """
     In this current version, the program will automatically calculates
@@ -885,11 +890,11 @@ def calculate(string_runs=None,
                 print '-> numerator  : ' + str(list_runs[index_numerator])
                 print '-> denominator: ' + str(list_runs[index_denominator])
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
-                                       denominator=list_runs[index_denominator],
-                                       list_peak_back_numerator=list_peak_back[index_numerator],
-                                       list_peak_back_denominator=list_peak_back[index_denominator],
-                                       list_objects=list_objects,
-                                       tof_range=tof_range)                                       
+                                      denominator=list_runs[index_denominator],
+                                      list_peak_back_numerator=list_peak_back[index_numerator],
+                                      list_peak_back_denominator=list_peak_back[index_denominator],
+                                      list_objects=list_objects,
+                                      tof_range=tof_range)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
                                 
@@ -913,7 +918,7 @@ def calculate(string_runs=None,
 #        output_file = output_path + '/' + output_pre + output_ext        
         
         if (output_file_name is None) or (output_file_name == ''):
-            output_file_name = "/home/j35/Desktop/RefLsf.cfg"
+            output_file_name = "RefLsf.cfg"
         
         outputFittingParameters(a, b, error_a, error_b, 
                                 _lambdaRequest,

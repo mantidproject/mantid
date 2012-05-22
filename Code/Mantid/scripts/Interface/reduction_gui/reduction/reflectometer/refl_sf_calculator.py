@@ -73,6 +73,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     continue
                         
                 if _arg == 'Incident medium':
+                    
+                    _val=_val[3:-2]
                     if incident_medium.strip() == '':
                         incident_medium = _val
                     continue
@@ -114,7 +116,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         new_script = algo + '(string_runs="' + script_run_attenuator + '"'
         new_script += ',list_peak_back=' + str(list_peak_back)
         
-        #retrieve right incident medium
+        #retrieve right incident medium        
+        
         incident_medium_list = incident_medium.split(',')
         incident_medium = incident_medium_list[incident_medium_index]
         new_script += ',incident_medium="' + incident_medium.strip() + '"'
