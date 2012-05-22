@@ -75,7 +75,7 @@ private:
 
   void applyIndexListToMaskWorkspace(API::MatrixWorkspace_sptr inpWS, std::vector<size_t> indexList);
 
-  void applyDetectorListToMaskWorkspace(API::MatrixWorkspace_sptr inpWS, std::vector<detid_t> detectorList);
+  void applyDetectorListToMaskWorkspace(std::vector<detid_t> detectorList);
 
   void applyWorkspaceToMaskWorkspace(API::MatrixWorkspace_sptr maskedWorkspace);
 

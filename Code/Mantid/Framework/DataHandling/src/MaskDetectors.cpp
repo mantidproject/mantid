@@ -187,7 +187,7 @@ void MaskDetectors::exec()
   // 6. Detectors List
   if ( !detectorList.empty() )
   {
-    applyDetectorListToMaskWorkspace(WS, detectorList);
+    applyDetectorListToMaskWorkspace(detectorList);
   }
 
   // 7. Non-MaskWorkspace masking workspace
@@ -391,10 +391,11 @@ void MaskDetectors::applyIndexListToMaskWorkspace(API::MatrixWorkspace_sptr inpW
 /*
  * Apply a list of detectors (ID) to mask workspace
  */
-void MaskDetectors::applyDetectorListToMaskWorkspace(API::MatrixWorkspace_sptr inpWS, std::vector<detid_t> detectorList)
+void MaskDetectors::applyDetectorListToMaskWorkspace(std::vector<detid_t> detectorList)
 {
   // 1. Get map
-  detid2index_map *map = inpWS->getDetectorIDToWorkspaceIndexMap(false);
+  // detid2index_map *map = inpWS->getDetectorIDToWorkspaceIndexMap(false);
+  detid2index_map *map = mMaskWS->getDetectorIDToWorkspaceIndexMap(false);
 
   // 2. Apply
   for (size_t idet = 0; idet < detectorList.size(); ++ idet)
@@ -510,7 +511,6 @@ void MaskDetectors::maskWorkspace(API::MatrixWorkspace_sptr inpWS)
         continue;
       }
       detid_t detid = mit->second;
-
       try
       {
         const Geometry::ComponentID det = instrument->getDetector(detid)->getComponentID();
@@ -545,7 +545,12 @@ void MaskDetectors::maskWorkspace(API::MatrixWorkspace_sptr inpWS)
     } // END IF
 
     // Report progress
-    if (iws % (static_cast<int>(mMaskWS->getNumberHistograms()/10)) == 0)
+    int denom = static_cast<int>(mMaskWS->getNumberHistograms()/10);
+    if (denom == 0)
+    {
+      denom = 1;
+    }
+    if (iws % (denom) == 0)
     {
       prog+= (0.75/static_cast<double>(mMaskWS->getNumberHistograms()));
       progress(prog);
@@ -556,6 +561,10 @@ void MaskDetectors::maskWorkspace(API::MatrixWorkspace_sptr inpWS)
   g_log.debug() << "Total " << numdetmasked << " detectors are masked. vs. " << numdettomask << " to mask." << std::endl;
 
   progress(1.0);
+
+  // -1 Clean
+  delete maskmap;
+  delete inwsmap;
 
   return;
 }

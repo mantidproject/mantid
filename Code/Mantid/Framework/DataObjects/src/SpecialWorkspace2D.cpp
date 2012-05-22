@@ -56,6 +56,59 @@ namespace DataObjects
         detID_to_WI[detID] = int(wi);
       }
     }
+
+    /* Check whether the instrument is correct or not
+    detid2index_map *detToindexmap = this->getDetectorIDToWorkspaceIndexMap(false);
+    index2detid_map *indexTodetmap = this->getWorkspaceIndexToDetectorIDMap();
+
+    std::cout << "Detector2IndexMap Size = " << detToindexmap->size() << "  Index2DetectorMap Size = " << indexTodetmap->size() << std::endl;
+
+    bool roundtripgood = true;
+    detid2index_map::iterator detit;
+    index2detid_map::iterator indexit;
+    for (detit = detToindexmap->begin(); detit != detToindexmap->end(); ++detit)
+    {
+      detid_t detid = detit->first;
+      size_t index = detit->second;
+      indexit = indexTodetmap->find(index);
+      if (indexit == indexTodetmap->end())
+      {
+        g_log.error() << "Round trip instrument test error for detector " << detid << std::endl;
+        std::cout << "Round trip instrument test error for detector " << detid << std::endl;
+        roundtripgood = false;
+      }
+      else
+      {
+        detid_t rounddetid = indexit->second;
+
+        if (index == 142 || index == 162)
+          std::cout << "WS Index = " << index << " ... Detector = " << detid << std::endl;
+
+        if (rounddetid != detid)
+        {
+          g_log.error() << "Round trip instrument test error for detector " << detid << "  Trip back ID = " << rounddetid << std::endl;
+          std::cout << "Round trip instrument test error for detector " << detid << "  Trip back ID = " << rounddetid << std::endl;
+          roundtripgood = false;
+        }
+      }
+      if (!roundtripgood)
+        break;
+    }
+
+    delete detToindexmap;
+    delete indexTodetmap;
+
+    if (!roundtripgood)
+    {
+      throw std::invalid_argument("Input instrument is not correct!");
+    }
+    else
+    {
+      std::cout << "Successfully generate a SpecialWorkspace2D object!" << std::endl;
+    }
+    */
+
+    return;
   }
 
 
