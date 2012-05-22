@@ -146,10 +146,10 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace",
-                  "",Direction::Input), "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace",
-                  "",Direction::Output), "The name of the output workspace.");
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The name of the input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the output workspace.");
+  //if desired, provide the imaginary part in a separate workspace.
+  declareProperty(new WorkspaceProperty<>("InputImagWorkspace","",Direction::Input,PropertyMode::Optional), "The name of the input workspace for the imaginary part. Leave blank if same as InputWorkspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
@@ -170,6 +170,8 @@ void FFT::init()
 void FFT::exec()
 {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+  if( !inImagWS ) inImagWS = inWS; //workspaces are one and the same
 
   const int iReal = getProperty("Real");
   const int iImag = getProperty("Imaginary");
@@ -255,7 +257,7 @@ void FFT::exec()
     {
       int j = shift? (ySize/2 + i) % ySize : i; 
       data[2*i] = inWS->dataY(iReal)[j];
-      data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
+      data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.;
     }
 
     gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
@@ -298,7 +300,7 @@ void FFT::exec()
     {
       int j = (ySize/2 + i) % ySize;
       data[2*i] = inWS->dataY(iReal)[j];
-      data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
+      data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.;
     }
     gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
     for(int i=0;i<ySize;i++)
