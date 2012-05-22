@@ -33,9 +33,10 @@ GraphDisplay::GraphDisplay( QwtPlot*      graph_plot,
   this->data_source = 0;
   this->is_vertical = is_vertical;
 
-  is_log_x = false;
-  image_x  = 0;
-  image_y  = 0;
+  is_log_x    = false;
+  image_x     = 0;
+  image_y     = 0;
+  range_scale = 1.0;
 
   if ( is_vertical )
   {
@@ -111,27 +112,17 @@ void GraphDisplay::SetData(const QVector<double> & xData,
                                     // the data and attaching
   if ( is_vertical )
   {
-    double min_y = yData[0];
-    double max_y = yData[yData.size()-1];
-
-    double min_x;
-    double max_x;
+    min_y = yData[0];
+    max_y = yData[yData.size()-1];
     IVUtils::FindValidInterval( xData, min_x, max_x );
-
-    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x ); 
-    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
   }
   else
   {
-    double min_x = xData[0];
-    double max_x = xData[xData.size()-1];
-
-    double min_y;
-    double max_y;
+    min_x = xData[0];
+    max_x = xData[xData.size()-1];
     IVUtils::FindValidInterval( yData, min_y, max_y );
-    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
-    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x );
   }
+
 
   if ( is_log_x )
   {
@@ -146,8 +137,37 @@ void GraphDisplay::SetData(const QVector<double> & xData,
 
   curve->setData( xData, yData );
   curve->attach( graph_plot );
-  graph_plot->replot(); 
+
+  SetRangeScale( range_scale );
+
   graph_plot->setAutoReplot(true);
+}
+
+
+/**
+ *  Set up axes using the specified scale factor and replot the graph.
+ *  This is useful for seeing low-level values, by clipping off the higher
+ *  magnitude values.
+ *
+ *  @param range_scale Value between 0 and 1 indicating what fraction of
+ *         graph value range should be plotted.
+ */
+void GraphDisplay::SetRangeScale( double range_scale )
+{
+  this->range_scale = range_scale;
+  if ( is_vertical )
+  {
+    double axis_max = range_scale * ( max_x - min_x ) + min_x;
+    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, axis_max ); 
+    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
+  }
+  else
+  {
+    double axis_max = range_scale * ( max_y - min_y ) + min_y;
+    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, axis_max );
+    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x );
+  }
+  graph_plot->replot();
 }
 
 

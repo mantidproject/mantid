@@ -60,7 +60,7 @@ public:
     API::FunctionDomain_sptr domain, API::IFunctionValues_sptr values);
 
   /// Get fitting function.
-  virtual API::IFunction_sptr getFittingFunction(){return m_function;}
+  virtual API::IFunction_sptr getFittingFunction()const{return m_function;}
 
   /// Calculates covariance matrix
   /// @param covar :: Returned covariance matrix, here as 

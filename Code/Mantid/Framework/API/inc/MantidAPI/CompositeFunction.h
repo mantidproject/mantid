@@ -56,9 +56,9 @@ public:
   /// Default constructor
   CompositeFunction(): m_nParams(0){}
   /// Copy contructor
-  CompositeFunction(const CompositeFunction&);
+  //CompositeFunction(const CompositeFunction&);
   ///Assignment operator
-  CompositeFunction& operator=(const CompositeFunction&);
+  //CompositeFunction& operator=(const CompositeFunction&);
   ///Destructor
   virtual ~CompositeFunction();
 

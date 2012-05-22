@@ -87,3 +87,5 @@ set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
 set ( PLUGINS_DIR plugins )
 set ( PVPLUGINS_DIR PVPlugins )
+set ( PVPLUGINS_SUBDIR PVPlugins ) # Need to tidy these things up!
+

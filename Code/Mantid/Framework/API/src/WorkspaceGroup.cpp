@@ -93,6 +93,17 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const
   return AnalysisDataService::Instance().retrieve(m_wsNames[index]);
 }
 
+/**
+ * Return the workspace by name
+ * @param wsName The name of the workspace
+ * @throws an out_of_range error if the workspace'sname not contained in the group's list of workspace names
+ */
+Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const
+{
+  if ( !this->contains(wsName) )
+    throw std::out_of_range("Workspace "+wsName+" not contained in the group");
+  return AnalysisDataService::Instance().retrieve(wsName);
+}
 
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.
 void WorkspaceGroup::removeAll()

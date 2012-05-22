@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/SeqDomain.h"
+#include "MantidCurveFitting/ParDomain.h"
 
 namespace Mantid
 {
@@ -34,15 +35,15 @@ size_t SeqDomain::getNDomains() const
 void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const
 {
   if ( i >= m_creators.size() ) throw std::range_error("Function domain index is out of range.");
-  if ( !m_domain || i != m_currentIndex )
+  if ( !m_domain[i] || i != m_currentIndex )
   {
-    m_domain.reset();
-    m_values.reset();
-    m_creators[i]->createDomain(m_domain, m_values);
+    m_domain[m_currentIndex].reset();
+    m_values[m_currentIndex].reset();
+    m_creators[i]->createDomain(m_domain[i], m_values[i]);
     m_currentIndex = i;
   }
-  domain = m_domain;
-  values = m_values;
+  domain = m_domain[i];
+  values = m_values[i];
 }
 
 /**
@@ -52,8 +53,75 @@ void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, A
 void SeqDomain::addCreator( IDomainCreator_sptr creator )
 {
   m_creators.push_back( creator );
+  m_domain.push_back( API::FunctionDomain_sptr() );
+  m_values.push_back( API::IFunctionValues_sptr() );
 }
 
+/**
+ * Create an instance of SeqDomain in one of two forms: either SeqDomain for sequential domain creation
+ * or ParDomain for parallel calculations
+ * @param type :: Either Sequential or Parallel
+ */
+SeqDomain* SeqDomain::create(IDomainCreator::DomainType type)
+{
+  if (type == IDomainCreator::Sequential)
+  {
+    return new SeqDomain;
+  }
+  else if (type == IDomainCreator::Parallel)
+  {
+    return new ParDomain;
+  }
+  throw std::invalid_argument("Unknown SeqDomain type");
+}
+
+
+/**
+ * Calculate the value of a least squares cost function
+ * @param leastSquares :: The least squares cost func to calculate the value for
+ */
+void SeqDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
+{
+  API::FunctionDomain_sptr domain;
+  API::IFunctionValues_sptr values;
+  const size_t n = getNDomains();
+  for(size_t i = 0; i < n; ++i)
+  {
+    values.reset();
+    getDomainAndValues( i, domain, values );
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+    if (!simpleValues)
+    {
+      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    }
+    leastSquares.addVal( domain, simpleValues );
+  }
+}
+
+/**
+ * Calculate the value, first and second derivatives of a least squares cost function
+ * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param evalFunction :: Flag to evaluate the value of the cost function
+ * @param evalDeriv :: Flag to evaluate the first derivatives
+ * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
+ */
+void SeqDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian)
+{
+  API::FunctionDomain_sptr domain;
+  API::IFunctionValues_sptr values;
+  const size_t n = getNDomains();
+  for(size_t i = 0; i < n; ++i)
+  {
+    values.reset();
+    getDomainAndValues( i, domain, values );
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+    if (!simpleValues)
+    {
+      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    }
+    leastSquares.addValDerivHessian(leastSquares.getFittingFunction(),domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+  }
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

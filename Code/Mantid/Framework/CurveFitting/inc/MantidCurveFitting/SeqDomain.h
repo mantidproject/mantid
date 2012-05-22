@@ -9,6 +9,7 @@
 #include "MantidAPI/FunctionValues.h"
 
 #include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidCurveFitting/CostFuncLeastSquares.h"
 
 #include <stdexcept>
 #include <vector>
@@ -47,6 +48,7 @@ class MANTID_CURVEFITTING_DLL SeqDomain: public API::FunctionDomain
 {
 public:
   SeqDomain():API::FunctionDomain(),m_currentIndex(0){}
+  virtual ~SeqDomain(){}
   /// Return the number of points in the domain
   virtual size_t size() const;
   /// Return the number of parts in the domain
@@ -55,13 +57,20 @@ public:
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const;
   /// Add new domain creator
   void addCreator( IDomainCreator_sptr creator );
+  /// Calculate the value of a least squares cost function
+  virtual void leastSquaresVal(const CostFuncLeastSquares& leastSquares);
+  /// Calculate the value, first and second derivatives of a least squares cost function
+  virtual void leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian);
+  /// Create an instance of SeqDomain in one of two forms: either SeqDomain for sequential domain creation
+  /// or ParDomain for parallel calculations
+  static SeqDomain* create(IDomainCreator::DomainType type);
 protected:
   /// Current index
   mutable size_t m_currentIndex;
   /// Currently active domain.
-  mutable API::FunctionDomain_sptr m_domain;
+  mutable std::vector< API::FunctionDomain_sptr > m_domain;
   /// Currently active values.
-  mutable API::IFunctionValues_sptr m_values;
+  mutable std::vector< API::IFunctionValues_sptr > m_values;
   /// Domain creators.
   std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
 };

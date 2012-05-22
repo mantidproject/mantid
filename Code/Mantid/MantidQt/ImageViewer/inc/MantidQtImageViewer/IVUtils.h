@@ -64,16 +64,16 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
                                      std::vector<std::string>  & list );
 
     /// find a non-degenerate interval containing all the specified values 
-    static void FindValidInterval( const QVector<double>  & values,
+    static bool FindValidInterval( const QVector<double>  & values,
                                          double           & min,
                                          double           & max );
 
     /// Adjust min and max so that min is strictly less than max
-    static void FindValidInterval( double           & min,
+    static bool FindValidInterval( double           & min,
                                    double           & max );
 
     /// Adjust min and max so they can be used to form a log scale
-    static void FindValidLogInterval( double  & min, double  & max );
+    static bool FindValidLogInterval( double  & min, double  & max );
 
     /// Find the number of steps from min to max on a linear or log scale
     static int NumSteps( double min, double max, double step );

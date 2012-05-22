@@ -18,23 +18,23 @@ namespace API
 {
 
 /// Copy contructor
-ParamFunction::ParamFunction(const ParamFunction& f)
-{
-  m_isFixed.assign(f.m_isFixed.begin(),f.m_isFixed.end());
-  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
-  m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
-  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
-}
+//ParamFunction::ParamFunction(const ParamFunction& f)
+//{
+//  m_isFixed.assign(f.m_isFixed.begin(),f.m_isFixed.end());
+//  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
+//  m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
+//  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
+//}
 
 ///Assignment operator
-ParamFunction& ParamFunction::operator=(const ParamFunction& f)
-{
-  m_isFixed.assign(f.m_isFixed.begin(),f.m_isFixed.end());
-  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
-  m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
-  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
-  return *this;
-}
+//ParamFunction& ParamFunction::operator=(const ParamFunction& f)
+//{
+//  m_isFixed.assign(f.m_isFixed.begin(),f.m_isFixed.end());
+//  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
+//  m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
+//  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
+//  return *this;
+//}
 
 /// Destructor
 ParamFunction::~ParamFunction()
@@ -51,6 +51,48 @@ ParamFunction::~ParamFunction()
   m_constraints.clear();
 }
 
+/**
+ * Virtual copy constructor
+ */
+//boost::shared_ptr<IFunction> ParamFunction::clone() const
+//{
+//  // Create a new instance using the factory
+//  auto fun = FunctionFactory::Instance().createFunction( this->name() );
+//  // copy the attributes
+//  auto attributeNames = this->getAttributeNames();
+//  for(auto attName = attributeNames.begin(); attName != attributeNames.end(); ++attName)
+//  {
+//    auto att = this->getAttribute( *attName );
+//    fun->setAttribute( *attName, att );
+//  }
+//  // copy the parameter vallues
+//  for(size_t i = 0; i < nParams(); ++i)
+//  {
+//    fun->setParameter( i, getParameter( i ) );
+//  }
+//  // copy the ties
+//  for(size_t i = 0; i < nParams(); ++i)
+//  {
+//    auto tie = getTie(i);
+//    if ( tie )
+//    {
+//      fun->addTies( tie->asString() );
+//    }
+//    else if ( isFixed(i) )
+//    {
+//      fun->fix(i);
+//    }
+//  }
+//  // copy the constraints
+//  for(size_t i = 0; i < nParams(); ++i)
+//  {
+//    auto c = getConstraint(i);
+//    if ( c )
+//    {
+//      fun->addConstraints( c->asString() );
+//    }
+//  }
+//}
 
 /** Sets a new value to the i-th parameter.
  *  @param i :: The parameter index

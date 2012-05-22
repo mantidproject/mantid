@@ -60,11 +60,13 @@ public:
   /// Default constructor
   ParamFunction (){}
   /// Copy contructor
-  ParamFunction (const ParamFunction &);
+  //ParamFunction (const ParamFunction &);
   /// Assignment operator
-  ParamFunction & operator=(const ParamFunction &);
+  //ParamFunction & operator=(const ParamFunction &);
   /// Virtual destructor
   virtual ~ParamFunction ();
+  /// Virtual copy constructor
+  //virtual boost::shared_ptr<IFunction> clone() const;
 
   /// Set i-th parameter
   virtual void setParameter(size_t, const double& value, bool explicitlySet = true);

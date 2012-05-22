@@ -87,65 +87,6 @@ void splitPath(const std::string &path, std::vector<std::string> &splitted)
   }
 }
 
-/**
- * Verify that two paths are equal. This can be two directories or two
- * semicolon separated paths.
- *
- * @param left The left path for comparison.
- * @param right The right path for comparison.
- *
- * @return True if the paths match.
- */
-bool pathsEqual(const std::string &left, const std::string &right)
-{
-  if (left == right)
-    return true;
-
-  // deal with silly case of empty paths
-  if (left.empty())
-    return false;
-  if (right.empty())
-    return false;
-
-  // check for path rather than simple directory
-  if ((left.find(";") != std::string::npos) || (right.find(";") != std::string::npos))
-  {
-    // at least one has a semicolons
-
-    std::vector<std::string> leftDirs;
-    splitPath(left, leftDirs);
-
-    std::vector<std::string> rightDirs;
-    splitPath(right, rightDirs);
-
-    // confirm they have the same number of items
-    if (leftDirs.size() != rightDirs.size())
-      return false;
-
-    // sort the vectors
-    std::sort(leftDirs.begin(), leftDirs.end());
-    std::sort(rightDirs.begin(), rightDirs.end());
-
-    // assume that they are in the same order now
-    std::size_t numpaths = leftDirs.size();
-    for (std::size_t i = 0; i < numpaths; i++)
-    {
-      if (!pathsEqual(leftDirs[i], rightDirs[i]))
-        return false;
-    }
-    return true;
-  }
-
-  Poco::File leftDir(left);
-  if (!leftDir.isDirectory())
-    return false;
-  Poco::File rightDir(right);
-  if (!rightDir.isDirectory())
-    return false;
-
-  return (leftDir == rightDir);
-}
-
 } // end of anonymous namespace
 
 /** Inner templated class to wrap the poco library objects that have protected
@@ -1083,14 +1024,9 @@ void ConfigServiceImpl::launchProcess(const std::string& programFilePath, const 
  */
 void ConfigServiceImpl::setString(const std::string & key, const std::string & value)
 {
-  std::string old;
-  try
-  {
-    old = m_pConf->getString(key);
-  } catch (Poco::NotFoundException &)
-  {
-    old = "";
-  }
+  // If the value is unchanged (after any path conversions), there's nothing to do.
+  const std::string old = getString(key);
+  if ( value == old ) return;
 
   //Ensure we keep a correct full path
   std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
@@ -1114,27 +1050,8 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
 
   m_pConf->setString(key, value);
 
-  if (value != old)
-  {
-    // if the property ends in "directory"
-    const std::string dirKey("directory");
-    if (key.size() > dirKey.size() && key.rfind(dirKey) != std::string::npos)
-    {
-      if (pathsEqual(value, old))
-        return;
-    }
-
-    // if the property ends in "directories"
-    const std::string dirsKey("directories");
-    if (key.size() > dirsKey.size() && key.rfind(dirsKey) != std::string::npos)
-    {
-      if (pathsEqual(value, old))
-        return;
-    }
-
-    m_notificationCenter.postNotification(new ValueChanged(key, value, old));
-    m_changed_keys.insert(key);
-  }
+  m_notificationCenter.postNotification(new ValueChanged(key, value, old));
+  m_changed_keys.insert(key);
 }
 
 /** Searches for a string within the currently loaded configuaration values and
@@ -1453,6 +1370,8 @@ void ConfigServiceImpl::setDataSearchDirs(const std::string &searchDirs)
  */
 void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
 {
+  if ( path.empty() ) return;
+
   Poco::Path dirPath;
   try
   {
@@ -1753,7 +1672,13 @@ bool ConfigServiceImpl::quickParaViewCheck() const
   try
   {
     //Try to run "paraview -V", which will succeed if ParaView is installed.
-    std::string cmd("paraview");
+    std::string paraviewDir = getString("paraview.path");
+    std::string cmd = "paraview";
+    if(!paraviewDir.empty())
+    {
+      Poco::Path paraviewExe = Poco::Path(paraviewDir, "paraview");
+      cmd = paraviewExe.toString();
+    }
     std::vector<std::string> args;
     args.push_back("-V");
     Poco::Pipe outPipe;

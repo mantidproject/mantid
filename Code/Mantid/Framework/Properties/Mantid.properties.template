@@ -28,7 +28,7 @@ plugins.directory = @PLUGINS@
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
 plugins.exclude = MantidPythonAPI;dlopen
 
-# Where to find mantid paravie plugin libraries
+# Where to find mantid paraview plugin libraries
 pvplugins.directory = @PV_PLUGINS@
 
 # Where to find Mantid Qt plugin libraries
@@ -80,6 +80,11 @@ pythonalgorithms.refresh.allowed = 0
 # A semi-colon(;) separated list of directories to use to search for data
 # Use forward slash / for all paths
 datasearch.directories = @DATADIRS@
+
+# Path to the ParaView bin directory, i.e. the directory containing the paraview executable
+# Warning: Mantid is compiled against a specific version of ParaView. Ensure that this path
+# points to the ParaView obtained from the Mantid download page
+paraview.path = @PARAVIEW_APP_BIN_DIR@
 
 # A semi-colon(;) separated list of directories to use to search for files other than data
 # Use forward slash / for all paths

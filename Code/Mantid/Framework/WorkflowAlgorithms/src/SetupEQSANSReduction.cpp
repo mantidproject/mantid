@@ -74,6 +74,7 @@ void SetupEQSANSReduction::init()
   // Beam center
   std::string center_grp = "Beam Center";
   declareProperty("FindBeamCenter", false, "If True, the beam center will be calculated");
+  declareProperty("UseConfigBeam", false, "If True, the beam center will be taken from the config file");
 
   //    Option 1: Set beam center by hand
   declareProperty("BeamCenterX", EMPTY_DBL(), "Position of the beam center, in pixel");
@@ -91,6 +92,7 @@ void SetupEQSANSReduction::init()
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
 
   setPropertyGroup("FindBeamCenter", center_grp);
+  setPropertyGroup("UseConfigBeam", center_grp);
   setPropertyGroup("BeamCenterX", center_grp);
   setPropertyGroup("BeamCenterY", center_grp);
   setPropertyGroup("BeamCenterFile", center_grp);
@@ -148,7 +150,8 @@ void SetupEQSANSReduction::exec()
 
   // Load algorithm
   IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad");
-  loadAlg->setProperty("UseConfigBeam", false);
+  const bool useConfigBeam = getProperty("UseConfigBeam");
+  loadAlg->setProperty("UseConfigBeam", useConfigBeam);
   const bool useConfigTOFCuts = getProperty("UseConfigTOFCuts");
   loadAlg->setProperty("UseConfigTOFCuts", useConfigTOFCuts);
   if (!useConfigTOFCuts)
@@ -230,7 +233,8 @@ void SetupEQSANSReduction::exec()
 
     reductionManager->declareProperty(new AlgorithmProperty("SANSBeamFinderAlgorithm"));
     reductionManager->setProperty("SANSBeamFinderAlgorithm", ctrAlg);
-  } else {
+  } else if (!isEmpty(beamCenterX) && !isEmpty(beamCenterY))
+  {
     reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
     reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
   }

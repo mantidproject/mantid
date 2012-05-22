@@ -3,6 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSassena.h"
+#include "MantidAPI/AnalysisDataService.h"
+
+using namespace Mantid;
 
 class LoadSassenaTest : public CxxTest::TestSuite
 {
@@ -15,20 +18,20 @@ public:
     m_inputFile = "outputSassena_1.4.1.h5";
   }
 
-  void testInit()
+  void test_init()
   {
     TS_ASSERT_THROWS_NOTHING( m_alg.initialize() )
     TS_ASSERT( m_alg.isInitialized() )
   }
 
-  void testFileCheck()
+  void test_fileCheck()
   {
     if( !m_alg.isInitialized() ) m_alg.initialize();
     m_alg.setPropertyValue( "Filename", m_inputFile );
     TS_ASSERT_EQUALS(m_alg.fileCheck(m_alg.getPropertyValue("Filename")), 99);
   }
 
-  void testExec()
+  void test_exec()
   {
     std::string result;
     if( !m_alg.isInitialized() ) m_alg.initialize();
@@ -42,6 +45,36 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
     TS_ASSERT( m_alg.isExecuted() );
+
+    //Test the last stored value for each of the workspaces
+    API::WorkspaceGroup_sptr gws = API::AnalysisDataService::Instance().retrieveWS<API::WorkspaceGroup>("outGWS");
+
+    //Test qvectors
+    DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_qvectors") );
+    TS_ASSERT_DELTA( ws->readY(4)[0], 0.02402402, 1e-08 );
+
+    //Test fq
+    ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_fq") );
+    TS_ASSERT_DELTA( ws->readY(0)[4], 1070.7009, 1e-04 );
+    TS_ASSERT_DELTA( ws->readY(1)[4], 674.67703, 1e-05 );
+
+    //Test fq0
+    ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_fq0") );
+    TS_ASSERT_DELTA( ws->readY(0)[4], 1094.1314, 1e-04 );
+    TS_ASSERT_DELTA( ws->readY(1)[4], 652.75902, 1e-05 );
+
+    //Test fq2
+    ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_fq2") );
+    TS_ASSERT_DELTA( ws->readY(0)[4], 358926.16, 1e-02 );
+    TS_ASSERT_EQUALS( ws->readY(1)[4], 0.0);
+
+    //Test fq Real part
+    ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_fqt.Re") );
+    TS_ASSERT_DELTA( ws->readY(4)[7], 1918.2156, 1e-04 );
+
+    //Test fq Imaginary part
+    ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_fqt.Im") );
+    TS_ASSERT_DELTA( ws->readY(4)[7], 656.82368, 1e-05 );
 
   } // end of testExec
 

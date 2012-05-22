@@ -84,10 +84,6 @@ class RefLReduction(PythonAlgorithm):
         from reduction.instruments.reflectometer import wks_utility
         
         run_numbers = self.getProperty("RunNumbers")
-        
-        
-        
-        
 
         backSubMethod = 2   #1 uses RefRoi, 2 used own method
 

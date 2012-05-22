@@ -75,6 +75,8 @@ public:
   size_t size() const { return m_wsNames.size(); }
   /// Return the ith workspace
   Workspace_sptr getItem(const size_t index) const;
+  /// Return the workspace by name
+  Workspace_sptr getItem(const std::string wsName) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
   /// Remove a name from the group

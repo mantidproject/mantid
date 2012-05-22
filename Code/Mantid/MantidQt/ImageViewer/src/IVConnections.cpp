@@ -41,8 +41,6 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->actionOffset_Diagonally->setDisabled(true);
   iv_ui->actionGraph_Rebinned_Data->setDisabled(true);
   iv_ui->menuHelp->setDisabled(true);
-  iv_ui->graph_max_slider->setDisabled(true);
-  iv_ui->graph_max_label->setDisabled(true);
   iv_ui->label_2->setDisabled(true);
  
   this->iv_main_window = iv_main_window;
@@ -96,6 +94,10 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->intensity_slider->setTickPosition(QSlider::TicksBelow);
   iv_ui->intensity_slider->setSliderPosition(30);
 
+  iv_ui->graph_max_slider->setTickInterval(10);
+  iv_ui->graph_max_slider->setTickPosition(QSlider::TicksBelow);
+  iv_ui->graph_max_slider->setSliderPosition(100);
+
   image_picker = new TrackingPicker( iv_ui->imagePlot->canvas() );
   image_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
   image_picker->setTrackerMode(QwtPicker::ActiveOnly);
@@ -142,13 +144,13 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
                    this, SLOT(imageSplitter_moved()) );
 
   QObject::connect(iv_ui->x_min_input, SIGNAL( returnPressed() ),
-                   this, SLOT(range_changed()) );
+                   this, SLOT(image_horizontal_range_changed()) );
 
   QObject::connect(iv_ui->x_max_input, SIGNAL( returnPressed() ),
-                   this, SLOT(range_changed()) );
+                   this, SLOT(image_horizontal_range_changed()) );
 
   QObject::connect(iv_ui->step_input, SIGNAL( returnPressed() ),
-                   this, SLOT(range_changed()) );
+                   this, SLOT(image_horizontal_range_changed()) );
 
   QObject::connect(iv_ui->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
                    this, SLOT(v_scroll_bar_moved()) );
@@ -164,6 +166,10 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
 
   QObject::connect(iv_ui->intensity_slider, SIGNAL(valueChanged(int)),
                    this, SLOT(intensity_slider_moved()) );
+
+  QObject::connect(iv_ui->graph_max_slider, SIGNAL(valueChanged(int)),
+                   this, SLOT(graph_range_changed()) );
+
                                                      // color scale selections 
   iv_ui->actionHeat->setCheckable(true);
   iv_ui->actionHeat->setChecked(true);
@@ -219,7 +225,7 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   QObject::connect( h_graph_picker, SIGNAL(mouseMoved()),
                     this, SLOT(h_graphPicker_moved()) );
 
-  // NOTE: This initialization could be (static?) method ih TrackingPicker
+  // NOTE: This initialization could be a (static?) method in TrackingPicker
   v_graph_picker = new TrackingPicker( iv_ui->v_graphPlot->canvas() );
   v_graph_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
   v_graph_picker->setTrackerMode(QwtPicker::ActiveOnly);
@@ -267,9 +273,24 @@ void IVConnections::toggle_Vscroll()
 }
 
 
-void IVConnections::range_changed()
+void IVConnections::image_horizontal_range_changed()
 {
   image_display->UpdateRange();
+}
+
+
+void IVConnections::graph_range_changed()
+{
+  double value = (double)iv_ui->graph_max_slider->value();
+  double min   = (double)iv_ui->graph_max_slider->minimum();
+  double max   = (double)iv_ui->graph_max_slider->maximum();
+
+  double range_scale = (value - min)/(max - min);
+  if ( range_scale < 0.01 )
+    range_scale = 0.01;
+
+  h_graph_display->SetRangeScale( range_scale );
+  v_graph_display->SetRangeScale( range_scale );
 }
 
 

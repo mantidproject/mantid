@@ -97,7 +97,7 @@ void IVUtils::PushNameValue( const std::string               & name,
  * @param max     Set to be greater than or equal to all values in the list
  *                and strictly more than min.
  */
-void IVUtils::FindValidInterval( const QVector<double>  & values,
+bool IVUtils::FindValidInterval( const QVector<double>  & values,
                                        double           & min,
                                        double           & max )
 {
@@ -112,7 +112,7 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
     if ( max < val )
       max = val;
   }
-  FindValidInterval( min, max );
+  return FindValidInterval( min, max );
 }
 
 
@@ -124,13 +124,18 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
  *
  * @param min     Set to be strictly less than max. 
  * @param max     Set to be strictly greater than min.
+ *
+ * @return true if the original values were OK and are unchanged, return
+ *         false if min or max was altered to make a valid interval.
  */
-void IVUtils::FindValidInterval( double  & min,
+bool IVUtils::FindValidInterval( double  & min,
                                  double  & max )
 {
+  bool values_OK = true;
 
   if ( max == min )           // adjust values so they are not equal
   {
+    values_OK = false;
     if ( min == 0 )
     {
       min = -1,
@@ -145,10 +150,13 @@ void IVUtils::FindValidInterval( double  & min,
 
   if ( min > max )            // fix the order
   {
+    values_OK = false;
     double temp = min;
     min = max;
     max = temp;
   }
+
+  return values_OK;
 }
 
 
@@ -160,22 +168,32 @@ void IVUtils::FindValidInterval( double  & min,
  *
  * @param min     Set to be strictly less than max and more than 0. 
  * @param max     Set to be strictly greater than min.
+ *
+ * @return true if the original values were OK and are unchanged, return
+ *         false if min or max was altered to make a valid interval.
  */
-void IVUtils::FindValidLogInterval( double  & min,
+bool IVUtils::FindValidLogInterval( double  & min,
                                     double  & max )
 {
+  bool values_OK = true;
   if ( min < 0 )
   {
+    std::cout << "min < 0 " << min << std::endl;
+    values_OK = false;
     min = -min;
   }
 
   if ( max < 0 )
   {
+    std::cout << "max < 0 " << max << std::endl;
+    values_OK = false;
     max = -max;
   }
 
   if ( min > max )            // fix the order
   {
+    std::cout << "min > max " << min << " > " << max << std::endl;
+    values_OK = false;
     double temp = min;
     min = max;
     max = temp;
@@ -183,10 +201,14 @@ void IVUtils::FindValidLogInterval( double  & min,
 
   if ( min == 0 && max > 0 )  // raise min, so the interval covers 2 orders
   {                           // of magnitude
+    std::cout << "min == 0, max > 0 " << min << ", " << max << std::endl;
+    values_OK = false;
     min = 0.01 * max;
   }
   else if ( max == min )      // adjust values so they are not equal
   {
+    values_OK = false;
+    std::cout << "min == max " << min << " == " << max << std::endl;
     if ( min == 0 )
     {
       min = 0.1,
@@ -198,6 +220,8 @@ void IVUtils::FindValidLogInterval( double  & min,
       min = 0.1 * min;
     }
   }
+
+  return values_OK;
 }
 
 
@@ -370,32 +394,6 @@ bool IVUtils::CalculateInterval( double   global_min,
 
   return true;
 }
-
-/*
-int main()
-{
-  double new_val;
-  IVUtils::Interpolate( -10, 20, 9, -100, 200, new_val );
-
-  std::cout << "new_val = " << new_val << std::endl;
-
-  size_t first_index;
-  double min = 150;
-  double max = 160;
-  size_t steps = 10;
-
-  IVUtils::CalculateInterval(100, 200, 100, 
-                             first_index, min, max, steps);
-
-  std::cout << "first_index = " << first_index << std::endl;
-  std::cout << "min         = " << min << std::endl;
-  std::cout << "max         = " << max << std::endl;
-  std::cout << "steps       = " << steps << std::endl;
-
-  return 0;
-}
-*/
-
 
 } // namespace MantidQt 
 } // namespace ImageView 

@@ -69,7 +69,7 @@ namespace CurveFitting
     const size_t n = iterator->getDataSize();
     if ( m_domainType != Simple )
     {
-      SeqDomain* seqDomain = new SeqDomain;
+      SeqDomain* seqDomain = SeqDomain::create( m_domainType );
       domain.reset( seqDomain );
       if ( n > m_maxSize )
       {

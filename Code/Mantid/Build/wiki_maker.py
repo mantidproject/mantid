@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ Utility to automatically generate and submit algorithm Wiki pages
 to the mantidproject.org"""
-
+from pdb import set_trace as trace
 import argparse
 import os
 import mwclient
@@ -331,7 +331,9 @@ def do_algorithm(args, algo):
 if __name__ == "__main__":
     # First, get the config for the last settings
     config = ConfigParser.ConfigParser()
-    config_filename = os.path.split(__file__)[0] + "/wiki_maker.ini"
+    localpath = os.path.split(__file__)[0]
+    if not localpath: localpath = '.'
+    config_filename = localpath + "/wiki_maker.ini"
     config.read(config_filename)
     defaultuser = ""
     defaultpassword = ""

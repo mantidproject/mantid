@@ -221,7 +221,7 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.wavlength_lb->setText(QString("Wavelength (%1)").arg(ANGSROM_SYM));
   m_uiForm.qx_lb->setText(QString("Qx (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.qxy_lb->setText(QString("Qxy (%1^-1)").arg(ANGSROM_SYM));
-  m_uiForm.transFit_ck->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
+  m_uiForm.transFitOnOff->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
   m_uiForm.q_rebin->setToolTip("Any string allowed by the Rebin algorithm may be used");
   
  
@@ -733,6 +733,10 @@ bool SANSRunWindow::loadUserFile()
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
   }
+  if ( text == "Off" )
+    m_uiForm.transFitOnOff->setChecked(false);
+  else 
+    m_uiForm.transFitOnOff->setChecked(true);  
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
@@ -1214,7 +1218,8 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
     { 
 
       exec_script += importCommand + "('" + m_uiForm.mask_table->item(row, 2)->text() 
-         + "')\n"; 
+         + "')\n";
+      continue; 
     } 
     
     temp = importCommand + "('MASK";
@@ -1914,15 +1919,23 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   {
     issueWarning("Flood file may not work", "Flood files have not always been compatible with the HAB detector you might want to check '"+floodFile+"'.\nThe reduction will continue");
   }
-  //Set the wavelength ranges, equal to those for the sample unless this box is checked
+  // Set the wavelength ranges, equal to those for the sample unless this box is checked
+  // Also check if the Trans Fit on/off tick is on or off. If Off then set the trans_opt to off
   if (m_uiForm.transFit_ck->isChecked())
   {
-    exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "','" +
-      m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
+    if ( m_uiForm.transFitOnOff->isChecked() )
+      exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "','" +
+        m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
+    else
+      exec_reduce += "i.TransFit('Off','" +
+        m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
   }
   else
   {
-    exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "')\n";
+    if ( m_uiForm.transFitOnOff->isChecked() )
+      exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "')\n";
+    else
+      exec_reduce += "i.TransFit('Off')\n";
   }
 
   //Gravity correction

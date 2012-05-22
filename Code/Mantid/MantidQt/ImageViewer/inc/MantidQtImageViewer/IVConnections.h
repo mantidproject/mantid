@@ -72,7 +72,8 @@ public slots:
   void close_viewer();
   void toggle_Hscroll();
   void toggle_Vscroll();
-  void range_changed();
+  void image_horizontal_range_changed();
+  void graph_range_changed();
   void v_scroll_bar_moved();
   void h_scroll_bar_moved();
   void imageSplitter_moved();
