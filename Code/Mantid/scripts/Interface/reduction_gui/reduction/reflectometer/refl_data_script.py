@@ -51,6 +51,11 @@ class DataSets(BaseScriptElement):
     incident_medium_list = ['H2O']
     incident_medium_index_selected = 0
 
+    #4th column of ASCII file (precision)
+    fourth_column_flag = True
+    fourth_column_dq0 = 0.0009
+    fourth_column_dq_over_q = 0.045
+
     def __init__(self):
         super(DataSets, self).__init__()
         self.reset()
@@ -162,6 +167,11 @@ class DataSets(BaseScriptElement):
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
 
+        #fourth column precision
+        xml += "<fourth_column_flag>%s</fourth_column_flag>\n" % str(self.fourth_column_flag)
+        xml += "<fourth_column_dq0>%s</fourth_column_dq0>\n" % str(self.fourth_column_dq0)
+        xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n " % str(self.fourth_column_dq_over_q)
+
         xml += "</RefLData>\n"
 
         return xml
@@ -259,6 +269,15 @@ class DataSets(BaseScriptElement):
         else:
             self.incident_medium_list = ['H2O']
             self.incident_medium_index_selected = 0
+
+        #fourth column (precision)
+        self.fourth_column_flag = BaseScriptElement.getBoolElement(instrument_dom, "fourth_column_flag")
+        self.fourth_column_dq0 = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq0")
+        self.fourth_column_dq_over_q = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq_over_q")
+
+        print 'self.fourth_column_flag:'
+        print self.fourth_column_flag
+        print
         
     def reset(self):
         """
@@ -299,4 +318,8 @@ class DataSets(BaseScriptElement):
         self.incident_medium_list = DataSets.incident_medium_list
         self.incident_medium_index_selected = DataSets.incident_medium_index_selected
 
+        #4th column (precision)
+        self.fourth_column_flag = DataSets.fourth_column_flag
+        self.fourth_column_dq0 = DataSets.fourth_column_dq0
+        self.fourth_column_dq_over_q = DataSets.fourth_column_dq_over_q
         

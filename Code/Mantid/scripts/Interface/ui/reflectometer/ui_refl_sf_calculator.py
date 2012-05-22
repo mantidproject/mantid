@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'refl_sf_calculator.ui'
 #
-# Created: Wed May 16 10:16:57 2012
+# Created: Tue May 22 11:03:21 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -478,8 +478,8 @@ class Ui_Frame(object):
         self.horizontalLayout_9 = QtGui.QHBoxLayout()
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
         self.label_11 = QtGui.QLabel(self.scrollAreaWidgetContents)
-        self.label_11.setMinimumSize(QtCore.QSize(190, 0))
-        self.label_11.setMaximumSize(QtCore.QSize(190, 16777215))
+        self.label_11.setMinimumSize(QtCore.QSize(170, 0))
+        self.label_11.setMaximumSize(QtCore.QSize(170, 16777215))
         self.label_11.setObjectName("label_11")
         self.horizontalLayout_9.addWidget(self.label_11)
         self.cfg_scaling_factor_file_name = QtGui.QLabel(self.scrollAreaWidgetContents)
@@ -580,7 +580,7 @@ class Ui_Frame(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;color:rgb(0,153,153);\">Click Save To List to apply your changes  →  </span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to add the data set above to the reduction list", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setText(QtGui.QApplication.translate("Frame", "Save to list", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_11.setText(QtGui.QApplication.translate("Frame", "Preview of scaling factor file:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_11.setText(QtGui.QApplication.translate("Frame", "Scaling Factor File Name:", None, QtGui.QApplication.UnicodeUTF8))
         self.cfg_scaling_factor_file_name_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.cfg_scaling_factor_file_name_refresh.setText(QtGui.QApplication.translate("Frame", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 

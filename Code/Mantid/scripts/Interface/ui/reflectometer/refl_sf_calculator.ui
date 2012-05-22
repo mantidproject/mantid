@@ -1489,18 +1489,18 @@ p, li { white-space: pre-wrap; }
                   <widget class="QLabel" name="label_11">
                    <property name="minimumSize">
                     <size>
-                     <width>190</width>
+                     <width>170</width>
                      <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>190</width>
+                     <width>170</width>
                      <height>16777215</height>
                     </size>
                    </property>
                    <property name="text">
-                    <string>Preview of scaling factor file:</string>
+                    <string>Scaling Factor File Name:</string>
                    </property>
                   </widget>
                  </item>
