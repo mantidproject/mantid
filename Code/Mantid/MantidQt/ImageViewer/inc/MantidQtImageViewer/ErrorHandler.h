@@ -1,19 +1,16 @@
-#ifndef EVENT_WS_IMAGE_VIEW_H
-#define EVENT_WS_IMAGE_VIEW_H
+#ifndef  ERROR_HANDLER_H
+#define  ERROR_HANDLER_H
 
 #include "MantidQtImageViewer/DllOptionIV.h"
-#include "MantidAPI/IEventWorkspace.h"
-
-#include "MantidQtImageViewer/ImageView.h"
 
 /**
-    @class EventWSDataSource 
+    @class ErrorHandler 
   
-       This is the top level class for showing an event workspace
-    using an ImageViewer.
+      This class has static methods that do various basic calculations 
+    needed by other parts of the ImageView package.
  
     @author Dennis Mikkelson 
-    @date   2012-04-18 
+    @date   2012-05-18 
      
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
   
@@ -41,20 +38,24 @@ namespace MantidQt
 namespace ImageView
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EventWSImageView 
+
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ErrorHandler 
 {
   public:
 
-    /// Construct an image viewer for the specifed EventWorkspace
-    EventWSImageView( Mantid::API::IEventWorkspace_sptr ev_ws );
+    /// Display the specified string in an error message 
+    static void Error( std::string  text );
 
-   ~EventWSImageView();
+    /// Display the specified string in a warning message 
+    static void Warning( std::string  text );
 
-  private:
-    ImageView *image_view;
+    /// Display the specified string in a notice message 
+    static void Notice( std::string  text );
+
 };
 
 } // namespace MantidQt 
 } // namespace ImageView 
 
-#endif // EVENT_WS_IMAGE_VIEW_H
+
+#endif   // ERROR_HANLDER_H

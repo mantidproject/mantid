@@ -72,6 +72,8 @@ namespace Mantid
       else //See if file looks like Ascii and have a go at doing something about it
       {
         bool is_ascii (true);
+        if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
+        	is_ascii =false;
         for(size_t i=0; i<nread; i++)
         {
           if (!isascii(header.full_hdr[i]))
@@ -96,6 +98,7 @@ namespace Mantid
       }
       
       int confidence(0);
+      if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0) return confidence;
 
       if (isAscii(file))
       {

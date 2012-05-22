@@ -5,6 +5,7 @@
 #include "MantidQtImageViewer/RangeHandler.h"
 #include "MantidQtImageViewer/QtUtils.h"
 #include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtImageViewer/ErrorHandler.h"
 
 namespace MantidQt
 {
@@ -36,7 +37,7 @@ void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
   double default_step = (total_max_x - total_min_x)/(double)total_n_steps;
   if ( total_n_steps > 2000 )
   {
-    default_step = (total_max_x - total_min_x)/2000;
+    default_step = (total_max_x - total_min_x)/2000.0;
   }
 
   SetRange( total_min_x, total_max_x, default_step );
@@ -55,6 +56,7 @@ void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
  *                to display.  This will be adjusted so that it is larger
  *                than min by an integer number of steps.  
  * @param step    This is size of the step to use between min and max.
+ *                If it is less than zero, a log scale is requested.
  */
 void RangeHandler::GetRange( double &min, double &max, double &step )
 {
@@ -62,20 +64,40 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
   QLineEdit* max_control  = iv_ui->x_max_input;
   QLineEdit* step_control = iv_ui->step_input;
 
-  IVUtils::StringToDouble(  min_control->text().toStdString(), min );
-  IVUtils::StringToDouble(  max_control->text().toStdString(), max );
-  IVUtils::StringToDouble(  step_control->text().toStdString(), step );
-
-  IVUtils::FindValidInterval( min, max );
-
-  if ( step < 0 )                    // just require step to be > 0, no other
-  {                                  // bounds
-    step = -step;
+  if ( !IVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
+  {
+    ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
+  }
+  if ( !IVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
+  {
+    ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
+  }
+  if ( !IVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
+  {
+    ErrorHandler::Error("Step is not a NUMBER! Value reset.");
   }
 
-  if ( step == 0 )                   // take a default step size
+                                 // just require step to be non-zero, no other
+                                 // bounds. If zero, take a default step size  
+  if ( step == 0 ) 
   {
-    step = (total_max_x - total_min_x) / 2000;
+    ErrorHandler::Error("Step = 0, resetting to default step");
+    step = (total_max_x - total_min_x) / 2000.0;
+  }
+
+  if ( step > 0 )
+  {
+    if ( !IVUtils::FindValidInterval( min, max ) )
+    {
+      ErrorHandler::Warning( "[Min,Max] interval invalid, values adjusted" );
+    }
+  }
+  else
+  {
+    if ( !IVUtils::FindValidLogInterval( min, max ) )
+    {
+      ErrorHandler::Warning("[Min,Max] log interval invalid, values adjusted");
+    }
   }
 
   SetRange( min, max, step );
@@ -83,34 +105,37 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
 
 
 /**
- * Adjust the values to be consistent with the avaliable data and 
+ * Adjust the values to be consistent with the available data and 
  * diplay them in the controls.
  *
  * @param min     This is the x value at the left edge of the first bin.
  * @param max     This is an x value at the right edge of the last bin.
- * @param step    This is size of the step to use between min and max.
+ * @param step    This is size of the step to use between min and max. 
+ *                If it is less than zero, a log scale is requested.
  */
 void RangeHandler::SetRange( double min, double max, double step )
 {
-  IVUtils::FindValidInterval( min, max );
-
-  if ( min < total_min_x )
+  if ( !IVUtils::FindValidInterval( min, max ) )
   {
+    ErrorHandler::Warning( "[Min,Max] interval invalid, values adjusted" );
+  }
+
+  if ( min < total_min_x || min > total_max_x )
+  {
+//    ErrorHandler::Warning("X Min out of range, resetting to range min.");
     min = total_min_x;
   }
-  if ( max > total_max_x )
-  {
-    max = total_max_x;
-  }
 
-  if ( step < 0 )
+  if ( max < total_min_x || max > total_max_x )
   {
-    step = -step;
+//    ErrorHandler::Warning("X Max out of range, resetting to range max.");
+    max = total_max_x;
   }
 
   if ( step == 0 )
   {
-    step = (max-min)/(double)total_n_steps;
+    ErrorHandler::Error("Step = 0, resetting to default step");
+    step = (max-min)/2000.0;
   }
 
   QtUtils::SetText( 8, 2, min, iv_ui->x_min_input );

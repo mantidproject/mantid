@@ -73,7 +73,7 @@ void EQSANSLoad::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Then name of the output EventWorkspace");
   declareProperty("NoBeamCenter", false, "If true, the detector will not be moved according to the beam center");
-  declareProperty("UseConfigBeam", true, "If true, the beam center defined in the configuration file will be used");
+  declareProperty("UseConfigBeam", false, "If true, the beam center defined in the configuration file will be used");
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
@@ -337,7 +337,7 @@ void EQSANSLoad::getSourceSlitSize()
     }
   }
   dataWS->mutableRun().addProperty("source-aperture-diameter", S1, "mm", true);
-  m_output_message += "   Source aperture diameter = ";
+  m_output_message += "   Source aperture diameter: ";
   Poco::NumberFormatter::append(m_output_message, S1, 1);
   m_output_message += " mm\n";
 }
@@ -590,6 +590,14 @@ void EQSANSLoad::exec()
   bool use_config = getProperty("UseConfig");
   if (use_config && config_file.size()>0)
   {
+    // Special case to force reading the beam center from the config file
+    // We're adding this to be compatible with the original EQSANS load
+    // written in python
+    if (m_center_x==0.0 && m_center_y==0.0)
+    {
+      setProperty("UseConfigBeam", true);
+    }
+
     readConfigFile(config_file);
   } else if (use_config) {
     use_config = false;
@@ -734,6 +742,7 @@ void EQSANSLoad::exec()
 
   dataWS->mutableRun().addProperty("event_ws", getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
+  //m_output_message = "Loaded " + fileName + '\n' + m_output_message;
   setPropertyValue("OutputMessage", m_output_message);
 }
 

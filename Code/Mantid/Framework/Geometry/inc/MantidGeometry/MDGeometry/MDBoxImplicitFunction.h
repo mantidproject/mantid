@@ -50,7 +50,7 @@ namespace Geometry
 
     void construct(const Mantid::Kernel::VMD & min, const Mantid::Kernel::VMD & max);
 
-    ~MDBoxImplicitFunction();
+    virtual ~MDBoxImplicitFunction();
     
   };
 

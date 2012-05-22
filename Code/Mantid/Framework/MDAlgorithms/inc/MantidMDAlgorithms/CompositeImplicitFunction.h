@@ -54,7 +54,7 @@ public:
   //-----------------------------------------------------------------
 
   CompositeImplicitFunction();
-  ~CompositeImplicitFunction();
+  virtual ~CompositeImplicitFunction();
   bool addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
   std::string getName() const;
   std::string toXMLString() const;

@@ -61,7 +61,7 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="techniques">
+              <property name="techniques" stdset="0">
                <stringlist>
                 <string>Muon spectroscopy</string>
                </stringlist>
@@ -98,7 +98,7 @@
                 <item>
                  <widget class="QLineEdit" name="timeZeroFront">
                   <property name="enabled">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -207,12 +207,12 @@
                 </item>
                 <item>
                  <property name="text">
-                  <string>From file</string>
+                  <string>From Data File</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>Choose table</string>
+                  <string>From Disk</string>
                  </property>
                 </item>
                </widget>
@@ -240,7 +240,7 @@
              </layout>
             </item>
             <item row="2" column="2">
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunDeadTimeFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunDeadTimeFile" native="true">
               <property name="label" stdset="0">
                <string>Load Dead Time Table:</string>
               </property>
@@ -301,7 +301,7 @@
             <item>
              <layout class="QHBoxLayout" name="fileInputLayout">
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles">
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                   <horstretch>0</horstretch>
@@ -1681,11 +1681,13 @@
    <class>MantidQt::MantidWidgets::FitPropertyBrowser</class>
    <extends>QDockWidget</extends>
    <header>MantidQtMantidWidgets/FitPropertyBrowser.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::MuonFitPropertyBrowser</class>
    <extends>MantidQt::MantidWidgets::FitPropertyBrowser</extends>
    <header>MantidQtMantidWidgets/MuonFitPropertyBrowser.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

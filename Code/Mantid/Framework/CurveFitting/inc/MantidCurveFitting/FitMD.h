@@ -52,7 +52,8 @@ namespace Mantid
       FitMD(Kernel::IPropertyManager* fit, const std::string& workspacePropertyName, DomainType domainType = Simple);
       /// Constructor
       FitMD(DomainType domainType = Simple)
-        :IDomainCreator(NULL,std::vector<std::string>(),domainType){}
+        :IDomainCreator(NULL,std::vector<std::string>(),domainType),
+        m_startIndex(0),m_count(0){}
       /// declare properties that specify the dataset within the workspace to fit to.
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);
       /// Create a domain from the input workspace
@@ -63,6 +64,8 @@ namespace Mantid
       virtual size_t getDomainSize() const;
       /// Set the workspace
       void setWorkspace( boost::shared_ptr<API::IMDWorkspace> IMDWorkspace ) {m_IMDWorkspace = IMDWorkspace;}
+      /// Set the range
+      void setRange(size_t startIndex, size_t count);
       /// Set max size for Sequantial and Parallel domains
       /// @param maxSize :: Maximum size of each simple domain
       void setMaxSize(size_t maxSize){m_maxSize = maxSize;}
@@ -77,6 +80,10 @@ namespace Mantid
       mutable boost::shared_ptr<API::IMDWorkspace> m_IMDWorkspace;
       /// Max size for seq domain
       mutable size_t m_maxSize;
+      /// Starting index
+      size_t m_startIndex;
+      /// Size of the domain if part of the workspace is used
+      size_t m_count;
     };
 
     

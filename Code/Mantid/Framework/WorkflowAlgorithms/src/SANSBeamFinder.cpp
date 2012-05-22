@@ -94,10 +94,12 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string& beamC
       std::string msg = loadAlg->getPropertyValue("OutputMessage");
       m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
     } else {
-      IAlgorithm_sptr loadAlg = m_reductionManager->getProperty("LoadAlgorithm");
-      loadAlg->setChild(true);
-      loadAlg->setChildStartProgress(0.1);
-      loadAlg->setChildEndProgress(0.3);
+      // Get load algorithm as a string so that we can create a completely
+      // new proxy and ensure that we don't overwrite existing properties
+      IAlgorithm_sptr loadAlg0 = m_reductionManager->getProperty("LoadAlgorithm");
+      const std::string loadString = loadAlg0->toString();
+      IAlgorithm_sptr loadAlg = Algorithm::fromString(loadString);
+
       loadAlg->setProperty("Filename", beamCenterFile);
       if (loadAlg->existsProperty("NoBeamCenter")) loadAlg->setProperty("NoBeamCenter", true);
       if (loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", EMPTY_DBL());
@@ -105,7 +107,8 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string& beamC
       loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->setPropertyValue("OutputWorkspace", finderWSName);
       loadAlg->execute();
-      finderWS = loadAlg->getProperty("OutputWorkspace");
+      boost::shared_ptr<Workspace> wks = AnalysisDataService::Instance().retrieve(finderWSName);
+      finderWS = boost::dynamic_pointer_cast<MatrixWorkspace>(wks);
 
       m_output_message += "   |Loaded " + beamCenterFile + "\n";
       if (loadAlg->existsProperty("OutputMessage"))
@@ -242,6 +245,8 @@ void SANSBeamFinder::exec()
 
 /*
  * The standard HFIR reduction masks the edges of the detector
+ * This is here mostly to allow a direct comparison with old HFIR code
+ * and ensure that we reproduce the same results
  */
 void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high, int low, int left, int right)
 {

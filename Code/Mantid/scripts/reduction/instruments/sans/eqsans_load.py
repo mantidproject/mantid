@@ -182,7 +182,8 @@ class LoadRun(ReductionStep):
         def _load_data_file(file_name, wks_name):
             # Check whether we are processing an event workspace or whether
             # we need to load a file
-            if mtd.workspaceExists(file_name):
+            if mtd.workspaceExists(file_name) \
+                and mtd[file_name].getAxis(0).getUnit().name()=="TOF":
                 input_ws = file_name
                 filepath = None
             else:
@@ -192,23 +193,23 @@ class LoadRun(ReductionStep):
             l = EQSANSLoad(Filename=filepath,
                            InputWorkspace=input_ws,
                            OutputWorkspace=wks_name,
-                       UseConfigBeam=use_config_beam,
-                       BeamCenterX=pixel_ctr_x,
-                       BeamCenterY=pixel_ctr_y,
-                       UseConfigTOFCuts=self._use_config_cutoff,
-                       LowTOFCut=self._low_TOF_cut,
-                       HighTOFCut=self._high_TOF_cut,
-                       SkipTOFCorrection=self._skip_tof_correction,
-                       WavelengthStep=self._wavelength_step,
-                       UseConfigMask=self._use_config_mask,
-                       UseConfig=self._use_config,
-                       CorrectForFlightPath=self._correct_for_flight_path,
-                       SampleDetectorDistance=self._sample_det_dist,
-                       SampleDetectorDistanceOffset=self._sample_det_offset,
-                       PreserveEvents=self._keep_events,
-                       LoadMonitors=self._load_monitors,
-                       ReductionProperties=reducer.get_reduction_table_name()
-                       )            
+                           UseConfigBeam=use_config_beam,
+                           BeamCenterX=None,
+                           BeamCenterY=None,
+                           UseConfigTOFCuts=self._use_config_cutoff,
+                           LowTOFCut=self._low_TOF_cut,
+                           HighTOFCut=self._high_TOF_cut,
+                           SkipTOFCorrection=self._skip_tof_correction,
+                           WavelengthStep=self._wavelength_step,
+                           UseConfigMask=self._use_config_mask,
+                           UseConfig=self._use_config,
+                           CorrectForFlightPath=self._correct_for_flight_path,
+                           SampleDetectorDistance=self._sample_det_dist,
+                           SampleDetectorDistanceOffset=self._sample_det_offset,
+                           PreserveEvents=self._keep_events,
+                           LoadMonitors=self._load_monitors,
+                           ReductionProperties=reducer.get_reduction_table_name()
+                           )            
             return l.getPropertyValue("OutputMessage")
         
         # Check whether we have a list of files that need merging
@@ -239,7 +240,7 @@ class LoadRun(ReductionStep):
             beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
             if type(reducer._beam_finder) is BaseBeamFinder:
                 reducer.set_beam_finder(BaseBeamFinder(beam_center_x, beam_center_y))
-                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
+                mantid.sendLogMessage("Setting beam center to [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
         
         # Remove the dirty flag if it existed
         reducer.clean(workspace)

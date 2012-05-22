@@ -3,6 +3,7 @@
 #include <QtGui>
 #include <QVector>
 #include <QString>
+#include <qwt_scale_engine.h>
 
 #include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/QtUtils.h"
@@ -30,10 +31,12 @@ GraphDisplay::GraphDisplay( QwtPlot*      graph_plot,
   this->graph_plot  = graph_plot;
   this->graph_table = graph_table;
   this->data_source = 0;
-  
   this->is_vertical = is_vertical;
-  image_x = 0;
-  image_y = 0;
+
+  is_log_x    = false;
+  image_x     = 0;
+  image_y     = 0;
+  range_scale = 1.0;
 
   if ( is_vertical )
   {
@@ -61,6 +64,18 @@ GraphDisplay::~GraphDisplay()
 void GraphDisplay::SetDataSource( ImageDataSource* data_source )
 {
   this->data_source = data_source;
+}
+
+
+/**
+ * Set flag indicating whether or not to use a log scale on the x-axis
+ *
+ * @param is_log_x  Pass in true to use a log scale on the x-axis and false
+ *                  to use a linear scale. 
+ */
+void GraphDisplay::SetLogX( bool is_log_x )
+{
+  this->is_log_x = is_log_x;
 }
 
 
@@ -97,32 +112,62 @@ void GraphDisplay::SetData(const QVector<double> & xData,
                                     // the data and attaching
   if ( is_vertical )
   {
-    double min_y = yData[0];
-    double max_y = yData[yData.size()-1];
-
-    double min_x;
-    double max_x;
+    min_y = yData[0];
+    max_y = yData[yData.size()-1];
     IVUtils::FindValidInterval( xData, min_x, max_x );
-
-    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x ); 
-    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
   }
   else
   {
-    double min_x = xData[0];
-    double max_x = xData[xData.size()-1];
-
-    double min_y;
-    double max_y;
+    min_x = xData[0];
+    max_x = xData[xData.size()-1];
     IVUtils::FindValidInterval( yData, min_y, max_y );
-    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
-    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x );
+  }
+
+
+  if ( is_log_x )
+  {
+    QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
+    graph_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
+  }
+  else
+  {
+    QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
+    graph_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
   }
 
   curve->setData( xData, yData );
   curve->attach( graph_plot );
-  graph_plot->replot(); 
+
+  SetRangeScale( range_scale );
+
   graph_plot->setAutoReplot(true);
+}
+
+
+/**
+ *  Set up axes using the specified scale factor and replot the graph.
+ *  This is useful for seeing low-level values, by clipping off the higher
+ *  magnitude values.
+ *
+ *  @param range_scale Value between 0 and 1 indicating what fraction of
+ *         graph value range should be plotted.
+ */
+void GraphDisplay::SetRangeScale( double range_scale )
+{
+  this->range_scale = range_scale;
+  if ( is_vertical )
+  {
+    double axis_max = range_scale * ( max_x - min_x ) + min_x;
+    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, axis_max ); 
+    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, max_y );
+  }
+  else
+  {
+    double axis_max = range_scale * ( max_y - min_y ) + min_y;
+    graph_plot->setAxisScale( QwtPlot::yLeft, min_y, axis_max );
+    graph_plot->setAxisScale( QwtPlot::xBottom, min_x, max_x );
+  }
+  graph_plot->replot();
 }
 
 
@@ -141,8 +186,14 @@ void GraphDisplay::SetPointedAtPoint( QPoint point )
   double x = graph_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = graph_plot->invTransform( QwtPlot::yLeft, point.y() );
 
-  data_source->RestrictX( x );
-  data_source->RestrictY( y );
+  if ( is_vertical )             // x can be anywhere on graph, y must be
+  {                              // a valid data source position, vertically
+    data_source->RestrictY( y );
+  }
+  else                           // y can be anywhere on graph, x must be
+  {                              // a valid data source position, horizontally
+    data_source->RestrictX( x );
+  }
 
   ShowInfoList( x, y );
 }

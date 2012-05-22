@@ -18,10 +18,22 @@ class HFIRSetup(ReductionStep):
         super(HFIRSetup, self).__init__()
     
     def execute(self, reducer, workspace=None):
+        beam_ctr_x = None
+        beam_ctr_y = None
+        find_beam = True
+        
+        if reducer._beam_finder is not None and \
+            type(reducer._beam_finder)==BaseBeamFinder:
+            [beam_ctr_x, beam_ctr_y] = reducer._beam_finder.get_beam_center()
+            find_beam = False
+
         SetupHFIRReduction(SampleDetectorDistance=reducer._data_loader._sample_det_dist,
                            SampleDetectorDistanceOffset=reducer._data_loader._sample_det_offset,
                            Wavelength=reducer._data_loader._wavelength,
                            WavelengthSpread=reducer._data_loader._wavelength_spread,
+                           FindBeamCenter=find_beam,
+                           BeamCenterX=beam_ctr_x,
+                           BeamCenterY=beam_ctr_y,                           
                            ReductionProperties=reducer.get_reduction_table_name())
         
 class BaseBeamFinder(ReductionStep):
@@ -42,23 +54,6 @@ class BaseBeamFinder(ReductionStep):
         self._beam_radius = None
         self._datafile = None
         self._persistent = True
-        
-        # Define detector edges to be be masked
-        self._x_mask_low = 0
-        self._x_mask_high = 0
-        self._y_mask_low = 0
-        self._y_mask_high = 0 
-        
-    def set_masked_edges(self, x_low=0, x_high=0, y_low=0, y_high=0):
-        """
-            Sets the number of pixels to mask on the edges before
-            doing the center of mass computation
-        """
-        self._x_mask_low = x_low
-        self._x_mask_high = x_high
-        self._y_mask_low = y_low
-        self._y_mask_high = y_high
-        return self
         
     def set_persistent(self, persistent):
         self._persistent = persistent
@@ -87,75 +82,6 @@ class BaseBeamFinder(ReductionStep):
         self._beam_center_y = c.getProperty("FoundBeamCenterY").value
         return c.getPropertyValue("OutputMessage")
         
-    def _find_beam_scripted(self, direct_beam, reducer, workspace=None):
-        """
-            Find the beam center.
-            @param reducer: Reducer object for which this step is executed
-        """
-        if self._beam_center_x is not None and self._beam_center_y is not None:
-            return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
-        
-        # Load the file to extract the beam center from, and process it.
-        filepath = find_data(self._datafile, instrument=reducer.instrument.name())
-        
-        # Check whether that file was already meant to be processed
-        workspace_default = "beam_center_"+extract_workspace_name(filepath)
-        workspace = workspace_default
-        if filepath in reducer._data_files.values():
-            for k in reducer._data_files.iterkeys():
-                if reducer._data_files[k]==filepath:
-                    workspace = k                    
-                   
-        loader = reducer._data_loader.clone(filepath)
-        loader.set_beam_center([None, None])
-        loader.execute(reducer, workspace)
-
-        # Mask edges of the detector
-        # This is here mostly to allow a direct comparison with old HFIR code and 
-        # ensure that we reproduce the same results
-        if self._x_mask_low!=0 or self._x_mask_high!=0 or self._y_mask_low!=0 or self._y_mask_high!=0: 
-            mantid.sendLogMessage("Masking beam data: %g %g %g %g" % (self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high))  
-            mask = Mask()
-            mask.ignore_run_properties()
-            mask.mask_edges(self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high)
-            mask.execute(reducer, workspace)
-                        
-        # We must convert the beam radius from pixels to meters
-        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        if self._beam_radius is not None:
-            self._beam_radius *= pixel_size_x/1000.0
-        beam_center = FindCenterOfMassPosition(InputWorkspace = workspace,
-                                               Output = None,
-                                               DirectBeam = direct_beam,
-                                               BeamRadius = self._beam_radius)
-        ctr_str = beam_center.getPropertyValue("CenterOfMass")
-        ctr = ctr_str.split(',')
-        mantid.sendLogMessage("Beam coordinate in real-space: %s" % str(ctr))  
-        
-        # Compute the relative distance to the current beam center in pixels
-        # Move detector array to correct position. Do it here so that we don't need to
-        # move it if we need to load that data set for analysis later.
-        # Note: the position of the detector in Z is now part of the load
-        # Note: if the relative translation is correct, we shouldn't have to keep 
-        #       the condition below. Check with EQSANS data (where the beam center and the data are the same workspace)
-        if not workspace == workspace_default:
-            if self._beam_center_x is None or self._beam_center_y is None:
-                old_ctr = [0.0,0.0]
-            else:
-                old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y, workspace)
-            detector_ID=mtd[workspace].getInstrument().getStringParameter("detector-name")[0]
-            MoveInstrumentComponent(workspace, detector_ID, 
-                                    X = old_ctr[0]-float(ctr[0]),
-                                    Y = old_ctr[1]-float(ctr[1]),
-                                    RelativePosition="1")        
-
-        [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]), workspace)
-        mantid[workspace].getRun().addProperty_dbl("beam_center_x", self._beam_center_x, 'pixel', True)            
-        mantid[workspace].getRun().addProperty_dbl("beam_center_y", self._beam_center_y, 'pixel', True)                                
-        
-        return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
-
-
 class ScatteringBeamCenter(BaseBeamFinder):
     """
         Find the beam center using the scattering data

@@ -48,6 +48,15 @@ void SetupHFIRReduction::init()
   declareProperty("WavelengthSpread", 0.1, mustBePositive,
     "Wavelength spread to use when loading the data file (default 0.0)" );
 
+  // Beam center
+  std::string center_grp = "Beam Center";
+  declareProperty("FindBeamCenter", false, "If True, the beam center will be calculated");
+  declareProperty("BeamCenterX", EMPTY_DBL(), "Position of the beam center, in pixel");
+  declareProperty("BeamCenterY", EMPTY_DBL(), "Position of the beam center, in pixel");
+  setPropertyGroup("FindBeamCenter", center_grp);
+  setPropertyGroup("BeamCenterX", center_grp);
+  setPropertyGroup("BeamCenterY", center_grp);
+
   declareProperty("OutputMessage","",Direction::Output);
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
@@ -83,6 +92,16 @@ void SetupHFIRReduction::exec()
   }
   reductionManager->declareProperty(new AlgorithmProperty("LoadAlgorithm"));
   reductionManager->setProperty("LoadAlgorithm", loadAlg);
+
+  // Beam center
+  const double beamCenterX = getProperty("BeamCenterX");
+  const double beamCenterY = getProperty("BeamCenterY");
+  const bool calcBeamCenter = getProperty("FindBeamCenter");
+  if (!calcBeamCenter)
+  {
+    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
+    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
+  }
 
   // Store default dark current algorithm
   IAlgorithm_sptr darkAlg = createSubAlgorithm("HFIRDarkCurrentSubtraction");

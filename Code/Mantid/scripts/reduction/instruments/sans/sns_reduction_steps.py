@@ -10,6 +10,7 @@ from sans_reduction_steps import WeightedAzimuthalAverage
 from sans_reduction_steps import DirectBeamTransmission as SingleFrameDirectBeamTransmission
 from sans_reduction_steps import SaveIqAscii as BaseSaveIqAscii
 from sans_reduction_steps import SensitivityCorrection as BaseSensitivityCorrection
+from sans_reduction_steps import BaseBeamFinder
 from reduction import extract_workspace_name, find_file, find_data
 from eqsans_load import LoadRun
 
@@ -22,7 +23,25 @@ class EQSANSSetup(ReductionStep):
         super(EQSANSSetup, self).__init__()
     
     def execute(self, reducer, workspace=None):
-        # Load options
+        """
+            Set up all the reduction options in a property manager object
+        """
+        beam_ctr_x = None
+        beam_ctr_y = None
+        find_beam = True
+        use_config_ctr = False
+        find_beam_filename = ""
+        if reducer._beam_finder is not None and \
+            type(reducer._beam_finder)==BaseBeamFinder:
+            [beam_ctr_x, beam_ctr_y] = reducer._beam_finder.get_beam_center()
+            find_beam = False
+            if beam_ctr_x==0.0 and beam_ctr_y==0.0:
+                beam_ctr_x = None
+                beam_ctr_y = None
+                use_config_ctr = True
+        else:
+            find_beam_filename = reducer._beam_finder._datafile
+        
         SetupEQSANSReduction(UseConfigTOFCuts = reducer._data_loader._use_config_cutoff,
                              LowTOFCut = reducer._data_loader._low_TOF_cut,
                              HighTOFCut = reducer._data_loader._high_TOF_cut,
@@ -35,6 +54,11 @@ class EQSANSSetup(ReductionStep):
                              LoadMonitors = reducer._data_loader._load_monitors,
                              WavelengthStep = reducer._data_loader._wavelength_step,
                              UseConfig = reducer._data_loader._use_config,
+                             UseConfigBeam = use_config_ctr,
+                             FindBeamCenter=find_beam,
+                             BeamCenterFile=find_beam_filename,
+                             BeamCenterX=beam_ctr_x,
+                             BeamCenterY=beam_ctr_y,
                              ReductionProperties=reducer.get_reduction_table_name())
         return "Reduction parameters set"
 

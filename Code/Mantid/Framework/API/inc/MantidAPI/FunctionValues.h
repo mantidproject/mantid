@@ -49,6 +49,8 @@ public:
   FunctionValues(const FunctionDomain& domain);
   /// Copy constructor.
   FunctionValues(const FunctionValues& values);
+  /// Destructor
+  ~FunctionValues();
   
   /// Return the number of values
   size_t size() const {return m_calculated.size();}

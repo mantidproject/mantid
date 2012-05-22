@@ -109,7 +109,7 @@ double DataArray::GetYMax() const
 /**
  * Check if the returned array is binned logarithmically in 'x'.
  */
-bool DataArray::GetIsLogX() const
+bool DataArray::IsLogX() const
 {
   return is_log_x;
 }

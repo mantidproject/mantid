@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include <qapplication.h>                                                        
+#include <qapplication.h>                                                       
 #include <QMainWindow>
 #include <QtGui>
 
@@ -10,7 +10,9 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidQtImageViewer/EventWSImageView.h"
+#include "MantidAPI/IEventWorkspace.h"
+
+#include "MantidQtImageViewer/MatrixWSImageView.h"
 
 using namespace MantidQt;
 using namespace ImageView;
@@ -50,7 +52,7 @@ int main( int argc, char** argv )
 
   std::cout << "Got EventWorkspace, making EventWSDataSource..." << std::endl;
 
-  MantidQt::ImageView::EventWSImageView image_view( WS );
+  MantidQt::ImageView::MatrixWSImageView image_view( WS );
 
   return a.exec();
 }

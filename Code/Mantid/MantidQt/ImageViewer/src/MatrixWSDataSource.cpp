@@ -125,24 +125,33 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
             << "  n_rows = " << n_rows
             << "  n_cols = " << n_cols << std::endl;
 */
-  size_t first_col;
-  IVUtils::CalculateInterval( total_xmin, total_xmax, total_cols,
-                              first_col, xmin, xmax, n_cols );
-
+                                                  // since we're rebinning, the
+                                                  // columns can be arbitrary
+                                                  // but rows must be aligned 
+                                                  // to get whole spectra
   size_t first_row;
   IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
 
-  float* new_data = new float[n_rows * n_cols];   // this is deleted in the
-                                                  // DataArrray destructor
+  float* new_data = new float[n_rows * n_cols];   // this array is deleted in
+                                                  // the DataArrray destructor
   MantidVec x_scale;
   x_scale.resize(n_cols+1);
-  double dx = (xmax - xmin)/((double)n_cols + 1.0);
-  for ( size_t i = 0; i < n_cols+1; i++ )
+  if ( is_log_x )
   {
-    x_scale[i] = xmin + (double)i * dx;;
+    for ( size_t i = 0; i < n_cols+1; i++ )
+    {
+      x_scale[i] = xmin * exp ( (double)i / (double)n_cols * log(xmax/xmin) );  
+    }
   }
-                                                   // choose spectra from  
+  else
+  {
+    double dx = (xmax - xmin)/((double)n_cols + 1.0);
+    for ( size_t i = 0; i < n_cols+1; i++ )
+    {
+      x_scale[i] = xmin + (double)i * dx;
+    }
+  }                                                // choose spectra from  
                                                    // required range of 
                                                    // spectrum indexes 
   double y_step = (ymax - ymin) / (double)n_rows;
@@ -176,7 +185,8 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                 // The calling code is responsible for deleting 
                                 // the DataArray when it is done with it      
   DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax,
-                                           is_log_x, n_rows, n_cols, new_data);
+                                             is_log_x, 
+                                             n_rows, n_cols, new_data);
   return new_data_array;
 }
 

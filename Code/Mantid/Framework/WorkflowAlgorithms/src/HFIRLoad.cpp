@@ -50,6 +50,7 @@ void HFIRLoad::init()
       "The name of the input file to load");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Then name of the output workspace");
+  declareProperty("NoBeamCenter", false, "If true, the detector will not be moved according to the beam center");
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates");
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
@@ -71,10 +72,6 @@ void HFIRLoad::init()
 /// Move the detector according to the beam center
 void HFIRLoad::moveToBeamCenter()
 {
-  double beam_ctr_x = 0.0;
-  double beam_ctr_y = 0.0;
-  HFIRInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS, beam_ctr_x, beam_ctr_y);
-
   double default_ctr_x_pix = 0.0;
   double default_ctr_y_pix = 0.0;
   double default_ctr_x = 0.0;
@@ -82,6 +79,22 @@ void HFIRLoad::moveToBeamCenter()
   HFIRInstrument::getDefaultBeamCenter(dataWS, default_ctr_x_pix, default_ctr_y_pix);
   HFIRInstrument::getCoordinateFromPixel(default_ctr_x_pix, default_ctr_y_pix, dataWS,
       default_ctr_x, default_ctr_y);
+
+  // Check that we have a beam center defined, otherwise set the
+  // default beam center
+  if (isEmpty(m_center_x) || isEmpty(m_center_y))
+  {
+    m_center_x = default_ctr_x_pix;
+    m_center_y = default_ctr_y_pix;
+    g_log.information() << "Setting beam center to ["
+      << Poco::NumberFormatter::format(m_center_x, 1) << ", "
+      << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
+    return;
+  }
+
+  double beam_ctr_x = 0.0;
+  double beam_ctr_y = 0.0;
+  HFIRInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS, beam_ctr_x, beam_ctr_y);
 
   IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
@@ -193,13 +206,22 @@ void HFIRLoad::exec()
   dataWS->mutableRun().addProperty("beam-diameter", beam_diameter, "mm", true);
 
   // Move the beam center to its proper position
-  const double pixel_ctr_x = getProperty("BeamCenterX");
-  const double pixel_ctr_y = getProperty("BeamCenterY");
-  if (!isEmpty(pixel_ctr_x) && !isEmpty(pixel_ctr_y))
+  const bool noBeamCenter = getProperty("NoBeamCenter");
+  if (!noBeamCenter)
   {
-    m_center_x = pixel_ctr_x;
-    m_center_y = pixel_ctr_y;
+    m_center_x = getProperty("BeamCenterX");
+    m_center_y = getProperty("BeamCenterY");
+    if (isEmpty(m_center_x) && isEmpty(m_center_y))
+    {
+      if (reductionManager->existsProperty("LatestBeamCenterX") &&
+          reductionManager->existsProperty("LatestBeamCenterY"))
+      {
+        m_center_x = reductionManager->getProperty("LatestBeamCenterX");
+        m_center_y = reductionManager->getProperty("LatestBeamCenterY");
+      }
+    }
     moveToBeamCenter();
+
     // Add beam center to reduction properties, as the last beam center position that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
@@ -208,17 +230,21 @@ void HFIRLoad::exec()
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
       reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", m_center_y) );
     else reductionManager->setProperty("LatestBeamCenterY", m_center_y);
-  } else {
-    HFIRInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-    g_log.information() << "No beam finding method: setting to default ["
-      << Poco::NumberFormatter::format(m_center_x, 1) << ", "
-      << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
-  }
 
-  dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
-  dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
-  m_output_message += "   Beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
-      + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
+    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
+    m_output_message += "   Beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
+        + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+  }
+  else
+  {
+    HFIRInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
+
+    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
+    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
+    m_output_message += "   Default beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
+        + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+  }
 
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
   setPropertyValue("OutputMessage", m_output_message);

@@ -61,10 +61,11 @@ class DataSets(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
 
-        if for_automated_reduction:
-            script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
-        else:
-            script =  "RefLReduction(RunNumbers=[int(%s)],\n" % str(self.data_files[0])
+#        if for_automated_reduction:
+#            script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
+#        else:
+#            script =  "RefLReduction(RunNumbers=[int(%s)],\n" % str(self.data_files[0])
+        script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
@@ -256,7 +257,6 @@ class DataSets(BaseScriptElement):
             self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
             self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         else:
-
             self.incident_medium_list = ['H2O']
             self.incident_medium_index_selected = 0
         

@@ -142,7 +142,17 @@ namespace DataHandling
     double filesize = 0;
     string runinfo = this->getPropertyValue(RUNINFO_PARAM);
     std::string ext = this->extension(runinfo);
-
+    Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    strategy->addColumn("int","ChunkNumber");
+    strategy->addColumn("int","TotalChunks");
+    this->setProperty("OutputWorkspace", strategy);
+    if (maxChunk == 0 || maxChunk == EMPTY_DBL())
+    {
+      Mantid::API::TableRow row = strategy->appendRow();
+      row << EMPTY_INT() << EMPTY_INT();
+      return;
+    }
+    //PreNexus
     if( ext.compare("xml") == 0)
     {
       vector<string> eventFilenames;
@@ -155,7 +165,8 @@ namespace DataHandling
         filesize += static_cast<double>(eventfile->getNumElements()) * 48.0 / (1024.0*1024.0*1024.0);
       }
     }
-    else
+    //Event Nexus
+    else if( runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
     {
       // top level file information
       ::NeXus::File file(runinfo);
@@ -213,20 +224,23 @@ namespace DataHandling
       // Factor fo 2 for compression
       filesize = static_cast<double>(total_events) * 48.0 / (1024.0*1024.0*1024.0);
     }
+    //Histo Nexus
+    else
+    {
+      Mantid::API::TableRow row = strategy->appendRow();
+      row << EMPTY_INT() << EMPTY_INT();
+      return;
+    }
 
     int numChunks = static_cast<int>(filesize/maxChunk);
     numChunks ++; //So maxChunkSize is not exceeded 
     if (numChunks < 0) numChunks = 1;
-    Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    strategy->addColumn("int","ChunkNumber");
-    strategy->addColumn("int","TotalChunks");
 
     for (int i = 1; i <= numChunks; i++) 
     {
       Mantid::API::TableRow row = strategy->appendRow();
       row << i << numChunks;
     }
-    this->setProperty("OutputWorkspace", strategy);
   }
   /// set the name of the top level NXentry m_top_entry_name
   std::string DetermineChunking::setTopEntryName(std::string m_filename)

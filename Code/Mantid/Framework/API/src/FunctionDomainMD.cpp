@@ -59,13 +59,11 @@ const IMDIterator* FunctionDomainMD::getNextIterator() const
     m_justReset = false;
     return m_iterator;
   }
+  ++m_currentIndex;
   if (!m_iterator->next() || m_currentIndex >= m_size)
   {
+    m_currentIndex = m_size;
     return NULL;
-  }
-  else
-  {
-    ++m_currentIndex;
   }
   return m_iterator;
 }

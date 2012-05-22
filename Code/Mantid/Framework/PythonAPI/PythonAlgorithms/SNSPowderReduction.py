@@ -231,58 +231,30 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
-    def _loadPreNeXusData(self, runnumber, extension, **chunk):
-        chunkNo = 1
-        if chunk.has_key("ChunkNumber"):
-            chunkNo = int(chunk["ChunkNumber"])
-
-        # generate the workspace name
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-        self.log().debug(filename)
-
-        name += "_%02d" % (chunkNo)
-        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **chunk)
-        wksp = alg['OutputWorkspace']
-
-        return wksp
-
-    def _loadEventNeXusData(self, runnumber, extension, filterWall=None, **chunk):
-        chunkNo = 1
-        if chunk.has_key("ChunkNumber"):
-            chunkNo = int(chunk["ChunkNumber"])
-        chunk["Precount"] = True
-        if filterWall is not None:
-            if filterWall[0] > 0.:
-                chunk["FilterByTimeStart"] = filterWall[0]
-            if filterWall[1] > 0.:
-                chunk["FilterByTimeStop"] = filterWall[1]
-
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        name += "_%02d" % (chunkNo)
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **chunk)
-        return alg.workspace()
-
-    def _loadHistoNeXusData(self, runnumber, extension):
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        name += "_%02d" % 1
-        alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
-        return alg.workspace()
-
     def _loadData(self, runnumber, extension, filterWall=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
+        
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+        # EMPTY_INT() from C++
+        if int(chunk["ChunkNumber"]) < 2147483647:
+            name += "_%02d" % (int(chunk["ChunkNumber"]))        
+        else:
+            name += "_%02d" % 0
 
         if extension.endswith("_event.nxs"):
-            return self._loadEventNeXusData(runnumber, extension, filterWall, **chunk)
+            chunk["Precount"] = True
+            if filterWall is not None:
+                if filterWall[0] > 0.:
+                    chunk["FilterByTimeStart"] = filterWall[0]
+                if filterWall[1] > 0.:
+                    chunk["FilterByTimeStop"] = filterWall[1]
         elif extension.endswith("_histo.nxs"):
-            return self._loadHistoNeXusData(runnumber, extension)
-        else:
-            return self._loadPreNeXusData(runnumber, extension, **chunk)
+            chunk = {}
+            
+        alg = Load(Filename=filename, OutputWorkspace=name, **chunk)
+        return alg.workspace()
 
     def _getStrategy(self, runnumber, extension):
         # generate the workspace name
@@ -290,21 +262,18 @@ class SNSPowderReduction(PythonAlgorithm):
         strategy = []
         if HAVE_MPI:
             comm = mpi.world
-            if self._chunks > 0 and not "histo" in extension and comm.size > 1:
-                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-                for row in Chunks: 
-                    if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
-                        strategy.append(row)
-            elif comm.size > 1:
-                strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
+            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+            # What about no chunks for parallel?
+            if len(Chunks) == 1:
+            	strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
             else:
-                strategy.append({})
+            	for row in Chunks:
+			 if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
+				 strategy.append(row)
+
         else:
-            if self._chunks > 0 and not "histo" in extension:
-                Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-                for row in Chunks: strategy.append(row)
-            else:
-                strategy.append({})
+            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+            for row in Chunks: strategy.append(row)
 
         return strategy
 
@@ -335,10 +304,10 @@ class SNSPowderReduction(PythonAlgorithm):
         if HAVE_MPI and len(strategy) > 1:
             alg = GatherWorkspaces(InputWorkspace=wksp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
             wksp = alg['OutputWorkspace']
-        if self._chunks > 0 and not "histo" in extension:
+        if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
-            mtd.deleteWorkspace('Chunks')
+        mtd.deleteWorkspace('Chunks')
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if normByCurrent:

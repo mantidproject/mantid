@@ -97,7 +97,7 @@ void IVUtils::PushNameValue( const std::string               & name,
  * @param max     Set to be greater than or equal to all values in the list
  *                and strictly more than min.
  */
-void IVUtils::FindValidInterval( const QVector<double>  & values,
+bool IVUtils::FindValidInterval( const QVector<double>  & values,
                                        double           & min,
                                        double           & max )
 {
@@ -112,7 +112,7 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
     if ( max < val )
       max = val;
   }
-  FindValidInterval( min, max );
+  return FindValidInterval( min, max );
 }
 
 
@@ -124,13 +124,18 @@ void IVUtils::FindValidInterval( const QVector<double>  & values,
  *
  * @param min     Set to be strictly less than max. 
  * @param max     Set to be strictly greater than min.
+ *
+ * @return true if the original values were OK and are unchanged, return
+ *         false if min or max was altered to make a valid interval.
  */
-void IVUtils::FindValidInterval( double  & min,
+bool IVUtils::FindValidInterval( double  & min,
                                  double  & max )
 {
+  bool values_OK = true;
 
   if ( max == min )           // adjust values so they are not equal
   {
+    values_OK = false;
     if ( min == 0 )
     {
       min = -1,
@@ -145,10 +150,114 @@ void IVUtils::FindValidInterval( double  & min,
 
   if ( min > max )            // fix the order
   {
+    values_OK = false;
     double temp = min;
     min = max;
     max = temp;
   }
+
+  return values_OK;
+}
+
+
+/**
+ * Adjust min and max so that min is strictly less than max, and both are
+ * greater than 0.  If min > max the values are swapped.  If min = max > 0, 
+ * they will be shifted off from their initial common value by factors of 10.  
+ * If min = max = 0, they will be set to 0.1 and 10, respectively.
+ *
+ * @param min     Set to be strictly less than max and more than 0. 
+ * @param max     Set to be strictly greater than min.
+ *
+ * @return true if the original values were OK and are unchanged, return
+ *         false if min or max was altered to make a valid interval.
+ */
+bool IVUtils::FindValidLogInterval( double  & min,
+                                    double  & max )
+{
+  bool values_OK = true;
+  if ( min < 0 )
+  {
+    std::cout << "min < 0 " << min << std::endl;
+    values_OK = false;
+    min = -min;
+  }
+
+  if ( max < 0 )
+  {
+    std::cout << "max < 0 " << max << std::endl;
+    values_OK = false;
+    max = -max;
+  }
+
+  if ( min > max )            // fix the order
+  {
+    std::cout << "min > max " << min << " > " << max << std::endl;
+    values_OK = false;
+    double temp = min;
+    min = max;
+    max = temp;
+  }
+
+  if ( min == 0 && max > 0 )  // raise min, so the interval covers 2 orders
+  {                           // of magnitude
+    std::cout << "min == 0, max > 0 " << min << ", " << max << std::endl;
+    values_OK = false;
+    min = 0.01 * max;
+  }
+  else if ( max == min )      // adjust values so they are not equal
+  {
+    values_OK = false;
+    std::cout << "min == max " << min << " == " << max << std::endl;
+    if ( min == 0 )
+    {
+      min = 0.1,
+      max =  10;
+    }
+    else
+    {
+      max =  10 * max;
+      min = 0.1 * min;
+    }
+  }
+
+  return values_OK;
+}
+
+
+/**
+ *  Calculate the number of steps required to go from min to max on either
+ *  a linear or logarithmic scale.
+ *  @param min   Lowest value on scale, must be positive for log scale, and
+ *               must always be less than max.
+ *  @param max   Highest value on scale, must be positive for log scale, and
+ *               must always be more than min.
+ *  @param step  Must be more than zero for linear scale and less than zero
+ *               for log scale.  This must NOT be zero and should be less
+ *               than max - min in absolute value.
+ *  @return the number of bins from min to max, if the interval is divided
+ *          linearly or "lograrithmically".  If the data is invalid, this
+ *          will return 0.
+ */
+int IVUtils::NumSteps( double min, double max, double step )
+{
+  int n_bins = 0;
+
+  if ( step == 0 || (max-min) <= 0 || (step < 0 && min <= 0) )
+  {
+    return 0;
+  }
+
+  if ( step > 0 )                          // uniform steps
+  {
+    n_bins = (int)(( max - min ) / step);
+  }
+  else if ( step < 0 )                     // log steps
+  {
+    n_bins = (int)ceil(( (log(max) - log(min))/log(1 - step/min) ));
+  }
+
+  return n_bins; 
 }
 
 
@@ -161,9 +270,9 @@ void IVUtils::FindValidInterval( double  & min,
  * @param new_min   Left endpoint of new interval
  * @param new_max   Right endpoint of new interval
  * @param new_val   Point in new interval that is placed in [new_min,new_max]
- *                  in the same proportion as val is in [min,max].  The 
- *                  resulting new_val will be clamped to be in the new
- *                  interval, even if val is outside of the original interval.
+ *                  in the same proportion as val is in [min,max]. 
+ * @return true if the calculated value is in [new_min,new_max] and false
+ *         if it is outside of the interval.
  */
 bool IVUtils::Interpolate( double   min,
                            double   max,
@@ -173,6 +282,40 @@ bool IVUtils::Interpolate( double   min,
                            double & new_val )
 {
   new_val = (val - min)/( max - min ) * (new_max - new_min) + new_min;
+
+  if ( new_val < new_min || new_val > new_max )
+    return false;
+  else
+    return true;
+}
+
+
+/**
+ * Calculate the value in [new_min,new_max] on a logarithmic scale that
+ * would correspond to the point val on a linear scale on [min,max].
+ * For example, if val was half way from min to max, and the log scale
+ * extended from new_min = 1 to new_max = 100, then new_val would return 10,
+ * since 10 is half way along a log scale from 1 to 100.
+ * Clamp the result to be in the interval [new_min,new_max].
+ * @param min       Left endpoint of original interval with linear scale
+ * @param max       Right endpoint of original interval with linear scale
+ * @param val       Reference point in orignal interval
+ * @param new_min   Left endpoint of new interval with log scale
+ * @param new_max   Right endpoint of new interval with log scale
+ * @param new_val   Point in new interval that is placed in [new_min,new_max]
+ *                  in the same proportion as val is in [min,max].
+ * @return true if the calculated value is in [new_min,new_max] and false
+ *         if it is outside of the interval.
+ */
+bool IVUtils::LogInterpolate( double   min,
+                              double   max,
+                              double   val,
+                              double   new_min,
+                              double   new_max,
+                              double & new_val )
+{
+  new_val = new_min * exp( (val-min)/(max-min) * log ( new_max/new_min ));
+
   if ( new_val < new_min || new_val > new_max )
     return false;
   else
@@ -185,7 +328,8 @@ bool IVUtils::Interpolate( double   min,
  *  data bin boundaries, then set first_index to the index of the bin, 
  *  corresponding to the min value and set the number of steps to the smaller
  *  of the number of steps in the data, and the initial value of the number
- *  of steps.
+ *  of steps.  NOTE: This calculation is needed for displaying a fixed array
+ *  of data that should not be rebinned.
  *
  *  @param global_min   Smallest value covered by the underlying data
  *  @param global_max   Largest value covered by the underlying data
@@ -203,7 +347,7 @@ bool IVUtils::Interpolate( double   min,
  *                      max value, if max is in the interior of a bin.
  *  @param steps        On input this should be the number of bins desired
  *                      between the min and max values.  This will be adjusted
- *                      to be more than the number of steps available.
+ *                      to be no more than the number of steps available.
  */
 bool IVUtils::CalculateInterval( double   global_min,
                                  double   global_max,
@@ -250,32 +394,6 @@ bool IVUtils::CalculateInterval( double   global_min,
 
   return true;
 }
-
-/*
-int main()
-{
-  double new_val;
-  IVUtils::Interpolate( -10, 20, 9, -100, 200, new_val );
-
-  std::cout << "new_val = " << new_val << std::endl;
-
-  size_t first_index;
-  double min = 150;
-  double max = 160;
-  size_t steps = 10;
-
-  IVUtils::CalculateInterval(100, 200, 100, 
-                             first_index, min, max, steps);
-
-  std::cout << "first_index = " << first_index << std::endl;
-  std::cout << "min         = " << min << std::endl;
-  std::cout << "max         = " << max << std::endl;
-  std::cout << "steps       = " << steps << std::endl;
-
-  return 0;
-}
-*/
-
 
 } // namespace MantidQt 
 } // namespace ImageView 

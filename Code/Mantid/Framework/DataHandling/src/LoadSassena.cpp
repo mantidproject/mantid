@@ -62,6 +62,12 @@ int LoadSassena::fileCheck(const std::string &filePath)
   return confidence;
 }
 
+void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &description )
+{
+  this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(wsName,"",Kernel::Direction::Output), description);
+  this->setProperty(wsName,ws);
+  gws->add(wsName); // Add the named workspace to the group
+}
 /**
  * Initialise the algorithm. Declare properties which can be set before execution (input) or
  * read from after the execution (output).
@@ -83,13 +89,8 @@ void LoadSassena::init()
  */
 void LoadSassena::exec()
 {
-  //this->GWS = API::WorkspaceFactory::Instance().create("WorkspaceGroup");
-  // WorkspaceGroup_sptr wsgroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputs_orig[i]);
-  // API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
-  // MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D",numSpectra,energies.size(),numBins));
-
-  API::WorkspaceGroup_sptr gws = this->getProperty("OutputWorkspace");
-  const std::string gwsName = gws->name();
+  const std::string gwsName = this->getPropertyValue("OutputWorkspace");
+  API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
   //populate m_validSets
   int nvalidSets = 4;
@@ -97,8 +98,8 @@ void LoadSassena::exec()
   for(int iSet=0; iSet<nvalidSets; iSet++) this->m_validSets.push_back( validSets[iSet] );
 
   //open the HDF5 file
-  this->m_filename = this->getPropertyValue("Filename");
-  hid_t h5file = H5Fopen(this->m_filename.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
+  m_filename = this->getPropertyValue("Filename");
+  hid_t h5file = H5Fopen(m_filename.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
   herr_t status;
 
   //find out the sassena version used
@@ -110,22 +111,25 @@ void LoadSassena::exec()
   //to be done at a later time, maybe implement a Version class
 
   int rank[3]; //store dimensions
+  H5T_class_t class_id;
+  size_t type_size;
+  hsize_t dims[3];
   /*load vectors onto a Workspace2D with 3 bins (the three components of the vectors)
    * dataX for the origin of the vector (assumed (0,0,0) )
    * dataY for the tip of the vector
    * dataE is assumed (0,0,0), no errors
    */
   std::string setName("qvectors");
-  status = H5LTget_dataset_ndims( h5file, setName.c_str(), rank );
-  int nq = rank[0]; //number of q-vectors
-  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
-  std::string wsName = gwsName + std::string(".qvectors") + setName;
-  ws->setTitle(wsName);
-  ws->getAxis(0)->setUnit("MomemtumTransfer");
-  ws->setYUnit("MomemtumTransfer");
+  status = H5LTget_dataset_info( h5file, setName.c_str(), dims, &class_id, &type_size );
+  int nq = static_cast<int>( dims[0] ); //number of q-vectors
   double* buf = new double[nq*3];
   H5LTread_dataset_double(h5file,"qvectors",buf);
+
+  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
+  std::string wsName = gwsName + std::string(".") + setName;
+  ws->setTitle(wsName);
   MantidVec qvmod; //store the modulus of the vector
+
   double* curr = buf;
   for(int iq=0; iq<nq; iq++){
     MantidVec& Y = ws->dataY(iq);
@@ -133,9 +137,9 @@ void LoadSassena::exec()
     qvmod.push_back( sqrt( curr[0]*curr[0] + curr[1]*curr[1] + curr[2]*curr[2] ) );
     curr += 3;
   }
-  delete buf;
-  gws->add(wsName); // Add the named workspace to the group
 
+  delete buf;
+  this->registerWorkspace(gws,setName,ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
 
 
   //iterate over the valid sets
@@ -164,7 +168,8 @@ void LoadSassena::exec()
           curr += 2;
         }
         delete buf;
-        gws->add(wsName); // Add the named workspace to the group
+
+        this->registerWorkspace(gws,setName,ws, "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
       }
 
       else if(setName == "fqt")
@@ -204,11 +209,13 @@ void LoadSassena::exec()
           }
         }
         delete buf;
-        gws->add(wsReName); // Add the named workspace to the group
-        gws->add(wsImName);
+        this->registerWorkspace(gws,wsReName,wsRe, "X-axis: time; Y-axis: real part of intermediate structure factor");
+        this->registerWorkspace(gws,wsImName,wsIm, "X-axis: time; Y-axis: imaginary part of intermediate structure factor");
       }
     }
   }
+
+  this->setProperty( "OutputWorkspace", gws ); //register the groupWorkspace in the analysis data service
 
 } // end of LoadSassena::exec()
 

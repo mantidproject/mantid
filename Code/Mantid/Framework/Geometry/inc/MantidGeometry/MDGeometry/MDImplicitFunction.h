@@ -64,6 +64,7 @@ namespace Geometry
   {
   public:
     MDImplicitFunction();
+    MDImplicitFunction(const MDImplicitFunction & other);
     virtual ~MDImplicitFunction();
 
     void addPlane(const MDPlane & plane);

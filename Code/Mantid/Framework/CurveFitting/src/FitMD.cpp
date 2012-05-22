@@ -27,7 +27,8 @@ namespace CurveFitting
    * Constructor
    */
   FitMD::FitMD(IPropertyManager* fit, const std::string& workspacePropertyName, DomainType domainType)
-    :IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType)
+    :IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
+    m_startIndex(0),m_count(0)
   {
     if (m_workspacePropertyNames.empty())
     {
@@ -41,14 +42,16 @@ namespace CurveFitting
    */
   void FitMD::declareDatasetProperties(const std::string& suffix,bool addProp)
   {
-    UNUSED_ARG( addProp );
     if ( m_domainType != Simple )
     {
       m_maxSizePropertyName = "MaxSize" + suffix;
-      auto mustBePositive = boost::shared_ptr< BoundedValidator<int> >( new BoundedValidator<int>() );
-      mustBePositive->setLower(1);
-      declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName,1, mustBePositive),
-                      "The maximum number of values per a simple domain.");
+      if (addProp && !m_manager->existsProperty(m_maxSizePropertyName))
+      {
+        auto mustBePositive = boost::shared_ptr< BoundedValidator<int> >( new BoundedValidator<int>() );
+        mustBePositive->setLower(1);
+        declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName,1, mustBePositive),
+          "The maximum number of values per a simple domain.");
+      }
     }
   }
 
@@ -58,19 +61,41 @@ namespace CurveFitting
     boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
   {
     UNUSED_ARG(i0);
-    if (m_workspacePropertyNames.empty())
+
+    setParameters();
+
+    auto iterator = m_IMDWorkspace->createIterator();
+
+    const size_t n = iterator->getDataSize();
+    if ( m_domainType != Simple )
     {
-      throw std::runtime_error("Cannot create FunctionDomainMD: no workspace given");
+      SeqDomain* seqDomain = new SeqDomain;
+      domain.reset( seqDomain );
+      if ( n > m_maxSize )
+      {
+        for(size_t i = 0; i < n; i += m_maxSize)
+        {
+          if ( i > 0 ) iterator->jumpTo(i);
+          FitMD* creator = new FitMD;
+          creator->setWorkspace(m_IMDWorkspace);
+          size_t count = m_maxSize;
+          if ( n - i < count ) count = n - i;
+          creator->setRange(i, count);
+          seqDomain->addCreator( IDomainCreator_sptr( creator ) );
+        }
+        ivalues.reset( new EmptyValues( n ) );
+        delete iterator;
+        return;
+      }
     }
-    // get the workspace 
-    API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyNames[0]);
-    m_IMDWorkspace = boost::dynamic_pointer_cast<API::IMDWorkspace>(ws);
-    if (!m_IMDWorkspace)
+    delete iterator;
+
+    if ( m_count == 0 )
     {
-      throw std::invalid_argument("InputWorkspace must be a IMDWorkspace.");
+      m_count = n;
     }
 
-    API::FunctionDomainMD* dmd = new API::FunctionDomainMD(m_IMDWorkspace);
+    API::FunctionDomainMD* dmd = new API::FunctionDomainMD(m_IMDWorkspace, m_startIndex, m_count);
     domain.reset(dmd);
     auto values = new API::FunctionValues(*domain);
     ivalues.reset(values);
@@ -86,7 +111,6 @@ namespace CurveFitting
       iter = dmd->getNextIterator();
       ++i;
     };
-
     dmd->reset();
   }
 
@@ -98,7 +122,10 @@ namespace CurveFitting
     // if property manager is set overwrite any set parameters
     if ( m_manager )
     {
-
+      if (m_workspacePropertyNames.empty())
+      {
+        throw std::runtime_error("Cannot create FunctionDomainMD: no workspace given");
+      }
       // get the workspace 
       API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
       m_IMDWorkspace = boost::dynamic_pointer_cast<API::IMDWorkspace>(ws);
@@ -114,13 +141,31 @@ namespace CurveFitting
     }
   }
 
+/**
+ * Set the range
+ * @param startIndex :: Starting index in the worspace
+ * @param count :: Size of the domain
+ */
+void FitMD::setRange(size_t startIndex, size_t count)
+{
+  m_startIndex = startIndex;
+  m_count = count;
+}
+
+
   /// Return the size of the domain to be created.
   size_t FitMD::getDomainSize() const
   {
     setParameters();
+    if ( !m_IMDWorkspace ) throw std::runtime_error("FitMD: workspace wasn't defined");
     auto iterator = m_IMDWorkspace->createIterator();
     size_t n = iterator->getDataSize();
     delete iterator;
+    if ( m_count != 0 )
+    {
+      if ( m_startIndex + m_count > n ) throw std::range_error("FitMD: index is out of range");
+      n = m_count;
+    }
     return n;
   }
 

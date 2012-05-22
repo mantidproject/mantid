@@ -220,7 +220,11 @@ void SANSSensitivityCorrection::exec()
         rawFloodWS = loadAlg->getProperty("OutputWorkspace");
         m_output_message += "   | Loaded " + fileName + " (Load algorithm)\n";
       } else {
-        IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
+        // Get load algorithm as a string so that we can create a completely
+        // new proxy and ensure that we don't overwrite existing properties
+        IAlgorithm_sptr loadAlg0 = reductionManager->getProperty("LoadAlgorithm");
+        const std::string loadString = loadAlg0->toString();
+        IAlgorithm_sptr loadAlg = Algorithm::fromString(loadString);
         loadAlg->setChild(true);
         loadAlg->setProperty("Filename", fileName);
         loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
@@ -228,8 +232,6 @@ void SANSSensitivityCorrection::exec()
         if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
         loadAlg->execute();
         rawFloodWS = loadAlg->getProperty("OutputWorkspace");
-        // rawFloodWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(rawFloodWSName);
-        //AnalysisDataService::Instance().addOrReplace(rawFloodWSName, rawFloodWS);
         m_output_message += "   |Loaded " + fileName + "\n";
         if (loadAlg->existsProperty("OutputMessage"))
         {

@@ -29,6 +29,11 @@ namespace API
   {
   }
 
+  /// Destructor
+  FunctionValues::~FunctionValues()
+  {
+  }
+
   /// Reset the values to match a new domain.
   void FunctionValues::reset(const FunctionDomain& domain)
   {

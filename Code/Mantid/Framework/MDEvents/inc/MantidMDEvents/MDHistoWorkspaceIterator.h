@@ -51,7 +51,7 @@ namespace MDEvents
         size_t beginPos = 0, size_t endPos = size_t(-1));
     MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function = NULL,
         size_t beginPos = 0, size_t endPos = size_t(-1));
-    ~MDHistoWorkspaceIterator();
+    virtual ~MDHistoWorkspaceIterator();
 
     void init(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
         size_t beginPos = 0, size_t endPos = size_t(-1));

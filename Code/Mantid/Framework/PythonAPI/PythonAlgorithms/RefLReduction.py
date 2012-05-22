@@ -152,6 +152,8 @@ class RefLReduction(PythonAlgorithm):
         
         # Load the data into its workspace
         allow_multiple = True        
+        print run_numbers
+        
         if len(run_numbers)>1 and allow_multiple:
             
             for _run in run_numbers:

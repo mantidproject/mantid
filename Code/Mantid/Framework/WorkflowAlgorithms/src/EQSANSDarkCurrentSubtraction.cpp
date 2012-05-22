@@ -143,16 +143,22 @@ void EQSANSDarkCurrentSubtraction::exec()
       if (loadAlg->existsProperty("LoadMonitors"))
         loadAlg->setProperty("LoadMonitors", false);
       loadAlg->executeAsSubAlg();
+      darkWS = loadAlg->getProperty("OutputWorkspace");
     } else {
-      loadAlg = reductionManager->getProperty("LoadAlgorithm");
+      // Get load algorithm as a string so that we can create a completely
+      // new proxy and ensure that we don't overwrite existing properties
+      IAlgorithm_sptr loadAlg0 = reductionManager->getProperty("LoadAlgorithm");
+      const std::string loadString = loadAlg0->toString();
+      loadAlg = Algorithm::fromString(loadString);
       loadAlg->setChild(true);
       loadAlg->setProperty("Filename", fileName);
       if (loadAlg->existsProperty("LoadMonitors"))
         loadAlg->setProperty("LoadMonitors", false);
       loadAlg->setPropertyValue("OutputWorkspace", darkWSName);
       loadAlg->execute();
+      darkWS = loadAlg->getProperty("OutputWorkspace");
     }
-    darkWS = loadAlg->getProperty("OutputWorkspace");
+
     output_message += "\n   Loaded " + fileName + "\n";
     if (loadAlg->existsProperty("OutputMessage"))
     {
