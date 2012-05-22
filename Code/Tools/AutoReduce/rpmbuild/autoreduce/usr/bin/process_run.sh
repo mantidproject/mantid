@@ -58,8 +58,10 @@ fi
 
 
 # Create metadata file for raw data
+echo "--------Creating metadata file from NeXus file--------"
 nxingestCommand=nxingest-autoreduce
 mappingFile=/etc/autoreduce/mapping.xml
+echo $nxingestCommand $mappingFile $nexusFile $metadataFile
 echo $nxingestCommand $mappingFile $nexusFile $metadataFile  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
 $nxingestCommand $mappingFile $nexusFile $metadataFile | sed "s/^/$(date)  /" >> $logfile
@@ -68,6 +70,18 @@ end=`date +%x-%T`
 # Accumulate any non-zero return code
 status=$(( $status + $? ))
 #echo "status=$status"
+
+# Add preNeXus datafiles to raw metadata
+echo "--------Adding preNeXus datafiles to raw metadata--------"
+addCommand="python /usr/bin/add_raw_datafile.py"
+preNexusDir="/SNS/"$instrument"/"$proposal"/"$visit"/"$runNumber"/preNeXus/"
+echo $addCommand $runNumber $preNexusDir $metadataFile
+echo $addCommand $runNumber $preNexusDir $metadataFile | sed "s/^/$(date)  /" >> $logfile
+start=`date +%x-%T`
+$addCommand $runNumber $preNexusDir $metadataFile &>> $logfile
+end=`date +%x-%T`
+echo "Started at $start --- Ended at $end"
+echo
 
 # Catalog raw metadata
 echo "--------Catalogging raw data--------"
@@ -89,7 +103,7 @@ reduce_script="/SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
 if [ ! -f $reduce_script ];
 then
   echo "$reduce_script does not exist, exiting..."
-  exit
+  return 
 fi
 redCommand="python $reduce_script"
 echo $redCommand $nexusFile $redOutDir
