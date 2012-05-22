@@ -157,7 +157,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   }
 
   // Try the stop condition
-  if (m_rho > 0)
+  if (m_rho >= 0)
   {
     GSLVector p(n);
     m_leastSquares->getParameters(p);
@@ -167,16 +167,30 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     {
       return false;
     }
-  }
-  else if (m_rho == 0)
-  {
-    this->m_errorString = "rho == 0";
-    return false;
+    if (m_rho == 0)
+    {
+      if ( m_F != F1 )
+      {
+        this->m_errorString = "rho == 0";
+      }
+      return false;
+    }
   }
 
-  if (fabs(dL) == 0.0) m_rho = 0;
+  if (fabs(dL) == 0.0)
+  {
+    if ( m_F == F1 ) m_rho = 1.0;
+    else
+      m_rho = 0;
+  }
   else
+  {
     m_rho = (m_F - F1) / dL;
+    if ( m_rho == 0 )
+    {
+      return false;
+    }
+  }
   if (debug)
   {
     std::cerr << "rho=" << m_rho << std::endl;

@@ -186,6 +186,7 @@ void CalMuonDeadTime::exec()
     const int wsindex = static_cast<int>(i);
     fit->setProperty("InputWorkspace", wsFitAgainst);
     fit->setProperty("WorkspaceIndex", wsindex);
+    fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
 
     fit->executeAsSubAlg();
 
