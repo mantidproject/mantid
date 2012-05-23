@@ -1671,7 +1671,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
 
   try
   {
-    //Try to run "paraview -V", which will succeed if ParaView is installed.
+    //Try to run "paraview --help", which will succeed if ParaView is installed.
     std::string paraviewDir = getString("paraview.path");
     std::string cmd = "paraview";
     if(!paraviewDir.empty())
@@ -1680,7 +1680,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       cmd = paraviewExe.toString();
     }
     std::vector<std::string> args;
-    args.push_back("-V");
+    args.push_back("--help");
     Poco::Pipe outPipe;
     Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, 0);
     const int rc = ph.wait();
