@@ -35,7 +35,7 @@ The Mantid FFT algorithm returns the complex array <math>\bar{F}_K</math> as Y v
 
 ===Example 1===
 
-In this example the input data were calculated using function <math>\exp(-(x-1)^2)</math>.
+In this example the input data were calculated using function <math>\exp(-(x-1)^2)</math> in the range [-5,5].
 
 [[Image:FFTGaussian1.png|Gaussian]]
 
@@ -45,7 +45,7 @@ Because the <math>x=0</math> is in the middle of the data array the transform sh
 
 ===Example 2===
 
-In this example the input data were calculated using function <math>\exp(-x^2)</math>.
+In this example the input data were calculated using function <math>\exp(-x^2)</math> in the range [-6,4].
 
 [[Image:FFTGaussian2.png|Gaussian]]
 
