@@ -1,10 +1,10 @@
-#include "MantidMDEvents/UnitConversionHelper.h"
+#include "MantidMDAlgorithms/UnitConversionHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 /*** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
 int is_member(const std::vector<std::string> &group,const std::string &candidate)
@@ -19,7 +19,14 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
     return num;
 }
 
+/** establish and initialize proper units conversion from input to output units
+    @param UnitsFrom -- the ID of the units, which have to be converted from
+    @param UnitsTo   -- the ID of the units to converted to
 
+    @returns kind of the initiated conversion, e.g. no conversion (unitsFrom == UnitsTo, fastConversion, convFromTOF or convViaTOF
+
+    Also sets up the 
+*/
 ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo)
 {
     // if units are equal, no conversion is necessary;
@@ -56,6 +63,7 @@ ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const st
         if(UnitsFrom.compare("TOF")==0){
             return ConvertToMD::ConvertFromTOF;
         }else{            // convert using TOF
+            pTargetUnit    =Kernel::UnitFactory::Instance().create(UnitsTo);
             return ConvertToMD::ConvertByTOF;
         }
     }
