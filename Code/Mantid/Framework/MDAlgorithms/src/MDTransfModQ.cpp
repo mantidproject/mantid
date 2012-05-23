@@ -1,9 +1,9 @@
-#include "MantidMDEvents/MDTransfModQ.h"
+#include "MantidMDAlgorithms/MDTransfModQ.h"
 #include "MantidKernel/RegistrationHelper.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 // register the class, whith conversion factory under ModQ name
 DECLARE_MD_TRANSFID(MDTransfModQ,ModQ);
