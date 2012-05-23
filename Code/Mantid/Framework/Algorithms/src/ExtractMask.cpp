@@ -174,8 +174,8 @@ namespace Mantid
                 detid_t detid = detid_t(*detiter);
                 detectorList.push_back(detid);
               }
+              workspaceindexList.push_back(i);
             }
-            workspaceindexList.push_back(i);
           }
         }
         catch(Kernel::Exception::NotFoundError &)
