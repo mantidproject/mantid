@@ -12,7 +12,7 @@ namespace Mantid
      * Constructor taking the number of dimensions for the sequence
      */
     SobolSequence::SobolSequence(const unsigned int ndims) :
-        m_gslGenerator(NULL), m_numDims(0), m_currentPoint()
+      QuasiRandomNumberSequence(ndims), m_gslGenerator(NULL)
     {
       setNumberOfDimensions(ndims);
     }
@@ -29,10 +29,10 @@ namespace Mantid
      * Returns the next number in the sequence
      * @returns A double giving the next number in the Sobol sequence for the current dimension
      */
-    std::vector<double> SobolSequence::nextPoint()
+    void SobolSequence::generateNextPoint()
     {
-      gsl_qrng_get(m_gslGenerator, m_currentPoint.data());
-      return m_currentPoint;
+      std::vector<double> & point = getNextPointCache();
+      gsl_qrng_get(m_gslGenerator, point.data());
     }
 
     /**
@@ -57,8 +57,6 @@ namespace Mantid
       {
         deleteCurrentGenerator();
         m_gslGenerator = generator;
-        m_numDims = ndims;
-        m_currentPoint = std::vector<double>(ndims, 0.0);
       }
       else
       {

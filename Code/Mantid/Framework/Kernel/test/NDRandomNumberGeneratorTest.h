@@ -3,38 +3,48 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/NDRandomNumberGenerator.h"
+#include <gmock/gmock.h>
 
 class NDRandomNumberGeneratorTest : public CxxTest::TestSuite
 {
-
 private:
   // RandomNumberGenerator is an interface so provide a trivial implementation 
   // for the test
-  class FakeNDRandomNumberGenerator : public Mantid::Kernel::NDRandomNumberGenerator
+  class Mock3DRandomNumberGenerator : public Mantid::Kernel::NDRandomNumberGenerator
   {
   public:
-    std::vector<double> nextPoint()
-    {
-      return std::vector<double>();
-    }
-    void restart()
-    {
-    }
+    Mock3DRandomNumberGenerator()
+      : Mantid::Kernel::NDRandomNumberGenerator(3)
+    {}
+    MOCK_METHOD0(generateNextPoint, void());
+    MOCK_METHOD0(restart, void());
   };
 
 public:
 
-  void test_That_Next_Returns_Empty()
+  void test_That_nextPoint_Calls_generateNextPoint_Exactly_Once()
   {
-    FakeNDRandomNumberGenerator rand_gen;
-    std::vector<double> point = rand_gen.nextPoint();
-    TS_ASSERT(point.empty());
+    Mock3DRandomNumberGenerator randGen;
+    EXPECT_CALL(randGen, generateNextPoint()).Times(1);
+    randGen.nextPoint();
+    TSM_ASSERT("nextPoint was called an unexpected number of times",
+              ::testing::Mock::VerifyAndClearExpectations(&randGen));
   }
 
   void test_That_Reset_Does_Nothing()
   {
-    FakeNDRandomNumberGenerator rand_gen;
-    TS_ASSERT_THROWS_NOTHING(rand_gen.restart());
+    Mock3DRandomNumberGenerator randGen;
+    EXPECT_CALL(randGen, restart()).Times(1);
+    randGen.restart();
+    TSM_ASSERT("restart was called an unexpected number of times",
+               ::testing::Mock::VerifyAndClearExpectations(&randGen));
+
+  }
+
+  void test_That_nextPoint_Vector_Is_Same_Size_As_Number_Of_Dimenions()
+  {
+    Mock3DRandomNumberGenerator randGen;
+    TS_ASSERT_EQUALS(randGen.nextPoint().size(), randGen.numberOfDimensions());
   }
 
 };

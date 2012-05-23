@@ -16,7 +16,7 @@ namespace Mantid
      */
     NDPseudoRandomNumberGenerator::
     NDPseudoRandomNumberGenerator(const unsigned int ndims, SingleValueGenerator singleValueGen)
-      : NDRandomNumberGenerator(), m_ndims(ndims), m_singleValueGen(singleValueGen)
+      : NDRandomNumberGenerator(ndims), m_singleValueGen(singleValueGen)
     {
     }
 
@@ -29,15 +29,13 @@ namespace Mantid
       m_singleValueGen->setSeed(seedValue);
     }
 
-    /// Returns the ND point
-    std::vector<double> NDPseudoRandomNumberGenerator::nextPoint()
+    /// Generates the next point
+    void NDPseudoRandomNumberGenerator::generateNextPoint()
     {
-      std::vector<double> point(m_ndims);
-      for(unsigned int i = 0; i < m_ndims; ++i)
+      for(unsigned int i = 0; i < numberOfDimensions(); ++i)
       {
-        point[i] = m_singleValueGen->nextValue();
+        this->cacheGeneratedValue(i, m_singleValueGen->nextValue());
       }
-      return point;
     }
 
     /**

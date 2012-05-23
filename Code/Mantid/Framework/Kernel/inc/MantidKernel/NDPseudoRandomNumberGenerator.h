@@ -46,8 +46,8 @@ namespace Mantid
       NDPseudoRandomNumberGenerator(const unsigned int ndims, SingleValueGenerator singleValueGen);
       /// Set the random number seed
       void setSeed(const size_t seedValue);
-      /// Returns the ND point
-      std::vector<double> nextPoint();
+      /// Generates the next ND point
+      void generateNextPoint();
       /// Resets the generator
       void restart();
 
@@ -55,8 +55,6 @@ namespace Mantid
       DISABLE_DEFAULT_CONSTRUCT(NDPseudoRandomNumberGenerator);
       DISABLE_COPY_AND_ASSIGN(NDPseudoRandomNumberGenerator);
 
-      /// The number of dimensions
-      const unsigned int m_ndims;
       /// The single value generator
       SingleValueGenerator m_singleValueGen;
     };

@@ -48,8 +48,8 @@ namespace Mantid
       explicit SobolSequence(const unsigned int ndims);
       /// Destructor
       ~SobolSequence();
-      /// Returns the next value in the sequence
-      std::vector<double> nextPoint();
+      /// Generates the next value in the sequence
+      void generateNextPoint();
       /// Reset the sequence
       void restart();
 
@@ -64,10 +64,6 @@ namespace Mantid
 
       /// GSL quasi-random number state
       gsl_qrng *m_gslGenerator;
-      /// Number of dimensions of current generator
-      unsigned int m_numDims;
-      /// A n-dimensional vector holding the current coordinate points
-      std::vector<double> m_currentPoint;
     };
   }
 }
