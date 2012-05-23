@@ -181,9 +181,9 @@
   
   <type name="door3">
     <component type="straight-through-beam-tube" >
-      <location r="2.50937" t="5.41821" p="113.91585"name="tube1" > </location>
-      <location r="2.50937" t="5.19467" p="107.56693"name="tube2" > </location>   
-      <location r="2.50937" t="5.04030" p="100.73910"name="tube3" > </location>
+      <location r="2.50937" t="5.41821" p="113.91585" name="tube1" > </location>
+      <location r="2.50937" t="5.19467" p="107.56693" name="tube2" > </location>   
+      <location r="2.50937" t="5.04030" p="100.73910" name="tube3" > </location>
       <location r="2.50937" t="4.96155" p="93.58839" name="tube4"> </location>   
       <location r="2.50937" t="4.96203" p="86.32413" name="tube5"> </location>
       <location r="2.50937" t="5.04172" p="79.17615" name="tube6"> </location>   
