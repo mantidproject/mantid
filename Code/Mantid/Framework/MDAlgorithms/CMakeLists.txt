@@ -43,6 +43,17 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
+#	
+	src/ConvToMDEventsBase.cpp
+	src/ConvToMDEventsEvents.cpp
+	src/ConvToMDEventsHisto.cpp
+	src/ConvToMDPreprocDet.cpp
+	src/MDTransfFactory.cpp	
+#	src/MDTransfQ3D.cpp
+#	src/MDTransfNoQ.cpp
+	src/MDTransfModQ.cpp
+	src/UnitConversionHelper.cpp		
+	
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -101,6 +112,18 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/XorMD.h
+# 
+	inc/MantidMDAlgorithms/ConvToMDEventsBase.h	
+	inc/MantidMDAlgorithms/ConvToMDEventsEvents.h
+	inc/MantidMDAlgorithms/ConvToMDEventsHisto.h	
+	inc/MantidMDAlgorithms/ConvToMDPreprocDet.h
+    inc/MantidMDAlgorithms/MDTransfFactory.h
+	inc/MantidMDAlgorithms/MDTransfInterface.h
+#	inc/MantidMDAlgorithms/MDTransfQ3D.h
+#	inc/MantidMDAlgorithms/MDTransfNoQ.h
+	inc/MantidMDAlgorithms/MDTransfModQ.h
+	inc/MantidMDAlgorithms/UnitConversionHelper.h	
+
 )
 
 # Test files. Other source files required.

@@ -12,20 +12,19 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include "MantidMDEvents/ConvToMDEventsBase.h"
-
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
+#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
 // coordinate transformation
-#include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
 // units conversion
-#include "MantidMDEvents/UnitConversionHelper.h"
+#include "MantidMDAlgorithms/UnitConversionHelper.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 /** The class specializes ConvToMDEventsBase for the case when the conversion occurs from Events WS to the MD events WS
    *
