@@ -20,17 +20,25 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 		self.declareFileProperty("OutputFile","", FileAction.Save, ['cal'],Description="The file to contain the results")
 
 		self.declareProperty("Invert", False, Description="If True, masking is inverted in the input workspace. Default: False")
+        
 		
 	def PyExec(self):
 		#extract settings
 		inputWorkspace = self.getProperty("InputWorkspace")
 		outputFileName = self.getProperty("OutputFile")
 		invert = self.getProperty("Invert")
-
-		#check for consistency
+        
+        #check for consistency
 		if inputWorkspace.getNumberBins() < 1:
 			raise RuntimeError('The input workspace is empty.')
-
+		
+		#define flags for masking and not-masking
+		masking_flag = 0
+		not_masking_flag = 1
+		
+		if invert:
+			masking_flag, not_masking_flag = not_masking_flag, masking_flag
+        
 		calFile = open(outputFileName,"w")
 		#write a header
 		instrumentName = inputWorkspace.getInstrument().getName()
@@ -41,9 +49,9 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 			try:
 				det = inputWorkspace.getDetector(i)
 				if (det.isMasked()): #check if masked
-					group = 0
+					group = masking_flag
 				else:
-					group = 1
+					group = not_masking_flag
 				if type(det) == DetectorGroup:
 					detIDs = det.getDetectorIDs()
 				else:
