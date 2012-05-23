@@ -166,6 +166,8 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.dq0, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.dq_over_q)
         self.connect(self._summary.dq_over_q, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.fourth_column_switch)
+        self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked()"), call_back)
  
          #name of output file changed
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
@@ -277,6 +279,7 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.incident_medium_combobox, False)
         util.set_edited(self._summary.dq0, False)
         util.set_edited(self._summary.dq_over_q, False)
+        util.set_edited(self._summary.fourth_column_switch, False)
     
     def _det_angle_offset_chk_changed(self):
         is_checked = self._summary.det_angle_offset_check.isChecked()
@@ -702,8 +705,8 @@ class BaseRefWidget(BaseWidget):
                 state.incident_medium_index_selected = _incident_medium_index_selected
                 
                 #4th column (precision)
-                state.fourth_column_dq0 = self._summary.dq0
-                state.fourth_column_dq_over_q = self._summary.dq_over_q
+                state.fourth_column_dq0 = self._summary.dq0.text()
+                state.fourth_column_dq_over_q = self._summary.dq_over_q.text()
                 
                 current_item.setData(QtCore.Qt.UserRole, state)
                 i+=1        
