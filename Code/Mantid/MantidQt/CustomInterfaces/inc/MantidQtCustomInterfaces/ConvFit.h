@@ -2,6 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
 #include "MantidQtCustomInterfaces/IDATab.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+#include <boost\shared_ptr.hpp>
 
 namespace Mantid
 {
