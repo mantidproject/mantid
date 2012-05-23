@@ -20,6 +20,8 @@
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfFactory.h"
+// units conversion
+#include "MantidMDEvents/UnitConversionHelper.h"
 
 namespace Mantid
 {
@@ -64,7 +66,8 @@ private:
    virtual size_t conversionChunk(size_t workspaceIndex);
    // the pointer to the source event workspace as event ws does not work through the public interface?
     DataObjects::EventWorkspace_sptr pEventWS;
-
+   // class responsible for converting units if necessary;
+   UnitsConversionHelper UnitConversion;
    /**function converts particular type of events into MD space and add these events to the workspace itself 
     */
    template <class T>
@@ -96,15 +99,33 @@ private:
         getEventsFrom(el, events_ptr);
         typename std::vector<T> & events = *events_ptr;
 
+
+
         // Iterators to start/end
        typename std::vector<T>::iterator it = events.begin();
        typename std::vector<T>::iterator it_end = events.end();
 
+       // obtain tof-coordinate for availible events
+       std::vector<double> X;
+       // counter for accessed events;
+       X.reserve(numEvents);
        for (; it != it_end; it++)
        {
          double tof=it->tof();
-         if(!pQConverter->calcMatrixCoord(tof,locCoord))continue; // skip ND outside the range
-         
+         X.push_back(tof);
+       }
+
+       std::vector<double> XtargetUnits;
+       UnitConversion.updateConversion(workspaceIndex);
+       UnitConversion.convertUnits(X,XtargetUnits);
+
+       size_t ic(0);
+       it = events.begin();
+       for (; it != it_end; it++)
+       {
+         if(!pQConverter->calcMatrixCoord(XtargetUnits[ic],locCoord))continue; // skip ND outside the range
+         ic++;
+
          sig_err.push_back(float(it->weight()));
          sig_err.push_back(float(it->errorSquared()));
          run_index.push_back(runIndexLoc);
