@@ -63,9 +63,11 @@ public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
 
+
 public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
+
 
 private slots:
   /// Guess Alpha clicked
@@ -174,6 +176,9 @@ private:
 
   /// Set start up interface look
   void startUpLook();
+
+  /// Change the connected data text.
+  void setConnectedDataText();
 
   /// Catch when the interface is closed and do something before.
   void closeEvent(QCloseEvent *e);

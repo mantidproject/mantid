@@ -77,7 +77,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
   m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay("")
 {
   try
@@ -125,6 +125,8 @@ void MuonAnalysis::initLayout()
 
   m_optionTab->initLayout();
   m_fitDataTab->init();
+
+  setConnectedDataText();
 
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
   connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
@@ -228,6 +230,17 @@ void MuonAnalysis::muonAnalysisHelpGroupingClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
             "MuonAnalysisGrouping"));
+}
+
+
+/**
+* Set connected data text.
+*/
+void MuonAnalysis::setConnectedDataText()
+{
+  m_uiForm.connectedDataHome->setText("Connected: " + m_currentDataName);
+  m_uiForm.connectedDataGrouping->setText("Connected: " + m_currentDataName);
+  m_uiForm.connectedDataSettings->setText("Connected: " + m_currentDataName);
 }
 
 
@@ -2079,6 +2092,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     changePlotType(plotDetails);
 
     m_currentDataName = titleLabel;
+    setConnectedDataText();
   }
   m_updating = false;
 }
@@ -2220,6 +2234,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     changePlotType(plotDetails);
     
     m_currentDataName = titleLabel;
+    setConnectedDataText();
   }
   m_updating = false;
 }
