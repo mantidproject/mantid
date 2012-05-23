@@ -214,20 +214,61 @@ class BaseRefWidget(BaseWidget):
         """
         Reached by the "Create ASCII" button
         """
-        print 'inside _create_ascii_clicked'
+        #make sure there is the right output workspace called '
+#        if not mtd.workspaceExists('ref_combined'):
+#            print 'Workspace "ref_combined" does not exist !'
+#            return
+        
+        #retrieve name of the output file
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
+        if (str(file_name).strip() == ''):
+            return
+        
+        #check the status of the 4th column switch
+        _with_4th_flag = self._summary.fourth_column_switch.isChecked()
+        text = []
+        if _with_4th_flag:
+            dq0 = self._summary.dq0.text()
+            dq_over_q = self._summary.dq_over_q.text()
+            line1 = '#dQ0[1/Angstrom]=' + str(dq0)
+            line2 = '#dQ/Q=' + str(dq_over_q)
+            line3 = '#Q(1/Angstrom) R delta_R Precision'
+            text = [line1, line2, line3]
+        else:
+            text = ['#Q(1/Angstrom) R delta_R']
+            
+        mt = mtd['ref_combined']
+        x_axis = mt.readX(0)[:]
+        y_axis = mt.readY(0)[:]
+        e_axis = mt.readE(0)[:]
+        sz = len(x_axis)
+        for i in range(sz):
+            _line = str(x_axis[i])
+            _line += ' ' + str(y_axis[i])
+            _line += ' ' + str(e_axis[i])
+            if _with_4th_flag:
+                _precision = str(dq0 + dq_over_q * x_axis[i])
+                _line += ' ' + _precision
+            
+            text.append(_line)
     
-    
+        f=open(file_name,'w')
+        for _line in text:
+            f.write(_line + '\n')
     
     
     def browse_config_file_name(self):
         '''
         Define configuration file name
         '''
-        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
-        if (str(file_name).strip() != ''):
-            if os.path.isfile(file_name):
-                self._summary.cfg_scaling_factor_file_name.setText(file_name)
-                self.retrieve_list_of_incident_medium(file_name)
+        try:
+            file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
+            if (str(file_name).strip() != ''):
+                if os.path.isfile(file_name):
+                    self._summary.cfg_scaling_factor_file_name.setText(file_name)
+                    self.retrieve_list_of_incident_medium(file_name)
+        except:
+            print 'Invalid file format (' + file_name + ')'
 
     def variable_value_splitter(self, variable_value):
         """
