@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/IConvertToMDEventsWS.cpp
 	src/ConvToMDPreprocDetectors.cpp	
-        src/DampedHisenbergFMSW.cpp
+  src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -33,10 +33,6 @@ set ( SRC_FILES
 	src/PlusMD.cpp
 	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
-	src/Quantification/ForegroundModelFactory.cpp
-	src/Quantification/CrossSectionResolutionConvolution.cpp
-	src/Quantification/MDResolutionConvolution.cpp
-	src/Quantification/MonteCarloResolutionConvolution.cpp
 	src/RunParam.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
@@ -73,7 +69,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
-        inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
+  inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -94,11 +90,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
-	inc/MantidMDAlgorithms/Quantification/CrossSectionResolutionConvolution.h
-	inc/MantidMDAlgorithms/Quantification/ForegroundModel.h
-	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
-	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
-	inc/MantidMDAlgorithms/Quantification/MonteCarloResolutionConvolution.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
@@ -125,13 +116,12 @@ set ( TEST_FILES
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsWSTest.h
 	test/ConvertToMDEventsParamsTest.h
-        test/ConvertToMDEventsSubalgFactoryTest.h
+  test/ConvertToMDEventsSubalgFactoryTest.h
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTestPerformance.h 	
-	test/CrossSectionResolutionConvolutionTest.h
-        test/DampedHisenbergFMSWTest.h
+  test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
@@ -145,7 +135,6 @@ set ( TEST_FILES
 	test/MergeMDFilesTest.h
 	test/MergeMDTest.h
 	test/MinusMDTest.h
-	test/MonteCarloResolutionConvolutionTest.h
 	test/MultiplyMDTest.h
 	test/NotMDTest.h
 	test/OrMDTest.h
