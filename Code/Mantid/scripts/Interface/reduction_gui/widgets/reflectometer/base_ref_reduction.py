@@ -831,5 +831,4 @@ class BaseRefWidget(BaseWidget):
 
         #4th column (precision)
         self._summary.fourth_column_switch.setChecked(state.fourth_column_flag)
-        self._summary.dq0.setText(str(state.fourth_column_dq0))
-        self._summary.dq_over_q.setText(str(state.fourth_column_dq_over_q))
+        self._fourth_column_clicked(state.fourth_column_flag)

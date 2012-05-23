@@ -268,10 +268,6 @@ def convertWorkspaceToQ(ws_data,
         returns the new workspace handle
     """
 
-    print 'q_binning:'
-    print q_binning
-
-
     mt1 = mtd[ws_data]
     _tof_axis = mt1.readX(0)[:]    
     _fromYpixel = min([fromYpixel, toYpixel])

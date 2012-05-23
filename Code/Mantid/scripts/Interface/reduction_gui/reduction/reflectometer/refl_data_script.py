@@ -275,10 +275,6 @@ class DataSets(BaseScriptElement):
         self.fourth_column_dq0 = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq0")
         self.fourth_column_dq_over_q = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq_over_q")
 
-        print 'self.fourth_column_flag:'
-        print self.fourth_column_flag
-        print
-        
     def reset(self):
         """
             Reset state
