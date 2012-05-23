@@ -8,7 +8,6 @@ Framework/Geometry
 Framework/Kernel
 Framework/DataObjects
 Framework/MDEvents
-Framework/MDAlgorithms
 )
 
 set ( COMMONVATES_SETUP_DONE TRUE )
