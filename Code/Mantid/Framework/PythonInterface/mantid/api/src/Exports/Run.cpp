@@ -2,6 +2,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/list.hpp>
 
 using Mantid::API::Run;
 using Mantid::Kernel::Property;
@@ -10,36 +11,6 @@ using namespace boost::python;
 namespace
 {
   namespace bpl = boost::python;
-
-  /**
-   * Emulate dict.get. Returns the value pointed to by the key or the default given
-   * @param self The object called on
-   * @param key The key
-   * @param default_ The default to return if it does not exist
-   */
-  bpl::object getWithDefault(bpl::object self, bpl::object key, bpl::object default_)
-  {
-    bpl::object exists(self.attr("__contains__"));
-    if( extract<bool>(exists(key))() )
-    {
-      return self.attr("__getitem__")(key);
-    }
-    else
-    {
-      return default_;
-    }
-  }
-
-  /**
-   * Emulate dict.get. Returns the value pointed to by the key or None if it doesn't exist
-   * @param self The bpl::object called on
-   * @param key The key
-   */
-  bpl::object get(bpl::object self, bpl::object key)
-  {
-    return getWithDefault(self, key, bpl::object());
-  }
-
 
   /**
      * Add a property with the given name and value
@@ -95,6 +66,51 @@ namespace
   }
 
 
+  /**
+   * Emulate dict.get. Returns the value pointed to by the key or the default given
+   * @param self The object called on
+   * @param key The key
+   * @param default_ The default to return if it does not exist
+   */
+  bpl::object getWithDefault(bpl::object self, bpl::object key, bpl::object default_)
+  {
+    bpl::object exists(self.attr("__contains__"));
+    if( extract<bool>(exists(key))() )
+    {
+      return self.attr("__getitem__")(key);
+    }
+    else
+    {
+      return default_;
+    }
+  }
+
+  /**
+   * Emulate dict.get. Returns the value pointed to by the key or None if it doesn't exist
+   * @param self The bpl::object called on
+   * @param key The key
+   */
+  bpl::object get(bpl::object self, bpl::object key)
+  {
+    return getWithDefault(self, key, bpl::object());
+  }
+
+  /**
+   * Emulate dict.keys. Returns a list of property names know to the run object
+   * @param self :: A reference to the Run object that called this method
+   */
+  bpl::list keys(Run & self)
+  {
+    const std::vector<Mantid::Kernel::Property*> & logs = self.getProperties();
+    bpl::list names;
+    for(auto iter = logs.begin(); iter != logs.end(); ++iter)
+    {
+      names.append((*iter)->name());
+    }
+    return names;
+  }
+
+
 }
 
 void export_Run()
@@ -125,6 +141,7 @@ void export_Run()
     //--------------------------- Dictionary access----------------------------
     .def("get", &getWithDefault, "Returns the value pointed to by the key or None if it does not exist")
     .def("get", &get, "Returns the value pointed to by the key or the default value given")
+    .def("keys", &keys, "Returns the names of the properties as list")
     .def("__contains__", &Run::hasProperty)
     .def("__getitem__", &Run::getProperty, return_value_policy<return_by_value>())
     .def("__setitem__", &addOrReplaceProperty)

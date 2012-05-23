@@ -61,6 +61,15 @@ class RunTest(unittest.TestCase):
     def test_add_property_with_unknown_type_raises_error(self):
         run = self._expt_ws.run()
         self.assertRaises(ValueError, run.addProperty, 'dict_t', {}, False)
+        
+    def test_keys_returns_a_list_of_the_property_names(self):
+        run = self._expt_ws.run()
+        names = run.keys()
+        self.assertEquals(len(names), 31)
+        # Test a few
+        self.assertTrue('nspectra' in names)
+        self.assertTrue('run_start' in names)
+        self.assertFalse('not a log' in names)
     
 if __name__ == '__main__':
     unittest.main()
