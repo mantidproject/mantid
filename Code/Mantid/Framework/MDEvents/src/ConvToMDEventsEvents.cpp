@@ -24,7 +24,7 @@ size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D
 
 void ConvToMDEventsEvents::runConversion(API::Progress *pProg)
 {
-         // Get the box controller
+       // Get the box controller
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
         
@@ -33,12 +33,12 @@ void ConvToMDEventsEvents::runConversion(API::Progress *pProg)
 
        // if any property dimension is outside of the data range requested, the job is done;
         if(!pQConverter->calcGenericVariables(Coord,this->n_dims))return; 
-
        
         size_t eventsAdded  = 0;
         for (size_t wi=0; wi <nValidSpectra; wi++)
         {     
            size_t iSpec         = this->pDetLoc->getDetSpectra(wi);       
+           UnitConversion.updateConversion(wi);
 
            eventsAdded         += this->conversionChunk(iSpec);
       // Give this task to the scheduler
