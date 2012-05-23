@@ -481,9 +481,37 @@ def outputFittingParameters(a, b, error_a, error_b,
                 if _match == False:
                     entry_list_to_add.append(i)
 
-        except:
+        except:            
+            #replace file because this one has the wrong format
+            _content = ['#y=a+bx\n', '#\n',
+                        '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+            sz = len(a)
+            for i in range(sz):
             
-            pass
+                _line = 'IncidentMedium=' + incident_medium.strip() + ' '
+                _line += 'LambdaRequested=' + str(lambda_requested) + ' '
+            
+                _S1H = "{0:.8f}".format(abs(S1H[i]))
+                _S2H = "{0:.8f}".format(abs(S2H[i]))
+                _S1W = "{0:.8f}".format(abs(S1W[i]))
+                _S2W = "{0:.8f}".format(abs(S2W[i]))
+                _a = "{0:.8f}".format(a[i])
+                _b = "{0:.8f}".format(b[i])
+                _error_a = "{0:.8f}".format(float(error_a[i]))
+                _error_b = "{0:.8f}".format(float(error_b[i]))
+            
+                _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
+                _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+                _line += 'a=' + _a + ' '
+                _line += 'b=' + _b + ' '
+                _line += 'error_a=' + _error_a + ' '
+                _line += 'error_b=' + _error_b + '\n'
+                _content.append(_line)
+    
+            f = open(output_file_name, 'w')
+            f.writelines(_content)
+            f.close()
+            return
 
         _content = []
         for j in entry_list_to_add:
