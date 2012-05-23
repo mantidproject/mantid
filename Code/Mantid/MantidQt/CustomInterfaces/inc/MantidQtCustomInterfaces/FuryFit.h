@@ -4,7 +4,7 @@
 #include "MantidQtCustomInterfaces/IDATab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include <boost\shared_ptr.hpp>
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid
 {
