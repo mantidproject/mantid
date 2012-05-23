@@ -68,8 +68,8 @@ public:
     /** the function returns the unit ID for the input units, the particular transformation expects. 
      if one wants the transformation to be meaningful, Input X-coordinates
      used by the transformation have to be expressed in the uinits  specified */
-    virtual std::string usedUnitID()const=0;
-    /**The function describes transformation */
+    virtual const std::string usedUnitID()const=0;
+    /**The function returns the name, under which the transformation would be known to user */
     virtual const std::string transfID()const=0;
     /** Method deployed out of the loop and calculates all variables needed within the loop.
      * In addition it calculates the property-dependant coordinates, which do not depend on workspace
@@ -120,7 +120,7 @@ public:
     virtual bool calcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const=0;
 
     /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and can provide
-      * all necessary variables necessary for the conversion */
+      * all variables necessary for the conversion */
     virtual void initialize(const ConvToMDEventsBase &)=0;
   
     virtual ~MDTransfInterface(){};
