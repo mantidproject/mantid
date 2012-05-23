@@ -227,7 +227,40 @@ class BaseRefWidget(BaseWidget):
         if (str(file_name).strip() != ''):
             if os.path.isfile(file_name):
                 self._summary.cfg_scaling_factor_file_name.setText(file_name)
-#            self.display_preview_config_file()
+                self.retrieve_list_of_incident_medium(file_name)
+
+    def variable_value_splitter(self, variable_value):
+        """
+            This function split the variable that looks like "LambdaRequested:3.75"
+            and returns a dictionnary of the variable name and value        
+        """
+        _split = variable_value.split('=')
+        variable = _split[0]
+        value = _split[1]
+        return {'variable':variable, 'value':value}
+
+    def retrieve_list_of_incident_medium(self, cfg_file_name):
+        """
+        This procedure will parse the configuration file and will 
+        populate the Incident Medium dropbox with the list of incident medium
+        found
+        """
+        f=open(cfg_file_name,'r')
+        text = f.readlines()
+        list_incident_medium = []
+        for _line in text:
+            if _line[0] == '#':
+                continue
+            
+            _line_split = _line.split(' ')
+            _incident_medium = self.variable_value_splitter(_line_split[0])
+            list_incident_medium.append(_incident_medium['value'])
+
+        _unique_list = list(set(list_incident_medium))
+        
+        self._summary.incident_medium_combobox.clear() 
+        for i in range(len(_unique_list)):
+            self._summary.incident_medium_combobox.addItem(str(_unique_list[i]))
 
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
