@@ -99,6 +99,7 @@ endfunction()
 # Fix up ParaView plugins (if we are building Vates)
 ####################################################
 if( MAKE_VATES )
+  message( "Fixing up ParaView plugins to point at @PARAVIEW_APP_LIB_DIR@" )
   set ( paraview_app_libs "@PARAVIEW_APP_LIB_DIR@" )
 
   foreach(plugin ${pvplugins})  
