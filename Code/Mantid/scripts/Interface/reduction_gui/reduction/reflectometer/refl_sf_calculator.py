@@ -126,6 +126,9 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
 
         new_script += ',tof_range=' + str(tof_range) + ')'
     
+        if scaling_factor_file == '':
+            return ''
+    
         return new_script
     
     def to_script(self, file_name=None):
@@ -149,7 +152,12 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
             if item.state() is not None:
                 script_part2 += str(item.state())
 
-        script += self.create_script(script_part2)
+        _script = self.create_script(script_part2)
+        if _script == '':
+            print 'Please define a Scaling Factor File Name'
+            raise RuntimeError
+            
+        script += _script
 
         if file_name is not None:
             f = open(file_name, 'w')
