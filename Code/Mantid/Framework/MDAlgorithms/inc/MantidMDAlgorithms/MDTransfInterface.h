@@ -5,7 +5,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 /** Interface to set of sub-classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into MD events.

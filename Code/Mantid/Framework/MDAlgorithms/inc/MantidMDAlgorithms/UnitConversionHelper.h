@@ -1,16 +1,16 @@
-#ifndef H_MDUNIT_CONVERSION_HELPER
-#define H_MDUNIT_CONVERSION_HELPER
+#ifndef H_MD_UNIT_CONVERSION_HELPER
+#define H_MD_UNIT_CONVERSION_HELPER
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 /**  The class helps to organize unit conversion when running transformation from a matrix(event) workspace into 
      MD event workspace
@@ -75,7 +75,7 @@ public:
     void convertUnits(const std::vector<double> &data_toConvert, std::vector<double> &dataConvertTo);
 
 protected: // for testing
-
+    /// establish and initialize proper units conversion from input to output units;
     ConvertToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo);
 
 };

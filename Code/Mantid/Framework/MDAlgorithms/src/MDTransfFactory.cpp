@@ -1,9 +1,9 @@
-#include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
 MDTransfFactoryImpl::MDTransfFactoryImpl() :

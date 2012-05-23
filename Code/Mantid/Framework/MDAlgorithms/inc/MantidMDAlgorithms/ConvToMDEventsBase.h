@@ -15,13 +15,13 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
 
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
-#include "MantidMDEvents/MDTransfInterface.h"
-#include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 /** class describes the inteface to the methods, which perform conversion from usual workspaces to MDEventWorkspace 
    *
@@ -87,7 +87,7 @@ namespace MDEvents
    // the description of the requested target MD workpsace:
    MDEvents::MDWSDescription TWS;
    // pointer to the class, which keeps target workspace and provides functions adding additional MD events to it. 
-   boost::shared_ptr<MDEventWSWrapper> pWSWrapper;
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
    // pointer to the array of detector's directions in reciprocal space
    ConvToMDPreprocDet const * pDetLoc;
    // shared pointer to the converter, which convertd WS coordinates to MD coordinates

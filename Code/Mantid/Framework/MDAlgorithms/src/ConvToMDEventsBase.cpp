@@ -1,9 +1,9 @@
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
 
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
 // logger for conversion  
@@ -76,9 +76,6 @@ size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, 
 
         // retrieve the class which does the conversion of workspace data into MD WS coordinates;
         pQConverter = MDTransfFactory::Instance().create(TWS.AlgID);
-
-        // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-        UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
 
         inWS2D = pWS2D;
         
