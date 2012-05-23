@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/XMLlogfile.cpp
+    src/MDGeometry/CompositeImplicitFunction.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
@@ -38,7 +39,8 @@ set ( SRC_FILES
 	src/MDGeometry/MDHistoDimensionBuilder.cpp
 	src/MDGeometry/MDImplicitFunction.cpp
 	src/MDGeometry/MDPlane.cpp
-        src/MDGeometry/MDPlaneImplicitFunction.cpp
+    src/MDGeometry/MDPlaneImplicitFunction.cpp
+	src/MDGeometry/NullImplicitFunction.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -133,6 +135,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/XMLlogfile.h
+	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
@@ -143,9 +146,10 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h
 	inc/MantidGeometry/MDGeometry/MDImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDPlane.h
-        inc/MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h
+    inc/MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
+	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
@@ -192,6 +196,7 @@ set ( TEST_FILES
 	test/CompAssemblyTest.h
 	test/ComponentParserTest.h
 	test/ComponentTest.h
+	test/CompositeImplicitFunctionTest.h
 	test/ConeTest.h
 	test/ConventionalCellTest.h
 	test/ConvexPolygonTest.h
@@ -222,6 +227,7 @@ set ( TEST_FILES
 	test/MathSupportTest.h
 	test/NearestNeighboursFactoryTest.h
 	test/NearestNeighboursTest.h
+	test/NullImplicitFunctionTest.h
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h

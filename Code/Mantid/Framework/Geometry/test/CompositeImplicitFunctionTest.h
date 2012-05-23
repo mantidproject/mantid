@@ -7,7 +7,9 @@
 #include <cmath>
 #include <typeinfo>
 
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"
+
+using namespace Mantid::Geometry;
 
 class CompositeImplicitFunctionTest : public CxxTest::TestSuite
 {
@@ -33,7 +35,6 @@ public:
 
   void testFunctionAddition()
   {
-    using namespace Mantid::MDAlgorithms;
     CompositeImplicitFunction composite;
     composite.addFunction(Mantid::Geometry::MDImplicitFunction_sptr(new MockImplicitFunction()));
     composite.addFunction(Mantid::Geometry::MDImplicitFunction_sptr(new MockImplicitFunction()));
@@ -43,7 +44,6 @@ public:
 
   void testEvaluateNestedFunctionsViaCoordinates()
   {
-    using namespace Mantid::MDAlgorithms;
     using namespace testing;
 
     CompositeImplicitFunction composite;
@@ -64,8 +64,6 @@ public:
 
   void testRecursiveToXML()
   {
-    using namespace Mantid::MDAlgorithms;
-
     MockImplicitFunction* mockFunctionA = new MockImplicitFunction;
     MockImplicitFunction* mockFunctionB = new MockImplicitFunction;
 
@@ -81,7 +79,6 @@ public:
 
   void testCannotAddNullDimension()
   {
-    using namespace Mantid::MDAlgorithms;
     CompositeImplicitFunction function;
 
     MockImplicitFunction* nullFunction = NULL;

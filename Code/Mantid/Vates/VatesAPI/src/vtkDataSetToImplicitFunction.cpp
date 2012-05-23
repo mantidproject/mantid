@@ -3,7 +3,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include <vtkDataSet.h>
 
 namespace Mantid
@@ -40,7 +40,7 @@ namespace Mantid
     */
     Mantid::Geometry::MDImplicitFunction* vtkDataSetToImplicitFunction::execute()
     {
-      using Mantid::MDAlgorithms::NullImplicitFunction;
+      using Mantid::Geometry::NullImplicitFunction;
       using Mantid::Geometry::MDGeometryXMLDefinitions;
       Mantid::Geometry::MDImplicitFunction* function = new NullImplicitFunction;
 

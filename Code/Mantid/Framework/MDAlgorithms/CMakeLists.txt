@@ -6,16 +6,13 @@ set ( SRC_FILES
 	src/BooleanBinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompareMDWorkspaces.cpp
-	src/CompositeFunctionBuilder.cpp
-	src/CompositeImplicitFunction.cpp
-	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/IConvertToMDEventsWS.cpp
 	src/ConvToMDPreprocDetectors.cpp	
-        src/DampedHisenbergFMSW.cpp
+  src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -32,7 +29,6 @@ set ( SRC_FILES
 	src/MinusMD.cpp
 	src/MultiplyMD.cpp
 	src/NotMD.cpp
-	src/NullImplicitFunction.cpp
 	src/OrMD.cpp
 	src/PlusMD.cpp
 	src/PowerMD.cpp
@@ -59,9 +55,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
-	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
-	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
-	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
@@ -76,7 +69,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
-        inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
+  inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -93,7 +86,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/MinusMD.h
 	inc/MantidMDAlgorithms/MultiplyMD.h
 	inc/MantidMDAlgorithms/NotMD.h
-	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/OrMD.h
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
@@ -124,12 +116,12 @@ set ( TEST_FILES
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsWSTest.h
 	test/ConvertToMDEventsParamsTest.h
-    test/ConvertToMDEventsSubalgFactoryTest.h
+  test/ConvertToMDEventsSubalgFactoryTest.h
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTestPerformance.h 	
-        test/DampedHisenbergFMSWTest.h
+  test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
@@ -161,9 +153,6 @@ set ( TEST_FILES
 )
 
 set ( GMOCK_TEST_FILES
-	test/CompositeBuilderTest.h
-	test/CompositeImplicitFunctionTest.h
-	test/NullImplicitFunctionTest.h
 	test/BinaryOperationMDTest.h
 )
 
