@@ -93,6 +93,7 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
         self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked(bool)"), self._fourth_column_clicked)
+        self.connect(self._summary.create_ascii_button, QtCore.SIGNAL("clicked()"), self._create_ascii_clicked)
         
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
@@ -160,6 +161,12 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.incident_medium_combobox)
         self.connect(self._summary.incident_medium_combobox, QtCore.SIGNAL("editTextChanged(QString)"), call_back)
  
+        #4th column
+        call_back = partial(self._edit_event, ctrl=self._summary.dq0)
+        self.connect(self._summary.dq0, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.dq_over_q)
+        self.connect(self._summary.dq_over_q, QtCore.SIGNAL("textChanged(QString)"), call_back)
+ 
          #name of output file changed
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
@@ -201,6 +208,15 @@ class BaseRefWidget(BaseWidget):
         if output_dir:
             self._summary.outdir_edit.setText(output_dir)   
         
+    def _create_ascii_clicked(self):
+        """
+        Reached by the "Create ASCII" button
+        """
+        print 'inside _create_ascii_clicked'
+    
+    
+    
+    
     def browse_config_file_name(self):
         '''
         Define configuration file name
@@ -259,6 +275,8 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.direct_pixel_edit, False)
         util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
         util.set_edited(self._summary.incident_medium_combobox, False)
+        util.set_edited(self._summary.dq0, False)
+        util.set_edited(self._summary.dq_over_q, False)
     
     def _det_angle_offset_chk_changed(self):
         is_checked = self._summary.det_angle_offset_check.isChecked()

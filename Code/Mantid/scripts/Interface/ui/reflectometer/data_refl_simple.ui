@@ -3808,7 +3808,7 @@ p, li { white-space: pre-wrap; }
                      </spacer>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="outdir_browse_button_3">
+                     <widget class="QPushButton" name="create_ascii_button">
                       <property name="minimumSize">
                        <size>
                         <width>150</width>

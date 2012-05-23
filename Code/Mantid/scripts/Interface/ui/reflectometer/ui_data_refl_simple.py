@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Tue May 22 08:02:53 2012
+# Created: Wed May 23 05:52:12 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1284,11 +1284,11 @@ class Ui_Frame(object):
         self.horizontalLayout_29.addWidget(self.dq_over_q)
         spacerItem18 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_29.addItem(spacerItem18)
-        self.outdir_browse_button_3 = QtGui.QPushButton(self.groupBox_4)
-        self.outdir_browse_button_3.setMinimumSize(QtCore.QSize(150, 0))
-        self.outdir_browse_button_3.setMaximumSize(QtCore.QSize(150, 16777215))
-        self.outdir_browse_button_3.setObjectName("outdir_browse_button_3")
-        self.horizontalLayout_29.addWidget(self.outdir_browse_button_3)
+        self.create_ascii_button = QtGui.QPushButton(self.groupBox_4)
+        self.create_ascii_button.setMinimumSize(QtCore.QSize(150, 0))
+        self.create_ascii_button.setMaximumSize(QtCore.QSize(150, 16777215))
+        self.create_ascii_button.setObjectName("create_ascii_button")
+        self.horizontalLayout_29.addWidget(self.create_ascii_button)
         self.verticalLayout_8.addLayout(self.horizontalLayout_29)
         self.verticalLayout_4.addWidget(self.groupBox_4)
         spacerItem19 = QtGui.QSpacerItem(20, 25, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
@@ -1460,7 +1460,7 @@ class Ui_Frame(object):
         self.dq0_unit.setText(QtGui.QApplication.translate("Frame", " 1/Å", None, QtGui.QApplication.UnicodeUTF8))
         self.dq_over_q_label.setText(QtGui.QApplication.translate("Frame", "dQ/Q", None, QtGui.QApplication.UnicodeUTF8))
         self.dq_over_q.setText(QtGui.QApplication.translate("Frame", "0.045", None, QtGui.QApplication.UnicodeUTF8))
-        self.outdir_browse_button_3.setText(QtGui.QApplication.translate("Frame", "Create ASCII...", None, QtGui.QApplication.UnicodeUTF8))
+        self.create_ascii_button.setText(QtGui.QApplication.translate("Frame", "Create ASCII...", None, QtGui.QApplication.UnicodeUTF8))
         self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

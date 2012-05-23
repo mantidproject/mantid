@@ -152,7 +152,6 @@ class RefLReduction(PythonAlgorithm):
         
         # Load the data into its workspace
         allow_multiple = True        
-        print run_numbers
         
         if len(run_numbers)>1 and allow_multiple:
             
@@ -841,6 +840,8 @@ class RefLReduction(PythonAlgorithm):
                 _Q = _const * math.sin(theta) / (tofm*1e-6)
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
+            if (q_min >= q_max):
+                q_min = min(_q_axis)
 
         if (backSubMethod == 1):        
             ws_integrated_data = ws_name + '_IntegratedDataWks'
