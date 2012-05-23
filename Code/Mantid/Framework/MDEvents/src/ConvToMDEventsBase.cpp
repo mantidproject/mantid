@@ -1,5 +1,6 @@
 #include "MantidMDEvents/ConvToMDEventsBase.h"
 
+
 namespace Mantid
 {
 namespace MDEvents
@@ -8,32 +9,13 @@ namespace MDEvents
 // logger for conversion  
    Kernel::Logger& ConvToMDEventsBase::convert_log =Kernel::Logger::get("MD-Algorithms");
 
-/** Helper function to obtain the units set along X-axis of the input workspace. 
+/** function extracts the coordinates from additional workspace porperties and places them to proper position within 
+  *  the vector of MD coodinates for the particular workspace.
   *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the name(ID) of the unit, specified along X-axis of current workspace
-*/
-//Kernel::Unit_sptr    
-//ConvToMDEventsBase::getAxisUnits()const{
-//    if(!this->inWS2D.get()){
-//        convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
-//        throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
-//    }
-//    API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(0));
-//    if(!pAxis){
-//        convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
-//        throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
-//    }
-//    return this->inWS2D->getAxis(0)->unit();
-//}
-/** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates for 
-    the particular workspace.
-
-    @param Coord             -- vector of coordinates for current multidimensional event
-    @param nd                -- number of the event's dimensions
-    @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
-                                workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
+  *  @param Coord             -- vector of coordinates for current multidimensional event
+  *  @param nd                -- number of the event's dimensions
+  *  @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
+                                  workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
                                 -- 1 for elastic and 2 for inelastic mode. Number of these properties is determined by the deployed algorithm
                                 The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
                                 obtained from dimensions placed after them. 
@@ -94,6 +76,9 @@ size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, 
 
         // retrieve the class which does the conversion of workspace data into MD WS coordinates;
         pQConverter = MDTransfFactory::Instance().create(TWS.AlgID);
+
+        // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
+        UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
 
         inWS2D = pWS2D;
         
