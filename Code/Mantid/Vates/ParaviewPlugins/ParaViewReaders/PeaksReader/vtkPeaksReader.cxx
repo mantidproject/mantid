@@ -11,12 +11,11 @@
 #include <vtkCubeSource.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-
+#include "MantidAPI/AlgorithmManager.h"
 #include <vtkPVGlyphFilter.h>
 
 vtkCxxRevisionMacro(vtkPeaksReader, "$Revision: 1.0 $");
@@ -106,7 +105,7 @@ int vtkPeaksReader::RequestInformation(
   if(!m_isSetup) 
   {
     // This actually loads the peaks file
-    Mantid::API::IAlgorithm_sptr alg(new Mantid::Crystal::LoadIsawPeaks());
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadIsawPeaks");
     alg->initialize();
     alg->setPropertyValue("Filename", this->FileName);
     alg->setPropertyValue("OutputWorkspace", "LoadedPeaksWS");
