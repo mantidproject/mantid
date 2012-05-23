@@ -5,14 +5,11 @@
  * anonymous namespace. The object itself does nothing, but the comma operator
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
- *
- * The second operation that this macro performs is to provide the definition
- * of the unitID method for the concrete unit.
  */
 #define DECLARE_MD_TRANSF(classname) \
     namespace { \
    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::MDEvents::MDTransfFactory::Instance().subscribe<classname>(#classname)) \
+       ((Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
        }
 
@@ -25,11 +22,11 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
 /** Creates instances of concrete transformations into .

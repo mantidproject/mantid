@@ -20,15 +20,6 @@ set ( SRC_FILES
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
-	src/MDTransfFactory.cpp
-	src/ConvToMDEventsBase.cpp
-	src/ConvToMDEventsEvents.cpp
-	src/ConvToMDEventsHisto.cpp
-	src/ConvToMDPreprocDet.cpp
-#	src/MDTransfQ3D.cpp
-#	src/MDTransfNoQ.cpp
-	src/MDTransfModQ.cpp
-	src/UnitConversionHelper.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDBoxBase.cpp
@@ -50,6 +41,7 @@ set ( SRC_FILES
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
+
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -90,7 +82,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
-	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h

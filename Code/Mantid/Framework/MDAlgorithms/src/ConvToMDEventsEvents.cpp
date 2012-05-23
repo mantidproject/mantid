@@ -1,9 +1,9 @@
-#include "MantidMDEvents/ConvToMDEventsEvents.h"
+#include "MantidMDAlgorithms/ConvToMDEventsEvents.h"
 //
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
 size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,
@@ -18,6 +18,9 @@ size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D
     }
 
     pQConverter->initialize(*this);
+   // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
+    UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
+
 
     return numSpec;
 }

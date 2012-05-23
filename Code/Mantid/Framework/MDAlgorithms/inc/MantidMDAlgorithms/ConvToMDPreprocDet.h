@@ -1,5 +1,5 @@
-#ifndef H_CONV2_MDEVENTS_DET_INFO
-#define H_CONV2_MDEVENTS_DET_INFO
+#ifndef H_CONV2_MDEVENTS_DET_INFO_
+#define H_CONV2_MDEVENTS_DET_INFO_
 /** This structure is the basis and temporary replacement for future subalgorithm, which calculates 
    * matrix workspace with various precprocessed detectors parameters.
    * The lightweight class below contain 3D uint vectors, pointing to the positions of the detectors
@@ -41,7 +41,7 @@
 #include "MantidAPI/Progress.h"
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 /** Class to calculate/keep informaion about detector's positions, this information is used for doing 
   * various transformation of signals into reciprocal place and stored by this class for efficiency and 

@@ -1,9 +1,9 @@
-#include "MantidMDEvents/ConvToMDEventsHisto.h"
+#include "MantidMDAlgorithms/ConvToMDEventsHisto.h"
 
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
 /// Template to check if a variable equal to NaN
@@ -25,6 +25,9 @@ size_t  ConvToMDEventsHisto::initialize(Mantid::API::MatrixWorkspace_sptr inWS, 
    }
 
    pQConverter->initialize(*this);
+  // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
+   UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
+
 
    return numSpec;
 }
