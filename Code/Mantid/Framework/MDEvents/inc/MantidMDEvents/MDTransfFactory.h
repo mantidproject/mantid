@@ -14,8 +14,9 @@
    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
        ((Mantid::MDEvents::MDTransfFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
-       } \
-  const std::string Mantid::MDEvents::classname::transfID() const {return #classname;}
+       }
+
+//  const std::string Mantid::MDEvents::classname::transfID() const {return #classname;}
 
 
 //----------------------------------------------------------------------
