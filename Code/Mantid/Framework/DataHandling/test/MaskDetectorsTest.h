@@ -15,11 +15,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
-using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -113,104 +109,16 @@ public:
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
     }
 
-    if (!asMaskWorkspace)
-    {
+    if (!asMaskWorkspace){
       space->setInstrument(instr);
       space->generateSpectraMap();
+
+      std::cout << "another way of find number of detectors = " << space->getInstrument()->getDetectorIDs().size() << std::endl;
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);
 
   }
-
-  /*
-   * Generate a Workspace which can be (1) EventWorkspace, (2) Workspace2D, and (3) SpecialWorkspace2D
-   * with grouped detectors
-   */
-  void setUpWSwGroupedDetectors(bool event, const std::string & name = "testSpace", bool asMaskWorkspace = false, size_t numspec=9)
-  {
-    // 1. Instrument
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1, false));
-
-    for (detid_t i = 10; i <= 36; ++i)
-    {
-      Detector *d = new Detector("det", i, 0);
-      instr->markAsDetector(d);
-    }
-
-    // 2. Workspace
-    MatrixWorkspace_sptr space;
-    // Set up a small workspace for testing
-    if (event)
-    {
-      space = WorkspaceFactory::Instance().create("EventWorkspace",numspec,6,5);
-      EventWorkspace_sptr spaceEvent = boost::dynamic_pointer_cast<EventWorkspace>(space);
-
-      MantidVecPtr x,vec;
-      vec.access().resize(5,1.0);
-      detid_t currdetid = 1;
-      for (int j = 0; j < 9; ++j)
-      {
-        //Just one event per pixel
-        for (int k = 0; k < 4; ++ k)
-        {
-          TofEvent event(1.23*(1.+double(k)*0.01), int64_t(4.56));
-          spaceEvent->getEventList(j).addEventQuickly(event);
-        }
-        // spaceEvent->getEventList(j).setDetectorID(j);
-        spaceEvent->getAxis(1)->spectraNo(j) = j;
-        Mantid::API::ISpectrum* spec = spaceEvent->getSpectrum(j);
-        std::vector<int> detids;
-        for (size_t k = 0; k < 4; ++k)
-        {
-          detids.push_back(currdetid);
-          currdetid ++;
-        }
-        spec->addDetectorIDs(detids);
-      }
-      spaceEvent->doneAddingEventLists();
-      x.access().push_back(0.0);
-      x.access().push_back(10.0);
-      spaceEvent->setAllX(x);
-    }
-    else if (!asMaskWorkspace)
-    {
-      space = WorkspaceFactory::Instance().create("Workspace2D",numspec,6,5);
-      Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-
-      MantidVecPtr x,vec;
-      x.access().resize(6,10.0);
-      vec.access().resize(5,1.0);
-      for (int j = 0; j < 9; ++j)
-      {
-        space2D->setX(j,x);
-        space2D->setData(j,vec,vec);
-        space2D->getSpectrum(j)->setSpectrumNo(j);
-        space2D->getSpectrum(j)->setDetectorID(j);
-      }
-    }
-    else
-    {
-      // In case of MaskWorkspace
-      Mantid::DataObjects::MaskWorkspace_sptr specspace(new  Mantid::DataObjects::MaskWorkspace(instr));
-      for (size_t i = 0; i < specspace->getNumberHistograms(); i ++)
-      {
-        // default to use all the detectors
-        specspace->dataY(i)[0] = 0.0;
-      }
-      space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
-    }
-
-    if (!asMaskWorkspace)
-    {
-      space->setInstrument(instr);
-      space->generateSpectraMap();
-    }
-    // Register the workspace in the data service
-    AnalysisDataService::Instance().addOrReplace(name, space);
-
-  }
-
 
   //---------------------------------------------------------------------------------------------
   void testInit()
@@ -295,8 +203,6 @@ public:
     marker.setPropertyValue("WorkspaceIndexList","0,3");
     marker.setPropertyValue("DetectorList","");
     TS_ASSERT_THROWS_NOTHING( marker.execute());
-
-    MatrixWorkspace_const_sptr outputWSx = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>("testSpace");
 
     MaskDetectors marker2;
     marker2.initialize();
@@ -460,91 +366,6 @@ public:
       }
     }
 
-  }
-
-  //---------------------------------------------------------------------------------------------
-  void test_GroupedDetectors()
-  {
-    // 1. Genearte an EventWorkspace
-    bool event = true;
-    std::string name = "GroupedDetectorsSpace";
-    bool asMaskWorkspace = false;
-    size_t numspec=9;
-
-    setUpWSwGroupedDetectors(event, name, asMaskWorkspace, numspec);
-    DataObjects::EventWorkspace_sptr eventWS =
-      AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(name);
-    TS_ASSERT(eventWS);
-
-    TS_ASSERT_EQUALS(eventWS->getNumberHistograms(), 9);
-
-    // 2. Mask some spectra
-    std::vector<specid_t> tomaskspecs;
-    tomaskspecs.push_back(1);
-    tomaskspecs.push_back(3);
-    tomaskspecs.push_back(6);
-
-    MaskDetectors mask;
-    mask.initialize();
-    mask.setPropertyValue("Workspace",name);
-    mask.setPropertyValue("DetectorList","");
-    mask.setPropertyValue("WorkspaceIndexList","1, 3, 6, 3, 6");
-    TS_ASSERT_THROWS_NOTHING( mask.execute());
-    TS_ASSERT( mask.isExecuted() );
-
-    // The detectors' indices are to be masked should be 4~7, 12~15, 24~27
-
-    DataObjects::EventWorkspace_sptr maskedWS =
-      AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(name);
-    Geometry::Instrument_const_sptr maskedinstr = maskedWS->getInstrument();
-    TS_ASSERT(maskedinstr);
-    if (!maskedinstr)
-    {
-      return;
-    }
-
-    // 3. Check detectors's status about being masked.
-    for (size_t iws = 0; iws < maskedWS->getNumberHistograms(); ++iws)
-    {
-      API::ISpectrum *spec = maskedWS->getSpectrum(iws);
-      TS_ASSERT(spec);
-      if (!spec)
-        return;
-
-      bool shouldbemasked;
-      if (iws == 1 || iws == 3 || iws == 6)
-        shouldbemasked = true;
-      else
-        shouldbemasked = false;
-
-      std::set<int> detids = spec->getDetectorIDs();
-      for (std::set<int>::iterator detiter = detids.begin(); detiter != detids.end(); ++detiter)
-      {
-        IDetector_const_sptr det = maskedinstr->getDetector(*detiter);
-        TS_ASSERT_EQUALS(det->isMasked(), shouldbemasked);
-      }
-    } // ENDFOR iws
-
-
-    // 4. Check the value of spectra is cleared to zero or not
-    for (size_t iws = 0; iws < maskedWS->getNumberHistograms(); ++ iws)
-    {
-      double sumY = 0.0;
-      const MantidVec& yarray = maskedWS->readY(iws);
-      for (size_t iy = 0; iy < yarray.size(); ++ iy)
-        sumY += yarray[iy];
-      if  (iws == 1 || iws == 3 || iws == 6)
-      {
-        TS_ASSERT_EQUALS(sumY, 0.0);
-      }
-      else
-      {
-        bool larger = (sumY > 0.0);
-        TS_ASSERT(larger);
-      }
-    }
-
-    return;
   }
 
 private:

@@ -9,9 +9,9 @@ This algorithm saves a SpecialWorkspace2D/MaskWorkspace to an XML file.
 
 #include "MantidDataHandling/SaveMask.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidGeometry/IDetector.h"
 
 #include "fstream"
 #include "sstream"
@@ -54,16 +54,16 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void SaveMask::initDocs()
   {
-    this->setWikiSummary("Save a mask workspace to an XML file.");
-    this->setOptionalMessage("Mask workspace can be a MaskWorkspace or a regular MatrixWorkspace. "
-        "In the second case, the detectors' masking information come from detectors. ");
+    this->setWikiSummary("Save a MaskWorkspace/SpecialWorkspace2D to an XML file.");
+    this->setOptionalMessage("Save a MaskWorkspace/SpecialWorkspace2D to an XML file.");
   }
 
   /// Define input parameters
   void SaveMask::init()
   {
-    declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input),
-        "MaskingWorkspace (MaskWorkspace or regular MatrixWorkspace) to output to XML file (SpecialWorkspace2D)");
+
+    declareProperty(new API::WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace", "", Direction::Input),
+        "MaskingWorkspace to output to XML file (SpecialWorkspace2D)");
     declareProperty(new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
         "File to save the detectors mask in XML format");
     declareProperty("GroupedDetectors", false,
@@ -75,33 +75,42 @@ namespace DataHandling
   void SaveMask::exec()
   {
     // 1. Get input
-    API::MatrixWorkspace_const_sptr inpWS = this->getProperty("InputWorkspace");
-    // DataObjects::SpecialWorkspace2D_const_sptr inpWS = this->getProperty("InputWorkspace");
+    DataObjects::SpecialWorkspace2D_const_sptr inpWS = this->getProperty("InputWorkspace");
     std::string outxmlfilename = this->getPropertyValue("OutputFile");
+    bool groupeddetectors = this->getProperty("GroupedDetectors");
 
-    // 2. Convert Workspace to a list of detectors of masked
+    // 2. Convert Workspace to ...
     std::vector<detid_t> detid0s;
+    for (size_t i = 0; i < inpWS->getNumberHistograms(); i ++){
+      if (inpWS->dataY(i)[0] > 0.1)
+      {
+        // It is way from 0 but smaller than 1
+        // a) workspace index -> spectrum -> detector ID
+        const API::ISpectrum *spec = inpWS->getSpectrum(i);
+        if (!spec)
+        {
+          g_log.error() << "No spectrum corresponds to workspace index " << i << std::endl;
+          throw std::invalid_argument("Cannot find spectrum");
+        }
 
-    bool ismaskworkspace;
-    DataObjects::MaskWorkspace_const_sptr inpMaskWS = boost::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inpWS);
-    if (inpMaskWS)
-    {
-      ismaskworkspace = true;
-    }
-    else
-    {
-      ismaskworkspace = false;
-    }
+        const std::set<detid_t> detids = spec->getDetectorIDs();
+        if (!groupeddetectors && detids.size() != 1)
+        {
+          g_log.error() << "Impossible Situation! Workspace " << i << " corresponds to #(Det) = " << detids.size() << std::endl;
+          throw std::invalid_argument("Impossible number of detectors");
+        }
 
-    if (ismaskworkspace)
-    {
-      getMaskedDetectorsFromMaskWorkspace(inpMaskWS, detid0s);
-    }
-    else
-    {
-      getMaskedDetectorsFromInstrument(inpWS, detid0s);
-    }
-
+        // b) get detector id & Store
+        detid_t detid;;
+        std::set<detid_t>::const_iterator it;
+        for (it=detids.begin(); it!=detids.end(); ++it)
+        {
+          detid = *it;
+          // c) store
+          detid0s.push_back(detid);
+        }
+      } // if
+    } // for
 
     // d) sort
     g_log.debug() << "Number of detectors to be masked = " << detid0s.size() << std::endl;
@@ -200,78 +209,6 @@ namespace DataHandling
     writer.writeNode(std::cout, pDoc);
     writer.writeNode(ofs, pDoc);
     ofs.close();
-
-    return;
-  }
-
-  /*
-   * Get the list of detector IDs for detectors that are masked
-   */
-  void SaveMask::getMaskedDetectorsFromMaskWorkspace(DataObjects::MaskWorkspace_const_sptr inpWS, std::vector<detid_t>& detidlist)
-  {
-    for (size_t i = 0; i < inpWS->getNumberHistograms(); i ++)
-    {
-      if (inpWS->dataY(i)[0] > 0.1)
-      {
-        // It is way from 0 but smaller than 1
-        // a) workspace index -> spectrum -> detector ID
-        const API::ISpectrum *spec = inpWS->getSpectrum(i);
-        if (!spec)
-        {
-          g_log.error() << "No spectrum corresponds to workspace index " << i << std::endl;
-          throw std::invalid_argument("Cannot find spectrum");
-        }
-
-        const std::set<detid_t> detids = spec->getDetectorIDs();
-        if (detids.size() != 1)
-        {
-          g_log.error() << "Impossible Situation! Workspace " << i << " corresponds to #(Det) = " << detids.size() << std::endl;
-          throw std::invalid_argument("Impossible number of detectors");
-        }
-
-        // b) get detector id & Store
-        detid_t detid;;
-        std::set<detid_t>::const_iterator it;
-        for (it=detids.begin(); it!=detids.end(); ++it)
-        {
-          detid = *it;
-        }
-
-        // c) store
-        detidlist.push_back(detid);
-      } // if
-    } // for
-
-    return;
-  }
-
-  /*
-   * Get the list of masked detectors' IDs
-   */
-  void SaveMask::getMaskedDetectorsFromInstrument(API::MatrixWorkspace_const_sptr inpWS, std::vector<detid_t>& detidlist)
-  {
-    // 1. Get instrument
-    Geometry::Instrument_const_sptr instrument = inpWS->getInstrument();
-    if (!instrument)
-    {
-      g_log.error() << "InputWorkspace " << inpWS->getName() << " has no instrument (NULL). " << std::endl;
-      throw std::invalid_argument("InputWorkspace has no instrument. ");
-    }
-
-    for (size_t iw = 0; iw < inpWS->getNumberHistograms(); ++iw)
-    {
-      const API::ISpectrum *spec = inpWS->getSpectrum(iw);
-      std::set<int> detids = spec->getDetectorIDs();
-      bool ismasked = inpWS->getDetector(iw)->isMasked();
-      if (ismasked)
-      {
-        for (std::set<int>::iterator dit = detids.begin(); dit != detids.end(); ++dit)
-        {
-          detid_t detid = detid_t(*dit);
-          detidlist.push_back(detid);
-        }
-      }
-    }
 
     return;
   }

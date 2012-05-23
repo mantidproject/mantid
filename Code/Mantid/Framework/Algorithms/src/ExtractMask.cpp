@@ -17,7 +17,6 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -52,11 +51,9 @@ namespace Mantid
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","", Direction::Input),
           "A workspace whose masking is to be extracted"
       );
-
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","", Direction::Output),
-          "A workspace containing the masked spectra as zeroes and ones."
-          "If there is one detector per spectrum for all spectra, then the output is a MaskWorkspace.");
+          "A workspace containing the masked spectra as zeroes and ones.");
 
       declareProperty(
           new ArrayProperty<detid_t>("DetectorList", boost::make_shared<NullValidator>(), Direction::Output),
@@ -68,28 +65,17 @@ namespace Mantid
      */
     void ExtractMask::exec()
     {
-      // 1. Input
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
-      // b) Check whether there are any grouped workspaces
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
-      bool groupeddet = false;
-      for (size_t ih = 0; ih < size_t(nHist); ++ih)
-      {
-        const API::ISpectrum *spec = inputWS->getSpectrum(ih);
-        if (!spec)
-        {
-          throw std::invalid_argument("Unable to access some spectrum.");
-        }
-        std::set<int> detids = spec->getDetectorIDs();
-        if (detids.size() > 1)
-        {
-          groupeddet = true;
-          break;
-        }
-      }
 
-      // c) Input workspace is MaskWorkspace?
+      // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
+      DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace(inputWS->getInstrument(), true);
+      maskWS->initialize(nHist, 1, 1);
+      MatrixWorkspace_sptr outputWS(maskWS);
+      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+      outputWS->setTitle(inputWS->getTitle());
+
       bool inputWSIsSpecial(false);
       {
         DataObjects::MaskWorkspace_const_sptr temp = boost::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
@@ -98,62 +84,32 @@ namespace Mantid
         g_log.notice() << "Input workspace is a MaskWorkspace.\n";
       }
 
-      // 2. Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      MatrixWorkspace_sptr outputWS;
-
-      if (!groupeddet)
-      {
-        DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace(inputWS->getInstrument(), true);
-        maskWS->initialize(nHist, 1, 1);
-        MatrixWorkspace_sptr tempws(maskWS);
-        outputWS = tempws;
-      }
-      else
-      {
-        DataObjects::Workspace2D* twodWS = new DataObjects::Workspace2D();
-        twodWS->initialize(nHist, 1, 1);
-        MatrixWorkspace_sptr tempws(twodWS);
-        outputWS = tempws;
-      }
-
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-      outputWS->setTitle(inputWS->getTitle());
-
-      // 3. Set values
       Progress prog(this,0.0,1.0,nHist);
       MantidVecPtr xValues;
       xValues.access() = MantidVec(1, 0.0);
 
       // List masked of detector IDs
       std::vector<detid_t> detectorList;
-      std::vector<size_t> workspaceindexList;
 
       PARALLEL_FOR2(inputWS, outputWS)
       for( int i = 0; i < nHist; ++i )
       {
         PARALLEL_START_INTERUPT_REGION
-
         // Spectrum in the output workspace
         ISpectrum * outSpec = outputWS->getSpectrum(i);
         // Spectrum in the input workspace
         const ISpectrum * inSpec = inputWS->getSpectrum(i);
-        // Detector IDs
-        std::set<int> detids = inSpec->getDetectorIDs();
 
         // Copy X, spectrum number and detector IDs
         outSpec->copyInfoFrom(*inSpec);
 
         bool inputIsMasked(false);
-        IDetector_const_sptr inputDet;
 
-        // Set value and detector
+        IDetector_const_sptr inputDet;
         try
         {
-          // a) Get effective detector & check masked or not
           inputDet = inputWS->getDetector(i);
-
-          if (inputWSIsSpecial)
-          {
+          if (inputWSIsSpecial) {
             inputIsMasked = (inSpec->dataY()[0] > 0.5);
           }
           // special workspaces can mysteriously have the mask bit set
@@ -163,18 +119,12 @@ namespace Mantid
             inputIsMasked = true;
           }
 
-          // b) Mask output
           if (inputIsMasked)
           {
-            // detid_t id = inputDet->getID();
+            detid_t id = inputDet->getID();
             PARALLEL_CRITICAL(name)
             {
-              for (std::set<int>::iterator detiter = detids.begin(); detiter != detids.end(); ++ detiter)
-              {
-                detid_t detid = detid_t(*detiter);
-                detectorList.push_back(detid);
-              }
-              workspaceindexList.push_back(i);
+              detectorList.push_back(id);
             }
           }
         }
@@ -201,22 +151,10 @@ namespace Mantid
 
 
       // Clear all the "masked" bits on the output masked workspace
-      /*
       Geometry::ParameterMap & pmap = outputWS->instrumentParameters();
       pmap.clearParametersByName("masked");
-      */
 
-      // 4. Mask all detectors listed
-      /*
-      Geometry::Instrument_const_sptr outinstr = outputWS->getInstrument();
-      for (size_t id = 0; id < detectorList.size(); ++id)
-      {
-        Geometry::IDetector_sptr det = outinstr->getDetector(detectorList[id]);
-      }
-      */
-
-      g_log.information() << detectorList.size() << " detectors are masked. " <<
-          workspaceindexList.size() << " spectra are masked. " << std::endl;
+      g_log.information() << detectorList.size() << " spectra are masked\n";
       setProperty("OutputWorkspace", outputWS);
       setProperty("DetectorList", detectorList);
     }

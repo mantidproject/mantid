@@ -3,9 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -58,10 +55,6 @@ namespace DataHandling
 
     /// Main body to execute algorithm
     void exec();
-
-    void getMaskedDetectorsFromMaskWorkspace(DataObjects::MaskWorkspace_const_sptr inpWS, std::vector<detid_t>& detidlist);
-
-    void getMaskedDetectorsFromInstrument(API::MatrixWorkspace_const_sptr inpWS, std::vector<detid_t>& detidlist);
 
   };
 

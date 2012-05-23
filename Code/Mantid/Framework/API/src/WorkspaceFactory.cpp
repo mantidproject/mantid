@@ -87,19 +87,6 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
 void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr parent,
   const MatrixWorkspace_sptr child, const bool differentSize) const
 {
-  // Check input workspaces
-  if (!parent)
-  {
-    g_log.error() << "WorkspaceFactoryImpl::initializeFromParent:  Input Parent pointer is NULL" << std::endl;
-    throw std::invalid_argument("Input MatrixWorkspace pointer is NULL. ");
-  }
-  if (!child)
-  {
-    g_log.error() << "WorkspaceFactoryImpl::initializeFromParent:  Input Child pointer is NULL" << std::endl;
-    throw std::invalid_argument("Input MatrixWorkspace pointer is NULL. ");
-  }
-
-  // Copy title and comment
   child->setTitle(parent->getTitle());
   child->setComment(parent->getComment());
   child->setInstrument(parent->getInstrument());  // This call also copies the SHARED POINTER to the parameter map
