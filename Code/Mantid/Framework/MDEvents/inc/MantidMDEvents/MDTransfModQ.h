@@ -11,8 +11,8 @@ namespace MDEvents
 {
 
 
-/** Set of internal class used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
-  * data into proper number of output dimensions for ModQ transformation
+/** Class responsible for conversion of input workspace 
+  * data into proper number of output dimensions for ModQ case
   * 
   * Currently contains Elastic and Inelastic transformations
   *
@@ -42,22 +42,19 @@ namespace MDEvents
 */
 
 
-
-
-// ModQ,Elastic 
-class DLLExport MDTransfModQElastic: public MDTransfInterface
+class DLLExport MDTransfModQ: public MDTransfInterface
 { 
 public:
-   /// elastic transformation expects momentum
-    std::string usedUnitID()const{return "Momentum";}
-    /// id for the 
-    const std::string transfID()const;//{return "ModQElastic";}
+   /**  returns the units, the transformation expects for workspace to be expressed in. */
+    const std::string usedUnitID()const;
+    /// the name, this subalgorithm is known to users 
+    const std::string transfID()const{return "ModQ"; }
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
-    MDTransfModQElastic():pDet(NULL),pHost(NULL),nMatrixDim(1){}
+    MDTransfModQ():pDet(NULL),pHost(NULL){}    
     //
     void initialize(const ConvToMDEventsBase &Conv);
 
@@ -68,35 +65,25 @@ protected:
     std::vector<double> rotMat;
     // min-max values, some modified to work with squared values:
     std::vector<double> dim_min,dim_max;
-    //
+    // pointer to the class, which contains the information about precprocessed detectors
     Kernel::V3D const * pDet;
     // The pointer to the class, which drives this conversion and provides all necessary values for variables
     ConvToMDEventsBase const* pHost;
-    // number of dimensions, calculated from a matrix workspace
+    // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode. 
     int nMatrixDim;
-    
- 
-};
-
-class DLLExport MDTransfModQInelastic: public MDTransfModQElastic
-{ 
-public:
-     /// inelastic transformation expects energy transfer to be correct
-     std::string usedUnitID()const{return "DeltaE";}
-     /// function returns the ID, this transformation is known by
-     const std::string transfID()const; 
-
-     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
-     void initialize(const ConvToMDEventsBase &Conv);
-     // constructor
-     MDTransfModQInelastic():MDTransfModQElastic(){nMatrixDim  = 2;}
-private:
+    // the variable which describes the conversion mode:
+    ConvertToMD::EModes emode;
+    //************* These two variables are relevant to inelastic modes only and will be used in inelastic cases:
     // the energy of the incident neutrons
     double Ei;
     // the wavevector of incident neutrons
     double ki;
     // energy conversion mode
-    ConvertToMD::EModes emode;
+private:
+    /// how to transform workspace data in elastic case
+    inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;
+    /// how to transform workspace data in inelastic case
+    inline bool calcMatrixCoordInelastic(const double &DeltaE,std::vector<coord_t> &Coored)const;
 };
 
 } // End MDAlgorighms namespace
