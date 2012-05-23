@@ -1,5 +1,6 @@
 #include "MantidMDEvents/ConvToMDEventsHisto.h"
 
+
 namespace Mantid
 {
 namespace MDEvents
@@ -67,15 +68,20 @@ void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
             const MantidVec& Error    = inWS2D->readE(iSpctr);
 
             // calculate the coordinates which depend on detector posision 
-            if(!pQConverter->calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
+            if(!pQConverter->calcYDepCoordinates(Coord,i))continue;   // skip y outside of the range;
 
-         //=> START INTERNAL LOOP OVER THE "TIME"
+            // convert units 
+            UnitConversion.updateConversion(i);
+            std::vector<double> XtargetUnits;
+            UnitConversion.convertUnits(X,XtargetUnits);
+
+          //=> START INTERNAL LOOP OVER THE "TIME"
             for (size_t j = 0; j < specSize; ++j)
             {
                 // drop NaN events
                 if(isNaN(Signal[j]))continue;
 
-                if(!pQConverter->calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
+                if(!pQConverter->calcMatrixCoord(XtargetUnits,i,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE BUFFER
                 float ErrSq = float(Error[j]*Error[j]);
 

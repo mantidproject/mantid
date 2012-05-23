@@ -48,8 +48,6 @@ namespace MDEvents
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-
  class DLLExport ConvToMDEventsBase
  {
  public:

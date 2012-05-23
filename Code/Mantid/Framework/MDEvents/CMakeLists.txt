@@ -28,6 +28,7 @@ set ( SRC_FILES
 #	src/MDTransfQ3D.cpp
 #	src/MDTransfNoQ.cpp
 	src/MDTransfModQ.cpp
+	src/UnitConversionHelper.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDBoxBase.cpp
@@ -104,6 +105,7 @@ set ( INC_FILES
 #	inc/MantidMDEvents/MDTransfQ3D.h
 #	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfModQ.h
+	inc/MantidMDEvents/UnitConversionHelper.h	
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
