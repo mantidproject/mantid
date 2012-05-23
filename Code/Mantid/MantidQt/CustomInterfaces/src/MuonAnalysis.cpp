@@ -428,9 +428,6 @@ void MuonAnalysis::runLoadGroupButton()
 void MuonAnalysis::runClearGroupingButton()
 {
   clearTablesAndCombo();
-
-  // also disable plotting buttons and cal alpha button
-  m_optionTab->noDataAvailable();
 }
 
 /**
@@ -2304,7 +2301,6 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
     }
     else
     {
-      m_optionTab->nowDataAvailable();
       return true;
     }
   }
@@ -2320,11 +2316,7 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
   {
 
     std::string complaint = isGroupingAndDataConsistent();
-    if ( complaint.empty() )
-    {
-      m_optionTab->nowDataAvailable();
-    }
-    else
+    if (!( complaint.empty() ) )
     {
       if (m_uiForm.frontPlotButton->isEnabled() )
         QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
