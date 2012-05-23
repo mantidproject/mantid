@@ -1,6 +1,6 @@
 #include "MantidQtCustomInterfaces/IDATab.h"
-#include "MantidAPI\MatrixWorkspace.h"
-#include "MantidAPI\AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "boost/shared_ptr.hpp"
 
 #include <qwt_plot.h>
