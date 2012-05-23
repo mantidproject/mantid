@@ -72,14 +72,14 @@ public:
   void testUnitRotation()
   {
     OrientedLattice theCell;
-    DblMatrix rot,expected(3,3);
     TSM_ASSERT_THROWS_NOTHING("The unit transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
-    rot = theCell.getUB();
+    const DblMatrix & rot = theCell.getUB();
     /*this should give
       / 0 1 0 \
       | 0 0 1 |
       \ 1 0 0 /
       */
+    DblMatrix expected(3,3);
     expected[0][1]=1.;
     expected[1][2]=1.;
     expected[2][0]=1.;
@@ -91,24 +91,22 @@ public:
   void testParallelProjThrows()
   {
     OrientedLattice theCell;
-    DblMatrix rot;
     TSM_ASSERT_THROWS("The transformation to plane defined by two parallel vectors should throw",
         theCell.setUFromVectors(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
-    rot = theCell.getUB();
   }
 
   /** @author Alex Buts, fixed by Andrei Savici */
   void testPermutations()
   {
     OrientedLattice theCell;
-    DblMatrix rot,expected(3,3);
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(0,1,0),V3D(1,0,0)));
-    rot = theCell.getUB();
+    const DblMatrix & rot = theCell.getUB();
     /*this should give
       / 1 0 0 \
       | 0 0 -1 |
       \ 0 1 0 /
       */
+    DblMatrix expected(3,3);
     expected[0][0]=1.;
     expected[1][2]=-1.;
     expected[2][1]=1.;
@@ -120,9 +118,8 @@ public:
   void testRotations2D()
   {
     OrientedLattice theCell;
-    DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,1,0),V3D(1,-1,0)));
-    rot = theCell.getUB();
+    const DblMatrix & rot = theCell.getUB();
     V3D dir0(sqrt(2.),0,0),rez,expected(1,0,1);
     rez=rot*dir0;
     // should be (1,0,1)
@@ -133,15 +130,14 @@ public:
   void testRotations3D()
   {
     OrientedLattice theCell;
-    DblMatrix rot;
     // two orthogonal vectors
     V3D ort1(sqrt(2.),-1,-1);
     V3D ort2(sqrt(2.),1,1);
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(ort1,ort2));
-    rot = theCell.getUB();
+    const DblMatrix & rot = theCell.getUB();
 
-    V3D dir(1,0,0),result,expected(sqrt(0.5),0,sqrt(0.5));
-    result=rot*dir;
+    V3D dir(1,0,0),expected(sqrt(0.5),0,sqrt(0.5));
+    V3D result=rot*dir;
     TSM_ASSERT_EQUALS("vector should be (sqrt(0.5),0,sqrt(0.5))",result,expected);
 
   }
@@ -150,9 +146,8 @@ public:
   void testRotations3DNonOrthogonal()
   {
     OrientedLattice theCell(1,2,3,30,60,45);
-    DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
-    rot = theCell.getUB();
+    const DblMatrix & rot = theCell.getUB();
 
     V3D dir(1,1,1);
 
@@ -171,9 +166,9 @@ public:
   {
     OrientedLattice theCell(2,2,2,90,90,90);
     V3D u(1,2,0), v(-2,1,0),expected1(0,0,1),expected2(1,0,0),res1,res2;
-    DblMatrix rot;
+
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(u,v));
-    rot = theCell.getUB();
+    const DblMatrix & rot = theCell.getUB();
     res1=rot*u; res1.normalize();
     res2=rot*v; res2.normalize();
     TSM_ASSERT_EQUALS("Ub*u should be along the beam",res1,expected1);
@@ -184,12 +179,14 @@ public:
   void testuvvectors()
   {
     OrientedLattice theCell(1,2,3,30,60,45);
-    DblMatrix rot;
+
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,2,0),V3D(-1,1,0)));
-    rot = theCell.getUB();
-    V3D u=theCell.getuVector(),v=theCell.getvVector(),expected1(0,0,1),expected2(1,0,0),res1,res2;
-    res1=rot*u; res1.normalize();
-    res2=rot*v; res2.normalize();
+    const DblMatrix & rot = theCell.getUB();
+    V3D u=theCell.getuVector(),v=theCell.getvVector(),expected1(0,0,1),expected2(1,0,0);
+    V3D res1=rot*u;
+    res1.normalize();
+    V3D res2=rot*v;
+    res2.normalize();
     TSM_ASSERT_EQUALS("Ub*u should be along the beam",res1,expected1);
     TSM_ASSERT_EQUALS("Ub*v should be along the x direction",res2,expected2);
   }
@@ -197,9 +194,8 @@ public:
   void test_UVPerm2()
   {
     OrientedLattice theCell(1,3,4,35,60,70);
-    DblMatrix U;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
-    U = theCell.getU();
+    const DblMatrix & U = theCell.getU();
     V3D ez=U*V3D(1,0,0);
     V3D ex=U*V3D(0,1,0);
     V3D ey=U*V3D(0,0,1);
@@ -223,11 +219,10 @@ public:
 void test_UVPerm1()
   {
     OrientedLattice theCell(1,1,1,90,90,90);
-    DblMatrix U;
     V3D r1(1,1,0);
     V3D r2(1,-1,0);
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(r1,r2));
-    U = theCell.getU();
+    DblMatrix U = theCell.getU();
    
     V3D ez=U*r1;
     ez.normalize();
@@ -275,11 +270,10 @@ void test_UVPerm1()
 void test_UVPerm3()
   {
     OrientedLattice theCell(2,1,2,90,90,90);
-    DblMatrix U;
     V3D r1(1,0,0);
     V3D r2(0,0,1);
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(r1,r2));
-    U = theCell.getU();
+    const DblMatrix & U = theCell.getU();
    
     V3D ez=U*r1;
     ez.normalize();

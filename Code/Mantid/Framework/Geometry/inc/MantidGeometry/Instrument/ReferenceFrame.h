@@ -51,6 +51,8 @@ namespace Geometry
     PointingAlong pointingUp() const;
     /// Gets the beam pointing along direction
     PointingAlong pointingAlongBeam() const;
+    /// Gets the pointing horizontal direction, i.e perpendicular to up & along beam
+    PointingAlong pointingHorizontal() const;
     /// Gets the handedness
     Handedness getHandedness() const;
     /// Gets the origin

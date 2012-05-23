@@ -7,8 +7,8 @@ set ( SRC_FILES
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
+	src/ConvertToMD.cpp
 	src/ConvertToMDEvents.cpp
-	src/ConvertToMD.cpp	
 	src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -30,6 +30,19 @@ set ( SRC_FILES
 	src/PlusMD.cpp
 	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
+	src/Quantification/FitResolutionConvolvedModel.cpp
+	src/Quantification/ForegroundModel.cpp
+	src/Quantification/ForegroundModelFactory.cpp
+	src/Quantification/MDResolutionConvolution.cpp
+	src/Quantification/MDResolutionConvolutionFactory.cpp
+	src/Quantification/Models/Strontium122.cpp
+	src/Quantification/Observation.cpp
+	src/Quantification/ResolutionConvolvedCrossSection.cpp
+	src/Quantification/Resolution/ModeratorChopperResolution.cpp
+	src/Quantification/Resolution/TobyFitBMatrix.cpp
+	src/Quantification/Resolution/TobyFitResolutionModel.cpp
+	src/Quantification/Resolution/TobyFitYVector.cpp
+	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/RunParam.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
@@ -54,8 +67,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
+	inc/MantidMDAlgorithms/ConvertToMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMD.h	
 	inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -77,6 +90,19 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
+	inc/MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h
+	inc/MantidMDAlgorithms/Quantification/ForegroundModel.h
+	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
+	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
+	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
+	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
+	inc/MantidMDAlgorithms/Quantification/Observation.h
+	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
+	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
+	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
+	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
+	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
+	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
@@ -110,28 +136,38 @@ set ( TEST_FILES
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
+	test/FitResolutionConvolvedModelTest.h
+	test/ForegroundModelTest.h
 	test/GreaterThanMDTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
 	test/LessThanMDTest.h
 	test/LogarithmMDTest.h
+	test/MDResolutionConvolutionFactoryTest.h
 	test/MagneticFormFactorTest.h
 	test/MaskMDTest.h
 	test/MergeMDFilesTest.h
 	test/MergeMDTest.h
 	test/MinusMDTest.h
+	test/ModeratorChopperResolutionTest.h
 	test/MultiplyMDTest.h
 	test/NotMDTest.h
+	test/ObservationTest.h
 	test/OrMDTest.h
 	test/PlusMDTest.h
 	test/PowerMDTest.h
 	test/QuadEnBackgroundTest.h
+	test/ResolutionConvolvedCrossSectionTest.h
 	test/RunParamTest.h
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
 	test/SimulateResolutionTest.h
+	test/Strontium122Test.h
+	test/TobyFitBMatrixTest.h
+	test/TobyFitResolutionModelTest.h
 	test/TobyFitSimulateTest.h
+	test/TobyFitYVectorTest.h
 	test/TransformMDTest.h
 	test/UnaryOperationMDTest.h
 	test/WeightedMeanMDTest.h

@@ -109,7 +109,7 @@
     </sphere>     
     <algebra val="some-shape some-shape2" />  <!-- intersection example -->
   </type>    
-
+  
   <!-- Sample-position types -->
 
   <type name="nickel-holder" is="SamplePos">

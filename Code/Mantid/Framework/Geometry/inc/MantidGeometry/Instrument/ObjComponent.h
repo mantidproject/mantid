@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Objects/Material.h"
 #include "MantidGeometry/Objects/Object.h"
+
 #include <boost/shared_ptr.hpp>
 
 #ifdef _WIN32

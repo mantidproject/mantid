@@ -49,6 +49,9 @@ public:
   virtual void reset() const;
   /// Next iterator.
   const IMDIterator* getNextIterator() const;
+  /// Returns the pointer to the original workspace
+  IMDWorkspace_const_sptr getWorkspace() const;
+
 protected:
   /// IMDIterator
   mutable IMDIterator* m_iterator;
@@ -60,6 +63,10 @@ protected:
   size_t m_size;
   /// Just reset flag
   mutable bool m_justReset;
+
+private:
+  /// A pointer to the workspace
+  IMDWorkspace_const_sptr m_workspace;
 };
 
 } // namespace API

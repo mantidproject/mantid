@@ -47,6 +47,34 @@ public:
     TS_ASSERT_EQUALS(X, frame2.pointingAlongBeam());
   }
 
+  void testGetHorizontal()
+  {
+    doGetHorizontalTest(Right);
+    doGetHorizontalTest(Left);
+  }
+
+  void doGetHorizontalTest(Mantid::Geometry::Handedness handed)
+  {
+    ReferenceFrame frame1(X, Y, handed, "source"); // X up, Y along beam
+    TS_ASSERT_EQUALS(Z, frame1.pointingHorizontal());
+
+    ReferenceFrame frame2(X, Z, handed, "source"); // X up, Z along beam
+    TS_ASSERT_EQUALS(Y, frame2.pointingHorizontal());
+
+    ReferenceFrame frame3(Y, Z, handed, "source"); // Y up, Z along beam
+    TS_ASSERT_EQUALS(X, frame3.pointingHorizontal());
+
+    ReferenceFrame frame4(Y, X, handed, "source"); // Y up, X along beam
+    TS_ASSERT_EQUALS(Z, frame4.pointingHorizontal());
+
+    ReferenceFrame frame5(Z, X, handed, "source"); // Z up, X along beam
+    TS_ASSERT_EQUALS(Y, frame5.pointingHorizontal());
+
+    ReferenceFrame frame6(Z, Y, handed, "source"); // Z up, Y along beam
+    TS_ASSERT_EQUALS(X, frame6.pointingHorizontal());
+  }
+
+
   void testGetHandedNess()
   {
     ReferenceFrame frameRight(X, Y, Right, "source");

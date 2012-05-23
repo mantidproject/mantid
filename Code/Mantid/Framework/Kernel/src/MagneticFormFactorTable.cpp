@@ -28,10 +28,10 @@ namespace Mantid
     {
       const double nintervals = qsqr/m_delta;
       const size_t index = static_cast<size_t>(nintervals);
-      if(index < m_length-1)
+      if(index < m_length)
       {
         const double fraction = nintervals - static_cast<double>(index);
-        return (1.0 - fraction)*m_lookup[index] + fraction*m_lookup[index + 1];
+        return (1.0 - fraction)*m_lookup[index] + fraction*m_lookup[index+1];
       }
       else return 0.0;
     }

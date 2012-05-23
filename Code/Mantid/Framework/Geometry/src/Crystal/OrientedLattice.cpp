@@ -139,7 +139,7 @@ namespace Geometry
    * @param Q :: Q-vector in $AA^-1 in the sample frame
    * @return a V3D with H,K,L
    */
-  V3D OrientedLattice::hklFromQ(V3D Q) const
+  V3D OrientedLattice::hklFromQ(const V3D & Q) const
   {
     DblMatrix UBinv = this->getUB();
     UBinv.Invert();
@@ -180,25 +180,24 @@ namespace Geometry
    *  The transformation from old coordinate system to new coordinate system is performed by 
    *  the whole UB matrix
    **/
-  DblMatrix OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
+  const DblMatrix & OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
   {
-    DblMatrix BMatrix=this->getB();
-    V3D buVec,bvVec,bwVec;
-    buVec=BMatrix*u;
-    bvVec=BMatrix*v;
+    const DblMatrix & BMatrix=this->getB();
+    V3D buVec = BMatrix*u;
+    V3D bvVec = BMatrix*v;
     //try to make an orthonormal system
     if (buVec.norm2()<1e-10) throw std::invalid_argument("|B.u|~0");
     if (bvVec.norm2()<1e-10) throw std::invalid_argument("|B.v|~0");
     buVec.normalize(); // 1st unit vector, along Bu
-    bwVec=buVec.cross_prod(bvVec);
+    V3D bwVec = buVec.cross_prod(bvVec);
     if (bwVec.normalize()<1e-5) throw std::invalid_argument("u and v are parallel"); // 3rd unit vector, perpendicular to Bu,Bv
-    bvVec=bwVec.cross_prod(buVec); // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
+    bvVec = bwVec.cross_prod(buVec); // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
     DblMatrix tau(3,3),lab(3,3),U(3,3);
     /*lab      = U tau
     / 0 1 0 \     /bu[0] bv[0] bw[0]\
     | 0 0 1 | = U |bu[1] bv[1] bw[1]|
     \ 1 0 0 /     \bu[2] bv[2] bw[2]/
-    */
+     */
     lab[0][1]=1.;
     lab[1][2]=1.;
     lab[2][0]=1.;
@@ -214,7 +213,7 @@ namespace Geometry
     tau.Invert();
     U=lab*tau;
     this->setU(U);
-    return U;
+    return getU();
   }
 
 

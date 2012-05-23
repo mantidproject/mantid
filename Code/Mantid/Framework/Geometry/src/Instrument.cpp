@@ -24,14 +24,14 @@ namespace Mantid
 
     /// Default constructor
     Instrument::Instrument() : CompAssembly(),
-      m_detectorCache(),m_sourceCache(0),m_sampleCache(0),
+      m_detectorCache(),m_sourceCache(0), m_chopperPoints(new std::vector<const ObjComponent*>), m_sampleCache(0),
       m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
     {
     }
 
     /// Constructor with name
     Instrument::Instrument(const std::string& name) : CompAssembly(name),
-      m_detectorCache(),m_sourceCache(0),m_sampleCache(0),
+      m_detectorCache(),m_sourceCache(0), m_chopperPoints(new std::vector<const ObjComponent*>),m_sampleCache(0),
       m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
     {
     }
@@ -42,7 +42,7 @@ namespace Mantid
      */
     Instrument::Instrument(const boost::shared_ptr<const Instrument> instr, boost::shared_ptr<ParameterMap> map)
       : CompAssembly(instr.get(), map.get() ),
-      m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
+      m_sourceCache(instr->m_sourceCache), m_chopperPoints(instr->m_chopperPoints), m_sampleCache(instr->m_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
       m_instr(instr), m_map_nonconst(map),
       m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame)
@@ -54,7 +54,7 @@ namespace Mantid
      *  in indirect instruments.
      */
     Instrument::Instrument(const Instrument& instr) : CompAssembly(instr),
-        m_sourceCache(NULL), m_sampleCache(NULL), /* Should only be temporarily null */
+        m_sourceCache(NULL), m_chopperPoints(new std::vector<const ObjComponent*>), m_sampleCache(NULL), /* Should only be temporarily null */
         m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
         m_monitorCache(instr.m_monitorCache), m_defaultViewAxis(instr.m_defaultViewAxis),
         m_instr(), m_map_nonconst(), /* Should not be parameterized */
@@ -78,19 +78,40 @@ namespace Mantid
         // As the majority of components will be detectors, we will rarely get to here
         if ( const ObjComponent* obj = dynamic_cast<const ObjComponent*>(it->get()) )
         {
+          const std::string objName = obj->getName();
           // This relies on the source and sample having a unique name.
           // I think the way our instrument definition files work ensures this is the case.
-          if ( obj->getName() == instr.m_sourceCache->getName() )
+          if ( objName == instr.m_sourceCache->getName() )
           {
             markAsSource(obj);
             continue;
           }
-          if ( obj->getName() == instr.m_sampleCache->getName() )
+          if ( objName == instr.m_sampleCache->getName() )
           {
             markAsSamplePos(obj);
             continue;
           }
+          for(size_t i = 0; i < instr.m_chopperPoints->size(); ++i)
+          {
+            if(objName == (*m_chopperPoints)[i]->getName())
+            {
+              markAsChopperPoint(obj);
+              break;
+            }
+          }
         }
+      }
+    }
+
+    /**
+     * Destructor
+     */
+    Instrument::~Instrument()
+    {
+      if(!m_isParametrized)
+      {
+        m_chopperPoints->clear(); // CompAssembly will delete them
+        delete m_chopperPoints;
       }
     }
 
@@ -317,6 +338,32 @@ namespace Mantid
       {
         return IObjComponent_const_sptr(m_sourceCache,NoDeleting());
       }
+    }
+
+    /**
+     * Returns the chopper at the given index. Index 0 is defined as closest to the source
+     * If there are no choppers defined or the index is out of range then an invalid_argument
+     * exception is thrown.
+     * @param index :: Defines which chopper to pick, 0 being closest to the source [Default = 0]
+     * @return A pointer to the chopper
+     */
+    IObjComponent_const_sptr Instrument::getChopperPoint(const size_t index) const
+    {
+      if(index >= getNumberOfChopperPoints())
+      {
+        std::ostringstream os;
+        os << "Instrument::getChopperPoint - No chopper point at index '" << index
+           << "' defined. Instrument has only " << getNumberOfChopperPoints() << " chopper points defined.";
+        throw std::invalid_argument(os.str());
+      }
+      return IObjComponent_const_sptr(m_chopperPoints->at(index), NoDeleting());
+    }
+    /**
+     * @return The number of chopper points defined by this instrument
+     */
+    size_t Instrument::getNumberOfChopperPoints() const
+    {
+      return m_chopperPoints->size();
     }
 
     //------------------------------------------------------------------------------------------
@@ -651,6 +698,36 @@ namespace Mantid
       IDetector_const_sptr monitor = getDetector(detector_id);
 
       return monitor;
+    }
+
+    /**
+     * Adds a Component which already exists in the instrument to the chopper cache. If
+     * the component is not a chopper or it has no name then an invalid_argument expection is thrown
+     * @param comp :: A pointer to the component
+     */
+    void Instrument::markAsChopperPoint(const ObjComponent * comp)
+    {
+      const std::string name  = comp->getName();
+      if(name.empty())
+      {
+        throw std::invalid_argument("Instrument::markAsChopper - Chopper component must have a name");
+      }
+      IObjComponent_const_sptr source = getSource();
+      if(!source)
+      {
+        throw Exception::InstrumentDefinitionError("Instrument::markAsChopper - No source is set, cannot defined chopper positions.");
+      }
+      auto insertPos = m_chopperPoints->begin();
+      const double newChopperSourceDist = m_sourceCache->getDistance(*comp);
+      for(;insertPos != m_chopperPoints->end(); ++insertPos)
+      {
+        const double sourceToChopDist = m_sourceCache->getDistance(**insertPos);
+        if(newChopperSourceDist < sourceToChopDist)
+        {
+          break; // Found the insertion point
+        }
+      }
+      m_chopperPoints->insert(insertPos, comp);
     }
 
     /** Mark a component which has already been added to the Instrument (as a child component)

@@ -22,9 +22,10 @@ namespace VectorHelper
 /** Creates a new output X array given a 'standard' set of rebinning parameters.
  *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n]
  *  @param[out] xnew   The newly created axis resulting from the input params
+ *  @param[in] resize_xnew If false then the xnew vector is NOT resized. Useful if on the number of bins needs determining. (Default=True)
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew)
+int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew, const bool resize_xnew)
 {
   double xs;
   int ibound(2), istep(1), inew(1);
@@ -33,7 +34,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
   xnew.clear();
 
   double xcurr = params[0];
-  xnew.push_back(xcurr);
+  if(resize_xnew) xnew.push_back(xcurr);
 
   while ((ibound <= ibounds) && (istep <= isteps))
   {
@@ -61,7 +62,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
       ibound += 2;
       istep += 2;
     }
-    xnew.push_back(xcurr);
+    if(resize_xnew) xnew.push_back(xcurr);
     inew++;
 
 //    if (xnew.size() > 10000000)

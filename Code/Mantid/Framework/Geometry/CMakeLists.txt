@@ -1,12 +1,13 @@
 set ( SRC_FILES
+	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
-	src/Crystal/IndexingUtils.cpp
-	src/Crystal/ReducedCell.cpp
 	src/Crystal/ConventionalCell.cpp
-	src/Crystal/ScalarUtils.cpp
+	src/Crystal/IndexingUtils.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
+	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
+	src/Crystal/ScalarUtils.cpp
 	src/Crystal/UnitCell.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
@@ -29,7 +30,7 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/XMLlogfile.cpp
-    src/MDGeometry/CompositeImplicitFunction.cpp
+	src/MDGeometry/CompositeImplicitFunction.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
@@ -39,7 +40,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDHistoDimensionBuilder.cpp
 	src/MDGeometry/MDImplicitFunction.cpp
 	src/MDGeometry/MDPlane.cpp
-    src/MDGeometry/MDPlaneImplicitFunction.cpp
+	src/MDGeometry/MDPlaneImplicitFunction.cpp
 	src/MDGeometry/NullImplicitFunction.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
@@ -98,13 +99,13 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
-	inc/MantidGeometry/Crystal/IndexingUtils.h
-	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
-	inc/MantidGeometry/Crystal/ScalarUtils.h
+	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
+	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
+	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h
@@ -146,7 +147,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h
 	inc/MantidGeometry/MDGeometry/MDImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDPlane.h
-    inc/MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h
+	inc/MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h

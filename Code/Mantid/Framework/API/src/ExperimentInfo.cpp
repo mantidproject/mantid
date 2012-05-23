@@ -1,9 +1,17 @@
 #include "MantidAPI/ExperimentInfo.h"
+
+#include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ModeratorModel.h"
+
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/InstrumentInfo.h"
@@ -12,15 +20,16 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
 #include <boost/regex.hpp>
-#include <map>
+
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
+
 #include <fstream>
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidAPI/InstrumentDataService.h"
+#include <map>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -37,7 +46,10 @@ namespace API
   /** Constructor
    */
   ExperimentInfo::ExperimentInfo()
-  : m_sample(),
+  :
+    m_moderatorModel(),
+    m_choppers(),
+    m_sample(),
     m_run(),
     m_parmap(new ParameterMap()),
     sptr_instrument(new Instrument())
@@ -321,6 +333,86 @@ namespace API
   }
 
   //---------------------------------------------------------------------------------------
+
+  /**
+   * Set an object describing the moderator properties and take ownership
+   * @param source :: A pointer to an object describing the source. Ownership is transferred to this object
+   */
+  void ExperimentInfo::setModeratorModel(ModeratorModel *source)
+  {
+    if(!source)
+    {
+      throw std::invalid_argument("ExperimentInfo::setModeratorModel - NULL source object found.");
+    }
+    m_moderatorModel = boost::shared_ptr<ModeratorModel>(source);
+  }
+
+  /// Returns a reference to the source properties object
+  ModeratorModel & ExperimentInfo::moderatorModel() const
+  {
+    if(!m_moderatorModel)
+    {
+      throw std::runtime_error("ExperimentInfo::moderatorModel - No source desciption has been defined");
+    }
+    return *m_moderatorModel;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /**
+   * Sets a new chopper description at a given point. The point is given by index where 0 is
+   * closest to the source
+   * @param chopper :: A pointer to a new chopper object, this class takes ownership of the pointer
+   * @param index :: An optional index that specifies which chopper point the chopper belongs to (default=0)
+   */
+  void ExperimentInfo::setChopperModel(ChopperModel *chopper, const size_t index)
+  {
+    if(!chopper)
+    {
+      throw std::invalid_argument("ExperimentInfo::setChopper - NULL chopper object found.");
+    }
+    if(index >= sptr_instrument->getNumberOfChopperPoints())
+    {
+      std::ostringstream os;
+      os << "ExperimentInfo::setChopper - There is no chopper point defined in this instrument for index=" << index
+         << ". Instrument \"" << sptr_instrument->getName() << "\" has only " << sptr_instrument->getNumberOfChopperPoints()
+         << " chopper points defined.";
+      throw std::runtime_error(os.str());
+    }
+    auto iter = m_choppers.begin();
+    std::advance(iter, index);
+    if(index < m_choppers.size()) // Replacement
+    {
+      (*iter) = boost::shared_ptr<ChopperModel>(chopper);
+    }
+    else // Insert it
+    {
+      m_choppers.insert(iter, boost::shared_ptr<ChopperModel>(chopper));
+    }
+  }
+
+  /**
+   * Returns a const reference to a chopper description
+   * @param index :: An optional index giving the point within the instrument this chopper describes (default=0)
+   * @return A reference to a const chopper object
+   */
+  ChopperModel & ExperimentInfo::chopperModel(const size_t index) const
+  {
+    if(index < m_choppers.size())
+    {
+      auto iter = m_choppers.begin();
+      std::advance(iter, index);
+      return **iter;
+    }
+    else
+    {
+      std::ostringstream os;
+      os << "ExperimentInfo::chopper - Invalid index=" << index << ". " << m_choppers.size()
+         << " chopper descriptions have been set.";
+      throw std::invalid_argument(os.str());
+    }
+  }
+
+  //---------------------------------------------------------------------------------------
   /** Get a constant reference to the Sample associated with this workspace.
   * @return const reference to Sample object
   */
@@ -444,6 +536,84 @@ namespace API
       }
     }
     return 0;
+  }
+
+  /**
+   * Returns the emode for this run. It first searchs the run logs for a "deltaE-mode" log and falls back to
+   * the instrument if one is not found. If neither exist then the run is considered Elastic.
+   * @return The emode enum for the energy transfer mode of this run. Currently only checks the instrument
+   */
+  Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const
+  {
+    static const char * emodeTag = "deltaE-mode";
+    std::string emodeStr;
+    if(run().hasProperty(emodeTag))
+    {
+      emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
+    }
+    else if(sptr_instrument && instrumentParameters().contains(sptr_instrument.get(), emodeTag))
+    {
+      Geometry::Parameter_sptr param = instrumentParameters().get(sptr_instrument.get(), emodeTag);
+      emodeStr = param->asString();
+    }
+    else
+    {
+      return Kernel::DeltaEMode::Elastic;
+    }
+    return Kernel::DeltaEMode::fromString(emodeStr);
+  }
+
+  /**
+   * Easy access to the efixed value for this run & detector ID
+   * @param detID :: The detector ID to ask for the efixed mode (ignored in Direct & Elastic mode). The
+   * detector with ID matching that given is pulled from the instrument with this method and it will
+   * throw a Exception::NotFoundError if the ID is unknown.
+   * @return The current EFixed value
+   */
+  double ExperimentInfo::getEFixed(const detid_t detID) const
+  {
+    IDetector_const_sptr det = getInstrument()->getDetector(detID);
+    return getEFixed(det);
+  }
+
+  /**
+   * Easy access to the efixed value for this run & detector
+   * @param detector :: The detector object to ask for the efixed mode. Only required for Indirect mode
+   * @return The current efixed value
+   */
+  double ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const
+  {
+    Kernel::DeltaEMode::Type emode = getEMode();
+    if(emode == Kernel::DeltaEMode::Direct)
+    {
+      try
+      {
+        return this->run().getPropertyValueAsType<double>("Ei");
+      }
+      catch(Kernel::Exception::NotFoundError &)
+      {
+        throw std::runtime_error("Experiment logs do not contain an Ei value. Have you run GetEi?");
+      }
+    }
+    else if(emode == Kernel::DeltaEMode::Indirect)
+    {
+      if(!detector) throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode efixed requested without a valid detector.");
+      Parameter_sptr par = constInstrumentParameters().getRecursive(detector.get(),"Efixed");
+      if (par)
+      {
+        return par->value<double>();
+      }
+      else
+      {
+        std::ostringstream os;
+        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
+        throw std::runtime_error(os.str());
+      }
+    }
+    else
+    {
+      throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for elastic mode, don't know what to do!");
+    }
   }
 
   // used to terminate SAX process
@@ -676,6 +846,7 @@ namespace API
     m_sample->saveNexus(file, "sample");
     m_run->saveNexus(file, "logs");
   }
+
 
   /* A private helper function so save information about a set of detectors to Nexus
   *  @param file :: open Nexus file ready to recieve the info about the set of detectors

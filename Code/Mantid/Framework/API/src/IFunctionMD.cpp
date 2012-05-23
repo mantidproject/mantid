@@ -86,9 +86,20 @@ namespace API
     {
       throw std::invalid_argument("Unexpected domain in IFunctionMD");
     }
+    evaluateFunction(*dmd, values);
+  }
+
+  /**
+   * Performs the function evaluations on the domain
+   *
+   * @param domain :: The MD domain to evaluate the function
+   * @param values :: The computed values
+   */
+  void IFunctionMD::evaluateFunction(const FunctionDomainMD& domain,FunctionValues& values) const
+  {
     domain.reset();
     size_t i=0;
-    for(const IMDIterator* r = dmd->getNextIterator(); r != NULL; r = dmd->getNextIterator())
+    for(const IMDIterator* r = domain.getNextIterator(); r != NULL; r = domain.getNextIterator())
     {
       values.setCalculated(i,functionMD(*r));
       i++;

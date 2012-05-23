@@ -192,10 +192,6 @@ void ConvertToMD::exec()
   }
   // -------- Input workspace
    m_InWS2D = getProperty("InputWorkspace");
-  if(!m_InWS2D)
-  {
-    g_Log.error()<<" can not obtain input matrix workspace from analysis data service\n";
-  }
 
   // ------- Is there any output workspace?
   // shared pointer to target workspace
@@ -246,7 +242,7 @@ void ConvertToMD::exec()
         {
             MsliceProj.setUVvectors(ut,vt,wt);
         }
-        catch(std::invalid_argument)
+        catch(std::invalid_argument &)
         {
             g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;
         }
@@ -336,7 +332,8 @@ void ConvertToMD::exec()
 
   g_log.information()<<" conversion started\n";
   m_Convertor->runConversion(m_Progress.get());
-  
+  storeHistogramBoundaries(spws);
+
   //JOB COMPLETED:
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
@@ -345,6 +342,27 @@ void ConvertToMD::exec()
   // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
   m_InWS2D.reset();
   return;
+}
+
+/**
+ * Store the histogram bins into each output experiment info
+ * @param mdEventWS :: The output MDEventWorkspace
+ */
+void ConvertToMD::storeHistogramBoundaries(API::IMDEventWorkspace_sptr mdEventWS) const
+{
+  const MantidVec & binBoundaries = m_InWS2D->readX(0);
+  for(auto i = (size_t)0; i < binBoundaries.size(); ++i)
+  {
+    std::cerr << binBoundaries[i] << " ";
+  }
+  std::cerr << "\n";
+
+  uint16_t nexpts = mdEventWS->getNumExperimentInfo();
+  for(uint16_t i = 0; i < nexpts; ++i)
+  {
+    ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(i);
+    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
+  }
 }
 
 /** Constructor */

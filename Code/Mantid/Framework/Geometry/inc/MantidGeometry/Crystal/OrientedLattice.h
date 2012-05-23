@@ -58,12 +58,13 @@ namespace Geometry
       //get u and v vectors for Horace/Mslice
       Kernel::V3D getuVector();
       Kernel::V3D getvVector();
-
-      Mantid::Kernel::V3D hklFromQ(Mantid::Kernel::V3D Q) const;
-
-      Kernel::DblMatrix setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
-
+      /// Return q(hkl) from the lab coordinates
+      Kernel::V3D hklFromQ(const Kernel::V3D & Q) const;
+      /// Create the U matrix from two vectors
+      const Kernel::DblMatrix & setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
+      /// Save the lattice to an open NeXus file
       void saveNexus(::NeXus::File * file, const std::string & group) const;
+      /// Load the lattice to from an open NeXus file
       void loadNexus(::NeXus::File * file, const std::string & group);
 
     private:

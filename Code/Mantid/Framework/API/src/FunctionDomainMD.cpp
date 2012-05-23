@@ -21,7 +21,8 @@ FunctionDomainMD::FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start, siz
 m_iterator(ws->createIterator()),
 m_startIndex(start),
 m_currentIndex(0),
-m_justReset(true)
+m_justReset(true),
+m_workspace(ws)
 {
   size_t dataSize = m_iterator->getDataSize();
   m_size = length == 0 ?  dataSize: length;
@@ -46,6 +47,14 @@ FunctionDomainMD::~FunctionDomainMD()
   delete m_iterator;
 }
 
+/// Reset the iterator to point to the start of the domain.
+void FunctionDomainMD::reset() const
+{
+  m_iterator->jumpTo(m_startIndex);
+  m_currentIndex = 0;
+  m_justReset = true;
+}
+
 /**
  * First call after creation returns the first iterator.
  * Successive calls return advanced iterators until the end of the domain reached
@@ -68,13 +77,13 @@ const IMDIterator* FunctionDomainMD::getNextIterator() const
   return m_iterator;
 }
 
-/// Reset the iterator to point to the start of the domain.
-void FunctionDomainMD::reset() const
+/// Returns the pointer to the original workspace
+IMDWorkspace_const_sptr FunctionDomainMD::getWorkspace() const
 {
-  m_iterator->jumpTo(m_startIndex);
-  m_currentIndex = 0;
-  m_justReset = true;
+  return m_workspace;
 }
+
+
 
 } // namespace API
 } // namespace Mantid

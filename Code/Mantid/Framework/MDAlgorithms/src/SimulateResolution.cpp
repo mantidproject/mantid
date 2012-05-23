@@ -388,6 +388,19 @@ namespace Mantid
       const double cp_f = wf/tf;
       const double ct_f = wf/x2;
 
+      //     y_vec(1)  = t_m   deviation in departure time from moderator surface
+      //     y_vec(2)  = y_a   y-coordinate of neutron at apperture
+      //     y_vec(3)  = z_a   z-coordinate of neutron at apperture
+      //     y_vec(4)  = t_ch' deviation in time of arrival at chopper
+      //     y_vec(5)  = x_s   x-coordinate of point of scattering in sample frame
+      //     y_vec(6)  = y_s   y-coordinate of point of scattering in sample frame
+      //     y_vec(7)  = z_s   z-coordinate of point of scattering in sample frame
+      //     y_vec(8)  = x_d   x-coordinate of point of detection in detector frame
+      //     y_vec(9)  = y_d   y-coordinate of point of detection in detector frame
+      //     y_vec(10) = z_d   z-coordinate of point of detection in detector frame
+      //     y_vec(11) = t_d   deviation in detection time of neutron
+
+
       if(bMat.numCols()<nCols || bMat.numRows()<nRows)
         throw std::invalid_argument("bMat too small in bMatrix");
       // Calculate the matrix elements:

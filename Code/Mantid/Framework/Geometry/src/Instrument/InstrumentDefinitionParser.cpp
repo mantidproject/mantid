@@ -1130,7 +1130,7 @@ namespace Geometry
       //-------------- Not a Detector nor a RectangularDetector ------------------------------
       std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
 
-      Geometry::ObjComponent *comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
+      auto comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
       parent->add(comp);
 
       // check if special Source or SamplePos Component
@@ -1141,6 +1141,10 @@ namespace Geometry
       if ( category.compare("SamplePos") == 0 )
       {
         m_instrument->markAsSamplePos(comp);
+      }
+      if ( category.compare("ChopperPos") == 0 )
+      {
+        m_instrument->markAsChopperPoint(comp);
       }
 
       // set location for this newly added comp and set facing if specified in instrument def. file. Also

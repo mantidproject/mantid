@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
+	src/ChopperModel.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CompositeDomainMD.cpp
@@ -24,6 +25,7 @@ set ( SRC_FILES
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
+	src/FermiChopperModel.cpp
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
@@ -51,6 +53,7 @@ set ( SRC_FILES
 	src/ISpectrum.cpp
 	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
+	src/IkedaCarpenterModerator.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/ImplictFunctionFactory.cpp
@@ -65,12 +68,14 @@ set ( SRC_FILES
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/MemoryManager.cpp
+	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
+	src/ParamFunctionAttributeHolder.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
 	src/Progress.cpp
@@ -114,6 +119,7 @@ set ( INC_FILES
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
+	inc/MantidAPI/ChopperModel.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CompositeDomain.h
@@ -129,6 +135,7 @@ set ( INC_FILES
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
+	inc/MantidAPI/FermiChopperModel.h
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
@@ -156,12 +163,12 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h
-	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/ImmutableCompositeFunction.h
+	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
@@ -169,6 +176,7 @@ set ( INC_FILES
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
 	inc/MantidAPI/IWorkspaceProperty.h
+	inc/MantidAPI/IkedaCarpenterModerator.h
 	inc/MantidAPI/ImplicitFunctionBuilder.h
 	inc/MantidAPI/ImplicitFunctionFactory.h
 	inc/MantidAPI/ImplicitFunctionParameter.h
@@ -188,12 +196,14 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MemoryManager.h
+	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
+	inc/MantidAPI/ParamFunctionAttributeHolder.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/Progress.h
@@ -239,6 +249,7 @@ set ( TEST_FILES
 	test/EnabledWhenWorkspaceIsTypeTest.h
 	test/ExperimentInfoTest.h
 	test/ExpressionTest.h
+	test/FermiChopperModelTest.h
 	test/FileFinderTest.h
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
@@ -254,16 +265,19 @@ set ( TEST_FILES
 	test/IMDWorkspaceTest.h
 	test/ImmutableCompositeFunctionTest.h
 	test/ISpectrumTest.h
+	test/IkedaCarpenterModeratorTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/LiveListenerFactoryTest.h
 	test/MDGeometryTest.h
 	test/MatrixWorkspaceMDIteratorTest.h
 	test/MemoryManagerTest.h
+	test/ModeratorModelTest.h
 	test/MultiDomainFunctionTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
 	test/NumericAxisTest.h
+	test/ParamFunctionAttributeHolderTest.h
 	test/ParameterReferenceTest.h
 	test/ParameterTieTest.h
 	test/PropertyManagerDataServiceTest.h

@@ -33,6 +33,8 @@ class ParameterTie;
 class IConstraint;
 class ParameterReference;
 class FunctionHandler;
+class FunctionDomainMD;
+
 /** This is a specialization of IFunction for functions defined on an IMDWorkspace.
     It uses FunctionDomainMD as a domain. Implement functionMD(...) method in a concrete
     function.
@@ -76,6 +78,8 @@ public:
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian){calNumericalDeriv(domain,jacobian);}
 
 protected:
+  /// Performs the function evaluations on the MD domain
+  void evaluateFunction(const FunctionDomainMD& domain,FunctionValues& values) const;
 
   virtual void useDimension(const std::string& id);
   /// Do finction initialization after useAllDimensions() was called

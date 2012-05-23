@@ -1,15 +1,35 @@
 #ifndef MANTID_API_EXPERIMENTINFO_H_
 #define MANTID_API_EXPERIMENTINFO_H_
     
-#include "MantidKernel/System.h"
-#include "MantidAPI/Sample.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+
 #include "MantidGeometry/Instrument.h"
+
+#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/DeltaEMode.h"
+
+#include <auto_ptr.h>
+#include <list>
 
 namespace Mantid
 {
+  //---------------------------------------------------------------------------
+  // Forward declaration
+  //---------------------------------------------------------------------------
+  namespace Geometry
+  {
+    class ParameterMap;
+  }
+
 namespace API
 {
+  //---------------------------------------------------------------------------
+  // Forward declaration
+  //---------------------------------------------------------------------------
+  class ChopperModel;
+  class ModeratorModel;
 
   /** This class is shared by a few Workspace types
    * and holds information related to a particular experiment/run:
@@ -21,7 +41,7 @@ namespace API
    * @author Janik Zikovsky
    * @date 2011-06-20
    */
-  class DLLExport ExperimentInfo 
+  class MANTID_API_DLL ExperimentInfo
   {
   public:
     /// Default constructor
@@ -48,6 +68,16 @@ namespace API
     // Add parameters to the instrument parameter map
     virtual void populateInstrumentParameters();
 
+    /// Set an object describing the source properties and take ownership
+    void setModeratorModel(ModeratorModel *source);
+    /// Returns a reference to the source properties object
+    ModeratorModel & moderatorModel() const;
+
+    /// Set a chopper description specified by index where 0 is closest to the source
+    void setChopperModel(ChopperModel *chopper, const size_t index = 0);
+    /// Returns a reference to a chopper description
+    ChopperModel & chopperModel(const size_t index = 0) const;
+
     /// Sample accessors
     const Sample& sample() const;
     /// Writable version of the sample object
@@ -64,6 +94,12 @@ namespace API
 
     /// Utility method to get the run number
     int getRunNumber() const;
+    /// Returns the emode for this run
+    Kernel::DeltaEMode::Type getEMode() const;
+    /// Easy access to the efixed value for this run & detector ID
+    double getEFixed(const detid_t detID) const;
+    /// Easy access to the efixed value for this run & optional detector
+    double getEFixed(const Geometry::IDetector_const_sptr detector = Geometry::IDetector_const_sptr()) const;
 
     /// Saves this experiment description to the open NeXus file
     void saveExperimentInfoNexus(::NeXus::File * file) const;
@@ -87,6 +123,10 @@ namespace API
     /// Static reference to the logger class
     static Kernel::Logger& g_log;
 
+    /// Description of the source object
+    boost::shared_ptr<ModeratorModel> m_moderatorModel;
+    /// Description of the choppers for this experiment.
+    std::list<boost::shared_ptr<ChopperModel>> m_choppers;
     /// The information on the sample environment
     Kernel::cow_ptr<Sample> m_sample;
     /// The run information
@@ -99,8 +139,6 @@ namespace API
   private:
     /// Save information about a set of detectors to Nexus
     void saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const;
-
-
   };
 
   /// Shared pointer to ExperimentInfo

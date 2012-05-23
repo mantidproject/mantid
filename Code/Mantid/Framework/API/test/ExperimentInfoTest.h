@@ -2,8 +2,11 @@
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ModeratorModel.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -23,6 +26,31 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::NexusTestHelper;
+
+class FakeChopper : public Mantid::API::ChopperModel
+{
+public:
+  double calculatePulseTimeVariance() const
+  {
+    return 0.0;
+  }
+  double sampleTimeDistribution(const double) const
+  {
+    return 0.0;
+  }
+private:
+  void setParameterValue(const std::string &,const std::string&) {};
+};
+
+class FakeSource : public Mantid::API::ModeratorModel
+{
+public:
+  double emissionTimeMean() const { return 0.0;}
+  double emissionTimeVariance() const { return 0.0; }
+  double sampleTimeDistribution(const double) const { return 0.0; }
+private:
+  void setParameterValue(const std::string &,const std::string&) {};
+};
 
 class ExperimentInfoTest : public CxxTest::TestSuite
 {
@@ -52,6 +80,70 @@ public:
     boost::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
     TS_ASSERT_EQUALS( inst3.get(), inst1.get());
     TS_ASSERT_EQUALS( inst3->getName(), "MyTestInst");
+  }
+
+  void test_Setting_A_New_Source_With_NULL_Ptr_Throws()
+  {
+    ExperimentInfo ws;
+
+    TS_ASSERT_THROWS(ws.setModeratorModel(NULL), std::invalid_argument);
+  }
+
+  void test_Retrieving_Source_Properties_Before_Set_Throws()
+  {
+    ExperimentInfo ws;
+
+    TS_ASSERT_THROWS(ws.moderatorModel(), std::runtime_error);
+  }
+
+
+  void test_Setting_New_Source_Description_With_Valid_Object_Does_Not_Throw()
+  {
+    using namespace Mantid::API;
+    ExperimentInfo ws;
+
+    ModeratorModel * source = new FakeSource;
+    TS_ASSERT_THROWS_NOTHING(ws.setModeratorModel(source));
+    const ModeratorModel & fetched = ws.moderatorModel();
+    const ModeratorModel & constInput = const_cast<const Mantid::API::ModeratorModel&>(*source);
+    TS_ASSERT_EQUALS(&fetched, &constInput);
+  }
+
+  void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws()
+  {
+    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
+
+    TS_ASSERT_THROWS(ws->setChopperModel(NULL), std::invalid_argument);
+  }
+
+  void test_Setting_A_New_Chopper_To_Point_Greater_Than_Number_Chopper_Points_Throws()
+  {
+    ExperimentInfo ws; // instrument with no chopper points defined
+
+    TS_ASSERT_THROWS(ws.setChopperModel(new FakeChopper), std::runtime_error);
+  }
+
+  void test_Setting_A_New_Chopper_To_Point_Lower_Than_Number_Instrument_Chopper_Points_Succeeds()
+  {
+    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
+
+    TS_ASSERT_THROWS_NOTHING(ws->setChopperModel(new FakeChopper));
+    TS_ASSERT_THROWS_NOTHING(ws->chopperModel(0));
+  }
+
+  void test_Setting_A_New_Chopper_To_Existing_Index_Replaces_Current()
+  {
+    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
+
+    TS_ASSERT_THROWS_NOTHING(ws->setChopperModel(new FakeChopper));
+    TS_ASSERT_THROWS(ws->chopperModel(1), std::invalid_argument);
+  }
+
+  void test_Getting_Chopper_At_Index_Greater_Than_Descriptions_Added_Throws()
+  {
+    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
+
+    TS_ASSERT_THROWS(ws->chopperModel(2), std::invalid_argument);
   }
 
   void test_GetSetSample()
@@ -230,6 +322,97 @@ public:
     do_compare_ExperimentInfo(ws,ws3);
   }
 
+  void test_default_emode_is_elastic()
+  {
+    ExperimentInfo exptInfo;
+
+    TS_ASSERT_EQUALS(exptInfo.getEMode(), Mantid::Kernel::DeltaEMode::Elastic);
+  }
+
+  void test_runlog_with_emode_returns_correct_mode()
+  {
+    ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
+
+    TS_ASSERT_EQUALS(exptInfo->getEMode(), Mantid::Kernel::DeltaEMode::Direct);
+  }
+
+  void test_runlog_with_emode_overrides_instrument_emode()
+  {
+    ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
+    addInstrumentWithIndirectEmodeParameter(exptInfo);
+
+    TS_ASSERT_EQUALS(exptInfo->getEMode(), Mantid::Kernel::DeltaEMode::Direct);
+  }
+
+  void test_runlog_with_only_instrument_emode_uses_this()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithIndirectEmodeParameter(exptInfo);
+
+    TS_ASSERT_EQUALS(exptInfo->getEMode(), Mantid::Kernel::DeltaEMode::Indirect);
+  }
+
+  void test_getEFixed_throws_exception_if_detID_does_not_exist()
+  {
+    ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
+
+    TS_ASSERT_THROWS(exptInfo->getEFixed(1), Mantid::Kernel::Exception::NotFoundError);
+  }
+
+  void test_correct_efixed_value_is_returned_for_direct_run()
+  {
+    ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
+    const double test_ei(15.1);
+    exptInfo->mutableRun().addProperty("Ei", test_ei);
+
+    TS_ASSERT_EQUALS(exptInfo->getEFixed(), test_ei);
+  }
+
+  void test_getEfixed_throws_for_indirect_mode_and_no_detector_passed()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
+
+    TS_ASSERT_THROWS(exptInfo->getEFixed(), std::runtime_error);
+  }
+
+  void test_getEfixed_throws_for_indirect_mode_when_passed_a_detector_without_parameter()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithIndirectEmodeParameter(exptInfo);
+    IDetector_const_sptr det = exptInfo->getInstrument()->getDetector(3);
+
+    TS_ASSERT_THROWS(exptInfo->getEFixed(det), std::runtime_error);
+  }
+
+  void test_getEfixed_in_indirect_mode_returns_detector_level_EFixed_parameter()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
+    const double test_ef(32.7);
+    const Mantid::detid_t test_id = 3;
+    IDetector_const_sptr det = exptInfo->getInstrument()->getDetector(test_id);
+    ParameterMap & pmap = exptInfo->instrumentParameters();
+    pmap.addDouble(det.get(), "Efixed", test_ef);
+
+    TS_ASSERT_EQUALS(exptInfo->getEFixed(det), test_ef);
+    TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
+
+  }
+
+  void test_getEfixed_in_indirect_mode_looks_recursively_for_Efixed_parameter()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
+    const double test_ef(32.7);
+    const Mantid::detid_t test_id = 3;
+    exptInfo->instrumentParameters().addDouble(inst.get(), "Efixed", test_ef);
+    IDetector_const_sptr det = exptInfo->getInstrument()->getDetector(test_id);
+
+    TS_ASSERT_EQUALS(exptInfo->getEFixed(det), test_ef);
+    TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
+  }
+
 
   struct fromToEntry
   {
@@ -398,6 +581,42 @@ private:
   void addRunWithLog(ExperimentInfo & expt, const std::string & name, const double value)
   {
     expt.mutableRun().addProperty(name, value);
+  }
+
+  ExperimentInfo_sptr createTestInfoWithDirectEModeLog()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    exptInfo->mutableRun().addProperty("deltaE-mode", std::string("direct"));
+    return exptInfo;
+  }
+
+  Instrument_sptr addInstrumentWithIndirectEmodeParameter(ExperimentInfo_sptr exptInfo)
+  {
+    Instrument_sptr inst = addInstrument(exptInfo);
+    exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode", "indirect");
+    return inst;
+  }
+
+  Instrument_sptr addInstrument(ExperimentInfo_sptr exptInfo)
+  {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    exptInfo->setInstrument(inst);
+    return inst;
+  }
+
+  ExperimentInfo_sptr createTestInfoWithChopperPoints(const size_t npoints)
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    boost::shared_ptr<Instrument> inst1(new Instrument());
+    inst1->setName("MyTestInst");
+    inst1->markAsSource(new ObjComponent("source"));
+
+    for(size_t i = 0; i < npoints; ++i)
+    {
+      inst1->markAsChopperPoint(new ObjComponent("ChopperPoint"));
+    }
+    exptInfo->setInstrument(inst1);
+    return exptInfo;
   }
 
 };

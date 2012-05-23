@@ -4,7 +4,10 @@ set ( SRC_FILES
 	src/ADARAParser.cpp
 	src/AppendGeometryToSNSNexus.cpp
 	src/CompressEvents.cpp
+	src/CreateChopperModel.cpp
+	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
+	src/CreateSimulationWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -39,9 +42,9 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadGSS.cpp
+	src/LoadILL.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
-	src/LoadILL.cpp
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
@@ -140,7 +143,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/ADARAParser.h
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/CompressEvents.h
+	inc/MantidDataHandling/CreateChopperModel.h
+	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
+	inc/MantidDataHandling/CreateSimulationWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -171,9 +177,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadGSS.h
+	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
-	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
@@ -265,11 +271,15 @@ set ( INC_FILES
 set ( TEST_FILES
 	#Needs fixing to not rely on network. test/SNSLiveEventDataListenerTest.h
 	#test/LoadDAETest.h
+	#test/LoadILLTest.h
 	#test/LoadSNSNexusTest.h # TODO has no active tests in it
 	#test/LoadSassenaTest.h
 	test/AppendGeometryToSNSNexusTest.h
 	test/CompressEventsTest.h
+	test/CreateChopperModelTest.h
+	test/CreateModeratorModelTest.h
 	test/CreateSampleShapeTest.h
+	test/CreateSimulationWorkspaceTest.h
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
 	test/DetermineChunkingTest.h
@@ -296,7 +306,6 @@ set ( TEST_FILES
 	test/LoadEventNexusTest.h
 	test/LoadEventPreNexus2Test.h
 	test/LoadEventPreNexusTest.h
-	#test/LoadILLTest.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h

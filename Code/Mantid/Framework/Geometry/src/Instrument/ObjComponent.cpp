@@ -67,7 +67,7 @@ namespace Mantid
     void ObjComponent::setShape(Object_const_sptr newShape)
     {
       if (m_isParametrized)
-        throw "Noooooooo!";
+        throw std::runtime_error("ObjComponent::setShape - Cannot change the shape of a parameterized object");
       else
         m_shape = newShape;
     }

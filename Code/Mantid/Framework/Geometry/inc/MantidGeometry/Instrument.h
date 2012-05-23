@@ -69,11 +69,13 @@ namespace Mantid
       Instrument(const std::string& name);
       Instrument(const Instrument&);
       ///Virtual destructor
-      virtual ~Instrument() {}
+      virtual ~Instrument();
 
       Instrument* clone() const;
 
       IObjComponent_const_sptr getSource() const;
+      IObjComponent_const_sptr getChopperPoint(const size_t index = 0) const;
+      size_t getNumberOfChopperPoints() const;
       IObjComponent_const_sptr getSample() const;
       Kernel::V3D getBeamDirection() const;
 
@@ -99,6 +101,9 @@ namespace Mantid
       /// to be 'the' samplePos Component. For now it is assumed that we have
       /// at most one of these.
       void markAsSamplePos(const ObjComponent*);
+
+      /// Marks a Component which already exists in the instrument to the chopper cache
+      void markAsChopperPoint(const ObjComponent *comp);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' source Component. For now it is assumed that we have
@@ -232,6 +237,10 @@ namespace Mantid
 
       /// Purpose to hold copy of source component. For now assumed to be just one component
       const ObjComponent* m_sourceCache;
+
+      /// Hold a list of places where a chopper can be situated
+      /// A pointer so that parameterized intruments are still fast to create.
+      std::vector<const ObjComponent*> * m_chopperPoints;
 
       /// Purpose to hold copy of samplePos component. For now assumed to be just one component
       const ObjComponent* m_sampleCache;

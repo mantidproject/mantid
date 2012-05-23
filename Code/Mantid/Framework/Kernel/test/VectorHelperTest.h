@@ -23,6 +23,34 @@ public:
     m_test_bins[4] = 3.2;
   }
 
+  void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins()
+  {
+    std::vector<double> rbParams(3);
+    rbParams[0] = 1;
+    rbParams[1] = 1;
+    rbParams[2] = 10;
+
+    std::vector<double> axis;
+    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams,axis);
+
+    TS_ASSERT_EQUALS(numBoundaries, 10);
+    TS_ASSERT_EQUALS(axis.size(), 10);
+  }
+
+  void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins_But_Not_Resized_Axis_When_Requested()
+  {
+    std::vector<double> rbParams(3);
+    rbParams[0] = 1;
+    rbParams[1] = 1;
+    rbParams[2] = 10;
+
+    std::vector<double> axis;
+    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams,axis, false);
+
+    TS_ASSERT_EQUALS(numBoundaries, 10);
+    TS_ASSERT_EQUALS(axis.size(), 0);
+  }
+
   // TODO: More tests of other methods
 
   void test_splitStringIntoVector()

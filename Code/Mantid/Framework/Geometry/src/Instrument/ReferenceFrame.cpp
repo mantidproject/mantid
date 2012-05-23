@@ -93,6 +93,29 @@ namespace Geometry
     return m_alongBeam;
   }
 
+  /**
+   * Gets the pointing horizontal direction, i.e perpendicular to up & along beam
+   * @return Axis that is perpendicular to Up & beam direction
+   */
+  PointingAlong ReferenceFrame::pointingHorizontal() const
+  {
+    if(m_up == X)
+    {
+      if(m_alongBeam == Y) return Z;
+      else return Y;
+    }
+    else if(m_up == Y)
+    {
+      if(m_alongBeam == Z) return X;
+      else return Z;
+    }
+    else
+    {
+      if(m_alongBeam == Y) return X;
+      else return Y;
+    }
+  }
+
   /** Gets the handedness
   @return handedness
   */

@@ -97,7 +97,8 @@ void testExecNoQ()
     pAlg->setPropertyValue("MaxValues"," 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
-    AnalysisDataService::Instance().remove("OutputWorkspace");
+    checkHistogramsHaveBeenStored("WS3DNoQ");
+    AnalysisDataService::Instance().remove("WS3DNoQ");
 
 }
 
@@ -121,7 +122,8 @@ void testExecModQ()
     pAlg->setPropertyValue("MaxValues"," 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
-    AnalysisDataService::Instance().remove("OutputWorkspace");
+    checkHistogramsHaveBeenStored("WS3DmodQ");
+    AnalysisDataService::Instance().remove("WS3DmodQ");
 
 }
 
@@ -141,7 +143,8 @@ void testExecQ3D()
     pAlg->setRethrows(false);
     pAlg->execute();
     TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
-    AnalysisDataService::Instance().remove("OutputWorkspace"); 
+    checkHistogramsHaveBeenStored("WS5DQ3D");
+    AnalysisDataService::Instance().remove("WS5DQ3D");
 }
 
 //DO NOT DISABLE THIS TEST
@@ -195,7 +198,20 @@ ConvertToMDTest(){
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 }
+private:
 
+  void checkHistogramsHaveBeenStored(const std::string & wsName)
+  {
+    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    uint16_t nexpts = outputWS->getNumExperimentInfo();
+    for(uint16_t i = 0; i < nexpts; ++i)
+    {
+      ExperimentInfo_const_sptr expt = outputWS->getExperimentInfo(i);
+      std::pair<double,double> bin = expt->run().histogramBinBoundaries(0.34);
+      TS_ASSERT_DELTA(bin.first, 0.3, 1e-10);
+      TS_ASSERT_DELTA(bin.second, 0.4, 1e-10);
+    }
+  }
 };
 
 
