@@ -41,7 +41,6 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->actionOffset_Diagonally->setDisabled(true);
   iv_ui->actionGraph_Rebinned_Data->setDisabled(true);
   iv_ui->menuHelp->setDisabled(true);
-  iv_ui->label_2->setDisabled(true);
  
   this->iv_main_window = iv_main_window;
   QObject::connect( iv_ui->actionClose, SIGNAL(triggered()),
@@ -180,6 +179,19 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
   iv_ui->actionOptimal->setCheckable(true);
   iv_ui->actionMulti->setCheckable(true);
   iv_ui->actionSpectrum->setCheckable(true);
+                                                    // set up initial color
+                                                    // scale display
+  iv_ui->color_scale->setScaledContents(true);
+  iv_ui->color_scale->setMinimumHeight(15);
+  iv_ui->color_scale->setMinimumWidth(15);
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  ShowColorScale( positive_color_table, negative_color_table );
+
 
   color_group = new QActionGroup(this);
   color_group->addAction(iv_ui->actionHeat);
@@ -369,6 +381,7 @@ void IVConnections::heat_color_scale()
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::gray_color_scale()
@@ -380,6 +393,7 @@ void IVConnections::gray_color_scale()
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::negative_gray_color_scale()
@@ -391,6 +405,7 @@ void IVConnections::negative_gray_color_scale()
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::green_yellow_color_scale()
@@ -402,6 +417,7 @@ void IVConnections::green_yellow_color_scale()
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::rainbow_color_scale()
@@ -413,6 +429,7 @@ void IVConnections::rainbow_color_scale()
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::optimal_color_scale()
@@ -424,6 +441,7 @@ void IVConnections::optimal_color_scale()
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::multi_color_scale()
@@ -435,6 +453,7 @@ void IVConnections::multi_color_scale()
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
 }
 
 void IVConnections::spectrum_color_scale()
@@ -446,6 +465,50 @@ void IVConnections::spectrum_color_scale()
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
+}
+
+
+/**
+ *  Set the pix map that shows the color scale from the specified positive
+ *  and negative color tables.
+ *
+ *  @param positive_color_table  The new color table used to map positive data 
+ *                               values to an RGB color.
+ *  @param negative_color_table  The new color table used to map negative data 
+ *                               values to an RGB color.  This must have the
+ *                               same number of entries as the positive
+ *                               color table.
+ */
+void IVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
+                                    std::vector<QRgb> & negative_color_table )
+{
+  size_t total_colors = positive_color_table.size() + 
+                        negative_color_table.size();
+
+  unsigned int *rgb_data = new unsigned int[ total_colors ];
+
+  size_t index = 0;
+  size_t n_colors = negative_color_table.size();
+  for ( size_t i = 0; i < n_colors; i++ )
+  {
+    rgb_data[index] = negative_color_table[ n_colors - 1 - i ];
+    index++;
+  }
+
+  n_colors = positive_color_table.size();
+  for ( size_t i = 0; i < n_colors; i++ )
+  {
+    rgb_data[index] = positive_color_table[i];
+    index++;
+  }
+
+  uchar *buffer = (uchar*)rgb_data;
+  QImage image( buffer, (int)total_colors, 1, QImage::Format_RGB32 );
+  QPixmap pixmap = QPixmap::fromImage(image);
+  iv_ui->color_scale->setPixmap( pixmap );
+
+// delete[] rgb_data;
 }
 
 

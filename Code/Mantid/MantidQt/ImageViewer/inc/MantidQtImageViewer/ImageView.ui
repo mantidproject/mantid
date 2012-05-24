@@ -139,7 +139,7 @@
          </widget>
         </item>
         <item row="4" column="0">
-         <widget class="QWidget" name="color_scale" native="true"/>
+         <widget class="QLabel" name="color_scale" native="true"/>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="table_label">
