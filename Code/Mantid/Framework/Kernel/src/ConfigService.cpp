@@ -203,19 +203,22 @@ ConfigServiceImpl::ConfigServiceImpl() :
   }
 
   //Fill the list of possible relative path keys that may require conversion to absolute paths
+  m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
+  m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
+  m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
+  m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
   m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
-  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
+  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
-  m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
+  m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
 
   //attempt to load the default properties file that resides in the directory of the executable
   std::string propertiesFilesList;
