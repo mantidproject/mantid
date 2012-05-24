@@ -21,7 +21,7 @@ namespace ImageView
  * @param color_table  Vector of colors that will be cleard and filled out 
  *                     with the requested color map.
  */
-void ColorMaps::getColorMap( ColorScale          name, 
+void ColorMaps::GetColorMap( ColorScale          name, 
                              size_t              n_colors,
                              std::vector<QRgb> & color_table )
 {
@@ -119,7 +119,7 @@ void ColorMaps::getColorMap( ColorScale          name,
  *                         values, when the control parameter is large.
  * @param intensity_table
  */
-void ColorMaps::getIntensityMap( double                control_s,
+void ColorMaps::GetIntensityMap( double                control_s,
                                  size_t                n_entries,
                                  std::vector<double> & intensity_table )
 {

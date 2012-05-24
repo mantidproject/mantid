@@ -362,58 +362,90 @@ void IVConnections::intensity_slider_moved()
 
 void IVConnections::heat_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::HEAT, 256, color_table );
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::gray_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::GRAY, 256, color_table );
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::negative_gray_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::NEGATIVE_GRAY,256,color_table);
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::NEGATIVE_GRAY,256, positive_color_table);
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::green_yellow_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::GREEN_YELLOW, 256,color_table);
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GREEN_YELLOW, 256, positive_color_table);
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::rainbow_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::RAINBOW, 256, color_table );
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::RAINBOW, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::optimal_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::OPTIMAL, 256, color_table );
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::OPTIMAL, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::multi_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::MULTI, 256, color_table );
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::MULTI, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 void IVConnections::spectrum_color_scale()
 {
-  std::vector<QRgb> color_table;
-  ColorMaps::getColorMap( ColorMaps::SPECTRUM, 256, color_table );
-  image_display->SetColorScale( color_table );
+  std::vector<QRgb> positive_color_table;
+  ColorMaps::GetColorMap( ColorMaps::SPECTRUM, 256, positive_color_table );
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
 }
 
 
