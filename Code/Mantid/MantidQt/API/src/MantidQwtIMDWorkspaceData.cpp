@@ -355,7 +355,6 @@ std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 //      xLabel += " (undefined units)";
 //    break;
   }
-  std::cout << "getXAxisLabel: " << m_originalWorkspace.use_count() << std::endl;
 
   return xLabel;
 }
