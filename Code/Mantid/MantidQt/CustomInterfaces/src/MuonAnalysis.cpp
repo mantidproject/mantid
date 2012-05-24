@@ -2438,6 +2438,18 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
   {
     Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+    if(!matrix_workspace) // Data collected in periods.
+    {
+      // Get run number from first period data.
+      workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
+      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+      if(!matrix_workspace)
+      {
+        QMessageBox::information(this, "Mantid - Muon Analysis", "Mantid expected period data but no periods were found.\n"
+                      "Default plot name will be used insead of run number.");
+        return;
+      }
+    }
     const Run& runDetails = matrix_workspace->run();
     
     std::string runNumber = runDetails.getProperty("run_number")->value();
