@@ -474,10 +474,15 @@ void ConfigServiceImpl::convertRelativeToAbsolute()
  * Make a relative path or a list of relative paths into an absolute one.
  * @param dir :: The directory to convert
  * @param key :: The key variable this relates to
- * @returns A string containing an aboluste path by resolving the relative directory with the executable directory
+ * @returns A string containing an absolute path by resolving the relative directory with the executable directory
  */
 std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
 {
+  if(dir.empty())
+  {
+    // Don't do anything for an empty value
+    return dir;
+  }
   std::string converted;
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos)
@@ -1284,13 +1289,21 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
 void ConfigServiceImpl::setParaViewPluginPath() const
 {
   std::string mantid_loc = this->getDirectoryOfExecutable();
-  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins/pvplugins");
+  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins/pvplugins"); // Developer build paths
   pv_plugin_path = pv_plugin_path.absolute();
+  g_log.debug() << "Trying " << pv_plugin_path.toString() << " as PV_PLUGIN_PATH\n";
   Poco::File pv_plugin(pv_plugin_path.toString());
   if (!pv_plugin.exists() || !pv_plugin.isDirectory())
   {
-    g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");
-    pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins/pvplugins");
+    // Installation paths
+    g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist. Trying properties file location.");
+    std::string user_loc = this->getString("pvplugins.directory");
+    if(user_loc.empty())
+    {
+      g_log.debug("No ParaView plugin directory specified in the properties file.");
+      return; // it didn't work
+    }
+    pv_plugin_path = Poco::Path(user_loc);
     pv_plugin_path = pv_plugin_path.absolute();
     pv_plugin = Poco::File(pv_plugin_path.toString());
     if (!pv_plugin.exists() || !pv_plugin.isDirectory())
@@ -1671,7 +1684,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
 
   try
   {
-    //Try to run "paraview --help", which will succeed if ParaView is installed.
+    //Try to run "paraview -V", which will succeed if ParaView is installed.
     std::string paraviewDir = getString("paraview.path");
     std::string cmd = "paraview";
     if(!paraviewDir.empty())
@@ -1680,9 +1693,9 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       cmd = paraviewExe.toString();
     }
     std::vector<std::string> args;
-    args.push_back("--help");
+    args.push_back("-V");
     Poco::Pipe outPipe;
-    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, 0);
+    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, &outPipe);
     const int rc = ph.wait();
     if(rc == 1)
     {

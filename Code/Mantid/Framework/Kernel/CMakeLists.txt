@@ -363,6 +363,7 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
+set ( PV_PLUGINS "./pvplugins/pvplugins" )
 set ( QTPLUGINS "." )
 set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
