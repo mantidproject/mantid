@@ -54,10 +54,10 @@ void LinePlotOptions::addPlotRadioButton(const std::string & text, const std::st
 void LinePlotOptions::setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   if (!ws) return;
-  m_originalWs = ws;
-  for (size_t d=0; d<(m_originalWs->getNumDims()); d++)
+
+  for (size_t d=0; d<(ws->getNumDims()); d++)
   {
-    IMDDimension_const_sptr dim = m_originalWs->getDimension(d);
+    IMDDimension_const_sptr dim = ws->getDimension(d);
     std::string text = dim->getName();
     std::string tooltip = "Use the "+dim->getName()+" dimension as the X plot axis.";
     const bool bIntegrated = dim->getIsIntegrated();

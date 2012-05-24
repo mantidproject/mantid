@@ -42,9 +42,6 @@ private:
   /// Vector of the various plot axis radio buttons
   QVector<QRadioButton *> m_radPlots;
 
-  /// Original workspace (gives the dimensions to plot);
-  Mantid::API::IMDWorkspace_sptr m_originalWs;
-
   /// Chosen plot X-axis
   int m_plotAxis;
 
