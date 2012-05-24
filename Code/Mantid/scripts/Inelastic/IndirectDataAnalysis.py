@@ -78,7 +78,7 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
 def confitPlotSeq(inputWS, plot):
     nhist = mtd[inputWS].getNumberHistograms()
     if ( plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nhist))
+        mp.plotSpectrum(inputWS, range(0, nhist), True)
         return    
     plotSpecs = []
     if ( plot == 'Intensity' ):
@@ -89,7 +89,7 @@ def confitPlotSeq(inputWS, plot):
         title = mtd[inputWS].getAxis(1).label(i)
         if re.search(res, title):
             plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs)
+    mp.plotSpectrum(inputWS, plotSpecs, True)
 
 def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
     StartTime('ConvFit')
@@ -263,7 +263,7 @@ def furyfitParsToWS(Table, Data):
 def furyfitPlotSeq(inputWS, Plot):
     nHist = mtd[inputWS].getNumberHistograms()
     if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nHist))
+        mp.plotSpectrum(inputWS, range(0, nHist), True)
         return
     plotSpecs = []
     if ( Plot == 'Intensity' ):
@@ -276,7 +276,7 @@ def furyfitPlotSeq(inputWS, Plot):
         title = mtd[inputWS].getAxis(1).label(i)
         if ( re.search(res, title) ):
             plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs)
+    mp.plotSpectrum(inputWS, plotSpecs, True)
 
 def furyfitSeq(inputWS, func, startx, endx, Save, Plot):
     StartTime('FuryFit')
