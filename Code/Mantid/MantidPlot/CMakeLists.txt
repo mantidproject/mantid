@@ -791,7 +791,7 @@ target_link_libraries ( MantidPlot
 # Custom Info.plist file for OS X
 ###########################################################################
 if( APPLE )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/MacInstaller/Info.plist
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
 
