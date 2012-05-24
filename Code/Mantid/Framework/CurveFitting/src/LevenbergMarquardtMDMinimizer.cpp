@@ -106,7 +106,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     H.set(i,i,tmp);
   }
 
-  if (debug && m_rho > 0)
+  if (/*debug &&*/ m_rho > 0)
   {
     std::cerr << "H:\n" << H ;
     std::cerr << "-----------------------------\n";

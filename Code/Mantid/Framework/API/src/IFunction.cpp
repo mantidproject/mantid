@@ -561,25 +561,25 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
     //  m_plusStep.reset(domain);
     //}
 
-    PARALLEL_CRITICAL(numeric_deriv)
+    //PARALLEL_CRITICAL(numeric_deriv)
     {
       applyTies(); // just in case
       function(domain,minusStep);
-      for (size_t iP = 0; iP < nParam; iP++)
-      {
-        if ( isActive(iP) )
-        {
-          params[iP] = activeParameter(iP);
-        }
-      }
+      //for (size_t iP = 0; iP < nParam; iP++)
+      //{
+      //  if ( isActive(iP) )
+      //  {
+      //    params[iP] = activeParameter(iP);
+      //  }
+      //}
     }
 
     for (size_t iP = 0; iP < nParam; iP++)
     {
       if ( isActive(iP) )
       {
-        //const double& val = activeParameter(iP);
-        const double& val = params[iP];
+        const double& val = activeParameter(iP);
+        //const double& val = params[iP];
         if (fabs(val) < cutoff)
         {
           step = epsilon;
@@ -591,7 +591,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
 
         double paramPstep = val + step;
 
-        PARALLEL_CRITICAL(numeric_deriv)
+        //PARALLEL_CRITICAL(numeric_deriv)
         {
           setActiveParameter(iP, paramPstep);
           applyTies(); 

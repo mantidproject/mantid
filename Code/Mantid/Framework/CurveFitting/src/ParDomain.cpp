@@ -63,31 +63,33 @@ void ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSqu
 {
   const int n = static_cast<int>( getNDomains() );
   omp_set_dynamic(0);
-  PARALLEL
+  std::vector<API::IFunction_sptr> funs;
+  //funs.push_back( leastSquares.getFittingFunction()->clone() );
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for(int i = 0; i < n; ++i)
   {
-    int nt = PARALLEL_NUMBER_OF_THREADS;
-    std::cerr << "nt=" << nt << std::endl;
-    std::vector<API::IFunction_sptr> funs;
-    funs.push_back( leastSquares.getFittingFunction() );
-    for( int k = 1; k < nt; ++k )
+    API::FunctionDomain_sptr domain;
+    API::IFunctionValues_sptr values;
+    getDomainAndValues( i, domain, values );
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+    if (!simpleValues)
     {
-      funs.push_back( leastSquares.getFittingFunction()->clone() );
+      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
     }
-    PRAGMA_OMP(for)
-    for(int i = 0; i < n; ++i)
+    int k = PARALLEL_THREAD_NUMBER;
+    PARALLEL_CRITICAL(resize)
     {
-      API::FunctionDomain_sptr domain;
-      API::IFunctionValues_sptr values;
-      getDomainAndValues( i, domain, values );
-      auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-      if (!simpleValues)
+      if ( k >= funs.size() )
       {
-        throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+        funs.resize( k + 1 );
       }
-      int k = PARALLEL_THREAD_NUMBER;
-      //std::cerr << 
-      leastSquares.addValDerivHessian(funs[k], domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+      if ( !funs[k] )
+      {
+        funs[k] = leastSquares.getFittingFunction()->clone();
+      }
     }
+    //std::cerr << 
+    leastSquares.addValDerivHessian(funs[k], domain,simpleValues,evalFunction,evalDeriv,evalHessian);
   }
 }
 

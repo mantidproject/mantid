@@ -30,6 +30,13 @@ namespace API
   
   Kernel::Logger& IFunctionMD::g_log = Kernel::Logger::get("IFunctionMD");
 
+  /// Virtual copy constructor
+  boost::shared_ptr<IFunction> IFunctionMD::clone() const
+  {
+    auto fun = IFunction::clone();
+
+  }
+
   /** Set the workspace
    * @param ws :: A shared pointer to a workspace.
    */
