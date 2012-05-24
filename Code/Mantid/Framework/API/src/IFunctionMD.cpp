@@ -34,7 +34,7 @@ namespace API
   boost::shared_ptr<IFunction> IFunctionMD::clone() const
   {
     auto fun = IFunction::clone();
-
+    return fun;
   }
 
   /** Set the workspace
