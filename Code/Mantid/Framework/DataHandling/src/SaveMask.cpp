@@ -58,26 +58,58 @@ namespace DataHandling
   }
 
   /// Define input parameters
-  void SaveMask::init(){
-
+  void SaveMask::init()
+  {
     declareProperty(new API::WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace", "", Direction::Input),
         "MaskingWorkspace to output to XML file (SpecialWorkspace2D)");
     declareProperty(new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
         "File to save the detectors mask in XML format");
-
   }
 
   /// Main body to execute algorithm
-  void SaveMask::exec(){
-    // TODO This is a dummy prototype
-
+  void SaveMask::exec()
+  {
     // 1. Get input
     DataObjects::SpecialWorkspace2D_const_sptr inpWS = this->getProperty("InputWorkspace");
     std::string outxmlfilename = this->getPropertyValue("OutputFile");
 
+    //    Check the instrument ...
+    size_t numspec0dets = 0;
+    size_t numspecMdets = 0;
+    Geometry::Instrument_const_sptr instr = inpWS->getInstrument();
+    if (!instr)
+    {
+      g_log.warning() << "Input MaskWorkspace has not instrument. " << std::endl;
+    }
+    else
+    {
+      size_t numdets = instr->getDetectorIDs(true).size();
+      size_t numdets2 = 0;
+      for (size_t iws = 0; iws < inpWS->getNumberHistograms(); ++iws)
+      {
+        const API::ISpectrum *spec = inpWS->getSpectrum(iws);
+        if (!spec)
+          continue;
+
+        const std::set<detid_t> detids = spec->getDetectorIDs();
+        size_t tmpnumdets = detids.size();
+        if (tmpnumdets == 0)
+          numspec0dets ++;
+        else if (tmpnumdets > 1)
+          numspecMdets ++;
+
+        numdets2 += tmpnumdets;
+      }
+
+      g_log.notice() << "Number of detectors (from instrument) = " << numdets << "; (from spectra) = " << numdets2 << std::endl;
+      g_log.notice() << "Number of spectra w/o detectors = " << numspec0dets << "; spectra w/ more than 1 detectors = " << numspecMdets << std::endl;
+    }
+
+
     // 2. Convert Workspace to ...
     std::vector<detid_t> detid0s;
-    for (size_t i = 0; i < inpWS->getNumberHistograms(); i ++){
+    for (size_t i = 0; i < inpWS->getNumberHistograms(); i ++)
+    {
       if (inpWS->dataY(i)[0] > 0.1){
         // It is way from 0 but smaller than 1
         // a) workspace index -> spectrum -> detector ID
@@ -88,21 +120,20 @@ namespace DataHandling
         }
 
         const std::set<detid_t> detids = spec->getDetectorIDs();
-        if (detids.size() != 1){
-          g_log.error() << "Impossible Situation! Workspace " << i << " corresponds to #(Det) = " << detids.size() << std::endl;
-          throw std::invalid_argument("Impossible number of detectors");
+        if (detids.size() == 0)
+        {
+          // Skip in the case that there is no detector associated with this spectrum
+          continue;
         }
 
-        // b) get detector id
+        // b) get detector id and store
         detid_t detid = 0;
         std::set<detid_t>::const_iterator it;
-        for (it=detids.begin(); it!=detids.end(); ++it){
+        for (it=detids.begin(); it!=detids.end(); ++it)
+        {
           detid = *it;
+          detid0s.push_back(detid);
         }
-
-        // c) store
-        detid0s.push_back(detid);
-
       } // if
     } // for
 
