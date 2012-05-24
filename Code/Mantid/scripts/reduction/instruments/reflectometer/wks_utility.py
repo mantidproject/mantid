@@ -776,10 +776,10 @@ def applySF(InputWorkspace,
                                     
                                     
                                     print '--> Found a perfect match'
-                                    a = float(sfFactorTable[i][6])
-                                    b = float(sfFactorTable[i][7])  
-                                    a_error = float(sfFactorTable[i][8])
-                                    b_error = float(sfFactorTable[i][9])
+                                    a = float(getFieldValue(sfFactorTable[i][6]))
+                                    b = float(getFieldValue(sfFactorTable[i][7]))  
+                                    a_error = float(getFieldValue(sfFactorTable[i][8]))
+                                    b_error = float(getFieldValue(sfFactorTable[i][9]))
                 
                                     OutputWorkspace = _applySFtoArray(InputWorkspace,
                                                                       a, b, a_error, b_error)
