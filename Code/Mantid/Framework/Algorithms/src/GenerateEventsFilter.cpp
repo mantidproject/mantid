@@ -149,6 +149,9 @@ namespace Algorithms
     // 2. Get Time
     processInputTime(runstart);
 
+    double prog = 0.1;
+    progress(prog);
+
     // 3. Get Log
     std::string logname = this->getProperty("LogName");
     if (logname.empty())
@@ -266,6 +269,10 @@ namespace Algorithms
     double timeinterval = this->getProperty("TimeInterval");
     int wsindex = 0;
 
+    // Progress
+    int64_t totaltime = mStopTime.totalNanoseconds()-mStartTime.totalNanoseconds();
+    int64_t timeslot = 0;
+
     if (timeinterval <= 0.0)
     {
       // 1. Default and thus just one interval
@@ -306,6 +313,17 @@ namespace Algorithms
         // d) Update loop variable
         curtime_ns = nexttime_ns;
         wsindex ++;
+
+        // e) Update progress
+        int64_t newtimeslot = (curtime_ns-mStartTime.totalNanoseconds())*90/totaltime;
+        if (newtimeslot > timeslot)
+        {
+          // There is change and update progress
+          timeslot = newtimeslot;
+          double prog = 0.1+double(timeslot)/100.0;
+          progress(prog);
+        }
+
       } // END-WHILE
 
     } // END-IF-ELSE
@@ -404,7 +422,19 @@ namespace Algorithms
     // 4. Add information
     API::TableRow row = mFilterInfoWS->appendRow();
     std::stringstream ss;
-    ss << "Log " << mlog->name() << " From " << minvalue << " To " << maxvalue;
+    ss << "Log " << mlog->name() << " From " << minvalue << " To " << maxvalue << "  Value-change-direction ";
+    if (filterincrease && filterdecrease)
+    {
+      ss << " both ";
+    }
+    else if (filterincrease)
+    {
+      ss << " increase";
+    }
+    else
+    {
+      ss << " decrease";
+    }
     row << 0 << ss.str();
 
     return;
@@ -441,7 +471,19 @@ namespace Algorithms
       valueranges.push_back(upbound);
 
       std::stringstream ss;
-      ss << "Log " << mlog->name() << " From " << lowbound << " To " << upbound;
+      ss << "Log " << mlog->name() << " From " << lowbound << " To " << upbound << "  Value-change-direction ";
+      if (filterincrease && filterdecrease)
+      {
+        ss << " both ";
+      }
+      else if (filterincrease)
+      {
+        ss << " increase";
+      }
+      else
+      {
+        ss << " decrease";
+      };
       API::TableRow newrow = mFilterInfoWS->appendRow();
       newrow << wsindex << ss.str();
 
@@ -501,6 +543,8 @@ namespace Algorithms
     DateAndTime lastTime, t;
     DateAndTime start, stop;
 
+    size_t progslot = 0;
+
     for (int i = 0; i < mlog->size(); i ++)
     {
       lastTime = t;
@@ -551,6 +595,17 @@ namespace Algorithms
         else
         {
           //End of the good section
+          if (centre)
+          {
+            stop = t - tol;
+          }
+          else
+          {
+            stop = t;
+          }
+          split.push_back( SplittingInterval(start, stop, wsindex) );
+
+          /*
           if (numgood == 1)
           {
             //There was only one point with the value. Use the last time, - the tolerance, as the end time
@@ -562,30 +617,31 @@ namespace Algorithms
             else
             {
               stop = t;
-              // stop = lastTime;
             }
             split.push_back( SplittingInterval(start, stop, wsindex) );
           }
           else
           {
             //At least 2 good values. Save the end time
-            if (centre)
-            {
-              stop = t - tol;
-              // stop = lastTime - tol;
-            }
-            else
-            {
-              stop = t;
-              // stop = lastTime;
-            }
-            split.push_back( SplittingInterval(start, stop, wsindex) );
+            XXX XXX
           }
+          */
+
           //Reset the number of good ones, for next time
           numgood = 0;
         }
         lastGood = isGood;
       }
+
+      // Progress bar..
+      size_t tmpslot = i*90/mlog->size();
+      if (tmpslot > progslot)
+      {
+        progslot = tmpslot;
+        double prog = double(progslot)/100.0+0.1;
+        progress(prog);
+      }
+
     } // ENDFOR
 
     if (numgood > 0)
@@ -642,10 +698,11 @@ namespace Algorithms
     DateAndTime start, stop;
     //double lastValue = 0.0;  // unused variable
     double currValue = 0.0;
+    size_t progslot = 0;
 
     for (int i = 0; i < mlog->size(); i ++)
     {
-      // a) Init status flags and new entry
+      // a) Initialize status flags and new entry
       lastTime = currTime;
       //lastValue = currValue;
       bool breakloop = false;
@@ -654,8 +711,6 @@ namespace Algorithms
 
       currTime = mlog->nthTime(i);
       currValue = mlog->nthValue(i);
-
-      // g_log.notice() << "Log Index = " << i << "\t, value = " << currValue << "  time = " << currTime << std::endl;
 
       // b) Filter out by time and direction (optional)
       bool intime = false;
@@ -800,7 +855,20 @@ namespace Algorithms
 
       // e) Update loop variable
       lastindex = currindex;
+
+      // f) Progress
+      // Progress bar..
+      size_t tmpslot = i*90/mlog->size();
+      if (tmpslot > progslot)
+      {
+        progslot = tmpslot;
+        double prog = double(progslot)/100.0+0.1;
+        progress(prog);
+      }
+
     } // For each log value
+
+    progress(1.0);
 
     return;
 

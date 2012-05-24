@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
 
 #include <sstream>
 
@@ -48,6 +49,9 @@ namespace Algorithms
     declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
       "The base name to use for the output workspace" );
 
+    declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>("SplittersInformationWorkspace", "", Direction::Input, PropertyMode::Optional),
+        "Optional output for the information of each splitter workspace index.");
+
     declareProperty(
         new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("InputSplittersWorkspace", "", Direction::Input),
         "An input SpilltersWorskpace for filtering");
@@ -56,7 +60,7 @@ namespace Algorithms
         "Input pixel TOF calibration file in column data format");
 
     this->declareProperty("FilterByPulseTime", false,
-        "Filter the event by its pulse time only.  This option can make execution of algorithm faster.  But it lowers precision.");
+        "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
 
     return;
   }
@@ -72,6 +76,16 @@ namespace Algorithms
     std::string outputwsnamebase = this->getProperty("OutputWorkspaceBaseName");
     std::string detcalfilename = this->getProperty("DetectorCalibrationFile");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
+
+    mInformationWS = this->getProperty("SplittersInformationWorkspace");
+    if (!mInformationWS)
+    {
+      mWithInfo = false;
+    }
+    else
+    {
+      mWithInfo = true;
+    }
 
     // 2. Process inputs
     processSplittersWorkspace();
@@ -105,12 +119,23 @@ namespace Algorithms
         inorder = false;
     }
 
-    // 3. Order if not ordered
+    // 3. Order if not ordered and add workspace for events excluded
     if (!inorder)
     {
       std::sort(mSplitters.begin(), mSplitters.end());
     }
     mWorkspaceGroups.insert(-1);
+
+    // 4. Add information
+    if (mWithInfo)
+    {
+      if (mWorkspaceGroups.size() != mInformationWS->rowCount()+1)
+      {
+        g_log.warning() << "Input Splitters Workspace has different entries than input information workspaces. "
+            << "  Information won't be written to output workspaces. " << std::endl;
+        mWithInfo = false;
+      }
+    }
 
     return;
   }
@@ -120,6 +145,19 @@ namespace Algorithms
    */
   void FilterEvents::createOutputWorkspaces(std::string outputwsnamebase)
   {
+    // Convert information workspace to map
+    std::map<int, std::string> infomap;
+    if (mWithInfo)
+    {
+      API::Column_const_sptr name = mInformationWS->getColumn("name");
+      for (size_t ir = 0; ir < mInformationWS->rowCount(); ++ ir)
+      {
+        TableRowHelper row = mInformationWS->getRow(ir);
+        int x = (*name)[ir];
+      }
+    }
+
+    // Set up new workspaces
     std::set<int>::iterator groupit;
     for (groupit = mWorkspaceGroups.begin(); groupit != mWorkspaceGroups.end(); ++groupit)
     {
@@ -134,6 +172,24 @@ namespace Algorithms
       DataObjects::EventWorkspace_sptr optws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
           API::WorkspaceFactory::Instance().create("EventWorkspace", mEventWorkspace->getNumberHistograms(), 2, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(mEventWorkspace, optws, false);
+
+      //    Add information
+      if (mWithInfo)
+      {
+        std::string info;
+        if (wsgroup < 0)
+        {
+          info = "Events that are filtered out. ";
+        }
+        else
+        {
+          // TODO More Code Here
+          // mInformationWS->getR
+          ;
+        }
+        optws->setComment(info);
+        optws->setTitle(info);
+      }
 
       // 3. Set to map
       mOutputWorkspaces.insert(std::make_pair(wsgroup, optws));

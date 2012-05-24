@@ -7,6 +7,7 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -77,6 +78,10 @@ namespace Algorithms
     std::vector<double> mCalibOffsets;
 
     bool mFilterByPulseTime;
+
+    API::ITableWorkspace_sptr mInformationWS;
+    bool mWithInfo;
+
 
   };
 
