@@ -1,14 +1,13 @@
 # IDA F2PY Absorption Corrections Wrapper
 ## Handle selection of .pyd files for absorption corrections
-import platform, sys
-operatingenvironment = platform.system()+platform.architecture()[0]
-if ( operatingenvironment == 'Windows32bit' ):
+from IndirectCommon import *
+
+if ( is_32bit_win() ):
     import fltabs_win32 as fltabs, cylabs_win32 as cylabs
+elif ( is_64bit_rhel_6_2() ):
+    import fltabs_lnx64 as fltabs, cylabs_lnx64 as cylabs
 else:
-    if ( operatingenvironment == 'Linux64bit' ):
-        import fltabs_lnx64 as fltabs, cylabs_lnx64 as cylabs
-    else:
-        sys.exit('F2Py Absorption Corrections programs NOT available on ' + operatingenvironment)
+    sys.exit('F2Py Absorption Corrections programs NOT available on your operatingenvironment')
 ##
 
 ## Other imports

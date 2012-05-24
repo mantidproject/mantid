@@ -1,14 +1,28 @@
-from mantidsimple import *
+from mantid.simpleapi import *
 from mantid import config, logger
-import platform, os.path, math, datetime
+import sys, platform, os.path, math, datetime
+
+def os_env():
+	return platform.system() + platform.architecture()[0]
+
+def is_32bit_win():
+	if os_env() == "Windows32bit":
+		return True
+	return False
+
+def is_64bit_rhel_6_2():
+	if os_env() != "Linux64bit":
+		return False
+	if platform.linux_distribution()[0] != "Red Hat Enterprise Linux Workstation":
+		return False
+	if platform.linux_distribution()[1] != "6.2":
+		return False
+	return True
 
 def inF2PyCompatibleEnv():
     '''Returns true if we are in an environment where our Fortran2Python 
     files are usable, otherwise returns false.'''
-    osEnv = platform.system() + platform.architecture()[0]
-    if osEnv == 'Windows32bit':
-        return True
-    return False
+    return is_32bit_win() or is_64bit_rhel_6_2()
 
 def runF2PyCheck():
     '''Raises exception if not in F2Py compatible env.'''

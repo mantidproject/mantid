@@ -6,15 +6,17 @@ from mantid import config, logger, mtd
 from IndirectCommon import *
 import platform, math, os.path
 
-operatingenvironment = platform.system()+platform.architecture()[0]
-if ( operatingenvironment == 'Windows32bit' ):
+if ( is_32bit_win() ):
 	import erange_win32 as Er,   QLres_win32 as QLr
 	import QLdata_win32 as QLd,  QLse_win32 as Qse
 	import Quest_win32 as Que,   ResNorm_win32 as resnorm
 	import CEfit_win32 as cefit, SSfit_win32 as ssfit
+elif ( is_64bit_rhel_6_2() ):
+	import erange_lnx64 as Er,   QLres_lnx64 as QLr
+	import QLdata_lnx64 as QLd,  QLse_lnx64 as Qse
+	import Quest_lnx64 as Que,   ResNorm_lnx64 as resnorm
+	import CEfit_lnx64 as cefit, SSfit_lnx64 as ssfit
 else:
-	sys.exit('F2Py Bayes programs NOT available on ' + operatingenvironment)
-
 def PadArray(inarray,nfixed):
 	npt=len(inarray)
 	padding = nfixed-npt
@@ -33,6 +35,7 @@ def PadXYE(Xin,Yin,Ein,array_len):
 	Y=PadArray(Yin,array_len)
 	E=PadArray(Ein,array_len)
 	return X,Y,E
+	sys.exit('F2Py Absorption Corrections programs NOT available on your operatingenvironment')
 
 def CalcErange(inWS,ns,er,nbin):
 	rscl = 1.0
