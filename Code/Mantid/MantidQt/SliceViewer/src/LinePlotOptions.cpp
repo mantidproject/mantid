@@ -31,14 +31,15 @@ LinePlotOptions::~LinePlotOptions()
  *
  * @param text :: text on the radio button
  * @param tooltip :: tooltip
+ * @param bIntegrated :: flag to indicate that the dimension is integrated.
  */
-void LinePlotOptions::addPlotRadioButton(const std::string & text, const std::string & tooltip)
+void LinePlotOptions::addPlotRadioButton(const std::string & text, const std::string & tooltip, const bool bIntegrated)
 {
   QRadioButton * rad;
   rad = new QRadioButton(ui.widgetPlotAxis);
   rad->setText(QString::fromStdString(text));
   rad->setToolTip(QString::fromStdString(tooltip));
-  rad->setVisible(true);
+  rad->setEnabled(!bIntegrated);
   // Insert it one before the horizontal spacer.
   QBoxLayout * layout = qobject_cast<QBoxLayout*>(ui.widgetPlotAxis->layout());
   layout->insertWidget( layout->count()-1, rad);
@@ -59,6 +60,7 @@ void LinePlotOptions::setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws)
     IMDDimension_const_sptr dim = m_originalWs->getDimension(d);
     std::string text = dim->getName();
     std::string tooltip = "Use the "+dim->getName()+" dimension as the X plot axis.";
+    const bool bIntegrated = dim->getIsIntegrated();
     // Index into the radio buttons array
     int index = int(d)+2;
     if (m_radPlots.size() > index)
@@ -67,7 +69,7 @@ void LinePlotOptions::setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws)
       m_radPlots[index]->setToolTip(QString::fromStdString(tooltip));
     }
     else
-      addPlotRadioButton(text, tooltip);
+      addPlotRadioButton(text, tooltip, bIntegrated);
   }
 }
 

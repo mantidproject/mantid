@@ -35,7 +35,7 @@ signals:
 
 private:
 
-  void addPlotRadioButton(const std::string & text, const std::string & tooltip);
+  void addPlotRadioButton(const std::string & text, const std::string & tooltip, const bool bIntegrated = false);
 
   Ui::LinePlotOptionsClass ui;
 
