@@ -74,7 +74,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                         
                 if _arg == 'Incident medium':
                     
-                    _val=_val[4:-2]
+                    _val=_val[4:-3]
                     if incident_medium.strip() == '':
                         incident_medium = _val
                     continue
