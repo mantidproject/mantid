@@ -181,12 +181,14 @@ void FFT::exec()
   const int ySize = static_cast<int>(inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
 
-  if(iReal >= ySize) throw std::invalid_argument("Property Real is out of range");
+  int nHist = static_cast<int>(inWS->getNumberHistograms());
+  if( iReal >= nHist ) throw std::invalid_argument("Property Real is out of range");
   if( isComplex )
   {
     const int yImagSize = static_cast<int>(inImagWS->blocksize());
     if( ySize != yImagSize ) throw std::length_error("Real and Imaginary sizes do not match");
-    if( iImag >= ySize ) throw std::invalid_argument("Property Imaginary is out of range");
+    nHist = static_cast<int>(inImagWS->getNumberHistograms());
+    if( iImag >= nHist ) throw std::invalid_argument("Property Imaginary is out of range");
   }
 
   //Check that the x values are evenly spaced
