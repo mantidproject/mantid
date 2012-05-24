@@ -508,7 +508,7 @@ void IVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
   QPixmap pixmap = QPixmap::fromImage(image);
   iv_ui->color_scale->setPixmap( pixmap );
 
-// delete[] rgb_data;
+  delete[] rgb_data;
 }
 
 
