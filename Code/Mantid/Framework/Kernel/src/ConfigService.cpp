@@ -1303,7 +1303,7 @@ void ConfigServiceImpl::setParaViewPluginPath() const
       g_log.debug("No ParaView plugin directory specified in the properties file.");
       return; // it didn't work
     }
-    pv_plugin_path = Poco::Path(user_loc);
+    pv_plugin_path = Poco::Path(user_loc, "pvplugins");
     pv_plugin_path = pv_plugin_path.absolute();
     pv_plugin = Poco::File(pv_plugin_path.toString());
     if (!pv_plugin.exists() || !pv_plugin.isDirectory())
