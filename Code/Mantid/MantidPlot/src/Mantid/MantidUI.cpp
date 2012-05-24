@@ -515,13 +515,12 @@ void MantidUI::showMDPlot()
   QString wsName = getSelectedWorkspaceName();
 
   // Create a dialog to ask for options
-  MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
-  int result = dlg->exec();
-  if (result == QDialog::Rejected)
+  MantidMDCurveDialog dlg(appWindow(), wsName);
+  if ( dlg.exec() == QDialog::Rejected )
     return;
   // Extract the settings from the dialog opened earlier
-  bool showErrors = dlg->showErrorBars();
-  LinePlotOptions * opts = dlg->getLineOptionsWidget();
+  bool showErrors = dlg.showErrorBars();
+  LinePlotOptions * opts = dlg.getLineOptionsWidget();
 
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);
