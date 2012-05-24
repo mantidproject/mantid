@@ -60,16 +60,21 @@ def getWSprefix(workspace):
     if workspace == '':
         return ''
     ws = mtd[workspace]
+    facility = config['default.facility']
+    logger.notice('Facility is '+facility)
     ins = ws.getInstrument().getName()
-    ins = ConfigService().facility().instrument(ins).shortName().lower()
-    run = ws.getRun().getLogData('run_number').value
-    try:
-        analyser = ws.getInstrument().getStringParameter('analyser')[0]
-        reflection = ws.getInstrument().getStringParameter('reflection')[0]
-    except IndexError:
-        analyser = ''
-        reflection = ''
-    prefix = ins + run + '_' + analyser + reflection + '_'
+    if ins == 'IN10' or ins == 'IN16':
+        prefix = ins + '_'
+    else:		
+        ins = config.getFacility().instrument(ins).shortName().lower()
+        run = ws.getRun().getLogData('run_number').value
+        try:
+            analyser = ws.getInstrument().getStringParameter('analyser')[0]
+            reflection = ws.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            analyser = ''
+            reflection = ''
+        prefix = ins + run + '_' + analyser + reflection + '_'
     return prefix
 
 def getEfixed(workspace, detIndex=0):
@@ -81,10 +86,10 @@ def getRunTitle(workspace):
     title = ws.getRun()['run_title'].value.strip()
     runNo = ws.getRun()['run_number'].value
     inst = ws.getInstrument().getName()
-    isn = ConfigService().facility().instrument(inst).shortName().upper()
+    ins = config.getFacility().instrument(ins).shortName().lower()
     valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
     title = ''.join(ch for ch in title if ch in valid)
-    title = isn + runNo + '-' + title
+    title = ins + runNo + '-' + title
     return title
 
 def getDetectorTwoTheta(detector, samplePos, beamPos): #fix 'cos getTwoTheta is incorrectly gettwoTheta in new API
@@ -113,11 +118,11 @@ def createQaxis(inputWS):
         msg = 'Creating Axis based on Detector Q value: '
         if not axis.isNumeric():
             msg += 'Input workspace must have either spectra or numeric axis.'
-            print msg
+            logger.notice(msg)
             sys.exit(msg)
         if ( axis.getUnit().name() != 'MomentumTransfer' ):
             msg += 'Input must have axis values of Q'
-            print msg
+            logger.notice(msg)
             sys.exit(msg)
         for i in range(0, nHist):
             result.append(float(axis.label(i)))
@@ -166,3 +171,11 @@ def ExtractInt(a):                              #extract values from line of asc
     for n in elements:
         extracted.append(int(n))
     return extracted                                 #values as list
+
+def PadArray(inarray,nfixed):                   #pad a list to specified size
+	npt=len(inarray)
+	padding = nfixed-npt
+	outarray=[]
+	outarray.extend(inarray)
+	outarray +=[0]*padding
+	return outarray

@@ -1,13 +1,9 @@
-from mantidsimple import *
-
-try: # mantidplot can only be imported within mantidplot
-    from mantidplot import * # we want to be able to run from mantid script
-except ImportError:
-    print "Could not import MantidPlot module. Plotting is disabled."
-    pass
-
+from mantid.simpleapi import *
 from IndirectCommon import *
+import mantidplot as mp
+from mantid import config, logger
 import inelastic_indirect_reducer
+import sys, os.path
 
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         Suffix=''):
@@ -17,18 +13,18 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         ( name, ext ) = os.path.splitext(filename)
         try:
             if ( SpecMin == -1 ) and ( SpecMax == -1 ):
-                Load(file, name+Suffix, LoadLogFiles=False)
+                Load(Filename=file, OutputWorkspace=name+Suffix, LoadLogFiles=False)
             else:
-                Load(file, name+Suffix, SpectrumMin=SpecMin, 
+                Load(Filename=file, OutputWorkspace=name+Suffix, SpectrumMin=SpecMin, 
                     SpectrumMax=SpecMax, LoadLogFiles=False)
             workspaces.append(name+Suffix)
         except ValueError, message:
-            print message
+            logger.notice(message)
             sys.exit(message)
     if Sum and ( len(workspaces) > 1 ):
-        MergeRuns(','.join(workspaces), outWS+Suffix)
+        MergeRuns(InputWorkspaces=','.join(workspaces), OutputWorkspace=outWS+Suffix)
         factor = 1.0 / len(workspaces)
-        Scale(outWS+Suffix, outWS+Suffix, factor)
+        Scale(InputWorkspace=outWS+Suffix, OutputWorkspace=outWS+Suffix, Factor=factor)
         for ws in workspaces:
             DeleteWorkspace(ws)
         return [outWS+Suffix]
@@ -38,7 +34,7 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
 def createMappingFile(groupFile, ngroup, nspec, first):
     if ( ngroup == 1 ): return 'All'
     if ( nspec == 1 ): return 'Individual'
-    filename = mtd.getConfigProperty('defaultsave.directory')
+    filename = config['defaultsave.directory']
     filename += groupFile
     handle = open(filename, 'w')
     handle.write(str(ngroup) +  "\n" )
@@ -61,7 +57,7 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
     for file in files:
         reducer.append_data_file(file)
-    parfile = mtd.settings["instrumentDefinition.directory"]
+    parfile = config['instrumentDefinition.directory']
     parfile += instrument +"_"+ analyser +"_"+ reflection +"_Parameters.xml"
     reducer.set_parameter_file(parfile)
     reducer.set_grouping_policy('All')
@@ -70,56 +66,68 @@ def resolution(files, iconOpt, rebinParam, bground,
     iconWS = reducer.get_result_workspaces()[0]
     if Res:
         name = getWSprefix(iconWS) + 'res'
-        FlatBackground(iconWS, '__background', bground[0], bground[1], 
+        FlatBackground(InputWorkspace=iconWS, OutputWorkspace='__background', StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Return Background')
-        Rebin(iconWS, iconWS, rebinParam)
-        RebinToWorkspace('__background', iconWS, '__background')
-        Minus(iconWS, '__background', name)
+        Rebin(InputWorkspace=iconWS, OutputWorkspace=iconWS, Params=rebinParam)
+        RebinToWorkspace(WorkspaceToRebin='__background', WorkspaceToMatch=iconWS, OutputWorkspace='__background')
+        Minus(LHSWorkspace=iconWS, RHSWorkspace='__background', OutputWorkspace=name)
         DeleteWorkspace(iconWS)
         DeleteWorkspace('__background')
-        SaveNexusProcessed(name, name+'.nxs')
+        SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
         if plotOpt:
-            graph = plotSpectrum(name, 0)
+            graph = mp.plotSpectrum(name, 0)
         return name
     else:
         if plotOpt:
-            graph = plotSpectrum(iconWS, 0)
+            graph = mp.plotSpectrum(iconWS, 0)
         return iconWS
 
-def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=False,
+def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
         Plot=False):
+    StartTime('Slice')
+    workdir = config['defaultsave.directory']
     outWSlist = []
     if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
-        mantid.sendLogMessage('>> TOF Range must contain either 2 or 4 \
-                numbers.')
-        sys.exit(1)
+        error = 'ERROR >> TOF Range must contain either 2 or 4 numbers'
+        logger.notice(error)
+        sys.exit(error)
     for file in inputfiles:
+        if Verbose:
+            logger.notice('Reading file :'+file)
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         if spec == [0, 0]:
-            Load(file, root, LoadLogFiles=False)
+            Load(Filename=file, OutputWorkspace=root, LoadLogFiles=False)
         else:
-            Load(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1],
+            Load(Filename=file, OutputWorkspace=root, SpectrumMin=spec[0], SpectrumMax=spec[1],
                 LoadLogFiles=False)
         nhist = mtd[root].getNumberHistograms()
         if calib != '':
-            useCalib(calib, inWS_n=root, outWS_n=root)
+            if Verbose:
+                logger.notice('Using Calibration file :'+calib)
+            useCalib(detectors=root)
         run = mtd[root].getRun().getLogData("run_number").value
-        sfile = root[:3].lower() + run + '_' + suffix + '_slt'
+        sfile = root[:3].lower() + run + '_' + suffix + '_slice'
         if (len(xrange) == 2):
-            Integration(root, sfile, xrange[0], xrange[1], 0, nhist-1)
+            Integration(InputWorkspace=root, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
+                StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
         else:
             FlatBackground(root, sfile, StartX=xrange[2], EndX=xrange[3], 
                     Mode='Mean')
-            Integration(sfile, sfile, xrange[0], xrange[1], 0, nhist-1)
+            Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
+                StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
         if Save:
-            SaveNexusProcessed(sfile, sfile+'.nxs')
+            o_path = os.path.join(workdir, sfile+'.nxs')					# path name for nxs file
+            SaveNexusProcessed(InputWorkspace=sfile, Filename=o_path)
+            if Verbose:
+                logger.notice('Output file :'+o_path)
         outWSlist.append(sfile)
         DeleteWorkspace(root)
     if Plot:
-        graph = plotBin(outWSlist, 0)
+        graph = mp.plotBin(outWSlist, 0)
+    EndTime('Slice')
         
-def useCalib(detectors=''):
+def useCalib(detectors):
     tmp = mtd[detectors]
     shist = tmp.getNumberHistograms()
     tmp = mtd['__calibration']
@@ -127,18 +135,18 @@ def useCalib(detectors=''):
     if chist != shist:
         msg = 'Number of spectra in calibration file does not match number \
                 that exist in the data file.'
-        print msg
+        logger.notice(msg)
         sys.exit(msg)
     else:
-        Divide(detectors,'__calibration',detectors)
+        Divide(LHSWorkspace=detectors, RHSWorkspace='__calibration', OutputWorkspace=detectors)
     return detectors
     
 def getInstrumentDetails(instrument):
     workspace = mtd['__empty_' + instrument]
     if ( workspace == None ):
-        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+        idf_dir = config['instrumentDefinition.directory']
         idf = idf_dir + instrument + '_Definition.xml'
-        LoadEmptyInstrument(idf, '__empty_'+instrument)
+        LoadEmptyInstrument(Filename=idf, OutputWorkspace='__empty_'+instrument)
         workspace = mtd['__empty_'+instrument]
     instrument = workspace.getInstrument()
     ana_list_split = instrument.getStringParameter('analysers')[0].split(',')
@@ -167,13 +175,13 @@ def getInstrumentDetails(instrument):
     return result
 
 def getReflectionDetails(inst, analyser, refl):
-    idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+    idf_dir = config['instrumentDefinition.directory']
     ws = '__empty_' + inst
     if (mtd[ws] == None):
         idf = idf_dir + inst + '_Definition.xml'
-        LoadEmptyInstrument(idf, ws)
+        LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
     ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
-    LoadParameterFile(ws, ipf)
+    LoadParameterFile(Workspace=ws, Filename=ipf)
     inst = mtd[ws].getInstrument()
     result = ''
     try:

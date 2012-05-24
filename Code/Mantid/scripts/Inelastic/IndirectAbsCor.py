@@ -11,17 +11,10 @@ else:
 ##
 
 ## Other imports
-from mantidsimple import *
+from mantid.simpleapi import *
 import mantidplot as mp
-from IndirectCommon import *
-from mantid import config, logger
-import math, os.path
-
-def Array2List(n,Array):
-	List = []
-	for m in range(0,n):
-		List.append(Array[m])
-	return List
+from mantid import config, logger, mtd
+import math, os.path, numpy as np
 
 def WaveRange(inWS, efixed):
     oWS = '__WaveRange'
@@ -44,17 +37,8 @@ def WaveRange(inWS, efixed):
     DeleteWorkspace(oWS)
     return wave
 
-def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose):
-    StartTime('Absorption Correction')
+def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, Save):
     workdir = config['defaultsave.directory']
-    if geom == 'flt':
-        if(math.fabs(avar-90.0) < 10.0):
-            error = 'ERROR ** can angle ' +str(avar)+ ' cannot be 90 +/- 10'
-            logger.notice(error)
-            exit(error)
-        else:
-            if Verbose:
-                logger.notice(' Flat geom: can angle = '+str(avar))
     det = GetWSangles(inputWS)
     ndet = len(det)
     efixed = getEfixed(inputWS)
@@ -66,28 +50,24 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose):
         message = '  sigt = '+str(sigs[0])+' ; siga = '+str(siga[0])+' ; rho = '+str(density[0])
         logger.notice(message)
         if geom == 'cyl':
-            message = ' Cyl geom: inner radius = '+str(size[0])+' ; outer radius = '+str(size[1])
+            message = '  inner radius = '+str(size[0])+' ; outer radius = '+str(size[1])
             logger.notice(message)
         if geom == 'flt':
-            logger.notice(' Flat geom: thickness = '+str(size[0]))
+            logger.notice('  thickness = '+str(size[0]))
         if ncan == 2:
             message = 'Can : sigt = '+str(sigs[1])+' ; siga = '+str(siga[1])+' ; rho = '+str(density[1])
             logger.notice(message)
             if geom == 'cyl':
                 logger.notice(message)
-                message = ' Cyl geom: inner radius = '+str(size[1])+' ; outer radius = '+str(size[2])
+                message = '  inner radius = '+str(size[1])+' ; outer radius = '+str(size[2])
             if geom == 'flt':
-                logger.notice(' Flat geom: thickness = '+str(size[1]))
+                logger.notice('  thickness = '+str(size[1]))
         logger.notice('Elastic lambda : '+str(wavelas))
         message = 'Lambda : '+str(nw)+' values from '+str(waves[0])+' to '+str(waves[nw-1])
         logger.notice(message)
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
-    dataX = []
-    dataE = []
-    for n in range(0,nw):
-        dataX.append(waves[n])
-        dataE.append(0)
+	eZ = np.zeros(nw)                  # set errors to zero
     name = inputWS[:-3] + geom
     assWS = name + '_ass'
     asscWS = name + '_assc'
@@ -96,11 +76,6 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose):
     fname = name +'_Abs'
     wrk = workdir + inputWS[:-4]
     wrk.ljust(120,' ')
-    plot_list = []
-    dataY_a1ws = []
-    dataY_a2ws = []
-    dataY_a3ws = []
-    dataY_a4ws = []
     for n in range(0,ndet):
         if geom == 'flt':
             angles = [avar, det[n]]
@@ -113,40 +88,45 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose):
                 density, sigs, siga, angle, wavelas, waves, n, wrk, 0)
         if kill == 0:
             if Verbose:
-                logger.notice('Detector '+str(n)+' at angle : '+str(det[n])+' successful')
-            dataY_a1ws += list(A1)
-            dataY_a2ws += list(A2)
-            dataY_a3ws += list(A3)
-            dataY_a4ws += list(A4)              
-            plot_list.append(n)
+                logger.notice('Detector '+str(n)+' at angle : '+str(det[n])+' * successful')
+            if n == 0:
+                dataA1 = A1
+                dataA2 = A2
+                dataA3 = A3
+                dataA4 = A4
+                eZero =eZ
+            else:
+                dataA1 = np.append(dataA1,A1)
+                dataA2 = np.append(dataA2,A2)
+                dataA3 = np.append(dataA3,A3)
+                dataA4 = np.append(dataA4,A4)
+                eZero = np.append(eZero,eZ)
         else:
             error = 'Detector '+str(n)+' at angle : '+str(det[n])+' *** failed : Error code '+str(kill)
             exit(error)
-    ## Create the workspaces
-    nspec = len(plot_list)
-    dataX = dataX * nspec
-    dataE = dataE * nspec
+## Create the workspaces
+    dataX = waves * ndet
     qAxis = createQaxis(inputWS)
-    CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataY_a1ws, DataE=dataE,
-        NSpec=nspec, UnitX='Wavelength',
+    CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1, DataE=eZero,
+        NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataY_a2ws, DataE=dataE,
-        NSpec=nspec, UnitX='Wavelength',
+    CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataA2, DataE=eZero,
+        NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataY_a3ws, DataE=dataE,
-        NSpec=nspec, UnitX='Wavelength',
+    CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataA3, DataE=eZero,
+        NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataY_a4ws, DataE=dataE,
-        NSpec=nspec, UnitX='Wavelength',
+    CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataA4, DataE=eZero,
+        NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
     ## Save output
     group = assWS +','+ asscWS +','+ acscWS +','+ accWS
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname)
-    opath = os.path.join(workdir,fname+'.nxs')
-    SaveNexusProcessed(InputWorkspace=fname, Filename=opath)
-    if Verbose:
-        logger.notice('Output file created : '+opath)
-    EndTime('Absorption Correction')
+    if Save:
+        opath = os.path.join(workdir,fname+'.nxs')
+        SaveNexusProcessed(InputWorkspace=fname, Filename=opath)
+        if Verbose:
+            logger.notice('Output file created : '+opath)
     if ncan > 1:
         return [assWS, asscWS, acscWS, accWS]
     else:
@@ -154,15 +134,18 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose):
 
 def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
         plotOpt='None'):
-    verbOp = True
+    Verbose = True
+    Save = True
+    StartTime('CalculateCorrections')
     '''Handles the feeding of input and plotting of output for the F2PY
     absorption correction routine.'''
     workspaces = AbsRun(inputWS, geom, beam, ncan, size, density,
-        sigs, siga, avar, Verbose=verbOp)
+        sigs, siga, avar, Verbose, Save)
+    EndTime('CalculateCorrections')
     if ( plotOpt == 'None' ):
         return
     if ( plotOpt == 'Wavelength' or plotOpt == 'Both' ):
-        w_graph = mp.plotSpectrum(workspaces, 0)
+        graph = mp.plotSpectrum(workspaces, 0)
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
-        a_graph = mp.plotTimeBin(workspaces, 0)
-        a_graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
+        graph = mp.plotTimeBin(workspaces, 0)
+        graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
