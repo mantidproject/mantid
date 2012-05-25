@@ -116,7 +116,6 @@ set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
-	test/BooleanBinaryOperationMDTest.h
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertToDetectorFaceMDTest.h	
@@ -160,6 +159,7 @@ set ( TEST_FILES
 )
 
 set ( GMOCK_TEST_FILES
+	test/BooleanBinaryOperationMDTest.h
 	test/CompositeBuilderTest.h
 	test/CompositeImplicitFunctionTest.h
 	test/NullImplicitFunctionTest.h
