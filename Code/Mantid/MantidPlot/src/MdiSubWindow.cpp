@@ -145,6 +145,30 @@ bool MdiSubWindow::close()
 }
 
 /**
+ * Override the QWidget's move(x,y) method to move the wrapper window instead.
+ */
+void MdiSubWindow::move(int x, int y)
+{
+  QWidget* pw = getWrapperWindow();
+  if (pw)
+  {
+    pw->move( x, y );
+  }
+}
+
+/**
+ * Override the QWidget's move(pos) method to move the wrapper window instead.
+ */
+void MdiSubWindow::move(const QPoint& pos)
+{
+  QWidget* pw = getWrapperWindow();
+  if (pw)
+  {
+    pw->move( pos );
+  }
+}
+
+/**
  * Handle the close event.
  * @param e :: A QCloseEvent event.
  */

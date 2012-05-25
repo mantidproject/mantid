@@ -225,6 +225,8 @@ public slots:
   bool close();
   void hide();
   void show();
+  void move(int x, int y);
+  void move(const QPoint& pos);
 
 signals:
 	//! Emitted when the window was closed
