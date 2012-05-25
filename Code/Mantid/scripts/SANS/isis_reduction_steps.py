@@ -1932,35 +1932,35 @@ class UserFile(ReductionStep):
             @param reducer: the object that contains all the settings
         """     
         values = details.split() 
-        detector = reducer.instrument.getDetector('FRONT')
+        rAnds = reducer.instrument.getDetector('FRONT').rescaleAndShift
         if details.startwith('RESCALE'):
             if 'FIT' in details:
                 if len(values) == 1:
-                    detector.rescaleAndShift.fitRescale = True 
+                    rAnds.fitRescale = True 
                 elif len(values) == 3: 
-                    detector.rescaleAndShift.fitRescale = True
-                    detector.rescaleAndShift.qMin = float(values[1])
-                    detector.rescaleAndShift.qMax = float(values[2])
+                    rAnds.fitRescale = True
+                    rAnds.qMin = float(values[1])
+                    rAnds.qMax = float(values[2])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE/FIT [q1 q2]")
             else:
                 if len(values) == 2:
-                    detector.rescale = float(values[1])
+                    rAnds.scale = float(values[1])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
         elif details.startwith('SHIFT'):
             if 'FIT' in details:
                 if len(values) == 1:
-                    detector.rescaleAndShift.fitShift = True 
+                    rAnds.fitShift = True 
                 elif len(values) == 3: 
-                    detector.rescaleAndShift.fitShift = True
-                    detector.rescaleAndShift.qMin = float(values[1])
-                    detector.rescaleAndShift.qMax = float(values[2])
+                    rAnds.fitShift = True
+                    rAnds.qMin = float(values[1])
+                    rAnds.qMax = float(values[2])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/SHIFT/FIT [q1 q2]")
             else:
                 if len(values) == 2:
-                    detector.shift = float(values[1])
+                    rAnds.shift = float(values[1])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
 
