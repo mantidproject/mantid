@@ -156,7 +156,6 @@ set ( TEST_FILES
 	test/SimulateResolutionTest.h
 	test/TobyFitSimulateTest.h
 	test/TransformMDTest.h
-	test/UnaryOperationMDTest.h
 	test/XorMDTest.h
 )
 
@@ -165,6 +164,7 @@ set ( GMOCK_TEST_FILES
 	test/CompositeImplicitFunctionTest.h
 	test/NullImplicitFunctionTest.h
 	test/BinaryOperationMDTest.h
+	test/UnaryOperationMDTest.h
 )
 
 if(UNITY_BUILD)
