@@ -331,6 +331,14 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
   }
 }
 
+/**
+@return the dimension index corresponding to the current plot X Axis.
+*/
+int MantidQwtIMDWorkspaceData::currentPlotXAxis() const
+{
+  return m_currentPlotAxis;
+}
+
 //-----------------------------------------------------------------------------
 /// @return the label for the X axis
 std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const

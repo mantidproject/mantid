@@ -399,6 +399,17 @@ double LineViewer::getBinWidth()
    
 %End
 
+int getXAxisDimensionIndex() const;
+%Docstring
+int LineViewer::getXAxisDimensionIndex()
+--------------------------------
+    Get the index of the dimension used for the x axis
+   
+    Returns:
+        the index of the dimension used for the x axis (int)
+   
+%End
+
 
 ////*WIKI* ==== Plotting ====
 void setPlotAxis(int choice);

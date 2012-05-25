@@ -48,6 +48,7 @@ public:
 
   std::string getXAxisLabel() const;
   std::string getYAxisLabel() const;
+  int currentPlotXAxis() const;
 
 
   /// Inform the data that it is to be plotted on a log y scale

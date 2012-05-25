@@ -31,6 +31,7 @@ set ( INC_FILES
 	inc/MantidPythonAPI/geometryhelper.h
 	inc/MantidPythonAPI/kernel_exports.h
 	inc/MantidPythonAPI/stl_proxies.h
+	inc/MantidPythonAPI/SharedPtrToPythonMacro.h
 )
 
 # Python files that need copying across

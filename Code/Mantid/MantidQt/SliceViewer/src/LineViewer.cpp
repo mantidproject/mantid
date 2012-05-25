@@ -961,6 +961,18 @@ void LineViewer::showPreview()
   m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
 }
 
+/**
+Gets the dimension index corresponding to the lineviewers preview plot x axis.
+@return the index.
+*/
+int LineViewer::getXAxisDimensionIndex() const
+{
+  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+      m_start, m_end, m_lineOptions->getNormalization());
+  curveData.setPreviewMode(true);
+  curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
+  return curveData.currentPlotXAxis();
+}
 
 //-----------------------------------------------------------------------------
 /** Calculate and show the full (integrated) line, using the latest

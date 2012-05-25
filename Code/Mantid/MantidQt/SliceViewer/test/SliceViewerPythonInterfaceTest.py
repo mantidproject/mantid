@@ -365,6 +365,56 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Length of 5, bin width of 0.025 = 200 bins
         self.assertEqual(liner.getNumBins(), 200)
         self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
+ 
+    #Helper method to find the name of the plot's x axis.
+    def _getPlotXAxisName(self, lv, ws):
+        index = lv.getXAxisDimensionIndex()
+        dim = ws.getDimension(index)
+        return dim.getName()
+ 
+    def test_autoAxisAssignmentWhenNoIntegration(self):
+        CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
+        FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
+        #Note that all axis have 10 bins below.
+        SliceMD(InputWorkspace='original',AlignedDim0='A,0,10,10',AlignedDim1='B,0,10,10',AlignedDim2='C,0,10,10',OutputWorkspace='binned_ws')
+        binned_ws = mtd['binned_ws']
+        
+        sv = self.sv
+        sv.setWorkspace('binned_ws')
+        sv.setXYDim("A","B")
+        
+        #should toggle to 'A' axis as that is now the longest
+        lv = self.svw.getLiner()
+        lv.setStartXY(0, 0)
+        lv.setEndXY(10,5)
+        self.assertEquals("A", self._getPlotXAxisName(lv, binned_ws))
+        
+        #should toggle to 'B' axis as that is now the longest
+        lv.setStartXY(0, 0)
+        lv.setEndXY(5,10)
+        self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
+
+        
+    def test_autoAxisAssignmentWhenAnAxisIsIntegrated(self):
+        CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
+        FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
+        #Note that the 'A' axis is now integrated (see call below)
+        SliceMD(InputWorkspace='original',AlignedDim0='A,0,10,1',AlignedDim1='B,0,10,10',AlignedDim2='C,0,10,10',OutputWorkspace='binned_ws')
+        binned_ws = mtd['binned_ws']
+        
+        sv = self.sv
+        sv.setWorkspace('binned_ws')
+        sv.setXYDim("A","B")
+        #should toggle to 'B' axis as the 'A' axis is integrated, even though 'A' is the longest.
+        lv = self.svw.getLiner()
+        lv.setStartXY(0, 0)
+        lv.setEndXY(10,5)
+        self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
+        
+        #should toggle to 'B' axis as that is now the longest and also because 'A' is integrated.
+        lv.setStartXY(0, 0)
+        lv.setEndXY(5,10)
+        self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
         
     #==========================================================================
     #======================= Dynamic Rebinning ================================
