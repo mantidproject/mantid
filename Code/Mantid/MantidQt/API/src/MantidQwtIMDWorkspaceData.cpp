@@ -312,7 +312,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
         if (fabs(diff[d]) > largest || ( originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated() ) )
         {
           //Skip over any integrated dimensions
-          if( originalWS && originalWS->getDimension(d)->getIsIntegrated() )
+          if( originalWS && !originalWS->getDimension(d)->getIsIntegrated() )
           {
             largest = fabs(diff[d]);
             m_currentPlotAxis = int(d);
