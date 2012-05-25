@@ -246,7 +246,6 @@ set ( TEST_FILES
 	test/IEventListTest.h
 	test/IFunction1DTest.h
 	test/IFunctionMDTest.h
-	test/ILiveListenerTest.h
 	test/IMDWorkspaceTest.h
 	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
@@ -278,6 +277,7 @@ set ( TEST_FILES
 )
 
 set ( GMOCK_TEST_FILES
+	test/ILiveListenerTest.h
         test/ImplicitFunctionFactoryTest.h
         test/ImplicitFunctionParameterParserFactoryTest.h
 	test/MatrixWorkspaceTest.h
