@@ -1345,9 +1345,9 @@ int MantidMatrix::precision()
 
 void MantidMatrix::setMatrixProperties()
 {
-  MantidMatrixDialog* dlg = new MantidMatrixDialog(m_appWindow);
-  dlg->setMatrix(this);
-  dlg->exec();
+  MantidMatrixDialog dlg(m_appWindow);
+  dlg.setMatrix(this);
+  dlg.exec();
 }
 
 void MantidMatrix::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
