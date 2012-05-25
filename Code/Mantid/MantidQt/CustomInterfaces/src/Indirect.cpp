@@ -107,7 +107,9 @@ void Indirect::initLayout()
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
   m_valPosDbl = new QDoubleValidator(this);
-  m_valPosDbl->setBottom(0.0);
+  // Tolerance chosen arbitrarily. Avoids dividing by zero elsewhere.
+  const double tolerance = 0.00001;
+  m_valPosDbl->setBottom(tolerance);
 
   // apply validators
   m_uiForm.leNoGroups->setValidator(m_valInt);
