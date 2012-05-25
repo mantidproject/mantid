@@ -250,7 +250,6 @@ set ( TEST_FILES
 	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
-	test/LiveListenerFactoryTest.h
 	test/MDGeometryTest.h
 	test/MatrixWorkspaceMDIteratorTest.h
 	test/MemoryManagerTest.h
@@ -280,6 +279,7 @@ set ( GMOCK_TEST_FILES
 	test/ILiveListenerTest.h
         test/ImplicitFunctionFactoryTest.h
         test/ImplicitFunctionParameterParserFactoryTest.h
+	test/LiveListenerFactoryTest.h
 	test/MatrixWorkspaceTest.h
 )
 
