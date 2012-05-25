@@ -8,8 +8,8 @@ import platform, math, os.path, numpy as np
 
 if ( is_32bit_win() ):
     import muscat_win32 as muscat
-elif ( is_64bit_rhel_6_2() ):
-    import muscat_lnx64 as muscat
+#elif ( is_64bit_rhel_6_2() ):
+#    import muscat_lnx64 as muscat
 else:
     sys.exit('F2Py Absorption Corrections programs NOT available on your operatingenvironment')
 

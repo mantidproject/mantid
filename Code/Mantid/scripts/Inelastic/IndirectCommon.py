@@ -22,7 +22,7 @@ def is_64bit_rhel_6_2():
 def inF2PyCompatibleEnv():
     '''Returns true if we are in an environment where our Fortran2Python 
     files are usable, otherwise returns false.'''
-    return is_32bit_win() or is_64bit_rhel_6_2()
+    return is_32bit_win()# or is_64bit_rhel_6_2()
 
 def runF2PyCheck():
     '''Raises exception if not in F2Py compatible env.'''
