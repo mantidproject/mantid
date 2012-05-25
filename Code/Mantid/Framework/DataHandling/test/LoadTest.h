@@ -519,7 +519,7 @@ public:
 
     WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(wsg);
-    TS_ASSERT_EQUALS(wsg->getNames().size(), 2);
+    TS_ASSERT_EQUALS(wsg->getNames().size(), 3);
 
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
