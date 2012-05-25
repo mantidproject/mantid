@@ -737,17 +737,23 @@ def applySF(InputWorkspace,
         s1h = getS1h(mtd[InputWorkspace])
         s2h = getS2h(mtd[InputWorkspace])
         
-        s1h_value = s1h[0]
-        s2h_value = s2h[0]
+        s1h_value = abs(s1h[0])
+        s2h_value = abs(s2h[0])
      
         #retrieve s1w and s2w values
         s1w = getS1w(mtd[InputWorkspace])
         s2w = getS2w(mtd[InputWorkspace])
         
-        s1w_value = s1w[0]
-        s2w_value = s2w[0]
+        s1w_value = abs(s1w[0])
+        s2w_value = abs(s2w[0])
         
 #        print sfFactorTable
+
+        print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
+        print '--> Data S1H: {0:2f}'.format(s1h_value)
+        print '--> Data S2H: {0:2f}'.format(s2h_value)
+        print '--> Data S1W: {0:2f}'.format(s1w_value)
+        print '--> Data S2W: {0:2f}'.format(s2w_value)
 
         for i in range(nbr_row):
             
