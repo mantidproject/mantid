@@ -117,14 +117,12 @@ set ( TEST_FILES
 	test/LoadMDTest.h
 	test/LoadSQWTest.h
 	test/MDBinTest.h
-	test/MDBoxIteratorTest.h
 	test/MDBoxTest.h
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
 	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h
-	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
@@ -140,6 +138,8 @@ set ( TEST_FILES
 
 set ( GMOCK_TEST_FILES
 	test/BinMDTest.h
+	test/MDBoxIteratorTest.h
+	test/MDGridBoxTest.h
 )
 
 if(UNITY_BUILD)
