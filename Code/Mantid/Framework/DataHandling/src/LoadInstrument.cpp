@@ -114,6 +114,8 @@ namespace Mantid
       // Retrieve the filename from the properties
       if ( m_filename.empty() )
       {
+        g_log.debug() << "=====> A1" << std::endl;
+        
         // look to see if an Instrument name provided in which case create
         // IDF filename on the fly
         if ( m_instName.empty() )
@@ -125,6 +127,8 @@ namespace Mantid
         {
           const std::string date = m_workspace->getWorkspaceStartDate();
           m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
+
+          g_log.debug() << "=====> A2 - Filename is " << m_filename << std::endl;
         }
       }
 
@@ -135,10 +139,14 @@ namespace Mantid
         std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
         // Strip off "_Definition.xml"
         m_instName = instrumentFile.substr(0,instrumentFile.find("_Def"));
+
+        g_log.debug() << "=====> A3 - Instrument is " << m_instName << std::endl;
       }
 
       // Load the XML text into a string
       std::string m_xmlText = Strings::loadFile(m_filename);
+
+      g_log.debug() << "\n\n\n\n" << "=====> B - XML:\n\n" << m_xmlText << "\n\n\n\n";
 
       // Our new instrument
       Instrument_sptr m_instrument;

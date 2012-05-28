@@ -84,6 +84,8 @@ namespace Geometry
    */
   void InstrumentDefinitionParser::initialize(const std::string & filename, const std::string & instName, const std::string & xmlText)
   {
+    g_log.debug() << "====> InstrumentDefinitionParser::initialize started" << std::endl;
+    
     // Handle the parameters
     m_filename = filename;
     m_instName = instName;
@@ -93,7 +95,9 @@ namespace Geometry
     DOMParser pParser;
     try
     {
+      g_log.debug() << "====> pre pDoc = pParser.parseString(m_xmlText);" << std::endl;
       pDoc = pParser.parseString(m_xmlText);
+      g_log.debug() << "====> post pDoc = pParser.parseString(m_xmlText);" << std::endl;
     }
     catch(Poco::Exception& exc)
     {
@@ -110,6 +114,8 @@ namespace Geometry
       g_log.error("XML file: " + m_filename + "contains no root element.");
       throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
     }
+
+    g_log.debug() << "====> InstrumentDefinitionParser::initialize finished" << std::endl;
   }
 
 
