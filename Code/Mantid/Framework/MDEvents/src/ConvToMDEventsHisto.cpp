@@ -13,21 +13,16 @@ inline bool isNaN(T val){
     return (val!=buf);
 }
 
-size_t  ConvToMDEventsHisto::initialize(Mantid::API::MatrixWorkspace_sptr inWS, ConvToMDPreprocDet &detLoc,
+size_t  ConvToMDEventsHisto::initialize(Mantid::API::MatrixWorkspace_sptr inWS,
                                         const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
                         
-   size_t numSpec=ConvToMDEventsBase::initialize(inWS,detLoc,WSD,inWSWrapper);
+   size_t numSpec=ConvToMDEventsBase::initialize(inWS,WSD,inWSWrapper);
 
    DataObjects::Workspace2D_sptr pWS2D  = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(inWS);
    if(!pWS2D.get()){
            throw(std::logic_error("ConvToMDEventsHisto should work with defined histrohram workspace"));
    }
-
-   pQConverter->initialize(*this);
-  // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-   UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
-
 
    return numSpec;
 }

@@ -56,7 +56,7 @@ namespace MDEvents
 class ConvToMDEventsEvents: public ConvToMDEventsBase
 {
  public:
-    size_t  initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,
+    size_t  initialize(Mantid::API::MatrixWorkspace_sptr pWS2D,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     void runConversion(API::Progress *pProg);
 
