@@ -10,16 +10,16 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
-#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 // coordinate transformation
-#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDEvents/MDTransfInterface.h"
 // units conversion
-#include "MantidMDAlgorithms/UnitConversionHelper.h"
+#include "MantidMDEvents/UnitConversionHelper.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /** The templated class to transform matrix workspace into MDEvent workspace when matrix workspace is ragged
    *

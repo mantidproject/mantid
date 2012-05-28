@@ -1,13 +1,13 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 #define  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 //
-#include "MantidMDAlgorithms/MDTransfInterface.h"
-#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
-#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/MDTransfFactory.h"
 //
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 
@@ -47,12 +47,12 @@ class DLLExport MDTransfModQ: public MDTransfInterface
 public:
    /**  returns the units, the transformation expects for workspace to be expressed in. */
     const std::string usedUnitID()const;
-    /// the name, this subalgorithm is known to users 
+    /// the name, this subalgorithm is known to users (will appear in selection list)
     const std::string transfID()const{return "ModQ"; }
     // energy conversion modes supported by this class
-    std::vector<std::string> getEmodes()const;
+    std::vector<std::string> getEmodes()const{dEModes.getEmodes();}
     /// string presentation of emode
-    std::string getEmode(ConvertToMD::EModes Mode)const;
+    std::string getEmode(ConvertToMD::EModes Mode)const{dEModes.getEmode(Mode);}
     //void setEmode(const std::string &Emode);
 
 
@@ -86,7 +86,8 @@ protected:
     double Ei;
     // the wavevector of incident neutrons
     double ki;
-    // energy conversion mode
+    // class which describes energy transfer modes supported by this class
+    MDTransfDEHelper dEModes;
 private:
     // vector which provides string representation of supporting emodes;
     std::vector<std::string> Emodes;

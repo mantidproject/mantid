@@ -1,10 +1,10 @@
-#include "MantidMDAlgorithms/UnitConversionHelper.h"
+#include "MantidMDEvents/UnitConversionHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /*** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
 int is_member(const std::vector<std::string> &group,const std::string &candidate)

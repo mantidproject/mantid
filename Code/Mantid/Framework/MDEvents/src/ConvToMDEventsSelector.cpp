@@ -1,8 +1,8 @@
-#include "MantidMDAlgorithms/ConvToMDEventsSelector.h"
+#include "MantidMDEvents/ConvToMDEventsSelector.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 // workspaces which currently can be converted to md workspaces:
 enum wsType

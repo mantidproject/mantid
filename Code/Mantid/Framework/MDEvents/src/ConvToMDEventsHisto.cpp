@@ -1,9 +1,9 @@
-#include "MantidMDAlgorithms/ConvToMDEventsHisto.h"
+#include "MantidMDEvents/ConvToMDEventsHisto.h"
 
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 /// Template to check if a variable equal to NaN

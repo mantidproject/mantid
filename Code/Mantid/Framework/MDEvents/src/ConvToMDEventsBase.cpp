@@ -1,9 +1,9 @@
-#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
 
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 // logger for conversion  
