@@ -1,4 +1,7 @@
 #include "MantidMDEvents/MDWSDescription.h"
+
+#include "MantidKernel/TimeSeriesProperty.h"
+
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
@@ -7,7 +10,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS, const std::string &QMode,const std::string dEMode)
+void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS, const std::string &QMode,const std::string dEMode,const std::vector<std::string> &dimProperyNames)
 {
 
 
@@ -20,7 +23,40 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
     this->GoniomMatr = pWS->run().getGoniometer().getR();
 
+    // fill additional dimensions values, defined by workspace properties;
+    this->fillAddProperties(pWS,dimProperyNames,AddCoord);
 
+
+}
+/** function extracts the coordinates from additional workspace porperties and places them to proper position within 
+  *  the vector of MD coodinates for the particular workspace.
+  *
+  *  @param dimProperyNames  -- names of properties which should be treated as dimensions
+  *
+  *  @returns AddCoord       -- vector of additional coordinates (derived from WS properties) for current multidimensional event
+ */
+void MDWSDescription::fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord)const
+{
+     size_t nDimPropNames = dimProperyNames.size();
+     if(AddCoord.size()!=nDimPropNames)AddCoord.resize(nDimPropNames);
+
+     for(size_t i=0;i<nDimPropNames;i++){
+         //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
+         Kernel::Property *pProperty = (inWS2D->run().getProperty(dimProperyNames[i]));
+         Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
+         if(run_property){
+                AddCoord[i]=coord_t(run_property->firstValue());
+         }else{
+              // e.g Ei can be a property and dimenson
+              Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
+              if(!proc_property){
+                std::string ERR = " Can not interpret property, used as dimension.\n Property: "+dimProperyNames[i]+
+                                  " is neither a time series (run) property nor a property with value<double>";
+                 throw(std::invalid_argument(ERR));
+              }
+              AddCoord[i]  = coord_t(*(proc_property));
+         }
+     }
 }
 
 /** the function builds MD event WS description from existing workspace. 

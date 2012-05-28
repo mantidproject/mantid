@@ -81,6 +81,9 @@ protected:
     int nMatrixDim;
     // the variable which describes current conversion mode:
     ConvertToMD::EModes emode;
+    /** the vector of the additional coordinates which define additional MD dimensions. 
+        For implemented ModQ case, these dimensions do not depend on matrix coordinates and are determined by WS properties */
+    std::vector<coord_t>  addDimCoordinates;
     //************* These two variables are relevant to inelastic modes only and will be used in inelastic cases:
     // the energy of the incident neutrons
     double Ei;

@@ -17,10 +17,7 @@ size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D
            throw(std::logic_error(" ConvertToMDEvensEventWS should work with defined event workspace"));
     }
 
-    pQConverter->initialize(*this);
-   // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-    UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
-
+  
 
     return numSpec;
 }
