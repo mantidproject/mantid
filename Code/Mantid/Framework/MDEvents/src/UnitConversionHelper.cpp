@@ -25,7 +25,7 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
 
     @returns kind of the initiated conversion, e.g. no conversion (unitsFrom == UnitsTo, fastConversion, convFromTOF or convViaTOF
 
-    Also sets up the 
+    if necessary, also sets up the proper units convertor pointers which do the actual conversion. 
 */
 ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo)
 {
@@ -154,14 +154,14 @@ void UnitsConversionHelper::convertUnits(const std::vector<double> &convertFrom,
             return;
         }
     case(ConvertToMD::ConvertFromTOF):
-        {
+        {  // unused delta
             double delta;
             pTargetUnit->fromTOF(convertTo, unused, L1,L2,twoTheta,emode,efix,delta);
             return;
         }
     case(ConvertToMD::ConvertByTOF):
         {
-            double delta;
+             double delta; // unused delta
              pSourceWSUnit->toTOF(convertTo, unused, L1,L2,twoTheta,emode,efix,delta);
              pTargetUnit->fromTOF(convertTo, unused, L1,L2,twoTheta,emode,efix,delta);
              return;

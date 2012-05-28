@@ -6,11 +6,27 @@ namespace Mantid
 {
 namespace MDEvents
 {
+
+void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS, const std::string &QMode,const std::string dEMode)
+{
+
+
+    // try to get the WS oriented lattice
+    if(pWS->sample().hasOrientedLattice()){        
+        this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(pWS->sample().getOrientedLattice()));      
+    }else{
+        this->pLatt.reset();
+    }
+    //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
+    this->GoniomMatr = pWS->run().getGoniometer().getR();
+
+
+}
+
 /** the function builds MD event WS description from existing workspace. 
   * Primary used to obtain existing ws parameters 
 */
-void 
-MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS)
+void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 {
     this->nDims = pWS->getNumDims();
     // prepare all arrays:
