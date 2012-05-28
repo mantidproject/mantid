@@ -43,7 +43,7 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-// forvard declaration for a class, which would provide all necessary parameters for the transformation
+// forvard declaration for a class, which would provide all necessary parameters for the transformation; should be refactored;
 class ConvToMDEventsBase;
 
 namespace ConvertToMD
@@ -57,7 +57,8 @@ namespace ConvertToMD
           Elastic = 0,  //< int emode = 0; Elastic analysis
           Direct  = 1,  //< emode=1; Direct inelastic analysis mode
           Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
-          No_DE         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion)
+          No_DE         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion), 
+                       // it is also the counter for the number of availible modes, used to initiate the mode names
     };
 }
 
@@ -123,6 +124,14 @@ public:
       * all variables necessary for the conversion */
     virtual void initialize(const ConvToMDEventsBase &)=0;
   
+    /** MD transformation can often be used together with energy analysis mode; This function should be overloaded 
+       if the transformation indeed can do the energy conversion */
+    virtual std::vector<std::string> getEmodes()const{return std::vector<std::string>(1,std::string("No dE"));}
+    virtual std::string getEmode(ConvertToMD::EModes Mode)const{UNUSED_ARG(Mode); return std::string("No dE");}
+
+    /** return the number of dimensions, calculated by the transformation from the workspace. This numebr is usually varies from 1 to 4*/
+    virtual int getNMatrixDimensions()const=0;
+
     virtual ~MDTransfInterface(){};
 }; 
 
