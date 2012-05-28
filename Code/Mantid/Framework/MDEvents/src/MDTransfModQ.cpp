@@ -26,16 +26,31 @@ bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)c
     }
 }
 
-
+/** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 
+ *  it fills in nd - (1 or 2 -- depending on emode) values into Coord vector;
+ *
+ *@param Coord -- input-output vector of MD-coordinates
+ *@param nd    -- number of current dimensions
+ *
+ *@returns     -- Coord vector with nd-(1 or 2, depending on emode) values of MD coordinates
+ */
 bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
 {      
-        // in Elastic case, 1  coordinate (|Q|) came from workspace
-        // in inelastic 2 coordinates (|Q| dE) came from workspace. All other are defined by properties. 
-        // nMatrixDim is either 1 in elastic case or 2 in inelastic
-        if(!pHost->fillAddProperties(Coord,nd,nMatrixDim))return false;
-        return true;
+   // in Elastic case, 1  coordinate (|Q|) came from workspace
+   // in inelastic 2 coordinates (|Q| dE) came from workspace. All other are defined by properties. 
+   // nMatrixDim is either 1 in elastic case or 2 in inelastic
+    size_t ic(0);
+    for(size_t i=nMatrixDim;i<nd;i++){
+        if(addDimCoordinates[ic]<dim_min[i] || addDimCoordinates[ic]>=dim_max[i])return false;
+        Coord[i]= addDimCoordinates[ic];
+        ic++;
+    }
+    return true;
 }
-//
+/** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
+ *@param i -- index of the detector, which corresponds to the spectra to process. 
+ * 
+*/
 bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
 {
         UNUSED_ARG(Coord); 
@@ -45,14 +60,16 @@ bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
         return true;
 }
 /** function calculates workspace-dependent coordinates in inelastic case. 
-  * Namely, it calculates module of Momentum transfer and Energy 
-  * transfer and put them into specified positions in the Coord vector
+  * Namely, it calculates module of Momentum transfer and the Energy 
+  * transfer and put them into initial positions (0 and 1) in the Coord vector
   *
   *@Param     E_tr   input energy transfer
   *@returns   &Coord  vector of MD coordinates with filled in momentum and energy transfer 
 
-  *&returns   true if all momentum and energy are within the limits requested by the algorithm and false otherwise. 
-*/    
+  *@returns   true if all momentum and energy are within the limits requested by the algorithm and false otherwise. 
+  *
+  * it also uses preprocessed detectors positions, which are calculated by PreprocessDetectors algorithm and set up by 
+  * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */    
 bool MDTransfModQ::calcMatrixCoordInelastic(const double& E_tr,std::vector<coord_t> &Coord)const
 {
         if(E_tr<dim_min[1]||E_tr>=dim_max[1])return false;
@@ -81,14 +98,16 @@ bool MDTransfModQ::calcMatrixCoordInelastic(const double& E_tr,std::vector<coord
 
 }
 /** function calculates workspace-dependent coordinates in elastic case. 
-  * Namely it calculates module of Momentum transfer 
-  * and put it into requested position of the Coord vector
+  * Namely, it calculates module of Momentum transfer
+  * put it into specified (0) position in the Coord vector
   *
-  *@Param     E_tr   input energy transfer
+  *@Param     k0   module of input momentum
   *@returns   &Coord  vector of MD coordinates with filled in momentum and energy transfer 
 
-  *&returns   true if all momentum and energy are within the limits requested by the algorithm and false otherwise. 
-*/    
+  *@returns   true if momentum is within the limits requested by the algorithm and false otherwise. 
+  *
+  * it uses preprocessed detectors positions, which are calculated by PreprocessDetectors algorithm and set up by 
+  * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */    
 bool MDTransfModQ::calcMatrixCoordElastic(const double& k0,std::vector<coord_t> &Coord)const
 {
    
@@ -107,9 +126,7 @@ bool MDTransfModQ::calcMatrixCoordElastic(const double& k0,std::vector<coord_t> 
 
 }
 
-/** function initalizes all variables necessary for converting workspace variables into 
-  *
-  */
+/** function initalizes all variables necessary for converting workspace variables into MD variables in ModQ (elastic/inelastic) cases  */
 void MDTransfModQ::initialize(const ConvToMDEventsBase &Conv)
 { 
 //********** Generic part of initialization, common for elastic and inelastic modes:
@@ -120,7 +137,8 @@ void MDTransfModQ::initialize(const ConvToMDEventsBase &Conv)
         // get pointer to the positions of the detectors
         std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
         pDet = &DetDir[0];     //
-        //
+
+        // get min and max values defined by the algorithm. 
         pHost->getMinMax(dim_min,dim_max);
          // dim_min/max here are momentums and they are verified on momentum squared base         
         if(dim_min[0]<0)dim_min[0]=0;
@@ -156,7 +174,7 @@ void MDTransfModQ::initialize(const ConvToMDEventsBase &Conv)
 }
 
 
-    // constructor;
+/// constructor;
 MDTransfModQ::MDTransfModQ():
 pDet(NULL),
 pHost(NULL)

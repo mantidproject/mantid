@@ -2,8 +2,6 @@
 #define H_ICONVERT_TO_MDEVENTS_METHODS
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
@@ -55,31 +53,16 @@ namespace MDEvents
      ConvToMDEventsBase();
  
     ///method which initates all main class variables 
-    virtual size_t initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
+    virtual size_t initialize(Mantid::API::MatrixWorkspace_sptr pWS2D,const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
     virtual ~ConvToMDEventsBase(){};
-/**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
- 
-    double               getEi()const{return TWS.Ei;}
-    int                  getEMode()const{return TWS.emode;}
-    ConvToMDPreprocDet   const * pPrepDetectors()const{return pDetLoc;}
-    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
 
 //   Kernel::Unit_sptr    getAxisUnits()const;
 //   API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
 //<------------------
-
-   /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
-    bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)const;
-    //
-    void getMinMax(std::vector<double> &min,std::vector<double> &max)const
-    {
-        min.assign(TWS.dimMin.begin(),TWS.dimMin.end());
-        max.assign(TWS.dimMax.begin(),TWS.dimMax.end());
-    }
-    ConvToMDPreprocDet const* getDetectors(){return pDetLoc;}
+  
   protected:
    // pointer to input matrix workspace;
    API::MatrixWorkspace_const_sptr inWS2D;
@@ -88,9 +71,7 @@ namespace MDEvents
    MDEvents::MDWSDescription TWS;
    // pointer to the class, which keeps target workspace and provides functions adding additional MD events to it. 
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
-   // pointer to the array of detector's directions in reciprocal space
-   ConvToMDPreprocDet const * pDetLoc;
-   // shared pointer to the converter, which convertd WS coordinates to MD coordinates
+    // shared pointer to the converter, which convertd WS coordinates to MD coordinates
    MDTransf_sptr      pQConverter;
    /// number of target ws dimesnions
    size_t n_dims;

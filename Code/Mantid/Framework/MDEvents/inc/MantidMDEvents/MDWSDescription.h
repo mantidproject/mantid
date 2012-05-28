@@ -1,12 +1,15 @@
 #ifndef H_MDEVENT_WS_DESCRIPTION
 #define H_MDEVENT_WS_DESCRIPTION
 
-#include "MantidMDEvents/MDEvent.h"
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+
+#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 
 namespace Mantid
 {
@@ -70,14 +73,18 @@ enum CoordScaling
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
 class DLLExport MDWSDescription
 {
-  public:
-    /// the variable which describes the number of the dimensions, in the target workspace. 
-    /// Calculated from number of input properties and the operations, performed on input workspace;
-    size_t nDims;
+   // pointer to the array of detector's directions in the reciprocal space
+    ConvToMDPreprocDet const * pDetLocations;
     /// conversion mode 0,1,2 (-1 --undef) (see units conversion for its definision/description)
     int emode;
     /// energy of incident neutrons, relevant in inelastic mode
     double Ei; 
+    /// 
+    std::vector<coord_t> AddCoord;
+  public:
+    /// the variable which describes the number of the dimensions, in the target workspace. 
+    /// Calculated from number of input properties and the operations, performed on input workspace;
+    size_t nDims;
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dimMin,dimMax;
     /// the names for the target workspace dimensions and properties of input MD workspace
@@ -105,13 +112,26 @@ class DLLExport MDWSDescription
     Kernel::DblMatrix GoniomMatr;   
     /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
     bool detInfoLost;
-//=======================
+   //=======================
+/**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
+    double               getEi()const{return Ei;}
+    int                  getEMode()const{return emode;}
+    std::vector<double> getTransfMatrix()const{return this->rotMatrix;}
+    //
+    void getMinMax(std::vector<double> &min,std::vector<double> &max)const
+    {
+        min.assign(this->dimMin.begin(),this->dimMin.end());
+        max.assign(this->dimMax.begin(),this->dimMax.end());
+    }
+    ConvToMDPreprocDet const * getDetectors(){return pDetLocations;}
+    ConvToMDPreprocDet const * pPrepDetectors()const{return pDetLocations;}
+
       /// constructor
      MDWSDescription(size_t nDimesnions=0);
      /// method builds MD Event description from existing MD event workspace
      void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
      /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
-     void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode);
+     void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,const std::vector<std::string> &dimProperyNames);
 
      /// compare two descriptions and select the coplimentary result.
      void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspace);
@@ -136,6 +156,8 @@ class DLLExport MDWSDescription
      ///
      std::vector<std::string> QScalingID;
 
+   /** function extracts the coordinates from additional workspace porperties and places them to AddCoord vector for further usage*/
+     void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord)const;
 
 }; 
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/
