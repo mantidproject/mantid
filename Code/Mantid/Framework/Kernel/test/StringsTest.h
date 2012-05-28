@@ -216,6 +216,21 @@ public:
   }
 
 
+  void test_isMember()
+  {
+      std::vector<std::string> group(5,"");
+      group[0]="A";
+      group[1]="A1";
+      group[2]="B0";
+      group[3]="C";
+
+      TS_ASSERT_EQUALS(1,isMember(group,"A1"));
+      TS_ASSERT_EQUALS(-1,isMember(group," "));
+      TS_ASSERT_EQUALS(-1,isMember(group,"nothing"));
+      TS_ASSERT_EQUALS(0,isMember(group,"A"));
+      TS_ASSERT_EQUALS(3,isMember(group,"C"));
+  }
+
 
 };
 

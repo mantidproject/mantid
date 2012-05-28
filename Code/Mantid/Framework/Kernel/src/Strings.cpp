@@ -962,6 +962,25 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
     path_components.resize(n_folders);
     return n_folders;
 }
+/** function checks  if the candidate is the member of the group 
+  * @param group     -- vector of string to check
+  * @param candidate -- the string which has to be checked against the group
+
+  * @returns         -- number of the candidate in the input vector of strings if the candidate belongs to the group 
+                        or -1 if it does not. 
+                        Returns the number of the first maching entry in the group if there are duplicated entries in the group
+*/
+int isMember(const std::vector<std::string> &group, const std::string &candidate)
+{
+    int num(-1);
+    for(size_t i=0;i<group.size();i++){
+        if(candidate.compare(group[i])==0){
+            num = int(i);
+            return num;
+        }
+    }
+    return num;
+}
 
 /// \cond TEMPLATE
 

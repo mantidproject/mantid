@@ -151,6 +151,9 @@ MANTID_KERNEL_DLL size_t split_path(const std::string &path, std::vector<std::st
 /// Loads the entire contents of a text file into a string
 MANTID_KERNEL_DLL std::string loadFile(const std::string & filename);
 
+/// checks if the candidate is the member of the group
+MANTID_KERNEL_DLL int isMember(const std::vector<std::string> &group, const std::string &candidate);
+
 }   // NAMESPACE Strings
 
 }   // NAMESPACE Kernel
