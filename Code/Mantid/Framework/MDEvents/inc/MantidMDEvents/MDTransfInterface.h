@@ -2,7 +2,7 @@
 #define H_IMD_TRANSFORMATION
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
-#include "ManditMDEvents/MDTransfDEHelper.h"
+#include "MantidMDEvents/MDTransfDEHelper.h"
 
 namespace Mantid
 {
