@@ -1,13 +1,13 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 #define  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 //
-#include "MantidMDAlgorithms/MDTransfInterface.h"
-#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
-#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/MDTransfFactory.h"
 //
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 

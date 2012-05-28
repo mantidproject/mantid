@@ -41,7 +41,7 @@
 #include "MantidAPI/Progress.h"
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /** Class to calculate/keep informaion about detector's positions, this information is used for doing 
   * various transformation of signals into reciprocal place and stored by this class for efficiency and 
