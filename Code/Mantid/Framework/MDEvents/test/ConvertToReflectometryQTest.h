@@ -31,7 +31,7 @@ private:
   boost::shared_ptr<ConvertToReflectometryQ> make_standard_algorithm()
   {
     MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    in_ws->getAxis(0)->setUnit("TOF");
+    in_ws->getAxis(0)->setUnit("Wavelength");
 
     Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(in_ws->getAxis(1)->length());
     in_ws->replaceAxis(1,newAxis);
@@ -76,6 +76,7 @@ public:
   void test_theta_initial_negative()
   {
     auto alg = make_standard_algorithm();
+    alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", -0.0001);
     TSM_ASSERT_THROWS("Incident theta is negative, should throw", alg->execute(), std::logic_error);
   }
@@ -83,6 +84,7 @@ public:
   void test_theta_initial_too_large()
   {
     auto alg = make_standard_algorithm();
+    alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", 90.001);
     TSM_ASSERT_THROWS("Incident theta is too large, should throw", alg->execute(), std::logic_error);
   }
