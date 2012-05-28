@@ -44,6 +44,7 @@ set ( SRC_FILES
 	src/ConvToMDEventsEvents.cpp
 	src/ConvToMDEventsHisto.cpp
 	src/ConvToMDPreprocDet.cpp
+	src/MDTransfDEHelper.cpp
 	src/MDTransfFactory.cpp	
 #	src/MDTransfQ3D.cpp
 #	src/MDTransfNoQ.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/ConvToMDEventsHisto.h	
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
     inc/MantidMDEvents/MDTransfFactory.h
+	inc/MantidMDEvents/MDTransfDEHelper.h
 	inc/MantidMDEvents/MDTransfInterface.h
 #	inc/MantidMDEvents/MDTransfQ3D.h
 #	inc/MantidMDEvents/MDTransfNoQ.h

@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
@@ -7,7 +7,7 @@ using namespace Mantid::Geometry;
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /// function sets appropriate energy conversion mode to work with detectors and unit conversion
 void ConvToMDPreprocDet::setEmode(int mode)

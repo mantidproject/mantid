@@ -6,11 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /**  The class helps to organize unit conversion when running transformation from a matrix(event) workspace into 
      MD event workspace

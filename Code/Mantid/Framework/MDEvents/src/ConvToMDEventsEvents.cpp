@@ -1,9 +1,9 @@
-#include "MantidMDAlgorithms/ConvToMDEventsEvents.h"
+#include "MantidMDEvents/ConvToMDEventsEvents.h"
 //
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,

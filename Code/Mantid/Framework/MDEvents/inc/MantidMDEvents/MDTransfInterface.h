@@ -2,10 +2,11 @@
 #define H_IMD_TRANSFORMATION
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
+#include "ManditMDEvents/MDTransfDEHelper.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /** Interface to set of sub-classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
   * data into MD events.
@@ -45,22 +46,6 @@ namespace MDAlgorithms
 */
 // forvard declaration for a class, which would provide all necessary parameters for the transformation; should be refactored;
 class ConvToMDEventsBase;
-
-namespace ConvertToMD
-{
-    /* enum describes known eneergy conversion/analysis modes
-    *  It is important to assign enums proper numbers, as direct correspondence between enums and their emodes 
-    *  used by the external units conversion algorithms within the Mantid, so the agreement should be the stame     
-    */
-    enum EModes
-    {
-          Elastic = 0,  //< int emode = 0; Elastic analysis
-          Direct  = 1,  //< emode=1; Direct inelastic analysis mode
-          Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
-          No_DE         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion), 
-                       // it is also the counter for the number of availible modes, used to initiate the mode names
-    };
-}
 
 
 class MDTransfInterface
