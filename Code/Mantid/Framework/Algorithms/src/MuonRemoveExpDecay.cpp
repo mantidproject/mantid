@@ -201,6 +201,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
     fit->setPropertyValue("Function", function);
     fit->setProperty("InputWorkspace", ws);
     fit->setProperty("WorkspaceIndex", wsIndex);
+    fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
     fit->setProperty("Ties", "A1=0.0");
     fit->execute();
 
