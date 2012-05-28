@@ -9,9 +9,9 @@ set ( SRC_FILES
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
 	src/ConvertToMDEventsParams.cpp
-	src/ConvertToMDEventsSubalgFactory.cpp
-	src/IConvertToMDEventsWS.cpp
-	src/ConvToMDPreprocDetectors.cpp	
+#	src/ConvertToMDEventsSubalgFactory.cpp
+#	src/IConvertToMDEventsWS.cpp
+#	src/ConvToMDPreprocDetectors.cpp	
   src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -43,17 +43,7 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
-#	
-	src/ConvToMDEventsBase.cpp
-	src/ConvToMDEventsEvents.cpp
-	src/ConvToMDEventsHisto.cpp
-	src/ConvToMDPreprocDet.cpp
-	src/MDTransfFactory.cpp	
-#	src/MDTransfQ3D.cpp
-#	src/MDTransfNoQ.cpp
-	src/MDTransfModQ.cpp
-	src/UnitConversionHelper.cpp		
-	
+
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -68,18 +58,18 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+#   inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
-	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
-	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
+#	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+#	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h
   inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -112,18 +102,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/XorMD.h
-# 
-	inc/MantidMDAlgorithms/ConvToMDEventsBase.h	
-	inc/MantidMDAlgorithms/ConvToMDEventsEvents.h
-	inc/MantidMDAlgorithms/ConvToMDEventsHisto.h	
-	inc/MantidMDAlgorithms/ConvToMDPreprocDet.h
-    inc/MantidMDAlgorithms/MDTransfFactory.h
-	inc/MantidMDAlgorithms/MDTransfInterface.h
-#	inc/MantidMDAlgorithms/MDTransfQ3D.h
-#	inc/MantidMDAlgorithms/MDTransfNoQ.h
-	inc/MantidMDAlgorithms/MDTransfModQ.h
-	inc/MantidMDAlgorithms/UnitConversionHelper.h	
-
 )
 
 # Test files. Other source files required.
@@ -135,14 +113,14 @@ set ( TEST_FILES
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertToDetectorFaceMDTest.h	
-	test/ConvertEventsToMDEventsTest.h
-	test/ConvertToMDEventsCoordTransfTest.h
-	test/ConvertToMDEventsWSTest.h
-	test/ConvertToMDEventsParamsTest.h
-  test/ConvertToMDEventsSubalgFactoryTest.h
-	test/ConvertToMDEventsTest.h
-	test/ConvertToMDEventsUnitsConvTest.h
-	test/ConvertToQ3DdETest.h
+#	test/ConvertEventsToMDEventsTest.h
+#	test/ConvertToMDEventsCoordTransfTest.h
+#	test/ConvertToMDEventsWSTest.h
+#	test/ConvertToMDEventsParamsTest.h
+#    test/ConvertToMDEventsSubalgFactoryTest.h
+#	test/ConvertToMDEventsTest.h
+#	test/ConvertToMDEventsUnitsConvTest.h
+#	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTestPerformance.h 	
   test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h

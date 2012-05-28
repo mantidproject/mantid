@@ -39,6 +39,17 @@ set ( SRC_FILES
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
+#	
+	src/ConvToMDEventsBase.cpp
+	src/ConvToMDEventsEvents.cpp
+	src/ConvToMDEventsHisto.cpp
+	src/ConvToMDPreprocDet.cpp
+	src/MDTransfFactory.cpp	
+#	src/MDTransfQ3D.cpp
+#	src/MDTransfNoQ.cpp
+	src/MDTransfModQ.cpp
+	src/UnitConversionHelper.cpp	
+	src/ConvToMDEventsSelector.cpp
 
 )
 
@@ -105,6 +116,25 @@ set ( INC_FILES
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
+<<<<<<< HEAD
+=======
+#	
+	inc/MantidMDEvents/MDEventWSWrapper.h
+	inc/MantidMDEvents/MDWSDescription.h
+	inc/MantidMDEvents/MDWSTransfDescr.h	
+# 
+	inc/MantidMDEvents/ConvToMDEventsBase.h	
+	inc/MantidMDEvents/ConvToMDEventsEvents.h
+	inc/MantidMDEvents/ConvToMDEventsHisto.h	
+	inc/MantidMDEvents/ConvToMDPreprocDet.h
+    inc/MantidMDEvents/MDTransfFactory.h
+	inc/MantidMDEvents/MDTransfInterface.h
+#	inc/MantidMDEvents/MDTransfQ3D.h
+#	inc/MantidMDEvents/MDTransfNoQ.h
+	inc/MantidMDEvents/MDTransfModQ.h
+	inc/MantidMDEvents/ConvToMDEventsSelector.h
+	inc/MantidMDEvents/UnitConversionHelper.h	
+>>>>>>> 315441e... refs #5336 Moved conv code back to MDEvents
 )
 
 # Test files. Other source files required.
