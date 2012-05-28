@@ -1,4 +1,5 @@
 #include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidKernel/Strings.h"
 
 
 namespace Mantid
@@ -6,7 +7,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-MDTransfDEHelper::MDTransfDEHelper()
+MDTransfDEHelper::MDTransfDEHelper():
 EmodesList(ConvertToMD::No_DE,"")
 {
    EmodesList[ConvertToMD::Elastic]="Elastic";
@@ -14,9 +15,15 @@ EmodesList(ConvertToMD::No_DE,"")
    EmodesList[ConvertToMD::Indir]  ="Indirect";
 
 }
-ConvertToMD::Emodes getEmode(const std::string &Mode)const
+
+ConvertToMD::EModes MDTransfDEHelper::getEmode(const std::string &Mode)const
 {
-    return ConvertToMD::No_DE;
+    int nMode = Kernel::Strings::isMember(EmodesList,Mode);
+    if(nMode<0){
+        std::string ERR= "MDTransfDEHelper::getEmode: Unknown energy conversion mode "+ Mode+" requested\n";
+        throw(std::invalid_argument(ERR));
+    }
+    return ConvertToMD::EModes(nMode);
 }
 
 } // endnamespace MDEvents

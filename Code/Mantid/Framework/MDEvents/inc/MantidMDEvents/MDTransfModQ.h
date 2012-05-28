@@ -50,9 +50,9 @@ public:
     /// the name, this subalgorithm is known to users (will appear in selection list)
     const std::string transfID()const{return "ModQ"; }
     // energy conversion modes supported by this class
-    std::vector<std::string> getEmodes()const{dEModes.getEmodes();}
+    std::vector<std::string> getEmodes()const{return dEModes.getEmodes();}
     /// string presentation of emode
-    std::string getEmode(ConvertToMD::EModes Mode)const{dEModes.getEmode(Mode);}
+    std::string getEmode(ConvertToMD::EModes Mode)const{return dEModes.getEmode(Mode);}
     //void setEmode(const std::string &Emode);
 
 
