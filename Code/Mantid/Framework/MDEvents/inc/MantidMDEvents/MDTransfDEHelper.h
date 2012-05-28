@@ -5,8 +5,8 @@ namespace Mantid
 {
 namespace MDEvents
 {
-/** The class is here do define common operations/interfaces involved in dE (energy transfer) for the MD transformations, 
-  * which actually do energy transfer analyzis 
+/** The class is here do define common operations/interfaces involved in dE (energy transfer) analysis 
+  * for the MD transformations, which actually do energy transfer analyzis 
   *
   * @date 07-01-2012
 
@@ -56,11 +56,11 @@ namespace ConvertToMD
     /// string presentation of emode
     std::string getEmode(ConvertToMD::EModes Mode)const{return EmodesList[Mode];}
     /// convert string presentation of emode into nimerical one 
-    ConvertToMD::Emodes getEmode(const std::string &Mode)const;
+    ConvertToMD::EModes getEmode(const std::string &Mode)const;
     // constructor
     MDTransfDEHelper();
  private:
-    const std::vector<std::string> EmodesList;
+    std::vector<std::string> EmodesList;
  };
 
 } // endnamespace MDEvents

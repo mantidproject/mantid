@@ -25,17 +25,6 @@ bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)c
         return calcMatrixCoordInelastic(x,Coord);
     }
 }
-// function returns energy conversion modes supported by this class
-std::vector<std::string> MDTransfModQ::getEmodes()const
-{
-    return std::vector<std::string>(this->Emodes.begin(),this->Emodes.end());
-}
-/// function returns  string presentation of emode
-std::string MDTransfModQ::getEmode(ConvertToMD::EModes Mode)const
-{
-    return Emodes[Mode];
-}
-
 
 
 bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
