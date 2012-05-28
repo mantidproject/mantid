@@ -1,4 +1,5 @@
 from MantidFramework import *
+from mantid.simpleapi import *
 from LoadEVSRaw import Intervals, sumWsList
 from mantid import logger, config
 
