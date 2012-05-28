@@ -4,7 +4,10 @@
 
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
+#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
+//
+#include "MantidMDAlgorithms/ConvToMDPrerpocDet.h"
+//#include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
 
 namespace Mantid
 {
@@ -68,17 +71,19 @@ namespace MDAlgorithms
    /// the properties of the requested target MD workpsace:
     MDEvents::MDWSDescription TWSD;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
-   static ConvToMDPreprocDetectors det_loc;  
+   static ConvToMDPreprocDet det_loc;  
   /// progress reporter
    std::auto_ptr<API::Progress > pProg;
     /// logger -> to provide logging, for MD dataset file operations
-    static Mantid::Kernel::Logger& convert_log;
-
+   static Mantid::Kernel::Logger& convert_log;
+   /// pointer to the class, which does the particular conversion
+   boost::shared_ptr<ConvToMDEventsBase> pConvertor;
+  
    /// the class which knows about existing subalgorithms and generates alforithm ID as function of input parameters of this algorithm. 
-    ConvertToMD::ConvertToMDEventsParams ParamParser;   
+    ///ConvertToMD::ConvertToMDEventsParams ParamParser;   
     /// The class which keeps map of all existing subalgorithms converting to MDEventWorkspace.
     /// It returns the pointer to the subalgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
-    ConvertToMDEventsSubalgFactory  subAlgFactory;
+    //ConvertToMDEventsSubalgFactory  subAlgFactory;
   //------------------------------------------------------------------------------------------------------------------------------------------
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();

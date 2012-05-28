@@ -28,6 +28,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include <algorithm>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidMDAlgorithms/ConvToMDEventsSelector.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -43,7 +44,7 @@ namespace MDAlgorithms
 // logger for the algorithm workspaces  
 Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
-ConvToMDPreprocDetectors ConvertToMDEvents::det_loc;
+ConvToMDPreprocDet ConvertToMDEvents::det_loc;
 //
 Mantid::Kernel::Logger & 
 ConvertToMDEvents::getLogger(){return convert_log;}
@@ -91,16 +92,16 @@ ConvertToMDEvents::init()
               "By default, existing Output Workspace will be replaced. Select false if you want to add new events to the workspace, which already exist.\n"
               " Can be very inefficient for file-based workspaces");
 
-     ConvertToMD::Strings Q_modes = ParamParser.getQModes();
+     std::vector<std::string> Q_modes = MDTransfFactory::Instance().getKeys();
      /// this variable describes default possible ID-s for Q-dimensions   
-     declareProperty("QDimensions",Q_modes[ConvertToMD::ModQ],boost::make_shared<StringListValidator>(Q_modes),
+     declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
          "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
          " (No Q analysis, or Q conversion is performed),\n"
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
 
-     ConvertToMD::Strings QScales = TWSD.getQScalings();
+      std::vector<std::string> QScales = TWSD.getQScalings();
      declareProperty("QConversionScales",QScales[MDEvents::NoScaling], boost::make_shared<StringListValidator>(QScales),
         "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
         "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
@@ -109,8 +110,8 @@ ConvertToMDEvents::init()
         "  Orthogonal HKL     -- three Q components are divided by 2pi/a,2pi/b and 2pi/c lattice vectors.\n"
         "  HKL                 -- converted to HKL (multiplied by B-matrix which is equivalent to Orthogonal HKL for rectilinear lattices.\n" 
         "This parameter is currently ignored in ""mod|Q|"" and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace.");
-     /// this variable describes implemented modes for energy transfer analysis
-     ConvertToMD::Strings dE_modes = ParamParser.getDEModes();
+     /// HACK!!!
+     std::vector<std::string> dE_modes = MDTransfFactory::Instance().create("ModQ")->getEmodes();
      declareProperty("dEAnalysisMode",dE_modes[ConvertToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
         " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
@@ -178,7 +179,7 @@ ConvertToMDEvents::init()
 void ConvertToMDEvents::exec()
 {
     // initiate all availible subalgorithms for further usage (it will do it only once, first time the algorithm is executed);
-    this->subAlgFactory.init(ParamParser);
+   // this->subAlgFactory.init(ParamParser);
 
   // initiate class which would deal with any dimension workspaces, handling 
   if(!pWSWrapper.get()){
@@ -219,7 +220,7 @@ void ConvertToMDEvents::exec()
 
 
     // Identify the algorithm to deploy on workspace. Also fills in the target workspace description
-    std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim(),TWSD);
+    //std::string algo_id = ParamParser.identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim(),TWSD);
 
   // instanciate class, responsible for defining Mslice-type projection
     MDEvents::MDWSTransfDescr MsliceProj;
@@ -247,7 +248,8 @@ void ConvertToMDEvents::exec()
 
         TWSD.convert_to_factor = TWSD.getQScaling(convert_to_);
         // check if we are working in powder mode
-        bool is_powder = ParamParser.isPowderMode(algo_id);
+        //bool is_powder = ParamParser.isPowderMode(algo_id);
+        bool is_powder = false;
         // set up target coordinate system
          TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,is_powder);
         // identify/set the (multi)dimension's names to use

@@ -49,14 +49,22 @@ public:
     const std::string usedUnitID()const;
     /// the name, this subalgorithm is known to users 
     const std::string transfID()const{return "ModQ"; }
+    // energy conversion modes supported by this class
+    std::vector<std::string> getEmodes()const;
+    /// string presentation of emode
+    std::string getEmode(ConvertToMD::EModes Mode)const;
+    //void setEmode(const std::string &Emode);
+
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
-    MDTransfModQ():pDet(NULL),pHost(NULL){}    
+    MDTransfModQ();
     //
     void initialize(const ConvToMDEventsBase &Conv);
+    /** return the number of dimensions, calculated by the transformation from the workspace. Depending on mode, this numebr here is either 1 or 2*/
+    virtual int getNMatrixDimensions()const{return nMatrixDim;}
 
 protected:
     //  directions to the detectors 
@@ -71,7 +79,7 @@ protected:
     ConvToMDEventsBase const* pHost;
     // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode. 
     int nMatrixDim;
-    // the variable which describes the conversion mode:
+    // the variable which describes current conversion mode:
     ConvertToMD::EModes emode;
     //************* These two variables are relevant to inelastic modes only and will be used in inelastic cases:
     // the energy of the incident neutrons
@@ -80,6 +88,8 @@ protected:
     double ki;
     // energy conversion mode
 private:
+    // vector which provides string representation of supporting emodes;
+    std::vector<std::string> Emodes;
     /// how to transform workspace data in elastic case
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;
     /// how to transform workspace data in inelastic case

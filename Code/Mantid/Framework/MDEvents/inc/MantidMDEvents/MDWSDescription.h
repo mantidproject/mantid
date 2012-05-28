@@ -11,7 +11,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
- /***  Lighteweith class wrapping together all parameters, related to conversion from a workspace to MDEventoWorkspace 
+ /***  Lighteweight class wrapping together all parameters, related to conversion from a workspace to MDEventoWorkspace 
     *  used mainly to reduce number of parameters trasferred between  an algorithm, creating a MD workspace and the UI.
     *
     * It also defines some auxiliary functions, used for convenient description of MD workspace, see below. 
@@ -95,8 +95,6 @@ class DLLExport MDWSDescription
 
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
-    /// the string describes 
-
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
     Kernel::DblMatrix Wtransf; 
     // UB matrix components:
@@ -109,8 +107,11 @@ class DLLExport MDWSDescription
 //=======================
       /// constructor
      MDWSDescription(size_t nDimesnions=0);
-     /// function builds MD Event description from existing MD event workspace
+     /// method builds MD Event description from existing MD event workspace
      void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
+     /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
+     void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode);
+
      /// compare two descriptions and select the coplimentary result.
      void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspace);
      /// copy some parameters from the target workspace;
