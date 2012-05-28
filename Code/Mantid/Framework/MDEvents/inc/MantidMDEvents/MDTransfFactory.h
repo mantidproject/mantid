@@ -9,7 +9,7 @@
 #define DECLARE_MD_TRANSF(classname) \
     namespace { \
    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>(#classname)) \
+       ((Mantid::MDEvents::MDTransfFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
        }
 
@@ -22,11 +22,11 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDEvents/MDTransfInterface.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 
 /** Creates instances of concrete transformations into .

@@ -1,9 +1,9 @@
-#include "MantidMDAlgorithms/MDTransfModQ.h"
+#include "MantidMDEvents/MDTransfModQ.h"
 #include "MantidKernel/RegistrationHelper.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 // register the class, whith conversion factory
 DECLARE_MD_TRANSF(MDTransfModQ);
@@ -170,12 +170,8 @@ void MDTransfModQ::initialize(const ConvToMDEventsBase &Conv)
     // constructor;
 MDTransfModQ::MDTransfModQ():
 pDet(NULL),
-pHost(NULL),
-Emodes(ConvertToMD::No_DE,"")
+pHost(NULL)
 {
-    Emodes[ConvertToMD::Elastic]="Elastic";
-    Emodes[ConvertToMD::Direct] ="Direct";
-    Emodes[ConvertToMD::Indir]  ="Indirect";
 
 }    
 

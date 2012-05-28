@@ -2,12 +2,12 @@
 #define H_CONV_TOMDEVENTS_SELECTOR
 
 
-#include "MantidMDAlgorithms/ConvToMDEventsEvents.h"
-#include "MantidMDAlgorithms/ConvToMDEventsHisto.h"
+#include "MantidMDEvents/ConvToMDEventsEvents.h"
+#include "MantidMDEvents/ConvToMDEventsHisto.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /** small class to select proper solver as function of the workspace kind and (possibly, in a future) other workspace parameters. 
    * may be replaced by usual mantid factory in a future; 

@@ -3,6 +3,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

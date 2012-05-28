@@ -15,16 +15,16 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
-#include "MantidMDAlgorithms/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
 // coordinate transformation
-#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDEvents/MDTransfFactory.h"
 // units conversion
-#include "MantidMDAlgorithms/UnitConversionHelper.h"
+#include "MantidMDEvents/UnitConversionHelper.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /** The class specializes ConvToMDEventsBase for the case when the conversion occurs from Events WS to the MD events WS
    *
