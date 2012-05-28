@@ -82,8 +82,7 @@ namespace Mantid
       for (int i = 0; i < numDetector; ++i)
       {
         Geometry::IDetector_sptr det = boost::const_pointer_cast<Geometry::IDetector>(instrument->getDetector(detID[i]));
-
-        det->setPos(detPos[i]);  // We need to make this an absolute position, but first we leave it relative to get a build
+        setDetectorPosition( Ws, instrument, detID[i], detPos[i], false );
       }
 
     }

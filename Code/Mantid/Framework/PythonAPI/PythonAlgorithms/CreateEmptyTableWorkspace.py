@@ -10,8 +10,6 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
  
     def PyExec(self):
 	tableWS = WorkspaceFactory.createTable()
-	tableWS.addColumn(type="int",name="Detector ID")
-	tableWS.addColumn(type="V3D",name="Detector Position")
 	
 	self.setProperty("OutputWorkspace", tableWS)
  
