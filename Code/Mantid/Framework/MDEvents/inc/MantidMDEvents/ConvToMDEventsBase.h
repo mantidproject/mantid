@@ -15,13 +15,13 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
 
-#include "MantidMDAlgorithms/ConvToMDPreprocDet.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
-#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidMDEvents/MDTransfFactory.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace MDEvents
 {
 /** class describes the inteface to the methods, which perform conversion from usual workspaces to MDEventWorkspace 
    *
@@ -55,7 +55,7 @@ namespace MDAlgorithms
      ConvToMDEventsBase();
  
     ///method which initates all main class variables 
-    virtual size_t initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    virtual size_t initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
