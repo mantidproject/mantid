@@ -88,6 +88,22 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Protection against removing the file while the dialog is up.
+     */
+    void LoadDialog::accept()
+    {
+      std::string errMess = getAlgorithm()->getPointerToProperty("Filename")->isValid();
+      if ( !errMess.empty() )
+      {
+        m_currentFile = "";
+        createDynamicWidgets();
+        return;
+      }
+      AlgorithmDialog::accept();
+    }
+
+
     //--------------------------------------------------------------------------
     // Private methods (non-slot)
     //---------------------------------------------------------------------------
