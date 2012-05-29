@@ -221,7 +221,7 @@ namespace MDEvents
         stream << "Extracted initial theta value of: " << incidentTheta;
         g_log.information(stream.str());
       }
-      catch(Exception::NotFoundError& ex)
+      catch(Exception::NotFoundError&)
       {
         throw std::runtime_error("The input workspace does not have a stheta log value.");
       }
@@ -255,8 +255,8 @@ namespace MDEvents
 
     //TODO. Change the dimensionality depending upon the user choice
     auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-    MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", qxmin, qxmax, nbinsx)); 
-    MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", qzmin, qzmax, nbinsz)); 
+    MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(qxmin), static_cast<Mantid::coord_t>(qxmax), nbinsx)); 
+    MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(qzmin), static_cast<Mantid::coord_t>(qzmax), nbinsz)); 
     
     ws->addDimension(qxDim);
     ws->addDimension(qzDim);
