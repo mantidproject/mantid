@@ -73,15 +73,17 @@ namespace Algorithms
     std::set<int> mWorkspaceGroups;
     Kernel::TimeSplitterType mSplitters;
     std::map<int, DataObjects::EventWorkspace_sptr> mOutputWorkspaces;
+    std::vector<std::string> mWsNames;
 
     std::vector<detid_t> mCalibDetectorIDs;
     std::vector<double> mCalibOffsets;
 
     bool mFilterByPulseTime;
 
-    API::ITableWorkspace_sptr mInformationWS;
+    DataObjects::TableWorkspace_sptr mInformationWS;
     bool mWithInfo;
 
+    double mProgress;
 
   };
 
