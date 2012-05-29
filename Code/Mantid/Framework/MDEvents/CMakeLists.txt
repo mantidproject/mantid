@@ -8,7 +8,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
-    src/ConvertToReflectometryQ.cpp
+	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
 	src/CoordTransformAligned.cpp
@@ -17,12 +17,12 @@ set ( SRC_FILES
 	src/CreateMDWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
-	src/MDBoxBase.cpp
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
+	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/MDWSTransfDescr.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
+	src/ReflectometryTranformQxQz.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -59,7 +60,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
-    inc/MantidMDEvents/ConvertToReflectometryQ.h
+	inc/MantidMDEvents/ConvertToReflectometryQ.h
 	inc/MantidMDEvents/CoordTransformAffine.h
 	inc/MantidMDEvents/CoordTransformAffineParser.h
 	inc/MantidMDEvents/CoordTransformAligned.h
@@ -68,12 +69,12 @@ set ( INC_FILES
 	inc/MantidMDEvents/CreateMDWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
-	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/IntegratePeaksMD.h
 	inc/MantidMDEvents/LoadMD.h
 	inc/MantidMDEvents/LoadSQW.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
+	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
@@ -85,9 +86,11 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MDWSDescription.h
-	inc/MantidMDEvents/MDWSTransfDescr.h	
+	inc/MantidMDEvents/MDWSTransfDescr.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
+	inc/MantidMDEvents/ReflectometryTranformQxQz.h
+	inc/MantidMDEvents/ReflectometryMDTransform.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
@@ -103,7 +106,7 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
-    test/ConvertToReflectometryQTest.h
+	test/ConvertToReflectometryQTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
 	test/CoordTransformAlignedTest.h
@@ -112,11 +115,11 @@ set ( TEST_FILES
 	test/CreateMDWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
-	test/MDBoxBaseTest.h
 	test/IntegratePeaksMDTest.h
 	test/LoadMDTest.h
 	test/LoadSQWTest.h
 	test/MDBinTest.h
+	test/MDBoxBaseTest.h
 	test/MDBoxIteratorTest.h
 	test/MDBoxTest.h
 	test/MDDimensionStatsTest.h
@@ -132,6 +135,7 @@ set ( TEST_FILES
 	test/MDWSTransfDescrTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
+	test/ReflectometryTranformQxQzTest.h
 	test/SaveMDTest.h
 	test/SkippingPolicyTest.h
 	test/SliceMDTest.h

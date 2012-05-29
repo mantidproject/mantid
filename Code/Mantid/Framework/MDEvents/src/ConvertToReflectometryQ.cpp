@@ -4,13 +4,8 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidMDEvents/ConvertToReflectometryQ.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -19,6 +14,8 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/ReflectometryTranformQxQz.h"
+#include "MantidMDEvents/ReflectometryMDTransform.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -141,109 +138,10 @@ namespace Mantid
 {
 namespace MDEvents
 {
-  /*
-  Interface for all reflectometry transformations.
-  */
-  class ReflectometryMDTransform 
-  {
-  public:
-    virtual IMDEventWorkspace_sptr execute(IEventWorkspace_const_sptr eventWs) const = 0;
-  };
-
-  /*
-  Tranforms to a 2D MDEventWorkspace with dimensions of Qx and Qz.
-  */
-  class TransformToQxQz : public ReflectometryMDTransform
-  {
-  private:
-    const double m_qxMin;
-    const double m_qxMax;
-    const double m_qzMin;
-    const double m_qzMax;
-    const double m_incidentTheta;
-  public:
-
-    /*
-    Constructor
-    @param qxMin: min qx value (extent)
-    @param qxMax: max qx value (extent)
-    @param qzMin: min qz value (extent)
-    @param qzMax; max qz value (extent)
-    @param incidentTheta: Predetermined incident theta value
-    */
-    TransformToQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
-        m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_incidentTheta(incidentTheta)
-        {
-        }
-
-        /*
-        Execute the transformtion. Generates an output IMDEventWorkspace.
-        @return the constructed IMDEventWorkspace following the transformation.
-        @param ws: Input EventWorkspace const shared pointer
-        */
-        virtual IMDEventWorkspace_sptr execute(IEventWorkspace_const_sptr eventWs) const
-        {
-          const size_t nbinsx = 10;
-          const size_t nbinsz = 10;
-
-          auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-          MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin), static_cast<Mantid::coord_t>(m_qxMax), nbinsx)); 
-          MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(m_qzMin), static_cast<Mantid::coord_t>(m_qzMax), nbinsz)); 
-
-          ws->addDimension(qxDim);
-          ws->addDimension(qzDim);
-
-          // Set some reasonable values for the box controller
-          BoxController_sptr bc = ws->getBoxController();
-          bc->setSplitInto(2);
-          bc->setSplitThreshold(10);
-
-          // Initialize the workspace.
-          ws->initialize();
-
-          // Start with a MDGridBox.
-          ws->splitBox();
-
-          auto spectraAxis = eventWs->getAxis(1);
-          const double two_pi = 6.28318531;
-          const double c_cos_theta_i = cos(m_incidentTheta);
-          const double  c_sin_theta_i = sin(m_incidentTheta);
-
-          for(size_t index = 0; index < eventWs->getNumberHistograms(); ++index)
-          {
-            auto counts = eventWs->readY(index);
-            auto wavelengths = eventWs->readX(index);
-            auto errors = eventWs->readE(index);
-            size_t nInputBins = eventWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
-            const double theta_final = spectraAxis->getValue(index)/2;
-            const double c_sin_theta_f = sin(theta_final);
-            const double c_cos_theta_f = cos(theta_final);
-            const double dirQx = (c_cos_theta_f - c_cos_theta_i);
-            const double dirQz = (c_sin_theta_f + c_sin_theta_i);
-            //Loop over all bins in spectra 
-            for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
-            {
-              double lambda = wavelengths[binIndex];
-              double wavenumber = two_pi/lambda;
-              double _qx = wavenumber * dirQx;
-              double _qz = wavenumber * dirQz;
-
-              double centers[2] = {_qx, _qz};
-
-              ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
-            }
-            ws->splitAllIfNeeded(NULL);
-          }
-          return ws;
-        }
-  };
-
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ConvertToReflectometryQ)
   
-
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
@@ -383,7 +281,7 @@ namespace MDEvents
     boost::scoped_ptr<ReflectometryMDTransform> transform(NULL);
     if(outputDimensions == qSpaceTransform())
     {
-      transform.swap(boost::scoped_ptr<ReflectometryMDTransform>(new TransformToQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta)));
+      transform.swap(boost::scoped_ptr<ReflectometryMDTransform>(new ReflectometryTranformQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta)));
     }
     else if(outputDimensions == pSpaceTransform())
     {
