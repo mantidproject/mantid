@@ -206,6 +206,7 @@ namespace MDEvents
     checkExtents(extents);
     checkIncidentTheta(incidentTheta);
     checkCustomThetaInputs(bUseOwnIncidentTheta, incidentTheta);
+    checkOutputDimensionalityChoice(outputDimensions);
     
     // Extract the incient theta angle from the logs if a user provided one is not given.
     if(!bUseOwnIncidentTheta)

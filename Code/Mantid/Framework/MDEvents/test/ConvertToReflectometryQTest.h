@@ -11,6 +11,7 @@
 #include "MantidMDEvents/ConvertToReflectometryQ.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -64,6 +65,10 @@ public:
   static ConvertToReflectometryQTest *createSuite() { return new ConvertToReflectometryQTest(); }
   static void destroySuite( ConvertToReflectometryQTest *suite ) { delete suite; }
 
+  void setUp()
+  {
+    Mantid::API::FrameworkManager::Instance();
+  }
 
   void test_Init()
   {
@@ -73,7 +78,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_theta_initial_negative()
+  void test_theta_initial_negative_throws()
   {
     auto alg = make_standard_algorithm();
     alg->setProperty("OverrideIncidentTheta", true);
@@ -81,7 +86,7 @@ public:
     TSM_ASSERT_THROWS("Incident theta is negative, should throw", alg->execute(), std::logic_error);
   }
 
-  void test_theta_initial_too_large()
+  void test_theta_initial_too_large_throws()
   {
     auto alg = make_standard_algorithm();
     alg->setProperty("OverrideIncidentTheta", true);
@@ -89,8 +94,53 @@ public:
     TSM_ASSERT_THROWS("Incident theta is too large, should throw", alg->execute(), std::logic_error);
   }
 
-  void test_invalid_theta_axis()
+  void test_wrong_number_of_extents_throws()
   {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1");
+    TSM_ASSERT_THROWS("Should only accept 4 extents", alg->execute(), std::runtime_error);
+  }
+
+  void test_extents_with_qxmin_equals_qxmax_throws()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,-1,-1,1");
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_extents_with_qxmin_more_than_qxmax_throws()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,-1.01,-1,1");
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_extents_with_qxmin_less_than_qxmax()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,-0.999,-1,1");
+    TS_ASSERT_THROWS_NOTHING(alg->execute(), std::runtime_error);
+  }
+
+  void test_extents_with_qzmin_equals_qzmax_throws()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,1,-1,-1");
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_extents_with_qzmin_more_than_qzmax_throws()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,1,-1,-1.01");
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_extents_with_qzmin_less_than_qzmax()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,1,0.999,1");
+    TS_ASSERT_THROWS_NOTHING(alg->execute(), std::runtime_error);
   }
 
   //Characterisation test for the current state of the algorithm
@@ -100,13 +150,6 @@ public:
     alg->setProperty("OutputDimensions", "P (lab frame)");
     TSM_ASSERT_THROWS("Should throw as this mode is not supported yet", alg->execute(), std::runtime_error);
   }
-
-  void test_check_shouldnt_be_working()
-  {
-    std::string outWSName("ConvertToReflectometryQTest_OutputWS");
-    doExecute(outWSName);
-  }
-
 
 
 };
