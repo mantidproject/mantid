@@ -20,6 +20,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;
@@ -30,6 +31,33 @@ using namespace Mantid::DataObjects;
 /*Non member helpers*/
 namespace
 {
+  /*
+  Transform to q-space label:
+  @return: associated id/label
+  */
+  std::string qSpaceTransform()
+  {
+    return "Q (lab frame)";
+  }
+
+  /*
+  Transform to p-space label:
+  @return: associated id/label
+  */
+  std::string pSpaceTransform()
+  {
+    return "P (lab frame)";
+  }
+
+    /*
+  Transform to k-space label:
+  @return: associated id/label
+  */
+  std::string kSpaceTransform()
+  {
+    return "K (incident, final)";
+  }
+
   /*
   Check that the input workspace is of the correct type.
   @param: inputWS: The input workspace.
@@ -101,11 +129,12 @@ namespace
   */
   void checkOutputDimensionalityChoice(const std::string & outputDimensions )
   {
-    if(outputDimensions != "Q (lab frame)")
+    if(outputDimensions != qSpaceTransform())
     {
       throw std::runtime_error("Transforms other than to Q have not been implemented yet");
     }
   }
+
 }
 
 namespace Mantid
@@ -261,9 +290,9 @@ namespace MDEvents
         "An input workspace in wavelength");
 
     std::vector<std::string> propOptions;
-    propOptions.push_back("Q (lab frame)");
-    propOptions.push_back("P (lab frame)");
-    propOptions.push_back("K (initial, final)");
+    propOptions.push_back(qSpaceTransform());
+    propOptions.push_back(pSpaceTransform());
+    propOptions.push_back(kSpaceTransform());
     
     declareProperty("OutputDimensions", "Q (lab frame)" ,boost::make_shared<StringListValidator>(propOptions),
       "What will be the dimensions of the output workspace?\n"
@@ -306,7 +335,7 @@ namespace MDEvents
     checkInputWorkspace(inputWs);
     checkExtents(extents);
     checkCustomThetaInputs(bUseOwnIncidentTheta, incidentTheta);
-    checkOutputDimensionalityChoice(outputDimensions);
+    checkOutputDimensionalityChoice(outputDimensions); //TODO: This check can be retired as soon as all transforms have been implemented.
     
     // Extract the incient theta angle from the logs if a user provided one is not given.
     if(!bUseOwnIncidentTheta)
@@ -351,12 +380,21 @@ namespace MDEvents
       inputEventWs = result;
     }
 
-    /*
-    The following bit actually does the conversion.
-    */
-    TransformToQxQz qTransform(qxmin, qxmax, qzmin, qzmax, incidentTheta);
-    ReflectometryMDTransform& transform = qTransform;
-    setProperty("OutputWorkspace", transform.execute(inputEventWs));
+    boost::scoped_ptr<ReflectometryMDTransform> transform(NULL);
+    if(outputDimensions == qSpaceTransform())
+    {
+      transform.swap(boost::scoped_ptr<ReflectometryMDTransform>(new TransformToQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta)));
+    }
+    else if(outputDimensions == pSpaceTransform())
+    {
+      throw std::runtime_error("pSpaceTransform is not supported Yet.");
+    }
+    else
+    {
+      throw std::runtime_error("kSpaceTransform is not supported Yet");
+    }
+
+    setProperty("OutputWorkspace", transform->execute(inputEventWs));
   }
 
 } // namespace Mantid
