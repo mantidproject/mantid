@@ -112,11 +112,19 @@ namespace Mantid
 {
 namespace MDEvents
 {
+  /*
+  Interface for all reflectometry transformations.
+  */
+  class ReflectometryMDTransform 
+  {
+  public:
+    virtual IMDEventWorkspace_sptr execute(IEventWorkspace_const_sptr eventWs) const = 0;
+  };
 
   /*
   Tranforms to a 2D MDEventWorkspace with dimensions of Qx and Qz.
   */
-  class TransformToQxQz
+  class TransformToQxQz : public ReflectometryMDTransform
   {
   private:
     const double m_qxMin;
@@ -124,7 +132,6 @@ namespace MDEvents
     const double m_qzMin;
     const double m_qzMax;
     const double m_incidentTheta;
-    IEventWorkspace_const_sptr m_ws;
   public:
 
     /*
@@ -134,18 +141,18 @@ namespace MDEvents
     @param qzMin: min qz value (extent)
     @param qzMax; max qz value (extent)
     @param incidentTheta: Predetermined incident theta value
-    @param ws: Input EventWorkspace shared pointer
     */
-    TransformToQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, IEventWorkspace_sptr ws):
-        m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_incidentTheta(incidentTheta), m_ws(ws)
+    TransformToQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
+        m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_incidentTheta(incidentTheta)
         {
         }
 
         /*
         Execute the transformtion. Generates an output IMDEventWorkspace.
         @return the constructed IMDEventWorkspace following the transformation.
+        @param ws: Input EventWorkspace const shared pointer
         */
-        IMDEventWorkspace_sptr execute() const
+        virtual IMDEventWorkspace_sptr execute(IEventWorkspace_const_sptr eventWs) const
         {
           const size_t nbinsx = 10;
           const size_t nbinsz = 10;
@@ -168,17 +175,17 @@ namespace MDEvents
           // Start with a MDGridBox.
           ws->splitBox();
 
-          auto spectraAxis = m_ws->getAxis(1);
+          auto spectraAxis = eventWs->getAxis(1);
           const double two_pi = 6.28318531;
           const double c_cos_theta_i = cos(m_incidentTheta);
           const double  c_sin_theta_i = sin(m_incidentTheta);
 
-          for(size_t index = 0; index < m_ws->getNumberHistograms(); ++index)
+          for(size_t index = 0; index < eventWs->getNumberHistograms(); ++index)
           {
-            auto counts = m_ws->readY(index);
-            auto wavelengths = m_ws->readX(index);
-            auto errors = m_ws->readE(index);
-            size_t nInputBins = m_ws->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
+            auto counts = eventWs->readY(index);
+            auto wavelengths = eventWs->readX(index);
+            auto errors = eventWs->readE(index);
+            size_t nInputBins = eventWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
             const double theta_final = spectraAxis->getValue(index)/2;
             const double c_sin_theta_f = sin(theta_final);
             const double c_cos_theta_f = cos(theta_final);
@@ -347,8 +354,9 @@ namespace MDEvents
     /*
     The following bit actually does the conversion.
     */
-    TransformToQxQz transform(qxmin, qxmax, qzmin, qzmax, incidentTheta, inputEventWs);
-    setProperty("OutputWorkspace", transform.execute());
+    TransformToQxQz qTransform(qxmin, qxmax, qzmin, qzmax, incidentTheta);
+    ReflectometryMDTransform& transform = qTransform;
+    setProperty("OutputWorkspace", transform.execute(inputEventWs));
   }
 
 } // namespace Mantid
