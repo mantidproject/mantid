@@ -324,7 +324,7 @@ using namespace DataObjects;
       int signal=1;
       status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
       // More properties
-      const std::string axesNames="axis1,axis2";
+      const std::string axesNames="axis2,axis1";
       status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), static_cast<int>(axesNames.size()), NX_CHAR);
       std::string yUnits=localworkspace->YUnit();
       std::string yUnitLabel=localworkspace->YUnitLabel();
