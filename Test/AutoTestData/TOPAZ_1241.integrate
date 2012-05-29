@@ -1,4 +1,4 @@
-Version: 2.0  Facility: SNS  Instrument: TOPAZ  Date: 2010-01-01T01:01:01
+Version: 2.0  Facility: SNS  Instrument: TOPAZ  Date: 2012-05-24T00:00:02
 This is the header format:
 0     1     2    3    4      5       6       7        8       9       10        11        12     13      14      15    16
 -   SEQN    H    K    L     COL     ROW    CHAN       L2  2_THETA       AZ        WL        D   IPK      INTI   SIGI RFLG
