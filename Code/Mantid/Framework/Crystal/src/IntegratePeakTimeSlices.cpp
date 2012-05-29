@@ -11,7 +11,8 @@ The result is returned in this algorithm's output "Intensity" and "SigmaIntensit
 The table workspace is also a result. Each line contains information on the fit for each good time slice.  The column names( and information) in the table are:
   Time, Channel, Background, Intensity, Mcol, Mrow, SScol,SSrow, SSrc, NCells,
   ChiSqrOverDOF, TotIntensity, BackgroundError, FitIntensityError, ISAWIntensity,
-   ISAWIntensityError,TotalBoundary, NBoundaryCells, Start Row, End Row,Start Col, and End Col
+   ISAWIntensityError,TotalBoundary, NBoundaryCells, Start Row, End Row,Start Col, and End Col.
+   The last column has a comma separated List of sepctral ID's used in the time slice.
 
 
 The final Peak intensity is the sum of the IsawIntensity for each time slice. The error is the square root of the sum of squares of the IsawIntensityError values.
@@ -198,9 +199,9 @@ namespace Mantid
 
       declareProperty("PeakIndex", 0, "Index of peak in PeaksWorkspace to integrate");
 
-      declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
+      declareProperty("PeakQspan", .06, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
 
-      declareProperty("CalculateVariances",false,"Calc (co)variances given parameter values versus fit (co)Variances ");
+      declareProperty("CalculateVariances", true ,"Calc (co)variances given parameter values versus fit (co)Variances ");
 
       declareProperty("Ties","","Tie parameters(Background,Intensity, Mrow,...) to values/formulas.");
 
@@ -211,7 +212,30 @@ namespace Mantid
 
     }
 
-    std::string IntegratePeakTimeSlices::CalcConstraints()
+    void IntegratePeakTimeSlices::CalcVariancesFromData( double background, double meanx, double meany,
+                                                        double &Varxx, double &Varxy, double &Varyy)
+    {
+      double Den = AttributeValues[IIntensities]-background*AttributeValues[ISS1];
+      Varxx =(AttributeValues[ISSIxx]-2*meanx*AttributeValues[ISSIx]+meanx*meanx*AttributeValues[IIntensities]-
+               background*(AttributeValues[ISSxx]-2*meanx*AttributeValues[ISSx]+meanx*meanx*AttributeValues[ISS1]))
+               /Den;
+
+      Varyy=(AttributeValues[ISSIyy]-2*meany*AttributeValues[ISSIy]+meany*meany*AttributeValues[IIntensities]-
+          background*(AttributeValues[ISSyy]-2*meany*AttributeValues[ISSy]+meany*meany*AttributeValues[ISS1]))
+          /Den;
+
+      Varxy =(AttributeValues[ISSIxy]-meanx*AttributeValues[ISSIy]-meany*AttributeValues[ISSIx]+
+          meanx*meany*AttributeValues[IIntensities]-
+          background*(AttributeValues[ISSxy]-meanx*AttributeValues[ISSy]-meany*AttributeValues[ISSx]+meanx*meany*AttributeValues[ISS1]))
+          /Den;
+      Varxx =  std::min<double>(Varxx, 1.21*ParameterValues[IVXX]);//copied from BiVariateNormal
+      Varxx = std::max<double>(Varxx, .79*ParameterValues[IVXX]);
+      Varyy =  std::min<double>(Varyy, 1.21*ParameterValues[IVYY]);
+      Varyy = std::max<double>(Varyy, .79*ParameterValues[IVYY]);
+
+    };
+
+    std::string IntegratePeakTimeSlices::CalcConstraints( std::vector< std::pair<double,double> > & Bounds)
     {
       double TotIntensity = AttributeValues[IIntensities];
       double ncells       =AttributeValues[ISS1];
@@ -222,6 +246,7 @@ namespace Mantid
       double back = TotBoundaryIntensities/nBoundaryCells;
       double backVar= TotBoundaryVariances/nBoundaryCells/nBoundaryCells;
       double IntensVar = Variance +ncells*ncells*backVar;
+
       double relError = .15;
 
       if( ParameterValues[IBACK] != back )
@@ -236,6 +261,10 @@ namespace Mantid
       str<< max<double>(0.0, ParameterValues[0]-(1+2*relError)*sqrt(backVar))<<"<Background<"<<(back+(1+2*relError)*sqrt(backVar))
          <<","<< max<double>(0.0, ParameterValues[1]-(1+2*relError)*sqrt(IntensVar))<<
          "<Intensity<"<<TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar);
+      double min =max<double>(0.0, ParameterValues[0]-(1+2*relError)*sqrt(backVar));
+      double maxx =back+(1+2*relError)*sqrt(backVar);
+      Bounds.push_back( pair<double,double>(min,maxx ));
+      Bounds.push_back( pair<double,double>(max<double>(0.0, ParameterValues[1]-(1+2*relError)*sqrt(IntensVar)),TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar)));
       for( int i=2; i<N; i++ )
       {
         if( i>0)
@@ -248,7 +277,7 @@ namespace Mantid
 
 
         str<<(1-relErr1)*val <<"<"<<ParameterNames[i]<<"<"<<(1+relErr1)*val;
-
+        Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
       }
 
       return str.str();
@@ -627,8 +656,8 @@ namespace Mantid
                 std::string SSS("   Fit string ");
                 SSS += fun_str;
                 g_log.debug(SSS);
-
-                std::string Constraints = CalcConstraints();
+                vector< pair<double,double> >  Bounds;
+                std::string Constraints = CalcConstraints( Bounds);
                 fit_alg->setPropertyValue("Function", fun_str);
 
                 fit_alg->setProperty("InputWorkspace", Data);
@@ -663,6 +692,22 @@ namespace Mantid
                     double error = RRes->getRef< double >( "Error",prm);
                     errs.push_back( error );
                   }
+                  if( names.size()< 5)
+                  {
+                    names.push_back( ParameterNames[IVXX] );
+                    names.push_back( ParameterNames[IVYY] );
+                    names.push_back( ParameterNames[IVXY] );
+                    double Varxx, Varxy,Varyy;
+                    CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
+                                                Varxx,   Varxy, Varyy);
+                    params.push_back( Varxx );
+                    params.push_back( Varyy );
+                    params.push_back( Varxy );
+                    errs.push_back( 0 );
+                    errs.push_back( 0 );
+                    errs.push_back( 0 );
+
+                  }
 
                   ostringstream res;
                   res << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
@@ -680,7 +725,11 @@ namespace Mantid
                     res << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
                    // if (names[kk].substr(0, 2) != string("SS"))
                       res << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
-
+                      if( Bounds.size() >kk)
+                      {
+                        pair<double,double> upLow = Bounds[kk];
+                        res<<" Bounds("<<upLow.first<<","<<upLow.second<<")";
+                      }
                     res << endl;
                   }
                   g_log.debug(res.str());
@@ -1112,7 +1161,7 @@ namespace Mantid
                                                )
     {
       UNUSED_ARG(g_log);
-      //std::cout<<"Start SetUpData1="<<Radius<<","<<CentPos<<","<<NeighborIDs[1]<< std::endl;
+
       if( NeighborIDs[1] < 10)
       {
         AttributeValues[ISSIxx]= -1;
@@ -1190,6 +1239,8 @@ namespace Mantid
 
           double col = COL + (pixPos - center).scalar_prod(xvec) / CellWidth;
 
+
+
           Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
 
           Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
@@ -1219,7 +1270,7 @@ namespace Mantid
             nBoundaryCells++;
 
             TotBoundaryVariances += variance;
-            //if(chan==14)  std::cout<<"*";
+
           }
 
           if (row < minRow)
@@ -1270,15 +1321,23 @@ namespace Mantid
 
       fun_str << "name=BivariateNormal,";
 
-      for (int i = 0; i < NParameters; i++)
+      if( getProperty( "CalculateVariances") && !EdgePeak)
+              fun_str<<"CalcVariances=1";
+          else
+              fun_str<<"CalcVariances = -1";
+
+
+      int NN =  NParameters;
+      if( getProperty("CalculateVariances") && !EdgePeak)
+           NN -=3;
+
+      for (int i = 0; i < NN; i++)
       {
-        fun_str << ParameterNames[i] << "=" << ParameterValues[i]<<",";
+        fun_str<<"," << ParameterNames[i] << "=" << ParameterValues[i];
 
       }
-      if( getProperty( "CalculateVariances") && !EdgePeak)
-          fun_str<<"CalcVariances=1";
-      else
-          fun_str<<"CalcVariances = -1";
+
+
 
       return fun_str.str();
     }

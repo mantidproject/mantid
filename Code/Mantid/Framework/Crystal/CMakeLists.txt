@@ -88,14 +88,14 @@ set ( TEST_FILES
         test/SelectCellOfTypeTest.h
         test/SelectCellWithFormTest.h
     test/IndexSXPeaksTest.h
-# 	test/IntegratePeakTimeSlicesTest.h
+ 	test/IntegratePeakTimeSlicesTest.h
 
 	test/LoadHKLTest.h
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h
 	test/MaskPeaksWorkspaceTest.h
 	test/NormaliseVanadiumTest.h
-#	test/PeakIntegrationTest.h
+	test/PeakIntegrationTest.h
 	test/PeakIntensityVsRadiusTest.h
 	test/PredictPeaksTest.h
 	test/SaveHKLTest.h
