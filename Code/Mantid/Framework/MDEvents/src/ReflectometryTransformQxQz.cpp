@@ -1,4 +1,4 @@
-#include "MantidMDEvents/ReflectometryTranformQxQz.h"
+#include "MantidMDEvents/ReflectometryTransformQxQz.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <stdexcept>
@@ -15,7 +15,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */
-    ReflectometryTranformQxQz::~ReflectometryTranformQxQz()
+    ReflectometryTransformQxQz::~ReflectometryTransformQxQz()
     {
     }
 
@@ -27,7 +27,7 @@ namespace Mantid
     @param qzMax; max qz value (extent)
     @param incidentTheta: Predetermined incident theta value
     */
-    ReflectometryTranformQxQz::ReflectometryTranformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
+    ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
     m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_incidentTheta(incidentTheta)
     {
       if(qxMin >= qxMax)
@@ -49,7 +49,7 @@ namespace Mantid
     @return the constructed IMDEventWorkspace following the transformation.
     @param ws: Input EventWorkspace const shared pointer
     */
-    IMDEventWorkspace_sptr ReflectometryTranformQxQz::execute(IEventWorkspace_const_sptr eventWs) const
+    IMDEventWorkspace_sptr ReflectometryTransformQxQz::execute(IEventWorkspace_const_sptr eventWs) const
     {
       const size_t nbinsx = 10;
       const size_t nbinsz = 10;

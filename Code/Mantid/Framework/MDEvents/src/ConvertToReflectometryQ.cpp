@@ -14,7 +14,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/ReflectometryTranformQxQz.h"
+#include "MantidMDEvents/ReflectometryTransformQxQz.h"
 #include "MantidMDEvents/ReflectometryMDTransform.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -281,7 +281,7 @@ namespace MDEvents
     boost::scoped_ptr<ReflectometryMDTransform> transform(NULL);
     if(outputDimensions == qSpaceTransform())
     {
-      transform.swap(boost::scoped_ptr<ReflectometryMDTransform>(new ReflectometryTranformQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta)));
+      transform.swap(boost::scoped_ptr<ReflectometryMDTransform>(new ReflectometryTransformQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta)));
     }
     else if(outputDimensions == pSpaceTransform())
     {

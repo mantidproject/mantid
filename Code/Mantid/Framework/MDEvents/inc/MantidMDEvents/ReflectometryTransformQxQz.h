@@ -35,7 +35,7 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-  class DLLExport ReflectometryTranformQxQz : public ReflectometryMDTransform
+  class DLLExport ReflectometryTransformQxQz : public ReflectometryMDTransform
   {
   private:
     const double m_qxMin;
@@ -46,16 +46,16 @@ namespace MDEvents
   public:
 
     /// Constructor
-    ReflectometryTranformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta);
+    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta);
     /// Destructor
-    ~ReflectometryTranformQxQz();
+    ~ReflectometryTransformQxQz();
     /// Execute transformation
     virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::IEventWorkspace_const_sptr eventWs) const;
 
   private:
 
-    DISABLE_DEFAULT_CONSTRUCT(ReflectometryTranformQxQz)
-    DISABLE_COPY_AND_ASSIGN(ReflectometryTranformQxQz)
+    DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
+    DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)
 
   };
 
