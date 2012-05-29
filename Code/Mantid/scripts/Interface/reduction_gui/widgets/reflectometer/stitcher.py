@@ -78,13 +78,34 @@ class ReflData(object):
     def is_selected(self):
         return self._radio.isChecked()
     
+    def get_common_range(self):
+        """
+            Get common range between all polarization states,
+            excluding beginning and trailing zeros
+        """
+        # Get valid range
+        xmin = None
+        xmax = None
+        for item in self._data:
+            if item is not None:
+                _xmin, _xmax = item.get_skipped_range()
+                if xmin is None or _xmin>xmin:
+                    xmin = _xmin
+                if xmax is None or _xmax<xmax:
+                    xmax = _xmax
+        return xmin, xmax
+        
     def _scale_updated(self):
+        """
+            Called when the scaling factors are updated
+        """
+        xmin, xmax = self.get_common_range()
         for item in self._data:
             if item is not None:
                 try:
                     self._scale = float(self._edit_ctrl.text())
                     item.set_scale(self._scale)
-                    item.apply_scale()
+                    item.apply_scale(xmin=xmin, xmax=xmax)
                 except:
                     pass
             
@@ -343,7 +364,8 @@ class StitcherWidget(BaseWidget):
         
         for item in self._workspace_list:
             data = item.get_user_data(ref_pol)
-            data.apply_scale()
+            xmin, xmax = item.get_common_range()
+            data.apply_scale(xmin=xmin, xmax=xmax)
             scale = data.get_scale()
             item.set_scale(scale)
 
