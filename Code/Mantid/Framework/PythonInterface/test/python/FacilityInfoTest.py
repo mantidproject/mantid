@@ -15,7 +15,7 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEquals(test_facility.name(), "ISIS")
         self.assertEquals(test_facility.zeroPadding(), 5)
         self.assertEquals(test_facility.delimiter(), "")
-        self.assertEquals(len(test_facility.extensions()), 12)
+        self.assertEquals(len(test_facility.extensions()), 14)
         self.assertEquals(test_facility.preferredExtension(), ".nxs")
         self.assertEquals(test_facility.getSoapEndPoint(), "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT")
         self.assertEquals(len(test_facility.archiveSearch()), 1)
