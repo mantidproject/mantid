@@ -77,6 +77,8 @@ namespace MantidQt
       void suggestWSName();
       /// Connect/Disconnect the signal that updates the workspace name with a suggested value
       void enableNameSuggestion(const bool on = false);
+      /// Override accept() slot
+      void accept();
 
     private:
       /// Initialize the layout
