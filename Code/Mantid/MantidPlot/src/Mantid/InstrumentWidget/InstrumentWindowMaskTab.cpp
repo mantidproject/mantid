@@ -446,6 +446,10 @@ void InstrumentWindowMaskTab::saveMaskToFile()
 void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  // Make sure we have applied the Mask
+  applyMask();
+
   m_pointer->setChecked(true);
   setActivity();
   Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
@@ -461,6 +465,10 @@ void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  // Make sure we have applied the Mask
+  applyMask();
+
   m_pointer->setChecked(true);
   setActivity();
   Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
