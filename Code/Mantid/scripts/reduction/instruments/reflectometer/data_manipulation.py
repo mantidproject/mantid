@@ -38,7 +38,8 @@ def tof_distribution(file_path, callback=None,
 def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                  range_min=None, range_max=None,
                                  high_res = True, instrument="REFL",
-                                 isPeak=True):
+                                 isPeak=True, 
+                                 tof_min=None, tof_max=None):
     """
         Display counts vs pixel of data or normalization data
     
@@ -68,6 +69,11 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         
     ws_list = []
     
+    if tof_min is None:
+        tof_min = 0
+    if tof_max is None:
+        tof_max = 200000
+
     def _load_entry(entry, ws, title=""):
         # 1D plot
         ws_output = "%s %s" % (ws_output_base, title)
@@ -114,7 +120,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                 
             # 2D plot
             output_2d = ws_output+'_2D'
-            Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="0,200,200000")
+            Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="%d,200,%d" % (tof_min, tof_max))
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_X.xml")
