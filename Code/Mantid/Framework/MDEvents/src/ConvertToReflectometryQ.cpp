@@ -27,10 +27,181 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+/*Non member helpers*/
+namespace
+{
+  /*
+  Check that the input workspace is of the correct type.
+  @param: inputWS: The input workspace.
+  @throw: runtime_error if the units do not appear to be correct/compatible with the algorithm.
+  */
+  void checkInputWorkspace(Mantid::API::MatrixWorkspace_const_sptr inputWs)
+  {
+    auto spectraAxis = inputWs->getAxis(1);
+    const std::string label = spectraAxis->unit()->label();
+    const std::string expectedLabel = "degrees";
+    if(expectedLabel != label)
+    {
+      std::string message = "Spectra axis should have units of degrees. Instead found: " + label;
+      throw std::runtime_error(message);
+    }
+  }
+
+  /*
+  Check the extents. 
+  @param extents: A vector containing all the extents.
+  @throw: runtime_error if the extents appear to be incorrect.
+  */
+  void checkExtents(const std::vector<double>& extents)
+  {
+    if(extents.size() != 4)
+    {
+      throw std::runtime_error("Four comma separated extents inputs should be provided");
+    }
+    if((extents[0] >= extents[1]) || (extents[2] >= extents[3]))
+    {
+      throw std::runtime_error("Extents must be provided min, max with min less than max!");
+    }
+  }
+
+  /*
+  Check the incident theta inputs.
+  @param bUseOwnIncidentTheta: True if the user has requested to provide their own incident theta value.
+  @param theta: The proposed incident theta value provided by the user.
+  @throw: logic_error if the theta value is out of range.
+  */
+  void checkCustomThetaInputs(const bool bUseOwnIncidentTheta, const double& theta)
+  { 
+    if(bUseOwnIncidentTheta)
+    {
+      if(theta < 0 || theta >  90)
+      {
+        throw std::logic_error("Overriding incident theta is out of range");
+      }
+    }
+  }
+
+  /*
+  General check for the indient theta.
+  @param theta: The proposed incident theta value.
+  @throw: logic_error if the theta value is out of range.
+  */
+  void checkIncidentTheta(const double& theta)
+  {
+   if(theta < 0 || theta >  90)
+    {
+      throw std::logic_error("Incident theta is out of range");
+    }
+  }
+
+  /*
+  Check for the output dimensionality.
+  @param outputDimensions : requested output dimensionality
+  @throw: runtime_errror if the dimensionality is not supported.
+  */
+  void checkOutputDimensionalityChoice(const std::string & outputDimensions )
+  {
+    if(outputDimensions != "Q (lab frame)")
+    {
+      throw std::runtime_error("Transforms other than to Q have not been implemented yet");
+    }
+  }
+}
+
 namespace Mantid
 {
 namespace MDEvents
 {
+
+  /*
+  Tranforms to a 2D MDEventWorkspace with dimensions of Qx and Qz.
+  */
+  class TransformToQxQz
+  {
+  private:
+    const double m_qxMin;
+    const double m_qxMax;
+    const double m_qzMin;
+    const double m_qzMax;
+    const double m_incidentTheta;
+    IEventWorkspace_const_sptr m_ws;
+  public:
+
+    /*
+    Constructor
+    @param qxMin: min qx value (extent)
+    @param qxMax: max qx value (extent)
+    @param qzMin: min qz value (extent)
+    @param qzMax; max qz value (extent)
+    @param incidentTheta: Predetermined incident theta value
+    @param ws: Input EventWorkspace shared pointer
+    */
+    TransformToQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, IEventWorkspace_sptr ws):
+        m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_incidentTheta(incidentTheta), m_ws(ws)
+        {
+        }
+
+        /*
+        Execute the transformtion. Generates an output IMDEventWorkspace.
+        @return the constructed IMDEventWorkspace following the transformation.
+        */
+        IMDEventWorkspace_sptr execute() const
+        {
+          const size_t nbinsx = 10;
+          const size_t nbinsz = 10;
+
+          auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
+          MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin), static_cast<Mantid::coord_t>(m_qxMax), nbinsx)); 
+          MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(m_qzMin), static_cast<Mantid::coord_t>(m_qzMax), nbinsz)); 
+
+          ws->addDimension(qxDim);
+          ws->addDimension(qzDim);
+
+          // Set some reasonable values for the box controller
+          BoxController_sptr bc = ws->getBoxController();
+          bc->setSplitInto(2);
+          bc->setSplitThreshold(10);
+
+          // Initialize the workspace.
+          ws->initialize();
+
+          // Start with a MDGridBox.
+          ws->splitBox();
+
+          auto spectraAxis = m_ws->getAxis(1);
+          const double two_pi = 6.28318531;
+          const double c_cos_theta_i = cos(m_incidentTheta);
+          const double  c_sin_theta_i = sin(m_incidentTheta);
+
+          for(size_t index = 0; index < m_ws->getNumberHistograms(); ++index)
+          {
+            auto counts = m_ws->readY(index);
+            auto wavelengths = m_ws->readX(index);
+            auto errors = m_ws->readE(index);
+            size_t nInputBins = m_ws->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
+            const double theta_final = spectraAxis->getValue(index)/2;
+            const double c_sin_theta_f = sin(theta_final);
+            const double c_cos_theta_f = cos(theta_final);
+            const double dirQx = (c_cos_theta_f - c_cos_theta_i);
+            const double dirQz = (c_sin_theta_f + c_sin_theta_i);
+            //Loop over all bins in spectra 
+            for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
+            {
+              double lambda = wavelengths[binIndex];
+              double wavenumber = two_pi/lambda;
+              double _qx = wavenumber * dirQx;
+              double _qz = wavenumber * dirQz;
+
+              double centers[2] = {_qx, _qz};
+
+              ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
+            }
+            ws->splitAllIfNeeded(NULL);
+          }
+          return ws;
+        }
+  };
+
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ConvertToReflectometryQ)
@@ -113,83 +284,6 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
   }
 
-  /*
-  Check that the input workspace is of the correct type.
-  @param: inputWS: The input workspace.
-  @throw: runtime_error if the units do not appear to be correct/compatible with the algorithm.
-  */
-  void checkInputWorkspace(Mantid::API::MatrixWorkspace_const_sptr inputWs)
-  {
-    auto spectraAxis = inputWs->getAxis(1);
-    const std::string label = spectraAxis->unit()->label();
-    const std::string expectedLabel = "degrees";
-    if(expectedLabel != label)
-    {
-      std::string message = "Spectra axis should have units of degrees. Instead found: " + label;
-      throw std::runtime_error(message);
-    }
-  }
-
-  /*
-  Check the extents. 
-  @param extents: A vector containing all the extents.
-  @throw: runtime_error if the extents appear to be incorrect.
-  */
-  void checkExtents(const std::vector<double>& extents)
-  {
-    if(extents.size() != 4)
-    {
-      throw std::runtime_error("Four comma separated extents inputs should be provided");
-    }
-    if((extents[0] >= extents[1]) || (extents[2] >= extents[3]))
-    {
-      throw std::runtime_error("Extents must be provided min, max with min less than max!");
-    }
-  }
-
-  /*
-  Check the incident theta inputs.
-  @param bUseOwnIncidentTheta: True if the user has requested to provide their own incident theta value.
-  @param theta: The proposed incident theta value provided by the user.
-  @throw: logic_error if the theta value is out of range.
-  */
-  void checkCustomThetaInputs(const bool bUseOwnIncidentTheta, const double& theta)
-  { 
-    if(bUseOwnIncidentTheta)
-    {
-      if(theta < 0 || theta >  90)
-      {
-        throw std::logic_error("Overriding incident theta is out of range");
-      }
-    }
-  }
-
-  /*
-  General check for the indient theta.
-  @param theta: The proposed incident theta value.
-  @throw: logic_error if the theta value is out of range.
-  */
-  void checkIncidentTheta(const double& theta)
-  {
-   if(theta < 0 || theta >  90)
-    {
-      throw std::logic_error("Incident theta is out of range");
-    }
-  }
-
-  /*
-  Check for the output dimensionality.
-  @param outputDimensions : requested output dimensionality
-  @throw: runtime_errror if the dimensionality is not supported.
-  */
-  void checkOutputDimensionalityChoice(const std::string & outputDimensions )
-  {
-    if(outputDimensions != "Q (lab frame)")
-    {
-      throw std::runtime_error("Transforms other than to Q have not been implemented yet");
-    }
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -201,10 +295,9 @@ namespace MDEvents
     double incidentTheta = getProperty("IncidentTheta");
     std::string outputDimensions = getPropertyValue("OutputDimensions");
 
-    //Validation.
+    //Validation of input parameters
     checkInputWorkspace(inputWs);
     checkExtents(extents);
-    checkIncidentTheta(incidentTheta);
     checkCustomThetaInputs(bUseOwnIncidentTheta, incidentTheta);
     checkOutputDimensionalityChoice(outputDimensions);
     
@@ -217,6 +310,7 @@ namespace MDEvents
         Property* p = run.getLogData("stheta");
         auto incidentThetas = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>*>(p);
         incidentTheta = incidentThetas->valuesAsVector().back(); //Not quite sure what to do with the time series for stheta
+        checkIncidentTheta(incidentTheta);
         std::stringstream stream;
         stream << "Extracted initial theta value of: " << incidentTheta;
         g_log.information(stream.str());
@@ -250,59 +344,11 @@ namespace MDEvents
       inputEventWs = result;
     }
 
-    const size_t nbinsx = 10;
-    const size_t nbinsz = 10;
-
-    //TODO. Change the dimensionality depending upon the user choice
-    auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-    MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(qxmin), static_cast<Mantid::coord_t>(qxmax), nbinsx)); 
-    MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(qzmin), static_cast<Mantid::coord_t>(qzmax), nbinsz)); 
-    
-    ws->addDimension(qxDim);
-    ws->addDimension(qzDim);
-
-    // Set some reasonable values for the box controller
-    BoxController_sptr bc = ws->getBoxController();
-    bc->setSplitInto(2);
-    bc->setSplitThreshold(10);
-
-    // Initialize the workspace.
-    ws->initialize();
-
-    // Start with a MDGridBox.
-    ws->splitBox();
-
-    auto spectraAxis = inputWs->getAxis(1);
-    const double two_pi = 6.28318531;
-    const double c_cos_theta_i = cos(incidentTheta);
-    const double  c_sin_theta_i = sin(incidentTheta);
-
-    for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
-    {
-      auto counts = inputWs->readY(index);
-      auto wavelengths = inputWs->readX(index);
-      auto errors = inputWs->readE(index);
-      size_t nInputBins = inputWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
-      const double theta_final = spectraAxis->getValue(index)/2;
-      const double c_sin_theta_f = sin(theta_final);
-      const double c_cos_theta_f = cos(theta_final);
-      const double dirQx = (c_cos_theta_f - c_cos_theta_i);
-      const double dirQz = (c_sin_theta_f + c_sin_theta_i);
-      //Loop over all bins in spectra 
-      for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
-      {
-        double lambda = wavelengths[binIndex];
-        double wavenumber = two_pi/lambda;
-        double _qx = wavenumber * dirQx;
-        double _qz = wavenumber * dirQz;
-
-        double centers[2] = {_qx, _qz};
-
-        ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
-      }
-      ws->splitAllIfNeeded(NULL);
-    }
-    setProperty("OutputWorkspace", ws);
+    /*
+    The following bit actually does the conversion.
+    */
+    TransformToQxQz transform(qxmin, qxmax, qzmin, qzmax, incidentTheta, inputEventWs);
+    setProperty("OutputWorkspace", transform.execute());
   }
 
 } // namespace Mantid
