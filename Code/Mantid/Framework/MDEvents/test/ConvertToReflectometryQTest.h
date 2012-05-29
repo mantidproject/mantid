@@ -50,15 +50,6 @@ private:
     return alg;
   }
 
-  void doExecute(const std::string& outWSName)
-  {
-    MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    in_ws->getAxis(0)->setUnit("TOF");
-  
-    auto alg = make_standard_algorithm();
-    TSM_ASSERT_THROWS("Not Implemented Yet", alg->execute(), std::runtime_error );
-  }
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -119,7 +110,7 @@ public:
   {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1,-0.999,-1,1");
-    TS_ASSERT_THROWS_NOTHING(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
   void test_extents_with_qzmin_equals_qzmax_throws()
@@ -140,7 +131,7 @@ public:
   {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1,1,0.999,1");
-    TS_ASSERT_THROWS_NOTHING(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
   //Characterisation test for the current state of the algorithm
