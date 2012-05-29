@@ -46,6 +46,7 @@ class DataSets(BaseScriptElement):
 
     #scaling factor file
     scaling_factor_file = ''
+    slits_width_flag = True
 
     #incident medium list and selected value
     incident_medium_list = ['H2O']
@@ -100,6 +101,7 @@ class DataSets(BaseScriptElement):
         # sf configuration file
         if self.scaling_factor_file != '':
             script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)   
+            script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
@@ -162,6 +164,7 @@ class DataSets(BaseScriptElement):
         
         # scaling factor file name
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
+        xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
         
         #incident medium
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
@@ -260,7 +263,9 @@ class DataSets(BaseScriptElement):
         self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
         self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error)        
         
+        #scaling factor file and options
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
+        self.slits_width_flag = BaseScriptElement.getBoolElement(instrument_dom, "slits_width_flag")
         
         #incident medium selected
         if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:        
@@ -307,8 +312,9 @@ class DataSets(BaseScriptElement):
         self.angle_offset = DataSets.angle_offset
         self.angle_offset_error = DataSets.angle_offset_error
         
-        #scaling factor file
+        #scaling factor file and options
         self.scaling_factor_file = DataSets.scaling_factor_file
+        self.slits_width_flag = DataSets.slits_width_flag
         
         #incident medium selected
         self.incident_medium_list = DataSets.incident_medium_list

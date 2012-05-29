@@ -143,6 +143,10 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_edit)
         self.connect(self._summary.direct_pixel_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
 
+
+        call_back = partial(self._edit_event, ctrl=self._summary.slits_width_flag)
+        self.connect(self._summary.slits_width_flag, QtCore.SIGNAL("clicked()"), call_back)
+
         call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_check)
         self.connect(self._summary.direct_pixel_check, QtCore.SIGNAL("clicked()"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.det_angle_check)
@@ -354,6 +358,7 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.dq0, False)
         util.set_edited(self._summary.dq_over_q, False)
         util.set_edited(self._summary.fourth_column_switch, False)
+        util.set_edited(self._summary.slits_width_flag, False)
     
     def _det_angle_offset_chk_changed(self):
         is_checked = self._summary.det_angle_offset_check.isChecked()
@@ -768,6 +773,8 @@ class BaseRefWidget(BaseWidget):
         
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
+                state.slits_width_flag = self._summary.slits_width_flag.isChecked()
+                
                 #incident medium
                 _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
                                           for j in range(self._summary.incident_medium_combobox.count())]
@@ -902,6 +909,10 @@ class BaseRefWidget(BaseWidget):
         if hasattr(state, "output_dir"):
             if len(str(state.output_dir).strip())>0:
                 self._summary.outdir_edit.setText(str(state.output_dir))
+            
+        #scaling factor file and options
+        self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
+        self._summary.slits_width_flag.setChecked(state.slits_width_flag)
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))

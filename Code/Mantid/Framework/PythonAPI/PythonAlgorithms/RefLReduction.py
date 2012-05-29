@@ -72,6 +72,8 @@ class RefLReduction(PythonAlgorithm):
         #scaling factor file
         self.declareProperty("ScalingFactorFile", "", 
                              Description="Scaling Factor configuration file")
+        self.declareProperty("SlitsWidthFlag", True,
+                             Description="Looking for perfect match of slits width when using Scaling Factor file")
         #incident medium
         self.declareProperty("IncidentMediumSelected", "",
                              Description="Incident medium used for those runs")
@@ -145,6 +147,7 @@ class RefLReduction(PythonAlgorithm):
         slitsValuePrecision = sfCalculator.PRECISION
         sfFile = self.getProperty("ScalingFactorFile")
         incidentMedium = self.getProperty("IncidentMediumSelected")
+        slitsWidthFlag = self.getProperty("SlitsWidthFlag")
                 
         # Pick a good workspace n    ame
         ws_name = "refl%d" % run_numbers[0]
@@ -820,7 +823,8 @@ class RefLReduction(PythonAlgorithm):
             ws_data_scaled = wks_utility.applySF(ws_data,
                                                  incidentMedium,
                                                  sfFile,
-                                                 slitsValuePrecision)
+                                                 slitsValuePrecision,
+                                                 slitsWidthFlag)
             
         else:
             print '-> Automatic SF not applied!'
