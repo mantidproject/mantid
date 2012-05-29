@@ -9,7 +9,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDEvents/ConvertToReflectometryQ.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FrameworkManager.h"
 
@@ -142,7 +142,14 @@ public:
     TSM_ASSERT_THROWS("Should throw as this mode is not supported yet", alg->execute(), std::runtime_error);
   }
 
-
+  void test_execute()
+  {
+     auto alg = make_standard_algorithm();
+     alg->execute();
+     auto ws = boost::shared_dynamic_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
+     //Other tests required here!
+  }
 };
 
 
