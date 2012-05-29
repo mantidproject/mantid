@@ -162,6 +162,7 @@ set ( SRC_FILES
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/SANSDirectBeamScaling.cpp
+	#src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/SetUncertainties.cpp
@@ -360,6 +361,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	#inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertainties.h
