@@ -17,7 +17,6 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/ReflectometryTransformQxQz.h"
 #include "MantidMDEvents/ReflectometryMDTransform.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;
@@ -278,10 +277,11 @@ namespace MDEvents
       inputEventWs = result;
     }
 
-    boost::scoped_ptr<ReflectometryMDTransform> transform(NULL);
+    typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
+    ReflectometryMDTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
     {
-      transform.swap(boost::scoped_ptr<ReflectometryMDTransform>(new ReflectometryTransformQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta)));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta));
     }
     else if(outputDimensions == pSpaceTransform())
     {
