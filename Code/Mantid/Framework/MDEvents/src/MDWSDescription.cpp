@@ -1,18 +1,113 @@
 #include "MantidMDEvents/MDWSDescription.h"
-
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
+
 
 namespace Mantid
 {
 namespace MDEvents
 {
 
-void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS, const std::string &QMode,const std::string dEMode,const std::vector<std::string> &dimProperyNames)
+/// Template to check if a variable equal to NaN
+template <class T>
+inline bool isNaN(T val){
+    volatile T buf=val;
+    return (val!=buf);
+}
+/** set specific (non-default) dimension name 
+ * @param nDim   -- number of dimension;
+ * @param Name   -- the name to assighn into diemnsion names vector;
+ */
+void MDWSDescription::setDimName(unsigned int nDim,const std::string &Name)
 {
+    if(nDim>=nDims){
+        std::string ERR = "setDimName::Dimension index: "+boost::lexical_cast<std::string>(nDim)+" out of total dimensions range: "+boost::lexical_cast<std::string>(nDims);
+        throw(std::invalid_argument(ERR));
+    }
+    dimNames[nDim] = Name;
+}
+void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
+{
+    if(nDim>=nDims){
+        std::string ERR = "setDimUnit::Dimension index: "+boost::lexical_cast<std::string>(nDim)+" out of total dimensions range: "+boost::lexical_cast<std::string>(nDims);
+        throw(std::invalid_argument(ERR));
+    }
+    dimUnits[nDim] = Unit;
+}
+/** method sets up the pointer to the class which contains detectors parameters
+  * @param   -- det_loc the class which contaits the preprocessed detectors parameters
+  *
+  * Throws if the parameters were not defined
+*/
+void MDWSDescription::setDetectors(const ConvToMDPreprocDet &det_loc)
+{
+    pDetLocations = &det_loc;
+    if(pDetLocations->nDetectors()==0) {
+        throw(std::invalid_argument( " Preprocessed detectors positions are either empty or undefined. Nothing to do"));
+    }
 
+}
+
+void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
+                                        const std::vector<std::string> &dimProperyNames,size_t maxNdims)
+{
+    // fill additional dimensions values, defined by workspace properties;
+    this->fillAddProperties(pWS,dimProperyNames,AddCoord);
+
+    this->AlgID = QMode;
+
+    // check and get energy conversion mode;
+    MDTransfDEHelper dEChecker;
+    emode = dEChecker.getEmode(dEMode);
+
+    // get raw pointer to Q-transformation (do not delete this pointer!)
+    MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
+
+    // get number of dimensions this Q transformation generates from the workspace. 
+    unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(emode);
+
+    // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions coming from additional coordinates
+    nDims  = nMatrixDim + (unsigned int)AddCoord.size();
+    if(nDims>maxNdims||AddCoord.size()>maxNdims)
+    {
+        std::string ERR="Input parameters have requested "+boost::lexical_cast<std::string>(nDims)+
+                        "which is higher then supported number: "+boost::lexical_cast<std::string>(maxNdims);
+        throw(std::invalid_argument(ERR));
+    }
+    this->resizeDimDescriptions(nDims);
+    // check if all MD dimensions descriptors are set properly
+    if(nDims!=dimNames.size()||nDims!=dimMin.size())
+        throw(std::invalid_argument(" dimension limits vectors and dimension description vectors inconsistent as have different length"));
+
+
+    //*********** fill in dimension id-s, dimension units and dimension names
+    // get default dim ID-s. TODO: it should be possibility to owerride it later;
+    std::vector<std::string> MatrDimID   = pQtransf->getDefaultDimID(emode);
+    std::vector<std::string> MatrUnitID  = pQtransf->outputUnitID(emode);
+    for(unsigned int i=0;i<nDims;i++)
+    {
+        if(i<nMatrixDim){
+            dimIDs[i]  = MatrDimID[i];
+            dimNames[i]= dimNames[i];
+            dimUnits[i]= MatrUnitID[i];
+        }else{
+            dimIDs[i]  = dimProperyNames[i-nMatrixDim];
+            dimNames[i]= dimProperyNames[i-nMatrixDim];
+            dimUnits[i]= dimProperyNames[i-nMatrixDim];
+        }
+    }
+
+    // get input energy
+    this->Ei = getEi(pWS);
+    // in direct or indirect mode input ws has to have input energy
+    if(emode==ConvertToMD::Direct||emode==ConvertToMD::Indir){
+        if(isNaN(Ei))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+    }
+    
 
     // try to get the WS oriented lattice
     if(pWS->sample().hasOrientedLattice()){        
@@ -22,12 +117,25 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     }
     //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
     this->GoniomMatr = pWS->run().getGoniometer().getR();
-
-    // fill additional dimensions values, defined by workspace properties;
-    this->fillAddProperties(pWS,dimProperyNames,AddCoord);
+    
+    // check if the detector information is still present in MD workspace
+    detInfoLost = false;
+    API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(pWS->getAxis(1));
+    if(pYAxis){
+        // if this is numeric axis, then the detector's information has been lost:
+        detInfoLost=true;
+    }          
 
 
 }
+/**checks if workspace has to be processed in powder mode. 
+  *   A ws has to be processed in powder mode if it does not have oriented lattice defined  */
+bool MDWSDescription::isPowder()const
+{
+    if(pLatt.get()==NULL)return true;
+    return false;
+}
+
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 
   *  the vector of MD coodinates for the particular workspace.
   *
@@ -64,7 +172,7 @@ void MDWSDescription::fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr 
 */
 void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 {
-    this->nDims = pWS->getNumDims();
+    this->nDims = (unsigned int)pWS->getNumDims();
     // prepare all arrays:
     this->dimMin.resize(nDims);
     this->dimMax.resize(nDims);
@@ -111,13 +219,13 @@ void  MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorks
                            boost::lexical_cast<std::string>(NewMDWorkspaceD.nDims);
          throw(std::invalid_argument(ERR)); 
     }
-    if(this->emode<-1)
+    if(this->emode==ConvertToMD::Undef)
     {
         throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
     }
-    if(this->emode>0)
+    if(this->emode==ConvertToMD::Direct||this->emode==ConvertToMD::Indir)
     {
-         volatile double Ei = this->Ei;
+        volatile double Ei = this->Ei;
         if(this->Ei!=Ei){
            std::string ERR = "Workspace description has not been correctly defined, as emode "+boost::lexical_cast<std::string>(this->emode)+" request input energy to be defined";
            throw(std::invalid_argument(ERR)); 
@@ -132,6 +240,11 @@ void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &So
 {
     this->emode = SourceMDWSDescr.emode;
     this->Ei    = SourceMDWSDescr.Ei;
+    this->AlgID = SourceMDWSDescr.AlgID;
+    this->emode = SourceMDWSDescr.emode;
+
+    this->AddCoord.assign(SourceMDWSDescr.AddCoord.begin(),SourceMDWSDescr.AddCoord.end());
+
     if(SourceMDWSDescr.pLatt.get()){
         this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(*(SourceMDWSDescr.pLatt)));
     }
@@ -142,107 +255,66 @@ void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &So
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
  * values vere defined and min values are smaller then mav values */
-void MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
+void MDWSDescription::checkMinMaxNdimConsistent()const
 {
-  if(this->dimMin.size()!=this->dimMax.size()||this->dimMin.size()!=this->nDims)
+  if(this->dimMin.size()!=this->dimMax.size())
   {
-      g_log.error()<<" number of specified min dimension values: "<<dimMin.size()<<", number of max values: "<<dimMax.size()<<
-                     " and total number of target dimensions: "<<nDims<<" are not consistent\n";
-      throw(std::invalid_argument("wrong number of dimension limits"));
+      std::string ERR = " number of specified min dimension values: "+boost::lexical_cast<std::string>(dimMin.size())+
+                        ", number of max values: "+boost::lexical_cast<std::string>(dimMax.size())+
+                        " and total number of target dimensions: "+boost::lexical_cast<std::string>(nDims)+" are not consistent\n";
+      throw(std::invalid_argument(ERR));
   }
     
   for(size_t i=0; i<this->dimMin.size();i++)
   {
     if(this->dimMax[i]<=this->dimMin[i])
     {
-      g_log.error()<<" min value "<<dimMin[i]<<" not less then max value"<<dimMax[i]<<" in direction: "<<i<<std::endl;
-      throw(std::invalid_argument("min limit not smaller then max limit"));
+      std::string ERR = " min value "+boost::lexical_cast<std::string>(dimMin[i])+
+                        " not less then max value"+boost::lexical_cast<std::string>(dimMax[i])+" in direction: "+
+                         boost::lexical_cast<std::string>(i)+"\n";
+      throw(std::invalid_argument(ERR));
     }
   }
 }
-//
-std::vector<std::string> MDWSDescription::getDefaultDimIDQ3D(int dEMode)const
-{
-    std::vector<std::string> rez;
-     if(dEMode==0)
-     {
-          rez.resize(3);
-     }else{
-       if (dEMode==1||dEMode==2)
-       {
-            rez.resize(4);
-            rez[3]=default_dim_ID[dE_ID];
-       }else{
-            throw(std::invalid_argument("Unknown dE mode provided"));
-       }
-     }
-     rez[0]=default_dim_ID[Q1_ID];
-     rez[1]=default_dim_ID[Q2_ID];
-     rez[2]=default_dim_ID[Q3_ID];
-     return rez;
-}
-
-
-
-std::vector<std::string> MDWSDescription::getDefaultDimIDModQ(int dEMode)const
-{
-     std::vector<std::string> rez;
-
-     if(dEMode==0){
-          rez.resize(1);
-     }else{
-         if (dEMode==1||dEMode==2){
-            rez.resize(2);
-            rez[1]=default_dim_ID[dE_ID];
-         }else{
-             throw(std::invalid_argument("Unknown dE mode provided"));
-         }
-     }
-     rez[0]=default_dim_ID[ModQ_ID];
-     return rez;
-}
-
 
 /// empty constructor
-MDWSDescription::MDWSDescription(size_t nDimensions):
-nDims(nDimensions),
-emode(-2),
+MDWSDescription::MDWSDescription(unsigned int nDimensions):
+emode(ConvertToMD::Undef),
 Ei(std::numeric_limits<double>::quiet_NaN()),
-dimMin(nDimensions,-1),
-dimMax(nDimensions,1),
-dimNames(nDimensions,"mdn"),
-dimIDs(nDimensions,"mdn_"),
-dimUnits(nDimensions,"Momentum"),
-nBins(nDimensions,10),
-convert_to_factor(NoScaling),
-rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error
+rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
 Wtransf(3,3,true),
 GoniomMatr(3,3,true),
-detInfoLost(false),
-default_dim_ID(nDefaultID),
-QScalingID(NCoordScalings)
+detInfoLost(true)
 {
-    for(size_t i=0;i<nDimensions;i++)
+
+    this->resizeDimDescriptions(nDimensions);
+    this->dimMin.assign(nDims,std::numeric_limits<double>::quiet_NaN());
+    this->dimMax.assign(nDims,std::numeric_limits<double>::quiet_NaN());
+
+}
+void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions, size_t nBins)
+{
+    this->nDims = nDimensions;
+
+    this->dimNames.assign(nDims,"mdn");
+    this->dimIDs.assign(nDims,"mdn_");
+    this->dimUnits.assign(nDims,"Momentum");
+    this->nBins.assign(nDims,nBins);
+
+    for(size_t i=0;i<nDims;i++)
     {
         dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
         dimNames[i]= dimNames[i]+boost::lexical_cast<std::string>(i);
     }
 
- // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
-     // for ModQ transformation:
-     default_dim_ID[ModQ_ID]="|Q|";
-     // for Q3D transformation
-     default_dim_ID[Q1_ID]="Q1";
-     default_dim_ID[Q2_ID]="Q2";
-     default_dim_ID[Q3_ID]="Q3";
-     default_dim_ID[dE_ID]="DeltaE";
+}
 
-    QScalingID[NoScaling]="Q in A^-1";
-    QScalingID[SingleScale]="Q in lattice units";
-    QScalingID[OrthogonalHKLScale]="Orthogonal HKL";
-    QScalingID[HKLScale]="HKL";
+void MDWSDescription::setMinMax(const std::vector<double> &minVal,const std::vector<double> &maxVal)
+{
+    dimMin.assign(minVal.begin(),minVal.end());
+    dimMax.assign(maxVal.begin(),maxVal.end());
 
-
+    this->checkMinMaxNdimConsistent();
 }
 
 MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
@@ -258,12 +330,12 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
     this->dimUnits=rhs.dimUnits;   
     this->nBins   =rhs.nBins;
 
-    this->convert_to_factor= rhs.convert_to_factor;
 
     this->rotMatrix     = rhs.rotMatrix;
     this->AlgID         = rhs.AlgID;
 
     this->detInfoLost   = rhs.detInfoLost;
+    this->pDetLocations = rhs.pDetLocations;
 
     if(rhs.pLatt.get()){
         this->pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(*(rhs.pLatt)));
@@ -274,70 +346,36 @@ MDWSDescription & MDWSDescription::operator=(const MDWSDescription &rhs)
     return *this;
 
 }
-
-
-std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &QNames)
+/**get vector of minimal and maximal values from the class */
+void MDWSDescription::getMinMax(std::vector<double> &min,std::vector<double> &max)const
 {
-    double eps(1.e-3);
-    Kernel::V3D absDir(fabs(Dir.X()),fabs(Dir.Y()),fabs(Dir.Z()));
-    std::string mainName;
-
-    if ((absDir[0]>=absDir[1])&&(absDir[0]>=absDir[2]))
-    {
-        mainName=QNames[0];
-    }
-    else if  (absDir[1]>=absDir[2])
-    {
-        mainName=QNames[1];
-    }
-    else
-    {
-        mainName=QNames[2];
-    }
-
-    std::string name("["),separator=",";
-    for(size_t i=0;i<3;i++){
-
-        if(i==2)separator="]";
-        if(absDir[i]<eps){
-            name+="0"+separator;
-            continue;
-        }
-        if(Dir[i]<0){
-           name+="-";
-        }
-        if(std::fabs(absDir[i]-1)<eps){
-            name+=mainName+separator;
-            continue;
-        }
-        name+= sprintfd(absDir[i],eps)+mainName+separator;
-    }
-
-    return name;
-}
-std::string DLLExport sprintfd(const double data, const double eps)
-{
-     // truncate to eps decimal points
-     float dist = float((int(data/eps+0.5))*eps);
-     return boost::str(boost::format("%d")%dist);
-
+     min.assign(this->dimMin.begin(),this->dimMin.end());
+     max.assign(this->dimMax.begin(),this->dimMax.end());
 }
 
 
-CoordScaling MDWSDescription::getQScaling(const std::string &ScID)const
+/** Helper function to obtain the energy of incident neutrons from the input workspaec
+  *
+  *@param pHost the pointer to the algorithm to work with
+  *
+  *@returns the incident energy of the neutrons or quet NaN if can not retrieve one 
+*/
+double MDWSDescription::getEi(API::MatrixWorkspace_const_sptr inWS2D)const
 {
-    CoordScaling theScaling(NCoordScalings);
-    for(size_t i=0;i<NCoordScalings;i++)
-    {
-        if(QScalingID[i].compare(ScID)==0)
-        {
-            theScaling = (CoordScaling)i;
-            break;
-        }
+    if(!inWS2D.get()){
+        throw(std::invalid_argument(" getEi: invoked on empty input workspace "));
     }
-    if(theScaling==NCoordScalings) throw(std::invalid_argument(" The scale with ID: "+ScID+" is unavalible"));
-
-    return theScaling;
+    Kernel::PropertyWithValue<double>  *pProp(NULL);
+    try{
+       pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("Ei"));
+    }catch(...){
+    }
+    if(!pProp){
+        //convert_log.error()<<"getEi: can not obtain incident energy of neutrons\n";
+        //throw(std::logic_error(" should not call this function when incident energy is undefined"));
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return (*pProp); 
 }
 
 

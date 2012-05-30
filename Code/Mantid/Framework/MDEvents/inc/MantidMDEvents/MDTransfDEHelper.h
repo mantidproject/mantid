@@ -1,6 +1,10 @@
 #ifndef H_MDTRANSF_DE_HELPER
 #define H_MDTRANSF_DE_HELPER
 
+#include "MantidKernel/DllConfig.h"
+#include <vector>
+#include <string>
+
 namespace Mantid
 {
 namespace MDEvents
@@ -42,14 +46,15 @@ namespace ConvertToMD
           Elastic = 0,  //< int emode = 0; Elastic analysis
           Direct  = 1,  //< emode=1; Direct inelastic analysis mode
           Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
-          No_DE         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion), 
+          No_DE,         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion), 
                        // it is also the counter for the number of availible modes, used to initiate the mode names
+          Undef        // non-existing (undefined mode). Used to check if emode was defined
     };
 }
 
 
- class DLLExport MDTransfDEHelper
- {
+class DLLExport MDTransfDEHelper
+{
  public:
     // energy conversion modes supported by this class
     std::vector<std::string> getEmodes()const{return EmodesList;}

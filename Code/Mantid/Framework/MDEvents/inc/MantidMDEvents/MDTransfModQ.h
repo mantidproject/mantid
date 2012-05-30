@@ -4,6 +4,7 @@
 #include "MantidMDEvents/MDTransfInterface.h"
 #include "MantidMDEvents/ConvToMDEventsBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidMDEvents/MDTransfDEHelper.h"
 //
 namespace Mantid
 {
@@ -45,16 +46,19 @@ namespace MDEvents
 class DLLExport MDTransfModQ: public MDTransfInterface
 { 
 public:
-   /**  returns the units, the transformation expects for workspace to be expressed in. */
-    const std::string usedUnitID()const;
     /// the name, this subalgorithm is known to users (will appear in selection list)
-    const std::string transfID()const{return "ModQ"; }
-    // energy conversion modes supported by this class
-    std::vector<std::string> getEmodes()const{return dEModes.getEmodes();}
-    /// string presentation of emode
-    std::string getEmode(ConvertToMD::EModes Mode)const{return dEModes.getEmode(Mode);}
-    //void setEmode(const std::string &Emode);
+    const std::string transfID()const; // {return "ModQ"; }
+    /** energy conversion modes supported by this class; 
+      * The class supports three standard energy conversion modes */
+    std::vector<std::string> getEmodes()const{MDTransfDEHelper dEModes;  return dEModes.getEmodes();}
+    /**the default dimID-s in ModQ mode are |Q| and dE if necessary */ 
+    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode)const;
 
+   /**  returns the units, the transformation expects for input workspace to be expressed in. */
+    const std::string inputUnitID()const;
+    /**function returns units ID-s which this transformation prodiuces its ouptut.
+       It is Momentum and Momentum and DelteE in inelastic modes */
+    std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode)const;
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
@@ -62,10 +66,10 @@ public:
     // constructor;
     MDTransfModQ();
     //
-    void initialize(const ConvToMDEventsBase &Conv);
-    /** return the number of dimensions, calculated by the transformation from the workspace. Depending on mode, this numebr here is either 1 or 2*/
-    virtual int getNMatrixDimensions()const{return nMatrixDim;}
-
+    void initialize(const MDWSDescription &ConvParams);
+    /** return the number of dimensions, calculated by the transformation from the workspace.
+       Depending on EMode, this numebr here is either 1 or 2*/
+    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode)const;
 protected:
     //  directions to the detectors 
     double ex,ey,ez;
@@ -75,10 +79,9 @@ protected:
     std::vector<double> dim_min,dim_max;
     // pointer to the class, which contains the information about precprocessed detectors
     Kernel::V3D const * pDet;
-    // The pointer to the class, which drives this conversion and provides all necessary values for variables
-    ConvToMDEventsBase const* pHost;
-    // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode. 
-    int nMatrixDim;
+
+    // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode here. 
+    unsigned int nMatrixDim;
     // the variable which describes current conversion mode:
     ConvertToMD::EModes emode;
     /** the vector of the additional coordinates which define additional MD dimensions. 
@@ -88,13 +91,9 @@ protected:
     // the energy of the incident neutrons
     double Ei;
     // the wavevector of incident neutrons
-    double ki;
-    // class which describes energy transfer modes supported by this class
-    MDTransfDEHelper dEModes;
+    double ki;  
 private:
-    // vector which provides string representation of supporting emodes;
-    std::vector<std::string> Emodes;
-    /// how to transform workspace data in elastic case
+     /// how to transform workspace data in elastic case
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;
     /// how to transform workspace data in inelastic case
     inline bool calcMatrixCoordInelastic(const double &DeltaE,std::vector<coord_t> &Coored)const;

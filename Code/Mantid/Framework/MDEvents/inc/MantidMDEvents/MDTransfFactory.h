@@ -11,9 +11,17 @@
    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
        ((Mantid::MDEvents::MDTransfFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
-       }
+       } \
+       const std::string Mantid::MDEvents::classname::transfID() const {return #classname;}
 
-//  const std::string Mantid::MDEvents::classname::transfID() const {return #classname;}
+#define DECLARE_MD_TRANSFID(classname,regID) \
+    namespace { \
+   Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+       ((Mantid::MDEvents::MDTransfFactory::Instance().subscribe<classname>(#regID)) \
+       , 0)); \
+       } \
+       const std::string Mantid::MDEvents::classname::transfID() const {return #regID;}
+
 
 
 //----------------------------------------------------------------------
@@ -58,7 +66,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDTransfFactoryImpl : public Kernel::DynamicFactory<MDTransfInterface>
+#ifdef IN_MANTID_MDEVENT
+#define MANTID_MDEVENTS_DLL DLLExport
+#else
+#define MANTID_MDEVENTS_DLL DLLImport
+#endif /* IN_MANTID_MDEVENT*/
+
+
+class MANTID_MDEVENTS_DLL MDTransfFactoryImpl : public Kernel::DynamicFactory<MDTransfInterface>
 {
 public:
   virtual boost::shared_ptr<MDTransfInterface> create(const std::string& className) const;
@@ -85,7 +100,7 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-  template class DLLExport Mantid::Kernel::SingletonHolder<MDTransfFactoryImpl>;
+  template class MANTID_MDEVENTS_DLL Mantid::Kernel::SingletonHolder<MDTransfFactoryImpl>;
 #endif /* _WIN32 */
 /// The specialisation of the SingletonHolder class that holds the MDTransformations Factory
 typedef Kernel::SingletonHolder<MDTransfFactoryImpl> MDTransfFactory;
