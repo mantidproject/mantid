@@ -73,10 +73,10 @@ namespace Mantid
       ws->splitBox();
 
       auto spectraAxis = eventWs->getAxis(1);
-      const double two_pi = 6.28318531;
-      const double c_cos_theta_i = cos(m_incidentTheta);
-      const double  c_sin_theta_i = sin(m_incidentTheta);
-
+      const double two_pi = 6.28318531; 
+      const double to_radians_factor = 3.14159265/180;
+      const double c_cos_theta_i = cos(m_incidentTheta*to_radians_factor);
+      const double  c_sin_theta_i = sin(m_incidentTheta*to_radians_factor);
       for(size_t index = 0; index < eventWs->getNumberHistograms(); ++index)
       {
         auto counts = eventWs->readY(index);
@@ -84,8 +84,8 @@ namespace Mantid
         auto errors = eventWs->readE(index);
         size_t nInputBins = eventWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
         const double theta_final = spectraAxis->getValue(index)/2;
-        const double c_sin_theta_f = sin(theta_final);
-        const double c_cos_theta_f = cos(theta_final);
+        const double c_sin_theta_f = sin(theta_final*to_radians_factor);
+        const double c_cos_theta_f = cos(theta_final*to_radians_factor);
         const double dirQx = (c_cos_theta_f - c_cos_theta_i);
         const double dirQz = (c_sin_theta_f + c_sin_theta_i);
         //Loop over all bins in spectra 
