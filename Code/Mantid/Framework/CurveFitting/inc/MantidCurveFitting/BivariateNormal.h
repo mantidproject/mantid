@@ -34,15 +34,16 @@ namespace Mantid
      <LI> Mrow - The row of the center of the peak on this slice</LI>
      <LI> SScol -The variance of the column values in the peak for this time slice </LI>
      <LI> SSrow - The variance of the row values in the peak for this time slice </LI>
-     <LI> SSrc- The covariance of the row and column values in the peak for this time slice </LI>
-    </UL>
+     <LI> SSrc - The covariance of the row and column values in the peak for this time slice </LI>
+    </UL><P>
     
-
-    <UL>There is one attribute( This must be specified)
-      <LI> CalcVariances - <UL>If true,calculates SScol, SSrow, and SSrc from the experimental data
+    There is one attribute( This must be specified)
+    <UL>
+      <LI> CalcVariances - <UL>
+                               If true,calculates SScol, SSrow, and SSrc from the experimental data
                                given Background, Mcol, and Mrow(if the parameter has not been tied)
                                If false, the parameters SScol, SSrow, and SSrc will be fit, unless
-                               tied. </LI>
+                                tied. </UL>  </LI>
     </UL>
 
 

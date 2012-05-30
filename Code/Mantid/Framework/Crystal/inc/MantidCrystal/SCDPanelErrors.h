@@ -36,7 +36,6 @@ The Parameters
       <LI>f*_Xrot-Rotation(degrees) Panel Center in x axis direction</LI>
       <LI>f*_Yrot-Rotation(degrees) Panel Center in y axis direction</LI>
       <LI>f*_Zrot-Rotation(degrees) Panel Center in z axis direction</LI>
-
     </UL>
 
    <UL> Note that the order of rotations are z first, then y then x.</UL>
