@@ -25,6 +25,9 @@ public:
 	PacketType::Enum type(void) const { return m_type; }
 	uint32_t payload_length(void) const { return m_payload_len; }
 	const struct timespec &timestamp(void) const { return m_timestamp; }
+	uint64_t pulseId(void) const {
+		return (m_timestamp.tv_sec << 32) | m_timestamp.tv_nsec;
+	}
 	uint32_t packet_length(void) const { return m_payload_len + 16; }
         bool compare_timestamp( const struct timespec &ts) const
         {
@@ -86,14 +89,19 @@ public:
 	uint32_t pulseCharge(void) const { return m_fields[2] & 0x00ffffff; }
 	bool badVeto(void) const { return !!(m_fields[3] & 0x8000000); }
 	bool badCycle(void) const { return !!(m_fields[3] & 0x40000000); }
-        uint8_t timingStatus(void) const { return (uint8_t)(m_fields[3] >> 22); }
+	uint8_t timingStatus(void) const {
+		return (uint8_t) (m_fields[3] >> 22);
+	}
 	uint16_t veto(void) const { return (m_fields[3] >> 10) & 0xfff; }
 	uint16_t cycle(void) const { return m_fields[3] &0x3ff; }
 	uint32_t intraPulseTime(void) const { return m_fields[4]; }
 	bool rawTOF(void) const { return !!(m_fields[5] & 0x80000000); }
 	uint32_t tofOffset(void) const { return m_fields[5] & 0x7fffffff; }
 
-	// TODO implment event accessors
+	const Event *events(void) const { return (Event *) &m_fields[6]; }
+	uint32_t num_events(void) const {
+		return (m_payload_len - 24) / (2 * sizeof (uint32_t));
+	}
 
 private:
 	uint32_t *m_fields;
@@ -114,7 +122,9 @@ public:
 	uint32_t pulseCharge(void) const { return m_fields[0] & 0x00ffffff; }
 	bool badVeto(void) const { return !!(m_fields[1] & 0x8000000); }
 	bool badCycle(void) const { return !!(m_fields[1] & 0x40000000); }
-        uint8_t timingStatus(void) const { return (uint8_t)(m_fields[1] >> 22); }
+	uint8_t timingStatus(void) const {
+		return (uint8_t) (m_fields[1] >> 22);
+	}
 	uint16_t veto(void) const { return (m_fields[1] >> 10) & 0xfff; }
 	uint16_t cycle(void) const { return m_fields[1] &0x3ff; }
 	uint32_t intraPulseTime(void) const { return m_fields[2]; }
@@ -135,6 +145,15 @@ private:
 class BankedEventPkt : public Packet {
 public:
 	BankedEventPkt(const BankedEventPkt &pkt);
+
+	enum Flags {
+		ERROR_PIXELS    = 0x0001,
+		PARTIAL_DATA    = 0x0002,
+		PULSE_VETO      = 0x0004,
+		MISSING_RTDL    = 0x0008,
+		MAPPING_ERROR   = 0x0010,
+		DUPLICATE_PULSE = 0x0020,
+	};
 
 	uint32_t pulseCharge(void) const { return m_fields[0]; }
 	uint32_t pulseEnergy(void) const { return m_fields[1]; }
@@ -273,6 +292,20 @@ public:
 
 private:
 	HeartbeatPkt(const uint8_t *data, uint32_t len);
+
+	friend class Parser;
+};
+
+class GeometryPkt : public Packet {
+public:
+	GeometryPkt(const GeometryPkt &pkt);
+
+	const std::string &info(void) const { return m_xml; }
+
+private:
+	std::string m_xml;
+
+	GeometryPkt(const uint8_t *data, uint32_t len);
 
 	friend class Parser;
 };

@@ -21,6 +21,7 @@ namespace PacketType {
 		STATS_RESET_V0		= ADARA_PKT_TYPE(0x4007, 0),
 		SYNC_V0			= ADARA_PKT_TYPE(0x4008, 0),
 		HEARTBEAT_V0		= ADARA_PKT_TYPE(0x4009, 0),
+		GEOMETRY_V0		= ADARA_PKT_TYPE(0x400A, 0),
 		DEVICE_DESC_V0		= ADARA_PKT_TYPE(0x8000, 0),
 		VAR_VALUE_U32_V0	= ADARA_PKT_TYPE(0x8001, 0),
 		VAR_VALUE_DOUBLE_V0	= ADARA_PKT_TYPE(0x8002, 0),
@@ -92,6 +93,18 @@ namespace VariableSeverity {
 		NOT_REPORTED		= 0xffff,
 	};
 }
+
+struct Event {
+	uint32_t pixel;
+	uint32_t tof;
+};
+
+struct Header {
+	uint32_t payload_len;
+	uint32_t pkt_format;
+	uint32_t ts_sec;
+	uint32_t ts_nsec;
+};
 
 class invalid_packet : public std::runtime_error {
 public:

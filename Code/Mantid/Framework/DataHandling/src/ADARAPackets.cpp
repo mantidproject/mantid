@@ -261,6 +261,29 @@ HeartbeatPkt::HeartbeatPkt(const HeartbeatPkt &pkt) :
 
 /* ------------------------------------------------------------------------ */
 
+GeometryPkt::GeometryPkt(const uint8_t *data, uint32_t len) :
+	Packet(data, len)
+{
+	uint32_t size = *(uint32_t *) payload();
+	const char *xml = (const char *) payload() + sizeof(uint32_t);
+
+	if (m_payload_len < sizeof(uint32_t))
+		throw invalid_packet("Geometry packet is too short");
+	if (m_payload_len < (size + sizeof(uint32_t)))
+		throw invalid_packet("Geometry packet has oversize string");
+
+	/* TODO it would be better to create the string on access
+	 * rather than object construction; the user may not care.
+	 */
+	m_xml.assign(xml, size);
+}
+
+GeometryPkt::GeometryPkt(const GeometryPkt &pkt) :
+	Packet(pkt), m_xml(pkt.m_xml)
+{}
+
+/* ------------------------------------------------------------------------ */
+
 DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len) :
 	Packet(data, len)
 {
