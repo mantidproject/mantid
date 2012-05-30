@@ -72,6 +72,8 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel1))
         self._summary.data_from_tof.setValidator(QtGui.QIntValidator(self._summary.data_from_tof))
         self._summary.data_to_tof.setValidator(QtGui.QIntValidator(self._summary.data_to_tof))
+        self._summary.dq0.setValidator(QtGui.QDoubleValidator(self._summary.dq0))
+        self._summary.dq_over_q.setValidator(QtGui.QDoubleValidator(self._summary.dq_over_q))
         
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
@@ -118,6 +120,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
+        self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked(bool)"), self._fourth_column_clicked)
                 
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
@@ -611,13 +614,20 @@ class DataReflWidget(BaseWidget):
         
         self._edit_event(None, self._summary.norm_switch)
 
+    def _fourth_column_clicked(self, is_checked):
+        """
+            This is reached by the 4th column switch
+        """
+        self._summary.dq0_label.setEnabled(is_checked)
+        self._summary.dq0.setEnabled(is_checked)
+        self._summary.dq0_unit.setEnabled(is_checked)
+        self._summary.dq_over_q_label.setEnabled(is_checked)
+        self._summary.dq_over_q.setEnabled(is_checked)
+        
     def _tof_range_clicked(self, is_checked):
         """
             This is reached by the TOF range switch
         """
-        print 'in _tof_range_clicked'
-        
-        
         self._summary.tof_min_label.setEnabled(is_checked)
         self._summary.data_from_tof.setEnabled(is_checked)
         self._summary.tof_min_label2.setEnabled(is_checked)
@@ -625,7 +635,6 @@ class DataReflWidget(BaseWidget):
         self._summary.data_to_tof.setEnabled(is_checked)
         self._summary.tof_max_label2.setEnabled(is_checked)
         #self._summary.plot_tof_btn.setEnabled(is_checked)
-        
         self._edit_event(None, self._summary.tof_range_switch)
 
     def _plot_count_vs_y(self, is_peak=True):

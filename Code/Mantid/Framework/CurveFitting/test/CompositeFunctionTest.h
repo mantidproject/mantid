@@ -263,7 +263,7 @@ public:
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
-    TS_ASSERT_DELTA(row.Double(1),2.13,0.2);
+    TS_ASSERT_DELTA(row.Double(1),2.13,0.3);
 
     row = outParams->getRow(5);
     TS_ASSERT_EQUALS(row.String(0),"f2.c");

@@ -35,15 +35,12 @@ signals:
 
 private:
 
-  void addPlotRadioButton(const std::string & text, const std::string & tooltip);
+  void addPlotRadioButton(const std::string & text, const std::string & tooltip, const bool bIntegrated = false);
 
   Ui::LinePlotOptionsClass ui;
 
   /// Vector of the various plot axis radio buttons
   QVector<QRadioButton *> m_radPlots;
-
-  /// Original workspace (gives the dimensions to plot);
-  Mantid::API::IMDWorkspace_sptr m_originalWs;
 
   /// Chosen plot X-axis
   int m_plotAxis;

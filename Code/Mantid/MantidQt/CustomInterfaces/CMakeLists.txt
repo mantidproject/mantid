@@ -1,13 +1,21 @@
 set ( SRC_FILES
+    src/ApplyCorr.cpp
+    src/CalcCorr.cpp
     src/ConvertToEnergy.cpp
+    src/ConvFit.cpp
 	src/CreateMDWorkspace.cpp
 	src/CreateMDWorkspaceAlgDialog.cpp	
+    src/Elwin.cpp
 	src/EventNexusFileMemento.cpp
+    src/Fury.cpp
+    src/FuryFit.cpp
 	src/Homer.cpp
+    src/IDATab.cpp
 	src/IO_MuonGrouping.cpp
 	src/Indirect.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
+    src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
 	src/MuonAnalysisHelper.cpp
@@ -28,15 +36,23 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
+    inc/MantidQtCustomInterfaces/ApplyCorr.h
+    inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+    inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
     inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+    inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
+    inc/MantidQtCustomInterfaces/Fury.h
+    inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
+    inc/MantidQtCustomInterfaces/IDATab.h
 	inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+    inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
@@ -57,13 +73,21 @@ set ( INC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
+                inc/MantidQtCustomInterfaces/ApplyCorr.h
+                inc/MantidQtCustomInterfaces/CalcCorr.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/ConvFit.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+                inc/MantidQtCustomInterfaces/Elwin.h
+                inc/MantidQtCustomInterfaces/Fury.h
+                inc/MantidQtCustomInterfaces/FuryFit.h
                 inc/MantidQtCustomInterfaces/Homer.h
+                inc/MantidQtCustomInterfaces/IDATab.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+                inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h

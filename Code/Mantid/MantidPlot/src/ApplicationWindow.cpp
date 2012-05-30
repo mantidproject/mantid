@@ -4706,8 +4706,8 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
       app->setListViewDate(caption, graph[3]);
       plot->setBirthDate(graph[3]);
 
-      //restoreWindowGeometry(app, plot, t.readLine());
-      t.readLine();
+      restoreWindowGeometry(app, plot, t.readLine());
+
       plot->blockSignals(true);
 
       if (d_file_version > 71)
@@ -5995,8 +5995,22 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
       return s + "maximized\n";
   }
 
-  s += QString::number(w->x()) + "\t";
-  s += QString::number(w->y()) + "\t";
+  int x = w->x();
+  int y = w->y();
+  QWidget* wrapper = w->getWrapperWindow();
+  if ( wrapper )
+  {
+    x = wrapper->x();
+    y = wrapper->y();
+    if ( w->getFloatingWindow() )
+    {
+      QPoint pos = QPoint(x,y) - desktopTopLeft();
+      x = pos.x();
+      y = pos.y();
+    }
+  }
+  s += QString::number(x) + "\t";
+  s += QString::number(y) + "\t";
   if (w->status() != MdiSubWindow::Minimized){
     s += QString::number(w->width()) + "\t";
     s += QString::number(w->height()) + "\t";
@@ -6039,7 +6053,10 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWind
     QStringList lst = s.split("\t");
     if (lst.count() > 4){
       w->resize(lst[3].toInt(), lst[4].toInt());
-      w->move(lst[1].toInt(), lst[2].toInt());
+      int x = lst[1].toInt();
+      int y = lst[2].toInt();
+      validateWindowPos( w, x, y );
+      w->move( x, y );
     }
     w->setStatus(MdiSubWindow::Normal);
     if (lst.count() > 5) {
@@ -11031,7 +11048,7 @@ Note* ApplicationWindow::openNote(ApplicationWindow* app, const QStringList &fli
     app->setListViewDate(caption, lst[1]);
     w->setBirthDate(lst[1]);
   }
-  //restoreWindowGeometry(app, w, flist[1]);
+  restoreWindowGeometry(app, w, flist[1]);
 
   lst=flist[2].split("\t");
   w->setWindowLabel(lst[1]);
@@ -17920,7 +17937,7 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
   QSize sz = w->size();
   if (pos == none)
   {
-    pos = positionNewFloatinfWindow(sz);
+    pos = positionNewFloatingWindow(sz);
   }
   else
   {
@@ -17957,7 +17974,7 @@ QPoint ApplicationWindow::desktopTopLeft() const
   * Find the best position for a new floating window.
   * @param sz :: Size of the new window.
   */
-QPoint ApplicationWindow::positionNewFloatinfWindow(QSize sz) const
+QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 {
   const int dlt = 40; // shift in x and y
   const QPoint first(-1,-1);
@@ -17986,10 +18003,11 @@ QPoint ApplicationWindow::positionNewFloatinfWindow(QSize sz) const
  * Add a sub-window to as a docked MDI window.
  * @param w :: Pointer to a MdiSubWindow which will be wrapped in a QMdiSubWindow.
  */
-QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w)
+QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos)
 {
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
   sw->resize(w->size());
+  sw->move(pos);
   return sw;
 }
 
@@ -18212,4 +18230,38 @@ bool ApplicationWindow::isDefaultFloating(const QString& aClassName) const
   }
 #endif
   return settings.value("/General/FloatingWindows/"+aClassName,theDefault).toBool();
+}
+
+
+/**
+ * Check that a widow will be visible if moved to these coordinates and
+ * set them to default values otherwise.
+ * @param w :: Pointer to a sub-window.
+ * @param x :: Tested x coordinate
+ * @param y :: Tested y coordinate
+ */
+void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
+{
+  QSize sz = w->size();
+  if ( w->getFloatingWindow() )
+  {
+    QWidget* desktop = QApplication::desktop()->screen();
+    QPoint pos(x, y);
+    pos += desktopTopLeft();
+    if ( pos.x() < 0 || pos.y() < 0 ||
+      pos.x() + sz.width() > desktop->width() ||
+      pos.y() + sz.height() > desktop->height() )
+    {
+      pos = positionNewFloatingWindow(sz);
+    }
+    x = pos.x();
+    y = pos.y();
+    return;
+  }
+  else if ( x < 0 || y < 0 || 
+    x + sz.width() > d_workspace->width() ||
+    y + sz.height() > d_workspace->height() )
+  {
+    x = y = 0;
+  }
 }

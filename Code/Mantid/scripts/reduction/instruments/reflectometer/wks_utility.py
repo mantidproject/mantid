@@ -707,7 +707,8 @@ def isWithinPrecisionRange(value_file, value_run, precision):
 def applySF(InputWorkspace,
             incidentMedium,
             sfFile,
-            valuePrecision):
+            valuePrecision,
+            slitsWidthFlag):
     """
     Function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
@@ -737,17 +738,23 @@ def applySF(InputWorkspace,
         s1h = getS1h(mtd[InputWorkspace])
         s2h = getS2h(mtd[InputWorkspace])
         
-        s1h_value = s1h[0]
-        s2h_value = s2h[0]
+        s1h_value = abs(s1h[0])
+        s2h_value = abs(s2h[0])
      
         #retrieve s1w and s2w values
         s1w = getS1w(mtd[InputWorkspace])
         s2w = getS2w(mtd[InputWorkspace])
         
-        s1w_value = s1w[0]
-        s2w_value = s2w[0]
+        s1w_value = abs(s1w[0])
+        s2w_value = abs(s2w[0])
         
 #        print sfFactorTable
+
+        print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
+        print '--> Data S1H: {0:2f}'.format(s1h_value)
+        print '--> Data S2H: {0:2f}'.format(s2h_value)
+        print '--> Data S1W: {0:2f}'.format(s1w_value)
+        print '--> Data S2W: {0:2f}'.format(s2w_value)
 
         for i in range(nbr_row):
             
@@ -765,26 +772,39 @@ def applySF(InputWorkspace,
                         if(isWithinPrecisionRange(_file_s2h,
                                                   s2h_value,
                                                   valuePrecision)):
-                            _file_s1w = getFieldValue(sfFactorTable,i,4)
-                            if(isWithinPrecisionRange(_file_s1w,
-                                                      s1w_value,
-                                                      valuePrecision)):
-                                _file_s2w = getFieldValue(sfFactorTable,i,5)
-                                if(isWithinPrecisionRange(_file_s2w,
-                                                          s2w_value,
+                            if (slitsWidthFlag):
+                                _file_s1w = getFieldValue(sfFactorTable,i,4)
+                                if(isWithinPrecisionRange(_file_s1w,
+                                                          s1w_value,
                                                           valuePrecision)):
-                                    
-                                    
-                                    print '--> Found a perfect match'
-                                    a = float(sfFactorTable[i][6])
-                                    b = float(sfFactorTable[i][7])  
-                                    a_error = float(sfFactorTable[i][8])
-                                    b_error = float(sfFactorTable[i][9])
+                                    _file_s2w = getFieldValue(sfFactorTable,i,5)
+                                    if(isWithinPrecisionRange(_file_s2w,
+                                                              s2w_value,
+                                                              valuePrecision)):
+                            
+                                        print '--> Found a perfect match'
+                                        a = float(getFieldValue(sfFactorTable,i,6))
+                                        b = float(getFieldValue(sfFactorTable,i,7))  
+                                        a_error = float(getFieldValue(sfFactorTable,i,8))
+                                        b_error = float(getFieldValue(sfFactorTable,i,9))
                 
-                                    OutputWorkspace = _applySFtoArray(InputWorkspace,
-                                                                      a, b, a_error, b_error)
+                                        OutputWorkspace = _applySFtoArray(InputWorkspace,
+                                                                          a, b, a_error, b_error)
 
-                                    return OutputWorkspace
+                                        return OutputWorkspace
+
+                            else:
+                                    
+                                print '--> Found a perfect match'
+                                a = float(getFieldValue(sfFactorTable,i,6))
+                                b = float(getFieldValue(sfFactorTable,i,7))  
+                                a_error = float(getFieldValue(sfFactorTable,i,8))
+                                b_error = float(getFieldValue(sfFactorTable,i,9))
+                
+                                OutputWorkspace = _applySFtoArray(InputWorkspace,
+                                                                  a, b, a_error, b_error)
+
+                                return OutputWorkspace
 
 #    #retrieve the lambdaRequested and check if we can find the sfCalculator
 #    #file corresponding to that lambda

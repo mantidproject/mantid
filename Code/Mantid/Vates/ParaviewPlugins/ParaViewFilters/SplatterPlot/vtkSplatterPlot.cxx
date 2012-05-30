@@ -5,7 +5,6 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/LoadMD.h"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"

@@ -66,6 +66,8 @@ public:
 
   /* Overidden methods */
 
+  /// Virtual copy constructor
+  virtual boost::shared_ptr<IFunction> clone() const;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);

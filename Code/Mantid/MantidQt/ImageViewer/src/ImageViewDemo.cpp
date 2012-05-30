@@ -37,8 +37,8 @@ float * MakeTestData( double total_xmin, double total_xmax,
     {
        x = ((double)col - (double)total_cols/2.0)/(double)total_cols;
        y = ((double)row - (double)total_rows/2.0)/(double)total_rows;
-       data[ row * total_cols + col ] = (float)
-                ((double)(row + col) + 1000.0*(1.0+cos( (x*x + y*y)*10.0 )));
+       data[ row * total_cols + col ] = 
+                                     (float)(1000.0 * cos( (x*x + y*y)*20.0 ));
     }
                                                 // mark a row 1/4 way up
   double point = (total_ymax - total_ymin)/4 + total_ymin;
@@ -49,7 +49,9 @@ float * MakeTestData( double total_xmin, double total_xmax,
   size_t row_offset = (int)(mark_row) * total_cols;
   for ( size_t col = 0; col < total_cols; col++ )
   {
-     data[ row_offset + col ] = 0;
+     data[ row_offset-total_cols + col ] = 0;
+     data[ row_offset            + col ] = 0;
+     data[ row_offset+total_cols + col ] = 0;
   }
                                                  // mark a col 1/10 way over
   point = (total_xmax - total_xmin)/10 + total_xmin;
@@ -60,7 +62,9 @@ float * MakeTestData( double total_xmin, double total_xmax,
   size_t col_offset = (int)( mark_col );
   for ( size_t row = 0; row < total_rows; row++ )
   {
-     data[ row * total_cols + col_offset ] = (float)(total_rows + total_cols);
+     data[ row * total_cols + col_offset-1 ] = 0;
+     data[ row * total_cols + col_offset   ] = 0;
+     data[ row * total_cols + col_offset+1 ] = 0;
   }
 
   return data;
@@ -71,10 +75,10 @@ int main( int argc, char **argv )
 {
   QApplication a( argc, argv );
 
-  float * data = MakeTestData( 10, 110, 220, 320, 3000, 2000 );
+  float * data = MakeTestData( 10, 110, 220, 320, 2000, 2000 );
 
   ArrayDataSource* source = 
-                   new ArrayDataSource( 10, 110, 220, 320, 3000, 2000, data );
+                   new ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
   MantidQt::ImageView::ImageView image_view( source );
 

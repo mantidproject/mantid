@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace Geometry
 {
 /**
 

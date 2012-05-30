@@ -35,7 +35,13 @@ class DataSets(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
         script = 'Run number: %s \n' % str(self.data_file)
-        script += 'Incident medium: %s \n' % str(self.incident_medium_list[self.incident_medium_index_selected])
+
+#        _u_list = self.incident_medium_list
+#        _list = str(_u_list[0]).split(',')
+        
+        script += 'Incident medium: %s \n' % str(self.incident_medium_list)
+#        script += 'Incident medium: %s \n' % str(self.incident_medium_list[self.incident_medium_index_selected])
+#        script += 'Incident medium: %s \n' % str(_list[self.incident_medium_index_selected])
         script += 'Incident medium index: %s \n' % str(self.incident_medium_index_selected)
         script += 'TOF from: %s \n' % str(self.tof_min)
         script += 'TOF to: %s \n' % str(self.tof_max)

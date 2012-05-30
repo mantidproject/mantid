@@ -73,6 +73,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     continue
                         
                 if _arg == 'Incident medium':
+                    
+                    _val=_val[4:-3]
                     if incident_medium.strip() == '':
                         incident_medium = _val
                     continue
@@ -114,7 +116,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         new_script = algo + '(string_runs="' + script_run_attenuator + '"'
         new_script += ',list_peak_back=' + str(list_peak_back)
         
-        #retrieve right incident medium
+        #retrieve right incident medium        
+        
         incident_medium_list = incident_medium.split(',')
         incident_medium = incident_medium_list[incident_medium_index]
         new_script += ',incident_medium="' + incident_medium.strip() + '"'
@@ -122,6 +125,9 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         new_script += ',output_file_name="' + scaling_factor_file + '"'
 
         new_script += ',tof_range=' + str(tof_range) + ')'
+    
+        if scaling_factor_file == '':
+            return ''
     
         return new_script
     
@@ -146,7 +152,12 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
             if item.state() is not None:
                 script_part2 += str(item.state())
 
-        script += self.create_script(script_part2)
+        _script = self.create_script(script_part2)
+        if _script == '':
+            print 'Please define a Scaling Factor File Name'
+            raise RuntimeError
+            
+        script += _script
 
         if file_name is not None:
             f = open(file_name, 'w')

@@ -42,6 +42,69 @@ class DetectorBank:
         def n_pixels(self):
             return self._n_pixels
 
+    class _RescaleAndShift:
+        """
+            Stores property about the detector which is used to rescale and shift
+            data in the bank after data have been reduced. The scale attempts to
+            take into account that the relative efficiency of different banks may not
+            be the same. By default this scale is set to 1.0. The shift is strictly
+            speaking more an effect of the geometry of the sample than the detector
+            but is included here since both these are required to bring the scale+shift of reduced data
+            collected on front and rear bank on the same 'level' before e.g. merging
+            such data
+        """
+        def __init__(self, scale=1.0, shift=0.0, fitScale = False, fitShift = False, qMin = None, qMax = None):
+            """
+                @param scale: Default to 1.0. Value to multiply data with
+                @param shift: Default to 0.0. Value to add to data
+                @param fitScale: Default is False. Whether or not to try and fit this param
+                @param fitShift: Default is False. Whether or not to try and fit this param
+                @param qMin: When set to None (default) then for fit use min value of the overlapping q range of front and rear
+                @param qMax: When set to None (default) then for fit use max value of the overlapping q range of front and rear              
+            """
+            self._scale = scale
+            self._shift = shift
+            self._fitScale = bool(fitScale)
+            self._fitShift = bool(fitShift)
+            self._qMin = qMin
+            self._qMax = qMax
+                
+        def get_scale(self):
+            return self._scale
+
+        def set_scale(self, scale):
+            self._scale = scale
+            
+        def get_shift(self):
+            return self._shift
+
+        def set_shift(self, shift):
+            self._shift = shift
+            
+        def get_fitScale(self):
+            return self._fitScale
+
+        def set_fitScale(self, fitScale):
+            self._fitScale = bool(fitScale)
+            
+        def get_fitShift(self):
+            return self._fitShift
+
+        def set_fitShift(self, fitShift):
+            self._fitShift = bool(fitShift)
+            
+        def get_qMin(self):
+            return self._qMin
+
+        def set_qMin(self, qMin):
+            self._qMin = qMin
+            
+        def get_qMax(self):
+            return self._qMax
+
+        def set_qMax(self, qMax):
+            self._qMax = qMax                                                 
+
     def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
         self._names = {
@@ -83,14 +146,9 @@ class DetectorBank:
         else :
             #'first-low-angle-spec-number' is an optimal instrument parameter
             self.set_first_spec_num(0)
-
-        
-        
+     
         #needed for compatibility with SANSReduction and SANSUtily, remove
-        self.n_columns = width
-        
-        
-        
+        self.n_columns = width    
         
         #this can be set to the name of a file with correction factor against wavelength
         self.correction_file = ''
@@ -102,6 +160,9 @@ class DetectorBank:
         #23/3/12 RKH add 2 more variables
         self._radius_corr = 0.0
         self._side_corr =0.0
+        
+        # hold rescale and shift object _RescaleAndShift
+        self._rescaleAndShift = self._RescaleAndShift()
         
         #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
         self._orientation = 'HorizontalFlipped'
@@ -115,6 +176,9 @@ class DetectorBank:
         #23/3/12 RKH add 2 more variables
         self._radius_corr = None
         self._side_corr = None
+
+    def get_rescaleAndShift(self):
+        return self._rescaleAndShift
 
     def get_y_corr(self):
         if not self._y_corr is None:

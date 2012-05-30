@@ -448,37 +448,70 @@ def outputFittingParameters(a, b, error_a, error_b,
 #        split_lines = text.split('\n')
         split_lines = text
         
-        
         entry_list_to_add = []
         
-        sz = len(a)
-        for i in range(sz):
-
-            _match = False
+        try:
         
-            for _line in split_lines:
-                if _line[0] == '#':
-                    continue
+            sz = len(a)
+            for i in range(sz):
+
+                _match = False
+        
+                for _line in split_lines:
+                    if _line[0] == '#':
+                        continue
             
-                _line_split = _line.split(' ')
-                _incident_medium = variable_value_splitter(_line_split[0])
+                    _line_split = _line.split(' ')
+                    _incident_medium = variable_value_splitter(_line_split[0])
                 
-                if (_incident_medium['value'].strip() == incident_medium.strip()):
-                    _lambdaRequested = variable_value_splitter(_line_split[1])
-                    if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
-                        _s1h = variable_value_splitter(_line_split[2])
-                        if (isWithinRange(_s1h['value'], S1H[i])):
-                            _s2h = variable_value_splitter(_line_split[3])
-                            if (isWithinRange(_s2h['value'],S2H[i])):
-                                _s1w = variable_value_splitter(_line_split[4])
-                                if (isWithinRange(_s1w['value'],S1W[i])):
-                                    _s2w = variable_value_splitter(_line_split[5])
-                                    if (isWithinRange(_s2w['value'],S2W[i])):
-                                        _match = True
-                                        break
+                    if (_incident_medium['value'].strip() == incident_medium.strip()):
+                        _lambdaRequested = variable_value_splitter(_line_split[1])
+                        if (isWithinRange(_lambdaRequested['value'], lambda_requested)):
+                            _s1h = variable_value_splitter(_line_split[2])
+                            if (isWithinRange(_s1h['value'], S1H[i])):
+                                _s2h = variable_value_splitter(_line_split[3])
+                                if (isWithinRange(_s2h['value'],S2H[i])):
+                                    _s1w = variable_value_splitter(_line_split[4])
+                                    if (isWithinRange(_s1w['value'],S1W[i])):
+                                        _s2w = variable_value_splitter(_line_split[5])
+                                        if (isWithinRange(_s2w['value'],S2W[i])):
+                                            _match = True
+                                            break
             
-            if _match == False:
-                entry_list_to_add.append(i)
+                if _match == False:
+                    entry_list_to_add.append(i)
+
+        except:            
+            #replace file because this one has the wrong format
+            _content = ['#y=a+bx\n', '#\n',
+                        '#lambdaRequested[Angstroms] S1H[mm] S2H[mm] S1W[mm] S2W[mm] a b error_a error_b\n', '#\n']
+            sz = len(a)
+            for i in range(sz):
+            
+                _line = 'IncidentMedium=' + incident_medium.strip() + ' '
+                _line += 'LambdaRequested=' + str(lambda_requested) + ' '
+            
+                _S1H = "{0:.8f}".format(abs(S1H[i]))
+                _S2H = "{0:.8f}".format(abs(S2H[i]))
+                _S1W = "{0:.8f}".format(abs(S1W[i]))
+                _S2W = "{0:.8f}".format(abs(S2W[i]))
+                _a = "{0:.8f}".format(a[i])
+                _b = "{0:.8f}".format(b[i])
+                _error_a = "{0:.8f}".format(float(error_a[i]))
+                _error_b = "{0:.8f}".format(float(error_b[i]))
+            
+                _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
+                _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
+                _line += 'a=' + _a + ' '
+                _line += 'b=' + _b + ' '
+                _line += 'error_a=' + _error_a + ' '
+                _line += 'error_b=' + _error_b + '\n'
+                _content.append(_line)
+    
+            f = open(output_file_name, 'w')
+            f.writelines(_content)
+            f.close()
+            return
 
         _content = []
         for j in entry_list_to_add:
@@ -735,8 +768,8 @@ def help():
 def calculate(string_runs=None, 
 #              list_attenuator=None, 
               list_peak_back=None, 
-              output_file_name=None,
               incident_medium=None,
+              output_file_name=None,
               tof_range=None):  
     """
     In this current version, the program will automatically calculates
@@ -885,11 +918,11 @@ def calculate(string_runs=None,
                 print '-> numerator  : ' + str(list_runs[index_numerator])
                 print '-> denominator: ' + str(list_runs[index_denominator])
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
-                                       denominator=list_runs[index_denominator],
-                                       list_peak_back_numerator=list_peak_back[index_numerator],
-                                       list_peak_back_denominator=list_peak_back[index_denominator],
-                                       list_objects=list_objects,
-                                       tof_range=tof_range)                                       
+                                      denominator=list_runs[index_denominator],
+                                      list_peak_back_numerator=list_peak_back[index_numerator],
+                                      list_peak_back_denominator=list_peak_back[index_denominator],
+                                      list_objects=list_objects,
+                                      tof_range=tof_range)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
                                 
@@ -913,7 +946,7 @@ def calculate(string_runs=None,
 #        output_file = output_path + '/' + output_pre + output_ext        
         
         if (output_file_name is None) or (output_file_name == ''):
-            output_file_name = "/home/j35/Desktop/RefLsf.cfg"
+            output_file_name = "RefLsf.cfg"
         
         outputFittingParameters(a, b, error_a, error_b, 
                                 _lambdaRequest,

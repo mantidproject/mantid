@@ -35,7 +35,7 @@ The Mantid FFT algorithm returns the complex array <math>\bar{F}_K</math> as Y v
 
 ===Example 1===
 
-In this example the input data were calculated using function <math>\exp(-(x-1)^2)</math>.
+In this example the input data were calculated using function <math>\exp(-(x-1)^2)</math> in the range [-5,5].
 
 [[Image:FFTGaussian1.png|Gaussian]]
 
@@ -45,7 +45,7 @@ Because the <math>x=0</math> is in the middle of the data array the transform sh
 
 ===Example 2===
 
-In this example the input data were calculated using function <math>\exp(-x^2)</math>.
+In this example the input data were calculated using function <math>\exp(-x^2)</math> in the range [-6,4].
 
 [[Image:FFTGaussian2.png|Gaussian]]
 
@@ -146,10 +146,10 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace",
-                  "",Direction::Input), "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace",
-                  "",Direction::Output), "The name of the output workspace.");
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The name of the input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the output workspace.");
+  //if desired, provide the imaginary part in a separate workspace.
+  declareProperty(new WorkspaceProperty<>("InputImagWorkspace","",Direction::Input,PropertyMode::Optional), "The name of the input workspace for the imaginary part. Leave blank if same as InputWorkspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
@@ -170,6 +170,8 @@ void FFT::init()
 void FFT::exec()
 {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+  if( !inImagWS ) inImagWS = inWS; //workspaces are one and the same
 
   const int iReal = getProperty("Real");
   const int iImag = getProperty("Imaginary");
@@ -179,8 +181,15 @@ void FFT::exec()
   const int ySize = static_cast<int>(inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
 
-  if (iReal >= ySize) throw std::invalid_argument("Property Real is out of range");
-  if (isComplex && iImag >= ySize) throw std::invalid_argument("Property Imaginary is out of range");
+  int nHist = static_cast<int>(inWS->getNumberHistograms());
+  if( iReal >= nHist ) throw std::invalid_argument("Property Real is out of range");
+  if( isComplex )
+  {
+    const int yImagSize = static_cast<int>(inImagWS->blocksize());
+    if( ySize != yImagSize ) throw std::length_error("Real and Imaginary sizes do not match");
+    nHist = static_cast<int>(inImagWS->getNumberHistograms());
+    if( iImag >= nHist ) throw std::invalid_argument("Property Imaginary is out of range");
+  }
 
   //Check that the x values are evenly spaced
   const double dx = (X.back() - X.front()) / (static_cast<int>(X.size()) - 1);
@@ -255,7 +264,7 @@ void FFT::exec()
     {
       int j = shift? (ySize/2 + i) % ySize : i; 
       data[2*i] = inWS->dataY(iReal)[j];
-      data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
+      data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.;
     }
 
     gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
@@ -298,7 +307,7 @@ void FFT::exec()
     {
       int j = (ySize/2 + i) % ySize;
       data[2*i] = inWS->dataY(iReal)[j];
-      data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
+      data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.;
     }
     gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
     for(int i=0;i<ySize;i++)

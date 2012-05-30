@@ -73,8 +73,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      /// Rebuild image from data source, due to resize or scroll bar movement
      void UpdateImage();
 
-     /// Change the color table used to map intensity to color
-     void SetColorScale( std::vector<QRgb> & new_color_table );
+     /// Change the color tables used to map intensity to color
+     void SetColorScales( std::vector<QRgb> & positive_color_table,
+                          std::vector<QRgb> & negative_color_table );
 
      /// Change the control parameter (0...100) used to brighten the image
      void SetIntensity( double control_parameter );
@@ -92,7 +93,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      /// Show information about the point (x, y) on the image in the table
      void ShowInfoList( double x, double y );
 
-     std::vector<QRgb>    color_table;
+     std::vector<QRgb>    positive_color_table;
+     std::vector<QRgb>    negative_color_table;
      std::vector<double>  intensity_table;
 
      ImageDataSource*     data_source;

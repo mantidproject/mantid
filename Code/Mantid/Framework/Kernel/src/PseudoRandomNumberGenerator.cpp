@@ -7,13 +7,20 @@ namespace Mantid
 {
   namespace Kernel
   {
+
+    /// Default constructor setting the dimension to 1
+    PseudoRandomNumberGenerator::PseudoRandomNumberGenerator()
+      : NDRandomNumberGenerator(1)
+    {
+    }
+
     /**
      * Returns the next value in the 1D sequence as a point to be
      * compatible with the NDRandomNumberGenerator interface
      */
-    std::vector<double> PseudoRandomNumberGenerator::nextPoint()
+    void PseudoRandomNumberGenerator::generateNextPoint()
     {
-      return std::vector<double>(1, this->nextValue());
+      cacheGeneratedValue(0, this->nextValue());
     }
   }
 }

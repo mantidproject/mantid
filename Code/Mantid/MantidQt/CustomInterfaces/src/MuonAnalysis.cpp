@@ -77,7 +77,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
   m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay("")
 {
   try
@@ -125,6 +125,8 @@ void MuonAnalysis::initLayout()
 
   m_optionTab->initLayout();
   m_fitDataTab->init();
+
+  setConnectedDataText();
 
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
   connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
@@ -228,6 +230,17 @@ void MuonAnalysis::muonAnalysisHelpGroupingClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
             "MuonAnalysisGrouping"));
+}
+
+
+/**
+* Set connected data text.
+*/
+void MuonAnalysis::setConnectedDataText()
+{
+  m_uiForm.connectedDataHome->setText("Connected: " + m_currentDataName);
+  m_uiForm.connectedDataGrouping->setText("Connected: " + m_currentDataName);
+  m_uiForm.connectedDataSettings->setText("Connected: " + m_currentDataName);
 }
 
 
@@ -428,9 +441,6 @@ void MuonAnalysis::runLoadGroupButton()
 void MuonAnalysis::runClearGroupingButton()
 {
   clearTablesAndCombo();
-
-  // also disable plotting buttons and cal alpha button
-  m_optionTab->noDataAvailable();
 }
 
 /**
@@ -2082,6 +2092,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     changePlotType(plotDetails);
 
     m_currentDataName = titleLabel;
+    setConnectedDataText();
   }
   m_updating = false;
 }
@@ -2223,6 +2234,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     changePlotType(plotDetails);
     
     m_currentDataName = titleLabel;
+    setConnectedDataText();
   }
   m_updating = false;
 }
@@ -2304,7 +2316,6 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
     }
     else
     {
-      m_optionTab->nowDataAvailable();
       return true;
     }
   }
@@ -2320,11 +2331,7 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
   {
 
     std::string complaint = isGroupingAndDataConsistent();
-    if ( complaint.empty() )
-    {
-      m_optionTab->nowDataAvailable();
-    }
-    else
+    if (!( complaint.empty() ) )
     {
       if (m_uiForm.frontPlotButton->isEnabled() )
         QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
@@ -2431,6 +2438,18 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
   {
     Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+    if(!matrix_workspace) // Data collected in periods.
+    {
+      // Get run number from first period data.
+      workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
+      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+      if(!matrix_workspace)
+      {
+        QMessageBox::information(this, "Mantid - Muon Analysis", "Mantid expected period data but no periods were found.\n"
+                      "Default plot name will be used insead of run number.");
+        return;
+      }
+    }
     const Run& runDetails = matrix_workspace->run();
     
     std::string runNumber = runDetails.getProperty("run_number")->value();

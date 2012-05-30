@@ -5,6 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "DllConfig.h"
+#include "ClassMacros.h"
 #include <vector>
 
 namespace Mantid
@@ -41,12 +42,38 @@ namespace Mantid
     class MANTID_KERNEL_DLL NDRandomNumberGenerator
     {
     public:
+      /// Constructor
+      NDRandomNumberGenerator(const unsigned int ndims);
       /// Virtual destructor to ensure that all inheriting classes have one
       virtual ~NDRandomNumberGenerator() {};
+
+      /// Returns the number of dimensions the point will be generated in, i.e. the size
+      /// of the vector returned from by nextPoint()
+      inline unsigned int numberOfDimensions() const { return m_ndims; }
       /// Generate the next set of values that form a point in ND space
-      virtual std::vector<double> nextPoint() = 0;
+      const std::vector<double> & nextPoint();
+
       /// Resets the generator
       virtual void restart() = 0;
+
+    protected:
+      /// Generate the next point. Override this in you concrete implementation
+      virtual void generateNextPoint() = 0;
+
+      /// Cache a value for a given dimension index, i.e. 0->ND-1
+      void cacheGeneratedValue(const size_t index, const double value);
+      /// Cache the while point in one go
+      void cacheNextPoint(const std::vector<double> & nextPoint);
+      /// Some generators need direct access to the cache
+      inline std::vector<double> & getNextPointCache() { return m_nextPoint; }
+
+    private:
+      DISABLE_DEFAULT_CONSTRUCT(NDRandomNumberGenerator);
+
+      /// The number of dimensions
+      const unsigned int m_ndims;
+      /// Storage the next point to return
+      std::vector<double> m_nextPoint;
     };
   }
 }

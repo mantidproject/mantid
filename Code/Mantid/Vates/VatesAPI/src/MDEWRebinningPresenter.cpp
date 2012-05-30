@@ -2,8 +2,8 @@
 #include "MantidVatesAPI/MDRebinningView.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
@@ -46,7 +46,7 @@ namespace Mantid
       m_timestep(0),
       m_wsGeometry(""),
       m_serializer(LocationNotRequired),
-      m_function(Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
+      m_function(Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction())),
       m_applyClipping(false),
       m_bOutputHistogramWS(true)
     {
@@ -111,7 +111,7 @@ namespace Mantid
     void MDEWRebinningPresenter::addFunctionKnowledge()
     {
       //Add existing functions.
-      Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
+      Mantid::Geometry::CompositeImplicitFunction* compFunction = new Mantid::Geometry::CompositeImplicitFunction;
       compFunction->addFunction(m_function);
       Mantid::Geometry::MDImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
       if (existingFunctions != NULL)
@@ -129,8 +129,6 @@ namespace Mantid
     */
     void MDEWRebinningPresenter::updateModel()
     {
-      using namespace Mantid::MDAlgorithms;
-
       if(m_view->getTimeStep() != m_timestep)
       {
         m_request->ask(RecalculateVisualDataSetOnly);

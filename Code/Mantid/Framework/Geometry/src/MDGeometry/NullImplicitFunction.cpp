@@ -1,8 +1,8 @@
-#include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace Geometry
 {
 
 NullImplicitFunction::NullImplicitFunction()

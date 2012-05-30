@@ -33,7 +33,7 @@ class BaseRefWidget(BaseWidget):
 
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):      
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
-        
+
         self.short_name = name
         self._settings.instrument_name = name
             
@@ -49,7 +49,9 @@ class BaseRefWidget(BaseWidget):
         self._summary.data_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel1))
         self._summary.data_from_tof.setValidator(QtGui.QIntValidator(self._summary.data_from_tof))
         self._summary.data_to_tof.setValidator(QtGui.QIntValidator(self._summary.data_to_tof))
-        
+        self._summary.dq0.setValidator(QtGui.QDoubleValidator(self._summary.dq0))
+        self._summary.dq_over_q.setValidator(QtGui.QDoubleValidator(self._summary.dq_over_q))
+
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
         self._summary.norm_x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.norm_x_min_edit))
@@ -90,6 +92,8 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
+        self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked(bool)"), self._fourth_column_clicked)
+        self.connect(self._summary.create_ascii_button, QtCore.SIGNAL("clicked()"), self._create_ascii_clicked)
         
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
@@ -139,6 +143,10 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_edit)
         self.connect(self._summary.direct_pixel_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
 
+
+        call_back = partial(self._edit_event, ctrl=self._summary.slits_width_flag)
+        self.connect(self._summary.slits_width_flag, QtCore.SIGNAL("clicked()"), call_back)
+
         call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_check)
         self.connect(self._summary.direct_pixel_check, QtCore.SIGNAL("clicked()"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.det_angle_check)
@@ -156,6 +164,14 @@ class BaseRefWidget(BaseWidget):
         #Incident medium (selection or text changed)
         call_back = partial(self._edit_event, ctrl=self._summary.incident_medium_combobox)
         self.connect(self._summary.incident_medium_combobox, QtCore.SIGNAL("editTextChanged(QString)"), call_back)
+ 
+        #4th column
+        call_back = partial(self._edit_event, ctrl=self._summary.dq0)
+        self.connect(self._summary.dq0, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.dq_over_q)
+        self.connect(self._summary.dq_over_q, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.fourth_column_switch)
+        self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked()"), call_back)
  
          #name of output file changed
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
@@ -198,15 +214,98 @@ class BaseRefWidget(BaseWidget):
         if output_dir:
             self._summary.outdir_edit.setText(output_dir)   
         
+    def _create_ascii_clicked(self):
+        """
+        Reached by the "Create ASCII" button
+        """
+        #make sure there is the right output workspace called '
+#        if not mtd.workspaceExists('ref_combined'):
+#            print 'Workspace "ref_combined" does not exist !'
+#            return
+        
+        #retrieve name of the output file
+        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
+        if (str(file_name).strip() == ''):
+            return
+        
+        #check the status of the 4th column switch
+        _with_4th_flag = self._summary.fourth_column_switch.isChecked()
+        text = []
+        if _with_4th_flag:
+            dq0 = self._summary.dq0.text()
+            dq_over_q = self._summary.dq_over_q.text()
+            line1 = '#dQ0[1/Angstrom]=' + str(dq0)
+            line2 = '#dQ/Q=' + str(dq_over_q)
+            line3 = '#Q(1/Angstrom) R delta_R Precision'
+            text = [line1, line2, line3]
+        else:
+            text = ['#Q(1/Angstrom) R delta_R']
+            
+        mt = mtd['ref_combined']
+        x_axis = mt.readX(0)[:]
+        y_axis = mt.readY(0)[:]
+        e_axis = mt.readE(0)[:]
+        sz = len(x_axis)
+        for i in range(sz):
+            _line = str(x_axis[i])
+            _line += ' ' + str(y_axis[i])
+            _line += ' ' + str(e_axis[i])
+            if _with_4th_flag:
+                _precision = str(dq0 + dq_over_q * x_axis[i])
+                _line += ' ' + _precision
+            
+            text.append(_line)
+    
+        f=open(file_name,'w')
+        for _line in text:
+            f.write(_line + '\n')
+    
+    
     def browse_config_file_name(self):
         '''
         Define configuration file name
         '''
-        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
-        if (str(file_name).strip() != ''):
-            if os.path.isfile(file_name):
-                self._summary.cfg_scaling_factor_file_name.setText(file_name)
-#            self.display_preview_config_file()
+        try:
+            file_name = QtGui.QFileDialog.getOpenFileName(self, "Select a SF configuration file", "", "(*.cfg)")
+            if (str(file_name).strip() != ''):
+                if os.path.isfile(file_name):
+                    self._summary.cfg_scaling_factor_file_name.setText(file_name)
+                    self.retrieve_list_of_incident_medium(file_name)
+        except:
+            print 'Invalid file format (' + file_name + ')'
+
+    def variable_value_splitter(self, variable_value):
+        """
+            This function split the variable that looks like "LambdaRequested:3.75"
+            and returns a dictionnary of the variable name and value        
+        """
+        _split = variable_value.split('=')
+        variable = _split[0]
+        value = _split[1]
+        return {'variable':variable, 'value':value}
+
+    def retrieve_list_of_incident_medium(self, cfg_file_name):
+        """
+        This procedure will parse the configuration file and will 
+        populate the Incident Medium dropbox with the list of incident medium
+        found
+        """
+        f=open(cfg_file_name,'r')
+        text = f.readlines()
+        list_incident_medium = []
+        for _line in text:
+            if _line[0] == '#':
+                continue
+            
+            _line_split = _line.split(' ')
+            _incident_medium = self.variable_value_splitter(_line_split[0])
+            list_incident_medium.append(_incident_medium['value'])
+
+        _unique_list = list(set(list_incident_medium))
+        
+        self._summary.incident_medium_combobox.clear() 
+        for i in range(len(_unique_list)):
+            self._summary.incident_medium_combobox.addItem(str(_unique_list[i]))
 
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
@@ -256,6 +355,10 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.direct_pixel_edit, False)
         util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
         util.set_edited(self._summary.incident_medium_combobox, False)
+        util.set_edited(self._summary.dq0, False)
+        util.set_edited(self._summary.dq_over_q, False)
+        util.set_edited(self._summary.fourth_column_switch, False)
+        util.set_edited(self._summary.slits_width_flag, False)
     
     def _det_angle_offset_chk_changed(self):
         is_checked = self._summary.det_angle_offset_check.isChecked()
@@ -499,6 +602,16 @@ class BaseRefWidget(BaseWidget):
         
         self._edit_event(None, self._summary.norm_switch)
 
+    def _fourth_column_clicked(self, is_checked):
+        """
+            This is reached by the 4th column switch
+        """
+        self._summary.dq0_label.setEnabled(is_checked)
+        self._summary.dq0.setEnabled(is_checked)
+        self._summary.dq0_unit.setEnabled(is_checked)        
+        self._summary.dq_over_q_label.setEnabled(is_checked)
+        self._summary.dq_over_q.setEnabled(is_checked)
+        
     def _tof_range_clicked(self, is_checked):
         """
             This is reached by the TOF range switch
@@ -660,6 +773,8 @@ class BaseRefWidget(BaseWidget):
         
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
+                state.slits_width_flag = self._summary.slits_width_flag.isChecked()
+                
                 #incident medium
                 _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
                                           for j in range(self._summary.incident_medium_combobox.count())]
@@ -669,6 +784,10 @@ class BaseRefWidget(BaseWidget):
                 state.incident_medium_list = [_incident_medium_string]
                 
                 state.incident_medium_index_selected = _incident_medium_index_selected
+                
+                #4th column (precision)
+                state.fourth_column_dq0 = self._summary.dq0.text()
+                state.fourth_column_dq_over_q = self._summary.dq_over_q.text()
                 
                 current_item.setData(QtCore.Qt.UserRole, state)
                 i+=1        
@@ -791,5 +910,13 @@ class BaseRefWidget(BaseWidget):
             if len(str(state.output_dir).strip())>0:
                 self._summary.outdir_edit.setText(str(state.output_dir))
             
+        #scaling factor file and options
+        self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
+        self._summary.slits_width_flag.setChecked(state.slits_width_flag)
+            
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
+
+        #4th column (precision)
+        self._summary.fourth_column_switch.setChecked(state.fourth_column_flag)
+        self._fourth_column_clicked(state.fourth_column_flag)

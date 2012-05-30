@@ -50,7 +50,7 @@ public:
   /*
    * Generate a Workspace which can be (1) EventWorkspace, (2) Workspace2D, and (3) SpecialWorkspace2D
    */
-  void setUpWS(bool event, const std::string & name = "testSpace", bool asMaskWorkspace = false, size_t numspec=9)
+  void setUpWS(bool event, const std::string & name = "testSpace", bool asMaskWorkspace = false, int numspec=9)
   {
     // 1. Instrument
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1, false));
@@ -67,7 +67,7 @@ public:
 
       MantidVecPtr x,vec;
       vec.access().resize(5,1.0);
-      for (int j = 0; j < 9; ++j)
+      for (int j = 0; j < numspec; ++j)
       {
         //Just one event per pixel
         TofEvent event(1.23, int64_t(4.56));
@@ -89,7 +89,7 @@ public:
       MantidVecPtr x,vec;
       x.access().resize(6,10.0);
       vec.access().resize(5,1.0);
-      for (int j = 0; j < 9; ++j)
+      for (int j = 0; j < numspec; ++j)
       {
         space2D->setX(j,x);
         space2D->setData(j,vec,vec);
@@ -100,7 +100,8 @@ public:
     else
     {
       // In case of MaskWorkspace
-      Mantid::DataObjects::MaskWorkspace_sptr specspace(new  Mantid::DataObjects::MaskWorkspace(instr));
+      MaskWorkspace_sptr specspace(new MaskWorkspace());
+      specspace->initialize(numspec, 1, 1);
       for (size_t i = 0; i < specspace->getNumberHistograms(); i ++)
       {
         // default to use all the detectors
@@ -109,13 +110,10 @@ public:
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
     }
 
-    if (!asMaskWorkspace){
-      space->setInstrument(instr);
-      space->generateSpectraMap();
+    space->setInstrument(instr);
+    space->generateSpectraMap();
 
-      std::cout << "another way of find number of detectors = " << space->getInstrument()->getDetectorIDs().size() << std::endl;
-    }
-    // Register the workspace in the data service
+  // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);
 
   }
@@ -365,7 +363,56 @@ public:
         TS_ASSERT_EQUALS(originalWS->readY(i)[0], 1.0);
       }
     }
+    AnalysisDataService::Instance().remove(inputWSName);
+    AnalysisDataService::Instance().remove(existingMaskName);
+  }
 
+  void test_InputWorkspace_Larger_Than_MaskedWorkspace_Masks_Section_Specified_By_Start_EndWorkspaceIndex()
+  {
+    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const int numInputSpec(9);
+    setUpWS(false, inputWSName,false, numInputSpec);
+    const int numMaskWSSpec(3);
+    setUpWS(false, existingMaskName, true, numMaskWSSpec);
+    MatrixWorkspace_sptr existingMask =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(existingMaskName);
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
+    TS_ASSERT(existingMask);
+    TS_ASSERT(inputWS);
+
+    // Mask workspace index 0,2 in MaskWS. These will be maped to index 3,5 in the test input
+    existingMask->dataY(0)[0] = 1.0;
+    existingMask->dataY(2)[0] = 1.0;
+
+    // Apply
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setPropertyValue("MaskedWorkspace", existingMaskName);
+    masker.setPropertyValue("StartWorkspaceIndex", "3");
+    masker.setPropertyValue("EndWorkspaceIndex", "5");
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+    inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
+
+    // Check masking
+    for(int i = 0; i < numInputSpec; ++i)
+    {
+      IDetector_const_sptr det;
+      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+      if( i == 3 || i == 5 )
+      {
+        TS_ASSERT_EQUALS(det->isMasked(), true);
+      }
+      else
+      {
+        TS_ASSERT_EQUALS(det->isMasked(), false);
+      }
+    }
+
+    AnalysisDataService::Instance().remove(inputWSName);
+    AnalysisDataService::Instance().remove(existingMaskName);
   }
 
 private:

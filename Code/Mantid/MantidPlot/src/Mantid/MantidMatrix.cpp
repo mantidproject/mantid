@@ -641,7 +641,6 @@ QwtDoubleRect MantidMatrix::boundingRect()
     x_start = x_end = 0;
     while(x_start == x_end && i0 <= m_endRow)
     {
-      i0++;
       const Mantid::MantidVec& X = m_workspace->readX(i0);
       x_start = X[0];
       if (X.size() != m_workspace->readY(i0).size()) x_end = X[m_workspace->blocksize()];
@@ -651,6 +650,7 @@ QwtDoubleRect MantidMatrix::boundingRect()
       {
         x_start = x_end = 0;
       }
+      i0++;
     }
 
     // if i0 > m_endRow there aren't any plottable rows
@@ -1345,9 +1345,9 @@ int MantidMatrix::precision()
 
 void MantidMatrix::setMatrixProperties()
 {
-  MantidMatrixDialog* dlg = new MantidMatrixDialog(m_appWindow);
-  dlg->setMatrix(this);
-  dlg->exec();
+  MantidMatrixDialog dlg(m_appWindow);
+  dlg.setMatrix(this);
+  dlg.exec();
 }
 
 void MantidMatrix::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)

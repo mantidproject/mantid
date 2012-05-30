@@ -57,7 +57,9 @@ public:
   ~ImagePlotItem();
   
   /// Specify the data to be plotted and the color table to use
-  void SetData( DataArray* data_array, std::vector<QRgb>* color_table );
+  void SetData( DataArray* data_array, 
+                std::vector<QRgb>* positive_color_table,
+                std::vector<QRgb>* negative_color_table );
 
   /// Set a non-linear lookup table to scale data values before mapping to color
   void SetIntensityTable( std::vector<double>*  intensity_table );
@@ -70,12 +72,16 @@ public:
 
 private:
 
-  int                   buffer_ID;         // set to 0 or 1 to select buffer 
-  DataArray*            data_array_0;      // double buffer the float data
-  DataArray*            data_array_1;        
-                                           // This class just uses these but
-  std::vector<QRgb>*    color_table;       // they are created and deleted
-  std::vector<double>*  intensity_table;   // in the upper level classes
+  int                   buffer_ID;        // set to 0 or 1 to select buffer 
+  DataArray*            data_array_0;     // these provide double buffers
+  DataArray*            data_array_1;     // for the float data.
+
+                                          // This class just uses the following
+                                          // but they are created and deleted
+                                          // in the upper level classes
+  std::vector<QRgb>*    positive_color_table;
+  std::vector<QRgb>*    negative_color_table;
+  std::vector<double>*  intensity_table;
 
 };
 

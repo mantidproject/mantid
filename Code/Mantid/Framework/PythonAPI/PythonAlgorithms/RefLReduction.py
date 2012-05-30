@@ -72,6 +72,8 @@ class RefLReduction(PythonAlgorithm):
         #scaling factor file
         self.declareProperty("ScalingFactorFile", "", 
                              Description="Scaling Factor configuration file")
+        self.declareProperty("SlitsWidthFlag", True,
+                             Description="Looking for perfect match of slits width when using Scaling Factor file")
         #incident medium
         self.declareProperty("IncidentMediumSelected", "",
                              Description="Incident medium used for those runs")
@@ -145,6 +147,7 @@ class RefLReduction(PythonAlgorithm):
         slitsValuePrecision = sfCalculator.PRECISION
         sfFile = self.getProperty("ScalingFactorFile")
         incidentMedium = self.getProperty("IncidentMediumSelected")
+        slitsWidthFlag = self.getProperty("SlitsWidthFlag")
                 
         # Pick a good workspace n    ame
         ws_name = "refl%d" % run_numbers[0]
@@ -152,7 +155,6 @@ class RefLReduction(PythonAlgorithm):
         
         # Load the data into its workspace
         allow_multiple = True        
-        print run_numbers
         
         if len(run_numbers)>1 and allow_multiple:
             
@@ -821,7 +823,8 @@ class RefLReduction(PythonAlgorithm):
             ws_data_scaled = wks_utility.applySF(ws_data,
                                                  incidentMedium,
                                                  sfFile,
-                                                 slitsValuePrecision)
+                                                 slitsValuePrecision,
+                                                 slitsWidthFlag)
             
         else:
             print '-> Automatic SF not applied!'
@@ -841,6 +844,8 @@ class RefLReduction(PythonAlgorithm):
                 _Q = _const * math.sin(theta) / (tofm*1e-6)
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
+            if (q_min >= q_max):
+                q_min = min(_q_axis)
 
         if (backSubMethod == 1):        
             ws_integrated_data = ws_name + '_IntegratedDataWks'

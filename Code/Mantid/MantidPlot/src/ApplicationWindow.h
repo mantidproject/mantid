@@ -1046,7 +1046,7 @@ public slots:
 
   //   Methods for Floating windows
   FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(-1,-1));
-  QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
+  QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos = QPoint(0,0));
   void mdiWindowActivated(MdiSubWindow* w);
   void changeToFloating(MdiSubWindow* w);
   void changeToDocked(MdiSubWindow* w);
@@ -1057,6 +1057,8 @@ public slots:
   QMenuBar* myMenuBar();
   void changeActiveToFloating();
   void changeActiveToDocked();
+  /// Validate sub-window position coordinates
+  void validateWindowPos(MdiSubWindow* w, int& x, int& y);
 
   /** Sets whether to prompt the user when closing/deleting a folder */
   void setConfirmFolderClose(bool value)
@@ -1085,7 +1087,7 @@ private:
   void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
-  QPoint positionNewFloatinfWindow(QSize sz) const;
+  QPoint positionNewFloatingWindow(QSize sz) const;
   QPoint desktopTopLeft() const;
   bool hasParaviewPath() const;
   bool hasVatesAvailable() const;

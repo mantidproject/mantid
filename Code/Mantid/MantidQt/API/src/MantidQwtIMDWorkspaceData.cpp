@@ -1,16 +1,17 @@
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::NullCoordTransform;
 using Mantid::API::CoordTransform;
 using Mantid::API::IMDWorkspace;
+using Mantid::API::IMDWorkspace_const_sptr;
 using Mantid::coord_t;
 
 /** This is needed to successfully compile on windows. */
@@ -305,12 +306,17 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
       double largest = -1e30;
       // Default to 0
       m_currentPlotAxis = 0;
+      IMDWorkspace_const_sptr originalWS = m_originalWorkspace.lock();
       for (size_t d=0; d<diff.getNumDims(); d++)
       {
-        if (fabs(diff[d]) > largest)
+        if (fabs(diff[d]) > largest || ( originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated() ) )
         {
-          largest = fabs(diff[d]);
-          m_currentPlotAxis = int(d);
+          //Skip over any integrated dimensions
+          if( originalWS && !originalWS->getDimension(d)->getIsIntegrated() )
+          {
+            largest = fabs(diff[d]);
+            m_currentPlotAxis = int(d);
+          }
         }
       }
     }
@@ -325,17 +331,25 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
   }
 }
 
+/**
+@return the dimension index corresponding to the current plot X Axis.
+*/
+int MantidQwtIMDWorkspaceData::currentPlotXAxis() const
+{
+  return m_currentPlotAxis;
+}
+
 //-----------------------------------------------------------------------------
 /// @return the label for the X axis
 std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 {
   std::string xLabel;
-  if (!m_originalWorkspace)
-    return "";
+  if ( m_originalWorkspace.expired() )
+    return xLabel; // Empty string
   if (m_currentPlotAxis >= 0)
   {
     // One of the dimensions of the original
-    IMDDimension_const_sptr dim = m_originalWorkspace->getDimension(m_currentPlotAxis);
+    IMDDimension_const_sptr dim = m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
     xLabel = dim->getName() + " (" + dim->getUnits() + ")";
   }
   else
@@ -349,6 +363,7 @@ std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 //      xLabel += " (undefined units)";
 //    break;
   }
+
   return xLabel;
 }
 

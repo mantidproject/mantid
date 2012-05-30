@@ -57,6 +57,7 @@ public:
     void setThickness(const QString & dim, double width);
     QPointF getStartXY() const;
     QPointF getEndXY() const;
+    int getXAxisDimensionIndex() const;
 
 private:
     void createDimensionWidgets();

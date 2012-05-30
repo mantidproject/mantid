@@ -29,6 +29,7 @@
 //
 #include <iostream>
 #include <boost/scoped_ptr.hpp>
+#include <ctime>
 //
 
 
@@ -137,6 +138,7 @@ public:
         // add events to make data quadratic in 4th coordinate with noise
         out3->calcVolume();
 
+        srand( time(NULL) );
         errorsq=1.0;
         events.clear();
         double noise=0.1;
@@ -339,6 +341,7 @@ public:
 
          alg1.setPropertyValue("Function",compFn->asString());
          alg1.setPropertyValue("InputWorkspace", testWrkspc3);
+         alg1.setPropertyValue("Minimizer","Levenberg-MarquardtMD");
          alg1.setPropertyValue("Output","outcf");
 
          TS_ASSERT_THROWS_NOTHING(
@@ -367,16 +370,16 @@ public:
          TS_ASSERT_DELTA(row.Double(1),0.0,0.00001);
          row = outParams1->getRow(3);
          TS_ASSERT_EQUALS(row.String(0),"f1.Constant");
-         TS_ASSERT_DELTA(row.Double(1),1.0,0.01);
+         TS_ASSERT_DELTA(row.Double(1),1.0,0.02);
          row = outParams1->getRow(4);
          TS_ASSERT_EQUALS(row.String(0),"f1.Linear");
          TS_ASSERT_DELTA(row.Double(1),-0.1,0.00001);
          row = outParams1->getRow(5);
          TS_ASSERT_EQUALS(row.String(0),"f1.Quadratic");
-         TS_ASSERT_DELTA(row.Double(1),0.1,0.001);
+         TS_ASSERT_DELTA(row.Double(1),0.1,0.01);
          row = outParams1->getRow(6);
          TS_ASSERT_EQUALS(row.String(0),"Cost function value");
-         TS_ASSERT_DELTA(row.Double(1),0.00084,0.0004);
+         TS_ASSERT_DELTA(row.Double(1),0.00084,0.0008);
          //for( int i = 0 ; i<outParams1->rowCount();i++)
          //{
          //  row = outParams1->getRow(i);

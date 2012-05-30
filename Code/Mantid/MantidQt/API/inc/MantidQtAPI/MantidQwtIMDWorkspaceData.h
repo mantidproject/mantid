@@ -1,14 +1,11 @@
 #ifndef MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
 #define MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
 
-#include <boost/shared_ptr.hpp>
-#include "MantidAPI/IMDWorkspace.h"
-#include <QObject>
-#include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include <boost/weak_ptr.hpp>
 #include "MantidKernel/VMD.h"
-#include "MantidAPI/CoordTransform.h"
-#include "DllOption.h"
-
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtAPI/DllOption.h"
+#include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
 /** This class is used to plot MDWorkspace line plots.
  * For example, in the LineViewer and via the "Plot MD" menu on workspaces.
@@ -51,6 +48,7 @@ public:
 
   std::string getXAxisLabel() const;
   std::string getYAxisLabel() const;
+  int currentPlotXAxis() const;
 
 
   /// Inform the data that it is to be plotted on a log y scale
@@ -73,7 +71,7 @@ private:
   bool m_logScale;
 
   /// lowest positive y value
-  mutable double m_minPositive;
+  double m_minPositive;
 
   /// Are we in preview mode?
   bool m_preview;
@@ -103,7 +101,7 @@ private:
   bool m_isDistribution;
 
   /// Original workspace (for purposes of showing alternative coordinates)
-  Mantid::API::IMDWorkspace_const_sptr m_originalWorkspace;
+  boost::weak_ptr<const Mantid::API::IMDWorkspace> m_originalWorkspace;
 
   /// Optional coordinate transformation to go from distance on line to another coordinate
   Mantid::API::CoordTransform * m_transform;

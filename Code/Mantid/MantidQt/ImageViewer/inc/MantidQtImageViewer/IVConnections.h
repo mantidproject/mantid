@@ -68,6 +68,10 @@ public:
 
   ~IVConnections();
 
+  /// Set the pix map that shows the color scale from the specified color maps
+  void ShowColorScale( std::vector<QRgb> & positive_color_table,
+                       std::vector<QRgb> & negative_color_table );
+
 public slots:
   void close_viewer();
   void toggle_Hscroll();

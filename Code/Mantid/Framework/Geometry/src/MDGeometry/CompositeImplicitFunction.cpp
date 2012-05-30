@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"
 #include <boost/algorithm/string.hpp> 
 #include <boost/format.hpp>
 #include <Poco/DOM/Document.h>
@@ -10,7 +10,7 @@
 
 namespace Mantid
 {
-    namespace MDAlgorithms
+    namespace Geometry
     {
 
         CompositeImplicitFunction::CompositeImplicitFunction()

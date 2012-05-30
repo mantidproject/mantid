@@ -1,4 +1,4 @@
-from mantidsimple import *
+from mantid.simpleapi import *
 import mantidplot as mp
 from IndirectCommon import *
 from mantid import config, logger
@@ -53,18 +53,20 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     names = ''
     ws = mtd[Table]
     cName =  ws.getColumnNames()
-    nSpec = ( ws.getColumnCount() - 1 ) / 2
+    nSpec = ( ws.columnCount() - 1 ) / 2
     for spec in range(0,nSpec):
+        yCol = (spec*2)+1
         yAxis = cName[(spec*2)+1]
         if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
             xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
             names += yAxis
+            eCol = (spec*2)+2
             eAxis = cName[(spec*2)+2]
-            for row in range(0, ws.getRowCount()):
-                dataY.append(ws.getDouble(yAxis,row))
-                dataE.append(ws.getDouble(eAxis,row))
+            for row in range(0, ws.rowCount()):
+                dataY.append(ws.cell(row,yCol))
+                dataE.append(ws.cell(row,eCol))
         else:
             nSpec -= 1
     suffix = str(nSpec / 2) + 'L' + BackG
@@ -78,7 +80,7 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
 def confitPlotSeq(inputWS, plot):
     nhist = mtd[inputWS].getNumberHistograms()
     if ( plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nhist))
+        mp.plotSpectrum(inputWS, range(0, nhist), True)
         return    
     plotSpecs = []
     if ( plot == 'Intensity' ):
@@ -89,7 +91,7 @@ def confitPlotSeq(inputWS, plot):
         title = mtd[inputWS].getAxis(1).label(i)
         if re.search(res, title):
             plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs)
+    mp.plotSpectrum(inputWS, plotSpecs, True)
 
 def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
     StartTime('ConvFit')
@@ -104,7 +106,7 @@ def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
-	    StartX=startX, EndX=endX)
+	    StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
     if save:
             SaveNexusProcessed(InputWorkspace=wsname, Filename=wsname+'.nxs')
@@ -150,18 +152,25 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
         eq2.append(savefile+'eq2')
         DeleteWorkspace(tempWS)
     if Plot:
-        nBins = mtd[eq1[0]].blocksize()
-        lastXeq1 = mtd[eq1[0]].readX(0)[nBins-1]
-        graph1 = mp.plotSpectrum(eq1, 0)
-        layer = graph1.activeLayer()
-        layer.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
-        nBins = mtd[eq2[0]].blocksize()
-        lastXeq2 = mtd[eq2[0]].readX(0)[nBins-1]
-        graph2 = mp.plotSpectrum(eq2, 0)
-        layer = graph2.activeLayer()
-        layer.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
+        elwinPlot(eq1,eq2)
     EndTime('Elwin')
     return eq1, eq2
+
+def elwinPlot(eq1,eq2):
+    nBins = mtd[eq1[0]].blocksize()
+    if nBins >= 10:
+        nBins = 10
+    lastXeq1 = mtd[eq1[0]].readX(0)[nBins-1]
+    graph1 = mp.plotSpectrum(eq1, 0)
+    layer = graph1.activeLayer()
+    layer.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
+    nBins = mtd[eq2[0]].blocksize()
+    if nBins >= 10:
+        nBins = 10
+    lastXeq2 = mtd[eq2[0]].readX(0)[nBins-1]
+    graph2 = mp.plotSpectrum(eq2, 0)
+    layer = graph2.activeLayer()
+    layer.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
 
 def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False):
@@ -200,7 +209,7 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         DeleteWorkspace('sam_fft')
         DeleteWorkspace('sam')
         # Crop nonsense values off workspace
-        bin = int(math.ceil(mtd[savefile].getNumberBins()/ 2.0))
+        bin = int(math.ceil(mtd[savefile].blocksize()/2.0))
         binV = mtd[savefile].dataX(0)[bin]
         CropWorkspace(InputWorkspace=savefile, OutputWorkspace=savefile, XMax=binV)
         if Save:
@@ -215,10 +224,15 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
     DeleteWorkspace('res')
     if Plot:
         specrange = range(0,mtd[outWSlist[0]].getNumberHistograms())
-        plotFury(outWSlist, specrange)
+        furyPlot(outWSlist, specrange)
     EndTime('Fury')
     return outWSlist
 	
+def furyPlot(inWS, spec):
+    graph = mp.plotSpectrum(inWS, spec)
+    layer = graph.activeLayer()
+    layer.setScale(mp.Layer.Left, 0, 1.0)
+
 def furyfitParsToWS(Table, Data):
     dataX = createQaxis(Data)
     dataY = []
@@ -226,13 +240,14 @@ def furyfitParsToWS(Table, Data):
     names = ""
     xAxisVals = []
     ws = mtd[Table]
-    cCount = ws.getColumnCount()
-    rCount = ws.getRowCount()
+    cCount = ws.columnCount()
+    rCount = ws.rowCount()
     cName =  ws.getColumnNames()
     nSpec = ( cCount - 1 ) / 2
     xAxis = cName[0]
     stretched = 0
     for spec in range(0,nSpec):
+        yCol = (spec*2)+1
         yAxis = cName[(spec*2)+1]
         if ( re.search('Intensity$', yAxis) or re.search('Tau$', yAxis) or
             re.search('Beta$', yAxis) ):
@@ -240,10 +255,11 @@ def furyfitParsToWS(Table, Data):
             if (len(names) > 0):
                 names += ","
             names += yAxis
+            eCol = (spec*2)+2
             eAxis = cName[(spec*2)+2]
             for row in range(0, rCount):
-                dataY.append(ws.getDouble(yAxis,row))
-                dataE.append(ws.getDouble(eAxis,row))
+                dataY.append(ws.cell(row,yCol))
+                dataE.append(ws.cell(row,eCol))
             if ( re.search('Beta$', yAxis) ): # need to know how many of curves
                 stretched += 1                # are stretched exponentials
         else:
@@ -263,7 +279,7 @@ def furyfitParsToWS(Table, Data):
 def furyfitPlotSeq(inputWS, Plot):
     nHist = mtd[inputWS].getNumberHistograms()
     if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nHist))
+        mp.plotSpectrum(inputWS, range(0, nHist), True)
         return
     plotSpecs = []
     if ( Plot == 'Intensity' ):
@@ -276,7 +292,7 @@ def furyfitPlotSeq(inputWS, Plot):
         title = mtd[inputWS].getAxis(1).label(i)
         if ( re.search(res, title) ):
             plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs)
+    mp.plotSpectrum(inputWS, plotSpecs, True)
 
 def furyfitSeq(inputWS, func, startx, endx, Save, Plot):
     StartTime('FuryFit')
@@ -290,7 +306,7 @@ def furyfitSeq(inputWS, func, startx, endx, Save, Plot):
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
-        StartX=startx, EndX=endx)
+        StartX=startx, EndX=endx, FitType='Sequential')
     wsname = furyfitParsToWS(outNm, inputWS)
     if Save:
         opath = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
@@ -310,20 +326,26 @@ def furyfitMultParsToWS(Table, Data):
     dataY3 = []
     dataE3 = []
     ws = mtd[Table+'_Parameters']
-    rCount = ws.getRowCount()
+    rCount = ws.rowCount()
     nSpec = ( rCount - 1 ) / 5
     for spec in range(0,nSpec):
         n1 = spec*5
         rowi = n1 + 2                   #intensity
+        ival = 5                   #intensity value
+        ierr = 6                   #intensity error
+        tval = 7                   #tau value
+        terr = 8                   #tau error
         rowt = n1 + 3                   #tau
         rowb = 4                        #beta
+        bval = 9                   #beta value
+        bval = 10                   #beta error
         dataX.append(spec)
-        dataY1.append(ws.getDouble('Value',rowi))
-        dataE1.append(ws.getDouble('Error',rowi))
-        dataY2.append(ws.getDouble('Value',rowt))
-        dataE2.append(ws.getDouble('Error',rowt))
-        dataY3.append(ws.getDouble('Value',rowb))
-        dataE3.append(ws.getDouble('Error',rowb))
+        dataY1.append(ws.cell(spec,ival))
+        dataE1.append(ws.cell(spec,ierr))
+        dataY2.append(ws.cell(spec,tval))
+        dataE2.append(ws.cell(spec,terr))
+        dataY3.append(ws.cell(spec,bval))
+        dataE3.append(ws.cell(spec,berr))
     suffix = 'S'
     wsname = Table + '_' + suffix
     CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY1, DataE=dataE1, 
@@ -391,27 +413,33 @@ def furyfitMult(inputWS, func, startx, endx, Save, Plot):
 
 def msdfitParsToWS(Table, xData):
     dataX = xData
-    dataY = []
-    dataE = []
+    dataY1 = []
     ws = mtd[Table+'_Table']
-    cCount = ws.getColumnCount()
-    rCount = ws.getRowCount()
-    cName =  ws.getColumnNames()
-    yAxis = cName[3]
-    eAxis = cName[4]
+    rCount = ws.rowCount()
     for row in range(0,rCount):
-        dataY.append(-ws.getDouble(yAxis,row))
-        dataE.append(ws.getDouble(eAxis,row))
+        dataY1.append(-ws.cell(row,3))
+    yA0 = ws.column(1)
+    eA0 = ws.column(2)
+    yA1 = ws.column(3)
+    eA1 = ws.column(4)
     wsname = Table
-    CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY, DataE=dataE,
+    CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
         Nspec=1, UnitX='')
+    CreateWorkspace(OutputWorkspace=wsname+'_a1', DataX=dataX, DataY=dataY1, DataE=eA1,
+        Nspec=1, UnitX='')
+    group = wsname+'_a0,'+wsname+'_a1'
+    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=wsname)
     return wsname
 
-def msdfitPlotSeq(inputWS, Plot, xlabel):
-    msd_plot = mp.plotSpectrum(inputWS,0,True)
+def msdfitPlotSeq(inputWS, xlabel):
+    msd_plot = mp.plotSpectrum(inputWS+'_a1',0,True)
     msd_layer = msd_plot.activeLayer()
     msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
     msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
+
+def msdfitPlotFits(lniWS, fitWS, n):
+    mfit_plot = mp.plotSpectrum(lniWS,n,True)
+    mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
     StartTime('msdFit')
@@ -476,37 +504,54 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
         np += 1
     if Verbose:
        logger.notice('Fitting Runs '+first+' to '+last)
+       logger.notice('Q-range from '+str(startX)+' to '+str(endX))
     function = 'name=LinearBackground, A0=0, A1=0'
     mname = first[0:8]+'_to_'+last[3:8]
-    fitWS = mname+'_msd'
-    PlotPeakByLogValue(Input=run_list, OutputWorkspace=fitWS+'_Table', Function=function,
-        StartX=startX, EndX=endX, FitType = "Sequential")
-    msdfitParsToWS(fitWS, x_list)
+    msdWS = mname+'_msd'
+    PlotPeakByLogValue(Input=run_list, OutputWorkspace=msdWS+'_Table', Function=function,
+        StartX=startX, EndX=endX, FitType = 'Sequential')
+    msdfitParsToWS(msdWS, x_list)
     np = 0
-    outWS = mname+'_lnI'
+    lniWS = mname+'_lnI'
+    fitWS = mname+'_Fit'
+    a0 = mtd[msdWS+'_a0'].readY(0)
+    a1 = mtd[msdWS+'_a1'].readY(0)
     for ws in file_list:
         inWS = ws[:-3] + 'lnI'
+        CropWorkspace(InputWorkspace=inWS,OutputWorkspace='__data',XMin=startX,XMax=endX)
+        xin = mtd['__data'].readX(0)
+        nxd = len(xin)-1
+        xd = []
+        yd = []
+        ed = []
+        for n in range(0,nxd):
+            line = a0[np] - a1[np]*xin[n]
+            xd.append(xin[n])
+            yd.append(line)
+            ed.append(0.0)
+            CreateWorkspace(OutputWorkspace='__line', DataX=xd, DataY=yd, DataE=ed,
+				Nspec=1)
         if (np == 0):
-            CloneWorkspace(InputWorkspace=inWS,OutputWorkspace=outWS)
+            RenameWorkspace(InputWorkspace=inWS,OutputWorkspace=lniWS)
+            RenameWorkspace(InputWorkspace='__data',OutputWorkspace=fitWS+'_data')
+            RenameWorkspace(InputWorkspace='__line',OutputWorkspace=fitWS+'_line')
         else:
-            ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2=inWS, CheckOverlapping=False)
+            ConjoinWorkspaces(InputWorkspace1=lniWS, InputWorkspace2=inWS, CheckOverlapping=False)
+            ConjoinWorkspaces(InputWorkspace1=fitWS+'_data', InputWorkspace2='__data', CheckOverlapping=False)
+            ConjoinWorkspaces(InputWorkspace1=fitWS+'_line', InputWorkspace2='__line', CheckOverlapping=False)
         np += 1
+        group = fitWS+'_data,'+ fitWS+'_line'
+        GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
     if Plot:
-        msdfitPlotSeq(fitWS, Plot, xlabel)
+        msdfitPlotSeq(msdWS, xlabel)
+        msdfitPlotFits(lniWS, fitWS, 0)
     if Save:
-        fit_path = os.path.join(workdir, fitWS+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path, Title=fitWS)
+        msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
         if Verbose:
-            logger.notice('Output Fit file : '+fit_path)  
+            logger.notice('Output msd file : '+msd_path)  
     EndTime('msdFit')
-    return fitWS
-
-def plotFury(inWS_n, spec):
-    inWS = mtd[inWS_n[0]]
-    nbins = inWS.getNumberBins()
-    graph = mp.plotSpectrum(inWS_n, spec)
-    layer = graph.activeLayer()
-    layer.setScale(mp.Layer.Left, 0, 1.0)
+    return msdWS
 
 def plotInput(inputfiles,spectra=[]):
     OneSpectra = False
@@ -535,9 +580,9 @@ def CubicFit(inputWS, spec, Verbose=False):
     fit = Fit(Function=function, InputWorkspace=inputWS, WorkspaceIndex=spec,
       CreateOutput=True, Output='Fit')
     table = mtd['Fit_Parameters']
-    A0 = table.getDouble('Value', 0)
-    A1 = table.getDouble('Value', 1)
-    A2 = table.getDouble('Value', 2)
+    A0 = table.cell(0,1)
+    A1 = table.cell(1,1)
+    A2 = table.cell(2,1)
     Abs = [A0, A1, A2]
     if Verbose:
        logger.notice('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
@@ -550,13 +595,14 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     efixed = getEfixed(inputWS)                # Get efixed
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
-    corrections = [corr+'_1']
-    CorrectedWS = inputWS[0:-3] +'Corrected'
     if canWS != '':
         corrections = [corr+'_1', corr+'_2', corr+'_3', corr+'_4']
         CorrectedWS = inputWS[0:-3] +'Correct_'+ canWS[3:8]
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
             EMode='Indirect', EFixed=efixed)
+    else:
+        corrections = [corr+'_1']
+        CorrectedWS = inputWS[0:-3] +'Corrected'
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
     # that of the input (sample) workspace
@@ -625,14 +671,19 @@ def abscorFeeder(sample, container, geom, useCor):
         cxlen = len(Xin)
         if s_hist != c_hist:	# check that no. groups are the same
             error = 'Can histograms (' +str(c_hist) + ') not = Sample (' +str(s_hist) +')'	
+            logger.notice(error)
             exit(error)
         else:
             if sxlen != cxlen:	# check that array lengths are the same
                 error = 'Can array length (' +str(cxlen) + ') not = Sample (' +str(sxlen) +')'	
+                logger.notice(error)
                 exit(error)
     if useCor:
         if Verbose:
-            logger.notice('Correcting sample ' + sample + ' with ' + container)
+            text = 'Correcting sample ' + sample
+            if container != '':
+                text += ' with ' + container
+            logger.notice(text)
         file = sample[:-3] + geom +'_Abs.nxs'
         abs_path = os.path.join(workdir, file)					# path name for nxs file
         if Verbose:
@@ -649,7 +700,7 @@ def abscorFeeder(sample, container, geom, useCor):
         if (PlotResult != 'None'):
             plotCorrResult(cor_result,PlotResult)
         if (PlotContrib != 'None'):
-            plotCorrContrib(plot_list,0,PlotContrib)
+            plotCorrContrib(plot_list,0)
     else:
         if ( container == '' ):
             sys.exit('Invalid options - nothing to do!')
@@ -661,22 +712,25 @@ def abscorFeeder(sample, container, geom, useCor):
             if Verbose:
 	            logger.notice('Subtracting '+container+' from '+sample)
 	            logger.notice('Output file created : '+sub_path)
+            plot_list = [sub_result,sample]
             if (PlotResult != 'None'):
-                plotCorrResult(sub_result)
+                plotCorrResult(sub_result,PlotResult)
             if (PlotResult != 'None'):
-                sub_plot=plotCorrContrib([sub_result,sample,container],0)
+                plotCorrContrib(plot_list,0)
     EndTime('ApplyCorrections')
 
 def plotCorrResult(inWS,PlotResult):
-    if (PlotResult !='None'):
-        if (PlotResult == 'Spectrum' or PlotResult == 'Both'):
-            nHist = mtd[inWS].getNumberHistograms()
-            plot_list = []
-            for i in range(0, nHist):
-                plot_list.append(i)
-            res_plot=mp.plotSpectrum(inWS,plot_list)
-        if (PlotResult == 'Contour' or PlotResult == 'Both'):
+    nHist = mtd[inWS].getNumberHistograms()
+    if (PlotResult == 'Spectrum' or PlotResult == 'Both'):
+        if nHist >= 10:
+            nHist = 10
+        plot_list = []
+        for i in range(0, nHist):
+            plot_list.append(i)
+        res_plot=mp.plotSpectrum(inWS,plot_list)
+    if (PlotResult == 'Contour' or PlotResult == 'Both'):
+        if nHist >= 5:
             mp.importMatrixWorkspace(inWS).plotGraph2D()
 
-def plotCorrContrib(plot_list,n,PlotContrib):
-        con_plot=mp.plotSpectrum(plot_list,0)
+def plotCorrContrib(plot_list,n):
+        con_plot=mp.plotSpectrum(plot_list,n)

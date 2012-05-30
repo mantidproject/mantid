@@ -41,6 +41,8 @@ Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <Poco/Path.h>
+
 #include <cctype>
 #include <algorithm>
 #include <functional>
@@ -77,9 +79,9 @@ namespace
    *
    * @param runs :: a vector of run numbers.
    *
-   * @returns a string containing a suggested file name based on the given run numbers.
+   * @returns a string containing a suggested ws name based on the given run numbers.
    */
-  std::string generateWsName(std::vector<unsigned int> runs)
+  std::string generateWsNameFromRuns(std::vector<unsigned int> runs)
   {
     std::string wsName("");
 
@@ -89,6 +91,29 @@ namespace
         wsName += "_";
 
       wsName += boost::lexical_cast<std::string>(runs[i]);
+    }
+
+    return wsName;
+  }
+
+  /**
+   * Helper function that takes a vector of filenames, and generates a suggested workspace name.
+   *
+   * @param filenames :: a vector of filenames.
+   *
+   * @returns a string containing a suggested ws name based on the given file names.
+   */
+  std::string generateWsNameFromFileNames(std::vector<std::string> filenames)
+  {
+    std::string wsName("");
+
+    for(size_t i = 0; i < filenames.size(); ++i)
+    {
+      if(!wsName.empty())
+        wsName += "_";
+
+      Poco::Path path(filenames[i]);
+      wsName += path.getBaseName();
     }
 
     return wsName;
@@ -431,21 +456,44 @@ namespace Mantid
     void Load::loadMultipleFiles()
     {
       MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filename"));
-      
       const std::vector<std::vector<std::string> > values = getProperty("Filename");
-      const std::vector<std::vector<unsigned int> > runs = multiFileProp->getRuns();
       std::string outputWsName = getProperty("OutputWorkspace");
+
+      // Generate ws names for the files to be loaded.
+      const std::vector<std::vector<unsigned int> > runs = multiFileProp->getRuns();
+      std::vector<std::string> wsNames;
+      wsNames.resize(values.size());
+
+      // If we successfully parsed run numbers (in the cases where we were given a string of "inst[runs].raw") then
+      // we can use them to generate the ws names.
+      if( ! runs.empty() )
+      {
+        std::transform(
+          runs.begin(), runs.end(),
+          wsNames.begin(),
+          generateWsNameFromRuns);
+      }
+      // Else if no runs were returned then the string we were given was of the form "inst1.raw, inst2.raw, ...".
+      // It would not make sense to generate ws names from just the run numbers in this case, since we could have
+      // two files with the same run number with but with different instruments.
+      else
+      {
+        std::transform(
+          values.begin(), values.end(),
+          wsNames.begin(),
+          generateWsNameFromFileNames);
+      }
 
       std::vector<std::string> loadedWsNames;
 
       std::vector<std::vector<std::string> >::const_iterator values_it = values.begin();
-      std::vector<std::vector<unsigned int> >::const_iterator runs_it = runs.begin();
+      std::vector<std::string >::const_iterator wsNames_it = wsNames.begin();
 
       // Cycle through the fileNames and wsNames.
-      for(; values_it != values.end(); ++values_it, ++runs_it)
+      for(; values_it != values.end(); ++values_it, ++wsNames_it)
       {
         std::vector<std::string> fileNames = *values_it;
-        std::string wsName = generateWsName(*runs_it);
+        std::string wsName = *wsNames_it;
 
         // If there is only one filename, then just load it to the given wsName.
         if(fileNames.size() == 1)

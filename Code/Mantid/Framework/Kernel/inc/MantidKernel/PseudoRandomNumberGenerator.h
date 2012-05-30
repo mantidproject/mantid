@@ -39,14 +39,16 @@ namespace Mantid
     class MANTID_KERNEL_DLL PseudoRandomNumberGenerator : public NDRandomNumberGenerator
     {
     public:
+      /// Default constructor setting the dimension to 1
+      PseudoRandomNumberGenerator();
       /// Set the random number seed
       virtual void setSeed(const size_t seedValue) = 0;
       /// Sets the range of the subsequent calls to nextValue;
       virtual void setRange(const double start, const double end) = 0;
       /// Return the next number in the sequence
       virtual double nextValue() = 0;
-      /// Returns the 1D point
-      virtual std::vector<double> nextPoint();
+      /// Generates the next point
+      virtual void generateNextPoint();
     };
   }
 }

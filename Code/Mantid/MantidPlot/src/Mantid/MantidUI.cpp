@@ -420,16 +420,15 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
   MantidMatrix* w = 0;
   if (showDlg)
   {
-    ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(appWindow(), ws->getNumberHistograms());
-    dlg->setModal(true);
-    if (dlg->exec() == QDialog::Accepted)
+    ImportWorkspaceDlg dlg(appWindow(), ws->getNumberHistograms());
+    if (dlg.exec() == QDialog::Accepted)
     {
-      int start = dlg->getLowerLimit();
-      int end = dlg->getUpperLimit();
+      int start = dlg.getLowerLimit();
+      int end = dlg.getUpperLimit();
 
       w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
-      if (dlg->isFiltered())
-        w->setRange(0,dlg->getMaxValue());
+      if (dlg.isFiltered())
+        w->setRange(0,dlg.getMaxValue());
     }
   }
   else
@@ -515,13 +514,12 @@ void MantidUI::showMDPlot()
   QString wsName = getSelectedWorkspaceName();
 
   // Create a dialog to ask for options
-  MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
-  int result = dlg->exec();
-  if (result == QDialog::Rejected)
+  MantidMDCurveDialog dlg(appWindow(), wsName);
+  if ( dlg.exec() == QDialog::Rejected )
     return;
   // Extract the settings from the dialog opened earlier
-  bool showErrors = dlg->showErrorBars();
-  LinePlotOptions * opts = dlg->getLineOptionsWidget();
+  bool showErrors = dlg.showErrorBars();
+  LinePlotOptions * opts = dlg.getLineOptionsWidget();
 
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);

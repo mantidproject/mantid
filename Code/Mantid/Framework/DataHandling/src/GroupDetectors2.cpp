@@ -674,7 +674,10 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
         if( !det->isMasked() ) ++nonMaskedSpectra;
       }
       catch(Exception::NotFoundError&)
-      {}
+      {
+        // If a detector cannot be found, it cannot be masked
+        ++nonMaskedSpectra;
+      }
     }
     if( nonMaskedSpectra == 0 ) ++nonMaskedSpectra; // Avoid possible divide by zero
     requireDivide = (nonMaskedSpectra > 1);

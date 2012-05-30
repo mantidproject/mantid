@@ -59,12 +59,12 @@ public:
        };
 
   /// Get the specified color scale
-  static void getColorMap( ColorScale          name, 
+  static void GetColorMap( ColorScale          name, 
                            size_t              n_colors,
                            std::vector<QRgb> & color_table );
 
   /// Get look up table to brighten image
-  static void getIntensityMap( double                 control_s,
+  static void GetIntensityMap( double                 control_s,
                                size_t                 n_entries,
                                std::vector<double>  & intensity_table );
 

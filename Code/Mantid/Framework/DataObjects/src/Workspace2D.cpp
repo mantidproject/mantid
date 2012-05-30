@@ -99,14 +99,22 @@ namespace Mantid
     ISpectrum * Workspace2D::getSpectrum(const size_t index)
     {
       if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::getSpectrum, histogram number out of range");
+      {
+        std::stringstream ss;
+        ss << "Workspace2D::getSpectrum, histogram number " << index << " out of range " << m_noVectors;
+        throw std::range_error(ss.str());
+      }
       return data[index];
     }
 
     const ISpectrum * Workspace2D::getSpectrum(const size_t index) const
     {
       if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::getSpectrum, histogram number out of range");
+      {
+        std::stringstream ss;
+        ss << "Workspace2D::getSpectrum, histogram number " << index << " out of range " << m_noVectors;
+        throw std::range_error(ss.str());
+      }
       return data[index];
     }
 

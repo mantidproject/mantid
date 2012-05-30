@@ -44,6 +44,7 @@ set ( SRC_FILES
 	src/MersenneTwister.cpp
 	src/MultiFileNameParser.cpp
 	src/MultiFileValidator.cpp
+	src/NDRandomNumberGenerator.cpp
 	src/NDPseudoRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
@@ -316,7 +317,7 @@ endif()
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   include_directories ( inc test )
-  target_link_libraries( KernelTest Kernel )
+  target_link_libraries( KernelTest Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies ( FrameworkTests KernelTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )
@@ -362,6 +363,7 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
+set ( PV_PLUGINS "./pvplugins" )
 set ( QTPLUGINS "." )
 set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )

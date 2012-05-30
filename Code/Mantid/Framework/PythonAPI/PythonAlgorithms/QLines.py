@@ -1,32 +1,32 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
-from mantidsimple import *
-from mantidplotpy import *
 from IndirectCommon import runF2PyCheck, inF2PyCompatibleEnv
+
 if inF2PyCompatibleEnv():
 	import IndirectBayes as Main
 
 class QLines(PythonAlgorithm):
  
 	def PyInit(self):
-		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']))
-		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']))
+		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
+		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='Program',DefaultValue='QL',Validator=ListValidator(['QL','QSe']),Description = 'Name of program to run')
 		self.declareProperty(Name='ResType',DefaultValue='Res',Validator=ListValidator(['Res','Data']),Description = 'Format of Resolution file')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
 		self.declareProperty(Name='ResNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Resolution run number')
-		self.declareProperty(Name='ElasticOption',DefaultValue='Yes',Validator=ListValidator(['Yes','No']),Description = 'Include elastic peak in fit')
 		self.declareProperty(Name='BackgroundOption',DefaultValue='Sloping',Validator=ListValidator(['Sloping','Flat','Zero']),Description = 'Form of background to fit')
-		self.declareProperty(Name='FixWidth',DefaultValue='No',Validator=ListValidator(['No','Yes']),Description = 'Fix one of the widths')
+		self.declareProperty(Name='ElasticOption',DefaultValue=True,Description = 'Include elastic peak in fit')
+		self.declareProperty(Name='FixWidth',DefaultValue=False,Description = 'Fix one of the widths')
 		self.declareProperty(Name='WidthFile', DefaultValue='',Description = 'Name of file containing fixed width values')
-		self.declareProperty(Name='ResNorm',DefaultValue='No',Validator=ListValidator(['No','Yes']),Description = 'Use ResNorm output file')
+		self.declareProperty(Name='ResNorm',DefaultValue=False,Description = 'Use ResNorm output file')
 		self.declareProperty(Name='ResNormNumber', DefaultValue='',Description = 'Name of file containing fixed width values')
-		self.declareProperty(Name='EnergyMin', DefaultValue=-0.5)
-		self.declareProperty(Name='EnergyMax', DefaultValue=0.5)
-		self.declareProperty(Name='SamBinning', DefaultValue=1,Description = 'Binning value for sample')
-		self.declareProperty(Name='ResBinning', DefaultValue=1,Description = 'Binning value for resolution - QLd only')
-		self.declareProperty(Name='Verbose',DefaultValue='Yes',Validator=ListValidator(['No','Yes']))
-		self.declareProperty(Name='Plot',DefaultValue='None',Validator=ListValidator(['None','ProbBeta','Intensity','FwHm','Fit','All']))
+		self.declareProperty(Name='EnergyMin', DefaultValue=-0.5,Description = 'Minimum energy for fit. Default=-0.5')
+		self.declareProperty(Name='EnergyMax', DefaultValue=0.5,Description = 'Maximum energy for fit. Default=0.5')
+		self.declareProperty(Name='SamBinning', DefaultValue=1,Description = 'Binning value (integer) for sample. Default=1')
+		self.declareProperty(Name='ResBinning', DefaultValue=1,Description = 'Binning value (integer) for resolution - QLd only. Default=1')
+		self.declareProperty(Name='Plot',DefaultValue='None',Validator=ListValidator(['None','ProbBeta','Intensity','FwHm','Fit','All']),Description = 'Plot options')
+		self.declareProperty(Name='Verbose',DefaultValue=True,Description = 'Switch Verbose Off/On')
+		self.declareProperty(Name='Save',DefaultValue=False,Description = 'Switch Save result to nxs file Off/On')
  
 	def PyExec(self):
 		runF2PyCheck()
@@ -42,11 +42,11 @@ class QLines(PythonAlgorithm):
 		rtype = self.getPropertyValue('ResType')
 		sam = self.getPropertyValue('SamNumber')
 		res = self.getPropertyValue('ResNumber')
-		elastic = self.getPropertyValue('ElasticOption')
+		elastic = self.getProperty('ElasticOption')
 		bgd = self.getPropertyValue('BackgroundOption')
-		width = self.getPropertyValue('FixWidth')
+		width = self.getProperty('FixWidth')
 		wfile = self.getPropertyValue('WidthFile')
-		resnorm = self.getPropertyValue('ResNorm')
+		resnorm = self.getProperty('ResNorm')
 		resn = self.getPropertyValue('ResNormNumber')
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
@@ -54,13 +54,13 @@ class QLines(PythonAlgorithm):
 		nrbin = self.getPropertyValue('ResBinning')
 		nbins = [nbin, nrbin]
 
-		sname = prefix+sam
-		rname = prefix+res
-		rsname = prefix +resn
+		sname = prefix+sam+'_'+ana
+		rname = prefix+res+'_'+ana
+		rsname = prefix+resn+'_'+ana
 		erange = [emin, emax]
-		if elastic == 'Yes':
+		if elastic:
 			o_el = 1
-		if elastic == 'No':
+		else:
 			o_el = 0
 		if bgd == 'Sloping':
 			o_bgd = 2
@@ -68,17 +68,19 @@ class QLines(PythonAlgorithm):
 			o_bgd = 1
 		if bgd == 'Zero':
 			o_bgd = 0
-		if width == 'Yes':
+		if width:
 			o_w1 = 1
-		if width == 'No':
+		else:
 			o_w1 = 0
-		if resnorm == 'Yes':
+		if resnorm:
 			o_res = 1
-		if resnorm == 'No':
+		else:
 			o_res = 0
 		fitOp = [o_el, o_bgd, o_w1, o_res]
-		verbOp = self.getPropertyValue('Verbose')
+		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
-		Main.QLStart(prog,ana,sname,rname,rtype,rsname,erange,nbins,fitOp,wfile,verbOp,plotOp)
+		saveOp = self.getProperty('Save')
+		Main.QLStart(prog,sname,rname,rtype,rsname,erange,nbins,fitOp,wfile,verbOp,plotOp,saveOp)
+#def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
 
 mantid.registerPyAlgorithm(QLines())         # Register algorithm with Mantid

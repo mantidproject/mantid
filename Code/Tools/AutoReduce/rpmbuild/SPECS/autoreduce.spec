@@ -1,7 +1,7 @@
 Summary: autoreduce
 Name: autoreduce
 Version: 1.1
-Release: 2 
+Release: 3 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}
@@ -32,6 +32,7 @@ install -m 664	../autoreduce/etc/autoreduce/cacerts.jks	 %{buildroot}%{_sysconfd
 install -m 755 -d 	 ../autoreduce/usr	 %{buildroot}/usr
 mkdir -p %{buildroot}%{_bindir}
 install -m 755	 ../autoreduce/usr/bin/nxingest	 %{buildroot}%{_bindir}/nxingest-autoreduce
+install -m 644	 ../autoreduce/usr/bin/add_raw_datafile.py	 %{buildroot}%{_bindir}/add_raw_datafile.py
 install -m 644	 ../autoreduce/usr/bin/create_reduced_metadata.py	 %{buildroot}%{_bindir}/create_reduced_metadata.py
 install -m 755	 ../autoreduce/usr/bin/process_run.sh	 %{buildroot}%{_bindir}/process_run.sh
 mkdir -p %{buildroot}%{_libdir}
@@ -51,6 +52,7 @@ chgrp snswheel %{_sysconfdir}/autoreduce/cacerts.jks
 %config %{_sysconfdir}/autoreduce/icatclient.properties 
 %config %{_sysconfdir}/autoreduce/cacerts.jks 
 %attr(755, -, -) %{_bindir}/nxingest-autoreduce
+%attr(755, -, -) %{_bindir}/add_raw_datafile.py
 %attr(755, -, -) %{_bindir}/create_reduced_metadata.py
 %attr(755, -, -) %{_bindir}/process_run.sh
 %attr(755, -, -) %{_libdir}/autoreduce

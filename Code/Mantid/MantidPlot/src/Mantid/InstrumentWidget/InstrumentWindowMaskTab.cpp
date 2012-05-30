@@ -139,16 +139,16 @@ m_userEditing(true)
   m_clear_all = new QPushButton("Clear All");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
-  m_save_as_workspace_exclude = new QAction("Save Mask As Workspace",this);
+  m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
   connect(m_save_as_workspace_exclude,SIGNAL(activated()),this,SLOT(saveMaskToWorkspace()));
 
-  m_save_as_workspace_include = new QAction("Save Inverted Mask As Workspace",this);
+  m_save_as_workspace_include = new QAction("As ROI to workspace",this);
   connect(m_save_as_workspace_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToWorkspace()));
 
-  m_save_as_file_exclude = new QAction("Save Mask As File",this);
+  m_save_as_file_exclude = new QAction("As Mask to file",this);
   connect(m_save_as_file_exclude,SIGNAL(activated()),this,SLOT(saveMaskToFile()));
 
-  m_save_as_file_include = new QAction("Save Inverted Mask As File",this);
+  m_save_as_file_include = new QAction("As ROI to file",this);
   connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToFile()));
 
   QPushButton* saveButton = new QPushButton("Save");
@@ -446,6 +446,10 @@ void InstrumentWindowMaskTab::saveMaskToFile()
 void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  // Make sure we have applied the Mask
+  applyMask();
+
   m_pointer->setChecked(true);
   setActivity();
   Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
@@ -461,6 +465,10 @@ void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  // Make sure we have applied the Mask
+  applyMask();
+
   m_pointer->setChecked(true);
   setActivity();
   Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);

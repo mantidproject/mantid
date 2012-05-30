@@ -75,5 +75,24 @@ private:
 
 };
 
+class SobolSequenceTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  void test_Large_Number_Of_Next_Point_Calls()
+  {
+    const unsigned int ndimensions(14);
+    SobolSequence generator(ndimensions);
+    const size_t ncalls = 10000000;
+    size_t sumSizes(0); // Make sure the optimizer actuall does the loop
+    for(size_t i = 0; i < ncalls; ++i)
+    {
+      const std::vector<double> & point = generator.nextPoint();
+      sumSizes += point.size();
+    }
+    TS_ASSERT(sumSizes > 0);
+  }
+};
+
 
 #endif

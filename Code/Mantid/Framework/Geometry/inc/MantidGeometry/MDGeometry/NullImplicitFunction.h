@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-    namespace MDAlgorithms
+    namespace Geometry
     {
         /**
         This class represents a Null Implicit function. This type prevents the requirement

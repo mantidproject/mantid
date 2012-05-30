@@ -3,6 +3,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IFunction.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
@@ -35,9 +36,9 @@ void SANSPlotSpecial::rangeChanged(double low, double high)
 
   Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
   fit->initialize();
+  fit->setPropertyValue("Function", "name=UserFunction, Formula=Intercept+Gradient*x");
   fit->setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", m_workspaceIQT);
   fit->setPropertyValue("Output", "__sans_isis_display_linear");
-  fit->setPropertyValue("Function", "name=UserFunction, Formula=Intercept+Gradient*x");
   fit->setProperty<double>("StartX", low);
   fit->setProperty<double>("EndX", high);
   fit->execute();
@@ -52,12 +53,12 @@ void SANSPlotSpecial::rangeChanged(double low, double high)
   m_linearCurve->setPen(fitPen);
   m_uiForm.plotWindow->replot();
 
-  QStringList parValues = QString::fromStdString(fit->getPropertyValue("Parameters")).split(",", QString::SkipEmptyParts);
+  Mantid::API::IFunction_sptr func = fit->getProperty("Function");
 
   double chisqrd = fit->getProperty("OutputChi2overDoF");
 
-  m_derivatives["Intercept"]->setText(parValues[0]);
-  m_derivatives["Gradient"]->setText(parValues[1]);
+  m_derivatives["Intercept"]->setText(QString::number(func->getParameter("Intercept")));
+  m_derivatives["Gradient"]->setText(QString::number(func->getParameter("Gradient")));
   m_derivatives["Chi Squared"]->setText(QString::number(chisqrd));
 
   calculateDerivatives();

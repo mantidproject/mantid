@@ -39,9 +39,12 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
 {
-  ColorMaps::getColorMap( ColorMaps::HEAT,
+  ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
-                          color_table );
+                          positive_color_table );
+  ColorMaps::GetColorMap( ColorMaps::GRAY,
+                          256,
+                          negative_color_table );
 
   this->image_plot     = image_plot;
   this->slider_handler = slider_handler;
@@ -103,7 +106,9 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
                                             data_array->GetYMax() );
 
-  image_plot_item->SetData( data_array, &color_table );
+  image_plot_item->SetData(  data_array, 
+                            &positive_color_table, 
+                            &negative_color_table );
 
   range_handler->ConfigureRangeControls( data_source );
 
@@ -273,26 +278,44 @@ void ImageDisplay::UpdateImage()
   image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
                                             data_array->GetYMax() );
 
-  image_plot_item->SetData( data_array, &color_table );
+  image_plot_item->SetData( data_array, 
+                           &positive_color_table,
+                           &negative_color_table );
   image_plot->replot();
 }
 
 
 /**
- *  Change the color table used to map intensity to color. 
+ *  Change the color tables used to map intensity to color. Two tables are
+ *  used to allow psuedo-log scaling based on the magnitude of a value.
+ *  Typically if the positive color table is colorful, such as the "HEAT"
+ *  scale, the negative color table should be a gray scale to easily
+ *  distinguish between positive and negative values.
  *
- *  @param new_color_table  The new color table used to map data values
- *                          to a RGB color.  This can have any positive 
- *                          number of values, but will typically have
- *                          256 entries.
+ *  @param positive_color_table  The new color table used to map positive data 
+ *                               values to an RGB color.  This can have any
+ *                               positive number of values, but will typically
+ *                               have 256 entries.
+ *  @param negative_color_table  The new color table used to map negative data 
+ *                               values to an RGB color.  This must have the
+ *                               same number of entries as the positive
+ *                               color table.
  */
-void ImageDisplay::SetColorScale( std::vector<QRgb> & new_color_table )
+void ImageDisplay::SetColorScales( std::vector<QRgb> & positive_color_table,
+                                   std::vector<QRgb> & negative_color_table )
 {
-  color_table.resize( new_color_table.size() );
-  for ( size_t i = 0; i < new_color_table.size(); i++ )
+  this->positive_color_table.resize( positive_color_table.size() );
+  for ( size_t i = 0; i < positive_color_table.size(); i++ )
   {
-    color_table[i] = new_color_table[i];
+    this->positive_color_table[i] = positive_color_table[i];
   }
+
+  this->negative_color_table.resize( negative_color_table.size() );
+  for ( size_t i = 0; i < negative_color_table.size(); i++ )
+  {
+    this->negative_color_table[i] = negative_color_table[i];
+  }
+ 
   UpdateImage();
 }
 
@@ -310,7 +333,7 @@ void ImageDisplay::SetColorScale( std::vector<QRgb> & new_color_table )
 void ImageDisplay::SetIntensity( double control_parameter )
 {
   size_t DEFAULT_SIZE = 100000;
-  ColorMaps::getIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
+  ColorMaps::GetIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
   image_plot_item->SetIntensityTable( &intensity_table );
   UpdateImage();
 }

@@ -1,24 +1,12 @@
 #Force for ILL backscattering raw
-from mantidsimple import *
+#from mantid.simpleapi import *
+from mantid.simpleapi import *
+from mantid import config, logger, mtd
 import mantidplot as mp
 import math, os.path as op
-from IndirectCommon import *
+from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
 
 #  Routines for Ascii file of raw data
-
-def ExtractFloat(a):                              #extract values from line of ascii
-	extracted = []
-	elements = a.split()							#split line on spaces
-	for n in elements:
-		extracted.append(float(n))
-	return extracted                                 #values as list
-
-def ExtractInt(a):                              #extract values from line of ascii
-	extracted = []
-	elements = a.split()							#split line on spaces
-	for n in elements:
-		extracted.append(int(n))
-	return extracted                                 #values as list
 
 def Iblock(a,first):                                 #read Ascii block of Integers
 	line1 = a[first]
@@ -95,9 +83,10 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 		e.append(ee)
 	return next,x,y,e                                #values of x,y,e as lists
 
-def IbackStart(instr,run,Verbose=False,Plot=False):      #Ascii start routine
+def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
+	idf = instr +'_Definition.xml'
 	file = instr +'_'+ run
 	filext = file + '.asc'
 	path = op.join(workdir, filext)
@@ -192,27 +181,42 @@ def IbackStart(instr,run,Verbose=False,Plot=False):      #Ascii start routine
 	xDat = []
 	yDat = []
 	eDat = []
+	tot = []
 	for n in range(0, nsp):
+		next,xd,yd,ed = ReadIbackGroup(asc,next)
+		tot.append(sum(yd))
 		if Verbose:
-			logger.notice('Spectrum ' + str(n+1) +' at angle '+ str(theta[n]))
-		next,x,y,e = ReadIbackGroup(asc,next)
+			logger.notice('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+
+				' ; Total counts = '+str(sum(yd)))
 		for m in range(0, new+1):
 			mm = m+imin
 			xDat.append(xMon[m])
-			yDat.append(y[mm])
-			eDat.append(e[mm])
+			yDat.append(yd[mm])
+			eDat.append(ed[mm])
 		if n != 0:
 			Qaxis += ','
+		xDat.append(2*xMon[new-1]-xMon[new-2])
 		Qaxis += str(theta[n])
-	outWS = file
-	CreateWorkspace(OutputWorkspace=outWS, DataX=xDat, DataY=yDat, DataE=eDat,
+	ascWS = file+'_asc'
+	outWS = file+'_red'
+	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=nsp, UnitX='Energy')
-	Divide(LHSWorkspace=outWS, RHSWorkspace=monWS, OutputWorkspace=outWS)
+	Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
+		AllowDifferentNumberSpectra=True)
 	DeleteWorkspace(monWS)								# delete monitor WS
-	opath = op.join(workdir,outWS+'_red.nxs')
-	SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-	if Verbose:
-		logger.notice('Output file : ' + opath)
+	LoadInstrument(Workspace=ascWS, Filename=idf, RewriteSpectraMap=False)
+	if useM:
+		map = ReadMap(instr,Verbose)
+		UseMap(ascWS,map,Verbose)
+	if rejectZ:
+		RejectZero(ascWS,tot,Verbose)
+	if useM == False and rejectZ == False:
+		CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
+	if Save:
+		opath = op.join(workdir,outWS+'.nxs')
+		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+		if Verbose:
+			logger.notice('Output file : ' + opath)
 	if (Plot != 'None'):
 		plotForce(outWS,Plot)
 	EndTime('Iback')
@@ -229,16 +233,16 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
 	Q = val[0]
 	for m in range(first+4, last): 
 		val = ExtractFloat(asc[m])
-		xin = val[0]/1000.0
-		x.append(xin)
+		x.append(val[0]/1000.0)
 		y.append(val[1])
 		e.append(val[2])
 	npt = len(x)
 	return Q,npt,x,y,e                                 #values of x,y,e as lists
 
-def InxStart(instr,run,Verbose=False,Plot=False):
+def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 	StartTime('Inx')
 	workdir = config['defaultsave.directory']
+	idf = instr +'_Definition.xml'
 	file = instr +'_'+ run
 	filext = file + '.inx'
 	path = op.join(workdir, filext)
@@ -264,35 +268,113 @@ def InxStart(instr,run,Verbose=False,Plot=False):
 	else:
 		err = 'ERROR ** file ' +filext+ ' should be ' +str(ltot)+ ' lines'
 		sys.exit(err)
-	outWS = file
 	Qaxis = ''
 	xDat = []
 	yDat = []
 	eDat = []
+	ns = 0
 	for m in range(0,ngrp):
 		Qq,nd,xd,yd,ed = ReadInxGroup(asc,m,lgrp)
+		tot = sum(yd)
 		if Verbose:
-			logger.notice('Spectrum ' + str(m+1) +' at Q= '+ str(Qq))
-		if m != 0:
+			logger.notice('Spectrum ' + str(m+1) +' at Q= '+ str(Qq)+' ; Total counts = '+str(tot))
+		if ns != 0:
 			Qaxis += ','
 		Qaxis += str(Qq)
 		for n in range(0,nd):
 			xDat.append(xd[n])
 			yDat.append(yd[n])
 			eDat.append(ed[n])
-	CreateWorkspace(OutputWorkspace=outWS, DataX=xDat, DataY=yDat, DataE=eDat,
-		Nspec=ngrp, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
-	opath = op.join(workdir,outWS+'_red.nxs')
-	SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-	if Verbose:
-		logger.notice('Output file : ' + opath)
+		xDat.append(2*xd[nd-1]-xd[nd-2])
+		ns += 1
+	ascWS = file+'_red'
+	outWS = file+'_red'
+	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
+		Nspec=ns, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+	LoadInstrument(Workspace=ascWS, Filename=idf, RewriteSpectraMap=False)
+	if useM:
+		map = ReadMap(instr,Verbose)
+		UseMap(ascWS,map,Verbose)
+	if rejectZ:
+		RejectZero(ascWS,tot,Verbose)
+	if useM == False and rejectZ == False:
+		CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
+	if Save:
+		opath = op.join(workdir,outWS+'.nxs')
+		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+		if Verbose:
+			logger.notice('Output file : ' + opath)
 	if (Plot != 'None'):
 		plotForce(outWS,Plot)
 	EndTime('Inx')
 
+def RejectZero(inWS,tot,Verbose):
+	nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
+	nout = 0
+	outWS = inWS[:-3]+'red'
+	for n in range(0, nin):
+		if tot[n] > 0:
+			ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+				WorkspaceIndex=n)
+			if nout == 0:
+				RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
+			else:
+				ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+			nout += 1
+		else:
+			if Verbose:
+				logger.notice('** spectrum '+str(n+1)+' rejected')
+
+def ReadMap(instr,Verbose):
+	workdir = config['defaultsave.directory']
+	file = instr +'_map.asc'
+	path = op.join(workdir, file)
+	handle = open(path, 'r')
+	asc = []
+	for line in handle:
+		line = line.rstrip()
+		asc.append(line)
+	handle.close()
+	lasc = len(asc)
+	if Verbose:
+		logger.notice('Map file : ' + path +' ; spectra = ' +str(lasc-1))
+	val = ExtractInt(asc[0])
+	numb = val[0]
+	if (numb != (lasc-1)):
+		error = 'Number of lines  not equal to number of spectra'
+		exit(error)
+	map = []
+	for n in range(1,lasc):
+		val = ExtractInt(asc[n])
+		map.append(val[1])
+	return map
+		
+def UseMap(inWS,map,Verbose):
+	nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
+	logger.notice('Nin '+str(nin))
+	nout = 0
+	outWS = inWS[:-3]+'red'
+	logger.notice('Nmap '+str(len(map)))
+	for n in range(0, nin):
+		if map[n] == 1:
+			ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+				WorkspaceIndex=n)
+			if nout == 0:
+				RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
+			else:
+				ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+			nout += 1
+			if Verbose:
+				logger.notice('** spectrum '+str(n+1)+' mapped')
+		else:
+			if Verbose:
+				logger.notice('** spectrum '+str(n+1)+' skipped')
+
 def plotForce(inWS,Plot):
 	if (Plot == 'Spectrum' or Plot == 'Both'):
 		nHist = mtd[inWS].getNumberHistograms()
+		if nHist > 10 :
+			nHist = 10
 		plot_list = []
 		for i in range(0, nHist):
 			plot_list.append(i)

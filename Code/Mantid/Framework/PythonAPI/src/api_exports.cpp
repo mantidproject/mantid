@@ -26,6 +26,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
+#include "MantidPythonAPI/SharedPtrToPythonMacro.h"
 //Poco
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
@@ -422,7 +423,7 @@ using namespace boost::python;
   //-----------------------------------------------------------------------------------------------
   void export_IMDDimension()
   {
-    register_ptr_to_python<Geometry::IMDDimension_sptr>();
+    REGISTER_SHARED_PTR_TO_PYTHON(IMDDimension);
 
     class_< IMDDimension, boost::noncopyable >("IMDDimension", no_init)
         .def("getName", &IMDDimension::getName)
@@ -459,7 +460,7 @@ using namespace boost::python;
     register_ptr_to_python<API::IMDEventWorkspace_sptr>();
 
     // MDEventWorkspace class
-    class_< IMDEventWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDEventWorkspace", no_init)
+    class_< IMDEventWorkspace, bases<API::IMDWorkspace>, boost::noncopyable >("IMDEventWorkspace", no_init)
             .def("getNPoints", &IMDEventWorkspace::getNPoints)
             .def("getNumDims", &IMDEventWorkspace::getNumDims)
             .def("getBoxController", (BoxController_sptr(IMDEventWorkspace::*)() )  &IMDEventWorkspace::getBoxController)

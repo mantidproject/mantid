@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1013</width>
-        <height>899</height>
+        <width>998</width>
+        <height>930</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -481,6 +481,13 @@ p, li { white-space: pre-wrap; }
                         <width>200</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_3">
+                      <property name="text">
+                       <string>Hit [ENTER] to refresh Metadata</string>
                       </property>
                      </widget>
                     </item>
@@ -973,13 +980,31 @@ p, li { white-space: pre-wrap; }
                     </item>
                    </layout>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="groupBox_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="title">
+                  <string>Metadata</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_5">
+                   <layout class="QHBoxLayout" name="horizontalLayout_18">
                     <property name="spacing">
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_9">
+                     <widget class="QLabel" name="label_22">
                       <property name="minimumSize">
                        <size>
                         <width>150</width>
@@ -1023,7 +1048,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_4">
+                     <widget class="QLabel" name="label_23">
                       <property name="minimumSize">
                        <size>
                         <width>50</width>
@@ -1045,7 +1070,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_7">
+                     <spacer name="horizontalSpacer_22">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
@@ -1060,12 +1085,12 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_20">
+                   <layout class="QHBoxLayout" name="horizontalLayout_21">
                     <property name="spacing">
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_3">
+                     <widget class="QLabel" name="label_24">
                       <property name="minimumSize">
                        <size>
                         <width>70</width>
@@ -1125,7 +1150,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_6">
+                     <widget class="QLabel" name="label_25">
                       <property name="minimumSize">
                        <size>
                         <width>70</width>
@@ -1185,7 +1210,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_4">
+                     <spacer name="horizontalSpacer_23">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
@@ -1200,12 +1225,12 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_22">
+                   <layout class="QHBoxLayout" name="horizontalLayout_23">
                     <property name="spacing">
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_7">
+                     <widget class="QLabel" name="label_26">
                       <property name="minimumSize">
                        <size>
                         <width>70</width>
@@ -1246,7 +1271,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="det_angle_unit_label_3">
+                     <widget class="QLabel" name="det_angle_unit_label_7">
                       <property name="minimumSize">
                        <size>
                         <width>150</width>
@@ -1265,7 +1290,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_8">
+                     <widget class="QLabel" name="label_27">
                       <property name="minimumSize">
                        <size>
                         <width>70</width>
@@ -1306,7 +1331,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="det_angle_unit_label_4">
+                     <widget class="QLabel" name="det_angle_unit_label_3">
                       <property name="minimumSize">
                        <size>
                         <width>100</width>
@@ -1325,7 +1350,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_9">
+                     <spacer name="horizontalSpacer_25">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
@@ -1489,18 +1514,18 @@ p, li { white-space: pre-wrap; }
                   <widget class="QLabel" name="label_11">
                    <property name="minimumSize">
                     <size>
-                     <width>190</width>
+                     <width>170</width>
                      <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>190</width>
+                     <width>170</width>
                      <height>16777215</height>
                     </size>
                    </property>
                    <property name="text">
-                    <string>Preview of scaling factor file:</string>
+                    <string>Scaling Factor File Name:</string>
                    </property>
                   </widget>
                  </item>

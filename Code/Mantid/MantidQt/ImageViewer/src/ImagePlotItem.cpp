@@ -14,11 +14,12 @@ namespace ImageView
  */
 ImagePlotItem::ImagePlotItem()
 {
-  buffer_ID       = 0;
-  data_array_0    = 0;
-  data_array_1    = 0;
-  color_table     = 0;
-  intensity_table = 0;
+  buffer_ID            = 0;
+  data_array_0         = 0;
+  data_array_1         = 0;
+  positive_color_table = 0;
+  negative_color_table = 0;
+  intensity_table      = 0;
 }
 
 
@@ -40,14 +41,19 @@ ImagePlotItem::~ImagePlotItem()
 /**
  * Specify the data to be plotted and the color table to use.
  *
- * @param data_array   The DataArray object containing the data to plot
- *                     along with information about the array size and 
- *                     the region covered by the data. 
- * @param color_table  Vector of RGB colors that determine the mapping 
- *                     from a data value to a color. 
+ * @param data_array            The DataArray object containing the data to 
+ *                              plot along with information about the array  
+ *                              size and the region covered by the data. 
+ * @param positive_color_table  Vector of RGB colors that determine the mapping 
+ *                              from a positive data value to a color. 
+ * @param negative_color_table  Vector of RGB colors that determine the mapping 
+ *                              from a negative data value to a color. This
+ *                              must have the same number of entries as the
+ *                              positive color table.
  */
 void ImagePlotItem::SetData( DataArray*         data_array, 
-                             std::vector<QRgb>* color_table )
+                             std::vector<QRgb>* positive_color_table,
+                             std::vector<QRgb>* negative_color_table )
 {
   if ( buffer_ID == 0 )
   {
@@ -71,7 +77,8 @@ void ImagePlotItem::SetData( DataArray*         data_array,
                                 // being drawn.
     buffer_ID = 0;
   }
-  this->color_table = color_table;
+  this->positive_color_table = positive_color_table;
+  this->negative_color_table = negative_color_table;
 }
 
 
@@ -109,8 +116,8 @@ void ImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & yMap,
                           const QRect       &       ) const
 {
-  if ( !color_table )     // if data not yet set, just return
-  {
+  if ( !positive_color_table )     // if no color table, the data is not yet
+  {                                // set, so just return
     return;
   }
 
@@ -142,32 +149,52 @@ void ImagePlotItem::draw(       QPainter    * painter,
   int pix_y_min = (int)yMap.transform( y_min );
   int pix_y_max = (int)yMap.transform( y_max );
 
-  double scale = ((double)color_table->size()-1)/(max-min);
+                                            // set up zero centered scale range
+                                            // symmetrical around zero
+  double zc_max = fabs(max);
+  if ( fabs(min) > fabs(max) )
+  {
+    zc_max = fabs(min);
+  }
+  if ( zc_max == 0 )                        // all values are zero, set up
+  {                                         // no-degenerate default range
+    zc_max = 1;
+  }
+
+  double scale = ((double)positive_color_table->size()-1)/zc_max;
   size_t lut_size = 0;
-  double ct_scale = ((double)color_table->size()-1);
+  double ct_scale = ((double)positive_color_table->size()-1);
   if ( intensity_table != 0 )
   {
     lut_size = intensity_table->size();
-    scale    = ((double)lut_size-1.0) / (max-min);
-    ct_scale = ((double)color_table->size()-1);
+    scale    = ((double)lut_size-1.0) / zc_max;
+    ct_scale = ((double)positive_color_table->size()-1);
   }
-  double shift = -min * scale;
   size_t data_index;
   size_t color_index;
   size_t lut_index;
   size_t image_index = 0;
 
   unsigned int* rgb_buffer = new unsigned int[n_rows * n_cols];
-
+  double val = 0;
   for ( int row = (int)n_rows-1; row >= 0; row-- )
   {
     data_index = row * n_cols;
-    if (intensity_table == 0 )              // use color table directly
+    if (intensity_table == 0 )              // use color tables directly
     {
       for ( int col = 0; col < (int)n_cols; col++ )
       {
-        color_index = (uint)(data[data_index] * scale + shift);
-        rgb_buffer[image_index] = (*color_table)[ color_index ];
+        val = data[data_index] * scale; 
+        if ( val >= 0 )                     // use positive color table
+        {
+          color_index = (uint)val;
+          rgb_buffer[image_index] = (*positive_color_table)[ color_index ];
+        }
+        else                               // use negative color table
+        {
+          color_index = (uint)(-val);
+          rgb_buffer[image_index] = (*negative_color_table)[ color_index ];
+        }
         image_index++;
         data_index++;
       }
@@ -176,9 +203,19 @@ void ImagePlotItem::draw(       QPainter    * painter,
     {
       for ( int col = 0; col < (int)n_cols; col++ )
       {
-        lut_index   = (uint)(data[data_index] * scale + shift);
-        color_index = (uint)((*intensity_table)[lut_index] * ct_scale );
-        rgb_buffer[image_index] = (*color_table)[ color_index ];
+        val = data[data_index] * scale;
+        if ( val >= 0 )
+        {
+          lut_index   = (uint)val;
+          color_index = (uint)((*intensity_table)[lut_index] * ct_scale );
+          rgb_buffer[image_index] = (*positive_color_table)[ color_index ];
+        }
+        else
+        {
+          lut_index   = (uint)(-val);
+          color_index = (uint)((*intensity_table)[lut_index] * ct_scale );
+          rgb_buffer[image_index] = (*negative_color_table)[ color_index ];
+        }
         image_index++;
         data_index++;
       }
@@ -198,8 +235,9 @@ void ImagePlotItem::draw(       QPainter    * painter,
 
   painter->drawPixmap( pix_x_min, pix_y_max, scaled_pixmap );
 
-  delete[] rgb_buffer;                       // hopefully we can delete this
-                                             // now  
+  delete[] rgb_buffer;                       // we can delete this now, but
+                                             // not earlier since the image
+                                             // and/or pixmap is using it
 }
 
 

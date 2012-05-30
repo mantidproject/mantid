@@ -1,4 +1,5 @@
 from MantidFramework import *
+from mantidsimple import *
 from mantid.api import FileFinder
 
 import itertools
@@ -129,6 +130,9 @@ class Intervals:
 	def __str__(self):
 		strings = ["(" + str(interval[0]) + ", " + str(interval[1]) + ")" for interval in self._intervals]
 		return ", ".join(strings)
+	
+	def __len__(self):
+		return len(self.getValues())
 
 """=================================================================================="""
 """=================================================================================="""
@@ -148,6 +152,7 @@ class GroupingMap():
 		raise RuntimeError("Unable to find spectrum ID in map.")
 		
 # Enumerating the different logical groupings of detectors, by their spectra IDs.
+"""TODO: Get this out of here.  It needs to be in an inst def file."""
 class DetectorGrouping:
 	# Monitors
 	MONITORS = Intervals( (1, 2) )
@@ -326,15 +331,13 @@ class LoadEVSRaw(PythonAlgorithm):
 		self.declareProperty('Runs', '' , MandatoryValidator(), Description='Runs, e.g. \"2012-2020\"')
 		self.declareWorkspaceProperty('OutputWorkspace', '' , Direction.Output, Description='Name of workspace into which the result will be put.')
 		self.declareProperty('Spectra', '' , MandatoryValidator(), Description='Spectra IDs, e.g. \"5-10\".  Can accept a full range of both backward and forward scattering spectra.')
-		""" TODO: What is this ... ? """
-		self.declareProperty('Beta', 0.0, MandatoryValidator(), Description='')
 
 	def PyExec(self):
 		# Parse / store algorithm property values for later use.
 		runNumbers		= Intervals.fromString(self.getProperty('Runs'))
 		self._spectraIDs	= Intervals.fromString(self.getProperty('Spectra'))
 		outputWsName	= self.getPropertyValue('OutputWorkspace')
-		beta	 		= self.getProperty('Beta')
+		beta	 		= 0.28
 		
 		# SpectraID of first monitor.
 		monitorID	= DetectorGrouping.MONITORS[0]
@@ -399,12 +402,13 @@ class LoadEVSRaw(PythonAlgorithm):
 		# It also has units of "TOF", so that other workspaces with TOF units may be divided by it.
 		dataX = periodWsList[0].dataX(0)
 		dataY = [dataX[i] - dataX[i - 1] for i in range(1, len(dataX))]
-		timeWs = CreateWorkspace(DataX=list(dataX), DataY=list(dataY), DataE=list(dataY), UnitX="TOF")
+		timeWsName = "timeWs"
+		CreateWorkspace(OutputWorkspace=timeWsName,DataX=list(dataX), DataY=list(dataY), DataE=list(dataY), UnitX="TOF")
 		
 		# Divide period and monitors through by the timeWs, and then delete it.
 		for periodWs in periodWsList + monPeriodWsList:
-			Divide(LHSWorkspace=periodWs.getName(),RHSWorkspace=timeWs.getName(),OutputWorkspace=periodWs.getName())
-		DeleteWorkspace(Workspace=timeWs.getName())
+			Divide(LHSWorkspace=periodWs.getName(), RHSWorkspace=timeWsName,OutputWorkspace=periodWs.getName())
+		DeleteWorkspace(Workspace=timeWsName)
 		
 		sumMap = {}
 		monSumMap = {}
@@ -489,15 +493,13 @@ class LoadEVSRaw(PythonAlgorithm):
 			
 			for i in range(0, len(cResult)):
 				if spectrumID in DetectorGrouping.BACKWARD:
-					""" TODO: Backward difference calcs not having desired effect at the moment.
-					Is the double difference below really the one used in RawB? """
-					
-					#THICK DIFFERENCE
-					#cResult[i] = cThick[i] - cOut[i]
-					
+					""" Note: This is slightly different to the code that appears in the original RawB,
+					as we seem to have swapped over cThick and cOut at some point.  Need to take
+					a look at this.  Otherwise, this seems to work as intended."""
 					#DOUBLE DIFFERENCE
-					#cResult[i] = cThick[i] * (1 - beta) - cOut[i] + beta * cThin[i]
-					cResult[i] = cOut[i] * (1 - beta) - cThin[i] + beta * cThick[i]
+					cResult[i] = cThick[i] * (1 - beta) - cThin[i] + beta * cOut[i]
+					# Should be:
+					# cResult[i] = cOut[i] * (1 - beta) - cThin[i] + beta * cThick[i]
 				
 				elif spectrumID in DetectorGrouping.FORWARD:
 					# SINGLE DIFFERENCE

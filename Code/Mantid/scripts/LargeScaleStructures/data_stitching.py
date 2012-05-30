@@ -178,9 +178,13 @@ class DataSet(object):
         """
         return self._xmin, self._xmax
     
-    def apply_scale(self):
+    def apply_scale(self, xmin=None, xmax=None):
         """
-            Apply the scaling factor to the unmodified data set
+            Apply the scaling factor to the unmodified data set.
+            If xmin and xmax are both set, only the data in the
+            defined range will be scaled.
+            @param xmin: minimum q-value
+            @param xmax: maximum q-value
         """
         self.load()
         
@@ -195,27 +199,57 @@ class DataSet(object):
         for i in range(len(dq)):
             dq_scaled[i] = dq[i]
             
-        y_scaled = mtd[self._ws_scaled].dataY(0)
-        e_scaled = mtd[self._ws_scaled].dataE(0)
-        for i in range(self._skip_first):
-            y_scaled[i] = 0
-            e_scaled[i] = 0
-            
-        first_index = max(len(y_scaled)-self._skip_last, 0)
-        for i in range(first_index, len(y_scaled)):
-            y_scaled[i] = 0
-            e_scaled[i] = 0
-        
-        # Get rid of points with an error greater than the intensity
-        if self._restricted_range:
-            for i in range(len(y_scaled)):
-                if y_scaled[i]<=e_scaled[i]:
-                    y_scaled[i] = 0
-                    e_scaled[i] = 0   
-        
-        # Dummy operation to update the plot
-        Scale(InputWorkspace=self._ws_scaled, OutputWorkspace=self._ws_scaled,
-              Operation="Multiply", Factor=1.0)
+        if xmin is not None and xmax is not None:
+            # Make sure we have point data
+            ConvertToPointData(InputWorkspace=self._ws_scaled,
+                               OutputWorkspace=self._ws_scaled)
+            x = mtd[self._ws_scaled].readX(0)
+            dx = mtd[self._ws_scaled].readDx(0)
+            y = mtd[self._ws_scaled].readY(0)
+            e = mtd[self._ws_scaled].readE(0)
+
+            x_trim = []
+            dx_trim = []
+            y_trim = []
+            e_trim = []
+            for i in range(len(y)):
+                if x[i]>=xmin and x[i]<=xmax:
+                    x_trim.append(x[i])
+                    dx_trim.append(dx[i])
+                    y_trim.append(y[i])
+                    e_trim.append(e[i])
+
+            CreateWorkspace(DataX=x_trim, DataY=y_trim, DataE=e_trim,
+                           OutputWorkspace=self._ws_scaled,
+                           UnitX="MomentumTransfer",
+                           ParentWorkspace=self._ws_name)
+
+            dq_scaled = mtd[self._ws_scaled].dataDx(0)
+            for i in range(len(dq_scaled)):
+                dq_scaled[i] = dx_trim[i]  
+        else:            
+            y_scaled = mtd[self._ws_scaled].dataY(0)
+            e_scaled = mtd[self._ws_scaled].dataE(0)
+            for i in range(self._skip_first):
+                y_scaled[i] = 0
+                e_scaled[i] = 0
+                
+            first_index = max(len(y_scaled)-self._skip_last, 0)
+            for i in range(first_index, len(y_scaled)):
+                y_scaled[i] = 0
+                e_scaled[i] = 0
+
+            # Get rid of points with an error greater than the intensity
+            if self._restricted_range:
+                for i in range(len(y_scaled)):
+                    if y_scaled[i]<=e_scaled[i]:
+                        y_scaled[i] = 0
+                        e_scaled[i] = 0   
+
+            # Dummy operation to update the plot
+            Scale(InputWorkspace=self._ws_scaled,
+                  OutputWorkspace=self._ws_scaled,
+                  Operation="Multiply", Factor=1.0)
         
     def load(self, update_range=False, restricted_range=False):
         """
@@ -408,7 +442,7 @@ class Stitcher(object):
         data_started = False        
         # First the zeros at the beginning
         for i in range(len(zipped)):
-            if data_started or zipped[i][1]>0:
+            if data_started or zipped[i][1]!=0:
                 data_started = True
                 trimmed.append(zipped[i])
         
@@ -416,7 +450,7 @@ class Stitcher(object):
         zipped = []
         data_started = False
         for i in range(len(trimmed)-1,-1,-1):
-            if data_started or trimmed[i][1]>0:
+            if data_started or trimmed[i][1]!=0:
                 data_started = True
                 zipped.append(trimmed[i])
         
@@ -441,18 +475,11 @@ class Stitcher(object):
         if first_ws is None:
             return
 
-        x = mtd[first_ws].dataX(0)
-        dx = mtd[first_ws].dataDx(0)
-        y = mtd[first_ws].dataY(0)
-        e = mtd[first_ws].dataE(0)
-        if len(x)==len(y)+1:
-            xtmp = [(x[i]+x[i+1])/2.0 for i in range(len(y))]
-            dxtmp = [(dx[i]+dx[i+1])/2.0 for i in range(len(y))]
-            x = xtmp
-            dx = dxtmp
-        x, y, e, dx = self.trim_zeros(x, y, e, dx)
-        
-        for d in self._data_sets[1:]:
+        x = []
+        dx = []
+        y = []
+        e = []
+        for d in self._data_sets:
             ws = d.get_scaled_ws()
             if ws is not None:
                 _x = mtd[ws].dataX(0)

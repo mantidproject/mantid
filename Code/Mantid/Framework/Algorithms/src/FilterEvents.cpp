@@ -4,6 +4,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidAPI/TableRow.h"
 
 #include <sstream>
 
@@ -48,6 +50,9 @@ namespace Algorithms
     declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
       "The base name to use for the output workspace" );
 
+    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("SplittersInformationWorkspace", "", Direction::Input, PropertyMode::Optional),
+        "Optional output for the information of each splitter workspace index.");
+
     declareProperty(
         new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("InputSplittersWorkspace", "", Direction::Input),
         "An input SpilltersWorskpace for filtering");
@@ -56,7 +61,10 @@ namespace Algorithms
         "Input pixel TOF calibration file in column data format");
 
     this->declareProperty("FilterByPulseTime", false,
-        "Filter the event by its pulse time only.  This option can make execution of algorithm faster.  But it lowers precision.");
+        "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
+
+    this->declareProperty("GroupWorkspaces", false,
+        "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
 
     return;
   }
@@ -73,13 +81,53 @@ namespace Algorithms
     std::string detcalfilename = this->getProperty("DetectorCalibrationFile");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
+    mInformationWS = this->getProperty("SplittersInformationWorkspace");
+    if (!mInformationWS)
+    {
+      mWithInfo = false;
+    }
+    else
+    {
+      mWithInfo = true;
+    }
+
     // 2. Process inputs
+    mProgress = 0.0;
+    progress(mProgress, "Processing SplittersWorkspace.");
     processSplittersWorkspace();
+
+
+    mProgress = 0.1;
+    progress(mProgress, "Create Output Workspaces.");
     createOutputWorkspaces(outputwsnamebase);
+
+    progress(0.2);
     importDetectorTOFCalibration(detcalfilename);
 
     // 3. Filter Events
+    mProgress = 0.20;
+    progress(mProgress, "Filter Events.");
     filterEventsBySplitters();
+
+    mProgress = 1.0;
+    progress(mProgress);
+
+    // 4. Optional to group detector
+    bool togroupws = this->getProperty("GroupWorkspaces");
+    if (togroupws)
+    {
+      std::string groupname = outputwsnamebase;
+      API::IAlgorithm_sptr groupws = createSubAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
+      // groupws->initialize();
+      groupws->setAlwaysStoreInADS(true);
+      groupws->setProperty("InputWorkspaces", mWsNames);
+      groupws->setProperty("OutputWorkspace", groupname);
+      groupws->execute();
+      if (!groupws->isExecuted())
+      {
+        g_log.error() << "Grouping all output workspaces fails." << std::endl;
+      }
+    }
 
     return;
   }
@@ -104,13 +152,26 @@ namespace Algorithms
       if (inorder && i > 0 && mSplitters[i] < mSplitters[i-1])
         inorder = false;
     }
+    mProgress = 0.5;
+    progress(mProgress);
 
-    // 3. Order if not ordered
+    // 3. Order if not ordered and add workspace for events excluded
     if (!inorder)
     {
       std::sort(mSplitters.begin(), mSplitters.end());
     }
     mWorkspaceGroups.insert(-1);
+
+    // 4. Add information
+    if (mWithInfo)
+    {
+      if (mWorkspaceGroups.size() > mInformationWS->rowCount()+1)
+      {
+        g_log.warning() << "Input Splitters Workspace has different entries (" << mWorkspaceGroups.size() -1 <<
+            ") than input information workspaces (" << mInformationWS->rowCount() << "). "
+            << "  Information may not be accurate. " << std::endl;
+      }
+    }
 
     return;
   }
@@ -120,6 +181,20 @@ namespace Algorithms
    */
   void FilterEvents::createOutputWorkspaces(std::string outputwsnamebase)
   {
+    // Convert information workspace to map
+    std::map<int, std::string> infomap;
+    if (mWithInfo)
+    {
+      for (size_t ir = 0; ir < mInformationWS->rowCount(); ++ ir)
+      {
+        API::TableRow row = mInformationWS->getRow(ir);
+        int& indexws = row.Int(0);
+        std::string& info = row.String(1);
+        infomap.insert(std::make_pair(indexws, info));
+      }
+    }
+
+    // Set up new workspaces
     std::set<int>::iterator groupit;
     for (groupit = mWorkspaceGroups.begin(); groupit != mWorkspaceGroups.end(); ++groupit)
     {
@@ -135,12 +210,39 @@ namespace Algorithms
           API::WorkspaceFactory::Instance().create("EventWorkspace", mEventWorkspace->getNumberHistograms(), 2, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(mEventWorkspace, optws, false);
 
+      //    Add information
+      if (mWithInfo)
+      {
+        std::string info;
+        if (wsgroup < 0)
+        {
+          info = "Events that are filtered out. ";
+        }
+        else
+        {
+          std::map<int, std::string>::iterator infoiter;
+          infoiter = infomap.find(wsgroup);
+          if (infoiter != infomap.end())
+          {
+            info = infoiter->second;
+          }
+          else
+          {
+            info = "This workspace has no informatin provided. ";
+          }
+        }
+        optws->setComment(info);
+        optws->setTitle(info);
+      }
+
       // 3. Set to map
       mOutputWorkspaces.insert(std::make_pair(wsgroup, optws));
 
       // 4. Set to output workspace
       this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(parname.str(), wsname.str(), Direction::Output), "Output");
       this->setProperty(parname.str(), optws);
+      mWsNames.push_back(wsname.str());
+      AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
       g_log.debug() << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << parname.str() <<
           " Workspace name = " << wsname.str() <<
@@ -261,6 +363,7 @@ namespace Algorithms
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
     // 1. Loop over the histograms (detector spectra)
+    // FIXME Make it parallel
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
     {
@@ -281,7 +384,9 @@ namespace Algorithms
       // c) Perform the filtering (using the splitting function and just one output)
       input_el.splitByFullTime(mSplitters, outputs, mCalibOffsets[i]);
 
-      // prog.report();
+      mProgress = 0.2+0.8*double(i)/double(numberOfSpectra);
+      progress(mProgress);
+
       // PARALLEL_END_INTERUPT_REGION
     }
     // PARALLEL_CHECK_INTERUPT_REGION

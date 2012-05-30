@@ -787,7 +787,17 @@ target_link_libraries ( MantidPlot
                         ${ZLIB_LIBRARIES} 
 )
 
+###########################################################################
+# Custom Info.plist file for OS X
+###########################################################################
+if( APPLE )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/MacInstaller/Info.plist.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+                   @ONLY )
 
+  set_target_properties( MantidPlot PROPERTIES MACOSX_BUNDLE_INFO_PLIST 
+                         ${CMAKE_CURRENT_BINARY_DIR}/Info.plist )
+endif()
 
 ###########################################################################
 # Entry point flag for Windows to ensure we always link to standard main 

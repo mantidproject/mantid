@@ -31,7 +31,6 @@ class LoadTest : public CxxTest::TestSuite
 {
 public:
 
-
   void testViaProxy()
   {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
@@ -508,6 +507,21 @@ public:
     TS_ASSERT_EQUALS(childWs->getNumberHistograms(), 91);
 
     removeGroupFromADS(wsg);
+  }
+
+  void testCommaSeparatedListOfDifferentIntruments()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ48127.raw, CSP79590.raw");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
+    TS_ASSERT(wsg);
+    TS_ASSERT_EQUALS(wsg->getNames().size(), 3);
+
+    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 };
 

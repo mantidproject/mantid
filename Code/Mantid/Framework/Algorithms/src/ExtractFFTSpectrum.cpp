@@ -33,13 +33,16 @@ using namespace API;
 void ExtractFFTSpectrum::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The input workspace.");
-  declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0,5));
+  //if desired, provide the imaginary part in a separate workspace.
+  declareProperty(new WorkspaceProperty<>("InputImagWorkspace","",Direction::Input,PropertyMode::Optional),"The optional input workspace for the imaginary part.");
+  declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0,5),"Spectrum index, one of the six possible spectra output by the FFT algorithm");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The output workspace.");
 }
 
 void ExtractFFTSpectrum::exec()
 {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputImagWS = getProperty("InputImagWorkspace");
   const int fftPart = getProperty("FFTPart");
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
@@ -54,6 +57,11 @@ void ExtractFFTSpectrum::exec()
     IAlgorithm_sptr childFFT = createSubAlgorithm("FFT");
     childFFT->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     childFFT->setProperty<int>("Real", i);
+    if( inputImagWS )
+    {
+      childFFT->setProperty<MatrixWorkspace_sptr>("InputImagWorkspace", inputImagWS);
+      childFFT->setProperty<int>("Imaginary", i);
+    }
     childFFT->execute();
     MatrixWorkspace_const_sptr fftTemp = childFFT->getProperty("OutputWorkspace");
 

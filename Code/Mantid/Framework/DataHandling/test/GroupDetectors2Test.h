@@ -13,6 +13,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <iostream>
@@ -91,6 +92,27 @@ public:
     TS_ASSERT( ! gd.isExecuted() );
     
     AnalysisDataService::Instance().remove(outputBase);
+  }
+
+  void testAveragingWithNoInstrument()
+  {
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(3,3,false);
+    GroupDetectors2 grouper;
+    grouper.initialize();
+    grouper.setChild(true);
+    grouper.setProperty("InputWorkspace", testWS);
+    grouper.setPropertyValue("OutputWorkspace", "__anonymous");
+    grouper.setPropertyValue("WorkspaceIndexList", "0,1,2");
+    grouper.setPropertyValue("Behaviour", "Average");
+    TS_ASSERT_THROWS_NOTHING(grouper.execute());
+
+    MatrixWorkspace_sptr outputWS = grouper.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    for(size_t i = 0; i < 3; ++i)
+    {
+      TS_ASSERT_DELTA(outputWS->readY(0)[0], 2.0, 1e-12);
+    }
+
   }
 
   void testSpectraList()

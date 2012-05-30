@@ -46,10 +46,16 @@ class DataSets(BaseScriptElement):
 
     #scaling factor file
     scaling_factor_file = ''
+    slits_width_flag = True
 
     #incident medium list and selected value
     incident_medium_list = ['H2O']
     incident_medium_index_selected = 0
+
+    #4th column of ASCII file (precision)
+    fourth_column_flag = True
+    fourth_column_dq0 = 0.0009
+    fourth_column_dq_over_q = 0.045
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -95,6 +101,7 @@ class DataSets(BaseScriptElement):
         # sf configuration file
         if self.scaling_factor_file != '':
             script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)   
+            script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
@@ -157,10 +164,16 @@ class DataSets(BaseScriptElement):
         
         # scaling factor file name
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
+        xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
         
         #incident medium
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
+
+        #fourth column precision
+        xml += "<fourth_column_flag>%s</fourth_column_flag>\n" % str(self.fourth_column_flag)
+        xml += "<fourth_column_dq0>%s</fourth_column_dq0>\n" % str(self.fourth_column_dq0)
+        xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n " % str(self.fourth_column_dq_over_q)
 
         xml += "</RefLData>\n"
 
@@ -250,7 +263,9 @@ class DataSets(BaseScriptElement):
         self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
         self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error)        
         
+        #scaling factor file and options
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
+        self.slits_width_flag = BaseScriptElement.getBoolElement(instrument_dom, "slits_width_flag")
         
         #incident medium selected
         if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:        
@@ -259,7 +274,12 @@ class DataSets(BaseScriptElement):
         else:
             self.incident_medium_list = ['H2O']
             self.incident_medium_index_selected = 0
-        
+
+        #fourth column (precision)
+        self.fourth_column_flag = BaseScriptElement.getBoolElement(instrument_dom, "fourth_column_flag")
+        self.fourth_column_dq0 = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq0")
+        self.fourth_column_dq_over_q = BaseScriptElement.getFloatElement(instrument_dom, "fourth_column_dq_over_q")
+
     def reset(self):
         """
             Reset state
@@ -292,11 +312,16 @@ class DataSets(BaseScriptElement):
         self.angle_offset = DataSets.angle_offset
         self.angle_offset_error = DataSets.angle_offset_error
         
-        #scaling factor file
+        #scaling factor file and options
         self.scaling_factor_file = DataSets.scaling_factor_file
+        self.slits_width_flag = DataSets.slits_width_flag
         
         #incident medium selected
         self.incident_medium_list = DataSets.incident_medium_list
         self.incident_medium_index_selected = DataSets.incident_medium_index_selected
 
+        #4th column (precision)
+        self.fourth_column_flag = DataSets.fourth_column_flag
+        self.fourth_column_dq0 = DataSets.fourth_column_dq0
+        self.fourth_column_dq_over_q = DataSets.fourth_column_dq_over_q
         

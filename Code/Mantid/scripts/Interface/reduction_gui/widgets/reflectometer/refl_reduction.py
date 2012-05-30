@@ -218,4 +218,22 @@ class DataReflWidget(BaseRefWidget):
         m.theta = float(self._summary.angle_edit.text())
         m.use_center_pixel = False
 
+        #4th column (precision)
+        m.fourth_column_flag = self._summary.fourth_column_switch.isChecked()
+        m.fourth_column_dq0 = float(self._summary.dq0.text())
+        m.fourth_column_dq_over_q = float(self._summary.dq_over_q.text())
+#        self._fourth_column_clicked(m.fourth_column_flag)
+
         return m
+    
+    def _fourth_column_clicked(self, is_checked):
+        """
+            This is reached by the 4th column switch
+        """
+        self._summary.dq0_label.setEnabled(is_checked)
+        self._summary.dq0.setEnabled(is_checked)
+        self._summary.dq0_unit.setEnabled(is_checked)        
+        self._summary.dq_over_q_label.setEnabled(is_checked)
+        self._summary.dq_over_q.setEnabled(is_checked)
+    
+    

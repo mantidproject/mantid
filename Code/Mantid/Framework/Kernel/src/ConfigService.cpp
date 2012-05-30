@@ -203,19 +203,22 @@ ConfigServiceImpl::ConfigServiceImpl() :
   }
 
   //Fill the list of possible relative path keys that may require conversion to absolute paths
+  m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
+  m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
+  m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
+  m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
   m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
-  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
+  m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
-  m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
+  m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
 
   //attempt to load the default properties file that resides in the directory of the executable
   std::string propertiesFilesList;
@@ -474,10 +477,15 @@ void ConfigServiceImpl::convertRelativeToAbsolute()
  * Make a relative path or a list of relative paths into an absolute one.
  * @param dir :: The directory to convert
  * @param key :: The key variable this relates to
- * @returns A string containing an aboluste path by resolving the relative directory with the executable directory
+ * @returns A string containing an absolute path by resolving the relative directory with the executable directory
  */
 std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
 {
+  if(dir.empty())
+  {
+    // Don't do anything for an empty value
+    return dir;
+  }
   std::string converted;
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos)
@@ -1284,13 +1292,21 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
 void ConfigServiceImpl::setParaViewPluginPath() const
 {
   std::string mantid_loc = this->getDirectoryOfExecutable();
-  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins/pvplugins");
+  Poco::Path pv_plugin_path(mantid_loc + "/pvplugins/pvplugins"); // Developer build paths
   pv_plugin_path = pv_plugin_path.absolute();
+  g_log.debug() << "Trying " << pv_plugin_path.toString() << " as PV_PLUGIN_PATH\n";
   Poco::File pv_plugin(pv_plugin_path.toString());
   if (!pv_plugin.exists() || !pv_plugin.isDirectory())
   {
-    g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");
-    pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins/pvplugins");
+    // Installation paths
+    g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist. Trying properties file location.");
+    std::string user_loc = this->getString("pvplugins.directory");
+    if(user_loc.empty())
+    {
+      g_log.debug("No ParaView plugin directory specified in the properties file.");
+      return; // it didn't work
+    }
+    pv_plugin_path = Poco::Path(user_loc, "pvplugins");
     pv_plugin_path = pv_plugin_path.absolute();
     pv_plugin = Poco::File(pv_plugin_path.toString());
     if (!pv_plugin.exists() || !pv_plugin.isDirectory())
@@ -1682,7 +1698,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
     std::vector<std::string> args;
     args.push_back("-V");
     Poco::Pipe outPipe;
-    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, 0);
+    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, &outPipe);
     const int rc = ph.wait();
     if(rc == 1)
     {
