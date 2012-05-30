@@ -1,6 +1,6 @@
 set ( SRC_FILES
-	src/ADARAPackets.cc
-	src/ADARAParser.cc
+	src/ADARAPackets.cpp
+	src/ADARAParser.cpp
 	src/CompressEvents.cpp
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
