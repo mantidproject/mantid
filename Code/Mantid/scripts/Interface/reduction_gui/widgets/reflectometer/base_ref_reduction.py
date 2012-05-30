@@ -156,9 +156,6 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
 
-#        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
-#        self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
-
         #scaling factor configuration file 
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
 
@@ -171,16 +168,7 @@ class BaseRefWidget(BaseWidget):
         self._auto_reduce(False)
         self.connect(self._summary.auto_reduce_check, QtCore.SIGNAL("clicked(bool)"), self._auto_reduce)
         self.connect(self._summary.auto_reduce_btn, QtCore.SIGNAL("clicked()"), self._create_auto_reduce_template)
-        
-        # Set up the scattering angle options
-#        self._scattering_angle_changed()
-#        self.connect(self._summary.det_angle_check, QtCore.SIGNAL("clicked()"), self._det_angle_chk_changed)
-#        self.connect(self._summary.det_angle_offset_check, QtCore.SIGNAL("clicked()"), self._det_angle_offset_chk_changed)
-#        self.connect(self._summary.direct_pixel_check, QtCore.SIGNAL("clicked()"), self._direct_pixel_chk_changed)
-#        self._det_angle_chk_changed()
-#        self._det_angle_offset_chk_changed()
-#        self._direct_pixel_chk_changed()
-        
+                
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
@@ -331,40 +319,7 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.slits_width_flag, False)
         util.set_edited(self._summary.angle_offset_edit, False)
         util.set_edited(self._summary.angle_offset_error_edit, False)
-    
-#    def _det_angle_offset_chk_changed(self):
-#        is_checked = self._summary.det_angle_offset_check.isChecked()
-#        self._summary.det_angle_offset_edit.setEnabled(is_checked)
-    
-#    def _det_angle_chk_changed(self):
-#        is_checked = self._summary.det_angle_check.isChecked()
-#        self._summary.det_angle_edit.setEnabled(is_checked)
-    
-#    def _direct_pixel_chk_changed(self):
-#        is_checked = self._summary.direct_pixel_check.isChecked()
-#        self._summary.direct_pixel_edit.setEnabled(is_checked)
-        
-#    def _scattering_angle_changed(self):
-#        self._summary.det_angle_check.setEnabled(True)
-#        self._det_angle_chk_changed()
-#        self._summary.det_angle_offset_check.setEnabled(True)
-#        self._det_angle_offset_chk_changed()
-#        self._summary.direct_pixel_check.setEnabled(True)
-#        self._direct_pixel_chk_changed()
-#        self._summary.det_angle_unit_label.setEnabled(True)   
-#        self._summary.det_angle_offset_unit_label.setEnabled(True)   
-            
-#    def _data_peak_range_changed(self):
-#        """
-#            Update the direct pixel value when the data peak
-#            range changes
-#        """
-#        min_pix = float(self._summary.data_peak_from_pixel.text())
-#        max_pix = float(self._summary.data_peak_to_pixel.text())
-#        dir_pix = (max_pix+min_pix)/2.0
-#        dir_pix_str = "%4.4g" % dir_pix
-#        self._summary.center_pix_edit.setText(dir_pix_str.strip())
-     
+         
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
         m.data_files = ["runNumber"]

@@ -328,19 +328,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
 #            self._read_logs()
         
         self._reset_warnings()
-    
-#    def _data_background_clicked(self, is_checked):
-#        """
-#            This is reached when the user clicks the Background switch and will enabled or not
-#            the widgets that follow that button
-#        """
-#        self._summary.data_background_from_pixel.setEnabled(is_checked)
-#        self._summary.data_background_from_pixel_label.setEnabled(is_checked)
-#        self._summary.data_background_to_pixel.setEnabled(is_checked)
-#        self._summary.data_background_to_pixel_label.setEnabled(is_checked)
-#        self._summary.plot_count_vs_y_bck_btn.setEnabled(is_checked)
-#        self._edit_event(None, self._summary.data_background_switch)
-    
+        
     def _reset_warnings(self):
         self._summary.edited_warning_label.hide()
         util.set_edited(self._summary.tof_min, False)
