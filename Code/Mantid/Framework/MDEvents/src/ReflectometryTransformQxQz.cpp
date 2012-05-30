@@ -83,7 +83,7 @@ namespace Mantid
         auto wavelengths = eventWs->readX(index);
         auto errors = eventWs->readE(index);
         size_t nInputBins = eventWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
-        const double theta_final = spectraAxis->getValue(index)/2;
+        const double theta_final = spectraAxis->getValue(index);
         const double c_sin_theta_f = sin(theta_final*to_radians_factor);
         const double c_cos_theta_f = cos(theta_final*to_radians_factor);
         const double dirQx = (c_cos_theta_f - c_cos_theta_i);
