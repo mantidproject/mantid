@@ -21,8 +21,8 @@ namespace IDA
 {
   FuryFit::FuryFit(QWidget * parent) : 
     IDATab(parent), m_intVal(NULL), m_stringManager(NULL), m_ffTree(NULL), m_groupManager(NULL), m_ffDblMng(NULL),
-    m_ffRangeManager(NULL), m_ffProp(), m_fixedProps(), m_ffPlot(NULL), m_ffDataCurve(NULL), m_ffRangeS(NULL),
-    m_ffBackRangeS(NULL), m_ffInputWS(), m_ffOutputWS(), m_ffInputWSName(), m_ties()
+    m_ffRangeManager(NULL), m_ffProp(), m_fixedProps(), m_ffPlot(NULL), m_ffFitCurve(NULL), m_ffDataCurve(NULL), 
+    m_ffRangeS(NULL), m_ffBackRangeS(NULL), m_ffInputWS(), m_ffOutputWS(), m_ffInputWSName(), m_ties()
   {}
       
   void FuryFit::setup()
