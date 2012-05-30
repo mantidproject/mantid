@@ -18,12 +18,14 @@ namespace Mantid
 {
   namespace DataHandling
   {
-
+#if 0
+   // Don't need this class since the live listener inherits from ADARA::Parser directly
     /**
      Implementation of the ADARA Packet Parser specific to the Mantid LiveView work.
      Basically, we have to provide handler functions for the packet types we care about.
-     We can also make tihngs a little more efficient by overriding rxPacket( const Pakcet &pkt)
-     with a version that ignores packet types we don't care about.
+     We can also make tihngs a little more efficient by overriding
+     rxPacket( const Packet &pkt) with a version that ignores packet types we don't care
+     about.
     */
     class MantidAdaraParser : public ADARA::Parser
     {
@@ -38,13 +40,13 @@ namespace Mantid
         virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
         virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
     };
-
-
+#endif
 
     /** An implementation of ILiveListener for use at SNS.  Connects to the Stream Management
         Service and receives events from it.
 
-        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
+        National Laboratory
 
         This file is part of Mantid.
 
@@ -61,7 +63,9 @@ namespace Mantid
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
      */
-    class SNSLiveEventDataListener : public API::ILiveListener , public Poco::Runnable, public ADARA::Parser
+    class SNSLiveEventDataListener : public API::ILiveListener,
+                                     public Poco::Runnable,
+                                     public ADARA::Parser
     {
     public:
       SNSLiveEventDataListener();
@@ -78,32 +82,49 @@ namespace Mantid
       ILiveListener::RunStatus runStatus();
       bool isConnected();
 
-      virtual void run();  // the background thread.  What gets executed when we call POCO::Thread::start()
+      virtual void run();  // the background thread.  What gets executed when we call
+                           // POCO::Thread::start()
     protected:
       using ADARA::Parser::rxPacket;
       //virtual bool rxPacket( const ADARA::Packet &pkt);
-      virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
+      //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
       virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
-      virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
-      virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
+      //virtual bool rxPacket( const ADARA::ClientHelloPkt &pkt);
+      //virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
+      //virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
+      //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 
     private:
      
-      void appendEvent();
+      void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
+      // tof is "Time Of Flight" and is in units of nanoseconds relative to the start of the pulse
+      // pulseTime is the start of the pulse relative to Jan 1, 1990.
+      // Both values are designed to be passed straight into the TofEvent constructor.
       
       DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
+      bool m_workspaceInitialized;
+      std::string m_wsName;
+      detid2index_map * m_indexMap;  // maps pixel id's to workspace indexes
+
+      struct timespec m_rtdlPulseTime;  // We get these two from the RTDL packet
+      bool  m_rtdlRawFlag;
+
       Poco::Net::StreamSocket m_socket;
       //int m_sockfd;  // socket file descriptor
       bool m_isConnected;
 
       Poco::Thread m_thread;
       Poco::FastMutex m_mutex;
-      bool m_stopThread;  // background thread checks this periodically.  If true, background thread exits
+      bool m_stopThread;  // background thread checks this periodically.  If true, the
+                          // thread exits
 
-      Kernel::DateAndTime m_startTime;  // The requested start time for the data stream (needed by the run() function)
-     
-
+      Kernel::DateAndTime m_startTime;  // The requested start time for the data stream
+                                        // (needed by the run() function)
+      Kernel::DateAndTime m_heartbeat;  // The time when we received the last ClientHello
+                                        // packet.  SMS is supposed to send these out
+                                        // periodicaly.  If we don't get them, there's a
+                                        // problem somewhere.
      
     };
 

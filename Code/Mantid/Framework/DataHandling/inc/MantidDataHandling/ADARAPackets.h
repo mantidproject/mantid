@@ -26,6 +26,16 @@ public:
 	uint32_t payload_length(void) const { return m_payload_len; }
 	const struct timespec &timestamp(void) const { return m_timestamp; }
 	uint32_t packet_length(void) const { return m_payload_len + 16; }
+        bool compare_timestamp( const struct timespec &ts) const
+        {
+          if (m_timestamp.tv_sec != ts.tv_sec)
+            return false;
+          if (m_timestamp.tv_nsec != ts.tv_nsec)
+            return false;
+
+          return true;
+        }
+        bool compare_timestamp( const PacketHeader &pkt) const { return compare_timestamp(pkt.timestamp()); }
 
 	static uint32_t header_length(void) { return 16; }
 

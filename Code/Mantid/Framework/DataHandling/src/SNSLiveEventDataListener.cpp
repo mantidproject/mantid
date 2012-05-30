@@ -1,12 +1,12 @@
-#include "MantidDataHandling/ADARAParser.h"
-#include "MantidDataHandling/SNSLiveEventDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/ADARAParser.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/SNSLiveEventDataListener.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/WriteLock.h"
-
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
@@ -34,21 +34,22 @@ namespace DataHandling
 {
   DECLARE_LISTENER(SNSLiveEventDataListener)
   ;
-  // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.  The semi-colon
-  // limits the complaints to one line.  It has no actual effect on the code.
+  // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.  The
+  // semi-colon limits the complaints to one line.  It has no actual effect on the code.
 
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()
     : ILiveListener(), ADARA::Parser(),
-      m_buffer(), m_socket(), m_isConnected( false), m_thread(), m_mutex(), m_stopThread( false)
-    // ADARA::Parser() will accept values for buffer size and max packet size, but the defaults will work fine
+      m_buffer(), m_workspaceInitialized( false), m_socket(),
+      m_isConnected( false), m_stopThread( false)
+    // ADARA::Parser() will accept values for buffer size and max packet size, but the
+    // defaults will work fine
   {
   }
     
   /// Destructor
   SNSLiveEventDataListener::~SNSLiveEventDataListener()
   {
-
   }
 
   /************************************************
@@ -56,8 +57,8 @@ namespace DataHandling
   {
     bool rv = false;  // assume failure
 
-    // <sigh>  Have to do this the hard way because Dave D.'s packet parser wants a file descriptor
-    // and POCO won't give me one for its StreamSocket....
+    // <sigh>  Have to do this the hard way because Dave D.'s packet parser wants a file
+    // descriptor and POCO won't give me one for its StreamSocket....
     struct addrinfo hints;
     memset( &hints, 0, sizeof( hints));
     hints.ai_socktype = SOCK_STREAM;
@@ -105,7 +106,7 @@ namespace DataHandling
   {
     bool rv = false;  // assume failure
 
-    m_socket.connect( address);  // NON-BLOCKING connect
+    m_socket.connect( address);  // BLOCKING connect
     //m_socket.connectNB( address);  // NON-BLOCKING connect
     m_socket.setReceiveTimeout( Poco::Timespan( 0, 100 * 1000));  // 100 millisec timeout
 
@@ -132,7 +133,7 @@ namespace DataHandling
     if (m_isConnected == false) // sanity check
     {
       throw std::runtime_error( std::string("SNSLiveEventDataListener::run(): No connection to SMS server."));
-      return;  // should never be called, but here just in case exceptions are disabled...
+      return;  // should never be called, but here just in case exceptions are disabled
     }
 
     // First thing to do is send a hello packet
@@ -151,10 +152,11 @@ namespace DataHandling
       throw std::runtime_error( msg);
     }
 
-/*****************************************************************
-    This is the code for creating an empty workspace.  It'll probably
-    go into the rxPacket function for whatever packet has the instrument
-    definition data in it.
+#if 0
+    ////////////////////////////////////////////////////////////////////////////////
+    //This is the code for creating an empty workspace.  It'll probably
+    //go into the rxPacket function for whatever packet has the instrument
+    //definition data in it.
 
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for whatever beamline we're on
@@ -179,86 +181,137 @@ namespace DataHandling
     // straight into the loader...
 
     loaderLiveView.setPropertyValue("Filename", definitionFile);
-    std::string wsName = "LiveViewWS";
-    loaderLiveView.setPropertyValue("OutputWorkspace", wsName);
+    m_wsName = "LiveViewWS";
+    loaderLiveView.setPropertyValue("OutputWorkspace", m_wsName);
 
     loaderLiveView.execute();
 
     //assert( loaderSLS.isExecuted() );
 
     m_buffer = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(wsName);
-
-***********************************************************************/
+    m_indexMap = getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
+    m_workspaceInitialized = true;
+    ///////////////////////////////////////////////////////////////////////////////////
+#endif
 
 
     while (m_stopThread == false)  // loop until the foreground thread tells us to stop
     {
       // Read the packets, accumulate them in m_buffer...
       read( m_socket);
+
+      // Check the heartbeat
+#define HEARTBEAT_TIMEOUT (60 * 5)  // 5 minutes
+      time_duration elapsed = Kernel::DateAndTime().getCurrentTime() - m_heartbeat;
+      if ( elapsed.total_seconds() > HEARTBEAT_TIMEOUT)
+      {
+        // SMS seems to have gone away.  Log an error
+        // TODO: HOW?!?
+      }
     }
 
     return;
   }
 
 
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::RawDataPkt &pkt)
-  {
-
-    return false; // TODO: implement me!
-  }
-
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
   {
+    // At the moment, all we need from the RTDL packets is the pulse
+    // time and the raw flag.  (We reference them when processing the
+    // banked event packets.)
+    m_rtdlPulseTime = pkt.timestamp();
+    m_rtdlRawFlag = pkt.rawTOF();
 
-    return false; // TODO: implement me!
+    return true;
   }
 
+  // Note:  Before we can process a particular BankedEventPkt, we must have
+  // received the RTDLPkt for pulse ID specified in the BankedEventPkt.
+  // Normally this won't be an issue since the SMS will send out RTDLPkts
+  // before it sends BankedEventPkts.
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BankedEventPkt &pkt)
   {
 
-    return false; // TODO: implement me!
-  }
+    // First step - make sure the RTDL packet we've saved matches the
+    // banked event packet we've just received and  make sure its RAW flag
+    // is false
+    if (pkt.compare_timestamp( m_rtdlPulseTime) == false)
+    {
+      // Wrong RTDL packet.  Fail!
+      // TODO: Should we set an error message somewhere?
+      return false;
+    }
 
+    if (m_rtdlRawFlag)
+    {
+      // As yet, we can't handle raw TofF values.
+      // TODO: Should we set an error message somewhere?
+      return false;
+    }
 
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
-  {
+    // Create a log with the pulse time and charge!!  (TimeSeriesProperties)
 
-    return false; // TODO: implement me!
-  }
+    // Next convert the Pulse ID fields into a DateAndTime object
+    const struct timespec &pulseTime = pkt.timestamp();
+    Mantid::Kernel::DateAndTime pulseID( pulseTime.tv_sec, pulseTime.tv_nsec);
 
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::RunInfoPkt &pkt)
-  {
-
-    return false; // TODO: implement me!
-  }
-
-
-  void SNSLiveEventDataListener::appendEvent()
-  {
     m_mutex.lock();
-
-
-    // TODO: implement me!
-
+    // Append the events
+        // Iterate through bank sections
+        // Note: We ignore bank ID's >= 0xFFFE  (-2 is for error pixels and -1 is for
+        // unmappable pixels);
+            // Iterate through each event
+            //appendEvent( )
     m_mutex.unlock();
+
+    return false; // TODO: implement me!
+  }
+
+  void SNSLiveEventDataListener::appendEvent(uint32_t pixelId, double tof,
+                                             const Mantid::Kernel::DateAndTime pulseTime)
+  {
+
+    // It'd be nice to use operator[], but we might end up inserting a value....
+    // Have to use find() instead.
+    detid2index_map::iterator it = m_indexMap->find( pixelId);
+    if (it != m_indexMap->end())
+    {
+      std::size_t workspaceIndex = it->second;
+      Mantid::DataObjects::TofEvent event( tof, pulseTime);
+      m_buffer->getEventList( workspaceIndex).addEventQuickly( event);
+    }
   }
 
   boost::shared_ptr<MatrixWorkspace> SNSLiveEventDataListener::extractData()
   {
 
+    // Block until the background thread has actually initialized the workspace
+    // (Which won't happen until the SMS sends it the packet with the geometry
+    // information in it.)
+    // Note:  Yes, I discussed this with the other developers and they all agreed
+    // that blocking was the proper behavior.  We can't return NULL, or some
+    // invalid workspace.
+    while (m_workspaceInitialized == false)
+    {
+      Poco::Thread::sleep( 100);  // 100 milliseconds
+    }
+
     using namespace DataObjects;
 
-    // Create a new, empty workspace of the same dimensions and assign to the buffer variable
+    // Create a new, empty workspace of the same dimensions and assign to the
+    // buffer variable  
+
+    //Make a brand new EventWorkspace
     // TODO: Think about whether creating a new workspace at this point is scalable
     EventWorkspace_sptr temp = boost::dynamic_pointer_cast<EventWorkspace>(
-                                 WorkspaceFactory::Instance().create("EventWorkspace",2,2,1) );
-    // Will need an 'initializeFromParent' here later on....
+        API::WorkspaceFactory::Instance().create("EventWorkspace", m_buffer->getNumberHistograms(), 2, 1));
 
-
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(m_buffer, temp, false);
 
     // Get an exclusive lock
     m_mutex.lock();
-    std::swap(m_buffer,temp);
+    std::swap(m_buffer, temp);
     m_mutex.unlock();
 
     return temp;
