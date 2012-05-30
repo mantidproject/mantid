@@ -143,6 +143,8 @@ namespace Mantid
         g_log.debug() << "=====> A3 - Instrument is " << m_instName << std::endl;
       }
 
+      g_log.debug() << "=====> m_filename = " << m_filename << std::endl;
+
       // Load the XML text into a string
       std::string m_xmlText = Strings::loadFile(m_filename);
 
