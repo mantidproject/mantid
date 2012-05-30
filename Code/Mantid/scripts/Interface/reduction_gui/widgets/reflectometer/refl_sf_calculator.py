@@ -89,6 +89,9 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), self.browse_config_file_name)
         
         #Catch edited controls        
+        #data run number
+        call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         #Incident medium (selection or text changed)
         call_back = partial(self._edit_event, ctrl=self._summary.incident_medium_combobox)
         self.connect(self._summary.incident_medium_combobox, QtCore.SIGNAL("editTextChanged(QString)"), call_back)
@@ -169,7 +172,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             text = f.readlines()
             _full_text = ''.join(text)
         else:
-            _full_text = 'File not found !'
+            _full_text = 'New File or File not found !'
         self._summary.textBrowser.setText(_full_text)
 
     def _plot_counts_vs_tof(self):
@@ -419,6 +422,9 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.tof_max.setText(str(state.tof_max))
     
         self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
+        if (state.scaling_factor_file != ''):
+            self.display_preview_config_file()
+                    
         self._summary.data_run_number_edit.setText(str(state.data_file))
         self._summary.number_of_attenuator.setText(str(state.number_attenuator))
         self._summary.data_peak_from_pixel.setText(str(state.peak_selection[0]))
