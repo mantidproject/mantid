@@ -257,6 +257,7 @@ void GraphDisplay::ShowInfoList( double x, double y )
     QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], graph_table );
   }
 
+  graph_table->resizeColumnsToContents();
 }
 
 } // namespace MantidQt 
