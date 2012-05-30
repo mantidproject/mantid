@@ -308,7 +308,10 @@ namespace IDA
       }
     }
 
-    QString error = "Please check the following inputs: \n" + invalidInputs.join("\n");
+    QString error = "";
+    if( ! invalidInputs.empty() )
+      error = "Please check the following inputs: \n" + invalidInputs.join("\n");
+
     return error;
   }
 
