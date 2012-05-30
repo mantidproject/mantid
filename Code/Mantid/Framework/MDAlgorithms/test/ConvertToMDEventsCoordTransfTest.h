@@ -154,7 +154,7 @@ void test_CoordTransfQ3DDirect()
     }
     // compare with conversion from TOF
 
-    CoordTransformer<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
+//    CoordTransformer<Q3D,Direct,ConvFromTOF,Histogram,CrystType> ConvFromTOFHisto;
 
     // make axis untit to be TOF to be able to work with conversion from TOF
     NumericAxis *pAxis0 = new NumericAxis(specSize); 

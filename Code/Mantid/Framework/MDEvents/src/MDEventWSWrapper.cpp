@@ -22,13 +22,13 @@ MDEventWSWrapper::nDimensions()const
 API::IMDEventWorkspace_sptr
 MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
 {
-    if(WSD.nDims<1||WSD.nDims>MAX_N_DIM){
+    if(WSD.nDimensions()<1||WSD.nDimensions()>MAX_N_DIM){
    //     g_log.error()<< " Number of requested dimensions: "<<WSD.n_dims<<" exceeds the maxumal allowed numed or dimensions: "<<MAX_N_DIM<<std::endl;
         throw(std::invalid_argument(" Numer of requested dimensions exceeds maximal allowed number of dimensions"));
     }
-    this->n_dimensions = (int)WSD.nDims;
+    this->n_dimensions = (int)WSD.nDimensions();
 
-    (this->*(wsCreator[n_dimensions]))(WSD.dimNames,WSD.dimIDs,WSD.dimUnits,WSD.dimMin,WSD.dimMax,WSD.nBins);
+    (this->*(wsCreator[n_dimensions]))(WSD.getDimNames(),WSD.getDimIDs(),WSD.getDimUnits(),WSD.getDimMin(),WSD.getDimMax(),WSD.getNBins());
     // set up the matrix, which convert momentums from Q in orthogonal crystal coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or whatevert
     workspace->setWTransf(WSD.Wtransf);
     return workspace;

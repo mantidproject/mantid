@@ -31,8 +31,6 @@ set ( SRC_FILES
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
-	src/MDWSDescription.cpp
-	src/MDWSTransfDescr.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/ReflectometryTransformQxQz.cpp
@@ -45,6 +43,8 @@ set ( SRC_FILES
 	src/ConvToMDEventsHisto.cpp
 	src/ConvToMDPreprocDet.cpp
 	src/MDTransfDEHelper.cpp
+	src/MDTransfAxisNames.cpp
+#
 	src/MDTransfFactory.cpp	
 #	src/MDTransfQ3D.cpp
 #	src/MDTransfNoQ.cpp
@@ -52,6 +52,8 @@ set ( SRC_FILES
 	src/UnitConversionHelper.cpp	
 	src/ConvToMDEventsSelector.cpp
 
+	src/MDWSDescription.cpp
+	src/MDWSTransform.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -122,14 +124,17 @@ set ( INC_FILES
 #	
 	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDWSDescription.h
-	inc/MantidMDEvents/MDWSTransfDescr.h	
+	inc/MantidMDEvents/MDWSTransform.h	
 # 
 	inc/MantidMDEvents/ConvToMDEventsBase.h	
 	inc/MantidMDEvents/ConvToMDEventsEvents.h
 	inc/MantidMDEvents/ConvToMDEventsHisto.h	
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
-    inc/MantidMDEvents/MDTransfFactory.h
+	
+	inc/MantidMDEvents/MDTransfAxisNames.h	
 	inc/MantidMDEvents/MDTransfDEHelper.h
+
+    inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
 #	inc/MantidMDEvents/MDTransfQ3D.h
 #	inc/MantidMDEvents/MDTransfNoQ.h

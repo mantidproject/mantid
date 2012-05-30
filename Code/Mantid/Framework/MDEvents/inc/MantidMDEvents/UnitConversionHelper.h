@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/MDWSDescription.h"
 
 namespace Mantid
 {
@@ -70,9 +70,9 @@ class DLLExport UnitsConversionHelper
 
 public:
     UnitsConversionHelper():pTwoTheta(NULL),pL2(NULL){};
-    void initialize(const ConvToMDPreprocDet &det, API::MatrixWorkspace_const_sptr inWS2D,const std::string &units_to);
+    void initialize(const MDWSDescription &TWSD, API::MatrixWorkspace_const_sptr inWS2D,const std::string &units_to);
     void updateConversion(size_t i);
-    void convertUnits(const std::vector<double> &data_toConvert, std::vector<double> &dataConvertTo);
+    double convertUnits(double val);
 
 protected: // for testing
     /// establish and initialize proper units conversion from input to output units;

@@ -17,6 +17,10 @@
 #include "MantidMDEvents/MDTransfInterface.h"
 #include "MantidMDEvents/MDTransfFactory.h"
 
+// units conversion
+#include "MantidMDEvents/UnitConversionHelper.h"
+
+
 namespace Mantid
 {
 namespace MDEvents
@@ -67,8 +71,8 @@ namespace MDEvents
    // pointer to input matrix workspace;
    API::MatrixWorkspace_const_sptr inWS2D;
    // common variables used by all workspace-related methods are specified here
-   // the description of the requested target MD workpsace:
-   MDEvents::MDWSDescription TWS;
+   // pointer to class, which describes preprocessed detectors location
+   ConvToMDPreprocDet const * pDetLoc;
    // pointer to the class, which keeps target workspace and provides functions adding additional MD events to it. 
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
     // shared pointer to the converter, which convertd WS coordinates to MD coordinates
@@ -81,6 +85,8 @@ namespace MDEvents
    static Mantid::Kernel::Logger& convert_log;
    // vector to keep MD coordinates of single event 
    std::vector<coord_t> Coord;
+   // class responsible for converting units if necessary;
+   UnitsConversionHelper UnitConversion;
  private:
     /** internal function which do one peace of work, which should be performed by one thread 
       *

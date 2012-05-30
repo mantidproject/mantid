@@ -1,23 +1,12 @@
 #include "MantidMDEvents/UnitConversionHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
-/*** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
-int is_member(const std::vector<std::string> &group,const std::string &candidate)
-{
-    int num(-1);
-    for(size_t i=0;i<group.size();i++){
-        if(candidate.compare(group[i])==0){
-            num = int(i);
-            return num;
-        }
-    }
-    return num;
-}
 
 /** establish and initialize proper units conversion from input to output units
     @param UnitsFrom -- the ID of the units, which have to be converted from
@@ -40,12 +29,12 @@ ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const st
     std::vector<std::string> AllKnownUnits= Kernel::UnitFactory::Instance().getKeys();
    
     // check if unit conversion is possible at all:
-    if(is_member(AllKnownUnits,UnitsFrom)<0)
+    if(Kernel::Strings::isMember(AllKnownUnits,UnitsFrom)<0)
     {
        std::string ERR=" Can not initate conversion from unknown unit: "+UnitsFrom;
        throw(std::invalid_argument(ERR));
     }
-    if(is_member(AllKnownUnits,UnitsTo)<0)
+    if(Kernel::Strings::isMember(AllKnownUnits,UnitsFrom)<0)
     {
        std::string ERR=" Can not initate conversion to unknown unit: "+UnitsTo;
        throw(std::invalid_argument(ERR));
@@ -70,7 +59,7 @@ ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const st
     
 }
 
-void UnitsConversionHelper::initialize(const ConvToMDPreprocDet &det, API::MatrixWorkspace_const_sptr inWS2D,const std::string &units_to)
+void UnitsConversionHelper::initialize(const MDWSDescription &TWSD, API::MatrixWorkspace_const_sptr inWS2D,const std::string &units_to)
 {   
   // obtain input workspace units
     if(!inWS2D.get()){
@@ -96,13 +85,13 @@ void UnitsConversionHelper::initialize(const ConvToMDPreprocDet &det, API::Matri
    }
 
    // get detectors positions and other data needed for units conversion:
-    pTwoTheta =  &(det.getTwoTheta());      
-    pL2       =  &(det.getL2());
+    pTwoTheta =  &(TWSD.getDetectors()->getTwoTheta());      
+    pL2       =  &(TWSD.getDetectors()->getL2());
 
-    L1        =  det.getL1();
+    L1        =  TWSD.getDetectors()->getL1();
    // get efix
-    efix      =  det.getEfix();
-    emode     =  det.getEmode();
+    efix      =  TWSD.getEi();
+    emode     =  (int)TWSD.getEMode();
 
 }
 
@@ -134,37 +123,27 @@ void UnitsConversionHelper::updateConversion(size_t i)
  
     }
 }
-/** Convert units for the vector of input data */
-void UnitsConversionHelper::convertUnits(const std::vector<double> &convertFrom, std::vector<double> &convertTo)
+/** Convert units for the input data */
+double UnitsConversionHelper::convertUnits(double val)
 {
-    std::vector<double> unused;
-    convertTo.assign(convertFrom.begin(),convertFrom.end());
     switch(UnitCnvrsn)
     {
     case(ConvertToMD::ConvertNo):   
         {
-            return ;
+            return val;
         }
     case(ConvertToMD::ConvertFast):
         {
-            size_t nPoints = convertFrom.size();
-            for(size_t i=0;i<nPoints;i++){
-                convertTo[i]=factor*std::pow(convertFrom[i],power);
-            }
-            return;
+            return factor*std::pow(val,power);
         }
     case(ConvertToMD::ConvertFromTOF):
-        {  // unused delta
-            double delta;
-            pTargetUnit->fromTOF(convertTo, unused, L1,L2,twoTheta,emode,efix,delta);
-            return;
+        {  
+            return pTargetUnit->singleFromTOF(val);
         }
     case(ConvertToMD::ConvertByTOF):
         {
-             double delta; // unused delta
-             pSourceWSUnit->toTOF(convertTo, unused, L1,L2,twoTheta,emode,efix,delta);
-             pTargetUnit->fromTOF(convertTo, unused, L1,L2,twoTheta,emode,efix,delta);
-             return;
+             double tof = pSourceWSUnit->singleToTOF(val);
+             return  pTargetUnit->singleFromTOF(tof);
         }
     default:
            throw std::runtime_error("updateConversion: unknown type of conversion requested");

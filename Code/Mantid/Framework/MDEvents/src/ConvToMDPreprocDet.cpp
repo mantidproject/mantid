@@ -9,24 +9,36 @@ namespace Mantid
 {
 namespace MDEvents
 {
-/// function sets appropriate energy conversion mode to work with detectors and unit conversion
-void ConvToMDPreprocDet::setEmode(int mode)
-{   
-    if(mode<-1||mode>2){
-        std::string Err="Energy conversion mode has to be between -1 and 2 but trying to set: "+boost::lexical_cast<std::string>(mode);
-        throw(std::invalid_argument(Err));
-    }
-    emode = mode;
-}
+///// function sets appropriate energy conversion mode to work with detectors and unit conversion
+//void ConvToMDPreprocDet::setEmode(int mode)
+//{   
+//    if(mode<-1||mode>2){
+//        std::string Err="Energy conversion mode has to be between -1 and 2 but trying to set: "+boost::lexical_cast<std::string>(mode);
+//        throw(std::invalid_argument(Err));
+//    }
+//    emode = mode;
+//}
 /// function sets appropriate energy  to work with detectors and unit conversion
-void ConvToMDPreprocDet::setEfix(double Ei)
-{
-    if(Ei<=0){
-        std::string Err="Input neutron's energy can not be negative but equal: "+boost::lexical_cast<std::string>(Ei);
-        throw(std::invalid_argument(Err));
-    }
-    efix  = Ei;
-}
+//void ConvToMDPreprocDet::setEfix(double Ei)
+//{
+//    if(Ei<=0){
+//        std::string Err="Input neutron's energy can not be negative but equal: "+boost::lexical_cast<std::string>(Ei);
+//        throw(std::invalid_argument(Err));
+//    }
+//    efix  = Ei;
+//}
+/** Function sets up energy of neurtorns used by number of conversion algorithms */
+//void ConvToMDPreprocDet::setEi(const API::MatrixWorkspace_sptr inputWS)
+//{
+//  try{
+//      Kernel::PropertyWithValue<double>  *pProp(NULL);
+//      pProp=dynamic_cast<Kernel::PropertyWithValue<double>  *>(inputWS->run().getProperty("Ei"));
+//      efix=(*pProp);
+//  }catch(...){
+//      efix= std::numeric_limits<double>::quiet_NaN();
+//  }
+//}
+
 /// function sets source-sample distance  to work with detectors and unit conversion
 void ConvToMDPreprocDet::setL1(double Dist)
 {
@@ -82,7 +94,7 @@ void ConvToMDPreprocDet::processDetectorsPositions(const API::MatrixWorkspace_sp
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
   }
   // efix
-  this->setEi(inputWS);
+//  this->setEi(inputWS);
 
   //
   const size_t nHist = inputWS->getNumberHistograms();
@@ -140,26 +152,15 @@ void ConvToMDPreprocDet::processDetectorsPositions(const API::MatrixWorkspace_sp
    convert_log.information()<<"finished preprocessing detectors locations \n";
    pProg->report();
 }
-/** Function sets up energy of neurtorns used by number of conversion algorithms */
-void ConvToMDPreprocDet::setEi(const API::MatrixWorkspace_sptr inputWS)
-{
-  try{
-      Kernel::PropertyWithValue<double>  *pProp(NULL);
-      pProp=dynamic_cast<Kernel::PropertyWithValue<double>  *>(inputWS->run().getProperty("Ei"));
-      efix=(*pProp);
-  }catch(...){
-      efix= std::numeric_limits<double>::quiet_NaN();
-  }
-}
-
+//
 void ConvToMDPreprocDet::buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS)
 {
 
     L1 = 1;
     double polar(0);
-    emode = 0;
+//    emode = 0;
     // efix
-    this->setEi(inputWS);
+//    this->setEi(inputWS);
     //
     const size_t nHist = inputWS->getNumberHistograms();
     this->allocDetMemory(nHist);
@@ -190,15 +191,15 @@ void ConvToMDPreprocDet::buildFakeDetectorsPositions(const API::MatrixWorkspace_
 
 // constructor
 ConvToMDPreprocDet::ConvToMDPreprocDet():
-emode(-2),
-efix(std::numeric_limits<double>::quiet_NaN()),
+//emode(-2),
+//efix(std::numeric_limits<double>::quiet_NaN()),
 L1(-1)
 {}
 // destructor
 void ConvToMDPreprocDet::clearAll()
 {
-    emode = -2,
-    efix  = std::numeric_limits<double>::quiet_NaN();
+//    emode = -2,
+//    efix  = std::numeric_limits<double>::quiet_NaN();
     L1    = -1;
 
     this->det_dir.clear();
