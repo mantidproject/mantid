@@ -8,6 +8,7 @@
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid
 {
@@ -85,6 +86,11 @@ namespace Algorithms
 
     double mProgress;
 
+    void getTimeSeriesLogNames(std::vector<std::string>& lognames);
+
+    void generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters);
+
+    void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters);
   };
 
 

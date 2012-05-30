@@ -687,6 +687,64 @@ public:
 
   }
 
+  /*
+   * Split current time series property by splitters, and put the result in another
+   * TimeSeriesProperty
+   *
+   */
+  void splitByTime(TimeSplitterType& splittervec, TimeSeriesProperty<TYPE>* splitproperty)
+  {
+    for (size_t isp = 0; isp < splittervec.size(); ++isp)
+    {
+      Kernel::SplittingInterval splitter = splittervec[isp];
+      Kernel::DateAndTime t_start = splitter.start();
+      Kernel::DateAndTime t_stop = splitter.stop();
+
+      int tstartindex = findIndex(t_start);
+      if (tstartindex < 0)
+      {
+        // The splitter is not well defined, and use the first
+        tstartindex = 0;
+      }
+      else if (tstartindex >= int(mP.size()))
+      {
+        // The splitter is not well defined, adn use the last
+        tstartindex = int(mP.size())-1;
+      }
+
+      int tstopindex = findIndex(t_stop);
+
+      if (tstopindex < 0)
+      {
+        tstopindex = 0;
+      }
+      else if (tstopindex < int(mP.size()))
+      {
+        tstopindex = int(mP.size())-1;
+      }
+      else
+      {
+        if (t_stop < mP[size_t(tstopindex)].time() && size_t(tstopindex) < mP.size()-1)
+        {
+          ++ tstopindex;
+        }
+      }
+
+      /* Check */
+      if (tstartindex < 0 || tstopindex >= int(mP.size()))
+      {
+        g_log.warning() << "Memory Leak In SplitbyTime!" << std::endl;
+      }
+
+      for (size_t im = size_t(tstartindex); im <= size_t(tstopindex); ++im)
+      {
+        splitproperty->addValue(mP[im].time(), mP[im].value());
+      }
+    } // ENDFOR
+
+    return;
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /**
