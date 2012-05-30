@@ -8,7 +8,7 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
-	src/ConvertToMDEventsParams.cpp
+#	src/ConvertToMDEventsParams.cpp
 #	src/ConvertToMDEventsSubalgFactory.cpp
 #	src/IConvertToMDEventsWS.cpp
 #	src/ConvToMDPreprocDetectors.cpp	
@@ -61,12 +61,12 @@ set ( INC_FILES
 #   inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+#	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
 #	inc/MantidMDAlgorithms/ConvToMDPreprocDetectors.h
 #	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 #	inc/MantidMDAlgorithms/IConvertToMDEventsWS.h

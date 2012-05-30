@@ -6,19 +6,18 @@ namespace Mantid
 namespace MDEvents
 {
 
-size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDet &detLoc,
+
+size_t  ConvToMDEventsEvents::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
-    size_t numSpec=ConvToMDEventsBase::initialize(pWS2D,detLoc,WSD,inWSWrapper);
+    size_t numSpec=ConvToMDEventsBase::initialize(pWS2D,WSD,inWSWrapper);
 
     
     pEventWS  = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(pWS2D);
     if(!pEventWS.get()){
            throw(std::logic_error(" ConvertToMDEvensEventWS should work with defined event workspace"));
     }
-
-  
-
+ 
     return numSpec;
 }
 

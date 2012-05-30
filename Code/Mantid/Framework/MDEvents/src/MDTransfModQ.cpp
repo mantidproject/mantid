@@ -6,9 +6,9 @@ namespace Mantid
 namespace MDEvents
 {
 // register the class, whith conversion factory
-DECLARE_MD_TRANSF(MDTransfModQ);
+DECLARE_MD_TRANSFID(MDTransfModQ,ModQ);
 
-const std::string MDTransfModQ::usedUnitID()const
+const std::string MDTransfModQ::inputUnitID()const
 {
     if (emode == ConvertToMD::Elastic){
         return "Momentum";
@@ -24,6 +24,19 @@ bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)c
     }else{
         return calcMatrixCoordInelastic(x,Coord);
     }
+}
+/** function returns number of matrix dimensions calculated by this class
+  * as function of energy analysis mode
+  */
+unsigned int MDTransfModQ::getNMatrixDimensions(ConvertToMD::EModes mode)const
+{
+   switch(mode)
+   {
+   case(ConvertToMD::Direct):  return 2;
+   case(ConvertToMD::Indir):   return 2;
+   case(ConvertToMD::Elastic): return 1;
+   default: throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
+   }
 }
 
 /** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 
@@ -127,19 +140,19 @@ bool MDTransfModQ::calcMatrixCoordElastic(const double& k0,std::vector<coord_t> 
 }
 
 /** function initalizes all variables necessary for converting workspace variables into MD variables in ModQ (elastic/inelastic) cases  */
-void MDTransfModQ::initialize(const ConvToMDEventsBase &Conv)
+void MDTransfModQ::initialize(const MDWSDescription &ConvParams)
 { 
 //********** Generic part of initialization, common for elastic and inelastic modes:
-        pHost      = &Conv;
+     //   pHost      = &Conv;
         // get transformation matrix (needed for CrystalAsPoder mode)
-        rotMat = pHost->getTransfMatrix();
+        rotMat = ConvParams.getTransfMatrix();
 
         // get pointer to the positions of the detectors
-        std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
+        std::vector<Kernel::V3D> const & DetDir = ConvParams.getDetectors()->getDetDir();
         pDet = &DetDir[0];     //
 
         // get min and max values defined by the algorithm. 
-        pHost->getMinMax(dim_min,dim_max);
+        ConvParams.getMinMax(dim_min,dim_max);
          // dim_min/max here are momentums and they are verified on momentum squared base         
         if(dim_min[0]<0)dim_min[0]=0;
         if(dim_max[0]<0)dim_max[0]=0;
@@ -156,28 +169,70 @@ void MDTransfModQ::initialize(const ConvToMDEventsBase &Conv)
 
 
 //************   specific part of the initialization, dependent on emode:
-        emode      = (ConvertToMD::EModes)pHost->getEMode();
+        emode      = ConvParams.getEMode();
+        nMatrixDim = getNMatrixDimensions(emode);
         if(emode == ConvertToMD::Direct||emode == ConvertToMD::Indir){
-            nMatrixDim=2;
             // energy needed in inelastic case
-            Ei  =  pHost->getEi();
+            Ei  =  ConvParams.getEi();
             // the wave vector of incident neutrons;
             ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
         }else{
-            if (emode == ConvertToMD::Elastic){
-                nMatrixDim=1;
-            }else{
-                throw(std::invalid_argument("MDTransfModQ::ModQ::Unknown energy conversion mode"));
+            if (emode != ConvertToMD::Elastic){
+                throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
             }
         }
         
+}
+/**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
+  * this class produces its ouptut in. 
+ *@param Emode   -- energy conversion mode
+
+ *@returns       -- vector of default dimension ID-s for correspondent energy conversion mode. 
+                    The position of each dimID in the vector corresponds to the position of each MD coordinate in the Coord vector
+*/
+std::vector<std::string> MDTransfModQ::getDefaultDimID(ConvertToMD::EModes dEmode)const
+{
+    std::vector<std::string> default_dim_ID;
+    switch(dEmode)
+    {
+    case(ConvertToMD::Elastic):
+        {
+            default_dim_ID.resize(1);
+            break;
+        }
+    case(ConvertToMD::Direct):
+    case(ConvertToMD::Indir):
+        {
+            default_dim_ID.resize(2);
+            default_dim_ID[1]= "DeltaE";
+            break;
+        }
+    default:
+        throw(std::invalid_argument("MDTransfModQ::getDefaultDimID::Unknown energy conversion mode"));
+    }
+    default_dim_ID[0]="|Q|";
+
+    return default_dim_ID;
+}
+
+
+/**function returns units ID-s which this transformation prodiuces its ouptut. 
+ * @param Emode   -- energy conversion mode
+ *
+ * It is Momentum and DelteE in inelastic modes   */
+std::vector<std::string> MDTransfModQ::outputUnitID(ConvertToMD::EModes dEmode)const
+{
+    std::vector<std::string> UnitID = MDTransfModQ::getDefaultDimID(dEmode);
+    //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
+    UnitID[0] = "MomentumTransfer";
+    return UnitID;
 }
 
 
 /// constructor;
 MDTransfModQ::MDTransfModQ():
 pDet(NULL),
-pHost(NULL)
+nMatrixDim(-1)
 {
 
 }    

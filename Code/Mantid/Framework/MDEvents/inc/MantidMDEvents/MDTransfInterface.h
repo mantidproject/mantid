@@ -3,6 +3,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidMDEvents/MDWSDescription.h"
 
 namespace Mantid
 {
@@ -44,19 +45,21 @@ namespace MDEvents
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-// forvard declaration for a class, which would provide all necessary parameters for the transformation; should be refactored;
-class ConvToMDEventsBase;
-
 
 class MDTransfInterface
 {
 public:
-    /** the function returns the unit ID for the input units, the particular transformation expects. 
-     if one wants the transformation to be meaningful, Input X-coordinates
-     used by the transformation have to be expressed in the uinits  specified */
-    virtual const std::string usedUnitID()const=0;
-    /**The function returns the name, under which the transformation would be known to user */
+    /**The method returns the name, under which the transformation would be known to a user */
     virtual const std::string transfID()const=0;
+
+    /** returns the unit ID for the input units, the particular transformation expects. 
+     if one wants the transformation to be meaningful, the X-coordinates of input workspace 
+     used by the transformation have to be expressed in the uinits  with ID, returned by this method */
+    virtual const std::string inputUnitID()const=0;
+    /** The transformation generates output MD events in particular units. This method returns these Units ID-s */ 
+    virtual std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode)const = 0;
+
+
     /** Method deployed out of the loop and calculates all variables needed within the loop.
      * In addition it calculates the property-dependant coordinates, which do not depend on workspace
      *
@@ -67,7 +70,6 @@ public:
      *
      * @return true         -- if all Coord are within the range requested by the conversion algorithm. false otherwise
     */  
-
     virtual bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes)=0;
    
     /** generalizes the code to calculate Y-variables within the detector's loop of the  workspace
@@ -97,7 +99,7 @@ public:
     }
   
  /**  The method to calculate all remaining coordinates, defined within the inner loop
-    * given that the input described by sinble value only
+    *  given that the input described by sinble value only
      * @param X    -- X workspace value
      * 
      * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
@@ -105,17 +107,19 @@ public:
      * */
     virtual bool calcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const=0;
 
-    /** set up transformation and retrieve the pointer to the incorporating class, which runs the transformation and can provide
-      * all variables necessary for the conversion */
-    virtual void initialize(const ConvToMDEventsBase &)=0;
+    /** set up transformation from the class, which can provide all variables necessary for the conversion */
+    virtual void initialize(const MDWSDescription &)=0;
   
     /** MD transformation can often be used together with energy analysis mode; This function should be overloaded 
-       if the transformation indeed can do the energy conversion */
+       if the transformation indeed can do the energy analysis */
     virtual std::vector<std::string> getEmodes()const{return std::vector<std::string>(1,std::string("No dE"));}
-    virtual std::string getEmode(ConvertToMD::EModes Mode)const{UNUSED_ARG(Mode); return std::string("No dE");}
+    /** when one builds MD workspace, he needs a dimension names/ID-s which can be different for different Q-transformatons and in different E-mode 
+       The position of each dimID in the output vector should correspond the position of each coordinate in the Coord vector     */
+    virtual std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode)const = 0;
 
-    /** return the number of dimensions, calculated by the transformation from the workspace. This numebr is usually varies from 1 to 4*/
-    virtual int getNMatrixDimensions()const=0;
+    /** return the number of dimensions, calculated by the transformation from the workspace. This number is usually varies from 1 to 4
+      * and depends on emode.     */
+    virtual unsigned int getNMatrixDimensions(ConvertToMD::EModes mode)const=0;
 
     virtual ~MDTransfInterface(){};
 }; 

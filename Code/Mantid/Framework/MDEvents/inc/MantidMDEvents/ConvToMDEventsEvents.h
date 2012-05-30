@@ -19,8 +19,6 @@
 #include "MantidMDEvents/ConvToMDEventsBase.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfFactory.h"
-// units conversion
-#include "MantidMDEvents/UnitConversionHelper.h"
 
 namespace Mantid
 {
@@ -63,10 +61,8 @@ class ConvToMDEventsEvents: public ConvToMDEventsBase
 private:
    // function runs the conversion on 
    virtual size_t conversionChunk(size_t workspaceIndex);
-   // the pointer to the source event workspace as event ws does not work through the public interface?
+   // the pointer to the source event workspace as event ws does not work through the public Matrix WS interface
     DataObjects::EventWorkspace_sptr pEventWS;
-   // class responsible for converting units if necessary;
-   UnitsConversionHelper UnitConversion;
    /**function converts particular type of events into MD space and add these events to the workspace itself 
     */
    template <class T>
@@ -82,6 +78,7 @@ private:
          std::vector<coord_t>locCoord(this->Coord);
          // set up unit conversion and calculate up all coordinates, which depend on spectra index only
         if(!pQConverter->calcYDepCoordinates(locCoord,detNum))return 0;   // skip if any y outsize of the range of interest;
+        UnitConversion.updateConversion(detNum);
 //
         // allocate temporary buffers for MD Events data
          // MD events coordinates buffer
@@ -103,27 +100,15 @@ private:
         // Iterators to start/end
        typename std::vector<T>::iterator it = events.begin();
        typename std::vector<T>::iterator it_end = events.end();
-
-       // obtain tof-coordinate for availible events
-       std::vector<double> X;
-       // counter for accessed events;
-       X.reserve(numEvents);
-       for (; it != it_end; it++)
-       {
-         double tof=it->tof();
-         X.push_back(tof);
-       }
-
-       std::vector<double> XtargetUnits;
-       UnitConversion.updateConversion(workspaceIndex);
-       UnitConversion.convertUnits(X,XtargetUnits);
+     
 
        size_t ic(0);
        it = events.begin();
        for (; it != it_end; it++)
        {
-         if(!pQConverter->calcMatrixCoord(XtargetUnits[ic],locCoord))continue; // skip ND outside the range
-         ic++;
+         double val=UnitConversion.convertUnits(it->tof());         
+         if(!pQConverter->calcMatrixCoord(val,locCoord))continue; // skip ND outside the range
+
 
          sig_err.push_back(float(it->weight()));
          sig_err.push_back(float(it->errorSquared()));

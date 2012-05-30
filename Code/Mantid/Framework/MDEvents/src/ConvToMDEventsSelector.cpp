@@ -13,7 +13,7 @@ enum wsType
 };
 /** function which selects the convertor depending on workspace type and (possibly, in a future) some workspace properties
   * @param inputWS      -- the sp to workspace which has to be processed
-  * @param currentSolver -- the sp to the existing solver (may be null if no initiated)
+  * @param currentSolver -- the sp to the existing solver (may be undef if not initiated)
 
   *@returns shared pointer to new solver, which corresponds to the workspace
 */
