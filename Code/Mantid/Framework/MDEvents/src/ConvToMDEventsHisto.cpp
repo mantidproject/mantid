@@ -71,7 +71,11 @@ void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
             // convert units 
             UnitConversion.updateConversion(i);
             std::vector<double> XtargetUnits;
-            UnitConversion.convertUnits(X,XtargetUnits);
+            XtargetUnits.resize(specSize);
+            for(size_t j=0;j<specSize;j++)
+            {
+                XtargetUnits[j]=UnitConversion.convertUnits(X[j]);
+            }
 
           //=> START INTERNAL LOOP OVER THE "TIME"
             for (size_t j = 0; j < specSize; ++j)

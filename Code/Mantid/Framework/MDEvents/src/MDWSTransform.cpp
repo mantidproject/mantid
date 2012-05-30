@@ -1,4 +1,6 @@
-#include "MantidMDEvents/MDWSTransfDescr.h"
+#include "MantidMDEvents/MDWSTransform.h"
+#include "MantidMDEvents/MDTransfAxisNames.h"
+#include "MantidKernel/Strings.h"
 #include <float.h>
 
 namespace Mantid
@@ -6,16 +8,17 @@ namespace Mantid
 namespace MDEvents
 {
 // logger for the algorithm workspaces  
-Kernel::Logger& MDWSTransfDescr::convert_log =Kernel::Logger::get("MD-Algorithms");
-
+Kernel::Logger& MDWSTransform::convert_log =Kernel::Logger::get("MD-Algorithms");
+using namespace ConvertToMD;
 
 /** The matrix to convert neutron momentums into the target coordinate system   */
-std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription,bool powderMode)const
+std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
 {
   
     Kernel::Matrix<double> mat(3,3,true);
     Kernel::Matrix<double> ub;
     
+    bool powderMode = TargWSDescription.isPowder();
 
     bool has_lattice(true);
     if(!TargWSDescription.pLatt.get())  has_lattice=false;
@@ -31,7 +34,7 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
     //
     if(has_lattice){
 
-      TargWSDescription.Wtransf = buildQTrahsf(TargWSDescription);
+      TargWSDescription.Wtransf = buildQTrahsf(TargWSDescription,QScaleRequested);
       // Obtain the transformation matrix to Cartezian related to Crystal
       mat = TargWSDescription.GoniomMatr*TargWSDescription.Wtransf;
      // and this is the transformation matrix to notional
@@ -45,14 +48,14 @@ std::vector<double> MDWSTransfDescr::getTransfMatrix(const std::string &inWsName
 }
 
 
-Kernel::DblMatrix MDWSTransfDescr::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription)const
+Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
 {
     //implements strategy Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
     if(!TargWSDescription.pLatt.get()){      
         throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
     }
 
-    CoordScaling ScaleID = TargWSDescription.convert_to_factor;
+    CoordScaling ScaleID = getQScaling(QScaleRequested);
 
     // if u,v us default, Wmat is unit transformation
     Kernel::DblMatrix  Wmat(3,3,true);
@@ -115,20 +118,12 @@ Kernel::DblMatrix MDWSTransfDescr::buildQTrahsf(MDEvents::MDWSDescription &TargW
 
 /** Build meaningful dimension names for different conversion modes
   */
-void MDWSTransfDescr::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription)
+void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)
 {
         
         std::vector<Kernel::V3D> dim_directions;
         // set default dimension names:
-        std::vector<std::string> dim_names = TargWSDescription.getDefaultDimIDQ3D(TargWSDescription.emode);
-        if(TargWSDescription.dimNames.size()<=dim_names.size()){
-            TargWSDescription.dimNames         = dim_names;
-        }else{
-            for(size_t i=0;i<dim_names.size();i++)
-            {
-                 TargWSDescription.dimNames[i]    = dim_names[i];
-            }
-        }      
+        std::vector<std::string> dim_names = TargWSDescription.getDimNames();
 
         // define B-matrix and Lattice parameters to one in case if no OrientedLattice is there
         Kernel::DblMatrix Bm(3,3,true);
@@ -139,7 +134,7 @@ void MDWSTransfDescr::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDes
             for(int i=0;i<3;i++)LatPar[i]=TargWSDescription.pLatt->a(i);
         }
        // axis units:
-        CoordScaling ScaleID = TargWSDescription.convert_to_factor;
+        CoordScaling ScaleID = getQScaling(QScaleRequested);
   
         dim_names[0]="H";
         dim_names[1]="K";
@@ -157,17 +152,17 @@ void MDWSTransfDescr::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDes
             dim_directions = Kernel::V3D::makeVectorsOrthogonal(uv);
         }
         // axis names:
-        for(int i=0;i<3;i++)TargWSDescription.dimNames[i]=MDEvents::makeAxisName(dim_directions[i],dim_names);
+        for(int i=0;i<3;i++)TargWSDescription.setDimName(i,MDEvents::makeAxisName(dim_directions[i],dim_names));
 
         if (ScaleID == NoScaling)
         {
-            for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "A^-1";
+            for(int i=0;i<3;i++)TargWSDescription.setDimUnit(i,"A^-1");
         }
         if(ScaleID==SingleScale)
         {
             double dMax(-1.e+32);
             for(int i=0;i<3;i++)dMax =(dMax>LatPar[i])?(dMax):(LatPar[i]);
-            for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(2*M_PI/dMax,1.e-3)+" A^-1";
+            for(int i=0;i<3;i++)TargWSDescription.setDimUnit(i,"in "+MDEvents::sprintfd(2*M_PI/dMax,1.e-3)+" A^-1");
         }
         if((ScaleID==OrthogonalHKLScale)||(ScaleID==HKLScale))
         {
@@ -180,30 +175,20 @@ void MDWSTransfDescr::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDes
             len.push_back(2*M_PI*x.norm());
             x=Bm*dim_directions[2];
             len.push_back(2*M_PI*x.norm());
-            for(int i=0;i<3;i++)TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(len[i],1.e-3)+" A^-1";
+            for(int i=0;i<3;i++)TargWSDescription.setDimUnit(i,"in "+MDEvents::sprintfd(len[i],1.e-3)+" A^-1");
         }
  
 }
 
-void MDWSTransfDescr::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription)
-{ //TODO: nothing meanigful has been done at the moment, should enable scaling if different coord transf modes
+void MDWSTransform::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)
+{ //TODO: nothing meanigful has been done at the moment, should enable scaling if different coord transf modes?
 
-   
-    // set default dimension names:
-    std::vector<std::string> dimNames = TargWSDescription.getDefaultDimIDModQ(TargWSDescription.emode);
-    if(TargWSDescription.dimNames.size()<=dimNames.size()){
-        TargWSDescription.dimNames         = dimNames;
-    }else{
-        for(size_t i=0;i<dimNames.size();i++)
-        {
-             TargWSDescription.dimNames[i]    = dimNames[i];
-        }
-    }
-    
+    UNUSED_ARG(TargWSDescription);
+    UNUSED_ARG(QScaleRequested);
 }
 
 //
-void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt, const std::vector<double> &wt)
+void  MDWSTransform::getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt, const std::vector<double> &wt)
 {   
 //identify if u,v are present among input parameters and use defaults if not
     bool u_default(true),v_default(true),w_default(true);
@@ -252,13 +237,31 @@ void  MDWSTransfDescr::getUVsettings(const std::vector<double> &ut,const std::ve
         throw std::invalid_argument("Projections are coplanar");
     }
 }
+/** function which convert input string representing coordinate scaling to correspondent enum */
+CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
+{
+    int nScaling = Kernel::Strings::isMember(QScalingID,ScID);
+
+    if (nScaling<0)throw(std::invalid_argument(" The Q scale with ID: "+ScID+" is unavalible"));
+
+    return CoordScaling(nScaling);
+}
+
 //
-MDWSTransfDescr::MDWSTransfDescr():
-is_uv_default(true)
+MDWSTransform::MDWSTransform():
+is_uv_default(true),
+QScalingID(NCoordScalings)
 {
     uProj[0] = 1;        uProj[1] = 0;     uProj[2] = 0;
     vProj[0] = 0;        vProj[1] = 1;     vProj[2] = 0;
     wProj[0] = 0;        wProj[1] = 0;     wProj[2] = 1;
+
+ 
+    QScalingID[NoScaling]="Q in A^-1";
+    QScalingID[SingleScale]="Q in lattice units";
+    QScalingID[OrthogonalHKLScale]="Orthogonal HKL";
+    QScalingID[HKLScale]="HKL";
+
 }
 
 }

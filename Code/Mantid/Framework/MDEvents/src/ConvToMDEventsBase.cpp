@@ -20,7 +20,8 @@ namespace MDEvents
 */
 size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
-        TWS   = WSD;
+        pDetLoc = WSD.getDetectors();
+            
         // set up output MD workspace wrapper
         pWSWrapper = inWSWrapper;
         
@@ -33,13 +34,13 @@ size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, 
         Coord.resize(this->n_dims);
 
         // retrieve the class which does the conversion of workspace data into MD WS coordinates;
-        pQConverter = MDTransfFactory::Instance().create(TWS.AlgID);
+        pQConverter = MDTransfFactory::Instance().create(WSD.AlgID);
 
         inWS2D = pWS2D;
-
-        pQConverter->initialize(TWS);
+        // initialize the MD coordinates conversion class
+        pQConverter->initialize(WSD);
        // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-       UnitConversion.initialize(detLoc,pWS2D,pQConverter->usedUnitID());
+       UnitConversion.initialize(WSD,pWS2D,pQConverter->inputUnitID());
 
         
         size_t n_spectra =inWS2D->getNumberHistograms();

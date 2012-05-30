@@ -96,12 +96,12 @@ public:
     size_t  getDetSpectra(size_t i)const{return detIDMap[i];}
     int32_t getDetID(size_t i)const{return det_id[i];}
 
-    int    getEmode()const{return emode;}
-    double getEfix()const{return efix;}
+    //int    getEmode()const{return emode;}
+    //double getEfix()const{return efix;}
     double getL1()const{return L1;}
 
-    void setEmode(int mode);
-    void setEfix(double Ei);
+    //void setEmode(int mode);
+    //void setEfix(double Ei);
     void setL1(double Dist);
 
    /** function, does preliminary calculations of the detectors positions to convert results into k-dE space */     
@@ -115,13 +115,13 @@ private:
     // function allocates the class detectors memory 
     void allocDetMemory(size_t nSpectra);
 
-    void setEi(const API::MatrixWorkspace_sptr inputWS);
+    //void setEi(const API::MatrixWorkspace_sptr inputWS);
 
 
    // parameter which describes the conversion mode, used to convert uints using TOF and detector's positions
-    int emode;
+  //    int emode;
     // parameter wjocj describes the energy used to convert uints using TOF and detector's positions
-    double efix;
+  //  double efix;
     // source-sample distance  used to convert uints using TOF and detector's positions
     double L1; 
     // minimal position for the detectors

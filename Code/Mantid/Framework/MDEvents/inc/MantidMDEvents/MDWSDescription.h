@@ -10,6 +10,8 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
+#include "MantidMDEvents/MDTransfDEHelper.h"
+
 
 namespace Mantid
 {
@@ -44,49 +46,21 @@ namespace MDEvents
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/** describes default dimensions ID currently used by multidimensional workspace
- * 
- *  DimensionID is the short name which used to retrieve this dimesnion from MD workspace.
- *  The names themself are defined in constructor
- */
-enum defaultDimID
-{
-    ModQ_ID,  //< the defauld |Q| id for mod Q or powder mode
-    Q1_ID,    //< 1 of 3 dimID in Q3D mode
-    Q2_ID,    //< 2 of 3 dimID in Q3D mode
-    Q3_ID,    //< 3 of 3 dimID in Q3D mode
-    dE_ID,    //< energy transfer ID
-    nDefaultID //< ID conunter
-};
-
-/// enum descrines availble momentum scalings, interpreted by this class: TODO: Reconsile this with future third projection parameter
-enum CoordScaling
-{ 
-    NoScaling, //< momentums in A^-1
-    SingleScale, //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sence
-    OrthogonalHKLScale,  //< each momentum component divided by appropriate lattice parameter; equivalent to hkl for reclenear lattice
-    HKLScale,            //< non-orthogonal system for non-reclenear lattice
-    NCoordScalings
-}; 
-
 
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
 class DLLExport MDWSDescription
 {
    // pointer to the array of detector's directions in the reciprocal space
     ConvToMDPreprocDet const * pDetLocations;
-    /// conversion mode 0,1,2 (-1 --undef) (see units conversion for its definision/description)
-    int emode;
-    /// energy of incident neutrons, relevant in inelastic mode
+    /// energy transfer analysis mode 
+    ConvertToMD::EModes emode;
+    /// energy of incident neutrons, relevant to inelastic modes
     double Ei; 
-    /// 
+    /// the vector of MD coordinates, which are obtained from workspace properties.
     std::vector<coord_t> AddCoord;
-  public:
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
-    size_t nDims;
-    /// minimal and maximal values for the workspace dimensions:
-    std::vector<double>      dimMin,dimMax;
+    unsigned int nDims;
     /// the names for the target workspace dimensions and properties of input MD workspace
     std::vector<std::string> dimNames;
     /// the ID-s for the target workspace, which allow to identify the dimensions according to their ID
@@ -95,12 +69,11 @@ class DLLExport MDWSDescription
     std::vector<std::string> dimUnits;
     /// if defined, specifies number of bins split in each dimension
     std::vector<size_t> nBins;
-    /** the enum, specifying the target coordinate system Q in A^-1, hkl etc.. Currently Ignored in NoQ and powder mode (but used in cryst as powder) 
-       Powder mode usage may be reconsiled later, though */
-    CoordScaling convert_to_factor;
-    /// the matrix to transform momentums of the workspace into target coordinate system, it is constructed from UB matix and W-matrix;
-    std::vector<double> rotMatrix;  // can be Quat if not for non-orthogonal lattices
-
+    /// minimal and maximal values for the workspace dimensions. Usually obtained from WS parameters;
+    std::vector<double>      dimMin,dimMax;
+    /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
+    bool detInfoLost;
+public:
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
@@ -109,61 +82,68 @@ class DLLExport MDWSDescription
     /// the oriented lattice which should be picked up from source ws and be carryed out to target ws. Defined for transfromation from Matrix or Event WS
     std::auto_ptr<Geometry::OrientedLattice> pLatt;
     // Goniometer is always present in a workspace but can be a unit matrix
-    Kernel::DblMatrix GoniomMatr;   
-    /// shows if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
-    bool detInfoLost;
+    Kernel::DblMatrix GoniomMatr;
+    // the vector which represent linear form of momentun transformation 
+    std::vector<double> rotMatrix;
    //=======================
 /**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
+    unsigned int         nDimensions()const{return nDims;}
+
+    std::vector<std::string> getDimNames()const{return dimNames;}
+    std::vector<std::string> getDimIDs()const{return dimIDs;}
+    std::vector<std::string> getDimUnits()const{return dimUnits;}
+    std::vector<double>      getDimMin()const{return dimMin;}
+    std::vector<double>      getDimMax()const{return dimMax;}
+    std::vector<size_t>      getNBins()const{return nBins;}
+
+    bool isDetInfoLost()const{return detInfoLost;}
+    bool isPowder()const;
+
     double               getEi()const{return Ei;}
-    int                  getEMode()const{return emode;}
+    double               getEi(API::MatrixWorkspace_const_sptr inWS2D)const;
+    ConvertToMD::EModes  getEMode()const{return emode;}
     std::vector<double> getTransfMatrix()const{return this->rotMatrix;}
     //
-    void getMinMax(std::vector<double> &min,std::vector<double> &max)const
-    {
-        min.assign(this->dimMin.begin(),this->dimMin.end());
-        max.assign(this->dimMax.begin(),this->dimMax.end());
-    }
+    void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
+    
     ConvToMDPreprocDet const * getDetectors(){return pDetLocations;}
-    ConvToMDPreprocDet const * pPrepDetectors()const{return pDetLocations;}
+    ConvToMDPreprocDet const * getDetectors()const{return pDetLocations;}
 
       /// constructor
-     MDWSDescription(size_t nDimesnions=0);
+     MDWSDescription(unsigned int nDimensions=0);
      /// method builds MD Event description from existing MD event workspace
      void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
      /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
-     void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,const std::vector<std::string> &dimProperyNames);
+     void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
+                            const std::vector<std::string> &dimProperyNames,size_t maxNdims);
 
      /// compare two descriptions and select the coplimentary result.
      void compareDescriptions(MDEvents::MDWSDescription &NewMDWorkspace);
      /// copy some parameters from the target workspace;
      void setUpMissingParameters(const MDEvents::MDWSDescription &SourceMDWorkspace);
-    /// helper function checks if min values are less them max values and are consistent between each other 
-    void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
-    // default does not do any more;
-    MDWSDescription & operator=(const MDWSDescription &rhs);
+     // default does not do any more;
+     MDWSDescription & operator=(const MDWSDescription &rhs);
 
-    /// function returns default dimension id-s for different Q and dE modes, defined by this class
-    std::vector<std::string> getDefaultDimIDQ3D(int dEmode)const;
-    std::vector<std::string> getDefaultDimIDModQ(int dEmode)const;
-  /// return the list of possible scalings for momentums
-   std::vector<std::string> getQScalings()const{return QScalingID;}
-   CoordScaling getQScaling(const std::string &ScID)const;
-  private:
-      // let's hide copy constructor for the time being as defaults are incorrect and it is unclear if one is needed.
-      MDWSDescription(const MDWSDescription &);
-     /// the vector describes default dimension names, specified along the axis if no names are explicitly requested;
-     std::vector<std::string> default_dim_ID;
-     ///
-     std::vector<std::string> QScalingID;
+   /// set up min and max values for dimensions in MD workspace
+   void setMinMax(const std::vector<double> &minVal,const std::vector<double> &maxVal);
+   /// set non-default dimension name
+   void setDimName(unsigned int nDim,const std::string &Name);
+   void setDimUnit(unsigned int nDim,const std::string &Unit);
+   void setDetectors(const ConvToMDPreprocDet &det_loc);
+private:
+     // let's hide copy constructor for the time being as defaults are incorrect and it is unclear if one is needed.
+     MDWSDescription(const MDWSDescription &);
 
    /** function extracts the coordinates from additional workspace porperties and places them to AddCoord vector for further usage*/
      void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord)const;
 
+     /// helper function to resize all vectors, responsible for MD dimensions in one go
+     void resizeDimDescriptions(unsigned int Dims,size_t nBins=10);
+
+     /// helper function checks if min values are less them max values and are consistent between each other 
+    void checkMinMaxNdimConsistent()const;
+
 }; 
-/** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/
-std::string DLLExport makeAxisName(const Kernel::V3D &vector,const std::vector<std::string> &Q1Names);
-/**creates string representation of the number with accuracy, cpecified by eps*/
-std::string DLLExport sprintfd(const double data, const double eps);
 
 }
 }
