@@ -77,6 +77,10 @@ namespace IDA
     /// Returns a handle to the QtCheckBoxFactory object stored in the IndirectDataAnalysis class.
     QtCheckBoxFactory * qtCheckBoxFactory();
 
+  protected slots:
+    /// Slot that can be called when a user eidts an input.
+    void inputChanged();
+
   private:
     /// Overidden by child class.
     virtual void setup() = 0;

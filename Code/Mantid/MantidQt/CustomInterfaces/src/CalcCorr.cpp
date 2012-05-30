@@ -1,5 +1,8 @@
 #include "MantidQtCustomInterfaces/CalcCorr.h"
 
+#include <QLineEdit>
+#include <QList>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -19,25 +22,33 @@ namespace IDA
     connect(uiForm().absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
     connect(uiForm().absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
-    // apply QValidators to items.
-    uiForm().absp_lewidth->setValidator(m_dblVal);
-    uiForm().absp_leavar->setValidator(m_dblVal);
-    // sample
-    uiForm().absp_lesamden->setValidator(m_dblVal);
-    uiForm().absp_lesamsigs->setValidator(m_dblVal);
-    uiForm().absp_lesamsiga->setValidator(m_dblVal);
-    // can
-    uiForm().absp_lecanden->setValidator(m_dblVal);
-    uiForm().absp_lecansigs->setValidator(m_dblVal);
-    uiForm().absp_lecansiga->setValidator(m_dblVal);
-    // flat shape
-    uiForm().absp_lets->setValidator(m_dblVal);
-    uiForm().absp_letc1->setValidator(m_dblVal);
-    uiForm().absp_letc2->setValidator(m_dblVal);
-    // cylinder shape
-    uiForm().absp_ler1->setValidator(m_dblVal);
-    uiForm().absp_ler2->setValidator(m_dblVal);
-    uiForm().absp_ler3->setValidator(m_dblVal);
+
+    QList<QLineEdit *> fields;
+    // Shape details.
+    fields.append(uiForm().absp_lets);
+    fields.append(uiForm().absp_letc1);
+    fields.append(uiForm().absp_letc2);
+    fields.append(uiForm().absp_leavar);
+    fields.append(uiForm().absp_lewidth);
+    fields.append(uiForm().absp_ler1);
+    fields.append(uiForm().absp_ler2);
+    fields.append(uiForm().absp_ler3);
+    // Sample details.
+    fields.append(uiForm().absp_lesamden);
+    fields.append(uiForm().absp_lesamsigs);
+    fields.append(uiForm().absp_lesamsiga);
+    // Can details.
+    fields.append(uiForm().absp_lecanden);
+    fields.append(uiForm().absp_lecansigs);
+    fields.append(uiForm().absp_lecansiga);
+
+    foreach(QLineEdit * field, fields)
+    {
+      // Watch all fields for changes.
+      connect(field, SIGNAL(editingFinished()), this, SLOT(inputChanged()));
+      // Allow doubles only.
+      field->setValidator(m_dblVal);
+    }
 
     // "Nudge" color of title of QGroupBox to change.
     useCanChecked(uiForm().absp_ckUseCan->isChecked());

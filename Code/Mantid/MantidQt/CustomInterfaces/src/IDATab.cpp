@@ -73,6 +73,14 @@ namespace IDA
   }
 
   /**
+   * Slot that can be called when a user edits an input.
+   */
+  void IDATab::inputChanged()
+  {
+    validate();
+  }
+
+  /**
    * Displays the given message in a dialog box.  Just calls the same method of parent.
    *
    * @param message :: message to display.
