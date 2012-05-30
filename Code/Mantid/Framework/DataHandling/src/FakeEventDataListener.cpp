@@ -96,7 +96,6 @@ namespace DataHandling
     using namespace DataObjects;
 
     // Create a new, empty workspace of the same dimensions and assign to the buffer variable
-    // TODO: Think about whether creating a new workspace at this point is scalable
     EventWorkspace_sptr temp = boost::dynamic_pointer_cast<EventWorkspace>(
                                  WorkspaceFactory::Instance().create("EventWorkspace",2,2,1) );
     // Will need an 'initializeFromParent' here later on....

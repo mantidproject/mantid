@@ -75,6 +75,8 @@ namespace Mantid
 
       /** Get the data that's been buffered since the last call to this method
        *  (or since start() was called).
+       *  This method should never return an empty shared pointer, and a given
+       *  instance of a listener should return a workspace of the same dimension every time.
        *  The implementation should reset its internal buffer when this method is called
        *    - the returned workspace is for the caller to do with as they wish.
        *  IF THIS METHOD IS CALLED BEFORE start() THEN THE RESULTS ARE UNDEFINED!!!
