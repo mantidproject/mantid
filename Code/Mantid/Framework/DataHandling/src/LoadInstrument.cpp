@@ -117,7 +117,7 @@ namespace Mantid
       // We will parse the XML using the InstrumentDefinitionParser
       InstrumentDefinitionParser parser;
 
-      // Is the XML is passed in via the InstrumentXML property, use that.
+      // If the XML is passed in via the InstrumentXML property, use that.
       const Property * const InstrumentXML = getProperty("InstrumentXML");
       if ( ! InstrumentXML->isDefault() )
       {

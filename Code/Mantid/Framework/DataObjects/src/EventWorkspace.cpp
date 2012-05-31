@@ -543,6 +543,14 @@ namespace DataObjects
       //Save it in the list
       data[wi] = newel;
     }
+
+    // Put on a default set of X vectors, with one bin of 0 & extremely close to zero
+    MantidVecPtr xVals;
+    MantidVec & x = xVals.access();
+    x.resize(2,0.0);
+    // Move the rhs very,very slightly just incase something doesn't like them being the same
+    x[1] = std::numeric_limits<double>::min();
+    this->setAllX(xVals);
     
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
