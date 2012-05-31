@@ -37,7 +37,7 @@ namespace MDEvents
   class DLLExport ReflectometryMDTransform 
   {
   public:
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::IEventWorkspace_const_sptr eventWs) const = 0;
+    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
   };
 }
 }

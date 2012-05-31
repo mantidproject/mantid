@@ -28,7 +28,7 @@ namespace Mantid
     @param incidentTheta: Predetermined incident theta value
     */
     ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
-    m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_incidentTheta(incidentTheta)
+    m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_QxCalculation(incidentTheta), m_QzCalculation(incidentTheta)
     {
       if(qxMin >= qxMax)
       {
@@ -47,9 +47,9 @@ namespace Mantid
     /*
     Execute the transformtion. Generates an output IMDEventWorkspace.
     @return the constructed IMDEventWorkspace following the transformation.
-    @param ws: Input EventWorkspace const shared pointer
+    @param ws: Input MatrixWorkspace const shared pointer
     */
-    IMDEventWorkspace_sptr ReflectometryTransformQxQz::execute(IEventWorkspace_const_sptr eventWs) const
+    IMDEventWorkspace_sptr ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const
     {
       const size_t nbinsx = 10;
       const size_t nbinsz = 10;
@@ -72,30 +72,22 @@ namespace Mantid
       // Start with a MDGridBox.
       ws->splitBox();
 
-      auto spectraAxis = eventWs->getAxis(1);
-      const double two_pi = 6.28318531; 
-      const double to_radians_factor = 3.14159265/180;
-      const double c_cos_theta_i = cos(m_incidentTheta*to_radians_factor);
-      const double  c_sin_theta_i = sin(m_incidentTheta*to_radians_factor);
-      for(size_t index = 0; index < eventWs->getNumberHistograms(); ++index)
+      auto spectraAxis = inputWs->getAxis(1);
+      for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
       {
-        auto counts = eventWs->readY(index);
-        auto wavelengths = eventWs->readX(index);
-        auto errors = eventWs->readE(index);
-        size_t nInputBins = eventWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
+        auto counts = inputWs->readY(index);
+        auto wavelengths = inputWs->readX(index);
+        auto errors = inputWs->readE(index);
+        size_t nInputBins = inputWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
         const double theta_final = spectraAxis->getValue(index);
-        const double c_sin_theta_f = sin(theta_final*to_radians_factor);
-        const double c_cos_theta_f = cos(theta_final*to_radians_factor);
-        const double dirQx = (c_cos_theta_f - c_cos_theta_i);
-        const double dirQz = (c_sin_theta_f + c_sin_theta_i);
+        m_QxCalculation.setThetaFinal(theta_final);
+        m_QzCalculation.setThetaFinal(theta_final);
         //Loop over all bins in spectra 
         for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
         {
-          double lambda = wavelengths[binIndex];
-          double wavenumber = two_pi/lambda;
-          double _qx = wavenumber * dirQx;
-          double _qz = wavenumber * dirQz;
-
+          const double& lambda = wavelengths[binIndex];
+          double _qx = m_QxCalculation.execute(lambda);
+          double _qz = m_QzCalculation.execute(lambda);
           double centers[2] = {_qx, _qz};
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
