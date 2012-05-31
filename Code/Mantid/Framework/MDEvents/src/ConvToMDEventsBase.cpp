@@ -40,7 +40,8 @@ size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, 
         // initialize the MD coordinates conversion class
         pQConverter->initialize(WSD);
        // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-       UnitConversion.initialize(WSD,pWS2D,pQConverter->inputUnitID());
+       ConvertToMD::EModes emode = WSD.getEMode();
+       UnitConversion.initialize(WSD,pWS2D,pQConverter->inputUnitID(emode,inWS2D));
 
         
         size_t n_spectra =inWS2D->getNumberHistograms();
