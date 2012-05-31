@@ -78,7 +78,7 @@ class RefLReduction(PythonAlgorithm):
         self.declareProperty("IncidentMediumSelected", "",
                              Description="Incident medium used for those runs")
 
-    def PyExec(self):
+    def PyExec(self):   
         
         import os
         import numpy
@@ -90,6 +90,8 @@ class RefLReduction(PythonAlgorithm):
         list_mt = mtd.getObjectNames()
         for _mt in list_mt:
             if _mt.find('_scaled') != -1:
+                mtd.remove(_mt)
+            if _mt.find('_reflectivity') != -1:
                 mtd.remove(_mt)
             
         from mantidsimple import mtd    
@@ -105,7 +107,6 @@ class RefLReduction(PythonAlgorithm):
         
         normalization_run = self.getProperty("NormalizationRunNumber")
 
-        print '** Working with data runs: ' + str(run_numbers)
         data_peak = self.getProperty("SignalPeakPixelRange")
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
@@ -166,6 +167,12 @@ class RefLReduction(PythonAlgorithm):
         allow_multiple = True        
         
         if len(run_numbers)>1 and allow_multiple:
+
+            _list = []
+            for _run in run_numbers:
+                _list.append(str(_run))
+            list_run = ','.join(_list)
+            print '** Working with data runs: ' + str(list_run)
             
             for _run in run_numbers:
 
@@ -191,6 +198,8 @@ class RefLReduction(PythonAlgorithm):
                          RHSWorkspace='tmp',
                          OutputWorkspace=ws_event_data)
         else:
+
+            print '** Working with data runs: ' + str(run_numbers[0])
             
             _File = FileFinder.findRuns("REF_L%d" %run_numbers[0])
             if len(_File)>0 and os.path.isfile(_File[0]): 
