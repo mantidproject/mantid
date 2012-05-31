@@ -627,9 +627,9 @@ public:
       }
       else
       {
-        if (t_stop < mP[size_t(tstopindex)].time() && size_t(tstopindex) < mP.size()-1)
+        if (t_stop == mP[size_t(tstopindex)].time() && size_t(tstopindex) > 0)
         {
-          ++ tstopindex;
+          tstopindex --;
         }
       }
 
@@ -647,11 +647,11 @@ public:
       else
       {
         mp_copy.push_back(TimeValueUnit<TYPE>(t_start, mP[tstartindex].value()));
-        for (size_t im = size_t(tstartindex+1); im <= size_t(tstopindex-1); ++im)
+        for (size_t im = size_t(tstartindex+1); im <= size_t(tstopindex); ++im)
         {
           mp_copy.push_back(TimeValueUnit<TYPE>(mP[im].time(), mP[im].value()));
         }
-        mp_copy.push_back(TimeValueUnit<TYPE>(t_stop, mP[tstopindex].value()));
+        // mp_copy.push_back(TimeValueUnit<TYPE>(t_stop, mP[tstopindex].value()));
       }
     } // ENDFOR
 
@@ -775,65 +775,6 @@ public:
     }
 
   }
-
-  /*
-   * Split current time series property by splitters, and put the result in another
-   * TimeSeriesProperty
-   *
-   */
-  void splitByTime(TimeSplitterType& splittervec, TimeSeriesProperty<TYPE>* splitproperty)
-  {
-    for (size_t isp = 0; isp < splittervec.size(); ++isp)
-    {
-      Kernel::SplittingInterval splitter = splittervec[isp];
-      Kernel::DateAndTime t_start = splitter.start();
-      Kernel::DateAndTime t_stop = splitter.stop();
-
-      int tstartindex = findIndex(t_start);
-      if (tstartindex < 0)
-      {
-        // The splitter is not well defined, and use the first
-        tstartindex = 0;
-      }
-      else if (tstartindex >= int(mP.size()))
-      {
-        // The splitter is not well defined, adn use the last
-        tstartindex = int(mP.size())-1;
-      }
-
-      int tstopindex = findIndex(t_stop);
-
-      if (tstopindex < 0)
-      {
-        tstopindex = 0;
-      }
-      else if (tstopindex < int(mP.size()))
-      {
-        tstopindex = int(mP.size())-1;
-      }
-      else
-      {
-        if (t_stop < mP[size_t(tstopindex)].time() && size_t(tstopindex) < mP.size()-1)
-        {
-          ++ tstopindex;
-        }
-      }
-
-      /* Check */
-      if (tstartindex < 0 || tstopindex >= int(mP.size()))
-      {
-        g_log.warning() << "Memory Leak In SplitbyTime!" << std::endl;
-      }
-
-      for (size_t im = size_t(tstartindex); im <= size_t(tstopindex); ++im)
-      {
-        splitproperty->addValue(mP[im].time(), mP[im].value());
-      }
-    } // ENDFOR
-
-    return;
-  }
-
 
   //-----------------------------------------------------------------------------------------------
   /**
@@ -1923,6 +1864,18 @@ public:
     g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << std::endl;
 
     return;
+  }
+
+  /*
+   * Print the content to string
+   */
+  std::string toString()
+  {
+    std::stringstream ss;
+    for (size_t i = 0; i < mP.size(); ++i)
+      ss << mP[i].time() << "\t\t" << mP[i].value() << std::endl;
+
+    return ss.str();
   }
 
 private:

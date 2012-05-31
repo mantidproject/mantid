@@ -210,6 +210,81 @@ public:
     delete log;
   }
 
+  //-------------------------------------------------------------------------------
+  void test_filterByTimes1()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
+    /*
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00",7) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:10",8) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:20",9) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
+    */
+
+    TS_ASSERT_EQUALS( log->realSize(), 6);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 21);
+
+    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"),
+        DateAndTime("2007-11-30T16:17:40"), 0);
+
+    Mantid::Kernel::TimeSplitterType splitters;
+    splitters.push_back(interval0);
+
+    //Since the filter is < stop, the last one is not counted, so there are  3 taken out.
+
+    log->filterByTimes(splitters);
+
+    TS_ASSERT_EQUALS( log->realSize(), 3);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 9);
+
+    delete log;
+
+  }
+
+  void test_filterByTimesN()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00",7) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:10",8) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:20",9) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
+
+    TS_ASSERT_EQUALS( log->realSize(), 10);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 55);
+
+    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"),
+        DateAndTime("2007-11-30T16:17:40"), 0);
+
+    Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"),
+        DateAndTime("2007-11-30T16:18:25"), 0);
+
+    Mantid::Kernel::TimeSplitterType splitters;
+    splitters.push_back(interval0);
+    splitters.push_back(interval1);
+
+    //Since the filter is < stop, the last one is not counted, so there are  3 taken out.
+
+    log->filterByTimes(splitters);
+
+    TS_ASSERT_EQUALS( log->realSize(), 6);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 33);
+
+    delete log;
+
+  }
+
 
   //----------------------------------------------------------------------------
   /// Ticket #2591
