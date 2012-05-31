@@ -45,8 +45,6 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams)
 
         // get min and max values defined by the algorithm. 
         ConvParams.getMinMax(dim_min,dim_max);
-        // obtain Y axis if availible
-        pYAxis = ConvParams.getInWS()->getPAxis(1);
 
         nMatrixDim = getNMatrixDimensions(ConvertToMD::Undef,ConvParams.getInWS());
         this->addDimCoordinates = ConvParams.getAddCoord();
@@ -77,20 +75,66 @@ bool MDTransfNoQ::calcMatrixCoord(const double& X,std::vector<coord_t> &Coord)co
     Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
 unsigned int MDTransfNoQ::getNMatrixDimensions(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
+    UNUSED_ARG(mode);
+
+    API::NumericAxis *pXAxis,*pYAx;
+    this->getAxes(inWS,pXAxis,pYAx);
+
+    unsigned int nMatrDim = 1;
+    if(pYAxis)nMatrDim =2;
+    return nMatrDim ;
 
 }
+ // internal helper function which extract one or two axis from input matrix workspace;
+void  MDTransfNoQ::getAxes(API::MatrixWorkspace_const_sptr inWS,API::NumericAxis *&pXAxis,API::NumericAxis *&pYAxis)
+{
+   // get the X axis of input workspace, it has to be there; if not axis throws invalid index
+    pXAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(0));
+    if(!pXAxis ){
+        std::string ERR="Can not retrieve X axis from the source workspace: "+inWS->getName();
+        throw(std::invalid_argument(ERR));
+    }
+    // get optional Y axis which can be used in NoQ-kind of algorithms 
+    pYAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
+
+}
+
 /**function returns units ID-s which this transformation prodiuces its ouptut.
    here it is usually input ws units, which are independent on emode */
-std::vector<std::string> outputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+std::vector<std::string> MDTransfNoQ::outputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
+    UNUSED_ARG(mode);
+
+    std::vector<std::string> rez;
+    API::NumericAxis *pXAxis,*pYAx;
+    this->getAxes(inWS,pXAxis,pYAx);
+
+    if(pYAx){
+        rez.resize(2);
+        rez[1] = pYAx->unit()->unitID();
+    }else{
+        rez.resize(1);
+    }
+    rez[0] = pXAxis->unit()->unitID();
+
+    return rez;
 }
 /**the default dimID-s in noQ mode equal to input WS dim-id-s */ 
-std::vector<std::string> getDefaultDimID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+std::vector<std::string> MDTransfNoQ::getDefaultDimID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
+    return this->outputUnitID(mode,inWS);
 }
 /**  returns the units, the input ws is actually in as they coinside with input units for this class */
-const std::string inputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+const std::string MDTransfNoQ::inputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
+    API::NumericAxis *pXAxis;
+   // get the X axis of input workspace, it has to be there; if not axis throws invalid index
+    pXAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(0));
+    if(!pXAxis ){
+        std::string ERR="Can not retrieve X axis from the source workspace: "+inWS->getName();
+        throw(std::invalid_argument(ERR));
+    }
+    return pXAxis->unit()->unitID();
 }
 
 MDTransfNoQ::MDTransfNoQ():
@@ -98,36 +142,6 @@ pYAxis(NULL),
 nMatrixDim(0),
 pDet(NULL)
 {};
-
-//// SPECIALIZATIONS:
-////----------------------------------------------------------------------------------------------------------------------
-//// ---->    NoQ
-//// NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
-////
-//#ifndef EXCLUDE_Q_TRANSFORMATION_NOQ
-//template<ConvertToMD::AnalMode MODE,ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE,ConvertToMD::SampleType SAMPLE> 
-//struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
-//{
-//    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
-//    {
-//       // get optional Y axis which can be used in NoQ-kind of algorithms
-//       pYAxis = pHost->getPAxis(1);
-//       if(pYAxis){  // two inital properties came from workspace. All are independant; All other dimensions are obtained from properties
-//           if(!pHost->fillAddProperties(Coord,nd,2))return false;
-//       }else{        // only one workspace property availible;
-//           if(!pHost->fillAddProperties(Coord,nd,1))return false;
-//       }
-//       //
-//       pHost->getMinMax(dim_min,dim_max);
-//        // set up units conversion defined by the host algorithm.  
-//       ConvToMDPreprocDetectors Dummy;
-//       CONV_UNITS_FROM.setUpConversion(Dummy,"",""); 
-//       return true;
-//    }
-//
-
-//
-//
 
 
 } // End MDAlgorighms namespace

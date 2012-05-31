@@ -55,6 +55,9 @@ public:
     //
     void initialize(const MDWSDescription &ConvParams);
 
+    /* clone method allowing to provide the copy of the particular class */
+    MDTransfInterface * clone() const{return new MDTransfNoQ(*this);}
+
 //***** output WS definition interface:
     /** return the number of dimensions, calculated by the transformation from the workspace.
         Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
@@ -78,6 +81,8 @@ private:
         For implemented NoQ case, these dimensions do not depend on matrix coordinates and are determined by the WS properties */
     std::vector<coord_t>  addDimCoordinates;
 private:
+    // internal helper function which extract one or two axis from input matrix workspace;
+    static  void getAxes( API::MatrixWorkspace_const_sptr inWS,API::NumericAxis *&pXAxis,API::NumericAxis *&pYAxis);
 };
 
 } // End MDAlgorighms namespace
