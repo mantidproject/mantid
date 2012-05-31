@@ -45,11 +45,59 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams)
 
         // get min and max values defined by the algorithm. 
         ConvParams.getMinMax(dim_min,dim_max);
+        // obtain Y axis if availible
+        pYAxis = ConvParams.getInWS()->getPAxis(1);
 
         nMatrixDim = getNMatrixDimensions(ConvertToMD::Undef,ConvParams.getInWS());
         this->addDimCoordinates = ConvParams.getAddCoord();
         
 }
+/** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
+ *@param i -- index of the detector, which corresponds to the spectra to process. 
+ * 
+*/
+bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
+{
+    if(pYAxis){   
+       if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
+        Coord[1] = (coord_t)(pYAxis->operator()(i));
+    }
+    return true;
+}
+bool MDTransfNoQ::calcMatrixCoord(const double& X,std::vector<coord_t> &Coord)const
+{
+       if(X<dim_min[0]||X>=dim_max[0])return false;
+          
+       Coord[0]=(coord_t)X;
+       return true;
+
+}
+
+ /** return the number of dimensions, calculated by the transformation from the workspace.
+    Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
+unsigned int MDTransfNoQ::getNMatrixDimensions(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+{
+
+}
+/**function returns units ID-s which this transformation prodiuces its ouptut.
+   here it is usually input ws units, which are independent on emode */
+std::vector<std::string> outputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+{
+}
+/**the default dimID-s in noQ mode equal to input WS dim-id-s */ 
+std::vector<std::string> getDefaultDimID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+{
+}
+/**  returns the units, the input ws is actually in as they coinside with input units for this class */
+const std::string inputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+{
+}
+
+MDTransfNoQ::MDTransfNoQ():
+pYAxis(NULL),
+nMatrixDim(0),
+pDet(NULL)
+{};
 
 //// SPECIALIZATIONS:
 ////----------------------------------------------------------------------------------------------------------------------
@@ -77,49 +125,11 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams)
 //       return true;
 //    }
 //
-//    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
-//    {
-//        CONV_UNITS_FROM.updateConversion(i);
-//        if(pYAxis){   
-//            if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
-//            Coord[1] = (coord_t)(pYAxis->operator()(i));
-//        }
-//        return true;
-//    }
-//
-//    inline bool calc1MatrixCoord(const double& X,std::vector<coord_t> &Coord)const
-//    {
-//       if(X<dim_min[0]||X>=dim_max[0])return false;
-//          
-//       Coord[0]=(coord_t)X;
-//       return true;
-//    }
-//    // should be actually on ICoordTransformer but there is problem with template-overloaded functions
-//    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
-//    {
-//       UNUSED_ARG(i);
-//       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
-//
-//       return calc1MatrixCoord(X_ev,Coord);
-//    }
-//    inline bool convertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
-//    {
-//         double X_ev = CONV_UNITS_FROM.getXConverted(X);
-//         return calc1MatrixCoord(X_ev,Coord);
-//    }   
-//
-//    // constructor;
-//    CoordTransformer():pYAxis(NULL),pHost(NULL){} 
-//
-//    inline void setUpTransf(IConvertToMDEventsWS *pConv){
-//        pHost = pConv;
-//    }
-//private:
-//// class which would convert units
-//     UnitsConverter<CONV,TYPE> CONV_UNITS_FROM;
-//};
 
 //
+//
+
+
 } // End MDAlgorighms namespace
 } // End Mantid namespace
 
