@@ -99,6 +99,8 @@ struct Event {
 	uint32_t tof;
 };
 
+typedef uint32_t EventBank;
+
 struct Header {
 	uint32_t payload_len;
 	uint32_t pkt_format;

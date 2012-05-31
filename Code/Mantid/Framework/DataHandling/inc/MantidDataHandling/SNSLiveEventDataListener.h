@@ -18,29 +18,6 @@ namespace Mantid
 {
   namespace DataHandling
   {
-#if 0
-   // Don't need this class since the live listener inherits from ADARA::Parser directly
-    /**
-     Implementation of the ADARA Packet Parser specific to the Mantid LiveView work.
-     Basically, we have to provide handler functions for the packet types we care about.
-     We can also make tihngs a little more efficient by overriding
-     rxPacket( const Packet &pkt) with a version that ignores packet types we don't care
-     about.
-    */
-    class MantidAdaraParser : public ADARA::Parser
-    {
-    public:
-        MantidAdaraParser( unsigned int buffer_size = 1024 * 1024,
-                           unsigned int max_pkt_size = 8 * 1024 * 1024) :
-            ADARA::Parser( buffer_size, max_pkt_size) { }
-    protected:
-        using ADARA::Parser::rxPacket;
-        //virtual bool rxPacket( const ADARA::Packet &pkt);
-        virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
-        virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
-        virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
-    };
-#endif
 
     /** An implementation of ILiveListener for use at SNS.  Connects to the Stream Management
         Service and receives events from it.
@@ -90,8 +67,8 @@ namespace Mantid
       //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
       virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
-      //virtual bool rxPacket( const ADARA::ClientHelloPkt &pkt);
-      //virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
+      virtual bool rxPacket( const ADARA::ClientHelloPkt &pkt);
+      virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       //virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
       //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 

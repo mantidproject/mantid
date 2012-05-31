@@ -111,11 +111,78 @@ BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len) :
 {
 	if (m_payload_len < (5 * sizeof(uint32_t)))
 		throw invalid_packet("BankedEvent packet is too short");
+
+        // Sets up the current bank, current event and last event pointers
+        firstBank();
 }
 
 BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt) :
 	Packet(pkt), m_fields((uint32_t *)payload())
 {}
+
+const EventBank * BankedEventPkt::firstBank() const
+{
+  m_curBank = (EventBank *)(&m_fields[5]);
+  m_curEvent = (Event *)&(((uint32_t *)m_curBank)[2]);
+  m_lastEvent = &m_curEvent[curEventCount() - 1];
+
+  return m_curBank;
+}
+
+const EventBank * BankedEventPkt::nextBank() const
+{
+  if (m_curBank != NULL)
+  {
+    uint8_t *temp = (uint8_t *)m_curBank;
+    unsigned bankSize =  (2 * sizeof(uint32_t))  + // account for the bank id and num events fields
+                         curEventCount() * sizeof( Event);  // account for all of the events in this bank
+
+    temp += bankSize;
+    if (temp - payload() > payload_length())
+    {
+      // We've gone past the end of the packet
+      m_curBank = NULL;
+      m_curEvent = m_lastEvent = NULL;
+    }
+    else
+    {
+      m_curBank = (EventBank *)temp;
+      m_curEvent = (Event *)&(((uint32_t *)m_curBank)[2]);
+      m_lastEvent = &m_curEvent[curEventCount() - 1];
+    }
+  }
+
+
+  return m_curBank;
+}
+
+const Event * BankedEventPkt::firstEvent() const
+{
+  if (m_curBank)
+  {
+      m_curEvent = (Event *)&(((uint32_t *)m_curBank)[2]);
+  }
+  else
+  {
+    m_curEvent = NULL;
+  }
+
+  return m_curEvent;
+}
+
+const Event * BankedEventPkt::nextEvent() const
+{
+  if (m_curEvent)
+  {
+    m_curEvent++;
+    if (m_curEvent > m_lastEvent)
+    {
+      // gone past the end
+      m_curEvent = NULL;
+    }
+  }
+  return m_curEvent;
+}
 
 /* ------------------------------------------------------------------------ */
 

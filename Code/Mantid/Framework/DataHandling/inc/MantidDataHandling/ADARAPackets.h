@@ -161,10 +161,25 @@ public:
 	uint32_t cycle(void) const { return m_fields[3]; }
 	uint32_t flags(void) const { return m_fields[4]; }
 
-	// TODO implment bank/event accessors
+        // The bank and event accessors all return NULL if we've incremented
+        // past the end
+        const EventBank * firstBank() const;
+        const EventBank * nextBank() const;
+        const Event * firstEvent() const;
+        const Event * nextEvent() const;
+
+        uint32_t curBankId() const { return *(uint32_t *)m_curBank; }
+        uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1]; }
 
 private:
-	uint32_t *m_fields;
+        uint32_t *m_fields;
+
+        // These are used by the EventBank and Event accessors.  If they are NULL, it
+        // means we've iterated past the end of the data.  Otherwise, they should always
+        // be valid.
+        mutable EventBank * m_curBank;
+        mutable Event * m_curEvent;
+        mutable Event * m_lastEvent;
 
 	BankedEventPkt(const uint8_t *data, uint32_t len);
 
