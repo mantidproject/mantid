@@ -495,12 +495,71 @@ public:
     IDS.clear();
   }
 
+  void test_loading_via_InstrumentXML_property()
+  {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl& IDS = InstrumentDataService::Instance();
+    IDS.clear();
+
+    // Minimal XML instrument, inspired by IDF_for_UNIT_TESTING3.xml
+    const std::string instrumentXML =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+        "<instrument name=\"xmlInst\" valid-from=\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2010-10-06T16:21:30\">"
+        "<defaults />"
+        "<component type=\"panel\" idlist=\"idlist_for_bank1\">"
+            "<location r=\"0\" t=\"0\" rot=\"0\" axis-x=\"0\" axis-y=\"1\" axis-z=\"0\" name=\"bank1\" xpixels=\"3\" ypixels=\"2\" />"
+        "</component>"
+        "<type is=\"detector\" name=\"panel\">"
+          "<properties/>"
+          "<component type=\"pixel\">"
+            "<location y=\"1\" x=\"1\"/>"
+          "</component>"
+        "</type>"
+        "<type is=\"detector\" name=\"pixel\">"
+          "<cuboid id=\"pixel-shape\" />"
+          "<algebra val=\"pixel-shape\"/>"
+        "</type>"
+        "<idlist idname=\"idlist_for_bank1\">"
+          "<id start=\"1005\" end=\"1005\" />"
+        "</idlist>"
+        "</instrument>";
+
+    LoadInstrument instLoader;
+    instLoader.initialize();
+    instLoader.setProperty("Workspace",WorkspaceFactory::Instance().create("EventWorkspace",1,1,1));
+    instLoader.setProperty("InstrumentXML",instrumentXML);
+    instLoader.setProperty("InstrumentName", "Nonsense"); // Want to make sure it doesn't matter what we call it
+
+    TS_ASSERT( instLoader.execute() )
+
+    TS_ASSERT( IDS.doesExist("Nonsense2010-10-06T16:21:30") )
+  }
+
+  void test_failure_if_InstrumentXML_property_set_but_not_InstrumentName()
+  {
+    LoadInstrument instLoader;
+    instLoader.initialize();
+    instLoader.setProperty("Workspace",WorkspaceFactory::Instance().create("EventWorkspace",1,1,1));
+    instLoader.setProperty("InstrumentXML","<doesn't matter what>");
+
+    TS_ASSERT( ! instLoader.execute() )
+  }
+
+  void test_failure_if_InstrumentXML_is_malformed()
+  {
+    LoadInstrument instLoader;
+    instLoader.initialize();
+    instLoader.setProperty("Workspace",WorkspaceFactory::Instance().create("EventWorkspace",1,1,1));
+    instLoader.setProperty("InstrumentXML","<instrument>");
+    instLoader.setProperty("InstrumentName", "Nonsense");
+
+    TS_ASSERT( ! instLoader.execute() )
+  }
 
 private:
   LoadInstrument loader;
   std::string inputFile;
   std::string wsName;
-
 };
 
 

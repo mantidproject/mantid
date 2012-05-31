@@ -790,13 +790,12 @@ namespace API
    */
   void ExperimentInfo::readParameterMap(const std::string & parameterStr)
   {
-    const std::string & details = parameterStr;
     Geometry::ParameterMap& pmap = this->instrumentParameters();
     Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
 
     int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
     options += Poco::StringTokenizer::TOK_TRIM;
-    Poco::StringTokenizer splitter(details, "|", options);
+    Poco::StringTokenizer splitter(parameterStr, "|", options);
 
     Poco::StringTokenizer::Iterator iend = splitter.end();
     //std::string prev_name;

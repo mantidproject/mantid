@@ -87,10 +87,13 @@ namespace Mantid
       declareProperty(new FileProperty("Filename","", FileProperty::OptionalLoad, ".xml"),
         "The filename (including its full or relative path) of an instrument\n"
         "definition file");
-      declareProperty(new ArrayProperty<detid_t>("MonitorList"),
+      declareProperty(new ArrayProperty<detid_t>("MonitorList",Direction::Output),
         "List of detector ids of monitors loaded in to the workspace");
-      declareProperty( "InstrumentName", "",
+      declareProperty("InstrumentName", "",
         "Name of instrument. Can be used instead of Filename to specify an IDF" );
+      declareProperty("InstrumentXML","","The full XML description of the instrument."
+                      "If given, the instrument is constructed from this instead of from an IDF."
+                      "The InstrumentName property must also be set.");
       declareProperty("RewriteSpectraMap", true, "If true then the spectra-detector mapping "
                       "for the input workspace will be overwritten with a 1:1 map of spectrum "
                       "number to detector ID");
@@ -111,78 +114,92 @@ namespace Mantid
       m_filename = getPropertyValue("Filename");
       m_instName = getPropertyValue("InstrumentName");
 
-      // Retrieve the filename from the properties
-      if ( m_filename.empty() )
-      {
-        g_log.debug() << "=====> A1" << std::endl;
-        
-        // look to see if an Instrument name provided in which case create
-        // IDF filename on the fly
-        if ( m_instName.empty() )
-        {
-          g_log.error("Either the InstrumentName or Filename property of LoadInstrument most be specified"); 
-          throw Kernel::Exception::FileError("Either the InstrumentName or Filename property of LoadInstrument most be specified to load an IDF" , m_filename);
-        }
-        else
-        {
-          const std::string date = m_workspace->getWorkspaceStartDate();
-          m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
-
-          g_log.debug() << "=====> A2 - Filename is " << m_filename << std::endl;
-        }
-      }
-
-      if (!m_filename.empty())
-      {
-        // Remove the path from the filename for use with the InstrumentDataService
-        const std::string::size_type stripPath = m_filename.find_last_of("\\/");
-        std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
-        // Strip off "_Definition.xml"
-        m_instName = instrumentFile.substr(0,instrumentFile.find("_Def"));
-
-        g_log.debug() << "=====> A3 - Instrument is " << m_instName << std::endl;
-      }
-
-      g_log.debug() << "=====> m_filename = " << m_filename << std::endl;
-
-      // Load the XML text into a string
-      std::string m_xmlText = Strings::loadFile(m_filename);
-
-      g_log.debug() << "\n\n\n\n" << "=====> B - XML:\n\n" << m_xmlText << "\n\n\n\n";
-
-      // Our new instrument
-      Instrument_sptr m_instrument;
-
-      // Parse the XML using the InstrumentDefinitionParser
+      // We will parse the XML using the InstrumentDefinitionParser
       InstrumentDefinitionParser parser;
-      parser.initialize(m_filename, m_instName, m_xmlText);
+
+      // Is the XML is passed in via the InstrumentXML property, use that.
+      const Property * const InstrumentXML = getProperty("InstrumentXML");
+      if ( ! InstrumentXML->isDefault() )
+      {
+        // We need the instrument name to be set as well because, for whatever reason,
+        //   this isn't pulled out of the XML.
+        if ( m_instName.empty() )
+          throw std::runtime_error("The InstrumentName property must be set when using the InstrumentXML property.");
+        // If the Filename property is not set, set it to the same as the instrument name
+        if ( m_filename.empty() ) m_filename = m_instName;
+
+        // Initialize the parser. Avoid copying the xmltext out of the property here.
+        parser.initialize(m_filename, m_instName,
+            *dynamic_cast<const PropertyWithValue<std::string>*>(InstrumentXML) );
+      }
+      // otherwise we need either Filename or InstrumentName to be set
+      else
+      {
+        // Retrieve the filename from the properties
+        if ( m_filename.empty() )
+        {
+          g_log.debug() << "=====> A1" << std::endl;
+
+          // look to see if an Instrument name provided in which case create
+          // IDF filename on the fly
+          if ( m_instName.empty() )
+          {
+            g_log.error("Either the InstrumentName or Filename property of LoadInstrument most be specified");
+            throw Kernel::Exception::FileError("Either the InstrumentName or Filename property of LoadInstrument most be specified to load an IDF" , m_filename);
+          }
+          else
+          {
+            const std::string date = m_workspace->getWorkspaceStartDate();
+            m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
+
+            g_log.debug() << "=====> A2 - Filename is " << m_filename << std::endl;
+          }
+        }
+
+        if (!m_filename.empty())
+        {
+          // Remove the path from the filename for use with the InstrumentDataService
+          const std::string::size_type stripPath = m_filename.find_last_of("\\/");
+          std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
+          // Strip off "_Definition.xml"
+          m_instName = instrumentFile.substr(0,instrumentFile.find("_Def"));
+
+          g_log.debug() << "=====> A3 - Instrument is " << m_instName << std::endl;
+        }
+
+        g_log.debug() << "=====> m_filename = " << m_filename << std::endl;
+
+        // Initialize the parser with the the XML text loaded from the IDF file
+        parser.initialize(m_filename, m_instName, Strings::loadFile(m_filename));
+      }
 
       // Find the mangled instrument name that includes the modified date
       std::string instrumentNameMangled = parser.getMangledName();
       g_log.debug() << "Instrument Mangled Name = " << instrumentNameMangled << std::endl;
 
+      Instrument_sptr instrument;
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentNameMangled) )
       {
           // If it does, just use the one from the one stored there
           g_log.debug() << "Instrument definition already loaded, using cached version.";
-          m_instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+          instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
       }
       else
       {
           g_log.debug() << "Loading instrument XML...";
           // Really create the instrument
           Progress * prog = new Progress(this, 0, 1, 100);
-          m_instrument = parser.parseXML(prog);
+          instrument = parser.parseXML(prog);
           delete prog;
           g_log.debug() << "...done!" << std::endl;
           // Add to data service for later retrieval
-          InstrumentDataService::Instance().add(instrumentNameMangled, m_instrument);
+          InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
       }
 
 
       // Add the instrument to the workspace
-      m_workspace->setInstrument(m_instrument);
+      m_workspace->setInstrument(instrument);
 
       // populate parameter map of workspace 
       m_workspace->populateInstrumentParameters();
@@ -192,12 +209,12 @@ namespace Mantid
         runLoadParameterFile();
       
       // Set the monitors output property
-      setProperty("MonitorList",m_instrument->getMonitors());
+      setProperty("MonitorList",instrument->getMonitors());
 
       // Rebuild the spectra map for this workspace so that it matches the instrument
       // if required
       const bool rewriteSpectraMap = getProperty("RewriteSpectraMap");
-      if( rewriteSpectraMap && m_workspace )
+      if( rewriteSpectraMap )
         m_workspace->rebuildSpectraMapping();
     }
 
@@ -228,11 +245,13 @@ namespace Mantid
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Parameters.xml";
 
+      g_log.debug() << "Parameter file: " << fullPathIDF << std::endl;
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
         // To allow the use of ExperimentInfo instead of workspace, we call it manually
         LoadParameterFile::execManually(fullPathIDF, m_workspace);
+        g_log.debug("Parameters loaded successfully.");
       } catch (std::invalid_argument& e)
       {
         g_log.information("LoadParameterFile: No parameter file found for this instrument");
