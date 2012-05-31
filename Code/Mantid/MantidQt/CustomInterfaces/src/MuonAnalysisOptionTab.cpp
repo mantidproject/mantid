@@ -44,6 +44,7 @@ void MuonAnalysisOptionTab::initLayout()
 {
   // Help
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
+  connect(m_uiForm.binBoundariesHelp, SIGNAL(clicked()), this, SLOT(rebinHelpClicked()));
 
   ////////////// Default Plot Style slots ///////////////
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
@@ -95,12 +96,22 @@ void MuonAnalysisOptionTab::initLayout()
 
 
 /**
-* Muon Analysis Plotting help (slot)
+* Muon Analysis Settings help.
 */
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
             "MuonAnalysisSettings"));
+}
+
+
+/*
+* Muon Analysis Rebin help (located on settings wiki).
+*/
+void MuonAnalysisOptionTab::rebinHelpClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+            "MuonAnalysisSettings#Variable_Rebin"));
 }
 
 
@@ -111,16 +122,8 @@ void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked()
 */
 void MuonAnalysisOptionTab::runRebinComboBox(int index)
 {
-  if (index == 0)
-  {
-    m_uiForm.optionBinStep->setVisible(false);
-    m_uiForm.optionStepSizeText->setVisible(false);
-  }
-  else
-  {
-    m_uiForm.optionBinStep->setVisible(true);
-    m_uiForm.optionStepSizeText->setVisible(true);
-  }
+  // Set which rebin entry to display.
+  m_uiForm.rebinEntryState->setCurrentIndex(index);
 
   QSettings group;
   group.beginGroup(m_settingsGroup + "BinningOptions");

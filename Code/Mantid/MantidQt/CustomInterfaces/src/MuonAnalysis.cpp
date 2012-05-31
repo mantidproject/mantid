@@ -2525,10 +2525,6 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
-  // Set initial stuff in Option tab
-  m_uiForm.optionBinStep->setVisible(false);
-  m_uiForm.optionStepSizeText->setVisible(false);
-
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
   m_uiForm.groupTable->setColumnWidth(1, 200);
