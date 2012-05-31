@@ -48,7 +48,7 @@ set ( SRC_FILES
 	src/MDTransfAxisNames.cpp
 #
 	src/MDTransfFactory.cpp	
-#	src/MDTransfQ3D.cpp
+	src/MDTransfQ3D.cpp
 	src/MDTransfNoQ.cpp
 	src/MDTransfModQ.cpp
 	src/UnitConversionHelper.cpp	
@@ -126,7 +126,7 @@ set ( INC_FILES
 
     inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
-#	inc/MantidMDEvents/MDTransfQ3D.h
+	inc/MantidMDEvents/MDTransfQ3D.h
 	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfModQ.h
 	inc/MantidMDEvents/ConvToMDEventsSelector.h
