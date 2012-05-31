@@ -139,6 +139,7 @@ void CompressEvents::exec()
       {
         // The EventList method does the work.
         output_el->compressEvents(tolerance, output_el);
+        Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       }
       prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION

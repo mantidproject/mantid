@@ -85,6 +85,15 @@ class RefLReduction(PythonAlgorithm):
         import math
         from reduction.instruments.reflectometer import wks_utility
         
+        from mantid import mtd
+        #remove all previous workspaces
+        list_mt = mtd.getObjectNames()
+        for _mt in list_mt:
+            if _mt.find('_scaled') != -1:
+                mtd.remove(_mt)
+            
+        from mantidsimple import mtd    
+
         run_numbers = self.getProperty("RunNumbers")
 
         backSubMethod = 2   #1 uses RefRoi, 2 used own method

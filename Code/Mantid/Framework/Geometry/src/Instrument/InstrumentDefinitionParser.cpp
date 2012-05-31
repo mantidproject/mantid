@@ -89,23 +89,22 @@ namespace Geometry
     // Handle the parameters
     m_filename = filename;
     m_instName = instName;
-    m_xmlText = xmlText;
 
     // Set up the DOM parser and parse xml file
     DOMParser pParser;
     try
     {
       g_log.debug() << "====> pre pDoc = pParser.parseString(m_xmlText);" << std::endl;
-      pDoc = pParser.parseString(m_xmlText);
+      pDoc = pParser.parseString(xmlText);
       g_log.debug() << "====> post pDoc = pParser.parseString(m_xmlText);" << std::endl;
     }
     catch(Poco::Exception& exc)
     {
-      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", m_filename);
+      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse XML", m_filename);
     }
     catch(...)
     {
-      throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
+      throw Kernel::Exception::FileError("Unable to parse XML" , m_filename);
     }
     // Get pointer to root element
     pRootElem = pDoc->documentElement();
@@ -114,6 +113,14 @@ namespace Geometry
       g_log.error("XML file: " + m_filename + "contains no root element.");
       throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
     }
+
+    // Create our new instrument
+    // We don't want the instrument name taken out of the XML file itself, it should come from the filename (or the property)
+    m_instrument = boost::make_shared<Instrument>(m_instName);
+
+    // Save the XML file path and contents
+    m_instrument->setFilename(m_filename);
+    m_instrument->setXmlText(xmlText);
 
     g_log.debug() << "====> InstrumentDefinitionParser::initialize finished" << std::endl;
   }
@@ -150,14 +157,6 @@ namespace Geometry
   {
     if (!pDoc)
       throw std::runtime_error("Call InstrumentDefinitionParser::initialize() before parseXML.");
-
-    // Create our new instrument
-    // We don't want the instrument name taken out of the XML file itself, it should come from the filename (or the property)
-    m_instrument = Instrument_sptr(new Instrument(m_instName));
-
-    // Save the XML file path and contents
-    m_instrument->setFilename(m_filename);
-    m_instrument->setXmlText(m_xmlText);
 
     setValidityRange(pRootElem);
     readDefaults(pRootElem->getChildElement("defaults"));
@@ -1768,16 +1767,25 @@ namespace Geometry
     // Get cached file name
     // If the instrument directory is writable, put them there else use temporary directory
     std::string cacheFilename;
-    if (m_filename.size() > 4)
+    Poco::File defFile(m_filename);
+    Poco::File instrDir;
+    if ( defFile.exists() && m_filename.size() > 4 )
+    {
       cacheFilename = std::string(m_filename.begin(),m_filename.end()-3);
+      instrDir = Poco::Path(defFile.path()).parent();
+    }
     else
-      cacheFilename = m_instName + ".";
+    {
+      // If the IDF doesn't exist, the XML was probably passed directly into LoadInstrument
+      // (e.g. from a live data listener) and we should use the temp directory for the cache
+      // as we won't be able to tell when the definition has changed
+      instrDir = ConfigService::Instance().getTempDir();
+      cacheFilename = instrDir.path() + "/" + m_instName + ".";
+    }
 
     cacheFilename += "vtp";
     // check for the geometry cache
-    Poco::File defFile(m_filename);
     Poco::File vtkFile(cacheFilename);
-    Poco::File instrDir(Poco::Path(defFile.path()).parent());
 
     bool cacheAvailable = true;
     if ((!vtkFile.exists()) || (defFile.exists() && (defFile.getLastModified() > vtkFile.getLastModified())))

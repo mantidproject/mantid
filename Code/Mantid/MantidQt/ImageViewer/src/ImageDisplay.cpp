@@ -445,6 +445,8 @@ void ImageDisplay::ShowInfoList( double x, double y )
     QtUtils::SetTableEntry( i+1, 0, info_list[2*i], image_table );
     QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], image_table );
   }
+
+  image_table->resizeColumnsToContents();
 }
 
 

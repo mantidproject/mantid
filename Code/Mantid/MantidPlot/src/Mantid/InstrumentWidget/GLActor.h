@@ -84,7 +84,7 @@ protected:
 class GLActorVisitor
 {
 public:
-  ~GLActorVisitor(){}
+  virtual ~GLActorVisitor(){}
   virtual bool visit(GLActor*)const = 0;
 };
 

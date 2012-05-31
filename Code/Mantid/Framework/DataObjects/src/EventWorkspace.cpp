@@ -1,6 +1,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/LocatedDataRef.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
@@ -777,11 +778,19 @@ namespace DataObjects
         else
         {
           if (m_howManyCores == 1)
+          {
             m_WS->getEventList(wi).sort(m_sortType);
+	  }
           else if (m_howManyCores == 2)
+          {
             m_WS->getEventList(wi).sortTof2();
+	    Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+	  }
           else if (m_howManyCores == 4)
+          {
             m_WS->getEventList(wi).sortTof4();
+	    Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+	  }
         }
         // Report progress
         if (prog) prog->report("Sorting");

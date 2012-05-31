@@ -170,8 +170,6 @@ private:
 
     /// The name and path of the input file
     std::string m_filename;
-    /// Full XML contents
-    std::string m_xmlText;
     /// Name of the instrument
     std::string m_instName;
 

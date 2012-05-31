@@ -54,17 +54,17 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         filename = self.getProperty("Filename").value
         
         path=mantid.config["instrumentDefinition.directory"]
-        w = mantid.simpleapi.LoadEmptyInstrument(Filename=path+'/'+instrument+"_Definition.xml")
+        __w = mantid.simpleapi.LoadEmptyInstrument(Filename=path+'/'+instrument+"_Definition.xml")
 
         i=0
-        while(w.getDetector(i).isMonitor()):
+        while(__w.getDetector(i).isMonitor()):
             i += 1
         #i is the index of the first true detector
         #now, crop the workspace of the monitors
-        w = mantid.simpleapi.CropWorkspace(w,StartWorkspaceIndex=i)
+        __w = mantid.simpleapi.CropWorkspace(__w,StartWorkspaceIndex=i)
         
         #get number of detectors (not including monitors)        
-        y=w.extractY()
+        y=__w.extractY()
         numdet=(y[y==1]).size
 
         spectra = arange(numdet).reshape(-1,8,128)
@@ -86,7 +86,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
                     ids = spectra[i, j:j+pixelsx, k:k+pixelsy].reshape(-1)              
                     detids = []
                     for l in ids:
-                        detids.append(w.getDetector(int(l)).getID())
+                        detids.append(__w.getDetector(int(l)).getID())
 
                     detids = str(detids).replace("[","").replace("]","")
 
@@ -94,7 +94,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
                     groupnum += 1
         f.write('</detector-grouping>')
         f.close()
-        mantid.simpleapi.DeleteWorkspace('w')
+        mantid.simpleapi.DeleteWorkspace(__w.getName())
         return
         
 mantid.api.registerAlgorithm(GenerateGroupingSNSInelastic)

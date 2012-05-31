@@ -115,13 +115,13 @@ void EQSANSDarkCurrentSubtraction::exec()
 
   const std::string fileName = getPropertyValue("Filename");
   MatrixWorkspace_sptr darkWS;
-  std::string darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
 
   progress.report("Subtracting dark current");
 
   // Look for an entry for the dark current in the reduction table
   Poco::Path path(fileName);
   const std::string entryName = "DarkCurrent"+path.getBaseName();
+  std::string darkWSName = "__dark_current_"+path.getBaseName();
 
   if (reductionManager->existsProperty(entryName))
   {
@@ -130,11 +130,6 @@ void EQSANSDarkCurrentSubtraction::exec()
     output_message += darkWSName + '\n';
   } else {
     // Load the dark current if we don't have it already
-    if (darkWSName.size()==0) {
-      darkWSName = "__dark_current_"+path.getBaseName();
-      setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
-    }
-
     IAlgorithm_sptr loadAlg;
     if (!reductionManager->existsProperty("LoadAlgorithm"))
     {
@@ -166,7 +161,10 @@ void EQSANSDarkCurrentSubtraction::exec()
       output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
     }
 
-    setProperty("OutputDarkCurrentWorkspace", darkWS);
+    std::string darkWSOutputName = getPropertyValue("OutputDarkCurrentWorkspace");
+    if (!darkWSOutputName.size()==0)
+      setProperty("OutputDarkCurrentWorkspace", darkWS);
+    AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
     reductionManager->declareProperty(new WorkspaceProperty<>(entryName,"",Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);

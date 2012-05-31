@@ -63,26 +63,11 @@ class DataReflWidget(BaseRefWidget):
         
     def _ref_instrument_selected(self):
         self.instrument_name = "REF_L"
-        self._summary.center_pix_radio.hide()
-        self._summary.center_pix_edit.hide()
-        self._summary.angle_radio.hide()
-        self._summary.angle_edit.hide()
-        self._summary.angle_unit_label.hide()
         self._summary.angle_offset_label.show()
         self._summary.angle_offset_edit.show()
         self._summary.angle_offset_pm_label.show()
         self._summary.angle_offset_error_edit.show()
-        self._summary.angle_offset_unit_label.show()
-        self._summary.det_angle_offset_check.hide()
-        self._summary.det_angle_offset_edit.hide()
-        self._summary.det_angle_offset_unit_label.hide()
-        self._summary.det_angle_check.hide()
-        self._summary.det_angle_edit.hide()
-        self._summary.det_angle_unit_label.hide()
-        self._summary.direct_pixel_check.hide()
-        self._summary.direct_pixel_edit.hide()
         self._summary.q_bins_label.hide()
-        self._summary.ref_pix_estimate.hide()
         
         # Output directory
         self._summary.outdir_label.hide()
@@ -214,10 +199,6 @@ class DataReflWidget(BaseRefWidget):
         roi1_to = int(self._summary.norm_background_to_pixel1.text())
         m.NormBackgroundRoi = [roi1_from, roi1_to]
         
-        # Scattering angle
-        m.theta = float(self._summary.angle_edit.text())
-        m.use_center_pixel = False
-
         #4th column (precision)
         m.fourth_column_flag = self._summary.fourth_column_switch.isChecked()
         m.fourth_column_dq0 = float(self._summary.dq0.text())

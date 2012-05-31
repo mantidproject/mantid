@@ -154,17 +154,13 @@ void SANSSensitivityCorrection::exec()
   Poco::Path path(fileName);
   const std::string entryName = "Sensitivity"+path.getBaseName();
   MatrixWorkspace_sptr floodWS;
-  std::string floodWSName = getPropertyValue("OutputSensitivityWorkspace");
+  std::string floodWSName = "__sensitivity_"+path.getBaseName();
 
   if (reductionManager->existsProperty(entryName))
   {
     floodWS = reductionManager->getProperty(entryName);
     floodWSName = reductionManager->getPropertyValue(entryName);
   } else {
-    if (floodWSName.size()==0)
-      floodWSName = "__sensitivity_"+path.getBaseName();
-    setPropertyValue("OutputSensitivityWorkspace", floodWSName);
-
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity workspace...
     if (!floodWS && fileCheck(fileName))
@@ -176,11 +172,7 @@ void SANSSensitivityCorrection::exec()
       floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
 
       // Check that it's really a sensitivity file
-      if (floodWS->run().hasProperty("is_sensitivity"))
-      {
-        setProperty("OutputSensitivityWorkspace", floodWS);
-      }
-      else
+      if (!floodWS->run().hasProperty("is_sensitivity"))
       {
         // Reset pointer
         floodWS.reset();
@@ -332,11 +324,14 @@ void SANSSensitivityCorrection::exec()
       }
 
       floodWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
-      setProperty("OutputSensitivityWorkspace", floodWS);
-      reductionManager->declareProperty(new WorkspaceProperty<>(entryName,"",Direction::Output));
-      reductionManager->setPropertyValue(entryName, floodWSName);
-      reductionManager->setProperty(entryName, floodWS);
     }
+    std::string floodWSOutputName = getPropertyValue("OutputSensitivityWorkspace");
+    if (!floodWSOutputName.size()==0)
+      setProperty("OutputSensitivityWorkspace", floodWS);
+    AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
+    reductionManager->declareProperty(new WorkspaceProperty<>(entryName,floodWSName,Direction::InOut));
+    reductionManager->setPropertyValue(entryName, floodWSName);
+    reductionManager->setProperty(entryName, floodWS);
   }
 
   progress.report(3, "Loaded flood field");

@@ -6,6 +6,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/LogFilter.h"
 
 #include <sstream>
 
@@ -365,7 +367,7 @@ namespace Algorithms
     // 1. Loop over the histograms (detector spectra)
     // FIXME Make it parallel
     // PARALLEL_FOR_NO_WSP_CHECK()
-    for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
+    for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
     {
       // PARALLEL_START_INTERUPT_REGION
 
@@ -374,37 +376,122 @@ namespace Algorithms
       for (wsiter = mOutputWorkspaces.begin(); wsiter != mOutputWorkspaces.end(); ++ wsiter)
       {
         int index = wsiter->first;
-        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(i);
+        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
         outputs.insert(std::make_pair(index, output_el));
       }
 
       // b) and this is the input event list
-      const DataObjects::EventList& input_el = mEventWorkspace->getEventList(i);
+      const DataObjects::EventList& input_el = mEventWorkspace->getEventList(iws);
 
       // c) Perform the filtering (using the splitting function and just one output)
-      input_el.splitByFullTime(mSplitters, outputs, mCalibOffsets[i]);
+      input_el.splitByFullTime(mSplitters, outputs, mCalibOffsets[iws]);
 
-      mProgress = 0.2+0.8*double(i)/double(numberOfSpectra);
+      mProgress = 0.2+0.8*double(iws)/double(numberOfSpectra);
       progress(mProgress);
 
       // PARALLEL_END_INTERUPT_REGION
-    }
+    } // END FOR i = 0
     // PARALLEL_CHECK_INTERUPT_REGION
 
-    // 2. Finish adding events and To split/filter the runs,
+    // 2. Finish adding events and To split/filter the runs for each workspace
+    std::vector<std::string> lognames;
+    this->getTimeSeriesLogNames(lognames);
+    g_log.debug() << "FilterEvents:  Number of TimeSeries Logs = " << lognames.size() << std::endl;
+
     for (wsiter = mOutputWorkspaces.begin(); wsiter != mOutputWorkspaces.end(); ++wsiter)
     {
-      // 2a Done adding event
-      wsiter->second->doneAddingEventLists();
+      int wsindex = wsiter->first;
+      DataObjects::EventWorkspace_sptr opws = wsiter->second;
 
-      // 2b To split/filter the runs, make a vector with just the one output run
-      // FIXME Complete split the "Run".
-      std::vector< Run *> output_runs;
-      output_runs.push_back( &wsiter->second->mutableRun() );
-      mEventWorkspace->run().splitByTime(mSplitters, output_runs);
+      // 2a Done adding event
+      opws->doneAddingEventLists();
+
+      // 2b To split/filter the selected run of the workspace output
+      Kernel::TimeSplitterType splitters;
+      generateSplitters(wsindex, splitters);
+
+      g_log.debug() << "FilterEvents: Workspace Index " << wsindex
+          << "  Number of Splitters = " << splitters.size() << std::endl;
+
+      if (splitters.size() == 0)
+      {
+        g_log.warning() << "Workspace " << opws->name() << " Indexed @ " << wsindex <<
+            " won't have logs splitted due to zero splitter size. " << std::endl;
+        continue;
+      }
+
+      for (size_t ilog = 0; ilog < lognames.size(); ++ilog)
+      {
+        this->splitLog(opws, lognames[ilog], splitters);
+      }
+      opws->mutableRun().integrateProtonCharge();
     }
 
     return;
   }
+
+
+  /*
+   * Generate splitters for specified workspace index
+   */
+  void FilterEvents::generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters)
+  {
+    splitters.clear();
+    for (size_t isp = 0; isp < mSplitters.size(); ++ isp)
+    {
+      Kernel::SplittingInterval splitter = mSplitters[isp];
+      int index = splitter.index();
+      if (index == wsindex)
+      {
+        splitters.push_back(splitter);
+      }
+    }
+
+    return;
+  }
+
+  /*
+   * Split a log by splitters
+   */
+  void FilterEvents::splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters)
+  {
+
+    bool print = true;
+
+    Kernel::TimeSeriesProperty<double>* prop =
+        dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventws->mutableRun().getProperty(logname));
+    if (!prop)
+    {
+      g_log.warning() << "Log " << logname << " is not TimeSeriesProperty.  Unable to split." << std::endl;
+      return;
+    }
+
+    prop->filterByTimes(splitters);
+
+    return;
+  }
+
+
+  /*
+   * Get all filterable logs' names
+   */
+  void FilterEvents::getTimeSeriesLogNames(std::vector<std::string>& lognames)
+  {
+    lognames.clear();
+
+    const std::vector<Kernel::Property*> allprop = mEventWorkspace->mutableRun().getProperties();
+    for (size_t ip = 0; ip < allprop.size(); ++ip)
+    {
+      Kernel::TimeSeriesProperty<double>* timeprop = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(allprop[ip]);
+      if (timeprop)
+      {
+        std::string pname = timeprop->name();
+        lognames.push_back(pname);
+      }
+    } // FOR
+
+    return;
+  }
+
 } // namespace Mantid
 } // namespace Algorithms

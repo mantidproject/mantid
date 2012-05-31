@@ -116,8 +116,11 @@ private slots:
   /// Save the settings for rebin steps and validate the entry.
   void runOptionStepSizeText();
 
-  /// Open the Muon Analysis Plotting help (Wiki).
+  /// Open the Muon Analysis Settings help (Wiki).
   void muonAnalysisHelpSettingsClicked();
+
+  /// Open the Muon Analysis Settings help and navigate to rebin section. (Wiki)
+  void rebinHelpClicked();
   
   /// Save the settings of plot creation.
   void plotCreationChanged(int);
