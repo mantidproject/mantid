@@ -55,6 +55,7 @@ void MDWSDescription::setDetectors(const ConvToMDPreprocDet &det_loc)
 void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
                                         const std::vector<std::string> &dimProperyNames,size_t maxNdims)
 {
+    inWS = pWS;
     // fill additional dimensions values, defined by workspace properties;
     this->fillAddProperties(pWS,dimProperyNames,AddCoord);
 
@@ -68,7 +69,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
 
     // get number of dimensions this Q transformation generates from the workspace. 
-    unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(emode);
+    unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(emode,inWS);
 
     // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions coming from additional coordinates
     nDims  = nMatrixDim + (unsigned int)AddCoord.size();
@@ -86,8 +87,8 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
 
     //*********** fill in dimension id-s, dimension units and dimension names
     // get default dim ID-s. TODO: it should be possibility to owerride it later;
-    std::vector<std::string> MatrDimID   = pQtransf->getDefaultDimID(emode);
-    std::vector<std::string> MatrUnitID  = pQtransf->outputUnitID(emode);
+    std::vector<std::string> MatrDimID   = pQtransf->getDefaultDimID(emode,inWS);
+    std::vector<std::string> MatrUnitID  = pQtransf->outputUnitID(emode,inWS);
     for(unsigned int i=0;i<nDims;i++)
     {
         if(i<nMatrixDim){
@@ -102,7 +103,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     }
 
     // get input energy
-    this->Ei = getEi(pWS);
+    this->Ei = getEi(inWS);
     // in direct or indirect mode input ws has to have input energy
     if(emode==ConvertToMD::Direct||emode==ConvertToMD::Indir){
         if(isNaN(Ei))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
@@ -116,11 +117,11 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
         this->pLatt.reset();
     }
     //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
-    this->GoniomMatr = pWS->run().getGoniometer().getR();
+    this->GoniomMatr = inWS->run().getGoniometer().getR();
     
     // check if the detector information is still present in MD workspace
     detInfoLost = false;
-    API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(pWS->getAxis(1));
+    API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
     if(pYAxis){
         // if this is numeric axis, then the detector's information has been lost:
         detInfoLost=true;
@@ -238,6 +239,7 @@ void  MDWSDescription::compareDescriptions(MDEvents::MDWSDescription &NewMDWorks
 */
 void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &SourceMDWSDescr)
 {
+    this->inWS  = SourceMDWSDescr.inWS;
     this->emode = SourceMDWSDescr.emode;
     this->Ei    = SourceMDWSDescr.Ei;
     this->AlgID = SourceMDWSDescr.AlgID;
