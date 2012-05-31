@@ -260,23 +260,6 @@ namespace MDEvents
     const double qzmin = extents[2];
     const double qzmax = extents[3];
     
-    /*
-    Convert the input workspace to an eventworkspace if it is not already one. This allows us to dynamically rebin the results.
-    */
-    auto inputEventWs = boost::dynamic_pointer_cast<IEventWorkspace>(inputWs);
-    if(!inputEventWs)
-    {
-      const std::string outputName = "ReflectometryEventWs";
-      auto convertInput = this->createSubAlgorithm("ConvertToEventWorkspace");
-      convertInput->setRethrows(true);
-      convertInput->initialize();
-      convertInput->setProperty("InputWorkspace", inputWs);
-      convertInput->setPropertyValue("OutputWorkspace", outputName);
-      convertInput->executeAsSubAlg();
-      EventWorkspace_sptr result = convertInput->getProperty("OutputWorkspace");
-      inputEventWs = result;
-    }
-
     typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
     ReflectometryMDTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
@@ -292,7 +275,7 @@ namespace MDEvents
       throw std::runtime_error("kSpaceTransform is not supported Yet");
     }
 
-    setProperty("OutputWorkspace", transform->execute(inputEventWs));
+    setProperty("OutputWorkspace", transform->execute(inputWs));
   }
 
 } // namespace Mantid
