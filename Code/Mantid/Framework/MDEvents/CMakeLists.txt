@@ -101,18 +101,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
-	inc/MantidMDEvents/MDWSDescription.h
-	inc/MantidMDEvents/MDWSTransfDescr.h
-	inc/MantidMDEvents/ConvToMDEventsBase.h	
-	inc/MantidMDEvents/ConvToMDEventsEvents.h
-	inc/MantidMDEvents/ConvToMDEventsHisto.h	
-	inc/MantidMDEvents/ConvToMDPreprocDet.h
-	inc/MantidMDEvents/MDTransfFactory.h
-	inc/MantidMDEvents/MDTransfInterface.h
-#	inc/MantidMDEvents/MDTransfQ3D.h
-#	inc/MantidMDEvents/MDTransfNoQ.h
-	inc/MantidMDEvents/MDTransfModQ.h
-	inc/MantidMDEvents/UnitConversionHelper.h	
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/ReflectometryMDTransform.h
@@ -123,8 +111,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
-<<<<<<< HEAD
-=======
 #	
 	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDWSDescription.h
@@ -145,7 +131,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDTransfModQ.h
 	inc/MantidMDEvents/ConvToMDEventsSelector.h
 	inc/MantidMDEvents/UnitConversionHelper.h	
->>>>>>> 315441e... refs #5336 Moved conv code back to MDEvents
 )
 
 # Test files. Other source files required.
