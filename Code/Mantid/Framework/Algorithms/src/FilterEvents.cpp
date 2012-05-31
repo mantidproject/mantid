@@ -396,7 +396,7 @@ namespace Algorithms
     // 2. Finish adding events and To split/filter the runs for each workspace
     std::vector<std::string> lognames;
     this->getTimeSeriesLogNames(lognames);
-    g_log.notice() << "DB1019:  Number of TimeSeries Logs = " << lognames.size() << std::endl;
+    g_log.debug() << "FilterEvents:  Number of TimeSeries Logs = " << lognames.size() << std::endl;
 
     for (wsiter = mOutputWorkspaces.begin(); wsiter != mOutputWorkspaces.end(); ++wsiter)
     {
@@ -410,18 +410,21 @@ namespace Algorithms
       Kernel::TimeSplitterType splitters;
       generateSplitters(wsindex, splitters);
 
-      g_log.notice() << "Workspace Index " << wsindex << "  Number of Splitters = " << splitters.size() << std::endl;
+      g_log.debug() << "FilterEvents: Workspace Index " << wsindex
+          << "  Number of Splitters = " << splitters.size() << std::endl;
 
       if (splitters.size() == 0)
       {
-        g_log.notice() << "Workspace " << opws->name() << " Indexed @ " << wsindex <<
+        g_log.warning() << "Workspace " << opws->name() << " Indexed @ " << wsindex <<
             " won't have logs splitted due to zero splitter size. " << std::endl;
+        continue;
       }
 
       for (size_t ilog = 0; ilog < lognames.size(); ++ilog)
       {
         this->splitLog(opws, lognames[ilog], splitters);
       }
+      opws->mutableRun().integrateProtonCharge();
     }
 
     return;
@@ -463,15 +466,7 @@ namespace Algorithms
       return;
     }
 
-    // 1. Split to many splitters
-    Kernel::TimeSeriesProperty<double>* splitprop = new Kernel::TimeSeriesProperty<double>(logname);
-    prop->splitByTime(splitters, splitprop);
-
-    g_log.notice() << "DB1056 Log Name = " << logname << "  Splitter Size = " << splitters.size()
-        << "  Splitted Property Size = " << splitprop->size() << std::endl;
-
-    // 2. Replace
-    eventws->mutableRun().addProperty(splitprop, true);
+    prop->filterByTimes(splitters);
 
     return;
   }

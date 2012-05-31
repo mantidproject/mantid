@@ -579,6 +579,95 @@ public:
 
   }
 
+
+  void filterByTimes(Kernel::TimeSplitterType splittervec)
+  {
+    // 1. Sort
+    sort();
+
+    // 2. Return for single value
+    if (mP.size() <= 1)
+    {
+      return;
+    }
+
+    // 3. Prepare a copy
+    std::vector<TimeValueUnit<TYPE> > mp_copy;
+
+    g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << mP.size() << std::endl;
+
+    // 4. Create new
+    for (size_t isp = 0; isp < splittervec.size(); ++isp)
+    {
+      Kernel::SplittingInterval splitter = splittervec[isp];
+      Kernel::DateAndTime t_start = splitter.start();
+      Kernel::DateAndTime t_stop = splitter.stop();
+
+      int tstartindex = findIndex(t_start);
+      if (tstartindex < 0)
+      {
+        // The splitter is not well defined, and use the first
+        tstartindex = 0;
+      }
+      else if (tstartindex >= int(mP.size()))
+      {
+        // The splitter is not well defined, adn use the last
+        tstartindex = int(mP.size())-1;
+      }
+
+      int tstopindex = findIndex(t_stop);
+
+      if (tstopindex < 0)
+      {
+        tstopindex = 0;
+      }
+      else if (tstopindex >= int(mP.size()))
+      {
+        tstopindex = int(mP.size())-1;
+      }
+      else
+      {
+        if (t_stop < mP[size_t(tstopindex)].time() && size_t(tstopindex) < mP.size()-1)
+        {
+          ++ tstopindex;
+        }
+      }
+
+      /* Check */
+      if (tstartindex < 0 || tstopindex >= int(mP.size()))
+      {
+        g_log.warning() << "Memory Leak In SplitbyTime!" << std::endl;
+      }
+
+      if (tstartindex == tstopindex)
+      {
+        TimeValueUnit<TYPE> temp(t_start, mP[tstartindex].value());
+        mp_copy.push_back(temp);
+      }
+      else
+      {
+        mp_copy.push_back(TimeValueUnit<TYPE>(t_start, mP[tstartindex].value()));
+        for (size_t im = size_t(tstartindex+1); im <= size_t(tstopindex-1); ++im)
+        {
+          mp_copy.push_back(TimeValueUnit<TYPE>(mP[im].time(), mP[im].value()));
+        }
+        mp_copy.push_back(TimeValueUnit<TYPE>(t_stop, mP[tstopindex].value()));
+      }
+    } // ENDFOR
+
+    g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << mP.size() << std::endl;
+
+    // 5. Clear
+    mP.clear();
+    mP = mp_copy;
+    mp_copy.clear();
+
+    m_size = static_cast<int>(mP.size());
+
+    return;
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /**
    * Split out a time series property by time intervals.

@@ -116,11 +116,8 @@ public:
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), WS->getNumberHistograms());
     //Things that changed
     TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), WS->getNumberEvents() );
-
     //Proton charge is lower
-
-    // TODO Make this right later!
-    //  TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );
+    TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );
 
     //-------------- Absolute time filtering --------------------
     alg = new FilterByTime2();
