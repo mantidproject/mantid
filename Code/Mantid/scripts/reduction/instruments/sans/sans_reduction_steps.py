@@ -410,6 +410,19 @@ class DirectBeamTransmission(BaseTransmission):
             if mtd.workspaceExists(ws):
                 mtd.deleteWorkspace(ws)          
                 
+    def _apply_transmission(self, workspace):
+        """
+            Apply transmission correction
+            @param workspace: workspace to apply correction to
+        """
+        #Apply angle-dependent transmission correction using the zero-angle transmission
+        if self._theta_dependent:
+            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                        TransmissionWorkspace=self._transmission_ws, 
+                                        OutputWorkspace=workspace)          
+        else:
+            Divide(workspace, self._transmission_ws, workspace)  
+        
     def execute(self,reducer, workspace=None):
         """
             Calculate transmission and apply correction
@@ -428,13 +441,7 @@ class DirectBeamTransmission(BaseTransmission):
         #reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
 
         # 2- Apply correction (Note: Apply2DTransCorr)
-        #Apply angle-dependent transmission correction using the zero-angle transmission
-        if self._theta_dependent:
-            ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                        TransmissionWorkspace=self._transmission_ws, 
-                                        OutputWorkspace=workspace)          
-        else:
-            Divide(workspace, self._transmission_ws, workspace)  
+        self._apply_transmission(workspace)
 
         trans_ws = mtd[self._transmission_ws]
         self._trans = trans_ws.dataY(0)[0]
@@ -557,20 +564,15 @@ class WeightedAzimuthalAverage(ReductionStep):
             qmax = float(toks[2])
             
         output_ws = workspace+str(self._suffix)
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            pixel_adj = mtd[workspace].getRun().getProperty("pixel_adj").value
-            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
-            Q1D(DetBankWorkspace=workspace, OutputWorkspace=output_ws,
-                OutputBinning=self._binning, 
-                PixelAdj=pixel_adj, WavelengthAdj=wl_adj)
-        else:
-            #Q1D(DetBankWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning, SolidAngleWeighting=False)
-            Q1DWeighted(InputWorkspace=workspace, 
-                        OutputWorkspace=output_ws, 
-                        OutputBinning=self._binning,
-                        NPixelDivision=self._nsubpix,
-                        PixelSizeX=pixel_size_x,
-                        PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
+
+        ConvertToMatrixWorkspace(workspace, '__'+workspace)
+        Q1DWeighted(InputWorkspace='__'+workspace, 
+                    OutputWorkspace=output_ws, 
+                    OutputBinning=self._binning,
+                    NPixelDivision=self._nsubpix,
+                    PixelSizeX=pixel_size_x,
+                    PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
+        
         ReplaceSpecialValues(InputWorkspace=output_ws, 
                              OutputWorkspace=output_ws, 
                              NaNValue=0.0, NaNError=0.0, 
@@ -1229,14 +1231,8 @@ class SubtractBackground(ReductionStep):
         
         # Make sure that we have the same binning
         RebinToWorkspace(self._background_ws, workspace, OutputWorkspace="__tmp_bck")
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            if reducer._absolute_scale is not None:
-                reducer._absolute_scale.execute(reducer, "__tmp_bck")
-            if reducer._azimuthal_averager is not None:
-                reducer._azimuthal_averager.execute(reducer, "__tmp_bck")
-        else:
-            Minus(LHSWorkspace=workspace, RHSWorkspace="__tmp_bck",
-                  OutputWorkspace=workspace)
+        Minus(LHSWorkspace=workspace, RHSWorkspace="__tmp_bck",
+              OutputWorkspace=workspace)
         if mtd.workspaceExists("__tmp_bck"):
             mtd.deleteWorkspace("__tmp_bck")        
         
