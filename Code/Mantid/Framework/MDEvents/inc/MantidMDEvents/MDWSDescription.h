@@ -50,6 +50,8 @@ namespace MDEvents
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
 class DLLExport MDWSDescription
 {
+    // shared pointer to the source matrix workspace
+    API::MatrixWorkspace_const_sptr inWS;
    // pointer to the array of detector's directions in the reciprocal space
     ConvToMDPreprocDet const * pDetLocations;
     /// energy transfer analysis mode 
@@ -95,6 +97,9 @@ public:
     std::vector<double>      getDimMin()const{return dimMin;}
     std::vector<double>      getDimMax()const{return dimMax;}
     std::vector<size_t>      getNBins()const{return nBins;}
+    std::vector<coord_t>     getAddCoord()const{return AddCoord;}
+    API::MatrixWorkspace_const_sptr getInWS()const{return inWS;}
+
 
     bool isDetInfoLost()const{return detInfoLost;}
     bool isPowder()const;
