@@ -21,11 +21,15 @@ from mantidsimple import *
 class EQSANSSetup(ReductionStep):
     def __init__(self):
         super(EQSANSSetup, self).__init__()
+        self._initialized = False
     
     def execute(self, reducer, workspace=None):
         """
             Set up all the reduction options in a property manager object
         """
+        if self._initialized:
+            return "Reduction parameters already set"
+        
         beam_ctr_x = None
         beam_ctr_y = None
         find_beam = True
@@ -60,6 +64,7 @@ class EQSANSSetup(ReductionStep):
                              BeamCenterX=beam_ctr_x,
                              BeamCenterY=beam_ctr_y,
                              ReductionProperties=reducer.get_reduction_table_name())
+        self._initialized = True
         return "Reduction parameters set"
 
 class SubtractDarkCurrent(ReductionStep):
@@ -338,12 +343,7 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        if self._theta_dependent:
-            ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                        TransmissionWorkspace=self._transmission_ws, 
-                                        OutputWorkspace=workspace)          
-        else:
-            Divide(workspace, self._transmission_ws, workspace)  
+        self._apply_transmission(workspace)
         
         return "Transmission correction applied for both frame independently [%s]\n%s\n" % (self._transmission_ws, output_str)
     
