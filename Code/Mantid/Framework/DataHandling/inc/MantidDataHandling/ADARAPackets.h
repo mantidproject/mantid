@@ -228,6 +228,10 @@ public:
 		return static_cast<RunStatus::Enum>(m_fields[2] >> 24);
 	}
 
+        const std::string beamlineId() const;
+        const std::string beamlineShortName() const;
+        const std::string beamlineLongName() const;
+
 private:
 	uint32_t *m_fields;
 

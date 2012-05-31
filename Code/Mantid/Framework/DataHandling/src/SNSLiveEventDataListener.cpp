@@ -1,3 +1,4 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/ADARAParser.h"
@@ -6,6 +7,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
 
 #include <Poco/Net/NetException.h>
@@ -206,33 +208,61 @@ namespace DataHandling
     // TODO:  For now, I'm only expecting to receive a single packet when I
     // first connect to the SMS. What should I do if I get another packet some
     // time later??
+    m_instrumentXML = pkt.info();
 
+    // if we also have the instrument name (from the run status packet), then
+    // we can initialize our workspace
+    if (m_instrumentName.size() > 0)
+    {
+      initWorkspace();
+    }
+
+    return true;
+  }
+
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
+  {
+    // We need the instrument name (we'll use the shortname);
+    m_instrumentName = pkt.beamlineShortName();
+
+    // If we've also got the XML definition (from the Geometry packet), then
+    // we can create our workspace.  Otherwise, we'll just wait
+    if (m_instrumentXML.size() > 0)
+    {
+      initWorkspace();
+    }
+
+    return true;
+  }
+
+  void SNSLiveEventDataListener::initWorkspace()
+  {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for whatever beamline we're on
 
-    LoadEmptyInstrument loaderLiveView;
-    loaderLiveView.initialize();
-    //assert( loaderSLS.isInitialized() );
+    m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+        (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    // The numbers in the create() function don't matter
 
-    const std::string &xml = pkt.info();
-    // TODO: Replace this line with one that uses the raw XML instead of a filename
-    //loaderLiveView.setPropertyValue("Filename", definitionFile);
+    boost::shared_ptr<Algorithm>loadInst = Mantid::API::AlgorithmManager::Instance().createUnmanaged( "LoadInstrument");
+    loadInst->initialize();
+    loadInst->setChild( true);  // keep the workspace out of the ADS
+    loadInst->setProperty("InstrumentXML", m_instrumentXML);
+    loadInst->setProperty("InstrumentName", m_instrumentName);
+    loadInst->setProperty("Workspace", m_buffer);
 
-    m_wsName = "LiveViewWS";
-    loaderLiveView.setPropertyValue("OutputWorkspace", m_wsName);
+    loadInst->execute();
 
-    loaderLiveView.execute();
-    //assert( loaderSLS.isExecuted() );
+    m_buffer->padSpectra();  // expands the workspace to the size of the just loaded instrument
 
-    m_buffer = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(m_wsName);
+    // Set the units
+    m_buffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    m_buffer->setYUnit( "Counts");
+
     m_indexMap = m_buffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
 
-    // TODO: Uncomment this line and set the return value to true once Russell has
-    // implemented the code to read an XML string for an instrument defintion
-    //m_workspaceInitialized = true;
-    return false;
+    m_workspaceInitialized = true;
   }
-
 
   void SNSLiveEventDataListener::appendEvent(uint32_t pixelId, double tof,
                                              const Mantid::Kernel::DateAndTime pulseTime)

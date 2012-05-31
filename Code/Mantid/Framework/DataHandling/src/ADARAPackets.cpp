@@ -134,8 +134,8 @@ const EventBank * BankedEventPkt::nextBank() const
   if (m_curBank != NULL)
   {
     uint8_t *temp = (uint8_t *)m_curBank;
-    unsigned bankSize =  (2 * sizeof(uint32_t))  + // account for the bank id and num events fields
-                         curEventCount() * sizeof( Event);  // account for all of the events in this bank
+    // account for the bank id and num events fields and for all of the events in this bank
+    unsigned long bankSize =  (2 * sizeof(uint32_t)) + (curEventCount() * sizeof( Event));
 
     temp += bankSize;
     if (temp - payload() > payload_length())
@@ -219,6 +219,33 @@ RunStatusPkt::RunStatusPkt(const uint8_t *data, uint32_t len) :
 RunStatusPkt::RunStatusPkt(const RunStatusPkt &pkt) :
 	Packet(pkt), m_fields((uint32_t *)payload())
 {}
+
+
+const std::string RunStatusPkt::beamlineId() const
+{
+  size_t len = (m_fields[3] >> 16) & 0xFF;
+  char *start = (char *)&m_fields[4];
+  return std::string(start, len);
+}
+
+const std::string RunStatusPkt::beamlineShortName() const
+{
+  size_t len = (m_fields[3] >> 8) & 0xFF;
+  unsigned skipChars = (m_fields[3] >> 16) & 0xFF;
+  char *start = (char *)&m_fields[4];
+  start += skipChars;
+  return std::string(start, len);
+}
+
+const std::string RunStatusPkt::beamlineLongName() const
+{
+  size_t len = m_fields[3] & 0xFF;
+  unsigned skipChars = ((m_fields[3] >> 16) & 0xFF) +
+                       ((m_fields[3] >> 8) & 0xFF);
+  char *start = (char *)&m_fields[4];
+  start += skipChars;
+  return std::string(start, len);
+}
 
 /* ------------------------------------------------------------------------ */
 

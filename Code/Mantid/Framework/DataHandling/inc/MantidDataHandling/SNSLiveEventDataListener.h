@@ -69,11 +69,18 @@ namespace Mantid
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
       virtual bool rxPacket( const ADARA::ClientHelloPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
-      //virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
+      virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
       //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 
     private:
      
+      // We need data from both the geometry packet and the run status packet in
+      // order to initialize the workspace.  Since I don't know what order the
+      // packets will arrive in, I've put the necessary code in this function.
+      // Both rxPacket() functions will check to see if all the data is available
+      // and call this function if it is.
+      void initWorkspace();
+
       void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
       // tof is "Time Of Flight" and is in units of nanoseconds relative to the start of the pulse
       // pulseTime is the start of the pulse relative to Jan 1, 1990.
@@ -83,6 +90,10 @@ namespace Mantid
       bool m_workspaceInitialized;
       std::string m_wsName;
       detid2index_map * m_indexMap;  // maps pixel id's to workspace indexes
+
+      // We need these 2 strings to initialize m_buffer
+      std::string m_instrumentName;
+      std::string m_instrumentXML;
 
       struct timespec m_rtdlPulseTime;  // We get these two from the RTDL packet
       bool  m_rtdlRawFlag;
