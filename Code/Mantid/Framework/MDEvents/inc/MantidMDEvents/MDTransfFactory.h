@@ -5,6 +5,12 @@
  * anonymous namespace. The object itself does nothing, but the comma operator
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
+ *
+ * The second operation that this macro performs is to provide the definition
+ * of the unitID method for the concrete unit.
+
+ * Second macro does the same thing as the first one, but allow to regirster the transformation 
+ * with a name, different form the class name. 
  */
 #define DECLARE_MD_TRANSF(classname) \
     namespace { \
