@@ -71,6 +71,8 @@ void MuonAnalysisOptionTab::initLayout()
            SLOT(runRebinComboBox(int)));
   connect(m_uiForm.optionStepSizeText, SIGNAL(lostFocus()), this, 
            SLOT(runOptionStepSizeText()));
+  connect(m_uiForm.binBoundaries, SIGNAL(lostFocus()), this, 
+           SLOT(runBinBoundaries()));
 
   ////////////// Auto Update  /////////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
@@ -86,6 +88,7 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMin()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMax()));
   connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
@@ -150,6 +153,18 @@ void MuonAnalysisOptionTab::runOptionStepSizeText()
     m_uiForm.optionStepSizeText->setText("1");
   }
 }
+
+
+/**
+*
+*/
+void MuonAnalysisOptionTab::runBinBoundaries()
+{
+    QSettings group;
+    group.beginGroup(m_settingsGroup + "BinningOptions");
+    group.setValue("rebinVariable", m_uiForm.binBoundaries->text());
+}
+
 
 ////////////// Default Plot Style slots ///////////////
 

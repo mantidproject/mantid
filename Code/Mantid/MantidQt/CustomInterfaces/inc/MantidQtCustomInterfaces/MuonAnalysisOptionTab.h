@@ -116,6 +116,9 @@ private slots:
   /// Save the settings for rebin steps and validate the entry.
   void runOptionStepSizeText();
 
+  /// Save the settings for rebin variables and validate the entry.
+  void runBinBoundaries();
+
   /// Open the Muon Analysis Settings help (Wiki).
   void muonAnalysisHelpSettingsClicked();
 
