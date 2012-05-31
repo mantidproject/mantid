@@ -10,14 +10,13 @@ namespace Mantid
 {
 namespace MDEvents
 {
-
-
+    
 /** Class responsible for conversion of input workspace 
   * data into proper number of output dimensions for ModQ case
   * 
   * Currently contains Elastic and Inelastic transformations
   *
-  * This particular file defines  specializations of generic coordinate transformation templated to the ModQ case
+  * This particular file defines  specializations of generic coordinate transformation to the ModQ case
    *
    * @date 16-05-2012
 
@@ -51,25 +50,35 @@ public:
     /** energy conversion modes supported by this class; 
       * The class supports three standard energy conversion modes */
     std::vector<std::string> getEmodes()const{MDTransfDEHelper dEModes;  return dEModes.getEmodes();}
-    /**the default dimID-s in ModQ mode are |Q| and dE if necessary */ 
-    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode)const;
-
-   /**  returns the units, the transformation expects for input workspace to be expressed in. */
-    const std::string inputUnitID()const;
-    /**function returns units ID-s which this transformation prodiuces its ouptut.
-       It is Momentum and Momentum and DelteE in inelastic modes */
-    std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode)const;
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
     MDTransfModQ();
+    /* clone method allowing to provide the copy of the particular class */
+    MDTransfInterface * clone() const{return new MDTransfModQ(*this);}
     //
     void initialize(const MDWSDescription &ConvParams);
+
+
     /** return the number of dimensions, calculated by the transformation from the workspace.
-       Depending on EMode, this numebr here is either 1 or 2*/
-    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode)const;
+       Depending on EMode, this numebr here is either 1 or 2 and do not depend on input workspace*/
+    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+    /**function returns units ID-s which this transformation prodiuces its ouptut.
+       It is Momentum and Momentum and DelteE in inelastic modes */
+    std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+    /**the default dimID-s in ModQ mode are |Q| and dE if necessary */ 
+    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+   /**  returns the units, the transformation expects for input workspace to be expressed in. */
+    const std::string inputUnitID(ConvertToMD::EModes dEmode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+
+
+ 
 protected:
     //  directions to the detectors 
     double ex,ey,ez;
@@ -97,6 +106,7 @@ private:
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;
     /// how to transform workspace data in inelastic case
     inline bool calcMatrixCoordInelastic(const double &DeltaE,std::vector<coord_t> &Coored)const;
+    
 };
 
 } // End MDAlgorighms namespace
