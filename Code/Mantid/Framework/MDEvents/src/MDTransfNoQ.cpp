@@ -100,7 +100,11 @@ void  MDTransfNoQ::getAxes(API::MatrixWorkspace_const_sptr inWS,API::NumericAxis
 }
 
 /**function returns units ID-s which this transformation prodiuces its ouptut.
-   here it is usually input ws units, which are independent on emode */
+   here it is usually input ws units, which are independent on emode 
+ * @param  mode -- current energy analysis mode (not used in NoQ mode)
+ * @param  inWS -- input matrix workspace shared pointer
+ *
+ */
 std::vector<std::string> MDTransfNoQ::outputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(mode);
