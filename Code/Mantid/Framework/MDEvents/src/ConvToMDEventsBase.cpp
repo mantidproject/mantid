@@ -18,15 +18,16 @@ namespace MDEvents
   *                      unit conversion (if any) 
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
-size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvToMDEventsBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         pDetLoc = WSD.getDetectors();
+        inWS2D  = WSD.getInWS();
             
         // set up output MD workspace wrapper
         pWSWrapper = inWSWrapper;
         
         // Copy ExperimentInfo (instrument, run, sample) to the output WS
-        API::ExperimentInfo_sptr ei(pWS2D->cloneExperimentInfo());
+        API::ExperimentInfo_sptr ei(inWS2D->cloneExperimentInfo());
         runIndex            = pWSWrapper->pWorkspace()->addExperimentInfo(ei);
 
         n_dims       = this->pWSWrapper->nDimensions();
@@ -36,12 +37,12 @@ size_t  ConvToMDEventsBase::initialize(Mantid::API::MatrixWorkspace_sptr pWS2D, 
         // retrieve the class which does the conversion of workspace data into MD WS coordinates;
         pQConverter = MDTransfFactory::Instance().create(WSD.AlgID);
 
-        inWS2D = pWS2D;
+   
         // initialize the MD coordinates conversion class
         pQConverter->initialize(WSD);
        // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
        ConvertToMD::EModes emode = WSD.getEMode();
-       UnitConversion.initialize(WSD,pWS2D,pQConverter->inputUnitID(emode,inWS2D));
+       UnitConversion.initialize(WSD,pQConverter->inputUnitID(emode,inWS2D));
 
         
         size_t n_spectra =inWS2D->getNumberHistograms();
