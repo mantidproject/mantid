@@ -488,14 +488,14 @@ namespace DataObjects
    * */
   EventList& EventList::operator-=(const EventList& more_events)
   {
-	if (this == &more_events)
-	{
-		//Special case, ticket #3844 part 2.
-		// When doing this = this - this,
-		// simply clear the input event list. Saves memory!
-		this->clearData();
-		return *this;
-	}
+    if (this == &more_events)
+    {
+        //Special case, ticket #3844 part 2.
+        // When doing this = this - this,
+        // simply clear the input event list. Saves memory!
+        this->clearData();
+        return *this;
+    }
 
     // We'll let the -= operator for the given vector of event lists handle it
     switch (this->getEventType())
@@ -3569,6 +3569,11 @@ namespace DataObjects
   {
     events = &el.getEvents();
   }
+  void getEventsFrom(const EventList & el, std::vector<TofEvent> const *&  events)
+  {
+    events = &el.getEvents();
+  }
+
 
   //--------------------------------------------------------------------------
   /** Get the vector of events contained in an EventList;
@@ -3583,6 +3588,10 @@ namespace DataObjects
   {
     events = &el.getWeightedEvents();
   }
+  void getEventsFrom(const EventList & el, std::vector<WeightedEvent> const*&  events)
+  {
+    events = &el.getWeightedEvents();
+  }
 
   //--------------------------------------------------------------------------
   /** Get the vector of events contained in an EventList;
@@ -3594,6 +3603,10 @@ namespace DataObjects
    * @throw runtime_error if you call this on the wrong type of EventList.
    */
   void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events)
+  {
+    events = &el.getWeightedEventsNoTime();
+  }
+  void getEventsFrom(const EventList & el, std::vector<WeightedEventNoTime> const *&  events)
   {
     events = &el.getWeightedEventsNoTime();
   }

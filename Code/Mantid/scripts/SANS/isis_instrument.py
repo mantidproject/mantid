@@ -53,57 +53,82 @@ class DetectorBank:
             collected on front and rear bank on the same 'level' before e.g. merging
             such data
         """
-        def __init__(self, scale=1.0, shift=0.0, fitScale = False, fitShift = False, qMin = None, qMax = None):
+        def __init__(self, scale=1.0, shift=0.0, fitScale=False, fitShift=False, qMin=None, qMax=None):
             """
                 @param scale: Default to 1.0. Value to multiply data with
                 @param shift: Default to 0.0. Value to add to data
                 @param fitScale: Default is False. Whether or not to try and fit this param
                 @param fitShift: Default is False. Whether or not to try and fit this param
-                @param qMin: When set to None (default) then for fit use min value of the overlapping q range of front and rear
-                @param qMax: When set to None (default) then for fit use max value of the overlapping q range of front and rear              
+                @param qMin: When set to None (default) then for fitting use the overlapping q region of front and rear detectors
+                @param qMax: When set to None (default) then for fitting use the overlapping q region of front and rear detectors               
             """
-            self._scale = scale
+            self.scale = scale
             self._shift = shift
             self._fitScale = bool(fitScale)
             self._fitShift = bool(fitShift)
             self._qMin = qMin
             self._qMax = qMax
+            
+            if self._qMin == None or self._qMax == None:
+                self._qRangeUserSelected = False
+            else:
+                self._qRangeUserSelected = True                
                 
         def get_scale(self):
             return self._scale
 
-        def set_scale(self, scale):
-            self._scale = scale
+        def set_scale(self, val):
+            self._scale = val
+            
+        scale = property(get_scale, set_scale, None, None)            
             
         def get_shift(self):
             return self._shift
 
-        def set_shift(self, shift):
-            self._shift = shift
+        def set_shift(self, val):
+            self._shift = val
+            
+        shift = property(get_shift, set_shift, None, None)
+
+        def get_qRangeUserSelected(self):
+            return self._qRangeUserSelected
+
+        def set_qRangeUserSelected(self, val):
+            self._qRangeUserSelected = bool(val)
+            
+        qRangeUserSelected = property(get_qRangeUserSelected, set_qRangeUserSelected, None, None)            
             
         def get_fitScale(self):
             return self._fitScale
 
-        def set_fitScale(self, fitScale):
-            self._fitScale = bool(fitScale)
+        def set_fitScale(self, val):
+            self._fitScale = bool(val)
+            
+        fitScale = property(get_fitScale, set_fitScale, None, None)             
             
         def get_fitShift(self):
             return self._fitShift
 
-        def set_fitShift(self, fitShift):
-            self._fitShift = bool(fitShift)
+        def set_fitShift(self, val):
+            self._fitShift = bool(val)
+            
+        fitShift = property(get_fitShift, set_fitShift, None, None)              
             
         def get_qMin(self):
             return self._qMin
 
-        def set_qMin(self, qMin):
-            self._qMin = qMin
+        def set_qMin(self, val):
+            self._qMin = val
+            
+        qMin = property(get_qMin, set_qMin, None, None)            
             
         def get_qMax(self):
             return self._qMax
 
-        def set_qMax(self, qMax):
-            self._qMax = qMax                                                 
+        def set_qMax(self, val):
+            self._qMax = val                                                 
+
+        qMax = property(get_qMax, set_qMax, None, None) 
 
     def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
@@ -162,7 +187,7 @@ class DetectorBank:
         self._side_corr =0.0
         
         # hold rescale and shift object _RescaleAndShift
-        self._rescaleAndShift = self._RescaleAndShift()
+        self.rescaleAndShift = self._RescaleAndShift()
         
         #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
         self._orientation = 'HorizontalFlipped'
@@ -176,9 +201,6 @@ class DetectorBank:
         #23/3/12 RKH add 2 more variables
         self._radius_corr = None
         self._side_corr = None
-
-    def get_rescaleAndShift(self):
-        return self._rescaleAndShift
 
     def get_y_corr(self):
         if not self._y_corr is None:

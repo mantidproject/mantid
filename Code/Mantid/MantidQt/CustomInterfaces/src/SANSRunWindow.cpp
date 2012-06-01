@@ -375,6 +375,9 @@ void SANSRunWindow::connectAnalysDetSignals()
   connect(m_uiForm.transFit_ck, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
   updateTransInfo(m_uiForm.transFit_ck->state());
 
+  connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this, SLOT(updateFrontDetQrange(int)));
+  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->state());
+
   connect(m_uiForm.enableFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
 
   connect(m_uiForm.wavRanges, SIGNAL(editingFinished()),
@@ -737,6 +740,38 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.transFitOnOff->setChecked(false);
   else 
     m_uiForm.transFitOnOff->setChecked(true);  
+
+  // The front rescale/shift section
+  m_uiForm.frontDetRescale->setText(runReduceScriptFunction(
+     "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale").trimmed());
+  m_uiForm.frontDetShift->setText(runReduceScriptFunction(
+     "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift").trimmed());
+
+  QString fitScale = runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitScale");
+  QString fitShift = runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitShift");
+
+  if ( fitScale == "True" )
+    m_uiForm.frontDetRescaleCB->setChecked(true);
+  else
+    m_uiForm.frontDetRescaleCB->setChecked(false);
+
+  if ( fitShift == "True" )
+    m_uiForm.frontDetShiftCB->setChecked(true);
+  else
+    m_uiForm.frontDetShiftCB->setChecked(false);
+
+  QString qRangeUserSelected = runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected");
+  if ( qRangeUserSelected == "True" )
+  {
+     m_uiForm.frontDetQrangeOnOff->setChecked(true); 
+     m_uiForm.frontDetQmin->setText(runReduceScriptFunction(
+      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qMin").trimmed());
+     m_uiForm.frontDetQmin->setText(runReduceScriptFunction(
+      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qMax").trimmed());   
+  }
+  else
+     m_uiForm.frontDetQrangeOnOff->setChecked(false);
+
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
@@ -1938,6 +1973,22 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
       exec_reduce += "i.TransFit('Off')\n";
   }
 
+  // Set the Front detector Rescale and Shift
+  QString fdArguments = "scale=" + m_uiForm.frontDetRescale->text().trimmed() + ","
+                      + "shift=" + m_uiForm.frontDetShift->text().trimmed();
+  if ( m_uiForm.frontDetRescaleCB->isChecked() )
+    fdArguments += ", fitScale=True";
+  if ( m_uiForm.frontDetShiftCB->isChecked() )
+    fdArguments += ", fitShift=True";
+  if ( m_uiForm.frontDetQrangeOnOff->isChecked() && !m_uiForm.frontDetQmin->text().isEmpty()
+       && !m_uiForm.frontDetQmax->text().isEmpty() )
+  {
+    fdArguments += ", qMin=" + m_uiForm.frontDetQmin->text().trimmed();
+    fdArguments += ", qMax=" + m_uiForm.frontDetQmax->text().trimmed();
+  }
+
+  exec_reduce += "i.SetFrontDetRescaleShift(" + fdArguments + ")\n";
+
   //Gravity correction
   exec_reduce += "i.Gravity(";
   if( m_uiForm.gravity_check->isChecked() )
@@ -2681,6 +2732,26 @@ void SANSRunWindow::clearLogger()
   m_uiForm.logging_field->clear();
   m_uiForm.tabWidget->setTabText(4, "Logging");
 }
+
+/**Respond to the Front detector Q range check box. 
+ * @param state :: equal to Qt::Checked or not
+ */
+void SANSRunWindow::updateFrontDetQrange(int state)
+{
+  if( state == Qt::Checked )
+  {
+    m_uiForm.frontDetQmin->setEnabled(true);
+    m_uiForm.frontDetQmax->setEnabled(true);
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected=True");
+  }
+  else
+  {
+    m_uiForm.frontDetQmin->setEnabled(false);
+    m_uiForm.frontDetQmax->setEnabled(false);
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected=False");
+  }
+}
+
 /**Respond to the "Use default transmission" check box being clicked. If
  * the box is checked the transmission fit wavelength maximum and minimum
  * boxs with be set to the defaults for the instrument and disabled.
@@ -2709,6 +2780,7 @@ void SANSRunWindow::updateTransInfo(int state)
     m_uiForm.trans_max->setText("");
   }
 }
+
 /** A slot to validate entries for Python lists and tupples
 */
 void SANSRunWindow::checkList()

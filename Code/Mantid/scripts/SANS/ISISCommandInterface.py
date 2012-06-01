@@ -159,6 +159,21 @@ def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
     ReductionSingleton().to_Q.set_gravity(flag)
     
+def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False, qMin=None, qMax=None):
+    """
+        Stores property about the detector which is used to rescale and shift
+        data in the bank after data have been reduced        
+        @param scale: Default to 1.0. Value to multiply data with
+        @param shift: Default to 0.0. Value to add to data
+        @param fitScale: Default is False. Whether or not to try and fit this param
+        @param fitShift: Default is False. Whether or not to try and fit this param
+        @param qMin: When set to None (default) then for fitting use the overlapping q region of front and rear detectors
+        @param qMax: When set to None (default) then for fitting use the overlapping q region of front and rear detectors              
+    """    
+    ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift = ReductionSingleton().instrument.getDetector('FRONT')._RescaleAndShift(
+        scale, shift, fitScale, fitShift, qMin, qMax)
+    _printMessage('#Set front detector rescale/shift values')
+    
 def TransFit(mode,lambdamin=None,lambdamax=None):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range

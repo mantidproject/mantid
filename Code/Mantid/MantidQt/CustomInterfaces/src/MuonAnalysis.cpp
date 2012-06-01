@@ -1875,19 +1875,27 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   }
 
   // rebin data if option set in Plot Options
-  if (m_uiForm.rebinComboBox->currentText() == "Fixed")
+  if (m_uiForm.rebinComboBox->currentIndex() != 0)
   {
     try
     {
       Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      std::string rebinParams("");
       double binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0];
-      double bunchedBinSize = binSize*m_uiForm.optionStepSizeText->text().toDouble();      
-
+      if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
+      {
+        double bunchedBinSize = binSize*m_uiForm.optionStepSizeText->text().toDouble();
+        rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
+      }
+      else // Variable
+      {
+        rebinParams = m_uiForm.binBoundaries->text().toStdString();
+      }
       // bunch data
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("Rebin");
       rebinAlg->setPropertyValue("InputWorkspace", wsname);
       rebinAlg->setPropertyValue("OutputWorkspace", wsname);
-      rebinAlg->setPropertyValue("Params", boost::lexical_cast<std::string>(bunchedBinSize));
+      rebinAlg->setPropertyValue("Params", rebinParams);
       rebinAlg->execute();
 
       // however muon group don't want last bin if shorter than previous bins
@@ -2977,8 +2985,9 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   // Load Plot Binning Options
   QSettings prevPlotBinning;
   prevPlotBinning.beginGroup(group + "BinningOptions");
-  int constStepSize = prevPlotBinning.value("constStepSize", 1).toInt();
-  m_uiForm.optionStepSizeText->setText(QString::number(constStepSize));
+  int rebinFixed = prevPlotBinning.value("rebinFixed", 1).toInt();
+  m_uiForm.optionStepSizeText->setText(QString::number(rebinFixed));
+  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toCString());
 
   int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
   m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);

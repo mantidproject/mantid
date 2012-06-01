@@ -1933,6 +1933,7 @@ class UserFile(ReductionStep):
         """     
         values = details.split() 
         rAnds = reducer.instrument.getDetector('FRONT').rescaleAndShift
+        rAnds.qRangeUserSelected = False
         if details.startwith('RESCALE'):
             if 'FIT' in details:
                 if len(values) == 1:
@@ -1941,6 +1942,7 @@ class UserFile(ReductionStep):
                     rAnds.fitRescale = True
                     rAnds.qMin = float(values[1])
                     rAnds.qMax = float(values[2])
+                    rAnds.qRangeUserSelected = True
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE/FIT [q1 q2]")
             else:
@@ -1956,6 +1958,7 @@ class UserFile(ReductionStep):
                     rAnds.fitShift = True
                     rAnds.qMin = float(values[1])
                     rAnds.qMax = float(values[2])
+                    rAnds.qRangeUserSelected = True                    
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/SHIFT/FIT [q1 q2]")
             else:
