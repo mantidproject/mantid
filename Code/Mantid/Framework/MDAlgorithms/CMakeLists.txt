@@ -115,12 +115,12 @@ set ( TEST_FILES
 	test/ConvertToDetectorFaceMDTest.h	
 	test/ConvertEventsToMDEventsTest.h
 	test/ConvertToMDEventsTest.h	
+	test/ConvertToQ3DdETest.h	
 #	test/ConvertToMDEventsCoordTransfTest.h
 #	test/ConvertToMDEventsWSTest.h
 #	test/ConvertToMDEventsParamsTest.h
 #    test/ConvertToMDEventsSubalgFactoryTest.h
 #	test/ConvertToMDEventsUnitsConvTest.h
-#	test/ConvertToQ3DdETest.h
 #	test/ConvertToMDEventsTestPerformance.h 	
   test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h
