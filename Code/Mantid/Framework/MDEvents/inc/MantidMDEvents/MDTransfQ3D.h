@@ -73,27 +73,7 @@ public:
     std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
 protected:
-    //  directions to the detectors 
-    double ex,ey,ez,ezm1;
-    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
-    std::vector<double> rotMat;
-    // min-max values, some modified to work with squared values:
-    std::vector<double> dim_min,dim_max;
-    // pointer to the class, which contains the information about precprocessed detectors
-    Kernel::V3D const * pDet;
-
-    // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode here. 
-    unsigned int nMatrixDim;
-    // the variable which describes current conversion mode:
-    ConvertToMD::EModes emode;
-    /** the vector of the additional coordinates which define additional MD dimensions. 
-        For implemented ModQ case, these dimensions do not depend on matrix coordinates and are determined by WS properties */
-    std::vector<coord_t>  addDimCoordinates;
-    //************* These two variables are relevant to inelastic modes only and will be used in inelastic cases:
-    // the energy of the incident neutrons
-    double Ei;
-    // the wavevector of incident neutrons
-    double ki;  
+    // all variables are the same as in ModQ
 private:
      /// how to transform workspace data in elastic case
     inline bool calcMatrixCoord3DElastic(const double &k0,std::vector<coord_t> &Coored)const;

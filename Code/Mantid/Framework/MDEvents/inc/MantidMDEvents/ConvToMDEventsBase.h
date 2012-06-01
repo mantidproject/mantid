@@ -63,10 +63,7 @@ namespace MDEvents
     /// virtual destructor
     virtual ~ConvToMDEventsBase(){};
 
-//   Kernel::Unit_sptr    getAxisUnits()const;
-//   API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
-//<------------------
-  
+ 
   protected:
    // pointer to input matrix workspace;
    API::MatrixWorkspace_const_sptr inWS2D;

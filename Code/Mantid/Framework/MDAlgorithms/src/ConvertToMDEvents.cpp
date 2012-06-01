@@ -96,7 +96,7 @@ ConvertToMDEvents::init()
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
-     if(Q_modes.empty()) Q_modes.assign(1,"");
+     if(Q_modes.empty()) Q_modes.assign(1,"ERROR IN LOADING Q-converters");
   
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),

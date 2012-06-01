@@ -113,7 +113,7 @@ set ( TEST_FILES
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertToDetectorFaceMDTest.h	
-#	test/ConvertEventsToMDEventsTest.h
+	test/ConvertEventsToMDEventsTest.h
 #	test/ConvertToMDEventsCoordTransfTest.h
 #	test/ConvertToMDEventsWSTest.h
 #	test/ConvertToMDEventsParamsTest.h
