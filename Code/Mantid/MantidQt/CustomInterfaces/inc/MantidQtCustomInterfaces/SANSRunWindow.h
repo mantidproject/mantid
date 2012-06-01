@@ -252,6 +252,8 @@ private slots:
   void clearLogger();
   ///Default trans changed state
   void updateTransInfo(int state);
+  /// So user can decide to use fixed q range or not
+  void updateFrontDetQrange(int state);
   void checkList();
   
 private:
