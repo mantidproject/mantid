@@ -22,6 +22,8 @@
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDBoxBase.h"
+#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDEventsSelector.h"
 
 
 
@@ -35,27 +37,6 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDAlgorithms::ConvertToMD;
 
-class TestConvertToMDEventsWS :public IConvertToMDEventsWS
-{
-    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
-public:
-    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc)
-    {
-        MDEvents::MDWSDescription TestWS(5);
-
-        TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
-        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
-
-        boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
-        pOutMDWSWrapper->createEmptyMDWS(TestWS);
-
-        IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
-
-    }
-    /// method which starts the conversion procedure
-    void runConversion(API::Progress *){}
- 
-};
 
 
 class ConvertToMDEventsWSTest : public CxxTest::TestSuite, public ConvertToMDEvents
@@ -66,10 +47,13 @@ class ConvertToMDEventsWSTest : public CxxTest::TestSuite, public ConvertToMDEve
 
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pHistoMDWSWrapper;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pEventMDWSWrapper;
+
    ConvToMDPreprocDetectors det_loc;
    MDEvents::MDWSDescription TestWS;
 
-   std::auto_ptr<TestConvertToMDEventsWS> pConvMethods;
+   std::auto_ptr<ConvToMDEventsBase> pConvMethods;
+
+   ConvToMDEventsSelector WSAlgoSelector;
 
 public:
 static ConvertToMDEventsWSTest *createSuite() {
@@ -79,11 +63,12 @@ static void destroySuite(ConvertToMDEventsWSTest  * suite) { delete suite; }
 
 void testSetUp_and_PreprocessDetectors()
 {
-   pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
+    std::vector<std::string> dimProperyNames;
 
     TS_ASSERT_THROWS_NOTHING(det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsWS>(new TestConvertToMDEventsWS()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
+    TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(ws2D,"Q3D","Direct",dimProperyNames,8);
+    TS_ASSERT_THROWS_NOTHING(TestWS.setDetectors());
+
 
 }
 
