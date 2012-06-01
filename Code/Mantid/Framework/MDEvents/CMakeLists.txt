@@ -163,8 +163,8 @@ set ( TEST_FILES
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
-	test/MDWSDescriptionTest.h
-	test/MDWSTransfDescrTest.h
+#	test/MDWSDescriptionTest.h
+#	test/MDWSTransfDescrTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/ReflectometryTransformQxQzTest.h

@@ -112,11 +112,16 @@ public:
      * */
     virtual bool calcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const=0;
 
+    /* clone method allowing to provide the copy of the particular class */
+    virtual MDTransfInterface * clone() const = 0;
+    // destructor
+    virtual ~MDTransfInterface(){};
     /** set up transformation from the class, which can provide all variables necessary for the conversion */
     virtual void initialize(const MDWSDescription &)=0;
 
 //***************> the methods below are mainly involved in defining the target workspace properties. 
 //                 Thay also can be involwed in the preparation to calculations of MD coordinates 
+// WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
 
     /** returns the unit ID for the input units, the particular transformation expects. 
      if one wants the transformation to be meaningful, the X-coordinates of input workspace 
@@ -132,11 +137,6 @@ public:
     /** return the number of dimensions, calculated by the transformation from the workspace. This number is usually varies from 1 to 4
       * and depends on emode and possibly on some WS parameters.     */
     virtual unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const=0;
-
-    /* clone method allowing to provide the copy of the particular class */
-    virtual MDTransfInterface * clone() const = 0;
-
-    virtual ~MDTransfInterface(){};
     
 }; 
 

@@ -70,7 +70,7 @@ class DLLExport UnitsConversionHelper
 
 public:
     UnitsConversionHelper():pTwoTheta(NULL),pL2(NULL){};
-    void initialize(const MDWSDescription &TWSD, API::MatrixWorkspace_const_sptr inWS2D,const std::string &units_to);
+    void initialize(const MDWSDescription &TWSD,const std::string &units_to);
     void updateConversion(size_t i);
     double convertUnits(double val);
 

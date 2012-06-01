@@ -13,13 +13,12 @@ inline bool isNaN(T val){
     return (val!=buf);
 }
 
-size_t  ConvToMDEventsHisto::initialize(Mantid::API::MatrixWorkspace_sptr inWS,
-                                        const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvToMDEventsHisto::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
                         
-   size_t numSpec=ConvToMDEventsBase::initialize(inWS,WSD,inWSWrapper);
+   size_t numSpec=ConvToMDEventsBase::initialize(WSD,inWSWrapper);
 
-   DataObjects::Workspace2D_sptr pWS2D  = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(inWS);
+   DataObjects::Workspace2D_const_sptr pWS2D  = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(inWS2D);
    if(!pWS2D.get()){
            throw(std::logic_error("ConvToMDEventsHisto should work with defined histrohram workspace"));
    }

@@ -52,12 +52,13 @@ public:
     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
     MDTransfNoQ();
-    //
-    void initialize(const MDWSDescription &ConvParams);
-
     /* clone method allowing to provide the copy of the particular class */
     MDTransfInterface * clone() const{return new MDTransfNoQ(*this);}
+    // initializes the contents of the class 
+    void initialize(const MDWSDescription &ConvParams);
 
+
+// WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
 //***** output WS definition interface:
     /** return the number of dimensions, calculated by the transformation from the workspace.
         Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
