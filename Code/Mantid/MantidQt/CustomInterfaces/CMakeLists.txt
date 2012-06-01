@@ -121,7 +121,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../API )
 include_directories ( ../../QtPropertyBrowser/src )
 # the directory with the information about ConvertToMD interface definitions
-include_directories (../../Framework/MDAlgorithms/inc)
+#include_directories (../../Framework/MDAlgorithms/inc)
 include_directories (../../Framework/MDEvents/inc)
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
@@ -145,7 +145,7 @@ set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomIn
 
 Find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser MDAlgorithms ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser MDEvents ${CMAKE_THREAD_LIBS_INIT})
 
 if ( CXXTEST_FOUND )
   

@@ -334,7 +334,7 @@ void ConvertToMDEvents::exec()
   pConvertor  = AlgoSelector.convSelector(inWS2D,pConvertor);
 
   // initate conversion and estimate amout of job to dl
-  size_t n_steps = pConvertor->initialize(inWS2D,TWSD,pWSWrapper);
+  size_t n_steps = pConvertor->initialize(TWSD,pWSWrapper);
   // progress reporter
   pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 
