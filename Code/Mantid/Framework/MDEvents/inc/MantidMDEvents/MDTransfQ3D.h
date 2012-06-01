@@ -60,7 +60,7 @@ public:
     //
     void initialize(const MDWSDescription &ConvParams);
 
-
+// WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS (THEY ARE VIRTUAL STATIC METHODS)
     /** return the number of dimensions, calculated by the transformation from the workspace.
        Depending on EMode, this numebr here is either 3 or 4 and do not depend on input workspace*/
     unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,

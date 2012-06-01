@@ -59,9 +59,10 @@ ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const st
     
 }
 
-void UnitsConversionHelper::initialize(const MDWSDescription &TWSD, API::MatrixWorkspace_const_sptr inWS2D,const std::string &units_to)
+void UnitsConversionHelper::initialize(const MDWSDescription &TWSD, const std::string &units_to)
 {   
   // obtain input workspace units
+    API::MatrixWorkspace_const_sptr inWS2D = TWSD.getInWS();
     if(!inWS2D.get()){
         throw(std::logic_error("UnitsConversionHelper::initialize Should not be able to call this function when workpsace is undefined"));
     }

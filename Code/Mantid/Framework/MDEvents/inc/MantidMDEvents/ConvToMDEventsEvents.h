@@ -54,22 +54,21 @@ namespace MDEvents
 class ConvToMDEventsEvents: public ConvToMDEventsBase
 {
  public:
-    size_t  initialize(Mantid::API::MatrixWorkspace_sptr pWS2D,
-                          const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    size_t  initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     void runConversion(API::Progress *pProg);
 
 private:
    // function runs the conversion on 
    virtual size_t conversionChunk(size_t workspaceIndex);
    // the pointer to the source event workspace as event ws does not work through the public Matrix WS interface
-    DataObjects::EventWorkspace_sptr pEventWS;
+    DataObjects::EventWorkspace_const_sptr pEventWS;
    /**function converts particular type of events into MD space and add these events to the workspace itself 
     */
    template <class T>
    size_t convertEventList(size_t workspaceIndex)
    {
 
-         Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
+         const Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
          size_t numEvents     = el.getNumberEvents();    
          size_t  detNum       = this->pDetLoc->getWSDet(workspaceIndex);
          uint32_t detID       = this->pDetLoc->getDetID(detNum);
@@ -91,15 +90,15 @@ private:
          run_index.reserve(numEvents);                 det_ids.reserve(numEvents);
     
       // This little dance makes the getting vector of events more general (since you can't overload by return type).
-        typename std::vector<T> * events_ptr;
+        typename std::vector<T>const * events_ptr;
         getEventsFrom(el, events_ptr);
-        typename std::vector<T> & events = *events_ptr;
+        const typename std::vector<T> & events = *events_ptr;
 
 
 
         // Iterators to start/end
-       typename std::vector<T>::iterator it = events.begin();
-       typename std::vector<T>::iterator it_end = events.end();
+       typename std::vector<T>::const_iterator it = events.begin();
+       typename std::vector<T>::const_iterator it_end = events.end();
      
 
        size_t ic(0);

@@ -57,7 +57,7 @@ namespace MDEvents
      ConvToMDEventsBase();
  
     ///method which initates all main class variables 
-    virtual size_t initialize(Mantid::API::MatrixWorkspace_sptr pWS2D,const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
+    virtual size_t initialize(const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
