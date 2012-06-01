@@ -67,7 +67,7 @@ namespace API
   //---------------------------------------------------------------------------------------
   /** Clone this ExperimentInfo class into a new one
    */
-  ExperimentInfo * ExperimentInfo::cloneExperimentInfo()
+  ExperimentInfo * ExperimentInfo::cloneExperimentInfo()const
   {
     ExperimentInfo * out = new ExperimentInfo();
     out->copyExperimentInfoFrom(this);
