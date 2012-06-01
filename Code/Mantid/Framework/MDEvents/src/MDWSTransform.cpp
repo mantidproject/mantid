@@ -21,7 +21,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,M
     bool powderMode = TargWSDescription.isPowder();
 
     bool has_lattice(true);
-    if(!TargWSDescription.pLatt.get())  has_lattice=false;
+    if(!TargWSDescription.hasLattice())  has_lattice=false;
 
     if(!powderMode && (!has_lattice))
     {
@@ -51,7 +51,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,M
 Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
 {
     //implements strategy Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
-    if(!TargWSDescription.pLatt.get()){      
+    if(!TargWSDescription.hasLattice()){      
         throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
     }
 
@@ -84,6 +84,7 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
                 Wmat[i][j]=dim_directions[j][i];
     }
     Kernel::DblMatrix Scale(3,3,true);
+    boost::shared_ptr<Geometry::OrientedLattice> spLatt = TargWSDescription.getLattice();
     switch (ScaleID)
     {
     case NoScaling:    //< momentums in A^-1
@@ -93,19 +94,19 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
     case SingleScale: //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sense
         {
           double dMax(-1.e+32);
-          for(int i=0;i<3;i++)  dMax =(dMax>TargWSDescription.pLatt->a(i))?(dMax):(TargWSDescription.pLatt->a(i));
+          for(int i=0;i<3;i++)  dMax =(dMax>spLatt->a(i))?(dMax):(spLatt->a(i));
           for(int i=0;i<3;i++)  Scale[i][i] = (2*M_PI)/dMax;
          
           break;
         }
     case OrthogonalHKLScale://< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
         {
-          if(TargWSDescription.pLatt.get()) Scale= TargWSDescription.pLatt->getUB()*(2*M_PI);
+          if(TargWSDescription.hasLattice()) Scale= spLatt->getUB()*(2*M_PI);
           break;
         }
     case HKLScale:   //< non-orthogonal system for non-orthogonal lattice
         {
-          if(TargWSDescription.pLatt.get()) Scale = TargWSDescription.pLatt->getUB()*(2*M_PI);
+          if(TargWSDescription.hasLattice()) Scale = spLatt->getUB()*(2*M_PI);
           break;
         }
 
@@ -128,10 +129,11 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
         // define B-matrix and Lattice parameters to one in case if no OrientedLattice is there
         Kernel::DblMatrix Bm(3,3,true);
         std::vector<double> LatPar(3,1);
-        if(TargWSDescription.pLatt.get())
+        if(TargWSDescription.hasLattice())
         { // redefine B-matrix and Lattice parameters from real oriented lattice if there is one
-            Bm=TargWSDescription.pLatt->getB();
-            for(int i=0;i<3;i++)LatPar[i]=TargWSDescription.pLatt->a(i);
+            boost::shared_ptr<Geometry::OrientedLattice> spLatt = TargWSDescription.getLattice();
+            Bm=spLatt->getB();
+            for(int i=0;i<3;i++)LatPar[i]=spLatt->a(i);
         }
        // axis units:
         CoordScaling ScaleID = getQScaling(QScaleRequested);
