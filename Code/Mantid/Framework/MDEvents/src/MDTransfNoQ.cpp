@@ -6,7 +6,7 @@ namespace MDEvents
 {
 
 // register the class, whith conversion factory under NoQ name
-DECLARE_MD_TRANSFID(MDTransfNoQ,NoQ);
+DECLARE_MD_TRANSFID(MDTransfNoQ,CopyToMD);
 
 /** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 
  *  it fills in [nd - (1 or 2 -- depending on input ws)] values into the Coord vector;

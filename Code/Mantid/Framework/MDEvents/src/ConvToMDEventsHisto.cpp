@@ -70,8 +70,8 @@ void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
             // convert units 
             UnitConversion.updateConversion(i);
             std::vector<double> XtargetUnits;
-            XtargetUnits.resize(specSize);
-            for(size_t j=0;j<specSize;j++)
+            XtargetUnits.resize(X.size());
+            for(size_t j=0;j<XtargetUnits.size();j++)
             {
                 XtargetUnits[j]=UnitConversion.convertUnits(X[j]);
             }

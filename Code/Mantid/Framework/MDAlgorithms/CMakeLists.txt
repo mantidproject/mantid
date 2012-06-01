@@ -114,11 +114,11 @@ set ( TEST_FILES
 	test/CompareMDWorkspacesTest.h
 	test/ConvertToDetectorFaceMDTest.h	
 	test/ConvertEventsToMDEventsTest.h
+	test/ConvertToMDEventsTest.h	
 #	test/ConvertToMDEventsCoordTransfTest.h
 #	test/ConvertToMDEventsWSTest.h
 #	test/ConvertToMDEventsParamsTest.h
 #    test/ConvertToMDEventsSubalgFactoryTest.h
-#	test/ConvertToMDEventsTest.h
 #	test/ConvertToMDEventsUnitsConvTest.h
 #	test/ConvertToQ3DdETest.h
 #	test/ConvertToMDEventsTestPerformance.h 	
