@@ -434,8 +434,12 @@ private:
 
 // Methods overloaded to get event vectors.
 DLLExport void getEventsFrom(EventList & el, std::vector<TofEvent> *&  events);
+DLLExport void getEventsFrom(const EventList & el, std::vector<TofEvent> const *&  events);
 DLLExport void getEventsFrom(EventList & el, std::vector<WeightedEvent> *&  events);
+DLLExport void getEventsFrom(const EventList & el, std::vector<WeightedEvent> const *&  events);
 DLLExport void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events);
+DLLExport void getEventsFrom(const EventList & el, std::vector<WeightedEventNoTime> const *&  events);
+
 
 } // DataObjects
 } // Mantid
