@@ -51,14 +51,15 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
     if ( NOT MPI_FOUND )
       message ( SEND_ERROR "MPI_BUILD flag is ON, but MPI could not be found" )
     endif ()
-    # Set things up to use the OpenMPI 'wrapper' compilers
+    # Set things up to use the OpenMPI 'wrapper' compilers.
+    # N.B. It's better to set these via '-D' arguments to cmake right from the start to avoid unexpected re-runs of cmake configuration.
     if ( MPI_CXX_COMPILER )
-      set ( CMAKE_C_COMPILER ${MPI_C_COMPILER} )
-      set ( CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER} )
+      set ( CMAKE_C_COMPILER ${MPI_C_COMPILER} CACHE FILEPATH "C Compiler." FORCE )
+      set ( CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER} CACHE FILEPATH "CXX Compiler." FORCE )
     else ()
       # Handle older FindMPI.cmake
-      set ( CMAKE_C_COMPILER ${MPI_COMPILER} )
-      set ( CMAKE_CXX_COMPILER ${MPI_COMPILER} )
+      set ( CMAKE_C_COMPILER ${MPI_COMPILER} CACHE FILEPATH "C Compiler." FORCE )
+      set ( CMAKE_CXX_COMPILER ${MPI_COMPILER} CACHE FILEPATH "CXX Compiler." FORCE )
     endif ()
     include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
   
@@ -149,7 +150,9 @@ endif ()
 
 # Unit test helper packages 
 if ( CXXTEST_FOUND )
-  add_subdirectory (UserAlgorithms)
+  add_subdirectory ( UserAlgorithms )
+  # This needs to be here so that a Framework-only build will work.
+  add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools )
 endif ()
 
 add_subdirectory (MDAlgorithms)
