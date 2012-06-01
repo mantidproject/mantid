@@ -274,7 +274,7 @@ void ConvertToMDEvents::exec()
         // and derived from input parameters. 
         OLDWSD.setUpMissingParameters(TWSD);      
         // check inconsistencies
-        OLDWSD.compareDescriptions(TWSD);
+        OLDWSD.checkWSCorresponsMDWorkspace(TWSD);
         // reset new ws description name
         TWSD =OLDWSD;
        // set up target coordinate system
