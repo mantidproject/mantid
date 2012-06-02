@@ -48,7 +48,7 @@ public:
   /** Run the IntegratePeaksMD with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
       std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
-      double BackgroundStartRadius = 0.0)
+      double BackgroundStartRadius = 0.0, bool edge = true)
   {
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -58,6 +58,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundOuterRadius", BackgroundRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrateIfOnEdge", edge ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDTest_peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
@@ -108,13 +109,30 @@ public:
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
+    peakWS0->setInstrument(inst);
+    peakWS0->addPeak( Peak(inst, 15050, 1.0 ) );
+
+    TS_ASSERT_EQUALS( peakWS0->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS0);
+
+    // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge false------------------------
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,false);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
-    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(2., 3., 4.) ) );
-    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(6., 6., 6.) ) );
+    peakWS->addPeak( Peak(inst, 15050, 1.0, V3D(0., 0., 0.) ) );
+    peakWS->addPeak( Peak(inst, 15050, 1.0, V3D(2., 3., 4.) ) );
+    peakWS->addPeak( Peak(inst, 15050, 1.0, V3D(6., 6., 6.) ) );
 
     TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS);
@@ -178,9 +196,10 @@ public:
     // These had no bg, so they are the same
     TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
     TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 125.0, 10.0);
-
+    
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_MDEWS");
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
+
   }
 
 

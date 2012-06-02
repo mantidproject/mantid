@@ -148,6 +148,9 @@ namespace MDEvents
     declareProperty("ReplaceIntensity", true, "Always replace intensity in PeaksWorkspacem (default).\n"
         "If false, then do not replace intensity if calculated value is 0 (used for SNSSingleCrystalReduction)");
 
+    declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
+        "If false, do not integrate if the outer radius is not on a detector.");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -181,6 +184,7 @@ namespace MDEvents
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
+    bool integrateEdge = getProperty("IntegrateIfOnEdge");
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
 
@@ -199,6 +203,26 @@ namespace MDEvents
         pos = p.getQSampleFrame();
       else if (CoordinatesToUse == "HKL")
         pos = p.getHKL();
+
+      // Get the instrument and its detectors
+      inst = peakWS->getInstrument();
+      // Do not integrate if sphere is off edge of detector
+      if (BackgroundOuterRadius > PeakRadius)
+      {
+    	  if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
+          {
+             g_log.warning() << "Warning: sphere for integration is off edge of detector for peak " << i << std::endl;
+             if (!integrateEdge)continue;
+          }
+      }
+      else
+      {
+    	  if (!detectorQ(p.getQLabFrame(), PeakRadius))
+          {
+             g_log.warning() << "Warning: sphere for integration is off edge of detector for peak " << i << std::endl;
+             if (!integrateEdge)continue;
+          }
+      }
 
       // Build the sphere transformation
       bool dimensionsUsed[nd];
@@ -279,6 +303,39 @@ namespace MDEvents
     // Save the output
     setProperty("OutputWorkspace", peakWS);
 
+  }
+  /** Calculate if this Q is on a detector
+   *
+   * @param QLabFrame of radius of integration
+   */
+  bool IntegratePeaksMD::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
+  {
+    bool in = true;
+    int nAngles = 8;
+    double dAngles = static_cast<coord_t>(nAngles);
+    // check 64 points in theta and phi at outer radius
+    for (int i=0; i < nAngles; ++i)
+    {
+      double theta = 6.28318531/dAngles * i;
+      for (int j=0; j < nAngles; ++j)
+      {
+    	 double phi = 6.28318531/dAngles * j;
+         V3D edge = V3D(QLabFrame.X()+r*std::cos(theta)*std::sin(phi),
+           QLabFrame.Y()+r*std::sin(theta)*std::sin(phi), QLabFrame.Z()+r*std::cos(phi));
+         // Create the peak using the Q in the lab frame with all its info:
+         try
+         {
+			 Peak p(inst, edge);
+			 in = (in && p.findDetector());
+			 if (!in) return in;
+         }
+         catch (...)
+         {
+        	 return false;
+         }
+      }
+    }
+    return in;
   }
 
   //----------------------------------------------------------------------------------------------
