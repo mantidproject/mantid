@@ -281,11 +281,15 @@ void SmoothNeighbours::findNeighboursRectangular()
   m_neighbours.resize(inWS->getNumberHistograms());
   int SumX = 1;
   int SumY = 1;
+  int StartX = Edge;
+  int StartY = Edge;
   bool sum = getProperty("SumNeighbours");
   if (sum)
   {
     SumX = 2*AdjX+1;
     SumY = 2*AdjY+1;
+    StartX += AdjX;
+    StartY += AdjY;
   }
 
   outWI = 0;
@@ -295,7 +299,7 @@ void SmoothNeighbours::findNeighboursRectangular()
     v1.push_back(std::pair<int, int>(detList[i]->getAtXY(0,0)->getID(), i));
 
   // To sort in descending order
-  stable_sort(v1.begin(), v1.end() );
+  if(sum) stable_sort(v1.begin(), v1.end() );
 
   std::vector <std::pair<int, int> >::iterator Iter1;
 
@@ -307,9 +311,9 @@ void SmoothNeighbours::findNeighboursRectangular()
     std::string det_name = det->getName();
     if (det)
     {
-      for (int j=Edge+AdjX; j < det->xpixels()-Edge; j += SumX)
+      for (int j=StartX; j < det->xpixels()-Edge; j += SumX)
       {
-        for (int k=Edge+AdjY; k < det->ypixels()-Edge; k += SumY)
+        for (int k=StartY; k < det->ypixels()-Edge; k += SumY)
         {
           double totalWeight = 0;
           // Neighbours and weights
@@ -385,6 +389,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 
   IDetector_const_sptr det;
   // Go through every input workspace pixel
+  outWI = 0;
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
   {
     // We want to skip monitors
@@ -442,6 +447,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 
     // Save the list of neighbours for this output workspace index.
     m_neighbours[wi] = neighbours;
+    outWI++;
 
     m_prog->report("Finding Neighbours");
   } // each workspace index
@@ -600,7 +606,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   //Get some stuff from the input workspace
-  const size_t numberOfSpectra = inWS->getNumberHistograms();
+  const size_t numberOfSpectra = outWI;
   
   const size_t YLength = inWS->blocksize();
 
@@ -621,7 +627,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
   // Go through all the output workspace
   PARALLEL_FOR2(ws, outWS)
-  for (int outWIi=0; outWIi<int(ws->getNumberHistograms()); outWIi++)
+  for (int outWIi=0; outWIi<int(numberOfSpectra); outWIi++)
   {
     PARALLEL_START_INTERUPT_REGION
 
