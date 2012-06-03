@@ -168,8 +168,6 @@ void SmoothNeighbours::init()
 
   declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
 
-  declareProperty("SumNeighbours", false, "If true, reduce number of output workspace indices.");
-
   std::vector<std::string> propOptions;
     propOptions.push_back("Flat");
     propOptions.push_back("Linear");
@@ -194,12 +192,22 @@ void SmoothNeighbours::init()
     "The number of Y (vertical) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
   setPropertySettings("AdjY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
+  declareProperty("SumPixelsX", 1, mustBePositive,
+    "The total number of X (horizontal) adjacent pixels to sum together. Only for instruments with RectangularDetectors.  AdjX will be ignored if SumPixelsX > 1." );
+  setPropertySettings("SumPixelsX", new EnabledWhenProperty("Radius", IS_DEFAULT) );
+
+  declareProperty("SumPixelsY", 1, mustBePositive,
+    "The total number of Y (vertical) adjacent pixels to sum together. Only for instruments with RectangularDetectors. AdjY will be ignored if SumPixelsY > 1" );
+  setPropertySettings("SumPixelsY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
+
   declareProperty("ZeroEdgePixels", 0, mustBePositive,
     "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
   setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
   setPropertyGroup("AdjX", "Rectangular Detectors Only");
   setPropertyGroup("AdjY", "Rectangular Detectors Only");
+  setPropertyGroup("SumPixelsX", "Rectangular Detectors Only");
+  setPropertyGroup("SumPixelsY", "Rectangular Detectors Only");
   setPropertyGroup("ZeroEdgePixels", "Rectangular Detectors Only");
 
   declareProperty("PreserveEvents", true,
@@ -279,17 +287,19 @@ void SmoothNeighbours::findNeighboursRectangular()
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
-  int SumX = 1;
-  int SumY = 1;
-  int StartX = Edge;
-  int StartY = Edge;
-  bool sum = getProperty("SumNeighbours");
+  int StartX = -AdjX;
+  int StartY = -AdjY;
+  int EndX = AdjX;
+  int EndY = AdjY;
+  int SumX = getProperty("SumPixelsX");
+  int SumY = getProperty("SumPixelsY");
+  bool sum = SumX*SumY-1;
   if (sum)
   {
-    SumX = 2*AdjX+1;
-    SumY = 2*AdjY+1;
-    StartX += AdjX;
-    StartY += AdjY;
+    StartX = 0;
+    StartY = 0;
+    EndX = SumX - 1;
+    EndY = SumY - 1;
   }
 
   outWI = 0;
@@ -311,16 +321,16 @@ void SmoothNeighbours::findNeighboursRectangular()
     std::string det_name = det->getName();
     if (det)
     {
-      for (int j=StartX; j < det->xpixels()-Edge; j += SumX)
+      for (int j=Edge; j < det->xpixels()-Edge; j += SumX)
       {
-        for (int k=StartY; k < det->ypixels()-Edge; k += SumY)
+        for (int k=Edge; k < det->ypixels()-Edge; k += SumY)
         {
           double totalWeight = 0;
           // Neighbours and weights
           std::vector< weightedNeighbour > neighbours;
 
-          for (int ix=-AdjX; ix <= AdjX; ix++)
-            for (int iy=-AdjY; iy <= AdjY; iy++)
+          for (int ix=StartX; ix <= EndX; ix++)
+            for (int iy=StartY; iy <= EndY; iy++)
             {
               //Weights for corners=1; higher for center and adjacent pixels
               double smweight = WeightedSum->weightAt(AdjX, ix, AdjY, iy);
@@ -703,7 +713,6 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
   //Get some stuff from the input workspace
   const size_t numberOfSpectra = outWI;
   const int YLength = static_cast<int>(inWS->blocksize());
-  //bool sum = getProperty("SumNeighbours");
 
   EventWorkspace_sptr outWS;
   //Make a brand new EventWorkspace
