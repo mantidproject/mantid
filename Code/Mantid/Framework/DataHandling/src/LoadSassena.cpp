@@ -143,7 +143,7 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
     qvmod.push_back( sqrt( curr[0]*curr[0] + curr[1]*curr[1] + curr[2]*curr[2] ) );
     curr += 3;
   }
-  delete buf;
+  delete[] buf;
   this->registerWorkspace(gws,wsName,ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return qvmod;
 }
@@ -177,7 +177,7 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
     im[iq]=curr[1];
     curr += 2;
   }
-  delete buf;
+  delete[] buf;
   this->registerWorkspace(gws,wsName,ws, "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
 }
 
@@ -226,7 +226,7 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
       curr ++;
     }
   }
-  delete buf;
+  delete[] buf;
   this->registerWorkspace(gws,wsReName,wsRe, "X-axis: time; Y-axis: real part of intermediate structure factor");
   this->registerWorkspace(gws,wsImName,wsIm, "X-axis: time; Y-axis: imaginary part of intermediate structure factor");
 }

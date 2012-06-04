@@ -74,48 +74,14 @@ void CalculateEfficiency::exec()
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
-
-  m_progress = 0.0;
 
   DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
-  if(inputEventWS)
-  {
-    std::vector<double> y_values(numberOfSpectra);
-    std::vector<double> e_values(numberOfSpectra);
-
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < numberOfSpectra; i++)
-    {
-      m_progress += 0.1/numberOfSpectra;
-      progress(m_progress, "Computing sensitivity");
-      double sum_i(0), err_i(0);
-      const EventList& el = inputEventWS->getEventList(i);
-      el.integrate(0,0,true,sum_i,err_i);
-      y_values[i] = sum_i;
-      e_values[i] = err_i;
-    }
-
-    IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.1, 0.2);
-    algo->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
-    algo->setProperty< std::vector<double> >("DataX", std::vector<double>(2,0.0) );
-    algo->setProperty< std::vector<double> >("DataY", y_values );
-    algo->setProperty< std::vector<double> >("DataE", e_values );
-    algo->setProperty<int>("NSpec", numberOfSpectra );
-    algo->execute();
-
-    rebinnedWS = algo->getProperty("OutputWorkspace");
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, rebinnedWS, false);
-  }
-  else
-  {
-    // Sum up all the wavelength bins
-    IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", 0.0, 0.2);
-    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    childAlg->executeAsSubAlg();
-    rebinnedWS = childAlg->getProperty("OutputWorkspace");
-  }
+  // Sum up all the wavelength bins
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", 0.0, 0.2);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+  childAlg->executeAsSubAlg();
+  rebinnedWS = childAlg->getProperty("OutputWorkspace");
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
   WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
@@ -214,14 +180,15 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     double min_eff, double max_eff)
 {
     // Number of spectra
-    const int numberOfSpectra = static_cast<int>(rebinnedWS->getNumberHistograms());
+    const size_t numberOfSpectra = rebinnedWS->getNumberHistograms();
 
     // Empty vector to store the pixels that outside the acceptable efficiency range
-    std::vector<detid_t> dets_to_mask;
+    std::vector<size_t> dets_to_mask;
 
-    for (int i = 0; i < numberOfSpectra; i++)
+    for (size_t i = 0; i < numberOfSpectra; i++)
     {
-      progress(0.4+0.2*i/numberOfSpectra, "Computing sensitivity");
+      const double currProgress = 0.4+0.2*((double)i/(double)numberOfSpectra);
+      progress(currProgress, "Computing sensitivity");
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one
@@ -255,17 +222,18 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     if ( !dets_to_mask.empty() )
     {
       // Mask detectors that were found to be outside the acceptable efficiency band
-      IAlgorithm_sptr mask = createSubAlgorithm("MaskDetectors", 0.8, 1.0);
       try
       {
+        IAlgorithm_sptr mask = createSubAlgorithm("MaskDetectors", 0.8, 0.9);
         // First we mask detectors in the output workspace
         mask->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
-        mask->setProperty< std::vector<specid_t> >("SpectraList", dets_to_mask);
+        mask->setProperty< std::vector<size_t> >("WorkspaceIndexList", dets_to_mask);
         mask->execute();
 
+        mask = createSubAlgorithm("MaskDetectors", 0.9, 1.0);
         // Then we mask the same detectors in the input workspace
         mask->setProperty<MatrixWorkspace_sptr>("Workspace", rebinnedWS);
-        mask->setProperty< std::vector<specid_t> >("SpectraList", dets_to_mask);
+        mask->setProperty< std::vector<size_t> >("WorkspaceIndexList", dets_to_mask);
         mask->execute();
       } catch (std::invalid_argument& err)
       {

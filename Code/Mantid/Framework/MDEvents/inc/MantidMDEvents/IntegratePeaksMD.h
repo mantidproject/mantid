@@ -44,6 +44,12 @@ namespace MDEvents
     /// Input MDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr inWS;
 
+    /// Calculate if this Q is on a detector
+    bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
+
+    /// Instrument reference
+    Geometry::Instrument_const_sptr inst;
+
   };
 
 

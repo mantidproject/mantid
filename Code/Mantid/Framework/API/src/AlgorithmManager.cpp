@@ -100,7 +100,7 @@ namespace Mantid
           {
             if (!(*it)->isRunning())
               break;
-            it++;
+            ++it;
           }
 
           if (it == m_managed_algs.end())
