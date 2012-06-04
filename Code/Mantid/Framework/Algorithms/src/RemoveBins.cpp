@@ -99,7 +99,6 @@ void RemoveBins::exec()
   // If the X range has been given in a different unit, or if the workspace isn't square, then we will need
   // to calculate the bin indices to cut out each time.
   const std::string rangeUnit = getProperty("RangeUnit");
-  const std::string inputUnit = m_inputWorkspace->getAxis(0)->unit()->unitID();
   const bool unitChange = (rangeUnit != "AsInput" && rangeUnit != "inputUnit");
   if (unitChange) m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
   const bool commonBins = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
