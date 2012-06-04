@@ -936,7 +936,7 @@ namespace Crystal
 
       rotz = result[ prefix + "Zrot" ];
 
-      Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotx,V3D( 0,0,1));//*RelRot;
+      Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotz,V3D( 0,0,1));//*RelRot;
 
       FixUpBankParameterMap( (*itv),
                               NewInstrument,

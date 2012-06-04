@@ -680,7 +680,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
       }
     }
     if( nonMaskedSpectra == 0 ) ++nonMaskedSpectra; // Avoid possible divide by zero
-    requireDivide = (nonMaskedSpectra > 1);
+    if(!requireDivide) requireDivide = (nonMaskedSpectra > 1);
     beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
 
     // make regular progress reports and check for cancelling the algorithm
