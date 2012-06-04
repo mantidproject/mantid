@@ -2136,7 +2136,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
-    std::string workspaceGroupName("");
     QString wsGroupName(getGroupName());
 
     QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "; " + plotTypeTitle + "";

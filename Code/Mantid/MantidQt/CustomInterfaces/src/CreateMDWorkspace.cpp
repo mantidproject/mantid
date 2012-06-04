@@ -133,7 +133,7 @@ void CreateMDWorkspace::initLayout()
   while(it != names.end())
   {
     m_uiForm.workspaceSelector->addItem((*it).c_str());
-    it++;
+    ++it;
   }
   
 }

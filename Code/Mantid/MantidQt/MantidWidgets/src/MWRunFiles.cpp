@@ -63,7 +63,7 @@ void FindFilesThread::run()
   }
 
   Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
-  std::string error = "";
+
   try
   {
     if( m_isForRunFiles )
