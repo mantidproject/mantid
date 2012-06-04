@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <math.h>
 
 #include "MantidQtImageViewer/DataArray.h"
 
@@ -196,13 +197,25 @@ double DataArray::GetValue( int row, int col ) const
  */
 double DataArray::GetValue( double x, double y ) const
 {
-  double relative_x = (x - xmin) / (xmax - xmin);
-  int col = (int)( relative_x * (double)n_cols );
+/*
+  int col = 0;
+  if ( is_log_x )
+  {
+    col = (int)((double)n_cols * log(x/xmin)/log(xmax/xmin) );
+  }
+  else
+  {
+    double relative_x = (x - xmin) / (xmax - xmin);
+    col = (int)( relative_x * (double)n_cols );
+  }
 
   double relative_y = (y - ymin) / (ymax - ymin);
   int row = (int)( relative_y * (double)n_rows );
+*/
+  size_t col = ColumnOfX( x );
+  size_t row = RowOfY( y );
 
-  return GetValue( row, col );
+  return GetValue( (int)row, (int)col );
 }
 
 
@@ -211,7 +224,7 @@ double DataArray::GetValue( double x, double y ) const
  * @param x   If x is more than xmax it will be set to xmax. If x is less 
  *            than xmin, it will be set to xmin.
  */
-void DataArray::RestrictX( double & x )
+void DataArray::RestrictX( double & x ) const
 {
   if ( x > xmax )
   {
@@ -229,7 +242,7 @@ void DataArray::RestrictX( double & x )
  * @param y   If y is more than ymax it will be set to ymax. If y is less 
  *            than ymin, it will be set to ymin.
  */
-void DataArray::RestrictY( double & y )
+void DataArray::RestrictY( double & y ) const
 {
   if ( y > ymax )
   {
@@ -247,7 +260,7 @@ void DataArray::RestrictY( double & y )
  * @param row  If row is more than n_rows-1, it is set to n_rows-1.  If
  *             row < 0 it is set to zero.
  */
-void DataArray::RestrictRow( int & row )
+void DataArray::RestrictRow( int & row ) const
 {
   if ( row >= (int)n_rows )
   {
@@ -265,7 +278,7 @@ void DataArray::RestrictRow( int & row )
  * @param col  If col is more than n_cols-1, it is set to n_cols-1.  If
  *             col < 0 it is set to zero.
  */
-void DataArray::RestrictCol( int & col )
+void DataArray::RestrictCol( int & col ) const
 {
   if ( col >= (int)n_cols )
   {
@@ -275,6 +288,100 @@ void DataArray::RestrictCol( int & col )
   {
     col = 0;
   }
+}
+
+
+/**
+ * Calculate the column number containing the specified x value.  If the
+ * specified value is less than xmin, 0 is returned.  If the specified
+ * value is more than or equal to xmax, n_cols-1 is returned.  This
+ * method uses the is_log_x flag to determine whether to use a "log"
+ * transformation to map the column to x.
+ *
+ * @param x  The x value to map to a column number
+ *
+ * @return A valid column number, containing x, if x is in range, or the
+ *         first or last column number if x is out of range.
+ */
+size_t DataArray::ColumnOfX( double x ) const
+{
+  int col;
+  if ( is_log_x )
+  {
+    col = (int)((double)n_cols * log(x/xmin)/log(xmax/xmin));
+  }
+  else
+  {
+    col = (int)((double)n_cols * (x-xmin)/(xmax-xmin));
+  }
+
+  RestrictCol( col );
+  return (size_t)col;
+}
+
+
+/*
+ * Calculate the x-value at the center of the specified column.  If the 
+ * column number is too large, xmax is returned.  If the column number is
+ * too small, xmin is returned.  This method uses the is_log_x flag to
+ * determine whether to use a "log" tranformation to map the column to x.
+ *
+ * @param col  The column number to map to an x-value.
+ *
+ * @return A corresponding x value between xmin and xmax.
+ */
+double DataArray::XOfColumn( size_t col ) const
+{
+  double xval;
+  if ( is_log_x )
+  {
+    xval = xmin * exp( ((double)col+0.5)/(double)n_cols * log(xmax/xmin));
+  }
+  else
+  {
+    xval = ((double)col+0.5)/(double)n_cols * (xmax-xmin) + xmin;
+  }
+ 
+  RestrictX( xval );
+  return xval;
+}
+
+
+/**
+ * Calculate the row number containing the specified y value.  If the
+ * specified value is less than ymin, 0 is returned.  If the specified
+ * value is more than or equal to ymax, n_rows-1 is returned. 
+ *
+ * @param y  The y value to map to a row number
+ *
+ * @return A valid row number, containing y, if y is in range, or the
+ *         first or last row number if y is out of range.
+ */
+size_t DataArray::RowOfY( double y ) const
+{
+  int row = (int)((double)n_rows * (y-ymin)/(ymax-ymin));
+
+  RestrictRow( row );
+  return (size_t)row;
+}
+
+
+/*
+ * Calculate the y-value at the center of the specified row.  If the 
+ * row number is too large, ymax is returned.  If the row number is
+ * too small, ymin is returned.  
+ *
+ * @param row  The row number to map to an y-value.
+ *
+ * @return A corresponding y value between ymin and ymax.
+ */
+double DataArray::YOfRow( size_t row ) const
+{
+  double yval;
+  yval = ((double)row+0.5)/(double)n_rows * (ymax-ymin) + ymin;
+
+  RestrictY( yval );
+  return yval;
 }
 
 

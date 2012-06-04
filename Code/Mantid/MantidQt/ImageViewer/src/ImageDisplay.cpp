@@ -378,37 +378,39 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
 
   QVector<double> xData;
   QVector<double> yData;
+
   double x_val;
+  xData.push_back( x_min );                              // start at x_min
+  yData.push_back( data[ row * n_cols ] );
   for ( size_t col = 0; col < n_cols; col++ )
   {
-    if ( data_array->IsLogX() )
-    {
-      x_val = x_min * exp( (double)col/double(n_cols-1)*log(x_max/x_min));
-    }
-    else
-    {
-      x_val = (double)col/(double)(n_cols-1) * (x_max-x_min) + x_min; 
-    }
-    xData.push_back( x_val );
-    yData.push_back( data[ row * n_cols + col ] );
+    x_val = data_array->XOfColumn( col );
+    xData.push_back( x_val );                           // mark data at col
+    yData.push_back( data[ row * n_cols + col ] );      // centers
   }
+  xData.push_back( x_max );                             // end at x_max
+  yData.push_back( data[ row * n_cols + n_cols-1 ] );
+
   h_graph_display->SetLogX( data_array->IsLogX() );
   h_graph_display->SetData( xData, yData, x, y );
 
-  double relative_x = (x-x_min)/(x_max-x_min);           // in 0 to 1
-  int    col = (int)(relative_x * (double)n_cols);
-
-  data_array->RestrictCol( col );
+  size_t col = data_array->ColumnOfX( x );
 
   QVector<double> v_xData;
   QVector<double> v_yData;
+
   double y_val;
-  for ( size_t row = 0; row < n_rows; row++ )
+  v_yData.push_back( y_min );                     // start at y_min
+  v_xData.push_back( data[col] );
+  for ( size_t row = 0; row < n_rows; row++ )     // mark data at row centers
   {
-    y_val = (double)row/(double)(n_rows-1) * (y_max-y_min) + y_min;
+    y_val = data_array->YOfRow( row );
     v_yData.push_back( y_val );
     v_xData.push_back( data[ row * n_cols + col ] );
   }
+  v_yData.push_back( y_max );                     // end at y_max
+  v_xData.push_back( data[ (n_rows-1) * n_cols + col] );
+
   v_graph_display->SetData( v_xData, v_yData, x, y );
 
   ShowInfoList( x, y );
