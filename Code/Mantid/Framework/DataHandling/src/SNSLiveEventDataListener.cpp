@@ -220,10 +220,10 @@ namespace DataHandling
     return true;
   }
 
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
     // We need the instrument name (we'll use the shortname);
-    m_instrumentName = pkt.beamlineShortName();
+    m_instrumentName = pkt.shortName();
 
     // If we've also got the XML definition (from the Geometry packet), then
     // we can create our workspace.  Otherwise, we'll just wait

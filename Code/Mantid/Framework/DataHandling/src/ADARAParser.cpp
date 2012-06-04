@@ -53,7 +53,7 @@ bool Parser::read(int fd, unsigned int max_read)
 
 		/* m_len cannot overflow when adding in rc, as we'll never
 		 * ask for more data in the read() call than will fit.
-                 */
+		 */
 		m_len += (unsigned int) rc;
 		bytes_read += rc;
 
@@ -209,6 +209,7 @@ bool Parser::rxPacket(const Packet &pkt)
 		MAP_TYPE(PacketType::SYNC_V0, SyncPkt);
 		MAP_TYPE(PacketType::HEARTBEAT_V0, HeartbeatPkt);
 		MAP_TYPE(PacketType::GEOMETRY_V0, GeometryPkt);
+		MAP_TYPE(PacketType::BEAMLINE_INFO_V0, BeamlineInfoPkt);
 		MAP_TYPE(PacketType::DEVICE_DESC_V0, DeviceDescriptorPkt);
 		MAP_TYPE(PacketType::VAR_VALUE_U32_V0, VariableU32Pkt);
 		MAP_TYPE(PacketType::VAR_VALUE_DOUBLE_V0, VariableDoublePkt);
@@ -230,7 +231,7 @@ bool Parser::rxUnknownPkt(const Packet &)
 }
 
 bool Parser::rxOversizePkt(const PacketHeader *, const uint8_t *,
-                           unsigned int, unsigned int )
+			   unsigned int, unsigned int)
 {
 	/* Default is to discard the data */
 	return false;
@@ -252,6 +253,7 @@ EXPAND_HANDLER(StatsResetPkt)
 EXPAND_HANDLER(SyncPkt)
 EXPAND_HANDLER(HeartbeatPkt)
 EXPAND_HANDLER(GeometryPkt)
+EXPAND_HANDLER(BeamlineInfoPkt)
 EXPAND_HANDLER(DeviceDescriptorPkt)
 EXPAND_HANDLER(VariableU32Pkt)
 EXPAND_HANDLER(VariableDoublePkt)

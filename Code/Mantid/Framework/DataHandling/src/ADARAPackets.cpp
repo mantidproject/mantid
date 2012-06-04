@@ -220,33 +220,6 @@ RunStatusPkt::RunStatusPkt(const RunStatusPkt &pkt) :
 	Packet(pkt), m_fields((uint32_t *)payload())
 {}
 
-
-const std::string RunStatusPkt::beamlineId() const
-{
-  size_t len = (m_fields[3] >> 16) & 0xFF;
-  char *start = (char *)&m_fields[4];
-  return std::string(start, len);
-}
-
-const std::string RunStatusPkt::beamlineShortName() const
-{
-  size_t len = (m_fields[3] >> 8) & 0xFF;
-  unsigned skipChars = (m_fields[3] >> 16) & 0xFF;
-  char *start = (char *)&m_fields[4];
-  start += skipChars;
-  return std::string(start, len);
-}
-
-const std::string RunStatusPkt::beamlineLongName() const
-{
-  size_t len = m_fields[3] & 0xFF;
-  unsigned skipChars = ((m_fields[3] >> 16) & 0xFF) +
-                       ((m_fields[3] >> 8) & 0xFF);
-  char *start = (char *)&m_fields[4];
-  start += skipChars;
-  return std::string(start, len);
-}
-
 /* ------------------------------------------------------------------------ */
 
 RunInfoPkt::RunInfoPkt(const uint8_t *data, uint32_t len) :
@@ -374,6 +347,39 @@ GeometryPkt::GeometryPkt(const uint8_t *data, uint32_t len) :
 
 GeometryPkt::GeometryPkt(const GeometryPkt &pkt) :
 	Packet(pkt), m_xml(pkt.m_xml)
+{}
+
+/* ------------------------------------------------------------------------ */
+
+BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len) :
+	Packet(data, len)
+{
+	const char *info = (const char *) payload() + sizeof(uint32_t);
+	uint32_t sizes = *(uint32_t *) payload();
+	uint32_t id_len, shortName_len, longName_len, info_len;
+
+	if (m_payload_len < sizeof(uint32_t))
+		throw invalid_packet("Beamline info packet is too short");
+
+	longName_len = sizes & 0xff;
+	shortName_len = (sizes >> 8) & 0xff;
+	id_len = (sizes >> 16) & 0xff;
+
+	info_len = id_len + shortName_len + longName_len;
+
+	if (m_payload_len < (info_len + sizeof(uint32_t)))
+		throw invalid_packet("Beamline info packet has undersize data");
+
+	m_id.assign(info, id_len);
+	info += id_len;
+	m_shortName.assign(info, shortName_len);
+	info += shortName_len;
+	m_longName.assign(info, longName_len);
+}
+
+BeamlineInfoPkt::BeamlineInfoPkt(const BeamlineInfoPkt &pkt) :
+	Packet(pkt), m_id(pkt.m_id), m_shortName(pkt.m_shortName),
+	m_longName(pkt.m_longName)
 {}
 
 /* ------------------------------------------------------------------------ */

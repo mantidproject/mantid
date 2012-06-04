@@ -228,10 +228,6 @@ public:
 		return static_cast<RunStatus::Enum>(m_fields[2] >> 24);
 	}
 
-        const std::string beamlineId() const;
-        const std::string beamlineShortName() const;
-        const std::string beamlineLongName() const;
-
 private:
 	uint32_t *m_fields;
 
@@ -325,6 +321,24 @@ private:
 	std::string m_xml;
 
 	GeometryPkt(const uint8_t *data, uint32_t len);
+
+	friend class Parser;
+};
+
+class BeamlineInfoPkt : public Packet {
+public:
+	BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
+
+	const std::string &id(void) const { return m_id; }
+	const std::string &shortName(void) const { return m_shortName; }
+	const std::string &longName(void) const { return m_longName; }
+
+private:
+	std::string m_id;
+	std::string m_shortName;
+	std::string m_longName;
+
+	BeamlineInfoPkt(const uint8_t *data, uint32_t len);
 
 	friend class Parser;
 };
