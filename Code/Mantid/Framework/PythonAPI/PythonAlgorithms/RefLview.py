@@ -50,8 +50,20 @@ class RefLview(PythonAlgorithm):
             print '====== Running in mode DEBUGGING ======='
 
         run_numbers = self.getProperty("RunNumbers")
-
+        if bDebug:
+            print 'run_numbers (before getSequenceRuns): ' 
+            print str(run_numbers)
+            print
+        run_numbers = wks_utility.getSequenceRuns(run_numbers)
+        if bDebug:
+            print 'run_numbers (after getSequenceRuns): ' 
+            print str(run_numbers)
+            print
+            
         for _run in run_numbers:
+        
+            #make sure we are working with integer
+            _run = int(_run)
         
             print '********* Working with run: ' + str(_run) + ' *********'
 
@@ -98,45 +110,45 @@ class RefLview(PythonAlgorithm):
             #tthd
             tthd_value = mt_run.getProperty('tthd').value[0]
             tthd_units = mt_run.getProperty('tthd').units
-            _line = 'tthd: {0:.4f}'.format(tthd_value)
+            _line = ' tthd: {0:.4f}'.format(tthd_value)
             _line += ' ' + tthd_units
             print _line
            
             #thi
             thi_value = mt_run.getProperty('thi').value[0]
             thi_units = mt_run.getProperty('thi').units
-            _line = 'thi: {0:.4f}'.format(thi_value)
+            _line = ' thi: {0:.4f}'.format(thi_value)
             _line += ' ' + thi_units
             print _line
             
             #ths
             ths_value = mt_run.getProperty('ths').value[0]
             ths_units = mt_run.getProperty('ths').units
-            _line = 'ths: {0:.4f}'.format(ths_value)
+            _line = ' ths: {0:.4f}'.format(ths_value)
             _line += ' ' + ths_units
             print _line
             
             #s1h
             s1h_value, s1h_units = wks_utility.getS1h(mtd[ws_event_data])
-            _line = 's1h: {0:.4f}'.format(s1h_value)
+            _line = ' s1h: {0:.4f}'.format(s1h_value)
             _line += ' ' + s1h_units
             print _line
             
             #s2h
             s2h_value, s2h_units = wks_utility.getS2h(mtd[ws_event_data])
-            _line = 's2h: {0:.4f}'.format(s2h_value)
+            _line = ' s2h: {0:.4f}'.format(s2h_value)
             _line += ' ' + s2h_units
             print _line
             
             #s1w
             s1w_value, s1w_units = wks_utility.getS1w(mtd[ws_event_data])
-            _line = 's1w: {0:.4f}'.format(s1w_value)
+            _line = ' s1w: {0:.4f}'.format(s1w_value)
             _line += ' ' + s1w_units
             print _line
             
             #s2w
             s2w_value, s2w_units = wks_utility.getS2w(mtd[ws_event_data])
-            _line = 's2w: {0:.4f}'.format(s2w_value)
+            _line = ' s2w: {0:.4f}'.format(s2w_value)
             _line += ' ' + s2w_units
             print _line
 
