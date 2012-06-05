@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/MaskDetectorBins.h"
+#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -17,24 +17,24 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MaskDetectorBins::MaskDetectorBins()
+  MaskBinsFromTable::MaskBinsFromTable()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  MaskDetectorBins::~MaskDetectorBins()
+  MaskBinsFromTable::~MaskBinsFromTable()
   {
   }
   
-  void MaskDetectorBins::initDocs()
+  void MaskBinsFromTable::initDocs()
   {
     this->setWikiSummary("Mask bins from a table workspace. ");
     this->setOptionalMessage("Mask bins from a table workspace. ");
   }
 
-  void MaskDetectorBins::init()
+  void MaskBinsFromTable::init()
   {
     this->declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()),
         "Input Workspace to mask bins. ");
@@ -46,7 +46,7 @@ namespace Algorithms
     return;
   }
 
-  void MaskDetectorBins::exec()
+  void MaskBinsFromTable::exec()
   {
     MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
     DataObjects::TableWorkspace_sptr paramWS = getProperty("MaskingInformation");

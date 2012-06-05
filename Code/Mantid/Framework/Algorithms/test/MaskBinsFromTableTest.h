@@ -8,20 +8,20 @@
 #include <iomanip>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/MaskDetectorBins.h"
+#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidAPI/TableRow.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class MaskDetectorBinsTest : public CxxTest::TestSuite
+class MaskBinsFromTableTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaskDetectorBinsTest *createSuite() { return new MaskDetectorBinsTest(); }
-  static void destroySuite( MaskDetectorBinsTest *suite ) { delete suite; }
+  static MaskBinsFromTableTest *createSuite() { return new MaskBinsFromTableTest(); }
+  static void destroySuite( MaskBinsFromTableTest *suite ) { delete suite; }
 
   /*
    * In-place single mask test.
@@ -45,7 +45,7 @@ public:
     row0 << 3.0 << 6.0 << "1-3";
 
     // 3. Execute
-    MaskDetectorBins maskalg;
+    MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
     maskalg.setPropertyValue("OutputWorkspace",workspaceName);
@@ -93,7 +93,7 @@ public:
     row0 << 3.0 << 6.0 << "1-3";
 
     // 3. Execute
-    MaskDetectorBins maskalg;
+    MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
     maskalg.setPropertyValue("OutputWorkspace",opWSName);
@@ -148,7 +148,7 @@ public:
     row2 << 0.0 << 1.0 << "9";
 
     // 3. Execute
-    MaskDetectorBins maskalg;
+    MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
     maskalg.setPropertyValue("OutputWorkspace",workspaceName);

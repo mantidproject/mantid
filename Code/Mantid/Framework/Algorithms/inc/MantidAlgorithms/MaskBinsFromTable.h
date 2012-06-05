@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MASKDETECTORBINS_H_
-#define MANTID_ALGORITHMS_MASKDETECTORBINS_H_
+#ifndef MANTID_ALGORITHMS_MASKBINSFROMTABLE_H_
+#define MANTID_ALGORITHMS_MASKBINSFROMTABLE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -10,7 +10,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** MaskDetectorBins : TODO: DESCRIPTION
+  /** MaskBinsFromTable : TODO: DESCRIPTION
     
     @date 2012-06-04
 
@@ -34,14 +34,14 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport MaskDetectorBins : public API::Algorithm
+  class DLLExport MaskBinsFromTable : public API::Algorithm
   {
   public:
-    MaskDetectorBins();
-    virtual ~MaskDetectorBins();
+    MaskBinsFromTable();
+    virtual ~MaskBinsFromTable();
     
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "MaskDetectorBins";};
+    virtual const std::string name() const { return "MaskBinsFromTable";};
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;};
     /// Algorithm's category for identification overriding a virtual method
@@ -61,4 +61,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_MASKDETECTORBINS_H_ */
+#endif  /* MANTID_ALGORITHMS_MASKBINSFROMTABLE_H_ */
