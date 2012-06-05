@@ -116,6 +116,7 @@ set ( SRC_FILES
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/MaskBins.cpp
+	src/MaskDetectorBins.cpp
 	src/MaskDetectorsIf.cpp
 	src/Max.cpp
 	src/MaxMin.cpp
@@ -316,6 +317,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/MaskBins.h
+	inc/MantidAlgorithms/MaskDetectorBins.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxMin.h
@@ -501,6 +503,7 @@ set ( TEST_FILES
 	test/InvertMaskTest.h
 	test/LogarithmTest.h
 	test/MaskBinsTest.h
+	test/MaskDetectorBinsTest.h
 	test/MaxMinTest.h
 	test/MedianDetectorTestTest.h
 	test/MergeRunsTest.h
