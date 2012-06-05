@@ -96,6 +96,10 @@ class RefLReduction(PythonAlgorithm):
             
         from mantidsimple import mtd    
 
+        bDebug = False
+        if bDebug:
+            print '====== Running in mode DEBUGGING ======='
+
         run_numbers = self.getProperty("RunNumbers")
 
         backSubMethod = 2   #1 uses RefRoi, 2 used own method
@@ -850,6 +854,9 @@ class RefLReduction(PythonAlgorithm):
             ws_data_scaled = ws_data
             
         if dMD is not None and theta is not None:
+
+            if bDebug:
+                print 'DEBUG: theta= {0:4f}'.format(theta) 
                     
             _tof_axis = mtd[ws_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
@@ -864,6 +871,9 @@ class RefLReduction(PythonAlgorithm):
             q_max = max(_q_axis)
             if (q_min >= q_max):
                 q_min = min(_q_axis)
+
+            if bDebug:
+                print 'DEBUG: [q_min:q_bin:q_max]=[{0:4f},{1:4f},{2:4f}]'.format(q_min, q_step, q_max) 
 
         if (backSubMethod == 1):        
             ws_integrated_data = ws_name + '_IntegratedDataWks'
