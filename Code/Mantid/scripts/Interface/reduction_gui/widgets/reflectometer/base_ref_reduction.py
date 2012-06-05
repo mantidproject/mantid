@@ -200,8 +200,6 @@ class BaseRefWidget(BaseWidget):
         i=0
         while (i < sz-1):
             
-            print 'i: ' + str(i)
-            
             _left_x = x_axis[i]
             _right_x = x_axis[i+1]
 
