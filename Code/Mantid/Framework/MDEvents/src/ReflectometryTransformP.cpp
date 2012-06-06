@@ -73,16 +73,16 @@ namespace Mantid
         auto counts = inputWs->readY(index);
         auto wavelengths = inputWs->readX(index);
         auto errors = inputWs->readE(index);
-        size_t nInputBins = inputWs->isHistogramData() ? wavelengths.size() -1 : wavelengths.size();
+        const size_t nInputBins = wavelengths.size() -1;
         const double theta_final = spectraAxis->getValue(index);
         m_pSumCalculation.setThetaFinal(theta_final);
         m_pDiffCalculation.setThetaFinal(theta_final);
         //Loop over all bins in spectra 
         for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
         {
-          const double& lambda = wavelengths[binIndex];
-          double _qx = m_pSumCalculation.execute(lambda);
-          double _qz = m_pDiffCalculation.execute(lambda);
+          const double& wavelength = 0.5*(wavelengths[binIndex] + wavelengths[binIndex+1]);
+          double _qx = m_pSumCalculation.execute(wavelength);
+          double _qz = m_pDiffCalculation.execute(wavelength);
           double centers[2] = {_qx, _qz};
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
