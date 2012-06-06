@@ -620,8 +620,8 @@ namespace Algorithms
       }
 
       // ii.  Get raw event & time: Total time = pulse time (ns) + TOF*offset - sensor-sample-offset
-      int64_t mtime = rawevent.m_pulsetime.totalNanoseconds()+
-          static_cast<int64_t>(rawevent.m_tof*1000*percentageoffsettof)-
+      int64_t mtime = rawevent.pulseTime().totalNanoseconds()+
+          static_cast<int64_t>(rawevent.tof()*1000*percentageoffsettof)-
           mSensorSampleOffset;
 
       // iii. Filter out if time falls out of (T0, Tf), and update loop variables
@@ -753,7 +753,7 @@ namespace Algorithms
       // viii. Filter in/out?
       double msevalue = mSEValues[mindex];
       if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
-        DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
+        DataObjects::TofEvent newevent(rawevent.tof(), rawevent.pulseTime());
         newevents.push_back(newevent);
       }
 
@@ -789,13 +789,13 @@ namespace Algorithms
 
     for (size_t iv=0; iv<newevents.size(); iv++){
       neweventlist->addEventQuickly(newevents[iv]);
-      if (newevents[iv].m_tof > local_longest_tof)
+      if (newevents[iv].tof() > local_longest_tof)
       {
-        local_longest_tof = newevents[iv].m_tof;
+        local_longest_tof = newevents[iv].tof();
       }
-      else if (newevents[iv].m_tof < local_shortest_tof)
+      else if (newevents[iv].tof() < local_shortest_tof)
       {
-        local_shortest_tof = newevents[iv].m_tof;
+        local_shortest_tof = newevents[iv].tof();
       }
     } // ENDFOR iv
 
@@ -879,10 +879,10 @@ namespace Algorithms
       }
 
       // ii.  Get raw event & time: Total time = pulse time (ns) + TOF*offset - sensor-sample-offset
-      int64_t mtime = rawevent.m_pulsetime.totalNanoseconds()+
-          static_cast<int64_t>(rawevent.m_tof*1000*percentageoffsettof)-
+      int64_t mtime = rawevent.pulseTime().totalNanoseconds()+
+          static_cast<int64_t>(rawevent.tof()*1000*percentageoffsettof)-
           mSensorSampleOffset;
-      double correctedtofns = rawevent.m_tof*1000*percentageoffsettof;
+      double correctedtofns = rawevent.tof()*1000*percentageoffsettof;
 
       // iii. Filter out if time falls out of (T0, Tf), and update loop variables
       if (mtime < mFilterT0.totalNanoseconds() || mtime > mFilterTf.totalNanoseconds())
@@ -930,7 +930,7 @@ namespace Algorithms
         if (mSelectedInterval < 0 || section==mSelectedInterval)
         {
           // Be filtered again by interval
-          DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
+          DataObjects::TofEvent newevent(rawevent.tof(), rawevent.pulseTime());
           newevents.push_back(newevent);
           numeventsin ++;
           selecttype = 1;
@@ -981,13 +981,13 @@ namespace Algorithms
 
     for (size_t iv=0; iv<newevents.size(); iv++){
       neweventlist->addEventQuickly(newevents[iv]);
-      if (newevents[iv].m_tof > local_longest_tof)
+      if (newevents[iv].tof() > local_longest_tof)
       {
-        local_longest_tof = newevents[iv].m_tof;
+        local_longest_tof = newevents[iv].tof();
       }
-      else if (newevents[iv].m_tof < local_shortest_tof)
+      else if (newevents[iv].tof() < local_shortest_tof)
       {
-        local_shortest_tof = newevents[iv].m_tof;
+        local_shortest_tof = newevents[iv].tof();
       }
     } // ENDFOR iv
 
@@ -1006,8 +1006,8 @@ namespace Algorithms
         mSETimes[mSETimes.size()-1]-mFilterT0.totalNanoseconds() << std::endl;
     if (events.getNumberEvents() > 0)
     {
-      g_log.information() << "Neutron 0   :   Pulse Time = " << events.getEvent(0).m_pulsetime << std::endl;
-      g_log.information() << "Neutron Last:   Pulse Time = " << events.getEvent(events.getNumberEvents()-1).m_pulsetime << std::endl;
+      g_log.information() << "Neutron 0   :   Pulse Time = " << events.getEvent(0).pulseTime() << std::endl;
+      g_log.information() << "Neutron Last:   Pulse Time = " << events.getEvent(events.getNumberEvents()-1).pulseTime() << std::endl;
     } else
     {
       g_log.information() << "There is no events in this spectrum" << std::endl;

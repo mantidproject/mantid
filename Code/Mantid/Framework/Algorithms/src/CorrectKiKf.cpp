@@ -344,11 +344,11 @@ template<class T>
     if (emodeStr == "Direct")  //Ei=Efixed
     {
       Ei = efixed;
-      Ef = Ei - it->m_tof;
+      Ef = Ei - it->tof();
     } else                     //Ef=Efixed
     { 
       Ef = efixed;
-      Ei = Ef + it->m_tof;
+      Ei = Ef + it->tof();
     }
     // if Ei or Ef is negative, delete the event
     if ((Ei <= 0)||(Ef <= 0))

@@ -16,6 +16,9 @@
 
 namespace Mantid
 {
+// Forward declaration needed while this needs to be a friend of TofEvent (see below)
+namespace DataHandling { class LoadEventNexus; }
+
 namespace DataObjects
 {
 
@@ -36,14 +39,13 @@ class DLLExport TofEvent {
   friend class WeightedEventNoTime;
   friend class tofGreaterOrEqual;
   friend class tofGreater;
+  friend class DataHandling::LoadEventNexus; // Needed while the ISIS hack of spreading events out in a bin remains
 
-public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
-
-  /** The units of the time of flight index in nanoseconds. This is relative to the
-   * start of the pulse (stored in pulse_time.
-   * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1
-   * @return a double
-   * */
+protected:
+  /** The 'x value' of the event. This will be in a unit available from the UnitFactory.
+   *  Initially (prior to any unit conversion on the holding workspace), this will have
+   *  the unit of time-of-flight in microseconds.
+   */
   double m_tof;
 
   /**
@@ -52,15 +54,14 @@ public: //#TODO: switch back to protected when the darwin build is upgraded to G
    * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1, 1990.
    *
    * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be enough.
-   * @return a DateAndTime
    */
   Mantid::Kernel::DateAndTime m_pulsetime;
 
 public:
-  /// Constructor, specifying only the time of flight
+  /// Constructor, specifying only the time of flight in microseconds
   TofEvent(double tof);
 
-  /// Constructor, specifying the time of flight and the frame id
+  /// Constructor, specifying the time of flight in microseconds and the frame id
   TofEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime);
 
   /// Constructor, copy from another TofEvent object
@@ -93,7 +94,9 @@ public:
   }
 
   //------------------------------------------------------------------------
-  /// Return the time of flight, as a double, in nanoseconds.
+  /** Return the 'x value'. Despite the name, this can be in any unit in the UnitFactory.
+   *  If it is time-of-flight, it will be in microseconds.
+   */
   double tof() const
   {
     return m_tof;
@@ -150,8 +153,7 @@ class DLLExport WeightedEvent : public TofEvent {
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
-public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
-
+public:
   /// The weight of this neutron.
   float m_weight;
 
@@ -234,11 +236,11 @@ class DLLExport WeightedEventNoTime {
   friend class tofGreaterOrEqual;
   friend class tofGreater;
 
-public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
-
-  /// The time of flight of this neutron
+protected:
+  /// The 'x value' (e.g. time-of-flight) of this neutron
   double m_tof;
 
+public:
   /// The weight of this neutron.
   float m_weight;
 

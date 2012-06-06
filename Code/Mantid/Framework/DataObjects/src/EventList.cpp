@@ -59,7 +59,7 @@ namespace DataObjects
     if (e1.pulseTime() < e2.pulseTime()){
       return true;
     }
-    else if ( (e1.pulseTime() == e2.pulseTime()) && (e1.m_tof < e2.m_tof) ){
+    else if ( (e1.pulseTime() == e2.pulseTime()) && (e1.tof() < e2.tof()) ){
       return true;
     }
 
