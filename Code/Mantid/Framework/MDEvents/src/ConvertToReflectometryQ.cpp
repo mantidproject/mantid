@@ -16,7 +16,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/ReflectometryTransformQxQz.h"
 #include "MantidMDEvents/ReflectometryTransformKiKf.h"
-
+#include "MantidMDEvents/ReflectometryTransformP.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;
@@ -125,9 +125,9 @@ namespace
   */
   void checkOutputDimensionalityChoice(const std::string & outputDimensions )
   {
-    if(outputDimensions != qSpaceTransform() && outputDimensions != kSpaceTransform())
+    if(outputDimensions != qSpaceTransform() && outputDimensions != kSpaceTransform() && outputDimensions != pSpaceTransform())
     {
-      throw std::runtime_error("Transforms other than to Q have not been implemented yet");
+      throw std::runtime_error("Unknown transformation");
     }
   }
 
@@ -261,6 +261,8 @@ namespace MDEvents
     const double dim1max = extents[3];
     
     typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
+
+    //Select the transform strategy.
     ReflectometryMDTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
     {
@@ -268,13 +270,14 @@ namespace MDEvents
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      throw std::runtime_error("pSpaceTransform is not supported Yet.");
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
     else
     {
-       transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
 
+    //Execute the transform and bind to the output.
     setProperty("OutputWorkspace", transform->execute(inputWs));
   }
 
