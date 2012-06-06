@@ -12,6 +12,7 @@
 #include <QTextStream>
 #include <QTemporaryFile>
 #include <QMdiArea>
+#include <QSize>
 
 /**
  * Constructor.
@@ -24,7 +25,6 @@ QMainWindow(NULL,f),
 #endif
 d_app(appWindow)
 {
-  this->setMinimumSize(100,100);
   setFocusPolicy(Qt::StrongFocus);
   connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
 #ifdef Q_OS_WIN
@@ -173,6 +173,11 @@ void FloatingWindow::removeMdiSubWindow()
   {
     wrapper->setWidget(NULL);
   }
+}
+
+QSize FloatingWindow::minimumSizeHint() const
+{
+  return QSize(200, 200);
 }
 
 /** Sets the widget displayed in the FloatingWindow

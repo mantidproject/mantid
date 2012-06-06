@@ -50,9 +50,7 @@ public:
   MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f = 0):
   QWidget(parent,f),
   m_widget(NULL)
-  {
-  }
-
+  {}
   void setWidget(QWidget* w)
   {
     if (w == NULL)

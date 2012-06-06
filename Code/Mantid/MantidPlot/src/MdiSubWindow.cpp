@@ -59,7 +59,6 @@ MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const Q
 		d_birthdate(QDateTime::currentDateTime ().toString(Qt::LocalDate)),
 		d_min_restore_size(QSize())
 {
-  this->setMinimumSize(100,100);
 	setObjectName(name);
 	setAttribute(Qt::WA_DeleteOnClose);
 	setLocale(app->locale());
