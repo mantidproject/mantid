@@ -35,6 +35,8 @@ set ( SRC_FILES
 	src/MDWSTransfDescr.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
+	src/ReflectometryTransformKiKf.cpp
+	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
@@ -89,8 +91,10 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDWSTransfDescr.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
-	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/ReflectometryMDTransform.h
+	inc/MantidMDEvents/ReflectometryTransformKiKf.h
+	inc/MantidMDEvents/ReflectometryTransformP.h
+	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
@@ -135,6 +139,8 @@ set ( TEST_FILES
 	test/MDWSTransfDescrTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
+	test/ReflectometryTransformKiKfTest.h
+	test/ReflectometryTransformPTest.h
 	test/ReflectometryTransformQxQzTest.h
 	test/SaveMDTest.h
 	test/SkippingPolicyTest.h
