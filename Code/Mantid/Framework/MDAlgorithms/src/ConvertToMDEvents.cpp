@@ -96,7 +96,7 @@ ConvertToMDEvents::init()
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
-     if(Q_modes.empty()) Q_modes.assign(1,"");
+     if(Q_modes.empty()) Q_modes.assign(1,"ERROR IN LOADING Q-converters");
   
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
@@ -334,7 +334,7 @@ void ConvertToMDEvents::exec()
   pConvertor  = AlgoSelector.convSelector(inWS2D,pConvertor);
 
   // initate conversion and estimate amout of job to dl
-  size_t n_steps = pConvertor->initialize(inWS2D,TWSD,pWSWrapper);
+  size_t n_steps = pConvertor->initialize(TWSD,pWSWrapper);
   // progress reporter
   pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 

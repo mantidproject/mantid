@@ -170,21 +170,23 @@ std::vector<std::string> MDTransfQ3D::getDefaultDimID(ConvertToMD::EModes dEmode
 std::vector<std::string> MDTransfQ3D::outputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(inWS);
-    std::vector<std::string> UnitID = MDTransfModQ::getDefaultDimID(dEmode,inWS);
+    std::vector<std::string> UnitID = this->getDefaultDimID(dEmode,inWS);
     //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
-    UnitID[0] = "MomentumTransfer";
-    UnitID[1] = "MomentumTransfer";
-    UnitID[2] = "MomentumTransfer";
+    std::string kUnits("MomentumTransfer");
+    if(dEmode==ConvertToMD::Elastic){
+         kUnits= "Momentum";
+    }
+
+    UnitID[0] = kUnits;
+    UnitID[1] = kUnits;
+    UnitID[2] = kUnits;
     return UnitID;
 }
 
 
 /// constructor;
-MDTransfQ3D::MDTransfQ3D():
-pDet(NULL),
-nMatrixDim(-1)
-{
-}    
+MDTransfQ3D::MDTransfQ3D()
+{}    
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace
