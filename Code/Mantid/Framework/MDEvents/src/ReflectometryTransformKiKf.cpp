@@ -23,6 +23,18 @@ namespace MDEvents
   ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta) 
     : m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
   {
+      if(kiMin >= kiMax)
+      {
+        throw std::invalid_argument("min ki bounds must be < max ki bounds");
+      }
+      if(kfMin >= kfMax)
+      {
+        throw std::invalid_argument("min kf bounds must be < max kf bounds");
+      }
+      if(incidentTheta < 0 || incidentTheta > 90)
+      {
+        throw std::out_of_range("incident theta angle must be > 0 and < 90");
+      }
   }
     
   //----------------------------------------------------------------------------------------------

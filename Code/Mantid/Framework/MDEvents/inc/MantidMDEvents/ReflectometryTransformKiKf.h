@@ -11,6 +11,9 @@ namespace Mantid
 {
 namespace MDEvents
 {
+  /**
+  class CalculateReflectometryK: Calculation type for converting to ki or kf given a theta value (in degrees) and a wavelength
+  */
   class CalculateReflectometryK
   {
   private:
