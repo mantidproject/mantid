@@ -30,6 +30,8 @@ void MDWSDescription::setDimName(unsigned int nDim,const std::string &Name)
     }
     dimNames[nDim] = Name;
 }
+/** this is rather misleading function, as MD workspace does not currently have dimension units. 
+  *It actually sets the units dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
 void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
 {
     if(nDim>=nDims){
@@ -38,6 +40,7 @@ void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
     }
     dimUnits[nDim] = Unit;
 }
+
 /** method sets up the pointer to the class which contains detectors parameters
   * @param   -- det_loc the class which contaits the preprocessed detectors parameters
   *
@@ -51,9 +54,17 @@ void MDWSDescription::setDetectors(const ConvToMDPreprocDet &det_loc)
     }
 
 }
+/** the method builds the MD ws description from existing matrix workspace and the requested transformation parameters. 
+ *@param  pWS    -- input matrix workspace to be converted into MD workpsace
+ *@param  QMode  -- momentum conversion mode. Any mode supported by Q conversion factory. Class just carries up the name of Q-mode, 
+ *                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
+ *                  to the factory
+ *@param  dEMode  -- energy analysis mode (string representation). Should correspond to energy analysis modes, supported by selected Q-mode
+ *@param  dimPropertyNames -- the names of additional properties, which will be used as dimensions
 
+*/
 void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
-                                        const std::vector<std::string> &dimProperyNames,size_t maxNdims)
+                                        const std::vector<std::string> &dimProperyNames)
 {
     inWS = pWS;
     // fill additional dimensions values, defined by workspace properties;
@@ -73,12 +84,6 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
 
     // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions coming from additional coordinates
     nDims  = nMatrixDim + (unsigned int)AddCoord.size();
-    if(nDims>maxNdims||AddCoord.size()>maxNdims)
-    {
-        std::string ERR="Input parameters have requested "+boost::lexical_cast<std::string>(nDims)+
-                        "which is higher then supported number: "+boost::lexical_cast<std::string>(maxNdims);
-        throw(std::invalid_argument(ERR));
-    }
     this->resizeDimDescriptions(nDims);
     // check if all MD dimensions descriptors are set properly
     if(nDims!=dimNames.size()||nDims!=dimMin.size())
@@ -112,9 +117,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
     this->GoniomMatr = inWS->run().getGoniometer().getR();
     
-}
-  
-
+} 
 
 /** the function builds MD event WS description from existing workspace. 
   * Primary used to obtain existing ws parameters 

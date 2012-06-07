@@ -101,13 +101,14 @@ public:
 
   /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
    void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
-                            const std::vector<std::string> &dimProperyNames,size_t maxNdims);
+                            const std::vector<std::string> &dimProperyNames);
 
   /// compare two descriptions and select the coplimentary result. 
    void checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &NewMDWorkspace);
  
    void setMinMax(const std::vector<double> &minVal,const std::vector<double> &maxVal);
    void setDimName(unsigned int nDim,const std::string &Name);
+   // this is rather misleading function, as MD workspace do not have dimension units
    void setDimUnit(unsigned int nDim,const std::string &Unit);
    void setDetectors(const ConvToMDPreprocDet &det_loc);
 // static helper functions:

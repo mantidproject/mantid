@@ -60,9 +60,9 @@ class DLLExport UnitsConversionHelper
       // the ID, which specifies what kind of unit conversion should be used. 
       ConvertToMD::ConvertUnits UnitCnvrsn;
 
-      //  these variables needed in the case of fast units conversion
+      //  these variables needed and used in the case of fast units conversion
       double factor, power;
-      //
+      //  these variables needed and used for conversion through TOF
       int emode;
       double L1,efix,twoTheta,L2;
       std::vector<double>const *pTwoTheta;

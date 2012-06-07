@@ -23,8 +23,12 @@ API::IMDEventWorkspace_sptr
 MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
 {
     if(WSD.nDimensions()<1||WSD.nDimensions()>MAX_N_DIM){
-   //     g_log.error()<< " Number of requested dimensions: "<<WSD.n_dims<<" exceeds the maxumal allowed numed or dimensions: "<<MAX_N_DIM<<std::endl;
-        throw(std::invalid_argument(" Numer of requested dimensions exceeds maximal allowed number of dimensions"));
+    {
+        std::string ERR=" Number of requested MD dimensions: "+boost::lexical_cast<std::string>(WSD.nDimensions())+
+                        " exceeds maximal number of MD dimensions: "+boost::lexical_cast<std::string>(MAX_N_DIM)+" set up during compilation\n";
+        throw(std::invalid_argument(ERR));
+    }
+
     }
     this->n_dimensions = (int)WSD.nDimensions();
 

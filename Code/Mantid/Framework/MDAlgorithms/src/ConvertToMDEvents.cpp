@@ -232,7 +232,7 @@ void ConvertToMDEvents::exec()
     std::vector<double> dimMax = getProperty("MaxValues");
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
     TWSD.setMinMax(dimMin,dimMax);   
-    TWSD.buildFromMatrixWS(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim());
+    TWSD.buildFromMatrixWS(inWS2D,Q_mod_req,dE_mod_req,other_dim_names);
 
 
   // instanciate class, responsible for defining Mslice-type projection
