@@ -14,22 +14,22 @@ namespace Mantid
   {
     /*
     Constructor
-    @param kiMin: min ki value (extent)
-    @param kiMax: max ki value (extent)
-    @param kfMin: min kf value (extent)
-    @param kfMax; max kf value (extent)
+    @param pSumMin: p sum min value (extent)
+    @param pSumMax: p sum max value (extent)
+    @param pDiffMin: p diff min value (extent)
+    @param pDiffMax: p diff max value (extent)
     @param incidentTheta: Predetermined incident theta value
     */
-    ReflectometryTransformP::ReflectometryTransformP(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta)
-      : m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
+    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta)
+      : m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
     {
-      if(kiMin >= kiMax)
+      if(pSumMin >= m_pSumMax)
       {
-        throw std::invalid_argument("min ki bounds must be < max ki bounds");
+        throw std::invalid_argument("min sum p bounds must be < max sum p bounds");
       }
-      if(kfMin >= kfMax)
+      if(pDiffMin >= pDiffMax)
       {
-        throw std::invalid_argument("min kf bounds must be < max kf bounds");
+        throw std::invalid_argument("min diff p bounds must be < max diff p bounds");
       }
       if(incidentTheta < 0 || incidentTheta > 90)
       {
@@ -50,8 +50,8 @@ namespace Mantid
       const size_t nbinsz = 10;
 
       auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-      MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i + Pz_f","sum_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin + m_kfMin), static_cast<Mantid::coord_t>(m_kiMax + m_kfMax), nbinsx)); 
-      MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i - Pz_f","diff_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin - m_kfMin), static_cast<Mantid::coord_t>(m_kiMax - m_kfMax), nbinsz)); 
+      MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i + Pz_f","sum_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pSumMin), static_cast<Mantid::coord_t>(m_pSumMax), nbinsx)); 
+      MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i - Pz_f","diff_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pDiffMin), static_cast<Mantid::coord_t>(m_pDiffMax), nbinsz)); 
 
       ws->addDimension(pSumDim);
       ws->addDimension(pDiffDim);

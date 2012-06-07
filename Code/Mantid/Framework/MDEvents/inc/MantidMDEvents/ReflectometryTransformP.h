@@ -95,17 +95,17 @@ namespace MDEvents
   class DLLExport ReflectometryTransformP : public ReflectometryMDTransform
   {
   private:
-    const double m_kiMin;
-    const double m_kiMax;
-    const double m_kfMin;
-    const double m_kfMax;
+    const double m_pSumMin;
+    const double m_pSumMax;
+    const double m_pDiffMin;
+    const double m_pDiffMax;
     /// Object performing raw calculation to determine pzi + pzf
     mutable CalculateReflectometrySumP m_pSumCalculation;
     /// Object performing raw calculation to determine pzi - pzf
     mutable CalculateReflectometryDiffP m_pDiffCalculation;
 
   public:
-    ReflectometryTransformP(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta);
+    ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta);
     virtual ~ReflectometryTransformP();
     virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
     
