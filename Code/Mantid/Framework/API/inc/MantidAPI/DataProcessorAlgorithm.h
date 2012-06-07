@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/PropertyManager.h"
 #include <vector>
 
 namespace Mantid
@@ -45,15 +46,18 @@ protected:
   void setAccumAlg(const std::string & alg);
   ITableWorkspace_sptr determineChunk();
   void loadChunk();
-  void load();
+  Workspace_sptr load(const std::string &inputData);
   std::vector<std::string> splitInput(const std::string & input);
   void forwardProperties();
+  boost::shared_ptr<Kernel::PropertyManager> getProcessProperties(const std::string &propertyManager);
 
 private:
   /// The name of the algorithm to invoke when loading data
   std::string m_loadAlg;
   /// The name of the algorithm to invoke when accumulating data chunks
   std::string m_accumulateAlg;
+  /// MPI option. If false, we will use one job event if MPI is available
+  bool m_useMPI;
 };
 
 } // namespace API
