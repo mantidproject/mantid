@@ -9,7 +9,7 @@ CMAKE_POLICY(VERSION 2.6)
 # Generated CMake target import file.
 #----------------------------------------------------------------
 
-MESSAGE (STATUS "CMAKE_LIBRARY_PATH: ${CMAKE_LIBRARY_PATH}")
+# MESSAGE (STATUS "CMAKE_LIBRARY_PATH: ${CMAKE_LIBRARY_PATH}")
 
 # Commands may need to know the format version.
 SET(CMAKE_IMPORT_FILE_VERSION 1)
