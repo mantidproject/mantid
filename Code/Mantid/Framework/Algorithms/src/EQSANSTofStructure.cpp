@@ -137,10 +137,10 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
       // Correct for the scattered neutron flight path
       if (flight_path_correction) newtof /= tof_factor;
 
-      while( it->tof() < threshold ) newtof += tmp_frame_width;
+      while( newtof < threshold ) newtof += tmp_frame_width;
 
       // Remove events that don't fall within the accepted time window
-      double rel_tof = it->tof() - frame_tof0;
+      double rel_tof = newtof - frame_tof0;
       double x = ( static_cast<int>(floor(rel_tof*10)) % static_cast<int>(floor(tof_frame_width*10) ) ) * 0.1;
       if( x < low_tof_cut || x > tof_frame_width-high_tof_cut)
       {
