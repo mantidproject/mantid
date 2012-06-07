@@ -366,7 +366,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 #	SET (HDF5_CONFIG "${CMAKE_MODULE_PATH}/hdf5-config.cmake" )
 #	find_package ( HDF5 COMPONENTS HL REQUIRED
 #				        CONFIGS hdf5-config.cmake )
-#ELSE
+#ELSE()
 #	find_package ( HDF5 COMPONENTS HL REQUIRED )
 #ENDIF()
 
