@@ -127,9 +127,16 @@ void MaskBins::exec()
     {
       outputWS = WorkspaceFactory::Instance().create(inputWS);
       setProperty("OutputWorkspace",outputWS);
+
+      // Copy over the data
+      for (size_t wi = 0; wi < outputWS->getNumberHistograms(); ++wi)
+      {
+        outputWS->dataX(wi) = inputWS->readX(wi);
+        outputWS->dataY(wi) = inputWS->readY(wi);
+        outputWS->dataE(wi) = inputWS->readE(wi);
+      }
     }
     
-
     const int numHists = static_cast<int>(inputWS->getNumberHistograms());
     Progress progress(this,0.0,1.0,numHists);
     //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
@@ -149,11 +156,7 @@ void MaskBins::exec()
       else
         wi = i;
 
-      // Copy over the data
-      outputWS->dataX(wi) = inputWS->readX(wi);
       const MantidVec& X = outputWS->readX(wi);
-      outputWS->dataY(wi) = inputWS->readY(wi);
-      outputWS->dataE(wi) = inputWS->readE(wi);
 
       MantidVec::difference_type startBinLoop(startBin),endBinLoop(endBin);
       if (!commonBins) this->findIndices(X,startBinLoop,endBinLoop);
@@ -164,10 +167,11 @@ void MaskBins::exec()
         outputWS->maskBin(wi,j);
       }
       progress.report();
-    }
 
-  }
+    } // ENDFOR(i)
+  } // ENDIFELSE(eventworkspace?)
  
+  return;
 }
 
 /** Execution code for EventWorkspaces

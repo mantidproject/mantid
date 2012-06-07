@@ -96,7 +96,7 @@ namespace Mantid
       }
     };
 
-  /** ReflectometryTranformQxQz : Type of ReflectometyTransform. Used to convert from an input event workspace to a 2D MDEvent workspace with dimensions of QxQy.
+  /** ReflectometryTranformQxQz : Type of ReflectometyTransform. Used to convert from an input R vs Wavelength workspace to a 2D MDEvent workspace with dimensions of QxQy.
   Transformation is specific for reflectometry purposes.
     
     @date 2012-05-29

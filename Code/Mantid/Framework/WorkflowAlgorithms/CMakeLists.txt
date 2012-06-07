@@ -1,42 +1,44 @@
 set ( SRC_FILES
-        src/EQSANSQ2D.cpp
-        src/EQSANSLoad.cpp
-        src/HFIRLoad.cpp
-        src/HFIRInstrument.cpp
-        src/EQSANSInstrument.cpp
-        src/SANSBeamFinder.cpp
-        src/SANSSolidAngleCorrection.cpp
-        src/SANSSensitivityCorrection.cpp
-        src/EQSANSDarkCurrentSubtraction.cpp
-        src/EQSANSPatchSensitivity.cpp
-        src/HFIRDarkCurrentSubtraction.cpp
-        src/SetupHFIRReduction.cpp
-        src/SetupEQSANSReduction.cpp
-        src/ComputeSensitivity.cpp
-        src/RefRoi.cpp
-        src/RefReduction.cpp
+	src/ComputeSensitivity.cpp
+	src/DgsReduction.cpp
+	src/EQSANSDarkCurrentSubtraction.cpp
+	src/EQSANSInstrument.cpp
+	src/EQSANSLoad.cpp
+	src/EQSANSPatchSensitivity.cpp
+	src/EQSANSQ2D.cpp
+	src/HFIRDarkCurrentSubtraction.cpp
+	src/HFIRInstrument.cpp
+	src/HFIRLoad.cpp
+	src/RefReduction.cpp
+	src/RefRoi.cpp
+	src/SANSBeamFinder.cpp
+	src/SANSSensitivityCorrection.cpp
+	src/SANSSolidAngleCorrection.cpp
+	src/SetupEQSANSReduction.cpp
+	src/SetupHFIRReduction.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES 
 )
 
 set ( INC_FILES
-        inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
-        inc/MantidWorkflowAlgorithms/EQSANSLoad.h
-        inc/MantidWorkflowAlgorithms/HFIRLoad.h
-        inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
-        inc/MantidWorkflowAlgorithms/HFIRInstrument.h
-        inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
-        inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
-        inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
-        inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
-        inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
-        inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
-        inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
-        inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
-        inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
-        inc/MantidWorkflowAlgorithms/RefRoi.h
-        inc/MantidWorkflowAlgorithms/RefReduction.h
+	inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
+	inc/MantidWorkflowAlgorithms/DgsReduction.h
+	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
+	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
+	inc/MantidWorkflowAlgorithms/EQSANSLoad.h
+	inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
+	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
+	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
+	inc/MantidWorkflowAlgorithms/HFIRLoad.h
+	inc/MantidWorkflowAlgorithms/RefReduction.h
+	inc/MantidWorkflowAlgorithms/RefRoi.h
+	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
+	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
+	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
+	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
+	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
 )
               
 set ( TEST_FILES

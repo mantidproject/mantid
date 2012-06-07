@@ -219,13 +219,12 @@ namespace Mantid
         else
         {
           std::string parName = term[0].name();
-          std::string parValue = term[1].str();
-          if (term[0].name().size() >= 10 && term[0].name().substr(0,10) == "constraint")
+          if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
           {
             addConstraints(cfun,term[1]);
             continue;
           }
-          else if (term[0].name() == "ties")
+          else if (parName == "ties")
           {
             addTies(cfun,term[1]);
             continue;

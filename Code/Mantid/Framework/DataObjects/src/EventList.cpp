@@ -59,7 +59,7 @@ namespace DataObjects
     if (e1.pulseTime() < e2.pulseTime()){
       return true;
     }
-    else if ( (e1.pulseTime() == e2.pulseTime()) && (e1.m_tof < e2.m_tof) ){
+    else if ( (e1.pulseTime() == e2.pulseTime()) && (e1.tof() < e2.tof()) ){
       return true;
     }
 
@@ -3487,7 +3487,8 @@ namespace DataObjects
     if (splitter.size() <= 0)
     {
       // 3A. Copy all events to group workspace = -1
-      this->duplicate(outputs[-1]);
+      (*outputs[-1]) = (*this);
+      // this->duplicate(outputs[-1]);
     }
     else
     {
@@ -3507,54 +3508,6 @@ namespace DataObjects
 
     return;
   }
-
-
-  /*
-   * Duplicate helper function
-   */
-  template< class T >
-  void EventList::duplicateHelper(EventList* output, typename std::vector<T> & events) const
-  {
-    for (size_t ie = 0; ie < events.size(); ++ ie)
-    {
-      const T eventCopy(events[ie]);
-      //Add the copy to the output
-      output->addEventQuickly(eventCopy);
-    }
-
-    return;
-  }
-
-
-  /*
-   * Duplicate events
-   */
-  void EventList::duplicate(EventList* output) const
-  {
-    // 1. Initialize all the outputs
-    output->clear();
-    output->detectorIDs = this->detectorIDs;
-    output->refX = this->refX;
-    // Match the output event type.
-    output->switchTo(eventType);
-
-    // 2. Call Helper to do duplicate
-    switch (eventType)
-    {
-    case TOF:
-      duplicateHelper(output, this->events);
-      break;
-    case WEIGHTED:
-      duplicateHelper(output, this->weightedEvents);
-      break;
-    case WEIGHTED_NOTIME:
-      duplicateHelper(output, this->weightedEventsNoTime);
-      break;
-    }
-
-    return;
-  }
-
 
   //--------------------------------------------------------------------------
   /** Get the vector of events contained in an EventList;

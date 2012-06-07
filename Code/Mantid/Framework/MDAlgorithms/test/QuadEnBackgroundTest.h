@@ -138,7 +138,7 @@ public:
         // add events to make data quadratic in 4th coordinate with noise
         out3->calcVolume();
 
-        srand( time(NULL) );
+        srand( static_cast<unsigned int>(time(NULL)) );
         errorsq=1.0;
         events.clear();
         double noise=0.1;

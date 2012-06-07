@@ -132,22 +132,23 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
 
     for (it=events.begin(); it<events.end(); ++it)
     {
-      it->m_tof += frame_offset;
+      double newtof = it->tof();
+      newtof += frame_offset;
       // Correct for the scattered neutron flight path
-      if (flight_path_correction) it->m_tof /= tof_factor;
+      if (flight_path_correction) newtof /= tof_factor;
 
-      while( it->m_tof < threshold ) it->m_tof += tmp_frame_width;
+      while( it->tof() < threshold ) newtof += tmp_frame_width;
 
       // Remove events that don't fall within the accepted time window
-    	double rel_tof = it->m_tof - frame_tof0;
-    	double x = ( static_cast<int>(floor(rel_tof*10)) % static_cast<int>(floor(tof_frame_width*10) ) ) * 0.1;
+      double rel_tof = it->tof() - frame_tof0;
+      double x = ( static_cast<int>(floor(rel_tof*10)) % static_cast<int>(floor(tof_frame_width*10) ) ) * 0.1;
       if( x < low_tof_cut || x > tof_frame_width-high_tof_cut)
       {
         continue;
       }
       // At this point the events in the second frame are still off by a frame
-      if (frame_skipping && rel_tof>tof_frame_width) it->m_tof += tof_frame_width;
-      clean_events.push_back(*it);
+      if (frame_skipping && rel_tof>tof_frame_width) newtof += tof_frame_width;
+      clean_events.push_back(TofEvent(newtof,it->pulseTime()));
     }
     events.clear();
     for (it=clean_events.begin(); it<clean_events.end(); ++it)

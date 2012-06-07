@@ -76,7 +76,7 @@ void ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSqu
     {
       throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
     }
-    int k = PARALLEL_THREAD_NUMBER;
+    std::vector<API::IFunction_sptr>::size_type k = PARALLEL_THREAD_NUMBER;
     PARALLEL_CRITICAL(resize)
     {
       if ( k >= funs.size() )

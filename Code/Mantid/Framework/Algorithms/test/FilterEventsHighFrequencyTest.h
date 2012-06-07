@@ -120,7 +120,7 @@ public:
     for (size_t i = 0; i < events0.getNumberEvents(); i ++){
       DataObjects::WeightedEvent e0 = events0.getEvent(i);
       int64_t abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
-      std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.m_tof << " / " << abstime2<< std::endl;
+      std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.tof() << " / " << abstime2<< std::endl;
     }
 
     DataObjects::WeightedEvent e0;
@@ -234,7 +234,7 @@ public:
      for (size_t i = 0; i < events0.getNumberEvents(); i ++){
        DataObjects::WeightedEvent e0 = events0.getEvent(i);
        int64_t abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
-       std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.m_tof << " / " << abstime2<< std::endl;
+       std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.tof() << " / " << abstime2<< std::endl;
      }
 
      DataObjects::WeightedEvent e0;
@@ -340,7 +340,7 @@ public:
       for (size_t i = 0; i < events0.getNumberEvents(); i ++){
         DataObjects::WeightedEvent e0 = events0.getEvent(i);
         int64_t abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
-        std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.m_tof << " / " << abstime2<< std::endl;
+        std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.tof() << " / " << abstime2<< std::endl;
       }
 
       DataObjects::WeightedEvent e0;
@@ -441,9 +441,7 @@ public:
 
       for (size_t i = 0; i < numevents; i ++){
         // a) generate an event
-        DataObjects::TofEvent event;
-        event.m_pulsetime = pulsetime;
-        event.m_tof = tof;
+        DataObjects::TofEvent event(tof,pulsetime);
         tof += dtof;
 
         // b) add event list

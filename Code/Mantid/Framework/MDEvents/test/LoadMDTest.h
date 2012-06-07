@@ -495,7 +495,7 @@ public:
       TS_ASSERT_DELTA(ws->getSignalAt(i), newWS->getSignalAt(i), 1e-6);
       TS_ASSERT_DELTA(ws->getErrorAt(i), newWS->getErrorAt(i), 1e-6);
       TS_ASSERT_DELTA(ws->getNumEventsAt(i), newWS->getNumEventsAt(i), 1e-6);
-      TS_ASSERT_DELTA(ws->getIsMaskedAt(i), newWS->getIsMaskedAt(i), 1e-6);
+      TS_ASSERT_EQUALS(ws->getIsMaskedAt(i), newWS->getIsMaskedAt(i));
     }
 
     if (Poco::File(filename).exists())

@@ -1,4 +1,4 @@
-#include "MantidMDEvents/ReflectometryTransformQxQz.h"
+#include "MantidMDEvents/ReflectometryTransformKiKf.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <stdexcept>
@@ -9,57 +9,57 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-  namespace MDEvents
-  {
+namespace MDEvents
+{
 
-    //----------------------------------------------------------------------------------------------
-    /** Destructor
-    */
-    ReflectometryTransformQxQz::~ReflectometryTransformQxQz()
-    {
-    }
-
-    /*
+  /*
     Constructor
-    @param qxMin: min qx value (extent)
-    @param qxMax: max qx value (extent)
-    @param qzMin: min qz value (extent)
-    @param qzMax; max qz value (extent)
+    @param kiMin: min ki value (extent)
+    @param kiMax: max ki value (extent)
+    @param kfMin: min kf value (extent)
+    @param kfMax; max kf value (extent)
     @param incidentTheta: Predetermined incident theta value
-    */
-    ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
-    m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_QxCalculation(incidentTheta), m_QzCalculation(incidentTheta)
-    {
-      if(qxMin >= qxMax)
+  */
+  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta) 
+    : m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
+  {
+      if(kiMin >= kiMax)
       {
-        throw std::invalid_argument("min qx bounds must be < max qx bounds");
+        throw std::invalid_argument("min ki bounds must be < max ki bounds");
       }
-      if(qzMin >= qzMax)
+      if(kfMin >= kfMax)
       {
-        throw std::invalid_argument("min qz bounds must be < max qz bounds");
+        throw std::invalid_argument("min kf bounds must be < max kf bounds");
       }
       if(incidentTheta < 0 || incidentTheta > 90)
       {
         throw std::out_of_range("incident theta angle must be > 0 and < 90");
       }
-    }
-
-    /*
+  }
+    
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  ReflectometryTransformKiKf::~ReflectometryTransformKiKf()
+  {
+  }
+  
+  /*
     Execute the transformtion. Generates an output IMDEventWorkspace.
     @return the constructed IMDEventWorkspace following the transformation.
     @param ws: Input MatrixWorkspace const shared pointer
-    */
-    IMDEventWorkspace_sptr ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const
-    {
+  */
+  Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+  {
       const size_t nbinsx = 10;
       const size_t nbinsz = 10;
 
       auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-      MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin), static_cast<Mantid::coord_t>(m_qxMax), nbinsx)); 
-      MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(m_qzMin), static_cast<Mantid::coord_t>(m_qzMax), nbinsz)); 
+      MDHistoDimension_sptr kiDim = MDHistoDimension_sptr(new MDHistoDimension("Ki","ki","(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin), static_cast<Mantid::coord_t>(m_kiMax), nbinsx)); 
+      MDHistoDimension_sptr kfDim = MDHistoDimension_sptr(new MDHistoDimension("Kf","kf","(Ang^-1)", static_cast<Mantid::coord_t>(m_kfMin), static_cast<Mantid::coord_t>(m_kfMax), nbinsz)); 
 
-      ws->addDimension(qxDim);
-      ws->addDimension(qzDim);
+      ws->addDimension(kiDim);
+      ws->addDimension(kfDim);
 
       // Set some reasonable values for the box controller
       BoxController_sptr bc = ws->getBoxController();
@@ -78,24 +78,24 @@ namespace Mantid
         auto counts = inputWs->readY(index);
         auto wavelengths = inputWs->readX(index);
         auto errors = inputWs->readE(index);
-        const size_t nInputBins =  wavelengths.size() -1;
+        const size_t nInputBins = wavelengths.size() -1 ;
         const double theta_final = spectraAxis->getValue(index);
-        m_QxCalculation.setThetaFinal(theta_final);
-        m_QzCalculation.setThetaFinal(theta_final);
+        CalculateReflectometryK kfCalculation(theta_final);
         //Loop over all bins in spectra 
         for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
         {
           const double& wavelength = 0.5*(wavelengths[binIndex] + wavelengths[binIndex+1]);
-          double _qx = m_QxCalculation.execute(wavelength);
-          double _qz = m_QzCalculation.execute(wavelength);
-          double centers[2] = {_qx, _qz};
+          double _ki = m_KiCalculation.execute(wavelength);
+          double _kf = kfCalculation.execute(wavelength);
+          double centers[2] = {_ki, _kf};
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
         }
         ws->splitAllIfNeeded(NULL);
       }
       return ws;
-    }
+  }
 
-  } // namespace Mantid
+
+} // namespace Mantid
 } // namespace MDEvents

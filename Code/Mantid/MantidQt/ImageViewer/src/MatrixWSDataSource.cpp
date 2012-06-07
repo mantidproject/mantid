@@ -13,6 +13,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Run.h"
+#include "MantidQtImageViewer/ErrorHandler.h"
 
 using namespace Mantid;
 using namespace Kernel;
@@ -247,6 +249,8 @@ void MatrixWSDataSource::GetInfoList( double x,
     IVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
   }
 
+  try
+  {
                                       // now try to do various unit conversions
                                       // to get equivalent info
                                       // first make sure we can get the needed
@@ -300,6 +304,15 @@ void MatrixWSDataSource::GetInfoList( double x,
   double efixed = 0;
   double delta  = 0;
 
+  const API::Run & run = mat_ws->run();   // cases I checked don't have Ei :-(
+  if ( run.hasProperty("Ei") )              
+  {
+    Kernel::Property* prop = run.getProperty("Ei");
+    efixed = boost::lexical_cast<double,std::string>(prop->value());
+    emode  = 1;                           // only correct for direct geometry 
+  }                                       // instruments
+  
+
   double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta, 
                                              emode, efixed, delta );
   if ( ! (x_label == "Time-of-flight") )
@@ -323,7 +336,7 @@ void MatrixWSDataSource::GetInfoList( double x,
     IVUtils::PushNameValue( "Energy", 8, 4, energy, list );
   }
 
-  if ( (! (x_label == "d-Spacing")) && (two_theta != 0.0) )
+  if ( (! (x_label == "d-Spacing")) && (two_theta != 0.0) && ( emode == 0 ) )
   {
     const Unit_sptr& d_unit = UnitFactory::Instance().create("dSpacing");
     double d_spacing = d_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
@@ -339,6 +352,19 @@ void MatrixWSDataSource::GetInfoList( double x,
     IVUtils::PushNameValue( "q", 8, 4, mag_q, list );
   }
 
+  if ( (! (x_label == "DeltaE")) && (two_theta != 0.0) && ( emode != 0 ) )
+  {
+    const Unit_sptr& deltaE_unit=UnitFactory::Instance().create("DeltaE");
+    double delta_E = deltaE_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
+                                                        emode, efixed, delta );
+    IVUtils::PushNameValue( "DeltaE", 8, 4, delta_E, list );
+  }
+  }
+  catch (std::exception & e)
+  {
+    ErrorHandler::Notice("Failed to get information from Workspace:");
+    ErrorHandler::Notice( e.what() );
+  }
   
 }
 

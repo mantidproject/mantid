@@ -40,6 +40,7 @@
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QSpinBox>
+#include <QSize>
 
 #include <set>
 
@@ -161,6 +162,11 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 
 MultiLayer::~MultiLayer()
 {
+}
+
+QSize MultiLayer::minimumSizeHint() const
+{
+  return QSize(200, 200);
 }
 
 Graph *MultiLayer::layer(int num)

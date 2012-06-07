@@ -77,10 +77,10 @@ namespace Crystal
   /**
    *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the y dir by Roty
    *                                     * a rotation in the z direction by Rotz
-   *  @param Quat  A rotation( a copy will be normalized)
+   *  @param Q  A rotation( a copy will be normalized)
    *  @ Rotx       The angle in degrees for the rotation in x direction
    *  @ Roty       The angle in degrees for the rotation in y direction
-   *  @ Rotxz      The angle in degrees for the rotation in z direction
+   *  @ Rotz      The angle in degrees for the rotation in z direction
    */
   static void Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz);
 
@@ -264,7 +264,7 @@ namespace Crystal
     void CalcInitParams(  RectangularDetector_const_sptr bank_rect,
                             Instrument_const_sptr instrument,
                             Instrument_const_sptr  PreCalibinstrument,
-                            double & detWidthScale0,double &detWidthHeight0,
+                            double & detWidthScale0,double &detHeightScale0,
                             double &Xoffset0,double &Yoffset0,double &Zoffset0,
                             double &Xrot0,double &Yrot0,double &Zrot0);
 
@@ -300,7 +300,7 @@ namespace Crystal
      * Saves the new instrument to an xml file that can be used with the
      * LoadParameterFile Algorithm. If the filename is empty, nothing gets done.
      *
-     * @parm FileName     The filename to save this information to
+     * @param FileName     The filename to save this information to
      *
      * @param Groups      The names of the banks in each group whose values are
      *                         to be saved to the file

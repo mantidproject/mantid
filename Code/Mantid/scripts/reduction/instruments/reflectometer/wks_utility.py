@@ -7,6 +7,31 @@ import os.path
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
 
+def getSequenceRuns(run_numbers):
+    """
+    This will return the sequence of runs
+    ex:
+        input: 10,11,12
+        output: 10,11,12
+        
+        input: 10,13-15
+        output: 10,13,14,15
+    """
+    final_list = []
+    for _run in run_numbers:
+        _run = str(_run)
+        _result = _run.find('-')
+        if _result == -1:
+            final_list.append(_run)
+        else:
+            _split = _run.split('-')
+            start = int(_split[0])
+            end = int(_split[1])
+            _range = arange(end-start+1)+start
+            for _r in _range:
+                final_list.append(_r)
+    return final_list
+
 def getProtonCharge(st=None):
     """
         Returns the proton charge of the given workspace in picoCoulomb

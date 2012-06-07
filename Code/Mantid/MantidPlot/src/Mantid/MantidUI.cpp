@@ -1031,7 +1031,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       if(row == 0)
       {
         std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true);
-        b_showSignedTwoThetaVersion = parameters.size() > 0 && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+        b_showSignedTwoThetaVersion = !parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
       }
       if(b_showSignedTwoThetaVersion)
       {

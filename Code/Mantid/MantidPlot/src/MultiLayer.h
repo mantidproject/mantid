@@ -45,6 +45,7 @@ class LegendWidget;
 class MantidTreeWidget;
 class MantidMDCurve;
 class MantidMatrixCurve;
+class QSize;
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -70,6 +71,9 @@ class MultiLayer: public MdiSubWindow
 public:
   MultiLayer (ApplicationWindow* parent = 0, int layers = 1, int rows = 1, int cols = 1, const QString& label = "", const char* name=0, Qt::WFlags f=0);
 	~MultiLayer();
+
+  QSize minimumSizeHint() const;
+
   QList<Graph *> layersList(){return graphsList;};
 	Graph *layer(int num);
 	LayerButton* addLayerButton();

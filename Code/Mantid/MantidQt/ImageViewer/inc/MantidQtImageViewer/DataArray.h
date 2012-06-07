@@ -90,16 +90,28 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
     double GetValue( double x, double y ) const;
 
     /// Clamp x to the interval of x-values covered by this DataArray
-    void RestrictX( double & x );
+    void RestrictX( double & x ) const;
   
     /// Clamp y to the interval of y-values covered by this DataArray
-    void RestrictY( double & y );
+    void RestrictY( double & y ) const;
 
     /// Clamp row to a valid row number for this DataArray
-    void RestrictRow( int & row );
+    void RestrictRow( int & row ) const;
 
     /// Clamp col to a valid column number for this DataArray
-    void RestrictCol( int & col );
+    void RestrictCol( int & col ) const;
+
+    /// Calculate the column number containing the specified x
+    size_t ColumnOfX( double x ) const;
+
+    /// Calculate the x-value at the center of the specified column
+    double XOfColumn( size_t col ) const;
+
+    /// Calculate the row number containing the specified y
+    size_t RowOfY( double y ) const;
+
+    /// Calculate the y-value at the center of the specified row 
+    double YOfRow( size_t row ) const;
 
 
   private:

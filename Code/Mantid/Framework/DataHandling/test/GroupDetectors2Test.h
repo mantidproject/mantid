@@ -19,6 +19,7 @@
 #include <iostream>
 #include <numeric>
 #include <Poco/Path.h>
+#include "MantidDataHandling/MaskDetectors.h"
 
 using Mantid::DataHandling::GroupDetectors2;
 using namespace Mantid::Kernel;
@@ -487,6 +488,11 @@ public:
 
   void testAverageBehaviour()
   {
+    Mantid::DataHandling::MaskDetectors mask;
+    mask.initialize();
+    mask.setPropertyValue("Workspace",inputWS);
+    mask.setPropertyValue("WorkspaceIndexList","2");
+    mask.execute();
     GroupDetectors2 gd2;
     gd2.initialize();
     gd2.setPropertyValue("InputWorkspace", inputWS);
@@ -497,8 +503,8 @@ public:
 
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("GroupDetectors2_testAverageBehaviour_Output");
 
-    // Result should be 1 + 2 + 3 / 3 = 2
-    TS_ASSERT_EQUALS(output->readY(0)[1], 2.0);
+    // Result should be 1 + 2  / 2 = 1.5
+    TS_ASSERT_EQUALS(output->readY(0)[1], 1.5);
 
     AnalysisDataService::Instance().remove("GroupDetectors2_testAverageBehaviour_Output");
   }

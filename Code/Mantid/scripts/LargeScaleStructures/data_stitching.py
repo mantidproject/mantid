@@ -60,7 +60,7 @@ class RangeSelector(object):
                 l.setScale(2,xmin,xmax)
                 
             if range_min is not None and range_max is not None:
-                mantidplot.selectMultiPeak(g, False, range_min, range_max)            
+                mantidplot.selectMultiPeak(g, False, range_min, range_max)
             else:
                 mantidplot.selectMultiPeak(g, False)
     

@@ -98,12 +98,17 @@ namespace Mantid
       }
       
       int confidence(0);
-      if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0) return confidence;
+      if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
+      {
+        fclose(file);
+        return confidence;
+      }
 
       if (isAscii(file))
       {
         confidence = 10; //Lower because should load other files first
       }
+      fclose(file);
       return confidence;
     }
 

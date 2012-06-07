@@ -168,12 +168,12 @@ void TOFSANSResolution::exec()
 
     for (itev = el.getWeightedEvents().begin(); itev != itev_end; ++itev)
     {
-      if ( boost::math::isnan(itev->m_weight) ) continue;
-      if (std::abs(itev->m_weight) == std::numeric_limits<double>::infinity()) continue;
-      if ( !isEmpty(min_wl) && itev->m_tof < min_wl ) continue;
-      if ( !isEmpty(max_wl) && itev->m_tof > max_wl ) continue;
+      if ( boost::math::isnan(itev->weight()) ) continue;
+      if (std::abs(itev->weight()) == std::numeric_limits<double>::infinity()) continue;
+      if ( !isEmpty(min_wl) && itev->tof() < min_wl ) continue;
+      if ( !isEmpty(max_wl) && itev->tof() > max_wl ) continue;
 
-      const double q = factor/itev->m_tof;
+      const double q = factor/itev->tof();
       int iq = 0;
 
       // Bin assignment depends on whether we have log or linear bins
@@ -189,16 +189,16 @@ void TOFSANSResolution::exec()
       const double dTheta2 = ( 3.0*R1*R1/(L1*L1) + 3.0*R2*R2*src_to_pixel*src_to_pixel/(L1*L1*L2*L2)
             + 2.0*(pixel_size_x*pixel_size_x+pixel_size_y*pixel_size_y)/(L2*L2) )/12.0;
 
-      const double dwl_over_wl = 3.9560*getTOFResolution(itev->m_tof)/(1000.0*(L1+L2)*itev->m_tof);
+      const double dwl_over_wl = 3.9560*getTOFResolution(itev->tof())/(1000.0*(L1+L2)*itev->tof());
       const double dq_over_q = std::sqrt(dTheta2/(theta*theta)+dwl_over_wl*dwl_over_wl);
       
       PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
       if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0)
       {
-        DxOut[iq] += q*dq_over_q*itev->m_weight;
-        XNorm[iq] += itev->m_weight;
-        TOFY[iq] += q*std::fabs(dwl_over_wl)*itev->m_weight;
-        ThetaY[iq] += q*std::sqrt(dTheta2)/theta*itev->m_weight;
+        DxOut[iq] += q*dq_over_q*itev->weight();
+        XNorm[iq] += itev->weight();
+        TOFY[iq] += q*std::fabs(dwl_over_wl)*itev->weight();
+        ThetaY[iq] += q*std::sqrt(dTheta2)/theta*itev->weight();
       }
     }
 

@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/FileFinder.h"
@@ -18,6 +19,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
+////////////////////////////////////////////////////////////////////
+// FindFilesThread
+////////////////////////////////////////////////////////////////////
+
 /**
  * Constructor.
  *
@@ -25,27 +30,42 @@ using namespace MantidQt::MantidWidgets;
  */
 FindFilesThread::FindFilesThread(QObject *parent) :
   QThread(parent), m_error(), m_filenames(), m_text(), 
-    m_isForRunFiles(), m_isOptional()
+    m_isForRunFiles(), m_isOptional(), m_algorithm(), m_property()
 {
 }
 
 /**
  * Set the values needed for the thread to run.
  *
- * @param text :: the text containing the file names, typed in by the user
- * @param isForRunFiles :: whether or not we are finding run files.
- * @param isOption :: whether or not the files are optional.
+ * @param text              :: the text containing the file names, typed in by the user
+ * @param isForRunFiles     :: whether or not we are finding run files.
+ * @param isOption          :: whether or not the files are optional.
+ * @param algorithmProperty :: the algorithm and property to use as an alternative to FileFinder.  Optional.
  */
-void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional)
+void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty)
 {
   m_text = text.trimmed().toStdString();
   m_isForRunFiles = isForRunFiles;
   m_isOptional = isOptional;
+
+  QStringList elements = algorithmProperty.split("|");
+
+  if( elements.size() == 2 )
+  {
+    m_algorithm = elements[0];
+    m_property = elements[1];
+  }
 }
 
 /**
  * Called when the thread is ran via start().  Tries to find the files, and
  * populates the error and filenames member variables with the result of the search.
+ *
+ * At present, there are two possible use cases:
+ *
+ * 1. Files are found directly by the FileFinder.  This is the default case.
+ * 2. Files are found using the specified algorithm property.  In this case, a class user must have
+ *    specified the algorithm and property via MWRunFiles::setAlgorithmProperty().
  */
 void FindFilesThread::run()
 {
@@ -63,13 +83,20 @@ void FindFilesThread::run()
   }
 
   Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
-  std::string error = "";
+
   try
   {
-    if( m_isForRunFiles )
+    // Use the property of the algorithm to find files, if one has been specified.
+    if( m_algorithm.length() != 0 && m_property.length() != 0 )
+    {
+      getFilesFromAlgorithm();
+    }
+    // Else if we are loading run files, then use findRuns.
+    else if( m_isForRunFiles )
     {
       m_filenames = fileSearcher.findRuns(m_text);
     }
+    // Else try to run a simple parsing on the string, and find the full paths individually.
     else
     {
       // Tokenise on ","
@@ -105,6 +132,43 @@ void FindFilesThread::run()
     m_filenames.clear();
   }
 }
+
+/**
+* Create a list of file extensions from the given algorithm property.
+*/
+void FindFilesThread::getFilesFromAlgorithm()
+{
+  Mantid::API::IAlgorithm_sptr algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(m_algorithm.toStdString());
+
+  if(!algorithm) throw std::invalid_argument("Cannot create algorithm " + m_algorithm.toStdString() + ".");
+
+  algorithm->initialize();
+  algorithm->setProperty("Filename", m_text);
+
+  Property *prop = algorithm->getProperty(m_property.toStdString());
+  
+  FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
+  MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty*>(prop);
+
+  if( fileProp )
+  {
+    m_filenames.push_back(fileProp->value());
+  }
+  else if( multiFileProp )
+  {
+    std::vector<std::vector<std::string> > filenames = algorithm->getProperty("Filename");
+    std::vector<std::string> flattenedNames = MultipleFileProperty::flattenFileNames(filenames);
+    
+    for( auto filename = flattenedNames.begin(); filename != flattenedNames.end(); ++filename )
+    {
+      m_filenames.push_back( *filename );
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////
+// MWRunFiles
+////////////////////////////////////////////////////////////////////
 
 MWRunFiles::MWRunFiles(QWidget *parent) 
   : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
@@ -540,8 +604,8 @@ void MWRunFiles::setFileTextWithoutSearch(const QString & text)
 }
 
 /**
- * Puts the comma separated string in the fileEditor into the m_files array.
- */
+* Finds the files specified by the user in a background thread.
+*/
 void MWRunFiles::findFiles()
 {
   if(m_uiForm.fileEditor->isModified())
@@ -558,7 +622,7 @@ void MWRunFiles::findFiles()
 
     emit findingFiles();
     // Set the values for the thread, and start it running.
-    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional());
+    m_thread->set(m_uiForm.fileEditor->text(), isForRunFiles(), this->isOptional(), m_algorithmProperty);
     m_thread->start();
   }
   else
@@ -749,26 +813,42 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
   algorithm->initialize();
   Property *prop = algorithm->getProperty(propName.toStdString());
   FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
+  MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty*>(prop);
+
+  std::set<std::string> allowed;
+  QString preferredExt;
+
   if( fileProp )
   {
-    std::set<std::string> allowed = fileProp->allowedValues();
-    std::set<std::string>::const_iterator iend = allowed.end();
-    QString preferredExt = QString::fromStdString(fileProp->getDefaultExt());
-    int index(0);
-    for(std::set<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
+    allowed = fileProp->allowedValues();
+    preferredExt = QString::fromStdString(fileProp->getDefaultExt());
+  }
+  else if( multiFileProp )
+  {
+    allowed = fileProp->allowedValues();
+    preferredExt = QString::fromStdString(fileProp->getDefaultExt());
+  }
+  else
+  {
+    return fileExts;
+  }
+
+  std::set<std::string>::const_iterator iend = allowed.end();
+  int index(0);
+  for(std::set<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
+  {
+    if ( ! it->empty() )
     {
-      if ( ! it->empty() )
+      QString ext = QString::fromStdString(*it);
+      fileExts.append(ext);
+      if( ext == preferredExt )
       {
-        QString ext = QString::fromStdString(*it);
-        fileExts.append(ext);
-        if( ext == preferredExt )
-        {
-          fileExts.move(index, 0);
-        }
-        ++index;
+        fileExts.move(index, 0);
       }
+      ++index;
     }
   }
+
   return fileExts;
 }
 

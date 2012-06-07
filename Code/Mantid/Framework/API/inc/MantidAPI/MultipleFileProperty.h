@@ -54,6 +54,9 @@ namespace API
     /// @return the vector of ws names.  For use by loading algorithm to name multiple workspaces, especially summed workspaces.
     std::vector<std::vector<unsigned int> > getRuns() const
     { return m_parser.runs(); }
+    
+    /// Returns the main file extension that's used 
+    std::string getDefaultExt() const {return m_defaultExt;}
 
     // Unhide the PropertyWithValue assignment operator
     using Kernel::PropertyWithValue< std::vector< std::vector< std::string> > >::operator=;
@@ -66,6 +69,8 @@ namespace API
     std::vector<std::string> m_exts;
     /// Parser used to parse multi-file strings.
     Kernel::MultiFileNameParsing::Parser m_parser;
+    ///The default file extension associated with the type of file this property will handle
+    std::string m_defaultExt;
   };
 
 

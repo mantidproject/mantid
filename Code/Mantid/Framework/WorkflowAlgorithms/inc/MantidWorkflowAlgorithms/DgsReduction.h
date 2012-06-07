@@ -1,18 +1,18 @@
-#ifndef MANTID_MDEVENTS_REFLECTOMETRYMDTRANFORM_H_
-#define MANTID_MDEVENTS_REFLECTOMETRYMDTRANFORM_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_
+#define MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace WorkflowAlgorithms
 {
 
-  /** ReflectometryMDTransform : Abstract type for reflectometry transforms to MDWorkspaces. This is a Strategy Design Pattern. 
+  /** DgsReduction : This is the top-level workflow algorithm for controlling
+   * direct geometry spectrometer reduction.
     
-    @date 2012-05-29
+    @date 2012-06-06
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -33,13 +33,27 @@ namespace MDEvents
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-  class DLLExport ReflectometryMDTransform 
+  */
+  class DLLExport DgsReduction  : public API::Algorithm
   {
   public:
-    //Execute the strategy to produce the a transformed, output MDWorkspace
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
+    DgsReduction();
+    virtual ~DgsReduction();
+    
+    virtual const std::string name() const;
+    virtual int version() const;
+    virtual const std::string category() const;
+
+  private:
+    virtual void initDocs();
+    void init();
+    void exec();
+
+
   };
-}
-}
-#endif
+
+
+} // namespace WorkflowAlgorithms
+} // namespace Mantid
+
+#endif  /* MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_ */
