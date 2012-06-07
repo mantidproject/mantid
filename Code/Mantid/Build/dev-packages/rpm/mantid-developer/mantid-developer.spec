@@ -34,9 +34,6 @@ Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: sip-devel
-Requires: subversion 
-Requires: gmock-devel
-Requires: gtest-devel
 Requires: git
 Requires: openssl-devel
 
@@ -61,6 +58,10 @@ required for Mantid development.
 %files
 
 %changelog
+* Thu Jun  7 2012 Russell Taylor <taylorrj@ornl.gov>
+- Remove gmock & gtest now that we include them in our repo
+- Remove subversion dependency now that we use git
+
 * Mon Mar 19 2012 Stuart Campbell <campbellsi@ornl.gov>
 - Updated for google-perftools -> gperftools package rename.
 
