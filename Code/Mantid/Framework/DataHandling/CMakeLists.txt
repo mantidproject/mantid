@@ -361,7 +361,14 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-#find_package ( HDF5 COMPONENTS HL REQUIRED )
+#IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#	SET (HDF5_DIR "${CMAKE_MODULE_PATH}")
+#	SET (HDF5_CONFIG "${CMAKE_MODULE_PATH}/hdf5-config.cmake" )
+#	find_package ( HDF5 COMPONENTS HL REQUIRED
+#				        CONFIGS hdf5-config.cmake )
+#ELSE
+#	find_package ( HDF5 COMPONENTS HL REQUIRED )
+#ENDIF()
 
 #include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
 include_directories ( inc ../Nexus/inc)
