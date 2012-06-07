@@ -1,7 +1,6 @@
 
 from interface import InstrumentInterface
-from reduction_gui.widgets.example_widget import ExampleWidget
-#from reduction_gui.reduction.example_reduction import ExampleScripter
+from reduction_gui.widgets.inelastic.dgs_sample_setup import SampleSetupWidget
 from reduction_gui.reduction.scripter import BaseReductionScripter
 class DgsInterface(InstrumentInterface):
     """
@@ -16,6 +15,6 @@ class DgsInterface(InstrumentInterface):
         # Scripter object to interface with Mantid 
         self.scripter = BaseReductionScripter(name=name)        
 
-        # Instrument description
-        self.attach(ExampleWidget(settings = self._settings, data_type = self.data_type))
+        # Sample run setup
+        self.attach(SampleSetupWidget(settings = self._settings))#, data_type = self.data_type))
         
