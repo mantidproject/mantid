@@ -6,7 +6,6 @@
 #include <iostream>
 
 // this preprocessor definition disables "ADD TO MD WORKSPACE" operations and should be enabled if this is necessary. (for debug purposes only!)
-#define _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
@@ -18,6 +17,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include "MantidMDEvents/ConvToMDEventsSelector.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -26,23 +27,23 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDAlgorithms::ConvertToMD;
 
 
 class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
 {
     Kernel::CPUTimer Clock;
-     time_t start,end;
+    time_t start,end;
 
     size_t numHist;
-    MDWSDescription WSD;
+    Kernel::Matrix<double> Rot;   
 
    Mantid::API::MatrixWorkspace_sptr inWs2D;
    Mantid::API::MatrixWorkspace_sptr inWsEv;
 
    WorkspaceCreationHelper::MockAlgorithm reporter;
-   std::auto_ptr<IConvertToMDEventsWS> pConvMethods;
-   ConvToMDPreprocDetectors det_loc;
+
+   boost::shared_ptr<ConvToMDEventsBase> pConvMethods;
+   ConvToMDPreprocDet det_loc;
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
@@ -52,33 +53,32 @@ public:
 static ConvertToMDEventsTestPerformance *createSuite() { return new ConvertToMDEventsTestPerformance(); }
 static void destroySuite(ConvertToMDEventsTestPerformance * suite) { delete suite; }    
 
-void setUp()
-{
- 
-    WSD.emode = 2;
-    WSD.Ei    = 10;
 
-    Kernel::Matrix<double> Rot(3,3);
-    Rot.setRandom(100);
-    Rot.toRotation();
-
-    size_t nDim = WSD.nDims;
-    WSD.rotMatrix = Rot;
-    WSD.dimMin.assign(nDim,-1.e+32);
-    WSD.dimMax.assign(nDim, 1.e+32);
-
-    det_loc.setEmode(WSD.emode);
-    det_loc.setL1(10);
-    det_loc.setEfix(WSD.Ei);
-
-    pTargWS->releaseWorkspace();
-    pTargWS->createEmptyMDWS(WSD);
-}
 
 void test_EventNoUnitsConv()
 {
-    pConvMethods = std::auto_ptr<IConvertToMDEventsWS>(new ConvertToMDEventsWS<EventWSType,Q3D,Indir,ConvertNo,CrystType>());
-    pConvMethods->setUPConversion(inWsEv,det_loc,WSD,pTargWS);        
+
+
+    NumericAxis *pAxis0 = new NumericAxis(2); 
+    pAxis0->setUnit("DeltaE");
+    inWsEv->replaceAxis(0,pAxis0);
+
+    MDWSDescription WSD;
+    std::vector<double> min(4,-1e+30),max(4,1e+30);
+    WSD.setMinMax(min,max);
+
+    WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
+
+    WSD.setDetectors(det_loc);
+    WSD.rotMatrix = Rot;
+
+    // create new target MD workspace
+    pTargWS->releaseWorkspace();   
+    pTargWS->createEmptyMDWS(WSD);
+
+    ConvToMDEventsSelector AlgoSelector;
+    pConvMethods = AlgoSelector.convSelector(inWsEv);
+    pConvMethods->initialize(WSD,pTargWS);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -91,9 +91,25 @@ void test_EventNoUnitsConv()
 
 void test_EventFromTOFConv()
 {
+    NumericAxis *pAxis0 = new NumericAxis(2); 
+    pAxis0->setUnit("TOF");
+    inWsEv->replaceAxis(0,pAxis0);
   
-    pConvMethods = std::auto_ptr<IConvertToMDEventsWS>(new ConvertToMDEventsWS<EventWSType,Q3D,Indir,ConvFromTOF,CrystType>());
-    pConvMethods->setUPConversion(inWsEv,det_loc,WSD,pTargWS);        
+    MDWSDescription WSD;
+    std::vector<double> min(4,-1e+30),max(4,1e+30);
+    WSD.setMinMax(min,max);
+    WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
+
+    WSD.setDetectors(det_loc);
+    WSD.rotMatrix = Rot;
+    // create new target MD workspace
+    pTargWS->releaseWorkspace();   
+    pTargWS->createEmptyMDWS(WSD);
+
+
+    ConvToMDEventsSelector AlgoSelector;
+    pConvMethods = AlgoSelector.convSelector(inWsEv);
+    pConvMethods->initialize(WSD,pTargWS);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -107,8 +123,29 @@ void test_EventFromTOFConv()
 void test_HistoFromTOFConv()
 {
   
-    pConvMethods = std::auto_ptr<IConvertToMDEventsWS>(new ConvertToMDEventsWS<Ws2DHistoType,Q3D,Indir,ConvFromTOF,CrystType>());
-    pConvMethods->setUPConversion(inWsEv,det_loc,WSD,pTargWS);        
+
+    NumericAxis *pAxis0 = new NumericAxis(2); 
+    pAxis0->setUnit("TOF");
+    inWs2D->replaceAxis(0,pAxis0);
+
+    MDWSDescription WSD;
+    std::vector<double> min(4,-1e+30),max(4,1e+30);
+    WSD.setMinMax(min,max);
+
+    WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
+
+    WSD.setDetectors(det_loc);
+    WSD.rotMatrix = Rot;
+    // create new target MD workspace
+    pTargWS->releaseWorkspace();   
+    pTargWS->createEmptyMDWS(WSD);
+
+
+    pTargWS->createEmptyMDWS(WSD);
+
+    ConvToMDEventsSelector AlgoSelector;
+    pConvMethods = AlgoSelector.convSelector(inWs2D);
+    pConvMethods->initialize(WSD,pTargWS);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -116,14 +153,36 @@ void test_HistoFromTOFConv()
     TS_ASSERT_THROWS_NOTHING(pConvMethods->runConversion(pMockAlgorithm->getProgress()));
     std::time (&end);
     double sec = std::difftime (end,start);
-    //float sec = Clock.elapsedCPU();
+
     TS_WARN("Time to complete: <Ws2DHistoType,Q3D,Indir,ConvFromTOF,CrystType>: "+boost::lexical_cast<std::string>(sec)+" sec");
 }
 
 void test_HistoNoUnitsConv()
 {
-    pConvMethods = std::auto_ptr<IConvertToMDEventsWS>(new ConvertToMDEventsWS<Ws2DHistoType,Q3D,Indir,ConvertNo,CrystType>());
-    pConvMethods->setUPConversion(inWsEv,det_loc,WSD,pTargWS);        
+
+
+    NumericAxis *pAxis0 = new NumericAxis(2); 
+    pAxis0->setUnit("DeltaE");
+    inWs2D->replaceAxis(0,pAxis0);
+
+    MDWSDescription WSD;
+    std::vector<double> min(4,-1e+30),max(4,1e+30);
+    WSD.setMinMax(min,max);
+
+    WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
+
+    WSD.setDetectors(det_loc);
+    WSD.rotMatrix = Rot;
+    // create new target MD workspace
+    pTargWS->releaseWorkspace();   
+    pTargWS->createEmptyMDWS(WSD);
+
+
+    pTargWS->createEmptyMDWS(WSD);
+
+    ConvToMDEventsSelector AlgoSelector;
+    pConvMethods = AlgoSelector.convSelector(inWs2D);
+    pConvMethods->initialize(WSD,pTargWS);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -131,28 +190,36 @@ void test_HistoNoUnitsConv()
     TS_ASSERT_THROWS_NOTHING(pConvMethods->runConversion(pMockAlgorithm->getProgress()));
     std::time (&end);
     double sec = std::difftime (end,start);
+
     TS_WARN("Time to complete: <Ws2DHistoType,Q3D,Indir,ConvertNo,CrystType>: "+boost::lexical_cast<std::string>(sec)+" sec");
 }
 
 
 ConvertToMDEventsTestPerformance():
-WSD(4)
+Rot(3,3)
 {
    numHist=100*100;
    size_t nEvents=1000;
    inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateRandomEventWorkspace(nEvents, numHist, 0.1));
    inWsEv->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)) );
+   inWsEv->mutableRun().addProperty("Ei",12.,"meV",true);
 
    inWs2D = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(int(numHist), int(nEvents)));
+    // add workspace energy
+    inWs2D->mutableRun().addProperty("Ei",12.,"meV",true);
+
 
    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(new WorkspaceCreationHelper::MockAlgorithm(numHist));
    det_loc.processDetectorsPositions(inWs2D,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
 
    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 
+    Rot.setRandom(100);
+    Rot.toRotation();
+
+
 }
 
 };
-// undef preprocessor symbol which removes add to mdWS operation to avoid possible side effect to other code.
-#undef _DEBUG_EXCLUDE_ADD_TO_WORKSPACE
+
 #endif
