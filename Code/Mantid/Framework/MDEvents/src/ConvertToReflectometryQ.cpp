@@ -179,9 +179,9 @@ namespace MDEvents
    */
   void ConvertToReflectometryQ::init()
   {
-    auto unitValidator = boost::make_shared<API::WorkspaceUnitValidator>("Wavelength");
     auto compositeValidator = boost::make_shared<CompositeValidator>();
-    compositeValidator->add(unitValidator);
+    compositeValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+    compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, compositeValidator),
         "An input workspace in wavelength");
