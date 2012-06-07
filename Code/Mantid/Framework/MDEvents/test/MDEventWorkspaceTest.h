@@ -582,7 +582,7 @@ public:
   {    
     size_t dim_size = 100;
     size_t sq_dim_size = dim_size*dim_size;
-    m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, dim_size, 10 /*event per box*/);
+    m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size, 10 /*event per box*/);
     m_ws->getBoxController()->setSplitThreshold(10);
     std::vector<MDLeanEvent<3> > vecEvents(dim_size*dim_size*dim_size);
     
@@ -592,7 +592,7 @@ public:
       {
         for(size_t k = 0; k < dim_size; ++k)
         {
-          double centers[3] = {i, j, k};
+          double centers[3] = {(double)i, (double)j, (double)k};
           vecEvents[i + j*dim_size + k*sq_dim_size] = MDLeanEvent<3>(1, 1, centers);
         }
       }
