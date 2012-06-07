@@ -117,9 +117,9 @@ set ( TEST_FILES
 	test/ConvertToMDEventsWSTest.h
 	test/ConvertToMDEventsTest.h		
 	test/ConvertToQ3DdETest.h	
+    test/ConvertToMDEventsSubalgFactoryTest.h	
 #	test/ConvertToMDEventsCoordTransfTest.h
 #	test/ConvertToMDEventsParamsTest.h
-#   test/ConvertToMDEventsSubalgFactoryTest.h
 #   test/ConvertToMDEventsUnitsConvTest.h
 #	test/ConvertToMDEventsTestPerformance.h 	
   test/DampedHisenbergFMSWTest.h
