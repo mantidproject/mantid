@@ -60,7 +60,7 @@ void MDWSDescription::setDetectors(const ConvToMDPreprocDet &det_loc)
  *                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
  *                  to the factory
  *@param  dEMode  -- energy analysis mode (string representation). Should correspond to energy analysis modes, supported by selected Q-mode
- *@param  dimPropertyNames -- the names of additional properties, which will be used as dimensions
+ *@param  dimPropertyNames -- the vector of names for additional properties, which will be used as dimensions.
 
 */
 void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,

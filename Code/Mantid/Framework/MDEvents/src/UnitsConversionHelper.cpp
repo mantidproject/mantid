@@ -1,4 +1,4 @@
-#include "MantidMDEvents/UnitConversionHelper.h"
+#include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"

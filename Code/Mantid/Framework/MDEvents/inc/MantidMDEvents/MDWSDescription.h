@@ -101,7 +101,7 @@ public:
 
   /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
    void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
-                            const std::vector<std::string> &dimProperyNames);
+                            const std::vector<std::string> &dimProperyNames = std::vector<std::string>());
 
   /// compare two descriptions and select the coplimentary result. 
    void checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &NewMDWorkspace);

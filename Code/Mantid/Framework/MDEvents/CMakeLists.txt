@@ -49,7 +49,7 @@ set ( SRC_FILES
 	src/MDTransfQ3D.cpp
 	src/MDTransfNoQ.cpp
 	src/MDTransfModQ.cpp
-	src/UnitConversionHelper.cpp	
+	src/UnitsConversionHelper.cpp	
 	src/ConvToMDEventsSelector.cpp
 
 	src/MDWSDescription.cpp
@@ -126,7 +126,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfModQ.h
 	inc/MantidMDEvents/ConvToMDEventsSelector.h
-	inc/MantidMDEvents/UnitConversionHelper.h	
+	inc/MantidMDEvents/UnitsConversionHelper.h	
 )
 
 # Test files. Other source files required.

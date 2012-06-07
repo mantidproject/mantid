@@ -18,7 +18,7 @@
 #include "MantidMDEvents/MDTransfFactory.h"
 
 // units conversion
-#include "MantidMDEvents/UnitConversionHelper.h"
+#include "MantidMDEvents/UnitsConversionHelper.h"
 
 
 namespace Mantid
