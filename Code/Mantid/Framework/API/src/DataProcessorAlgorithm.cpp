@@ -106,7 +106,7 @@ namespace API
           boost::mpi::communicator included = world.split(1);
 
           loadAlg->setProperty("ChunkNumber", included.rank());
-          loadAlg->setProperty("TotalChunks"), included.size());
+          loadAlg->setProperty("TotalChunks", included.size());
         }
 #endif
 
