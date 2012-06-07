@@ -1,23 +1,24 @@
 # QL main  - does both Res & Data options
 #
+from IndirectImport import *
+if is_supported_f2py_platform():
+    Er      = import_f2py("erange")
+    QLr     = import_f2py("QLres")
+    QLd     = import_f2py("QLdata")
+    Qse     = import_f2py("QLse")
+    Que     = import_f2py("Quest")
+    resnorm = import_f2py("ResNorm")
+    cefit   = import_f2py("CEfit")
+    ssfit   = import_f2py("SSfit")
+else:
+    sys.exit('F2Py Bayes programs NOT available on your operating environment.')
+    
 from mantid.simpleapi import *
-import mantidplot as mp
 from mantid import config, logger, mtd
 from IndirectCommon import *
 import platform, math, os.path
 
-if ( is_32bit_win() ):
-	import erange_win32 as Er,   QLres_win32 as QLr
-	import QLdata_win32 as QLd,  QLse_win32 as Qse
-	import Quest_win32 as Que,   ResNorm_win32 as resnorm
-	import CEfit_win32 as cefit, SSfit_win32 as ssfit
-#elif ( is_64bit_rhel_6_2() ):
-#	import erange_lnx64 as Er,   QLres_lnx64 as QLr
-#	import QLdata_lnx64 as QLd,  QLse_lnx64 as Qse
-#	import Quest_lnx64 as Que,   ResNorm_lnx64 as resnorm
-#	import CEfit_lnx64 as cefit, SSfit_lnx64 as ssfit
-else:
-	sys.exit('F2Py Absorption Corrections programs NOT available on your operatingenvironment')
+mp = import_mantidplot()
 
 def PadArray(inarray,nfixed):
 	npt=len(inarray)

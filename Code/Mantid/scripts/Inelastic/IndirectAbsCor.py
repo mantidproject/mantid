@@ -1,20 +1,17 @@
 # IDA F2PY Absorption Corrections Wrapper
-## Handle selection of .pyd files for absorption corrections
-from IndirectCommon import *
-
-if ( is_32bit_win() ):
-    import fltabs_win32 as fltabs, cylabs_win32 as cylabs
-#elif ( is_64bit_rhel_6_2() ):
-#    import fltabs_lnx64 as fltabs, cylabs_lnx64 as cylabs
+#
+from IndirectImport import *
+if is_supported_f2py_platform():
+    cylabs = import_f2py("cylabs")
+    fltabs = import_f2py("fltabs")
 else:
-    sys.exit('F2Py Absorption Corrections programs NOT available on your operatingenvironment')
-##
+    sys.exit('F2Py Absorption Corrections programs NOT available on your operating environment.')
 
-## Other imports
+from IndirectCommon import *
 from mantid.simpleapi import *
-import mantidplot as mp
 from mantid import config, logger, mtd
 import math, os.path, numpy as np
+mp = import_mantidplot()
 
 def WaveRange(inWS, efixed):
     oWS = '__WaveRange'

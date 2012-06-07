@@ -1,10 +1,13 @@
 # Transmission main
 #
+from IndirectImport import *
+
 from mantid.simpleapi import *
-import mantidplot as mp
 from mantid import config, logger, mtd
 from IndirectCommon import StartTime, EndTime
 import numpy, os.path
+
+mp = import_mantidplot()
 
 def UnwrapMon(inWS):
 # Unwrap monitor - inWS contains M1,M2,S1  - outWS contains unwrapped Mon
