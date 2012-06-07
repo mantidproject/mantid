@@ -95,8 +95,7 @@ void GraphDisplay::SetLogX( bool is_log_x )
  */
 void GraphDisplay::SetData(const QVector<double> & xData, 
                            const QVector<double> & yData,
-                                 double            image_x,
-                                 double            image_y )
+                                 double            cut_value )
 {
   if ( xData.size() == 0 ||          // ignore invalid data vectors
        yData.size() == 0 ||
@@ -105,34 +104,33 @@ void GraphDisplay::SetData(const QVector<double> & xData,
     return;
   }
 
-  this->image_x = image_x;
-  this->image_y = image_y;
 
   curve->attach(0);                 // detach from any plot, before changing
                                     // the data and attaching
   if ( is_vertical )
   {
+    this->image_x = cut_value;
     min_y = yData[0];
     max_y = yData[yData.size()-1];
     IVUtils::FindValidInterval( xData, min_x, max_x );
   }
   else
   {
+    this->image_y = cut_value;
     min_x = xData[0];
     max_x = xData[xData.size()-1];
     IVUtils::FindValidInterval( yData, min_y, max_y );
-  }
 
-
-  if ( is_log_x )
-  {
-    QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
-    graph_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
-  }
-  else
-  {
-    QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
-    graph_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
+    if ( is_log_x )                // only set log scale for x if NOT vertical
+    {
+      QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
+      graph_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
+    }
+    else
+    {
+      QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
+      graph_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
+    }
   }
 
   curve->setData( xData, yData );
@@ -141,6 +139,13 @@ void GraphDisplay::SetData(const QVector<double> & xData,
   SetRangeScale( range_scale );
 
   graph_plot->setAutoReplot(true);
+}
+
+
+void GraphDisplay::Clear()
+{
+  curve->attach(0);                 // detach from plot
+  graph_plot->replot();
 }
 
 

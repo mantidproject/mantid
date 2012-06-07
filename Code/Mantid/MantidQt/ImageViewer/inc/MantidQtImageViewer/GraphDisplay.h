@@ -60,8 +60,10 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
    /// Set the actual data that will be displayed on the graph
    void SetData( const QVector<double> & xData,
                  const QVector<double> & yData,
-                       double            image_x,
-                       double            image_y );
+                       double            cut_value );
+
+   /// Clear the graph(s) off the display
+   void Clear();
 
    /// Set up axes using the specified scale factor and replot the graph 
    void SetRangeScale( double range_scale );
