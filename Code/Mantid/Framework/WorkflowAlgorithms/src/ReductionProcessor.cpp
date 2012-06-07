@@ -5,7 +5,11 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include <stdexcept>
+#ifdef MPI_BUILD
+#include <boost/mpi.hpp>
+#endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -31,6 +35,8 @@ namespace WorkflowAlgorithms
     declareProperty("LoadAlgorithm", "LoadEventNexus");
     declareProperty("ProcessingAlgorithm", "");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+    declareProperty(new FileProperty("OutputFile", "", FileProperty::OptionalSave, ".nxs"),
+        "File path for the output nexus file");
   }
 
   void ReductionProcessor::exec()
@@ -44,9 +50,7 @@ namespace WorkflowAlgorithms
     Workspace_sptr inputWS = load(inputData);
 
     // Process the data
-    g_log.information() << "Starting to process " << inputData << std::endl;
-
-    const std::string outputWSName = getPropertyValue("OutputWorkspace");
+    std::string outputWSName = getPropertyValue("OutputWorkspace");
     const std::string procAlgName = getProperty("ProcessingAlgorithm");
 
     IAlgorithm_sptr procAlg = createSubAlgorithm(procAlgName);
@@ -54,11 +58,15 @@ namespace WorkflowAlgorithms
     procAlg->setAlwaysStoreInADS(true);
     procAlg->setPropertyValue("OutputWorkspace", outputWSName);
     procAlg->execute();
-
-    g_log.information() << "Done processing " << inputData << std::endl;
-
     Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+
+    // Assemble
+    outputWS = assemble(outputWSName, outputWSName);
     setProperty("OutputWorkspace", outputWS);
+
+    // Save as necessary
+    const std::string outputFile = getPropertyValue("OutputFile");
+    saveNexus(outputWSName, outputFile);
   }
 
 }

@@ -30,7 +30,7 @@ class EQSANSLiveReduce(PythonAlgorithm):
                                       Description="Output workspace containing the reduced data")
         self.declareProperty("ReductionProcess", True,
                              Description="If true, both the reduction and the post-processing will be run")
-        self.declareProperty("PostProcess", True,
+        self.declareProperty("PostProcess", False,
                              Description="If true, I(q) will be computed from the input workspace")
         self.declareFileProperty("LogDataFile", "",
                                  FileAction.OptionalLoad, [".nxs"],

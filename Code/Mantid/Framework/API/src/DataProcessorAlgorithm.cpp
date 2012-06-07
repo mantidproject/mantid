@@ -39,7 +39,7 @@ namespace API
   }
 
   //----------------------------------------------------------------------------------------------
-  void DataProcessorAlgorithm::setLoadAlg(const std::string & alg)
+  void DataProcessorAlgorithm::setLoadAlg(const std::string &alg)
   {
     if (alg.empty())
       throw std::invalid_argument("Cannot set load algorithm to empty string");
@@ -64,11 +64,44 @@ namespace API
     throw std::runtime_error("DataProcessorAlgorithm::loadChunk is not implemented");
   }
 
+  Workspace_sptr DataProcessorAlgorithm::assemble(const std::string &partialWSName, const std::string &outputWSName)
+  {
+#ifdef MPI_BUILD
+    Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
+    IAlgorithm_sptr gatherAlg = createSubAlgorithm("GatherWorkspaces");
+    gatherAlg->setAlwaysStoreInADS(true);
+    gatherAlg->setProperty("InputWorkspace", partialWS);
+    gatherAlg->setPropertyValue("OutputWorkspace", outputWSName);
+    gatherAlg->execute();
+#endif
+    Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+    return outputWS;
+  }
+
+  void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
+      const std::string &outputFile)
+  {
+
+    bool saveOutput = true;
+#ifdef MPI_BUILD
+    if(boost::mpi::communicator().rank()>0) saveOutput = false;
+#endif
+
+    if (saveOutput && outputFile.size() > 0)
+    {
+      IAlgorithm_sptr saveAlg = createSubAlgorithm("SaveNexus");
+      saveAlg->setPropertyValue("Filename", outputFile);
+      saveAlg->setPropertyValue("InputWorkspace", outputWSName);
+      saveAlg->execute();
+    }
+  }
+
   /// Determine what kind of input data we have and load it
   //TODO: Chunking, MPI, etc...
   Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData)
   {
     Workspace_sptr inputWS;
+    std::string outputWSName = inputData;
 
     // First, check whether we have the name of an existing workspace
     if (AnalysisDataService::Instance().doesExist(inputData))
@@ -90,7 +123,6 @@ namespace API
       {
         IAlgorithm_sptr loadAlg = createSubAlgorithm(m_loadAlg);
         loadAlg->setProperty("Filename", foundFile);
-        loadAlg->setPropertyValue("OutputWorkspace", inputData);
         loadAlg->setAlwaysStoreInADS(true);
 
         // Set up MPI if available
@@ -102,19 +134,17 @@ namespace API
           m_useMPI = true;
           // The communicator containing all processes
           boost::mpi::communicator world;
-          // Create a new communicator that includes only those processes that have an input workspace
-          boost::mpi::communicator included = world.split(1);
-
-          loadAlg->setProperty("ChunkNumber", included.rank());
-          loadAlg->setProperty("TotalChunks", included.size());
+          g_log.notice() << "Chunk/Total: " << world.rank()+1 << "/" << world.size() << std::endl;
+          loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
+          loadAlg->setProperty("ChunkNumber", world.rank()+1);
+          loadAlg->setProperty("TotalChunks", world.size());
         }
+#else
+        loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
 #endif
-
-
-
-
         loadAlg->execute();
-        Workspace_sptr inputMatrixWS = AnalysisDataService::Instance().retrieve(inputData);
+
+        Workspace_sptr inputMatrixWS = AnalysisDataService::Instance().retrieve(outputWSName);
       }
     }
     return inputWS;

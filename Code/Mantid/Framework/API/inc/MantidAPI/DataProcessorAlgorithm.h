@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 #include <vector>
 
@@ -50,14 +51,17 @@ protected:
   std::vector<std::string> splitInput(const std::string & input);
   void forwardProperties();
   boost::shared_ptr<Kernel::PropertyManager> getProcessProperties(const std::string &propertyManager);
+  /// MPI option. If false, we will use one job event if MPI is available
+  bool m_useMPI;
+  Workspace_sptr assemble(const std::string &partialWSName, const std::string &outputWSName);
+  void saveNexus(const std::string &outputWSName,
+        const std::string &outputFile);
 
 private:
   /// The name of the algorithm to invoke when loading data
   std::string m_loadAlg;
   /// The name of the algorithm to invoke when accumulating data chunks
   std::string m_accumulateAlg;
-  /// MPI option. If false, we will use one job event if MPI is available
-  bool m_useMPI;
 };
 
 } // namespace API
