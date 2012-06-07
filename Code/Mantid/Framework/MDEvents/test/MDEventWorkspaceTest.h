@@ -15,6 +15,8 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDEvents/CreateMDWorkspace.h"
+#include "MantidMDEvents/FakeMDEventData.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -560,6 +562,56 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
     TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
+};
+
+class MDEventWorkspaceTestPerformance :    public CxxTest::TestSuite
+{
+
+private:
+
+  MDEventWorkspace3Lean::sptr m_ws;
+
+public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDEventWorkspaceTestPerformance *createSuite() { return new MDEventWorkspaceTestPerformance(); }
+  static void destroySuite( MDEventWorkspaceTestPerformance *suite ) { delete suite; }
+
+  MDEventWorkspaceTestPerformance()
+  {    
+    size_t dim_size = 100;
+    size_t sq_dim_size = dim_size*dim_size;
+    m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, dim_size, 10 /*event per box*/);
+    m_ws->getBoxController()->setSplitThreshold(10);
+    std::vector<MDLeanEvent<3> > vecEvents(dim_size*dim_size*dim_size);
+    
+    for(size_t i = 0; i < dim_size; ++i)
+    {
+      for(size_t j = 0; j < dim_size; ++j)
+      {
+        for(size_t k = 0; k < dim_size; ++k)
+        {
+          double centers[3] = {i, j, k};
+          vecEvents[i + j*dim_size + k*sq_dim_size] = MDLeanEvent<3>(1, 1, centers);
+        }
+      }
+    }
+    m_ws->addEvents(vecEvents);
+  }
+
+  void test_splitting_performance_single_threaded()
+  {
+    m_ws->splitAllIfNeeded(NULL);
+  }
+
+  //void test_splitting_performance_parallel()
+  //{
+  //  auto ts_splitter = new ThreadSchedulerFIFO();
+  //  ThreadPool tp_splitter(ts_splitter);
+  //  m_ws->splitAllIfNeeded(ts_splitter);
+  //  tp_splitter.joinAll();
+  //}
 };
 
 #endif
