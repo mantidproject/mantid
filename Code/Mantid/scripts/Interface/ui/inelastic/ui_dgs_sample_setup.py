@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_sample_setup.ui'
 #
-# Created: Thu Jun  7 08:40:44 2012
+# Created: Fri Jun  8 14:27:58 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -24,15 +24,15 @@ class Ui_Frame(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.label = QtGui.QLabel(Frame)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.horizontalLayout.addWidget(self.label)
+        self.sample_label = QtGui.QLabel(Frame)
+        self.sample_label.setObjectName(_fromUtf8("sample_label"))
+        self.horizontalLayout.addWidget(self.sample_label)
         self.sample_edit = QtGui.QLineEdit(Frame)
         self.sample_edit.setObjectName(_fromUtf8("sample_edit"))
         self.horizontalLayout.addWidget(self.sample_edit)
-        self.sample_browse_button = QtGui.QPushButton(Frame)
-        self.sample_browse_button.setObjectName(_fromUtf8("sample_browse_button"))
-        self.horizontalLayout.addWidget(self.sample_browse_button)
+        self.sample_browse = QtGui.QPushButton(Frame)
+        self.sample_browse.setObjectName(_fromUtf8("sample_browse"))
+        self.horizontalLayout.addWidget(self.sample_browse)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -44,6 +44,6 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Frame", "Input Runs", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_label.setText(QtGui.QApplication.translate("Frame", "Sample Data", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
 
