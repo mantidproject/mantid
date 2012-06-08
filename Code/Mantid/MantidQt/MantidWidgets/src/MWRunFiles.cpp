@@ -825,8 +825,8 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
   }
   else if( multiFileProp )
   {
-    allowed = fileProp->allowedValues();
-    preferredExt = QString::fromStdString(fileProp->getDefaultExt());
+    allowed = multiFileProp->allowedValues();
+    preferredExt = QString::fromStdString(multiFileProp->getDefaultExt());
   }
   else
   {
