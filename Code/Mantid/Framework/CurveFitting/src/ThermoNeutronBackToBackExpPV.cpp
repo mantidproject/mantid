@@ -1,7 +1,7 @@
 #include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 #define PI 3.14159265358979323846264338327950288419716939937510582
 
@@ -167,7 +167,7 @@ namespace CurveFitting
     double z = (beta*sigma2 - x)*invert_sqrt2sigma;
 
     // 2. Calculate
-    double omega1 = (1-eta)*N*(exp(u)*erfc(y) + std::exp(v)*erfc(z));
+    double omega1 = (1-eta)*N*(exp(u)*gsl_sf_log_erfc(y) + std::exp(v)*gsl_sf_log_erfc(z));
     double omega2;
     if (eta < 1.0E-8)
     {
