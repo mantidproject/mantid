@@ -34,6 +34,8 @@ set ( SRC_FILES
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/ReflectometryTransformQxQz.cpp
+	src/ReflectometryTransformKiKf.cpp
+	src/ReflectometryTransformP.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -103,6 +105,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/ReflectometryMDTransform.h
+	inc/MantidMDEvents/ReflectometryTransformKiKf.h
+	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
