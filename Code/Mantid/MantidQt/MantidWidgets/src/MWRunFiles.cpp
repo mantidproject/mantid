@@ -30,7 +30,7 @@ using namespace MantidQt::MantidWidgets;
  */
 FindFilesThread::FindFilesThread(QObject *parent) :
   QThread(parent), m_error(), m_filenames(), m_text(), 
-    m_isForRunFiles(), m_isOptional(), m_algorithm(), m_property()
+  m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional()
 {
 }
 
