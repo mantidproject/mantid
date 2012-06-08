@@ -10,6 +10,7 @@
 #include "MantidKernel/Memory.h"
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <boost/lexical_cast.hpp>
 
 using Mantid::MantidVec;
 using std::size_t;
@@ -296,15 +297,173 @@ public:
     }
   }
 
+  void testMultipleFiles()
+  {
+    const size_t NHist = 111;
+    const size_t NY = 9;
+    const size_t NX = NY + 1;
+
+    double dBlockSize = 2 * ( sizeof(int) + ( NX + 2*NY ) * sizeof(double) );
+
+    // This will make sure 1 ManagedDataBlock = 2 Vectors
+    Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+    const std::string blocksize = "ManagedWorkspace.DataBlockSize";
+    const std::string oldValue = conf.getString(blocksize);
+    conf.setString(blocksize,boost::lexical_cast<std::string>(dBlockSize));
+
+    const std::string blockPerFile = "ManagedWorkspace.BlocksPerFile";
+    const std::string oldValueBlockPerFile = conf.getString(blockPerFile);
+    conf.setString(blockPerFile,"9");
+
+    Mantid::DataObjects::ManagedWorkspace2D ws;
+    ws.initialize(NHist, NX, NY);
+    
+    TS_ASSERT_EQUALS( ws.getNumberFiles(), NHist /( 2 * 9 ) + 1 );
+
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i )
+    {
+      auto& y = ws.dataY( i );
+      for(size_t j = 0; j < y.size(); ++j)
+      {
+        y[j] = double(1000*i) + double(j);
+      }
+    }
+
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i )
+    {
+      auto& y = ws.dataY( i );
+      for(size_t j = 0; j < y.size(); ++j)
+      {
+        TS_ASSERT_EQUALS( y[j], double(1000*i) + double(j) );
+      }
+    }
+
+    conf.setString(blocksize,oldValue);
+    conf.setString(blockPerFile,oldValueBlockPerFile);
+  }
+
+  void testMultipleFiles1()
+  {
+
+    const size_t NHist = 211;
+    const size_t NY = 9;
+    const size_t NX = NY + 1;
+    const size_t StartHist = 90;
+
+    double dBlockSize = /*sizeof(int) +*/ ( NX + 2*NY ) * sizeof(double);
+
+    // This will make sure 1 ManagedDataBlock = 1 Vector
+    Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+    const std::string blocksize = "ManagedWorkspace.DataBlockSize";
+    const std::string oldValue = conf.getString(blocksize);
+    conf.setString(blocksize,boost::lexical_cast<std::string>(dBlockSize));
+
+    const std::string blockPerFile = "ManagedWorkspace.BlocksPerFile";
+    const std::string oldValueBlockPerFile = conf.getString(blockPerFile);
+    conf.setString(blockPerFile,"40");
+
+    Mantid::DataObjects::ManagedWorkspace2D ws;
+    ws.initialize(NHist, NX, NY);
+
+    TS_ASSERT_EQUALS( ws.getNumberFiles(), NHist /( 40 ) + 1 );
+
+    // start writing from some index > 0
+    for(size_t i = StartHist; i < ws.getNumberHistograms(); ++i )
+    {
+      auto& y = ws.dataY( i );
+      for(size_t j = 0; j < y.size(); ++j)
+      {
+        y[j] = double(1000*i) + double(j);
+      }
+    }
+
+    for(size_t i = StartHist; i < ws.getNumberHistograms(); ++i )
+    {
+      auto& y = ws.dataY( i );
+      for(size_t j = 0; j < y.size(); ++j)
+      {
+        TS_ASSERT_EQUALS( y[j], double(1000*i) + double(j) );
+      }
+    }
+
+    // check that front spectra can be read and zero
+    TS_ASSERT_EQUALS( ws.readY( 0 )[0], 0.0 );
+    TS_ASSERT_EQUALS( ws.readY( 1 )[0], 0.0 );
+
+    conf.setString(blocksize,oldValue);
+    conf.setString(blockPerFile,oldValueBlockPerFile);
+  }
+
+  void testMultipleFiles2()
+  {
+
+    const size_t NHist = 211;
+    const size_t NY = 9;
+    const size_t NX = NY + 1;
+    const size_t StartHist = 90;
+
+    double dBlockSize = /*sizeof(int) +*/ ( NX + 2*NY ) * sizeof(double);
+
+    // This will make sure 1 ManagedDataBlock = 1 Vector
+    Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+    const std::string blocksize = "ManagedWorkspace.DataBlockSize";
+    const std::string oldValue = conf.getString(blocksize);
+    conf.setString(blocksize,boost::lexical_cast<std::string>(dBlockSize));
+
+    const std::string blockPerFile = "ManagedWorkspace.BlocksPerFile";
+    const std::string oldValueBlockPerFile = conf.getString(blockPerFile);
+    conf.setString(blockPerFile,"40");
+
+    Mantid::DataObjects::ManagedWorkspace2D ws;
+    ws.initialize(NHist, NX, NY);
+
+    TS_ASSERT_EQUALS( ws.getNumberFiles(), NHist /( 40 ) + 1 );
+
+    // write at front
+    ws.dataY( 0 )[0] = 1.0;
+    ws.dataY( 1 )[0] = 2.0;
+
+    // leave a gap
+    for(size_t i = StartHist; i < ws.getNumberHistograms(); ++i )
+    {
+      auto& y = ws.dataY( i );
+      for(size_t j = 0; j < y.size(); ++j)
+      {
+        y[j] = double(1000*i) + double(j);
+      }
+    }
+
+    // check the filled spectra
+    for(size_t i = StartHist; i < ws.getNumberHistograms(); ++i )
+    {
+      auto& y = ws.dataY( i );
+      for(size_t j = 0; j < y.size(); ++j)
+      {
+        TS_ASSERT_EQUALS( y[j], double(1000*i) + double(j) );
+      }
+    }
+
+    // check that front spectra weren't changed by padding
+    TS_ASSERT_EQUALS( ws.readY( 0 )[0], 1.0 );
+    TS_ASSERT_EQUALS( ws.readY( 1 )[0], 2.0 );
+
+    conf.setString(blocksize,oldValue);
+    conf.setString(blockPerFile,oldValueBlockPerFile);
+  }
+
   void testPadding()
   {
-    std::cout << "Start!!!!" << std::endl;
+    //std::cout << "Start!!!!" << std::endl;
 
     // This will make sure 1 ManagedDataBlock = 1 Vector
     Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
     const std::string blocksize = "ManagedWorkspace.DataBlockSize";
     const std::string oldValue = conf.getString(blocksize);
     conf.setString(blocksize,"1");
+
+    const std::string blockPerFile = "ManagedWorkspace.BlocksPerFile";
+    const std::string oldValueBlockPerFile = conf.getString(blockPerFile);
+    conf.setString(blockPerFile,"10");
 
     Mantid::DataObjects::ManagedWorkspace2D ws;
     ws.initialize(111,10,9);
@@ -320,9 +479,9 @@ public:
     }
 
     // Get back a block that should have gone out to disk and check its values
-    MantidVec xvals = ws.dataX(10);
-    MantidVec yvals = ws.dataY(10);
-    MantidVec evals = ws.dataE(10);
+    MantidVec xvals = ws.dataX(50);
+    MantidVec yvals = ws.dataY(50);
+    MantidVec evals = ws.dataE(50);
     TS_ASSERT_EQUALS( xvals.size(), 10 );
     TS_ASSERT_EQUALS( yvals.size(), 9 );
     TS_ASSERT_EQUALS( evals.size(), 9 );
@@ -335,7 +494,8 @@ public:
     TS_ASSERT_EQUALS( xvals.back(), 4.0 );
 
     conf.setString(blocksize,oldValue);
-    std::cout << "End!!!!" << std::endl;
+    conf.setString(blockPerFile,oldValueBlockPerFile);
+    //std::cout << "End!!!! " <<  std::endl;
   }
 
   void testDestructor()

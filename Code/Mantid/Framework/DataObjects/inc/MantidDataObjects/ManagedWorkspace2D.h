@@ -53,6 +53,9 @@ public:
 
   std::string get_filename() const;
 
+  /// Get number of temporary files used to store the data.
+  size_t getNumberFiles() const {return m_datafile.size();}
+
 protected:
 
   /// Reads in a data block.
@@ -75,6 +78,8 @@ private:
 
   /// The number of blocks per temporary file
   std::size_t m_blocksPerFile;
+  /// Size of each temp file in bytes
+  long long m_fileSize;
 
   /// The name of the temporary file
   std::string m_filename;

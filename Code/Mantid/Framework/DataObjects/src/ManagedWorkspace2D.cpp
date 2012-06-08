@@ -48,7 +48,7 @@ void ManagedWorkspace2D::init(const std::size_t &NVectors, const std::size_t &XL
 {
   AbsManagedWorkspace2D::init(NVectors,XLength,YLength);
 
-  m_vectorSize = sizeof(int) + ( m_XLength + ( 2*m_YLength ) ) * sizeof(double);
+  m_vectorSize = /*sizeof(int) +*/ ( m_XLength + ( 2*m_YLength ) ) * sizeof(double);
 
   // CALCULATE BLOCKSIZE
   // Get memory size of a block from config file
@@ -76,8 +76,14 @@ void ManagedWorkspace2D::init(const std::size_t &NVectors, const std::size_t &XL
 
 
   // Calculate the number of blocks that will go into a file
-  m_blocksPerFile = std::numeric_limits<int>::max() / (m_vectorsPerBlock * static_cast<int>(m_vectorSize));
-  if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile; 
+  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.BlocksPerFile", m_blocksPerFile)
+      || m_blocksPerFile <= 0 )
+  {
+    // default
+    m_blocksPerFile = std::numeric_limits<int>::max() / (m_vectorsPerBlock * static_cast<int>(m_vectorSize));
+    if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile; 
+  }
+  m_fileSize = m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
 
   // Now work out the number of files needed
   size_t totalBlocks = m_noVectors / m_vectorsPerBlock;
@@ -188,9 +194,11 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,std::size_t 
       long long seekPoint = startIndex * m_vectorSize;
 
       int fileIndex = 0;
-      while (seekPoint > std::numeric_limits<int>::max())
+      //while (seekPoint > std::numeric_limits<int>::max())
+      while (seekPoint > m_fileSize)
       {
-        seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+        //seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+        seekPoint -= m_fileSize;
         ++fileIndex;
       }
 
@@ -215,32 +223,45 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,std::size_t 
  */
 void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {
-//  std::cout << "Writing " << toWrite->minIndex() << std::endl;
-//  std::cout << ">>> " << m_indexWrittenTo << std::endl;
-//  std::cout << ">>> " << m_vectorsPerBlock << std::endl;
+  //std::cout << "Writing " << toWrite->minIndex() << std::endl;
+  //std::cout << ">>> " << m_indexWrittenTo << std::endl;
+  //std::cout << ">>> " << m_vectorsPerBlock << std::endl;
   size_t fileIndex = 0;
   // Check whether we need to pad file with zeroes before writing data
-  if ( toWrite->minIndex() > static_cast<int>(m_indexWrittenTo+m_vectorsPerBlock) && m_indexWrittenTo >= 0 )
+  if ( toWrite->minIndex() > static_cast<int>(m_indexWrittenTo+m_vectorsPerBlock) /*&& m_indexWrittenTo >= 0*/ )
   {
-    fileIndex = m_indexWrittenTo / (m_vectorsPerBlock * m_blocksPerFile);
+    if ( m_indexWrittenTo < 0 )
+    {
+      fileIndex = 0;
+    }
+    else
+    {
+      fileIndex = m_indexWrittenTo / (m_vectorsPerBlock * m_blocksPerFile);
+    }
 
     m_datafile[fileIndex]->seekp(0, std::ios::end);
     const int speczero = 0;
     const std::vector<double> xzeroes(m_XLength);
     const std::vector<double> yzeroes(m_YLength);
-    for (int i = 0; i < (toWrite->minIndex() - m_indexWrittenTo); ++i)
+    // if i is a workspace index the loop has to start with 1 because m_indexWrittenTo + 0 is the index
+    // of the last saved histogram.
+    for (int i = 1; i < (toWrite->minIndex() - m_indexWrittenTo); ++i)
     {
-      if ( (m_indexWrittenTo + i) / (m_blocksPerFile * m_vectorsPerBlock) )
+      size_t fi = (m_indexWrittenTo + i) / (m_blocksPerFile * m_vectorsPerBlock);
+      if ( fi > fileIndex )
       {
-        ++fileIndex;
+        fileIndex = fi;
         m_datafile[fileIndex]->seekp(0, std::ios::beg);
       }
+
+      //std::cerr << "Zeroes to " << fi << ' ' << m_indexWrittenTo + i << ' ' << m_datafile[fileIndex]->tellg() << std::endl;
 
       m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
       m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
       m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-      m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-      m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
+      // these don't match the ManagedWorkspace2D file stream operators.
+      //m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      //m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
     }
     //std::cout << "Here!!!!" << std::endl;
   }
@@ -249,9 +270,10 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
   {
     long long seekPoint = toWrite->minIndex() * m_vectorSize;
 
-    while (seekPoint > std::numeric_limits<int>::max())
+    //while (seekPoint > std::numeric_limits<int>::max())
+    while (seekPoint > m_fileSize)
     {
-      seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+      seekPoint -= m_fileSize;
       ++fileIndex;
     }
 
