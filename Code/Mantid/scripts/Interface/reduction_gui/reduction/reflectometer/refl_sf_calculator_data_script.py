@@ -12,7 +12,9 @@ class DataSets(BaseScriptElement):
 
     data_file = 0
     incident_medium_list = ['H2O']
+    incident_medium_list_bkup = incident_medium_list
     incident_medium_index_selected = 0
+    incident_medium_index_selected_bkup = incident_medium_index_selected
     number_attenuator = 0
     peak_selection = [0,0]
     back_selection = [0,0]
@@ -83,6 +85,7 @@ class DataSets(BaseScriptElement):
         xml += "<s2w>%s</s2w>\n" % str(self.s2w)
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "</RefLSFCalculator>\n"
+        
         return xml
 
     def from_xml(self, xml_str):
