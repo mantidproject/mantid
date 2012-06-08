@@ -52,7 +52,7 @@ namespace MDEvents
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
 class DLLExport MDWSDescription
 {
-public:
+public:  // for the time being
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
@@ -84,30 +84,31 @@ public:
 
     API::MatrixWorkspace_const_sptr getInWS()const               {return inWS;}
 
+    std::string getWSName()const                                  {return inWS->name();}
     bool isPowder()const                                          {return !inWS->sample().hasOrientedLattice();}
     bool hasLattice()const                                        {return inWS->sample().hasOrientedLattice();}
     bool isDetInfoLost()const                                     {return isDetInfoLost(inWS);}
     double getEi()const                                           {return getEi(inWS);}
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(inWS);}
 
-    /// constructor
-    MDWSDescription(unsigned int nDimensions=0);
+  /// constructor
+  MDWSDescription(unsigned int nDimensions=0);
 
-
-    /// method builds MD Event description from existing MD event workspace
+  /// method builds MD Event description from existing MD event workspace
   void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
   /// copy some parameters from the input workspace, as target md WS do not have all information about the algorithm.  
   void setUpMissingParameters(const MDEvents::MDWSDescription &SourceMatrixWorkspace);
 
   /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
    void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
-                            const std::vector<std::string> &dimProperyNames,size_t maxNdims);
+                            const std::vector<std::string> &dimProperyNames = std::vector<std::string>());
 
   /// compare two descriptions and select the coplimentary result. 
    void checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &NewMDWorkspace);
  
    void setMinMax(const std::vector<double> &minVal,const std::vector<double> &maxVal);
    void setDimName(unsigned int nDim,const std::string &Name);
+   // this is rather misleading function, as MD workspace do not have dimension units
    void setDimUnit(unsigned int nDim,const std::string &Unit);
    void setDetectors(const ConvToMDPreprocDet &det_loc);
 // static helper functions:

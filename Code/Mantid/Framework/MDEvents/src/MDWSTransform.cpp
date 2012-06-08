@@ -11,8 +11,19 @@ namespace MDEvents
 Kernel::Logger& MDWSTransform::convert_log =Kernel::Logger::get("MD-Algorithms");
 using namespace ConvertToMD;
 
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+{
+    CoordScaling ScaleID = getQScaling(QScaleRequested);
+    if(TargWSDescription.AlgID.compare("Q3D")==0)
+    {
+        this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+    }
+
+    return getTransfMatrix(TargWSDescription,ScaleID);
+}
+
 /** The matrix to convert neutron momentums into the target coordinate system   */
-std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CoordScaling ScaleID)const
 {
   
     Kernel::Matrix<double> mat(3,3,true);
@@ -25,6 +36,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,M
 
     if(!powderMode && (!has_lattice))
     {
+        std::string inWsName = TargWSDescription.getWSName();
     // warn about 3D case without lattice
         convert_log.warning()<<
         " Can not obtain transformation matrix from the input workspace: "<<inWsName<<
@@ -34,7 +46,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,M
     //
     if(has_lattice){
 
-      TargWSDescription.Wtransf = buildQTrahsf(TargWSDescription,QScaleRequested);
+      TargWSDescription.Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
       // Obtain the transformation matrix to Cartezian related to Crystal
       mat = TargWSDescription.GoniomMatr*TargWSDescription.Wtransf;
      // and this is the transformation matrix to notional
@@ -48,14 +60,12 @@ std::vector<double> MDWSTransform::getTransfMatrix(const std::string &inWsName,M
 }
 
 
-Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling ScaleID)const
 {
     //implements strategy Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
     if(!TargWSDescription.hasLattice()){      
         throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
     }
-
-    CoordScaling ScaleID = getQScaling(QScaleRequested);
 
     // if u,v us default, Wmat is unit transformation
     Kernel::DblMatrix  Wmat(3,3,true);
@@ -101,7 +111,8 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
         }
     case OrthogonalHKLScale://< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
         {
-          if(TargWSDescription.hasLattice()) Scale= spLatt->getUB()*(2*M_PI);
+          if(TargWSDescription.hasLattice())
+              for(int i=0;i<3;i++){ Scale[i][i] = (2*M_PI)/spLatt->a(i);}             
           break;
         }
     case HKLScale:   //< non-orthogonal system for non-orthogonal lattice
@@ -119,7 +130,15 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
 
 /** Build meaningful dimension names for different conversion modes
   */
-void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)
+void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+{
+   //axis units: convert string representation to any availible
+    CoordScaling ScaleID = getQScaling(QScaleRequested);
+    this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+
+}
+
+void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling ScaleID)const
 {
         
         std::vector<Kernel::V3D> dim_directions;
@@ -135,8 +154,6 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
             Bm=spLatt->getB();
             for(int i=0;i<3;i++)LatPar[i]=spLatt->a(i);
         }
-       // axis units:
-        CoordScaling ScaleID = getQScaling(QScaleRequested);
   
         dim_names[0]="H";
         dim_names[1]="K";
@@ -182,7 +199,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
  
 }
 
-void MDWSTransform::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)
+void MDWSTransform::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
 { //TODO: nothing meanigful has been done at the moment, should enable scaling if different coord transf modes?
 
     UNUSED_ARG(TargWSDescription);
@@ -190,7 +207,7 @@ void MDWSTransform::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDesc
 }
 
 //
-void  MDWSTransform::getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt, const std::vector<double> &wt)
+void  MDWSTransform::setUVvectors(const std::vector<double> &ut,const std::vector<double> &vt, const std::vector<double> &wt)
 {   
 //identify if u,v are present among input parameters and use defaults if not
     bool u_default(true),v_default(true),w_default(true);

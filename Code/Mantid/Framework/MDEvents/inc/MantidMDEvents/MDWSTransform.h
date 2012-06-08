@@ -58,16 +58,18 @@ public:
  
   /** helper function which verifies if projection vectors are specified and if their values are correct when present.
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
-    void getUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,const std::vector<double> &wt);
+    void setUVvectors(const std::vector<double> &ut,const std::vector<double> &vt,const std::vector<double> &wt);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
        (C)- Busing, Levi 1967 coordinate system */
-   std::vector<double> getTransfMatrix(const std::string &inWsName, MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling scaling)const;
   
    /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
-   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested);
+   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling scaling)const;
    /// construct meaningful dimension names for ModQ case and different transformation types defined by the class;
-   void setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested);
+   void setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
   /// return the list of possible scalings for momentums
    std::vector<std::string> getQScalings()const{return QScalingID;}
    ConvertToMD::CoordScaling getQScaling(const std::string &ScID)const;
@@ -84,7 +86,7 @@ private:
    std::vector<std::string> QScalingID;
 protected: // for testing
   /// function generates "Kind of" W transformation matrix for different Q-conversion modes;
-   Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling scaling)const;
    /// build orthogonal coordinate around two input vecotors u and v expressed in rlu;
    //std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const Kernel::V3D &u, const Kernel::V3D &v)const;
 

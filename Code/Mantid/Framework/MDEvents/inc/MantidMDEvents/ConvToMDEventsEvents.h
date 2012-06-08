@@ -116,7 +116,7 @@ private:
          allCoord.insert(allCoord.end(),locCoord.begin(),locCoord.end());
        }
 
-//      // Clear out the EventList to save memory
+//      // Clear out the EventList to save memory --> will not work now as el is const.
 //      if (ClearInputWorkspace)
 //      {
 //        // Track how much memory you cleared

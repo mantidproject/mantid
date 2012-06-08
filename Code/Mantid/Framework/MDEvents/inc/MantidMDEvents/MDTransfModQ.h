@@ -4,19 +4,19 @@
 #include "MantidMDEvents/MDTransfInterface.h"
 #include "MantidMDEvents/ConvToMDEventsBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidMDEvents/MDTransfDEHelper.h"
 //
 namespace Mantid
 {
 namespace MDEvents
 {
-
-
+    
 /** Class responsible for conversion of input workspace 
   * data into proper number of output dimensions for ModQ case
   * 
   * Currently contains Elastic and Inelastic transformations
   *
-  * This particular file defines  specializations of generic coordinate transformation templated to the ModQ case
+  * This particular file defines  specializations of generic coordinate transformation to the ModQ case
    *
    * @date 16-05-2012
 
@@ -45,27 +45,40 @@ namespace MDEvents
 class DLLExport MDTransfModQ: public MDTransfInterface
 { 
 public:
-   /**  returns the units, the transformation expects for workspace to be expressed in. */
-    const std::string usedUnitID()const;
     /// the name, this subalgorithm is known to users (will appear in selection list)
-    const std::string transfID()const{return "ModQ"; }
-    // energy conversion modes supported by this class
-    std::vector<std::string> getEmodes()const{dEModes.getEmodes();}
-    /// string presentation of emode
-    std::string getEmode(ConvertToMD::EModes Mode)const{dEModes.getEmode(Mode);}
-    //void setEmode(const std::string &Emode);
-
+    const std::string transfID()const; // {return "ModQ"; }
+    /** energy conversion modes supported by this class; 
+      * The class supports three standard energy conversion modes */
+    std::vector<std::string> getEmodes()const{MDTransfDEHelper dEModes;  return dEModes.getEmodes();}
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
     bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
     // constructor;
     MDTransfModQ();
+    /* clone method allowing to provide the copy of the particular class */
+    MDTransfInterface * clone() const{return new MDTransfModQ(*this);}
     //
-    void initialize(const ConvToMDEventsBase &Conv);
-    /** return the number of dimensions, calculated by the transformation from the workspace. Depending on mode, this numebr here is either 1 or 2*/
-    virtual int getNMatrixDimensions()const{return nMatrixDim;}
+    void initialize(const MDWSDescription &ConvParams);
 
+// WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
+    /** return the number of dimensions, calculated by the transformation from the workspace.
+       Depending on EMode, this numebr here is either 1 or 2 and do not depend on input workspace*/
+    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+    /**function returns units ID-s which this transformation prodiuces its ouptut.
+       It is Momentum and Momentum and DelteE in inelastic modes */
+    std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+    /**the default dimID-s in ModQ mode are |Q| and dE if necessary */ 
+    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+   /**  returns the units, the transformation expects for input workspace to be expressed in. */
+    const std::string inputUnitID(ConvertToMD::EModes dEmode,
+        API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
+
+
+ 
 protected:
     //  directions to the detectors 
     double ex,ey,ez;
@@ -75,26 +88,25 @@ protected:
     std::vector<double> dim_min,dim_max;
     // pointer to the class, which contains the information about precprocessed detectors
     Kernel::V3D const * pDet;
-    // The pointer to the class, which drives this conversion and provides all necessary values for variables
-    ConvToMDEventsBase const* pHost;
-    // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode. 
-    int nMatrixDim;
+
+    // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode here. 
+    unsigned int nMatrixDim;
     // the variable which describes current conversion mode:
     ConvertToMD::EModes emode;
+    /** the vector of the additional coordinates which define additional MD dimensions. 
+        For implemented ModQ case, these dimensions do not depend on matrix coordinates and are determined by WS properties */
+    std::vector<coord_t>  addDimCoordinates;
     //************* These two variables are relevant to inelastic modes only and will be used in inelastic cases:
     // the energy of the incident neutrons
     double Ei;
     // the wavevector of incident neutrons
-    double ki;
-    // class which describes energy transfer modes supported by this class
-    MDTransfDEHelper dEModes;
+    double ki;  
 private:
-    // vector which provides string representation of supporting emodes;
-    std::vector<std::string> Emodes;
-    /// how to transform workspace data in elastic case
+     /// how to transform workspace data in elastic case
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;
     /// how to transform workspace data in inelastic case
     inline bool calcMatrixCoordInelastic(const double &DeltaE,std::vector<coord_t> &Coored)const;
+    
 };
 
 } // End MDAlgorighms namespace

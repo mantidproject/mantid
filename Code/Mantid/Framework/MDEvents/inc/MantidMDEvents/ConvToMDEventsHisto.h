@@ -14,8 +14,6 @@
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfInterface.h"
-// units conversion
-#include "MantidMDEvents/UnitConversionHelper.h"
 
 namespace Mantid
 {
@@ -59,9 +57,6 @@ public:
 private:
   // conversion chunk; it does not used at the moment but can be provided to thread pull to do the job
    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
-
-   // class responsible for converting units if necessary;
-   UnitsConversionHelper UnitConversion;
 
 };
 

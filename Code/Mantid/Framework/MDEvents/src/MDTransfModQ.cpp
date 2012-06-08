@@ -6,7 +6,7 @@ namespace Mantid
 namespace MDEvents
 {
 // register the class, whith conversion factory under ModQ name
-DECLARE_MD_TRANSFID(MDTransfModQ,ModQ);
+DECLARE_MD_TRANSFID(MDTransfModQ,|Q|);
 
 /** method calculates the unigs, the transformation expects input ws to be in. If input ws is in different units, 
     the WS data will be converted into the units requested on-fly. 
@@ -48,17 +48,6 @@ bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)c
         return calcMatrixCoordInelastic(x,Coord);
     }
 }
-// function returns energy conversion modes supported by this class
-std::vector<std::string> MDTransfModQ::getEmodes()const
-{
-    return std::vector<std::string>(this->Emodes.begin(),this->Emodes.end());
-}
-/// function returns  string presentation of emode
-std::string MDTransfModQ::getEmode(ConvertToMD::EModes Mode)const
-{
-    return Emodes[Mode];
-}
-
 
 /** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 
  *  it fills in [nd - (1 or 2 -- depending on emode)] values into Coord vector;
@@ -254,9 +243,13 @@ std::vector<std::string> MDTransfModQ::getDefaultDimID(ConvertToMD::EModes dEmod
 std::vector<std::string> MDTransfModQ::outputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(inWS);
-    std::vector<std::string> UnitID = MDTransfModQ::getDefaultDimID(dEmode,inWS);
+    std::vector<std::string> UnitID = this->getDefaultDimID(dEmode,inWS);
     //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
-    UnitID[0] = "MomentumTransfer";
+    if(dEmode==ConvertToMD::Elastic){
+        UnitID[0] = "Momentum";
+    }else{
+        UnitID[0] = "MomentumTransfer";
+    }
     return UnitID;
 }
 
@@ -266,15 +259,6 @@ MDTransfModQ::MDTransfModQ():
 pDet(NULL),
 nMatrixDim(-1)
 {
-}    
-
-
-    // constructor;
-MDTransfModQ::MDTransfModQ():
-pDet(NULL),
-pHost(NULL)
-{
-
 }    
 
 } // End MDAlgorighms namespace

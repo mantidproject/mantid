@@ -2,29 +2,27 @@
 #define CONVERT2_MDEVENTS_METHODS_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/FrameworkManager.h"
 
-
-#include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 
 // stuff for convertToEventWorkspace subalgorithm
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Events.h"
+
 //
-#include "MantidMDAlgorithms/BinaryOperationMD.h"
+//#include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDBoxBase.h"
-
-
-
+#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDEventsSelector.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 
 
 using namespace Mantid;
@@ -32,44 +30,32 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDAlgorithms::ConvertToMD;
+//using namespace Mantid::MDAlgorithms;
+//using namespace Mantid::MDAlgorithms::ConvertToMD;
 
-class TestConvertToMDEventsWS :public IConvertToMDEventsWS
+
+
+class ConvertToMDEventsWSTest : public CxxTest::TestSuite
 {
-    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
-public:
-    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc)
-    {
-        MDEvents::MDWSDescription TestWS(5);
-
-        TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
-        TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
-
-        boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
-        pOutMDWSWrapper->createEmptyMDWS(TestWS);
-
-        IConvertToMDEventsWS::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
-
-    }
-    /// method which starts the conversion procedure
-    void runConversion(API::Progress *){}
- 
-};
-
-
-class ConvertToMDEventsWSTest : public CxxTest::TestSuite, public ConvertToMDEvents
-{
+  // matrix ws and event ws which contains the same data
    Mantid::API::MatrixWorkspace_sptr ws2D;
    Mantid::API::MatrixWorkspace_sptr ws_events;
-   std::auto_ptr<API::Progress > pProg;   
 
+   // MD ws obtained from histo and MD ws obtained from events, which should be again similar
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pHistoMDWSWrapper;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pEventMDWSWrapper;
-   ConvToMDPreprocDetectors det_loc;
+
+   // preprocessed detectors positions and target ws description
+   ConvToMDPreprocDet det_loc;
    MDEvents::MDWSDescription TestWS;
 
-   std::auto_ptr<TestConvertToMDEventsWS> pConvMethods;
+   std::auto_ptr<ConvToMDEventsBase> pConvMethods;
+
+   // class which would select the solver as function of ws type
+   ConvToMDEventsSelector WSAlgoSelector;
+
+   // the helper claa which woudl provide log and progress --> algorithm's properties 
+   WorkspaceCreationHelper::MockAlgorithm logProvider;
 
 public:
 static ConvertToMDEventsWSTest *createSuite() {
@@ -77,44 +63,46 @@ static ConvertToMDEventsWSTest *createSuite() {
 }
 static void destroySuite(ConvertToMDEventsWSTest  * suite) { delete suite; }    
 
-void testSetUp_and_PreprocessDetectors()
+void test_PreprocessDetectors()
 {
-   pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
-
-    TS_ASSERT_THROWS_NOTHING(det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsWS>(new TestConvertToMDEventsWS()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
+    TS_ASSERT_THROWS_NOTHING(det_loc.processDetectorsPositions(ws2D,logProvider.getLogger(),logProvider.getProgress()));
 
 }
 
 void test_TwoTransfMethods()
 {
-  
-    ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvertNo,CrystType> HistoConv;
-    
-    TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
-    TestWS.emode= MDAlgorithms::ConvertToMD::Direct;
-    TestWS.dimMin.assign(4,-3);
-    TestWS.dimMax.assign(4,3);
-    TestWS.dimNames.assign(4,"Momentum");
-    TestWS.dimNames[3]="DeltaE";
+
+    // define the parameters of the conversion
+    std::vector<std::string> dimProperyNames; //--- empty property names
+    TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(ws2D,"Q3D","Direct",dimProperyNames));
+    TS_ASSERT_THROWS_NOTHING(TestWS.setDetectors(det_loc));
+
+    std::vector<double> dimMin(4,-3);
+    std::vector<double> dimMax(4, 3);
+    TS_ASSERT_THROWS_NOTHING(TestWS.setMinMax(dimMin,dimMax));
+
+    // define transformation
     TestWS.rotMatrix.assign(9,0);
     TestWS.rotMatrix[0]=1;
     TestWS.rotMatrix[4]=1;
     TestWS.rotMatrix[8]=1;
 
-     pHistoMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
-     pHistoMDWSWrapper->createEmptyMDWS(TestWS);
+    // create target md workspace
+    pHistoMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+    pHistoMDWSWrapper->createEmptyMDWS(TestWS);
 
     Mantid::API::BoxController_sptr bc=pHistoMDWSWrapper->pWorkspace()->getBoxController();
     bc->setSplitThreshold(5);
     bc->setMaxDepth(100);
     bc->setSplitInto(5);
 
-    TS_ASSERT_THROWS_NOTHING(HistoConv.setUPConversion(ws2D,det_loc,TestWS,pHistoMDWSWrapper));
+    // initialize solver converting from Matrix ws to md ws
+    boost::shared_ptr<ConvToMDEventsBase> pSolver;
+    TS_ASSERT_THROWS_NOTHING(pSolver = WSAlgoSelector.convSelector(ws2D,pSolver));
+    TS_ASSERT_THROWS_NOTHING(pSolver->initialize(TestWS,pHistoMDWSWrapper));
 
-    pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
-    TS_ASSERT_THROWS_NOTHING(HistoConv.runConversion(pProg.get()));
+    logProvider.resetProgress(4);
+    TS_ASSERT_THROWS_NOTHING(pSolver->runConversion(logProvider.getProgress()));
 
     TS_ASSERT_EQUALS(50,pHistoMDWSWrapper->pWorkspace()->getNPoints());
 
@@ -124,36 +112,41 @@ void test_buildFromEWS()
     // create empty target ws
      pEventMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
      pEventMDWSWrapper->createEmptyMDWS(TestWS);
-     // set up conversion just to deliver proper pointers to tof convertor
-     ConvertToMDEventsWS<Ws2DHistoType,Q3D,Direct,ConvByTOF,CrystType> tmp;
-     tmp.setUPConversion(ws2D,det_loc,TestWS,pEventMDWSWrapper);
-
-     // provide arguments for convertor
+     // convert initial matrix ws into event ws
      DataObjects::Workspace2D_const_sptr inWS = boost::static_pointer_cast<const DataObjects::Workspace2D>(ws2D);
-     EventWorkspace_sptr outWS = convertToEvents(inWS,tmp);
+     EventWorkspace_sptr outWS = convertToEvents(inWS);
+
+     // build ws description from event ws
+      std::vector<std::string> dimProperyNames; //--- empty property names
+      TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(outWS,"Q3D","Direct",dimProperyNames));
 
      ws_events =boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
      if (!ws_events){
           throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
      }
-     // initate conversion from event ws
-     ConvertToMDEventsWS<EventWSType,Q3D,Direct,ConvFromTOF,CrystType> TOFConv;
-  
+
+    // create target md workspace wrapper
+    pEventMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+    pEventMDWSWrapper->createEmptyMDWS(TestWS);
+
      Mantid::API::BoxController_sptr bc=pEventMDWSWrapper->pWorkspace()->getBoxController();
      bc->setSplitThreshold(5);
      bc->setMaxDepth(100);
      bc->setSplitInto(5);
 
-     TS_ASSERT_THROWS_NOTHING(TOFConv.setUPConversion(ws_events,det_loc,TestWS,pEventMDWSWrapper));
+    // initialize solver converting from Event ws to md ws
+    boost::shared_ptr<ConvToMDEventsBase> pTOFConv;
+    TS_ASSERT_THROWS_NOTHING(pTOFConv = WSAlgoSelector.convSelector(outWS));
+    TS_ASSERT_THROWS_NOTHING(pTOFConv->initialize(TestWS,pEventMDWSWrapper));
 
-     pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
-     TS_ASSERT_THROWS_NOTHING(TOFConv.runConversion(pProg.get()));
+     logProvider.resetProgress(4);
+     TS_ASSERT_THROWS_NOTHING(pTOFConv->runConversion(logProvider.getProgress()));
      TS_ASSERT_EQUALS(50,pEventMDWSWrapper->pWorkspace()->getNPoints());
 
 
 }
 
-void test_compareTwoBuilds()
+void test_compareTwoConversions()
 {
 
    MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> * pMatrWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> *>(this->pHistoMDWSWrapper->pWorkspace().get());
@@ -213,7 +206,11 @@ void test_compareTwoBuilds()
 }
 
 // constructor:
-ConvertToMDEventsWSTest ():TestWS(4){    
+ConvertToMDEventsWSTest ():
+TestWS(4),
+logProvider(100)
+{    
+   API::FrameworkManager::Instance();
 
    std::vector<double> L2(5,5);
    std::vector<double> polar(5,(30./180.)*3.1415926);
@@ -227,27 +224,17 @@ ConvertToMDEventsWSTest ():TestWS(4){
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
 
-   Kernel::UnitFactory::Instance().create("TOF");
-   Kernel::UnitFactory::Instance().create("Energy");
-   Kernel::UnitFactory::Instance().create("DeltaE");
-   Kernel::UnitFactory::Instance().create("Momentum");
-
-   // set up workpspaces and preprocess detectors
-    pProg =  std::auto_ptr<API::Progress >(new API::Progress(dynamic_cast<ConvertToMDEvents *>(this),0.0,1.0,4));
-
-    det_loc.processDetectorsPositions(ws2D,ConvertToMDEvents::getLogger(),pProg.get());
-    //pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
-    //pConvMethods->setUPConversion(ws2D,det_loc);
+  
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.
-EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,const IConvertToMDEventsWS &conv,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10){
-  
+EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10)
+{
+ 
     // set up conversion to Time of flight
-    UnitsConverter<ConvByTOF,Centered> TOFCONV;
+    UnitsConversionHelper TOFCONV;
 
-    const Kernel::Unit_sptr pThisUnit= conv.getAxisUnits();          
-    TOFCONV.setUpConversion(*(conv.pPrepDetectors()),pThisUnit->unitID(),"TOF");
+    TOFCONV.initialize(TestWS,"TOF");
 
     //Create the event workspace
     EventWorkspace_sptr  outWS = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -260,7 +247,8 @@ EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,con
     double inf = std::numeric_limits<double>::infinity();
     double ninf = -inf;
 
-    Progress prog(this, 0.0, 1.0, inWS->getNumberHistograms());
+    logProvider.resetProgress(inWS->getNumberHistograms());
+    Progress *prog = logProvider.getProgress();
     //PARALLEL_FOR1(inWS)
     for (int iwi=0; iwi<int(inWS->getNumberHistograms()); iwi++)
     {
@@ -314,7 +302,7 @@ EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,con
                 double tof = X[i] + tofStep * (0.5 + double(j));
                 // Create and add the event
 
-                el.addEventQuickly( WeightedEventNoTime(TOFCONV.getXConverted(tof), weight, errorSquared) );
+                el.addEventQuickly(WeightedEventNoTime(TOFCONV.convertUnits(tof), weight, errorSquared) );
               }
             }
             else
@@ -326,7 +314,7 @@ EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,con
               double errorSquared = E[i];
               errorSquared *= errorSquared;
               // Create and add the event
-              el.addEventQuickly( WeightedEventNoTime(TOFCONV.getXConverted(tof), weight, errorSquared) );
+              el.addEventQuickly( WeightedEventNoTime(TOFCONV.convertUnits(tof), weight, errorSquared) );
             }
           } // error is nont NAN or infinite
         } // weight is non-zero, not NAN, and non-infinite
@@ -337,7 +325,7 @@ EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,con
       // Manually set that this is sorted by TOF, since it is. This will make it "threadSafe" in other algos.
       el.setSortOrder( TOF_SORT );
 
-      prog.report("Converting");
+      prog->report("Converting");
      // PARALLEL_END_INTERUPT_REGION
     }
    // PARALLEL_CHECK_INTERUPT_REGION

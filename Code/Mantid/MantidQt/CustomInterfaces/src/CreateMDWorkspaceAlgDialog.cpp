@@ -1,12 +1,13 @@
 #include "MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+#include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidMDEvents/MDTransfDEHelper.h"
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QFileDialog>
 
-using namespace Mantid::MDAlgorithms;
+//using namespace Mantid::MDAlgorithms;
 /**
 Constructor
 */
@@ -17,16 +18,21 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   connect(m_uiForm.buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-  ConvertToMD::ConvertToMDEventsParams ConvParams;
-  std::vector<std::string> QModes = ConvParams.getQModes();
-  // based on noQ mode being first in the list
-  QString name1(QModes[ConvertToMD::ModQ].c_str());
-  m_uiForm.combo_q_dimensions->addItem(name1);
-  QString name2(QModes[ConvertToMD::Q3D].c_str());
-  m_uiForm.combo_q_dimensions->addItem(name2);
+  //ConvertToMD::ConvertToMDEventsParams ConvParams;
+  std::vector<std::string> QModes =Mantid::MDEvents::MDTransfFactory::Instance().getKeys();
+  if(QModes.empty()) // avoid werid situations with factory not initiated
+  {
+      QModes.assign(1," No Q modes availible; error Initiating Q-conversion factory");
+  }
+  for(size_t i=0;i<QModes.size();i++)
+  {
+      QString name(QModes[i].c_str());
+      m_uiForm.combo_q_dimensions->addItem(name);
 
-  std::vector<std::string> dEModes = ConvParams.getDEModes();
-  for(size_t i=0;i<ConvertToMD::ANY_Mode;i++)
+  }
+  Mantid::MDEvents::MDTransfDEHelper AlldEModes;
+  std::vector<std::string> dEModes = AlldEModes.getEmodes();
+  for(size_t i=0;i<dEModes.size();i++)
   {
       QString name(dEModes[i].c_str());
       m_uiForm.combo_analysis_mode->addItem(name);

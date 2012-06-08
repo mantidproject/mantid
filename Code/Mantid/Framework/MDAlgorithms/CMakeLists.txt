@@ -113,14 +113,14 @@ set ( TEST_FILES
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertToDetectorFaceMDTest.h	
-#	test/ConvertEventsToMDEventsTest.h
+	test/ConvertEventsToMDEventsTest.h
+	test/ConvertToMDEventsWSTest.h
+	test/ConvertToMDEventsTest.h		
+	test/ConvertToQ3DdETest.h	
+    test/ConvertToMDEventsSubalgFactoryTest.h	
 #	test/ConvertToMDEventsCoordTransfTest.h
-#	test/ConvertToMDEventsWSTest.h
 #	test/ConvertToMDEventsParamsTest.h
-#    test/ConvertToMDEventsSubalgFactoryTest.h
-#	test/ConvertToMDEventsTest.h
-#	test/ConvertToMDEventsUnitsConvTest.h
-#	test/ConvertToQ3DdETest.h
+#   test/ConvertToMDEventsUnitsConvTest.h
 #	test/ConvertToMDEventsTestPerformance.h 	
   test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h

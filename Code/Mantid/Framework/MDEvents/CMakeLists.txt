@@ -33,8 +33,6 @@ set ( SRC_FILES
 	src/MDLeanEvent.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
-	src/ReflectometryTransformKiKf.cpp
-	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
@@ -51,7 +49,7 @@ set ( SRC_FILES
 	src/MDTransfQ3D.cpp
 	src/MDTransfNoQ.cpp
 	src/MDTransfModQ.cpp
-	src/UnitConversionHelper.cpp	
+	src/UnitsConversionHelper.cpp	
 	src/ConvToMDEventsSelector.cpp
 
 	src/MDWSDescription.cpp
@@ -103,10 +101,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
-	inc/MantidMDEvents/ReflectometryMDTransform.h
-	inc/MantidMDEvents/ReflectometryTransformKiKf.h
-	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
+	inc/MantidMDEvents/ReflectometryMDTransform.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
@@ -130,7 +126,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfModQ.h
 	inc/MantidMDEvents/ConvToMDEventsSelector.h
-	inc/MantidMDEvents/UnitConversionHelper.h	
+	inc/MantidMDEvents/UnitsConversionHelper.h	
 )
 
 # Test files. Other source files required.
@@ -167,12 +163,10 @@ set ( TEST_FILES
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
-#	test/MDWSDescriptionTest.h
-#	test/MDWSTransfDescrTest.h
+	test/MDTransfAxisNamesTest.h
+	test/MDWSTransfTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
-	test/ReflectometryTransformKiKfTest.h
-	test/ReflectometryTransformPTest.h
 	test/ReflectometryTransformQxQzTest.h
 	test/SaveMDTest.h
 	test/SkippingPolicyTest.h

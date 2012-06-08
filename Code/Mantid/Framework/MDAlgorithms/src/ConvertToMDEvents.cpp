@@ -96,7 +96,7 @@ ConvertToMDEvents::init()
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
-     if(Q_modes.empty()) Q_modes.assign(1,"");
+     if(Q_modes.empty()) Q_modes.assign(1,"ERROR IN LOADING Q-converters");
   
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
@@ -232,7 +232,7 @@ void ConvertToMDEvents::exec()
     std::vector<double> dimMax = getProperty("MaxValues");
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
     TWSD.setMinMax(dimMin,dimMax);   
-    TWSD.buildFromMatrixWS(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,pWSWrapper->getMaxNDim());
+    TWSD.buildFromMatrixWS(inWS2D,Q_mod_req,dE_mod_req,other_dim_names);
 
 
   // instanciate class, responsible for defining Mslice-type projection
@@ -245,23 +245,19 @@ void ConvertToMDEvents::exec()
         std::vector<double> wt = getProperty("WProj");
         try
         {
-            MsliceProj.getUVsettings(ut,vt,wt);
+            MsliceProj.setUVvectors(ut,vt,wt);
         }
         catch(std::invalid_argument)
         {
-            g_log.error() << "The projections are coplanar. Will switch to default." << std::endl;
+            g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;
         }
        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
 
 
         // check if we are working in powder mode
-        // set up target coordinate system
-         TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,convert_to_);
-        // identify/set the (multi)dimension's names to use
-        // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
-        /* QMode Q    = ParamParser.getQMode(algo_id);
-         if(Q==Q3D)  MsliceProj.setQ3DDimensionsNames(TWSD);
-         if(Q==ModQ) MsliceProj.setModQDimensionsNames(TWSD);*/
+        // set up target coordinate system and identify/set the (multi) dimension's names to use
+         TWSD.rotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);     
+      
     }
     else // user input is mainly ignored and everything is in old workspac
     {  
@@ -278,7 +274,7 @@ void ConvertToMDEvents::exec()
         // reset new ws description name
         TWSD =OLDWSD;
        // set up target coordinate system
-        TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,convert_to_);
+        TWSD.rotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);
     
     }
 
@@ -334,7 +330,7 @@ void ConvertToMDEvents::exec()
   pConvertor  = AlgoSelector.convSelector(inWS2D,pConvertor);
 
   // initate conversion and estimate amout of job to dl
-  size_t n_steps = pConvertor->initialize(inWS2D,TWSD,pWSWrapper);
+  size_t n_steps = pConvertor->initialize(TWSD,pWSWrapper);
   // progress reporter
   pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 

@@ -2,19 +2,19 @@
 #define MANTID_MDWS_DESCRIPTION_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidMDEvents/MDTransfAxisNames.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Kernel;
 
-class MDWSDescriptionTest : public CxxTest::TestSuite
+class MDTransfAxisNamesTest : public CxxTest::TestSuite
 {
-    MDWSDescription descr;
+    MDTransfAxisNames descr;
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDWSDescriptionTest *createSuite() { return new MDWSDescriptionTest(); }
-  static void destroySuite( MDWSDescriptionTest *suite ) { delete suite; }
+  static MDTransfAxisNamesTest *createSuite() { return new MDTransfAxisNamesTest(); }
+  static void destroySuite( MDTransfAxisNamesTest *suite ) { delete suite; }
 
   void test_name()
   {
@@ -47,7 +47,7 @@ public:
 
   }
 
-MDWSDescriptionTest():descr(5)
+MDTransfAxisNamesTest()
 {
 }
 
