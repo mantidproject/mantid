@@ -831,7 +831,7 @@ class RefLReduction(PythonAlgorithm):
 
         #now we can convert to Q
         
-        theta = math.fabs(tthd_rad - thi_rad)
+        theta = math.fabs(tthd_rad - thi_rad)/2.
         AngleOffset_deg = float(self.getProperty("AngleOffset"))
         AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
         theta += AngleOffset_rad
