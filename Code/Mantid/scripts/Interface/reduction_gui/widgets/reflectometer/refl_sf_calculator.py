@@ -518,7 +518,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         mt_run = mt.getRun()
         sl = mt_run.getProperty(left_tag).value
         sr = mt_run.getProperty(right_tag).value
-        sw = math.fabs(float(sl[0]) - float(sr[0])
+        sw = math.fabs(float(sl[0]) - float(sr[0]))
         units = mt_run.getProperty(left_tag).units
         return sw, units
 
