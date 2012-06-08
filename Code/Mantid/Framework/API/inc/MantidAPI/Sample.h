@@ -103,7 +103,7 @@ namespace Mantid
       /// Get a reference to the sample's OrientedLattice
       Geometry::OrientedLattice & getOrientedLattice();
       /** Set the pointer to OrientedLattice defining the sample's lattice and orientation. 
-          No copying is done in the class, so keeping the pointer alive is the responsibility of the application, providing the pointer */
+          No copying is done in the class, but the class deletes pointer on destruction so the application, providing the pointer should not do it*/
       void setOrientedLattice(Geometry::OrientedLattice * latt);
       bool hasOrientedLattice() const;
       //@}
