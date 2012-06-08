@@ -22,6 +22,7 @@ class RunPythonScript(PythonAlgorithm):
 
     def PyInit(self):
         self.declareWorkspaceProperty("InputWorkspace","", Direction=Direction.Input, Type=Workspace,
+                Optional=True,
                 Description=
                     "An input workspace that the python code will modify.\n"
                     "The workspace will be in the python variable named 'input'.")
@@ -30,6 +31,7 @@ class RunPythonScript(PythonAlgorithm):
                              Description="Python code (can be on multiple lines)." )
         
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Type=Workspace,
+                Optional=True,
                 Description=
                 "An output workspace to be produced by the python code.\n"
                 "The python code should create the workspace named by the python variable 'output'.")
@@ -59,13 +61,14 @@ class RunPythonScript(PythonAlgorithm):
             if mtd.workspaceExists(wsOutputName):
                 # The script did create the workspace; use it
                 wsOut = mtd[wsOutputName]
-            else:
+            elif len(wsOutputName)>0:
                 # The script did NOT create it
                 # So we take care of cloning it so that the output is valid
                 CloneWorkspace(InputWorkspace=wsInputName, OutputWorkspace=wsOutputName)
                 wsOut = mtd[wsOutputName]
             
-        self.setProperty("OutputWorkspace",wsOut)
+        if len(wsOutputName)>0:
+            self.setProperty("OutputWorkspace",wsOut)
 
         return
         

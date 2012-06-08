@@ -1581,7 +1581,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         
     # Specialized version for workspaces
     def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Validator = None, \
-                                     Description = '', Type = MatrixWorkspace):
+                                     Description = '', Type = MatrixWorkspace, Optional=False):
         if Type == MatrixWorkspace:
             decl_fn = self._declareMatrixWorkspace
         elif Type == Workspace:
@@ -1592,9 +1592,9 @@ class PythonAlgorithm(PyAlgorithmBase):
             raise TypeError('Unrecognized type of workspace specified for property "' + PropertyName + '"')
 
         if Validator == None:
-            decl_fn(PropertyName, WorkspaceName, Description, Direction)
+            decl_fn(PropertyName, WorkspaceName, Description, Direction, Optional)
         else:
-            decl_fn(PropertyName, WorkspaceName, Validator, Description, Direction)
+            decl_fn(PropertyName, WorkspaceName, Validator, Description, Direction, Optional)
             
         self._mapPropertyToType(PropertyName, WorkspaceProperty)
 
