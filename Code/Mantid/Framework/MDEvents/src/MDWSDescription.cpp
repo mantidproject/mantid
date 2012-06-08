@@ -60,7 +60,7 @@ void MDWSDescription::setDetectors(const ConvToMDPreprocDet &det_loc)
  *                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
  *                  to the factory
  *@param  dEMode  -- energy analysis mode (string representation). Should correspond to energy analysis modes, supported by selected Q-mode
- *@param  dimPropertyNames -- the vector of names for additional properties, which will be used as dimensions.
+ *@param  dimPropertyNames -- the vector of names for additional ws properties, which will be used as dimensions.
 
 */
 void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
@@ -98,7 +98,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     {
         if(i<nMatrixDim){
             dimIDs[i]  = MatrDimID[i];
-            dimNames[i]= dimNames[i];
+            dimNames[i]= MatrDimID[i];
             dimUnits[i]= MatrUnitID[i];
         }else{
             dimIDs[i]  = dimProperyNames[i-nMatrixDim];
@@ -121,6 +121,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
 
 /** the function builds MD event WS description from existing workspace. 
   * Primary used to obtain existing ws parameters 
+  *@param pWS -- shared pointer to existing MD workspace 
 */
 void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 {
@@ -154,9 +155,14 @@ void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS
     //}
 
 }
-/** When the workspace has been build from existing MDWrokspace, some target worskpace parameters can not be defined. 
-    examples are emode or input energy, which is actually source workspace parameters, or some other parameters 
-    defined by the transformation algorithm
+/** When the workspace has been build from existing MDWrokspace, some target worskpace parameters can not be defined,
+  * as these parameters are defined by the algorithm and input matrix workspace.
+  *  examples are emode or input energy, which is actually source workspace parameters, or some other parameters 
+  *  defined by the transformation algorithm
+  * 
+  * This method used to define such parameters from MDWS description, build from workspace and the transformation algorithm parameters
+  *
+  *@param SourceMartWS -- the MDWS description obtained from input matrix workspace and the algorithm parameters
 */
 void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &SourceMatrWS)
 {
@@ -175,7 +181,7 @@ void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &So
  * selects/changes the properties which can be changed through input parameters given that target MD workspace exist   
  *
  * This situation occurs if the base description has been obtained from MD workspace, and one is building a description from 
- * other matrix workspace to add new data to the existing workspace. The workspaces have to copmarible
+ * other matrix workspace to add new data to the existing workspace. The workspaces have to be comparable.
  *
  * @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm parameters
  *

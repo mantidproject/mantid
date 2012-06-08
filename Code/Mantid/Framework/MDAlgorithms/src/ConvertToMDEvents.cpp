@@ -245,23 +245,19 @@ void ConvertToMDEvents::exec()
         std::vector<double> wt = getProperty("WProj");
         try
         {
-            MsliceProj.getUVsettings(ut,vt,wt);
+            MsliceProj.setUVvectors(ut,vt,wt);
         }
         catch(std::invalid_argument)
         {
-            g_log.error() << "The projections are coplanar. Will switch to default." << std::endl;
+            g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;
         }
        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
 
 
         // check if we are working in powder mode
-        // set up target coordinate system
-         TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,convert_to_);
-        // identify/set the (multi)dimension's names to use
-        // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
-        /* QMode Q    = ParamParser.getQMode(algo_id);
-         if(Q==Q3D)  MsliceProj.setQ3DDimensionsNames(TWSD);
-         if(Q==ModQ) MsliceProj.setModQDimensionsNames(TWSD);*/
+        // set up target coordinate system and identify/set the (multi) dimension's names to use
+         TWSD.rotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);     
+      
     }
     else // user input is mainly ignored and everything is in old workspac
     {  
@@ -278,7 +274,7 @@ void ConvertToMDEvents::exec()
         // reset new ws description name
         TWSD =OLDWSD;
        // set up target coordinate system
-        TWSD.rotMatrix = MsliceProj.getTransfMatrix(inWS2D->name(),TWSD,convert_to_);
+        TWSD.rotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);
     
     }
 
