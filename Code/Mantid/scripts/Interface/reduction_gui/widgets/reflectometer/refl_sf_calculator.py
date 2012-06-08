@@ -489,7 +489,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         mt_run = mt.getRun()
         st = mt_run.getProperty(top_tag).value
         sb = mt_run.getProperty(bottom_tag).value
-        sh = float(sb[0]) - float(st[0])
+        sh = math.fabs(float(sb[0]) - float(st[0]))
         units = mt_run.getProperty(top_tag).units
         return sh, units
     
@@ -518,7 +518,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         mt_run = mt.getRun()
         sl = mt_run.getProperty(left_tag).value
         sr = mt_run.getProperty(right_tag).value
-        sw = float(sl[0]) - float(sr[0])
+        sw = math.fabs(float(sl[0]) - float(sr[0])
         units = mt_run.getProperty(left_tag).units
         return sw, units
 
