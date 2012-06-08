@@ -240,7 +240,7 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
     }
 
     m_datafile[fileIndex]->seekp(0, std::ios::end);
-    const int speczero = 0;
+    //const int speczero = 0;
     const std::vector<double> xzeroes(m_XLength);
     const std::vector<double> yzeroes(m_YLength);
     // if i is a workspace index the loop has to start with 1 because m_indexWrittenTo + 0 is the index
