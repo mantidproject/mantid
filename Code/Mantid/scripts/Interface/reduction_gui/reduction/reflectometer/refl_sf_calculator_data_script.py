@@ -12,9 +12,7 @@ class DataSets(BaseScriptElement):
 
     data_file = 0
     incident_medium_list = ['H2O']
-    incident_medium_list_bkup = incident_medium_list
     incident_medium_index_selected = 0
-    incident_medium_index_selected_bkup = incident_medium_index_selected
     number_attenuator = 0
     peak_selection = [0,0]
     back_selection = [0,0]
