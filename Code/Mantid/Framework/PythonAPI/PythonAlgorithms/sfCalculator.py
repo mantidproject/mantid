@@ -3,7 +3,7 @@ from mantidsimple import *
 from numpy import zeros, unique, arange, sqrt
 import os.path
 
-PRECISION = 0.010
+PRECISION = 0.020
 
 class sfCalculator():      
     
