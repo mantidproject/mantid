@@ -1,5 +1,6 @@
 #include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Exception.h"
 
 
 namespace Mantid
