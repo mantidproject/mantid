@@ -85,10 +85,10 @@ public:
      *  2   1   0 1.859018     55175.79        0.03613    0.02376    187.50514    0.00000 30.46799         3.4990    52.2059    91.3293   0.5385
      */
 
-    peak.setParameter("height", 111.0);
-    peak.setParameter("TOF_h", 55175.79);
+    peak.setParameter("I", 1.0);
+    peak.setParameter("height", 1000.0);
 
-    // peak.tie("TOF_h", "55175.79");
+    peak.tie("TOF_h", "55175.79");
     peak.tie("Alpha", "0.03613");
     peak.tie("Beta", "0.02376");
     peak.tie("Sigma2", "187.50514");
@@ -132,8 +132,7 @@ public:
     fitalg.setPropertyValue("WorkspaceIndex","0");
     fitalg.setProperty("StartX", wsX[0]);
     fitalg.setProperty("EndX", wsX.back());
-    // fitalg.setProperty("Minimizer", "Levenberg-MarquardtMD");
-    fitalg.setProperty("Minimizer", "Simplex");
+    fitalg.setProperty("Minimizer", "Levenberg-MarquardtMD");
     fitalg.setProperty("CostFunction", "Least squares");
     fitalg.setProperty("MaxIterations", 100);
 
@@ -142,42 +141,28 @@ public:
     TS_ASSERT(fitalg.isExecuted());
 
     // test the output from fit is what you expect
-    double dummy = fitalg.getProperty("OutputChi2overDoF");
-    std::cout << "Chi2 = " << dummy << std::endl;
+    double chi2 = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT(chi2 < 1.5);
 
     std::string fitStatus = fitalg.getProperty("OutputStatus");
-    std::cout << "Fit status = " << fitStatus << std::endl;
+    TS_ASSERT_EQUALS(fitStatus, "success");
 
     // 5. Check result
     IFunction_sptr out = fitalg.getProperty("Function");
     std::vector<std::string> parnames = out->getParameterNames();
-    std::cout << "Number of Parameters = " << parnames.size() << std::endl;
     for (size_t ip = 0; ip < parnames.size(); ++ip)
     {
-      std::string parname = parnames[ip];
-      double parvalue = out->getParameter(parname);
-      std::cout << parname << " = " << parvalue << std::endl;
+      if (parnames[ip].compare("TOF_h") == 0)
+      {
+        TS_ASSERT_DELTA(out->getParameter("TOF_h"), 55175.79, 1.0E-8);
+      }
+      else if (parnames[ip].compare("height") == 0)
+      {
+        TS_ASSERT_DELTA(out->getParameter("height"), 96000, 100);
+      }
     }
 
-    /*
-    std::cout << "InputWorkspace: " << std::endl;
-    API::MatrixWorkspace_sptr inpWS =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    for (size_t i = 0; i < inpWS->readX(0).size(); ++i)
-    {
-      std::cout << i << " X = " << inpWS->readX(0)[i] << "  Y = " << inpWS->readY(0)[i] << "  E = " << inpWS->readE(0)[i] << std::endl;
-    }
-    */
-
-    /*
-    peak.geneatePeak(out, xvalues, nData);
-
-    std::ofstream ofile;
-    ofile.open("prof10.dat", std::ios::out);
-    for (size_t i = 0; i < nData; ++i)
-      ofile << xvalues[i] << "    " << out[i] << std::endl;
-    ofile.close();
-    */
+    return;
 
   }
 

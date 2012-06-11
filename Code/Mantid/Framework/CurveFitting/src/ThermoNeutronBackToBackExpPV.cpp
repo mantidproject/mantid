@@ -97,6 +97,14 @@ namespace CurveFitting
 
   double ThermoNeutronBackToBackExpPV::fwhm() const
   {
+    if (fabs(mFWHM) < 1.0E-8)
+    {
+      double sigma2 = this->getParameter("Sigma2");
+      double gamma = this->getParameter("Gamma");
+      double H, eta;
+      calHandEta(sigma2, gamma, H, eta);
+    }
+
     return mFWHM;
   };
 
@@ -130,11 +138,17 @@ namespace CurveFitting
     double H, eta;
     calHandEta(sigma2, gamma, H, eta);
 
+
+    g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
+        << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << std::endl;
+
     // 2. Do calculation
     for (size_t id = 0; id < nData; ++id)
     {
       double dT = xValues[id]-tof_h;
-      out[id] = height*calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+      double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+      out[id] = height*omega;
+      // std::cout << "DB1143  " << xValues[id] << "   " << out[id] << "   " << omega << std::endl;
     }
 
     return;
@@ -167,7 +181,7 @@ namespace CurveFitting
     double z = (beta*sigma2 - x)*invert_sqrt2sigma;
 
     // 2. Calculate
-    double omega1 = (1-eta)*N*(exp(u)*gsl_sf_log_erfc(y) + std::exp(v)*gsl_sf_log_erfc(z));
+    double omega1 = (1-eta)*N*(exp(u)*gsl_sf_erfc(y) + std::exp(v)*gsl_sf_erfc(z));
     double omega2;
     if (eta < 1.0E-8)
     {
