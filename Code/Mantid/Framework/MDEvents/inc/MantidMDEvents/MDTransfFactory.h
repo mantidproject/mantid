@@ -10,7 +10,7 @@
  * of the unitID method for the concrete unit.
 
  * Second macro does the same thing as the first one, but allow to regirster the transformation 
- * with a name, different form the class name. 
+ * with a name, different form the class name and specified by the transformation ID.  
  */
 #define DECLARE_MD_TRANSF(classname) \
     namespace { \
@@ -43,7 +43,8 @@ namespace Mantid
 namespace MDEvents
 {
 
-/** Creates instances of concrete transformations into .
+/** Creates instances of concrete transformations into multidimensional (MD) coordinates.
+
     The factory is a singleton that hands out shared pointers to the base MDTransfornation class.
     It overrides the base class DynamicFactory::create method so that only a single
     instance of a given transformation is ever created, and a pointer to that same instance

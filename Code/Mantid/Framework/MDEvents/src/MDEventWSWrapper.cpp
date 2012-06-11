@@ -5,11 +5,8 @@ namespace Mantid
 namespace MDEvents
 {
 
-// define static variable which specifies the maximal number of MD dimensions allowed by the class and assign reasonable value to it. 
-//const size_t MDEventWSWrapper::MAX_N_DIM = 8;
 /**function returns the number of dimensions in current MDEvent workspace or throws if the workspace has not been defined */
-size_t 
-MDEventWSWrapper::nDimensions()const
+size_t MDEventWSWrapper::nDimensions()const
 {
     if(n_dimensions==0){
       //  g_log.error()<<" attempt to obtain number of dimensions from not-initated undefined workspace wrapper\n";
@@ -17,21 +14,27 @@ MDEventWSWrapper::nDimensions()const
     }
     return size_t(n_dimensions);
 }
-/** function creates empty MD event workspace with given parameters (workspace factory) and stores internal pointer to this workspace for further usage */
-API::IMDEventWorkspace_sptr
-MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
+/** function creates empty MD event workspace with given parameters (workspace factory) and stores internal pointer to this workspace for further usage.
+ *  IT ASLO SETS UP W-TRANSFORMATON. TODO: reconsile w-transfo with MD geometry. 
+ *
+ *@param WSD the class which describes an MD workspace
+ *
+ *@returns shared pointer to the created workspace
+*/
+API::IMDEventWorkspace_sptr MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
 {
-    if(WSD.nDimensions()<1||WSD.nDimensions()>MAX_N_DIM){
+
+    if(WSD.nDimensions()<1||WSD.nDimensions()>MAX_N_DIM)
     {
         std::string ERR=" Number of requested MD dimensions: "+boost::lexical_cast<std::string>(WSD.nDimensions())+
-                        " exceeds maximal number of MD dimensions: "+boost::lexical_cast<std::string>((int)MAX_N_DIM)+" set up during compilation\n";
+                        " exceeds maximal number of MD dimensions: "+boost::lexical_cast<std::string>((int)MAX_N_DIM)+" instantiated during compilation\n";
         throw(std::invalid_argument(ERR));
     }
-
-    }
+   
     this->n_dimensions = (int)WSD.nDimensions();
-
+    // call the particular function, which creates the workspace with n_dimensions
     (this->*(wsCreator[n_dimensions]))(WSD.getDimNames(),WSD.getDimIDs(),WSD.getDimUnits(),WSD.getDimMin(),WSD.getDimMax(),WSD.getNBins());
+
     // set up the matrix, which convert momentums from Q in orthogonal crystal coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or whatevert
     workspace->setWTransf(WSD.Wtransf);
     return workspace;
@@ -55,17 +58,17 @@ void  MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16
 
 /** method should be called at the end of the algorithm, to let the workspace manager know that it has whole responsibility for the workspace
    (As the algorithm is static, it will hold the pointer to the workspace otherwise, not allowing the WS manager to delete WS on request or when it find this usefull)*/
-void 
-MDEventWSWrapper::releaseWorkspace()
+void MDEventWSWrapper::releaseWorkspace()
 {
     // decrease the sp count by one
      workspace.reset();
-     // mark the number dimensions invalid;
+     // mark the number of dimensions invalid;
      n_dimensions=0;
 }
 
 
-//
+// the class instantiated by compiler at compilation time and generates the map,  
+// between the number of dimensions and the function, which process this number of dimensions
 template<size_t i>
 class LOOP{
   public:
@@ -77,6 +80,7 @@ class LOOP{
 
     }
 };
+// the class terminates the compitlation-time metaloop and sets up functions which process 0-dimension workspace operations
 template<>
 class LOOP<0>{
   public:
@@ -86,8 +90,9 @@ class LOOP<0>{
             pH->mdCalCentroid[0]=&MDEventWSWrapper::calc_Centroid_wrong;
       }
 };
-
-MDEventWSWrapper::MDEventWSWrapper():n_dimensions(0)
+/**constructor */
+MDEventWSWrapper::MDEventWSWrapper():
+n_dimensions(0)
 {
     wsCreator.resize(MAX_N_DIM+1);
     mdEvSummator.resize(MAX_N_DIM+1);
