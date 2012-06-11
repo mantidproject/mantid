@@ -138,7 +138,7 @@ const EventBank * BankedEventPkt::nextBank() const
     unsigned long bankSize =  (2 * sizeof(uint32_t)) + (curEventCount() * sizeof( Event));
 
     temp += bankSize;
-    if (temp - payload() > payload_length())
+    if (temp - payload() >= payload_length())
     {
       // We've gone past the end of the packet
       m_curBank = NULL;
