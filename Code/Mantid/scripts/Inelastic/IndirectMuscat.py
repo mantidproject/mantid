@@ -9,8 +9,7 @@ else:
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
 from IndirectCommon import *
-import platform, math, os.path, numpy as np
-
+import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
 def CalcW0(nq,dq,disp,coeff):
