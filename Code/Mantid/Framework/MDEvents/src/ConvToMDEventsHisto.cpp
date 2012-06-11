@@ -82,7 +82,7 @@ void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
                 // drop NaN events
                 if(isNaN(Signal[j]))continue;
 
-                if(!pQConverter->calcMatrixCoord(XtargetUnits,i,j,Coord))continue; // skip ND outside the range
+                if(!pQConverter->calcMatrixCoordinates(XtargetUnits,i,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE BUFFER
                 float ErrSq = float(Error[j]*Error[j]);
 

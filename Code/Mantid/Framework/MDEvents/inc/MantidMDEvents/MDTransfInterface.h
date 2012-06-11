@@ -96,7 +96,7 @@ public:
      * in most existing algorighms X does not depend on Y coordinate, so we can place generalization here; 
      * It should be overridden if the dependence on Y coordinate do exist.
      */
-    virtual bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    virtual bool calcMatrixCoordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
        double X_ev =double(0.5*(X[j]+X[j+1])); // ! POSSIBLE FACTORY HERE !!! if the histogram interpolation is different

@@ -131,6 +131,7 @@ std::vector<std::string> MDTransfNoQ::getDefaultDimID(ConvertToMD::EModes mode, 
 /**  returns the units, the input ws is actually in as they coinside with input units for this class */
 const std::string MDTransfNoQ::inputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
+    UNUSED_ARG(mode);
     API::NumericAxis *pXAxis;
    // get the X axis of input workspace, it has to be there; if not axis throws invalid index
     pXAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(0));
