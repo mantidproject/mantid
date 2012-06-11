@@ -4,10 +4,9 @@ namespace Mantid
 {
 namespace MDEvents
 {
-// logger for loading workspaces  
- //  Kernel::Logger& MDEventWSWrapper::g_log =Kernel::Logger::get("MD-Algorithms");
 
-     
+// define static variable which specifies the maximal number of MD dimensions allowed by the class and assign reasonable value to it. 
+//const size_t MDEventWSWrapper::MAX_N_DIM = 8;
 /**function returns the number of dimensions in current MDEvent workspace or throws if the workspace has not been defined */
 size_t 
 MDEventWSWrapper::nDimensions()const
