@@ -114,7 +114,7 @@ void testTransfMat1()
 }
 
 
-MDWSTransfTest::MDWSTransfTest()
+MDWSTransfTest()
 {
      ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     // rotate the crystal by twenty degrees back;
