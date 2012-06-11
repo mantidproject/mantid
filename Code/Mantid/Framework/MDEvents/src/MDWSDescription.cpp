@@ -208,10 +208,10 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 
 /// empty constructor
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
-emode(ConvertToMD::Undef),
-rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
 Wtransf(3,3,true),
-GoniomMatr(3,3,true)
+GoniomMatr(3,3,true),
+rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
+emode(ConvertToMD::Undef)
 {
 
     this->resizeDimDescriptions(nDimensions);
