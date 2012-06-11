@@ -143,8 +143,8 @@ const std::string MDTransfNoQ::inputUnitID(ConvertToMD::EModes mode, API::Matrix
 }
 
 MDTransfNoQ::MDTransfNoQ():
-pYAxis(NULL),
 nMatrixDim(0),
+pYAxis(NULL),
 pDet(NULL)
 {};
 
