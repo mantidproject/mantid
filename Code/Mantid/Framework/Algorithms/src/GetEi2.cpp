@@ -78,9 +78,10 @@ void GetEi2::init()
     "microseconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  declareProperty("Monitor1Spec", -1, mustBePositive,
+  specid_t minimum=1<<31;//minimum int32_t
+  declareProperty("Monitor1Spec", minimum,// mustBePositive,
     "The spectrum number of the output of the first monitor, e.g. MAPS 41474, MARI 2, MERLIN 69634\n");
-  declareProperty("Monitor2Spec", -1, mustBePositive,
+  declareProperty("Monitor2Spec", minimum,// mustBePositive,
     "The spectrum number of the output of the second monitor e.g. MAPS 41475, MARI 3, MERLIN 69638\n");
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0.0);
@@ -140,10 +141,36 @@ double GetEi2::calculateEi(const double initial_guess)
 {
   const specid_t monitor1_spec = getProperty("Monitor1Spec");
   const specid_t monitor2_spec = getProperty("Monitor2Spec");
+  specid_t mon1=monitor1_spec,mon2=monitor2_spec;
 
+
+  if (mon1<0)
+  {
+      const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
+      Instrument_const_sptr instrument=m_input_ws->getInstrument();
+      Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),"ei-mon1-spec");
+      if (par)
+      {
+        mon1=boost::lexical_cast<specid_t>(par->asString());
+      }
+  }
+  if (mon2<0)
+  {
+      const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
+      Instrument_const_sptr instrument=m_input_ws->getInstrument();
+      Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),"ei-mon2-spec");
+      if (par)
+      {
+        mon2=boost::lexical_cast<specid_t>(par->asString());
+      }
+  }
+  if ((mon1<0) || (mon2<0))
+  {
+      throw std::invalid_argument("Could not determine spectrum number to use. Try to set it explicitly");
+  }
   //Covert spectrum numbers to workspace indices
-  std::vector<specid_t> spec_nums(2, monitor1_spec);
-  spec_nums[1] = monitor2_spec;
+  std::vector<specid_t> spec_nums(2, mon1);
+  spec_nums[1] = mon2;
   std::vector<size_t> mon_indices;
   mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
