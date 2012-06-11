@@ -100,8 +100,7 @@ private:
        typename std::vector<T>::const_iterator it = events.begin();
        typename std::vector<T>::const_iterator it_end = events.end();
      
-
-       size_t ic(0);
+    
        it = events.begin();
        for (; it != it_end; it++)
        {
