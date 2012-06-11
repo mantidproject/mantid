@@ -7,8 +7,11 @@ parameters and generating calls to other workflow or standard algorithms.
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/RebinParamsValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -64,6 +67,16 @@ namespace WorkflowAlgorithms
     //declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     //declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
     declareProperty("SampleData", "", "Run numbers, files or workspaces of the data sets to be reduced");
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+    mustBePositive->setLower(0.0);
+    declareProperty("IncidentEnergy",EMPTY_DBL(), mustBePositive,
+      "Set the value of the incident energy in meV.");
+    declareProperty("FixedIncidentEnergy", false,
+        "Declare the value of the incident energy to be fixed (will not be calculated).");
+    declareProperty(new ArrayProperty<double>("EnergyTransferRange",
+        boost::make_shared<RebinParamsValidator>()),
+      "A comma separated list of first bin boundary, width, last bin boundary.\n"
+      "Negative width value indicates logarithmic binning.");
     declareProperty("FilterBadPulses", false, "If true, filter bad pulses from data.");
     std::vector<std::string> incidentBeamNormOptions;
     incidentBeamNormOptions.push_back("None");
