@@ -161,14 +161,11 @@ set ( TEST_FILES
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
-	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
-	test/MDTransfAxisNamesTest.h
-	test/MDWSTransfTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/ReflectometryTransformQxQzTest.h
@@ -176,6 +173,16 @@ set ( TEST_FILES
 	test/SkippingPolicyTest.h
 	test/SliceMDTest.h
 	test/SlicingAlgorithmTest.h
+#
+	test/MDTransfAxisNamesTest.h
+	test/MDWSTransfTest.h
+	test/MDEventWSWrapperTest.h	
+#	
+	test/ConvertToMDEventsWSTest.h		
+    test/ConvertToMDEventsSubalgFactoryTest.h	
+#
+	test/ConvertToMDEventsUnitsConvTest.h 	
+	test/ConvertToMDEventsParamsTest.h
 )
 
 set ( GMOCK_TEST_FILES

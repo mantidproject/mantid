@@ -39,7 +39,7 @@ API::IMDEventWorkspace_sptr MDEventWSWrapper::createEmptyMDWS(const MDWSDescript
     workspace->setWTransf(WSD.Wtransf);
     return workspace;
 }
-/// set up existing workspace pointer as input for the class
+/// set up existing workspace pointer as internal pointer for the class to perform proper MD operations on this workspace
 void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS)
 {
     workspace    = spWS;

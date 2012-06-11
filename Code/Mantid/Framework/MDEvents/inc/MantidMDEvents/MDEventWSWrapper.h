@@ -44,7 +44,7 @@ class MDEventWSWrapper;
 //        appear not portable to all architectures supported (Fail on MAC)
 /// signature to void templated function 
 typedef void (MDEventWSWrapper::*fpVoidMethod)();
-/// signature for the internal templated function pointer to add data to the existing workspace
+/// signature for the internal templated function pointer to add data to an existing workspace
 typedef void(MDEventWSWrapper::*fpAddData)(float *,uint16_t *,uint32_t*,coord_t*,size_t)const;
 /// signature for the internal templated function pointer to create workspace
 typedef  void(MDEventWSWrapper::*fpCreateWS)(const Strings &,const Strings &t,const Strings &,
