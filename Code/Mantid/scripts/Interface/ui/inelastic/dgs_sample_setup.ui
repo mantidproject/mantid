@@ -23,9 +23,9 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="sample_label">
        <property name="text">
-        <string>Input Runs</string>
+        <string>Sample Data</string>
        </property>
       </widget>
      </item>
@@ -33,7 +33,7 @@
       <widget class="QLineEdit" name="sample_edit"/>
      </item>
      <item>
-      <widget class="QPushButton" name="sample_browse_button">
+      <widget class="QPushButton" name="sample_browse">
        <property name="text">
         <string>Browse</string>
        </property>

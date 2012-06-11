@@ -1,7 +1,6 @@
-
 from interface import InstrumentInterface
 from reduction_gui.widgets.inelastic.dgs_sample_setup import SampleSetupWidget
-from reduction_gui.reduction.scripter import BaseReductionScripter
+from reduction_gui.reduction.inelastic.dgs_reduction_script import DgsReductionScripter
 class DgsInterface(InstrumentInterface):
     """
         Defines the widgets for direct geometry spectrometer reduction
@@ -13,7 +12,7 @@ class DgsInterface(InstrumentInterface):
         super(DgsInterface, self).__init__(name, settings)
         
         # Scripter object to interface with Mantid 
-        self.scripter = BaseReductionScripter(name=name)        
+        self.scripter = DgsReductionScripter()        
 
         # Sample run setup
         self.attach(SampleSetupWidget(settings = self._settings))#, data_type = self.data_type))
