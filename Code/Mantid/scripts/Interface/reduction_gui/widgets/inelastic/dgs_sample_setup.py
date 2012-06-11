@@ -28,6 +28,10 @@ class SampleSetupWidget(BaseWidget):
             self.set_state(SampleSetupScript())
         
     def initialize_content(self):
+        # Constraints
+        dv = QtGui.QDoubleValidator()
+        dv.setBottom(0.0)
+        self._content.ei_edit.setValidator(dv)
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), 
                      self._sample_browse)
@@ -43,6 +47,11 @@ class SampleSetupWidget(BaseWidget):
             @param state: SampleSetupScript object
         """
         self._content.sample_edit.setText(state.sample_data)
+        self._content.ei_edit.setText(state.incident_energy)
+        self._content.fixed_ei_chkbox.setChecked(state.fixed_ei)
+        self._content.etr_low_edit.setText(state.et_range_low)
+        self._content.etr_width_edit.setText(state.et_range_width)
+        self._content.etr_high_edit.setText(state.et_range_high)
     
     def get_state(self):
         """
@@ -50,4 +59,9 @@ class SampleSetupWidget(BaseWidget):
         """
         s = SampleSetupScript()
         s.sample_data = self._content.sample_edit.text()
+        s.incident_energy = self._content.ei_edit.text()
+        s.fixed_ei = self._content.fixed_ei_chkbox.isChecked()
+        s.et_range_low = self._content.etr_low_edit.text()
+        s.et_range_width = self._content.etr_width_edit.text()
+        s.et_range_high = self._content.etr_high_edit.text()      
         return s
