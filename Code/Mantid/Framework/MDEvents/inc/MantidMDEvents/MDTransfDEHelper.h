@@ -59,7 +59,7 @@ class DLLExport MDTransfDEHelper
     // energy conversion modes supported by this class
     std::vector<std::string> getEmodes()const{return EmodesList;}
     /// string presentation of emode
-    std::string getEmode(ConvertToMD::EModes Mode)const{return EmodesList[Mode];}
+    std::string getEmode(ConvertToMD::EModes Mode)const;
     /// convert string presentation of emode into nimerical one 
     ConvertToMD::EModes getEmode(const std::string &Mode)const;
     // constructor

@@ -95,7 +95,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &TWSD, const std::s
     emode     =  (int)TWSD.getEMode();
 
 }
-
+/** Method updates unit conversion given the index of detector parameters in the array of detectors */
 void UnitsConversionHelper::updateConversion(size_t i)
 {
     switch(UnitCnvrsn)

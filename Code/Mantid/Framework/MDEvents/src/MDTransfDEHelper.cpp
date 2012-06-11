@@ -26,6 +26,13 @@ ConvertToMD::EModes MDTransfDEHelper::getEmode(const std::string &Mode)const
     }
     return ConvertToMD::EModes(nMode);
 }
+/**return string representation of correspondend enum mode */
+std::string MDTransfDEHelper::getEmode(ConvertToMD::EModes Mode)const
+{
+    if(Mode>ConvertToMD::No_DE) throw(std::invalid_argument(" Can not convert into string undefined emode"));
+  
+    return EmodesList[Mode];
+}
 
 } // endnamespace MDEvents
 } // endnamespace Mantid
