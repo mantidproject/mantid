@@ -138,8 +138,6 @@ namespace Mantid
         // Retrieve the filename from the properties
         if ( m_filename.empty() )
         {
-          g_log.debug() << "=====> A1" << std::endl;
-
           // look to see if an Instrument name provided in which case create
           // IDF filename on the fly
           if ( m_instName.empty() )
@@ -151,8 +149,6 @@ namespace Mantid
           {
             const std::string date = m_workspace->getWorkspaceStartDate();
             m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
-
-            g_log.debug() << "=====> A2 - Filename is " << m_filename << std::endl;
           }
         }
 
@@ -163,11 +159,7 @@ namespace Mantid
           std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
           // Strip off "_Definition.xml"
           m_instName = instrumentFile.substr(0,instrumentFile.find("_Def"));
-
-          g_log.debug() << "=====> A3 - Instrument is " << m_instName << std::endl;
         }
-
-        g_log.debug() << "=====> m_filename = " << m_filename << std::endl;
 
         // Initialize the parser with the the XML text loaded from the IDF file
         parser.initialize(m_filename, m_instName, Strings::loadFile(m_filename));
@@ -175,24 +167,20 @@ namespace Mantid
 
       // Find the mangled instrument name that includes the modified date
       std::string instrumentNameMangled = parser.getMangledName();
-      g_log.debug() << "Instrument Mangled Name = " << instrumentNameMangled << std::endl;
 
       Instrument_sptr instrument;
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentNameMangled) )
       {
           // If it does, just use the one from the one stored there
-          g_log.debug() << "Instrument definition already loaded, using cached version.";
           instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
       }
       else
       {
-          g_log.debug() << "Loading instrument XML...";
           // Really create the instrument
           Progress * prog = new Progress(this, 0, 1, 100);
           instrument = parser.parseXML(prog);
           delete prog;
-          g_log.debug() << "...done!" << std::endl;
           // Add to data service for later retrieval
           InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
       }
