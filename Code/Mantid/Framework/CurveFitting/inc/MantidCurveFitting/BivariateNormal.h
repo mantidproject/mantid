@@ -17,64 +17,64 @@ namespace Mantid
   namespace CurveFitting
   {
    
-    /**
-    Provide peak shape function interface a Peak shape on one time slice of a
-    RectangularDetector.
-    I.e. the function: Background +Intensity* 
-             NormalDist( col,row,col_mean,row_mean,col_sigma,row_sigma, covariance)
-             
-     Where NormalDist is the bivariate normal distribution whose total "area" is
-     1. So Intensity should be the integrated intensity.
-
-    BivariateNormal parameters:
-    <UL>
-     <LI> Background - The background of the peak</LI>
-     <LI> Intensity - The intensity of data for the peak on this time slice </LI>
-     <LI> Mcol -  The col of the center of the peak </LI>
-     <LI> Mrow - The row of the center of the peak on this slice</LI>
-     <LI> SScol -The variance of the column values in the peak for this time slice </LI>
-     <LI> SSrow - The variance of the row values in the peak for this time slice </LI>
-     <LI> SSrc - The covariance of the row and column values in the peak for this time slice </LI>
-    </UL><P>
-    
-    There is one attribute( This must be specified)
-    <UL>
-      <LI> CalcVariances - <UL>
-                               If true,calculates SScol, SSrow, and SSrc from the experimental data
-                               given Background, Mcol, and Mrow(if the parameter has not been tied)
-                               If false, the parameters SScol, SSrow, and SSrc will be fit, unless
-                                tied. </UL>  </LI>
-    </UL>
-
-
-    This is a bivariate function.  The workspace must have three histograms of equal length.
-    Histogram 0: Contains the experimental values for each x and y, along with their errors.
-    Histogram 1: Contains the corresponding x value for the data in Histogram 0
-    Histogram 2: contains the corresponding y values for the data in Histogram 0
-
-    @author Ruth Mikkelson, SNS ORNL
-    @date 11/4/2011
-
-
-    Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
+  /**
+    * Provide peak shape function interface a Peak shape on one time slice of a
+    * RectangularDetector.
+    * i.e. the function: Background +Intensity*
+    *        NormalDist( col,row,col_mean,row_mean,col_sigma,row_sigma, covariance)
+    *
+    * Where NormalDist is the bivariate normal distribution whose total "area" is
+    * 1. So Intensity should be the integrated intensity.
+    *
+    * BivariateNormal parameters:
+    *<UL>
+    * <LI> Background - The background of the peak</LI>
+    *  <LI> Intensity - The intensity of data for the peak on this time slice </LI>
+    *  <LI> Mcol -  The col of the center of the peak </LI>
+    *  <LI> Mrow - The row of the center of the peak on this slice</LI>
+    *  <LI> SScol -The variance of the column values in the peak for this time slice </LI>
+    *  <LI> SSrow - The variance of the row values in the peak for this time slice </LI>
+    *  <LI> SSrc - The covariance of the row and column values in the peak for this time slice </LI>
+    * </UL><P>
+    *
+    * There is one attribute, This must be specified.
+    * <UL>
+    *   <LI> CalcVariances - <UL>
+    *                           If true,calculates SScol, SSrow, and SSrc from the experimental data
+    *                           given Background, Mcol, and Mrow,if the parameter has not been tied,
+    *                           If false, the parameters SScol, SSrow, and SSrc will be fit, unless
+    *                            tied. </UL>  </LI>
+    * </UL>
+    *
+    *
+    * This is a bivariate function.  The workspace must have three histograms of equal length.
+    * Histogram 0: Contains the experimental values for each x and y, along with their errors.
+    * Histogram 1: Contains the corresponding x value for the data in Histogram 0
+    * Histogram 2: contains the corresponding y values for the data in Histogram 0
+    *
+    * @author Ruth Mikkelson, SNS ORNL
+    * @date 11/4/2011
+    *
+    *
+    * Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    *
+    * This file is part of Mantid.
+    *
+    * Mantid is free software; you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation; either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * Mantid is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    * GNU General Public License for more details.
+    *
+    * You should have received a copy of the GNU General Public License
+    * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    *
+    * File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    * Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
    class  DLLExport  BivariateNormal: public API::ParamFunction, public virtual API::IFunction1D, public virtual API::IFunctionMW

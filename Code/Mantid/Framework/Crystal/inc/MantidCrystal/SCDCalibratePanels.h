@@ -23,31 +23,31 @@ namespace Crystal
 {
   /** SCDCalibratePanels calibrates instrument parameters for Rectangular Detectors
 
-      @author Ruth Mikkelson(adapted from Isaw's Calibration code)
-      @date   Mar 12, 2012
-
-      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory &
-                       NScD Oak Ridge National Laboratory
-
-      This file is part of Mantid.
-
-      Mantid is free software; you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation; either version 3 of the License, or
-      (at your option) any later version.
-
-      Mantid is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
-
-      You should have received a copy of the GNU General Public License
-      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-      File change history is stored at:
-      <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-      Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
+   *  @author Ruth Mikkelson(adapted from Isaw's Calibration code)
+   *  @date   Mar 12, 2012
+   *
+   *  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory &
+   *                   NScD Oak Ridge National Laboratory
+   *
+   *  This file is part of Mantid.
+   *
+   *  Mantid is free software; you can redistribute it and/or modify
+   *  it under the terms of the GNU General Public License as published by
+   *  the Free Software Foundation; either version 3 of the License, or
+   *  (at your option) any later version.
+   *
+   *  Mantid is distributed in the hope that it will be useful,
+   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   *  GNU General Public License for more details.
+   *
+   *  You should have received a copy of the GNU General Public License
+   *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   *
+   *  File change history is stored at:
+   *   <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+   *   Code Documentation is available at: <http://doxygen.mantidproject.org>
+   */
 
   class SCDCalibratePanels: public Mantid::API::Algorithm
   {
@@ -78,9 +78,9 @@ namespace Crystal
    *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the y dir by Roty
    *                                     * a rotation in the z direction by Rotz
    *  @param Q  A rotation( a copy will be normalized)
-   *  @ Rotx       The angle in degrees for the rotation in x direction
-   *  @ Roty       The angle in degrees for the rotation in y direction
-   *  @ Rotz      The angle in degrees for the rotation in z direction
+   *  @param Rotx       The angle in degrees for the rotation in x direction
+   *  @param Roty       The angle in degrees for the rotation in y direction
+   *  @param Rotz      The angle in degrees for the rotation in z direction
    */
   static void Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz);
 
