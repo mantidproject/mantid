@@ -77,6 +77,8 @@ namespace WorkflowAlgorithms
         boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
       "Negative width value indicates logarithmic binning.");
+    declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
+    declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
     declareProperty("FilterBadPulses", false, "If true, filter bad pulses from data.");
     std::vector<std::string> incidentBeamNormOptions;
     incidentBeamNormOptions.push_back("None");
