@@ -29,7 +29,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void xtest_exec()
   {
 //    // Name of the output workspace.
 //    std::string outWSName("AppendGeometryToSNSNexusTest_OutputWS");
