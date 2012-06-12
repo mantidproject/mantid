@@ -49,21 +49,21 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 
 //Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
-MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
+MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
     WorkspaceObserver(),
+    m_appWindow(parent),
+    m_workspace(ws),
     y_start(0.0),y_end(0.0),
     m_histogram(false),
     m_min(0),m_max(0),
     m_are_min_max_set(false),
     m_boundingRect(),
     m_funct(this),
+    m_strName(name.toStdString()),
     m_selectedRows(),
     m_selectedCols()
 {
-  m_appWindow = parent;
-  m_strName = name.toStdString();
-  m_workspace = ws;
   setup(ws,start,end);
   setWindowTitle(name);
   setName(name);
@@ -177,7 +177,7 @@ bool isANumber(volatile const double& d)
   return d != std::numeric_limits<double>::infinity() && !boost::math::isnan(d);
 }
 
-void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int end)
+void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start, int end)
 {
   if (!ws.get())
   {
@@ -189,7 +189,6 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
     return;
   }
 
-  m_workspace = ws;
   m_workspaceTotalHist = static_cast<int>(ws->getNumberHistograms());
   m_startRow = (start<0 || start>=m_workspaceTotalHist)?0:start;
   m_endRow   = (end<0 || end>=m_workspaceTotalHist || end < start)? m_workspaceTotalHist - 1 : end;
@@ -1427,7 +1426,7 @@ const std::string & MantidMatrix::getWorkspaceName()
       @param type :: Type of the data to display: Y, X, or E
   */
 MantidMatrixModel::MantidMatrixModel(QObject *parent,
-                                     Mantid::API::MatrixWorkspace* ws,
+                                     const Mantid::API::MatrixWorkspace* ws,
                                      int rows,
                                      int cols,
                                      int start,
@@ -1439,7 +1438,7 @@ m_format('e'),m_prec(6)
 }
 
 /// Call this function if the workspace has changed
-void MantidMatrixModel::setup(Mantid::API::MatrixWorkspace* ws,
+void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace* ws,
                               int rows,
                               int cols,
                               int start)

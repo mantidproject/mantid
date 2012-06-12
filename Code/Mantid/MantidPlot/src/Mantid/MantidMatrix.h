@@ -98,7 +98,7 @@ class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver
 
 public:
 
-  MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1);
+  MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1);
   ~MantidMatrix();
 
   void connectTableView(QTableView*,MantidMatrixModel*);
@@ -119,7 +119,7 @@ public:
   int indexX(int row,double s)const;
   int indexY(double s)const;
 
-  Mantid::API::MatrixWorkspace_sptr workspace(){return m_workspace;}
+  Mantid::API::MatrixWorkspace_const_sptr workspace(){return m_workspace;}
   QString workspaceName() const;
 
   QPixmap matrixIcon(){return m_matrix_icon;}
@@ -246,10 +246,10 @@ public slots:
 
 protected:
 
-  void setup(Mantid::API::MatrixWorkspace_sptr ws, int start=-1, int end=-1);
+  void setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start=-1, int end=-1);
 
   ApplicationWindow *m_appWindow;
-  Mantid::API::MatrixWorkspace_sptr m_workspace;
+  const Mantid::API::MatrixWorkspace_const_sptr m_workspace;
   QTabWidget *m_tabs;
   QTableView *m_table_viewY;
   QTableView *m_table_viewX;
@@ -354,14 +354,14 @@ class MantidMatrixModel:public QAbstractTableModel
 public:
   typedef enum {Y,X,E} Type;
   MantidMatrixModel(QObject *parent,
-                    Mantid::API::MatrixWorkspace* ws,
+                    const Mantid::API::MatrixWorkspace* ws,
                     int rows,
                     int cols,
                     int start,
                     Type type);
 
   /// Call this function if the workspace has changed
-  void setup(Mantid::API::MatrixWorkspace* ws,
+  void setup(const Mantid::API::MatrixWorkspace* ws,
              int rows,
              int cols,
              int start);
@@ -398,7 +398,7 @@ public slots:
   /// Signals QTableView that the data have changed.
   void resetData(){reset();}
 private:
-  Mantid::API::MatrixWorkspace* m_workspace;
+  const Mantid::API::MatrixWorkspace* m_workspace;
   int m_startRow; ///< starting workspace index to display
   int m_endRow;   ///< ending workspace index to display
   int m_rows,m_cols; ///< numbers of rows and columns

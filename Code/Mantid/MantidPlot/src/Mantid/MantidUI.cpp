@@ -2838,7 +2838,7 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
 @param Name :: Name of the graph
 @param workspace :: The workspace
 */
-void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::MatrixWorkspace_sptr workspace)
+void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::MatrixWorkspace_const_sptr workspace)
 {
   Graph* g = ml->activeGraph();
   g->setTitle(tr("Workspace ")+Name);
@@ -3142,7 +3142,7 @@ MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, 
   return plotSpectraList(m->workspaceName(),rowSet,errs,distr);
 }
 
-Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)
+Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)
 {
   if (bins.empty()) return NULL;
 
