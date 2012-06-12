@@ -45,6 +45,7 @@ endif ()
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
   if ( MPI_BUILD )
+    message ( STATUS "This is an MPI-enabled build of the Mantid Framework!" )
     # This finds OpenMPI on rhel6 (assuming it's installed, of course)
     find_package ( MPI REQUIRED )
     # The FindMPI module doesn't seem to respect the REQUIRED specifier (as of CMake 2.8.7)
@@ -52,16 +53,12 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
       message ( SEND_ERROR "MPI_BUILD flag is ON, but MPI could not be found" )
     endif ()
     # Set things up to use the OpenMPI 'wrapper' compilers.
-    # N.B. It's better to set these via '-D' arguments to cmake right from the start to avoid unexpected re-runs of cmake configuration.
-    if ( MPI_CXX_COMPILER )
-      set ( CMAKE_C_COMPILER ${MPI_C_COMPILER} CACHE FILEPATH "C Compiler." FORCE )
-      set ( CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER} CACHE FILEPATH "CXX Compiler." FORCE )
-    else ()
-      # Handle older FindMPI.cmake
-      set ( CMAKE_C_COMPILER ${MPI_COMPILER} CACHE FILEPATH "C Compiler." FORCE )
-      set ( CMAKE_CXX_COMPILER ${MPI_COMPILER} CACHE FILEPATH "CXX Compiler." FORCE )
-    endif ()
-    include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
+    # With CMake, we don't use the OpenMPI 'wrapper' compilers (because setting CMAKE_CXX_COMPILER after the
+    # 'project' call is a no-no), but rather extract the extra arguments and apply them to the normal compiler.
+    include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} )
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${MPI_CXX_COMPILE_FLAGS} )
+    # Setting the linker flags doesn't seem to work right (or matter)
+    #set ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}" ${MPI_CXX_LINK_FLAGS} ) 
   
     set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where (boost-)openmpi winds up on rhel6
     find_package ( Boost REQUIRED mpi serialization )
@@ -88,8 +85,8 @@ endif ()
 ###########################################################################
 
 # Might just as well link everything to Boost & Poco (found in CommonSetup)
-# TCMalloc variable will be empty if not using
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
+# TCMalloc & MPI_CXX variables will be empty if not using
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI_CXX_LIBRARIES} )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
