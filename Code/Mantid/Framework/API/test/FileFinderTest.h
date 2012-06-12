@@ -8,7 +8,7 @@
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <boost\lexical_cast.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <stdio.h>
 #include <fstream>
