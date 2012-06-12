@@ -6,6 +6,7 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 
 import numpy
 import platform
+import sys
 
 def import_mantidplot():
     ''' Currently, all scripts in the PythonAlgorithms directory are imported 
@@ -47,7 +48,10 @@ def _linux_distro_name():
 
 def _linux_distro_version():
     return platform.linux_distribution()[1]
-    
+
+def unsupported_message():
+    sys.exit('F2Py functionality not currently available on your platform.')
+
 def is_supported_f2py_platform():
     ''' We check for numpy version, as if Linux we check its distro and version
     as well.

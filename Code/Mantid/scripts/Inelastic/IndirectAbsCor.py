@@ -5,7 +5,7 @@ if is_supported_f2py_platform():
     cylabs = import_f2py("cylabs")
     fltabs = import_f2py("fltabs")
 else:
-    sys.exit('F2Py Absorption Corrections programs NOT available on your operating environment.')
+    unsupported_message():
 
 from IndirectCommon import *
 from mantid.simpleapi import *

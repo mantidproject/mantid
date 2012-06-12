@@ -14,7 +14,7 @@ if is_supported_f2py_platform():
     cefit   = import_f2py("CEfit")
     ssfit   = import_f2py("SSfit")
 else:
-    sys.exit('F2Py Bayes programs NOT available on your operating environment.')
+    unsupported_message():
 
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
