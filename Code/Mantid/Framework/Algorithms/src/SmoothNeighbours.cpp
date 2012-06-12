@@ -293,7 +293,7 @@ void SmoothNeighbours::findNeighboursRectangular()
   int EndY = AdjY;
   int SumX = getProperty("SumPixelsX");
   int SumY = getProperty("SumPixelsY");
-  bool sum = SumX*SumY-1;
+  bool sum = ( SumX*SumY > 1 ) ? true : false;
   if (sum)
   {
     StartX = 0;
