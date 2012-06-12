@@ -8,6 +8,7 @@ import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+from lxml.html.builder import SAMP
 
 class SampleSetupScript(BaseScriptElement):
     
@@ -17,6 +18,8 @@ class SampleSetupScript(BaseScriptElement):
     et_range_low = ""
     et_range_width = ""
     et_range_high = ""
+    hardmask_file = ""
+    grouping_file = ""
     
     def __init__(self):
         super(SampleSetupScript, self).__init__()
@@ -29,6 +32,8 @@ class SampleSetupScript(BaseScriptElement):
         script += "EnergyTransferRange=\"%s,%s,%s\"" % (self.et_range_low, 
                                                         self.et_range_width, 
                                                         self.et_range_high)
+        script += "HardMaskFile=\"%s\"\n" % self.hardmask_file
+        script += "GroupingFile=\"%s\"\n" % self.grouping_file
         return script
         
     def to_xml(self):
@@ -43,7 +48,9 @@ class SampleSetupScript(BaseScriptElement):
         xml += "    <low>%s</low>\n" % self.et_range_low
         xml += "    <width>%s</width>\n"  % self.et_range_width
         xml += "    <high>%s</high>\n" % self.et_range_high
-        xml += "  </et_range>\n" 
+        xml += "  </et_range>\n"
+        xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
+        xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
         xml += "</SampleSetup>\n"
         return xml
     
@@ -75,6 +82,12 @@ class SampleSetupScript(BaseScriptElement):
             self.et_range_high = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "et_range/high",
                                                                     default=SampleSetupScript.et_range_high)
+            self.hardmask_file = BaseScriptElement.getStringElement(instrument_dom,
+                                                                    "hardmask_file",
+                                                                    default=SampleSetupScript.hardmask_file)
+            self.grouping_file = BaseScriptElement.getStringElement(instrument_dom,
+                                                                    "grouping_file",
+                                                                    default=SampleSetupScript.grouping_file)
 
     def reset(self):
         """
@@ -86,3 +99,6 @@ class SampleSetupScript(BaseScriptElement):
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width
         self.et_range_high = SampleSetupScript.et_range_high
+        self.hardmask_file = SampleSetupScript.hardmask_file
+        self.grouping_file = SampleSetupScript.grouping_file
+        

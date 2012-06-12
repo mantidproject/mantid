@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_sample_setup.ui'
 #
-# Created: Mon Jun 11 10:35:34 2012
+# Created: Tue Jun 12 14:00:32 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -78,8 +78,36 @@ class Ui_Frame(object):
         self.etr_high_edit.setObjectName(_fromUtf8("etr_high_edit"))
         self.horizontalLayout_3.addWidget(self.etr_high_edit)
         self.verticalLayout.addWidget(self.et_range_box)
-        spacerItem3 = QtGui.QSpacerItem(20, 242, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem3)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.hmask_label = QtGui.QLabel(Frame)
+        self.hmask_label.setObjectName(_fromUtf8("hmask_label"))
+        self.horizontalLayout_4.addWidget(self.hmask_label)
+        self.hmask_edit = QtGui.QLineEdit(Frame)
+        self.hmask_edit.setObjectName(_fromUtf8("hmask_edit"))
+        self.horizontalLayout_4.addWidget(self.hmask_edit)
+        self.hmask_browse = QtGui.QPushButton(Frame)
+        self.hmask_browse.setObjectName(_fromUtf8("hmask_browse"))
+        self.horizontalLayout_4.addWidget(self.hmask_browse)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem3)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        self.grouping_label = QtGui.QLabel(Frame)
+        self.grouping_label.setObjectName(_fromUtf8("grouping_label"))
+        self.horizontalLayout_5.addWidget(self.grouping_label)
+        self.grouping_edit = QtGui.QLineEdit(Frame)
+        self.grouping_edit.setObjectName(_fromUtf8("grouping_edit"))
+        self.horizontalLayout_5.addWidget(self.grouping_edit)
+        self.grouping_browse = QtGui.QPushButton(Frame)
+        self.grouping_browse.setObjectName(_fromUtf8("grouping_browse"))
+        self.horizontalLayout_5.addWidget(self.grouping_browse)
+        spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem4)
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
+        spacerItem5 = QtGui.QSpacerItem(20, 242, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem5)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
@@ -95,4 +123,8 @@ class Ui_Frame(object):
         self.etr_low_label.setText(QtGui.QApplication.translate("Frame", "Low", None, QtGui.QApplication.UnicodeUTF8))
         self.etr_width_label.setText(QtGui.QApplication.translate("Frame", "Width", None, QtGui.QApplication.UnicodeUTF8))
         self.etr_high_label.setText(QtGui.QApplication.translate("Frame", "High", None, QtGui.QApplication.UnicodeUTF8))
+        self.hmask_label.setText(QtGui.QApplication.translate("Frame", "Hard Mask", None, QtGui.QApplication.UnicodeUTF8))
+        self.hmask_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.grouping_label.setText(QtGui.QApplication.translate("Frame", "Grouping", None, QtGui.QApplication.UnicodeUTF8))
+        self.grouping_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
 

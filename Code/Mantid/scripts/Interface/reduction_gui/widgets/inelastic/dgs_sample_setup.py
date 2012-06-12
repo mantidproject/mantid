@@ -1,6 +1,8 @@
 from PyQt4 import QtGui, uic, QtCore
+from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
+import reduction_gui.widgets.util as util
 import ui.inelastic.ui_dgs_sample_setup
 
 class SampleSetupWidget(BaseWidget):
@@ -32,14 +34,39 @@ class SampleSetupWidget(BaseWidget):
         dv = QtGui.QDoubleValidator()
         dv.setBottom(0.0)
         self._content.ei_edit.setValidator(dv)
+        util.set_valid(self._content.ei_edit, False)
+        
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), 
                      self._sample_browse)
+        self.connect(self._content.hmask_browse, QtCore.SIGNAL("clicked()"), 
+                     self._hmask_browse)
+        self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"), 
+                     self._grouping_browse)
+        call_back = partial(self._validate_edit, ctrl=self._content.ei_edit)
+        self.connect(self._content.ei_edit, QtCore.SIGNAL("editingFinished()"), call_back)
+        self.connect(self._content.ei_edit, QtCore.SIGNAL("textEdited(QString)"), call_back)
+        
+    def _validate_edit(self, ctrl=None):
+        is_valid = True
+        if ctrl.text().isEmpty():
+            is_valid = False
+        util.set_valid(ctrl, is_valid)
 
     def _sample_browse(self):
         fname = self.data_browse_dialog()
         if fname:
             self._content.sample_edit.setText(fname)   
+
+    def _hmask_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.hmask_edit.setText(fname)   
+
+    def _grouping_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.grouping_edit.setText(fname)   
             
     def set_state(self, state):
         """
@@ -52,6 +79,8 @@ class SampleSetupWidget(BaseWidget):
         self._content.etr_low_edit.setText(state.et_range_low)
         self._content.etr_width_edit.setText(state.et_range_width)
         self._content.etr_high_edit.setText(state.et_range_high)
+        self._content.hmask_edit.setText(state.hardmask_file)
+        self._content.grouping_edit.setText(state.grouping_file)
     
     def get_state(self):
         """
@@ -63,5 +92,7 @@ class SampleSetupWidget(BaseWidget):
         s.fixed_ei = self._content.fixed_ei_chkbox.isChecked()
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()
-        s.et_range_high = self._content.etr_high_edit.text()      
+        s.et_range_high = self._content.etr_high_edit.text()
+        s.hardmask_file = self._content.hmask_edit.text()
+        s.grouping_file = self._content.grouping_edit.text()    
         return s
