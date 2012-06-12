@@ -504,7 +504,7 @@ class DirectEnergyConversion(object):
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
         # Calculate the incident energy
-        alg = GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), EnergyEstimate=ei_guess,FixEi=self.fix_ei)
+        alg = GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), EnergyEstimate=ei_guess,FixEi=fix_ei)
         mon1_peak = float(alg.getPropertyValue("FirstMonitorPeak"))
         mon1_index = int(alg.getPropertyValue("FirstMonitorIndex"))
         ei = input_ws.getSampleDetails().getLogData("Ei").value
