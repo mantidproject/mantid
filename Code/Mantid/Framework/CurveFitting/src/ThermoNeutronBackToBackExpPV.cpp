@@ -22,7 +22,7 @@ namespace CurveFitting
   /*
    * Constructor and Desctructor
    */
-  ThermoNeutronBackToBackExpPV::ThermoNeutronBackToBackExpPV()
+  ThermoNeutronBackToBackExpPV::ThermoNeutronBackToBackExpPV() : mFWHM(0.0)
   {
 
   }
