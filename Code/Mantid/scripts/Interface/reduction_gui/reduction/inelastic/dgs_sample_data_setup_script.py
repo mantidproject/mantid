@@ -8,7 +8,6 @@ import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
-from lxml.html.builder import SAMP
 
 class SampleSetupScript(BaseScriptElement):
     
