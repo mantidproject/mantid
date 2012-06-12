@@ -10,11 +10,20 @@ find_path ( TCMALLOC_INCLUDE_DIR tcmalloc.h
             PATHS /usr/include/google
 )
 
-find_library ( TCMALLOC_LIBRARIES NAMES tcmalloc tcmalloc_minimal )
+find_library ( TCMALLOC_LIB NAMES tcmalloc tcmalloc_minimal )
+find_library ( TCMALLOC_LIB_DEBUG NAMES tcmalloc_debug tcmalloc_minimal_debug )
+
+if( TCMALLOC_LIB_DEBUG )
+  set ( TCMALLOC_LIBRARIES optimized ${TCMALLOC_LIB} 
+                           debug ${TCMALLOC_LIB_DEBUG} )
+else()
+  set ( TCMALLOC_LIBRARIES ${TCMALLOC_LIB} )
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set TCMALLOC_FOUND to TRUE if 
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( Tcmalloc DEFAULT_MSG TCMALLOC_LIBRARIES TCMALLOC_INCLUDE_DIR )
 
-mark_as_advanced ( TCMALLOC_INCLUDE_DIR TCMALLOC_LIBRARIES TCMALLOC_FOUND )
+mark_as_advanced ( TCMALLOC_INCLUDE_DIR TCMALLOC_LIB TCMALLOC_LIB_DEBUG 
+                   TCMALLOC_LIBRARIES TCMALLOC_FOUND )
