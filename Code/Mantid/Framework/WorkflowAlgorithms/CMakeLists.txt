@@ -5,7 +5,8 @@ set ( SRC_FILES
 	src/EQSANSInstrument.cpp
 	src/EQSANSLoad.cpp
 	src/EQSANSPatchSensitivity.cpp
-	src/EQSANSQ2D.cpp
+    src/EQSANSQ2D.cpp
+    src/EQSANSReduce.cpp
 	src/HFIRDarkCurrentSubtraction.cpp
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
@@ -28,7 +29,8 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
 	inc/MantidWorkflowAlgorithms/EQSANSLoad.h
 	inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
-	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+    inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+    inc/MantidWorkflowAlgorithms/EQSANSReduce.h
 	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h

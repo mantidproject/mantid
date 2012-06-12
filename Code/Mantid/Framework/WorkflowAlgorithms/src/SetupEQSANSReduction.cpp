@@ -15,6 +15,7 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
+#include "Poco/NumberFormatter.h"
 
 namespace Mantid
 {
@@ -127,6 +128,20 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("SensitivityBeamCenterX", eff_grp);
   setPropertyGroup("SensitivityBeamCenterY", eff_grp);
   setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
+
+  declareProperty("SetupReducer",false, "If true, a Reducer object will be created");
+  declareProperty("TransmissionValue", EMPTY_DBL(), "If set, this value will be used as the transmission");
+  declareProperty(new API::FileProperty("TransmissionDirectBeam", "",
+      API::FileProperty::OptionalLoad, "_event.nxs"),
+      "Direct beam data file used to compute transmission");
+
+  declareProperty(new API::FileProperty("TransmissionEmptyBeam", "",
+      API::FileProperty::OptionalLoad, "_event.nxs"),
+      "Empty beam data file used to compute transmission");
+  setPropertySettings("TransmissionValue", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
+  setPropertySettings("TransmissionDirectBeam", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
+  setPropertySettings("TransmissionEmptyBeam", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
+
 
   // Outputs
   declareProperty("OutputMessage","",Direction::Output);
@@ -266,6 +281,105 @@ void SetupEQSANSReduction::exec()
   }
 
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
+
+  // Create a python reduction singleton as needed
+  const bool setupReducer = getProperty("SetupReducer");
+  if (setupReducer) initializeReduction(reductionManager);
+}
+
+/*
+ * For backward compatibility, we have the option of creating a
+ * python ReductionSingleton object.
+ */
+void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager> reductionManager)
+{
+  // Write the Reducer python script to be executed
+  std::string script = "import reduction.instruments.sans.sns_command_interface as cmd\n";
+
+
+  //  - beam center
+  double center_x = 0.0;
+  double center_y = 0.0;
+  if (reductionManager->existsProperty("LatestBeamCenterX")
+      && reductionManager->existsProperty("LatestBeamCenterY"))
+  {
+    center_x = reductionManager->getProperty("LatestBeamCenterX");
+    center_y = reductionManager->getProperty("LatestBeamCenterY");
+  }
+  else
+    throw std::runtime_error("EQSANSReduce not yet compatible with beam finder: enter beam center coordinates");
+
+  script += "cmd.EQSANS()\n";
+  script += "cmd.SetBeamCenter(" + Poco::NumberFormatter::format(center_x, 2)
+    + ", " + Poco::NumberFormatter::format(center_y, 2) + ")\n";
+
+  //  - sensitivity file
+  if (reductionManager->existsProperty("SensitivityAlgorithm"))
+  {
+    IAlgorithm_sptr effAlg = reductionManager->getProperty("SensitivityAlgorithm");
+    const std::string fileName = effAlg->getPropertyValue("Filename");
+    if (fileName.size()>0)
+      script += "cmd.SensitivityCorrection(\"" + fileName + "\")\n";
+  }
+
+  //  - load options
+  if (reductionManager->existsProperty("LoadAlgorithm"))
+  {
+    IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
+
+    // Correct for flight path?
+    const bool tofCorr = loadAlg->getProperty("CorrectForFlightPath");
+    if (tofCorr)
+      script += "cmd.PerformFlightPathCorrection(True)\n";
+    else
+      script += "cmd.PerformFlightPathCorrection(False)\n";
+
+    // Use TOF cut from config file?
+    const bool confTOF = loadAlg->getProperty("UseConfigTOFCuts");
+    if (confTOF)
+      script += "cmd.UseConfigTOFTailsCutoff(use_config=True)\n";
+    else
+    {
+      script += "cmd.UseConfigTOFTailsCutoff(use_config=False)\n";
+      // Manual TOF cut
+      const double lowTOF = loadAlg->getProperty("LowTOFCut");
+      const double highTOF = loadAlg->getProperty("HighTOFCut");
+      script += "cmd.SetTOFTailsCutoff(low_cut=" + Poco::NumberFormatter::format(lowTOF, 2)
+          + ", high_cut=" + Poco::NumberFormatter::format(highTOF, 2) + ")\n";
+    }
+
+    // Use config mask?
+    const bool confMask = loadAlg->getProperty("UseConfigMask");
+    if (confMask)
+      script += "cmd.UseConfigMask(use_config=True)\n";
+    else
+      script += "cmd.UseConfigMask(use_config=False)\n";
+  }
+
+  //  - Transmission
+  const double trans = getProperty("TransmissionValue");
+  if (isEmpty(trans))
+  {
+    const std::string directBeam = getPropertyValue("TransmissionDirectBeam");
+    const std::string emptyBeam = getPropertyValue("TransmissionEmptyBeam");
+
+    script += "cmd.DirectBeamTransmission(\"" + directBeam
+        + "\", \"" + emptyBeam + "\")\n";
+    script += "cmd.ThetaDependentTransmission(False)\n";
+  }
+  else
+  {
+    script += "cmd.SetTransmission(" + Poco::NumberFormatter::format(trans, 2) + ", 0.0)\n";
+  }
+  script += "cmd.ReductionSingleton().set_azimuthal_averager(None)\n";
+
+  g_log.information() << "Reducer script:\n" << script << std::endl;
+
+  // Run a snippet of python
+  IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+  alg->setLogging(false);
+  alg->setPropertyValue("Code", script);
+  alg->execute();
 }
 
 } // namespace WorkflowAlgorithms

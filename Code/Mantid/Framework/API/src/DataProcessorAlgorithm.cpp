@@ -8,6 +8,7 @@
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 #include <stdexcept>
+#include "Poco/Path.h"
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
@@ -24,7 +25,7 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  DataProcessorAlgorithm::DataProcessorAlgorithm()
+  DataProcessorAlgorithm::DataProcessorAlgorithm() : API::Algorithm()
   {
     m_loadAlg = "Load";
     m_accumulateAlg = "Plus";
@@ -66,22 +67,28 @@ namespace API
 
   Workspace_sptr DataProcessorAlgorithm::assemble(const std::string &partialWSName, const std::string &outputWSName)
   {
+    std::string threadOutput = partialWSName;
 #ifdef MPI_BUILD
     Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
     IAlgorithm_sptr gatherAlg = createSubAlgorithm("GatherWorkspaces");
+    gatherAlg->setLogging(true);
     gatherAlg->setAlwaysStoreInADS(true);
     gatherAlg->setProperty("InputWorkspace", partialWS);
+    gatherAlg->setProperty("PreserveEvents", true);
     gatherAlg->setPropertyValue("OutputWorkspace", outputWSName);
     gatherAlg->execute();
+
+    if (isMainThread()) threadOutput = outputWSName;
+#else
+    UNUSED_ARG(outputWSName)
 #endif
-    Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+    Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve(threadOutput);
     return outputWS;
   }
 
   void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
       const std::string &outputFile)
   {
-
     bool saveOutput = true;
 #ifdef MPI_BUILD
     if(boost::mpi::communicator().rank()>0) saveOutput = false;
@@ -96,17 +103,32 @@ namespace API
     }
   }
 
+  bool DataProcessorAlgorithm::isMainThread()
+  {
+    bool mainThread = true;
+#ifdef MPI_BUILD
+    mainThread = (boost::mpi::communicator().rank()==0);
+#endif
+    return mainThread;
+  }
+
+  int DataProcessorAlgorithm::getNThreads()
+  {
+#ifdef MPI_BUILD
+    return boost::mpi::communicator().size();
+#else
+    return 1;
+#endif
+  }
   /// Determine what kind of input data we have and load it
-  //TODO: Chunking, MPI, etc...
   Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData)
   {
     Workspace_sptr inputWS;
-    std::string outputWSName = inputData;
 
     // First, check whether we have the name of an existing workspace
     if (AnalysisDataService::Instance().doesExist(inputData))
     {
-      Workspace_sptr inputWS = AnalysisDataService::Instance().retrieve(inputData);
+      inputWS = AnalysisDataService::Instance().retrieve(inputData);
     }
     else
     {
@@ -121,6 +143,9 @@ namespace API
 
       if (!foundFile.empty())
       {
+        Poco::Path p(foundFile);
+        const std::string outputWSName = p.getBaseName();
+
         IAlgorithm_sptr loadAlg = createSubAlgorithm(m_loadAlg);
         loadAlg->setProperty("Filename", foundFile);
         loadAlg->setAlwaysStoreInADS(true);
@@ -144,8 +169,10 @@ namespace API
 #endif
         loadAlg->execute();
 
-        Workspace_sptr inputMatrixWS = AnalysisDataService::Instance().retrieve(outputWSName);
+        inputWS = AnalysisDataService::Instance().retrieve(outputWSName);
       }
+      else
+        throw std::runtime_error("DataProcessorAlgorithm::load could process any data");
     }
     return inputWS;
   }

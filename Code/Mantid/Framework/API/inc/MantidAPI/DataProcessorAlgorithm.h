@@ -54,8 +54,9 @@ protected:
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
   Workspace_sptr assemble(const std::string &partialWSName, const std::string &outputWSName);
-  void saveNexus(const std::string &outputWSName,
-        const std::string &outputFile);
+  void saveNexus(const std::string &outputWSName, const std::string &outputFile);
+  bool isMainThread();
+  int getNThreads();
 
 private:
   /// The name of the algorithm to invoke when loading data

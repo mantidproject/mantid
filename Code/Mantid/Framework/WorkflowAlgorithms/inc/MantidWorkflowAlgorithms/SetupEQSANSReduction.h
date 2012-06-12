@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -59,6 +60,7 @@ private:
   /// Execution code
   void exec();
   std::string _findFile(std::string dataRun);
+  void initializeReduction(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 
 };
 
