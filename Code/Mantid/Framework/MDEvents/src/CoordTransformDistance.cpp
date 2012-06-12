@@ -54,8 +54,8 @@ namespace MDEvents
    */
   CoordTransformDistance::~CoordTransformDistance()
   {
-    delete m_center;
-    delete m_dimensionsUsed;
+    delete [] m_center;
+    delete [] m_dimensionsUsed;
   }
   
 
