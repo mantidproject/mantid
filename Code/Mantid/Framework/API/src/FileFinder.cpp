@@ -622,14 +622,32 @@ namespace Mantid
       extensions.assign(exts.begin(),exts.end());
 
       // Remove wild cards.
-      extensions.erase(std::remove_if( // "Erase-remove" idiom.
+      extensions.erase(std::remove_if(
           extensions.begin(), extensions.end(),
           containsWildCard),
         extensions.end());
+      
+      const std::vector<std::string> & searchPaths =
+          Kernel::ConfigService::Instance().getDataSearchDirs();
 
-      std::vector<std::string>::const_iterator ext = extensions.begin();
+      // Before we try any globbing, make sure we exhaust all reasonable attempts at constructing the possible filename.
+      // Avoiding the globbing of getFullPath() for as long as possible will help performance when calling findRuns() 
+      // with a large range of files, especially when searchPaths consists of folders containing a large number of runs.
+      for(auto ext = extensions.begin(); ext != extensions.end(); ++ext)
+      {
+        for(auto filename = filenames.begin(); filename != filenames.end(); ++filename)
+        {
+          for(auto searchPath = searchPaths.begin(); searchPath != searchPaths.end(); ++searchPath)
+          {
+            Poco::Path path(*searchPath, *filename + *ext);
+            Poco::File file(path);
+            if (file.exists())
+              return path.toString();
+          }
+        }
+      }
 
-      for (; ext != extensions.end(); ++ext)
+      for (auto ext = extensions.begin(); ext != extensions.end(); ++ext)
       {
         std::set<std::string>::const_iterator it = filenames.begin();
         for(; it!=filenames.end(); ++it)
