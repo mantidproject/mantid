@@ -258,8 +258,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.angle_list.setEnabled(True)        
         self._summary.remove_btn.setEnabled(True)  
 
-        
-
     def _edit_event(self, text=None, ctrl=None):
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl,True)
@@ -283,8 +281,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         except:
             self._summary.data_run_number_processing.hide()
         
-    def _add_data(self):
-        
+    def _add_data(self):        
         state = self.get_editing_state()
 #        state = self.get_state()
         in_list = False
@@ -381,9 +378,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-
-        print 'in set_state'
-
         self._summary.angle_list.clear()
         if len(state.data_sets) == 1 and state.data_sets[0].data_file==0:
             pass
@@ -459,7 +453,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         return state
     
     def get_editing_state(self):
-        
         m = REFLDataSets()
 
         #run number

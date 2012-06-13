@@ -499,8 +499,7 @@ class BaseRefWidget(BaseWidget):
                           "Your instrument may not be set up for automated reduction.")
         
     def _auto_reduce(self, is_checked=False):
-        if is_checked:
-            
+        if is_checked:            
             self._summary.auto_reduce_help_label.show()
             self._summary.auto_reduce_tip_label.show()
             self._summary.auto_reduce_btn.show()
@@ -749,7 +748,6 @@ class BaseRefWidget(BaseWidget):
                                                range_max=range_max)
 
     def _add_data(self):
-        
         state = self.get_editing_state()
         in_list = False
         # Check whether it's already in the list
@@ -798,6 +796,18 @@ class BaseRefWidget(BaseWidget):
         
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
+            state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+            
+             #incident medium
+            _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
+                                     for j in range(self._summary.incident_medium_combobox.count())]
+            _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+                
+            _incident_medium_string = (',').join(_incident_medium_list)
+            state.incident_medium_list = [_incident_medium_string]
+                
+            state.incident_medium_index_selected = _incident_medium_index_selected
+                
             item_widget.setData(QtCore.Qt.UserRole, state)
         
         # Read logs
@@ -824,7 +834,6 @@ class BaseRefWidget(BaseWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-        
         self._summary.angle_list.clear()
         if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
             pass
@@ -850,7 +859,6 @@ class BaseRefWidget(BaseWidget):
         self._reset_warnings()
         
     def set_editing_state(self, state):
-
         self._summary.q_min_edit.setText(str(state.q_min))
         self._summary.log_scale_chk.setChecked(state.q_step<0)
 
