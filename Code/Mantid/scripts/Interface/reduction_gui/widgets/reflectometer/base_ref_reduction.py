@@ -35,6 +35,8 @@ class BaseRefWidget(BaseWidget):
     y_axis = []
     e_axis = []
 
+    bDEBUG = False
+
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):      
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
@@ -196,6 +198,10 @@ class BaseRefWidget(BaseWidget):
         new_y_axis = []
         new_e_axis = []
         
+        if self.bDEBUG:
+            print 'x_axis before _smooth_x_axis:'
+            print x_axis
+        
         sz = len(x_axis)        
         i=0
         while (i < sz-1):
@@ -247,6 +253,11 @@ class BaseRefWidget(BaseWidget):
     
             i+=1
     
+        if self.bDEBUG:
+            print
+            print 'x-axis after _smooth_x_axis:'
+            print new_x_axis
+    
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
         self.e_axis = new_e_axis
@@ -284,7 +295,6 @@ class BaseRefWidget(BaseWidget):
         e_axis = mt.readE(0)[:]
         
         self._smooth_x_axis(x_axis, y_axis, e_axis)
-        
         x_axis = self.x_axis
         y_axis = self.y_axis
         e_axis = self.e_axis
