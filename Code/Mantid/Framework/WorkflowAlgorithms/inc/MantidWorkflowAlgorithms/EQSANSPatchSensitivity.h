@@ -11,27 +11,24 @@ namespace Mantid
 namespace WorkflowAlgorithms
 {
 /**
+    Calculate the detector sensitivity and patch the pixels that are masked in a second workspace.
 
-    Apply the sensitivity correction as a function of wavelength for EQSANS.
-    Apply wavelength dependence as
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-          Efficiency(lambda) = Efficiency(0) * (1 - exp(-b*lambda))
+    This file is part of Mantid.
 
-    where b is the value of the Factor property.
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
 
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the workspace to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    </UL>
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-    Optional Properties:
-    <UL>
-    <LI> MinEfficiency - Minimum efficiency for a pixel to be considered (default: no minimum)</LI>
-    <LI> MaxEfficiency - Maximum efficiency for a pixel to be considered (default: no maximum)</LI>
-    <LI> Factor        - Exponential factor for detector efficiency as a function of wavelength (default: 1.0)</LI>
-    <LI> Error         - Error on Factor property (default: 0.0)</LI>
-    </UL>
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
