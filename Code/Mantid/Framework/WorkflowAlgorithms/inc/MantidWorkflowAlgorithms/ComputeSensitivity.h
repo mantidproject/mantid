@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 
 namespace Mantid
 {
@@ -33,11 +33,11 @@ namespace WorkflowAlgorithms
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport ComputeSensitivity : public API::Algorithm
+class DLLExport ComputeSensitivity : public API::DataProcessorAlgorithm
 {
 public:
   /// (Empty) Constructor
-  ComputeSensitivity() : API::Algorithm() {}
+  ComputeSensitivity() : API::DataProcessorAlgorithm() {}
   /// Virtual destructor
   virtual ~ComputeSensitivity() {}
   /// Algorithm's name
