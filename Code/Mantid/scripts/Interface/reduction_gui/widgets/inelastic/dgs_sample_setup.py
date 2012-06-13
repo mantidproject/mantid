@@ -35,18 +35,32 @@ class SampleSetupWidget(BaseWidget):
         dv.setBottom(0.0)
         self._content.ei_edit.setValidator(dv)
         util.set_valid(self._content.ei_edit, False)
+        dv1 = QtGui.QDoubleValidator()
+        self._content.etr_low_edit.setValidator(dv1)
+        util.set_valid(self._content.etr_low_edit, False)
+        self._content.etr_width_edit.setValidator(dv1)
+        util.set_valid(self._content.etr_width_edit, False)
+        self._content.etr_high_edit.setValidator(dv1)
+        util.set_valid(self._content.etr_high_edit, False)
         
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), 
                      self._sample_browse)
-        self.connect(self._content.hmask_browse, QtCore.SIGNAL("clicked()"), 
-                     self._hmask_browse)
+        self.connect(self._content.hardmask_browse, QtCore.SIGNAL("clicked()"), 
+                     self._hardmask_browse)
         self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"), 
                      self._grouping_browse)
-        call_back = partial(self._validate_edit, ctrl=self._content.ei_edit)
-        self.connect(self._content.ei_edit, QtCore.SIGNAL("editingFinished()"), call_back)
-        self.connect(self._content.ei_edit, QtCore.SIGNAL("textEdited(QString)"), call_back)
-        
+        # Validated widgets
+        self._connect_validated_lineedit(self._content.ei_edit)
+        self._connect_validated_lineedit(self._content.etr_low_edit)
+        self._connect_validated_lineedit(self._content.etr_width_edit)
+        self._connect_validated_lineedit(self._content.etr_high_edit)
+
+    def _connect_validated_lineedit(self, ui_ctrl):
+        call_back = partial(self._validate_edit, ctrl=ui_ctrl)
+        self.connect(ui_ctrl, QtCore.SIGNAL("editingFinished()"), call_back)
+        self.connect(ui_ctrl, QtCore.SIGNAL("textEdited(QString)"), call_back)
+
     def _validate_edit(self, ctrl=None):
         is_valid = True
         if ctrl.text().isEmpty():
@@ -58,10 +72,10 @@ class SampleSetupWidget(BaseWidget):
         if fname:
             self._content.sample_edit.setText(fname)   
 
-    def _hmask_browse(self):
+    def _hardmask_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.hmask_edit.setText(fname)   
+            self._content.hardmask_edit.setText(fname)   
 
     def _grouping_browse(self):
         fname = self.data_browse_dialog()
@@ -79,7 +93,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.etr_low_edit.setText(state.et_range_low)
         self._content.etr_width_edit.setText(state.et_range_width)
         self._content.etr_high_edit.setText(state.et_range_high)
-        self._content.hmask_edit.setText(state.hardmask_file)
+        self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
     
     def get_state(self):
@@ -93,6 +107,6 @@ class SampleSetupWidget(BaseWidget):
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()
         s.et_range_high = self._content.etr_high_edit.text()
-        s.hardmask_file = self._content.hmask_edit.text()
+        s.hardmask_file = self._content.hardmask_edit.text()
         s.grouping_file = self._content.grouping_edit.text()    
         return s
