@@ -56,6 +56,10 @@ class SampleSetupWidget(BaseWidget):
         self._connect_validated_lineedit(self._content.etr_width_edit)
         self._connect_validated_lineedit(self._content.etr_high_edit)
 
+    def _check_and_set_lineedit_content(self, lineedit, content):
+        lineedit.setText(content)
+        util.set_valid(lineedit, not lineedit.text().isEmpty())
+        
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
         self.connect(ui_ctrl, QtCore.SIGNAL("editingFinished()"), call_back)
@@ -88,11 +92,15 @@ class SampleSetupWidget(BaseWidget):
             @param state: SampleSetupScript object
         """
         self._content.sample_edit.setText(state.sample_data)
-        self._content.ei_edit.setText(state.incident_energy)
+        self._check_and_set_lineedit_content(self._content.ei_edit, 
+                                             state.incident_energy)
         self._content.fixed_ei_chkbox.setChecked(state.fixed_ei)
-        self._content.etr_low_edit.setText(state.et_range_low)
-        self._content.etr_width_edit.setText(state.et_range_width)
-        self._content.etr_high_edit.setText(state.et_range_high)
+        self._check_and_set_lineedit_content(self._content.etr_low_edit, 
+                                             state.et_range_low)
+        self._check_and_set_lineedit_content(self._content.etr_width_edit, 
+                                             state.et_range_width)
+        self._check_and_set_lineedit_content(self._content.etr_high_edit, 
+                                             state.et_range_high)
         self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
     
