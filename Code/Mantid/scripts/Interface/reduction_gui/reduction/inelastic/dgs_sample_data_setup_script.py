@@ -25,14 +25,14 @@ class SampleSetupScript(BaseScriptElement):
         self.reset()
         
     def to_script(self):
-        script =  "SampleData=\"%s\"\n" % self.sample_data
-        script += "IncidentEnergy=\"%s\"\n" % self.incident_energy
-        script += "FixedIncidentEnergy=\"%s\"\n" % self.fixed_ei
-        script += "EnergyTransferRange=\"%s,%s,%s\"" % (self.et_range_low, 
+        script =  "SampleData=\"%s\",\n" % self.sample_data
+        script += "IncidentEnergy=\"%s\",\n" % self.incident_energy
+        script += "FixedIncidentEnergy=%s,\n" % self.fixed_ei
+        script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
                                                         self.et_range_width, 
                                                         self.et_range_high)
-        script += "HardMaskFile=\"%s\"\n" % self.hardmask_file
-        script += "GroupingFile=\"%s\"\n" % self.grouping_file
+        script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
+        script += "GroupingFile=\"%s\",\n" % self.grouping_file
         return script
         
     def to_xml(self):

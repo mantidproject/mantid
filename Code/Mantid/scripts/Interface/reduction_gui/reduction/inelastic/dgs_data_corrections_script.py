@@ -18,7 +18,7 @@ class DataCorrectionsScript(BaseScriptElement):
         self.reset()
         
     def to_script(self):
-        script =  "FilterBadPulses=\"%s\",\n" % str(self.filter_bad_pulses)
+        script =  "FilterBadPulses=%s,\n" % self.filter_bad_pulses
         return script
     
     def to_xml(self):
