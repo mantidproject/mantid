@@ -11,6 +11,7 @@ def make_cmd(ui_filename):
 # Compile resource files for DGS instruments
 try:
     os.system(make_cmd("ui/inelastic/dgs_sample_setup.ui"))
+    os.system(make_cmd("ui/inelastic/dgs_data_corrections.ui"))
 
 except:
     print "Could not compile resource file"
