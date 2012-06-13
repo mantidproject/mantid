@@ -122,11 +122,11 @@ namespace DataHandling
 //            // Detector
 //        }
 
-      }
+      //}
 
 
       // Clean up the workspace
-      AnalysisDataService::Instance().remove(workspaceName);
+      //AnalysisDataService::Instance().remove(workspaceName);
   }
 
 
