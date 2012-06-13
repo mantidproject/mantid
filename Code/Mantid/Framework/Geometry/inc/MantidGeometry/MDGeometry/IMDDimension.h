@@ -79,7 +79,7 @@ namespace Mantid
     /** @return the width of each bin */
     virtual coord_t getBinWidth() const
     {
-      return (getMaximum() - getMinimum())/getNBins();
+      return (getMaximum() - getMinimum())/static_cast<coord_t>(getNBins());
     }
 
     /// @return true if the dimension is integrated (e.g. has only one single bin)
