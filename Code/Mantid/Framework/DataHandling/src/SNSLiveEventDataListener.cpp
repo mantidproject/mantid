@@ -29,6 +29,9 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+// Time we'll wait on a receive call (in milliseconds)
+// Also used when shutting down the thread so we know how long to wait there
+#define RECV_TIMEOUT_MS 100
 
 namespace Mantid
 {
@@ -38,6 +41,9 @@ namespace DataHandling
   ;
   // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.  The
   // semi-colon limits the complaints to one line.  It has no actual effect on the code.
+
+  // Get a reference to the logger
+  Kernel::Logger& SNSLiveEventDataListener::g_log = Kernel::Logger::get("SNSLiveEventDataListener");
 
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()
@@ -52,6 +58,27 @@ namespace DataHandling
   /// Destructor
   SNSLiveEventDataListener::~SNSLiveEventDataListener()
   {
+    // Stop the background thread
+    if (m_thread.isRunning())
+    {
+      // Ask the thread to exit (and hope that it does - Poco doesn't
+      // seem to have an equivalent to pthread_cancel
+      m_stopThread = true;
+      try {
+      m_thread.join(RECV_TIMEOUT_MS * 2);
+      } catch (Poco::TimeoutException e) {
+        // And just what do we do here?!?
+        // Log a message, sure, but other than that we can either hang the
+        // Mantid process waiting for a thread that will apparently never exit
+        // or segfault because the ADARA::read() is going to try to write to
+        // a buffer that's going to be deleted.
+        // Chose segfault - at least that's obvious.
+        g_log.fatal() << "SNSLiveEventDataListener failed to shut down its background thread! "
+                      << "This should never happen and Mantid is pretty much guaranteed to crash shortly.  "
+                      << "Talk to the Mantid developer team." << std::endl;
+      }
+
+    }
   }
 
   bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress& address)
@@ -62,9 +89,20 @@ namespace DataHandling
   {
     bool rv = false;  // assume failure
 
-    m_socket.connect( address);  // BLOCKING connect
-    //m_socket.connectNB( address);  // NON-BLOCKING connect
-    m_socket.setReceiveTimeout( Poco::Timespan( 0, 100 * 1000));  // 100 millisec timeout
+    // If we don't have an address, force a connection to the test server running on
+    // localhost on the default port
+    if (address.host().toString().compare( "0.0.0.0") == 0)
+    {
+      Poco::Net::SocketAddress tempAddress("localhost:31415");
+      m_socket.connect( tempAddress);  // BLOCKING connect
+    }
+    else
+    {
+      m_socket.connect( address);  // BLOCKING connect
+    }
+
+    m_socket.setReceiveTimeout( Poco::Timespan( 0, RECV_TIMEOUT_MS * 1000)); // POCO timespan is seconds, microseconds
+    g_log.information() << "Connected to " << m_socket.address().toString() << std::endl;
 
     rv = m_isConnected = true;
     return rv;
@@ -101,7 +139,6 @@ namespace DataHandling
     helloPkt[4] = (uint32_t)(m_startTime.totalNanoseconds() / 1000000000);  // divide by a billion to get time in seconds
 
     if ( m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
-    //if ( send( m_sockfd, helloPkt, sizeof(helloPkt), 0) != sizeof(helloPkt))
     {
       std::string msg( "SNSLiveEventDataListener::run(): Failed to send client hello packet.  Err: ");
       msg += strerror(errno);
@@ -119,7 +156,8 @@ namespace DataHandling
       if ( elapsed.total_seconds() > HEARTBEAT_TIMEOUT)
       {
         // SMS seems to have gone away.  Log an error
-        // TODO: HOW?!?
+        g_log.error() << "SMS server has sent no data for " << HEARTBEAT_TIMEOUT
+                      << " seconds.  Is it still running?" << std::endl;
       }
     }
 
@@ -132,7 +170,7 @@ namespace DataHandling
     // At the moment, all we need from the RTDL packets is the pulse
     // time and the raw flag.  (We reference them when processing the
     // banked event packets.)
-    m_rtdlPulseTime = pkt.timestamp();
+    m_rtdlPulseId = pkt.pulseId();
     m_rtdlRawFlag = pkt.rawTOF();
 
     return true;
@@ -145,20 +183,27 @@ namespace DataHandling
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BankedEventPkt &pkt)
   {
 
+    // A few counters that we use for logging purposes
+    unsigned eventsPerBank;
+    unsigned totalEvents = 0;
+
     // First step - make sure the RTDL packet we've saved matches the
     // banked event packet we've just received and  make sure its RAW flag
     // is false
-    if (pkt.compare_timestamp( m_rtdlPulseTime) == false)
+    if (pkt.pulseId() != m_rtdlPulseId)
     {
       // Wrong RTDL packet.  Fail!
-      // TODO: Should we set an error message somewhere?
+      g_log.error() << "Ignoring data from Pulse ID" << pkt.pulseId()
+                    << "because we have not received an RTDL packet for that pulse!"
+                    << std::endl;
       return false;
     }
 
     if (m_rtdlRawFlag)
     {
       // As yet, we can't handle raw TofF values.
-      // TODO: Should we set an error message somewhere?
+      g_log.warning() << "Ignoring data from Pulse ID " << pkt.pulseId()
+                      << " because the raw flag was set." << std::endl;
       return false;
     }
 
@@ -169,7 +214,7 @@ namespace DataHandling
     Mantid::Kernel::DateAndTime pulseID( pulseTime.tv_sec, pulseTime.tv_nsec);
 
     // Append the events
-
+    g_log.information() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
     m_mutex.lock();
     // Iterate through bank sections
     const ADARA::EventBank *bank = pkt.firstBank();
@@ -179,17 +224,32 @@ namespace DataHandling
       // Note: We ignore bank ID's >= 0xFFFE  (-2 is for error pixels and -1 is
       // for unmappable pixels);
       {
+        eventsPerBank=0;
+
         // Iterate through each event
         const ADARA::Event *event = pkt.firstEvent();
         while (event != NULL)
         {
-          appendEvent(event->pixel, event->tof, pulseID);
+          eventsPerBank++;
+          totalEvents++;
+
+          // appendEvent needs tof to be in units of microseconds, but it comes
+          // from the ADARA stream in units of 100ns.
+          appendEvent(event->pixel, event->tof / 10.0D, pulseID);
           event = pkt.nextEvent();
         }
+        g_log.debug() << "BankID " << pkt.curBankId() << " had " << eventsPerBank
+                      << " events" << std::endl;
+      }
+      else
+      {
+        g_log.information() << "Ignoring Bank ID: " << pkt.curBankId() << std::endl;
       }
       bank = pkt.nextBank();
     }
     m_mutex.unlock();
+    g_log.information() << "Total Events: " << totalEvents << std::endl;
+    g_log.information() << "-------------------------------" << std::endl;
 
     return true;
   }
@@ -205,16 +265,18 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::GeometryPkt &pkt)
   {
-    // TODO:  For now, I'm only expecting to receive a single packet when I
-    // first connect to the SMS. What should I do if I get another packet some
-    // time later??
-    m_instrumentXML = pkt.info();
-
-    // if we also have the instrument name (from the run status packet), then
-    // we can initialize our workspace
-    if (m_instrumentName.size() > 0)
+    // TODO: For now, I'm assuming that we only need to process one of these
+    // packets the first time it comes in and we can ignore any others.
+    if (m_workspaceInitialized == false)
     {
-      initWorkspace();
+      m_instrumentXML = pkt.info();
+
+      // if we also have the instrument name (from the run status packet), then
+      // we can initialize our workspace
+      if (m_instrumentName.size() > 0)
+      {
+        initWorkspace();
+      }
     }
 
     return true;
@@ -222,14 +284,18 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
-    // We need the instrument name (we'll use the shortname);
-    m_instrumentName = pkt.shortName();
-
-    // If we've also got the XML definition (from the Geometry packet), then
-    // we can create our workspace.  Otherwise, we'll just wait
-    if (m_instrumentXML.size() > 0)
+    // We only need to process a beamlineinfo packet once
+    if (m_workspaceInitialized == false)
     {
-      initWorkspace();
+      // We need the instrument name (we'll use the shortname);
+      m_instrumentName = pkt.shortName();
+
+      // If we've also got the XML definition (from the Geometry packet), then
+      // we can create our workspace.  Otherwise, we'll just wait
+      if (m_instrumentXML.size() > 0)
+      {
+        initWorkspace();
+      }
     }
 
     return true;
@@ -269,7 +335,6 @@ namespace DataHandling
   // NOTE: This function does NOT lock the mutex!  Make sure you do that
   // before calling this function!
   {
-
     // It'd be nice to use operator[], but we might end up inserting a value....
     // Have to use find() instead.
     detid2index_map::iterator it = m_indexMap->find( pixelId);
@@ -278,6 +343,10 @@ namespace DataHandling
       std::size_t workspaceIndex = it->second;
       Mantid::DataObjects::TofEvent event( tof, pulseTime);
       m_buffer->getEventList( workspaceIndex).addEventQuickly( event);
+    }
+    else
+    {
+      std::cout << "Workspace fail" << std::endl;
     }
   }
 
@@ -305,7 +374,7 @@ namespace DataHandling
     API::WorkspaceFactory::Instance().initializeFromParent(m_buffer, temp, false);
 
     // Get an exclusive lock
-    m_mutex.lock();
+    m_mutex.lock();    
     std::swap(m_buffer, temp);
     m_mutex.unlock();
 

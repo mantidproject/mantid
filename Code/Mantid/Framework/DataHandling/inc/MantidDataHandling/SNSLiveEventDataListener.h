@@ -82,7 +82,9 @@ namespace Mantid
       void initWorkspace();
 
       void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
-      // tof is "Time Of Flight" and is in units of nanoseconds relative to the start of the pulse
+      // tof is "Time Of Flight" and is in units of microsecondss relative to the start of the pulse
+      // (There's some documentation that says nanoseconds, but Russell Taylor assures me it's really
+      // is microseconds!)
       // pulseTime is the start of the pulse relative to Jan 1, 1990.
       // Both values are designed to be passed straight into the TofEvent constructor.
       
@@ -95,7 +97,7 @@ namespace Mantid
       std::string m_instrumentName;
       std::string m_instrumentXML;
 
-      struct timespec m_rtdlPulseTime;  // We get these two from the RTDL packet
+      uint64_t m_rtdlPulseId;  // We get these two from the RTDL packet
       bool  m_rtdlRawFlag;
 
       Poco::Net::StreamSocket m_socket;
@@ -113,6 +115,8 @@ namespace Mantid
                                         // packet.  SMS is supposed to send these out
                                         // periodicaly.  If we don't get them, there's a
                                         // problem somewhere.
+
+      static Kernel::Logger& g_log;   ///< reference to the logger clas
      
     };
 
