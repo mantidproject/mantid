@@ -167,6 +167,8 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
+
     // At the moment, all we need from the RTDL packets is the pulse
     // time and the raw flag.  (We reference them when processing the
     // banked event packets.)
@@ -186,6 +188,8 @@ namespace DataHandling
     // A few counters that we use for logging purposes
     unsigned eventsPerBank;
     unsigned totalEvents = 0;
+
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
     // First step - make sure the RTDL packet we've saved matches the
     // banked event packet we've just received and  make sure its RAW flag
@@ -265,6 +269,8 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::GeometryPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
+
     // TODO: For now, I'm assuming that we only need to process one of these
     // packets the first time it comes in and we can ignore any others.
     if (m_workspaceInitialized == false)
@@ -284,6 +290,8 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
+
     // We only need to process a beamlineinfo packet once
     if (m_workspaceInitialized == false)
     {
@@ -346,7 +354,8 @@ namespace DataHandling
     }
     else
     {
-      std::cout << "Workspace fail" << std::endl;
+      g_log.information() << "Invalid pixel ID: " << pixelId << " (TofF: "
+                          << tof << " microseconds)" << std::endl;
     }
   }
 
