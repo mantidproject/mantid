@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_data_corrections.ui'
 #
-# Created: Wed Jun 13 11:57:33 2012
+# Created: Wed Jun 13 15:45:24 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,12 +49,12 @@ class Ui_DataCorrsFrame(object):
         self.monint_label = QtGui.QLabel(self.incident_beam_norm_gb)
         self.monint_label.setObjectName(_fromUtf8("monint_label"))
         self.gridLayout.addWidget(self.monint_label, 1, 1, 1, 1)
-        self.lineEdit = QtGui.QLineEdit(self.incident_beam_norm_gb)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.gridLayout.addWidget(self.lineEdit, 1, 2, 1, 1)
-        self.lineEdit_2 = QtGui.QLineEdit(self.incident_beam_norm_gb)
-        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
-        self.gridLayout.addWidget(self.lineEdit_2, 1, 3, 1, 1)
+        self.monint_low_edit = QtGui.QLineEdit(self.incident_beam_norm_gb)
+        self.monint_low_edit.setObjectName(_fromUtf8("monint_low_edit"))
+        self.gridLayout.addWidget(self.monint_low_edit, 1, 2, 1, 1)
+        self.monint_high_edit = QtGui.QLineEdit(self.incident_beam_norm_gb)
+        self.monint_high_edit.setObjectName(_fromUtf8("monint_high_edit"))
+        self.gridLayout.addWidget(self.monint_high_edit, 1, 3, 1, 1)
         self.horizontalLayout_2.addWidget(self.incident_beam_norm_gb)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)

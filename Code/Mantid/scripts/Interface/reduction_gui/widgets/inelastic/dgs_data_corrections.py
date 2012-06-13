@@ -29,8 +29,21 @@ class DataCorrectionsWidget(BaseWidget):
         else:
             self.set_state(DataCorrectionsScript())
 
-    def initalize_content(self):
-        pass
+    def initialize_content(self):
+        # Make group for incident beam normalisation radio buttons
+        self.incident_beam_norm_grp = QtGui.QButtonGroup()
+        self.incident_beam_norm_grp.addButton(self._content.none_rb, 0)
+        self.incident_beam_norm_grp.addButton(self._content.current_rb, 1)
+        self.incident_beam_norm_grp.addButton(self._content.monitor1_rb, 2) 
+    
+        self._monitor_intrange_widgets_state(self._content.monitor1_rb.isChecked())
+        self.connect(self._content.monitor1_rb, QtCore.SIGNAL("toggled(bool)"), 
+                     self._monitor_intrange_widgets_state)
+        
+    def _monitor_intrange_widgets_state(self, state=False):
+        self._content.monint_label.setEnabled(state)
+        self._content.monint_low_edit.setEnabled(state)
+        self._content.monint_high_edit.setEnabled(state)        
     
     def set_state(self, state):
         """
@@ -38,6 +51,9 @@ class DataCorrectionsWidget(BaseWidget):
             @param state: SampleSetupScript object
         """
         self._content.filter_bad_pulses_chkbox.setChecked(state.filter_bad_pulses)
+        button_index = DataCorrectionsScript.INCIDENT_BEAM_NORM_TYPES.index(state.incident_beam_norm)
+        cbutton = self.incident_beam_norm_grp.button(button_index)
+        cbutton.setChecked(True)
 
     def get_state(self):
         """
@@ -45,4 +61,5 @@ class DataCorrectionsWidget(BaseWidget):
         """
         d = DataCorrectionsScript()
         d.filter_bad_pulses = self._content.filter_bad_pulses_chkbox.isChecked()
+        d.incident_beam_norm = DataCorrectionsScript.INCIDENT_BEAM_NORM_TYPES[self.incident_beam_norm_grp.checkedId()]
         return d
