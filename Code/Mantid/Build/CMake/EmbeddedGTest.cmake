@@ -4,7 +4,8 @@
 
 find_path ( GTEST_INCLUDE_DIR gtest/gtest.h
             PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.6.0/gtest/include
-                  ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.6.0/gtest/include )
+                  ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.6.0/gtest/include 
+            NO_SYSTEM_ENVIRONMENT_PATH )
 
 # handle the QUIETLY and REQUIRED arguments and set GTEST_FOUND to TRUE if 
 # all listed variables are TRUE
