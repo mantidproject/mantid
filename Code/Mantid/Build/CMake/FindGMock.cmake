@@ -5,7 +5,7 @@
 find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
             PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.6.0/include
                   ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.6.0/include
-            NO_SYSTEM_ENVIRONMENT_PATH )
+            NO_DEFAULT_PATH )
 
 SET(GMOCK_LIB gmock)
 SET(GMOCK_LIB_DEBUG gmock)
