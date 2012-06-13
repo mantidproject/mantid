@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/AppendGeometryToSNSNexus.cpp
 	src/CompressEvents.cpp
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
@@ -69,7 +70,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-#        src/LoadSassena.cpp
+#       src/LoadSassena.cpp
 	src/LoadSNSEventNexus.cpp
 	src/LoadSNSNexus.cpp
 	src/LoadSNSspec.cpp
@@ -88,8 +89,8 @@ set ( SRC_FILES
 	src/OrbiterDataArchive.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
-	src/RenameLog.cpp
 	src/RemoveLogs.cpp
+	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
 	src/SaveAscii.cpp
@@ -125,6 +126,7 @@ set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
         src/LoadDAE/isisds_command.cpp)
 
 set ( INC_FILES
+	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
@@ -245,6 +247,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#test/LoadSNSNexusTest.h # TODO has no active tests in it
+	test/AppendGeometryToSNSNexusTest.h
 	test/CompressEventsTest.h
 	test/CreateSampleShapeTest.h
 	test/DefineGaugeVolumeTest.h
@@ -269,9 +272,9 @@ set ( TEST_FILES
 	test/LoadDetectorsGroupingFileTest.h
 	test/LoadDspacemapTest.h
 	test/LoadEmptyInstrumentTest.h
-	test/LoadEventNexusTest.h
-	test/LoadEventPreNexusTest.h
-	test/LoadEventPreNexus2Test.h
+        test/LoadEventNexusTest.h
+        test/LoadEventPreNexusTest.h
+        test/LoadEventPreNexus2Test.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h

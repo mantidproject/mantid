@@ -29,7 +29,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void xtest_exec()
+  void test_exec()
   {
 //    // Name of the output workspace.
 //    std::string outWSName("AppendGeometryToSNSNexusTest_OutputWS");
@@ -40,7 +40,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "CNCS_7860_event.nxs") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
-    
+
     // Retrieve the workspace from data service. TODO: Change to your desired type
 //    Workspace_sptr ws;
 //    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
