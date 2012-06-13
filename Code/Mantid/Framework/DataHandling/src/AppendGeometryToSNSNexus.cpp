@@ -112,22 +112,21 @@ namespace DataHandling
 
       g_log.notice() << "Number of Histograms = " << numHistograms << std::endl;
 
-      for (size_t i=0; i < numHistograms; ++i)
-      {
-        Geometry::IDetector_const_sptr det = ws->getDetector(i);
-        if (det->isMonitor())
-            // TODO: Do the correct thing for the monitors
-        else
-        {
-            // Detector
+//      for (size_t i=0; i < numHistograms; ++i)
+//      {
+//        Geometry::IDetector_const_sptr det = ws->getDetector(i);
+//        if (det->isMonitor())
+//            // TODO: Do the correct thing for the monitors
+//        else
+//        {
+//            // Detector
+//        }
 
-        }
-
-      }
+      //}
 
 
       // Clean up the workspace
-      AnalysisDataService::Instance().remove(workspaceName);
+      //AnalysisDataService::Instance().remove(workspaceName);
   }
 
 

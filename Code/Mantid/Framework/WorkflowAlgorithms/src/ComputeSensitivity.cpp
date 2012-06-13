@@ -59,17 +59,7 @@ void ComputeSensitivity::exec()
 
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
-  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
-  {
-    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-  }
-  else
-  {
-    g_log.notice() << "Could not find property manager" << std::endl;
-    reductionManager = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
-  }
+  boost::shared_ptr<PropertyManager> reductionManager = getProcessProperties(reductionManagerName);
 
   const std::string outputWS = getPropertyValue("OutputWorkspace");
 
