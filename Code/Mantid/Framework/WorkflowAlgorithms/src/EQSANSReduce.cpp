@@ -56,6 +56,9 @@ void EQSANSReduce::init()
       "File path for the output nexus file");
 }
 
+/**
+ * Determine whether the input data is a file or a workspace and load it.
+ */
 Workspace_sptr EQSANSReduce::loadInputData()
 {
   setLoadAlg("LoadEventNexus");
@@ -75,6 +78,10 @@ Workspace_sptr EQSANSReduce::loadInputData()
   return inputWS;
 }
 
+/**
+ * Perform the reduction process on the given workspace.
+ * @param workspace :: name of the workspace to reduce
+ */
 void EQSANSReduce::performReduction(Workspace_sptr workspace)
 {
   if (!workspace)
@@ -105,6 +112,11 @@ void EQSANSReduce::performReduction(Workspace_sptr workspace)
   alg->execute();
 }
 
+/**
+ * Perform post-processing (I(q) calculation) on the reduced workspace.
+ * In the case of MPI jobs, the post-processing is done on the assemble workspace.
+ * @param workspace :: name of the workspace to process
+ */
 Workspace_sptr EQSANSReduce::postProcess(Workspace_sptr workspace)
 {
   // Construct the script's output workspace name

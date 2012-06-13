@@ -12,7 +12,9 @@ namespace Mantid
 {
 namespace API
 {
-/** DataProcessorAlgorithm : TODO: DESCRIPTION
+/** DataProcessorAlgorithm :
+   Data processor algorithm to be used as a parent to workflow algorithms.
+   This algorithm provides utility methods to load and process data.
 
    @date 2012-04-04
 

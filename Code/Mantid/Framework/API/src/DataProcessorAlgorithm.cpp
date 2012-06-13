@@ -65,6 +65,11 @@ namespace API
     throw std::runtime_error("DataProcessorAlgorithm::loadChunk is not implemented");
   }
 
+  /**
+   * Assemble the partial workspaces from all MPI processes
+   * @param partialWSName :: Name of the workspace to assemble
+   * @param outputWSName :: Name of the assembled workspace (available in main thread only)
+   */
   Workspace_sptr DataProcessorAlgorithm::assemble(const std::string &partialWSName, const std::string &outputWSName)
   {
     std::string threadOutput = partialWSName;
@@ -86,6 +91,12 @@ namespace API
     return outputWS;
   }
 
+  /**
+   * Save a workspace as a nexus file, with check for which thread
+   * we are executing in.
+   * @param outputWSName :: Name of the workspace to save
+   * @param outputFile :: Path to the Nexus file to save
+   */
   void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
       const std::string &outputFile)
   {
@@ -103,6 +114,7 @@ namespace API
     }
   }
 
+  /// Return true if we are running on the main thread
   bool DataProcessorAlgorithm::isMainThread()
   {
     bool mainThread = true;
@@ -112,6 +124,7 @@ namespace API
     return mainThread;
   }
 
+  /// Return the number of MPI processes running
   int DataProcessorAlgorithm::getNThreads()
   {
 #ifdef MPI_BUILD
@@ -120,7 +133,11 @@ namespace API
     return 1;
 #endif
   }
-  /// Determine what kind of input data we have and load it
+
+  /**
+   * Determine what kind of input data we have and load it
+   * @param inputData :: File path or workspace name
+   */
   Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData)
   {
     Workspace_sptr inputWS;
@@ -177,8 +194,11 @@ namespace API
     return inputWS;
   }
 
-  /// Get the property manager object of a given name from the property manager
-  /// data service, or create a new one.
+  /**
+   * Get the property manager object of a given name from the property manager
+   * data service, or create a new one.
+   * @param propertyManager :: Name of the property manager to retrieve
+   */
   boost::shared_ptr<PropertyManager>
   DataProcessorAlgorithm::getProcessProperties(const std::string &propertyManager)
   {
