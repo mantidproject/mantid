@@ -142,6 +142,8 @@ if ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" )
 # Also make sure the equivalent gcc warning is turned off
 elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" )
   add_definitions ( -Wno-overloaded-virtual )
+  # And one other one as well that GCC 4.6 complains about
+  add_definitions ( -Wno-unused-but-set-variable )
 endif ()
 
 ###########################################################################

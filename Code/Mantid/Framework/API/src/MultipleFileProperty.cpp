@@ -54,7 +54,8 @@ namespace API
         boost::make_shared<MultiFileValidator>(exts), 
         Direction::Input),
       m_exts(exts),
-      m_parser()
+      m_parser(),
+      m_defaultExt("")
   {}
 
   //----------------------------------------------------------------------------------------------

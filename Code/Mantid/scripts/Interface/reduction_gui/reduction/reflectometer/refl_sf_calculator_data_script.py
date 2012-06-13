@@ -83,6 +83,7 @@ class DataSets(BaseScriptElement):
         xml += "<s2w>%s</s2w>\n" % str(self.s2w)
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "</RefLSFCalculator>\n"
+        
         return xml
 
     def from_xml(self, xml_str):
@@ -124,8 +125,8 @@ class DataSets(BaseScriptElement):
         
         #s1h, s2h, s1w, s2w
         self.s1h = BaseScriptElement.getStringElement(instrument_dom, "s1h")
-        self.s2h = BaseScriptElement.getStringElement(instrument_dom, "s1w")
-        self.s1w = BaseScriptElement.getStringElement(instrument_dom, "s2h")
+        self.s2h = BaseScriptElement.getStringElement(instrument_dom, "s2h")
+        self.s1w = BaseScriptElement.getStringElement(instrument_dom, "s1w")
         self.s2w = BaseScriptElement.getStringElement(instrument_dom, "s2w")
         
         #scaling factor file

@@ -74,12 +74,12 @@ namespace Mantid
         throw std::runtime_error("Workspace to apply calibration to has no defined instrument");
       }
 
-      int numDetector = PosTable->rowCount();
+      size_t numDetector = PosTable->rowCount();
       //API::Column_const_sptr detID = PosTable->getColumn( 0 );
       ColumnVector<int> detID = PosTable->getVector("Detector ID");
       ColumnVector<V3D> detPos = PosTable->getVector("Detector Position");
       // numDetector needs to be got as the number of rows in the table and the detID got from the (i)th row of table.
-      for (int i = 0; i < numDetector; ++i)
+      for (size_t i = 0; i < numDetector; ++i)
       {
         Geometry::IDetector_sptr det = boost::const_pointer_cast<Geometry::IDetector>(instrument->getDetector(detID[i]));
         setDetectorPosition( Ws, instrument, detID[i], detPos[i], false );
@@ -95,9 +95,9 @@ namespace Mantid
     * @param pos :: new position of Dectector
     * @param sameParent :: true if detector has same parent as previous detector set here.
     */
-    void ApplyCalibration::setDetectorPosition(API::MatrixWorkspace_sptr Ws, boost::shared_ptr<Geometry::Instrument> instrument, int detID, V3D pos, bool sameParent )
+    void ApplyCalibration::setDetectorPosition(API::MatrixWorkspace_sptr Ws, boost::shared_ptr<Geometry::Instrument> instrument, int detID, V3D pos, bool /*sameParent*/ )
     {
-       Geometry::IDetector_sptr det = boost::const_pointer_cast<Geometry::IDetector>(instrument->getDetector(detID)); 
+       Geometry::IDetector_sptr det = boost::const_pointer_cast<Geometry::IDetector>(instrument->getDetector(detID));
 
        if (det == 0)
        {

@@ -10,7 +10,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** ReflectometryMDTransform : Abstract type for reflectometry transforms to MDWorkspaces
+  /** ReflectometryMDTransform : Abstract type for reflectometry transforms to MDWorkspaces. This is a Strategy Design Pattern. 
     
     @date 2012-05-29
 
@@ -37,6 +37,7 @@ namespace MDEvents
   class DLLExport ReflectometryMDTransform 
   {
   public:
+    //Execute the strategy to produce the a transformed, output MDWorkspace
     virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
   };
 }

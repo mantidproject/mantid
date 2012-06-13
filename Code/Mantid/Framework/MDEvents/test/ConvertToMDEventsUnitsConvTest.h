@@ -2,26 +2,28 @@
 #define CONVERT2_MDEVENTS_UNITS_CONVERSION_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include "MantidAPI/NumericAxis.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
 
+#include "MantidMDEvents/UnitsConversionHelper.h"
+#include "MantidMDEvents/MDWSDescription.h"
+
 using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDAlgorithms::ConvertToMD;
-
+using namespace Mantid::MDEvents;
 
 
 
 class ConvertToMDEventsUnitsConvTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
-   ConvToMDPreprocDetectors det_loc;
+   ConvToMDPreprocDet det_loc;
 
 public:
 static ConvertToMDEventsUnitsConvTest *createSuite() {
@@ -37,7 +39,7 @@ void testSpecialConversionTOF()
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
 }
 
-void testTOFConversionFails()
+void testTOFConversionRuns()
 { 
 
     Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
@@ -58,24 +60,41 @@ void testTOFConversionFails()
 
 void testConvertFastFromInelasticWS()
 {
-    UnitsConverter<ConvFast,Histogram> Conv;
+    UnitsConversionHelper Conv;
+    MDWSDescription WSD;
 
-    TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(det_loc,"DeltaE","DeltaE_inWavenumber"));
+    // ws description currently needs min/max to be set properly
+    std::vector<double> min(2,-10),max(2,10);
+    WSD.setMinMax(min,max);
+
+    WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
+    WSD.setDetectors(det_loc);
+
+
+    // initialize peculiar conversion from ws units to DeltaE_inWavenumber
+    TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE_inWavenumber"));
 
      const MantidVec& X        = ws2D->readX(0);
      size_t n_bins = X.size()-1;
      for(size_t i=0;i<n_bins;i++){
-         TS_ASSERT_DELTA(0.5*(X[i]+X[i+1])*8.06554465,Conv.getXConverted(X,i),1.e-4);
+         TS_ASSERT_DELTA(X[i]*8.06554465,Conv.convertUnits(X[i]),1.e-4);
      }
 
 }
 void testConvertToTofInelasticWS()
 {
-    // Convert to TOF
-    UnitsConverter<ConvByTOF,Centered> Conv;
-    // set diret conversion mode
-    det_loc.setEmode(1);
-    TS_ASSERT_THROWS_NOTHING(Conv.setUpConversion(det_loc,"DeltaE","TOF"));
+    UnitsConversionHelper Conv;
+    MDWSDescription WSD;
+
+    // ws description currently needs min/max to be set properly
+    std::vector<double> min(2,-10),max(2,10);
+    WSD.setMinMax(min,max);
+
+    WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
+    WSD.setDetectors(det_loc);
+
+    // initalize Convert to TOF
+    TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"TOF"));
 
 
      const MantidVec& X        = ws2D->readX(0);
@@ -86,7 +105,7 @@ void testConvertToTofInelasticWS()
      std::vector<double> TOFS(n_bins);
      for(size_t i=0;i<n_bins;i++){
          E_storage[i]=X[i];
-         TOFS[i]     =Conv.getXConverted(X,i);
+         TOFS[i]     =Conv.convertUnits(X[i]);
      }
 
      // Let WS know that it is in TOF now (one column)
@@ -103,22 +122,23 @@ void testConvertToTofInelasticWS()
      pAxis0->setUnit("TOF");
      ws2D->replaceAxis(0,pAxis0);
 
+     // initialize matrix ws description, to the same number of dimensions as before
+     WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
 
-
-     // Convert back;
-     UnitsConverter<ConvFromTOF,Centered> ConvBack;
-     std::string uintFrom = ws2D->getAxis(0)->unit()->unitID();
-     TS_ASSERT_THROWS_NOTHING(ConvBack.setUpConversion(det_loc,uintFrom,"DeltaE"));
-     TS_ASSERT_THROWS_NOTHING(ConvBack.updateConversion(0));
+     //initialize Convert back;
+     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE"));
+     TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
 
      for(size_t i=0;i<n_bins;i++){
-         TS_ASSERT_DELTA(E_storage[i],ConvBack.getXConverted(TOFS,i),1.e-5);
+         TS_ASSERT_DELTA(E_storage[i],Conv.convertUnits(TOFS[i]),1.e-5);
      }
 }
 
 
-ConvertToMDEventsUnitsConvTest (){
+ConvertToMDEventsUnitsConvTest ()
+{
     
+   API::FrameworkManager::Instance();
 
    std::vector<double> L2(5,5);
    std::vector<double> polar(5,(30./180.)*3.1415926);
@@ -133,15 +153,7 @@ ConvertToMDEventsUnitsConvTest (){
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
 
    det_loc.buildFakeDetectorsPositions(ws2D);
-   det_loc.setEfix(10);
-   det_loc.setEmode(1);
   
-   Kernel::UnitFactory::Instance().create("TOF");
-   Kernel::UnitFactory::Instance().create("Energy");
-   Kernel::UnitFactory::Instance().create("DeltaE");
-   Kernel::UnitFactory::Instance().create("DeltaE_inWavenumber");
-   Kernel::UnitFactory::Instance().create("Momentum");
-
 
 }
 };

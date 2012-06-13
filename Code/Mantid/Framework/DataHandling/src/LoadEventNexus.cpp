@@ -2069,13 +2069,13 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
     {
       double right = double(tof[i]);
       // find the right boundary for the current event
-      if(ev != ev_end && right < ev->m_tof )
+      if(ev != ev_end && right < ev->tof() )
       {
         continue;
       }
       // count events which have the same right boundary
       size_t m = 0;
-      while(ev != ev_end && ev->m_tof < right)
+      while(ev != ev_end && ev->tof() < right)
       {
         ++ev;
         ++m;  // count events in the i-th bin

@@ -27,6 +27,13 @@ endif ()
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
 
+if( ${CMAKE_C_COMPILER} MATCHES "icc.*$" )
+  set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-intel-extensions" )
+endif()
+if( ${CMAKE_CXX_COMPILER} MATCHES "icpc.*$" )
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-intel-extensions" )
+endif()
+
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################

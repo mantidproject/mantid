@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="TOPAZ" valid-from   ="2012-05-25 00:00:01"
-		         last-modified="2012-05-29 11:00:00">
+		         last-modified="2012-06-06 18:00:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
 
@@ -85,6 +85,13 @@
   </rot>
 </location>
 </component>
+<component type="panel" idstart="2162688" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="108.000253" p="0.000000" name="bank33" rot="-71.999747" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+      <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
 <component type="panel" idstart="2359296" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.395000" t="143.999764" p="180.000000" name="bank36" rot="36.000236" axis-x="0" axis-y="1" axis-z="0">
   <rot val="45.000000">
@@ -121,7 +128,7 @@
 </location>
 </component>
 <!-- List of all the bank names:
-bank17,bank18,bank22,bank26,bank27,bank28,bank36,bank37,bank38,bank39,bank47
+bank17,bank18,bank22,bank26,bank27,bank28,bank33,bank36,bank37,bank38,bank39,bank47
 -->
 
 <!-- NOTE: This detector is the same as the SNAP detector -->

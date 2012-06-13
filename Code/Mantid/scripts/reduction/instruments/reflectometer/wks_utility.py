@@ -7,6 +7,31 @@ import os.path
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
 
+def getSequenceRuns(run_numbers):
+    """
+    This will return the sequence of runs
+    ex:
+        input: 10,11,12
+        output: 10,11,12
+        
+        input: 10,13-15
+        output: 10,13,14,15
+    """
+    final_list = []
+    for _run in run_numbers:
+        _run = str(_run)
+        _result = _run.find('-')
+        if _result == -1:
+            final_list.append(_run)
+        else:
+            _split = _run.split('-')
+            start = int(_split[0])
+            end = int(_split[1])
+            _range = arange(end-start+1)+start
+            for _r in _range:
+                final_list.append(_r)
+    return final_list
+
 def getProtonCharge(st=None):
     """
         Returns the proton charge of the given workspace in picoCoulomb
@@ -36,7 +61,7 @@ def getSh(mt, top_tag, bottom_tag):
     mt_run = mt.getRun()
     st = mt_run.getProperty(top_tag).value
     sb = mt_run.getProperty(bottom_tag).value
-    sh = float(sb[0]) - float(st[0])
+    sh = math.fabs(float(sb[0]) - float(st[0]))
     units = mt_run.getProperty(top_tag).units
     return sh, units
     
@@ -65,7 +90,7 @@ def getSw(mt, left_tag, right_tag):
     mt_run = mt.getRun()
     sl = mt_run.getProperty(left_tag).value
     sr = mt_run.getProperty(right_tag).value
-    sw = float(sl[0]) - float(sr[0])
+    sw = math.fabs(float(sl[0]) - float(sr[0]))
     units = mt_run.getProperty(left_tag).units
     return sw, units
 

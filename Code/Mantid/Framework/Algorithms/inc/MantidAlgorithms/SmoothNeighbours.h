@@ -133,6 +133,8 @@ private:
   boost::scoped_ptr<WeightingStrategy> WeightedSum;
   /// PreserveEvents
   bool PreserveEvents;
+  /// number of output workspace pixels
+  size_t outWI;
 
   /// Input workspace
   Mantid::API::MatrixWorkspace_sptr inWS;

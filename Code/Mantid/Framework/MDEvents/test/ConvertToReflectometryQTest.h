@@ -134,14 +134,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
-  //Characterisation test for the current state of the algorithm
-  void test_only_support_q_conversion()
-  {
-    auto alg = make_standard_algorithm();
-    alg->setProperty("OutputDimensions", "P (lab frame)");
-    TSM_ASSERT_THROWS("Should throw as this mode is not supported yet", alg->execute(), std::runtime_error);
-  }
-
   void test_execute()
   {
      auto alg = make_standard_algorithm();

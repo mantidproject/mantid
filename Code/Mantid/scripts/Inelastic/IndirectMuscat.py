@@ -1,17 +1,16 @@
 # MUSIC : Version of Minus for MIDAS
+#
+from IndirectImport import *
+if is_supported_f2py_platform():
+    muscat = import_f2py("muscat")
+else:
+    unsupported_message():
 
 from mantid.simpleapi import *
-import mantidplot as mp
 from mantid import config, logger, mtd
 from IndirectCommon import *
-import platform, math, os.path, numpy as np
-
-if ( is_32bit_win() ):
-    import muscat_win32 as muscat
-#elif ( is_64bit_rhel_6_2() ):
-#    import muscat_lnx64 as muscat
-else:
-    sys.exit('F2Py Absorption Corrections programs NOT available on your operatingenvironment')
+import sys, platform, math, os.path, numpy as np
+mp = import_mantidplot()
 
 def CalcW0(nq,dq,disp,coeff):
 	Q = []

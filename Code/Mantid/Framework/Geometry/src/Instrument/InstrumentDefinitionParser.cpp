@@ -84,8 +84,6 @@ namespace Geometry
    */
   void InstrumentDefinitionParser::initialize(const std::string & filename, const std::string & instName, const std::string & xmlText)
   {
-    g_log.debug() << "====> InstrumentDefinitionParser::initialize started" << std::endl;
-    
     // Handle the parameters
     m_filename = filename;
     m_instName = instName;
@@ -94,9 +92,7 @@ namespace Geometry
     DOMParser pParser;
     try
     {
-      g_log.debug() << "====> pre pDoc = pParser.parseString(m_xmlText);" << std::endl;
       pDoc = pParser.parseString(xmlText);
-      g_log.debug() << "====> post pDoc = pParser.parseString(m_xmlText);" << std::endl;
     }
     catch(Poco::Exception& exc)
     {
@@ -121,8 +117,6 @@ namespace Geometry
     // Save the XML file path and contents
     m_instrument->setFilename(m_filename);
     m_instrument->setXmlText(xmlText);
-
-    g_log.debug() << "====> InstrumentDefinitionParser::initialize finished" << std::endl;
   }
 
 

@@ -1,10 +1,11 @@
 #Force for ILL backscattering raw
-#from mantid.simpleapi import *
+#
+from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
-import mantidplot as mp
 import math, os.path as op
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
+mp = import_mantidplot()
 
 #  Routines for Ascii file of raw data
 

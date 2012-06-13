@@ -6,6 +6,7 @@
 class QEvent;
 class ApplicationWindow;
 class MdiSubWindow;
+class QSize;
 
 /**
  * Floating wrapper window for a MdiSubWindow.
@@ -21,6 +22,7 @@ public:
   MdiSubWindow* mdiSubWindow() const;
   void setMdiSubWindow(MdiSubWindow* sw);
   void removeMdiSubWindow();
+  virtual QSize minimumSizeHint () const;
 
 protected:
 

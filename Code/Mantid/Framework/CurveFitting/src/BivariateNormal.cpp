@@ -132,14 +132,14 @@ BivariateNormal::~BivariateNormal()
 
      }
      double diff = out[x]-D[x];
-     inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
-         D[x]<<")";
+    // inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
+     //    D[x]<<")";
      chiSq +=diff*diff;
 
      x++;
    }
 
-   inf << std::endl<<"    chiSq =" << chiSq <<"     nData"<<nData<<std::endl;
+   inf << std::endl<<"    chiSq =" << chiSq <<"     nData "<<nData<<std::endl;
    g_log.debug(inf.str());
 
  }

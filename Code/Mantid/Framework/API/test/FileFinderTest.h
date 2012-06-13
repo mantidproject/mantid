@@ -8,7 +8,9 @@
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include <boost/lexical_cast.hpp>
 
+#include <stdio.h>
 #include <fstream>
 
 using namespace Mantid::Kernel;
@@ -289,6 +291,135 @@ public:
 private:
 
   Poco::File m_facFile;
+};
+
+class FileFinderTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FileFinderTestPerformance *createSuite() { return new FileFinderTestPerformance(); }
+  static void destroySuite( FileFinderTestPerformance *suite ) { delete suite; }
+
+  FileFinderTestPerformance() :
+    m_oldDataSearchDirectories(), m_dirPath("_FileFinderTestPerformanceDummyData"),
+      // Keeping these as low as possible so as to keep the time of the test down, but users with 70,000+ files
+      // in a single folder looking for a range of hundreds of files are not unheard of.
+      m_filesInDir(10000), m_filesToFind(100)
+  {
+    // Create some dummy TOSCA run files to use.
+    Poco::File dir(m_dirPath);
+    dir.createDirectories();
+    std::cout << dir.path() << " = " << dir.exists() << std::endl;
+    
+    for( size_t run = 0; run < m_filesInDir; ++run )
+    {
+      std::stringstream filename;
+      generateFileName(filename, run);
+
+      {
+        // Hoping for some speed increase from this (assuming no RVO optimisation 
+        // when using filename.str().c_str() ...):
+        const std::string& tmp = filename.str();
+        const char* cstr = tmp.c_str();
+        
+        // Shun use of Poco, which is slower.
+        FILE * pFile;
+        pFile = fopen (cstr , "w");
+        if (pFile != NULL)
+        {
+          fclose (pFile);
+        }
+      }
+    }
+    
+    // Set TOSCA as default instrument.
+    Mantid::Kernel::ConfigService::Instance().setString("default.instrument", "TSC");
+    
+    // Add dummy directory to search path, saving old search paths to be put back later.
+    Poco::Path path(dir.path());
+    path = path.makeAbsolute();
+    m_oldDataSearchDirectories = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", path.toString());
+  }
+
+  ~FileFinderTestPerformance()
+  {
+    // Put back the old search paths.
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories);
+
+    // Destroy dummy folder and files.  
+    // Use Poco here so removing works on multiple platforms. Recursive .remove(true) also means we dont have to generate
+    // the filenames for a second time.
+    Poco::File dir(m_dirPath);
+    dir.remove(true);
+  }
+
+  void test_largeDirectoryOfFiles()
+  {
+    std::vector<std::string> files;
+    std::stringstream range;
+    range << (m_filesInDir - m_filesToFind) << "-" << (m_filesInDir - 1);
+    TS_ASSERT_THROWS_NOTHING( files = FileFinder::Instance().findRuns(range.str().c_str()) );
+    TS_ASSERT( files.size() == m_filesToFind );
+  }
+  
+private:
+
+  void generateFileName(std::stringstream & stream, size_t run)
+  {
+    // Alternate cases of instrument and extension.
+    if( run % 4 == 0 )
+    {
+      stream << m_dirPath << "/TSC";
+      pad(stream, run);
+      stream << ".raw";
+    }
+    else if( run % 4 == 1 )
+    {
+      stream << m_dirPath << "/TSC";
+      pad(stream, run);
+      stream << ".RAW";
+    }
+    else if( run % 4 == 2 )
+    {
+      stream << m_dirPath << "/tsc";
+      pad(stream, run);
+      stream << ".RAW";
+    }
+    else
+    {
+      stream << m_dirPath << "/tsc";
+      pad(stream, run);
+      stream << ".raw";
+    }
+  }
+  
+  /**
+   * Pad the given stringstream with zeros from a lookup, then add the run number.
+   */
+  void pad(std::stringstream & stream, size_t run)
+  {
+    if( run < 10 )
+      stream << "0000" << run;
+    else if( run < 100 )
+      stream << "000" << run;
+    else if( run < 1000 )
+      stream << "00" << run;
+    else if( run < 10000 )
+      stream << "0" << run;
+    else
+      stream << run;
+  }
+
+  // Temp storage.
+  std::string m_oldDataSearchDirectories;
+  // Path to directory where dummy files will be created.
+  std::string m_dirPath;
+  // Number of dummy files to create.
+  size_t m_filesInDir;
+  // Number of files to find.
+  size_t m_filesToFind;
 };
 
 #endif /*FILEFINDERTEST_H_*/

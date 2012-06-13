@@ -1,10 +1,13 @@
 # Transmission main
 #
+from IndirectImport import *
+
 from mantid.simpleapi import *
-import mantidplot as mp
 from mantid import config, logger, mtd
 from IndirectCommon import StartTime, EndTime, GetThetaQ
 import numpy, os.path
+
+mp = import_mantidplot()
 
 def MomentRun(samWS,Verbose,Plot,Save):
     StartTime('Moments')

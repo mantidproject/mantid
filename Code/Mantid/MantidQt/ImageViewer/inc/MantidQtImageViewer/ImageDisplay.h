@@ -83,6 +83,12 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      /// Record the point that the user is currently pointing at with the mouse
      void SetPointedAtPoint( QPoint point );
 
+     /// Set horizontal graph wit data from the array at the specified y value
+     void SetHGraph( double y );
+
+     /// Set vertical graph with data from the array at the specified x value
+     void SetVGraph( double x );
+
   private:
      /// Check if the DataSource has been changed under us
      bool DataSourceRangeChanged();
@@ -108,6 +114,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 
      GraphDisplay*        h_graph_display;
      GraphDisplay*        v_graph_display;
+
+     double               pointed_at_x;
+     double               pointed_at_y;
 
      QTableWidget*        image_table;
                                            // save current total data range

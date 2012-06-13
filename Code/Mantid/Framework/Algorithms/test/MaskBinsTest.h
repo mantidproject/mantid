@@ -186,6 +186,58 @@ public:
     AnalysisDataService::Instance().remove(workspaceName);
   }
 
+  /*
+   * A more sserious check
+   */
+  void testSpectraList_WS2D_OutPlace()
+  {
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    const std::string opWSName("maskedWS");
+
+    int nBins = 10;
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5,nBins,0.0);
+    AnalysisDataService::Instance().add(workspaceName,WS);
+
+    Mantid::Algorithms::MaskBins masker2;
+    masker2.initialize();
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",opWSName);
+    masker2.setPropertyValue("XMin","3.0");
+    masker2.setPropertyValue("XMax","6.0");
+    masker2.setPropertyValue("SpectraList","1-3");
+
+    TS_ASSERT_THROWS_NOTHING( masker2.execute() );
+    TS_ASSERT( masker2.isExecuted() );
+
+    // Get output workspace and compare
+    MatrixWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(opWSName));
+    TS_ASSERT(outWS);
+    if (!outWS)
+      return;
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 5);
+
+    for (size_t wi = 0; wi < 5; ++ wi)
+    {
+      for (size_t bin = 0; bin < size_t(nBins); ++bin)
+      {
+        if (wi >= 1 && wi <= 3 && bin >= 3 && bin < 6)
+        {
+          TS_ASSERT_EQUALS( outWS->dataY(wi)[bin], 0.0 );
+        }
+        else
+        {
+          TS_ASSERT_EQUALS( outWS->dataY(wi)[bin], WS->dataY(wi)[bin] );
+        }
+      }
+    } // ENDFOR wi
+
+    AnalysisDataService::Instance().remove(workspaceName);
+    AnalysisDataService::Instance().remove(opWSName);
+  }
+
+
   void testEventWorkspace_SpectraList()
   {
     // Create a dummy workspace
@@ -216,6 +268,56 @@ public:
       }
 
     AnalysisDataService::Instance().remove(workspaceName);
+  }
+
+
+  /*
+   * A more serious test to compare all bins
+   */
+  void testEventWorkspace_SpectraList_OutPlace()
+  {
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    const std::string opWSName("maskedWorkspace");
+
+    int nBins = 10;
+    int numHist = 5;
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins) ;
+    AnalysisDataService::Instance().add(workspaceName,WS);
+
+    Mantid::Algorithms::MaskBins masker2;
+    masker2.initialize();
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",opWSName);
+    masker2.setPropertyValue("XMin","3.0");
+    masker2.setPropertyValue("XMax","6.0");
+    masker2.setPropertyValue("SpectraList","1-3");
+
+    TS_ASSERT_THROWS_NOTHING( masker2.execute() );
+    TS_ASSERT( masker2.isExecuted() );
+
+    EventWorkspace_const_sptr constWS =
+        boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(opWSName));
+
+    for (size_t wi = 0; wi < 5; ++ wi)
+    {
+      for (size_t bin = 0; bin < size_t(nBins); ++bin)
+      {
+        const MantidVec& Y = constWS->readY(wi);
+        const MantidVec& oY = WS->readY(wi);
+        if (wi >= 1 && wi <= 3 && bin >= 3 && bin < 6)
+        {
+          TS_ASSERT_EQUALS( Y[bin], 0.0 );
+        }
+        else
+        {
+          TS_ASSERT_EQUALS( Y[bin], oY[bin] );
+        }
+      }
+    } // ENDFOR wi
+
+    AnalysisDataService::Instance().remove(workspaceName);
+    AnalysisDataService::Instance().remove(opWSName);
   }
 
   void testEventWorkspace_No_SpectraList()

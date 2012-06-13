@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
 
-#define PI 3.14159
+#define PI 3.14159265
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"

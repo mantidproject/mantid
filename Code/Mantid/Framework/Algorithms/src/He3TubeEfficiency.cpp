@@ -543,7 +543,7 @@ void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval)
   typename std::vector<T>::iterator it;
   for (it = events.begin(); it != events.end(); ++it)
   {
-    float de = static_cast<float>(this->detectorEfficiency(expval * it->m_tof,
+    float de = static_cast<float>(this->detectorEfficiency(expval * it->tof(),
                                                            scale));
     it->m_weight *= de;
     it->m_errorSquared *= de * de;

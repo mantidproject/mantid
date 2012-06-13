@@ -73,8 +73,8 @@ public:
      alg->setProperty("gamma",90.0);
     // alg->setProperty("use_L0", false);
     // alg->setProperty("use_timeOffset", false );
-     alg->setProperty("XmlFilename","abc.xml");
-     alg->setProperty("DetCalFilename","abc.DetCal");
+     //alg->setProperty("XmlFilename","abc.xml");
+     //alg->setProperty("DetCalFilename","abc.DetCal");
      alg->setProperty("PanelGroups","SpecifyGroups");
      alg->setProperty("Grouping","26");
 

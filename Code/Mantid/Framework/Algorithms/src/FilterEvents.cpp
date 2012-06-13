@@ -455,9 +455,6 @@ namespace Algorithms
    */
   void FilterEvents::splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters)
   {
-
-    bool print = true;
-
     Kernel::TimeSeriesProperty<double>* prop =
         dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventws->mutableRun().getProperty(logname));
     if (!prop)

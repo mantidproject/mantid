@@ -38,11 +38,13 @@ namespace MDEvents
 /// vectors of strings are often used here 
 typedef  std::vector<std::string> Strings;
 
-/// signature for a function which implement void method of this workspace
+/// predefenition of the class name
 class MDEventWSWrapper;
+//NOTICE: There is need to work with bare class-function pointers here, as Boost function pointers with multiple arguments 
+//        appear not portable to all architectures supported (Fail on MAC)
 /// signature to void templated function 
 typedef void (MDEventWSWrapper::*fpVoidMethod)();
-/// signature for the internal templated function pointer to add data to the existing workspace
+/// signature for the internal templated function pointer to add data to an existing workspace
 typedef void(MDEventWSWrapper::*fpAddData)(float *,uint16_t *,uint32_t*,coord_t*,size_t)const;
 /// signature for the internal templated function pointer to create workspace
 typedef  void(MDEventWSWrapper::*fpCreateWS)(const Strings &,const Strings &t,const Strings &,
@@ -68,17 +70,14 @@ public:
     /// get access to the internal workspace
     API::IMDEventWorkspace_sptr pWorkspace(){return workspace;}
     // should it be moved to the IMDEvents?
-    void refreshCentroid(){
-        (this->*(mdCalCentroid[n_dimensions]))();
-    };
+    void refreshCentroid(){ (this->*(mdCalCentroid[n_dimensions]))();   };
+    /** initiate the class with pointer to existing MD workspace */
     void setMDWS(API::IMDEventWorkspace_sptr spWS);
 private:
    /// maximal nuber of dimensions, currently supported by the class;
-   static const size_t MAX_N_DIM=8;
-   /// actual number of dimensions, initiated in current MD workspace 0 if not initated;
+    enum{ MAX_N_DIM=8};
+   /// actual number of dimensions, initiated in current MD workspace; 0 if not initated;
    size_t n_dimensions;
-   /// logger -> to provide logging, for MD dataset file operations
-   //static Mantid::Kernel::Logger& g_log;
    /// taret workspace:
    API::IMDEventWorkspace_sptr workspace;
   
@@ -153,7 +152,7 @@ private:
  
     }
    //
-  /// helper function to create empty MDEventWorkspace with nd dimensions 
+  /// helper function to refresh centroid on MDEventWorkspace with nd dimensions 
     template<size_t nd>
     void  calc_Centroid(void)
     {
@@ -165,13 +164,14 @@ private:
         }
         pWs->getBox()->refreshCentroid(NULL);
     }
-
-   void  calc_Centroid_wrong(void){
+   /// the function used in template metaloop termination on 0 dimensions and as the function which will throw the error on undefined MDWorkspaceWrapper  
+    void  calc_Centroid_wrong(void){
         //   g_log.error()<<" MDEventWSWrapper:calc_Centroid MDEventWSWrapper class has not been initiated with any number of dimensions\n";
         throw(std::invalid_argument(" class has not been initiated"));
    }
-
-   void add_MDData_wrong(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const{
+   /// the function used in template metaloop termination on 0 dimensions and to throw the error on adding data to 0-dimension workspace
+   void add_MDData_wrong(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const
+   {
     ///   g_log.error()<<" MDEvent WSWrapper class has not been initiated with any number of dimensions, can not add anything to 0-dimensional ws\n";
        throw(std::invalid_argument(" class has not been initiated, can not add data to 0-dimensional workspace"));
    }

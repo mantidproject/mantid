@@ -12,6 +12,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include <boost/lexical_cast.hpp>
 #include <stdio.h>
 #include <math.h>
@@ -39,7 +40,7 @@ namespace Mantid
 
     static const double UBq2Q(2 * M_PI);
     static const double Q2UBq = 1 / UBq2Q;
-
+    static int doMethod = 1;
 
     void CheckSizetMax( size_t v1, size_t v2, size_t v3,std::string ErrMess)
     {
@@ -621,6 +622,17 @@ namespace Mantid
 
     }
 
+    void updateDerivResult( PeaksWorkspace_sptr peaks, V3D &unRotDeriv, Matrix<double> &Result, size_t peak, vector<int>& peakIndx)
+    {
+      Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+           GonMatrix.Invert();
+
+           V3D RotDeriv = GonMatrix * unRotDeriv;
+
+           for (int kk = 0; kk < 3; ++kk)
+             Result[kk][peak] = RotDeriv[kk];
+    }
+
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
 
@@ -950,14 +962,16 @@ namespace Mantid
 
           //dxyz2theta is partials xyz wrt rot x
           V3D unRotDeriv = Bas * dxyz2theta;
-
-          Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+       if(doMethod ==0)
+       {   Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
 
           V3D RotDeriv = GonMatrix * unRotDeriv;
 
           for (int kk = 0; kk < 3; ++kk)
             Result[kk][peak] = RotDeriv[kk];
+       }else
+          updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
         }
 
         Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
@@ -999,32 +1013,34 @@ namespace Mantid
 
         V3D Xvec = xvec[peak] * (col[peak] - NPanelcols[peak] / 2);//partial xyz wrt widthScale
 
+
         V3D unRotDeriv = Bas * Xvec;
-        Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+        if( doMethod ==0)
+          {Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
         GonMatrix.Invert();
 
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
         for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
-
+          }else
+        updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
       }
 
       Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-     // for (size_t w = 0; w < nData; w++)
-     //   out->set(w, param, 0.0);
+
 
       size_t x = StartX;
       for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
         for (int roww = 0; roww < 3; ++roww)
-        { CheckSizetMax(coll,roww,x,"deriv scalew final");
+        {
+          CheckSizetMax(coll,roww,x,"deriv scalew final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
 
       param =  parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detHeightScale");
 
-     // param = StartLen+1;//scale Height
       Result.zeroMatrix();
       for (size_t peak = 0; peak <  qlab.size(); ++peak)
         if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
@@ -1049,14 +1065,16 @@ namespace Mantid
 
         V3D unRotDeriv = Bas * Yvec;
 
-        Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+       if( doMethod==0)
+         {Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
         GonMatrix.Invert();
 
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
         for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
-
+         }else
+        updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
       }
 
       Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
@@ -1104,12 +1122,14 @@ namespace Mantid
 
         V3D unRotDeriv = qlab[peak] * KK;
 
-        Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+       /* Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
         GonMatrix.Invert();
         V3D RotDeriv = GonMatrix * unRotDeriv;
 
         for (int kk = 0; kk < 3; ++kk)
           Result[kk][peak] = RotDeriv[kk];
+          */
+        updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
 
       }
 

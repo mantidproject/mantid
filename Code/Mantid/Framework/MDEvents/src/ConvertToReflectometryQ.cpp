@@ -15,8 +15,8 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/ReflectometryTransformQxQz.h"
-#include "MantidMDEvents/ReflectometryMDTransform.h"
-
+#include "MantidMDEvents/ReflectometryTransformKiKf.h"
+#include "MantidMDEvents/ReflectometryTransformP.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;
@@ -125,9 +125,9 @@ namespace
   */
   void checkOutputDimensionalityChoice(const std::string & outputDimensions )
   {
-    if(outputDimensions != qSpaceTransform())
+    if(outputDimensions != qSpaceTransform() && outputDimensions != kSpaceTransform() && outputDimensions != pSpaceTransform())
     {
-      throw std::runtime_error("Transforms other than to Q have not been implemented yet");
+      throw std::runtime_error("Unknown transformation");
     }
   }
 
@@ -179,9 +179,9 @@ namespace MDEvents
    */
   void ConvertToReflectometryQ::init()
   {
-    auto unitValidator = boost::make_shared<API::WorkspaceUnitValidator>("Wavelength");
     auto compositeValidator = boost::make_shared<CompositeValidator>();
-    compositeValidator->add(unitValidator);
+    compositeValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+    compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, compositeValidator),
         "An input workspace in wavelength");
@@ -209,7 +209,7 @@ namespace MDEvents
     extents[0]=-50;extents[1]=+50;extents[2]=-50;extents[3]=+50;
     declareProperty(
       new ArrayProperty<double>("Extents", extents),
-      "A comma separated list of min, max for each dimension. Takes four values in the form qx_min, qx_max, qz_min, qz_max,\n"
+      "A comma separated list of min, max for each dimension. Takes four values in the form dim_0_min, dim_0_max, dim_1_min, dim_1_max,\n"
       "specifying the extents of each dimension. Optional, default +-50 in each dimension.");
 
     setPropertySettings("IncidentTheta", new Kernel::EnabledWhenProperty("OverrideIncidentTheta", IS_EQUAL_TO, "1") );
@@ -255,26 +255,29 @@ namespace MDEvents
     }
 
     // Min max extent values.
-    const double qxmin = extents[0];
-    const double qxmax = extents[1];
-    const double qzmin = extents[2];
-    const double qzmax = extents[3];
+    const double dim0min = extents[0];
+    const double dim0max = extents[1];
+    const double dim1min = extents[2];
+    const double dim1max = extents[3];
     
     typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
+
+    //Select the transform strategy.
     ReflectometryMDTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(qxmin, qxmax, qzmin, qzmax, incidentTheta));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      throw std::runtime_error("pSpaceTransform is not supported Yet.");
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
     else
     {
-      throw std::runtime_error("kSpaceTransform is not supported Yet");
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
 
+    //Execute the transform and bind to the output.
     setProperty("OutputWorkspace", transform->execute(inputWs));
   }
 

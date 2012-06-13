@@ -192,12 +192,22 @@ void SmoothNeighbours::init()
     "The number of Y (vertical) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
   setPropertySettings("AdjY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
+  declareProperty("SumPixelsX", 1, mustBePositive,
+    "The total number of X (horizontal) adjacent pixels to sum together. Only for instruments with RectangularDetectors.  AdjX will be ignored if SumPixelsX > 1." );
+  setPropertySettings("SumPixelsX", new EnabledWhenProperty("Radius", IS_DEFAULT) );
+
+  declareProperty("SumPixelsY", 1, mustBePositive,
+    "The total number of Y (vertical) adjacent pixels to sum together. Only for instruments with RectangularDetectors. AdjY will be ignored if SumPixelsY > 1" );
+  setPropertySettings("SumPixelsY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
+
   declareProperty("ZeroEdgePixels", 0, mustBePositive,
     "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
   setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
   setPropertyGroup("AdjX", "Rectangular Detectors Only");
   setPropertyGroup("AdjY", "Rectangular Detectors Only");
+  setPropertyGroup("SumPixelsX", "Rectangular Detectors Only");
+  setPropertyGroup("SumPixelsY", "Rectangular Detectors Only");
   setPropertyGroup("ZeroEdgePixels", "Rectangular Detectors Only");
 
   declareProperty("PreserveEvents", true,
@@ -277,25 +287,50 @@ void SmoothNeighbours::findNeighboursRectangular()
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
+  int StartX = -AdjX;
+  int StartY = -AdjY;
+  int EndX = AdjX;
+  int EndY = AdjY;
+  int SumX = getProperty("SumPixelsX");
+  int SumY = getProperty("SumPixelsY");
+  bool sum = ( SumX*SumY > 1 ) ? true : false;
+  if (sum)
+  {
+    StartX = 0;
+    StartY = 0;
+    EndX = SumX - 1;
+    EndY = SumY - 1;
+  }
+
+  outWI = 0;
+  // Build a map to sort by the detectorID
+  std::vector <std::pair<int, int> > v1;
+  for (int i = 0; i<static_cast<int>(detList.size()); i++)
+    v1.push_back(std::pair<int, int>(detList[i]->getAtXY(0,0)->getID(), i));
+
+  // To sort in descending order
+  if(sum) stable_sort(v1.begin(), v1.end() );
+
+  std::vector <std::pair<int, int> >::iterator Iter1;
 
   //Loop through the RectangularDetector's we listed before.
-  for (int i=0; i < static_cast<int>(detList.size()); i++)
+  for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; ++Iter1 )
   {
+    int i = (*Iter1).second;
     boost::shared_ptr<RectangularDetector> det = detList[i];
     std::string det_name = det->getName();
     if (det)
     {
-      size_t outWI = 0;
-      for (int j=Edge; j < det->xpixels()-Edge; j++)
+      for (int j=Edge; j < det->xpixels()-Edge; j += SumX)
       {
-        for (int k=Edge; k < det->ypixels()-Edge; k++)
+        for (int k=Edge; k < det->ypixels()-Edge; k += SumY)
         {
           double totalWeight = 0;
           // Neighbours and weights
           std::vector< weightedNeighbour > neighbours;
 
-          for (int ix=-AdjX; ix <= AdjX; ix++)
-            for (int iy=-AdjY; iy <= AdjY; iy++)
+          for (int ix=StartX; ix <= EndX; ix++)
+            for (int iy=StartY; iy <= EndY; iy++)
             {
               //Weights for corners=1; higher for center and adjacent pixels
               double smweight = WeightedSum->weightAt(AdjX, ix, AdjY, iy);
@@ -309,8 +344,6 @@ void SmoothNeighbours::findNeighboursRectangular()
               if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
               {
                 size_t wi = (*pixel_to_wi)[pixelID];
-                // Find the output workspace index at the center
-                if( ix==0 && iy==0) outWI = wi;
                 neighbours.push_back( weightedNeighbour(wi, smweight) );
                 // Count the total weight
                 totalWeight += smweight;
@@ -318,11 +351,12 @@ void SmoothNeighbours::findNeighboursRectangular()
             }
 
           // Adjust the weights of each neighbour to normalize to unity
-          for (size_t q=0; q<neighbours.size(); q++)
+          if (!sum) for (size_t q=0; q<neighbours.size(); q++)
             neighbours[q].second /= totalWeight;
 
           // Save the list of neighbours for this output workspace index.
           m_neighbours[outWI] = neighbours;
+          outWI ++;
 
           m_prog->report("Finding Neighbours");
         }
@@ -365,6 +399,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 
   IDetector_const_sptr det;
   // Go through every input workspace pixel
+  outWI = 0;
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
   {
     // We want to skip monitors
@@ -422,6 +457,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 
     // Save the list of neighbours for this output workspace index.
     m_neighbours[wi] = neighbours;
+    outWI++;
 
     m_prog->report("Finding Neighbours");
   } // each workspace index
@@ -580,7 +616,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   //Get some stuff from the input workspace
-  const size_t numberOfSpectra = inWS->getNumberHistograms();
+  const size_t numberOfSpectra = outWI;
   
   const size_t YLength = inWS->blocksize();
 
@@ -601,12 +637,11 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
   // Go through all the output workspace
   PARALLEL_FOR2(ws, outWS)
-  for (int outWIi=0; outWIi<int(ws->getNumberHistograms()); outWIi++)
+  for (int outWIi=0; outWIi<int(numberOfSpectra); outWIi++)
   {
-    size_t outWI = size_t(outWIi);
     PARALLEL_START_INTERUPT_REGION
 
-    ISpectrum * outSpec = outWS->getSpectrum(outWI);
+    ISpectrum * outSpec = outWS->getSpectrum(outWIi);
     // Reset the Y and E vectors
     outSpec->clearData();
     MantidVec & outY = outSpec->dataY();
@@ -616,7 +651,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
     MantidVec & outX = outSpec->dataX();
 
     // Which are the neighbours?
-    std::vector< weightedNeighbour > & neighbours = m_neighbours[outWI];
+    std::vector< weightedNeighbour > & neighbours = m_neighbours[outWIi];
     std::vector< weightedNeighbour >::iterator it;
     for (it = neighbours.begin(); it != neighbours.end(); ++it)
     {
@@ -655,7 +690,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       outE[i] = sqrt(outE[i]);
 
     //Copy the single detector ID (of the center) and spectrum number from the input workspace
-    outSpec->copyInfoFrom(*ws->getSpectrum(outWI));
+    outSpec->copyInfoFrom(*ws->getSpectrum(outWIi));
 
     m_prog->report("Summing");
     PARALLEL_END_INTERUPT_REGION
@@ -676,7 +711,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   //Get some stuff from the input workspace
-  const size_t numberOfSpectra = inWS->getNumberHistograms();
+  const size_t numberOfSpectra = outWI;
   const int YLength = static_cast<int>(inWS->blocksize());
 
   EventWorkspace_sptr outWS;
@@ -691,20 +726,20 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
 
   // Go through all the output workspace
   PARALLEL_FOR2(ws, outWS)
-  for (int outWIi=0; outWIi<int(ws->getNumberHistograms()); outWIi++)
+  for (int outWIi=0; outWIi<int(numberOfSpectra); outWIi++)
   {
-    size_t outWI = size_t(outWIi);
     PARALLEL_START_INTERUPT_REGION
 
     // Create the output event list (empty)
-    EventList & outEL = outWS->getOrAddEventList(outWI);
+    EventList & outEL = outWS->getOrAddEventList(outWIi);
 
     // Which are the neighbours?
-    std::vector< weightedNeighbour > & neighbours = m_neighbours[outWI];
+    std::vector< weightedNeighbour > & neighbours = m_neighbours[outWIi];
     std::vector< weightedNeighbour >::iterator it;
     for (it = neighbours.begin(); it != neighbours.end(); ++it)
     {
       size_t inWI = it->first;
+      //if(sum)outEL.copyInfoFrom(*ws->getSpectrum(inWI));
       double weight = it->second;
       // Copy the event list
       EventList tmpEL = ws->getEventList(inWI);
@@ -715,7 +750,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
     }
 
     //Copy the single detector ID (of the center) and spectrum number from the input workspace
-    outEL.copyInfoFrom(*ws->getSpectrum(outWI));
+    //if (!sum) outEL.copyInfoFrom(*ws->getSpectrum(outWIi));
 
     m_prog->report("Summing");
     PARALLEL_END_INTERUPT_REGION

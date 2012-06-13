@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2012-05-29 16:25:18.478231" valid-to="2100-01-31 23:59:59" name="NOMAD" valid-from="2012-08-01 00:00:01">
+<instrument last-modified="2012-05-31 14:10:47.792168" valid-to="2100-01-31 23:59:59" name="NOMAD" valid-from="2012-08-01 00:00:01">
   <!-- Created by Peter Peterson -->
   <!--DEFAULTS-->
   <defaults>
@@ -326,7 +326,7 @@
       <location y="-0.504005" x="-0.6737715" z="1.44178470255" name="bank18">
         <rot axis-z="0" axis-x="0" axis-y="1" val="-90.0">
           <rot val="90.0">
-            <rot axis-z="0" axis-x="0" axis-y="1" val="1.44178470255"/>
+            <rot axis-z="0" axis-x="0" axis-y="1" val="144.78248153"/>
           </rot>
         </rot>
       </location>

@@ -1,5 +1,7 @@
 set ( SRC_FILES
-  src/Abragam.cpp
+	#	src/CostFuncIgnorePosPeaks.cpp
+	#	src/SCDPanelErrors.cpp
+	src/Abragam.cpp
 	src/BFGS_Minimizer.cpp
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
@@ -8,56 +10,55 @@ set ( SRC_FILES
 	src/Chebyshev.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
-#	src/CostFuncIgnorePosPeaks.cpp
 	src/CostFuncLeastSquares.cpp
 	src/DeltaFunction.cpp
-	src/DiffSphere.cpp
 	src/DerivMinimizer.cpp
+	src/DiffSphere.cpp
 	src/EndErfc.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
-	src/FlatBackground.cpp
 	src/FRConjugateGradientMinimizer.cpp
-	src/Fit.cpp 
+	src/Fit.cpp
 	src/Fit1D.cpp
 	src/FitMD.cpp
 	src/FitMW.cpp
+	src/FlatBackground.cpp
 	src/FuncMinimizerFactory.cpp
+	src/GSLFunctions.cpp
 	src/GausDecay.cpp
 	src/GausOsc.cpp
 	src/Gaussian.cpp
-	src/MuonFInteraction.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
-	src/GSLFunctions.cpp
 	src/IDomainCreator.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
-	src/LevenbergMarquardtMinimizer.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
+	src/LevenbergMarquardtMinimizer.cpp
 	src/Linear.cpp
 	src/LinearBackground.cpp
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
 	src/MultiDomainCreator.cpp
-	src/ParDomain.cpp
+	src/MuonFInteraction.cpp
 	src/PRConjugateGradientMinimizer.cpp
+	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunction.cpp
 	src/Quadratic.cpp
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
-#	src/SCDPanelErrors.cpp
 	src/SeqDomain.cpp
-	src/StaticKuboToyabe.cpp
 	src/SimplexMinimizer.cpp
-	src/SteepestDescentMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
+	src/StaticKuboToyabe.cpp
+	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
+	src/ThermoNeutronBackToBackExpPV.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 	src/UserFunctionMD.cpp
@@ -66,7 +67,9 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
-  inc/MantidCurveFitting/Abragam.h
+	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
+	#	inc/MantidCurveFitting/SCDPanelErrors.h
+	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
@@ -76,29 +79,27 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
-#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/DeltaFunction.h
-	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DerivMinimizer.h
+	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/EmptyValues.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
-	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMD.h
 	inc/MantidCurveFitting/FitMW.h
+	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
-	inc/MantidCurveFitting/Jacobian.h
+	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
-	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GausDecay.h
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
@@ -107,68 +108,66 @@ set ( INC_FILES
 	inc/MantidCurveFitting/IDomainCreator.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
-	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
+	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
+	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/Linear.h
 	inc/MantidCurveFitting/LinearBackground.h
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
-	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/MultiDomainCreator.h
-	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
+	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
-#	inc/MantidCurveFitting/SCDPanelErrors.h
 	inc/MantidCurveFitting/SeqDomain.h
-	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
-	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
+	inc/MantidCurveFitting/StaticKuboToyabe.h
+	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
+	inc/MantidCurveFitting/ThermoNeutronBackToBackExpPV.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
 	inc/MantidCurveFitting/UserFunctionMD.h
 )
               
 set ( TEST_FILES
-  test/AbragamTest.h
-	test/DeltaFunctionTest.h
-	test/DiffSphereTest.h
-	test/FlatBackgroundTest.h
-	test/GausOscTest.h
-	test/MuonFInteractionTest.h
+	test/IkedaCarpenterPVTest.h
 	#test/SCDPanelErrorsTest.h
-	test/StaticKuboToyabeTest.h
-	test/StretchExpMuonTest.h
+	test/AbragamTest.h
 	test/BFGSTest.h
 	test/BivariateNormalTest.h
 	test/BoundaryConstraintTest.h
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
-	test/ExpDecayTest.h
+	test/DeltaFunctionTest.h
+	test/DiffSphereTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
+	test/ExpDecayTest.h
+	test/FRConjugateGradientTest.h
 	test/FitMDTest.h
 	test/FitMWTest.h
-	test/FRConjugateGradientTest.h
+	test/FlatBackgroundTest.h
 	test/FuncMinimizerFactoryTest.h
 	test/FunctionFactoryConstraintTest.h
-	test/Gaussian1DTest.h
-	test/GausDecayTest.h
-	test/GaussianTest.h
 	test/GSLMatrixTest.h
-#	test/IkedaCarpenterPVTest.h
+	test/GausDecayTest.h
+	test/GausOscTest.h
+	test/Gaussian1DTest.h
+	test/GaussianTest.h
 	test/LeastSquaresTest.h
-	test/LevenbergMarquardtTest.h
 	test/LevenbergMarquardtMDTest.h
+	test/LevenbergMarquardtTest.h
 	test/LinearBackgroundTest.h
 	test/LinearTest.h
 	test/LogNormalTest.h
@@ -176,8 +175,9 @@ set ( TEST_FILES
 	test/LorentzianTest.h
 	test/MultiDomainCreatorTest.h
 	test/MultiDomainFunctionTest.h
-	test/PlotPeakByLogValueTest.h
+	test/MuonFInteractionTest.h
 	test/PRConjugateGradientTest.h
+	test/PlotPeakByLogValueTest.h
 	test/ProductFunctionTest.h
 	test/QuadraticBackgroundTest.h
 	test/QuadraticTest.h
@@ -185,7 +185,10 @@ set ( TEST_FILES
 	test/SimplexTest.h
 	test/SpecialFunctionSupportTest.h
 	test/SplineBackgroundTest.h
+	test/StaticKuboToyabeTest.h
+	test/StretchExpMuonTest.h
 	test/StretchExpTest.h
+	test/ThermoNeutronBackToBackExpPVTest.h
 	test/UserFunction1DTest.h
 	test/UserFunctionTest.h
 )

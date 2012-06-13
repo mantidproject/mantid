@@ -31,14 +31,31 @@ set ( SRC_FILES
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
-	src/MDWSDescription.cpp
-	src/MDWSTransfDescr.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/ReflectometryTransformQxQz.cpp
+	src/ReflectometryTransformKiKf.cpp
+	src/ReflectometryTransformP.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
+#	
+	src/ConvToMDEventsBase.cpp
+	src/ConvToMDEventsEvents.cpp
+	src/ConvToMDEventsHisto.cpp
+	src/ConvToMDPreprocDet.cpp
+	src/MDTransfDEHelper.cpp
+	src/MDTransfAxisNames.cpp
+#
+	src/MDTransfFactory.cpp	
+	src/MDTransfQ3D.cpp
+	src/MDTransfNoQ.cpp
+	src/MDTransfModQ.cpp
+	src/UnitsConversionHelper.cpp	
+	src/ConvToMDEventsSelector.cpp
+
+	src/MDWSDescription.cpp
+	src/MDWSTransform.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -79,22 +96,41 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
-	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
-	inc/MantidMDEvents/MDWSDescription.h
-	inc/MantidMDEvents/MDWSTransfDescr.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/ReflectometryMDTransform.h
+	inc/MantidMDEvents/ReflectometryTransformKiKf.h
+	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
+#	
+	inc/MantidMDEvents/MDEventWSWrapper.h
+	inc/MantidMDEvents/MDWSDescription.h
+	inc/MantidMDEvents/MDWSTransform.h	
+# 
+	inc/MantidMDEvents/ConvToMDEventsBase.h	
+	inc/MantidMDEvents/ConvToMDEventsEvents.h
+	inc/MantidMDEvents/ConvToMDEventsHisto.h	
+	inc/MantidMDEvents/ConvToMDPreprocDet.h
+	
+	inc/MantidMDEvents/MDTransfAxisNames.h	
+	inc/MantidMDEvents/MDTransfDEHelper.h
+
+    inc/MantidMDEvents/MDTransfFactory.h
+	inc/MantidMDEvents/MDTransfInterface.h
+	inc/MantidMDEvents/MDTransfQ3D.h
+	inc/MantidMDEvents/MDTransfNoQ.h
+	inc/MantidMDEvents/MDTransfModQ.h
+	inc/MantidMDEvents/ConvToMDEventsSelector.h
+	inc/MantidMDEvents/UnitsConversionHelper.h	
 )
 
 # Test files. Other source files required.
@@ -125,14 +161,11 @@ set ( TEST_FILES
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
-	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
-	test/MDWSDescriptionTest.h
-	test/MDWSTransfDescrTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/ReflectometryTransformQxQzTest.h
@@ -140,6 +173,16 @@ set ( TEST_FILES
 	test/SkippingPolicyTest.h
 	test/SliceMDTest.h
 	test/SlicingAlgorithmTest.h
+#
+	test/MDTransfAxisNamesTest.h
+	test/MDWSTransfTest.h
+	test/MDEventWSWrapperTest.h	
+#	
+	test/ConvertToMDEventsWSTest.h		
+    test/ConvertToMDEventsSubalgFactoryTest.h	
+#
+	test/ConvertToMDEventsUnitsConvTest.h 	
+	test/ConvertToMDEventsParamsTest.h
 )
 
 set ( GMOCK_TEST_FILES

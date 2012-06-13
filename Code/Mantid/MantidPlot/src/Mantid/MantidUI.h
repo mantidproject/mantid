@@ -213,10 +213,10 @@ public slots:
   static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName);
 
   // Set properties of a 1d graph which plots data from a workspace
-  static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace);
+  static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace);
 
   // Copy to a Table Y-values (and Err-values if errs==true) of bins with indeces from i0 to i1 (inclusive) from a workspace
-  Table* createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, const QList<int>& bins, bool errs=true,int fromRow = -1, int toRow = -1);
+  Table* createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace, const QList<int>& bins, bool errs=true,int fromRow = -1, int toRow = -1);
 
   // Copies selected columns (time bins) in a MantidMatrix to a Table
   Table* createTableFromSelectedColumns(MantidMatrix *m, bool errs);

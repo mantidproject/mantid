@@ -1,8 +1,8 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
-from IndirectCommon import runF2PyCheck, inF2PyCompatibleEnv
+from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
-if inF2PyCompatibleEnv():
+if is_supported_f2py_platform():
 	import IndirectMuscat as Main
 
 class MuscatFunc(PythonAlgorithm):
@@ -38,7 +38,7 @@ class MuscatFunc(PythonAlgorithm):
 		self.declareProperty(Name='Save',DefaultValue=False,Description = 'Switch Save result to nxs file Off/On')
  
 	def PyExec(self):
-		runF2PyCheck()
+		run_f2py_compatibility_test()
 
 		self.log().information('Muscat input')
 		instr = self.getPropertyValue('Instrument')

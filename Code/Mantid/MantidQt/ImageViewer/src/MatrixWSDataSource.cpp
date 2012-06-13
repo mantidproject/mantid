@@ -13,6 +13,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Run.h"
+#include "MantidQtImageViewer/ErrorHandler.h"
 
 using namespace Mantid;
 using namespace Kernel;
@@ -247,99 +249,119 @@ void MatrixWSDataSource::GetInfoList( double x,
     IVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
   }
 
-                                      // now try to do various unit conversions
-                                      // to get equivalent info
-                                      // first make sure we can get the needed
-                                      // information
-  if ( old_unit == 0 )
-  {
-    return;
-  }
+                                     // now try to do various unit conversions
+  try                                // to get equivalent info
+  {                                  // first make sure we can get the needed
+                                     // information
+    if ( old_unit == 0 )
+    {
+      return;
+    }
 
-  Instrument_const_sptr instrument = mat_ws->getInstrument();
-  if ( instrument == 0 )
-  {
-    return;
-  }
+    Instrument_const_sptr instrument = mat_ws->getInstrument();
+    if ( instrument == 0 )
+    {
+      return;
+    }
 
-  IObjComponent_const_sptr source = instrument->getSource();
-  if ( source == 0 )
-  {
-    return;
-  }
+    IObjComponent_const_sptr source = instrument->getSource();
+    if ( source == 0 )
+    {
+      return;
+    }
 
-  IObjComponent_const_sptr sample = instrument->getSample();
-  if ( sample == 0 )
-  {
-    return;
-  }
+    IObjComponent_const_sptr sample = instrument->getSample();
+    if ( sample == 0 )
+    {
+      return;
+    }
 
-  IDetector_const_sptr det = mat_ws->getDetector( row );
-  if ( det == 0 )
-  {
-    return;
-  }
+    IDetector_const_sptr det = mat_ws->getDetector( row );
+    if ( det == 0 )
+    {
+      return;
+    }
 
-  double l1        = source->getDistance(*sample);
-  double l2        = 0;
-  double two_theta = 0;
-  if ( det->isMonitor() )
-  {
-    l2 = det->getDistance(*source);
-    l2 = l2-l1;
-  }
-  else
-  {
-    l2 = det->getDistance(*sample);
-    two_theta = mat_ws->detectorTwoTheta(det);
-  }
+    double l1        = source->getDistance(*sample);
+    double l2        = 0;
+    double two_theta = 0;
+    if ( det->isMonitor() )
+    {
+      l2 = det->getDistance(*source);
+      l2 = l2-l1;
+    }
+    else
+    {
+      l2 = det->getDistance(*sample);
+      two_theta = mat_ws->detectorTwoTheta(det);
+    }
                         // For now, only support diffractometers and monitors.
                         // We need a portable way to determine emode and
                         // and efixed that will work for any matrix workspace!
-  int    emode  = 0;
-  double efixed = 0;
-  double delta  = 0;
+    int    emode  = 0;
+    double efixed = 0;
+    double delta  = 0;
 
-  double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta, 
-                                             emode, efixed, delta );
-  if ( ! (x_label == "Time-of-flight") )
-  {
-    IVUtils::PushNameValue( "Time-of-flight", 8, 1, tof, list );
-  }
-
-  if ( ! (x_label == "Wavelength") )
-  {
-  const Unit_sptr& wl_unit = UnitFactory::Instance().create("Wavelength");
-  double wavelength = wl_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
-                                                     emode, efixed, delta );
-  IVUtils::PushNameValue( "Wavelength", 8, 4, wavelength, list );
-  }
-
-  if ( ! (x_label == "Energy") )
-  {
-    const Unit_sptr& e_unit = UnitFactory::Instance().create("Energy");
-    double energy = e_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
-                                                  emode, efixed, delta );
-    IVUtils::PushNameValue( "Energy", 8, 4, energy, list );
-  }
-
-  if ( (! (x_label == "d-Spacing")) && (two_theta != 0.0) )
-  {
-    const Unit_sptr& d_unit = UnitFactory::Instance().create("dSpacing");
-    double d_spacing = d_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
-                                                     emode, efixed, delta );
-    IVUtils::PushNameValue( "d-Spacing", 8, 4, d_spacing, list );
-  }
-
-  if ( (! (x_label == "q")) && (two_theta != 0.0) )
-  {
-    const Unit_sptr& q_unit=UnitFactory::Instance().create("MomentumTransfer");
-    double mag_q = q_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
-                                                 emode, efixed, delta );
-    IVUtils::PushNameValue( "q", 8, 4, mag_q, list );
-  }
-
+    const API::Run & run = mat_ws->run();  // cases I checked don't have Ei :-(
+    if ( run.hasProperty("Ei") )              
+    {
+      Kernel::Property* prop = run.getProperty("Ei");
+      efixed = boost::lexical_cast<double,std::string>(prop->value());
+      emode  = 1;                         // only correct for direct geometry 
+    }                                     // instruments
   
+    double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta, 
+                                               emode, efixed, delta );
+    if ( ! (x_label == "Time-of-flight") )
+    {
+      IVUtils::PushNameValue( "Time-of-flight", 8, 1, tof, list );
+    }
+
+    if ( ! (x_label == "Wavelength") )
+    {
+      const Unit_sptr& wl_unit = UnitFactory::Instance().create("Wavelength");
+      double wavelength = wl_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
+                                                         emode, efixed, delta );
+      IVUtils::PushNameValue( "Wavelength", 8, 4, wavelength, list );
+    }
+
+    if ( ! (x_label == "Energy") )
+    {
+      const Unit_sptr& e_unit = UnitFactory::Instance().create("Energy");
+      double energy = e_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
+                                                    emode, efixed, delta );
+      IVUtils::PushNameValue( "Energy", 8, 4, energy, list );
+    }
+
+    if ( (! (x_label == "d-Spacing")) && (two_theta != 0.0) && ( emode == 0 ) )
+    {
+      const Unit_sptr& d_unit = UnitFactory::Instance().create("dSpacing");
+      double d_spacing = d_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
+                                                       emode, efixed, delta );
+      IVUtils::PushNameValue( "d-Spacing", 8, 4, d_spacing, list );
+    }
+
+    if ( (! (x_label == "q")) && (two_theta != 0.0) )
+    {
+      const Unit_sptr& q_unit=UnitFactory::Instance().create("MomentumTransfer");
+      double mag_q = q_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
+                                                   emode, efixed, delta );
+      IVUtils::PushNameValue( "q", 8, 4, mag_q, list );
+    }
+
+    if ( (! (x_label == "DeltaE")) && (two_theta != 0.0) && ( emode != 0 ) )
+    {
+      const Unit_sptr& deltaE_unit=UnitFactory::Instance().create("DeltaE");
+      double delta_E = deltaE_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
+                                                          emode, efixed, delta );
+      IVUtils::PushNameValue( "DeltaE", 8, 4, delta_E, list );
+    }
+  }
+  catch (std::exception & e)
+  {
+    ErrorHandler::Notice("Failed to get information from Workspace:");
+    ErrorHandler::Notice( e.what() );
+  }
 }
 
 

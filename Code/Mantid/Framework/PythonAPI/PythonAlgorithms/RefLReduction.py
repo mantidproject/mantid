@@ -96,6 +96,10 @@ class RefLReduction(PythonAlgorithm):
             
         from mantidsimple import mtd    
 
+        bDebug = True
+        if bDebug:
+            print '====== Running in mode DEBUGGING ======='
+
         run_numbers = self.getProperty("RunNumbers")
 
         backSubMethod = 2   #1 uses RefRoi, 2 used own method
@@ -159,7 +163,7 @@ class RefLReduction(PythonAlgorithm):
         incidentMedium = self.getProperty("IncidentMediumSelected")
         slitsWidthFlag = self.getProperty("SlitsWidthFlag")
                 
-        # Pick a good workspace n    ame
+        # Pick a good workspace name
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
         
@@ -216,12 +220,12 @@ class RefLReduction(PythonAlgorithm):
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
         ##get angles value
-        ths_value = mt_run.getProperty('ths').value[0]
-        ths_units = mt_run.getProperty('ths').units
+        thi_value = mt_run.getProperty('thi').value[0]
+        thi_units = mt_run.getProperty('thi').units
         tthd_value = mt_run.getProperty('tthd').value[0]
         tthd_units = mt_run.getProperty('tthd').units
-        ths_rad = wks_utility.angleUnitConversion(value=ths_value,
-                                                  from_units=ths_units,
+        thi_rad = wks_utility.angleUnitConversion(value=thi_value,
+                                                  from_units=thi_units,
                                                   to_units='rad')
         tthd_rad = wks_utility.angleUnitConversion(value=tthd_value,
                                                    from_units=tthd_units,
@@ -827,7 +831,7 @@ class RefLReduction(PythonAlgorithm):
 
         #now we can convert to Q
         
-        theta = tthd_rad - ths_rad
+        theta = math.fabs(tthd_rad - thi_rad)/2.
         AngleOffset_deg = float(self.getProperty("AngleOffset"))
         AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
         theta += AngleOffset_rad
@@ -850,6 +854,9 @@ class RefLReduction(PythonAlgorithm):
             ws_data_scaled = ws_data
             
         if dMD is not None and theta is not None:
+
+            if bDebug:
+                print 'DEBUG: theta= {0:4f}'.format(theta) 
                     
             _tof_axis = mtd[ws_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
@@ -864,6 +871,9 @@ class RefLReduction(PythonAlgorithm):
             q_max = max(_q_axis)
             if (q_min >= q_max):
                 q_min = min(_q_axis)
+
+            if bDebug:
+                print 'DEBUG: [q_min:q_bin:q_max]=[{0:4f},{1:4f},{2:4f}]'.format(q_min, q_step, q_max) 
 
         if (backSubMethod == 1):        
             ws_integrated_data = ws_name + '_IntegratedDataWks'

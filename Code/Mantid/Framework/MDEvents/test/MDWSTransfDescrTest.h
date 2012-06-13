@@ -2,7 +2,7 @@
 #define MANTID_MDWS_SLICE_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidMDEvents/MDWSTransfDescr.h"
+#include "MantidMDEvents/MDTransfAxisNames.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -11,14 +11,14 @@ using namespace Mantid::Kernel;
 
 
 
-class MDWSTransfDescrTest : public CxxTest::TestSuite
+class MDWSTransfAxisTest : public CxxTest::TestSuite
 {
     //MDWSSliceTest slice;
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDWSTransfDescrTest *createSuite() { return new MDWSTransfDescrTest(); }
-  static void destroySuite( MDWSTransfDescrTest *suite ) { delete suite; }
+  static MDWSTransfAxisTest *createSuite() { return new MDWSTransfAxisTest(); }
+  static void destroySuite( MDWSTransfAxisTest *suite ) { delete suite; }
 
 
 void test_buildDimNames(){

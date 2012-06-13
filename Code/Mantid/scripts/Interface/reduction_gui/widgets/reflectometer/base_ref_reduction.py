@@ -31,6 +31,10 @@ class BaseRefWidget(BaseWidget):
     peak_pixel_range = []
     background_pixel_range = []
 
+    x_axis = []
+    y_axis = []
+    e_axis = []
+
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):      
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
@@ -181,6 +185,72 @@ class BaseRefWidget(BaseWidget):
         if output_dir:
             self._summary.outdir_edit.setText(output_dir)   
         
+    def _smooth_x_axis(self, x_axis, y_axis, e_axis):
+        """
+        This method will do an weighted average of the value when
+        their x-axis is within a given range (precision)
+        """
+        _precision = 0.1/100.   #0.1%
+        
+        new_x_axis = []
+        new_y_axis = []
+        new_e_axis = []
+        
+        sz = len(x_axis)        
+        i=0
+        while (i < sz-1):
+            
+            _left_x = x_axis[i]
+            _right_x = x_axis[i+1]
+
+            bCalAverage = False
+            if (_left_x == _right_x):
+                bCalAverage = True
+            else:
+                _left_x = math.fabs(_left_x)
+                _right_x = math.fabs(_right_x)
+                _relative_diff = (_left_x - _right_x) / (_left_x + _right_x)
+                if (math.fabs(_relative_diff <= _precision)):
+                    bCalAverage = True
+
+            _left_e = e_axis[i]
+            _left_e2 = _left_e * _left_e
+            _left_y = y_axis[i]
+            
+            if bCalAverage:
+
+                #average the two values
+                _right_e = e_axis[i+1]
+                _right_e2 = _right_e * _right_e
+                _right_y = y_axis[i+1]
+
+                if (_left_e2 == 0. or _right_e2 == 0.):
+                    _y = 0.
+                    _e = 0.
+                else:
+                    _error = 1./_left_e2 + 1./_right_e2
+                    _x = (_left_x + _right_x) / 2. 
+                    _y = (_left_y/_left_e2 + _right_y/_right_e2) / _error 
+                    _e = math.sqrt(1./_error)
+                
+                new_x_axis.append(_x)
+                new_y_axis.append(_y)
+                new_e_axis.append(_e)
+                
+                i+=1
+            
+            else:
+            
+                new_x_axis.append(x_axis[i])
+                new_y_axis.append(y_axis[i])
+                new_e_axis.append(e_axis[i])
+    
+            i+=1
+    
+        self.x_axis = new_x_axis
+        self.y_axis = new_y_axis
+        self.e_axis = new_e_axis
+    
     def _create_ascii_clicked(self):
         """
         Reached by the "Create ASCII" button
@@ -199,8 +269,8 @@ class BaseRefWidget(BaseWidget):
         _with_4th_flag = self._summary.fourth_column_switch.isChecked()
         text = []
         if _with_4th_flag:
-            dq0 = self._summary.dq0.text()
-            dq_over_q = self._summary.dq_over_q.text()
+            dq0 = float(self._summary.dq0.text())
+            dq_over_q = float(self._summary.dq_over_q.text())
             line1 = '#dQ0[1/Angstrom]=' + str(dq0)
             line2 = '#dQ/Q=' + str(dq_over_q)
             line3 = '#Q(1/Angstrom) R delta_R Precision'
@@ -212,6 +282,13 @@ class BaseRefWidget(BaseWidget):
         x_axis = mt.readX(0)[:]
         y_axis = mt.readY(0)[:]
         e_axis = mt.readE(0)[:]
+        
+        self._smooth_x_axis(x_axis, y_axis, e_axis)
+        
+        x_axis = self.x_axis
+        y_axis = self.y_axis
+        e_axis = self.e_axis
+        
         sz = len(x_axis)
         for i in range(sz):
             _line = str(x_axis[i])
@@ -422,8 +499,7 @@ class BaseRefWidget(BaseWidget):
                           "Your instrument may not be set up for automated reduction.")
         
     def _auto_reduce(self, is_checked=False):
-        if is_checked:
-            
+        if is_checked:            
             self._summary.auto_reduce_help_label.show()
             self._summary.auto_reduce_tip_label.show()
             self._summary.auto_reduce_btn.show()
@@ -672,7 +748,6 @@ class BaseRefWidget(BaseWidget):
                                                range_max=range_max)
 
     def _add_data(self):
-        
         state = self.get_editing_state()
         in_list = False
         # Check whether it's already in the list
@@ -721,6 +796,18 @@ class BaseRefWidget(BaseWidget):
         
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
+            state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+            
+             #incident medium
+            _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
+                                     for j in range(self._summary.incident_medium_combobox.count())]
+            _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+                
+            _incident_medium_string = (',').join(_incident_medium_list)
+            state.incident_medium_list = [_incident_medium_string]
+                
+            state.incident_medium_index_selected = _incident_medium_index_selected
+                
             item_widget.setData(QtCore.Qt.UserRole, state)
         
         # Read logs
@@ -747,7 +834,6 @@ class BaseRefWidget(BaseWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-        
         self._summary.angle_list.clear()
         if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
             pass
@@ -773,7 +859,6 @@ class BaseRefWidget(BaseWidget):
         self._reset_warnings()
         
     def set_editing_state(self, state):
-
         self._summary.q_min_edit.setText(str(state.q_min))
         self._summary.log_scale_chk.setChecked(state.q_step<0)
 

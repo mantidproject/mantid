@@ -188,7 +188,7 @@ namespace Mantid
       {
         double yout,eout;
         // Call the abstract function, passing in the current values
-        performUnaryOperation(it->m_tof,it->m_weight,std::sqrt(it->m_errorSquared),yout,eout);
+        performUnaryOperation(it->tof(),it->weight(),std::sqrt(it->errorSquared()),yout,eout);
         it->m_weight=static_cast<float>(yout);
         it->m_errorSquared=static_cast<float>(eout*eout);
       }

@@ -26,12 +26,14 @@ namespace MantidQt
       /// Constructor.
       FindFilesThread(QObject *parent = NULL);
       /// Set the various file-finding values / options.
-      void set(QString text = "", bool isForRunFiles = true, bool isOptional = false);
+      void set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty = "");
 
       /// Returns the error string.  Empty if no error was caught.
       std::string error() const { return m_error; }
       /// Returns the vector of filenames.  Empty if no files were found, or if there was an error.
       std::vector<std::string> filenames() const { return m_filenames; }
+      /// Use the specified algorithm and property to find files instead of using the FileFinder.
+      void getFilesFromAlgorithm();
 
     protected:
       /// Override parent class run().
@@ -46,6 +48,8 @@ namespace MantidQt
       /// File name text typed in by the user.
       std::string m_text;
 
+      QString m_algorithm;
+      QString m_property;
       bool m_isForRunFiles;
       bool m_isOptional;
     };
@@ -186,6 +190,8 @@ namespace MantidQt
       QString createFileFilter();
       /// Create an extension list from the name algorithm and property
       QStringList getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName);
+      /// Create an extension list from the name algorithm and property
+      QStringList getFilesFromAlgorithm(const QString & algName, const QString &propName, const QString &filename);
       /// Open a file dialog
       QString openFileDialog();
       /// flag a problem with the supplied entry number, an empty string means no error

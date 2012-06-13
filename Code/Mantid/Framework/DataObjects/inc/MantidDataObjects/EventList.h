@@ -386,10 +386,6 @@ public:
   void convertUnitsViaTof(Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
   void convertUnitsQuickly(const double& factor, const double& power);
 
-  template< class T >
-  void duplicateHelper(EventList* output, typename std::vector<T> & events) const;
-  void duplicate(EventList* output) const;
-
 private:
   ///List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;

@@ -90,7 +90,8 @@ void testExecNoQ()
     pAlg->setPropertyValue("UsePreprocessedDetectors","0");
     pAlg->setPropertyValue("QDimensions","CopyToMD");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "NoDE"));
+//    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "NoDE"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode","Elastic")); // dE mode will be ignored
     //
     pAlg->setPropertyValue("MinValues","-10,0,-10");
     pAlg->setPropertyValue("MaxValues"," 10,20,40");
@@ -176,8 +177,8 @@ void testAlgorithmProperties()
 
   Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
   PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
-  TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 4, dEAnalysisModeValues.size());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("NoDE") != dEAnalysisModeValues.end());
+  TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, dEAnalysisModeValues.size());
+//  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("NoDE") != dEAnalysisModeValues.end());
   TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Direct") != dEAnalysisModeValues.end());
   TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Indirect") != dEAnalysisModeValues.end());
   TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Elastic") != dEAnalysisModeValues.end());

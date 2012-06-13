@@ -101,351 +101,351 @@
 
   <type name="door1">
     <component type="standard-tube">
-      <location r="2.5" t="-45.01000" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-44.37977" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-43.74954" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-43.11931" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-42.48908" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-41.85885" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-41.22862" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-40.59839" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-45.01000" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-44.37977" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-43.74954" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-43.11931" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-42.48908" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-41.85885" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-41.22862" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-40.59839" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="-39.97000" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-39.33977" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-38.70954" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-38.07931" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-37.44908" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-36.81885" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-36.18862" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-35.55839" name="tube16"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-39.97000" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-39.33977" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-38.70954" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-38.07931" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-37.44908" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-36.81885" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-36.18862" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-35.55839" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="-34.93000" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-34.29977" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-33.66954" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-33.03931" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-32.40908" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-31.77885" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-31.14863" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-30.51840" name="tube24"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-34.93000" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-34.29977" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-33.66954" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-33.03931" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-32.40908" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-31.77885" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-31.14863" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-30.51840" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="-29.89001" name="tube25"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-29.25978" name="tube26"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-28.62955" name="tube27"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-27.99932" name="tube28"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-27.36909" name="tube29"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-26.73886" name="tube30"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-26.10863" name="tube31"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-25.47840" name="tube32"> <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="-29.89001" name="tube_4_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-29.25978" name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-28.62955" name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-27.99932" name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-27.36909" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-26.73886" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-26.10863" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-25.47840" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location>      
     </component>      
   </type>
   
   <type name="door2">
     <component type="standard-tube">
-      <location r="2.5" t="-23.57801" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-22.94778" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-22.31755" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-21.68732" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-21.05709" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-20.42686" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-19.79664" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-19.16641" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-23.57801" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-22.94778" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-22.31755" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-21.68732" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-21.05709" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-20.42686" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-19.79664" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-19.16641" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="-18.53802" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-17.90779" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-17.27756" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-16.64733" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-16.01710" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-15.38687" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-14.75664" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-14.12642" name="tube16"> <facing x="0" y="0" z="0"/> </location> 
+      <location r="2.5" t="-18.53802" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-17.90779" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-17.27756" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-16.64733" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-16.01710" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-15.38687" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-14.75664" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-14.12642" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location> 
                                       
-      <location r="2.5" t="-13.49803" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-12.86780" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-12.23757" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-11.60734" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-10.97712" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-10.34689" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-9.716660" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-9.086440" name="tube24"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-13.49803" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-12.86780" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-12.23757" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-11.60734" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-10.97712" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-10.34689" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-9.716660" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-9.086440" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="-8.458050" name="tube25"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-7.827830" name="tube26"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-7.197600" name="tube27"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-6.567380" name="tube28"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-5.937160" name="tube29"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-5.306940" name="tube30"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-4.676720" name="tube31"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="-4.046510" name="tube32"> <facing x="0" y="0" z="0"/> </location> 
+      <location r="2.5" t="-8.458050" name="tube_4_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-7.827830" name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-7.197600" name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-6.567380" name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-5.937160" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-5.306940" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-4.676720" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="-4.046510" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location> 
     </component>
   </type>
   
   <type name="door3">
     <component type="straight-through-beam-tube" >
-      <location r="2.50937" t="5.41821" p="113.91585" name="tube1" > </location>
-      <location r="2.50937" t="5.19467" p="107.56693" name="tube2" > </location>   
-      <location r="2.50937" t="5.04030" p="100.73910" name="tube3" > </location>
-      <location r="2.50937" t="4.96155" p="93.58839" name="tube4"> </location>   
-      <location r="2.50937" t="4.96203" p="86.32413" name="tube5"> </location>
-      <location r="2.50937" t="5.04172" p="79.17615" name="tube6"> </location>   
-      <location r="2.50937" t="5.19697" p="72.35330" name="tube7"> </location>
-      <location r="2.50937" t="5.42130" p="66.01085" name="tube8"> </location>   
+      <location r="2.50937" t="5.41821" p="113.91585" name="tube_1_1" > </location>
+      <location r="2.50937" t="5.19467" p="107.56693" name="tube_1_2" > </location>   
+      <location r="2.50937" t="5.04030" p="100.73910" name="tube_1_3" > </location>
+      <location r="2.50937" t="4.96155" p="93.58839" name="tube_1_4"> </location>   
+      <location r="2.50937" t="4.96203" p="86.32413" name="tube_1_5"> </location>
+      <location r="2.50937" t="5.04172" p="79.17615" name="tube_1_6"> </location>   
+      <location r="2.50937" t="5.19697" p="72.35330" name="tube_1_7"> </location>
+      <location r="2.50937" t="5.42130" p="66.01085" name="tube_1_8"> </location>   
 
-      <location r="2.88977" t="30.17630" p="-93.79165" name="tube9" > </location>
-      <location r="2.88977" t="30.14056" p="-92.70872" name="tube10"> </location>   
-      <location r="2.88977" t="30.11674" p="-91.62351" name="tube11"> </location>
-      <location r="2.88977" t="30.10486" p="-90.53695" name="tube12"> </location>   
-      <location r="2.88977" t="30.10493" p="-89.44993" name="tube13"> </location>
-      <location r="2.88977" t="30.11696" p="-88.36337" name="tube14"> </location>   
-      <location r="2.88977" t="30.14092" p="-87.27819" name="tube15"> </location>
-      <location r="2.88977" t="30.17680" p="-86.19529" name="tube16"> </location>         
+      <location r="2.88977" t="30.17630" p="-93.79165" name="tube_2_1" > </location>
+      <location r="2.88977" t="30.14056" p="-92.70872" name="tube_2_2"> </location>   
+      <location r="2.88977" t="30.11674" p="-91.62351" name="tube_2_3"> </location>
+      <location r="2.88977" t="30.10486" p="-90.53695" name="tube_2_4"> </location>   
+      <location r="2.88977" t="30.10493" p="-89.44993" name="tube_2_5"> </location>
+      <location r="2.88977" t="30.11696" p="-88.36337" name="tube_2_6"> </location>   
+      <location r="2.88977" t="30.14092" p="-87.27819" name="tube_2_7"> </location>
+      <location r="2.88977" t="30.17680" p="-86.19529" name="tube_2_8"> </location>         
     </component>
     <component type="standard-tube"> 
-      <location r="2.5" t="2.838180 " name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="3.468370 " name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="4.098580 " name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="4.728790 " name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="5.359010 " name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="5.989230 " name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="6.619450 " name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="7.249670 " name="tube8" > <facing x="0" y="0" z="0"/> </location>      
-      <location r="2.5" t="7.878060 " name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="8.508280 " name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="9.138510 " name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="9.768730 " name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="10.398960" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="11.029190" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="11.659410" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="12.289640" name="tube16"> <facing x="0" y="0" z="0"/> </location>    
-      <location r="2.5" t="12.918030" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="13.548260" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="14.178490" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="14.808710" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="15.438940" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="16.069170" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="16.699400" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="17.329630" name="tube24"> <facing x="0" y="0" z="0"/> </location> 
+      <location r="2.5" t="2.838180 " name="tube_3_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="3.468370 " name="tube_3_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="4.098580 " name="tube_3_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="4.728790 " name="tube_3_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="5.359010 " name="tube_3_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="5.989230 " name="tube_3_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="6.619450 " name="tube_3_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="7.249670 " name="tube_3_8" > <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="7.878060 " name="tube_4_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="8.508280 " name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="9.138510 " name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="9.768730 " name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="10.398960" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="11.029190" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="11.659410" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="12.289640" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location>    
+      <location r="2.5" t="12.918030" name="tube_5_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="13.548260" name="tube_5_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="14.178490" name="tube_5_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="14.808710" name="tube_5_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="15.438940" name="tube_5_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="16.069170" name="tube_5_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="16.699400" name="tube_5_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="17.329630" name="tube_5_8"> <facing x="0" y="0" z="0"/> </location> 
     </component>
   </type>
   
   <type name="door4">
     <component type="standard-tube">
-      <location r="2.5" t="19.163020" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="19.793250" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="20.423470" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="21.053700" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="21.683930" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="22.314160" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="22.944390" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="23.574620" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="19.163020" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="19.793250" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="20.423470" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="21.053700" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="21.683930" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="22.314160" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="22.944390" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="23.574620" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="24.204010" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="24.834240" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="25.464470" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="26.094700" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="26.724930" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="27.355160" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="27.985390" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="28.615620" name="tube16"> <facing x="0" y="0" z="0"/> </location> 
+      <location r="2.5" t="24.204010" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="24.834240" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="25.464470" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="26.094700" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="26.724930" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="27.355160" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="27.985390" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="28.615620" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location> 
                                       
-      <location r="2.5" t="29.247010" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="29.877240" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="30.507470" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="31.137700" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="31.767920" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="32.398150" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="33.028380" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="33.658610" name="tube24"> <facing x="0" y="0" z="0"/> </location> 
+      <location r="2.5" t="29.247010" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="29.877240" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="30.507470" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="31.137700" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="31.767920" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="32.398150" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="33.028380" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="33.658610" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location> 
                                       
-      <location r="2.5" t="34.288000" name="tube25"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="34.918230" name="tube26"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="35.548460" name="tube27"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="36.178690" name="tube28"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="36.808920" name="tube29"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="37.439150" name="tube30"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="38.069380" name="tube31"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="38.699610" name="tube32"> <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="34.288000" name="tube_4_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="34.918230" name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="35.548460" name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="36.178690" name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="36.808920" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="37.439150" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="38.069380" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="38.699610" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location>      
     </component>  
   </type>
   
   <type name="door5">
     <component type="standard-tube">
-      <location r="2.5" t="40.587000" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="41.217230" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="41.847460" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="42.477690" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="43.107920" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="43.738150" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="44.368380" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="44.998610" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="40.587000" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="41.217230" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="41.847460" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="42.477690" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="43.107920" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="43.738150" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="44.368380" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="44.998610" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="45.629000" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="46.259230" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="46.889460" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="47.519690" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="48.149920" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="48.780150" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="49.410380" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="50.040610" name="tube16"> <facing x="0" y="0" z="0"/> </location>  
+      <location r="2.5" t="45.629000" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="46.259230" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="46.889460" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="47.519690" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="48.149920" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="48.780150" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="49.410380" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="50.040610" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location>  
                                       
-      <location r="2.5" t="50.671000" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="51.301230" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="51.931460" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="52.561690" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="53.191920" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="53.822150" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="54.452380" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="55.082610" name="tube24"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="50.671000" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="51.301230" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="51.931460" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="52.561690" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="53.191920" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="53.822150" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="54.452380" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="55.082610" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="55.713000" name="tube25"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="56.343230" name="tube26"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="56.973460" name="tube27"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="57.603690" name="tube28"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="58.233920" name="tube29"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="58.864150" name="tube30"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="59.494380" name="tube31"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="60.124610" name="tube32"> <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="55.713000" name="tube_4_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="56.343230" name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="56.973460" name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="57.603690" name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="58.233920" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="58.864150" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="59.494380" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="60.124610" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location>      
     </component>  
   </type>
   
   <type name="door6">
     <component type="standard-tube">
-      <location r="2.5" t="61.817990" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="62.448220" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="63.078450" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="63.708680" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="64.338910" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="64.969140" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="65.599370" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="66.229600" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="61.817990" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="62.448220" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="63.078450" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="63.708680" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="64.338910" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="64.969140" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="65.599370" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="66.229600" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="66.859990" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="67.490220" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="68.120450" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="68.750680" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="69.380910" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="70.011140" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="70.641370" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="71.271600" name="tube16"> <facing x="0" y="0" z="0"/> </location> 
+      <location r="2.5" t="66.859990" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="67.490220" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="68.120450" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="68.750680" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="69.380910" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="70.011140" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="70.641370" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="71.271600" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location> 
                                       
-      <location r="2.5" t="71.901990" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="72.532220" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="73.162450" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="73.792680" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="74.422910" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="75.053140" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="75.683370" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="76.313600" name="tube24"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="71.901990" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="72.532220" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="73.162450" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="73.792680" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="74.422910" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="75.053140" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="75.683370" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="76.313600" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="76.943990" name="tube25"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="77.574220" name="tube26"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="78.204450" name="tube27"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="78.834680" name="tube28"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="79.464910" name="tube29"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="80.095140" name="tube30"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="80.725370" name="tube31"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="81.355600" name="tube32"> <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="76.943990" name="tube_4_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="77.574220" name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="78.204450" name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="78.834680" name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="79.464910" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="80.095140" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="80.725370" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="81.355600" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location>      
     </component>  
   </type>
   
   <type name="door7">
     <component type="standard-tube">
-      <location r="2.5" t="83.278990" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="83.909220" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="84.539450" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="85.169680" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="85.799910" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="86.430140" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="87.060370" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="87.690600" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="83.278990" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="83.909220" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="84.539450" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="85.169680" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="85.799910" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="86.430140" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="87.060370" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="87.690600" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="88.320990" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="88.951220" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="89.581450" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="90.211680" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="90.841910" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="91.472140" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="92.102370" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="92.732600" name="tube16"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="88.320990" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="88.951220" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="89.581450" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="90.211680" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="90.841910" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="91.472140" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="92.102370" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="92.732600" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="93.362990" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="93.993220" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="94.623450" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="95.253680" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="95.883910" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="96.514140" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="97.144370" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="97.774600" name="tube24"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="93.362990" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="93.993220" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="94.623450" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="95.253680" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="95.883910" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="96.514140" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="97.144370" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="97.774600" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="98.404990" name="tube25"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="99.035220" name="tube26"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="99.665450" name="tube27"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="100.29568" name="tube28"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="100.92591" name="tube29"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="101.55614" name="tube30"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="102.18637" name="tube31"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="102.81660" name="tube32"> <facing x="0" y="0" z="0"/> </location>      
+      <location r="2.5" t="98.404990" name="tube_4_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="99.035220" name="tube_4_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="99.665450" name="tube_4_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="100.29568" name="tube_4_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="100.92591" name="tube_4_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="101.55614" name="tube_4_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="102.18637" name="tube_4_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="102.81660" name="tube_4_8"> <facing x="0" y="0" z="0"/> </location>      
     </component>  
   </type>
   
   <type name="door8">
     <component type="standard-tube">
-      <location r="2.5" t="104.71099" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="105.34122" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="105.97145" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="106.60168" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="107.23191" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="107.86214" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="108.49237" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="109.12260" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="104.71099" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="105.34122" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="105.97145" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="106.60168" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="107.23191" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="107.86214" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="108.49237" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="109.12260" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="109.75299" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="110.38322" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="111.01345" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="111.64368" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="112.27391" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="112.90414" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="113.53437" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="114.16460" name="tube16"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="109.75299" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="110.38322" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="111.01345" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="111.64368" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="112.27391" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="112.90414" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="113.53437" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="114.16460" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="114.79499" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="115.42522" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="116.05545" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="116.68568" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="117.31591" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="117.94614" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="118.57636" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="119.20659" name="tube24"> <facing x="0" y="0" z="0"/> </location>                                        
+      <location r="2.5" t="114.79499" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="115.42522" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="116.05545" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="116.68568" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="117.31591" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="117.94614" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="118.57636" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="119.20659" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>                                        
     </component>  
   </type>
   
   <type name="door9">
     <component type="standard-tube">
-      <location r="2.5" t="121.19498" name="tube1" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="121.82521" name="tube2" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="122.45544" name="tube3" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="123.08567" name="tube4" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="123.71590" name="tube5" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="124.34613" name="tube6" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="124.97636" name="tube7" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="125.60659" name="tube8" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="121.19498" name="tube_1_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="121.82521" name="tube_1_2" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="122.45544" name="tube_1_3" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="123.08567" name="tube_1_4" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="123.71590" name="tube_1_5" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="124.34613" name="tube_1_6" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="124.97636" name="tube_1_7" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="125.60659" name="tube_1_8" > <facing x="0" y="0" z="0"/> </location>
                                                    
-      <location r="2.5" t="126.23698" name="tube9" > <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="126.86721" name="tube10"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="127.49744" name="tube11"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="128.12767" name="tube12"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="128.75790" name="tube13"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="129.38813" name="tube14"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="130.01836" name="tube15"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="130.64859" name="tube16"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="126.23698" name="tube_2_1" > <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="126.86721" name="tube_2_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="127.49744" name="tube_2_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="128.12767" name="tube_2_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="128.75790" name="tube_2_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="129.38813" name="tube_2_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="130.01836" name="tube_2_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="130.64859" name="tube_2_8"> <facing x="0" y="0" z="0"/> </location>
                                       
-      <location r="2.5" t="131.27898" name="tube17"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="131.90921" name="tube18"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="132.53944" name="tube19"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="133.16967" name="tube20"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="133.79990" name="tube21"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="134.43013" name="tube22"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="135.06036" name="tube23"> <facing x="0" y="0" z="0"/> </location>
-      <location r="2.5" t="135.69059" name="tube24"> <facing x="0" y="0" z="0"/> </location>                                        
+      <location r="2.5" t="131.27898" name="tube_3_1"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="131.90921" name="tube_3_2"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="132.53944" name="tube_3_3"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="133.16967" name="tube_3_4"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="133.79990" name="tube_3_5"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="134.43013" name="tube_3_6"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="135.06036" name="tube_3_7"> <facing x="0" y="0" z="0"/> </location>
+      <location r="2.5" t="135.69059" name="tube_3_8"> <facing x="0" y="0" z="0"/> </location>                                        
     </component>  
   </type>
    

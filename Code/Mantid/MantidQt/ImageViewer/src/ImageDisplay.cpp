@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <cfloat>
 
 #include <QtGui>
 #include <QVector>
@@ -93,6 +94,9 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
   total_x_min = data_source->GetXMin();
   total_x_max = data_source->GetXMax();
   
+  pointed_at_x = DBL_MAX;
+  pointed_at_y = DBL_MAX;
+
   int    n_rows = 500;         // get reasonable size initial image data
   int    n_cols = 500;     
                                // data_array is deleted in the ImagePlotItem
@@ -282,6 +286,9 @@ void ImageDisplay::UpdateImage()
                            &positive_color_table,
                            &negative_color_table );
   image_plot->replot();
+
+  SetVGraph( pointed_at_x );
+  SetHGraph( pointed_at_y );
 }
 
 
@@ -357,8 +364,74 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
   double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
   double y = image_plot->invTransform( QwtPlot::yLeft, point.y() );
 
-  data_array->RestrictX(x);    // Qt returns values outside of region, so
-  data_array->RestrictY(y);    // we need to keep them valid
+  SetHGraph( y );
+  SetVGraph( x );
+
+  ShowInfoList( x, y );
+}
+
+/*
+ *  Extract data for Horizontal graph from the image at the specified y value.
+ *  If the y value is NOT in the y-interval covered by the data array, just
+ *  return.
+ *
+ *  @param y   The y-value of the horizontal cut through the image.
+ */
+void ImageDisplay::SetHGraph( double y )
+{
+  if ( y < data_array->GetYMin() || y > data_array->GetYMax()  )
+  {
+    h_graph_display->Clear();
+    return;
+  }
+
+  pointed_at_y = y;
+
+  float *data   = data_array->GetData();
+
+  size_t n_cols = data_array->GetNCols();
+
+  double x_min = data_array->GetXMin();
+  double x_max = data_array->GetXMax();
+
+  size_t row = data_array->RowOfY( y );
+
+  QVector<double> xData;
+  QVector<double> yData;
+
+  double x_val;
+  xData.push_back( x_min );                              // start at x_min
+  yData.push_back( data[ row * n_cols ] );
+  for ( size_t col = 0; col < n_cols; col++ )
+  {
+    x_val = data_array->XOfColumn( col );
+    xData.push_back( x_val );                           // mark data at col
+    yData.push_back( data[ row * n_cols + col ] );      // centers
+  }
+  xData.push_back( x_max );                             // end at x_max
+  yData.push_back( data[ row * n_cols + n_cols-1 ] );
+
+  h_graph_display->SetLogX( data_array->IsLogX() );
+  h_graph_display->SetData( xData, yData, y );
+}
+
+
+/*
+ *  Extract data for vertical graph from the image at the specified x value.
+ *  If the x value is NOT in the x-interval covered by the data array, just
+ *  return.
+ *
+ *  @param x   The x-value of the vertical cut through the image.
+ */
+void ImageDisplay::SetVGraph( double x )
+{
+  if ( x < data_array->GetXMin() || x > data_array->GetXMax()  )
+  {
+    v_graph_display->Clear();
+    return;
+  }
+
+  pointed_at_x = x;
 
   float *data   = data_array->GetData();
 
@@ -368,50 +441,24 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
   double y_min = data_array->GetYMin();
   double y_max = data_array->GetYMax();
 
-  double x_min = data_array->GetXMin();
-  double x_max = data_array->GetXMax();
-
-  double relative_y = (y-y_min)/(y_max-y_min);            //  in 0 to 1
-  int    row = (int)(relative_y * (double)n_rows);
-
-  data_array->RestrictRow( row );
-
-  QVector<double> xData;
-  QVector<double> yData;
-  double x_val;
-  for ( size_t col = 0; col < n_cols; col++ )
-  {
-    if ( data_array->IsLogX() )
-    {
-      x_val = x_min * exp( (double)col/double(n_cols-1)*log(x_max/x_min));
-    }
-    else
-    {
-      x_val = (double)col/(double)(n_cols-1) * (x_max-x_min) + x_min; 
-    }
-    xData.push_back( x_val );
-    yData.push_back( data[ row * n_cols + col ] );
-  }
-  h_graph_display->SetLogX( data_array->IsLogX() );
-  h_graph_display->SetData( xData, yData, x, y );
-
-  double relative_x = (x-x_min)/(x_max-x_min);           // in 0 to 1
-  int    col = (int)(relative_x * (double)n_cols);
-
-  data_array->RestrictCol( col );
+  size_t col = data_array->ColumnOfX( x );
 
   QVector<double> v_xData;
   QVector<double> v_yData;
+
   double y_val;
-  for ( size_t row = 0; row < n_rows; row++ )
+  v_yData.push_back( y_min );                     // start at y_min
+  v_xData.push_back( data[col] );
+  for ( size_t row = 0; row < n_rows; row++ )     // mark data at row centers
   {
-    y_val = (double)row/(double)(n_rows-1) * (y_max-y_min) + y_min;
+    y_val = data_array->YOfRow( row );
     v_yData.push_back( y_val );
     v_xData.push_back( data[ row * n_cols + col ] );
   }
-  v_graph_display->SetData( v_xData, v_yData, x, y );
+  v_yData.push_back( y_max );                     // end at y_max
+  v_xData.push_back( data[ (n_rows-1) * n_cols + col] );
 
-  ShowInfoList( x, y );
+  v_graph_display->SetData( v_xData, v_yData, x );
 }
 
 

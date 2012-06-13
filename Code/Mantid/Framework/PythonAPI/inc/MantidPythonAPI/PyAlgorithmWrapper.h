@@ -147,9 +147,12 @@ public:
      * @param direction :: The direction
      */
     void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
-                           const std::string & description, const unsigned int direction)
+                           const std::string & description, const unsigned int direction,
+                           bool optional=false)
     {
-      this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction), description);
+      API::PropertyMode::Type isOptional = API::PropertyMode::Mandatory;
+      if (optional) isOptional = API::PropertyMode::Optional;
+      this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction, isOptional), description);
     }
 
     /**
@@ -162,9 +165,11 @@ public:
      */
     void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
         Kernel::IValidator & validator,
-        const std::string & description, const unsigned int direction)
+        const std::string & description, const unsigned int direction, bool optional=false)
     {
-      this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction, validator.clone()), description);
+      API::PropertyMode::Type isOptional = API::PropertyMode::Mandatory;
+      if (optional) isOptional = API::PropertyMode::Optional;
+      this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction, isOptional, validator.clone()), description);
     }
 
   /**
@@ -175,9 +180,12 @@ public:
    * @param direction :: The direction
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, 
-                               const std::string & description, const unsigned int direction)
+                               const std::string & description, const unsigned int direction,
+                               bool optional=false)
   {
-    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction), description);
+    API::PropertyMode::Type isOptional = API::PropertyMode::Mandatory;
+    if (optional) isOptional = API::PropertyMode::Optional;
+    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, isOptional), description);
   }
 
   /**
@@ -190,9 +198,11 @@ public:
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname,
 			       Kernel::IValidator & validator,
-			       const std::string & description, const unsigned int direction)
+			       const std::string & description, const unsigned int direction, bool optional=false)
   {
-    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, validator.clone()), description);
+    API::PropertyMode::Type isOptional = API::PropertyMode::Mandatory;
+    if (optional) isOptional = API::PropertyMode::Optional;
+    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, isOptional, validator.clone()), description);
   }
 
 	/**
@@ -215,9 +225,11 @@ public:
    * @param direction :: The direction
    */
   void _declareTableWorkspace(const std::string & prop_name, const std::string & default_wsname, 
-			      const std::string & description, const unsigned int direction)
+			      const std::string & description, const unsigned int direction, bool optional=false)
   {
-    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(prop_name, default_wsname, direction), description);
+    API::PropertyMode::Type isOptional = API::PropertyMode::Mandatory;
+    if (optional) isOptional = API::PropertyMode::Optional;
+    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(prop_name, default_wsname, direction, isOptional), description);
   }
 
   /**

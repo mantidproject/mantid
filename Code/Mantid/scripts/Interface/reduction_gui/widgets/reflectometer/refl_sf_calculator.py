@@ -243,6 +243,11 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             return min, max
 
     def _remove_item(self):
+        if self._summary.angle_list.count()==1:
+            #about to remove last element
+            m = REFLDataSets()
+            m.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+            
         if self._summary.angle_list.count()==0:
             return
         self._summary.angle_list.setEnabled(False)        
@@ -276,8 +281,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         except:
             self._summary.data_run_number_processing.hide()
         
-    def _add_data(self):
-        
+    def _add_data(self):        
         state = self.get_editing_state()
 #        state = self.get_state()
         in_list = False
@@ -285,14 +289,15 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         run_numbers = self._summary.data_run_number_edit.text()
         if (run_numbers == ''):
             return
+        
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
-               
+        
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
 
             #loop over all the already defined states and give all of them the
-            #same tof_min, tof_max and incident_medium list and index selected
+            #same tof_min, tof_max and incident_medium list and index selected...
             i=0
             while i < self._summary.angle_list.count():
                 #print self._summary.angle_list.item(i)
@@ -320,7 +325,19 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 current_item.setData(QtCore.Qt.UserRole, state)
                 i+=1
         else:
+            
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
+            state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+            
+            #incident medium
+            _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
+                                     for j in range(self._summary.incident_medium_combobox.count())]
+            _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
+                
+            _incident_medium_string = (',').join(_incident_medium_list)
+            state.incident_medium_list = [_incident_medium_string]
+                
+            state.incident_medium_index_selected = _incident_medium_index_selected
             item_widget.setData(QtCore.Qt.UserRole, state)
         
 #        # Read logs
@@ -361,7 +378,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-
         self._summary.angle_list.clear()
         if len(state.data_sets) == 1 and state.data_sets[0].data_file==0:
             pass
@@ -437,7 +453,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         return state
     
     def get_editing_state(self):
-        
         m = REFLDataSets()
 
         #run number
@@ -489,7 +504,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         mt_run = mt.getRun()
         st = mt_run.getProperty(top_tag).value
         sb = mt_run.getProperty(bottom_tag).value
-        sh = float(sb[0]) - float(st[0])
+        sh = math.fabs(float(sb[0]) - float(st[0]))
         units = mt_run.getProperty(top_tag).units
         return sh, units
     
@@ -518,7 +533,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         mt_run = mt.getRun()
         sl = mt_run.getProperty(left_tag).value
         sr = mt_run.getProperty(right_tag).value
-        sw = float(sl[0]) - float(sr[0])
+        sw = math.fabs(float(sl[0]) - float(sr[0]))
         units = mt_run.getProperty(left_tag).units
         return sw, units
 

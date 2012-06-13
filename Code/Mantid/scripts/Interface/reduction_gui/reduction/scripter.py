@@ -119,7 +119,15 @@ class BaseScriptElement(object):
             return float(value)
         else:
             return default
-        
+
+    @classmethod
+    def getFloatList(cls, dom, tag, default=[]):
+        value = BaseScriptElement.getContent(dom, tag)
+        if value is not None and len(value.strip())>0:
+            return map(float, value.split(','))
+        else:
+            return default
+
     @classmethod
     def getStringElement(cls, dom, tag, default=''):
         value = BaseScriptElement.getContent(dom, tag)

@@ -52,6 +52,8 @@ public:
         const size_t n_dims(5),n_MDev(2);
         Mantid::API::BoxController_sptr bc;
         MDWSDescription TWSD(5);
+        std::vector<double> minval(5,-10),maxval(5,10);
+        TWSD.setMinMax(minval,maxval);
 
          TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->createEmptyMDWS(TWSD));
 
