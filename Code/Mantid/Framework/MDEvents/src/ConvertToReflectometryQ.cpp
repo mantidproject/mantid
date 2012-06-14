@@ -1,5 +1,32 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+=== Prerequisites === 
+
+The workspace spectrum axis should be converted to signed_theta using [[ConvertSpectrumAxis]] and the x axis should be converted to Wavelength using [[ConvertUnits]] before running this algorithm. Histogram input workspaces are expected. 
+
+The algorithm will looks for a specific log value called ''stheta'', which contains the incident theta angle <math>theta_i</math>. If the input workspace does not contain this value, or if you wish to override this value you can do so by providing your own ''IncidentTheta'' property and enabling ''OverrideIncidentTheta''.
+
+=== Transformations ===
+Output workspaces are always 2D MD Histogram workspaces, but the algorithm will perform one of three possible transformations.
+
+* Convert to <math>Q_x</math>, <math>Q_z</math>
+* Convert to <math>K_i</math>, <math>K_f</math>
+* Convert to <math>P_i-P_f</math>, <math>P_i+P_f</math>. Note that P and K are interchangeable.
+
+where 
+
+<math>Q_x = \frac{2\pi}{\lambda}(sin\theta_f + sin\theta_i) </math>
+
+<math>Q_z = \frac{2\pi}{\lambda}(cos\theta_f - cos\theta_i) </math>
+
+<math>K_i = \frac{2\pi}{\lambda}sin\theta_i </math>
+
+<math>K_f = \frac{2\pi}{\lambda}sin\theta_f </math>
+[[Category:Algorithms]]
+[[Category:General]]
+{{AlgorithmLinks|ConvertToReflectometryQ}}
+
+=== After Transformation ===
+You will usually want to rebin using [[BinMD]] or [[SliceMD]] after transformation because the output workspaces are not regularly binned.
 *WIKI*/
 
 #include "MantidAPI/WorkspaceValidators.h"
