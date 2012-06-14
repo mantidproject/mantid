@@ -13,6 +13,7 @@ namespace Mantid
 namespace Algorithms
 {
 
+  DECLARE_ALGORITHM(MaskBinsFromTable)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
