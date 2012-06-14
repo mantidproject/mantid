@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/IDomainCreator.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
+	src/LeBailFit.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
 	src/LevenbergMarquardtMinimizer.cpp
 	src/Linear.cpp
@@ -109,6 +110,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
+	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/Linear.h
@@ -140,7 +142,6 @@ set ( INC_FILES
 )
               
 set ( TEST_FILES
-	test/IkedaCarpenterPVTest.h
 	#test/SCDPanelErrorsTest.h
 	test/AbragamTest.h
 	test/BFGSTest.h
@@ -165,6 +166,8 @@ set ( TEST_FILES
 	test/GausOscTest.h
 	test/Gaussian1DTest.h
 	test/GaussianTest.h
+	test/IkedaCarpenterPVTest.h
+	test/LeBailFitTest.h
 	test/LeastSquaresTest.h
 	test/LevenbergMarquardtMDTest.h
 	test/LevenbergMarquardtTest.h
