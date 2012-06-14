@@ -11,10 +11,10 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Glob.h"
 
+#include <boost/regex.hpp>
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/StringTokenizer.h>
-#include <Poco/RegularExpression.h>
 #include <boost/lexical_cast.hpp>
 
 #include <cctype>
@@ -546,8 +546,8 @@ namespace Mantid
           runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
 
           // Throw if runEnd contains something else other than a digit.
-          Poco::RegularExpression digits("[0-9]+");
-          if (!digits.match(runEnd))
+          boost::regex digits("[0-9]+");
+          if (!boost::regex_match(runEnd, digits))
             throw std::invalid_argument("Malformed range of runs: Part of the run has a non-digit character in it.");
 
           int runEndNumber = boost::lexical_cast<int>(runEnd);

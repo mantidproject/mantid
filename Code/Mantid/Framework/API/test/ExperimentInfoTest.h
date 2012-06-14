@@ -6,11 +6,11 @@
 #include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include <boost/regex.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
 #include <Poco/DirectoryIterator.h>
-#include <Poco/RegularExpression.h>
 #include <set>
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -159,7 +159,7 @@ public:
     std::multimap<std::string, fromToEntry> idfFiles;
     std::set<std::string> idfIdentifiers;
 
-    Poco::RegularExpression regex(".*_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
+    boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase );
     Poco::DirectoryIterator end_iter;
     for ( Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString("instrumentDefinition.directory")); dir_itr != end_iter; ++dir_itr )
     {
@@ -167,7 +167,7 @@ public:
 
           std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
 
-          if ( regex.match(l_filenamePart) )
+          if ( boost::regex_match(l_filenamePart, regex) )
           {
             std::string validFrom, validTo;
             helper.getValidFromTo(dir_itr->path(), validFrom, validTo);
