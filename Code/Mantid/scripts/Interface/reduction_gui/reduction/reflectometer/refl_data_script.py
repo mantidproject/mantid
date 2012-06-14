@@ -101,7 +101,11 @@ class DataSets(BaseScriptElement):
            
         # sf configuration file
 #        if self.scaling_factor_file != '':
-        script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)   
+        if (self.scaling_factor_file_flag):
+            script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)
+        else:
+            script += "ScalingFactorFile='',\n"
+               
         script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
             
         # The output should be slightly different if we are generating
