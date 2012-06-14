@@ -4,7 +4,7 @@ from IndirectImport import *
 if is_supported_f2py_platform():
     muscat = import_f2py("muscat")
 else:
-    unsupported_message():
+    unsupported_message()
 
 from mantid.simpleapi import *
 from mantid import config, logger, mtd

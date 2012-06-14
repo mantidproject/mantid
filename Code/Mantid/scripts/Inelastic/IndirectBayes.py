@@ -14,7 +14,7 @@ if is_supported_f2py_platform():
     cefit   = import_f2py("CEfit")
     ssfit   = import_f2py("SSfit")
 else:
-    unsupported_message():
+    unsupported_message()
 
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
