@@ -2,7 +2,7 @@
 
 Finds spectrum numbers corresponding to reflected and transmission lines in a line detector Reflectometry dataset.
 
-Expects two or one, reflectometry peaks, will fail if there are more or less than this number of peaks. The first peak is taken to be from the reflected line, the second is taken to be from the transmission line. This  algorithm outputs a  Table workspace containing the spectrum number of interest.
+Expects two or one, reflectometry peaks, will fail if there are more or less than this number of peaks. The first peak is taken to be from the reflected line, the second is taken to be from the transmission line. This  algorithm outputs a TableWorkspace containing the spectrum number of interest.
 *WIKI*"""
 
 from mantid.api import *
@@ -14,11 +14,14 @@ class PeakFindingException(Exception):
 
 class FindReflectometryLines(PythonAlgorithm):
 	
+	# Determine if a given signal  identifies a peak or not.
 	def __is_peak(self, before, current, after):
+		# A peak is defined to be any signal that is preceeded by a lower signal value and followed by a lower signal value.
 		if before < current and current > after:
 			return True
 		return False
-		
+	
+	# Find a list of spectra numbers corresponding to peaks in the data.
 	def __find_peak_spectrum_numbers(self, y_data, ws):
 		peak_index_list = []
 		for index, current in enumerate(y_data.flat):
@@ -29,10 +32,12 @@ class FindReflectometryLines(PythonAlgorithm):
 					spec_number = ws.getSpectrum(index).getSpectrumNo()
 					peak_index_list.append(spec_number)
 		return peak_index_list
-		
+	
+	# Zero-out any data considered to be background.
 	def __remove_background(self, y_data):
 		y_average = np.sum(y_data) / y_data.size
 		y_max = np.max(y_data)
+		#The thresholding criteria is hard-coded to be above the average as follows.
 		threshold =  (y_max - y_average)/10 + y_average
 		y_data[y_data < threshold] = 0
 		return y_data
@@ -60,16 +65,19 @@ class FindReflectometryLines(PythonAlgorithm):
 		min_wavelength = self.getPropertyValue("StartWavelength")
 		keep_workspaces = self.getPropertyValue("KeepIntermediateWorkspaces")
 		
+		# Crop off lower wavelengths where the signal is also lower.
 		cropped_ws = CropWorkspace(InputWorkspace=in_ws,XMin=float(min_wavelength))
+		# Integrate over the higher wavelengths after cropping.
 		summed_ws = Integration(InputWorkspace=cropped_ws)
-		
+		# Loop through each histogram, and fetch out each intensity value from the single bin to generate a list of all values.
 		n_histograms = summed_ws.getNumberHistograms()
 		y_data = np.empty([n_histograms])
 		for i in range(0, n_histograms):
 			intensity = summed_ws.readY(i)[0]
 			y_data[i] = intensity
-			
+		#Remove the background	
 		y_data = self.__remove_background(y_data)
+		#Find the peaks
 		peak_index_list = self.__find_peak_spectrum_numbers(y_data, summed_ws)
 		n_peaks_found = len(peak_index_list) 
 		
