@@ -8,19 +8,19 @@
 #include <iomanip>
 #include <fstream>
 
-#include "MantidCurveFitting/LeBailFit.h"
+#include "MantidCurveFitting/LeBailFunction.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
-class LeBailFitTest : public CxxTest::TestSuite
+class LeBailFunctionTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeBailFitTest *createSuite() { return new LeBailFitTest(); }
-  static void destroySuite( LeBailFitTest *suite ) { delete suite; }
+  static LeBailFunctionTest *createSuite() { return new LeBailFunctionTest(); }
+  static void destroySuite( LeBailFunctionTest *suite ) { delete suite; }
 
 
   void test_Something()
@@ -29,7 +29,7 @@ public:
   }
 
   /*
-   * Goal: test function1D() of LeBailFit by plotting 2 adjacent peaks
+   * Goal: test function1D() of LeBailFunction by plotting 2 adjacent peaks
    * Input
    * (1) Instrument geometry parameters Dtt1, Dtt1t, Zero, ... from .prf file;
    * (2) Base peak parameters Alph0, Alph1, ... from .prf file
@@ -45,7 +45,7 @@ public:
    */
   void test_Plot2Peaks()
   {
-    LeBailFit fitalg;
+    LeBailFunction fitalg;
     fitalg.initialize();
 
     // 1. Set up parameters

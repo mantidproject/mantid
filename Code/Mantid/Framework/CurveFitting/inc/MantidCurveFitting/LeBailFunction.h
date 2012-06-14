@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_LEBAILFIT_H_
-#define MANTID_CURVEFITTING_LEBAILFIT_H_
+#ifndef MANTID_CURVEFITTING_LEBAILFUNCTION_H_
+#define MANTID_CURVEFITTING_LEBAILFUNCTION_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ParamFunction.h"
@@ -12,7 +12,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** LeBailFit : LeBail Fit
+  /** LeBailFunction : LeBail Fit
    *
     Prototype:  mainly focussed on the workflow
     
@@ -40,11 +40,11 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LeBailFit : public API::ParamFunction, public API::IFunction1D, public API::IFunctionMW
+  class DLLExport LeBailFunction : public API::ParamFunction, public API::IFunction1D, public API::IFunctionMW
   {
   public:
-    LeBailFit();
-    virtual ~LeBailFit();
+    LeBailFunction();
+    virtual ~LeBailFunction();
     
     virtual std::string name() const;
 
@@ -91,4 +91,4 @@ namespace CurveFitting
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_LEBAILFIT_H_ */
+#endif  /* MANTID_CURVEFITTING_LEBAILFUNCTION_H_ */

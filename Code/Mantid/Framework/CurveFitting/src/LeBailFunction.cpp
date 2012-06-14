@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/LeBailFit.h"
+#include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -11,15 +11,15 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_FUNCTION(LeBailFit)
+  DECLARE_FUNCTION(LeBailFunction)
 
   // Get a reference to the logger
-  Mantid::Kernel::Logger& LeBailFit::g_log = Kernel::Logger::get("LeBailFit");
+  Mantid::Kernel::Logger& LeBailFunction::g_log = Kernel::Logger::get("LeBailFunction");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LeBailFit::LeBailFit()
+  LeBailFunction::LeBailFunction()
   {
     mL1 = 1.0;
     mL2 = 0.0;
@@ -31,16 +31,16 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  LeBailFit::~LeBailFit()
+  LeBailFunction::~LeBailFunction()
   {
   }
   
-  std::string LeBailFit::name() const
+  std::string LeBailFunction::name() const
   {
-    return "LeBailFit";
+    return "LeBailFunction";
   }
 
-  void LeBailFit::init()
+  void LeBailFunction::init()
   {
     declareParameter("Dtt1", 1.0);
     declareParameter("Dtt2", 1.0);
@@ -73,7 +73,7 @@ namespace CurveFitting
     return;
   }
 
-  void LeBailFit::calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h,
+  void LeBailFunction::calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h,
       double &sigma_g2, double &gamma_l, std::map<std::string, double>& parmap) const
   {
     // 1. Get some parameters
@@ -110,7 +110,7 @@ namespace CurveFitting
     return;
   }
 
-  void LeBailFit::function1D(double *out, const double *xValues, size_t nData) const
+  void LeBailFunction::function1D(double *out, const double *xValues, size_t nData) const
   {
     // 1. Get parameters (class)
     Alph0 = getParameter("Alph0");
@@ -168,7 +168,7 @@ namespace CurveFitting
     return;
   }
 
-  void LeBailFit::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian)
+  void LeBailFunction::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian)
   {
     calNumericalDeriv(domain, jacobian);
     return;
@@ -177,15 +177,15 @@ namespace CurveFitting
   /*
    * Analytical
    */
-  void LeBailFit::functionDeriv1D(API::Jacobian *out, const double* xValues, const size_t nData)
+  void LeBailFunction::functionDeriv1D(API::Jacobian *out, const double* xValues, const size_t nData)
   {
-    throw std::runtime_error("LeBailFit does not support analytical derivative. ");
+    throw std::runtime_error("LeBailFunction does not support analytical derivative. ");
   }
 
   /*
    * Add a peak with its d-value
    */
-  void LeBailFit::setPeak(double dh, double height)
+  void LeBailFunction::setPeak(double dh, double height)
   {
     dvalues.push_back(dh);
     heights.push_back(height);
@@ -198,14 +198,14 @@ namespace CurveFitting
   /*
    * A public function API for function1D
    */
-  void LeBailFit::calPeaks(double* out, const double* xValues, const size_t nData)
+  void LeBailFunction::calPeaks(double* out, const double* xValues, const size_t nData)
   {
     this->function1D(out, xValues, nData);
 
     return;
   }
 
-  double LeBailFit::getPeakParameter(size_t index, std::string parname) const
+  double LeBailFunction::getPeakParameter(size_t index, std::string parname) const
   {
     if (index >= mPeakParameters.size())
     {
