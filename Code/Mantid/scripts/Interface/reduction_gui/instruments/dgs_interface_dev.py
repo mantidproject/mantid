@@ -1,6 +1,7 @@
 from interface import InstrumentInterface
 from reduction_gui.widgets.inelastic.dgs_sample_setup import SampleSetupWidget
 from reduction_gui.widgets.inelastic.dgs_data_corrections import DataCorrectionsWidget
+from reduction_gui.widgets.inelastic.dgs_diagnose_detectors import DiagnoseDetectorsWidget
 from reduction_gui.reduction.inelastic.dgs_reduction_script import DgsReductionScripter
 class DgsInterface(InstrumentInterface):
     """
@@ -20,4 +21,7 @@ class DgsInterface(InstrumentInterface):
         
         # Data corrections
         self.attach(DataCorrectionsWidget(settings = self._settings))
+        
+        # Diagnose detectors
+        self.attach(DiagnoseDetectorsWidget(settings = self._settings))
         
