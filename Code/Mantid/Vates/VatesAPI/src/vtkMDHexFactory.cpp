@@ -248,7 +248,7 @@ namespace Mantid
       // Clean up
       if (this->slice)
       {
-        delete this->sliceMask;
+        delete[] this->sliceMask;
         delete this->sliceImplicitFunction;
       }
 
