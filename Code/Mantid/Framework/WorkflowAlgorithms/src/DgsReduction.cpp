@@ -12,6 +12,7 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -87,8 +88,43 @@ namespace WorkflowAlgorithms
     declareProperty("IncidentBeamNormalisation", "None",
         boost::make_shared<StringListValidator>(incidentBeamNormOptions),
         "Options for incident beam normalisation on data.");
-    declareProperty("TimeIndepBackgroundRemoval", false,
+    declareProperty("MonitorIntRangeLow", EMPTY_DBL(),
+        "Set the lower bound for monitor integration.");
+    setPropertySettings("MonitorIntRangeLow",
+        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO, "ToMonitor"));
+    declareProperty("MonitorIntRangeHigh", EMPTY_DBL(),
+           "Set the upper bound for monitor integration.");
+    setPropertySettings("MonitorIntRangeHigh",
+        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO, "ToMonitor"));
+    declareProperty("TimeIndepBackgroundSub", false,
         "If true, time-independent background will be calculated and removed.");
+    declareProperty("TibTofRangeStart", EMPTY_DBL(),
+        "Set the lower TOF bound for time-independent background subtraction.");
+    setPropertySettings("TibTofRangeStart",
+        new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
+    declareProperty("TibTofRangeEnd", EMPTY_DBL(),
+        "Set the upper TOF bound for time-independent background subtraction.");
+    setPropertySettings("TibTofRangeEnd",
+        new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
+    declareProperty("DetectorVanadium", "", "Run numbers, files or workspaces of detector vanadium data.");
+    declareProperty("UseBoundsForDetVan", false,
+        "If true, integrate the detector vanadium over a given range.");
+    declareProperty("DetVanIntRangeLow", EMPTY_DBL(),
+        "Set the lower bound for integrating the detector vanadium.");
+    setPropertySettings("DetVanIntRangeLow",
+        new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
+    declareProperty("DetVanIntRangeHigh", EMPTY_DBL(),
+        "Set the upper bound for integrating the detector vanadium.");
+    setPropertySettings("DetVanIntRangeHigh",
+        new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
+    std::vector<std::string> detvanIntRangeUnits;
+    detvanIntRangeUnits.push_back("DeltaE");
+    detvanIntRangeUnits.push_back("Wavelength");
+    declareProperty("DetVanIntRangeUnits", "DeltaE",
+        boost::make_shared<StringListValidator>(detvanIntRangeUnits),
+        "Options for the units on the detector vanadium integration.");
+    setPropertySettings("DetVanIntRangeUnits",
+        new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
   }
 
   //----------------------------------------------------------------------------------------------
