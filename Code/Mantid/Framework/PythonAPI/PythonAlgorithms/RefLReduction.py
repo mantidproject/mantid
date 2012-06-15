@@ -290,6 +290,18 @@ class RefLReduction(PythonAlgorithm):
         dMD = dSD + dSM
 
         ws_data = '_' + ws_name + '_DataWks'
+
+        #Even if user select Background subtraction
+        #make sure there is a background selection (peak != back selection)        
+
+        _LfromPx = data_back[0]
+        _LtoPx = data_peak[0]
+        _RfromPx = data_peak[1]
+        _RtoPx = data_back[1]
+
+        if ((_LfromPx == _LtoPx) and (_RfromPx == _RtoPx)):
+            subtract_data_bck = False
+        
         if (subtract_data_bck and (backSubMethod == 1)):
 
             print '-> substract background'
@@ -455,7 +467,7 @@ class RefLReduction(PythonAlgorithm):
             else:
                 if (bLeftBack):
                     _y_px_range = _Larray
-                else:
+                else: 
                     _y_px_range = _Rarray
 
             for i in _tof_range:
@@ -518,8 +530,8 @@ class RefLReduction(PythonAlgorithm):
             ConvertToMatrixWorkspace(InputWorkspace=ws_data,
                                      OutputWorkspace=ws_data)
             
-            ConvertToMatrixWorkspace(InputWorkspace=ws_data,
-                                     OutputWorkspace=ws_data)
+#            ConvertToMatrixWorkspace(InputWorkspace=ws_data,
+#                                     OutputWorkspace=ws_data)
 
             if mtd.workspaceExists(ws_histo_data):
                 mtd.deleteWorkspace(ws_histo_data)
