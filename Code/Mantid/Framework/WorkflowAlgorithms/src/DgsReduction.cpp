@@ -203,6 +203,41 @@ namespace WorkflowAlgorithms
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     setPropertySettings("IgnoredPixels",
         new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
+    declareProperty("DoAbsoluteUnits", false,
+        "If true, perform an absolute units normalisation.");
+    declareProperty("AbsUnitsVanadium" "",
+        "The vanadium file used as the sample in the absolute units normalisation.");
+    setPropertySettings("AbsUnitsVanadium",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("AbsUnitsGroupingFile", "",
+        "Grouping file for absolute units normalisation.");
+    setPropertySettings("AbsUnitsGroupingFile",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("AbsUnitsDetectorVanadium", "",
+        "The detector vanadium file used in the absolute units normalisation.");
+    setPropertySettings("AbsUnitsDetectorVanadium",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("AbsUnitsIncidentEnergy", EMPTY_DBL(), mustBePositive,
+        "The incident energy for the vanadium sample.");
+    setPropertySettings("AbsUnitsIncidentEnergy",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("AbsUnitsMinimumEnergy", -1.0,
+        "The minimum energy for the integration range.");
+    setPropertySettings("AbsUnitsMinimumEnergy",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("AbsUnitsMaximumEnergy", 1.0,
+        "The maximum energy for the integration range.");
+    setPropertySettings("AbsUnitsMaximumEnergy",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("VanadiumMass", 32.58, "The mass of vanadium.");
+    setPropertySettings("VanadiumMass",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("SampleMass", 1.0, "The mass of sample.");
+    setPropertySettings("SampleMass",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("SampleRmm", 1.0, "The rmm of sample.");
+    setPropertySettings("SampleRmm",
+        new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   }
 
   //----------------------------------------------------------------------------------------------
