@@ -70,7 +70,7 @@ namespace WorkflowAlgorithms
     declareProperty("SampleData", "", "Run numbers, files or workspaces of the data sets to be reduced");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
-    declareProperty("IncidentEnergy",EMPTY_DBL(), mustBePositive,
+    declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
       "Set the value of the incident energy in meV.");
     declareProperty("FixedIncidentEnergy", false,
         "Declare the value of the incident energy to be fixed (will not be calculated).");
@@ -125,6 +125,84 @@ namespace WorkflowAlgorithms
         "Options for the units on the detector vanadium integration.");
     setPropertySettings("DetVanIntRangeUnits",
         new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
+    declareProperty("FindBadDetectors", false,
+        "If true, run all of the detector diagnostics tests and create a mask.");
+    declareProperty("OutputMaskFile", "",
+        "The output mask file name used for the results of the detector tests.");
+    setPropertySettings("OutputMaskFile",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("ErrorBarCriterion", 3.3, mustBePositive,
+        "Some selection criteria for the detector tests.");
+    setPropertySettings("ErrorBarCriterion",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("DetectorVanadium1", "",
+        "The detector vanadium file to run the tests on.");
+    setPropertySettings("DetectorVanadium1",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("HighCounts", 1.e+10, mustBePositive,
+        "Mask detectors above this threshold.");
+    setPropertySettings("HighCounts",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("LowCounts", 1.e-10, mustBePositive,
+        "Mask detectors below this threshold.");
+    setPropertySettings("LowCounts",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("MedianTestHigh", 3.0, mustBePositive,
+        "Mask detectors above this threshold.");
+    setPropertySettings("MedianTestHigh",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("MedianTestLow", 0.1, mustBePositive,
+        "Mask detectors below this threshold.");
+    setPropertySettings("MedianTestLow",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("DetectorVanadium2", "",
+        "The detector vanadium to check against for time variations.");
+    setPropertySettings("DetectorVanadium2",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("ProptionalChangeCriterion", 1.1, mustBePositive,
+        "Mask detectors if the time variation is above this threshold.");
+    setPropertySettings("ProptionalChangeCriterion",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("BackgroundCheck", false,
+        "If true, run a background check on detector vanadium.");
+    setPropertySettings("BackgroundCheck",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("AcceptanceFactor", 5, mustBePositive,
+        "Mask detectors above this threshold.");
+    setPropertySettings("AcceptanceFactor",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    setPropertySettings("AcceptanceFactor",
+        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
+    auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
+    mustBeIntPositive->setLower(0);
+    declareProperty("BackgroundTofStart", 18000, mustBeIntPositive,
+        "Start TOF for the background check.");
+    setPropertySettings("BackgroundTofStart",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    setPropertySettings("BackgroundTofStart",
+        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
+    declareProperty("BackgroundTofEnd", 19500, mustBeIntPositive,
+        "End TOF for the background check.");
+    declareProperty("RejectZeroBackground", true,
+        "If true, check the background region for anomolies.");
+    setPropertySettings("RejectZeroBackground",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    setPropertySettings("RejectZeroBackground",
+        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
+    declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
+    setPropertySettings("PsdBleed",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    declareProperty("MaxFramerate", "", "The maximum framerate to check.");
+    setPropertySettings("MaxFramerate",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    setPropertySettings("MaxFramerate",
+        new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
+    declareProperty("IgnoredPixels", "",
+        "A list of pixels to ignore in the calculations.");
+    setPropertySettings("IgnoredPixels",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    setPropertySettings("IgnoredPixels",
+        new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
   }
 
   //----------------------------------------------------------------------------------------------
