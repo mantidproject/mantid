@@ -775,6 +775,7 @@ class BaseRefWidget(BaseWidget):
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
+
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
@@ -821,6 +822,7 @@ class BaseRefWidget(BaseWidget):
                 i+=1        
         
         else:
+                        
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
             
@@ -828,6 +830,13 @@ class BaseRefWidget(BaseWidget):
                 state.scaling_factor_file_flag = True
             else:
                 state.scaling_factor_file_flag = False
+
+            _q_min = self._summary.q_min_edit.text()
+            state.q_min = float(_q_min)
+            _q_step = self._summary.q_step_edit.text()
+            if self._summary.log_scale_chk.isChecked():
+                _q_step = '-' + _q_step
+            state.q_step = float(_q_step)
 
              #incident medium
             _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
