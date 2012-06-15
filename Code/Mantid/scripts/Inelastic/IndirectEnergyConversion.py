@@ -178,9 +178,11 @@ def getReflectionDetails(inst, analyser, refl):
     idf_dir = config['instrumentDefinition.directory']
     ws = '__empty_' + inst
     if (mtd[ws] == None):
-        idf = idf_dir + inst + '_Definition.xml'
+        idf_file = inst + '_Definition.xml'
+        idf = os.path.join(idf_dir, idf_file)
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
-    ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
+    ipf_file = inst + '_' + analyser + '_' + refl + '_Parameters.xml'
+    ipf = os.path.join(idf_dir, ipf_file)
     LoadParameterFile(Workspace=ws, Filename=ipf)
     inst = mtd[ws].getInstrument()
     result = ''
