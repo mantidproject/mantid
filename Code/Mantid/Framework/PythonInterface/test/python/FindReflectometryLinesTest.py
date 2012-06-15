@@ -15,7 +15,7 @@ class FindReflectometryLinesTest(unittest.TestCase):
 	    self.__class__._test_ws = load.getPropertyValue('OutputWorkspace')
 
     def test_inputs_ws_not_in_wavelength(self):
-        convert_units_to_tof = run_algorithm('ConvertUnits', InputWorkspace=self.__class__._test_ws, OutputWorkspace='in_tof',Target="TOF")
+        run_algorithm("CreateWorkspace", DataX=[0, 1], DataY=[0], DataE=[0], NSpec=1, UnitX="TOF", VerticalAxisUnit="SpectraNumber", OutputWorkspace="in_tof")
         try:
             # This should throw, because input units are in TOF, not wavelength!
             alg = run_algorithm('FindReflectometryLines', InputWorkspace='in_tof' , OutputWorkspace='spectrum_numbers', StartWavelength=10, child=True)
@@ -25,9 +25,10 @@ class FindReflectometryLinesTest(unittest.TestCase):
             self.assertTrue(False)
 
     def test_start_wavlength_too_low(self):
+        run_algorithm("CreateWorkspace", DataX=[0, 1], DataY=[0], DataE=[0], NSpec=1, UnitX="TOF", VerticalAxisUnit="SpectraNumber", OutputWorkspace="test_workspace")
         try:
             # Negative value choosen for start wavelength, should throw!
-            alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._test_ws , OutputWorkspace='spectrum_numbers', StartWavelength=-1, child=True)
+            alg = run_algorithm('FindReflectometryLines', InputWorkspace="test_workspace" , OutputWorkspace='spectrum_numbers', StartWavelength=-1, child=True)
         except ValueError:
             self.assertTrue(True)
         else:
