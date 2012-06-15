@@ -38,6 +38,15 @@ void CheckWorkspacesMatch::initDocs()
   this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
 }
 
+/// Constructor
+CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL)
+{}
+
+/// Virtual destructor
+CheckWorkspacesMatch::~CheckWorkspacesMatch()
+{
+  delete prog;
+}
 
 using namespace Kernel;
 using namespace API;
