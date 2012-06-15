@@ -218,70 +218,93 @@ class StitcherWidget(BaseWidget):
         self._content.high_scale_edit.setText("1.0")
         self._referenceID = 2
         
+    def update_data(self, dataset_control, min_control, max_control,
+                    scale_control, first_spin_control, last_spin_control):
+        """
+            Update a data set
+            
+            @param dataset_control: combo box with the file path or workspace name
+            @param min_control: text widget containing the minimum Q of the overlap region
+            @param max_control: text widget containing the maximum Q of the overlap region
+            @param scale_control: text widget containing the scale (can be input or output)
+            @param first_spin_control: spinner widget containing the number of points to skip at the beginning
+            @param last_spin_control: spinner widget containing the number of points to skip at the end 
+        """
+        data_object = None
+        
+        file = str(dataset_control.lineEdit().text())
+        if len(file.strip())==0:
+            data_object = None
+        elif os.path.isfile(file) or mtd.workspaceExists(file):
+            data_object = DataSet(file)
+            try:
+                data_object.load(True)
+            except:
+                data_object = None
+                util.set_valid(dataset_control.lineEdit(), False)
+                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
+                return
+            if min_control is not None and max_control is not None \
+                and (len(min_control.text())==0 or len(max_control.text())==0):
+                minx, maxx = data_object.get_range()
+                min_control.setText("%-6.3g" % minx)
+                max_control.setText("%-6.3g" % maxx)
+            
+            # Set the reference scale, unless we just loaded the data
+            if len(scale_control.text())==0:
+                scale_control.setText("1.0")
+            else:
+                scale = util._check_and_get_float_line_edit(scale_control)
+                data_object.set_scale(scale)
+                
+            npts = data_object.get_number_of_points()
+            first_spin_control.setMaximum(npts)
+            last_spin_control.setMaximum(npts)
+            util.set_valid(dataset_control.lineEdit(), True)
+        else:
+            data_object = None
+            util.set_valid(dataset_control.lineEdit(), False)
+        self._plotted = False
+        
+        return data_object
+        
     def _update_low_q(self, ws=None):
         """
             Update Low-Q data set
         """
-        file = str(self._content.low_q_combo.lineEdit().text())
-        if os.path.isfile(file) or mtd.workspaceExists(file):
-            self._low_q_data = DataSet(file)
-            try:
-                self._low_q_data.load(True)
-            except:
-                self._low_q_data = None
-                util.set_valid(self._content.low_q_combo.lineEdit(), False)
-                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
-                return
-            if len(self._content.low_min_edit.text())==0 or \
-                len(self._content.low_max_edit.text())==0:
-                minx, maxx = self._low_q_data.get_range()
-                self._content.low_min_edit.setText("%-6.3g" % minx)
-                self._content.low_max_edit.setText("%-6.3g" % maxx)
-            self._content.low_scale_edit.setText("1.0")
-            npts = self._low_q_data.get_number_of_points()
-            self._content.low_first_spin.setMaximum(npts)
-            self._content.low_last_spin.setMaximum(npts)
-            util.set_valid(self._content.low_q_combo.lineEdit(), True)
-        else:
-            self._low_q_data = None
-            util.set_valid(self._content.low_q_combo.lineEdit(), False)
-        self._plotted = False
+        self._low_q_data = self.update_data(self._content.low_q_combo,
+                                            self._content.low_min_edit,
+                                            self._content.low_max_edit,
+                                            self._content.low_scale_edit,
+                                            self._content.low_first_spin,
+                                            self._content.low_last_spin)
 
     def _update_medium_q(self, ws=None):
         """
             Update Medium-Q data set
         """
-        file = str(self._content.medium_q_combo.lineEdit().text())
-        if os.path.isfile(file) or mtd.workspaceExists(file):
-            self._medium_q_data = DataSet(file)
-            try:
-                self._medium_q_data.load(True)
-            except:
-                self._medium_q_data = None
-                util.set_valid(self._content.medium_q_combo.lineEdit(), False)
-                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
-                return
-            if len(self._content.medium_min_edit.text())==0 or \
-                len(self._content.medium_max_edit.text())==0:
-                minx, maxx = self._medium_q_data.get_range()
-                self._content.medium_min_edit.setText("%-6.3g" % minx)
-                self._content.medium_max_edit.setText("%-6.3g" % maxx)
-            self._content.medium_scale_edit.setText("1.0")
-            npts = self._medium_q_data.get_number_of_points()
-            self._content.medium_first_spin.setMaximum(npts)
-            self._content.medium_last_spin.setMaximum(npts)
-            util.set_valid(self._content.medium_q_combo.lineEdit(), True)
-        else:
-            self._medium_q_data = None
-            util.set_valid(self._content.medium_q_combo.lineEdit(), False)
-        self._plotted = False
+        self._medium_q_data = self.update_data(self._content.medium_q_combo,
+                                               self._content.medium_min_edit,
+                                               self._content.medium_max_edit,
+                                               self._content.medium_scale_edit,
+                                               self._content.medium_first_spin,
+                                               self._content.medium_last_spin)
 
     def _update_high_q(self, ws=None):
         """
             Update High-Q data set
         """
+        self._high_q_data = self.update_data(self._content.high_q_combo,
+                                             None,
+                                             None,
+                                             self._content.high_scale_edit,
+                                             self._content.high_first_spin,
+                                             self._content.high_last_spin)
+
         file = str(self._content.high_q_combo.lineEdit().text())
-        if os.path.isfile(file) or mtd.workspaceExists(file):
+        if len(file.strip())==0:
+            self._high_q_data = None
+        elif os.path.isfile(file) or mtd.workspaceExists(file):
             self._high_q_data = DataSet(file)
             try:
                 self._high_q_data.load(True)
@@ -367,6 +390,11 @@ class StitcherWidget(BaseWidget):
         """
             Perform auto-scaling
         """
+        # Update data sets, in case the user typed in a file name without using the browse button
+        self._update_low_q()
+        self._update_medium_q()
+        self._update_high_q()
+        
         s = Stitcher()
         if self._low_q_data is not None:
             xmin = util._check_and_get_float_line_edit(self._content.low_min_edit)
