@@ -41,8 +41,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         script += "DetectorVanadium1=\"%s\",\n" % self.det_van1
         script += "HighCounts=%s,\n" % str(self.high_counts)
         script += "LowCounts=%s,\n" % str(self.low_counts)
-        script += "MedianTestLow=%s,\n" % str(self.median_test_low)
         script += "MedianTestHigh=%s,\n" % str(self.median_test_high)
+        script += "MedianTestLow=%s,\n" % str(self.median_test_low)
         script += "DetectorVanadium2=\"%s\",\n" % self.det_van2
         script += "ProptionalChangeCriterion=%s,\n" % str(self.prop_change_criterion)
         script += "BackgroundCheck=%s,\n" % self.background_check
