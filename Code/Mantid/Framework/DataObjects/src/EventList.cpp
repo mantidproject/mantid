@@ -75,7 +75,7 @@ namespace DataObjects
 
   /// Constructor (empty)
   EventList::EventList() :
-        eventType(TOF), order(UNSORTED), mru(NULL)
+        eventType(TOF), order(UNSORTED), mru(NULL), m_lockedMRU(false)
   {
   }
 
@@ -85,7 +85,7 @@ namespace DataObjects
    */
   EventList::EventList(EventWorkspaceMRU * mru, specid_t specNo)
    : IEventList(specNo),
-     eventType(TOF), order(UNSORTED), mru(mru)
+     eventType(TOF), order(UNSORTED), mru(mru), m_lockedMRU(false)
   {
   }
 
@@ -93,7 +93,7 @@ namespace DataObjects
   /** Constructor copying from an existing event list
    * @param rhs :: EventList object to copy*/
   EventList::EventList(const EventList& rhs)
-  : IEventList(rhs), mru(rhs.mru)
+    : IEventList(rhs), mru(rhs.mru), m_lockedMRU(false)
   {
     //Call the copy operator to do the job,
     this->operator=(rhs);
@@ -102,6 +102,7 @@ namespace DataObjects
   /** Constructor, taking a vector of events.
    * @param events :: Vector of TofEvent's */
   EventList::EventList(const std::vector<TofEvent> &events)
+    : mru(NULL), m_lockedMRU(false)
   {
     this->events.assign(events.begin(), events.end());
     this->eventType = TOF;
@@ -111,6 +112,7 @@ namespace DataObjects
   /** Constructor, taking a vector of events.
    * @param events :: Vector of WeightedEvent's */
   EventList::EventList(const std::vector<WeightedEvent> &events)
+    : mru(NULL), m_lockedMRU(false)
   {
     this->weightedEvents.assign(events.begin(), events.end());
     this->eventType = WEIGHTED;
@@ -120,6 +122,7 @@ namespace DataObjects
   /** Constructor, taking a vector of events.
    * @param events :: Vector of WeightedEventNoTime's */
   EventList::EventList(const std::vector<WeightedEventNoTime> &events)
+    : mru(NULL), m_lockedMRU(false)
   {
     this->weightedEventsNoTime.assign(events.begin(), events.end());
     this->eventType = WEIGHTED_NOTIME;
