@@ -80,6 +80,8 @@ class FindReflectometryLines(PythonAlgorithm):
 		y_data = self.__remove_background(y_data)
 		#Find the peaks
 		peak_index_list = self.__find_peak_spectrum_numbers(y_data, summed_ws)
+        #Reverse the order so that it goes from high spec number to low spec number
+		peak_index_list.reverse()
 		n_peaks_found = len(peak_index_list) 
 		
 		output_ws = WorkspaceFactory.createTable("TableWorkspace")

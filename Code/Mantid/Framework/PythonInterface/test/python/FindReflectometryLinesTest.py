@@ -116,8 +116,8 @@ class FindReflectometryLinesTest(unittest.TestCase):
         # Should create a table with a TWO columns (reflected spectra #, transmission spectra #) and one row.
         self.assertEquals(2, spectrum_workspace.columnCount())
         self.assertEquals(1, spectrum_workspace.rowCount())
-        self.assertEquals(2, spectrum_workspace.cell(0,0)) # Match of exact spectrum that should be found 
-        self.assertEquals(6, spectrum_workspace.cell(0,1)) # Match of exact spectrum that should be found 
+        self.assertEquals(6, spectrum_workspace.cell(0,0)) # Match of exact spectrum that should be found 
+        self.assertEquals(2, spectrum_workspace.cell(0,1)) # Match of exact spectrum that should be found 
         
 if __name__ == '__main__':
     unittest.main()
