@@ -58,7 +58,7 @@ class DataCorrectionsWidget(BaseWidget):
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
-            @param state: SampleSetupScript object
+            @param state: DataCorrectionsScript object
         """
         self._content.filter_bad_pulses_chkbox.setChecked(state.filter_bad_pulses)
         button_index = DataCorrectionsScript.INCIDENT_BEAM_NORM_TYPES.index(state.incident_beam_norm)

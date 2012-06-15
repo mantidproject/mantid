@@ -67,6 +67,10 @@ class DiagnoseDetectorsWidget(BaseWidget):
             self._content.det_van2_edit.setText(fname)   
     
     def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state.
+            @param state: DiagnoseDetectorsScript object
+        """
         self._content.find_bad_det_gb.setChecked(state.find_bad_detectors)
         self._content.output_mask_edit.setText(state.output_mask_file)
         self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.errorbar_criterion)))
@@ -87,6 +91,9 @@ class DiagnoseDetectorsWidget(BaseWidget):
         self._content.ignored_pixels_edit.setText(state.ignored_pixels)
     
     def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
         d = DiagnoseDetectorsScript()
         d.find_bad_detectors = self._content.find_bad_det_gb.isChecked()
         d.output_mask_file = self._content.output_mask_edit.text()
