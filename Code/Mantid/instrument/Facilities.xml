@@ -141,6 +141,7 @@
   <instrument name="MUSR" zeropadding="8">
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
+    <livedata address="NDXMUSR:6789" />
   </instrument>
   
   <instrument name="EMU" zeropadding="8">
@@ -153,6 +154,13 @@
     <technique>Radio frequency muSR</technique>
   </instrument> 
   
+  <livedata listener="ISISHistoDataListener"/>
+
+  <instrument name="TESTHISTOLISTENER"> 
+    <technique>Test ISISHistoDataListener</technique>
+    <livedata address="127.0.0.1:6789" />
+  </instrument>
+   
 </facility>
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">

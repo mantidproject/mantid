@@ -66,6 +66,10 @@ int IDCgetpard(idc_handle_t fh, const char* name, double* value, int dims_array[
     The size of the returned array is written to the parameters dims_array and ndims  */
 int IDCAgetparc(idc_handle_t fh, const char* name, char** value, int dims_array[], int* ndims);
 
+/** Read a character parameter \a name from the DAE into pre-allocated array \a value.
+    The size of the returned array is written to the parameters dims_array and ndims  */
+int IDCgetparc(idc_handle_t fh, const char* name, char* value, int dims_array[], int* ndims);
+
 /** Read \a nos spectra from the DAE starting at \a ifsn into pre-allocated array \a value.
     The size of value is held in the parameters \a dims_array and \a ndims  */
 int DLLExport IDCgetdat(idc_handle_t fh, int ifsn, int nos, int* value, int dims_array[], int* ndims);
