@@ -10,7 +10,7 @@ class SampleSetupWidget(BaseWidget):
         Widget that presents sample setup options to the user.
     """ 
     ## Widget name
-    name = "SampleSetup"
+    name = "Sample Setup"
     
     def __init__(self, parent=None, state=None, settings=None):
         super(SampleSetupWidget, self).__init__(parent, state, settings)

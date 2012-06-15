@@ -10,7 +10,7 @@ class DataCorrectionsWidget(BaseWidget):
         Widget that presents data correction options to the user.
     """ 
     ## Widget name
-    name = "DataCorrections"
+    name = "Data Corrections"
     
     def __init__(self, parent=None, state=None, settings=None):
         super(DataCorrectionsWidget, self).__init__(parent, state, settings)
