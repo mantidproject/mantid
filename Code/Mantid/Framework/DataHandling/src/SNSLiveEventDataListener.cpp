@@ -258,10 +258,10 @@ namespace DataHandling
     return true;
   }
 
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::ClientHelloPkt &)
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::HeartbeatPkt &)
   {
-    // We don't actually need anything out of the hello packet - we just need
-    // to know that it arrived (and thus the SMS is still online)
+    // We don't actually need anything out of the heartbeat packet - we just
+    // need to know that it arrived (and thus the SMS is still online)
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     return true;
   }

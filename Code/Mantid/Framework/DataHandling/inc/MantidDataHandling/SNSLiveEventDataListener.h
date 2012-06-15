@@ -67,7 +67,7 @@ namespace Mantid
       //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
       virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
-      virtual bool rxPacket( const ADARA::ClientHelloPkt &pkt);
+      virtual bool rxPacket( const ADARA::HeartbeatPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       virtual bool rxPacket( const ADARA::BeamlineInfoPkt &pkt);
       //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
