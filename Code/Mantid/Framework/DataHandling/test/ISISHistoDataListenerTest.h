@@ -4,6 +4,7 @@
 #include "MantidDataHandling/ISISHistoDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include <cxxtest/TestSuite.h>
 
