@@ -23,7 +23,7 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEquals(len(test_facility.instruments("Neutron Diffraction")), 11)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
         self.assertEquals(test_facility.catalogName(), "ICat3Catalog")
-        self.assertEquals(test_facility.liveListener(), "")
+        self.assertEquals(test_facility.liveListener(), "ISISHistoDataListener")
 
 if __name__ == '__main__':
     unittest.main()
