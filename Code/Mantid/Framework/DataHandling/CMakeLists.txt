@@ -269,7 +269,7 @@ set ( TEST_FILES
 	test/LoadAsciiTest.h
 	test/LoadCalFileTest.h
 	test/LoadCanSAS1dTest.h
-	test/LoadDAETest.h
+	#test/LoadDAETest.h
 	test/LoadDaveGrpTest.h
 	test/LoadDetectorInfoTest.h
 	test/LoadDetectorsGroupingFileTest.h
