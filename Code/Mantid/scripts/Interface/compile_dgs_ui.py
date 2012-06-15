@@ -13,6 +13,7 @@ try:
     os.system(make_cmd("ui/inelastic/dgs_sample_setup.ui"))
     os.system(make_cmd("ui/inelastic/dgs_data_corrections.ui"))
     os.system(make_cmd("ui/inelastic/dgs_diagnose_detectors.ui"))
+    os.system(make_cmd("ui/inelastic/dgs_absolute_units.ui"))
 
 except:
     print "Could not compile resource file"
