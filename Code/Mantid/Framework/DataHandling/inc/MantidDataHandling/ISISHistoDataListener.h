@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/cow_ptr.h"
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -16,6 +17,7 @@ typedef struct idc_info* idc_handle_t;
 
 namespace Mantid
 {
+
   namespace DataHandling
   {
     /** ILiveListener is the interface implemented by classes which connect directly to

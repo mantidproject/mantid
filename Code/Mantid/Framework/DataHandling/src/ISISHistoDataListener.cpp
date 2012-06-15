@@ -2,6 +2,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
@@ -265,7 +266,7 @@ namespace DataHandling
   void ISISHistoDataListener::calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count)
   {
     // max number of spectra that could be read in in one go
-    const size_t maxNumberOfSpectra = 10000000;
+    const int maxNumberOfSpectra = 10000000;
 
     if ( m_specList.empty() )
     {
