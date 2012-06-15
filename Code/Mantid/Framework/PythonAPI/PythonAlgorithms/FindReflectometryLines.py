@@ -60,6 +60,7 @@ class FindReflectometryLines(PythonAlgorithm):
 		self.declareProperty(name="KeepIntermediateWorkspaces", defaultValue=False, doc="Keeps cropped and integrated workspaces in memory after usage.")
 	
 	def PyExec(self):
+		from mantid.simpleapi import CropWorkspace, Integration, DeleteWorkspace
 		
 		in_ws = self.getPropertyValue("InputWorkspace")
 		min_wavelength = self.getPropertyValue("StartWavelength")
