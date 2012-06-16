@@ -26,6 +26,7 @@ namespace DataHandling
 {
 
   // Register the algorithm into the AlgorithmFactory
+  // TODO: Uncomment this when we want it visible in Mantid.
   //DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
   
 
@@ -76,6 +77,9 @@ namespace DataHandling
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, extensions),
                       "The name of the NeXus file to append geometry to.");
 
+      declareProperty(new PropertyWithValue<bool>("MakeCopy", true, Direction::Input),
+                      "Copy the NeXus file first before appending (optional, default True).");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -83,6 +87,8 @@ namespace DataHandling
    */
   void AppendGeometryToSNSNexus::exec()
   {
+
+      std::string nxdetector;
 
       // Retrieve filename from the properties
       m_filename = getPropertyValue("Filename");
@@ -110,19 +116,57 @@ namespace DataHandling
       // Get the number of histograms/detectors
       const size_t numHistograms = ws->getNumberHistograms();
 
-      g_log.notice() << "Number of Histograms = " << numHistograms << std::endl;
+      g_log.information() << "Number of Histograms = " << numHistograms << std::endl;
 
-//      for (size_t i=0; i < numHistograms; ++i)
-//      {
-//        Geometry::IDetector_const_sptr det = ws->getDetector(i);
-//        if (det->isMonitor())
-//            // TODO: Do the correct thing for the monitors
-//        else
-//        {
-//            // Detector
-//        }
+      this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
 
-      //}
+
+      // Get the sample (needed to calculate distances)
+      Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+
+
+      for (size_t i=0; i < numHistograms; ++i)
+      {
+          Geometry::IDetector_const_sptr det = ws->getDetector(i);
+          if (det->isMonitor())
+          {
+              // TODO: Do the correct thing for the monitors
+              g_log.warning() << "Monitors are not supported in this version. Sorry! :-( " << std::endl;
+          }
+          else
+          {
+              // Detector
+
+
+              //TODO: These are in Radians - check what they should be in NeXus file.
+              double polar = ws->detectorTwoTheta(det);
+              double azimuthal = det->getPhi();
+              double l2 = det->getDistance(*sample);
+
+              g_log.debug() << "detector(" << det->getID() << ") : " << l2 << "," << polar << ","
+                              << azimuthal << std::endl;
+
+              // Get the NXdetector name for this detector
+              if (det->hasParameter("NXdetectorName"))
+              {
+                  nxdetector = det->getStringParameter("NXdetectorName").at(0);
+                  g_log.debug() << "DetectorID: " << det->getID() << " --> " << nxdetector << std::endl;
+
+
+                  //TODO: Open the correct place in the NeXus file
+
+              }
+              else
+              {
+                  // We have to try and determine this from the hierarchy
+                  // TODO: Decide if we should bother doing this or not - or just fail.s
+              }
+
+          }
+
+          this->progress->report();
+
+      }
 
 
       // Clean up the workspace
