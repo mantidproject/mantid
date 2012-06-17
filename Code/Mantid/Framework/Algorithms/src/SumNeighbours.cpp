@@ -52,12 +52,12 @@ using namespace DataObjects;
  */
 void SumNeighbours::init()
 {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,
+  declareProperty(new WorkspaceProperty<Mantid::API::MatrixWorkspace>("InputWorkspace","",Direction::Input,
                                                         boost::make_shared<InstrumentValidator>()),
     "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours)." );
 
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
+    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
@@ -89,193 +89,25 @@ void SumNeighbours::exec()
   SumX = getProperty("SumX");
   SumY = getProperty("SumY");
 
-//  if ((XPixels % SumX != 0) || (YPixels % SumY != 0))
-//    throw std::invalid_argument("SumX must evenly divide XPixels and SumY must evenly divide YPixels for SumNeighbours to work.");
 
   // Get the input workspace
-  EventWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr outWS;
 
-  //Get some stuff from the input workspace
-  //const size_t numberOfSpectra = inWS->getNumberHistograms();
-  const int YLength = static_cast<int>(inWS->blocksize());
-  Instrument_const_sptr inst = inWS->getInstrument();
-
-  EventWorkspace_sptr outWS;
-  //Make a brand new EventWorkspace
-  outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", 1, YLength, 1));
-  //Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, true);
-
+  IAlgorithm_sptr smooth = createSubAlgorithm("SmoothNeighbours");
+  smooth->setProperty("InputWorkspace", inWS);
+  //SmoothNeighbours(InputWorkspace='NOM_3778',OutputWorkspace='NOM_3778',RadiusUnits='NumberOfPixels',Radius='100',NumberOfNeighbours='224',SumNumberOfNeighbours='8')
+  smooth->setProperty("SumPixelsX",SumX);
+  smooth->setProperty("SumPixelsY",SumY);
+  smooth->setProperty<std::string>("RadiusUnits","NumberOfPixels");
+  smooth->setProperty("Radius",4.0*SumY);
+  smooth->setProperty("NumberOfNeighbours",SumY*SumY*4);
+  smooth->setProperty("SumNumberOfNeighbours",SumY);
+  smooth->executeAsSubAlg();
+  // Get back the result
+  outWS = smooth->getProperty("OutputWorkspace");
   //Cast to the matrixOutputWS and save it
   this->setProperty("OutputWorkspace", outWS);
-
-//  //Split the detector names string.
-//  std::vector<std::string> det_names;
-    std::string det_name = getProperty("DetectorName");
-//  boost::split(det_names, det_name_list, boost::is_any_of(", "));
-
-  //To get the workspace index from the detector ID
-  detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
-
-  int outWI = 0;
-  //std::cout << " inst->nelements() " << inst->nelements() << "\n";
-  Progress prog(this,0.0,1.0,inst->nelements());
-
-  //Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector> > detList;
-  for (int i=0; i < inst->nelements(); i++)
-  {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
-
-    det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-    if (det) 
-    {
-      if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
-        detList.push_back(det);
-    }
-    else
-    {
-      //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
-      if (assem)
-      {
-        for (int j=0; j < assem->nelements(); j++)
-        {
-          det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-          if (det)
-          {
-            if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
-              detList.push_back(det);
-
-          }
-          else
-          {
-            //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
-            // We are not doing a full recursive search since that will be very long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
-            if (assem2)
-            {
-              for (int k=0; k < assem2->nelements(); k++)
-              {
-                det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
-                if (det) 
-                {
-                  if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0))  
-                    detList.push_back(det);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (detList.empty())
-    throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbours cannot operate on this instrument at this time.");
-
-  // Build a map to sort by the detectorID
-  std::vector <std::pair<int, int> > v1;
-  for (int i = 0; i<static_cast<int>(detList.size()); i++)
-    v1.push_back(std::pair<int, int>(detList[i]->getAtXY(0,0)->getID(), i));
-
-  // To sort in descending order
-  stable_sort(v1.begin(), v1.end() );
-
-  std::vector <std::pair<int, int> >::iterator Iter1;
-
-  //Loop through the RectangularDetector's we listed before.
-  for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; ++Iter1 )
-  {
-    int i = (*Iter1).second;
-    std::string det_name("");
-    boost::shared_ptr<RectangularDetector> det;
-    det = detList[i];
-    if (det)
-    {
-      int x0 = 0;
-      int xend = det->xpixels();
-      int y0 = 0;
-      int yend = det->ypixels();
-      bool SingleNeighbourhood = getProperty("SingleNeighbourhood");
-      if (SingleNeighbourhood)
-      {
-        x0 = getProperty("Xpixel");
-        if(x0 < 0)x0 = 0;
-        if(x0 >= det->xpixels())x0 = det->xpixels()-1;
-        xend = x0 + SumX;
-        if(xend >= det->xpixels())SumX = det->xpixels()-x0;
-        xend = x0 + SumX;
-        y0 = getProperty("Ypixel");
-        if(y0 < 0)y0 = 0;
-        if(y0 >= det->ypixels())y0 = det->ypixels()-1;
-        yend = y0 + SumY;
-        if(yend >= det->ypixels())SumY = det->ypixels()-y0;
-        yend = y0 + SumY;
-      }
-      int x, y;
-      det_name = det->getName();
-
-      //det->getAtXY()
-      for (x=x0; x<xend; x += SumX)
-        for (y=y0; y<yend; y += SumY)
-        {
-          //Initialize the output event list
-          EventList outEL;
-//          Kernel::cow_ptr<MantidVec> outX;
-//          bool outX_set = false;
-          for (int ix=0; ix < SumX; ix++)
-            for (int iy=0; iy < SumY; iy++)
-            {
-              //Find the pixel ID at that XY position on the rectangular detector
-              int pixelID = det->getAtXY(x+ix,y+iy)->getID();
-
-              //Find the corresponding workspace index, if any
-              if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
-              {
-                size_t wi = (*pixel_to_wi)[pixelID];
-                //Get the event list on the input and add it
-                outEL += inWS->getEventList(wi);
-
-//                if (!outX_set)
-//                {
-//                  //We'll keep the first X axis
-//                  outX = inWS->refX(wi);
-//                  outX_set = true;
-//                }
-              }
-            }
-
-          //Add all these events to the (empty) list returned by this
-          outWS->getOrAddEventList(outWI) += outEL;
-
-//          //Set the X binning, if any was found.
-//          if (outX_set)
-//            outWS->setX(outWI, outX);
-//          else
-//            outWS->setX(outWI, inWS->refX(0)); //get the 0th x-axis if nothing was set.
-
-          outWI++;
-
-          //std::cout << pixelID << ", ";
-        }
-    }
-    prog.report(det_name);
-  }
-
-  //Finalize the data
-  outWS->doneAddingEventLists();
-
-  //Give the 0-th X bins to all the output spectra.
-  Kernel::cow_ptr<MantidVec> outX = inWS->refX(0);
-  outWS->setAllX( outX );
-
-
-  //Clean up memory
-  delete pixel_to_wi;
 
 }
 
