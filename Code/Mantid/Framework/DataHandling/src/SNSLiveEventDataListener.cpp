@@ -13,18 +13,14 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketStream.h>
+#include <Poco/Timestamp.h>
 
-#include <errno.h>
-#include <sys/time.h> // for gettimeofday()
-#include <unistd.h>
-#include <fcntl.h>
+#include <Poco/Thread.h>
+#include <Poco/Runnable.h>
 
 #include <sstream>    // for ostringstream
 #include <string>
 #include <exception>
-
-#include <Poco/Thread.h>
-#include <Poco/Runnable.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -132,17 +128,20 @@ namespace DataHandling
 
     // First thing to do is send a hello packet
     uint32_t helloPkt[5] = { 4, ADARA::PacketType::CLIENT_HELLO_V0, 0, 0, 0};
-    struct timeval now;
-    gettimeofday( &now, NULL);
-    helloPkt[2] = (uint32_t)(now.tv_sec - ADARA::EPICS_EPOCH_OFFSET);
-    helloPkt[3] = (uint32_t)now.tv_usec * 1000;
+    Poco::Timestamp now;
+    uint32_t now_usec = (uint32_t)(now.epochMicroseconds() - now.epochTime());
+    helloPkt[2] = (uint32_t)(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
+    helloPkt[3] = (uint32_t)now_usec * 1000;
     helloPkt[4] = (uint32_t)(m_startTime.totalNanoseconds() / 1000000000);  // divide by a billion to get time in seconds
 
     if ( m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
+    // Yes, I know a send isn't guarenteed to send the whole buffer in one call.
+    // I'm treating such a case as an error anyway.
     {
-      std::string msg( "SNSLiveEventDataListener::run(): Failed to send client hello packet.  Err: ");
-      msg += strerror(errno);
-      throw std::runtime_error( msg);
+      g_log.error()
+        << "SNSLiveEventDataListener::run(): Failed to send client hello packet.  Thread exiting."
+        << std::endl;
+      m_stopThread = true;
     }
 
     while (m_stopThread == false)  // loop until the foreground thread tells us to stop
