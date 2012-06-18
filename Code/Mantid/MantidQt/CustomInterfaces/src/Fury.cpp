@@ -44,6 +44,7 @@ namespace IDA
     m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
     m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
+    m_furRange->setInfoOnly(true);
 
     // signals / slots & validators
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
