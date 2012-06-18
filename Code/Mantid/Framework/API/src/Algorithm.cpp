@@ -69,7 +69,7 @@ namespace Mantid
       m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(this),
-      m_processGroups(false), m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
+      m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
     {
     }
 
@@ -487,11 +487,13 @@ namespace Mantid
       }
 
       // ----- Check for processing groups -------------
+      // default true so that it has the right value at the check below the catch block should checkGroups throw
+      bool callProcessGroups = true;
       try
       {
         // Checking the input is a group. Throws if the sizes are wrong
-        this->checkGroups();
-        if (m_processGroups)
+        callProcessGroups = this->checkGroups();
+        if (callProcessGroups)
         {
           // This calls this->execute() again on each member of the group.
           return processGroups();
@@ -511,7 +513,7 @@ namespace Mantid
       }
       // If checkGroups() threw an exception but there ARE group workspaces
       // (means that the group sizes were incompatible)
-      if (m_processGroups)
+      if (callProcessGroups)
         return false;
 
       // Read or write locks every input/output workspace
@@ -970,19 +972,18 @@ namespace Mantid
      *    - In this case, algorithms are processed in order
      *  - OR, only one input should be a group, the others being size of 1
      *
-     * Sets m_processGroups to true if if processGroups() should be called.
+     * Returns true if if processGroups() should be called.
      * It also sets up some other members.
      *
-     * Override if it is needed to customize the group checking. Make sure
-     * to set m_processGroups in the overridden method.
+     * Override if it is needed to customize the group checking.
      *
      * @throw std::invalid_argument if the groups sizes are incompatible.
      * @throw std::invalid_argument if a member is not found
      */
-    void Algorithm::checkGroups()
+    bool Algorithm::checkGroups()
     {
       size_t numGroups = 0;
-      m_processGroups = false;
+      bool processGroups = false;
 
       // Unroll the groups or single inputs into vectors of workspace
       m_groups.clear();
@@ -1011,7 +1012,7 @@ namespace Mantid
         if (wsGroup)
         {
           numGroups++;
-          m_processGroups = true;
+          processGroups = true;
           std::vector<std::string> names = wsGroup->getNames();
           for (size_t j=0; j<names.size(); j++)
           {
@@ -1035,7 +1036,7 @@ namespace Mantid
 
       // No groups? Get out.
       if (numGroups == 0)
-        return;
+        return processGroups;
 
       // ---- Confirm that all the groups are the same size -----
       // Index of the single group
@@ -1075,6 +1076,7 @@ namespace Mantid
       } // end for each group
 
       // If you get here, then the groups are compatible
+      return processGroups;
     }
 
 

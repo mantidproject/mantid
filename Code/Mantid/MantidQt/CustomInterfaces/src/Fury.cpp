@@ -1,10 +1,12 @@
 #include "MantidQtCustomInterfaces/Fury.h"
-
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QFileInfo>
 
 #include <qwt_plot.h>
+#include <boost/lexical_cast.hpp>
+
+#include <math.h>
 
 namespace MantidQt
 {
@@ -44,6 +46,7 @@ namespace IDA
     m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
     m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
+    m_furRange->setInfoOnly(true);
 
     // signals / slots & validators
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
@@ -88,6 +91,10 @@ namespace IDA
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 
+  /**
+   * Ensure we have present and valid file/ws inputs.  The underlying Fourier transform of Fury
+   * also means we must enforce several rules on the parameters.
+   */
   QString Fury::validate()
   {
     switch ( uiForm().fury_cbInputType->currentIndex() )
@@ -108,6 +115,19 @@ namespace IDA
 
     if ( ! uiForm().fury_resFile->isValid()  )
       return "Invalid or empty resolution file field.";
+
+    double eWidth = boost::lexical_cast<double>(m_furProp["EWidth"]->valueText().toStdString());
+    double eLow   = boost::lexical_cast<double>(m_furProp["ELow"]->valueText().toStdString());
+    double eHigh  = boost::lexical_cast<double>(m_furProp["EHigh"]->valueText().toStdString());
+
+    if( eWidth == 0.0 )
+      return "EWidth (bin size) must be non-zero.";
+
+    if( eLow >= eHigh )
+      return "ELow must be lower than EHigh.";
+
+    if( fmod( eHigh - eLow, eWidth ) != 0 )
+      return "All bins must be of equal width.  See Wiki.";
 
     return "";
   }

@@ -9,6 +9,7 @@
 #include "../pixmaps.h"
 
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/ReadLock.h"
 
 #include <QtGlobal>
 #include <QTextStream>
@@ -1456,6 +1457,8 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace* ws,
 
 double MantidMatrixModel::data(int row, int col) const
 {
+  Mantid::Kernel::ReadLock _lock(*m_workspace);
+
   double val;
   if (m_type == X)
   {

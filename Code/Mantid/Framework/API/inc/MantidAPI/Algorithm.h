@@ -367,15 +367,13 @@ private:
   std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
 
   // ------------------ For WorkspaceGroups ------------------------------------
-  virtual void checkGroups();
+  virtual bool checkGroups();
   void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// One vector of workspaces for each input workspace property
   std::vector<WorkspaceVector> m_groups;
   /// Pointer to the WorkspaceGroup (if any) for each input workspace property
   std::vector<boost::shared_ptr<WorkspaceGroup> > m_groupWorkspaces;
-  /// Flag set true if processGroups() should be called
-  bool m_processGroups;
   /// If only one input is a group, this is its index. -1 if they are all groups
   int m_singleGroup;
   /// Size of the group(s) being processed

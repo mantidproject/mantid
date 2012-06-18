@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>674</width>
-    <height>618</height>
+    <width>1011</width>
+    <height>514</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,6 +42,12 @@
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QLabel" name="absunits_van_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>AbsUnits Vanadium</string>
              </property>
@@ -76,6 +82,12 @@
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QLabel" name="grouping_file_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Grouping File</string>
              </property>
@@ -110,6 +122,12 @@
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QLabel" name="absunits_detvan_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Detector Vanadium (Abs Units)</string>
              </property>
@@ -153,13 +171,32 @@
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QLabel" name="ei_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Incident Energy</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="ei_edit"/>
+            <widget class="QLineEdit" name="ei_edit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer_4">
@@ -180,13 +217,48 @@
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
             <widget class="QLabel" name="emin_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
-              <string>E Min</string>
+              <string>Energy range                  E Min</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="emin_edit"/>
+            <widget class="QLineEdit" name="emin_edit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item>
             <widget class="QLabel" name="emax_label">
@@ -196,7 +268,20 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="emax_edit"/>
+            <widget class="QLineEdit" name="emax_edit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer_5">
@@ -226,13 +311,26 @@
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
             <widget class="QLabel" name="van_mass_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Vanadium mass</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="van_mass_edit"/>
+            <widget class="QLineEdit" name="van_mass_edit">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer_6">
@@ -253,13 +351,32 @@
           <layout class="QHBoxLayout" name="horizontalLayout_7">
            <item>
             <widget class="QLabel" name="sample_mass_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Sample Mass</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="sample_mass_edit"/>
+            <widget class="QLineEdit" name="sample_mass_edit">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer_7">
@@ -280,13 +397,26 @@
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
             <widget class="QLabel" name="sample_rmm_label">
+             <property name="minimumSize">
+              <size>
+               <width>225</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Sample RMM</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="sample_rmm_edit"/>
+            <widget class="QLineEdit" name="sample_rmm_edit">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer_8">
