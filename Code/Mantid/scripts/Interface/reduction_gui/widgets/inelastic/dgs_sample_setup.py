@@ -31,16 +31,15 @@ class SampleSetupWidget(BaseWidget):
         
     def initialize_content(self):
         # Constraints
-        dv = QtGui.QDoubleValidator()
+        dv = QtGui.QDoubleValidator(self._content.ei_edit)
         dv.setBottom(0.0)
         self._content.ei_edit.setValidator(dv)
         util.set_valid(self._content.ei_edit, False)
-        dv1 = QtGui.QDoubleValidator()
-        self._content.etr_low_edit.setValidator(dv1)
+        self._content.etr_low_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_low_edit))
         util.set_valid(self._content.etr_low_edit, False)
-        self._content.etr_width_edit.setValidator(dv1)
+        self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
         util.set_valid(self._content.etr_width_edit, False)
-        self._content.etr_high_edit.setValidator(dv1)
+        self._content.etr_high_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_high_edit))
         util.set_valid(self._content.etr_high_edit, False)
         
         # Connections

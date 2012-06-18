@@ -31,17 +31,21 @@ class DiagnoseDetectorsWidget(BaseWidget):
 
     def initialize_content(self):
         # Constraints
-        dvp = QtGui.QDoubleValidator()
-        dvp.setBottom(0.0)
-        self._content.errorbar_crit_edit.setValidator(dvp)
-        self._content.median_test_high_edit.setValidator(dvp)
-        self._content.median_test_low_edit.setValidator(dvp)
-        self._content.prop_change_crit_edit.setValidator(dvp)
-        self._content.accept_factor_edit.setValidator(dvp)
-        ivp = QtGui.QIntValidator()
-        ivp.setBottom(0)
-        self._content.tof_start_edit.setValidator(ivp)
-        self._content.tof_end_edit.setValidator(ivp)
+        for widget in [self._content.errorbar_crit_edit,
+                       self._content.median_test_high_edit,
+                       self._content.median_test_low_edit,
+                       self._content.prop_change_crit_edit,
+                       self._content.accept_factor_edit]:
+            
+            dvp = QtGui.QDoubleValidator(widget)
+            dvp.setBottom(0.0)
+            widget.setValidator(dvp)
+        
+        for widget in [self._content.tof_start_edit,
+                       self._content.tof_end_edit]:
+            ivp = QtGui.QIntValidator(widget)
+            ivp.setBottom(0)
+            widget.setValidator(ivp)
 
         # Connections
         self.connect(self._content.output_mask_browse, QtCore.SIGNAL("clicked()"), 

@@ -31,7 +31,7 @@ class AbsoluteUnitsWidget(BaseWidget):
 
     def initialize_content(self):
         # Constraints
-        dvp = QtGui.QDoubleValidator()
+        dvp = QtGui.QDoubleValidator(self._content.ei_edit)
         dvp.setBottom(0.0)
         self._content.ei_edit.setValidator(dvp)
         
