@@ -126,8 +126,6 @@ namespace IDA
     if( eLow >= eHigh )
       return "ELow must be lower than EHigh.";
 
-    double diff = eHigh - eLow;
-
     if( fmod( eHigh - eLow, eWidth ) != 0 )
       return "All bins must be of equal width.  See Wiki.";
 
