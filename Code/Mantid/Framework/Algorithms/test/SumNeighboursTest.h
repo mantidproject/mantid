@@ -31,7 +31,7 @@ public:
     TS_ASSERT( alg.isInitialized() );
 
     std::vector<Property*> props = alg.getProperties();
-    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 8 );
+    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 );
   }
 
 

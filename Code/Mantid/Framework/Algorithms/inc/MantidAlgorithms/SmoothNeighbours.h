@@ -129,6 +129,8 @@ private:
   int Edge;
   /// Radius to search nearest neighbours
   double Radius;
+  /// Number of neighbours
+  int nNeighbours;
   /// Weight the neighbours during summing
   boost::scoped_ptr<WeightingStrategy> WeightedSum;
   /// PreserveEvents

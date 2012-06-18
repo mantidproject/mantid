@@ -286,7 +286,12 @@ void SmoothNeighbours::findNeighboursRectangular()
   }
 
   if (detList.empty())
-    throw std::runtime_error("This instrument does not have any RectangularDetector's. SmoothNeighbours cannot operate on this instrument at this time.");
+  {
+    Radius = translateToMeters("NumberOfPixels", std::max(AdjX,AdjY));
+    nNeighbours = AdjX * AdjY * AdjX * AdjY;
+    std::cout << Radius <<"  "<<nNeighbours<<"\n";
+    findNeighboursUbiqutious();
+  }
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
@@ -394,7 +399,6 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
 
-  int nNeighbours = getProperty("NumberOfNeighbours");
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
 
   //Cull by radius
@@ -599,6 +603,7 @@ void SmoothNeighbours::exec()
 
   // Retrieve the optional properties
   double enteredRadius = getProperty("Radius");
+  nNeighbours = getProperty("NumberOfNeighbours");
 
   // Use the unit type to translate the entered radius into meters.
   Radius = translateToMeters(getProperty("RadiusUnits"), enteredRadius);

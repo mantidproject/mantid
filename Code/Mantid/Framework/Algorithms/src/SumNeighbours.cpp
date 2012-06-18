@@ -69,12 +69,13 @@ void SumNeighbours::init()
   declareProperty("SumY", 4, mustBePositive,
     "The number of Y (vertical) pixels to sum together. This must evenly divide the number of Y pixels in a detector" );
 
-  declareProperty(
+  // TODO:  Add this capability for rectangular and non-rectangular
+  /*declareProperty(
       new PropertyWithValue<bool>("SingleNeighbourhood", false, Direction::Input),
     "Optional: Only applies if you specified a single Xpixel and Ypixel for DetectorName.\n");
   declareProperty("Xpixel", 0, "Optional: Left-most X of neighbourhood when choosing only single neighbourhood." );
   declareProperty("Ypixel", 0, "Optional: Lowest Y of neighbourhood when choosing only single neighbourhood." );
-  declareProperty("DetectorName", "", "Optional: Name of the detector when calculating for single neighbourhood." );
+  declareProperty("DetectorName", "", "Optional: Name of the detector when calculating for single neighbourhood." );*/
 
 
 
@@ -92,17 +93,27 @@ void SumNeighbours::exec()
 
   // Get the input workspace
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  Mantid::Geometry::IDetector_const_sptr det = inWS->getDetector(0);
+  // Check if grandparent is rectangular detector
+  boost::shared_ptr<const Geometry::IComponent> parent = det->getParent()->getParent();
+  boost::shared_ptr<const RectangularDetector> rect = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+  
   Mantid::API::MatrixWorkspace_sptr outWS;
 
   IAlgorithm_sptr smooth = createSubAlgorithm("SmoothNeighbours");
   smooth->setProperty("InputWorkspace", inWS);
-  //SmoothNeighbours(InputWorkspace='NOM_3778',OutputWorkspace='NOM_3778',RadiusUnits='NumberOfPixels',Radius='100',NumberOfNeighbours='224',SumNumberOfNeighbours='8')
-  smooth->setProperty("SumPixelsX",SumX);
-  smooth->setProperty("SumPixelsY",SumY);
-  smooth->setProperty<std::string>("RadiusUnits","NumberOfPixels");
-  smooth->setProperty("Radius",4.0*SumY);
-  smooth->setProperty("NumberOfNeighbours",SumY*SumY*4);
-  smooth->setProperty("SumNumberOfNeighbours",SumY);
+  if (rect)
+  {
+    smooth->setProperty("SumPixelsX",SumX);
+    smooth->setProperty("SumPixelsY",SumY);
+  }
+  else
+  {
+    smooth->setProperty<std::string>("RadiusUnits","NumberOfPixels");
+    smooth->setProperty("Radius",static_cast<double>(SumX*SumY*SumX*SumY));
+    smooth->setProperty("NumberOfNeighbours",SumX*SumY*SumX*SumY*4);
+    smooth->setProperty("SumNumberOfNeighbours",SumX*SumY);
+  }
   smooth->executeAsSubAlg();
   // Get back the result
   outWS = smooth->getProperty("OutputWorkspace");
