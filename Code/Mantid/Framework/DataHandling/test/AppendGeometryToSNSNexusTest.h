@@ -37,7 +37,9 @@ public:
     AppendGeometryToSNSNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
+    // TODO: Get a better test file.
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "CNCS_7860_event.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeCopy", true) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 

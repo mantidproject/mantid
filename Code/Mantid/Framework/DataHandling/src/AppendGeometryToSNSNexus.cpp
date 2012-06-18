@@ -16,6 +16,9 @@ and calculates the resolved positions of all the detectors and then writes this 
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace ::NeXus;
@@ -86,12 +89,32 @@ namespace DataHandling
   /** Execute the algorithm.
    */
   void AppendGeometryToSNSNexus::exec()
-  {
-
-      std::string nxdetector;
+  {          
 
       // Retrieve filename from the properties
       m_filename = getPropertyValue("Filename");
+
+      // Are we going to make a copy of the file ?
+      m_makeNexusCopy = getProperty("MakeCopy");
+
+      if (m_makeNexusCopy)
+      {
+          Poco::File originalFile(m_filename);
+          Poco::Path originalPath(m_filename);
+
+          if (originalFile.exists())
+          {
+              Poco::File duplicateFile(Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
+              originalFile.copyTo(duplicateFile.path());
+              g_log.notice() << "Copied " << m_filename << " to " << duplicateFile.path() << "." << std::endl ;
+              m_filename = duplicateFile.path();
+          }
+          else
+          {
+              g_log.error() << "Cannot copy a file that doesn't exist! (" << originalFile.path() << ")." << std::endl;
+          }
+
+      }
 
       // Let's look for the instrument name
       m_instrument = getInstrumentName(m_filename);
@@ -113,58 +136,166 @@ namespace DataHandling
       MatrixWorkspace_sptr ws;
       ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
+
+      // Get the number of detectors (just for progress reporting)
       // Get the number of histograms/detectors
-      const size_t numHistograms = ws->getNumberHistograms();
+      const size_t numDetectors = ws->getInstrument()->getDetectorIDs().size();
 
-      g_log.information() << "Number of Histograms = " << numHistograms << std::endl;
+      this->progress = new API::Progress(this, 0.0, 1.0, numDetectors);
 
-      this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
 
+      // Get the instrument
+      Geometry::Instrument_const_sptr instrument = ws->getInstrument();
 
       // Get the sample (needed to calculate distances)
-      Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      // Get the source (moderator)
+      Geometry::IObjComponent_const_sptr source = instrument->getSource();
 
 
-      for (size_t i=0; i < numHistograms; ++i)
+      // Get a list of the NXdetectors in the NeXus file
+      std::vector<std::string> nxdetectors;
+
+      // Open the NeXus file
+      ::NeXus::File nxfile(m_filename, NXACC_RDWR);
+
+      //typedef std::map<std::string,std::string> string_map_t;
+      std::map<std::string,std::string>::const_iterator root_iter;
+      std::map<std::string, std::string> entries = nxfile.getEntries();
+
+      for (root_iter = entries.begin(); root_iter != entries.end(); ++root_iter)
       {
-          Geometry::IDetector_const_sptr det = ws->getDetector(i);
-          if (det->isMonitor())
+          // Open all NXentry
+          if (root_iter->second == "NXentry")
           {
-              // TODO: Do the correct thing for the monitors
-              g_log.warning() << "Monitors are not supported in this version. Sorry! :-( " << std::endl;
+              nxfile.openGroup(root_iter->first, "NXentry");
+
+              // Get a list of items within the entry.
+              std::map<std::string, std::string> entry_items = nxfile.getEntries();
+              // Create an iterator for this
+              std::map<std::string,std::string>::const_iterator entry_iter;
+
+
+              for (entry_iter = entry_items.begin(); entry_iter != entry_items.end(); ++entry_iter)
+              {
+                  // Look for an instrument
+                  if (entry_iter->second == "NXinstrument")
+                  {
+                      // Open the instrument
+                      nxfile.openGroup(entry_iter->first, "NXinstrument");
+                      std::map<std::string, std::string> instr_items = nxfile.getEntries();
+                      std::map<std::string,std::string>::const_iterator instr_iter;
+                      for (instr_iter = instr_items.begin(); instr_iter != instr_items.end(); ++instr_iter)
+                      {
+                          // Look for NXdetectors
+                          if (instr_iter->second == "NXdetector")
+                          {
+                              g_log.debug() << "Detector called '" << instr_iter->first << "' found." << std::endl;
+                              std::string bankName = instr_iter->first;
+                              std::vector<Geometry::IDetector_const_sptr> dets;
+                              ws->getInstrument()->getDetectorsInBank(dets, bankName);
+
+                              if (!dets.empty())
+                              {
+                                  nxfile.openGroup(bankName, "NXdetector");
+
+                                  // Let's create some vectors for the parameters to write
+                                  // Pixel IDs
+                                  std::vector<int> pixel_id;
+                                  std::vector<double> distance;
+                                  std::vector<double> polar_angle;
+                                  std::vector<double> azimuthal_angle;
+
+                                  pixel_id.reserve(dets.size());
+                                  distance.reserve(dets.size());
+                                  polar_angle.reserve(dets.size());
+                                  azimuthal_angle.reserve(dets.size());
+
+
+                                  for (std::size_t i=0; i < dets.size(); i++)
+                                  {
+                                      pixel_id.push_back(dets[i]->getID());
+                                      distance.push_back(dets[i]->getDistance(*sample));
+                                      azimuthal_angle.push_back(dets[i]->getPhi());
+                                      polar_angle.push_back(ws->detectorTwoTheta(dets[i]));
+                                  }
+
+                                  // Write Pixel ID to file
+                                  nxfile.writeData("pixel_id_new", pixel_id);
+
+                                  // Write Secondary Flight Path to file
+                                  nxfile.writeData("distance_new", distance);
+                                  nxfile.openData("distance_new");
+                                  nxfile.putAttr("units", "metre");
+                                  nxfile.closeData();
+
+                                  // Write Polar Angle (2theta) to file
+                                  nxfile.writeData("polar_angle_new", polar_angle);
+                                  nxfile.openData("polar_angle_new");
+                                  nxfile.putAttr("units", "radian");
+                                  nxfile.closeData();
+
+                                  // Write Azimuthal Angle (Phi) to file
+                                  nxfile.writeData("azimuthal_angle_new", azimuthal_angle);
+                                  nxfile.openData("azimuthal_angle_new");
+                                  nxfile.putAttr("units", "radian");
+                                  nxfile.closeData();
+
+                                  nxfile.closeGroup(); // close NXdetector
+
+                                  this->progress->report(dets.size());
+                              }
+                              else
+                              {
+                                  throw std::runtime_error("Could not find any detectors for the bank named" + bankName +
+                                                           " that is listed in the NeXus file."
+                                                           "Check that it exists in the Instrument Definition FIle.");
+                              }
+
+                          }
+                      }
+
+                      nxfile.closeGroup(); // NXinstrument
+
+                  }
+                  // Look for monitors
+                  else if (entry_iter->second == "NXmonitor")
+                  {
+                        g_log.debug() << "Monitor called '" << entry_iter->first << "' found." << std::endl;
+                        nxfile.openGroup(entry_iter->first, "NXmonitor");
+
+                        Geometry::IComponent_const_sptr monitor = instrument->getComponentByName(entry_iter->first);
+
+                        // Write Pixel ID to file
+                        //nxfile.writeData("pixel_id_new", monitor->get);
+
+                        double source_monitor = source->getDistance(*monitor);
+                        double source_sample = source->getDistance(*sample);
+
+                        g_log.debug() << "source->monitor=" << source_monitor << std::endl;
+                        g_log.debug() << "source->sample=" << source_sample << std::endl;
+                        g_log.debug() << "sample->monitor=" << (source_monitor-source_sample) << std::endl;
+
+                        // Distance
+                        nxfile.writeData("distance_new", (source_monitor-source_sample));
+                        nxfile.openData("distance_new");
+                        nxfile.putAttr("units", "metre");
+                        nxfile.closeData();
+
+
+                        nxfile.closeGroup();  // NXmonitor
+
+                  }
+
+
+              }
+
+
           }
           else
           {
-              // Detector
-
-
-              //TODO: These are in Radians - check what they should be in NeXus file.
-              double polar = ws->detectorTwoTheta(det);
-              double azimuthal = det->getPhi();
-              double l2 = det->getDistance(*sample);
-
-              g_log.debug() << "detector(" << det->getID() << ") : " << l2 << "," << polar << ","
-                              << azimuthal << std::endl;
-
-              // Get the NXdetector name for this detector
-              if (det->hasParameter("NXdetectorName"))
-              {
-                  nxdetector = det->getStringParameter("NXdetectorName").at(0);
-                  g_log.debug() << "DetectorID: " << det->getID() << " --> " << nxdetector << std::endl;
-
-
-                  //TODO: Open the correct place in the NeXus file
-
-              }
-              else
-              {
-                  // We have to try and determine this from the hierarchy
-                  // TODO: Decide if we should bother doing this or not - or just fail.s
-              }
-
+              g_log.error() << "There are no NXentry nodes in the specified NeXus file." << std::endl;
           }
-
-          this->progress->report();
 
       }
 
