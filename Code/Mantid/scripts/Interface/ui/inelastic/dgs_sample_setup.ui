@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
-    <height>473</height>
+    <width>1195</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,6 +24,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="sample_label">
+       <property name="minimumSize">
+        <size>
+         <width>110</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Sample Data</string>
        </property>
@@ -44,6 +50,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -58,13 +67,26 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="ei_label">
+       <property name="minimumSize">
+        <size>
+         <width>110</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Incident Energy</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="ei_edit"/>
+      <widget class="QLineEdit" name="ei_edit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="ei_units_label">
@@ -77,6 +99,9 @@
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -118,13 +143,29 @@
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QLabel" name="etr_low_label">
+          <property name="minimumSize">
+           <size>
+            <width>93</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Low</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="etr_low_edit"/>
+         <widget class="QLineEdit" name="etr_low_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="etr_width_label">
@@ -134,7 +175,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="etr_width_edit"/>
+         <widget class="QLineEdit" name="etr_width_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="etr_high_label">
@@ -144,7 +192,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="etr_high_edit"/>
+         <widget class="QLineEdit" name="etr_high_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -168,6 +223,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="hardmask_label">
+       <property name="minimumSize">
+        <size>
+         <width>110</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Hard Mask</string>
        </property>
@@ -188,6 +249,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -202,6 +266,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="grouping_label">
+       <property name="minimumSize">
+        <size>
+         <width>110</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Grouping</string>
        </property>
@@ -221,6 +291,9 @@
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
