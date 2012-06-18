@@ -823,18 +823,20 @@ public:
     {
       // ------ Use expected answer --------------------
       bool breakOut=false;
+      std::string  dummy;
       for (size_t wi=0; wi < work_out1->getNumberHistograms(); wi++)
       {
         for (size_t i=0; i<work_out1->blocksize(); i++)
         {
-          std::ostringstream mess;
-          mess << message << ", evaluated at wi " << wi << ", i " << i;
-        
+          //std::ostringstream mess;
+          //mess << message << ", evaluated at wi " << wi << ", i " << i;
           TS_ASSERT_DELTA(work_in1->readX(wi)[i], work_out1->readX(wi)[i], 0.0001);
           double sig3 = work_out1->readY(wi)[i];
           double err3 = work_out1->readE(wi)[i];
-          TSM_ASSERT_DELTA(mess.str(), sig3, expectedValue, 0.0001);
-          TSM_ASSERT_DELTA(mess.str(), err3, expectedError, 0.0001);
+          TS_ASSERT_DELTA(sig3, expectedValue, 0.0001);
+          TS_ASSERT_DELTA(err3, expectedError, 0.0001);
+          //TSM_ASSERT_DELTA(mess.str(), sig3, expectedValue, 0.0001);
+          //TSM_ASSERT_DELTA(mess.str(), err3, expectedError, 0.0001);
           if (fabs(err3 - expectedError) > 0.001)
           {
             breakOut=true;
