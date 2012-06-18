@@ -291,9 +291,6 @@ protected:
 
   /// A map to keep track of replace workspace button presses
   QHash<QPushButton*, int> m_wsbtn_tracker;
-
-  /// A signal mapper
-  QSignalMapper *m_signal_mapper;
   //@}
 };
 
