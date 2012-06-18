@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "boost/tokenizer.hpp"
@@ -40,7 +41,17 @@ namespace DataHandling
   {
     // Options for the Instrument = all the listeners that are registered.
     std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
-    declareProperty(new PropertyWithValue<std::string>("Instrument","", boost::make_shared<StringListValidator>(listeners)),
+    std::vector<std::string> instruments;
+    auto& instrInfo = Kernel::ConfigService::Instance().getFacility().instruments();
+    for(auto it = instrInfo.begin(); it != instrInfo.end(); ++it)
+    {
+      if ( !it->liveDataAddress().empty() )
+      {
+        instruments.push_back( it->name() );
+      }
+    }
+    instruments.insert( instruments.end(), listeners.begin(), listeners.end() );
+    declareProperty(new PropertyWithValue<std::string>("Instrument","", boost::make_shared<StringListValidator>(instruments)),
         "Name of the instrument to monitor.");
 
     declareProperty(new PropertyWithValue<std::string>("StartTime","",Direction::Input),

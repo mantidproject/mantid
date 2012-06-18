@@ -2,7 +2,10 @@
 # GMOCK_INCLUDE_DIR where to find gmock.h
 # GMOCK_FOUND If false, do not try to use Google Mock
 
-SET(GMOCK_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.6.0/include)
+find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
+            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.6.0/include
+                  ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.6.0/include
+            NO_DEFAULT_PATH )
 
 SET(GMOCK_LIB gmock)
 SET(GMOCK_LIB_DEBUG gmock)

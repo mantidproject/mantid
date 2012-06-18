@@ -29,7 +29,9 @@ class DgsReductionScripter(BaseReductionScripter):
         script =  "%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
         for item in self._observers:
             if item.state() is not None:
-                script += DgsReductionScripter.WIDTH + str(item.state())
+                for subitem in str(item.state()).split('\n'):
+                    if len(subitem):
+                        script += DgsReductionScripter.WIDTH + subitem + "\n"
         script += DgsReductionScripter.WIDTH_END + ")\n"
         
         if file_name is not None:

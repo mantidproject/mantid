@@ -8,6 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <Poco/Net/SocketAddress.h>
 #include "MantidKernel/DateAndTime.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/DllConfig.h"
 
 namespace Mantid
@@ -112,6 +113,11 @@ namespace Mantid
        *  @return A value of the RunStatus enumeration indicating the present status
        */
       virtual ILiveListener::RunStatus runStatus() = 0;
+
+      /** Sets a list of spectra to be extracted. Default is reading all available spectra.
+       * @param specList :: A vector with spectra indices.
+       */
+      virtual void setSpectra(const std::vector<specid_t>& specList) {(void)specList;}
 
       /// Constructor.
       ILiveListener();

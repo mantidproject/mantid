@@ -66,7 +66,7 @@ def is_supported_f2py_platform():
     #   _numpy_ver() == "1.5.1":
     #    return True
     #if _os_env() == "Linux64bit" and \
-    #   _linux_distro_name() == "Red Hat Enterprise Linux Workstation" and \
+    #   _linux_distro_name()[0:24] == "Red Hat Enterprise Linux" and \
     #   _linux_distro_version() == "6.2" and \
     #   _numpy_ver() == "1.3.0":
     #    return True

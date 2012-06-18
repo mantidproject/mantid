@@ -35,6 +35,8 @@ class BaseRefWidget(BaseWidget):
     y_axis = []
     e_axis = []
 
+    bDEBUG = False
+
     def __init__(self, parent=None, state=None, settings=None, name="", data_proxy=None):      
         super(BaseRefWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
@@ -91,12 +93,15 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
         self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked(bool)"), self._fourth_column_clicked)
         self.connect(self._summary.create_ascii_button, QtCore.SIGNAL("clicked()"), self._create_ascii_clicked)
+        self.connect(self._summary.use_sf_config_switch, QtCore.SIGNAL("clicked(bool)"), self._use_sf_config_clicked)
         
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
 #        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self.refresh_data_peak_counts_vs_pixel)
 
+        call_back = partial(self._edit_event, ctrl=self._summary.use_sf_config_switch)
+        self.connect(self._summary.use_sf_config_switch, QtCore.SIGNAL("clicked()"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_to_pixel)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel1)
@@ -133,7 +138,6 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
         self._run_number_first_edit = True
         
-
         call_back = partial(self._edit_event, ctrl=self._summary.slits_width_flag)
         self.connect(self._summary.slits_width_flag, QtCore.SIGNAL("clicked()"), call_back)
  
@@ -196,6 +200,10 @@ class BaseRefWidget(BaseWidget):
         new_y_axis = []
         new_e_axis = []
         
+        if self.bDEBUG:
+            print 'x_axis before _smooth_x_axis:'
+            print x_axis
+        
         sz = len(x_axis)        
         i=0
         while (i < sz-1):
@@ -247,6 +255,11 @@ class BaseRefWidget(BaseWidget):
     
             i+=1
     
+        if self.bDEBUG:
+            print
+            print 'x-axis after _smooth_x_axis:'
+            print new_x_axis
+    
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
         self.e_axis = new_e_axis
@@ -284,7 +297,6 @@ class BaseRefWidget(BaseWidget):
         e_axis = mt.readE(0)[:]
         
         self._smooth_x_axis(x_axis, y_axis, e_axis)
-        
         x_axis = self.x_axis
         y_axis = self.y_axis
         e_axis = self.e_axis
@@ -360,6 +372,7 @@ class BaseRefWidget(BaseWidget):
         
     def _reset_warnings(self):
         self._summary.edited_warning_label.hide()
+        util.set_edited(self._summary.use_sf_config_switch, False)
         util.set_edited(self._summary.data_peak_from_pixel, False)
         util.set_edited(self._summary.data_peak_to_pixel, False)
         util.set_edited(self._summary.data_background_from_pixel1, False)
@@ -629,6 +642,15 @@ class BaseRefWidget(BaseWidget):
         
         self._edit_event(None, self._summary.tof_range_switch)
 
+    def _use_sf_config_clicked(self, is_checked):
+        """
+            This is reached by the 'Use SF configuration file'
+        """
+        self._summary.outdir_label_3.setEnabled(is_checked)
+        self._summary.cfg_scaling_factor_file_name.setEnabled(is_checked)
+        self._summary.cfg_scaling_factor_file_name_browse.setEnabled(is_checked)
+        self._summary.slits_width_flag.setEnabled(is_checked)
+
     def _plot_count_vs_y(self, is_peak=True):
         """
             Plot counts as a function of high-resolution pixels
@@ -753,6 +775,7 @@ class BaseRefWidget(BaseWidget):
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
+
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
             in_list = True
@@ -774,6 +797,10 @@ class BaseRefWidget(BaseWidget):
                 state.q_step = float(_q_step)
         
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
+                if (self._summary.use_sf_config_switch.isChecked()):
+                    state.scaling_factor_file_flag = True
+                else:
+                    state.scaling_factor_file_flag = False
                 
                 state.slits_width_flag = self._summary.slits_width_flag.isChecked()
                 
@@ -795,9 +822,22 @@ class BaseRefWidget(BaseWidget):
                 i+=1        
         
         else:
+                        
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
             
+            if (self._summary.use_sf_config_switch.isChecked()):
+                state.scaling_factor_file_flag = True
+            else:
+                state.scaling_factor_file_flag = False
+
+            _q_min = self._summary.q_min_edit.text()
+            state.q_min = float(_q_min)
+            _q_step = self._summary.q_step_edit.text()
+            if self._summary.log_scale_chk.isChecked():
+                _q_step = '-' + _q_step
+            state.q_step = float(_q_step)
+
              #incident medium
             _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
                                      for j in range(self._summary.incident_medium_combobox.count())]
@@ -923,8 +963,10 @@ class BaseRefWidget(BaseWidget):
                 self._summary.outdir_edit.setText(str(state.output_dir))
             
         #scaling factor file and options
+        self._summary.use_sf_config_switch.setChecked(state.scaling_factor_file_flag)
         self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
         self._summary.slits_width_flag.setChecked(state.slits_width_flag)
+        self._use_sf_config_clicked(state.scaling_factor_file_flag)
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))

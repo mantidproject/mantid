@@ -100,10 +100,17 @@ class RefLview(PythonAlgorithm):
             _line = ' Run start: ' + run_start
             print _line
             
+            #duration
+            duration_value = mt_run.getProperty('duration').value
+            duration_units = mt_run.getProperty('duration').units
+            _line = ' Duration: {0:.2f}'.format(duration_value)
+            _line += ' ' + duration_units
+            print _line
+            
             #Lambda Requested
             lambda_request_value = mt_run.getProperty('LambdaRequest').value[0]
             lambda_request_units = mt_run.getProperty('LambdaRequest').units
-            _line = ' Lambda requested: ' + str(lambda_request_value)
+            _line = ' Lambda requested: {0:.2f}'.format(lambda_request_value)
             _line += ' ' + lambda_request_units
             print _line
             
@@ -118,6 +125,12 @@ class RefLview(PythonAlgorithm):
             thi_value = mt_run.getProperty('thi').value[0]
             thi_units = mt_run.getProperty('thi').units
             _line = ' thi: {0:.4f}'.format(thi_value)
+            _line += ' ' + thi_units
+            print _line
+            
+            #(tthd-thi)/2
+            _cal = (float(tthd_value)-float(thi_value))/2.
+            _line = ' (tthd-thi)/2: {0:.2f}'.format(_cal)
             _line += ' ' + thi_units
             print _line
             

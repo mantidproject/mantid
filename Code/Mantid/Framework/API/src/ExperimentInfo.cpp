@@ -12,10 +12,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/regex.hpp>
 #include <map>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
-#include <Poco/RegularExpression.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <fstream>
@@ -492,7 +492,7 @@ namespace API
     // Get the search directory for XML instrument definition files (IDFs)
     std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
 
-    Poco::RegularExpression regex(instrument+"_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
+    boost::regex regex(instrument+"_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
     DateAndTime d(date);
     bool foundGoodFile = false; // True if we have found a matching file (valid at the given date)
@@ -504,7 +504,7 @@ namespace API
       if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
       std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-      if ( regex.match(l_filenamePart) )
+      if ( regex_match(l_filenamePart, regex) )
       {
         g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
         std::string validFrom, validTo;

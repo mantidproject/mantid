@@ -60,6 +60,9 @@ namespace DataHandling
     /// Get the instrument name from the NeXus file
     std::string getInstrumentName(const std::string & nxfilename);
 
+    /// Algorithm progress keeper
+    API::Progress *progress;
+
   };
 
 

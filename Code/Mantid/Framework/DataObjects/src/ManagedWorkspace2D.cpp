@@ -195,9 +195,8 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,std::size_t 
 
       int fileIndex = 0;
       //while (seekPoint > std::numeric_limits<int>::max())
-      while (seekPoint > m_fileSize)
+      while (seekPoint >= m_fileSize)
       {
-        //seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
         seekPoint -= m_fileSize;
         ++fileIndex;
       }
@@ -271,7 +270,7 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
     long long seekPoint = toWrite->minIndex() * m_vectorSize;
 
     //while (seekPoint > std::numeric_limits<int>::max())
-    while (seekPoint > m_fileSize)
+    while (seekPoint >= m_fileSize)
     {
       seekPoint -= m_fileSize;
       ++fileIndex;

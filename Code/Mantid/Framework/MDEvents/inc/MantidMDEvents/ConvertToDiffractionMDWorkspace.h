@@ -81,7 +81,7 @@ namespace MDEvents
     /// Sample position
     Kernel::V3D samplePos;
     /// Progress reporter (shared)
-    Kernel::ProgressBase * prog;
+    boost::shared_ptr<Kernel::ProgressBase> prog;
     /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
     Kernel::Matrix<double> mat;
 

@@ -64,10 +64,8 @@ namespace Algorithms
 class DLLExport CheckWorkspacesMatch : public API::Algorithm
 {
 public:
-  /// (Empty) Constructor
-  CheckWorkspacesMatch() : API::Algorithm(), result() {}
-  /// Virtual destructor
-  virtual ~CheckWorkspacesMatch() {}
+  CheckWorkspacesMatch();
+  virtual ~CheckWorkspacesMatch();
   /// Algorithm's name
   virtual const std::string name() const { return "CheckWorkspacesMatch"; }
   /// Algorithm's version

@@ -82,7 +82,7 @@ namespace Crystal
   void SaveIsawPeaks::exec()
   {
     // Section header
-    std::string header = "2   SEQN    H    K    L     COL      ROW     CHAN        L2   2_THETA        AZ         WL         D      IPK          INTI    SIGI  RFLG";
+    std::string header = "2   SEQN    H    K    L     COL      ROW     CHAN        L2   2_THETA        AZ         WL         D      IPK       INTI    SIGI  RFLG";
 
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
@@ -290,7 +290,8 @@ namespace Crystal
             // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
             scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
 
-            // "Azimuthal" angle: project the beam onto the XY plane, and measure the angle between that and the +X axis (right-handed)
+            // "Azimuthal" angle: project the scattered beam direction onto the XY plane, 
+            // and calculate the angle between that and the +X axis (right-handed)
             azimuth = atan2( dir.Y(), dir.X() );
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
@@ -305,8 +306,11 @@ namespace Crystal
             out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
               << p.getDSpacing() << " ";
 
-            out << std::setw( 8 ) << std::fixed << int(p.getBinCount()) << std::setw( 10 ) << " "
-              << std::fixed << std::setprecision( 2 ) << p.getIntensity() << " ";
+            out << std::setw( 8 ) << std::fixed << std::setprecision(0)
+              << int(p.getBinCount()) << " ";
+
+            out << std::setw( 10 ) << std::fixed << std::setprecision( 2 ) 
+              << p.getIntensity() << " ";
 
             out << std::setw( 7 ) << std::fixed << std::setprecision( 2 )
               << p.getSigmaIntensity() << " ";

@@ -166,6 +166,9 @@ void SmoothNeighbours::init()
   declareProperty("NumberOfNeighbours", 8, mustBePositive, "Number of nearest neighbouring pixels.\n"
     "Alternative to providing the radius. The default is 8.");
 
+  declareProperty("SumNumberOfNeighbours", 1, "Sum nearest neighbouring pixels with same parent.\n"
+    "Number of pixels will be reduced. The default is false.");
+
   declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
 
   std::vector<std::string> propOptions;
@@ -283,7 +286,12 @@ void SmoothNeighbours::findNeighboursRectangular()
   }
 
   if (detList.empty())
-    throw std::runtime_error("This instrument does not have any RectangularDetector's. SmoothNeighbours cannot operate on this instrument at this time.");
+  {
+    Radius = translateToMeters("NumberOfPixels", std::max(AdjX,AdjY));
+    nNeighbours = AdjX * AdjY * AdjX * AdjY;
+    std::cout << Radius <<"  "<<nNeighbours<<"\n";
+    findNeighboursUbiqutious();
+  }
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
@@ -391,7 +399,6 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
 
-  int nNeighbours = getProperty("NumberOfNeighbours");
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
 
   //Cull by radius
@@ -400,14 +407,28 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   IDetector_const_sptr det;
   // Go through every input workspace pixel
   outWI = 0;
+  int sum = getProperty("SumNumberOfNeighbours");
+  boost::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent, neighbGParent;
+  bool* used = new bool[inWS->getNumberHistograms()];
+  if (sum > 1)
+  {
+    for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
+      used[wi] = false;
+  }
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
   {
+    if (sum > 1 ) if (used[wi]) continue;
     // We want to skip monitors
     try
     {
       det = inWS->getDetector(wi);
       if( det->isMonitor() ) continue; //skip monitor
       if( det->isMasked() ) continue; //skip masked detectors
+      if(sum > 1)
+      {
+        parent = det->getParent();
+        grandparent = parent->getParent();
+      }
     }
     catch(Kernel::Exception::NotFoundError&)
     {
@@ -428,6 +449,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 
     // Neighbours and weights list
     double totalWeight = 0;
+    int noNeigh = 0;
     std::vector< weightedNeighbour > neighbours;
 
     // Convert from spectrum numbers to workspace indices
@@ -445,6 +467,14 @@ void SmoothNeighbours::findNeighboursUbiqutious()
         if (mapIt != spec2index->end())
         {
           size_t neighWI = mapIt->second;
+          if(sum > 1)
+          {
+            neighbParent = inWS->getDetector(neighWI)->getParent();
+            neighbGParent = neighbParent->getParent();
+            if(noNeigh >= sum || neighbParent->getName().compare(parent->getName()) > 0 || neighbGParent->getName().compare(grandparent->getName()) > 0 || used[neighWI])continue;
+            noNeigh++;
+            used[neighWI] = true;
+          }
           neighbours.push_back( weightedNeighbour(neighWI, weight) );
           totalWeight += weight;
         }
@@ -452,17 +482,18 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     } 
 
     // Adjust the weights of each neighbour to normalize to unity
-    for (size_t q=0; q<neighbours.size(); q++)
+    if (sum == 1) for (size_t q=0; q<neighbours.size(); q++)
       neighbours[q].second /= totalWeight;
 
     // Save the list of neighbours for this output workspace index.
-    m_neighbours[wi] = neighbours;
+    m_neighbours[outWI] = neighbours;
     outWI++;
 
     m_prog->report("Finding Neighbours");
   } // each workspace index
 
   delete spec2index;
+  delete [] used;
 }
 
 /**
@@ -572,6 +603,7 @@ void SmoothNeighbours::exec()
 
   // Retrieve the optional properties
   double enteredRadius = getProperty("Radius");
+  nNeighbours = getProperty("NumberOfNeighbours");
 
   // Use the unit type to translate the entered radius into meters.
   Radius = translateToMeters(getProperty("RadiusUnits"), enteredRadius);

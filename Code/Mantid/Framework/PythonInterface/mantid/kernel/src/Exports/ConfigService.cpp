@@ -22,8 +22,17 @@ namespace
     self.setDataSearchDirs(Converters::PySequenceToVector<std::string>(paths)());
   }
 
+
+   /// Forward call from __getitem__ to getString with use_cache_true
+   std::string getStringUsingCache(ConfigServiceImpl &self, const std::string & key)
+   {
+     return self.getString(key, true);
+   }
+
   /// Overload generator for getInstrument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 0, 1);
+  /// Overload generator for getString
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2);
 }
 
 void export_ConfigService()
@@ -49,8 +58,9 @@ void export_ConfigService()
           getInstrument_Overload("Returns the named instrument. If name = \"\" then the default.instrument is returned",
                                  (arg("instrumentName")=""))[return_value_policy<copy_const_reference>()])
 
-    .def("getString", (std::string (ConfigServiceImpl::*)(const std::string &))&ConfigServiceImpl::getString,
-         "Return the given property")
+    .def("getString", &ConfigServiceImpl::getString,
+          getString_Overload("Returns the named key's value. If use_cache = true [default] then relative paths->absolute",
+                             (arg("key"),arg("use_cache")=true)))
 
     .def("setString", &ConfigServiceImpl::setString, "Set the given property name. "
          "If it does not exist it is added to the current configuration")
@@ -70,7 +80,7 @@ void export_ConfigService()
          "Set the  datasearch.directories property from a list of strings.")
 
     // Treat this as a dictionary
-    .def("__getitem__", (std::string (ConfigServiceImpl::*)(const std::string &))&ConfigServiceImpl::getString)
+    .def("__getitem__", getStringUsingCache)
     .def("__setitem__", &ConfigServiceImpl::setString)
     .def("__contains__", &ConfigServiceImpl::hasProperty)
     .def("Instance", &ConfigService::Instance,  return_value_policy<reference_existing_object>(),

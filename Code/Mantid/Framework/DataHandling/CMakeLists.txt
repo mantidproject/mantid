@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
 	src/ISISDataArchive.cpp
+	src/ISISHistoDataListener.cpp
 	src/LiveDataAlgorithm.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
@@ -147,6 +148,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
 	inc/MantidDataHandling/ISISDataArchive.h
+	inc/MantidDataHandling/ISISHistoDataListener.h
 	inc/MantidDataHandling/LiveDataAlgorithm.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -269,12 +271,13 @@ set ( TEST_FILES
 	test/GroupDetectors2Test.h
 	test/GroupDetectorsTest.h
 	test/ISISDataArchiveTest.h
+	test/ISISHistoDataListenerTest.h
 	test/InstrumentRayTracerTest.h
 	test/LiveDataAlgorithmTest.h
 	test/LoadAsciiTest.h
 	test/LoadCalFileTest.h
 	test/LoadCanSAS1dTest.h
-	test/LoadDAETest.h
+	#test/LoadDAETest.h
 	test/LoadDaveGrpTest.h
 	test/LoadDetectorInfoTest.h
 	test/LoadDetectorsGroupingFileTest.h
@@ -311,7 +314,7 @@ set ( TEST_FILES
 	test/LoadRawBin0Test.h
 	test/LoadRawSpectrum0Test.h
 	test/LoadRawTest.h
-#	test/LoadSassenaTest.h
+	#test/LoadSassenaTest.h
 	test/LoadSNSEventNexusTest.h
 	test/LoadSNSspecTest.h
 	test/LoadSPETest.h

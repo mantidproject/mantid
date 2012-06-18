@@ -13,6 +13,7 @@
 
 #include "LoadRaw/isisraw2.h"
 
+#include <boost/regex.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/lexical_cast.hpp>
@@ -22,7 +23,6 @@
 #include <Poco/DirectoryIterator.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
-#include <Poco/RegularExpression.h>
 
 #include <sstream>
 #include <algorithm>
@@ -960,7 +960,7 @@ void SaveISISNexus::selog()
     l_filenamePart.erase(i);
   }
   std::string base_name = l_filenamePart;
-  Poco::RegularExpression regex(l_filenamePart + "_.*\\.txt", Poco::RegularExpression::RE_CASELESS );
+  boost::regex regex(l_filenamePart + "_.*\\.txt", boost::regex_constants::icase);
   Poco::DirectoryIterator end_iter;
   for ( Poco::DirectoryIterator dir_itr(Poco::Path(inputFilename).parent()); dir_itr != end_iter; ++dir_itr )
   {
@@ -968,7 +968,7 @@ void SaveISISNexus::selog()
 
     l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
 
-    if ( regex.match(l_filenamePart) )
+    if ( boost::regex_match(l_filenamePart, regex) )
     {
       potentialLogFiles.push_back( dir_itr->path() );
     }

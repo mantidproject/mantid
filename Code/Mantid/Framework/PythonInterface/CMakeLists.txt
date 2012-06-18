@@ -89,6 +89,7 @@ set ( TEST_PY_FILES
   test/python/FacilityInfoTest.py
   test/python/FilePropertyTest.py
   test/python/FileFinderTest.py
+  test/python/FindReflectometryLinesTest.py
   test/python/FrameworkManagerTest.py
   test/python/IComponentTest.py
   test/python/IEventWorkspaceTest.py

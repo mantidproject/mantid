@@ -13,6 +13,8 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
@@ -88,7 +90,14 @@ namespace Mantid
       if (!inst)
         throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
+      // Init a table workspace
+      DataObjects::TableWorkspace_sptr tablews =
+          boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+      tablews->addColumn("double", "XMin");
+      tablews->addColumn("double", "XMax");
+      tablews->addColumn("str", "SpectraList");
  
+      // Loop of peaks
       std::vector <std::pair<double, int> >::iterator Iter1;
       for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; ++Iter1 )
       {
@@ -121,13 +130,34 @@ namespace Mantid
             {
               size_t wi = (*pixel_to_wi)[pixelID];
               const MantidVec& X = inputW->readX(wi);
-              inputW->getEventList(wi).maskTof(X[0],X[X.size()-1]);
+
+              // Add information to TableWorkspace
+              API::TableRow newrow = tablews->appendRow();
+              newrow << X[0] <<  X[X.size()-1];
+              std::stringstream ss;
+              ss << wi;
+              newrow << ss.str();
+
+              // inputW->getEventList(wi).maskTof(X[0],X[X.size()-1]);
+              // std::cout << wi << ", " << X[0] << ", " << X[X.size()-1] << std::endl;
             }
           }
+      } // ENDFOR(Iter1)
 
-      }
-    //Clean up memory
-    delete pixel_to_wi;
+      // Mask bins
+      API::IAlgorithm_sptr maskbinstb = this->createSubAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
+      maskbinstb->initialize();
+
+      maskbinstb->setPropertyValue("InputWorkspace", inputW->getName());
+      maskbinstb->setPropertyValue("OutputWorkspace", inputW->getName());
+      maskbinstb->setProperty("MaskingInformation", tablews);
+
+      maskbinstb->execute();
+
+      //Clean up memory
+      delete pixel_to_wi;
+
+      return;
     }
 
     void MaskPeaksWorkspace::retrieveProperties()

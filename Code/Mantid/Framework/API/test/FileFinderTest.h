@@ -241,6 +241,12 @@ public:
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
   }
 
+  void testFindRunsDefaultInst()
+  {
+    ConfigService::Instance().setString("default.instrument", "MUSR");
+    std::vector<std::string> paths = FileFinder::Instance().findRuns("15189-15190");
+    TS_ASSERT( paths.size() == 2 );
+  }
 
   // test to see if case sensitive on/off works
   void testFindFileCaseSensitive()

@@ -46,6 +46,7 @@ class DataSets(BaseScriptElement):
 
     #scaling factor file
     scaling_factor_file = ''
+    scaling_factor_file_flag = True
     slits_width_flag = True
 
     #incident medium list and selected value
@@ -99,9 +100,13 @@ class DataSets(BaseScriptElement):
             script += "              AngleOffsetError=%s,\n" % str(self.angle_offset_error)
            
         # sf configuration file
-        if self.scaling_factor_file != '':
-            script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)   
-            script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
+#        if self.scaling_factor_file != '':
+        if (self.scaling_factor_file_flag):
+            script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)
+        else:
+            script += "ScalingFactorFile='',\n"
+               
+        script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
@@ -163,6 +168,7 @@ class DataSets(BaseScriptElement):
         xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
         
         # scaling factor file name
+        xml += "<scaling_factor_flag>%s</scaling_factor_flag>\n" % str(self.scaling_factor_file_flag)
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
         
@@ -266,6 +272,7 @@ class DataSets(BaseScriptElement):
         #scaling factor file and options
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
         self.slits_width_flag = BaseScriptElement.getBoolElement(instrument_dom, "slits_width_flag")
+        self.scaling_factor_file_flag = BaseScriptElement.getBoolElement(instrument_dom, "scaling_factor_flag")
         
         #incident medium selected
         if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:        
@@ -315,6 +322,7 @@ class DataSets(BaseScriptElement):
         #scaling factor file and options
         self.scaling_factor_file = DataSets.scaling_factor_file
         self.slits_width_flag = DataSets.slits_width_flag
+        self.scaling_factor_file_flag = DataSets.scaling_factor_file_flag
         
         #incident medium selected
         self.incident_medium_list = DataSets.incident_medium_list

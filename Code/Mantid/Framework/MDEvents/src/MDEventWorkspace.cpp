@@ -37,7 +37,7 @@ namespace MDEvents
    */
   TMDE(
   MDEventWorkspace)::MDEventWorkspace()
-  : m_BoxController(new BoxController(nd))
+  : m_BoxController(boost::make_shared<BoxController>(nd))
   {
     // First box is at depth 0, and has this default boxController
     data = new MDBox<MDE, nd>(m_BoxController, 0);
@@ -530,6 +530,7 @@ namespace MDEvents
       if (!box) throw
           std::runtime_error("MDEventWorkspace::splitBox() expected its data to be a MDBox* to split to MDGridBox.");
       gridBox = new MDGridBox<MDE,nd>(box);
+      delete data;
       data = gridBox;
     }
   }

@@ -517,9 +517,7 @@ namespace MDEvents
     size_t totalEvents = m_inWS->size();
     if (m_inEventWS && !OneEventPerBin)
       totalEvents = m_inEventWS->getNumberEvents();
-    prog = new Progress(this, 0, 1.0, totalEvents);
-//    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
-//    if (DODEBUG) prog->setNotifyStep(1);
+    prog = boost::make_shared<Progress>(this, 0, 1.0, totalEvents);
 
     // Is the addition of events thread-safe?
     bool MultiThreadedAdding = m_inWS->threadSafe();
