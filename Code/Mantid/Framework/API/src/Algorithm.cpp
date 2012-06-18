@@ -487,7 +487,7 @@ namespace Mantid
       }
 
       // ----- Check for processing groups -------------
-      //default true
+      // default true so that it has the right value at the check below the catch block should checkGroups throw
       bool callProcessGroups = true;
       try
       {
