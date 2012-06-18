@@ -487,7 +487,8 @@ namespace Mantid
       }
 
       // ----- Check for processing groups -------------
-      bool callProcessGroups = false;
+      //default true
+      bool callProcessGroups = true;
       try
       {
         // Checking the input is a group. Throws if the sizes are wrong
