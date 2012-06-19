@@ -189,13 +189,15 @@ namespace IDA
     m_cfCalcCurve->setPen(fitPen);
     m_cfPlot->replot();
 
+    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
+
     // Get params.
     QMap<QString,double> parameters;
-    std::vector<std::string> parNames = function->getParameterNames();
+    std::vector<std::string> parNames = outputFunc->getParameterNames();
     std::vector<double> parVals;
 
     for( size_t i = 0; i < parNames.size(); ++i )
-      parVals.push_back(function->getParameter(parNames[i]));
+      parVals.push_back(outputFunc->getParameter(parNames[i]));
 
     for ( size_t i = 0; i < parNames.size(); ++i )
       parameters[QString(parNames[i].c_str())] = parVals[i];
