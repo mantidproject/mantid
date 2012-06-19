@@ -182,16 +182,9 @@ namespace DataHandling
         // Set the total proton charge for this run
         localWorkspace->mutableRun().setProtonCharge(protonCharge);
       }
-
-      if ( m_numberOfPeriods > 0 )
-      {
-        std::string wsName = "ISISHistoDataListenerWS_" + boost::lexical_cast<std::string>( period + 1 );
-        API::AnalysisDataService::Instance().addOrReplace( wsName, localWorkspace );
-        workspaceGroup->add( wsName );
-      }
     }
 
-    if ( m_numberOfPeriods > 0 )
+    if ( m_numberOfPeriods > 1 )
     {
       return workspaceGroup;
     }

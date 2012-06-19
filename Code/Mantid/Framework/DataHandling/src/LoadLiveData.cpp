@@ -60,7 +60,6 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -161,17 +160,6 @@ namespace DataHandling
       if (!AnalysisDataService::Instance().doesExist(inputName))
         g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. " << this->getPropertyValue("OutputWorkspace") << std::endl;
 
-      // if 
-      auto wsGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>( inputWS );
-      if ( wsGroup )
-      {
-        auto names = wsGroup->getNames();
-        for(auto it = names.begin(); it != names.end(); ++it)
-        {
-          API::AnalysisDataService::Instance().remove( *it );
-        }
-      }
-
       alg->setPropertyValue("InputWorkspace", inputName);
       alg->setPropertyValue("OutputWorkspace", outputName);
       alg->setChild(true);
@@ -195,17 +183,6 @@ namespace DataHandling
     }
     else
     {
-      // if 
-      auto wsGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>( inputWS );
-      if ( wsGroup )
-      {
-        auto names = wsGroup->getNames();
-        for(auto it = names.begin(); it != names.end(); ++it)
-        {
-          API::AnalysisDataService::Instance().remove( *it );
-        }
-      }
-
       // Don't do any processing.
       return inputWS;
     }
