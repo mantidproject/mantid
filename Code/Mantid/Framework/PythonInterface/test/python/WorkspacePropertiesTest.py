@@ -4,7 +4,7 @@ property types
 import unittest
 import testhelpers
 from mantid.api import (WorkspaceProperty, MatrixWorkspaceProperty, IEventWorkspaceProperty, 
-                        ITableWorkspaceProperty, PropertyMode, LockMode)
+                        ITableWorkspaceProperty, IMDHistoWorkspaceProperty, PropertyMode, LockMode)
 from mantid.kernel import Direction
 
 class WorkspacePropertiesTest(unittest.TestCase):
@@ -48,6 +48,9 @@ class WorkspacePropertiesTest(unittest.TestCase):
 
     def test_ITableWorkspaceProperty_can_be_instantiated(self):
         self._do_test(ITableWorkspaceProperty)
-
+        
+    def test_IHistoWorkspaceProperty_can_be_instantiated(self):    
+        self._do_test(IMDHistoWorkspaceProperty)
+        
 if __name__ == "__main__":
     unittest.main()
