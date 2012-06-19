@@ -18,6 +18,7 @@ and calculates the resolved positions of all the detectors and then writes this 
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/Exception.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,7 +31,7 @@ namespace DataHandling
 
   // Register the algorithm into the AlgorithmFactory
   // TODO: Uncomment this when we want it visible in Mantid.
-  //DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
+  DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
   
 
 
@@ -91,6 +92,9 @@ namespace DataHandling
   void AppendGeometryToSNSNexus::exec()
   {          
 
+      g_log.warning() << "This is intended as a proof of principle and not a long term implementation." << std::endl;
+      g_log.warning() << "(the created arrays in the NeXus file will have the '_new' suffix)" << std::endl;
+
       // Retrieve filename from the properties
       m_filename = getPropertyValue("Filename");
 
@@ -104,10 +108,20 @@ namespace DataHandling
 
           if (originalFile.exists())
           {
-              Poco::File duplicateFile(Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
-              originalFile.copyTo(duplicateFile.path());
-              g_log.notice() << "Copied " << m_filename << " to " << duplicateFile.path() << "." << std::endl ;
-              m_filename = duplicateFile.path();
+              Poco::File destinationFile(Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
+
+              try
+              {
+                  originalFile.copyTo(destinationFile.path());
+                  g_log.notice() << "Copied " << m_filename << " to " << destinationFile.path() << "." << std::endl ;
+                  m_filename = destinationFile.path();
+              }
+              catch (Poco::FileAccessDeniedException & e)
+              {
+                  throw std::runtime_error("A Problem occurred in making a copy of the NeXus file. Failed to copy "
+                                           + originalFile.path() + " to " + destinationFile.path()
+                                           + ". Please check file permissions.");
+              }
           }
           else
           {
@@ -115,6 +129,13 @@ namespace DataHandling
           }
 
       }
+
+      // Let's check to see if we can write to the NeXus file.
+      if (!(Poco::File(m_filename).canWrite()))
+      {
+          throw std::runtime_error("The specified NeXus file (" + m_filename + ") is not writable.");
+      }
+
 
       // Let's look for the instrument name
       m_instrument = getInstrumentName(m_filename);
@@ -158,6 +179,7 @@ namespace DataHandling
 
       // Open the NeXus file
       ::NeXus::File nxfile(m_filename, NXACC_RDWR);
+
 
       //typedef std::map<std::string,std::string> string_map_t;
       std::map<std::string,std::string>::const_iterator root_iter;
@@ -210,7 +232,6 @@ namespace DataHandling
                                   distance.reserve(dets.size());
                                   polar_angle.reserve(dets.size());
                                   azimuthal_angle.reserve(dets.size());
-
 
                                   for (std::size_t i=0; i < dets.size(); i++)
                                   {
@@ -289,7 +310,6 @@ namespace DataHandling
 
 
               }
-
 
           }
           else
