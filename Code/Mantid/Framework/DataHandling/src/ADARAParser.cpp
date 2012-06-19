@@ -1,6 +1,4 @@
 #include <string.h>
-#include <unistd.h>
-#include <errno.h>
 
 #include "MantidDataHandling/ADARAParser.h"
 
@@ -30,6 +28,11 @@ void Parser::reset(void)
 	m_oversize_len = 0;
 }
 
+#if 0
+//  Mantid doesn't use this, and trying to make it build on
+//  Windows would be a nightmare...
+#include <unistd.h>
+#include <errno.h>
 bool Parser::read(int fd, unsigned int max_read)
 {
 	unsigned long bytes_read = 0;
@@ -63,13 +66,13 @@ bool Parser::read(int fd, unsigned int max_read)
 
 	return true;
 }
-
+#endif
 
 /* Added by RGM, 17 May 2012 */
 bool Parser::read(Poco::Net::StreamSocket &stream, unsigned int max_read)
 {
         unsigned long bytes_read = 0;
-        ssize_t rc;
+        int rc;
 
         while (!max_read || bytes_read < max_read) {
                 try {

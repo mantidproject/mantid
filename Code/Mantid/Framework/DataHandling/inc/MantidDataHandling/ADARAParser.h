@@ -3,7 +3,6 @@
 
 #include <string>
 #include <stdint.h>
-#include <time.h>
 
 #include "MantidDataHandling/ADARA.h"
 #include "MantidDataHandling/ADARAPackets.h"
@@ -30,7 +29,8 @@ public:
 	 * limits the amount of maximum amount of data read and parsed
 	 * from the file descriptor.
 	 */
-	bool read(int fd, unsigned int max_read = 0);
+        // Commented out in favor of the Poco version below for Mantid use
+        // bool read(int fd, unsigned int max_read = 0);
 
         // Similar semantics as above: returns true if a timeout is set on the
         // socket and we hit the timeout before reading max_read bytes.
