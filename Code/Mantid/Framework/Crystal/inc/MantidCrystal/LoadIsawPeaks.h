@@ -37,7 +37,13 @@ namespace Crystal
     /// Run the algorithm
     void exec();
 
-    std::string readHeader( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::ifstream& in );
+    std::string  ApplyCalibInfo(std::ifstream                 & in,
+                                std::string                     startChar,
+                                Geometry::Instrument_const_sptr instr_old,
+                                Geometry::Instrument_const_sptr instr,
+                                double                          &T0);
+
+    std::string readHeader( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::ifstream& in,double &T0 );
 
     void appendFile( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::string filename);
 

@@ -31,7 +31,7 @@ Some features:
  */
 //TODO
 //  Rotate should also rotate around centroid of Group
-//  1. Change xxx --> SCDCalibratePanelsx  where x=0,1,2,3,...
+
 
 
 
@@ -393,6 +393,7 @@ namespace Crystal
       boost::shared_ptr<const Instrument> newInstrument = ws->getInstrument();
       newInstrument->getInstrumentParameters(L0,beamline,norm,samplePos);
       timeOffset = LoadDetCal->getProperty("TimeOffset");
+      AnalysisDataService::Instance().remove("fff");
       return newInstrument;
 
     }
@@ -484,7 +485,10 @@ namespace Crystal
     Quat ChgRot = rotPre*rotI;
 
     Quat2RotxRotyRotz(ChgRot,Xrot0,Yrot0,Zrot0);
-
+   std::cout<<"new Initial Values="<<std::endl;
+    std::cout<<"   "<< detWidthScale0<<","<<detHeightScale0
+        <<","<<Xoffset0<<","<<Yoffset0<<","<<Zoffset0
+        <<","<<Xrot0<<","<<Yrot0<<","<<Zrot0<<std::endl;
   }
 
 
@@ -558,8 +562,13 @@ namespace Crystal
                                                    (string) getProperty("PreProcFilename"),
                                                     T0, L0, banksVec);
     g_log.debug()<<"Initial L0,T0="<<L0<<","<<T0<<std::endl;
-    AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
 
+    string PeakWSName = getPropertyValue( "PeakWorkspace");
+    if(PeakWSName.length()<1)
+    {
+      PeakWSName = "xxx";
+      AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
+    }
 
     string FunctionArgument;
     string Constraints("");
@@ -600,7 +609,7 @@ namespace Crystal
            }
        // if( i > 0 ) oss << ";";
 
-        oss << "name=SCDPanelErrors, PeakWorkspaceName=\"xxx\",";
+        oss << "name=SCDPanelErrors, PeakWorkspaceName=\""<<PeakWSName<<"\",";
         oss << "a=" << fixed << a << "," << "b=" << fixed << b << "," << "c=" << fixed << c << "," << "alpha=" << fixed << alpha << "," << "beta=" << fixed << beta
              << "," << "gamma=" << fixed << gamma << ","<< "NGroups="<<NGroups<<",BankNames ="<<BankNameString<<","
              <<"startX=-1,endX=-1,";
@@ -920,6 +929,7 @@ namespace Crystal
     string instName = instrument->getName();
 
     i = -1;
+    std::cout<<"Ere set new values into instrument"<<std::endl;
     for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
     {
       i++;
@@ -958,7 +968,7 @@ namespace Crystal
     {
 
      boost::shared_ptr<Algorithm>SaveDetCal = createSubAlgorithm( "SaveIsawDetCal");
-
+     //clone this
      peaksWs->setInstrument( NewInstrument);
      SaveDetCal->initialize();
      SaveDetCal->setProperty( "InputWorkspace",peaksWs);
@@ -971,6 +981,7 @@ namespace Crystal
 
      g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< std::endl;
     }
+
     SaveXmlFile(  XmlFileName, Groups,NewInstrument);
 
 
@@ -1161,7 +1172,10 @@ namespace Crystal
      fit->setAttribute("alpha",IFunction::Attribute((double)getProperty("alpha")));
      fit->setAttribute("beta",IFunction::Attribute((double)getProperty("beta")));
      fit->setAttribute("gamma",IFunction::Attribute((double)getProperty("gamma")));
-     fit->setAttribute("PeakWorkspaceName",IFunction::Attribute("xxx"));
+     string PeakWSName = getPropertyValue("PeakWorkspace");
+     if( PeakWSName.length()<1)
+       PeakWSName="xxx";
+     fit->setAttribute("PeakWorkspaceName",IFunction::Attribute(PeakWSName));
      fit->setAttribute("startX",IFunction::Attribute(-1));
      fit->setAttribute("endX",IFunction::Attribute(-1));
      fit->setAttribute("NGroups",IFunction::Attribute(NGroups));
@@ -1306,8 +1320,10 @@ namespace Crystal
 
         const string bankName = (*it1);
 
-        boost::shared_ptr<const IComponent> bank = NewInstrument->getComponentByName(bankName);
+        boost::shared_ptr<const IComponent> bank1 = NewInstrument->getComponentByName(bankName);
+        boost::shared_ptr<const Geometry::RectangularDetector> bank = boost::dynamic_pointer_cast<const RectangularDetector>(bank1);//Component
         updateBankParams(bank, pmap, pmapOld);
+
         Quat RelRot = bank->getRelativeRot();
         Quat newRelRot = rot * RelRot;
         double rotx, roty, rotz;
@@ -1330,12 +1346,12 @@ namespace Crystal
 
         double scalex, scaley;
         if (!oldScalex.empty())
-          scalex = oldScalex[0] + DetWScale;
+          scalex = oldScalex[0] * DetWScale;
         else
           scalex = DetWScale;
 
         if (!oldScaley.empty())
-          scaley = oldScaley[0] + DetHtScale;
+          scaley = oldScaley[0] * DetHtScale;
         else
           scaley = DetHtScale;
 

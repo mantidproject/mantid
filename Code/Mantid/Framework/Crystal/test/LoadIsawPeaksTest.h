@@ -102,7 +102,6 @@ public:
     TS_ASSERT_DELTA( p.getIntensity(), 221.83, 0.01);
     TS_ASSERT_DELTA( p.getSigmaIntensity(), 15.02, 0.01);
     TS_ASSERT_DELTA( p.getBinCount(), 8, 0.01);
-
     TS_ASSERT_DELTA( p.getWavelength(), 0.761095, 0.001);
     TS_ASSERT_DELTA( p.getL1(), 18.0, 1e-3);
     TS_ASSERT_DELTA( p.getL2(), 0.461, 1e-3);

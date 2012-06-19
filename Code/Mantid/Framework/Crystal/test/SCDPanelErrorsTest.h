@@ -121,18 +121,18 @@ public:
     //calib.setParameter("Yrot",90);
 
     calib.function1D(out.data(), xVals.data(), (size_t) N);
+    std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[10]<<std::endl;
+    double d = .0001;
+    TS_ASSERT_DELTA(out[0], -0.0038554, d);
 
-    double d = .00001;
-    TS_ASSERT_DELTA(out[0], -0.00396681, d);
+    TS_ASSERT_DELTA(out[4], 0.00756805, d);
 
-    TS_ASSERT_DELTA(out[4], 0.00734371, d);
+    TS_ASSERT_DELTA(out[8], 0.0267926, d);
 
-    TS_ASSERT_DELTA(out[8], 0.0268435, d);
-
-    TS_ASSERT_DELTA(out[10], 0.00858511, d);
+    TS_ASSERT_DELTA(out[10], 0.00880572, d);
 
     //-------------------------Test the derivative --------------------------------
-    boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
+  boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
 
     calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t) N);
 

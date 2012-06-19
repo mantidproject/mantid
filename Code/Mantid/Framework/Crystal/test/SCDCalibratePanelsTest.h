@@ -61,10 +61,11 @@ public:
      AnalysisDataService::Instance().remove("TOPAZ_3007");
 
      alg= AlgorithmFactory::Instance().create("SCDCalibratePanels", 1);
-
+     std::cout<<"A"<<std::endl;
      alg->initialize();
-
+     Peakws->setName("PeaksWsp");
      alg->setProperty("PeakWorkspace", Peakws );
+
      alg->setProperty("a",14.0);
      alg->setProperty("b",19.3);
      alg->setProperty("c",  8.6);
@@ -77,10 +78,11 @@ public:
      //alg->setProperty("DetCalFilename","abc.DetCal");
      alg->setProperty("PanelGroups","SpecifyGroups");
      alg->setProperty("Grouping","26");
-
      alg->setPropertyValue("ResultWorkspace","Result");
      alg->setPropertyValue("QErrorWorkspace","QErrorResult");
+
      alg->execute();
+
      alg->setPropertyValue("ResultWorkspace","Result");
 
      boost::shared_ptr<TableWorkspace> Results  =  alg->getProperty("ResultWorkspace");
@@ -91,7 +93,7 @@ public:
      TS_ASSERT_DELTA(-0.416479,Results->cell<double>(9,1),.01);
      TS_ASSERT_DELTA(-0.298888,Results->cell<double>(8,1),.01);
      TS_ASSERT_DELTA(0.212273,Results->cell<double>(17,1),.01);
-
+     std::cout<<"G"<<std::endl;
      /* for( int i=0; i<(int)Results->rowCount(); i++)
      {
 

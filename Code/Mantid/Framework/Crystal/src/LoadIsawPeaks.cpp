@@ -7,7 +7,6 @@ Reads an ISAW-style .peaks or .integrate file into a PeaksWorkspace. Any detecto
 NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:' tags at the start of the file.If the date is not present, the latest [[Instrument Definition File]] is used.
 
 
-
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -18,6 +17,7 @@ NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:'
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <exception>
@@ -28,9 +28,11 @@ NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:'
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
+using Mantid::Kernel::Units::Wavelength;
 
 namespace Mantid
 {
@@ -84,6 +86,137 @@ namespace Crystal
   }
 
 
+  std::string  LoadIsawPeaks::ApplyCalibInfo(std::ifstream & in, std::string startChar,Geometry::Instrument_const_sptr instr_old, Geometry::Instrument_const_sptr instr,
+      double &T0)
+  {
+    ParameterMap_sptr parMap1= instr_old->getParameterMap();
+
+    ParameterMap_sptr parMap= instr->getParameterMap();
+    std::string lastString ="";
+
+    while( in.good() && (startChar.size() <1 || startChar !="7") )
+       {
+         readToEndOfLine( in, true);
+         startChar = getWord(in, false);
+       }
+     if( !(in.good()))
+     {
+       //g_log.error()<<"Peaks file has no time shift and L0 info"<<std::endl;
+       throw std::invalid_argument("Peaks file has no time shift and L0 info");
+     }
+     std::string L1s= getWord(in,false);
+     std::string T0s =getWord(in, false);
+     if( L1s.length() < 1 || T0s.length() < 1)
+     {
+       g_log.error()<<"Missing L1 or Time offset"<<std::endl;
+       throw std::invalid_argument("Missing L1 or Time offset");
+     }
+     double L1;
+     try
+     {
+       std::istringstream iss( L1s+" "+T0s, std::istringstream::in);
+       iss>>L1;
+       iss>>T0;
+
+       SCDCalibratePanels::FixUpSourceParameterMap(instr, L1/100, parMap1);
+
+     }catch(...)
+     {
+       g_log.error()<<"Invalid L1 or Time offset"<<std::endl;
+       throw std::invalid_argument("Invalid L1 or Time offset");
+
+     }
+
+     readToEndOfLine( in, true);
+     startChar = getWord(in , false);
+     while( in.good() && (startChar.size() <1 || startChar !="5") )
+            {
+              readToEndOfLine( in, true);
+              startChar = getWord(in, false);
+            }
+
+    if( !(in.good()))
+    {
+      g_log.error()<<"Peaks file has no detector panel info"<<std::endl;
+      throw std::invalid_argument("Peaks file has no detector panel info");
+    }
+
+
+    while( startChar =="5")
+    {
+
+      std::string line;
+      for( int i=0; i<16;i++)
+      {
+        std::string s= getWord(in, false);
+        if( s.size() < 1)
+        {
+          g_log.error()<<"Not enough info to describe panel "<<std::endl;
+          throw std::length_error("Not enough info to describe panel ");
+        }
+       line +=" "+s;;
+      }
+
+      readToEndOfLine(in, true);
+      startChar = getWord( in, false);// blank lines ?? and # lines ignore
+
+      std::istringstream iss( line, std::istringstream::in);
+      int  bankNum,nrows,ncols;
+      double width,height,depth,detD,Centx,Centy,Centz,Basex,Basey,Basez,
+             Upx,Upy,Upz;
+      try
+      {
+         iss>>bankNum>>nrows>>ncols>>width>>height>>depth>>detD
+            >>Centx>>Centy>>Centz>>Basex>>Basey>>Basez
+            >>Upx>>Upy>>Upz;
+      }catch(...)
+      {
+
+        g_log.error()<<"incorrect type of data for panel "<<std::endl;
+        throw std::length_error("incorrect type of data for panel ");
+      }
+
+      std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
+
+      std::string bankName = "bank"+SbankNum;
+      boost::shared_ptr<const Geometry::IComponent> bank =instr_old->getComponentByName( bankName );
+
+      if( !bank)
+      {
+        g_log.error()<<"There is no bank "<< bankName<<" in the instrument"<<std::endl;
+        throw std::length_error("There is no bank "+ bankName+" in the instrument");
+      }
+
+      V3D dPos= V3D(Centx,Centy,Centz)/100.0- bank->getPos();
+      V3D Base(Basex,Basey,Basez), Up(Upx,Upy,Upz);
+      V3D ToSamp =Base.cross_prod(Up);
+      Base.normalize();
+      Up.normalize();
+      ToSamp.normalize();
+      Quat thisRot(Base,Up,ToSamp);
+      Quat bankRot(bank->getRotation());
+      bankRot.inverse();
+      Quat dRot = thisRot*bankRot;
+
+      boost::shared_ptr< const Geometry::RectangularDetector>bankR= boost::dynamic_pointer_cast
+                         <const Geometry::RectangularDetector>( bank);
+
+      double DetWScale = 1, DetHtScale = 1;
+      if( bank)
+      {
+        DetWScale = width/bankR->xsize()/100;
+        DetHtScale = height/bankR->ysize()/100;
+
+      }
+      std::vector<std::string> bankNames;
+      bankNames.push_back(bankName);
+
+      SCDCalibratePanels::FixUpBankParameterMap(bankNames,instr, dPos,
+          dRot,DetWScale,DetHtScale , parMap1);
+
+    }
+    return startChar;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Reads the header of a .peaks file
@@ -91,7 +224,7 @@ namespace Crystal
    * @param in :: stream of the input file
    * @return the first word on the next line
    */
-  std::string LoadIsawPeaks::readHeader( PeaksWorkspace_sptr outWS, std::ifstream& in )
+  std::string LoadIsawPeaks::readHeader( PeaksWorkspace_sptr outWS, std::ifstream& in, double &T0 )
   {
     std::string tag;
     std::string r = getWord( in ,  false );
@@ -139,17 +272,24 @@ namespace Crystal
 
     // Populate the instrument parameters in this workspace - this works around a bug
     tempWS->populateInstrumentParameters();
-    outWS->setInstrument( tempWS->getInstrument() );
+    Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument() ;
+    boost::shared_ptr< ParameterMap > map(new ParameterMap());
+    Geometry::Instrument_const_sptr instr ( new Geometry::Instrument(instr_old->baseInstrument(), map ));
+
+    //std::string s;
+    std::string  s = ApplyCalibInfo(in, "", instr_old, instr, T0);
+    outWS->setInstrument( instr);
 
     // Now skip all lines on L1, detector banks, etc. until we get to a block of peaks. They start with 0.
-    readToEndOfLine( in ,  true );
-    readToEndOfLine( in ,  true );
-    std::string s = getWord(in, false);
-    while (s != "0")
+   // readToEndOfLine( in ,  true );
+   // readToEndOfLine( in ,  true );
+   // s = getWord(in, false);
+    while (s != "0" && in.good())
     {
       readToEndOfLine( in ,  true );
       s = getWord(in, false);
     }
+
 
     return s;
   }
@@ -243,7 +383,6 @@ namespace Crystal
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setBinCount(IPK);
-
     // Return the peak
     return peak;
   }
@@ -303,14 +442,16 @@ namespace Crystal
    * @param outWS :: the workspace in which to place the information
    * @param filename :: path to the .peaks file
    */
-  void LoadIsawPeaks::appendFile( PeaksWorkspace_sptr outWS, std::string filename)
+  void LoadIsawPeaks::appendFile( PeaksWorkspace_sptr outWS, std::string filename )
   {
 
     // Open the file
     std::ifstream in( filename.c_str() );
 
+
     // Read the header, load the instrument
-    std::string s = readHeader( outWS, in );
+    double T0;
+    std::string s = readHeader( outWS, in , T0);
 
     if( !in.good() || s.length() < 1 )
       throw std::runtime_error( "End of Peaks file before peaks" );
@@ -359,6 +500,13 @@ namespace Crystal
         peak.setGoniometerMatrix(gonMat);
         peak.setRunNumber(run);
 
+        double tof = peak.getTOF()+T0;
+        Kernel::Units::Wavelength wl;
+
+        wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
+                  peak.getInitialEnergy(), 0.0);
+
+        peak.setWavelength(wl.singleFromTOF( tof));
         // Add the peak to workspace
         outWS->addPeak(peak);
       }
