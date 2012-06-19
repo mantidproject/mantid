@@ -32,7 +32,7 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void xtest_Receiving_data()
+  void test_Receiving_data()
   {
 
     //system("pause");
@@ -51,7 +51,7 @@ public:
     listener->setSpectra( specs );
     auto outWS = listener->extractData();
     auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>( outWS );
-    TS_ASSERT( ws );
+    //TS_ASSERT( ws );
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 11 );
     TS_ASSERT_EQUALS( ws->blocksize(), 30 );
 
@@ -118,26 +118,7 @@ public:
 
   }
   
-  void xtestWorkspaceGroup()
-  {
-    auto ws1 = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    auto ws2 = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    API::AnalysisDataService::Instance().addOrReplace("ws1",ws1);
-    API::AnalysisDataService::Instance().addOrReplace("ws2",ws2);
-    auto group = boost::shared_ptr<API::WorkspaceGroup>(new API::WorkspaceGroup);
-    group->add("ws1");
-    group->add("ws2");
-    API::AnalysisDataService::Instance().addOrReplace("group",group);
-
-    auto tst = API::AnalysisDataService::Instance().retrieve("group");
-    TS_ASSERT(tst);
-    auto tstGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>( tst );
-    TS_ASSERT(tstGroup);
-
-    tstGroup->print();
-  }
-
-  void test_Receiving_multiperiod_data()
+  void xtest_Receiving_multiperiod_data()
   {
 
     FakeISISHistoDAE dae;
