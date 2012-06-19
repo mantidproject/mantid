@@ -20,6 +20,7 @@ The table workspace can be used as a basis for plotting within MantidPlot.
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "../inc/MantidMDEvents/MDEventWorkspace.h"
 #include "../inc/MantidMDEvents/MDEventFactory.h"
 
@@ -33,6 +34,56 @@ namespace MDEvents
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(QueryMDWorkspace)
+
+  /**
+  Non-member defining the no normalisation option.
+  @return no normalisation option.
+  */
+  std::string noNormalisationOption()
+  {
+    return "none";
+  }
+
+  /**
+  Non-member defining the volume normalisation option.
+  @return volume normalisation option.
+  */
+  std::string volumeNormalisationOption()
+  {
+    return "volume";
+  }
+
+  /**
+  Non-member defining the number of events normalisation option.
+  @return number of events normalisation.
+  */
+  std::string numberOfEventsNormalisationOption()
+  {
+    return "number of events";
+  }
+
+    /**
+  Non-member method to interpret an normalisation option.
+  @param strNormalisation: string normalisation property value.
+  @return MDNormalisation option.
+  */
+  Mantid::API::MDNormalization whichNormalisation(const std::string& strNormalisation)
+  {
+    Mantid::API::MDNormalization requestedNormalisation = Mantid::API::NoNormalization;
+    if(strNormalisation == noNormalisationOption())
+    {
+      requestedNormalisation = Mantid::API::NoNormalization;;
+    }
+    else if(strNormalisation == volumeNormalisationOption())
+    {
+      requestedNormalisation = Mantid::API::VolumeNormalization;
+    }
+    else
+    {
+      requestedNormalisation = Mantid::API::NumEventsNormalization;
+    }
+    return requestedNormalisation;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -68,6 +119,18 @@ namespace MDEvents
 
     declareProperty(new PropertyWithValue<int>("MaximumRows", 100000, boost::make_shared<BoundedValidator<int>>(), Direction::Input), "The number of neighbours to utilise. Defaults to 100000.");
     setPropertySettings("MaximumRows", new EnabledWhenProperty("LimitRows", IS_DEFAULT));
+
+    std::vector<std::string> propOptions;
+    propOptions.push_back(noNormalisationOption());
+    propOptions.push_back(volumeNormalisationOption());
+    propOptions.push_back(numberOfEventsNormalisationOption());
+    
+    declareProperty("Normalisation", "none", boost::make_shared<StringListValidator>(propOptions),
+      "What normalisation do you wish to apply"
+      "  none: No normalisation.\n"
+      "  volume: Normalise by the volume.\n"
+      "  number of events: Normalise by the number of events."
+       );
 
     declareProperty(new WorkspaceProperty<ITableWorkspace>("BoxDataTable","",Direction::Output, Mantid::API::PropertyMode::Optional),
         "Optional output data table with MDEventWorkspace-specific box data.");
@@ -149,11 +212,17 @@ namespace MDEvents
   /// Run the algorithm
   void QueryMDWorkspace::exec()
   {
+    //Extract the required normalisation.
+    std::string strNormalisation = getPropertyValue("Normalisation");
+    MDNormalization requestedNormalisation = whichNormalisation(strNormalisation);
+    
     IMDWorkspace_sptr input = getProperty("InputWorkspace");
     // Define a table workspace with a specific column schema.
     ITableWorkspace_sptr output = WorkspaceFactory::Instance().createTable();
-    output->addColumn("double", "Signal");
-    output->addColumn("double", "Error");
+    const std::string signalColumnName = "Signal/" + strNormalisation;
+    const std::string errorColumnName = "Error/" + strNormalisation;
+    output->addColumn("double", signalColumnName);
+    output->addColumn("double", errorColumnName);
     output->addColumn("int", "Number of Events");
 
     const size_t ndims = input->getNumDims();
@@ -167,11 +236,12 @@ namespace MDEvents
     }
 
     //Magic numbers required to configure the Y axis.
-    output->getColumn("Signal")->setPlotType(2);
-    output->getColumn("Error")->setPlotType(5);
+    output->getColumn(signalColumnName)->setPlotType(2);
+    output->getColumn(errorColumnName)->setPlotType(5);
 
     
     IMDIterator* it = input->createIterator();
+    it->setNormalization(requestedNormalisation);
 
     bool bLimitRows = getProperty("LimitRows");
     int maxRows = 0;
@@ -189,7 +259,7 @@ namespace MDEvents
       size_t cellIndex = 0;
       output->appendRow();
       output->cell<double>(rowCounter, cellIndex++) = it->getNormalizedSignal();
-      output->cell<double>(rowCounter, cellIndex++) = std::sqrt(it->getNormalizedError());
+      output->cell<double>(rowCounter, cellIndex++) = it->getNormalizedError();
       output->cell<int>(rowCounter, cellIndex++) = int(it->getNumEvents());
       VMD center = it->getCenter();
       for(size_t index = 0; index < ndims; ++index)
