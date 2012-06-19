@@ -17,6 +17,13 @@ typedef struct idc_info* idc_handle_t;
 
 namespace Mantid
 {
+  //----------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
 
   namespace DataHandling
   {
