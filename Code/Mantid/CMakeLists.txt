@@ -55,48 +55,21 @@ ENDIF()
 ###########################################################################
 # Set paths to Third_Party for Mac builds
 ###########################################################################
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
 
-execute_process(
-      COMMAND /usr/bin/sw_vers -productVersion
-      OUTPUT_VARIABLE OSX_VERSION
-      RESULT_VARIABLE OSX_VERSION_STATUS
-  )
-  
-  # Strip off any /CR or /LF
-  string(STRIP ${OSX_VERSION} OSX_VERSION)
+  if ( NOT THIRD_PARTY )
+    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+  endif ()
 
-  if (OSX_VERSION VERSION_LESS 10.6)
-    message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard).")
+  # Print out where we think we are looking for 3rd party stuff
+  message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
+
+  # Check that the 3rd party directory exists.
+  if (NOT IS_DIRECTORY "${THIRD_PARTY}")
+    message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
   endif()
 
-  if (OSX_VERSION VERSION_GREATER 10.6 OR OSX_VERSION VERSION_EQUAL 10.6)
-    set ( OSX_CODENAME "Snow Leopard" )
-  endif()
-
-  if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-    set ( OSX_CODENAME "Lion")
-  endif()
-
-  if (OSX_VERSION VERSION_GREATER 10.8 OR OSX_VERSION VERSION_EQUAL 10.8)
-    set ( OSX_CODENAME "Mountain Lion")
-  endif()
-
-  message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
-
-	if ( NOT THIRD_PARTY )
-  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
-	endif ()
-
-	# Print out were we think we are looking for 3rd party stuff
-	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
-
-	# Check that the 3rd party directory exists.
-	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
-        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
-	endif()
-
-    include ( DarwinSetup )	
+  include ( DarwinSetup )	
     
 ENDIF()
 
