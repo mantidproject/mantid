@@ -70,7 +70,7 @@ namespace DataHandling
     return;
   }
 
-  boost::shared_ptr<MatrixWorkspace> FileEventDataListener::extractData()
+  boost::shared_ptr<Workspace> FileEventDataListener::extractData()
   {
     // Once the end of the file is reached, this method throws to stop the calling algorithm.
     // This is equivalent to the end of the run - which we still need to figure out how to handle.

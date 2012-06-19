@@ -60,6 +60,7 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -160,6 +161,17 @@ namespace DataHandling
       if (!AnalysisDataService::Instance().doesExist(inputName))
         g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. " << this->getPropertyValue("OutputWorkspace") << std::endl;
 
+      // if 
+      auto wsGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>( inputWS );
+      if ( wsGroup )
+      {
+        auto names = wsGroup->getNames();
+        for(auto it = names.begin(); it != names.end(); ++it)
+        {
+          API::AnalysisDataService::Instance().remove( *it );
+        }
+      }
+
       alg->setPropertyValue("InputWorkspace", inputName);
       alg->setPropertyValue("OutputWorkspace", outputName);
       alg->setChild(true);
@@ -182,8 +194,21 @@ namespace DataHandling
       return temp;
     }
     else
+    {
+      // if 
+      auto wsGroup = boost::dynamic_pointer_cast<API::WorkspaceGroup>( inputWS );
+      if ( wsGroup )
+      {
+        auto names = wsGroup->getNames();
+        for(auto it = names.begin(); it != names.end(); ++it)
+        {
+          API::AnalysisDataService::Instance().remove( *it );
+        }
+      }
+
       // Don't do any processing.
       return inputWS;
+    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -193,7 +218,7 @@ namespace DataHandling
    * @param chunkWS :: chunk workspace to process
    * @return the processed workspace sptr
    */
-  Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS)
+  Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS)
   {
     return runProcessing(chunkWS, false);
   }
@@ -349,7 +374,7 @@ namespace DataHandling
     bool dataReset = listener->dataReset();
 
     // The listener returns a MatrixWorkspace containing the chunk of live data.
-    MatrixWorkspace_sptr chunkWS = listener->extractData();
+    Workspace_sptr chunkWS = listener->extractData();
 
     // TODO: Have the ILiveListener tell me exactly the time stamp
     DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();

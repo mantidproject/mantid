@@ -92,7 +92,7 @@ namespace DataHandling
     m_buffer->setInstrument(inst);
   }
 
-  boost::shared_ptr<MatrixWorkspace> TestDataListener::extractData()
+  boost::shared_ptr<Workspace> TestDataListener::extractData()
   {
     m_dataReset = false;
 

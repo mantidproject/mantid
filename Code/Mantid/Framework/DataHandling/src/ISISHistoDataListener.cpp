@@ -3,13 +3,17 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "LoadDAE/idc.h"
+
+#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 
@@ -108,7 +112,7 @@ namespace DataHandling
    * Read the data from the DAE.
    * @return :: A workspace with the data.
    */
-  boost::shared_ptr<MatrixWorkspace> ISISHistoDataListener::extractData()
+  boost::shared_ptr<Workspace> ISISHistoDataListener::extractData()
   {
     if ( !m_daeHandle ) 
     {
@@ -157,13 +161,17 @@ namespace DataHandling
     std::vector<int> index, count;
     calculateIndicesForReading(index, count);
     
-    m_numberOfPeriods = 1;
+    auto workspaceGroup = API::WorkspaceGroup_sptr( new API::WorkspaceGroup );
     for(int period = 0; period < m_numberOfPeriods; ++period)
     {
+      if ( period > 0 )
+      {
+        localWorkspace = WorkspaceFactory::Instance().create( localWorkspace );
+      }
       size_t workspaceIndex = 0;
       for(size_t i = 0; i < index.size(); ++i)
       {
-        getData(index[i], count[i], localWorkspace, workspaceIndex);
+        getData(period, index[i], count[i], localWorkspace, workspaceIndex);
         workspaceIndex += count[i];
       }
 
@@ -174,6 +182,18 @@ namespace DataHandling
         // Set the total proton charge for this run
         localWorkspace->mutableRun().setProtonCharge(protonCharge);
       }
+
+      if ( m_numberOfPeriods > 0 )
+      {
+        std::string wsName = "ISISHistoDataListenerWS_" + boost::lexical_cast<std::string>( period + 1 );
+        API::AnalysisDataService::Instance().addOrReplace( wsName, localWorkspace );
+        workspaceGroup->add( wsName );
+      }
+    }
+
+    if ( m_numberOfPeriods > 0 )
+    {
+      return workspaceGroup;
     }
 
     return localWorkspace;
@@ -318,7 +338,7 @@ namespace DataHandling
    * @param count :: Number of spectra to read
    * @param workspace :: Workspace to store the data
    */
-  void ISISHistoDataListener::getData(int index, int count, API::MatrixWorkspace_sptr workspace, size_t workspaceIndex)
+  void ISISHistoDataListener::getData(int period, int index, int count, API::MatrixWorkspace_sptr workspace, size_t workspaceIndex)
   {
     const size_t bufferSize = count * (m_numberOfBins + 1) * sizeof(int);
     std::vector<int> dataBuffer( bufferSize );
@@ -327,7 +347,8 @@ namespace DataHandling
     dims[0] = count;
     dims[1] = m_numberOfBins + 1;
 
-    if (IDCgetdat(m_daeHandle, index, count, dataBuffer.data(), dims, &ndims) != 0)
+    int spectrumIndex = index + period * (m_numberOfSpectra + 1);
+    if (IDCgetdat(m_daeHandle, spectrumIndex, count, dataBuffer.data(), dims, &ndims) != 0)
     {
       g_log.error("Unable to read DATA from DAE " + m_daeName);
       throw Kernel::Exception::FileError("Unable to read DATA from DAE " , m_daeName);
@@ -343,12 +364,6 @@ namespace DataHandling
       size_t shift = i * (m_numberOfBins + 1);
       y.assign( dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size() );
       std::transform( y.begin(), y.end(), e.begin(), dblSqrt );
-      //for(size_t j = 0; j < y.size(); ++j)
-      //{
-      //  const double value = static_cast<double>( dataBuffer[ shift + j] );
-      //  y[j] = value;
-      //  e[j] = sqrt( value );
-      //}
     }
   }
 
