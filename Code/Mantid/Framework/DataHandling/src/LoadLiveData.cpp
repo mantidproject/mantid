@@ -182,8 +182,10 @@ namespace DataHandling
       return temp;
     }
     else
+    {
       // Don't do any processing.
       return inputWS;
+    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -193,7 +195,7 @@ namespace DataHandling
    * @param chunkWS :: chunk workspace to process
    * @return the processed workspace sptr
    */
-  Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS)
+  Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS)
   {
     return runProcessing(chunkWS, false);
   }
@@ -349,7 +351,7 @@ namespace DataHandling
     bool dataReset = listener->dataReset();
 
     // The listener returns a MatrixWorkspace containing the chunk of live data.
-    MatrixWorkspace_sptr chunkWS = listener->extractData();
+    Workspace_sptr chunkWS = listener->extractData();
 
     // TODO: Have the ILiveListener tell me exactly the time stamp
     DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();

@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
 	src/FakeEventDataListener.cpp
+	src/FakeISISHistoDAE.cpp
 	src/FileEventDataListener.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
 	inc/MantidDataHandling/FakeEventDataListener.h
+	inc/MantidDataHandling/FakeISISHistoDAE.h
 	inc/MantidDataHandling/FileEventDataListener.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
@@ -271,7 +273,7 @@ set ( TEST_FILES
 	test/GroupDetectors2Test.h
 	test/GroupDetectorsTest.h
 	test/ISISDataArchiveTest.h
-	test/ISISHistoDataListenerTest.h
+	#test/ISISHistoDataListenerTest.h
 	test/InstrumentRayTracerTest.h
 	test/LiveDataAlgorithmTest.h
 	test/LoadAsciiTest.h
@@ -283,9 +285,9 @@ set ( TEST_FILES
 	test/LoadDetectorsGroupingFileTest.h
 	test/LoadDspacemapTest.h
 	test/LoadEmptyInstrumentTest.h
-        test/LoadEventNexusTest.h
-        test/LoadEventPreNexusTest.h
-        test/LoadEventPreNexus2Test.h
+	test/LoadEventNexusTest.h
+	test/LoadEventPreNexusTest.h
+	test/LoadEventPreNexus2Test.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h

@@ -177,6 +177,18 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
     StartTime('Fury')
     Verbose = True
     workdir = config['defaultsave.directory']
+    LoadNexus(Filename=sam_files[0], OutputWorkspace='__sam_tmp') # SAMPLE
+    Xin = mtd['__sam_tmp'].readX(0)
+    npt = len(Xin)
+    d1 = Xin[1]-Xin[0]
+    d2 = Xin[npt-1]-Xin[npt-2]
+    dmin = min(d1,d2)
+    DeleteWorkspace('__sam_tmp')
+    pars = rebinParam.split(',')
+    if (float(pars[1]) <= dmin):
+        error = 'EWidth = ' + pars[1] + ' < smallest Eincr = ' + str(dmin)
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
     outWSlist = []
     # Process RES Data Only Once
     if Verbose:
@@ -244,6 +256,10 @@ def furyfitParsToWS(Table, Data):
     rCount = ws.rowCount()
     cName =  ws.getColumnNames()
     nSpec = ( cCount - 1 ) / 2
+    yA0 = ws.column(1)
+    eA0 = ws.column(2)
+    logger.notice(str(yA0))
+    logger.notice(str(eA0))
     xAxis = cName[0]
     stretched = 0
     for spec in range(0,nSpec):
@@ -413,14 +429,12 @@ def furyfitMult(inputWS, func, startx, endx, Save, Plot):
 
 def msdfitParsToWS(Table, xData):
     dataX = xData
-    dataY1 = []
     ws = mtd[Table+'_Table']
     rCount = ws.rowCount()
-    for row in range(0,rCount):
-        dataY1.append(-ws.cell(row,3))
     yA0 = ws.column(1)
     eA0 = ws.column(2)
-    yA1 = ws.column(3)
+    yA1 = ws.column(3)  
+    dataY1 = map(lambda x : -x, yA1) 
     eA1 = ws.column(4)
     wsname = Table
     CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
@@ -703,7 +717,7 @@ def abscorFeeder(sample, container, geom, useCor):
             plotCorrContrib(plot_list,0)
     else:
         if ( container == '' ):
-            sys.exit('Invalid options - nothing to do!')
+            sys.exit('ERROR *** Invalid options - nothing to do!')
         else:
             sub_result = sample[0:8] +'_Subtract_'+ container[3:8]
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)

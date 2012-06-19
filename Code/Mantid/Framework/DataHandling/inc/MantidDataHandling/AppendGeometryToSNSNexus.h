@@ -60,6 +60,9 @@ namespace DataHandling
     /// Get the instrument name from the NeXus file
     std::string getInstrumentName(const std::string & nxfilename);
 
+    /// Are we going to make a copy of the NeXus file to operate on ?
+    bool m_makeNexusCopy;
+
     /// Algorithm progress keeper
     API::Progress *progress;
 

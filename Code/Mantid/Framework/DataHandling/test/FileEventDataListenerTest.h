@@ -40,7 +40,8 @@ public:
     TS_ASSERT_EQUALS( listener->runStatus(), ILiveListener::BeginRun )
 
     MatrixWorkspace_const_sptr buffer;
-    TS_ASSERT_THROWS_NOTHING( buffer = listener->extractData())
+    TS_ASSERT_THROWS_NOTHING( buffer = boost::dynamic_pointer_cast<const MatrixWorkspace>( listener->extractData() ))
+    TS_ASSERT( buffer )
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS( buffer.use_count(), 1 )
     TS_ASSERT_EQUALS( buffer->getNumberHistograms(), 77824 )
@@ -49,7 +50,8 @@ public:
 
     MatrixWorkspace_const_sptr buffer2;
     // Call extractData again
-    TS_ASSERT_THROWS_NOTHING( buffer2 = listener->extractData())
+    TS_ASSERT_THROWS_NOTHING( buffer2 = boost::dynamic_pointer_cast<const MatrixWorkspace>( listener->extractData() ))
+    TS_ASSERT( buffer2 )
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS( buffer2.use_count(), 1 )
     // Check it's a different workspace to last time

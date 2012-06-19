@@ -17,6 +17,13 @@ typedef struct idc_info* idc_handle_t;
 
 namespace Mantid
 {
+  //----------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
 
   namespace DataHandling
   {
@@ -52,7 +59,7 @@ namespace Mantid
 
       bool connect(const Poco::Net::SocketAddress& address);
       void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-      boost::shared_ptr<API::MatrixWorkspace> extractData();
+      boost::shared_ptr<API::Workspace> extractData();
 
       bool isConnected();
       ILiveListener::RunStatus runStatus();
@@ -65,7 +72,7 @@ namespace Mantid
       std::string getString(const std::string& par) const;
       void getFloatArray(const std::string& par, std::vector<float>& arr, const size_t dim);
       void getIntArray(const std::string& par, std::vector<int>& arr, const size_t dim);
-      void getData(int index, int count, boost::shared_ptr<API::MatrixWorkspace> workspace, size_t workspaceIndex);
+      void getData(int period, int index, int count, boost::shared_ptr<API::MatrixWorkspace> workspace, size_t workspaceIndex);
       void calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count);
       void loadSpectraMap(boost::shared_ptr<API::MatrixWorkspace> localWorkspace);
       void runLoadInstrument(boost::shared_ptr<API::MatrixWorkspace> localWorkspace, const std::string& iName);

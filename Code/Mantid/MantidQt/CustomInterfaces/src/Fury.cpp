@@ -91,6 +91,21 @@ namespace IDA
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 
+  namespace
+  {
+    static const double TOL = 0.000001;
+
+    bool acceptableBinWidth(double range, double binWidth, double tolerance = TOL)
+    {
+      assert(binWidth > 0 && range > 0);
+
+      while( range > tolerance )
+        range -= binWidth;
+
+      return abs(range) <= tolerance;
+    }
+  }
+
   /**
    * Ensure we have present and valid file/ws inputs.  The underlying Fourier transform of Fury
    * also means we must enforce several rules on the parameters.
@@ -126,7 +141,7 @@ namespace IDA
     if( eLow >= eHigh )
       return "ELow must be lower than EHigh.";
 
-    if( fmod( eHigh - eLow, eWidth ) != 0 )
+    if( ! acceptableBinWidth(eHigh - eLow, eWidth) )
       return "All bins must be of equal width.  See Wiki.";
 
     return "";

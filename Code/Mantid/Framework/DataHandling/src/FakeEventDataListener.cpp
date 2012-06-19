@@ -87,7 +87,7 @@ namespace DataHandling
     return;
   }
 
-  boost::shared_ptr<MatrixWorkspace> FakeEventDataListener::extractData()
+  boost::shared_ptr<Workspace> FakeEventDataListener::extractData()
   {
     /* For the very first try, just add a small number of uniformly distributed events.
      * Next: 1. Add some kind of distribution

@@ -27,7 +27,7 @@ namespace Mantid
 
       bool connect(const Poco::Net::SocketAddress& address);
       void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-      boost::shared_ptr<API::MatrixWorkspace> extractData();
+      boost::shared_ptr<API::Workspace> extractData();
 
       bool isConnected();
       ILiveListener::RunStatus runStatus();
