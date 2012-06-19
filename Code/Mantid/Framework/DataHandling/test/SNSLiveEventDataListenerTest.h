@@ -45,7 +45,7 @@ public:
   void testExtractData()
   {
     using namespace Mantid::DataObjects;
-    MatrixWorkspace_const_sptr buffer;
+    Workspace_const_sptr buffer;
     Poco::Thread::sleep(100);
     TS_ASSERT_THROWS_NOTHING( buffer = sns_l->extractData())
     // Check this is the only surviving reference to it
@@ -80,7 +80,7 @@ public:
   void testThreadSafety()
   {
     using namespace Mantid::DataObjects;
-    MatrixWorkspace_const_sptr buffer;
+    Workspace_const_sptr buffer;
     Poco::Thread::sleep(100);
 
     CPUTimer tim;

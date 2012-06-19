@@ -358,7 +358,7 @@ namespace DataHandling
     }
   }
 
-  boost::shared_ptr<MatrixWorkspace> SNSLiveEventDataListener::extractData()
+  boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData()
   {
 
     // Block until the background thread has actually initialized the workspace
