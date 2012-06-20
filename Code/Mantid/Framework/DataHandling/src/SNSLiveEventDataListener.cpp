@@ -2,11 +2,8 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/ADARAParser.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/SNSLiveEventDataListener.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
 
@@ -210,11 +207,7 @@ namespace DataHandling
       return false;
     }
 
-    // Create a log with the pulse time and charge!!  (TimeSeriesProperties)
-
-    // Next convert the Pulse ID fields into a DateAndTime object
-    const struct timespec &pulseTime = pkt.timestamp();
-    Mantid::Kernel::DateAndTime pulseID( pulseTime.tv_sec, pulseTime.tv_nsec);
+    // TODO: Create a log with the pulse time and charge!!  (TimeSeriesProperties)
 
     // Append the events
     g_log.information() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
@@ -238,7 +231,7 @@ namespace DataHandling
 
           // appendEvent needs tof to be in units of microseconds, but it comes
           // from the ADARA stream in units of 100ns.
-          appendEvent(event->pixel, event->tof / 10.0D, pulseID);
+          appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
           event = pkt.nextEvent();
         }
         g_log.debug() << "BankID " << pkt.curBankId() << " had " << eventsPerBank

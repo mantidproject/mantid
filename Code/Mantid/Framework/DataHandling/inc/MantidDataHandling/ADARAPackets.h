@@ -15,38 +15,20 @@ public:
 		m_payload_len = field[0];
 		m_type = (PacketType::Enum) field[1];
 
-		/* Convert EPICS epoch to Unix epoch,
-		 * Jan 1, 1990 ==> Jan 1, 1970
-		 */
-		m_timestamp.tv_sec = field[2] + EPICS_EPOCH_OFFSET;
-		m_timestamp.tv_nsec = field[3];
-
                 m_pulseId = ((uint64_t) field[2]) << 32;
                 m_pulseId |= field[3];
 	}
 
 	PacketType::Enum type(void) const { return m_type; }
 	uint32_t payload_length(void) const { return m_payload_len; }
-	const struct timespec &timestamp(void) const { return m_timestamp; }
         uint64_t pulseId(void) const { return m_pulseId; }
         uint32_t packet_length(void) const { return m_payload_len + 16; }
-        bool compare_timestamp( const struct timespec &ts) const
-        {
-          if (m_timestamp.tv_sec != ts.tv_sec)
-            return false;
-          if (m_timestamp.tv_nsec != ts.tv_nsec)
-            return false;
-
-          return true;
-        }
-        bool compare_timestamp( const PacketHeader &pkt) const { return compare_timestamp(pkt.timestamp()); }
 
 	static uint32_t header_length(void) { return 16; }
 
 protected:
 	uint32_t m_payload_len;
 	PacketType::Enum m_type;
-	struct timespec m_timestamp;
         uint64_t m_pulseId;
 
 	/* Don't allow the default constructor */
