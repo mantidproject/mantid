@@ -45,11 +45,11 @@ namespace MDEvents
   /**
   Functor to compute the product of the set.
   */
-  struct Product : public std::unary_function<double, void>
+  struct Product : public std::unary_function<size_t, void>
   {
     Product() : result(1) {}
-    double result;
-    void operator()(double x) { result *= x; }
+    size_t result;
+    void operator()(size_t x) { result *= x; }
   };
 
 
@@ -182,9 +182,8 @@ namespace MDEvents
     file.close();
 
     // Calculated the expected number of elements.
-    Product product;
-    std::for_each(nbins.begin(), nbins.end(), product);
-    const size_t nElements = product.result * 2;
+    Product answer = std::for_each(nbins.begin(), nbins.end(), Product());
+    const size_t nElements = answer.result * 2;
 
     // Handle the case that the number of elements is wrong.
     if(box_elements.size() % nElements != 0)

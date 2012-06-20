@@ -158,6 +158,18 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
+  void test_throws_when_dimensionality_num_bins_and_file_size_do_not_match()
+  {
+    MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 3*3); //bin size set to 3, so 3*3*2, entries will be in the file! i.e file corrsponds to 2D md workspace.
+    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    alg->setPropertyValue("Extents", "-1,1,-1,1,-1,1");
+    alg->setPropertyValue("NumberOfBins", "3,3,3"); //but the nubmer of bins has been set to 3!
+    alg->setPropertyValue("Names", "A,B,C");
+    alg->setPropertyValue("Units", "U1,U2,U3");
+    alg->setProperty("Dimensionality", 3); //but dimensionality has been set to 3 also!
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
   /// Test execution with as specific output dimensionality required.
   void test_executes_2D()
   {
