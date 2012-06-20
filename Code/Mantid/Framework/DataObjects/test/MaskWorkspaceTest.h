@@ -44,6 +44,28 @@ public:
         TS_ASSERT(maskWS->isMasked(0));
     }
 
+    void test_mask_accessors()
+    {
+        int pixels = 10;
+        int maskpixels = 25;
+
+        Mantid::Geometry::Instrument_sptr inst =
+                ComponentCreationHelper::createTestInstrumentRectangular2(1,pixels);
+        inst->setName("MaskWorkspaceTest_Accessors");
+
+        Mantid::DataObjects::MaskWorkspace* maskWS =
+                new Mantid::DataObjects::MaskWorkspace(inst, false);
+        for (int i = 0; i < maskpixels; i++)
+          maskWS->setMasked(i); // mask the pixel
+
+        TS_ASSERT_EQUALS(maskWS->getNumberHistograms(), pixels*pixels);
+        TS_ASSERT_EQUALS(maskWS->getNumberMasked(), maskpixels);
+        TS_ASSERT(maskWS->isMasked(0));
+        TS_ASSERT_EQUALS(maskWS->isMasked(maskpixels), false); // one past the masked ones
+
+        maskWS->setMasked(0, false);
+        TS_ASSERT_EQUALS(maskWS->isMasked(0), false);
+    }
 };
 
 #endif // MANTID_DATAOBJECTS_MASKWORKSPACETEST_H
