@@ -123,7 +123,6 @@ set ( SRC_FILES
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
-	src/SNSLiveEventDataListener.cpp
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
@@ -357,7 +356,7 @@ set ( TEST_FILES
 	test/SaveSPETest.h
 	test/SaveToSNSHistogramNexusTest.h
 	test/SetScalingPSDTest.h
-	test/SNSLiveEventDataListenerTest.h
+	#Needs fixing to not rely on network. test/SNSLiveEventDataListenerTest.h
 	test/StartLiveDataTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
