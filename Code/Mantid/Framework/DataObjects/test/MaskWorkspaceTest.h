@@ -51,7 +51,7 @@ public:
 
         Mantid::Geometry::Instrument_sptr inst =
                 ComponentCreationHelper::createTestInstrumentRectangular2(1,pixels);
-        inst->setName("MaskWorkspaceTest_Accessors");
+        inst->setName("MaskWorkspaceTest_Instrument");
 
         Mantid::DataObjects::MaskWorkspace* maskWS =
                 new Mantid::DataObjects::MaskWorkspace(inst, false);
@@ -63,8 +63,19 @@ public:
         TS_ASSERT(maskWS->isMasked(0));
         TS_ASSERT_EQUALS(maskWS->isMasked(maskpixels), false); // one past the masked ones
 
+        // unmask a pixel and check it
         maskWS->setMasked(0, false);
         TS_ASSERT_EQUALS(maskWS->isMasked(0), false);
+
+        // check of a group of pixels
+        std::set<Mantid::detid_t> detIds;
+        detIds.insert(0); // isn't masked
+        TS_ASSERT_EQUALS(maskWS->isMasked(detIds), false);
+        detIds.insert(1); // is masked
+        TS_ASSERT_EQUALS(maskWS->isMasked(detIds), false);
+        detIds.erase(0);
+        detIds.insert(2);
+        TS_ASSERT_EQUALS(maskWS->isMasked(detIds), true);
     }
 };
 
