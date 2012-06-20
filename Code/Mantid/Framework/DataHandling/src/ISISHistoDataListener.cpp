@@ -311,7 +311,7 @@ namespace DataHandling
       for(size_t i = 1; i < m_specList.size(); ++i)
       {
         specid_t next = m_specList[i];
-        if ( next - m_specList[i-1] > 1 || i - i0 >= maxNumberOfSpectra )
+        if ( next - m_specList[i-1] > 1 || static_cast<int>(i - i0) >= maxNumberOfSpectra )
         {
           index.push_back( spec );
           count.push_back( static_cast<int>( i - i0 ) );

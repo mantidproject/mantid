@@ -56,7 +56,7 @@ public:
   m_nBins(nbins)
   {
     char buffer[1024];
-    int n = socket().receiveBytes(&buffer,1024);
+    socket().receiveBytes(&buffer,1024);
     sendOK();
   }
   ~TestServerConnection()
@@ -76,7 +76,7 @@ public:
   {
     isisds_command_header_t comm;
     memset( &comm, 0, sizeof(comm) );
-    comm.len = sizeof(comm) + (int)str.size();
+    comm.len = (int)sizeof(comm) + (int)str.size();
     comm.type = ISISDSChar;
 		comm.ndims = 1;
     comm.dims_array[0] = (int)str.size();
@@ -88,7 +88,7 @@ public:
   {
     isisds_command_header_t comm;
     memset( &comm, 0, sizeof(comm) );
-    comm.len = sizeof(comm) + sizeof(int);
+    comm.len = (int)sizeof(comm) + sizeof(int);
     comm.type = ISISDSInt32;
 		comm.ndims = 1;
     comm.dims_array[0] = 1;
@@ -113,21 +113,21 @@ public:
     }
     const int ndata = nos * nb1;
     std::vector<int> data( ndata );
-    for(size_t i = 0; i < nos; ++i)
+    for(int i = 0; i < nos; ++i)
     {
-      const int value = period * 1000 + istart + (int)i;
+      const int value = period * 1000 + istart + i;
       std::fill( data.begin() + i * nb1, data.begin() + ( i + 1 ) * nb1, value );
     }
     isisds_command_header_t comm;
     memset( &comm, 0, sizeof(comm) );
-    comm.len = sizeof(comm) + sizeof(int) * ndata;
+    comm.len = (int)(sizeof(comm) + sizeof(int) * ndata);
     comm.type = ISISDSInt32;
 		comm.ndims = 2;
     comm.dims_array[0] = nos;
     comm.dims_array[1] = m_nBins + 1;
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(data.data(), sizeof(int) * ndata);
+    socket().sendBytes(data.data(), (int)sizeof(int) * ndata);
   }
   void sendFloatArray(const std::vector<float>& arr)
   {
@@ -213,7 +213,7 @@ public:
         else if ( command == "UDET" )
         {
           std::vector<int> udet( m_nSpectra );
-          for(size_t i = 0; i < m_nSpectra; ++i)
+          for(int i = 0; i < m_nSpectra; ++i)
           {
             udet[i] = (int)( 1000 + i + 1 );
           }
@@ -222,7 +222,7 @@ public:
         else if ( command == "SPEC" )
         {
           std::vector<int> spec( m_nSpectra );
-          for(size_t i = 0; i < m_nSpectra; ++i)
+          for(int i = 0; i < m_nSpectra; ++i)
           {
             spec[i] = (int)( i + 1 );
           }
