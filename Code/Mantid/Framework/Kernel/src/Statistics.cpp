@@ -204,14 +204,27 @@ namespace Mantid
       return getNanStatistics();
     }
 
+    /// Getting statistics of a boolean array should just give a bunch of NaNs
+    template<>
+    DLLExport Statistics getStatistics<bool> (const vector<bool>& data, const bool sorted)
+    {
+      UNUSED_ARG(sorted);
+      UNUSED_ARG(data);
+      return getNanStatistics();
+    }
 
     // -------------------------- concrete instantiations
     template DLLExport Statistics getStatistics<double> (const vector<double> &, const bool);
     template DLLExport Statistics getStatistics<int32_t> (const vector<int32_t> &, const bool);
+    template DLLExport Statistics getStatistics<int64_t> (const vector<int64_t> &, const bool);
+
     template DLLExport std::vector<double> getZscore<double> (const vector<double> &, const bool);
     template DLLExport std::vector<double> getZscore<int32_t> (const vector<int32_t> &, const bool);
+    template DLLExport std::vector<double> getZscore<int64_t> (const vector<int64_t> &, const bool);
+
     template DLLExport std::vector<double> getModifiedZscore<double> (const vector<double> &, const bool);
     template DLLExport std::vector<double> getModifiedZscore<int32_t> (const vector<int32_t> &, const bool);
+    template DLLExport std::vector<double> getModifiedZscore<int64_t> (const vector<int64_t> &, const bool);
 
   } // namespace Kernel
 } // namespace Mantid

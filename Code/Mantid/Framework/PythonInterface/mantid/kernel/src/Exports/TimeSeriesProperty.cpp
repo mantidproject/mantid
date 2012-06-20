@@ -12,9 +12,9 @@ namespace
   /// Defines the getStatistics member for various types
   #define DEF_GET_STATS(TYPE) DEF_GET_STATS_##TYPE
   /// Doubles have a get stats member
-  #define DEF_GET_STATS_double .def("getStatistics", &TimeSeriesProperty<double>::getStatistics)
+  #define DEF_GET_STATS_double
   /// booleans do not have a get stats member
-  #define DEF_GET_STATS_bool 
+  #define DEF_GET_STATS_bool
 
   /// Macro to reduce copy-and-paste
   #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)\
@@ -33,7 +33,7 @@ namespace
       .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue) \
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue) \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime) \
-      DEF_GET_STATS(TYPE) \
+      .def("getStatistics", &TimeSeriesProperty<double>::getStatistics) \
       ;
   ;
 }
@@ -47,6 +47,22 @@ void export_TimeSeriesProperty_Bool()
 {
   EXPORT_TIMESERIES_PROP(bool, Bool);
 }
+
+void export_TimeSeriesProperty_Int32()
+{
+  EXPORT_TIMESERIES_PROP(int32_t, Int32);
+}
+
+void export_TimeSeriesProperty_Int64()
+{
+  EXPORT_TIMESERIES_PROP(int64_t, Int64);
+}
+
+void export_TimeSeriesProperty_String()
+{
+  EXPORT_TIMESERIES_PROP(std::string, String);
+}
+
 
 void export_TimeSeriesPropertyStatistics()
 {

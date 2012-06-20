@@ -200,6 +200,42 @@ namespace PythonAPI
       .def("nthTime", &TimeSeriesProperty<double>::nthTime)
     ;
 
+    register_ptr_to_python<TimeSeriesProperty<int32_t>*>();
+    register_ptr_to_python<const TimeSeriesProperty<int32_t>*>();
+
+    class_<Mantid::Kernel::TimeSeriesProperty<int32_t>, \
+           bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_int32_t", no_init)
+      .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<int32_t>::getStatistics)
+      .add_property("value", &Mantid::Kernel::TimeSeriesProperty<int32_t>::valuesAsVector)
+      .add_property("times", &Mantid::Kernel::TimeSeriesProperty<int32_t>::timesAsVector)
+      .def("valueAsString", &TimeSeriesProperty<int32_t>::value)
+      .def("size", &TimeSeriesProperty<int32_t>::size)
+      .def("firstTime", &TimeSeriesProperty<int32_t>::firstTime)
+      .def("firstValue", &TimeSeriesProperty<int32_t>::firstValue)
+      .def("lastTime", &TimeSeriesProperty<int32_t>::lastTime)
+      .def("lastValue", &TimeSeriesProperty<int32_t>::lastValue)
+      .def("nthValue", &TimeSeriesProperty<int32_t>::nthValue)
+      .def("nthTime", &TimeSeriesProperty<int32_t>::nthTime)
+    ;
+
+    register_ptr_to_python<TimeSeriesProperty<int64_t>*>();
+    register_ptr_to_python<const TimeSeriesProperty<int64_t>*>();
+
+    class_<Mantid::Kernel::TimeSeriesProperty<int64_t>, \
+           bases<Mantid::Kernel::Property>, boost::noncopyable>("TimeSeriesProperty_int64_t", no_init)
+      .def("getStatistics", &Mantid::Kernel::TimeSeriesProperty<int64_t>::getStatistics)
+      .add_property("value", &Mantid::Kernel::TimeSeriesProperty<int64_t>::valuesAsVector)
+      .add_property("times", &Mantid::Kernel::TimeSeriesProperty<int64_t>::timesAsVector)
+      .def("valueAsString", &TimeSeriesProperty<int64_t>::value)
+      .def("size", &TimeSeriesProperty<int64_t>::size)
+      .def("firstTime", &TimeSeriesProperty<int64_t>::firstTime)
+      .def("firstValue", &TimeSeriesProperty<int64_t>::firstValue)
+      .def("lastTime", &TimeSeriesProperty<int64_t>::lastTime)
+      .def("lastValue", &TimeSeriesProperty<int64_t>::lastValue)
+      .def("nthValue", &TimeSeriesProperty<int64_t>::nthValue)
+      .def("nthTime", &TimeSeriesProperty<int64_t>::nthTime)
+    ;
+
     class_<time_duration>("time_duration", no_init)
     .def("hours", &time_duration::hours, "Returns the normalized number of hours")
     .def("minutes", &time_duration::minutes, "Returns the normalized number of minutes +/-(0..59)")
