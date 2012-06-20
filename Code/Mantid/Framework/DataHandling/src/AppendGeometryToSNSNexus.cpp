@@ -270,7 +270,7 @@ namespace DataHandling
                               {
                                   throw std::runtime_error("Could not find any detectors for the bank named" + bankName +
                                                            " that is listed in the NeXus file."
-                                                           "Check that it exists in the Instrument Definition FIle.");
+                                                           "Check that it exists in the Instrument Definition File.");
                               }
 
                           }
