@@ -1,5 +1,6 @@
 # Source files
 set ( SRC_FILES
+	#
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
 	src/BinMD.cpp
@@ -7,6 +8,11 @@ set ( SRC_FILES
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
+	src/ConvToMDEventsBase.cpp
+	src/ConvToMDEventsEvents.cpp
+	src/ConvToMDEventsHisto.cpp
+	src/ConvToMDEventsSelector.cpp
+	src/ConvToMDPreprocDet.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
@@ -19,6 +25,7 @@ set ( SRC_FILES
 	src/FindPeaksMD.cpp
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
+	src/LoadMDHistoWorkspace.cpp
 	src/LoadSQW.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
@@ -31,31 +38,23 @@ set ( SRC_FILES
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
+	src/MDTransfAxisNames.cpp
+	src/MDTransfDEHelper.cpp
+	src/MDTransfFactory.cpp
+	src/MDTransfModQ.cpp
+	src/MDTransfNoQ.cpp
+	src/MDTransfQ3D.cpp
+	src/MDWSDescription.cpp
+	src/MDWSTransform.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
-	src/ReflectometryTransformQxQz.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
+	src/ReflectometryTransformQxQz.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
-#	
-	src/ConvToMDEventsBase.cpp
-	src/ConvToMDEventsEvents.cpp
-	src/ConvToMDEventsHisto.cpp
-	src/ConvToMDPreprocDet.cpp
-	src/MDTransfDEHelper.cpp
-	src/MDTransfAxisNames.cpp
-#
-	src/MDTransfFactory.cpp	
-	src/MDTransfQ3D.cpp
-	src/MDTransfNoQ.cpp
-	src/MDTransfModQ.cpp
-	src/UnitsConversionHelper.cpp	
-	src/ConvToMDEventsSelector.cpp
-
-	src/MDWSDescription.cpp
-	src/MDWSTransform.cpp
+	src/UnitsConversionHelper.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -69,6 +68,7 @@ set ( SRC_UNITY_IGNORE_FILES
 
 # Header files
 set ( INC_FILES
+	#
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BinMD.h
@@ -76,6 +76,11 @@ set ( INC_FILES
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
+	inc/MantidMDEvents/ConvToMDEventsBase.h
+	inc/MantidMDEvents/ConvToMDEventsEvents.h
+	inc/MantidMDEvents/ConvToMDEventsHisto.h
+	inc/MantidMDEvents/ConvToMDEventsSelector.h
+	inc/MantidMDEvents/ConvToMDPreprocDet.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/ConvertToReflectometryQ.h
 	inc/MantidMDEvents/CoordTransformAffine.h
@@ -88,6 +93,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/FindPeaksMD.h
 	inc/MantidMDEvents/IntegratePeaksMD.h
 	inc/MantidMDEvents/LoadMD.h
+	inc/MantidMDEvents/LoadMDHistoWorkspace.h
 	inc/MantidMDEvents/LoadSQW.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
@@ -96,45 +102,37 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
+	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
+	inc/MantidMDEvents/MDTransfAxisNames.h
+	inc/MantidMDEvents/MDTransfDEHelper.h
+	inc/MantidMDEvents/MDTransfFactory.h
+	inc/MantidMDEvents/MDTransfInterface.h
+	inc/MantidMDEvents/MDTransfModQ.h
+	inc/MantidMDEvents/MDTransfNoQ.h
+	inc/MantidMDEvents/MDTransfQ3D.h
+	inc/MantidMDEvents/MDWSDescription.h
+	inc/MantidMDEvents/MDWSTransform.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
-	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/ReflectometryMDTransform.h
 	inc/MantidMDEvents/ReflectometryTransformKiKf.h
 	inc/MantidMDEvents/ReflectometryTransformP.h
+	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
-#	
-	inc/MantidMDEvents/MDEventWSWrapper.h
-	inc/MantidMDEvents/MDWSDescription.h
-	inc/MantidMDEvents/MDWSTransform.h	
-# 
-	inc/MantidMDEvents/ConvToMDEventsBase.h	
-	inc/MantidMDEvents/ConvToMDEventsEvents.h
-	inc/MantidMDEvents/ConvToMDEventsHisto.h	
-	inc/MantidMDEvents/ConvToMDPreprocDet.h
-	
-	inc/MantidMDEvents/MDTransfAxisNames.h	
-	inc/MantidMDEvents/MDTransfDEHelper.h
-
-    inc/MantidMDEvents/MDTransfFactory.h
-	inc/MantidMDEvents/MDTransfInterface.h
-	inc/MantidMDEvents/MDTransfQ3D.h
-	inc/MantidMDEvents/MDTransfNoQ.h
-	inc/MantidMDEvents/MDTransfModQ.h
-	inc/MantidMDEvents/ConvToMDEventsSelector.h
-	inc/MantidMDEvents/UnitsConversionHelper.h	
+	inc/MantidMDEvents/UnitsConversionHelper.h
 )
 
 # Test files. Other source files required.
 set ( TEST_FILES
+	#
 	test/AffineMatrixParameterParserTest.h
 	test/AffineMatrixParameterTest.h
 	test/BinToMDHistoWorkspaceTest.h
@@ -142,6 +140,10 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
+	test/ConvertToMDEventsParamsTest.h
+	test/ConvertToMDEventsSubalgFactoryTest.h
+	test/ConvertToMDEventsUnitsConvTest.h
+	test/ConvertToMDEventsWSTest.h
 	test/ConvertToReflectometryQTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
@@ -152,6 +154,7 @@ set ( TEST_FILES
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
 	test/IntegratePeaksMDTest.h
+	test/LoadMDHistoWorkspaceTest.h
 	test/LoadMDTest.h
 	test/LoadSQWTest.h
 	test/MDBinTest.h
@@ -161,11 +164,14 @@ set ( TEST_FILES
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
+	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
+	test/MDTransfAxisNamesTest.h
+	test/MDWSTransfTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/ReflectometryTransformQxQzTest.h
@@ -173,16 +179,6 @@ set ( TEST_FILES
 	test/SkippingPolicyTest.h
 	test/SliceMDTest.h
 	test/SlicingAlgorithmTest.h
-#
-	test/MDTransfAxisNamesTest.h
-	test/MDWSTransfTest.h
-	test/MDEventWSWrapperTest.h	
-#	
-	test/ConvertToMDEventsWSTest.h		
-    test/ConvertToMDEventsSubalgFactoryTest.h	
-#
-	test/ConvertToMDEventsUnitsConvTest.h 	
-	test/ConvertToMDEventsParamsTest.h
 )
 
 set ( GMOCK_TEST_FILES
