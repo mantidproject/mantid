@@ -287,10 +287,12 @@ void SmoothNeighbours::findNeighboursRectangular()
 
   if (detList.empty())
   {
+    // Not rectangular so use Nearest Neighbours
     Radius = translateToMeters("NumberOfPixels", std::max(AdjX,AdjY));
-    nNeighbours = AdjX * AdjY * AdjX * AdjY;
-    std::cout << Radius <<"  "<<nNeighbours<<"\n";
+    setWeightingStrategy("Flat", Radius);
+    nNeighbours = AdjX * AdjY - 1;
     findNeighboursUbiqutious();
+    return;
   }
 
   // Resize the vector we are setting
@@ -423,7 +425,12 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     {
       det = inWS->getDetector(wi);
       if( det->isMonitor() ) continue; //skip monitor
-      if( det->isMasked() ) continue; //skip masked detectors
+      if( det->isMasked() )
+      {
+    	  //Calibration masks many detectors, but there should be 0s after smoothing
+    	  if(sum == 1) outWI++;
+    	  continue; //skip masked detectors
+      }
       if(sum > 1)
       {
         parent = det->getParent();

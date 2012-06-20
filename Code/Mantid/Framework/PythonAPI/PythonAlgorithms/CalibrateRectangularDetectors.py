@@ -300,10 +300,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
             DReference=self._peakpos, FitWindowMaxWidth=self.getProperty("PeakWindowMax"), BackgroundType=self.getProperty("BackgroundType"),
             MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
-        #TODO fix SmoothNeighbours for non-rectangular
-        #if self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
-                #SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
-                                 #AdjX=self._xpixelbin, AdjY=self._ypixelbin)
+        #Fixed SmoothNeighbours for non-rectangular and rectangular
+        if self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
+                SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
+                                 AdjX=self._xpixelbin, AdjY=self._ypixelbin)
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
