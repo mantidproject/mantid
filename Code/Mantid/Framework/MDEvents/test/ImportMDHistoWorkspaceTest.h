@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_LOADMDHISTOWORKSPACETEST_H_
-#define MANTID_MDEVENTS_LOADMDHISTOWORKSPACETEST_H_
+#ifndef MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
+#define MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include "MantidMDEvents/LoadMDHistoWorkspace.h"
+#include "MantidMDEvents/ImportMDHistoWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
 using namespace Mantid;
@@ -53,7 +53,7 @@ private:
   void *operator new[](size_t);
 };
 
-class LoadMDHistoWorkspaceTest : public CxxTest::TestSuite
+class ImportMDHistoWorkspaceTest : public CxxTest::TestSuite
 {
 
 private:
@@ -64,7 +64,7 @@ private:
   */
   boost::shared_ptr<IAlgorithm> make_standard_algorithm(const MDFileObject& fileObject)
   {
-    IAlgorithm_sptr alg = IAlgorithm_sptr(new LoadMDHistoWorkspace());
+    IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("FileName", fileObject.getFileName());
@@ -81,12 +81,12 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadMDHistoWorkspaceTest *createSuite() { return new LoadMDHistoWorkspaceTest(); }
-  static void destroySuite( LoadMDHistoWorkspaceTest *suite ) { delete suite; }
+  static ImportMDHistoWorkspaceTest *createSuite() { return new ImportMDHistoWorkspaceTest(); }
+  static void destroySuite( ImportMDHistoWorkspaceTest *suite ) { delete suite; }
 
   void test_Init()
   {
-    LoadMDHistoWorkspace alg;
+    ImportMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -174,7 +174,7 @@ public:
   void test_executes_2D()
   {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2*2);
-    IAlgorithm_sptr alg = IAlgorithm_sptr(new LoadMDHistoWorkspace());
+    IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
     alg->setPropertyValue("FileName", fileObject.getFileName());
     alg->setProperty("Dimensionality", 2);
@@ -229,7 +229,7 @@ public:
   void test_executes_3D()
   {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2*2*2);
-    IAlgorithm_sptr alg = IAlgorithm_sptr(new LoadMDHistoWorkspace());
+    IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
     alg->setPropertyValue("FileName", fileObject.getFileName());
     alg->setProperty("Dimensionality", 3);
@@ -260,4 +260,4 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_LOADMDHISTOWORKSPACETEST_H_ */
+#endif /* MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_ */

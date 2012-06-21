@@ -13,7 +13,7 @@ Signal and Error inputs are read in such that, the first entries in the file wil
 
 *WIKI*/
 
-#include "MantidMDEvents/LoadMDHistoWorkspace.h"
+#include "MantidMDEvents/ImportMDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -40,7 +40,7 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadMDHistoWorkspace)
+  DECLARE_ALGORITHM(ImportMDHistoWorkspace)
   
   /**
   Functor to compute the product of the set.
@@ -56,31 +56,31 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadMDHistoWorkspace::LoadMDHistoWorkspace()
+  ImportMDHistoWorkspace::ImportMDHistoWorkspace()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  LoadMDHistoWorkspace::~LoadMDHistoWorkspace()
+  ImportMDHistoWorkspace::~ImportMDHistoWorkspace()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string LoadMDHistoWorkspace::name() const { return "LoadMDHistoWorkspace";};
+  const std::string ImportMDHistoWorkspace::name() const { return "ImportMDHistoWorkspace";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int LoadMDHistoWorkspace::version() const { return 1;};
+  int ImportMDHistoWorkspace::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string LoadMDHistoWorkspace::category() const { return "General";}
+  const std::string ImportMDHistoWorkspace::category() const { return "General";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void LoadMDHistoWorkspace::initDocs()
+  void ImportMDHistoWorkspace::initDocs()
   {
     this->setWikiSummary("Reads a text file and generates an MDHistoWorkspace from it.");
     this->setOptionalMessage("Reads a text file and generates an MDHistoWorkspace from it.");
@@ -89,7 +89,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void LoadMDHistoWorkspace::init()
+  void ImportMDHistoWorkspace::init()
   {
     std::vector<std::string> fileExtensions(1);
     fileExtensions[0]=".txt";
@@ -124,7 +124,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void LoadMDHistoWorkspace::exec()
+  void ImportMDHistoWorkspace::exec()
   {
     // Fetch input properties
     const int ndims = getProperty("Dimensionality");

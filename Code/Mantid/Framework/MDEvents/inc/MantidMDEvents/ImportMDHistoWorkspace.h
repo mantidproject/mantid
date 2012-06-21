@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_LOADMDHISTOWORKSPACE_H_
-#define MANTID_MDEVENTS_LOADMDHISTOWORKSPACE_H_
+#ifndef MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACE_H_
+#define MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -9,7 +9,8 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** LoadMDHistoWorkspace : TODO: DESCRIPTION
+  /** ImportMDHistoWorkspace : Takes a text file containing structured signal and error information and imports it 
+    as a new MDHistoWorkspace.
     
     @date 2012-06-20
 
@@ -33,11 +34,11 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMDHistoWorkspace  : public API::Algorithm
+  class DLLExport ImportMDHistoWorkspace  : public API::Algorithm
   {
   public:
-    LoadMDHistoWorkspace();
-    virtual ~LoadMDHistoWorkspace();
+    ImportMDHistoWorkspace();
+    virtual ~ImportMDHistoWorkspace();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -48,11 +49,10 @@ namespace MDEvents
     void init();
     void exec();
 
-
   };
 
 
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_LOADMDHISTOWORKSPACE_H_ */
+#endif  /* MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACE_H_ */
