@@ -92,6 +92,13 @@ namespace DataHandling
 
     double l1; V3D beamline; double beamline_norm; V3D samplePos;
     inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
+    out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):" <<  std::endl;
+    out << "# Lengths are in centimeters." <<  std::endl;
+    out << "# Base and up give directions of unit vectors for a local " <<  std::endl;
+    out << "# x,y coordinate system on the face of the detector." <<  std::endl;
+    out << "#" <<  std::endl;
+    out << "#" <<  std::endl;
+    out << "# " << DateAndTime::getCurrentTime().toISO8601String() <<  std::endl;
 
     out << "6         L1    T0_SHIFT" <<  std::endl;
     out << "7 "<< std::setw( 10 )  ;

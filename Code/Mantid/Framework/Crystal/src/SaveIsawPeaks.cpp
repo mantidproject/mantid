@@ -18,6 +18,7 @@ Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/V3D.h"
 #include <fstream>
+#include <Poco/File.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -133,6 +134,10 @@ namespace Crystal
 
     std::ofstream out;
     bool append = getProperty("AppendFile");
+
+    // do not append if file does not exist
+    if (!Poco::File(filename.c_str()).exists())append = false;
+
     if (append)
     {
       out.open( filename.c_str(), std::ios::app);
