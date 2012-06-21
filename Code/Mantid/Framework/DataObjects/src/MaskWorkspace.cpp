@@ -41,7 +41,8 @@ namespace DataObjects
      */
     MaskWorkspace::MaskWorkspace(std::size_t numvectors): m_hasInstrument(false)
     {
-        this->init(numvectors, 1, 1);
+      this->init(numvectors, 1, 1);
+      this->clearMask();
     }
 
     /**
@@ -52,6 +53,7 @@ namespace DataObjects
     MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
       : SpecialWorkspace2D(instrument, includeMonitors), m_hasInstrument(true)
     {
+      this->clearMask();
     }
 
     //--------------------------------------------------------------------------
@@ -65,6 +67,20 @@ namespace DataObjects
     }
 
     //--------------------------------------------------------------------------
+
+    void MaskWorkspace::clearMask()
+    {
+      std::size_t nHist = this->getNumberHistograms();
+      for (std::size_t i = 0; i < nHist; ++i)
+      {
+        this->dataY(i)[0] = LIVE_VALUE;
+        this->dataE(i)[0] = ERROR_VALUE;
+      }
+
+      // Clear the mask flags
+      Geometry::ParameterMap & pmap = this->instrumentParameters();
+      pmap.clearParametersByName("masked");
+    }
 
     /**
      * @return The total number of masked spectra.

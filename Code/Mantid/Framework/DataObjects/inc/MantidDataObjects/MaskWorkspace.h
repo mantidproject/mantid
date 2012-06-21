@@ -33,6 +33,7 @@ namespace DataObjects
         MaskWorkspace(const MaskWorkspace&);
         /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
         MaskWorkspace& operator=(const MaskWorkspace&);
+        void clearMask();
         bool m_hasInstrument;
     };
 
