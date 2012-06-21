@@ -46,7 +46,7 @@ namespace MDEvents
     /// Vector containing the number of bins in each dimension.
     std::vector<int> nbins;
     /// Creates an empty md histo workspace (with dimensions)
-    MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace();
+    MDHistoWorkspace_sptr createEmptyOutputWorkspace();
     /// Initialise the properties associated with the generic import (those to do with dimensionality).
     void initGenericImportProps();
     /// Getter for the number of bins (product accross all dimensions)
