@@ -25,7 +25,7 @@ public:
   MDFileObject(const std::string& filename, const size_t& size) : m_filename(filename)
   {
     m_file.open (filename.c_str());
-    for(int i=1; i<size+1;++i)
+    for(size_t i=1; i<size+1;++i)
     {
       m_file << i << "\t" << i+1 << std::endl;
     }

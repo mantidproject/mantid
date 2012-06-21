@@ -127,7 +127,7 @@ namespace MDEvents
   void ImportMDHistoWorkspace::exec()
   {
     // Fetch input properties
-    const int ndims = getProperty("Dimensionality");
+    size_t ndims = getProperty("Dimensionality");
     std::vector<double> extents = getProperty("Extents");
     std::vector<int> nbins = getProperty("NumberOfBins");
     std::vector<std::string> names = getProperty("Names");
