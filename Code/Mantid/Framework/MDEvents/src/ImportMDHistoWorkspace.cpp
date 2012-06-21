@@ -1,15 +1,47 @@
 /*WIKI*
 
+
 This algorithm takes a text file (.txt extension) containing two columns and converts it into an MDHistoWorkspace.
 
 === Details ===
-The columns are in the order '''signal''' then '''error'''. The file must only contain two columns, these may be separated by any whitespace character.
 
-The algorithm expects there to be 2*product(nbins in each dimension) entries in this file. So if you have set the dimensionality to be ''4,4,4'' then you will need to provide 64 rows of data, in 2 columns or 124 floating point entries.
+The columns are in the order '''signal''' then '''error'''. The file must only contain two columns, these may be separated by any whitespace character. The algorithm expects there to be 2*product(nbins in each dimension) entries in this file. So if you have set the dimensionality to be ''4,4,4'' then you will need to provide 64 rows of data, in 2 columns or 124 floating point entries.
 
 The Names, Units, Extents and NumberOfBins inputs are all linked by the order they are provided in. For example, if you provide Names ''A, B, C'' and Units ''U1, U2, U3'' then the dimension ''A'' will have units ''U1''.
 
 Signal and Error inputs are read in such that, the first entries in the file will be entered across the first dimension specified, and the zeroth index in the other dimensions. The second set of entries will be entered across the first dimension and the 1st index in the second dimension, and the zeroth index in the others.
+
+== Usage ==
+
+The following call will create an MDHistoWorkspace called ''demo'' with 3 dimensions with 2 bins in each dimension. Each dimension will
+span from -1 to 1 in units of T.
+
+ ImportMDHistoWorkspace(Filename='demo.txt',Dimensionality='3',Extents='-1,1,-1,1,-1,1',NumberOfBins='2,2,2',Names='A,B,C',Units='T,T,T',OutputWorkspace='demo')
+
+
+And here's the corresponding contents of ''demo.txt'':
+
+ 1	1.1
+ 2	2.1
+ 3	3.1
+ 4	4.1
+ 5	5.1
+ 6	6.1
+ 7	7.1
+ 8	8.1
+ 9	9.1
+ 10	10.1
+ 11	11.1
+ 12	12.1
+ 13	13.1
+ 14	14.1
+ 15	15.1
+ 16	16.1
+
+== Alternatives ==
+A very similar algorithm to this is [[CreateMDHistoWorkspace]], which takes it's input signal and error values from arrays rather than a text file. Another alternative is to use [[ConvertToMDEvents]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
+
+[[Category:MDAlgorithms]]
 
 *WIKI*/
 
