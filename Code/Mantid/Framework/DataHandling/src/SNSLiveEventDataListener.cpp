@@ -346,8 +346,8 @@ namespace DataHandling
     }
     else
     {
-      g_log.information() << "Invalid pixel ID: " << pixelId << " (TofF: "
-                          << tof << " microseconds)" << std::endl;
+      g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof
+                      << " microseconds)" << std::endl;
     }
   }
 
