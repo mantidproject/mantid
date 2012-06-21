@@ -219,8 +219,8 @@ public:
     TS_ASSERT_DELTA(1, signals[0], 0.0001); // Check the first signal value
     TS_ASSERT_DELTA(2, signals[1], 0.0001); // Check the second signal value
     double* errorsSQ = outWs->getErrorSquaredArray();
-    TS_ASSERT_DELTA(2*2, errorsSQ[0], 0.0001); // Check the first error value
-    TS_ASSERT_DELTA(3*3, errorsSQ[1], 0.0001); // Check the second error value
+    TS_ASSERT_DELTA(2*2, errorsSQ[0], 0.0001); // Check the first error sq value
+    TS_ASSERT_DELTA(3*3, errorsSQ[1], 0.0001); // Check the second error sq value
 
     ADS.remove("test_workspace");
   }

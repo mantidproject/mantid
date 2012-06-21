@@ -16,13 +16,6 @@ Signal and Error inputs are read in such that, the first entries in the file wil
 #include "MantidMDEvents/ImportMDHistoWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include <vector>
-
 #include <deque>
 #include <iostream>
 #include <fstream>
@@ -82,7 +75,6 @@ namespace MDEvents
     std::vector<std::string> fileExtensions(1);
     fileExtensions[0]=".txt";
     declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load,fileExtensions), "File of type txt");
-    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace","",Direction::Output), "MDHistoWorkspace reflecting the input text file.");
 
     // Initialize generic dimension properties on the base class.
     this->initGenericImportProps();

@@ -72,6 +72,8 @@ namespace MDEvents
     declareProperty(
       new ArrayProperty<std::string>("Units"), 
       "A comma separated list of the units of each dimension.");
+
+    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace","",Direction::Output), "MDHistoWorkspace reflecting the input text file.");
   }
 
   //----------------------------------------------------------------------------------------------
