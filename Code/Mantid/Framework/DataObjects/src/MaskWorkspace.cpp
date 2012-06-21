@@ -145,6 +145,14 @@ namespace DataObjects
     }
 
     /**
+     * Use this method with MaskWorkspace that doesn't have an instrument.
+     */
+    bool MaskWorkspace::isMaskedIndex(const std::size_t wkspIndex) const
+    {
+      return (this->dataY(wkspIndex)[0] != LIVE_VALUE); // if is not live it should masked
+    }
+
+    /**
      * Mask an individual pixel.
      *
      * @param detectorID to mask.
@@ -169,6 +177,15 @@ namespace DataObjects
       {
         this->setMasked(*detId, mask);
       }
+    }
+
+    void MaskWorkspace::setMaskedIndex(const std::size_t wkspIndex, const bool mask)
+    {
+      double value(LIVE_VALUE);
+      if (mask)
+        value = DEAD_VALUE;
+
+      this->dataY(wkspIndex)[0] = value;
     }
 
     /**

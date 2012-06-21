@@ -23,8 +23,10 @@ namespace DataObjects
 
         bool isMasked(const detid_t detectorID) const;
         bool isMasked(const std::set<detid_t> &detectorIDs) const;
+        bool isMaskedIndex(const std::size_t wkspIndex) const;
         void setMasked(const detid_t detectorID, const bool mask=true);
         void setMasked(const std::set<detid_t> &detectorIDs, const bool mask=true);
+        void setMaskedIndex(const std::size_t wkspIndex, const bool mask=true);
         std::size_t getNumberMasked() const;
         virtual const std::string id() const;
 
