@@ -127,7 +127,11 @@ namespace MDEvents
   void ImportMDHistoWorkspace::exec()
   {
     // Fetch input properties
-    size_t ndims = getProperty("Dimensionality");
+    size_t ndims;
+    {
+      int ndims_int = getProperty("Dimensionality");
+      ndims = ndims_int;
+    }
     std::vector<double> extents = getProperty("Extents");
     std::vector<int> nbins = getProperty("NumberOfBins");
     std::vector<std::string> names = getProperty("Names");
@@ -146,7 +150,7 @@ namespace MDEvents
     
     // Fabricate new dimensions from inputs
     std::vector<MDHistoDimension_sptr> dimensions;
-    for(int k = 0; k < ndims; ++k)
+    for(size_t k = 0; k < ndims; ++k)
     {
       dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(names[k], names[k], units[k], static_cast<coord_t>(extents[k*2]), static_cast<coord_t>(extents[(k*2) + 1]), nbins[k])));
     }
