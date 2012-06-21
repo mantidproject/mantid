@@ -23,7 +23,8 @@ set ( SRC_FILES
 	src/CreateMDWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
-  src/ImportMDHistoWorkspace.cpp
+	src/ImportMDHistoWorkspace.cpp
+	src/ImportMDHistoWorkspaceBase.cpp
 	src/IntegratePeaksMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
@@ -91,7 +92,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/CreateMDWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
-  inc/MantidMDEvents/ImportMDHistoWorkspace.h
+	inc/MantidMDEvents/ImportMDHistoWorkspace.h
+	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
 	inc/MantidMDEvents/IntegratePeaksMD.h
 	inc/MantidMDEvents/LoadMD.h
 	inc/MantidMDEvents/LoadSQW.h
@@ -153,7 +155,7 @@ set ( TEST_FILES
 	test/CreateMDWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
-  test/ImportMDHistoWorkspaceTest.h
+	test/ImportMDHistoWorkspaceTest.h
 	test/IntegratePeaksMDTest.h
 	test/LoadMDTest.h
 	test/LoadSQWTest.h

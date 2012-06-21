@@ -14,20 +14,19 @@ Signal and Error inputs are read in such that, the first entries in the file wil
 *WIKI*/
 
 #include "MantidMDEvents/ImportMDHistoWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Progress.h"
+
+#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 #include <vector>
+
 #include <deque>
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <algorithm>
 
 
 using namespace Mantid::Kernel;
@@ -41,22 +40,11 @@ namespace MDEvents
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ImportMDHistoWorkspace)
-  
-  /**
-  Functor to compute the product of the set.
-  */
-  struct Product : public std::unary_function<size_t, void>
-  {
-    Product() : result(1) {}
-    size_t result;
-    void operator()(size_t x) { result *= x; }
-  };
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ImportMDHistoWorkspace::ImportMDHistoWorkspace()
+  ImportMDHistoWorkspace::ImportMDHistoWorkspace() : ImportMDHistoWorkspaceBase()
   {
   }
     
@@ -96,29 +84,8 @@ namespace MDEvents
     declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load,fileExtensions), "File of type txt");
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace","",Direction::Output), "MDHistoWorkspace reflecting the input text file.");
 
-    auto validator = boost::make_shared<CompositeValidator>();
-    validator->add(boost::make_shared<BoundedValidator<int> >(1,9));
-    validator->add(boost::make_shared<MandatoryValidator<int> >());
-
-    declareProperty(new PropertyWithValue<int>("Dimensionality", -1, validator, Direction::Input), "Dimensionality of the data in the file.");
-
-    declareProperty(
-      new ArrayProperty<double>("Extents"),
-      "A comma separated list of min, max for each dimension,\n"
-      "specifying the extents of each dimension.");
-    
-    declareProperty(
-      new ArrayProperty<int>("NumberOfBins"), 
-      "Number of bin in each dimension.");
-
-    declareProperty(
-      new ArrayProperty<std::string>("Names"), 
-      "A comma separated list of the name of each dimension.");
-
-    declareProperty(
-      new ArrayProperty<std::string>("Units"), 
-      "A comma separated list of the units of each dimension.");
-
+    // Initialize generic dimension properties on the base class.
+    this->initGenericImportProps();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -126,40 +93,13 @@ namespace MDEvents
    */
   void ImportMDHistoWorkspace::exec()
   {
-    // Fetch input properties
-    size_t ndims;
-    {
-      int ndims_int = getProperty("Dimensionality");
-      ndims = ndims_int;
-    }
-    std::vector<double> extents = getProperty("Extents");
-    std::vector<int> nbins = getProperty("NumberOfBins");
-    std::vector<std::string> names = getProperty("Names");
-    std::vector<std::string> units = getProperty("Units");
+    
     std::string filename = getProperty("Filename");
     
-    // Perform all validation on inputs
-    if (extents.size() != ndims*2)
-      throw std::invalid_argument("You must specify twice as many extents (min,max) as there are dimensions.");    
-    if (nbins.size() != ndims)
-      throw std::invalid_argument("You must specify as number of bins as there are dimensions.");
-    if (names.size() != ndims)
-      throw std::invalid_argument("You must specify as many names as there are dimensions.");
-    if (units.size() != ndims)
-      throw std::invalid_argument("You must specify as many units as there are dimensions.");
-    
-    // Fabricate new dimensions from inputs
-    std::vector<MDHistoDimension_sptr> dimensions;
-    for(size_t k = 0; k < ndims; ++k)
-    {
-      dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(names[k], names[k], units[k], static_cast<coord_t>(extents[k*2]), static_cast<coord_t>(extents[(k*2) + 1]), nbins[k])));
-    }
-   
     /*
-    Create a new output workspace. Note that the MDHistoWorkspace will take care of memory allocation associated with
-    the internal arrays for signal and error values. So no need to provide any clean-up in this algorithm if allocation is not possible.
+     Base class creates an empty output workspace, with the correct dimensionality according to the algorithm inputs (see base class).
     */
-    MDHistoWorkspace_sptr ws (new MDHistoWorkspace(dimensions));
+    MDHistoWorkspace_sptr ws = this->createEmptyOutputWorkspace();
 
     // Open the file
     std::ifstream file;
@@ -185,9 +125,7 @@ namespace MDEvents
     // Release the resource.
     file.close();
 
-    // Calculated the expected number of elements.
-    Product answer = std::for_each(nbins.begin(), nbins.end(), Product());
-    const size_t nElements = answer.result * 2;
+    const size_t nElements = this->getBinProduct() * 2;
 
     // Handle the case that the number of elements is wrong.
     if(box_elements.size() % nElements != 0)
