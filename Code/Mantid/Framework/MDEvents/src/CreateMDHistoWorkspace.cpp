@@ -107,13 +107,14 @@ namespace MDEvents
 
      //Copy from property
      std::copy(signalValues.begin(), signalValues.end(), signals);
+     std::vector<double> empty;
      //Clean up.
-     signalValues.swap(std::vector<double>());
+     signalValues.swap(empty);
      //Copy from property
      std::for_each(errorValues.begin(), errorValues.end(), Square());
      std::copy(errorValues.begin(), errorValues.end(), errors);
      //Clean up
-     errorValues.swap(std::vector<double>());
+     errorValues.swap(empty);
 
      setProperty("OutputWorkspace", ws);
 
