@@ -20,7 +20,7 @@ class Stitch1DTest(unittest.TestCase):
             self.__bad_type_of_workspace_name = bad_md_workspace_alg.getPropertyValue("OutputWorkspace")
             
             # Create a workspace that is of the right type and shape
-            good_workspace_alg = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2',ErrorInput='1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='2,1',Names='A,B',Units='U1,U2',OutputWorkspace='Stitch1D_test_workspace_2')
+            good_workspace_alg = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2',ErrorInput='1,2',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='2,1',Names='A,B',Units='U1,U2',OutputWorkspace='Stitch1D_test_workspace_2')
             self.__good_workspace_name = good_workspace_alg.getPropertyValue("OutputWorkspace")
             
             # Create a workspace that is of the right type, but the wrong shape
@@ -156,7 +156,7 @@ class Stitch1DTest(unittest.TestCase):
             mtd.remove(a)
             mtd.remove(b)
             self.assertTrue(passed) 
-	
+    
     def test_ws1_and_ws2_dim1_have_different_dimension_names_throws(self):
         self.__do_test_ws1_and_ws2_have_different_dimension_names_throws(['A1','B1'], ['A2', 'B1'])
         
@@ -198,9 +198,35 @@ class Stitch1DTest(unittest.TestCase):
             passed = True
         finally:
             self.assertTrue(passed)
-    
-    
-      
+	  	
+    def test_end_overlap_equal_to_start_overlap_throws(self):
+        passed = False	  	
+        try:
+            alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0,child=True) 
+        except RuntimeError:
+            passed = True
+        finally:
+            self.assertTrue(passed)
+            
+    def test_calculates_scaling_factor_correctly(self):
+        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,1,1',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
+        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
+   
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1) 
+        self.assertTrue(alg.isExecuted())
+        scale_factor = float(alg.getPropertyValue("AppliedScaleFactor"))
+        
+        # 1 * ((2 + 3)/( 1 + 1)) = 2.5
+        
+        self.assertEqual(2.5, scale_factor)
+            
+    def test_does_something(self):
+        # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
+        alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.5,child=True) 
+        self.assertTrue(alg.isExecuted())
+        scale_factor = alg.getPropertyValue("AppliedScaleFactor")
         
 if __name__ == '__main__':
     unittest.main()
