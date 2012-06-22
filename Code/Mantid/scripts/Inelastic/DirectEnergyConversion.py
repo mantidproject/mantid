@@ -176,7 +176,7 @@ class DirectEnergyConversion(object):
         if 'second_white' in kwargs:
             DeleteWorkspace(kwargs['second_white'])
         # Return a mask workspace
-        diag_mask = ExtractMasking(whiteintegrals, OutputWorkspace='diag_mask').workspace()
+        diag_mask = ExtractMask(whiteintegrals, OutputWorkspace='diag_mask').workspace()
         DeleteWorkspace(whiteintegrals)
 
         if var_name is not None and var_name != str(diag_mask):
@@ -583,7 +583,7 @@ class DirectEnergyConversion(object):
         args['van_sig'] = self.diag_samp_sig
 
         diagnostics.diagnose(data_ws, **args)
-        monovan_masks = ExtractMasking(data_ws, OutputWorkspace='monovan_masks').workspace()
+        monovan_masks = ExtractMask(data_ws, OutputWorkspace='monovan_masks').workspace()
         MaskDetectors(data_ws, MaskedWorkspace=monovan_masks)
         DeleteWorkspace(Workspace=monovan_masks)
 
