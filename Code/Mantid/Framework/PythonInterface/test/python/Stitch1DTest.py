@@ -4,7 +4,7 @@ from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 
-class FindReflectometryLinesTest(unittest.TestCase):
+class Stitch1DTest(unittest.TestCase):
 
     __good_workspace_name = None
     __bad_type_of_workspace_name = None
