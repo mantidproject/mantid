@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/ExtractMask.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -52,7 +53,7 @@ public:
 
     const std::string inputName("inputWS");
     AnalysisDataService::Instance().add(inputName, inputWS);
-    MatrixWorkspace_sptr outputWS;
+    MaskWorkspace_sptr outputWS;
     TS_ASSERT_THROWS_NOTHING(outputWS = runExtractMask(inputName));
     TS_ASSERT(outputWS);
     if( outputWS )
@@ -67,7 +68,7 @@ public:
 private:
   
   // The input workspace should be in the analysis data service
-  MatrixWorkspace_sptr runExtractMask(const std::string & inputName)
+  MaskWorkspace_sptr runExtractMask(const std::string & inputName)
   {
     ExtractMask maskExtractor;
     maskExtractor.initialize();
@@ -80,17 +81,18 @@ private:
     Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(outputName);
     if( workspace )
     {
-      MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+      // output should be a MaskWorkspace
+      MaskWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MaskWorkspace>(workspace);
       return outputWS;
     }
     else
     {
-      return MatrixWorkspace_sptr();
+      return MaskWorkspace_sptr();
     }
  
   }
 
-  void doTest(MatrixWorkspace_const_sptr inputWS, MatrixWorkspace_const_sptr outputWS)
+  void doTest(MatrixWorkspace_const_sptr inputWS, MaskWorkspace_const_sptr outputWS)
   {
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     size_t nOutputHists(outputWS->getNumberHistograms());
