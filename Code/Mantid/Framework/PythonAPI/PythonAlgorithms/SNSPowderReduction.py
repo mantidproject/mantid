@@ -260,20 +260,8 @@ class SNSPowderReduction(PythonAlgorithm):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
-        if HAVE_MPI:
-            comm = mpi.world
-            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-            # What about no chunks for parallel?
-            if len(Chunks) == 1:
-            	strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
-            else:
-            	for row in Chunks:
-			 if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
-				 strategy.append(row)
-
-        else:
-            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-            for row in Chunks: strategy.append(row)
+        Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+        for row in Chunks: strategy.append(row)
 
         return strategy
 

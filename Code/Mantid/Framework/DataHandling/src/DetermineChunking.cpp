@@ -25,6 +25,10 @@ Workflow algorithm to determine chunking strategy.
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/BinaryFile.h"
+#ifdef MPI_BUILD
+    #include <boost/mpi.hpp>
+    namespace mpi = boost::mpi;
+#endif
 
 using namespace ::NeXus;
 using namespace Mantid::Kernel;
@@ -236,8 +240,17 @@ namespace DataHandling
     numChunks ++; //So maxChunkSize is not exceeded 
     if (numChunks < 0) numChunks = 1;
 
+#ifdef MPI_BUILD
+      // use all cores so number of chunks should be a multiple of cores
+      int imult = numChunks/mpi::communicator().size() + 1;
+      numChunks = imult * mpi::communicator().size();
+#endif
     for (int i = 1; i <= numChunks; i++) 
     {
+#ifdef MPI_BUILD
+      // chunk 1 should go to rank=0, chunk 2 to rank=1, etc.
+      if(i%mpi::communicator().size() != mpi::communicator().rank()+1) continue;
+#endif
       Mantid::API::TableRow row = strategy->appendRow();
       row << i << numChunks;
     }
