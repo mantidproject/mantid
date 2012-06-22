@@ -198,23 +198,7 @@ class Stitch1DTest(unittest.TestCase):
             passed = True
         finally:
             self.assertTrue(passed)
-            
-    def test_end_overlap_equal_to_start_overlap_throws(self):
-        passed = False
-        #alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0,child=True) 
-        try:
-            alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0,child=True) 
-        except RuntimeError:
-            passed = True
-        finally:
-            self.assertTrue(passed)
     
-     
-    # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
-    def test_does_something(self):
-        alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.3) 
-        self.assertTrue(isinstance(mtd['converted'], IMDHistoWorkspace))
-        mtd.remove('converted')
     
       
         
