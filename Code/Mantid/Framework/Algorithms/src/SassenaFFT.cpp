@@ -1,8 +1,6 @@
 /*WIKI*
 
 The SassenaFFT algorithm performs the discrete Fourier transform on the intermediate scattering factor, F(q,t), resulting from loading a Sassena input file.
-
-The input data is mirrored into negative times, as F(q,t) is expected to be invariant under time reversal.
  */
 
 //----------------------------------------------------------------------
@@ -12,7 +10,7 @@ The input data is mirrored into negative times, as F(q,t) is expected to be inva
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 
 namespace Mantid
 {
@@ -30,13 +28,26 @@ void SassenaFFT::initDocs()
   this->setWikiDescription("Performs complex Fast Fourier Transform of intermediate scattering function");
 }
 
+/// Override Algorithm::checkGroups
+bool SassenaFFT::checkGroups() { return false; }
+
+/// processGroups must not be called
+bool SassenaFFT::processGroups()
+{
+  const std::string errMessg = "processGroups must not be called from SassenaFFT";
+  this->g_log.error(errMessg);
+  throw std::logic_error(errMessg);
+  return false;
+}
+
+
 /**
  * Initialise the algorithm. Declare properties which can be set before execution (input) or
  * read from after the execution (output).
  */
 void SassenaFFT::init()
 {
-  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("InputWorkspace","",Kernel::Direction::Input), "The name of the input group workspace");
+  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("InputWorkspace","",Kernel::Direction::InOut), "The name of the input group workspace");
 }
 
 /// Execute the algorithm
@@ -45,8 +56,8 @@ void SassenaFFT::exec()
   const std::string gwsName = this->getPropertyValue("InputWorkspace");
   API::WorkspaceGroup_sptr gws = this->getProperty("InputWorkspace");
 
-  const std::string ftqReName = gwsName + "_fqt.re";
-  const std::string ftqImName = gwsName + "_fqt.re";
+  const std::string ftqReName = gwsName + "_fqt.Re";
+  const std::string ftqImName = gwsName + "_fqt.Im";
 
   // Make sure the intermediate structure factor is there
   if(!gws->contains(ftqReName) )
@@ -57,19 +68,21 @@ void SassenaFFT::exec()
   }
 
   // Retrieve the real and imaginary parts of the intermediate scattering function
-  DataObjects::Workspace2D_const_sptr fqtRe = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem( ftqReName ) );
-  DataObjects::Workspace2D_const_sptr fqtIm = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem( ftqImName ) );
+  DataObjects::Workspace2D_sptr fqtRe = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem( ftqReName ) );
+  DataObjects::Workspace2D_sptr fqtIm = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem( ftqImName ) );
 
   // Calculate the FFT for all spectra, retaining only the real part since F(q,-t) = F*(q,t)
   const std::string sqwName = gwsName + "_sqw";
-  API::Algorithm_sptr fft = this->createSubAlgorithm("ExtractFFTSpectrum");
+  API::IAlgorithm_sptr fft = this->createSubAlgorithm("ExtractFFTSpectrum");
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", fqtRe);
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputImagWorkspace", fqtIm);
-  fft->setProperty<int>("FFTPart",3);
   fft->setPropertyValue("OutputWorkspace", sqwName );
+  fft->setProperty<int>("FFTPart",2); // extract the real part
   fft->executeAsSubAlg();
-
+  API::MatrixWorkspace_sptr sqw0 = fft->getProperty("OutputWorkspace");
+  DataObjects::Workspace2D_sptr sqw = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( sqw0 );
   // Add to group workspace
+  API::AnalysisDataService::Instance().add( sqwName, sqw );
   gws->add( sqwName );
 }
 
