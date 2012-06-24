@@ -278,18 +278,15 @@ class SNSPowderReduction(PythonAlgorithm):
             if self._info is None:
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent, filterBadPulsesOverride)
-            if HAVE_MPI and len(strategy) == 1:
-                alg = GatherWorkspaces(InputWorkspace=temp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
+            if firstChunk:
+                alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
+                firstChunk = False
             else:
-                if firstChunk:
-                    alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
-                    wksp = alg['OutputWorkspace']
-                    firstChunk = False
-                else:
-                    wksp += temp
-                    DeleteWorkspace(temp)
-        if HAVE_MPI and len(strategy) > 1:
+                wksp += temp
+                DeleteWorkspace(temp)
+        # Sum workspaces for all mpi tasks
+        if HAVE_MPI:
             alg = GatherWorkspaces(InputWorkspace=wksp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
             wksp = alg['OutputWorkspace']
         if self._chunks > 0:
