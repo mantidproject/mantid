@@ -189,7 +189,16 @@ namespace MDEvents
       BackgroundInnerRadius = PeakRadius;
 
     // cppcheck-suppress syntaxError
-    PRAGMA_OMP(parallel for schedule(dynamic, 10) )
+//
+// If the following OMP pragma is included, this algorithm seg faults
+// sporadically when processing multiple TOPAZ runs in a script, on 
+// Scientific Linux 6.2.  Typically, it seg faults after 2 to 6 runs are 
+// processed, though occasionally it will process all 8 requested in the 
+// script without crashing.  Since the lower level codes already use OpenMP, 
+// parallelizing at this level is only marginally useful, giving about a 
+// 5-10% speedup.  Perhaps is should just be removed permanantly, but for 
+// now it is commented out to avoid the seg faults.  Refs #5533
+//PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
     {
       // Get a direct ref to that peak.
