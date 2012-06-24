@@ -92,7 +92,7 @@ namespace Crystal
     ParameterMap_sptr parMap1= instr_old->getParameterMap();
 
     ParameterMap_sptr parMap= instr->getParameterMap();
-    std::string lastString ="";
+
 
     while( in.good() && (startChar.size() <1 || startChar !="7") )
        {
@@ -222,6 +222,7 @@ namespace Crystal
   /** Reads the header of a .peaks file
    * @param outWS :: the workspace in which to place the information
    * @param in :: stream of the input file
+   * @param T0 :: Time offset
    * @return the first word on the next line
    */
   std::string LoadIsawPeaks::readHeader( PeaksWorkspace_sptr outWS, std::ifstream& in, double &T0 )
