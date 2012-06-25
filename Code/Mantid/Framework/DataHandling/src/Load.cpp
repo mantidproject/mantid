@@ -564,9 +564,10 @@ namespace Mantid
         groupingAlg->setProperty("OutputWorkspace",outputWsName.c_str());
         groupingAlg->execute();
 
+        auto outws = AnalysisDataService::Instance().retrieve(outputWsName.c_str());
         unhideWs(outputWsName);
 
-        setProperty("OutputWorkspace", AnalysisDataService::Instance().retrieve(outputWsName.c_str()));
+        setProperty("OutputWorkspace", outws);
       }
     }
 

@@ -353,8 +353,9 @@ namespace Mantid
       }
       outws = outputWorkspace + "_" + suffix.str();
       declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
-      grpws_sptr->add(wsName);
       setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
+      //grpws_sptr->add(wsName);
+      grpws_sptr->addWorkspace( ws_sptr );
     }
 
     /** This method sets the workspace property

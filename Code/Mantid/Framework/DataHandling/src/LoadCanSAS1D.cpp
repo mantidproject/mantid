@@ -256,7 +256,7 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork, const s
   //the following code registers the workspace with the AnalysisDataService and with the workspace group, I'm taking this oone trust I don't know why it's done this way sorry, Steve
   declareProperty(new WorkspaceProperty<MatrixWorkspace>(propName, newWorkName,
                                                          Direction::Output));
-  container->add(newWorkName);
+  container->addWorkspace(newWork);
   setProperty(propName, newWork);
 }
 /** Run the sub-algorithm LoadInstrument (as for LoadRaw)

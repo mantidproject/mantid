@@ -343,7 +343,10 @@ namespace Mantid
           outws =outputWorkspace+"_"+suffix.str();
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
-          if(wsGrpSptr)wsGrpSptr->add(WSName);
+          if (wsGrpSptr)
+          {
+            wsGrpSptr->addWorkspace( localWorkspace );
+          }
         }
 
         size_t counter = 0;

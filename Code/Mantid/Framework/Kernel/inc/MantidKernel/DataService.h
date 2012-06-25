@@ -274,7 +274,7 @@ public:
     {
       // Avoid double-locking
       m_mutex.unlock();
-      add(name,Tobject);
+      DataService::add(name,Tobject);
     }
     return;
   }
@@ -304,6 +304,51 @@ public:
 
     m_mutex.unlock();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
+    return;
+  }
+
+  //--------------------------------------------------------------------------
+  /** Rename an object within the service.
+   * @param oldName :: The old name of the object 
+   * @param newName :: The new name of the object 
+   */
+  void rename( const std::string& oldName, const std::string& newName)
+  {
+    // Make DataService access thread-safe
+    m_mutex.lock();
+
+    std::string foundName;
+    svc_it it = this->findNameWithCaseSearch(oldName, foundName);
+    if (it==datamap.end())
+    {
+      g_log.warning(" rename '" + oldName + "' cannot be found");
+      m_mutex.unlock();
+      return;
+    }
+
+    // delete the object with the old name
+    auto object = it->second;
+    datamap.erase( it );
+
+    // if there is another object which has newName delete it
+    it = datamap.find( newName );
+    if ( it != datamap.end() )
+    {
+      datamap.erase( it );
+    }
+
+    // insert the old object with the new name
+    if ( ! datamap.insert(typename svcmap::value_type(newName, object)).second )
+    {
+      std::string error=" add : Unable to insert Data Object : '"+newName+"'";
+      g_log.error(error);
+      m_mutex.unlock();
+      throw std::runtime_error(error);
+    }
+    g_log.information("Data Object '"+ foundName +"' renamed to '" + newName + "'");
+
+    m_mutex.unlock();
+    notificationCenter.postNotification(new RenameNotification(oldName, newName));
     return;
   }
 

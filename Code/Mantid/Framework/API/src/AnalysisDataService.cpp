@@ -1,4 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid
@@ -36,7 +37,8 @@ namespace Mantid
 
     /**
      * Overwridden add member to attach the name to the workspace when a workspace object is added to the service
-     * If the name already exists then this throws a std::runtime_error
+     * If the name already exists then this throws a std::runtime_error. If a workspace group is added adds the
+     * members which are not in the ADS yet.
      * @param name The name of the object
      * @param workspace The shared pointer to the workspace to store
      */
@@ -46,11 +48,34 @@ namespace Mantid
       //Attach the name to the workspace
       if( workspace ) workspace->setName(name);
       Kernel::DataService<API::Workspace>::add(name, workspace);
+      
+      // if a group is added add its members as well
+      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
+      if ( !group ) return;
+      for(size_t i = 0; i < group->size(); ++i)
+      {
+        auto ws = group->getItem( i );
+        std::string wsName = ws->name();
+        // if anonymous make up a name and add
+        if ( wsName.empty() )
+        {
+          wsName = name + "_" + boost::lexical_cast<std::string>( i + 1 );
+        }
+        else if ( doesExist( wsName ) )
+        {// if ws is already there do nothing
+          wsName.clear();
+        }
+        // add member workspace if needed
+        if ( !wsName.empty() )
+        {
+          add( wsName, ws );
+        }
+      }
     }
 
    /**
      * Overwridden addOrReplace member to attach the name to the workspace when a workspace object is added to the service.
-     * This will overwrite one of the same name
+     * This will overwrite one of the same name. If the workspace is group adds or replaces its members.
      * @param name The name of the object
      * @param workspace The shared pointer to the workspace to store
      */
@@ -61,8 +86,43 @@ namespace Mantid
       //Attach the name to the workspace
       if( workspace ) workspace->setName(name);
       Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
+
+      // if a group is added add its members as well
+      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
+      if ( !group ) return;
+      for(size_t i = 0; i < group->size(); ++i)
+      {
+        auto ws = group->getItem( i );
+        std::string wsName = ws->name();
+        // make up a name for an anonymous workspace
+        if ( wsName.empty() )
+        {
+          wsName = name + "_" + boost::lexical_cast<std::string>( i + 1 );
+        }
+        else if ( doesExist( wsName ) )
+        {// if ws is already there do nothing
+          wsName.clear();
+        }
+        // add member workspace if needed
+        if ( !wsName.empty() )
+        {
+          addOrReplace( wsName, ws );
+        }
+      }
     }
 
+    /**
+     * Overridden rename member to attach the new name to the workspace when a workspace object is renamed
+     * @param oldName The old name of the object
+     * @param newName The new name of the object
+     */
+    void AnalysisDataServiceImpl::rename( const std::string& oldName, const std::string& newName)
+    {
+      Kernel::DataService<API::Workspace>::rename( oldName, newName );
+      //Attach the new name to the workspace
+      auto ws = retrieve( newName );
+      ws->setName( newName );
+    }
 
     //-------------------------------------------------------------------------
     // Private methods

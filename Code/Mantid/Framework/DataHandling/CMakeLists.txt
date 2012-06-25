@@ -272,7 +272,7 @@ set ( TEST_FILES
 	test/GroupDetectors2Test.h
 	test/GroupDetectorsTest.h
 	test/ISISDataArchiveTest.h
-	#test/ISISHistoDataListenerTest.h
+	test/ISISHistoDataListenerTest.h
 	test/InstrumentRayTracerTest.h
 	test/LiveDataAlgorithmTest.h
 	test/LoadAsciiTest.h

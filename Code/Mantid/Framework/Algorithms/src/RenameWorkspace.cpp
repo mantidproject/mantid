@@ -54,12 +54,8 @@ void RenameWorkspace::exec()
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", inputWS);
 
-  AnalysisDataServiceImpl& data_store = AnalysisDataService::Instance();
-  // Post notice that a workspace has been renamed
-  data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
-      outputwsName));
-  //remove the input workspace from the analysis data service
-  data_store.remove(inputwsName);
+  //rename the input workspace using the rename method
+  AnalysisDataService::Instance().rename(inputwsName,outputwsName);
 }
 
 bool RenameWorkspace::processGroups()
@@ -83,12 +79,12 @@ bool RenameWorkspace::processGroups()
   const bool renameMembers = inputGroup->areNamesSimilar();
 
   AnalysisDataServiceImpl& data_store = AnalysisDataService::Instance();
-  // Change the group workspace name in the analysis data service
-  data_store.remove(inputwsName);
-  data_store.addOrReplace(outputwsName,inputWS);
-  // Post notice that a workspace has been renamed
-  data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
-        outputwsName));
+  //// Change the group workspace name in the analysis data service
+  //data_store.remove(inputwsName);
+  //data_store.addOrReplace(outputwsName,inputWS);
+  //// Post notice that a workspace has been renamed
+  //data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
+  //      outputwsName));
 
   // If necessary, go through group members calling the algorithm on each one
   if ( renameMembers )
@@ -117,6 +113,8 @@ bool RenameWorkspace::processGroups()
       }
     }
   }
+
+  AnalysisDataService::Instance().rename(inputwsName, outputwsName);
 
   // We finished successfully.
   setExecuted(true);

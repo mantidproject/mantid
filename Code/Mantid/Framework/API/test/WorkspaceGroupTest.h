@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -17,20 +18,15 @@ class WorkspaceGroupTest : public CxxTest::TestSuite
 {
 public:
 
-  void setUp()
+  /// Make a simple group
+  WorkspaceGroup_sptr makeGroup()
   {
-    AnalysisDataService::Instance().clear();
     for (size_t i=0; i<3; i++)
     {
       boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
       ws->initialize(2,3,4);
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
     }
-  }
-
-  /// Make a simple group
-  WorkspaceGroup_sptr makeGroup()
-  {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     group->add("ws0");
     group->add("ws1");
@@ -44,6 +40,23 @@ public:
     WorkspaceGroup_sptr group = makeGroup();
     TS_ASSERT_EQUALS( group->size(), 3);
     TS_ASSERT( group->contains("ws0") );
+    // cannot add a workspace which doesn't exist
+    TS_ASSERT_THROWS( group->add("noworkspace"), Kernel::Exception::NotFoundError );
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_addWorkspace()
+  {
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+    TS_ASSERT_EQUALS( group->size(), 2 );
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 0 );
+    AnalysisDataService::Instance().add("group", group);
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 3 );
   }
 
   void test_getItem()
@@ -53,6 +66,7 @@ public:
     TS_ASSERT_EQUALS( ws1->name(), "ws1");
     Workspace_sptr ws11 = group->getItem("ws1");
     TS_ASSERT_EQUALS( ws1, ws11 );
+    AnalysisDataService::Instance().clear();
   }
 
   void test_remove()
@@ -61,7 +75,8 @@ public:
     group->remove("ws0");
     TSM_ASSERT( "remove() takes out from group", !group->contains("ws0") );
     TSM_ASSERT( "remove() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0") );
-  }
+    AnalysisDataService::Instance().clear();
+}
 
   void test_removeAll()
   {
@@ -69,6 +84,7 @@ public:
     group->removeAll();
     TS_ASSERT_EQUALS( group->size(), 0);
     TSM_ASSERT( "removeAll() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0") );
+    AnalysisDataService::Instance().clear();
   }
 
   void test_deleting_workspaces()
@@ -88,6 +104,7 @@ public:
     // When you remove the last one, the group deletes itself
     AnalysisDataService::Instance().remove("ws2");
     TS_ASSERT( !AnalysisDataService::Instance().doesExist("group") );
+    AnalysisDataService::Instance().clear();
   }
 
   void test_areNamesSimilar()
@@ -95,9 +112,22 @@ public:
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     group->setName("name");
     TSM_ASSERT( "Empty group is not similar", !group->areNamesSimilar() );
-    group->add("name");
-    TSM_ASSERT( "No underscore is not similar", !group->areNamesSimilar() );
-    group->removeAll();
+
+    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    ws->initialize(2,3,4);
+    AnalysisDataService::Instance().addOrReplace("name_0", ws);
+
+    ws.reset(new WorkspaceTester());
+    ws->initialize(2,3,4);
+    AnalysisDataService::Instance().addOrReplace("name_12", ws);
+
+    ws.reset(new WorkspaceTester());
+    ws->initialize(2,3,4);
+    AnalysisDataService::Instance().addOrReplace("name_monkey", ws);
+
+    ws.reset(new WorkspaceTester());
+    ws->initialize(2,3,4);
+    AnalysisDataService::Instance().addOrReplace("different_name", ws);
 
     group->add("name_0");
     TS_ASSERT( group->areNamesSimilar() );
@@ -107,6 +137,8 @@ public:
     TS_ASSERT( group->areNamesSimilar() );
     group->add("different_name");
     TS_ASSERT( !group->areNamesSimilar() );
+    
+    AnalysisDataService::Instance().clear();
   }
 
 
