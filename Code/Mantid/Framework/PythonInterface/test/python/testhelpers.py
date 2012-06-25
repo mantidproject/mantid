@@ -22,6 +22,9 @@ def run_algorithm(name, **kwargs):
         del kwargs['child']
         if 'OutputWorkspace' in alg:
             alg.setPropertyValue("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
+    if 'rethrow' in kwargs:
+        alg.setRethrows(True)
+        del kwargs['rethrow']
     for key, value in kwargs.iteritems():
         alg.setProperty(key, value)
     alg.execute()

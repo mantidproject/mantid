@@ -21,6 +21,7 @@ void export_IMDDimension()
       .def("getX", &IMDDimension::getX, "Return coordinate of the axis at the given index")
       .def("getDimensionId", &IMDDimension::getDimensionId, "Return a short name which identify the dimension among other dimension."
            "A dimension can be usually find by its ID and various  ")
+      .def("getUnits",  &IMDDimension::getDimensionId, "Return the units associated with this dimension.")
       ;
 }
 

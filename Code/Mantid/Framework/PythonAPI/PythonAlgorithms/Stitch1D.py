@@ -3,10 +3,12 @@
 Performs 1D stitching of Reflectometry 2D MDHistoWorkspaces.
 
 """
+import mantid.simpleapi as api
 
 from mantid.api import *
 from mantid.kernel import *
 import numpy as np
+import math
 
 
 class Stitch1D(PythonAlgorithm):
@@ -15,6 +17,13 @@ class Stitch1D(PythonAlgorithm):
         for i in range(0, ws.getNumDims()):
             dim = ws.getDimension(i)
             if not dim.getNBins() == 1:
+                return dim
+        raise RuntimeError("No non integrated dimension")
+        
+    def __get_first_integrated_dimension(self, ws):
+        for i in range(0, ws.getNumDims()):
+            dim = ws.getDimension(i)
+            if dim.getNBins() == 1:
                 return dim
         raise RuntimeError("No integrated dimension")
 
@@ -52,7 +61,84 @@ class Stitch1D(PythonAlgorithm):
         for index in range(bin_low, bin_high):
             sum_signal += ws.signalAt(index)
         return sum_signal
+        
+    def __trim_out_integrated_dimension(self, ws):
+        dim = self.__get_first_non_integrated_dimension(ws)
+        nbins = dim.getNBins()
+        q_low = dim.getMinimum()
+        q_high = dim.getMaximum()
+        
+        signals = np.empty(nbins)
+        errors = np.empty(nbins)
+        
+        for index in range(0, nbins):
+            signals[index] = ws.signalAt(index)
+            errors[index] = ws.errorSquaredAt(index)
+        errors = np.sqrt(errors)
+        
+        one_d_workspace = api.CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=1,Extents=[q_low, q_high],NumberOfBins=[nbins],Names=[dim.getName()],Units=[dim.getUnits()])
+        result = api.RenameWorkspace(InputWorkspace=one_d_workspace, OutputWorkspace=ws.name() + "_one_d")
+        return result
+        
+    def __extract_overlap_as_workspace(self, ws, fraction_low, fraction_high):
+        dim = self.__get_first_non_integrated_dimension(ws)
+        nbins = dim.getNBins()
+        bin_low = int(nbins * fraction_low)
+        bin_high = int(nbins * fraction_high)
+        step = ( dim.getMaximum() + dim.getMinimum() )/ nbins
+        q_low = bin_low * step
+        q_high = bin_high * step        
+        
+        bins_iterating_over = range(bin_low, bin_high)
+        signals = np.empty(len(bins_iterating_over))
+        errors = np.empty(len(bins_iterating_over))
+        
+        counter = 0
+        for index in bins_iterating_over:
+                signals[counter] = ws.signalAt(index)
+                errors[counter] = ws.errorSquaredAt(index)
+                counter += 1
+        errors = np.sqrt(errors)
+        overlapped = api.CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=1,Extents=[q_low, q_high],NumberOfBins=[len(bins_iterating_over)],Names=[dim.getName()],Units=[dim.getUnits()])
+        result = api.RenameWorkspace(InputWorkspace=overlapped, OutputWorkspace=ws.name() + "_overlapped")
+        return result
+        
+    def __perform_weighed_mean(self, ws1, ws2):
+        dim = ws1.getDimension(0)
+        nbins = dim.getNBins()
 
+        step = ( dim.getMaximum() + dim.getMinimum() )/ nbins
+        q_low = dim.getMinimum()
+        q_high = dim.getMaximum()
+        
+        signals = np.empty(nbins)
+        errors = np.empty(nbins)
+        for index in range(nbins):
+            e1 = math.sqrt(ws1.errorSquaredAt(index))
+            s1 = ws1.signalAt(index)
+            e2 = math.sqrt(ws2.errorSquaredAt(index))
+            s2 = ws2.signalAt(index)
+            if (e1 > 0.0) and (e2 > 0.0):
+                e1_sq = e1*e1
+                e2_sq = e2*e2
+                y = (s1/e1_sq) + (s2/e2_sq)
+                e = (e1_sq * e2_sq) / (e1_sq + e2_sq)
+                y *= e
+                signals[index] = y
+                errors[index] = math.sqrt(e)
+            elif (e1 > 0.0) and (e2 <= 0.0):
+                signals[index] = s1
+                errors[index] = e1
+            elif (e1 <= 0.0) and (e2 > 0.0):
+                signals[index] = s2
+                errors[index] = e2
+            else:
+                signals[index] = 0
+                errors[index] = 0
+        
+        weighted_mean = api.CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=1,Extents=[q_low, q_high],NumberOfBins=[nbins],Names=[dim.getName()],Units=[dim.getUnits()])
+        return weighted_mean
+            
     def category(self):
         return "PythonAlgorithms"
     
@@ -74,12 +160,10 @@ class Stitch1D(PythonAlgorithm):
         self.declareProperty(name="ScaleWorkspace1", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
-        self.declareProperty(name="AppliedScaleFactor", defaultValue=-1.0, direction = Direction.Output, doc="The actual used value for the scaling factor.");
-        
+        self.declareProperty(name="AppliedScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.");
 
-    
     def PyExec(self):
-        from mantid.simpleapi import MultiplyMD, DivideMD
+    
         workspace1 = mtd[self.getPropertyValue("Workspace1")]
         workspace2 = mtd[self.getPropertyValue("Workspace2")]
         self.__check_individual_Workspace(workspace1)
@@ -87,24 +171,43 @@ class Stitch1D(PythonAlgorithm):
         self.__check_both_Workspaces(workspace1, workspace2)
         start_overlap = float(self.getPropertyValue("StartOverlap"))
         end_overlap = float(self.getPropertyValue("EndOverlap"))     
-        
-        b_scale_workspace1 = bool(self.getProperty("ScaleWorkspace1"))
+        b_manual_scale_factor = self.getProperty("UseManualScaleFactor").value
+        b_scale_workspace1 = self.getProperty("ScaleWorkspace1").value
   
         if start_overlap >= end_overlap:
             raise RuntimeError("StartOverlap must be < EndOverlap")
         
-        ws1_overlap = self.__integrate_over(workspace1, start_overlap, end_overlap)
-        ws2_overlap = self.__integrate_over(workspace2, start_overlap, end_overlap)
-        scale_factor = None
-        if b_scale_workspace1 == True:
-            scale_factor = (ws2_overlap / ws1_overlap)
-            x = workspace2 * scale_factor
-        else:
-            scale_factor = (ws1_overlap / ws2_overlap)
-            x = workspace1 * scale_factor
-        self.setProperty("AppliedScaleFactor", scale_factor)
-        #use the start and end positions to 'sum' over the appopriate region in the input workspaces
+        ws1_flattened = self.__trim_out_integrated_dimension(workspace1)
+        ws2_flattened = self.__trim_out_integrated_dimension(workspace2)
         
-        self.setProperty("OutputWorkspace", workspace1)
+        ws1_overlap = self.__integrate_over(ws1_flattened, start_overlap, end_overlap)
+        ws2_overlap = self.__integrate_over(ws2_flattened, start_overlap, end_overlap)
+        scale_factor = None
+        if b_manual_scale_factor == True:
+            scale_factor = float(self.getPropertyValue("ManualScaleFactor"))
+        else:
+            if b_scale_workspace1 == True:
+                scale_factor = (ws2_overlap / ws1_overlap)
+                
+            else:
+                scale_factor = (ws1_overlap / ws2_overlap)
+        self.setProperty("AppliedScaleFactor", scale_factor)
+        scaled_workspace_1 = ws1_flattened * scale_factor
+        scaled_workspace_2 = ws2_flattened * scale_factor
+        #use the start and end positions to 'sum' over the appropriate region in the input workspaces
+        
+        workspace1_overlap = self.__extract_overlap_as_workspace(ws1_flattened, start_overlap, end_overlap)
+        workspace2_overlap = self.__extract_overlap_as_workspace(ws2_flattened, start_overlap, end_overlap)
+        weighted_mean = self.__perform_weighed_mean(workspace1_overlap, workspace2_overlap)
+        
+        mtd.remove('sum')
+        sum = scaled_workspace_1 + scaled_workspace_2
+        self.setProperty("OutputWorkspace", sum)
+        
+        #Clean up
+        
+        #mtd.remove(workspace1_overlap.name())
+        #mtd.remove(workspace2_overlap.name())
+        return None
 
 registerAlgorithm(Stitch1D())

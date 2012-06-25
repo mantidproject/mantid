@@ -214,19 +214,36 @@ class Stitch1DTest(unittest.TestCase):
         # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
         alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
    
-        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1) 
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,rethrow=True) 
         self.assertTrue(alg.isExecuted())
+        
+        b_use_manual_scaling = alg.getProperty("UseManualScaleFactor").value
+        self.assertEqual(False, b_use_manual_scaling)
+        
         scale_factor = float(alg.getPropertyValue("AppliedScaleFactor"))
         
         # 1 * ((2 + 3)/( 1 + 1)) = 2.5
-        
         self.assertEqual(2.5, scale_factor)
-            
-    def test_does_something(self):
-        # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
-        alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.5,child=True) 
+        
+    def test_calculates_scaling_factor_correctly_inverted(self):
+        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,1,1',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
+        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
+   
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace1=False,rethrow=True) 
         self.assertTrue(alg.isExecuted())
-        scale_factor = alg.getPropertyValue("AppliedScaleFactor")
+        scale_factor = float(alg.getPropertyValue("AppliedScaleFactor"))
+        
+        # 1 * (( 1 + 1) / (2 + 3)) = 0.4
+        self.assertEqual(0.4, scale_factor)
+        
+            
+    #def test_does_something(self):
+        # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
+        #alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.5,rethrow=True) 
+        #self.assertTrue(alg.isExecuted())
+        #scale_factor = alg.getPropertyValue("AppliedScaleFactor")
         
 if __name__ == '__main__':
     unittest.main()
