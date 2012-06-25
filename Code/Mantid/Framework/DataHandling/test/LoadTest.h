@@ -357,7 +357,6 @@ public:
 
   void testList()
   {
-    system("pause");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189,15190,15191.nxs");
