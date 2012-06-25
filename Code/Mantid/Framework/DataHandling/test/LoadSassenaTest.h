@@ -75,7 +75,7 @@ public:
 
     //Test fq Imaginary part
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem("outGWS_fqt.Im") );
-    TS_ASSERT_DELTA( ws->readY(4)[0], 656.82368, 1e-05 );
+    TS_ASSERT_DELTA( ws->readY(4)[0], -656.82368, 1e-05 );
     TS_ASSERT_DELTA( ws->readY(4)[14], 656.82368, 1e-05 );
 
   } // end of testExec
