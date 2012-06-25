@@ -36,8 +36,6 @@ set ( SRC_FILES
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
-	src/ConvertToMaskWorkspace.cpp
-	src/ConvertToMaskingWorkspace.cpp
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
@@ -236,8 +234,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
-	inc/MantidAlgorithms/ConvertToMaskWorkspace.h
-	inc/MantidAlgorithms/ConvertToMaskingWorkspace.h
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
@@ -434,7 +430,6 @@ set ( TEST_FILES
 	test/ConvertToDistributionTest.h
 	test/ConvertToEventWorkspaceTest.h
 	test/ConvertToHistogramTest.h
-	test/ConvertToMaskWorkspaceTest.h
 	test/ConvertToMatrixWorkspaceTest.h
 	test/ConvertToPointDataTest.h
 	test/ConvertUnitsTest.h
