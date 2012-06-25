@@ -273,7 +273,7 @@ class SNSPowderReduction(PythonAlgorithm):
         firstChunk = True
         for chunk in strategy:
             if "ChunkNumber" in chunk:
-                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy)))
+                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], chunk["TotalChunks"]))
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)

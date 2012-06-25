@@ -150,12 +150,15 @@ namespace DataHandling
     strategy->addColumn("int","ChunkNumber");
     strategy->addColumn("int","TotalChunks");
     this->setProperty("OutputWorkspace", strategy);
+#ifndef MPI_BUILD
+    // mpi needs work for every core, so don't do this
     if (maxChunk == 0 || maxChunk == EMPTY_DBL())
     {
       Mantid::API::TableRow row = strategy->appendRow();
       row << EMPTY_INT() << EMPTY_INT();
       return;
     }
+#endif
     //PreNexus
     if( ext.compare("xml") == 0)
     {
