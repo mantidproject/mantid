@@ -397,7 +397,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	test/CalMuonDeadTimeTest.h
-	test/SassenaFFTTest.h
+#	test/SassenaFFTTest.h
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
 	test/AlignDetectorInTOFTest.h
