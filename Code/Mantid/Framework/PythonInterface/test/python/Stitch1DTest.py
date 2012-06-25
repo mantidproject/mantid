@@ -238,6 +238,7 @@ class Stitch1DTest(unittest.TestCase):
         # 1 * (( 1 + 1) / (2 + 3)) = 0.4
         self.assertEqual(0.4, scale_factor)
         
+        
             
     #def test_does_something(self):
         # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
