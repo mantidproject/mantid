@@ -77,7 +77,8 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
 {
   this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(wsName,wsName,Kernel::Direction::Output), description);
   this->setProperty(wsName,ws);
-  gws->add(wsName); // Add the named workspace to the group
+  API::AnalysisDataService::Instance().add( wsName, ws );
+  gws->add(wsName);
 }
 
 /**
