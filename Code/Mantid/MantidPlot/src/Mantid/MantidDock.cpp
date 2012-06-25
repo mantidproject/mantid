@@ -152,6 +152,9 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   connect(m_mantidUI, SIGNAL(workspace_removed(const QString &)),
     this, SLOT(removeWorkspaceEntry(const QString &)),Qt::QueuedConnection);
 
+  connect(m_mantidUI, SIGNAL(workspace_renamed(const QString &,const QString &)),
+    this, SLOT(renameWorkspaceEntry(const QString &,const QString &)),Qt::QueuedConnection);
+
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 
@@ -836,6 +839,62 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
       m_known_groups.remove(ws_name);
     }
     m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
+  }
+
+}
+
+/**
+ * Rename a workspace entry. Slot to connect to a workspace_renamed signal.
+ * @param ws_name :: The old workspace name.
+ * @param new_name :: The new workspace name.
+ */
+void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QString& new_name)
+{
+  //This will only ever be of size zero or one
+  QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
+  QTreeWidgetItem *parent_item(NULL);
+  if( name_matches.isEmpty() )
+  {	 
+    //   if there are  no toplevel items in three matching the workspace name ,loop through
+    //  all child elements 
+    int topitemCounts = m_tree->topLevelItemCount();
+    for (int index = 0; index < topitemCounts; ++index)
+    {
+      QTreeWidgetItem* topItem = m_tree->topLevelItem(index);
+      if(!topItem)
+      {
+        return;
+      }
+      int childCounts=topItem->childCount();
+      for(int chIndex=0;chIndex<childCounts;++chIndex)
+      {
+        QTreeWidgetItem* childItem= topItem->child(chIndex);
+        if(!childItem)
+        {
+          return;
+        }
+        //if the workspace  exists as child workspace
+        if(!ws_name.compare(childItem->text(0)))
+        {
+          //topItem->takeChild(chIndex);
+		      parent_item = topItem;
+          childItem->setText(0, new_name);
+        }
+      }
+    }
+    if( parent_item && parent_item->isExpanded() )
+    {
+      populateChildData(parent_item);
+    }
+  }
+  else
+  {
+    //if( m_known_groups.contains(ws_name) )
+    //{
+    //  m_known_groups.remove(ws_name);
+    //}
+    //m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
+    name_matches[0]->setText(0, new_name);
   }
 
 }
