@@ -1,5 +1,6 @@
 from MantidFramework import *
 mtd.initialise()
+from mantidsimple import *
 
 #back = 'NOM_1000_event.nxs'#'/SNS/NOM/2011_2_1B_SCI/1/1000/preNeXus/
 #van = 'NOM_1000_neutron_event.dat' # 1GB
