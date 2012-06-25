@@ -3104,6 +3104,13 @@ p, li { white-space: pre-wrap; }
                      </spacer>
                     </item>
                     <item>
+                     <widget class="QLabel" name="label_4">
+                      <property name="text">
+                       <string>Logarithmic binning</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QCheckBox" name="log_scale_chk">
                       <property name="text">
                        <string>Log scale</string>

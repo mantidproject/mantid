@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Thu Jun 14 08:02:59 2012
+# Created: Mon Jun 25 10:56:05 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1083,6 +1083,9 @@ class Ui_Frame(object):
         self.horizontalLayout_14.addWidget(self.q_step_unit_label)
         spacerItem11 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_14.addItem(spacerItem11)
+        self.label_4 = QtGui.QLabel(self.groupBox_4)
+        self.label_4.setObjectName("label_4")
+        self.horizontalLayout_14.addWidget(self.label_4)
         self.log_scale_chk = QtGui.QCheckBox(self.groupBox_4)
         self.log_scale_chk.setObjectName("log_scale_chk")
         self.horizontalLayout_14.addWidget(self.log_scale_chk)
@@ -1359,6 +1362,7 @@ class Ui_Frame(object):
         self.q_step_label.setText(QtGui.QApplication.translate("Frame", "Q steps ", None, QtGui.QApplication.UnicodeUTF8))
         self.q_step_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.q_step_unit_label.setText(QtGui.QApplication.translate("Frame", " 1/Å", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("Frame", "Logarithmic binning", None, QtGui.QApplication.UnicodeUTF8))
         self.log_scale_chk.setText(QtGui.QApplication.translate("Frame", "Log scale", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_offset_label.setText(QtGui.QApplication.translate("Frame", "Angle offset", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_offset_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
