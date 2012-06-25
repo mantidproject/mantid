@@ -86,7 +86,9 @@ private:
       yv = ws->readY(i);
       double h = *std::max_element( yv.begin(), yv.end() );
       size_t nbins = yv.size();
-      double sum = std::accumulate(yv.begin(), yv.end(), 0.0) * dx / static_cast<double>(nbins);
+      double sum = 0.0;
+      for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) sum += *it;
+      sum *= dx / static_cast<double>(nbins);
       double sigma = sum / (h * std::sqrt(2*M_PI));
       TS_ASSERT_DELTA( sigma, goldStandard, frErr );
     }

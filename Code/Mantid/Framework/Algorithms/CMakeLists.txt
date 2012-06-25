@@ -397,7 +397,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	test/CalMuonDeadTimeTest.h
-#	test/SassenaFFTTest.h
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
 	test/AlignDetectorInTOFTest.h
@@ -541,6 +540,7 @@ set ( TEST_FILES
 	test/ReplaceSpecialValuesTest.h
 	test/ResetNegativesTest.h
 	test/ResizeRectangularDetectorTest.h
+	test/SassenaFFTTest.h
 	test/ScaleTest.h
 	test/ScaleXTest.h
 	test/ShiftLogTimeTest.h
