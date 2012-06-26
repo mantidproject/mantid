@@ -33,6 +33,7 @@ private:
     alg->setProperty("DataY", s );
     alg->setProperty("DataX", x );
     alg->setProperty("DataE", e );
+    alg->setPropertyValue("UnitX", "Wavelength");
     alg->setProperty("OutputWorkspace", name);
     alg->execute();
     // Return the generated MDHistoWorkspace
