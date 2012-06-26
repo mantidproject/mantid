@@ -185,10 +185,13 @@ set ( INC_FILES
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/TestChannel.h
+	inc/MantidKernel/ThreadPool.h	
 	inc/MantidKernel/ThreadPoolRunnable.h
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
+	inc/MantidKernel/Task.h 
+	inc/MantidKernel/FunctionTask.h 
 	inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h

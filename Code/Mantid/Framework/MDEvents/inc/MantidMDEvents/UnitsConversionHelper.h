@@ -73,7 +73,8 @@ public:
     void initialize(const MDWSDescription &TWSD,const std::string &units_to);
     void updateConversion(size_t i);
     double convertUnits(double val);
-
+    // copy constructor
+    UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing
     /// establish and initialize proper units conversion from input to output units;
     ConvertToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo);

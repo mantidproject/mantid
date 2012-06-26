@@ -1,4 +1,4 @@
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDBase.h"
 
 
 namespace Mantid
@@ -7,18 +7,16 @@ namespace MDEvents
 {
 
 // logger for conversion  
-   Kernel::Logger& ConvToMDEventsBase::convert_log =Kernel::Logger::get("MD-Algorithms");
+   Kernel::Logger& ConvToMDBase::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 
 /** method which initates all main class variables
-  * @param pWS2D      -- shared pointer to input matirx workspace to process
-  * @param detLoc     -- class with information about datecotrs, partially transformed for convenient Q calculations
   * @param WSD        -- class describing the target workspace. 
   *                      the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for  
   *                      unit conversion (if any) 
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
-size_t  ConvToMDEventsBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         pDetLoc = WSD.getDetectors();
         inWS2D  = WSD.getInWS();
@@ -49,7 +47,8 @@ size_t  ConvToMDEventsBase::initialize(const MDEvents::MDWSDescription &WSD, boo
         return n_spectra;
 };  
 
-ConvToMDEventsBase::ConvToMDEventsBase()
+/** empty default constructor */
+ConvToMDBase::ConvToMDBase()
 {}
 
 

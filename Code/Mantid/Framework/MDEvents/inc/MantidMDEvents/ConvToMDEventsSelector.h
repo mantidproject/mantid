@@ -2,7 +2,7 @@
 #define H_CONV_TOMDEVENTS_SELECTOR
 
 
-#include "MantidMDEvents/ConvToMDEventsEvents.h"
+#include "MantidMDEvents/ConvToMDEventsWS.h"
 #include "MantidMDEvents/ConvToMDEventsHisto.h"
 
 namespace Mantid

@@ -13,11 +13,15 @@ inline bool isNaN(T val){
     return (val!=buf);
 }
 
+/** method sets up all internal variables necessary to convert from Matrix2D workspace to MDEvent workspace 
+ @parameter WSD         -- the class describing the target MD workspace, sorurce matrtix workspace and the transformations, necessary to perform on these workspaces
+ @parameter inWSWrapper -- the class wrapping the target MD workspace
+*/
 size_t  ConvToMDEventsHisto::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
                         
    size_t numSpec=ConvToMDEventsBase::initialize(WSD,inWSWrapper);
-
+   // check if we indeed have matrix workspace as input.
    DataObjects::Workspace2D_const_sptr pWS2D  = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(inWS2D);
    if(!pWS2D.get()){
            throw(std::logic_error("ConvToMDEventsHisto should work with defined histrohram workspace"));
@@ -33,6 +37,7 @@ void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
         //
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes                = bc->getTotalNumMDBoxes();
+        size_t nEventsInWS                 = pWSWrapper->pWorkspace()->getNPoints();
         //
 
         const size_t specSize = this->inWS2D->blocksize();    
@@ -100,11 +105,12 @@ void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
                 if(n_buf_events>=buf_size){
                    pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
                    n_added_events+=n_buf_events;
+                   nEventsInWS   +=n_buf_events;
 
                    // reset buffer counts
                    n_coordinates= 0;
                    n_buf_events = 0;
-                   if (bc->shouldSplitBoxes(n_added_events, lastNumBoxes)){
+                   if (bc->shouldSplitBoxes(nEventsInWS,n_added_events, lastNumBoxes)){
                         // Do all the adding tasks
                         //   tp.joinAll();    
                         // Now do all the splitting tasks

@@ -75,13 +75,7 @@ namespace MDAlgorithms
     /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& convert_log;
    /// pointer to the class, which does the particular conversion
-   boost::shared_ptr<MDEvents::ConvToMDEventsBase> pConvertor;
-  
-   /// the class which knows about existing subalgorithms and generates alforithm ID as function of input parameters of this algorithm. 
-    ///ConvertToMD::ConvertToMDEventsParams ParamParser;   
-    /// The class which keeps map of all existing subalgorithms converting to MDEventWorkspace.
-    /// It returns the pointer to the subalgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
-    //ConvertToMDEventsSubalgFactory  subAlgFactory;
+   boost::shared_ptr<MDEvents::ConvToMDEventsBase> pConvertor; 
   //------------------------------------------------------------------------------------------------------------------------------------------
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();

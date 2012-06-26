@@ -185,9 +185,6 @@ ConvertToMDEvents::init()
 /* Execute the algorithm.   */
 void ConvertToMDEvents::exec()
 {
-    // initiate all availible subalgorithms for further usage (it will do it only once, first time the algorithm is executed);
-   // this->subAlgFactory.init(ParamParser);
-
   // initiate class which would deal with any dimension workspaces, handling 
   if(!pWSWrapper.get()){
     pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());

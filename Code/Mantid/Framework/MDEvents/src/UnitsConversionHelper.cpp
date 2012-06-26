@@ -150,8 +150,24 @@ double UnitsConversionHelper::convertUnits(double val)
            throw std::runtime_error("updateConversion: unknown type of conversion requested");
  
     }
+}
+// copy constructor;
+UnitsConversionHelper::UnitsConversionHelper(const UnitsConversionHelper &another)
+{
+      UnitCnvrsn = another.UnitCnvrsn;
+      factor     = another.factor;
+      power      = another.power;
 
+      emode      = another.emode;
+      L1         = another.L1;
+      efix       = another.efix;
+      twoTheta   = another.twoTheta;
+      L2         = another.L2;
+      pTwoTheta  = another.pTwoTheta;
+      pL2        = another.pL2;
 
+      if(pSourceWSUnit.get())pSourceWSUnit = Kernel::Unit_sptr(another.pSourceWSUnit->clone());      
+      if(pTargetUnit.get())  pTargetUnit   = Kernel::Unit_sptr(another.pSourceWSUnit->clone());
 }
 
 } // endNamespace MDEvents

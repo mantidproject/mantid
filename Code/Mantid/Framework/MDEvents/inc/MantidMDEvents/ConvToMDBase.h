@@ -50,18 +50,18 @@ namespace MDEvents
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
- class DLLExport ConvToMDEventsBase
+ class DLLExport ConvToMDBase
  {
  public:
      // constructor;
-     ConvToMDEventsBase();
+     ConvToMDBase();
  
     ///method which initates all main class variables 
     virtual size_t initialize(const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
-    virtual ~ConvToMDEventsBase(){};
+    virtual ~ConvToMDBase(){};
 
  
   protected:

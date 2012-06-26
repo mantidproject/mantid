@@ -27,6 +27,8 @@ public:
 
   /// Typedef for a function with no arguments and no return
   typedef void(*voidFunction)();
+  /// Typedef for a function with no arguments and size_t return
+  typedef size_t(*sizetFunction)();
 
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple void function.
@@ -40,7 +42,7 @@ public:
    * @param cost :: computational cost
    */
   FunctionTask(voidFunction func, double cost=1.0)
-    : Task(cost), m_voidFunc(func)
+    : Task(cost), m_voidFunc(func),m_sizetFunc(NULL)
   {
   }
 
@@ -74,6 +76,7 @@ public:
 
 protected:
   boost::function<void ()> m_voidFunc;
+  boost::function<size_t ()> m_sizetFunc;
 };
 
 

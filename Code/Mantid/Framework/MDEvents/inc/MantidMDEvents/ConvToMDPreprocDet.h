@@ -115,14 +115,7 @@ private:
     // function allocates the class detectors memory 
     void allocDetMemory(size_t nSpectra);
 
-    //void setEi(const API::MatrixWorkspace_sptr inputWS);
-
-
-   // parameter which describes the conversion mode, used to convert uints using TOF and detector's positions
-  //    int emode;
-    // parameter wjocj describes the energy used to convert uints using TOF and detector's positions
-  //  double efix;
-    // source-sample distance  used to convert uints using TOF and detector's positions
+      // source-sample distance  used to convert uints using TOF and detector's positions
     double L1; 
     // minimal position for the detectors
     Kernel::V3D   minDetPosition;    

@@ -69,40 +69,7 @@ void testGetWS4DimIDFine()
 
 
 }
-//void testGetWS3DimIDFine()
-//{
-//    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
-//    API::NumericAxis *pAx = new API::NumericAxis(3);
-//    pAx->title() = "Dim1";
-//    pAx->setUnit("dSpacing");
-//    ws2D->replaceAxis(0,pAx);
-//    MDEvents::MDWSDescription TWS;
-//
-// 
-//    std::vector<std::string> dim_units;
-//    std::string Alg_ID; 
-//    ConvertToMDEventsParams params;
-//    std::vector<std::string> other_dim_names;
-//
-//    TS_ASSERT_THROWS_NOTHING(Alg_ID=params.identifyMatrixAlg(ws2D,"Q3D","Elastic",dim_units, TWS));
-//
-//    TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_units.size());
-//    TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
-//    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DHistoQ3DCrystElasticCnvByTOF",Alg_ID);
-//    TS_ASSERT(!TWS.detInfoLost);
-//
-//    TS_ASSERT_THROWS_NOTHING(params.buildMDDimDescription(ws2D,Alg_ID,other_dim_names,TWS));
-//    TSM_ASSERT_EQUALS("elastic workspace will produce 3 dimensions",3,TWS.nDims);
-//    TS_ASSERT_EQUALS(TWS.dimIDs.size(),TWS.dimNames.size());
-//
-//    std::vector<std::string> dimID= TWS.getDefaultDimIDQ3D(0);
-//    for(size_t i=0;i<TWS.dimNames.size();i++)
-//    {
-//        TS_ASSERT_EQUALS(dimID[i],TWS.dimIDs[i]);
-//        TS_ASSERT_EQUALS(dimID[i],TWS.dimNames[i]);
-//    }
-//
-//}
+
 //void testGetWSDimNames2AxisNoQ()
 //{
 //    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);

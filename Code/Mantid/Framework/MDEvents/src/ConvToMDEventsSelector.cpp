@@ -22,8 +22,8 @@ enum wsType
  {
     // identify what kind of workspace we expect to process
     wsType inputWSType(Undefined);
-    if(dynamic_cast<DataObjects::EventWorkspace *>(inputWS.get()))    inputWSType = EventWS;   
-    if(dynamic_cast<DataObjects::Workspace2D *>(inputWS.get())   )    inputWSType = Matrix2DWS;
+    if(boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(inputWS)) inputWSType = EventWS;   
+    if(boost::dynamic_pointer_cast<DataObjects::Workspace2D>(inputWS)) inputWSType = Matrix2DWS;
     
     if(inputWSType == Undefined)
     {
@@ -35,8 +35,8 @@ enum wsType
      ConvToMDEventsBase *pSolver = currentSolver.get();
      if(pSolver)
      {
-         if(dynamic_cast<ConvToMDEventsEvents *>(pSolver))    wsConvType = EventWS;
-         if(dynamic_cast<ConvToMDEventsHisto  *>(pSolver))    wsConvType = Matrix2DWS;          
+         if(dynamic_cast<ConvToMDEventsEvents *>(pSolver)) wsConvType = EventWS;
+         if(dynamic_cast<ConvToMDEventsHisto  *>(pSolver)) wsConvType = Matrix2DWS;          
      }
 
      // select a converter, which corresponds to the workspace type
@@ -44,9 +44,9 @@ enum wsType
      {
          switch(inputWSType)
          {
-            case(EventWS):       return boost::shared_ptr<ConvToMDEventsBase>(new ConvToMDEventsEvents());
-            case(Matrix2DWS):    return boost::shared_ptr<ConvToMDEventsBase>(new ConvToMDEventsHisto());
-            default:             throw(std::logic_error("ConvToMDEventsSelector: requested converter for unknown ws type"));
+            case(EventWS):   return boost::shared_ptr<ConvToMDEventsBase>(new ConvToMDEventsEvents());
+            case(Matrix2DWS): return boost::shared_ptr<ConvToMDEventsBase>(new ConvToMDEventsHisto());
+            default:  throw(std::logic_error("ConvToMDEventsSelector: requested converter for unknown ws type"));
          }
 
      }else{ // existing converter is suitable for the workspace

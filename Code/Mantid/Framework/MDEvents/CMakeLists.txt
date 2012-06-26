@@ -8,8 +8,8 @@ set ( SRC_FILES
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
-	src/ConvToMDEventsBase.cpp
-	src/ConvToMDEventsEvents.cpp
+	src/ConvToMDBase.cpp
+	src/ConvToMDEventsWS.cpp
 	src/ConvToMDEventsHisto.cpp
 	src/ConvToMDEventsSelector.cpp
 	src/ConvToMDPreprocDet.cpp
@@ -78,8 +78,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
-	inc/MantidMDEvents/ConvToMDEventsBase.h
-	inc/MantidMDEvents/ConvToMDEventsEvents.h
+	inc/MantidMDEvents/ConvToMDBase.h
+	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDEventsHisto.h
 	inc/MantidMDEvents/ConvToMDEventsSelector.h
 	inc/MantidMDEvents/ConvToMDPreprocDet.h

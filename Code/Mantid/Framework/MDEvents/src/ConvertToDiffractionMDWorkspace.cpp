@@ -558,15 +558,7 @@ namespace MDEvents
       eventsAdded += eventsAdding;
       approxEventsInOutput += eventsAdding;
 
-      // Performance depends pretty strongly on WHEN you split the boxes.
-      // This is an empirically-determined way to optimize the splitting calls.
-      // Split when adding 1/16^th as many events as are already in the output,
-      //  (because when the workspace gets very large you should split less often)
-      // But no more often than every 10 million events.
-      size_t comparisonPoint = approxEventsInOutput/16;
-      if (comparisonPoint < 10000000)
-        comparisonPoint = 10000000;
-      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes) || (eventsAdded > (comparisonPoint)))
+      if (bc->shouldSplitBoxes(approxEventsInOutput,eventsAdded, lastNumBoxes))
       {
         if (DODEBUG) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks

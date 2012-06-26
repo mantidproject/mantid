@@ -9,36 +9,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-///// function sets appropriate energy conversion mode to work with detectors and unit conversion
-//void ConvToMDPreprocDet::setEmode(int mode)
-//{   
-//    if(mode<-1||mode>2){
-//        std::string Err="Energy conversion mode has to be between -1 and 2 but trying to set: "+boost::lexical_cast<std::string>(mode);
-//        throw(std::invalid_argument(Err));
-//    }
-//    emode = mode;
-//}
-/// function sets appropriate energy  to work with detectors and unit conversion
-//void ConvToMDPreprocDet::setEfix(double Ei)
-//{
-//    if(Ei<=0){
-//        std::string Err="Input neutron's energy can not be negative but equal: "+boost::lexical_cast<std::string>(Ei);
-//        throw(std::invalid_argument(Err));
-//    }
-//    efix  = Ei;
-//}
-/** Function sets up energy of neurtorns used by number of conversion algorithms */
-//void ConvToMDPreprocDet::setEi(const API::MatrixWorkspace_sptr inputWS)
-//{
-//  try{
-//      Kernel::PropertyWithValue<double>  *pProp(NULL);
-//      pProp=dynamic_cast<Kernel::PropertyWithValue<double>  *>(inputWS->run().getProperty("Ei"));
-//      efix=(*pProp);
-//  }catch(...){
-//      efix= std::numeric_limits<double>::quiet_NaN();
-//  }
-//}
-
 /// function sets source-sample distance  to work with detectors and unit conversion
 void ConvToMDPreprocDet::setL1(double Dist)
 {
