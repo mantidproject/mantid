@@ -22,6 +22,38 @@ class WeightedMeanMDTest : public CxxTest::TestSuite
 
 private:
 
+  /// Helper method to create and return a matrix workspace.
+  MatrixWorkspace_sptr create_matrix_workspace(const std::vector<double>& s, const std::vector<double>& e, const std::vector<double>& x, const std::string& name)
+  {
+    // Create and run the algorithm
+    AnalysisDataServiceImpl& ADS = Mantid::API::AnalysisDataService::Instance();
+    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    alg->initialize();
+    alg->setProperty("NSpec", 1);
+    alg->setProperty("DataY", s );
+    alg->setProperty("DataX", x );
+    alg->setProperty("DataE", e );
+    alg->setProperty("OutputWorkspace", name);
+    alg->execute();
+    // Return the generated MDHistoWorkspace
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(name));
+  }
+
+  /// Helper method to run the WeightedMean algorithm on two matrix workspaces and return the result.
+  MatrixWorkspace_sptr run_matrix_weighed_mean(MatrixWorkspace_sptr a, MatrixWorkspace_sptr b, const std::string& name)
+  {
+    AnalysisDataServiceImpl& ADS = Mantid::API::AnalysisDataService::Instance();
+    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("WeightedMean");
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace1", a);
+    alg->setProperty("InputWorkspace2", b);
+    alg->setProperty("OutputWorkspace", name);
+    alg->execute();
+    return boost::dynamic_pointer_cast<MatrixWorkspace>( ADS.retrieve(name) );
+  }
+
+
   /// Helper method to run input type validation checks.
   void do_test_workspace_input_types(IMDWorkspace_sptr a, IMDWorkspace_sptr b)
   {
@@ -126,36 +158,10 @@ public:
     TS_ASSERT(out != NULL);
   }
 
-  MatrixWorkspace_sptr create_matrix_workspace(const std::vector<double>& s, const std::vector<double>& e, const std::vector<double>& x, const std::string& name)
-  {
-    // Create and run the algorithm
-    AnalysisDataServiceImpl& ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
-    alg->initialize();
-    alg->setProperty("NSpec", 1);
-    alg->setProperty("DataY", s );
-    alg->setProperty("DataX", x );
-    alg->setProperty("DataE", e );
-    alg->setProperty("OutputWorkspace", name);
-    alg->execute();
-    // Return the generated MDHistoWorkspace
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(name));
-  }
-
-  MatrixWorkspace_sptr run_matrix_weighed_mean(MatrixWorkspace_sptr a, MatrixWorkspace_sptr b, const std::string& name)
-  {
-    AnalysisDataServiceImpl& ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("WeightedMean");
-    alg->setRethrows(true);
-    alg->initialize();
-    alg->setProperty("InputWorkspace1", a);
-    alg->setProperty("InputWorkspace2", b);
-    alg->setProperty("OutputWorkspace", name);
-    alg->execute();
-    return boost::dynamic_pointer_cast<MatrixWorkspace>( ADS.retrieve(name) );
-  }
-
-
+  /**
+  This is more of an integration test, but it's quite useful because it executes both WeightedMean and WeightedMeanMD on the same data and 
+  compares the results.
+  */
   MDHistoWorkspace_sptr create_md_histo_workspace(const std::vector<double>& s, const std::vector<double>& e, const std::vector<double>& x, const std::string& name)
   {
     // Fabricate some additional inputs
@@ -188,7 +194,6 @@ public:
     typedef std::vector<double> VecDouble;
     double pi = 3.14159;
     VecDouble s1, s2, e1, e2, x;
-    double extents[2] = {0,40};
     double theta_shift=0.4;
     for(size_t i = 0; i < 40; ++i)
     {
@@ -230,6 +235,7 @@ public:
      TS_ASSERT_DELTA(std::pow(weighted_mean_matrix->readE(0)[j], 2) , weighted_mean_md->errorSquaredAt(j), 0.0001);
     }
 
+    // Clean up.
     ADS.remove("a_md_histo");
     ADS.remove("b_md_histo");
     ADS.remove("a_matrix_workspace");
