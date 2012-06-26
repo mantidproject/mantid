@@ -18,7 +18,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidMDEvents/ConvToMDEventsSelector.h"
+#include "MantidMDEvents/ConvToMDSelector.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -76,7 +76,7 @@ void test_EventNoUnitsConv()
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
 
-    ConvToMDEventsSelector AlgoSelector;
+    ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWsEv);
     pConvMethods->initialize(WSD,pTargWS);
 
@@ -107,7 +107,7 @@ void test_EventFromTOFConv()
     pTargWS->createEmptyMDWS(WSD);
 
 
-    ConvToMDEventsSelector AlgoSelector;
+    ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWsEv);
     pConvMethods->initialize(WSD,pTargWS);
 
@@ -143,7 +143,7 @@ void test_HistoFromTOFConv()
 
     pTargWS->createEmptyMDWS(WSD);
 
-    ConvToMDEventsSelector AlgoSelector;
+    ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWs2D);
     pConvMethods->initialize(WSD,pTargWS);
 
@@ -180,7 +180,7 @@ void test_HistoNoUnitsConv()
 
     pTargWS->createEmptyMDWS(WSD);
 
-    ConvToMDEventsSelector AlgoSelector;
+    ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWs2D);
     pConvMethods->initialize(WSD,pTargWS);
 

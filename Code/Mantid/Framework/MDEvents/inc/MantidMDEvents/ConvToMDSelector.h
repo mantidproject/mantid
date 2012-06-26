@@ -3,7 +3,7 @@
 
 
 #include "MantidMDEvents/ConvToMDEventsWS.h"
-#include "MantidMDEvents/ConvToMDEventsHisto.h"
+#include "MantidMDEvents/ConvToMDHistoWS.h"
 
 namespace Mantid
 {
@@ -35,7 +35,7 @@ namespace MDEvents
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport ConvToMDEventsSelector
+class DLLExport ConvToMDSelector
 {
 public:
  /// function which selects the convertor depending on workspace type and (possibly, in a future) some workspace properties

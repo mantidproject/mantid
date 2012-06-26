@@ -11,17 +11,15 @@
 #include "MantidMDEvents/MDBoxIterator.h"
 
 // stuff for convertToEventWorkspace subalgorithm
-//#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 //
-//#include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/ConvToMDBase.h"
-#include "MantidMDEvents/ConvToMDEventsSelector.h"
+#include "MantidMDEvents/ConvToMDSelector.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 
 
@@ -50,7 +48,7 @@ class ConvertToMDEventsWSTest : public CxxTest::TestSuite
    std::auto_ptr<ConvToMDBase> pConvMethods;
 
    // class which would select the solver as function of ws type
-   ConvToMDEventsSelector WSAlgoSelector;
+   ConvToMDSelector WSAlgoSelector;
 
    // the helper claa which woudl provide log and progress --> algorithm's properties 
    WorkspaceCreationHelper::MockAlgorithm logProvider;

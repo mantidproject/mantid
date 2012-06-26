@@ -28,7 +28,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include <algorithm>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidMDEvents/ConvToMDEventsSelector.h"
+#include "MantidMDEvents/ConvToMDSelector.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"
 
 using namespace Mantid;
@@ -325,7 +325,7 @@ void ConvertToMDEvents::exec()
   //DO THE JOB:
 
   // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
-  ConvToMDEventsSelector AlgoSelector;
+  ConvToMDSelector AlgoSelector;
   pConvertor  = AlgoSelector.convSelector(inWS2D,pConvertor);
 
   // initate conversion and estimate amout of job to dl

@@ -1,4 +1,4 @@
-#include "MantidMDEvents/ConvToMDEventsHisto.h"
+#include "MantidMDEvents/ConvToMDHistoWS.h"
 
 
 namespace Mantid
@@ -17,7 +17,7 @@ inline bool isNaN(T val){
  @parameter WSD         -- the class describing the target MD workspace, sorurce matrtix workspace and the transformations, necessary to perform on these workspaces
  @parameter inWSWrapper -- the class wrapping the target MD workspace
 */
-size_t  ConvToMDEventsHisto::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvToMDHistoWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
                         
    size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper);
@@ -30,7 +30,7 @@ size_t  ConvToMDEventsHisto::initialize(const MDEvents::MDWSDescription &WSD, bo
    return numSpec;
 }
 
-void ConvToMDEventsHisto::runConversion(API::Progress *pProg)
+void ConvToMDHistoWS::runConversion(API::Progress *pProg)
 {
        // counder for the number of events
         size_t n_added_events(0),n_buf_events(0);

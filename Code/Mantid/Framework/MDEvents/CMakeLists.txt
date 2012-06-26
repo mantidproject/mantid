@@ -10,8 +10,8 @@ set ( SRC_FILES
 	src/CloneMDWorkspace.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
-	src/ConvToMDEventsHisto.cpp
-	src/ConvToMDEventsSelector.cpp
+	src/ConvToMDHistoWS.cpp
+	src/ConvToMDSelector.cpp
 	src/ConvToMDPreprocDet.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
@@ -80,8 +80,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/CloneMDWorkspace.h
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
-	inc/MantidMDEvents/ConvToMDEventsHisto.h
-	inc/MantidMDEvents/ConvToMDEventsSelector.h
+	inc/MantidMDEvents/ConvToMDHistoWS.h
+	inc/MantidMDEvents/ConvToMDSelector.h
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/ConvertToReflectometryQ.h

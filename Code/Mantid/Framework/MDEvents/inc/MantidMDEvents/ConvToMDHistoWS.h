@@ -47,7 +47,7 @@ namespace MDEvents
 // service variable used for efficient filling of the MD event WS  -> should be moved to configuration?
 #define SPLIT_LEVEL  8192
 //-----------------------------------------------
-class ConvToMDEventsHisto: public ConvToMDBase
+class ConvToMDHistoWS: public ConvToMDBase
 {
 
 public:
