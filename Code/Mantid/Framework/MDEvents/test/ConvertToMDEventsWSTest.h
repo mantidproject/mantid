@@ -166,7 +166,7 @@ void test_compareTwoConversions()
     std::vector<MDBoxBase<MDEvent<4>,4> *> boxesM;
     parentBox->getBoxes(boxesM, 1000, true);
 
-                            parentBox = pEvntWs->getBox();
+    parentBox = pEvntWs->getBox();
     std::vector<MDBoxBase<MDEvent<4>,4> *> boxesE;
     parentBox->getBoxes(boxesE, 1000, true);
 
@@ -178,6 +178,13 @@ void test_compareTwoConversions()
 
           std::vector<MDEvent<4> > & eventsM = boxM->getEvents();
           std::vector<MDEvent<4> > & eventsE = boxE->getEvents();
+          if(eventsM.size()!=eventsE.size())
+          {
+            TS_FAIL(" sizes of the boxes, obtained from matrix workspace="+boost::lexical_cast<std::string>(eventsM.size())+" and from event worskpace="+boost::lexical_cast<std::string>(eventsE.size())+" and are different");
+            return;
+          }
+
+
           std::vector<MDEvent<4> >::iterator itM = eventsM.begin();
           std::vector<MDEvent<4> >::iterator itE = eventsE.begin();
           std::vector<MDEvent<4> >::iterator it_end = eventsM.end();
@@ -226,7 +233,7 @@ logProvider(100)
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.
-EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,bool GenerateMultipleEvents=false,int MaxEventsPerBin=10)
+EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS)
 {
  
     // set up conversion to Time of flight
@@ -278,33 +285,6 @@ EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,boo
           if ((error == error) /*NAN check*/
               && (error != inf) && (error != ninf))
           {
-            if (GenerateMultipleEvents)
-            {
-              // --------- Multiple events per bin ----------
-              double errorSquared = error * error;
-              // Find how many events to fake
-              double val = weight / E[i];
-              val *= val;
-              // Convert to int with slight rounding up. This is to avoid rounding errors
-              int numEvents = int(val + 0.2);
-              if (numEvents < 1) numEvents = 1;
-              if (numEvents > MaxEventsPerBin) numEvents = MaxEventsPerBin;
-              // Scale the weight and error for each
-              weight /= numEvents;
-              errorSquared /= numEvents;
-
-              // Spread the TOF. e.g. 2 events = 0.25, 0.75.
-              double tofStep = (X[i+1] - X[i]) / (numEvents);
-              for (size_t j=0; j<size_t(numEvents); j++)
-              {
-                double tof = X[i] + tofStep * (0.5 + double(j));
-                // Create and add the event
-
-                el.addEventQuickly(WeightedEventNoTime(TOFCONV.convertUnits(tof), weight, errorSquared) );
-              }
-            }
-            else
-            {
               // --------- Single event per bin ----------
               // TOF = midpoint of the bin
               double tof = (X[i] + X[i+1]) / 2.0;
@@ -313,7 +293,7 @@ EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS,boo
               errorSquared *= errorSquared;
               // Create and add the event
               el.addEventQuickly( WeightedEventNoTime(TOFCONV.convertUnits(tof), weight, errorSquared) );
-            }
+
           } // error is nont NAN or infinite
         } // weight is non-zero, not NAN, and non-infinite
       } // (each bin)

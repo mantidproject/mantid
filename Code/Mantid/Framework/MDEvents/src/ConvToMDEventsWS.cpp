@@ -68,6 +68,23 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex)
        return n_added_events;
 }
 
+/** The method runs conversion for a single event list, corresponding to a particular workspace index */
+size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex)
+{       
+
+       switch (this->pEventWS->getEventList(workspaceIndex).getEventType())
+        {
+        case Mantid::API::TOF:
+            return this->convertEventList<Mantid::DataObjects::TofEvent>(workspaceIndex);
+         case Mantid::API::WEIGHTED:
+          return  this->convertEventList<Mantid::DataObjects::WeightedEvent>(workspaceIndex);
+        case Mantid::API::WEIGHTED_NOTIME:
+          return this->convertEventList<Mantid::DataObjects::WeightedEventNoTime>(workspaceIndex);
+        default:
+           throw std::runtime_error("EventList had an unexpected data type!");
+        }
+}
+
 
 /** method sets up all internal variables necessary to convert from Event Workspace to MDEvent workspace 
  @parameter WSD         -- the class describing the target MD workspace, sorurce Event workspace and the transformations, necessary to perform on these workspaces
@@ -139,22 +156,6 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProg)
     pProg->report();
 }
 
-//
-size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex)
-{       
-
-       switch (this->pEventWS->getEventList(workspaceIndex).getEventType())
-        {
-        case Mantid::API::TOF:
-            return this->convertEventList<Mantid::DataObjects::TofEvent>(workspaceIndex);
-         case Mantid::API::WEIGHTED:
-          return  this->convertEventList<Mantid::DataObjects::WeightedEvent>(workspaceIndex);
-        case Mantid::API::WEIGHTED_NOTIME:
-          return this->convertEventList<Mantid::DataObjects::WeightedEventNoTime>(workspaceIndex);
-        default:
-           throw std::runtime_error("EventList had an unexpected data type!");
-        }
-}
   
 
 } // endNamespace MDEvents

@@ -42,7 +42,7 @@ class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
 
    WorkspaceCreationHelper::MockAlgorithm reporter;
 
-   boost::shared_ptr<ConvToMDEventsBase> pConvMethods;
+   boost::shared_ptr<ConvToMDBase> pConvMethods;
    ConvToMDPreprocDet det_loc;
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;

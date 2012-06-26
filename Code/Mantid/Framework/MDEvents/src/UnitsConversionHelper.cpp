@@ -166,8 +166,8 @@ UnitsConversionHelper::UnitsConversionHelper(const UnitsConversionHelper &anothe
       pTwoTheta  = another.pTwoTheta;
       pL2        = another.pL2;
 
-      if(pSourceWSUnit.get())pSourceWSUnit = Kernel::Unit_sptr(another.pSourceWSUnit->clone());      
-      if(pTargetUnit.get())  pTargetUnit   = Kernel::Unit_sptr(another.pSourceWSUnit->clone());
+      if(another.pSourceWSUnit)pSourceWSUnit = Kernel::Unit_sptr(another.pSourceWSUnit->clone());      
+      if(another.pTargetUnit)  pTargetUnit   = Kernel::Unit_sptr(another.pTargetUnit->clone());
 }
 
 } // endNamespace MDEvents
