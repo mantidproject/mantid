@@ -76,12 +76,6 @@ namespace API
 
     std::string value = propValue;
     
-    // Remove whitespace.
-    value.erase(std::remove_if( // ("Erase-remove" idiom.)
-        value.begin(), value.end(),
-        isspace),
-      value.end());
-    
     std::stringstream errorMsg;
 
     // Assume a format of "dir/inst_1,2,...n.raw", and try to parse using parser.
@@ -235,6 +229,10 @@ namespace API
 
       if(!result.empty())
         result += "+";
+      
+      // Trim whitespace from filename.
+      std::string value = fileName;
+      boost::algorithm::trim(value);
 
       // Initialise a "slave" FileProperty object to do all the work.
       FileProperty slaveFileProp(
@@ -244,7 +242,7 @@ namespace API
         m_exts,
         Direction::Input);
 
-      std::string error = slaveFileProp.setValue(fileName);
+      std::string error = slaveFileProp.setValue(value);
 
       // If an error was returned then we throw it out of the functor, to be
       // returned by MultiFileProperty.setvalue(...).

@@ -4,18 +4,51 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
 #include <Poco/Path.h>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 
 class MultipleFilePropertyTest : public CxxTest::TestSuite
 {
+private:
+  std::string m_dirPath;
+  std::string m_filename;
+  std::string m_oldDataSearchDirectories;
+
 public:
-  
+  MultipleFilePropertyTest() : m_dirPath("_MultipleFilePropertyTestDummyFolder WithWhiteSpace"), m_filename("TSC99999.raw"),
+    m_oldDataSearchDirectories("")
+  {
+    // Create a dummy folder with whitespace to use.
+    Poco::File dir(m_dirPath);
+    dir.createDirectories();
+    
+    Poco::File file(m_dirPath + "/" + m_filename);
+    file.createFile();
+    
+    // Add dummy directory to search path, saving old search paths to be put back later.
+    Poco::Path path(dir.path());
+    path = path.makeAbsolute();
+    m_oldDataSearchDirectories = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories + "; " + path.toString());
+  }
+
+  ~MultipleFilePropertyTest()
+  {
+    // Put back the old search paths.
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories);
+
+    // Destroy dummy folder and any files it contains.  
+    Poco::File dir(m_dirPath);
+    dir.remove(true);
+  }
+    
   void test_setValue()
   {
     MultipleFileProperty p("Filename");
@@ -44,7 +77,15 @@ public:
     TS_ASSERT_EQUALS(fileNames[3].size(), 1);
   }
 
+  void test_folderWithWhitespace()
+  {
+    MultipleFileProperty p("Filename");
+    p.setValue(m_filename);
+    std::vector<std::vector<std::string> > fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
+    TS_ASSERT_EQUALS(fileNames[0].size(), 1);
+  }
 };
 
 
