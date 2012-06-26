@@ -15,7 +15,6 @@ Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
-  m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle),
   m_workspaces(), m_observingADS(false)
 {
   observeADSNotifications(observeADS);
@@ -38,7 +37,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
     if(!m_observingADS)
     {
       AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
       m_observingADS = true;
     }
   }
@@ -47,7 +45,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
     if(m_observingADS)
     {
       AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
       m_observingADS = false;
     }
   }
