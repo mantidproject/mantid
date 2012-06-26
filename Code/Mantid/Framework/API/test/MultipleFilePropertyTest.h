@@ -16,39 +16,7 @@ using namespace Mantid::API;
 
 class MultipleFilePropertyTest : public CxxTest::TestSuite
 {
-private:
-  std::string m_dirPath;
-  std::string m_filename;
-  std::string m_oldDataSearchDirectories;
-
-public:
-  MultipleFilePropertyTest() : m_dirPath("_MultipleFilePropertyTestDummyFolder WithWhiteSpace"), m_filename("TSC99999.raw"),
-    m_oldDataSearchDirectories("")
-  {
-    // Create a dummy folder with whitespace to use.
-    Poco::File dir(m_dirPath);
-    dir.createDirectories();
-    
-    Poco::File file(m_dirPath + "/" + m_filename);
-    file.createFile();
-    
-    // Add dummy directory to search path, saving old search paths to be put back later.
-    Poco::Path path(dir.path());
-    path = path.makeAbsolute();
-    m_oldDataSearchDirectories = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
-    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories + "; " + path.toString());
-  }
-
-  ~MultipleFilePropertyTest()
-  {
-    // Put back the old search paths.
-    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories);
-
-    // Destroy dummy folder and any files it contains.  
-    Poco::File dir(m_dirPath);
-    dir.remove(true);
-  }
-    
+public:    
   void test_setValue()
   {
     MultipleFileProperty p("Filename");
@@ -79,12 +47,35 @@ public:
 
   void test_folderWithWhitespace()
   {
+    std::string dirPath = "_MultipleFilePropertyTestDummyFolder WithWhiteSpace";
+    std::string filename = "TSC99999.raw";
+    std::string oldDataSearchDirectories = "";
+       
+       // Create a dummy folder with whitespace to use.
+    Poco::File dir(dirPath);
+    dir.createDirectories();
+    
+    Poco::File file(dirPath + "/" + filename);
+    file.createFile();
+    
+    // Add dummy directory to search path, saving old search paths to be put back later.
+    Poco::Path path(dir.path());
+    path = path.makeAbsolute();
+    oldDataSearchDirectories = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", oldDataSearchDirectories + "; " + path.toString());
+    
     MultipleFileProperty p("Filename");
-    p.setValue(m_filename);
+    p.setValue(filename);
     std::vector<std::vector<std::string> > fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(fileNames[0].size(), 1);
+
+    // Put back the old search paths.
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", oldDataSearchDirectories);
+
+    // Destroy dummy folder and any files it contains.  
+    dir.remove(true);
   }
 };
 
