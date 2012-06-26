@@ -4,7 +4,7 @@
 
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDBase.h"
 //
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 
@@ -70,14 +70,14 @@ namespace MDAlgorithms
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
    static MDEvents::ConvToMDPreprocDet det_loc;  
-  /// progress reporter
+   /// progress reporter
    std::auto_ptr<API::Progress > pProg;
-    /// logger -> to provide logging, for MD dataset file operations
+   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& convert_log;
    /// pointer to the class, which does the particular conversion
-   boost::shared_ptr<MDEvents::ConvToMDEventsBase> pConvertor; 
-  //------------------------------------------------------------------------------------------------------------------------------------------
-    protected: //for testing
+   boost::shared_ptr<MDEvents::ConvToMDBase> pConvertor; 
+   //------------------------------------------------------------------------------------------------------------------------------------------
+   protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
 
  };

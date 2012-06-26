@@ -2,7 +2,7 @@
 #define  H_CONVERT_TO_MDEVENTS_Q3D_TRANSF
 //
 #include "MantidMDEvents/MDTransfInterface.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+//#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidMDEvents/MDTransfModQ.h"

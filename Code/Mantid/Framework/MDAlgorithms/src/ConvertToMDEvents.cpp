@@ -186,7 +186,8 @@ ConvertToMDEvents::init()
 void ConvertToMDEvents::exec()
 {
   // initiate class which would deal with any dimension workspaces, handling 
-  if(!pWSWrapper.get()){
+  if(!pWSWrapper)
+  {
     pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
   }
   // -------- Input workspace
@@ -195,6 +196,7 @@ void ConvertToMDEvents::exec()
   {
     convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
   }
+
   // ------- Is there any output workspace?
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");

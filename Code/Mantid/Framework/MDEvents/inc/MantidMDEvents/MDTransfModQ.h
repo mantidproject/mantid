@@ -2,7 +2,7 @@
 #define  H_CONVERT_TO_MDEVENTS_MODQ_TRANSF
 //
 #include "MantidMDEvents/MDTransfInterface.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+//#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"
 //

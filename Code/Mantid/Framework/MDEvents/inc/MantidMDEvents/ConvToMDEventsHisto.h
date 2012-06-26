@@ -10,7 +10,7 @@
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
 
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfInterface.h"
@@ -47,7 +47,7 @@ namespace MDEvents
 // service variable used for efficient filling of the MD event WS  -> should be moved to configuration?
 #define SPLIT_LEVEL  8192
 //-----------------------------------------------
-class ConvToMDEventsHisto: public ConvToMDEventsBase
+class ConvToMDEventsHisto: public ConvToMDBase
 {
 
 public:

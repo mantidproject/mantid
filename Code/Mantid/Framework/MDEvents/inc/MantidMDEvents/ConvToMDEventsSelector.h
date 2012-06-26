@@ -35,13 +35,13 @@ namespace MDEvents
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
- class DLLExport ConvToMDEventsSelector
- {
- public:
+class DLLExport ConvToMDEventsSelector
+{
+public:
  /// function which selects the convertor depending on workspace type and (possibly, in a future) some workspace properties
-   boost::shared_ptr<ConvToMDEventsBase> convSelector(API::MatrixWorkspace_sptr inputWS,
-                     boost::shared_ptr<ConvToMDEventsBase> currentSptr = boost::shared_ptr<ConvToMDEventsBase>())const;
- };
+   boost::shared_ptr<ConvToMDBase> convSelector(API::MatrixWorkspace_sptr inputWS,
+                     boost::shared_ptr<ConvToMDBase> currentSptr = boost::shared_ptr<ConvToMDBase>())const;
+};
 } // end MDAlgorithms Namespace
 } // end Mantid Namespace
 

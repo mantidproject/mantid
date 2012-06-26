@@ -20,7 +20,7 @@
 //#include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/ConvToMDEventsSelector.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 
@@ -47,7 +47,7 @@ class ConvertToMDEventsWSTest : public CxxTest::TestSuite
    ConvToMDPreprocDet det_loc;
    MDEvents::MDWSDescription TestWS;
 
-   std::auto_ptr<ConvToMDEventsBase> pConvMethods;
+   std::auto_ptr<ConvToMDBase> pConvMethods;
 
    // class which would select the solver as function of ws type
    ConvToMDEventsSelector WSAlgoSelector;
@@ -95,7 +95,7 @@ void test_TwoTransfMethods()
     bc->setSplitInto(5);
 
     // initialize solver converting from Matrix ws to md ws
-    boost::shared_ptr<ConvToMDEventsBase> pSolver;
+    boost::shared_ptr<ConvToMDBase> pSolver;
     TS_ASSERT_THROWS_NOTHING(pSolver = WSAlgoSelector.convSelector(ws2D,pSolver));
     TS_ASSERT_THROWS_NOTHING(pSolver->initialize(TestWS,pHistoMDWSWrapper));
 
@@ -133,7 +133,7 @@ void test_buildFromEWS()
      bc->setSplitInto(5);
 
     // initialize solver converting from Event ws to md ws
-    boost::shared_ptr<ConvToMDEventsBase> pTOFConv;
+    boost::shared_ptr<ConvToMDBase> pTOFConv;
     TS_ASSERT_THROWS_NOTHING(pTOFConv = WSAlgoSelector.convSelector(outWS));
     TS_ASSERT_THROWS_NOTHING(pTOFConv->initialize(TestWS,pEventMDWSWrapper));
 

@@ -1,19 +1,20 @@
-#include "MantidMDEvents/ConvToMDEventsEvents.h"
+#include "MantidMDEvents/ConvToMDEventsWS.h"
+#include "MantidMDEvents/UnitsConversionHelper.h"
 //
 
 namespace Mantid
 {
 namespace MDEvents
 {
-/**function converts particular list of events type T into MD space and adds these events to the workspace itself   */
+/**function converts particular list of events of type T into MD workspace space and adds these events to the workspace itself  */
 template <class T>
-size_t ConvToMDEventsEvents::convertEventList(size_t workspaceIndex)
+size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex)
 {
 
          const Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
          size_t iSpec                              = this->pDetLoc->getDetSpectra(workspaceIndex);   
          // create local unit conversion class
-         UnitConversionHelper localUnitConv(UnitConversion);
+         UnitsConversionHelper localUnitConv(UnitConversion);
 
          size_t numEvents     = el.getNumberEvents();    
          size_t  detNum       = this->pDetLoc->getWSDet(workspaceIndex);
@@ -72,9 +73,9 @@ size_t ConvToMDEventsEvents::convertEventList(size_t workspaceIndex)
  @parameter WSD         -- the class describing the target MD workspace, sorurce Event workspace and the transformations, necessary to perform on these workspaces
  @parameter inWSWrapper -- the class wrapping the target MD workspace
 */
-size_t  ConvToMDEventsEvents::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvToMDEventsWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
-    size_t numSpec=ConvToMDEventsBase::initialize(WSD,inWSWrapper);
+    size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper);
 
     
     pEventWS  = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inWS2D);
@@ -85,7 +86,7 @@ size_t  ConvToMDEventsEvents::initialize(const MDEvents::MDWSDescription &WSD, b
     return numSpec;
 }
 
-void ConvToMDEventsEvents::runConversion(API::Progress *pProg)
+void ConvToMDEventsWS::runConversion(API::Progress *pProg)
 {
        // Get the box controller
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
@@ -139,7 +140,7 @@ void ConvToMDEventsEvents::runConversion(API::Progress *pProg)
 }
 
 //
-size_t ConvToMDEventsEvents::conversionChunk(size_t workspaceIndex)
+size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex)
 {       
 
        switch (this->pEventWS->getEventList(workspaceIndex).getEventType())

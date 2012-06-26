@@ -20,7 +20,7 @@ inline bool isNaN(T val){
 size_t  ConvToMDEventsHisto::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
                         
-   size_t numSpec=ConvToMDEventsBase::initialize(WSD,inWSWrapper);
+   size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper);
    // check if we indeed have matrix workspace as input.
    DataObjects::Workspace2D_const_sptr pWS2D  = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(inWS2D);
    if(!pWS2D.get()){

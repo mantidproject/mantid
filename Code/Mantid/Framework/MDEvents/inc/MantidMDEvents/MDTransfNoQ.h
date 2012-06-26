@@ -2,8 +2,9 @@
 #define  H_CONVERT_TO_MDEVENTS_NOQ_TRANSF
 //
 #include "MantidMDEvents/MDTransfInterface.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+//#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidAPI/NumericAxis.h"
 
 //
 namespace Mantid
