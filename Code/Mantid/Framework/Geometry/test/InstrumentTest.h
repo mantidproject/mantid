@@ -164,6 +164,15 @@ public:
     TS_ASSERT_EQUALS( instrument.getBeamDirection(), V3D(0,0,1) );
   }
 
+  void testNumberDetectors()
+  { // THIS MUST BE RUN BEFORE testDetector!!!!!!!
+    // that test adds a detector to the instrument
+    std::size_t ndets(3);
+    TS_ASSERT_EQUALS(instrument.getDetectorIDs(false).size(), ndets);
+    TS_ASSERT_EQUALS(instrument.getNumberDetectors(false), ndets);
+    TS_ASSERT_EQUALS(instrument.getNumberDetectors(true), ndets-1); // skipMonitors
+  }
+
   void testDetector()
   {
     TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError );
@@ -219,7 +228,6 @@ public:
     {
       TS_ASSERT_EQUALS(dets[i]->getID(), detIDs[i]);
     }
-    
   }
 
   void test_GetDetector_With_A_List_Returns_A_Group()
@@ -340,6 +348,9 @@ public:
     std::vector<detid_t> dets;
     dets = inst->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 36*5);
+
+    TS_ASSERT_EQUALS(inst->getNumberDetectors(false), 5*6*6);
+    TS_ASSERT_EQUALS(inst->getNumberDetectors(true), 5*6*6); // skipMonitors
   }
 
   void test_getValidFromDate()
