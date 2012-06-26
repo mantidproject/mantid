@@ -76,6 +76,7 @@ class BaseRefWidget(BaseWidget):
         self._summary.norm_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel1))
 
         # Event connections
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"), self.data_run_number_validated)
         self.connect(self._summary.data_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._data_low_res_clicked)
         self.connect(self._summary.norm_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_low_res_clicked)
         self.connect(self._summary.norm_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_clicked)
@@ -137,6 +138,7 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.norm_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
         self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("returnPressed()"), self._run_number_changed)
         self._run_number_first_edit = True
         
         call_back = partial(self._edit_event, ctrl=self._summary.slits_width_flag)
@@ -181,6 +183,51 @@ class BaseRefWidget(BaseWidget):
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
+            
+    def getMetadata(self,file):
+        """
+        This retrieve the metadata from the data event NeXus file
+        """
+        _full_file_name = file
+        LoadEventNexus(Filename=_full_file_name,
+                       OutputWorkspace='tmpWks',
+                       MetaDataOnly='1')
+        
+        mt1 = mtd['tmpWks']
+        mt_run = mt1.getRun()
+        
+        #tthd
+        tthd = mt_run.getProperty('tthd').value[0]
+        
+        #ths
+        ths = mt_run.getProperty('ths').value[0]
+        
+        return [tthd,ths]
+    
+    def data_run_number_validated(self):
+        """
+        This function is reached when the user hits ENTER on the data run
+        number and will retrieve some of the metadata and display them
+        in the metadata box
+        """
+#        self._summary.data_run_number_processing.show()
+        run_number = self._summary.data_run_number_edit.text()
+        _file = FileFinder.findRuns("REF_L%d"%int(run_number))
+        lambdaRequest = ''
+        try:
+            metadata= self.getMetadata(_file[0])
+            
+            tthd_value = metadata[0]
+            tthd_value_string = '{0:.2f}'.format(tthd_value)
+            self._summary.tthd_value.setText(tthd_value_string)
+            
+            ths_value = metadata[1]
+            ths_value_string = '{0:.2f}'.format(ths_value)
+            self._summary.ths_value.setText(ths_value_string)
+#            self._summary.data_run_number_processing.hide()
+        except:
+            pass
+#            self._summary.data_run_number_processing.hide()
             
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -910,6 +957,10 @@ class BaseRefWidget(BaseWidget):
         self._summary.x_min_edit.setText(str(state.data_x_range[0]))
         self._summary.x_max_edit.setText(str(state.data_x_range[1]))
         self._data_low_res_clicked(state.data_x_range_flag)
+        
+        #data metadata
+        self._summary.tthd_value.setText(str(state.tthd_value))
+        self._summary.ths_value.setText(str(state.ths_value))
         
         #norm low resolution range
         self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
