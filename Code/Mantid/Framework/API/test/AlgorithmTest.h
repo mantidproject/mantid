@@ -552,7 +552,7 @@ public:
     {
       TS_ASSERT( !alg.isExecuted() );
       return WorkspaceGroup_sptr();
-    }
+    } 
     TS_ASSERT( alg.isExecuted() )
     Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
     WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(out1);

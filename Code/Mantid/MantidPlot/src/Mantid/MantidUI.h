@@ -303,7 +303,7 @@ signals:
   void workspace_removed(const QString &);
   void workspaces_cleared();
   void algorithms_updated();
-  void workspace_renamed(const QString &, const QString);
+  void workspace_renamed(const QString &, const QString &);
   void workspaces_grouped(const QStringList&);
   void workspace_ungrouped(const QString&, Mantid::API::Workspace_sptr);
 

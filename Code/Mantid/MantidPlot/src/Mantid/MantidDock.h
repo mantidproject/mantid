@@ -67,6 +67,7 @@ private slots:
   void replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr);
   void unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
+  void renameWorkspaceEntry(const QString &, const QString&);
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();

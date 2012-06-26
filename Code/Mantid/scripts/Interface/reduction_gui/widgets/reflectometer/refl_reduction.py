@@ -174,6 +174,10 @@ class DataReflWidget(BaseRefWidget):
         roi1_to = int(self._summary.data_background_to_pixel1.text())
         m.DataBackgroundRoi = [roi1_from, roi1_to, 0, 0]
 
+        #data metadata
+        m.tthd_value = str(self._summary.tthd_value.text())
+        m.ths_value = str(self._summary.ths_value.text())
+
         #from TOF and to TOF
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())

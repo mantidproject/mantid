@@ -432,6 +432,7 @@ using namespace boost::python;
         .def("getNBins", &IMDDimension::getNBins)
         .def("getX", &IMDDimension::getX)
         .def("getDimensionId", &IMDDimension::getDimensionId)
+        .def("getUnits", &IMDDimension::getUnits)
         ;
   }
 

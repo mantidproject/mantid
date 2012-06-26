@@ -117,6 +117,7 @@ set ( TEST_PY_FILES
   test/python/SimpleAPITest.py
   test/python/SimpleAPILoadTest.py
   test/python/SimpleAPIFitTest.py
+  test/python/Stitch1DTest.py
   test/python/TimeSeriesPropertyTest.py
   test/python/QuatTest.py
   test/python/V3DTest.py

@@ -1,6 +1,5 @@
 set ( SRC_FILES
 	#	src/Q1DTOF.cpp
-	#src/SassenaFFT.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddSampleLog.cpp
@@ -36,8 +35,6 @@ set ( SRC_FILES
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
-	src/ConvertToMaskWorkspace.cpp
-	src/ConvertToMaskingWorkspace.cpp
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
@@ -165,6 +162,7 @@ set ( SRC_FILES
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/SANSDirectBeamScaling.cpp
+	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/SetUncertainties.cpp
@@ -200,7 +198,6 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
-	#inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddSampleLog.h
@@ -236,8 +233,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
-	inc/MantidAlgorithms/ConvertToMaskWorkspace.h
-	inc/MantidAlgorithms/ConvertToMaskingWorkspace.h
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
@@ -366,6 +361,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertainties.h
@@ -401,7 +397,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	test/CalMuonDeadTimeTest.h
-	#test/SassenaFFTTest.h
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
 	test/AlignDetectorInTOFTest.h
@@ -434,7 +429,6 @@ set ( TEST_FILES
 	test/ConvertToDistributionTest.h
 	test/ConvertToEventWorkspaceTest.h
 	test/ConvertToHistogramTest.h
-	test/ConvertToMaskWorkspaceTest.h
 	test/ConvertToMatrixWorkspaceTest.h
 	test/ConvertToPointDataTest.h
 	test/ConvertUnitsTest.h
@@ -546,6 +540,7 @@ set ( TEST_FILES
 	test/ReplaceSpecialValuesTest.h
 	test/ResetNegativesTest.h
 	test/ResizeRectangularDetectorTest.h
+	test/SassenaFFTTest.h
 	test/ScaleTest.h
 	test/ScaleXTest.h
 	test/ShiftLogTimeTest.h

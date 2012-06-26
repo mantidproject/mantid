@@ -253,7 +253,6 @@ private:
   void createData()
   {
     m_wsg.reset(new WorkspaceGroup);
-    m_wsg->add("PlotPeakGroup");
     const int N = 3;
     for(int iWS=0;iWS<N;++iWS)
     {

@@ -316,7 +316,6 @@ public:
     // Create some dummy TOSCA run files to use.
     Poco::File dir(m_dirPath);
     dir.createDirectories();
-    std::cout << dir.path() << " = " << dir.exists() << std::endl;
     
     for( size_t run = 0; run < m_filesInDir; ++run )
     {

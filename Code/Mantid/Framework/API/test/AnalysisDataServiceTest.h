@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -148,7 +149,162 @@ public:
     removeFromADS(name);
   }
 
+  void test_Rename()
+  {
+    const std::string oldName = "Old";
+    const std::string newName = "New";
+    Workspace_sptr work = addToADS(oldName);
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().rename(oldName, newName) );
+    auto workBack = AnalysisDataService::Instance().retrieve(newName);
+    TS_ASSERT_EQUALS(work, workBack);
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist( oldName ) );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist( newName ) );
+    //clean up the ADS for other tests
+    AnalysisDataService::Instance().clear();
+  }
 
+  void test_Rename_Overwrites_Existing_WS()
+  {
+    AnalysisDataService::Instance().clear();
+    const std::string oldName = "Old";
+    const std::string newName = "New";
+    Workspace_sptr work1 = addToADS(oldName);
+    Workspace_sptr work2 = addToADS(newName);
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().rename(oldName, newName) );
+    auto workBack = AnalysisDataService::Instance().retrieve(newName);
+    TS_ASSERT_EQUALS(work1, workBack);
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist( oldName ) );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist( newName ) );
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1 );
+
+    //clean up the ADS for other tests
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_add_workspace_group()
+  {
+    auto& ADS = AnalysisDataService::Instance();
+    // create a group
+    WorkspaceGroup_sptr group( new WorkspaceGroup );
+    // create anonymous workspaces
+    MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
+    MockWorkspace_sptr ws2 = MockWorkspace_sptr(new MockWorkspace);
+    // add them to the group
+    group->addWorkspace( ws1 );
+    group->addWorkspace( ws2 );
+    // ADS must be empty
+    TS_ASSERT_EQUALS( ADS.size(), 0 );
+    ADS.add( "Group", group );
+    // there must be 3 workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 3 );
+    TS_ASSERT( ADS.doesExist( "Group" ) );
+    TS_ASSERT( ADS.doesExist( "Group_1" ) );
+    TS_ASSERT( ADS.doesExist( "Group_2" ) );
+    //clean up the ADS for other tests
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_add_workspace_group_keeps_existing_workspaces()
+  {
+    auto& ADS = AnalysisDataService::Instance();
+    // populate the ADS
+    Workspace_sptr work1 = addToADS("work1");
+    Workspace_sptr work2 = addToADS("work2");
+    // create a group
+    WorkspaceGroup_sptr group( new WorkspaceGroup );
+    // create anonymous workspace
+    MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
+    // add one anonymous ...
+    group->addWorkspace( ws1 );
+    // and one existing workspace
+    group->addWorkspace( work2 );
+    // ADS must have 2 workspaces
+    TS_ASSERT_EQUALS( ADS.size(), 2 );
+    ADS.add( "Group", group );
+    // there must be 4 workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 4 );
+    TS_ASSERT(   ADS.doesExist( "Group" ) );
+    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
+    TS_ASSERT( ! ADS.doesExist( "Group_2" ) );
+    TS_ASSERT(   ADS.doesExist( "work1" ) );
+    TS_ASSERT(   ADS.doesExist( "work2" ) );
+
+    auto names = group->getNames();
+    TS_ASSERT_EQUALS( names.size(), 2 );
+    TS_ASSERT_EQUALS( names[0], "Group_1" );
+    TS_ASSERT_EQUALS( names[1], "work2" );
+
+    //clean up the ADS for other tests
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_addOrReplace_workspace_group_replaces_existing_workspaces()
+  {
+    auto& ADS = AnalysisDataService::Instance();
+    // populate the ADS
+    Workspace_sptr work1 = addToADS("work1");
+    Workspace_sptr work2 = addToADS("Group_2");
+    // create a group
+    WorkspaceGroup_sptr group( new WorkspaceGroup );
+    // create anonymous workspace
+    MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
+    MockWorkspace_sptr ws2 = MockWorkspace_sptr(new MockWorkspace);
+    // add them
+    group->addWorkspace( ws1 );
+    group->addWorkspace( ws2 );
+    // ADS must have 2 workspaces
+    TS_ASSERT_EQUALS( ADS.size(), 2 );
+    ADS.addOrReplace( "Group", group );
+    // there must be 4 workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 4 );
+    TS_ASSERT(   ADS.doesExist( "Group" ) );
+    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
+    TS_ASSERT(   ADS.doesExist( "Group_2" ) );
+    TS_ASSERT(   ADS.doesExist( "work1" ) );
+    TS_ASSERT( ! ADS.doesExist( "work2" ) );
+
+    auto names = group->getNames();
+    TS_ASSERT_EQUALS( names.size(), 2 );
+    TS_ASSERT_EQUALS( names[0], "Group_1" );
+    TS_ASSERT_EQUALS( names[1], "Group_2" );
+
+    //clean up the ADS for other tests
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_add_workspace_group_throws_if_adding_existing_names()
+  {
+    auto& ADS = AnalysisDataService::Instance();
+    // populate the ADS
+    Workspace_sptr work1 = addToADS("work1");
+    Workspace_sptr work2 = addToADS("Group_2");
+    // create a group
+    WorkspaceGroup_sptr group( new WorkspaceGroup );
+    // create anonymous workspace
+    MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
+    MockWorkspace_sptr ws2 = MockWorkspace_sptr(new MockWorkspace);
+    // add them
+    group->addWorkspace( ws1 );
+    group->addWorkspace( ws2 );
+    // ADS must have 2 workspaces
+    TS_ASSERT_EQUALS( ADS.size(), 2 );
+    TS_ASSERT_THROWS( ADS.add( "Group", group ), std::runtime_error );
+    // there must be 4 workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 4 );
+    TS_ASSERT(   ADS.doesExist( "Group" ) );
+    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
+    TS_ASSERT(   ADS.doesExist( "Group_2" ) );
+    TS_ASSERT(   ADS.doesExist( "work1" ) );
+    TS_ASSERT( ! ADS.doesExist( "work2" ) );
+
+    auto names = group->getNames();
+    TS_ASSERT_EQUALS( names.size(), 2 );
+    TS_ASSERT_EQUALS( names[0], "Group_1" );
+    TS_ASSERT_EQUALS( names[1], "Group_2" );
+
+    //clean up the ADS for other tests
+    AnalysisDataService::Instance().clear();
+  }
 
 private:
 

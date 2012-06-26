@@ -8,6 +8,7 @@
 
 from MantidFramework import *
 mtd.initialise()
+from mantidsimple import *
 
 def focus(eventfile, wksp, binning):
     calfile = "PG3_1370_2010_09_12.cal"

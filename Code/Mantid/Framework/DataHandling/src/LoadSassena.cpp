@@ -77,7 +77,8 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
 {
   this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(wsName,wsName,Kernel::Direction::Output), description);
   this->setProperty(wsName,ws);
-  gws->add(wsName); // Add the named workspace to the group
+  API::AnalysisDataService::Instance().add( wsName, ws );
+  gws->add(wsName);
 }
 
 /**
@@ -182,7 +183,8 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
 }
 
 /**
- * Create one workspace to hold the real part and another to hold the imaginary part
+ * Create one workspace to hold the real part and another to hold the imaginary part.
+ * We symmetrize the structure factor to negative times
  * Y-values are structure factor for each Q-value
  * X-values are time bins
  * @param h5file file identifier
@@ -197,8 +199,10 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
   double dt = 1.0; //time unit increment;
   hsize_t dims[3];
   this->dataSetInfo(h5file, setName, dims);
-  int nt = static_cast<int>( dims[1] ); //number of time points
-  double* buf = new double[nq*nt*2];
+  int nnt = static_cast<int>( dims[1] ); //number of non-negative time points
+  int nt = 2*nnt - 1; //number of time points
+  int origin = nnt-1;
+  double* buf = new double[nq*nnt*2];
   this->dataSetDouble(h5file,setName,buf);
 
   DataObjects::Workspace2D_sptr wsRe = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, nt, nt));
@@ -216,13 +220,18 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
     MantidVec& imX = wsIm->dataX(iq);
     MantidVec& reY = wsRe->dataY(iq);
     MantidVec& imY = wsIm->dataY(iq);
-    for(int it=0; it<nt; it++)
+    for(int it=0; it<nnt; it++)
     {
-      reX[it] = it*dt;  // time point for the real part
-      reY[it] = *curr;  // real part of the intermediate structure factor
+      reX[origin+it] = it*dt;  // time point for the real part
+      reY[origin+it] = *curr;  // real part of the intermediate structure factor
+      reX[origin-it] = -it*dt; // symmetric negative time
+      reY[origin-it] = *curr;  // symmetric value for the negative time
       curr ++;
-      imX[it] = it*dt;
-      imY[it] = *curr;
+      // For it=0, it is expected that *curr==0.0 (no imaginary part for for it=0)
+      imX[origin+it] = it*dt;
+      imY[origin+it] = *curr;
+      imX[origin-it] = -it*dt;
+      imY[origin-it] = -(*curr); // antisymmetric value for negative times
       curr ++;
     }
   }

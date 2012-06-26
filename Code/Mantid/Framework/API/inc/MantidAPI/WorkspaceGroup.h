@@ -63,16 +63,18 @@ public:
   virtual size_t getMemorySize() const { return 0; }
   /// Turn ADS observations on/off
   void observeADSNotifications(const bool observeADS);
-  /// Adds a name to the group
+  /// Adds a workspace to the group.
   void add(const std::string& wsName);
+  /// Adds a workspace to the group.
+  void addWorkspace(Workspace_sptr workspace);
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
   /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
-  std::vector<std::string> getNames() const { return m_wsNames; }
+  std::vector<std::string> getNames() const;
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container
-  size_t size() const { return m_wsNames.size(); }
+  size_t size() const { return m_workspaces.size(); }
   /// Return the ith workspace
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
@@ -99,12 +101,9 @@ private:
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
-  /// Callback when a rename notification is received
-  void workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
-  /// Observer for renaming of workspaces
-  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
-  /// The list of workspace names in the group
-  std::vector<std::string> m_wsNames;
+  /// The list of workspace pointers in the group
+  //std::vector<std::string> m_wsNames;
+  std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
   /// Static reference to the logger

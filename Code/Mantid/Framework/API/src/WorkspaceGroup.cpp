@@ -15,8 +15,7 @@ Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
-  m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle),
-  m_wsNames(), m_observingADS(false)
+  m_workspaces(), m_observingADS(false)
 {
   observeADSNotifications(observeADS);
 }
@@ -38,7 +37,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
     if(!m_observingADS)
     {
       AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
       m_observingADS = true;
     }
   }
@@ -47,19 +45,37 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
     if(m_observingADS)
     {
       AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
       m_observingADS = false;
     }
   }
 }
 
-/** Add the named workspace to the group
+/** Add the named workspace to the group. The workspace must exist in the ADS
  *  @param name :: The name of the workspace (in the AnalysisDataService) to add
  */
 void WorkspaceGroup::add(const std::string& name)
 {
-  m_wsNames.push_back(name);
+  Workspace_sptr ws = AnalysisDataService::Instance().retrieve( name );
+  addWorkspace( ws );
   g_log.debug() << "workspacename added to group vector =  " << name <<std::endl;
+}
+
+/**
+ * Adds a workspace to the group. The workspace does not have to be in the ADS
+ * @param workspace :: A shared pointer to a workspace to add. If the workspace already exists give a warning.
+ */
+void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
+{
+  // check it's not there already
+  auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
+  if ( it == m_workspaces.end() )
+  {
+    m_workspaces.push_back( workspace );
+  }
+  else
+  {
+    g_log.warning() << "Workspace already exists in a WorkspaceGroup" << std::endl;;
+  }
 }
 
 /**
@@ -69,12 +85,25 @@ void WorkspaceGroup::add(const std::string& name)
  */
 bool WorkspaceGroup::contains(const std::string & wsName) const
 {
-  // Protection against the case where calling m_wsNames.end() results in a crash. (Probable temp fix.)
-  if(m_wsNames.empty() )
-    return false;
+  for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+  {
+    if ( (**it).name() == wsName ) return true;
+  }
+  return false;
+}
 
-  std::vector<std::string>::const_iterator itr = std::find(m_wsNames.begin(), m_wsNames.end(), wsName);
-  return (itr != m_wsNames.end());
+/**
+ * Returns the names of workspaces that make up this group. 
+ * Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
+ */
+std::vector<std::string> WorkspaceGroup::getNames() const
+{
+  std::vector<std::string> out;
+  for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+  {
+    out.push_back( (**it).name() );
+  }
+  return out;
 }
 
 /**
@@ -90,7 +119,7 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const
     os << "WorkspaceGroup - index out of range. Requested=" << index << ", current size=" << this->size();
     throw std::out_of_range(os.str());
   }
-  return AnalysisDataService::Instance().retrieve(m_wsNames[index]);
+  return m_workspaces[index];
 }
 
 /**
@@ -100,26 +129,32 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const
 {
-  if ( !this->contains(wsName) )
-    throw std::out_of_range("Workspace "+wsName+" not contained in the group");
-  return AnalysisDataService::Instance().retrieve(wsName);
+  for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+  {
+    if ( (**it).name() == wsName ) return *it;
+  }
+  throw std::out_of_range("Workspace "+wsName+" not contained in the group");
 }
 
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.
 void WorkspaceGroup::removeAll()
 {
-  m_wsNames.clear();
+  m_workspaces.clear();
 }
 
 /** Remove the named workspace from the group. Does not delete the workspace from the AnalysisDataService.
  *  @param name :: The name of the workspace to be removed from the group.
  */
-void WorkspaceGroup::remove(const std::string& name)
+void WorkspaceGroup::remove(const std::string& wsName)
 {
-  std::vector<std::string>::iterator itr = std::find(m_wsNames.begin(), m_wsNames.end(), name);
-  if( itr != m_wsNames.end() )
+  auto it = m_workspaces.begin();
+  for(; it != m_workspaces.end(); ++it)
   {
-    m_wsNames.erase(itr);
+    if ( (**it).name() == wsName )
+    {
+      m_workspaces.erase(it);
+      break;
+    }
   }
 }
 
@@ -127,10 +162,10 @@ void WorkspaceGroup::remove(const std::string& name)
 void WorkspaceGroup::deepRemoveAll()
 {
   if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-  while (!m_wsNames.empty())
+  while (!m_workspaces.empty())
   {
-    AnalysisDataService::Instance().remove(m_wsNames.back());
-	  m_wsNames.pop_back();
+    AnalysisDataService::Instance().remove(m_workspaces.back()->name());
+	  m_workspaces.pop_back();
   }
   if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
@@ -138,10 +173,10 @@ void WorkspaceGroup::deepRemoveAll()
 /// Print the names of all the workspaces in this group to the logger (at debug level)
 void WorkspaceGroup::print() const
 {
-  std::vector<std::string>::const_iterator itr;
-  for (itr = m_wsNames.begin(); itr != m_wsNames.end(); ++itr)
+  for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr)
   {
-    g_log.debug() << "Workspace name in group vector =  " << *itr << std::endl;
+    g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
+    //std::cerr << "Workspace name in group vector =  " << (**itr).name() << std::endl;
   }
 }
 
@@ -168,26 +203,12 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 }
 
 /**
- * Callback for a workspace rename notification
- * @param notice :: A pointer to a workspace rename notfication object
- */
-void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice)
-{
-  std::vector<std::string>::iterator itr = 
-    std::find(m_wsNames.begin(), m_wsNames.end(), notice->object_name());
-  if( itr != m_wsNames.end() )
-  {
-    (*itr) = notice->new_objectname();
-  }
-}
-
-/**
  * This method returns true if the workspace group is empty
  * @return true if workspace is empty
  */
 bool WorkspaceGroup::isEmpty() const
 {
-	return m_wsNames.empty();
+	return m_workspaces.empty();
 }
 
 //------------------------------------------------------------------------------
@@ -199,20 +220,20 @@ bool WorkspaceGroup::isEmpty() const
  */
 bool WorkspaceGroup::areNamesSimilar() const
 {
-  if(m_wsNames.empty()) return false;
+  if(m_workspaces.empty()) return false;
 
   //Check all the members are of similar names
-  std::vector<std::string>::const_iterator citr;
-  for(citr=m_wsNames.begin(); citr!=m_wsNames.end(); ++citr)
+  for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
   {
+    const std::string wsName = (**citr).name();
     // Find the last underscore _
-    std::size_t pos=(*citr).find_last_of("_");
+    std::size_t pos = wsName.find_last_of("_");
     // No underscore = not similar
     if(pos==std::string::npos)
       return false;
     // The part before the underscore has to be the same
     // as the group name to be similar
-    std::string commonpart((*citr).substr(0,pos));
+    std::string commonpart(wsName.substr(0,pos));
     if (this->name() != commonpart)
       return false;
   }

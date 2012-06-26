@@ -250,7 +250,7 @@ namespace Mantid
             loadPeriodData(p, entry, local_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));
-          wksp_group->add(base_name + os.str());
+          wksp_group->addWorkspace(local_workspace);
           setProperty(prop_name + os.str(), boost::static_pointer_cast<Workspace>(local_workspace));
         }
         // The group is the root property value

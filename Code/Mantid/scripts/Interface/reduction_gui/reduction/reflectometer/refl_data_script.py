@@ -20,6 +20,9 @@ class DataSets(BaseScriptElement):
     
     data_x_range_flag = True
     data_x_range = [115,210]
+
+    tthd_value = 'N/A'
+    ths_value = 'N/A'
     
     norm_x_range_flag = True
     norm_x_range = [115,210]
@@ -146,6 +149,9 @@ class DataSets(BaseScriptElement):
         xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.data_x_range[1])
         xml += "<x_range_flag>%s</x_range_flag>\n" % str(self.data_x_range_flag)
 
+        xml += "<tthd_value>%s</tthd_value>\n" % str(self.tthd_value)
+        xml += "<ths_value>%s</ths_value>\n" % str(self.ths_value)
+
         xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
         xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
         xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[1])
@@ -205,6 +211,17 @@ class DataSets(BaseScriptElement):
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
         
+        
+        #data metadata
+        _tthd_value = BaseScriptElement.getStringElement(instrument_dom, "tthd_value")
+        if (_tthd_value == ''):
+            _tthd_value = 'N/A'
+        self.tthd_value = _tthd_value
+        
+        _ths_value = BaseScriptElement.getStringElement(instrument_dom, "ths_value")
+        if (_ths_value == ''):
+            _ths_value = 'N/A'
+        self.ths_value = _ths_value
         
         #low resolution range
         self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
@@ -299,6 +316,9 @@ class DataSets(BaseScriptElement):
         self.DataTofRange = DataSets.DataTofRange
         self.TofRangeFlag = DataSets.TofRangeFlag
         self.data_files = DataSets.data_files
+        
+        self.tthd_value = DataSets.tthd_value
+        self.ths_value = DataSets.ths_value
         
         self.NormFlag = DataSets.NormFlag
         self.NormBackgroundFlag = DataSets.NormBackgroundFlag

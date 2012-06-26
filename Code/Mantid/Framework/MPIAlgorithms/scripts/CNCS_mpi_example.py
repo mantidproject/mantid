@@ -8,6 +8,7 @@
 
 from MantidFramework import * 
 import boostmpi as mpi
+from mantidsimple import *
 mtd.initialise()
 
 comm = mpi.world

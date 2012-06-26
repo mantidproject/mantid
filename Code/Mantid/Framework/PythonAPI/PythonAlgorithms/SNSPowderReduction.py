@@ -260,20 +260,8 @@ class SNSPowderReduction(PythonAlgorithm):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
-        if HAVE_MPI:
-            comm = mpi.world
-            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-            # What about no chunks for parallel?
-            if len(Chunks) == 1:
-            	strategy.append({'ChunkNumber':comm.rank+1,'TotalChunks':comm.size})
-            else:
-            	for row in Chunks:
-			 if (int(row["ChunkNumber"])-1)%comm.size == comm.rank:
-				 strategy.append(row)
-
-        else:
-            Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
-            for row in Chunks: strategy.append(row)
+        Chunks = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks').workspace()
+        for row in Chunks: strategy.append(row)
 
         return strategy
 
@@ -285,23 +273,20 @@ class SNSPowderReduction(PythonAlgorithm):
         firstChunk = True
         for chunk in strategy:
             if "ChunkNumber" in chunk:
-                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy)))
+                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], chunk["TotalChunks"]))
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent, filterBadPulsesOverride)
-            if HAVE_MPI and len(strategy) == 1:
-                alg = GatherWorkspaces(InputWorkspace=temp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
+            if firstChunk:
+                alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
+                firstChunk = False
             else:
-                if firstChunk:
-                    alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
-                    wksp = alg['OutputWorkspace']
-                    firstChunk = False
-                else:
-                    wksp += temp
-                    DeleteWorkspace(temp)
-        if HAVE_MPI and len(strategy) > 1:
+                wksp += temp
+                DeleteWorkspace(temp)
+        # Sum workspaces for all mpi tasks
+        if HAVE_MPI:
             alg = GatherWorkspaces(InputWorkspace=wksp, PreserveEvents=preserveEvents, AccumulationMethod="Add", OutputWorkspace=wksp)
             wksp = alg['OutputWorkspace']
         if self._chunks > 0:

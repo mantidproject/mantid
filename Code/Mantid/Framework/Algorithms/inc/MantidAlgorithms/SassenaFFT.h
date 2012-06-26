@@ -48,17 +48,20 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic\\FFT"; }
-
+protected:
+  // Overridden Algorithm methods
+  bool processGroups();
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();
+  bool checkGroups();
 
 }; // class SassenaFFT
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif MANTID_ALGORITHM_SASSENAFFT_H_
+#endif // MANTID_ALGORITHM_SASSENAFFT_H_

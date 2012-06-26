@@ -1,8 +1,23 @@
+/*WIKI*
+
+
+
+
+
+Get information from a TimeSeriesProperty log.
+
+
+
+
+
+
+*WIKI*/
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -15,7 +30,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -82,11 +97,13 @@ namespace Algorithms
     this->declareProperty(new API::FileProperty("CalibrationFile", "", API::FileProperty::OptionalSave),
         "Name of the output calibration file.");
 
-    this->declareProperty("NumberEntriesExport", 0, "Number of entries of the log to be exported.");
+    this->declareProperty("NumberEntriesExport", 0, "Number of entries of the log to be exported.  Default is all entries.");
     this->declareProperty(new API::FileProperty("OutputPartialLogFile", "", API::FileProperty::OptionalSave),
-        "Column file to record the first N entries of the designated log.");
+        "Column file to record the first N entries of the designated log. (Optional for Export Log)");
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output, PropertyMode::Optional),
+      "The name of the workspace to be created for exporting the log events. (Optional for Export Log)" );
 
-    this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalDirectory),
+    this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalSave),
         "Directory where the information file will be written to.");
 
     return;
@@ -158,31 +175,88 @@ namespace Algorithms
 
 
     int numentries = this->getProperty("NumberEntriesExport");
-    if (numentries <= 0)
+    if (numentries < 0)
     {
       g_log.error() << "For Export Log, NumberEntriesExport must be greater than 0.  Input = "
           << numentries << std::endl;
       throw std::invalid_argument("NumberEntriesExport cannot be smaller and equal to 0. ");
     }
-    if (static_cast<size_t>(numentries) > times.size())
-      numentries = static_cast<int>(times.size());
-
-    std::string outputfilename = this->getProperty("OutputPartialLogFile");
-
-    // 2. Output different in time
-    std::ofstream ofs;
-    ofs.open(outputfilename.c_str(), std::ios::out);
-
-    Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
-
-    for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
+    else if (numentries == 0 || static_cast<size_t>(numentries) > times.size())
     {
-      Kernel::DateAndTime tnow = times[i];
-      int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
-      ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
+      numentries = static_cast<int>(times.size());
     }
 
-    ofs.close();
+    std::string outputfilename = this->getProperty("OutputPartialLogFile");
+	if(!outputfilename.empty())
+	{
+		// 2. Output different in time
+		std::ofstream ofs;
+		ofs.open(outputfilename.c_str(), std::ios::out);
+
+		Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
+
+		for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
+		{
+		  Kernel::DateAndTime tnow = times[i];
+		  int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
+		  ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
+		}
+
+
+		ofs.close();
+
+	}
+
+	if (!getPropertyValue("OutputWorkspace").empty())
+	{
+		 // 3. Output events in workspace
+
+
+		 Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
+
+		 //Get some stuff from the input workspace
+		 const size_t numberOfSpectra = 1;
+		 const int YLength = static_cast<int>(eventWS->blocksize());
+
+		 EventWorkspace_sptr outWS;
+		 //Make a brand new EventWorkspace
+		 outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength+1, YLength));
+		 //Copy geometry over.
+		 API::WorkspaceFactory::Instance().initializeFromParent(eventWS, outWS, false);
+
+		 this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+		 // Create the output event list (empty)
+		 EventList & outEL = outWS->getOrAddEventList(0);
+		 outEL.switchTo(WEIGHTED_NOTIME);
+
+		 // Allocate all the required memory
+		 outEL.reserve(numentries);
+		 outEL.clearDetectorIDs();
+
+		 for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
+		 {
+		   Kernel::DateAndTime tnow = times[i];
+		   int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
+
+		   // convert to microseconds
+		   double dtmsec = static_cast<double>(dt)/1000.0;
+		   outEL.addEventQuickly( WeightedEventNoTime( dtmsec, values[i], values[i]) );
+		 }
+		 outWS->doneAddingEventLists();
+		 // Ensure thread-safety
+		 outWS->sortAll(TOF_SORT, NULL);
+
+		 //Now, create a default X-vector for histogramming, with just 2 bins.
+		 Kernel::cow_ptr<MantidVec> axis;
+		 MantidVec& xRef = axis.access();
+		 xRef.resize(2);
+		 std::vector<WeightedEventNoTime>& events = outEL.getWeightedEventsNoTime();
+		 xRef[0] = events.begin()->tof();
+		 xRef[1] = events.rbegin()->tof();
+
+		 //Set the binning axis using this.
+		 outWS->setX(0, axis);
+	}
 
     return;
   }

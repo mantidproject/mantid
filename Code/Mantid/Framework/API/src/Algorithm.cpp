@@ -1152,7 +1152,7 @@ namespace Mantid
           } // not an empty (i.e. optional) input
         } // for each InputWorkspace property
 
-
+        std::vector<std::string> outputWSNames(m_pureOutputWorkspaceProps.size());
         // ---------- Set all the output workspaces ----------------------------
         for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
         {
@@ -1167,13 +1167,21 @@ namespace Mantid
           // Set in the output
           alg->setPropertyValue(prop->name(), outName);
 
-          // And add it to the output group
-          outGroups[owp]->add(outName);
+          outputWSNames[owp] = outName;
         } // for each OutputWorkspace property
 
         // ------------ Execute the algo --------------
         if (!alg->execute())
           throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+
+        // ------------ Fill in the output workspace group ------------------
+        // this has to be done after execute() because a workspace must exist 
+        // when it is added to a group
+        for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
+        {
+          // And add it to the output group
+          outGroups[owp]->add( outputWSNames[owp] );
+        }
 
       } // for each entry in each group
 
