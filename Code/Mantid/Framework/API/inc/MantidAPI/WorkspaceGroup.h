@@ -101,8 +101,6 @@ private:
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
-  /// Callback when a rename notification is received
-  void workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
   /// Observer for renaming of workspaces
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
   /// The list of workspace pointers in the group

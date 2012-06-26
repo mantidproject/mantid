@@ -78,14 +78,6 @@ bool RenameWorkspace::processGroups()
   // Basically we rename if the members ALL follow the pattern GroupName_1, _2, _3 etc.
   const bool renameMembers = inputGroup->areNamesSimilar();
 
-  AnalysisDataServiceImpl& data_store = AnalysisDataService::Instance();
-  //// Change the group workspace name in the analysis data service
-  //data_store.remove(inputwsName);
-  //data_store.addOrReplace(outputwsName,inputWS);
-  //// Post notice that a workspace has been renamed
-  //data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
-  //      outputwsName));
-
   // If necessary, go through group members calling the algorithm on each one
   if ( renameMembers )
   {

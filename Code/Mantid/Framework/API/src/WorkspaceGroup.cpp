@@ -206,14 +206,6 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 }
 
 /**
- * Callback for a workspace rename notification
- * @param notice :: A pointer to a workspace rename notfication object
- */
-void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice)
-{
-}
-
-/**
  * This method returns true if the workspace group is empty
  * @return true if workspace is empty
  */
