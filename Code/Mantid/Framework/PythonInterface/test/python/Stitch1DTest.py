@@ -238,8 +238,23 @@ class Stitch1DTest(unittest.TestCase):
         # 1 * (( 1 + 1) / (2 + 3)) = 0.4
         self.assertEqual(0.4, scale_factor)
         
-        
-            
+    def test_flat_offsetting_schenario(self):
+        errors = [1,1,1,1,1,1,1,1,1,1] # Errors for both input ws1 and ws2
+        s1 = [1,1,1,1,1,1,1,1,1,1] # Signal values for ws1
+        s2 = [3,3,3,3,3,3,3,3,3,3] # Signal values for ws2
+        expected_output_signal =[2,2,2,2,2,4,4,4,4,4]
+        expected_output_error_sq = [0.5, 0.5, 0.5, 0.5, 0.5, 2, 2, 2, 2, 2]
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput=s1,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_a',rethrow=True)
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput=s2,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_b',rethrow=True)
+        # Specify that overlap goes from start to half way along workspace
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal_a', Workspace2='flat_signal_b',OutputWorkspace='converted',StartOverlap=0.0,EndOverlap=0.5,ScaleWorkspace1=False,rethrow=True)    
+        # Verify the calculated output values.
+        ws = mtd.retrieve(alg.getPropertyValue("OutputWorkspace"))
+        for i in range(0, len(errors)):
+            self.assertEqual(expected_output_signal[i], ws.signalAt(i))
+            self.assertEqual(expected_output_error_sq[i], ws.errorSquaredAt(i))
+    
+
     #def test_does_something(self):
         # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
         #alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.5,rethrow=True) 

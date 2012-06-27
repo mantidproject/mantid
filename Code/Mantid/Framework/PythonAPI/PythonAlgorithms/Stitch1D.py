@@ -85,9 +85,9 @@ class Stitch1D(PythonAlgorithm):
         nbins = dim.getNBins()
         bin_low = int(nbins * fraction_low)
         bin_high = int(nbins * fraction_high)
-        step = ( dim.getMaximum() + dim.getMinimum() )/ nbins
-        q_low = bin_low * step
-        q_high = bin_high * step        
+        step = ( dim.getMaximum() - dim.getMinimum() )/ nbins
+        q_low = (bin_low * step) + dim.getMinimum()
+        q_high = (bin_high * step) + dim.getMinimum()       
         
         bins_iterating_over = range(bin_low, bin_high)
         signals = np.empty(len(bins_iterating_over))
@@ -102,62 +102,27 @@ class Stitch1D(PythonAlgorithm):
         overlapped = api.CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=1,Extents=[q_low, q_high],NumberOfBins=[len(bins_iterating_over)],Names=[dim.getName()],Units=[dim.getUnits()])
         result = api.RenameWorkspace(InputWorkspace=overlapped, OutputWorkspace=ws.name() + "_overlapped")
         return result
-        
-    def __perform_weighed_mean(self, ws1, ws2):
-        dim = ws1.getDimension(0)
-        nbins = dim.getNBins()
-
-        step = ( dim.getMaximum() + dim.getMinimum() )/ nbins
-        q_low = dim.getMinimum()
-        q_high = dim.getMaximum()
-        
-        signals = np.empty(nbins)
-        errors = np.empty(nbins)
-        for index in range(nbins):
-            e1 = math.sqrt(ws1.errorSquaredAt(index))
-            s1 = ws1.signalAt(index)
-            e2 = math.sqrt(ws2.errorSquaredAt(index))
-            s2 = ws2.signalAt(index)
-            if (e1 > 0.0) and (e2 > 0.0):
-                e1_sq = e1 * e1
-                e2_sq = e2 * e2
-                y = (s1/e1_sq) + (s2/e2_sq)
-                e = (e1_sq * e2_sq) / (e1_sq + e2_sq)
-                y *= e
-                signals[index] = y
-                errors[index] = math.sqrt(e)
-            elif (e1 > 0.0) and (e2 <= 0.0):
-                signals[index] = s1
-                errors[index] = e1
-            elif (e1 <= 0.0) and (e2 > 0.0):
-                signals[index] = s2
-                errors[index] = e2
-            else:
-                signals[index] = 0
-                errors[index] = 0
-        
-        weighted_mean = api.CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=1,Extents=[q_low, q_high],NumberOfBins=[nbins],Names=[dim.getName()],Units=[dim.getUnits()])
-        return weighted_mean
     
     def __overlay_overlap(self, sum, overlap):
         target_dim = sum.getDimension(0)
         target_q_max = target_dim.getMaximum()
         target_q_min = target_dim.getMinimum()
         target_nbins = target_dim.getNBins()
-        target_step = (target_q_max - target_q_min) / target_nbins
+        target_step = target_nbins / (target_q_max - target_q_min) 
+        target_c = -1 * target_step * target_q_min
         
         overlap_dim = overlap.getDimension(0)
         overlap_q_max = overlap_dim.getMaximum()
         overlap_q_min = overlap_dim.getMinimum()
         overlap_nbins = overlap_dim.getNBins()
         overlap_step = (overlap_q_max - overlap_q_min) / overlap_nbins
+        overlap_c = overlap_q_min
         for i in range(0, overlap_nbins):
-            q = (overlap_step * i) + overlap_q_min
-            target_index = int((target_step * q) + overlap_q_min)
-            current_signal = sum.signalAt(target_index)
-            current_error_squared = sum.errorSquaredAt(target_index)
-            sum.setSignalAt(target_index, current_signal + overlap.signalAt(i))
-            sum.setErrorSquaredAt(target_index, current_error_squared + overlap.errorSquaredAt(i))
+            q = (overlap_step * i) + overlap_c
+            target_index = int((target_step * q) + target_c)
+            sum.setSignalAt(target_index, overlap.signalAt(i))
+            sum.setErrorSquaredAt(target_index, overlap.errorSquaredAt(i))
+	   
        
     def category(self):
         return "PythonAlgorithms"
@@ -203,34 +168,34 @@ class Stitch1D(PythonAlgorithm):
         ws1_overlap = self.__integrate_over(ws1_flattened, start_overlap, end_overlap)
         ws2_overlap = self.__integrate_over(ws2_flattened, start_overlap, end_overlap)
         scale_factor = None
+        scaled_workspace_1 = None
+        scaled_workspace_2 = None
         if b_manual_scale_factor == True:
-            scale_factor = float(self.getPropertyValue("ManualScaleFactor"))
+            scale_factor = self.getProperty("ManualScaleFactor").value
         else:
             if b_scale_workspace1 == True:
                 scale_factor = (ws2_overlap / ws1_overlap)
             else:
                 scale_factor = (ws1_overlap / ws2_overlap)
         self.setProperty("AppliedScaleFactor", scale_factor)
-        scaled_workspace_1 = ws1_flattened * scale_factor
-        scaled_workspace_2 = ws2_flattened * scale_factor
-        #use the start and end positions to 'sum' over the appropriate region in the input workspaces
         
+        #use the start and end positions to 'sum' over the appropriate region in the input workspaces
         workspace1_overlap = self.__extract_overlap_as_workspace(ws1_flattened, start_overlap, end_overlap)
         workspace2_overlap = self.__extract_overlap_as_workspace(ws2_flattened, start_overlap, end_overlap)
-        weighted_mean_overlap = self.__perform_weighed_mean(workspace1_overlap, workspace2_overlap)
+        weighted_mean_overlap = api.WeightedMeanMD(LHSWorkspace=workspace1_overlap,RHSWorkspace=workspace2_overlap)
         
         mtd.remove('sum')
-        sum = scaled_workspace_1 + scaled_workspace_2
+        sum = ws1_flattened + ws2_flattened
         self.__overlay_overlap(sum, weighted_mean_overlap)
         self.setProperty("OutputWorkspace", sum)
         
         #Clean up
-        #TODO.
         mtd.remove(ws1_flattened.name())
         mtd.remove(ws2_flattened.name())
         mtd.remove(workspace1_overlap.name())
         mtd.remove(workspace2_overlap.name())
         mtd.remove(weighted_mean_overlap.name())
+        mtd.remove(sum.name())
         return None
 
 registerAlgorithm(Stitch1D())
