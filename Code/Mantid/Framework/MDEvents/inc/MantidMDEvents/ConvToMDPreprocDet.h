@@ -90,9 +90,9 @@ public:
     std::vector<size_t>const  & getSpec2DetMap()const{return spec2detMap;}
     std::vector<Kernel::V3D>const & getDetDir()const{return det_dir;}
 
-    /// obtain detector id, which correspond to the spectra index
+    /// obtain detector id, which correspond to the spectra number
     size_t  getWSDet(size_t iws)const{return spec2detMap[iws];}
-    /// obtain spectra id, corrsponing to detector id;
+    /// obtain detector id, corrsponing to  te wodkspace index;
     size_t  getDetSpectra(size_t i)const{return detIDMap[i];}
     int32_t getDetID(size_t i)const{return det_id[i];}
 

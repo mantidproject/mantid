@@ -73,7 +73,7 @@ void ConvToMDPreprocDet::processDetectorsPositions(const API::MatrixWorkspace_sp
 
   size_t div=100;
      // Loop over the spectra
-  size_t ic(0);
+  size_t actual_detectors_count(0);
   for (size_t i = 0; i < nHist; i++){
 
      Geometry::IDetector_const_sptr spDet;
@@ -87,37 +87,36 @@ void ConvToMDPreprocDet::processDetectorsPositions(const API::MatrixWorkspace_sp
     // Check that we aren't dealing with monitor...
     if (spDet->isMonitor())continue;   
 
-     this->spec2detMap[i]= ic;
-     this->det_id[ic]    = spDet->getID();
-     this->detIDMap[ic]  = i;
-     this->L2[ic]        = spDet->getDistance(*sample);
+     this->spec2detMap[i] = actual_detectors_count;
+     this->det_id[actual_detectors_count]    = spDet->getID();
+     this->detIDMap[actual_detectors_count]  = i;
+     this->L2[actual_detectors_count]        = spDet->getDistance(*sample);
      
-
      double polar        =  inputWS->detectorTwoTheta(spDet);
-     this->TwoTheta[ic]  =  polar;
      double azim         =  spDet->getPhi();    
+     this->TwoTheta[actual_detectors_count]  =  polar;
 
      double sPhi=sin(polar);
      double ez = cos(polar);
      double ex = sPhi*cos(azim);
      double ey = sPhi*sin(azim);
  
-     this->det_dir[ic].setX(ex);
-     this->det_dir[ic].setY(ey);
-     this->det_dir[ic].setZ(ez);
+     this->det_dir[actual_detectors_count].setX(ex);
+     this->det_dir[actual_detectors_count].setY(ey);
+     this->det_dir[actual_detectors_count].setZ(ez);
 
-     ic++;
+     actual_detectors_count++;
      if(i%div==0){
         pProg->report(i);
      }
    }
    // 
-   if(ic<nHist){
-       this->det_dir.resize(ic);
-       this->det_id.resize(ic);
-       this->L2.resize(ic);
-       this->TwoTheta.resize(ic);
-       this->detIDMap.resize(ic);
+   if(actual_detectors_count<nHist){
+       this->det_dir.resize(actual_detectors_count);
+       this->det_id.resize(actual_detectors_count);
+       this->L2.resize(actual_detectors_count);
+       this->TwoTheta.resize(actual_detectors_count);
+       this->detIDMap.resize(actual_detectors_count);
    }
    convert_log.information()<<"finished preprocessing detectors locations \n";
    pProg->report();

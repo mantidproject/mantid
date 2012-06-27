@@ -12,26 +12,25 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex)
 {
 
          const Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
-         size_t iSpec                              = this->pDetLoc->getDetSpectra(workspaceIndex);   
+
          // create local unit conversion class
          UnitsConversionHelper localUnitConv(UnitConversion);
 
-         size_t numEvents     = el.getNumberEvents();    
-         size_t  detNum       = this->pDetLoc->getWSDet(workspaceIndex);
-         uint32_t detID       = this->pDetLoc->getDetID(detNum);
+         size_t numEvents     = el.getNumberEvents();      
+         uint32_t detID       = this->pDetLoc->getDetID(workspaceIndex);
          uint16_t runIndexLoc = this->runIndex;
 
          std::vector<coord_t>locCoord(this->Coord);
          // set up unit conversion and calculate up all coordinates, which depend on spectra index only
-        if(!pQConverter->calcYDepCoordinates(locCoord,detNum))return 0;   // skip if any y outsize of the range of interest;
-        localUnitConv.updateConversion(detNum);
+        if(!pQConverter->calcYDepCoordinates(locCoord,workspaceIndex))return 0;   // skip if any y outsize of the range of interest;
+        localUnitConv.updateConversion(workspaceIndex);
 //
         // allocate temporary buffers for MD Events data
          // MD events coordinates buffer
          std::vector<coord_t>  allCoord;
          std::vector<float>    sig_err;       // array for signal and error. 
-         std::vector<uint16_t> run_index;       // Buffer run index for each event 
-         std::vector<uint32_t> det_ids;         // Buffer of det Id-s for each event
+         std::vector<uint16_t> run_index;     // Buffer for run index for each event 
+         std::vector<uint32_t> det_ids;       // Buffer of det Id-s for each event
 
          allCoord.reserve(this->n_dims*numEvents);     sig_err.reserve(2*numEvents);
          run_index.reserve(numEvents);                 det_ids.reserve(numEvents);
