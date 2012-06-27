@@ -199,6 +199,8 @@ void test_compareTwoConversions()
             for(size_t j=0;i<4;i++){
                 TS_ASSERT_DELTA(itM->getCenter(j),itE->getCenter(j),1.e-4);
             }
+            TS_ASSERT_EQUALS(itM->getDetectorID(),itE->getDetectorID());
+            TS_ASSERT_EQUALS(itM->getRunIndex(),itE->getRunIndex());
             itE++;
           }
           boxE->releaseEvents();
