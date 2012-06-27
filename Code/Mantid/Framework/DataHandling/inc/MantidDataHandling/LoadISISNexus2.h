@@ -102,7 +102,8 @@ namespace Mantid
       // Load a data block
       void loadBlock(Mantid::NeXus::NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
           int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
-
+      // Load period logs
+      void loadPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
 
       /// The name and path of the input file
       std::string m_filename;

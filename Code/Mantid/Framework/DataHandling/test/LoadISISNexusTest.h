@@ -11,6 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/LogFilter.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -18,6 +19,29 @@ using namespace Mantid::DataHandling;
 
 class LoadISISNexusTest : public CxxTest::TestSuite
 {
+private:
+
+  // Helper method to fetch the log property entry corresponding to period.
+  Property* fetchPeriod(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
+  {
+    std::stringstream period_number_stream;
+    period_number_stream << expectedPeriodNumber;
+    std::string log_name = "period " + period_number_stream.str();
+    Property* p= workspace->run().getLogData(log_name);
+    return p;
+  }
+
+  // Helper method to check that the log data contains a specific period number entry.
+  void checkPeriodLogData(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
+  {
+    Property* p; 
+    TS_ASSERT_THROWS_NOTHING(p = fetchPeriod(workspace, expectedPeriodNumber));
+    TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry", fetchPeriod(workspace, expectedPeriodNumber-1), Mantid::Kernel::Exception::NotFoundError);
+    TSM_ASSERT_THROWS("Shouldn't have a period greater than the expected entry", fetchPeriod(workspace, expectedPeriodNumber+1), Mantid::Kernel::Exception::NotFoundError);
+    Mantid::Kernel::TimeSeriesProperty<bool>* period_property = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool>*>(p);
+    TS_ASSERT(period_property);
+  }
+
 public:
     void testExec()
     {
@@ -80,6 +104,7 @@ public:
         
         Property *l_property = ws->run().getLogData( "run_number" );
         TS_ASSERT_EQUALS( l_property->value(), "49886" );
+        AnalysisDataService::Instance().remove("outWS");
     }
     void testExec2()
     {
@@ -109,6 +134,7 @@ public:
         TS_ASSERT_EQUALS(ws->readY(8)[1],2.);
         TS_ASSERT_EQUALS(ws->readY(10)[3],1.);
         TS_ASSERT_EQUALS(ws->readY(13)[4],1.);
+        AnalysisDataService::Instance().remove("outWS");
     }
          void testMultiPeriodEntryNumberZero()
     {
@@ -143,6 +169,7 @@ public:
         TS_ASSERT_EQUALS(ws->readY(7)[1],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[1],0.);
+        AnalysisDataService::Instance().remove("outWS");
     }
           void testMultiPeriodEntryNumberNonZero()
     {
@@ -175,6 +202,37 @@ public:
         TS_ASSERT_EQUALS(ws->readY(7)[1],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[1],0.);
+        AnalysisDataService::Instance().remove("outWS");
+    }
+
+    void testLoadMultiPeriodData()
+    {
+        Mantid::API::FrameworkManager::Instance();
+        const std::string wsName = "outWS";
+        LoadISISNexus2 loadingAlg;
+        loadingAlg.initialize();
+        loadingAlg.setRethrows(true);
+        loadingAlg.setPropertyValue("Filename","POLREF00004699.nxs");
+        loadingAlg.setPropertyValue("OutputWorkspace", wsName);
+        loadingAlg.execute();
+        TS_ASSERT(loadingAlg.isExecuted());
+
+        AnalysisDataServiceImpl& ADS = AnalysisDataService::Instance();
+
+        WorkspaceGroup_sptr grpWs;
+        TS_ASSERT_THROWS_NOTHING(grpWs=ADS.retrieveWS<WorkspaceGroup>(wsName));
+        TSM_ASSERT_EQUALS("Should be two workspaces in the group",2, grpWs->size());
+
+        // Check the individual workspace group members.
+        MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
+        MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(1));
+        TS_ASSERT(ws1 != NULL);
+        TS_ASSERT(ws2 != NULL);
+        // Check that workspace 1 has the correct period data, and no other period log data
+        checkPeriodLogData(ws1, 1);
+        // Check that workspace 2 has the correct period data, and no other period log data
+        checkPeriodLogData(ws2, 2);
+        AnalysisDataService::Instance().remove(wsName);
     }
 };
 

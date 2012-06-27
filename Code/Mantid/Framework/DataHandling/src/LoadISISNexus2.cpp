@@ -228,6 +228,12 @@ namespace Mantid
       }
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
+      
+      // Clone the workspace at this point to provide a base object for future workspace generation.
+      DataObjects::Workspace2D_sptr period_free_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (WorkspaceFactory::Instance().create(local_workspace));
+
+      loadPeriodLogs(firstentry, local_workspace);
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
@@ -237,7 +243,7 @@ namespace Mantid
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
-
+        
         for( size_t p = 1; p <= m_numberOfPeriods; ++p )
         {
           std::ostringstream os;
@@ -246,8 +252,9 @@ namespace Mantid
           if( p > 1 )
           {
             local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (WorkspaceFactory::Instance().create(local_workspace));
+              (WorkspaceFactory::Instance().create(period_free_workspace));
             loadPeriodData(p, entry, local_workspace);
+            loadPeriodLogs(p, local_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));
           wksp_group->addWorkspace(local_workspace);
@@ -496,6 +503,27 @@ namespace Mantid
       }
     }
 
+    /**
+    Loads period log data into the workspace
+    @param period :: period number
+    @param local_workspace :: workspace to add period log data to.
+    */
+    void LoadISISNexus2::loadPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      // If we loaded an icp_event log then create the necessary period logs 
+      if( local_workspace->run().hasProperty("icp_event") )
+      {
+        Kernel::Property *log = local_workspace->run().getProperty("icp_event");
+        LogParser parser(log);
+        local_workspace->mutableRun().addProperty(parser.createPeriodLog(static_cast<int>(period)));
+        Property* periods = parser.createAllPeriodsLog();
+        if(!local_workspace->mutableRun().hasProperty(periods->name()))
+        {
+          local_workspace->mutableRun().addProperty(periods);
+        }
+      }
+    }
+
 
     /**
     * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize
@@ -727,15 +755,6 @@ namespace Mantid
         return;
       }
       ws->populateInstrumentParameters();
-      // If we loaded an icp_event log then create the necessary period logs 
-      if( ws->run().hasProperty("icp_event") )
-      {
-        Kernel::Property *log = ws->run().getProperty("icp_event");
-        LogParser parser(log);
-        ws->mutableRun().addProperty(parser.createPeriodLog(period));
-        ws->mutableRun().addProperty(parser.createAllPeriodsLog());
-      }
-
     }
 
     double LoadISISNexus2::dblSqrt(double in)
