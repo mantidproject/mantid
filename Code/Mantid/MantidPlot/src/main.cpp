@@ -197,12 +197,11 @@ int main( int argc, char ** argv )
     QPixmap pixmap;
     if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","Couldn't load splashscreen");
     QSplashScreen splash(pixmap);
+    const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
+    const QString versionInfo(Mantid::Kernel::MantidVersion::version());
+    splash.showMessage("Release: " + releaseDateTime + " (Version " + versionInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
     splash.show();
     app.processEvents();
-
-    QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
-    QString svnInfo(Mantid::Kernel::MantidVersion::version());
-    splash.showMessage("Release: " + releaseDateTime + " (Version " + svnInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
 
     bool factorySettings = false;
     if (args.contains("-d") || args.contains("--default-settings"))
