@@ -145,7 +145,7 @@ class Stitch1D(PythonAlgorithm):
         self.declareProperty(name="ScaleWorkspace1", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
-        self.declareProperty(name="AppliedScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.");
+        self.declareProperty(name="OutScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.");
 
     def PyExec(self):
     
@@ -172,16 +172,24 @@ class Stitch1D(PythonAlgorithm):
         scaled_workspace_2 = None
         if b_manual_scale_factor == True:
             scale_factor = self.getProperty("ManualScaleFactor").value
+            if b_scale_workspace1 == True:
+                scaled_workspace_1 = ws1_flattened * scale_factor
+                scaled_workspace_2 = ws2_flattened * 1
+            else:
+                scaled_workspace_1 = ws1_flattened * 1
+                scaled_workspace_2 = ws2_flattened * scale_factor
         else:
             if b_scale_workspace1 == True:
                 scale_factor = (ws2_overlap / ws1_overlap)
             else:
                 scale_factor = (ws1_overlap / ws2_overlap)
-        self.setProperty("AppliedScaleFactor", scale_factor)
+            scaled_workspace_1 = ws1_flattened * 1
+            scaled_workspace_2 = ws2_flattened * 1
+        self.setProperty("OutScaleFactor", scale_factor)
         
         #use the start and end positions to 'sum' over the appropriate region in the input workspaces
-        workspace1_overlap = self.__extract_overlap_as_workspace(ws1_flattened, start_overlap, end_overlap)
-        workspace2_overlap = self.__extract_overlap_as_workspace(ws2_flattened, start_overlap, end_overlap)
+        workspace1_overlap = self.__extract_overlap_as_workspace(scaled_workspace_1, start_overlap, end_overlap)
+        workspace2_overlap = self.__extract_overlap_as_workspace(scaled_workspace_2, start_overlap, end_overlap)
         weighted_mean_overlap = api.WeightedMeanMD(LHSWorkspace=workspace1_overlap,RHSWorkspace=workspace2_overlap)
         
         mtd.remove('sum')
