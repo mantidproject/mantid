@@ -290,6 +290,7 @@ void ConvertToMDEvents::exec()
             const size_t nHist = inWS2D->getNumberHistograms();
             pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
             det_loc.processDetectorsPositions(inWS2D,convert_log,pProg.get());
+            g_log.information()<<" preprocessing detectors\n";
             if(det_loc.nDetectors()==0){
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
@@ -333,6 +334,7 @@ void ConvertToMDEvents::exec()
   // progress reporter
   pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 
+  g_log.information()<<" conversion started\n";
   pConvertor->runConversion(pProg.get());
   
   //JOB COMPLETED:
