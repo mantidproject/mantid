@@ -44,8 +44,6 @@ namespace MDEvents
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-// service variable used for efficient filling of the MD event WS  -> should be moved to configuration?
-#define SPLIT_LEVEL  8192
 //-----------------------------------------------
 class ConvToMDHistoWS: public ConvToMDBase
 {
@@ -55,8 +53,14 @@ public:
 
     void runConversion(API::Progress *pProg);
 private:
-  // conversion chunk; it does not used at the moment but can be provided to thread pull to do the job
-   size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
+  // conversion chunk;
+   size_t conversionChunk(size_t job_ID);
+  // the number of spectra to process by single computational thread;
+   size_t m_spectraChunk;
+   // the size of temporary buffer, each thread stores data in before adding these data to target MD workspace;
+   size_t m_bufferSize;
+   // internal function used to identify m_spectraChunk and m_bufferSize
+   void estimateThreadWork(size_t nThreads,size_t specSize);
 
 };
 

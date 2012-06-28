@@ -110,7 +110,11 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProg)
         size_t nEventsInWS  = pWSWrapper->pWorkspace()->getNPoints();
          // Is the access to input events thread-safe?
         bool MultiThreadedAdding = pEventWS->threadSafe();
-
+        // Create the thread pool that will run all of these.
+        Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
+        // initiate thread pool with number of machine's cores (0 in tp constructor)
+        //Kernel::ThreadScheduler * ts = NULL;       
+        Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProg));
         
         // preprocessed detectors insure that each detector has its own spectra
         size_t nValidSpectra  = this->pDetLoc->nDetectors();
@@ -131,12 +135,11 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProg)
 
           // Keep a running total of how many events we've added
            if (bc->shouldSplitBoxes(nEventsInWS,eventsAdded, lastNumBoxes)){
-            // Do all the adding tasks
-            //   tp.joinAll();    
-            // Now do all the splitting tasks
-              //ws->splitAllIfNeeded(ts);
-               pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
-             //if (ts->size() > 0)       tp.joinAll();
+              // Do all the adding tasks
+              tp.joinAll();    
+              // Now do all the splitting tasks
+              pWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
+              if (ts->size() > 0)  tp.joinAll();
 
             // Count the new # of boxes.
               lastNumBoxes = pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
@@ -144,11 +147,10 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProg)
            }
    
        }
-    //tp.joinAll();
-    // Do a final splitting of everything
-    //ws->splitAllIfNeeded(ts);
-    //tp.joinAll();
-    pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+    tp.joinAll();
+    // Do a final splitting of everything 
+    pWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
+    tp.joinAll();
     // Recount totals at the end.
     pWSWrapper->pWorkspace()->refreshCache(); 
     pWSWrapper->refreshCentroid();
