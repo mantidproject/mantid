@@ -213,20 +213,21 @@ namespace Mantid
 
       if (m_isParametrized)
       {
-        const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
-        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
-          if (!skipMonitors || !it->second->isMonitor())
-            numDetIDs += 1;
+        numDetIDs = dynamic_cast<const Instrument*>(m_base)->m_detectorCache.size();
       }
       else
       {
-        const detid2det_map & in_dets = m_detectorCache;
-        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
-          if (!skipMonitors || !it->second->isMonitor())
-            numDetIDs += 1;
+        numDetIDs = m_detectorCache.size();
       }
 
-      return numDetIDs;
+      if (skipMonitors)
+      {
+        return (numDetIDs - this->numMonitors());
+      }
+      else
+      {
+        return numDetIDs;
+      }
     }
 
     /** Get the minimum and maximum (inclusive) detector IDs
