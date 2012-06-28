@@ -142,7 +142,7 @@ class Stitch1D(PythonAlgorithm):
         self.declareProperty(name="EndOverlap", defaultValue=0.1, validator=overlap_validator, doc="Fraction along axis to end overlap. 0 to 1.");
         self.declareProperty(name="ExpectGroupWorkspaces", defaultValue=False, doc="True if the input workspaces expected to be group workspaces.")
         self.declareProperty(name="GroupWorkspaceIndex", defaultValue=0, doc="Index of the workspace in the group workspaces")
-        self.declareProperty(name="ScaleWorkspace1", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
+        self.declareProperty(name="ScaleWorkspace2", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
         self.declareProperty(name="OutScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.");
@@ -157,7 +157,7 @@ class Stitch1D(PythonAlgorithm):
         start_overlap = float(self.getPropertyValue("StartOverlap"))
         end_overlap = float(self.getPropertyValue("EndOverlap"))     
         b_manual_scale_factor = self.getProperty("UseManualScaleFactor").value
-        b_scale_workspace1 = self.getProperty("ScaleWorkspace1").value
+        b_scale_workspace2 = self.getProperty("ScaleWorkspace2").value
   
         if start_overlap >= end_overlap:
             raise RuntimeError("StartOverlap must be < EndOverlap")
@@ -172,17 +172,17 @@ class Stitch1D(PythonAlgorithm):
         scaled_workspace_2 = None
         if b_manual_scale_factor == True:
             scale_factor = self.getProperty("ManualScaleFactor").value
-            if b_scale_workspace1 == True:
-                scaled_workspace_1 = ws1_flattened * scale_factor
-                scaled_workspace_2 = ws2_flattened * 1
-            else:
+            if b_scale_workspace2 == True:
                 scaled_workspace_1 = ws1_flattened * 1
                 scaled_workspace_2 = ws2_flattened * scale_factor
-        else:
-            if b_scale_workspace1 == True:
-                scale_factor = (ws2_overlap / ws1_overlap)
             else:
+                scaled_workspace_1 = ws1_flattened * scale_factor
+                scaled_workspace_2 = ws2_flattened * 1
+        else:
+            if b_scale_workspace2 == True:
                 scale_factor = (ws1_overlap / ws2_overlap)
+            else:
+                scale_factor = (ws2_overlap / ws1_overlap)
             scaled_workspace_1 = ws1_flattened * 1
             scaled_workspace_2 = ws2_flattened * 1
         self.setProperty("OutScaleFactor", scale_factor)

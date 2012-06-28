@@ -222,34 +222,22 @@ class Stitch1DTest(unittest.TestCase):
         
         scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
         
+         # 1 * (( 1 + 1) / (2 + 3)) = 0.4
+        self.assertEqual(0.4, scale_factor)
+        
+    def test_calculates_scaling_factor_correctly_inverted(self):
+        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,1,1',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
+        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
+   
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace2=False,rethrow=True) 
+        self.assertTrue(alg.isExecuted())
+        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
+        
         # 1 * ((2 + 3)/( 1 + 1)) = 2.5
         self.assertEqual(2.5, scale_factor)
-        
-    def test_calculates_scaling_factor_correctly_inverted(self):
-        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
-        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,1,1',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
-        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
-        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
-   
-        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace1=False,rethrow=True) 
-        self.assertTrue(alg.isExecuted())
-        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
-        
-        # 1 * (( 1 + 1) / (2 + 3)) = 0.4
-        self.assertEqual(0.4, scale_factor)
-        
-    def test_calculates_scaling_factor_correctly_inverted(self):
-        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
-        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,1,1',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
-        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
-        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
-   
-        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace1=False,rethrow=True) 
-        self.assertTrue(alg.isExecuted())
-        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
-        
-        # 1 * (( 1 + 1) / (2 + 3)) = 0.4
-        self.assertEqual(0.4, scale_factor)
+       
         
     def test_manual_scaling_factor(self):
         alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1',ErrorInput='1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
@@ -257,7 +245,7 @@ class Stitch1DTest(unittest.TestCase):
         
         expected_manual_scale_factor = 2.2
         
-        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace1=False,UseManualScaleFactor=True,ManualScaleFactor=expected_manual_scale_factor,rethrow=True) 
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace2=True,UseManualScaleFactor=True,ManualScaleFactor=expected_manual_scale_factor,rethrow=True) 
         self.assertTrue(alg.isExecuted())
         scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
         
@@ -272,7 +260,7 @@ class Stitch1DTest(unittest.TestCase):
         alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput=s1,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_a',rethrow=True)
         alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput=s2,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_b',rethrow=True)
         # Specify that overlap goes from start to half way along workspace
-        alg = run_algorithm("Stitch1D", Workspace1='flat_signal_a', Workspace2='flat_signal_b',OutputWorkspace='converted',StartOverlap=0.0,EndOverlap=0.5,ScaleWorkspace1=False,rethrow=True)    
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal_a', Workspace2='flat_signal_b',OutputWorkspace='converted',StartOverlap=0.0,EndOverlap=0.5,ScaleWorkspace2=True,rethrow=True)    
         # Verify the calculated output values.
         ws = mtd.retrieve(alg.getPropertyValue("OutputWorkspace"))
         for i in range(0, len(errors)):
@@ -283,7 +271,7 @@ class Stitch1DTest(unittest.TestCase):
         errors = [1,1,1,1,1,1,1,1,1,1] # Errors for both input ws1 and ws2
         s1 = [1,1,1,1,1,1,1,1,1,1] # Signal values for ws1
         s2 = [3,3,3,3,3,3,3,3,3,3] # Signal values for ws2
-        expected_output_signal =[2.8,2.8,2.8,2.8,2.8,4,4,4,4,4]
+        expected_output_signal =[2,2,2,2,2,4,4,4,4,4]
         expected_output_error_sq = [0.8, 0.8, 0.8, 0.8, 0.8, 2, 2, 2, 2, 2]
         alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput=s1,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_a',rethrow=True)
         alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput=s2,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_b',rethrow=True)
