@@ -110,14 +110,16 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProg)
         size_t nEventsInWS  = pWSWrapper->pWorkspace()->getNPoints();
          // Is the access to input events thread-safe?
         bool MultiThreadedAdding = pEventWS->threadSafe();
+        // preprocessed detectors insure that each detector has its own spectra
+        size_t nValidSpectra  = this->pDetLoc->nDetectors();
+
         // Create the thread pool that will run all of these.
         Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
         // initiate thread pool with number of machine's cores (0 in tp constructor)
         //Kernel::ThreadScheduler * ts = NULL;       
+        pProg->resetNumSteps(nValidSpectra,0,1);
         Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProg));
         
-        // preprocessed detectors insure that each detector has its own spectra
-        size_t nValidSpectra  = this->pDetLoc->nDetectors();
 
        // if any property dimension is outside of the data range requested, the job is done;
         if(!pQConverter->calcGenericVariables(Coord,this->n_dims))return; 

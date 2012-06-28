@@ -135,6 +135,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProg)
         Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
         // initiate thread pool with number of machine's cores (0 in tp constructor)
         //Kernel::ThreadScheduler * ts = NULL;       
+        pProg->resetNumSteps(nValidSpectra,0,1);
         Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProg));
         // estimate the size of data conversion a single thread should perform
 
@@ -162,7 +163,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProg)
         } // end detectors loop;
 
 
-        pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL); 
+        pWSWrapper->pWorkspace()->splitAllIfNeeded(ts); 
         pWSWrapper->pWorkspace()->refreshCache();
         pWSWrapper->refreshCentroid();
         pProg->report();          
@@ -178,10 +179,19 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize)
         {
             m_bufferSize = ((m_bufferSize/specSize)+1)*specSize;
         }
-
-        m_spectraChunk =  this->inWS2D->getNPoints()/(specSize*nThreads);
-
-        if(m_spectraChunk*specSize>10*m_bufferSize)m_spectraChunk = 10*m_bufferSize;
+        size_t nSpectras = this->inWS2D->getNPoints()/(specSize);
+        m_spectraChunk =  nSpectras/nThreads;
+        // estimate number of points, produced by single thread;
+        size_t nPoints = m_spectraChunk*nThreads;
+        // experimental parameter, which defines the number of points, which can be added to ws efficiently;
+        if(nPoints > 10000000)
+        {
+          nPoints = 10000000;
+          m_spectraChunk = nPoints/nThreads+1;
+        }
+        // the usfullness of this criteria is questionable;
+        //if(m_spectraChunk*specSize>10*m_bufferSize)m_spectraChunk = 10*m_bufferSize;
+        //if(nSpectras/m_spectraChunk<nThreads)m_spectraChunk=nSpectras/nThreads;
 
         if(m_spectraChunk<1)m_spectraChunk=1;
    
