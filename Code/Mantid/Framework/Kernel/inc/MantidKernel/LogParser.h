@@ -7,6 +7,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <map>
 #include <vector>
 #include <ctime>
@@ -89,6 +90,12 @@ namespace Mantid
 
     private:
 
+      /// Available commands.
+      enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
+
+      /// Typedef for a map of string commands to an enum of strongly typed commands.
+      typedef std::map<std::string, commands> CommandMap;
+
       /// TimeSeriesProperty<int> containing data periods. Created by LogParser
       boost::shared_ptr<Kernel::Property> m_periods;
 
@@ -100,6 +107,12 @@ namespace Mantid
 
       /// static reference to the logger class
       static Kernel::Logger& g_log;
+
+      /// Creates a map of all available commands.
+      CommandMap createCommandMap() const;
+
+      /// Try to parse period data.
+      void tryParsePeriod(const std::string& com, const DateAndTime& time, std::istringstream& idata, Kernel::TimeSeriesProperty<int>* const periods);
     };
 
     /// Returns the mean value if the property is TimeSeriesProperty<double>

@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
 #include <fstream>  // used to get ifstream
 #include <sstream>
 #include <algorithm>
@@ -18,13 +17,73 @@ namespace Mantid
 
     Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
 
-    enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
-
     /**
      * Destructor
      */
     LogParser::~LogParser()
     {
+    }
+
+    /**
+    Common creational method for generating a command map.
+    Better ensures that the same command mapping is available for any constructor.
+    @return fully constructed command map.
+    */
+    LogParser::CommandMap LogParser::createCommandMap() const
+    {
+      CommandMap command_map;
+      command_map["BEGIN"] = BEGIN;
+      command_map["RESUME"] = BEGIN;
+      command_map["END_SE_WAIT"] = BEGIN;
+      command_map["PAUSE"] = END;
+      command_map["END"] = END;
+      command_map["ABORT"] = END;
+      command_map["UPDATE"] = END;
+      command_map["START_SE_WAIT"] = END;
+      command_map["CHANGE"] = CHANGE_PERIOD;
+      command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+      return command_map;
+    }
+
+    /**
+    Try to pass the periods
+    @param scom : The command corresponding to a change in period.
+    @param time : The time
+    @param idata : stream of input data
+    @param periods : periods data to update
+    */
+    void LogParser::tryParsePeriod(const std::string& scom, const DateAndTime& time, std::istringstream& idata, Kernel::TimeSeriesProperty<int>* const periods)
+    {
+      int ip = -1;
+      bool shouldAddPeriod = false;
+      // Handle the version where log flag is CHANGE PERIOD
+      if(scom == "CHANGE")
+      {
+        std::string s;
+        idata >> s >> ip;
+        if (ip > 0 && s == "PERIOD")
+        {
+          shouldAddPeriod = true;
+        }
+      }
+      // Handle the version where log flat is CHANGE_PERIOD
+      else if(scom == "CHANGE_PERIOD");
+      {
+        idata >> ip;
+        if( ip > 0 )
+        {
+          shouldAddPeriod = true;
+        }
+      }
+      // Common for either variant of the log flag.
+      if(shouldAddPeriod)
+      {
+        if (ip > m_nOfPeriods)
+        {
+          m_nOfPeriods = ip;
+        }
+        periods->addValue(time,ip);
+      }
     }
 
     /** 
@@ -49,16 +108,7 @@ namespace Mantid
       }
 
       // Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
-      std::map<std::string,commands> command_map;
-      command_map["BEGIN"] = BEGIN;
-      command_map["RESUME"] = BEGIN;
-      command_map["END_SE_WAIT"] = BEGIN;
-      command_map["PAUSE"] = END;
-      command_map["END"] = END;
-      command_map["ABORT"] = END;
-      command_map["UPDATE"] = END;
-      command_map["START_SE_WAIT"] = END;
-      command_map["CHANGE"] = CHANGE_PERIOD;
+      CommandMap command_map = createCommandMap();
 
       std::string str,start_time;
       m_nOfPeriods = 1;
@@ -76,14 +126,7 @@ namespace Mantid
         commands com = command_map[scom];
         if (com == CHANGE_PERIOD)
         {
-          int ip = -1;
-          std::string s;
-          idata >> s >> ip;
-          if (ip > 0 && s == "PERIOD")
-          {
-            if (ip > m_nOfPeriods) m_nOfPeriods = ip;
-            periods->addValue(stime,ip);
-          }
+          tryParsePeriod(scom, DateAndTime(stime), idata, periods);
         }
         else if (com == BEGIN)
         {
@@ -121,16 +164,7 @@ namespace Mantid
       }
 
       /// Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
-      std::map<std::string,commands> command_map;
-      command_map["BEGIN"] = BEGIN;
-      command_map["RESUME"] = BEGIN;
-      command_map["END_SE_WAIT"] = BEGIN;
-      command_map["PAUSE"] = END;
-      command_map["END"] = END;
-      command_map["ABORT"] = END;
-      command_map["UPDATE"] = END;
-      command_map["START_SE_WAIT"] = END;
-      command_map["CHANGE"] = CHANGE_PERIOD;
+      CommandMap command_map = createCommandMap();
 
       m_nOfPeriods = 1;
 
@@ -145,14 +179,7 @@ namespace Mantid
         commands com = command_map[scom];
         if (com == CHANGE_PERIOD)
         {
-          int ip = -1;
-          std::string s;
-          idata >> s >> ip;
-          if (ip > 0 && s == "PERIOD")
-          {
-            if (ip > m_nOfPeriods) m_nOfPeriods = ip;
-            periods->addValue(it->first,ip);
-          }
+          tryParsePeriod(scom, it->first, idata, periods);
         }
         else if (com == BEGIN)
         {

@@ -86,6 +86,7 @@ public:
         delete p1;
     }
 
+
     void testLate()
     {
         mkICP();
@@ -210,6 +211,73 @@ public:
         delete p1;
     }
 
+    // Test a variant of the log file containing CHANGE_PERIOD flags
+    void testConstructionFromFileUsingICPVariant_CHANGE_PERIOD()
+    {
+      mkICPVariant();
+      LogParser lp(icp_file.path());
+      const boost::shared_ptr<Property> prop = lp.getPeriodsProperty();
+      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
+      TS_ASSERT(timeseriesprop != NULL);
+      //Check the size
+      TS_ASSERT_EQUALS(4, timeseriesprop->size());
+      //Check the exact time stamps
+      TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:22:55").toSimpleString(), timeseriesprop->nthTime(0).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:08").toSimpleString(), timeseriesprop->nthTime(1).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:22").toSimpleString(), timeseriesprop->nthTime(2).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:37").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
+    }
+
+    void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD()
+    {
+      auto* log  = new TimeSeriesProperty<std::string>("ICPLog");
+      // Notice we are using "CHANGE_PERIOD"
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:15:00", "CHANGE_PERIOD 1") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:16:00", "CHANGE_PERIOD 2") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00", "CHANGE_PERIOD 3") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00", "CHANGE_PERIOD 2") );
+      
+      LogParser logparser(log);
+
+      const boost::shared_ptr<Property> prop = logparser.getPeriodsProperty();
+      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
+      TS_ASSERT(timeseriesprop != NULL);
+      //Check the size
+      TS_ASSERT_EQUALS(4, timeseriesprop->size());
+       //Check the exact time stamps
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00").toSimpleString(), timeseriesprop->nthTime(0).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00").toSimpleString(), timeseriesprop->nthTime(1).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00").toSimpleString(), timeseriesprop->nthTime(2).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
+
+      delete log;
+    }
+
+    void testConstructionFromPropertyUsingICPVariant_CHANGE_SPACE_PERIOD()
+    {
+      auto* log  = new TimeSeriesProperty<std::string>("ICPLog");
+      // Notice we are using "CHANGE PERIOD"
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00", "CHANGE PERIOD 3") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00", "CHANGE PERIOD 2") );
+      
+      LogParser logparser(log);
+
+      const boost::shared_ptr<Property> prop = logparser.getPeriodsProperty();
+      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
+      TS_ASSERT(timeseriesprop != NULL);
+      //Check the size
+      TS_ASSERT_EQUALS(4, timeseriesprop->size());
+       //Check the exact time stamps
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00").toSimpleString(), timeseriesprop->nthTime(0).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00").toSimpleString(), timeseriesprop->nthTime(1).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00").toSimpleString(), timeseriesprop->nthTime(2).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
+
+      delete log;
+    }
+
     void testNoICPevent()
     {
       if ( icp_file.exists() ) icp_file.remove();
@@ -293,6 +361,28 @@ private:
         f << "2000-09-05T12:23:27   RESUME"<<'\n';dt+=7;
         f << "2000-09-05T12:23:34   ABORT"<<'\n';dt+=3;
         f << "2000-09-05T12:23:37   CHANGE PERIOD 1"<<'\n';dt+=5;
+        f << "2000-09-05T12:23:42   END_SE_WAIT"<<'\n';
+        f << "2000-09-05T14:03:54   END"<<'\n';
+        f.close();
+    }
+
+    void mkICPVariant()
+    {
+        std::ofstream f( icp_file.path().c_str());
+        int dt = 0;
+        f << "2000-09-05T12:22:28   START_SE_WAIT"<<'\n';
+        f << "2000-09-05T12:22:33   BEGIN"<<'\n';dt+=8;
+        f << "2000-09-05T12:22:41   PAUSE"<<'\n';dt+=4;
+        f << "2000-09-05T12:22:55   CHANGE_PERIOD 2"<<'\n';dt+=3;
+        f << "2000-09-05T12:22:58   RESUME"<<'\n';dt+=6;
+        f << "2000-09-05T12:23:04   PAUSE"<<'\n';dt+=4;
+        f << "2000-09-05T12:23:08   CHANGE_PERIOD 1"<<'\n';dt+=2;
+        f << "2000-09-05T12:23:10   RESUME"<<'\n';dt+=8;
+        f << "2000-09-05T12:23:18   START_SE_WAIT"<<'\n';dt+=4;
+        f << "2000-09-05T12:23:22   CHANGE_PERIOD 2"<<'\n';dt+=5;
+        f << "2000-09-05T12:23:27   RESUME"<<'\n';dt+=7;
+        f << "2000-09-05T12:23:34   ABORT"<<'\n';dt+=3;
+        f << "2000-09-05T12:23:37   CHANGE_PERIOD 1"<<'\n';dt+=5;
         f << "2000-09-05T12:23:42   END_SE_WAIT"<<'\n';
         f << "2000-09-05T14:03:54   END"<<'\n';
         f.close();
