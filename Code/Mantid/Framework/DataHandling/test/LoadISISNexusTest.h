@@ -34,8 +34,9 @@ private:
   // Helper method to check that the log data contains a specific period number entry.
   void checkPeriodLogData(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
   {
-    Property* p; 
+    Property* p = NULL; 
     TS_ASSERT_THROWS_NOTHING(p = fetchPeriod(workspace, expectedPeriodNumber));
+    TS_ASSERT(p != NULL)
     TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry", fetchPeriod(workspace, expectedPeriodNumber-1), Mantid::Kernel::Exception::NotFoundError);
     TSM_ASSERT_THROWS("Shouldn't have a period greater than the expected entry", fetchPeriod(workspace, expectedPeriodNumber+1), Mantid::Kernel::Exception::NotFoundError);
     Mantid::Kernel::TimeSeriesProperty<bool>* period_property = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool>*>(p);

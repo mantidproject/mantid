@@ -34,7 +34,7 @@ public:
     query.setRethrows(true);
     query.setProperty("InputWorkspace", in_ws);
     query.setProperty("OutputWorkspace", "QueryWS");
-    query.setProperty("Normalisation", "none");
+    query.setProperty("Normalisation", strNormalisation);
     TSM_ASSERT_EQUALS("Invalid property setup", true, query.validateProperties());
   }
 
@@ -118,8 +118,8 @@ public:
       const size_t nEvents = it->getNumEvents();
 
       //Compare each signal and error result.
-      TS_ASSERT_DELTA(signalNotNormalised, signalNormalisedByNumEvents*nEvents, 0.0001);
-      TS_ASSERT_DELTA(errorNotNormalised, errorNormalisedByNumEvents*nEvents, 0.0001);
+      TS_ASSERT_DELTA(signalNotNormalised, signalNormalisedByNumEvents*double(nEvents), 0.0001);
+      TS_ASSERT_DELTA(errorNotNormalised, errorNormalisedByNumEvents*double(nEvents), 0.0001);
     }
     
     ADS.remove("QueryWS_A");

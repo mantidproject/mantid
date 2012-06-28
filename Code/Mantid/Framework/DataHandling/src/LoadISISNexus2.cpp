@@ -737,9 +737,8 @@ namespace Mantid
     *   /raw_data_1/runlog group of the file. Call to this method must be done
     *   within /raw_data_1 group.
     *   @param ws :: The workspace to load the logs to.
-    *   @param period :: The period of this workspace
     */
-    void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, int period)
+    void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws)
     {
       IAlgorithm_sptr alg = createSubAlgorithm("LoadNexusLogs", 0.0, 0.5);
       alg->setPropertyValue("Filename", this->getProperty("Filename"));
