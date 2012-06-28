@@ -161,12 +161,20 @@ namespace DataHandling
     std::vector<int> index, count;
     calculateIndicesForReading(index, count);
     
+    // create a workspace group in case the data are multiperiod
     auto workspaceGroup = API::WorkspaceGroup_sptr( new API::WorkspaceGroup );
+    if ( m_numberOfPeriods > 1 )
+    {
+      workspaceGroup->addWorkspace( localWorkspace );
+    }
+    // loop over periods and spectra and fill in the output workspace
     for(int period = 0; period < m_numberOfPeriods; ++period)
     {
       if ( period > 0 )
       {
+        // create a new matrix workspace similar to the previous, copy over the instrument info
         localWorkspace = WorkspaceFactory::Instance().create( localWorkspace );
+        workspaceGroup->addWorkspace( localWorkspace );
       }
       size_t workspaceIndex = 0;
       for(size_t i = 0; i < index.size(); ++i)
@@ -279,7 +287,11 @@ namespace DataHandling
   void ISISHistoDataListener::calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count)
   {
     // max number of spectra that could be read in in one go
-    const int maxNumberOfSpectra = 10000000;
+    int maxNumberOfSpectra = 1024 * 1024 / ( m_numberOfBins * sizeof(int) );
+    if ( maxNumberOfSpectra == 0 )
+    {
+      maxNumberOfSpectra = 1;
+    }
 
     if ( m_specList.empty() )
     {

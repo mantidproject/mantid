@@ -19,7 +19,8 @@ namespace Mantid
 namespace DataHandling
 {
 /**
-    Simulates ISIS histogram DAE.
+    Simulates ISIS histogram DAE. It runs continuously until canceled and listens to port 6789 for
+    ISIS DAE commands.
 
     Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

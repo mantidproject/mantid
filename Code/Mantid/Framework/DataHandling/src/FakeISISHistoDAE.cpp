@@ -43,12 +43,23 @@ typedef struct
 	/* additional data (if any) will follow this */
 } isisds_command_header_t;
 
+/**
+ * Implements Poco TCPServerConnection and does the actual job of interpreting commands
+ * from a client and sending data.
+ */
 class TestServerConnection: public Poco::Net::TCPServerConnection
 {
   int m_nPeriods;
   int m_nSpectra;
   int m_nBins;
 public:
+  /**
+   * Constructor. Defines the simulated dataset dimensions.
+   * @param soc :: A socket that provides communication with the client.
+   * @param nper :: Number of periods in the simulated dataset.
+   * @param nspec :: Number of spectra in the simulated dataset.
+   * @param nbins :: Number of bins in the simulated dataset.
+   */
   TestServerConnection( const Poco::Net::StreamSocket & soc, int nper = 1, int nspec = 100, int nbins = 30 ):
   Poco::Net::TCPServerConnection(soc),
   m_nPeriods(nper),
@@ -59,10 +70,12 @@ public:
     socket().receiveBytes(&buffer,1024);
     sendOK();
   }
+  /// Destructor.
   ~TestServerConnection()
   {
     //std::cerr << "Test connection deleted" << std::endl;
   }
+  /// Sends an OK message when there is nothing to send or an error occured
   void sendOK()
   {
     isisds_command_header_t comm;
@@ -72,6 +85,10 @@ public:
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, comm.len);
   }
+  /**
+   * Send a text string
+   * @param str :: A string to send
+   */
   void sendString(const std::string& str)
   {
     isisds_command_header_t comm;
@@ -84,6 +101,10 @@ public:
     socket().sendBytes(&comm, sizeof(comm));
     socket().sendBytes(str.c_str(), (int)str.size());
   }
+  /**
+   * Send an int value
+   * @param value :: A value to send
+   */
   void sendInt(int value)
   {
     isisds_command_header_t comm;
@@ -96,6 +117,11 @@ public:
     socket().sendBytes(&comm, sizeof(comm));
     socket().sendBytes(&value, sizeof(int));
   }
+  /**
+   * Send some data
+   * @param spec :: Staring spectra index
+   * @param nos :: Number of spectra to send.
+   */
   void sendData(int spec, int nos)
   {
     int period = 0;
@@ -129,6 +155,10 @@ public:
     socket().sendBytes(&comm, sizeof(comm));
     socket().sendBytes(data.data(), (int)sizeof(int) * ndata);
   }
+  /**
+   * Send an array of float numbers
+   * @param arr :: An array to send
+   */
   void sendFloatArray(const std::vector<float>& arr)
   {
     isisds_command_header_t comm;
@@ -141,6 +171,10 @@ public:
     socket().sendBytes( &comm, sizeof(comm) );
     socket().sendBytes( arr.data(), (int)( sizeof(float) * arr.size() ) );
   }
+  /**
+   * Send an array of int numbers
+   * @param arr :: An array to send
+   */
   void sendIntArray(const std::vector<int>& arr)
   {
     isisds_command_header_t comm;
@@ -153,6 +187,9 @@ public:
     socket().sendBytes( &comm, sizeof(comm) );
     socket().sendBytes( arr.data(), (int)( sizeof(int) * arr.size() ) );
   }
+  /**
+   * Main method that reads commands from the socket and send out the data.
+   */
   void run()
   {
     for(;;)
@@ -252,18 +289,31 @@ public:
   }
 };
 
+/**
+ * Implements Poco TCPServerConnectionFactory
+ */
 class TestServerConnectionFactory: public Poco::Net::TCPServerConnectionFactory
 {
-  int m_nPeriods;
-  int m_nSpectra;
-  int m_nBins;
+  int m_nPeriods; ///< Number of periods in the fake dataset
+  int m_nSpectra; ///< Number of spectra in the fake dataset
+  int m_nBins;    ///< Number of bins in the fake dataset
 public:
+  /**
+   * Constructor.
+   * @param nper :: Number of periods in the simulated dataset.
+   * @param nspec :: Number of spectra in the simulated dataset.
+   * @param nbins :: Number of bins in the simulated dataset.
+   */
   TestServerConnectionFactory(int nper = 1, int nspec = 100, int nbins = 30): 
   Poco::Net::TCPServerConnectionFactory(), 
   m_nPeriods(nper),
   m_nSpectra(nspec),
   m_nBins(nbins)
   {}
+  /**
+   * The factory method.
+   * @param socket :: The socket.
+   */
   Poco::Net::TCPServerConnection * createConnection(const Poco::Net::StreamSocket & socket)
   {
     return new TestServerConnection( socket, m_nPeriods, m_nSpectra, m_nBins );
@@ -296,6 +346,9 @@ FakeISISHistoDAE::~FakeISISHistoDAE()
   }
 }
 
+/**
+ * Declare the algorithm properties
+ */
 void FakeISISHistoDAE::init()
 {
   declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),"Number of periods.");
@@ -303,6 +356,9 @@ void FakeISISHistoDAE::init()
   declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),"Number of bins.");
 }
 
+/**
+ * Execute the algorithm.
+ */
 void FakeISISHistoDAE::exec()
 {
   Mutex::ScopedLock lock(m_mutex);
