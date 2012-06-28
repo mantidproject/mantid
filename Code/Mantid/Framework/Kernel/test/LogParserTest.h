@@ -278,6 +278,31 @@ public:
       delete log;
     }
 
+    // Check that periods that don't have a full "CHANGE PERIOD" flag are not added.
+    void testWontAddPeriodWithoutPERIODpartOfCHANGE_SPACE_PERIOD()
+    {
+      auto* log  = new TimeSeriesProperty<std::string>("ICPLog");
+      // Notice we are using "CHANGE PERIOD"
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00", "CHANGE PERIOD 3") );
+      TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00", "CHANGE 2") ); //This is a duff entry. Shouldn't get added.
+      
+      LogParser logparser(log);
+
+      const boost::shared_ptr<Property> prop = logparser.getPeriodsProperty();
+      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
+      TS_ASSERT(timeseriesprop != NULL);
+      //Check the size
+      TS_ASSERT_EQUALS(3, timeseriesprop->size());
+       //Check the exact time stamps
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00").toSimpleString(), timeseriesprop->nthTime(0).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00").toSimpleString(), timeseriesprop->nthTime(1).toSimpleString());
+      TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00").toSimpleString(), timeseriesprop->nthTime(2).toSimpleString());
+
+      delete log;
+    }
+
     void testNoICPevent()
     {
       if ( icp_file.exists() ) icp_file.remove();
