@@ -1,6 +1,7 @@
 from mantid.simpleapi import *
 from IndirectCommon import *
-import mantidplot as mp
+from IndirectImport import import_mantidplot
+mp = import_mantidplot()
 from mantid import config, logger
 import inelastic_indirect_reducer
 import sys, os.path
