@@ -23,21 +23,22 @@ using namespace Mantid::Kernel;
 class LoadRaw3Test : public CxxTest::TestSuite
 {
 public:
-    static LoadRaw3Test *createSuite() { return new LoadRaw3Test(); }
+  static LoadRaw3Test *createSuite() { return new LoadRaw3Test(); }
   static void destroySuite(LoadRaw3Test *suite) { delete suite; }
+
   LoadRaw3Test()
   {
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "HET15869.raw";
   }
 
-  void xtestInit()
+  void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
   }
 
-  void xtestExec()
+  void testExec()
   {
 	 	 
 	if ( !loader.isInitialized() ) loader.initialize();
@@ -130,7 +131,7 @@ public:
 	AnalysisDataService::Instance().remove(outputSpace);
   }
 
- void xtestMixedLimits()
+ void testMixedLimits()
   {
 	 if ( !loader2.isInitialized() ) loader2.initialize();
 
@@ -165,7 +166,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
   }
 
-  void xtestMinlimit()
+  void testMinlimit()
   {
     LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
@@ -187,7 +188,7 @@ public:
     AnalysisDataService::Instance().remove(outWS);
   }
 
-  void xtestMaxlimit()
+  void testMaxlimit()
   {
     LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
@@ -209,7 +210,7 @@ public:
     AnalysisDataService::Instance().remove(outWS);
   }
 
-  void xtestMinMaxlimit()
+  void testMinMaxlimit()
   {
     LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
@@ -237,7 +238,7 @@ public:
     AnalysisDataService::Instance().remove(outWS);
   }
 
-  void xtestListlimit()
+  void testListlimit()
   {
 	 LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
@@ -259,7 +260,7 @@ public:
     AnalysisDataService::Instance().remove(outWS);
   }
 
-  void xtestfail()
+  void testfail()
   {
 	  LoadRaw3 loader3;
     if ( !loader3.isInitialized() ) loader3.initialize();
@@ -367,7 +368,7 @@ public:
   }
 
   // test if parameters set in instrument definition file are loaded properly
-  void xtestIfParameterFromIDFLoaded()
+  void testIfParameterFromIDFLoaded()
   {
 	 LoadRaw3 loader4;
     loader4.initialize();
@@ -391,7 +392,7 @@ public:
 	AnalysisDataService::Instance().remove("parameterIDF");
   }
 
-  void xtestTwoTimeRegimes()
+  void testTwoTimeRegimes()
   {
     LoadRaw3 loader5;
     loader5.initialize();
@@ -411,7 +412,7 @@ public:
 
     AnalysisDataService::Instance().remove("twoRegimes");
   }
-  void xtestSeparateMonitors()
+  void testSeparateMonitors()
   {
     LoadRaw3 loader6;
     if ( !loader6.isInitialized() ) loader6.initialize();
@@ -511,7 +512,7 @@ public:
     AnalysisDataService::Instance().remove(outputSpace+"_Monitors");
   }
 
-  void xtestSeparateMonitorsMultiPeriod()
+  void testSeparateMonitorsMultiPeriod()
   {
     LoadRaw3 loader7;
     loader7.initialize();
@@ -611,7 +612,7 @@ public:
  
   
   //no monitors in the selected range 
-  void xtestSeparateMonitorswithMixedLimits()
+  void testSeparateMonitorswithMixedLimits()
   {
 	LoadRaw3 loader9;
     if ( !loader9.isInitialized() ) loader9.initialize();
@@ -650,7 +651,7 @@ public:
   }
 
   // start and end spectra contains  monitors only  
-  void xtestSeparateMonitorswithMaxMinLimits1()
+  void testSeparateMonitorswithMaxMinLimits1()
   {	 
     LoadRaw3 loader9;
     if ( !loader9.isInitialized() ) loader9.initialize();
@@ -687,7 +688,7 @@ public:
     }
 
   //select start and end spectra a mix of monitors and normal workspace
-  void xtestSeparateMonitorswithMaxMinimits2()
+  void testSeparateMonitorswithMaxMinimits2()
   {	
 	 LoadRaw3 loader10;
     if ( !loader10.isInitialized() ) loader10.initialize();
@@ -727,7 +728,7 @@ public:
 
     }
    //no monitors in the selected range 
-  void xtestSeparateMonitorswithMixedLimits3()
+  void testSeparateMonitorswithMixedLimits3()
   {
 	LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
@@ -761,7 +762,7 @@ public:
 	AnalysisDataService::Instance().remove("outWS");
   }
    //no monitors in the selected range 
-  void xtestExcludeMonitors()
+  void testExcludeMonitors()
   {
 	 LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
@@ -788,7 +789,7 @@ public:
 	AnalysisDataService::Instance().remove("outWS");
   }
 
-  void xtestExcludeMonitorswithMaxMinLimits()
+  void testExcludeMonitorswithMaxMinLimits()
   {
 	 LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
@@ -813,7 +814,7 @@ public:
     
   }
 
-  void xtestWithManagedWorkspace()
+  void testWithManagedWorkspace()
   {
     ConfigServiceImpl& conf = ConfigService::Instance();
     const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
@@ -836,7 +837,7 @@ public:
     conf.setString(managed,oldValue);
   }
 
-  void xtestSeparateMonitorsWithManagedWorkspace()
+  void testSeparateMonitorsWithManagedWorkspace()
   {
     ConfigServiceImpl& conf = ConfigService::Instance();
     const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
@@ -876,7 +877,7 @@ private:
 class LoadRaw3TestPerformance : public CxxTest::TestSuite
 {
 public:
-  void xtestDefaultLoad()
+  void testDefaultLoad()
   {
     LoadRaw3 loader;
     loader.initialize();
