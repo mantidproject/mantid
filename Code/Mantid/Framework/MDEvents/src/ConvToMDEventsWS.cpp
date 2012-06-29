@@ -109,7 +109,7 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProg)
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
         size_t nEventsInWS  = pWSWrapper->pWorkspace()->getNPoints();
          // Is the access to input events thread-safe?
-        bool MultiThreadedAdding = pEventWS->threadSafe();
+       // bool MultiThreadedAdding = pEventWS->threadSafe();
         // preprocessed detectors insure that each detector has its own spectra
         size_t nValidSpectra  = this->pDetLoc->nDetectors();
 

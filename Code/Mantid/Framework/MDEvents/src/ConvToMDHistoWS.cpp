@@ -116,7 +116,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra)
 void ConvToMDHistoWS::runConversion(API::Progress *pProg)
 {
        // counder for the number of events
-        size_t n_added_events(0),n_buf_events(0);
+        size_t n_added_events(0);
         //
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes                = bc->getTotalNumMDBoxes();
