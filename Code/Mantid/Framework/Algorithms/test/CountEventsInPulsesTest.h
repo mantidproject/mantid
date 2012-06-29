@@ -291,7 +291,6 @@ public:
     }
 
     // 4. Add proton charge log (for full list of pulse)
-    Kernel::DateAndTime pulsetime = run_start;
     double pulselength = 1.0E9/50.0;
 
     double pcharge = 1.3;

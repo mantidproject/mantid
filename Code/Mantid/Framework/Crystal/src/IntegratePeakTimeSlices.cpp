@@ -467,9 +467,6 @@ namespace Mantid
       try
       {
 
-        Mantid::detid2index_map::iterator it1= wi_to_detid_map->begin();
-
-
         // Find the workspace index for this detector ID
         Mantid::detid2index_map::iterator it;
         it = (*wi_to_detid_map).find(detID);

@@ -239,7 +239,7 @@ namespace
     {
       throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
     }
-    bool foundZeroOrNegativeError = false;
+    //bool foundZeroOrNegativeError = false;
     for(size_t i = m_startIndex; i < ito; ++i)
     {
       size_t j = i - m_startIndex + i0;
@@ -248,7 +248,7 @@ namespace
       if (error <= 0)
       {
         error = 1.0;
-        foundZeroOrNegativeError = true;
+        //foundZeroOrNegativeError = true;
       }
       values->setFitWeight( j, 1.0 / error );
     }

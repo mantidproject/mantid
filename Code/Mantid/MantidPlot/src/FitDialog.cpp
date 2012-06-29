@@ -730,7 +730,7 @@ void FitDialog::showFitPage()
 		aux = 7;
 	boxParams->setMinimumHeight(4 + (aux + 1)*boxParams->horizontalHeader()->height());
 
-	QLocale locale = app->locale();
+	//QLocale locale = app->locale();
 	int prec = boxPrecision->value();
     for (int i = 0; i<parameters; i++){
         QTableWidgetItem *it = new QTableWidgetItem(paramList[i]);
