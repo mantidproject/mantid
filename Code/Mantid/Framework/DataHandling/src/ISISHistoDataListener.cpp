@@ -287,7 +287,7 @@ namespace DataHandling
   void ISISHistoDataListener::calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count)
   {
     // max number of spectra that could be read in in one go
-    int maxNumberOfSpectra = 1024 * 1024 / ( m_numberOfBins * sizeof(int) );
+    int maxNumberOfSpectra = 1024 * 1024 / ( m_numberOfBins * (int)sizeof(int) );
     if ( maxNumberOfSpectra == 0 )
     {
       maxNumberOfSpectra = 1;
