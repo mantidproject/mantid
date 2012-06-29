@@ -67,7 +67,7 @@ namespace Mantid
         }
       }
       // Handle the version where log flat is CHANGE_PERIOD
-      else if(scom == "CHANGE_PERIOD");
+      else if(scom == "CHANGE_PERIOD")
       {
         idata >> ip;
         if( ip > 0 )
