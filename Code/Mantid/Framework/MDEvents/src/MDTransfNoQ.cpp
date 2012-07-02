@@ -48,6 +48,8 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams)
 
         nMatrixDim = getNMatrixDimensions(ConvertToMD::Undef,ConvParams.getInWS());
         this->addDimCoordinates = ConvParams.getAddCoord();
+        API::NumericAxis *pXAx;
+        this->getAxes(ConvParams.getInWS(),pXAx,pYAxis);
         
 }
 /** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
@@ -77,11 +79,11 @@ unsigned int MDTransfNoQ::getNMatrixDimensions(ConvertToMD::EModes mode, API::Ma
 {
     UNUSED_ARG(mode);
 
-    API::NumericAxis *pXAxis,*pYAx;
-    this->getAxes(inWS,pXAxis,pYAx);
+    API::NumericAxis *pXAx,*pYAx;
+    this->getAxes(inWS,pXAx,pYAx);
 
     unsigned int nMatrDim = 1;
-    if(pYAxis)nMatrDim =2;
+    if(pYAx)nMatrDim =2;
     return nMatrDim ;
 
 }
