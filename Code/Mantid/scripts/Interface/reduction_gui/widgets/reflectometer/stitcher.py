@@ -2,7 +2,6 @@ from PyQt4 import QtGui, uic, QtCore
 import sip
 import os
 import sys
-import zip
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
@@ -449,7 +448,7 @@ class StitcherWidget(BaseWidget):
         """
             Update the catalog according to the new data path
         """
-        # Remove current entries
+        #Remove current entries
         for item in self._workspace_list:
             item.delete()
             
@@ -457,7 +456,7 @@ class StitcherWidget(BaseWidget):
         
         # Refresh combo boxes
         if self._settings.instrument_name == "REFL":
-            _tmp_workspace_list = []
+            _tmp_workspace_list = []    
             for item in mtd.keys():
                 #retrieve workspaces of interest
                 if item.startswith("reflectivity") and item.endswith("ts"):
@@ -465,21 +464,22 @@ class StitcherWidget(BaseWidget):
             #sort the items by time stamp 
             _list_name = []
             _list_ts = []
-            for _item in _tmp_workspace_list:
-                (_name,_ts) = _item.split('_#')
-                _list_name.append(_name)
-                _list_ts.append(_ts)
+            if _tmp_workspace_list != []:
+                for _item in _tmp_workspace_list:
+                    (_name,_ts) = _item.split('_#')
+                    _list_name.append(_name)
+                    _list_ts.append(_ts)
             
-            _name_ts = zip(_list_ts, _list_name)
-            _name_ts.sort()
-            _ts_sorted, _name_sorted = zip(*_name_ts)
-            print _name_sorted
+                _name_ts = zip(_list_ts, _list_name)
+                _name_ts.sort()
+                _ts_sorted, _name_sorted = zip(*_name_ts)
+                
+                for item in _name_sorted:
+                    self._add_entry(item)
 
         else: #REF_M
             for item in mtd.keys():
-                if item.startswith("reflectivity") and not item.endswith("scaled")\
-                and item.find('On_Off')<0 and item.find('Off_On')<0\
-                and item.find('On_On')<0:
+                if item.startswith("reflectivity") and not item.endswith("scaled") and item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
                     self._add_entry(item)
                 
         if len(self._workspace_list)>0:
