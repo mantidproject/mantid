@@ -177,7 +177,7 @@ namespace DataHandling
 
     GroupingWorkspace_sptr groupWS;
     OffsetsWorkspace_sptr offsetsWS;
-    MatrixWorkspace_sptr maskWS;
+    MaskWorkspace_sptr maskWS;
 
     // Title of all workspaces = the file without path
     std::string title = Poco::Path(CalFilename).getFileName();
@@ -203,7 +203,7 @@ namespace DataHandling
 
     if (MakeMaskWorkspace)
     {
-      maskWS = MatrixWorkspace_sptr(new MaskWorkspace(inst));
+      maskWS = MaskWorkspace_sptr(new MaskWorkspace(inst));
       maskWS->setTitle(title);
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
               "Set the the output MaskWorkspace, if any.");
@@ -223,14 +223,11 @@ namespace DataHandling
    * @param maskWS :: optional, masking-type workspace to fill. Must be initialized to the right instrument.
    */
   void LoadCalFile::readCalFile(const std::string& calFileName,
-      GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MatrixWorkspace_sptr maskWS)
+      GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MaskWorkspace_sptr maskWS)
   {
-    bool doGroup = false;
-    if (groupWS) doGroup = true;
-    bool doOffsets = false;
-    if (offsetsWS) doOffsets = true;
-    bool doMask = false;
-    if (maskWS) doMask = true;
+    bool doGroup = bool(groupWS);
+    bool doOffsets = bool(offsetsWS);
+    bool doMask = bool(maskWS);
 
     if (!doOffsets && !doGroup && !doMask)
       throw std::invalid_argument("You must give at least one of the grouping, offsets or masking workspaces.");
