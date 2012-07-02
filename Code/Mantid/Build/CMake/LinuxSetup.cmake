@@ -110,10 +110,8 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\
                                                              "fi\n"
 )
 
-# Note: On older versions of CMake, this line may mean that to do a "make package" without being root
-# you will need to set the cache variable CPACK_SET_DESTDIR to ON.
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-          DESTINATION ${CMAKE_INSTALL_PREFIX}/${ETC_DIR}
+          DESTINATION ${ETC_DIR}
 )
 
 # unset all install/uninstall scripts
