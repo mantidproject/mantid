@@ -955,6 +955,12 @@ class RefLReduction(PythonAlgorithm):
         
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
+        #add a unique time stamp to the data to sort them for the 
+        #stitching process
+        import time
+        _time = int(time.time())
+        output_ws = output_ws + '_#' + str(_time) + 'ts'
+        
         if mtd.workspaceExists(output_ws):
             mtd.deleteWorkspace(output_ws)
             

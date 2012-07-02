@@ -2,6 +2,7 @@ from PyQt4 import QtGui, uic, QtCore
 import sip
 import os
 import sys
+import zip
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
@@ -456,10 +457,23 @@ class StitcherWidget(BaseWidget):
         
         # Refresh combo boxes
         if self._settings.instrument_name == "REFL":
-            print 'in set_state of stitcher.py'
-            print 
-
-
+            _tmp_workspace_list = []
+            for item in mtd.keys():
+                #retrieve workspaces of interest
+                if item.startswith("reflectivity") and item.endswith("ts"):
+                    _tmp_workspace_list.append(item)
+            #sort the items by time stamp 
+            _list_name = []
+            _list_ts = []
+            for _item in _tmp_workspace_list:
+                (_name,_ts) = _item.split('_#')
+                _list_name.append(_name)
+                _list_ts.append(_ts)
+            
+            _name_ts = zip(_list_ts, _list_name)
+            _name_ts.sort()
+            _ts_sorted, _name_sorted = zip(*_name_ts)
+            print _name_sorted
 
         else: #REF_M
             for item in mtd.keys():
