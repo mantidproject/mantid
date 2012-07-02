@@ -455,11 +455,18 @@ class StitcherWidget(BaseWidget):
         self._workspace_list = []
         
         # Refresh combo boxes
-        for item in mtd.keys():
-            if item.startswith("reflectivity") and not item.endswith("scaled")\
-            and item.find('On_Off')<0 and item.find('Off_On')<0\
-            and item.find('On_On')<0:
-                self._add_entry(item)
+        if self._settings.instrument_name == "REFL":
+            print 'in set_state of stitcher.py'
+            print 
+
+
+
+        else: #REF_M
+            for item in mtd.keys():
+                if item.startswith("reflectivity") and not item.endswith("scaled")\
+                and item.find('On_Off')<0 and item.find('Off_On')<0\
+                and item.find('On_On')<0:
+                    self._add_entry(item)
                 
         if len(self._workspace_list)>0:
             self._workspace_list[0].select()

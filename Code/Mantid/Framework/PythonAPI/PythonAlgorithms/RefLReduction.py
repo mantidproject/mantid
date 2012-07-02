@@ -85,6 +85,17 @@ class RefLReduction(PythonAlgorithm):
         import math
         from reduction.instruments.reflectometer import wks_utility
         
+        from mantid import mtd
+        #remove all previous workspaces
+        list_mt = mtd.getObjectNames()
+        for _mt in list_mt:
+            if _mt.find('_scaled') != -1:
+                mtd.remove(_mt)
+            if _mt.find('_reflectivity') != -1:
+                mtd.remove(_mt)
+            
+        from mantidsimple import mtd    
+
         bDebug = True
         if bDebug:
             print '====== Running in mode DEBUGGING ======='
@@ -1010,3 +1021,5 @@ class RefLReduction(PythonAlgorithm):
         print
         
 mtd.registerPyAlgorithm(RefLReduction())
+
+
