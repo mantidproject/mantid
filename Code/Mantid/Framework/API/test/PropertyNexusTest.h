@@ -30,7 +30,7 @@ public:
   void check_prop(Property * prop, T * other)
   {
     T * p = dynamic_cast<T*>(prop);
-    TS_ASSERT(p);
+    TSM_ASSERT("Loaded property was not of the expected type", p);
     if (!p) return;
     TS_ASSERT_EQUALS( p->value(), other->value() );
   }
@@ -61,12 +61,17 @@ public:
     tspd.addValue( DateAndTime("2011-01-01T00:00:01"), 1234.5 );
     tspd.addValue( DateAndTime("2011-01-01T00:01:02"), 4567.8 );
 
+    TimeSeriesProperty<bool> tspb("bool_series");
+    tspb.addValue( DateAndTime("2011-01-01T00:00:01"), true );
+    tspb.addValue( DateAndTime("2011-01-01T00:01:02"), false );
+
     TimeSeriesProperty<std::string> tsps("string_series");
     tsps.addValue( DateAndTime("2011-01-01T00:00:01"), "help me i" );
     tsps.addValue( DateAndTime("2011-01-01T00:01:02"), "am stuck in a NXS file" );
 
     PropertyNexus::saveProperty(th.file, &tspi);
     PropertyNexus::saveProperty(th.file, &tspd);
+    PropertyNexus::saveProperty(th.file, &tspb);
     PropertyNexus::saveProperty(th.file, &tsps);
 
     // ---- Now re-load and compare to the original ones ----------------------------
@@ -83,6 +88,7 @@ public:
 
     prop = PropertyNexus::loadProperty(th.file, "int_series");   check_prop(prop, &tspi);
     prop = PropertyNexus::loadProperty(th.file, "double_series");   check_prop(prop, &tspd);
+    prop = PropertyNexus::loadProperty(th.file, "bool_series");   check_prop(prop, &tspb);
     prop = PropertyNexus::loadProperty(th.file, "string_series");   check_prop(prop, &tsps);
   }
 
