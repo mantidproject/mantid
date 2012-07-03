@@ -529,9 +529,14 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     std::vector<Property *> props = m_manager.getProperties();
     for (size_t i=0; i<props.size(); i++)
     {
-      Property * prop = props[i];
-      if (prop)
-        PropertyNexus::saveProperty(file, prop);
+      try
+      {
+        PropertyNexus::saveProperty(file, props[i]);
+      }
+      catch(std::invalid_argument &exc)
+      {
+        g_log.warning(exc.what());
+      }
     }
     file->closeGroup();
   }
