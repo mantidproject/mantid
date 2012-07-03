@@ -64,17 +64,17 @@ public:
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
     /** return the number of dimensions, calculated by the transformation from the workspace.
        Depending on EMode, this numebr here is either 1 or 2 and do not depend on input workspace*/
-    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,
+    unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
     /**function returns units ID-s which this transformation prodiuces its ouptut.
        It is Momentum and Momentum and DelteE in inelastic modes */
-    std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode,
+    std::vector<std::string> outputUnitID(CnvrtToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
     /**the default dimID-s in ModQ mode are |Q| and dE if necessary */ 
-    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode,
+    std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
    /**  returns the units, the transformation expects for input workspace to be expressed in. */
-    const std::string inputUnitID(ConvertToMD::EModes dEmode,
+    const std::string inputUnitID(CnvrtToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
 
 
@@ -92,7 +92,7 @@ protected:
     // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode here. 
     unsigned int nMatrixDim;
     // the variable which describes current conversion mode:
-    ConvertToMD::EModes emode;
+    CnvrtToMD::EModes emode;
     /** the vector of the additional coordinates which define additional MD dimensions. 
         For implemented ModQ case, these dimensions do not depend on matrix coordinates and are determined by WS properties */
     std::vector<coord_t>  addDimCoordinates;

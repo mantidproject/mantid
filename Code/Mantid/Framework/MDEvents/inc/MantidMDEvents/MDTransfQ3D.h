@@ -63,14 +63,14 @@ public:
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS (THEY ARE VIRTUAL STATIC METHODS)
     /** return the number of dimensions, calculated by the transformation from the workspace.
        Depending on EMode, this numebr here is either 3 or 4 and do not depend on input workspace*/
-    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,
+    unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
     /**function returns units ID-s which this transformation prodiuces its ouptut.
        It is Momentum and Momentum and DelteE in inelastic modes */
-    std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode,
+    std::vector<std::string> outputUnitID(CnvrtToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
     /**the default dimID-s in Q3D mode are Q1,Q2,Q3 and dE if necessary */ 
-    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode,
+    std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
 protected:
     // all variables are the same as in ModQ

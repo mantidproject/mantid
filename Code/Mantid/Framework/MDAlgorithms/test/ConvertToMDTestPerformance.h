@@ -12,7 +12,7 @@
 #include "MantidKernel/CPUTimer.h"
 
 #include "MantidAPI/TextAxis.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -29,7 +29,7 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 
 
-class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
+class ConvertToMDTestPerformance : public CxxTest::TestSuite
 {
     Kernel::CPUTimer Clock;
     time_t start,end;
@@ -50,8 +50,8 @@ class ConvertToMDEventsTestPerformance : public CxxTest::TestSuite
     boost::shared_ptr<MDEvents::MDEventWSWrapper> pTargWS;
 
 public:
-static ConvertToMDEventsTestPerformance *createSuite() { return new ConvertToMDEventsTestPerformance(); }
-static void destroySuite(ConvertToMDEventsTestPerformance * suite) { delete suite; }    
+static ConvertToMDTestPerformance *createSuite() { return new ConvertToMDTestPerformance(); }
+static void destroySuite(ConvertToMDTestPerformance * suite) { delete suite; }    
 
 
 
@@ -195,7 +195,7 @@ void test_HistoNoUnitsConv()
 }
 
 
-ConvertToMDEventsTestPerformance():
+ConvertToMDTestPerformance():
 Rot(3,3)
 {
    numHist=100*100;

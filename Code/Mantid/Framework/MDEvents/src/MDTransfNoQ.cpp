@@ -46,7 +46,7 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams)
         // get min and max values defined by the algorithm. 
         ConvParams.getMinMax(dim_min,dim_max);
 
-        nMatrixDim = getNMatrixDimensions(ConvertToMD::Undef,ConvParams.getInWS());
+        nMatrixDim = getNMatrixDimensions(CnvrtToMD::Undef,ConvParams.getInWS());
         this->addDimCoordinates = ConvParams.getAddCoord();
         API::NumericAxis *pXAx;
         this->getAxes(ConvParams.getInWS(),pXAx,pYAxis);
@@ -75,7 +75,7 @@ bool MDTransfNoQ::calcMatrixCoord(const double& X,std::vector<coord_t> &Coord)co
 
  /** return the number of dimensions, calculated by the transformation from the workspace.
     Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
-unsigned int MDTransfNoQ::getNMatrixDimensions(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+unsigned int MDTransfNoQ::getNMatrixDimensions(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(mode);
 
@@ -107,7 +107,7 @@ void  MDTransfNoQ::getAxes(API::MatrixWorkspace_const_sptr inWS,API::NumericAxis
  * @param  inWS -- input matrix workspace shared pointer
  *
  */
-std::vector<std::string> MDTransfNoQ::outputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+std::vector<std::string> MDTransfNoQ::outputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(mode);
 
@@ -126,12 +126,12 @@ std::vector<std::string> MDTransfNoQ::outputUnitID(ConvertToMD::EModes mode, API
     return rez;
 }
 /**the default dimID-s in noQ mode equal to input WS dim-id-s */ 
-std::vector<std::string> MDTransfNoQ::getDefaultDimID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+std::vector<std::string> MDTransfNoQ::getDefaultDimID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
     return this->outputUnitID(mode,inWS);
 }
 /**  returns the units, the input ws is actually in as they coinside with input units for this class */
-const std::string MDTransfNoQ::inputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+const std::string MDTransfNoQ::inputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(mode);
     API::NumericAxis *pXAxis;

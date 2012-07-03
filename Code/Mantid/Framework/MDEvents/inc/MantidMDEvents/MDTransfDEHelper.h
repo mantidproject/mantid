@@ -35,7 +35,7 @@ namespace MDEvents
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-namespace ConvertToMD
+namespace CnvrtToMD
 {
     /* enum describes known eneergy conversion/analysis modes
     *  It is important to assign enums proper numbers, as direct correspondence between enums and their emodes 
@@ -59,9 +59,9 @@ class DLLExport MDTransfDEHelper
     // energy conversion modes supported by this class
     std::vector<std::string> getEmodes()const{return EmodesList;}
     /// string presentation of emode
-    std::string getEmode(ConvertToMD::EModes Mode)const;
+    std::string getEmode(CnvrtToMD::EModes Mode)const;
     /// convert string presentation of emode into nimerical one 
-    ConvertToMD::EModes getEmode(const std::string &Mode)const;
+    CnvrtToMD::EModes getEmode(const std::string &Mode)const;
     // constructor
     MDTransfDEHelper();
  private:

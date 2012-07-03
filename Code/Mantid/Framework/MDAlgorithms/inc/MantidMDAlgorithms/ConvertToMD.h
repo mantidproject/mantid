@@ -15,7 +15,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-/** ConvertToMDEvents :
+/** ConvertToMD :
    *  Transfrom a workspace into MD workspace with components defined by user. 
    *
    * Gateway for number of subalgorithms, some are very important, some are questionable 
@@ -46,14 +46,14 @@ namespace MDAlgorithms
  
  
 /// Convert to MD Events class itself:
-  class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm, public API::DeprecatedAlgorithm
+  class DLLExport ConvertToMD  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:
-    ConvertToMDEvents();
-    ~ConvertToMDEvents();
+    ConvertToMD();
+    ~ConvertToMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "ConvertToMDEvents";};
+    virtual const std::string name() const { return "ConvertToMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

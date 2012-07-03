@@ -37,7 +37,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::ConvertToMD;
+using namespace Mantid::MDEvents::CnvrtToMD;
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -108,7 +108,7 @@ ConvertToMDEvents::init()
 
      MDEvents::MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
-     declareProperty("QConversionScales",QScales[ConvertToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
+     declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
         "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
         "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
         "  Q in lattice units -- single scale, where all momentums are divided by the minimal reciprocal lattice vector 2*Pi/Max(a_latt)\n"
@@ -119,7 +119,7 @@ ConvertToMDEvents::init()
      /// temporary
      MDEvents::MDTransfDEHelper AlldEModes;
      std::vector<std::string> dE_modes = AlldEModes.getEmodes();
-     declareProperty("dEAnalysisMode",dE_modes[ConvertToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
+     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
         " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
         """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                

@@ -16,12 +16,12 @@ namespace MDEvents
 
     if necessary, also sets up the proper units convertor pointers which do the actual conversion. 
 */
-ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo)
+CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo)
 {
     // if units are equal, no conversion is necessary;
     if(UnitsFrom.compare(UnitsTo)==0)
     {
-        return ConvertToMD::ConvertNo;
+        return CnvrtToMD::ConvertNo;
     }
 
 
@@ -46,14 +46,14 @@ ConvertToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const st
     pSourceWSUnit=Kernel::UnitFactory::Instance().create(UnitsFrom);
     if(pSourceWSUnit->quickConversion(UnitsTo,factor,power))
     {
-        return ConvertToMD::ConvertFast;
+        return CnvrtToMD::ConvertFast;
     }else{
         // is the input unts are TOF?
         if(UnitsFrom.compare("TOF")==0){
-            return ConvertToMD::ConvertFromTOF;
+            return CnvrtToMD::ConvertFromTOF;
         }else{            // convert using TOF
             pTargetUnit    =Kernel::UnitFactory::Instance().create(UnitsTo);
-            return ConvertToMD::ConvertByTOF;
+            return CnvrtToMD::ConvertByTOF;
         }
     }
     
@@ -100,9 +100,9 @@ void UnitsConversionHelper::updateConversion(size_t i)
 {
     switch(UnitCnvrsn)
     {
-    case(ConvertToMD::ConvertNo):        return;
-    case(ConvertToMD::ConvertFast):      return;
-    case(ConvertToMD::ConvertFromTOF):
+    case(CnvrtToMD::ConvertNo):        return;
+    case(CnvrtToMD::ConvertFast):      return;
+    case(CnvrtToMD::ConvertFromTOF):
         {
             double delta;
             twoTheta = (*pTwoTheta)[i];
@@ -110,7 +110,7 @@ void UnitsConversionHelper::updateConversion(size_t i)
             pTargetUnit->initialize(L1,L2,twoTheta,emode,efix,delta);
             return;
         }
-    case(ConvertToMD::ConvertByTOF):
+    case(CnvrtToMD::ConvertByTOF):
         {
             double delta;
             twoTheta = (*pTwoTheta)[i];
@@ -129,19 +129,19 @@ double UnitsConversionHelper::convertUnits(double val)
 {
     switch(UnitCnvrsn)
     {
-    case(ConvertToMD::ConvertNo):   
+    case(CnvrtToMD::ConvertNo):   
         {
             return val;
         }
-    case(ConvertToMD::ConvertFast):
+    case(CnvrtToMD::ConvertFast):
         {
             return factor*std::pow(val,power);
         }
-    case(ConvertToMD::ConvertFromTOF):
+    case(CnvrtToMD::ConvertFromTOF):
         {  
             return pTargetUnit->singleFromTOF(val);
         }
-    case(ConvertToMD::ConvertByTOF):
+    case(CnvrtToMD::ConvertByTOF):
         {
              double tof = pSourceWSUnit->singleToTOF(val);
              return  pTargetUnit->singleFromTOF(tof);

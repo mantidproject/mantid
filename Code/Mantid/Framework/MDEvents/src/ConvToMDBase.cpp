@@ -39,7 +39,7 @@ size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::sh
         // initialize the MD coordinates conversion class
         pQConverter->initialize(WSD);
        // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-       ConvertToMD::EModes emode = WSD.getEMode();
+       CnvrtToMD::EModes emode = WSD.getEMode();
        UnitConversion.initialize(WSD,pQConverter->inputUnitID(emode,inWS2D));
 
         

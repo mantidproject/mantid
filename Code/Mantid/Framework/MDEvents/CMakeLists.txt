@@ -144,10 +144,10 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
-	test/ConvertToMDEventsParamsTest.h
-	test/ConvertToMDEventsSubalgFactoryTest.h
-	test/ConvertToMDEventsUnitsConvTest.h
-	test/ConvertToMDEventsWSTest.h
+	test/ConvertToMDParamsTest.h
+	test/ConvertToMDFactoryTest.h
+	test/ConvertToMDUnitsConvTest.h
+	test/ConvertToMDWSTest.h
 	test/ConvertToReflectometryQTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h

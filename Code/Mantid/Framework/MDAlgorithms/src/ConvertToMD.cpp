@@ -9,7 +9,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 
 *WIKI*/
 
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ProgressText.h"
@@ -37,26 +37,26 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::ConvertToMD;
+using namespace Mantid::MDEvents::CnvrtToMD;
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
 // logger for the algorithm workspaces  
-Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
+Kernel::Logger& ConvertToMD::convert_log =Kernel::Logger::get("MD-Algorithms");
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
-MDEvents::ConvToMDPreprocDet ConvertToMDEvents::det_loc;
+MDEvents::ConvToMDPreprocDet ConvertToMD::det_loc;
 //
 Mantid::Kernel::Logger & 
-ConvertToMDEvents::getLogger(){return convert_log;}
+ConvertToMD::getLogger(){return convert_log;}
 //
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertToMDEvents)
+DECLARE_ALGORITHM(ConvertToMD)
 
 
 // Sets documentation strings for this algorithm
-void ConvertToMDEvents::initDocs()
+void ConvertToMD::initDocs()
 {
     this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
     this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
@@ -65,7 +65,7 @@ void ConvertToMDEvents::initDocs()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertToMDEvents::~ConvertToMDEvents()
+ConvertToMD::~ConvertToMD()
 {
     // if the algorithm has gone, then the preprocessed detectors should probably too
     det_loc.clearAll();
@@ -76,7 +76,7 @@ ConvertToMDEvents::~ConvertToMDEvents()
 /** Initialize the algorithm's properties.
  */
 void 
-ConvertToMDEvents::init()
+ConvertToMD::init()
 {
       auto ws_valid = boost::make_shared<CompositeValidator>();
       //
@@ -108,7 +108,7 @@ ConvertToMDEvents::init()
 
      MDEvents::MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
-     declareProperty("QConversionScales",QScales[ConvertToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
+     declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
         "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
         "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
         "  Q in lattice units -- single scale, where all momentums are divided by the minimal reciprocal lattice vector 2*Pi/Max(a_latt)\n"
@@ -119,7 +119,7 @@ ConvertToMDEvents::init()
      /// temporary
      MDEvents::MDTransfDEHelper AlldEModes;
      std::vector<std::string> dE_modes = AlldEModes.getEmodes();
-     declareProperty("dEAnalysisMode",dE_modes[ConvertToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
+     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
         " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
         """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
@@ -183,7 +183,7 @@ ConvertToMDEvents::init()
 
  //----------------------------------------------------------------------------------------------
 /* Execute the algorithm.   */
-void ConvertToMDEvents::exec()
+void ConvertToMD::exec()
 {
   // initiate class which would deal with any dimension workspaces, handling 
   if(!pWSWrapper)
@@ -348,12 +348,8 @@ void ConvertToMDEvents::exec()
 }
 
 /** Constructor */
-ConvertToMDEvents::ConvertToMDEvents()
-{
-  this->useAlgorithm("ConvertToMD");
-  this->deprecatedDate("2012-07-01");
-
-}
+ConvertToMD::ConvertToMD()
+{}
 
 
 } // namespace Mantid

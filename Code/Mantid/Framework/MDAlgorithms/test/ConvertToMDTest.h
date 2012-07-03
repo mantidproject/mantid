@@ -5,7 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -21,7 +21,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDEvents;
 
-class Convert2AnyTestHelper: public ConvertToMDEvents
+class Convert2AnyTestHelper: public ConvertToMD
 {
 public:
     Convert2AnyTestHelper(){};
@@ -39,12 +39,12 @@ std::vector<std::string> dim_availible()
     return data_names_in_WS;
 }
 //
-class ConvertToMDEventsTest : public CxxTest::TestSuite
+class ConvertToMDTest : public CxxTest::TestSuite
 {
  std::auto_ptr<Convert2AnyTestHelper> pAlg;
 public:
-static ConvertToMDEventsTest *createSuite() { return new ConvertToMDEventsTest(); }
-static void destroySuite(ConvertToMDEventsTest * suite) { delete suite; }    
+static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
+static void destroySuite(ConvertToMDTest * suite) { delete suite; }    
 
 
 void testInit(){
@@ -157,7 +157,7 @@ void testAlgorithmProperties()
   3) Finally this unit test should be updated so that the tests pass.
   */
 
-  ConvertToMDEvents alg;
+  ConvertToMD alg;
   alg.initialize();
 
   Mantid::Kernel::Property *QDimProperty;
@@ -185,7 +185,7 @@ void testAlgorithmProperties()
 }
 
 
-ConvertToMDEventsTest(){
+ConvertToMDTest(){
      pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     // rotate the crystal by twenty degrees back;

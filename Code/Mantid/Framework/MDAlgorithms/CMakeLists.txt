@@ -101,10 +101,10 @@ set ( TEST_FILES
 	test/BooleanBinaryOperationMDTest.h
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
-	test/ConvertEventsToMDEventsTest.h
+	test/ConvertEventsToMDTest.h
 	test/ConvertToDetectorFaceMDTest.h
-	test/ConvertToMDEventsTest.h
-	test/ConvertToMDEventsTestPerformance.h
+	test/ConvertToMDTest.h
+	test/ConvertToMDTestPerformance.h
 	test/ConvertToQ3DdETest.h
 	test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h

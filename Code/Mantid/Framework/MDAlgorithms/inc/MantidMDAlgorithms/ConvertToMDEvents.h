@@ -15,7 +15,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-/** ConvertToMDEvents :
+/** ConvertToMD :
    *  Transfrom a workspace into MD workspace with components defined by user. 
    *
    * Gateway for number of subalgorithms, some are very important, some are questionable 

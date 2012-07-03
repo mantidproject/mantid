@@ -96,7 +96,7 @@ size_t  ConvToMDEventsWS::initialize(const MDEvents::MDWSDescription &WSD, boost
     
     pEventWS  = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inWS2D);
     if(!pEventWS.get()){
-           throw(std::logic_error(" ConvertToMDEvensEventWS should work with defined event workspace"));
+           throw(std::logic_error(" ConvertToMDEventWS should work with defined event workspace"));
     }
  
     return numSpec;

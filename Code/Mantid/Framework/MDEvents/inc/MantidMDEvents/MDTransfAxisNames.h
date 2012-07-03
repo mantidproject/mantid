@@ -37,7 +37,7 @@ namespace MDEvents
  * 
  *  DimensionID is the short name which used to retrieve this dimesnion from MD workspace.
  *  The names themself are defined in constructor  */
-namespace ConvertToMD
+namespace CnvrtToMD
 {
     enum defaultDimID
     {
@@ -54,8 +54,8 @@ class DLLExport MDTransfAxisNames
 {
 public:
     /// function returns default dimension id-s for different Q and dE modes, defined by this class
-    std::vector<std::string> getDefaultDimIDQ3D(ConvertToMD::EModes  dEmode)const;
-    std::vector<std::string> getDefaultDimIDModQ(ConvertToMD::EModes dEmode)const;
+    std::vector<std::string> getDefaultDimIDQ3D(CnvrtToMD::EModes  dEmode)const;
+    std::vector<std::string> getDefaultDimIDModQ(CnvrtToMD::EModes dEmode)const;
 
     // constructor
     MDTransfAxisNames();

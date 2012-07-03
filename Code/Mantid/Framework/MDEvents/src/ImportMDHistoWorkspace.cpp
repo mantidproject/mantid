@@ -39,7 +39,7 @@ And here's the corresponding contents of ''demo.txt'':
  16	16.1
 
 == Alternatives ==
-A very similar algorithm to this is [[CreateMDHistoWorkspace]], which takes it's input signal and error values from arrays rather than a text file. Another alternative is to use [[ConvertToMDEvents]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
+A very similar algorithm to this is [[CreateMDHistoWorkspace]], which takes it's input signal and error values from arrays rather than a text file. Another alternative is to use [[ConvertToMD]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
 
 [[Category:MDAlgorithms]]
 

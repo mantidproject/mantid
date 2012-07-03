@@ -25,7 +25,7 @@ The following example creates a 1D sine function
  CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=dimensionality,Extents=extents,NumberOfBins=nbins,Names='x',Units='dimensionless',OutputWorkspace='demo')
 
 == Alternatives ==
-A very similar algorithm to this is [[ImportMDHistoWorkspace]], which takes it's input signal and error values from a text file rather than from arrays. Another alternative is to use [[ConvertToMDEvents]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
+A very similar algorithm to this is [[ImportMDHistoWorkspace]], which takes it's input signal and error values from a text file rather than from arrays. Another alternative is to use [[CnvrtToMD]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
 
 [[Category:MDAlgorithms]]
 

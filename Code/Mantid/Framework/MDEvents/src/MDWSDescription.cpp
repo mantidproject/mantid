@@ -109,7 +109,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
 
 
     // in direct or indirect mode input ws has to have input energy
-    if(emode==ConvertToMD::Direct||emode==ConvertToMD::Indir){
+    if(emode==CnvrtToMD::Direct||emode==CnvrtToMD::Indir){
         if(isNaN(getEi(inWS)))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
     }
     
@@ -196,7 +196,7 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
                            boost::lexical_cast<std::string>(NewMDWorkspaceD.nDims);
          throw(std::invalid_argument(ERR)); 
     }
-    if(this->emode==ConvertToMD::Undef)
+    if(this->emode==CnvrtToMD::Undef)
     {
         throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
     }
@@ -211,7 +211,7 @@ MDWSDescription::MDWSDescription(unsigned int nDimensions):
 Wtransf(3,3,true),
 GoniomMatr(3,3,true),
 rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
-emode(ConvertToMD::Undef)
+emode(CnvrtToMD::Undef)
 {
 
     this->resizeDimDescriptions(nDimensions);
