@@ -124,10 +124,16 @@ class RefLReduction(PythonAlgorithm):
         # Steps for TOF rebin
         TOFsteps = 100.0
 
+        #use now a global q binning (user does not have control over it)
+        #q_min = 0.005
+        #q_step = -0.01
+
         # Q binning for output distribution
         q_min = self.getProperty("QMin")
         q_step = self.getProperty("QStep")
-          
+        if (q_step > 0):
+            q_step = -q_step
+        
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
         maxY = 256

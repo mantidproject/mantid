@@ -284,6 +284,7 @@ class BaseRefWidget(BaseWidget):
                     _y = 0.
                     _e = 0.
                 else:
+
                     _error = 1./_left_e2 + 1./_right_e2
                     _x = (_left_x + _right_x) / 2. 
                     _y = (_left_y/_left_e2 + _right_y/_right_e2) / _error 
@@ -338,6 +339,19 @@ class BaseRefWidget(BaseWidget):
             text = [line1, line2, line3]
         else:
             text = ['#Q(1/Angstrom) R delta_R']
+        
+#        #rebinned using output factors
+#        q_min = float(self._summary.q_min_edit.text())
+#        q_bin = -float(self._summary.q_step_edit.text())
+#
+#        mt = mtd['ref_combined']
+#        x_axis = mt.readX(0)[:]
+#        q_max = float(x_axis[-1]) 
+#        
+#        q_binning = [q_min, q_bin, q_max]
+#        Rebin(InputWorkspace='ref_combined',
+#              OutputWorkspace='ref_combined',
+#              Params=q_binning)
             
         mt = mtd['ref_combined']
         x_axis = mt.readX(0)[:]
