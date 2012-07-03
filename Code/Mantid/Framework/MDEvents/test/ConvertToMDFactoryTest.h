@@ -19,11 +19,11 @@ using namespace Mantid::MDEvents;
 
 
 //
-class ConvertToMDEventsFactoryTest : public CxxTest::TestSuite
+class ConvertToMDFactoryTest : public CxxTest::TestSuite
 {
 public:
-static ConvertToMDEventsFactoryTest *createSuite() { return new ConvertToMDEventsFactoryTest(); }
-static void destroySuite(ConvertToMDEventsFactoryTest * suite) { delete suite; }    
+static ConvertToMDFactoryTest *createSuite() { return new ConvertToMDFactoryTest(); }
+static void destroySuite(ConvertToMDFactoryTest * suite) { delete suite; }    
 
 void testInit()
 {
@@ -55,7 +55,7 @@ void testGetAlg()
 }
 
 //
-ConvertToMDEventsFactoryTest()
+ConvertToMDFactoryTest()
 {
        API::FrameworkManager::Instance();
 }

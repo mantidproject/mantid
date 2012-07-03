@@ -53,15 +53,14 @@ public:
 
     void runConversion(API::Progress *pProg);
 private:
-  // conversion chunk;
-   size_t conversionChunk(size_t job_ID);
-  // the number of spectra to process by single computational thread;
+   // the number of spectra to process by single computational thread;
    size_t m_spectraChunk;
    // the size of temporary buffer, each thread stores data in before adding these data to target MD workspace;
    size_t m_bufferSize;
    // internal function used to identify m_spectraChunk and m_bufferSize
    void estimateThreadWork(size_t nThreads,size_t specSize);
-
+  // the function does a chunk of work. Expected to run on a thread. 
+   size_t conversionChunk(size_t job_ID);
 };
 
  
