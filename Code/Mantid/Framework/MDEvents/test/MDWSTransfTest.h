@@ -36,7 +36,7 @@ void test_buildDimNames(){
     TargWSDescription.buildFromMatrixWS(ws2D,"Q3D","Direct");
 
    MDWSTransform MsliceTransf;
-   TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TargWSDescription,ConvertToMD::NoScaling));
+   TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TargWSDescription,CnvrtToMD::NoScaling));
 
    std::vector<std::string> dimNames = TargWSDescription.getDimNames();
    TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -83,8 +83,8 @@ void testTransfMat1()
      MsliceTransf.setUVvectors(u,v,w);
 
 
-      TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,ConvertToMD::HKLScale));
-      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,ConvertToMD::HKLScale));
+      TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::HKLScale));
+      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -94,8 +94,8 @@ void testTransfMat1()
 
 
       std::vector<double> rot1;
-      TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,ConvertToMD::OrthogonalHKLScale));
-      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,ConvertToMD::OrthogonalHKLScale));
+      TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::OrthogonalHKLScale));
+      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::OrthogonalHKLScale));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);

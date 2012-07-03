@@ -4,7 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -22,13 +22,13 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDEvents;
 
-class ConvertTo3DdETestHelper: public ConvertToMDEvents
+class ConvertTo3DdETestHelper: public ConvertToMD
 {
 public:
     ConvertTo3DdETestHelper(){};
 };
 
-// Test is transformed from ConvetToQ3DdE but actually tests some aspects of ConvertToMDEvents algorithm. 
+// Test is transformed from ConvetToQ3DdE but actually tests some aspects of ConvertToMD algorithm. 
 class ConvertToQ3DdETest : public CxxTest::TestSuite
 {
  std::auto_ptr<ConvertTo3DdETestHelper> pAlg;
