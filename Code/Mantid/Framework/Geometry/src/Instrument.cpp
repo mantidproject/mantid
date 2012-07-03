@@ -220,9 +220,24 @@ namespace Mantid
         numDetIDs = m_detectorCache.size();
       }
 
-      if (skipMonitors)
+      if (skipMonitors) // this slow, but gets the right answer
       {
-        return (numDetIDs - this->numMonitors());
+        std::size_t monitors(0);
+        if (m_isParametrized)
+        {
+          const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+          for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
+            if (it->second->isMonitor())
+              monitors += 1;
+        }
+        else
+        {
+          const detid2det_map & in_dets = m_detectorCache;
+          for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
+            if (it->second->isMonitor())
+              monitors += 1;
+        }
+        return (numDetIDs - monitors);
       }
       else
       {
