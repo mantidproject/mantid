@@ -131,6 +131,8 @@ class LoadRun(ReductionStep):
         if type(data_file)==str:
             data_file = find_data(data_file, instrument=reducer.instrument.name(), allow_multiple=True)
         if type(data_file)==list:
+            monitor = 0.0
+            timer = 0.0 
             for i in range(len(data_file)):
                 output_str += "Loaded %s\n" % data_file[i]
                 if i==0:
@@ -140,6 +142,19 @@ class LoadRun(ReductionStep):
                     Plus(LHSWorkspace=workspace,
                          RHSWorkspace='__tmp_wksp',
                          OutputWorkspace=workspace)
+                    # Get the monitor and timer values
+                    monitor += mtd['__tmp_wksp'].getRun().getProperty("monitor").value
+                    timer += mtd['__tmp_wksp'].getRun().getProperty("timer").value
+            
+            # Get the monitor and timer of the first file, which haven't yet
+            # been added to the total
+            monitor += mtd[workspace].getRun().getProperty("monitor").value
+            timer += mtd[workspace].getRun().getProperty("timer").value
+                    
+            # Update the timer and monitor
+            mantid[workspace].getRun().addProperty_dbl("monitor", monitor, True)
+            mantid[workspace].getRun().addProperty_dbl("timer", timer, True)
+            
             if mtd.workspaceExists('__tmp_wksp'):
                 mtd.deleteWorkspace('__tmp_wksp')
         else:
