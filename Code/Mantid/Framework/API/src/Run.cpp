@@ -356,7 +356,44 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     return total;
   }
 
+  /**
+   * Returns a property as a time series property. It will throw if it is not valid or the
+   * property does not exist
+   * @param name The name of a time-series property
+   * @return A pointer to the time-series property
+   */
+  template<typename T>
+  Kernel::TimeSeriesProperty<T> * Run::getTimeSeriesProperty(const std::string & name) const
+  {
+    Kernel::Property *prop = getProperty(name);
+    if(Kernel::TimeSeriesProperty<T>* tsp = dynamic_cast<Kernel::TimeSeriesProperty<T>*>(prop))
+    {
+      return tsp;
+    }
+    else
+    {
+      throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name + "' is not a TimeSeriesProperty");
+    }
+  }
 
+  /**
+   * Get the value of a property as a double. Throws if the type is not correct
+   * @param name :: The name of the property
+   * @return The value of as a double, the most common type in logs
+   */
+  template<typename HeldType>
+  HeldType Run::getPropertyValueAsType(const std::string & name) const
+  {
+    Kernel::Property *prop = getProperty(name);
+    if(Kernel::PropertyWithValue<HeldType>* valueProp = dynamic_cast<Kernel::PropertyWithValue<HeldType>*>(prop))
+    {
+      return (*valueProp)();
+    }
+    else
+    {
+      throw std::invalid_argument("Run::getPropertyValueAsType - '" + name + "' is not of the requested type");
+    }
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Get the gonimeter rotation matrix, calculated using the
@@ -489,6 +526,14 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       }
     }
   }
+
+  /// Concrete instantiations for getTimeSeriesProperty
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<double> * Run::getTimeSeriesProperty(const std::string &) const ;
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<std::string> * Run::getTimeSeriesProperty(const std::string &) const;
+  /// Concrete instantiations for getPropertyValueAsType
+  template MANTID_API_DLL double Run::getPropertyValueAsType(const std::string &) const ;
+  template MANTID_API_DLL int Run::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL std::string Run::getPropertyValueAsType(const std::string &) const;
 
 } //API namespace
 

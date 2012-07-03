@@ -111,6 +111,60 @@ public:
     TS_ASSERT_EQUALS( runInfo.getMemorySize(), sizeof(ConcreteProperty) + sizeof( void *));
   }
 
+  void test_GetTimeSeriesProperty_Returns_TSP_When_Log_Exists()
+  {
+    Run runInfo;
+    const std::string & name = "double_time_series";
+    const double value = 10.9;
+    addTimeSeriesEntry(runInfo, name, value);
+
+    TimeSeriesProperty<double> * tsp(NULL);
+    TS_ASSERT_THROWS_NOTHING(tsp = runInfo.getTimeSeriesProperty<double>(name));
+    TS_ASSERT_DELTA(tsp->firstValue(), value, 1e-12);
+  }
+
+  void test_GetTimeSeriesProperty_Throws_When_Log_Does_Not_Exist()
+  {
+    Run runInfo;
+    TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>("not_a_log"), Exception::NotFoundError);
+  }
+
+  void test_GetTimeSeriesProperty_Throws_When_Log_Exists_But_Is_Not_Correct_Type()
+  {
+    Run runInfo;
+    const std::string & name = "double_prop";
+    runInfo.addProperty(name, 5.6); // Standard double property
+
+    TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>(name), std::invalid_argument);
+  }
+
+  void test_GetPropertyAsType_Throws_When_Property_Does_Not_Exist()
+  {
+    Run runInfo;
+    TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<double>("not_a_log"), Exception::NotFoundError);
+  }
+
+  void test_GetPropertyAsType_Returns_Expected_Value_When_Type_Is_Correct()
+  {
+    Run runInfo;
+    const std::string & name = "double_prop";
+    const double value = 5.6;
+    runInfo.addProperty(name, value); // Standard double property
+
+    double retrieved(0.0);
+    TS_ASSERT_THROWS_NOTHING(retrieved = runInfo.getPropertyValueAsType<double>(name));
+    TS_ASSERT_DELTA(retrieved, value, 1e-12);
+  }
+
+  void test_GetPropertyAsType_Throws_When_Requested_Type_Does_Not_Match()
+  {
+    Run runInfo;
+    runInfo.addProperty("double_prop", 6.7); // Standard double property
+
+    TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"), std::invalid_argument);
+  }
+
+
   void test_getGoniometer()
   {
     Run runInfo;
@@ -127,7 +181,7 @@ public:
   }
 
 
-  void AddTSPEntry(Run & runInfo, std::string name, double val)
+  void addTimeSeriesEntry(Run & runInfo, std::string name, double val)
   {
     TimeSeriesProperty<double> * tsp;
     tsp = new TimeSeriesProperty<double>(name);
@@ -142,9 +196,9 @@ public:
   void test_getGoniometerMatrix()
   {
     Run runInfo;
-    AddTSPEntry(runInfo, "phi", 90.0);
-    AddTSPEntry(runInfo, "chi", 90.0);
-    AddTSPEntry(runInfo, "omega", 90.0);
+    addTimeSeriesEntry(runInfo, "phi", 90.0);
+    addTimeSeriesEntry(runInfo, "chi", 90.0);
+    addTimeSeriesEntry(runInfo, "omega", 90.0);
     runInfo.getGoniometer().makeUniversalGoniometer();
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
@@ -156,9 +210,9 @@ public:
   void test_getGoniometerMatrix2()
   {
     Run runInfo;
-    AddTSPEntry(runInfo, "phi", 45.0);
-    AddTSPEntry(runInfo, "chi", 90.0);
-    AddTSPEntry(runInfo, "omega", 0.0);
+    addTimeSeriesEntry(runInfo, "phi", 45.0);
+    addTimeSeriesEntry(runInfo, "chi", 90.0);
+    addTimeSeriesEntry(runInfo, "omega", 0.0);
     runInfo.getGoniometer().makeUniversalGoniometer();
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
@@ -174,14 +228,14 @@ public:
 
     Run run1;
     run1.getGoniometer().makeUniversalGoniometer();
-    AddTSPEntry(run1, "double_series", 45.0);
+    addTimeSeriesEntry(run1, "double_series", 45.0);
     run1.addProperty( new PropertyWithValue<int>("int_val", 1234) );
     run1.addProperty( new PropertyWithValue<std::string>("string_val", "help_im_stuck_in_a_log_file") );
     run1.addProperty( new PropertyWithValue<double>("double_val", 5678.9) );
-    AddTSPEntry(run1, "phi", 12.3);
-    AddTSPEntry(run1, "chi", 45.6);
-    AddTSPEntry(run1, "omega", 78.9);
-    AddTSPEntry(run1, "proton_charge", 78.9);
+    addTimeSeriesEntry(run1, "phi", 12.3);
+    addTimeSeriesEntry(run1, "chi", 45.6);
+    addTimeSeriesEntry(run1, "omega", 78.9);
+    addTimeSeriesEntry(run1, "proton_charge", 78.9);
 
     run1.saveNexus(th.file, "logs");
     th.file->openGroup("logs", "NXgroup");

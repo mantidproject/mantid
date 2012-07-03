@@ -5,9 +5,10 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSplitter.h"
-#include <vector>
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include <vector>
 
 
 namespace Mantid
@@ -91,6 +92,13 @@ namespace Mantid
        * @returns A vector of the current list of properties
        */
       const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
+      /// Returns a property as a time series property. It will throw if it is not valid
+      template<typename T>
+      Kernel::TimeSeriesProperty<T> * getTimeSeriesProperty(const std::string & name) const;
+      /// Get the value of a property as the given TYPE. Throws if the type is not correct
+      template<typename HeldType>
+      HeldType getPropertyValueAsType(const std::string & name) const;
+
       /**
        * Returns the named property
        * @param name :: The name of the property
