@@ -64,7 +64,7 @@ namespace VectorHelper
   template <typename NumT>
   MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString);
 
-  MANTID_KERNEL_DLL int getBinIndex(std::vector<double>& bins, const double X );
+  MANTID_KERNEL_DLL int getBinIndex(const std::vector<double>& bins, const double X );
   // Linearly interpolate between a set of Y values. Assumes the values are set for the calculated nodes
   MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize);
 

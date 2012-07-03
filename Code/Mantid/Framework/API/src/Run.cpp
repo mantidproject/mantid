@@ -2,11 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Run.h"
+#include "MantidAPI/PropertyNexus.h"
+
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VectorHelper.h"
+
 #include <boost/lexical_cast.hpp>
-#include "MantidAPI/PropertyNexus.h"
+
+#include <algorithm>
 
 namespace Mantid
 {
@@ -15,8 +21,17 @@ namespace API
 
 using namespace Kernel;
 
+/// The number of log entries summed when adding a run
 const int Run::ADDABLES = 6;
+
+/// The names of the log entries summed when adding two runs together
 const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"};
+
+/// Name of the log entry containing the proton charge when retrieved using getProtonCharge
+const char * Run::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
+
+/// Name of the log entry containing the histogram bins
+const char * Run::HISTOGRAM_BINS_LOG_NAME = "processed_histogram_bins";
 
 // Get a reference to the logger
 Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
@@ -27,8 +42,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /**
    * Default constructor
    */
-  Run::Run() : m_manager(), m_protonChargeName("gd_prtn_chrg"), 
-    m_goniometer()
+  Run::Run() : m_manager(), m_goniometer()
   {
   }
 
@@ -43,7 +57,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * Copy constructor
    * @param copy :: The object to initialize the copy from
    */
-  Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName), 
+  Run::Run(const Run& copy) : m_manager(copy.m_manager),
     m_goniometer(copy.m_goniometer)
   {
   }
@@ -59,7 +73,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   {
     if( this == &rhs ) return *this;
     m_manager = rhs.m_manager;
-    m_protonChargeName = rhs.m_protonChargeName;
     m_goniometer = rhs.m_goniometer;
     return *this;
   }
@@ -251,11 +264,11 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   void Run::addProperty(Kernel::Property *prop, bool overwrite)
   {
-    // Mmake an exception for the proton charge
+    // Make an exception for the proton charge
     // and overwrite it's value as we don't want to store the proton charge in two separate locations
     // Similar we don't want more than one run_title
     std::string name = prop->name();
-    if( hasProperty(name) && (overwrite || prop->name() == m_protonChargeName || prop->name()=="run_title") )
+    if( hasProperty(name) && (overwrite || prop->name() == PROTON_CHARGE_LOG_NAME || prop->name()=="run_title") )
     {
       removeProperty(name);
     }
@@ -270,13 +283,13 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   void Run::setProtonCharge(const double charge)
   {
-    if( !hasProperty(m_protonChargeName) )
+    if( !hasProperty(PROTON_CHARGE_LOG_NAME) )
     {
-      addProperty(m_protonChargeName, charge, "uA.hour");
+      addProperty(PROTON_CHARGE_LOG_NAME, charge, "uA.hour");
     }
     else
     {
-      Kernel::Property *charge_prop = getProperty(m_protonChargeName);
+      Kernel::Property *charge_prop = getProperty(PROTON_CHARGE_LOG_NAME);
       charge_prop->setValue(boost::lexical_cast<std::string>(charge));
     }
   }
@@ -290,7 +303,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   double Run::getProtonCharge() const
   {
-    double charge = m_manager.getProperty(m_protonChargeName);
+    double charge = m_manager.getProperty(PROTON_CHARGE_LOG_NAME);
     return charge;
   }
 
@@ -338,6 +351,58 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     {
       return -1;
     }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Store the given values as a set of energy bin boundaries. Throws
+   *    - an invalid_argument if fewer than 2 values are given;
+   *    - an out_of_range error if first value is greater of equal to the last
+   * @param histoBins :: A vector of values that are interpreted as bin boundaries from a histogram
+   */
+  void Run::storeHistogramBinBoundaries(const std::vector<double> & histoBins)
+  {
+    if(histoBins.size() < 2)
+    {
+      std::ostringstream os;
+      os << "Run::storeEnergyBinBoundaries - Fewer than 2 values given, size=" << histoBins.size() << ". Cannot interpret values as bin boundaries.";
+      throw std::invalid_argument(os.str());
+    }
+    if(histoBins.front() >= histoBins.back())
+    {
+      std::ostringstream os;
+      os << "Run::storeEnergyBinBoundaries - Inconsistent start & end values given, size=" << histoBins.size() << ". Cannot interpret values as bin boundaries.";
+      throw std::out_of_range(os.str());
+    }
+    addProperty(new ArrayProperty<double>(HISTOGRAM_BINS_LOG_NAME, histoBins), true);
+  }
+
+  /**
+   * Returns the energy bin boundaries for a given energy value if they have been stored here. Throws a std::runtime_error
+   * if the energy bins have not been set and a std::out_of_range error if the input value is out of the stored range
+   * @return The bin boundaries for the given energy value
+   */
+  std::pair<double, double> Run::histogramBinBoundaries(const double value) const
+  {
+    if(!m_manager.existsProperty(HISTOGRAM_BINS_LOG_NAME))
+    {
+      throw std::runtime_error("Run::histogramBoundaries - No energy bins have been stored for this run");
+    }
+    const std::vector<double> bins = getPropertyValueAsType<std::vector<double>>(HISTOGRAM_BINS_LOG_NAME);
+    if(value < bins.front())
+    {
+      std::ostringstream os;
+      os << "Run::histogramBinBoundaries- Value lower than first bin boundary. Value= " << value << ", first boundary=" << bins.front();
+      throw std::out_of_range(os.str());
+    }
+    if(value > bins.back())
+    {
+      std::ostringstream os;
+      os << "Run::histogramBinBoundaries- Value greater than last bin boundary. Value= " << value << ", last boundary=" << bins.back();
+      throw std::out_of_range(os.str());
+    }
+    const int index = VectorHelper::getBinIndex(bins, value);
+    return std::make_pair(bins[index], bins[index+1]);
   }
 
   //-----------------------------------------------------------------------------------------------

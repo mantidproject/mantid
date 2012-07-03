@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_PROPERTYNEXUSTEST_H_
-#define MANTID_KERNEL_PROPERTYNEXUSTEST_H_
+#ifndef MANTID_API_PROPERTYNEXUSTEST_H_
+#define MANTID_API_PROPERTYNEXUSTEST_H_
 
 #include "MantidAPI/PropertyNexus.h"
 #include "MantidKernel/System.h"
@@ -44,12 +44,14 @@ public:
     PropertyWithValue<double> pd("double_val", 456.78);
     PropertyWithValue<float> pf("float_val", float(987.56));
     PropertyWithValue<std::string> ps("string_val", "supercallifragalistic");
+    PropertyWithValue<std::vector<double>> pvd("vector_double_val", std::vector<double>(2, 1.4));
 
     PropertyNexus::saveProperty(th.file, &pi);
     PropertyNexus::saveProperty(th.file, &pu);
     PropertyNexus::saveProperty(th.file, &pd);
     PropertyNexus::saveProperty(th.file, &pf);
     PropertyNexus::saveProperty(th.file, &ps);
+    PropertyNexus::saveProperty(th.file, &pvd);
 
     TimeSeriesProperty<int> tspi("int_series");
     tspi.addValue( DateAndTime("2011-01-01T00:00:01"), 1234 );
@@ -76,6 +78,8 @@ public:
     prop = PropertyNexus::loadProperty(th.file, "double_val");   check_prop(prop, &pd);
     prop = PropertyNexus::loadProperty(th.file, "float_val");   check_prop(prop, &pf);
     prop = PropertyNexus::loadProperty(th.file, "string_val");   check_prop(prop, &ps);
+    prop = PropertyNexus::loadProperty(th.file, "vector_double_val");   check_prop(prop, &pvd);
+
 
     prop = PropertyNexus::loadProperty(th.file, "int_series");   check_prop(prop, &tspi);
     prop = PropertyNexus::loadProperty(th.file, "double_series");   check_prop(prop, &tspd);
@@ -86,5 +90,5 @@ public:
 };
 
 
-#endif /* MANTID_KERNEL_PROPERTYNEXUSTEST_H_ */
+#endif /* MANTID_API_PROPERTYNEXUSTEST_H_ */
 

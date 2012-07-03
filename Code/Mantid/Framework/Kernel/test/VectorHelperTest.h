@@ -14,6 +14,15 @@ class VectorHelperTest : public CxxTest::TestSuite
 {
 public:
 
+  VectorHelperTest() : m_test_bins(5,0.0)
+  {
+    m_test_bins[0] = -1.1;
+    m_test_bins[1] = -0.2;
+    m_test_bins[2] = 0.7;
+    m_test_bins[3] = 1.6;
+    m_test_bins[4] = 3.2;
+  }
+
   // TODO: More tests of other methods
 
   void test_splitStringIntoVector()
@@ -86,6 +95,63 @@ public:
 //    TS_ASSERT_EQUALS( vec[3], 134);
 //  }
 
+  void test_getBinIndex_Returns_Zero_For_Value_Lower_Than_Input_Range()
+  {
+    const double testValue = m_test_bins.front() - 1.1;
+    int index(-1);
+
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_EQUALS(index, 0);
+  }
+
+  void test_getBinIndex_Returns_Zero_For_Value_Equal_To_Lowest_In_Input_Range()
+  {
+    const double testValue = m_test_bins.front();
+    int index(-1);
+
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_EQUALS(index, 0);
+  }
+
+  void test_getBinIndex_Returns_Last_Bin_For_Value_Equal_To_Highest_In_Input_Range()
+  {
+    const double testValue = m_test_bins.back();
+    int index(-1);
+
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_EQUALS(index, 3);
+  }
+
+  void test_getBinIndex_Returns_Index_Of_Last_Bin_For_Value_Greater_Than_Input_Range()
+  {
+    const double testValue = m_test_bins.back() + 10.1;
+    int index(-1);
+
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_EQUALS(index, 3);
+  }
+
+  void test_getBinIndex_Returns_Correct_Bins_Index_For_Value_Not_On_Edge()
+  {
+    const double testValue = m_test_bins[1] + 0.3;
+    int index(-1);
+
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_EQUALS(index, 1);
+  }
+
+  void test_getBinIndex_Returns_Index_For_Bin_On_RHS_Of_Boundary_When_Given_Value_Is_Equal_To_A_Boundary()
+  {
+    const double testValue = m_test_bins[2];
+    int index(-1);
+
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_EQUALS(index, 2);
+  }
+
+private:
+  /// Testing bins
+  std::vector<double> m_test_bins;
 
 };
 

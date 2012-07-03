@@ -37,8 +37,16 @@ namespace
 
 class RunTest : public CxxTest::TestSuite
 {
- 
 public:
+  RunTest() : m_test_energy_bins(5)
+  {
+    m_test_energy_bins[0] = -1.1;
+    m_test_energy_bins[1] = -0.2;
+    m_test_energy_bins[2] = 0.7;
+    m_test_energy_bins[3] = 1.6;
+    m_test_energy_bins[4] = 3.2;
+  }
+
   void testAddGetData()
   {
     Run runInfo;
@@ -164,6 +172,115 @@ public:
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"), std::invalid_argument);
   }
 
+  void test_storeHistogramBinBoundaries_Throws_If_Fewer_Than_Two_Values_Are_Given()
+  {
+    Run runInfo;
+
+    std::vector<double> bins;
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::invalid_argument);
+    bins.push_back(0.5);
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::invalid_argument);
+    bins.push_back(1.5);
+    TS_ASSERT_THROWS_NOTHING(runInfo.storeHistogramBinBoundaries(bins));
+  }
+
+  void test_storeHistogramBinBoundaries_Throws_If_First_Value_Is_Greater_Or_Equal_To_Last_Value()
+  {
+    Run runInfo;
+    std::vector<double> bins(2, 0.0);
+
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::out_of_range);
+
+    bins[0] = -1.5;
+    bins[1] = -1.5;
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::out_of_range);
+
+    bins[0] = 2.1;
+    bins[1] = 2.1;
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::out_of_range);
+
+    bins[0] = -1.5;
+    bins[1] = -1.6;
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::out_of_range);
+
+    bins[0] = 2.1;
+    bins[1] = 1.9;
+    TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins), std::out_of_range);
+  }
+
+  void test_storeHistogramBinBoundaries_Succeeds_With_Valid_Bins()
+  {
+    Run runInfo;
+
+    TS_ASSERT_THROWS_NOTHING(runInfo.storeHistogramBinBoundaries(m_test_energy_bins));
+    TS_ASSERT_THROWS_NOTHING(runInfo.histogramBinBoundaries(m_test_energy_bins[1] + 0.1));
+  }
+
+  void test_histogramBinBoundaries_Throws_RuntimeError_For_New_Run()
+  {
+    Run runInfo;
+
+    TS_ASSERT_THROWS(runInfo.histogramBinBoundaries(1.5), std::runtime_error);
+  }
+
+  void test_histogramBinBoundaries_Throws_RuntimeError_When_Value_Is_Outside_Boundaries_Range()
+  {
+    using namespace Mantid::Kernel;
+    Run runInfo;
+    runInfo.storeHistogramBinBoundaries(m_test_energy_bins);
+
+    TS_ASSERT_THROWS(runInfo.histogramBinBoundaries(m_test_energy_bins.front() - 1.3), std::out_of_range);
+    TS_ASSERT_THROWS(runInfo.histogramBinBoundaries(m_test_energy_bins.back() + 1.3), std::out_of_range);
+  }
+
+  void test_histogramBinBoundaries_Returns_Closest_Lower_And_Upper_Boundary_For_Valid_Bin_Value_Away_From_Any_Edge()
+  {
+    using namespace Mantid::Kernel;
+    Run runInfo;
+    runInfo.storeHistogramBinBoundaries(m_test_energy_bins);
+
+    std::pair<double,double> edges;
+    TS_ASSERT_THROWS_NOTHING(edges = runInfo.histogramBinBoundaries(1.2));
+
+    TS_ASSERT_DELTA(edges.first, 0.7, 1e-12);
+    TS_ASSERT_DELTA(edges.second, 1.6, 1e-12);
+  }
+
+  void test_histogramBinBoundaries_Returns_The_Value_And_Next_Boundary_Along_If_Given_Value_Equals_A_Bin_Edge_Away_From_Ends()
+  {
+    using namespace Mantid::Kernel;
+    Run runInfo;
+    runInfo.storeHistogramBinBoundaries(m_test_energy_bins);
+
+    std::pair<double,double> edges;
+    TS_ASSERT_THROWS_NOTHING(edges = runInfo.histogramBinBoundaries(-0.2));
+    TS_ASSERT_DELTA(edges.first, -0.2, 1e-12);
+    TS_ASSERT_DELTA(edges.second, 0.7, 1e-12);
+  }
+
+  void test_histogramBinBoundaries_Returns_The_Value_And_Next_Boundary_Along_If_Given_Value_Equals_A_The_First_Bin_Edge()
+  {
+    using namespace Mantid::Kernel;
+    Run runInfo;
+    runInfo.storeHistogramBinBoundaries(m_test_energy_bins);
+
+    std::pair<double,double> edges;
+    TS_ASSERT_THROWS_NOTHING(edges = runInfo.histogramBinBoundaries(m_test_energy_bins.front()));
+    TS_ASSERT_DELTA(edges.first, -1.1, 1e-12);
+    TS_ASSERT_DELTA(edges.second, -0.2, 1e-12);
+  }
+
+  void test_histogramBinBoundaries_Returns_The_Value_And_Previous_Boundary_If_Given_Value_Equals_The_Last_Bin_Edge()
+  {
+    using namespace Mantid::Kernel;
+    Run runInfo;
+    runInfo.storeHistogramBinBoundaries(m_test_energy_bins);
+
+    std::pair<double,double> edges;
+    TS_ASSERT_THROWS_NOTHING(edges = runInfo.histogramBinBoundaries(m_test_energy_bins.back()));
+    TS_ASSERT_DELTA(edges.first, 1.6, 1e-12);
+    TS_ASSERT_DELTA(edges.second, 3.2, 1e-12);
+  }
 
   void test_getGoniometer()
   {
@@ -237,6 +354,8 @@ public:
     addTimeSeriesEntry(run1, "omega", 78.9);
     addTimeSeriesEntry(run1, "proton_charge", 78.9);
 
+    run1.storeHistogramBinBoundaries(m_test_energy_bins);
+
     run1.saveNexus(th.file, "logs");
     th.file->openGroup("logs", "NXgroup");
     th.file->makeGroup("junk_to_ignore", "NXmaterial");
@@ -252,6 +371,11 @@ public:
     TS_ASSERT( run2.hasProperty("double_val") );
     // This test both uses the goniometer axes AND looks up some values.
     TS_ASSERT_EQUALS( run2.getGoniometerMatrix(), run1.getGoniometerMatrix() );
+
+    std::pair<double,double> edges(0.0,0.0);
+    TS_ASSERT_THROWS_NOTHING(edges = run2.histogramBinBoundaries(1.2));
+    TS_ASSERT_DELTA(edges.first, 0.7, 1e-12);
+    TS_ASSERT_DELTA(edges.second, 1.6, 1e-12);
 
     // Reload without opening the group (for backwards-compatible reading of old files)
     Run run3;
@@ -278,6 +402,9 @@ public:
     TS_ASSERT_DELTA( run3.getProtonCharge(), 1.234, 1e-5 );
   }
 
+private:
+  /// Testing bins
+  std::vector<double> m_test_energy_bins;
 
 };
 

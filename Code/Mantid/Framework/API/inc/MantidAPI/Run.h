@@ -45,7 +45,6 @@ namespace Mantid
     */
     class MANTID_API_DLL Run
     {
-
     public:
       /// Default constructor
       Run();
@@ -110,14 +109,17 @@ namespace Mantid
         return p;
       }
 
-      /** @name Legacy functions */
-      //@{
       /// Set the proton charge
       void setProtonCharge( const double charge);
       /// Get the proton charge
       double getProtonCharge() const;
       /// Integrate the proton charge over the whole run time
       double integrateProtonCharge();
+
+      /// Store the given values as a set of histogram bin boundaries
+      void storeHistogramBinBoundaries(const std::vector<double> & energyBins);
+      /// Returns the bin boundaries for a given value
+      std::pair<double, double> histogramBinBoundaries(const double energyValue) const;
 
       /** @return a reference to the Goniometer object for this run */
       Mantid::Geometry::Goniometer & getGoniometer()
@@ -154,21 +156,23 @@ namespace Mantid
        * @param delproperty :: If true, delete the log entry
        */
       void removeLogData(const std::string &name, const bool delproperty=true) { return removeProperty(name, delproperty); }
-      //@}
-
+      /// Save the run to a NeXus file with a given group name
       void saveNexus(::NeXus::File * file, const std::string & group) const;
+      /// Load the run from a NeXus file with a given group name
       void loadNexus(::NeXus::File * file, const std::string & group);
 
     private:
       /// The number of properties that are summed when two workspaces are summed
       static const int ADDABLES;
-      /// The names of the properties to summ when two workspaces are summed
+      /// The names of the properties to sum when two workspaces are summed
       static const std::string ADDABLE[];
+      /// The name of the proton charge property
+      static const char *PROTON_CHARGE_LOG_NAME;
+      /// The name of the histogram bins property
+      static const char *HISTOGRAM_BINS_LOG_NAME;
 
       /// A pointer to a property manager
       Kernel::PropertyManager m_manager;
-      /// The name of the proton charge property
-      std::string m_protonChargeName;
       
       /// Goniometer for this run
       Mantid::Geometry::Goniometer m_goniometer;

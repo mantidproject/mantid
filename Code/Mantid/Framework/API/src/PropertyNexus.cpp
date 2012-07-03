@@ -1,13 +1,17 @@
 #include "MantidAPI/PropertyNexus.h"
-#include "MantidKernel/System.h"
+
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidNexusCPP/NeXusFile.hpp"
+
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Strings.h"
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include "MantidKernel/Strings.h"
+
 #include <napi.h>
 
 using namespace Mantid::Kernel;
@@ -39,7 +43,16 @@ namespace PropertyNexus
     std::vector<NumT> values;
     file->getData(values);
     if (times.empty())
-      return new PropertyWithValue<NumT>(name, values[0]);
+    {
+      if(values.size() == 1)
+      {
+        return new PropertyWithValue<NumT>(name, values[0]);
+      }
+      else
+      {
+        return new ArrayProperty<NumT>(name, values);
+      }
+    }
     else
     {
       TimeSeriesProperty<NumT> * prop = new TimeSeriesProperty<NumT>(name);
@@ -259,6 +272,10 @@ namespace PropertyNexus
       if (p) { savePropertyWithValue(file, p); return; } }
     { PropertyWithValue<uint64_t> * p = dynamic_cast<PropertyWithValue<uint64_t>*>(prop);
       if (p) { savePropertyWithValue(file, p); return; } }
+    { PropertyWithValue<std::vector<double> > * p = dynamic_cast<PropertyWithValue<std::vector<double> >*>(prop);
+    if (p) { savePropertyWithValue(file, p); return; } }
+    { PropertyWithValue<std::vector<int> > * p = dynamic_cast<PropertyWithValue<std::vector<int> >*>(prop);
+    if (p) { savePropertyWithValue(file, p); return; } }
 
     { TimeSeriesProperty<std::string> * p = dynamic_cast<TimeSeriesProperty<std::string>*>(prop);
       if (p) { saveTimeSeriesPropertyString(file, p); return; } }
@@ -278,6 +295,7 @@ namespace PropertyNexus
     { TimeSeriesProperty<uint64_t> * p = dynamic_cast<TimeSeriesProperty<uint64_t>*>(prop);
       if (p) { saveTimeSeriesProperty(file, p); return; } }
 
+    throw std::invalid_argument("PropertyNexus::saveProperty - Cannot save '" + prop->name() + "', unknown property type");
   }
 
 }// namespace PropertyNexus
