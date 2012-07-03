@@ -6,7 +6,7 @@
 #include <qwt_plot.h>
 #include <boost/lexical_cast.hpp>
 
-#include <math.h>
+#include <cmath>
 
 namespace MantidQt
 {
@@ -102,7 +102,7 @@ namespace IDA
       while( range > tolerance )
         range -= binWidth;
 
-      return abs(range) <= tolerance;
+      return std::abs(range) <= tolerance;
     }
   }
 
