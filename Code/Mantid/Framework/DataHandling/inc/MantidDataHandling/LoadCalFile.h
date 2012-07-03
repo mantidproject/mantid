@@ -5,6 +5,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/System.h"
@@ -39,7 +40,8 @@ namespace DataHandling
     static Geometry::Instrument_const_sptr getInstrument3Ways(API::Algorithm * alg);
 
     static void readCalFile(const std::string& calFileName,
-        Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, Mantid::API::MatrixWorkspace_sptr maskWS);
+        Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
+                            Mantid::DataObjects::MaskWorkspace_sptr maskWS);
 
     
   private:
