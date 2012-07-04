@@ -410,8 +410,12 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
 
     if (path.size()==0 || !Poco::File(path).exists())
     {
-      std::vector<std::string> paths = FileFinder::Instance().findRuns(instrument+dataRun);
-      if (!paths.empty()) path = paths[0];
+      try
+      {
+        std::vector<std::string> paths = FileFinder::Instance().findRuns(instrument+dataRun);
+        path = paths[0];
+      }
+      catch(Exception::NotFoundError&) { /* Pass. We report the missing file later. */ }
     }
 
     if (Poco::File(path).exists()) {

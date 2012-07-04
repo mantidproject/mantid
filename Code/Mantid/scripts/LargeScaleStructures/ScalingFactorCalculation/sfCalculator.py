@@ -787,10 +787,10 @@ def calculate(string_runs=None,
         list_runs = dico['list_runs']
 
         for (offset, item) in enumerate(list_runs):
-            _File = FileFinder.findRuns("REF_L%d" %int(item))
-            if len(_File)>0 and os.path.isfile(_File[0]): 
-                list_runs[offset] = _File[0]
-            else:
+            try:
+                _File = FileFinder.findRuns("REF_L%d" %int(item))[0]
+                list_runs[offset] = _File
+            except:
                 msg = "RefLReduction: could not find run %s\n" %item
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)

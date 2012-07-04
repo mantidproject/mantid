@@ -68,12 +68,6 @@ class RetrieveRunInfo(PythonAlgorithm):
 		runs = Intervals.fromString(runString)
 		filenames = FileFinder.findRuns(runString)
 
-		# Make sure we have something to work with, and warn user if some files are not present.
-		if len(filenames) == 0:
-			sys.exit("No files were found.  Quitting.")
-		if len(filenames) < len(runs.getValues()):
-			logger.error( str(len(runs.getValues()) - len(filenames)) + " files could not be found.  Carrying on with those that were." )
-
 		# Split the file names into groups of given size.  Dealing with the runs in 
 		filenameGroups = list(chunks(filenames, CHUNK_SIZE))
 

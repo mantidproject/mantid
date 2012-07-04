@@ -188,10 +188,9 @@ class RefLReduction(PythonAlgorithm):
 
                 ##############################################################
                 # Find full path to event NeXus data file
-                _File = FileFinder.findRuns("REF_L%d" %_run)
-                if len(_File)>0 and os.path.isfile(_File[0]): 
-                    data_file = _File[0]
-                else:
+                try:
+                    data_file = FileFinder.findRuns("REF_L%d" %_run)[0]
+                except RuntimeError:
                     msg = "RefLReduction: could not find run %d\n" % _run
                     msg += "Add your data folder to your User Data Directories in the File menu"
                     raise RuntimeError(msg)
@@ -209,12 +208,11 @@ class RefLReduction(PythonAlgorithm):
                          OutputWorkspace=ws_event_data)
         else:
 
-            print '** Working with data runs: ' + str(run_numbers[0])
+            print '** Working with data run: ' + str(run_numbers[0])
             
-            _File = FileFinder.findRuns("REF_L%d" %run_numbers[0])
-            if len(_File)>0 and os.path.isfile(_File[0]): 
-                data_file = _File[0]    
-            else:
+            try:
+                data_file = FileFinder.findRuns("REF_L%d" %run_numbers[0])[0]
+            except RuntimeError:
                 msg = "RefLReduction: could not find run %d\n" %run_numbers[0]
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)
@@ -548,10 +546,9 @@ class RefLReduction(PythonAlgorithm):
 
             print '-> normalization file is ' + str(normalization_run)
             # Find full path to event NeXus data file
-            f = FileFinder.findRuns("REF_L%d" %normalization_run)
-            if len(f)>0 and os.path.isfile(f[0]): 
-                norm_file = f[0]
-            else:
+            try:
+                norm_file = FileFinder.findRuns("REF_L%d" %normalization_run)[0]
+            except RuntimeError:
                 msg = "RefLReduction: could not find run %d\n" %normalization_run
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)

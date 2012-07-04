@@ -200,10 +200,13 @@ def get_logs(instrument, run):
         ws = '%s_%s'%(ws, 'Off_Off')
         
     if not mtd.workspaceExists(ws):
-        f = FileFinder.findRuns("%s%s" % (instrument, run))
-        if len(f)>0:
-            LoadEventNexus(Filename=f[0], OutputWorkspace=ws, 
+        try:
+            f = FileFinder.findRuns("%s%s" % (instrument, run))[0]
+            
+            LoadEventNexus(Filename=f, OutputWorkspace=ws, 
                            NXentryName='entry-Off_Off', MetaDataOnly=True)
+        except:
+            pass
 
     if mtd.workspaceExists(ws):
         if mtd[ws].getRun().hasProperty("SANGLE"):
