@@ -28,16 +28,23 @@ class Stitch1D(PythonAlgorithm):
         raise RuntimeError("No integrated dimension")
 
     def __check_individual_Workspace(self, ws):
-        if not ws.getNumDims() == 2:
-            raise RuntimeError( ws.name() + " must have 2 dimensions" )
-        dim1 = ws.getDimension(0)
-        dim2 = ws.getDimension(1)
-        if not bool(dim1.getNBins() == 1) ^ bool(dim2.getNBins() == 1):
-            raise RuntimeError(ws.name() + " must have one integrated and one unintegrated dimension")
+        ndims = ws.getNumDims()
+        if (ndims < 1) or (ndims > 2):
+            raise RuntimeError( ws.name() + " must have 1 or 2 dimensions" )
+        if ndims == 1:
+            dim1 = ws.getDimension(0)
+            if dim1.getNBins() == 1:
+                raise RuntimeError(ws.name() + " is one-dimensional, so must have an un-integrated dimension.")
+        if ndims == 2:
+            dim1 = ws.getDimension(0)
+            dim2 = ws.getDimension(1)
+            if not bool(dim1.getNBins() == 1) ^ bool(dim2.getNBins() == 1):
+                raise RuntimeError(ws.name() + " is two-dimensional, so must have one integrated and one un-integrated dimension.")
         return None
     
     def __check_both_Workspaces(self, ws1, ws2):
-        for i in range(0, 2):
+        ndims = min(ws1.getNumDims(), ws2.getNumDims())
+        for i in range(0, ndims):
             ws_1_dim = ws1.getDimension(i)
             ws_2_dim = ws2.getDimension(i)
             if not ws_1_dim.getNBins() == ws_2_dim.getNBins():
@@ -47,9 +54,9 @@ class Stitch1D(PythonAlgorithm):
         ws1_integrated_dim = self.__get_first_non_integrated_dimension(ws1)
         ws2_integrated_dim = self.__get_first_non_integrated_dimension(ws2)
         if not ws1_integrated_dim.getMaximum() == ws2_integrated_dim.getMaximum():
-            raise RuntimeError("Max values in the two non-integrated dimensions of the combining workspaces are not equal")
+            raise RuntimeError("Max values in the two non-integrated dimensions of the combining workspaces are not equal.")
         if not ws1_integrated_dim.getMinimum() == ws2_integrated_dim.getMinimum(): 
-            raise RuntimeError("Min values in the two non-integrated dimensions of the combining workspaces are not equal")
+            raise RuntimeError("Min values in the two non-integrated dimensions of the combining workspaces are not equal.")
             
     def __integrate_over(self, ws, fraction_low, fraction_high):
         dim = self.__get_first_non_integrated_dimension(ws)
@@ -118,8 +125,9 @@ class Stitch1D(PythonAlgorithm):
         overlap_step = (overlap_q_max - overlap_q_min) / overlap_nbins
         overlap_c = overlap_q_min
         for i in range(0, overlap_nbins):
-            q = (overlap_step * i) + overlap_c
-            target_index = int((target_step * q) + target_c)
+            q = float((overlap_step * i) + overlap_c)
+            # Find the target index by recentering (adding 0.5) and then truncating to an integer.
+            target_index = int((target_step * q) + target_c + 0.5) 
             sum.setSignalAt(target_index, overlap.signalAt(i))
             sum.setErrorSquaredAt(target_index, overlap.errorSquaredAt(i))
 	   
@@ -181,19 +189,20 @@ class Stitch1D(PythonAlgorithm):
         else:
             if b_scale_workspace2 == True:
                 scale_factor = (ws1_overlap / ws2_overlap)
+                scaled_workspace_1 = ws1_flattened * 1
+                scaled_workspace_2 = ws2_flattened * scale_factor
             else:
                 scale_factor = (ws2_overlap / ws1_overlap)
-            scaled_workspace_1 = ws1_flattened * 1
-            scaled_workspace_2 = ws2_flattened * 1
+                scaled_workspace_1 = ws1_flattened * scale_factor
+                scaled_workspace_2 = ws2_flattened * 1
         self.setProperty("OutScaleFactor", scale_factor)
-        
         #use the start and end positions to 'sum' over the appropriate region in the input workspaces
         workspace1_overlap = self.__extract_overlap_as_workspace(scaled_workspace_1, start_overlap, end_overlap)
         workspace2_overlap = self.__extract_overlap_as_workspace(scaled_workspace_2, start_overlap, end_overlap)
         weighted_mean_overlap = api.WeightedMeanMD(LHSWorkspace=workspace1_overlap,RHSWorkspace=workspace2_overlap)
         
         mtd.remove('sum')
-        sum = ws1_flattened + ws2_flattened
+        sum = scaled_workspace_1 + scaled_workspace_2
         self.__overlay_overlap(sum, weighted_mean_overlap)
         self.setProperty("OutputWorkspace", sum)
         
