@@ -30,8 +30,7 @@ private:
     SliceMD alg;
     alg.initialize();
 
-    Mantid::Kernel::Property *QDimProperty;
-    TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken SlicingAlgorithmDialog. Fix SlicingAlgorithmDialog!", QDimProperty = alg.getProperty(propertyName));
+    TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken SlicingAlgorithmDialog. Fix SlicingAlgorithmDialog!", alg.getProperty(propertyName));
   }
 
   /// Helper method to test application of the recusion depth

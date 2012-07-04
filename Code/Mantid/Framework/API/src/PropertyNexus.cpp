@@ -19,6 +19,11 @@ using namespace ::NeXus;
 using boost::algorithm::is_any_of;
 using boost::algorithm::split;
 
+#ifdef _WIN32
+  #pragma warning(push)
+  #pragma warning(disable : 4805)
+#endif
+
 namespace Mantid
 {
 namespace API
@@ -67,7 +72,6 @@ namespace PropertyNexus
    * @param times :: vector of times, empty = single property with value
    * @return Property *
    */
-  #pragma warning(disable:4800)
   Property * makeTimeSeriesBoolProperty(::NeXus::File * file, const std::string & name,  std::vector<Kernel::DateAndTime> & times)
   {
     std::vector<uint8_t> savedValues;
@@ -359,6 +363,10 @@ namespace PropertyNexus
 
     throw std::invalid_argument("PropertyNexus::saveProperty - Cannot save '" + prop->name() + "', unknown property type");
   }
+
+#ifdef _WIN32
+  #pragma warning(pop)
+#endif
 
 }// namespace PropertyNexus
 

@@ -88,7 +88,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
   case QEvent::MouseButtonPress: // User has started moving something (perhaps)
     {
     QPoint p = ((QMouseEvent*)evn)->pos();
-    double x, dx;
+    double x(0.0), dx(0.0);
     switch ( m_type )
     {
     case XMINMAX:
@@ -136,7 +136,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     if ( m_minChanging || m_maxChanging )
     {
     QPoint p = ((QMouseEvent*)evn)->pos();
-    double x;
+    double x(0.0);
     switch ( m_type )
     {
     case XMINMAX:
@@ -185,7 +185,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
       {
         m_canvas->setCursor(Qt::PointingHandCursor);
         QPoint p = ((QMouseEvent*)evn)->pos();
-        double x;
+        double x(0.0);
         switch ( m_type )
         {
         case XMINMAX:

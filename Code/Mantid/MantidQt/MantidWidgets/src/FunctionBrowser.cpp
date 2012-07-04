@@ -561,7 +561,7 @@ void FunctionBrowser::addAttributeAndParameterProperties(QtProperty* prop, Manti
   for(auto att = attributeNames.begin(); att != attributeNames.end(); ++att)
   {
     QString attName = QString::fromStdString(*att);
-    AProperty ap = addAttributeProperty(prop, attName, fun->getAttribute(*att));
+    addAttributeProperty(prop, attName, fun->getAttribute(*att));
   }
 
   auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
