@@ -393,7 +393,7 @@ public:
      WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
      TS_ASSERT( group );
      int groupSize = group->getNumberOfEntries();
-     TS_ASSERT( groupSize, 12 );
+     TS_ASSERT_EQUALS( groupSize, 12 );
      for(int i = 0; i < groupSize; ++i)
      {
        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(i) );
