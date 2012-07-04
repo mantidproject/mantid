@@ -510,6 +510,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             xlabel = 'Temp'
         if (np == 0):
             first = root[0:8]
+            last = root[0:8]
             run_list = lnWS
         else:
             last = root[0:8]
