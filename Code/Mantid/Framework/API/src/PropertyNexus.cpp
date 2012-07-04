@@ -84,7 +84,6 @@ namespace PropertyNexus
     }
     TimeSeriesProperty<bool> * prop = new TimeSeriesProperty<bool>(name);
     prop->addValues(times, realValues);
-    #pragma warning(default:4800)
     return prop;
   }
 
