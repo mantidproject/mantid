@@ -175,7 +175,6 @@ void AlignDetectors::init()
 
 }
 
-
 //-----------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::FileError If the calibration file cannot be opened and read successfully
@@ -246,7 +245,7 @@ void AlignDetectors::exec()
     try {
       // Get the input spectrum number at this workspace index
       const ISpectrum * inSpec = inputWS->getSpectrum(size_t(i));
-      double factor = calcConversionFromMap(this->tofToDmap, inSpec->getDetectorIDs());
+      const double factor = calcConversionFromMap(this->tofToDmap, inSpec->getDetectorIDs());
 
       // Get references to the x data
       MantidVec& xOut = outputWS->dataX(i);
@@ -254,16 +253,23 @@ void AlignDetectors::exec()
       // Make sure reference to input X vector is obtained after output one because in the case
       // where the input & output workspaces are the same, it might move if the vectors were shared.
       const MantidVec& xIn = inSpec->readX();
-      std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
+      
+      //std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
+      // the above transform creates wrong output in parallel in debug in Visual Studio
+      for(size_t k = 0; k < xOut.size(); ++k)
+      {
+        xOut[k] = xIn[k] * factor;
+      }
+
       // Copy the Y&E data
-      outputWS->dataY(i) = inSpec->dataY();
-      outputWS->dataE(i) = inSpec->dataE();
+      outputWS->dataY(i) = inSpec->readY();
+      outputWS->dataE(i) = inSpec->readE();
 
     } catch (Exception::NotFoundError &) {
       // Zero the data in this case
-      outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
-      outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
-      outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
+      outputWS->dataX(i).assign(outputWS->readX(i).size(),0.0);
+      outputWS->dataY(i).assign(outputWS->readY(i).size(),0.0);
+      outputWS->dataE(i).assign(outputWS->readE(i).size(),0.0);
     }
     progress.report();
     PARALLEL_END_INTERUPT_REGION

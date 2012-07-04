@@ -187,7 +187,8 @@ void LoadNexusProcessed::exec()
       Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), static_cast<double>(p-1)/nperiods_d, 1./nperiods_d);
       declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), base_name + os.str(),
           Direction::Output));
-      wksp_group->add(base_name + os.str());
+      //wksp_group->add(base_name + os.str());
+      wksp_group->addWorkspace(local_workspace);
       setProperty(prop_name + os.str(), local_workspace);
     }
 
