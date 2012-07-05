@@ -7,6 +7,9 @@ if is_supported_f2py_platform():
 
 class ResNorm(PythonAlgorithm):
  
+	def category(self):
+		return "Workflow\\MIDAS;PythonAlgorithms"
+
 	def PyInit(self):
 		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
@@ -34,6 +37,7 @@ class ResNorm(PythonAlgorithm):
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
 		nbin = self.getPropertyValue('VanBinning')
+		nbins = [nbin]
 
 		vname = prefix+van+'_'+ana
 		rname = prefix+res+'_'+ana
@@ -41,6 +45,6 @@ class ResNorm(PythonAlgorithm):
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')
-		Main.ResNormStart(vname,rname,erange,nbin,verbOp,plotOp,saveOp)
+		Main.ResNormStart(vname,rname,erange,nbins,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(ResNorm())         # Register algorithm with Mantid

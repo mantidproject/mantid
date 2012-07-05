@@ -7,23 +7,26 @@ if is_supported_f2py_platform():
 
 class MuscatData(PythonAlgorithm):
  
+	def category(self):
+		return "Workflow\\MIDAS;PythonAlgorithms"
+
 	def PyInit(self):
 		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']))
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']))
-		self.declareProperty(Name='Geom',DefaultValue='Flat',Validator=ListValidator(['Flat','Cyl']),Description = '')
-		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = '')
-		self.declareProperty(Name='SqwInput',DefaultValue='',Validator=MandatoryValidator(),Description = '')
-		self.declareProperty(Name='NR1', DefaultValue=1000)
-		self.declareProperty(Name='NR2', DefaultValue=1000)
-		self.declareProperty(Name='Nms', DefaultValue=1)
-		self.declareProperty(Name='DetAngle', DefaultValue=90.0)
-		self.declareProperty(Name='Thick', DefaultValue='',Validator=MandatoryValidator())
-		self.declareProperty(Name='Width', DefaultValue='',Validator=MandatoryValidator())
-		self.declareProperty(Name='Height', DefaultValue=3.0)
-		self.declareProperty(Name='Density', DefaultValue=0.1)
-		self.declareProperty(Name='SigScat', DefaultValue=5.0)
-		self.declareProperty(Name='SigAbs', DefaultValue=0.1)
-		self.declareProperty(Name='Temperature', DefaultValue=300.0)
+		self.declareProperty(Name='Geom',DefaultValue='Flat',Validator=ListValidator(['Flat','Cyl']),Description = 'Sample geometry')
+		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample data run number')
+		self.declareProperty(Name='SqwInput',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sqw file run number')
+		self.declareProperty(Name='NR1', DefaultValue=1000,Description = 'MonteCarlo neutrons NR1. Default=1000')
+		self.declareProperty(Name='NR2', DefaultValue=1000,Description = 'MonteCarlo neutrons NR2. Default=1000')
+		self.declareProperty(Name='Nms', DefaultValue=1,Description = 'Number of scatterings. Default=1')
+		self.declareProperty(Name='DetAngle', DefaultValue=90.0,Description = 'Detector angle. Default=90.0')
+		self.declareProperty(Name='Thick', DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample thickness')
+		self.declareProperty(Name='Width', DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample width')
+		self.declareProperty(Name='Height', DefaultValue=3.0,Description = 'Sample height. Default=3.0')
+		self.declareProperty(Name='Density', DefaultValue=0.1,Description = 'Sample density. Default=0.1')
+		self.declareProperty(Name='SigScat', DefaultValue=5.0,Description = 'Scattering cross-section. Default=5.0')
+		self.declareProperty(Name='SigAbs', DefaultValue=0.1,Description = 'Absorption cross-section. Default=0.1')
+		self.declareProperty(Name='Temperature', DefaultValue=300.0,Description = 'Sample temperature (K). Default=300.0')
 		self.declareProperty(Name='Plot',DefaultValue='None',Validator=ListValidator(['None','Totals','Scat1','All']))
 		self.declareProperty(Name='Verbose',DefaultValue=True,Description = 'Switch Verbose Off/On')
 		self.declareProperty(Name='Save',DefaultValue=False,Description = 'Switch Save result to nxs file Off/On')

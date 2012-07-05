@@ -7,6 +7,9 @@ if is_supported_f2py_platform():
 
 class Quest(PythonAlgorithm):
  
+	def category(self):
+		return "Workflow\\MIDAS;PythonAlgorithms"
+
 	def PyInit(self):
 		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
@@ -44,7 +47,6 @@ class Quest(PythonAlgorithm):
 		nbet = self.getPropertyValue('NumberBeta')
 		nsig = self.getPropertyValue('NumberSigma')
 		nbs = [nbet, nsig]
-		nbs = [ 30,50]
 
 		sname = prefix+sam+'_'+ana
 		rname = prefix+res+'_'+ana
