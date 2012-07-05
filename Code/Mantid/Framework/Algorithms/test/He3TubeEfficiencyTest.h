@@ -196,8 +196,8 @@ private:
       detIDs[i] = i;
     }
     space2D->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, nspecs));
-    delete specNums;
-    delete detIDs;
+    delete[] specNums;
+    delete[] detIDs;
 
     AnalysisDataService::Instance().add(inputWS, space2D);
 
