@@ -56,7 +56,12 @@ namespace CurveFitting
     std::string name()const{return "ThermoNeutronBackToBackExpPV";}
     virtual const std::string category() const { return "Peak";}
 
+    /// Set up the range of peak calculation for higher efficiency
+    void setCalculationRange(double tof_low, double tof_upper);
+    /// Calculate peak
     void geneatePeak(double* out, const double* xValues, const size_t nData);
+    ///
+    void resetFWHM();
 
   protected:
 
@@ -83,8 +88,14 @@ namespace CurveFitting
     void calHandEta(double sigma2, double gamma, double& H, double& eta) const;
 
     mutable double mFWHM;
+    mutable double mLowTOF;
+    mutable double mUpperTOF;
 
   };
+
+  // typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+
+  typedef boost::shared_ptr<ThermoNeutronBackToBackExpPV> ThermoNeutronBackToBackExpPV_sptr;
 
 
 } // namespace CurveFitting

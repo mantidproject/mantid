@@ -24,7 +24,8 @@ namespace CurveFitting
    */
   ThermoNeutronBackToBackExpPV::ThermoNeutronBackToBackExpPV() : mFWHM(0.0)
   {
-
+    mLowTOF = 0.0;
+    mUpperTOF = 1.0E20;
   }
 
   ThermoNeutronBackToBackExpPV::~ThermoNeutronBackToBackExpPV()
@@ -38,47 +39,22 @@ namespace CurveFitting
   void ThermoNeutronBackToBackExpPV::init()
   {
     declareParameter("I", 1.0);
-    declareParameter("TOF_h", 0.0);
+    declareParameter("TOF_h", -0.0);
     declareParameter("height", 1.0);
     declareParameter("Alpha",1.6);
     declareParameter("Beta",1.6);
     declareParameter("Sigma2", 1.0);
     declareParameter("Gamma", 0.0);
 
-    /* Kept for wrapper function
-    declareParameter("I", 1.0);
-    declareParameter("Dtt1", 1.0);
-    declareParameter("Dtt1t", 1.0);
-    declareParameter("Dtt2t", 1.0);
-    declareParameter("d_peak", 1.0);
-    declareParameter("Zero_e", 0.0);
-    declareParameter("Zero_t", 0.0);
-    declareParameter("w_cross", 1.0);
-    declareParameter("T_cross", 1.0);
-    declareParameter("Alpha0",1.6);
-    declareParameter("Alpha1",1.5);
-    declareParameter("Beta0",1.6);
-    declareParameter("Beta1",1.5);
-    declareParameter("Alpha0t",1.6);
-    declareParameter("Alpha1t",1.5);
-    declareParameter("Beta0t",1.6);
-    declareParameter("Beta1t",1.5);
-
-    declareParameter("Sigma0", 1.0);
-    declareParameter("Sigma1", 1.0);
-    declareParameter("Sigma2", 1.0);
-
-    declareParameter("Gamma0", 0.0);
-    declareParameter("Gamma1", 0.0);
-    declareParameter("Gamma2", 0.0);
-    */
-
     return;
   }
 
   double ThermoNeutronBackToBackExpPV::centre()const
   {
-    return getParameter("TOF_h");
+    double tofh = getParameter("TOF_h");
+
+
+    return tofh;
   }
 
 
@@ -95,9 +71,15 @@ namespace CurveFitting
     return height;
   };
 
+  /*
+   * Calculate FWHM
+   * It will be calculated each time when it is called because
+   * there is no record whether any peak parameter is changed since last caculation
+   * of FWHM.
+   */
   double ThermoNeutronBackToBackExpPV::fwhm() const
   {
-    if (fabs(mFWHM) < 1.0E-8)
+    if (mFWHM < 1.0E-8)
     {
       double sigma2 = this->getParameter("Sigma2");
       double gamma = this->getParameter("Gamma");
@@ -138,17 +120,24 @@ namespace CurveFitting
     double H, eta;
     calHandEta(sigma2, gamma, H, eta);
 
-
     g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
-        << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << std::endl;
+        << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << "  Peak Range = " << mLowTOF << ", "
+        << mUpperTOF << std::endl;
 
     // 2. Do calculation
+    g_log.debug() << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] << std::endl;
     for (size_t id = 0; id < nData; ++id)
     {
-      double dT = xValues[id]-tof_h;
-      double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
-      out[id] = height*omega;
-      // std::cout << "DB1143  " << xValues[id] << "   " << out[id] << "   " << omega << std::endl;
+      if (xValues[id] >= mLowTOF &&  xValues[id] <= mUpperTOF)
+      {
+        double dT = xValues[id]-tof_h;
+        double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+        out[id] = height*omega;
+      }
+      else
+      {
+        out[id] = 0.0;
+      }
     }
 
     return;
@@ -234,6 +223,22 @@ namespace CurveFitting
     }
 
     return;
+  }
+
+  /*
+   * Set the range for a peak to be calculated
+   */
+  void ThermoNeutronBackToBackExpPV::setCalculationRange(double tof_low, double tof_upper)
+  {
+    mLowTOF = tof_low;
+    mUpperTOF = tof_upper;
+
+    return;
+  }
+
+  void ThermoNeutronBackToBackExpPV::resetFWHM()
+  {
+    mFWHM = 0.0;
   }
 
 } // namespace Mantid

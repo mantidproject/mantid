@@ -81,10 +81,6 @@ public:
     ThermoNeutronBackToBackExpPV peak;
     peak.initialize();
 
-    /*
-     *  2   1   0 1.859018     55175.79        0.03613    0.02376    187.50514    0.00000 30.46799         3.4990    52.2059    91.3293   0.5385
-     */
-
     peak.setParameter("I", 1.0);
     peak.setParameter("height", 1000.0);
 
@@ -143,6 +139,10 @@ public:
     // test the output from fit is what you expect
     double chi2 = fitalg.getProperty("OutputChi2overDoF");
     TS_ASSERT(chi2 < 1.5);
+    if (chi2 >= 1.5)
+    {
+      std::cout << "Chi^2 = " << chi2 << std::endl;
+    }
 
     std::string fitStatus = fitalg.getProperty("OutputStatus");
     TS_ASSERT_EQUALS(fitStatus, "success");
@@ -162,8 +162,8 @@ public:
       }
     }
 
-    return;
 
+    return;
   }
 
 
