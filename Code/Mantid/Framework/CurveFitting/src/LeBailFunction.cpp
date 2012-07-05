@@ -25,8 +25,6 @@ namespace CurveFitting
     mL1 = 1.0;
     mL2 = 0.0;
 
-    g_log.warning() << "LeBailFunction.function1D(): Need a good algorithm to calculate a proper range for each peak. " << std::endl;
-
     return;
   }
     
@@ -225,7 +223,7 @@ namespace CurveFitting
       mPeaks[id]->setParameter("Sigma2", sigma2);
       mPeaks[id]->setParameter("Gamma", gamma);
 
-      // c) FIXME Implement "Calculate individual peak range"
+      // c) Calculate individual peak range
       double fwhm = mPeaks[id]->fwhm();
       double tof_low = tof_h - DEFAULTPEAKWIDTHFACTOR*fwhm;
       double tof_upper = tof_h + DEFAULTPEAKWIDTHFACTOR*fwhm;

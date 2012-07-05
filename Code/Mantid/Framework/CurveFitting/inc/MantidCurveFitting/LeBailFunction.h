@@ -6,6 +6,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
 
 namespace Mantid
 {
@@ -49,7 +50,11 @@ namespace CurveFitting
     virtual std::string name() const;
 
     // Functions to input parameters
-    void setPeak(double d, double height);
+    void addPeaks(std::vector<std::vector<int> > peakhkls, std::vector<double> peakheights);
+    void setPeakHeights(std::vector<double> inheights);
+    CurveFitting::ThermoNeutronBackToBackExpPV_sptr getPeak(size_t peakindex);
+
+    void calPeaksParameters();
 
     void calPeaks(double* out, const double* xValues, const size_t nData);
 
@@ -70,6 +75,8 @@ namespace CurveFitting
 
     void calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h, double &sigma_g2, double &gamma_l, std::map<std::string, double>& parmap) const;
     void adPeakPositionD(double dh);
+    double calCubicDSpace(double a, int h, int k, int l) const;
+    void addPeak(double d, double height);
 
     double mL1;
     double mL2;
@@ -79,13 +86,18 @@ namespace CurveFitting
     mutable double Sig0, Sig1, Sig2, Gam0, Gam1, Gam2;
     mutable double Dtt1, Dtt2, Dtt1t, Dtt2t, Zero, Zerot;
 
-    std::vector<double> dvalues;
-    std::vector<double> heights;
+    mutable std::vector<double> dvalues;
+    mutable std::vector<double> heights;
+    std::vector<std::vector<int> > mPeakHKLs;
+
+    //std::vector<API::IPeakFunction* > mPeaks;
+    std::vector<ThermoNeutronBackToBackExpPV_sptr> mPeaks;
+
     mutable std::vector<std::map<std::string, double> > mPeakParameters; // It is in strict order with dvalues;
 
-    API::IPeakFunction* mPeak;
-
   };
+
+  typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;
 
 
 } // namespace CurveFitting
