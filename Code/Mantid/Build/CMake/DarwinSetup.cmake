@@ -22,8 +22,13 @@ if ( PYTHON_DEBUG_LIBRARIES )
 endif ()
 # Find the python interpreter to get the version we're using (needed for install commands below)
 find_package ( PythonInterp )
-set ( PY_VER "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" )
-message ( STATUS "Python version is " ${PY_VER} )
+if ( PYTHON_VERSION_MAJOR )
+  set ( PY_VER "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" )
+  message ( STATUS "Python version is " ${PY_VER} )
+else ()
+  # Older versions of CMake don't set these variables so just assume 2.6 as before
+  set ( PY_VER 2.6 )
+endif ()
 
 ###########################################################################
 # Force 64-bit compiler as that's all we support
