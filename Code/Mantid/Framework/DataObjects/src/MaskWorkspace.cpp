@@ -97,8 +97,9 @@ namespace DataObjects
         }
         else if (m_hasInstrument)
         {
-          if (this->isMasked(this->getDetectorID(i))) // slow and correct check with the real method
-              numMasked++;
+          const std::set<detid_t> ids = this->getDetectorIDs(i);
+          if (this->isMasked(ids)) // slow and correct check with the real method
+              numMasked += ids.size();
         }
       }
       return numMasked;

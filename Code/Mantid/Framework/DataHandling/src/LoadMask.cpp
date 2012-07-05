@@ -172,16 +172,10 @@ namespace DataHandling
 
   void LoadMask::initDetectors(){
 
-    // 1. Initialize
-    if (mDefaultToUse){
-      // Default is to use all detectors
-      for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
-        mMaskWS->dataY(i)[0] = 0;
-      }
-    } else {
-      // Default not to use any detectors
-      for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
-        mMaskWS->dataY(i)[0] = 1;
+    if (!mDefaultToUse){  // Default is to use all detectors
+      size_t numHist = mMaskWS->getNumberHistograms();
+      for (size_t wkspIndex = 0; wkspIndex < numHist; wkspIndex++){
+        mMaskWS->setMaskedIndex(wkspIndex);
       }
     }
 
@@ -876,9 +870,7 @@ namespace DataHandling
     }
 
     // 2. Use the instrument in the temp Workspace for new MaskWorkspace
-    Geometry::Instrument_const_sptr minstrument = tempWS->getInstrument();
-    API::MatrixWorkspace_sptr mm = API::MatrixWorkspace_sptr(new DataObjects::MaskWorkspace(minstrument));
-    mMaskWS = mm;
+    mMaskWS = DataObjects::MaskWorkspace_sptr(new DataObjects::MaskWorkspace(tempWS->getInstrument()));
     mMaskWS->setTitle("Mask");
 
     return;

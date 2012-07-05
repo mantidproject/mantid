@@ -46,8 +46,9 @@ namespace DataObjects
     double getValue(const detid_t detectorID, const double defaultValue) const;
 
     void setValue(const detid_t detectorID, const double value, const double error=0.);
+    void setValue(const std::set<detid_t> &detectorIDs, const double value, const double error=0.);
 
-    detid_t getDetectorID(const std::size_t workspaceIndex) const;
+    std::set<detid_t> getDetectorIDs(const std::size_t workspaceIndex) const;
 
     void binaryOperation(boost::shared_ptr<const SpecialWorkspace2D>& ws, const unsigned int operatortype);
     void binaryOperation(const unsigned int operatortype);
@@ -68,10 +69,6 @@ namespace DataObjects
   protected:
 
     virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
-
-    /** Vector with all the detector IDs, in the same order as the workspace indices.
-     * Therefore, detectorIDs[workspaceIndex] = that detector ID.  */
-    std::vector<detid_t> detectorIDs;
 
     void binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws);
     void binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws);

@@ -6,6 +6,7 @@
 
 using Mantid::API::SpectraAxis;
 using Mantid::API::SpectraDetectorMap;
+using std::set;
 using std::size_t;
 
 namespace Mantid
@@ -33,11 +34,8 @@ namespace DataObjects
    */
   SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst, const bool includeMonitors)
   {
-    // Get all the detectors IDs
-    detectorIDs = inst->getDetectorIDs(!includeMonitors);
-
     // Init the Workspace2D with one spectrum per detector, in the same order.
-    this->init(int(detectorIDs.size()), 1, 1);
+    this->init(inst->getNumberDetectors(!includeMonitors), 1, 1);
 
     // Copy the instrument
     this->setInstrument( inst );
@@ -49,11 +47,10 @@ namespace DataObjects
     detID_to_WI.clear();
     for (size_t wi=0; wi<m_noVectors; wi++)
     {
-      std::set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-      if (!dets.empty())
+      set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+      for (auto det = dets.begin(); det != dets.end(); ++det)
       {
-        detid_t detID = *dets.begin();
-        detID_to_WI[detID] = int(wi);
+        detID_to_WI[*det] = wi;
       }
     }
   }
@@ -127,14 +124,14 @@ namespace DataObjects
 
 
   //----------------------------------------------------------------------------------------------
-  /** Return the special value (Y) in the workspace at the given detector ID
+  /** Set the special value (Y) in the workspace at the given detector ID
    *
    * @param detectorID :: detector ID to look up
    * @param value :: holder for the Y value
    * @return the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */
-  void SpecialWorkspace2D::setValue(const detid_t detectorID, double value, const double error)
+  void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value, const double error)
   {
     std::map<detid_t,size_t>::iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end()){
@@ -148,17 +145,34 @@ namespace DataObjects
     }
   }
 
+  /**
+   * Set the special value (Y) in the workspace at the given detector IDs. This is a
+   * convenience function that just calls setValue(const detid_t, double, double).
+   *
+   * @param detectorIDs :: detector IDs to look up
+   * @param value :: holder for the Y value
+   * @return the Y value for the detector IDs.
+   * @throw std::invalid_argument if any of the detector IDs are not found
+   */
+  void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs, const double value, const double error)
+  {
+    for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID)
+    {
+      this->setValue(*detID, value, error);
+    }
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Return the detector ID at the given workspace index (i.e., spectrum/histogram index)
    *
    * @param workspaceIndex
    * @return
    */
-  detid_t SpecialWorkspace2D::getDetectorID(const std::size_t workspaceIndex) const
+  set<detid_t> SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const
   {
-    if (size_t(workspaceIndex) > detectorIDs.size())
+    if (size_t(workspaceIndex) > this->getNumberHistograms())
       throw std::invalid_argument("SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
-    return detectorIDs[workspaceIndex];
+    return this->getSpectrum(workspaceIndex)->getDetectorIDs();
   }
 
   //--------------------------------------------------------------------------------------------
@@ -328,8 +342,8 @@ namespace DataObjects
 
     // 2. Check detector ID
     for (size_t ispec = 0; ispec < numhist1; ispec ++){
-      std::set<detid_t> ids1 = this->getSpectrum(ispec)->getDetectorIDs();
-      std::set<detid_t> ids2 = ws->getSpectrum(ispec)->getDetectorIDs();
+      set<detid_t> ids1 = this->getSpectrum(ispec)->getDetectorIDs();
+      set<detid_t> ids2 = ws->getSpectrum(ispec)->getDetectorIDs();
 
       if (ids1.size() != ids2.size()){
         g_log.debug() << "Spectra " << ispec << ": 2 Workspaces have different number of detectors " << ids1.size() << " vs. " << ids2.size() << std::endl;
@@ -383,7 +397,6 @@ namespace DataObjects
 
     // 2. Copy detector map
     this->detID_to_WI = sourcews->detID_to_WI;
-    this->detectorIDs = sourcews->detectorIDs;
 
     /*
     std::map<detid_t, std::size_t>::iterator copyiter;

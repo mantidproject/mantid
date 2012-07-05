@@ -43,8 +43,8 @@ public:
     const std::set<detid_t> & dets = ws->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
 
-    TS_ASSERT_EQUALS( ws->getDetectorID(0), 1);
-    TS_ASSERT_EQUALS( ws->getDetectorID(1), 2);
+    TS_ASSERT_EQUALS( *(ws->getDetectorIDs(0).begin()), 1);
+    TS_ASSERT_EQUALS( *(ws->getDetectorIDs(1).begin()), 2);
   }
 
   void test_setValue_getValue()
@@ -171,7 +171,7 @@ public:
     ws3->binaryOperation(cws2, BinaryOperator::OR);
 
     for (size_t i = 0; i < ws1->getNumberHistograms(); i ++){
-      detid_t did = ws1->getDetectorID(i);
+      detid_t did = *(ws1->getDetectorIDs(i).begin());
       TS_ASSERT_EQUALS(ws1->getValue(did), 0);
       TS_ASSERT_EQUALS(ws3->getValue(did), 1);
     }

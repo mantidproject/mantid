@@ -68,10 +68,13 @@ namespace DataObjects
       // Convert the Y value to a group number
       int group = static_cast<int>(this->readY(wi)[0]);
       if (group == 0) group = -1;
-      detid_t detID = detectorIDs[wi];
-      detIDToGroup[detID] = group;
-      if (group > ngroups)
-        ngroups = group;
+      std::set<detid_t> detIDs = this->getDetectorIDs(wi);
+      for (auto detID = detIDs.begin(); detID != detIDs.end(); ++detID)
+      {
+        detIDToGroup[*detID] = group;
+        if (group > ngroups)
+          ngroups = group;
+      }
     }
   }
 
@@ -91,14 +94,17 @@ namespace DataObjects
       // Convert the Y value to a group number
       int group = static_cast<int>(this->readY(wi)[0]);
       if (group == 0) group = -1;
-      detid_t detID = detectorIDs[wi];
-      if (detID < 0) // if you need negative detector ids, use the other function
-        continue;
-      if (detIDToGroup.size() < static_cast<size_t>(detID + 1))
-        detIDToGroup.resize(detID+1);
-      detIDToGroup[detID] = group;
-      if (group > ngroups)
-        ngroups = group;
+      std::set<detid_t> detIDs = this->getDetectorIDs(wi);
+      for (auto detID = detIDs.begin(); detID != detIDs.end(); ++detID)
+      {
+        if ((*detID) < 0) // if you need negative detector ids, use the other function
+          continue;
+        if (detIDToGroup.size() < static_cast<size_t>((*detID) + 1))
+          detIDToGroup.resize((*detID)+1);
+        detIDToGroup[*detID] = group;
+        if (group > ngroups)
+          ngroups = group;
+      }
     }
   }
 
