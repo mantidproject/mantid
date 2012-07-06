@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>557</width>
-    <height>422</height>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,14 +50,51 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="jobLabel">
+       <property name="text">
+        <string>Ignore jobs older than </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="daysSlider">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>30</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="daysLabel">
+       <property name="text">
+        <string>XX Days</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -79,5 +116,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>daysSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>JobStatusDialog</receiver>
+   <slot>updateIgnoreVal(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>287</x>
+     <y>385</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>278</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>updateIgnoreVal(int)</slot>
+ </slots>
 </ui>

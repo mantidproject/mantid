@@ -29,6 +29,8 @@ JobStatusDialog::JobStatusDialog(QWidget *parent) :
     //ui->tableWidget->setCellWidget(1, 4, new QPushButton("Download",this));
     *****************************/
 
+    m_ignoreDays = ui->daysSlider->value();
+
 }
 
 JobStatusDialog::~JobStatusDialog()
@@ -87,5 +89,15 @@ void JobStatusDialog::addRow( RemoteJob &job)
         table->setCellWidget(0, 4, new QPushButton("Download",this));
         // TODO: Hook up the button to a download function!
     }
+
+}
+
+void JobStatusDialog::updateIgnoreVal( int ignoreDays)
+{
+  m_ignoreDays = ignoreDays;
+  if (m_ignoreDays == 1)
+    ui->daysLabel->setText( QString("01 ") + QString( QObject::tr("Day")));
+  else
+    ui->daysLabel->setText( QString("%1 ").arg( m_ignoreDays, 2, 10, QChar('0')) + QString(QObject::tr("Days")));
 
 }
