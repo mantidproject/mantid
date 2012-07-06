@@ -61,7 +61,8 @@ void Abragam::setActiveParameter(size_t i,double value)
     double a = fmod(value, 2*M_PI); 
     if( a<=-M_PI ) a += 2*M_PI; 
     if( a>M_PI ) a-= 2*M_PI;
-    setParameter(j,a,false);  }
+    setParameter(j,a,false);
+  }
   else
     setParameter(j,value,false);
 }
