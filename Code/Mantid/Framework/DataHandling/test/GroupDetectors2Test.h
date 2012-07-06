@@ -509,6 +509,36 @@ public:
     AnalysisDataService::Instance().remove("GroupDetectors2_testAverageBehaviour_Output");
   }
 
+  void testEvents()
+  {
+      int numPixels = 5;
+      int numBins = 5;
+      int numEvents = 200;
+      EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numEvents,0,1,4);
+      AnalysisDataService::Instance().addOrReplace("GDEvents", input);
+      GroupDetectors2 alg2;
+      TS_ASSERT_THROWS_NOTHING( alg2.initialize());
+      TS_ASSERT( alg2.isInitialized() );
+
+      // Set the properties
+      alg2.setPropertyValue("InputWorkspace","GDEvents");
+      alg2.setPropertyValue("OutputWorkspace","GDEventsOut");
+      alg2.setPropertyValue("WorkspaceIndexList", "2-4");
+      alg2.setPropertyValue("Behaviour", "Average");
+
+      alg2.execute();
+      TS_ASSERT(alg2.isExecuted());
+
+      EventWorkspace_sptr output;
+      output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("GDEventsOut");
+      TS_ASSERT(output);
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(output->getNumberEvents(), (2+3+4)*numEvents);
+      TS_ASSERT_EQUALS(input->readX(0).size(), output->readX(0).size());
+      TS_ASSERT_DELTA((input->readY(2)[0]+input->readY(3)[0]+input->readY(4)[0])/3,output->readY(0)[0],0.00001);
+      AnalysisDataService::Instance().remove("GDEventsOut");
+  }
+
   private:
     const std::string inputWS, outputBase, inputFile;
     enum constants { NHIST = 6, NBINS = 4 };
