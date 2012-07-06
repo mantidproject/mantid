@@ -13,10 +13,13 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 
+#include <boost/regex.hpp>
+#include <boost/shared_array.hpp>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -25,9 +28,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/Text.h>
-#include "Poco/RegularExpression.h"
-#include "Poco/NumberParser.h"
-#include <boost/shared_array.hpp>
 #include <iostream>
 //-----------------------------------------------------------------------
 
@@ -263,15 +263,14 @@ namespace Mantid
       int numberXPixels = 0;
       int numberYPixels = 0;
       std::string data_type = element->getAttribute("type");
-      Poco::RegularExpression re_sig("([0-9]+),([0-9]+)");
-      Poco::RegularExpression::MatchVec match;
-      re_sig.match(data_type, 0, match);
-      if (match.size()==3)
+      boost::regex b_re_sig("INT\\d+\\[(\\d+),(\\d+)\\]");
+      if (boost::regex_match(data_type, b_re_sig))
       {
-        std::string num_str = data_type.substr(match[1].offset, match[1].length);
-        Poco::NumberParser::tryParse(num_str, numberXPixels);
-        num_str = data_type.substr(match[2].offset, match[2].length);
-        Poco::NumberParser::tryParse(num_str, numberYPixels);
+        boost::match_results<std::string::const_iterator> match;
+        boost::regex_search(data_type, match, b_re_sig);
+        // match[0] is the full string
+        Kernel::Strings::convert(match[1], numberXPixels);
+        Kernel::Strings::convert(match[2], numberYPixels);
       }
       if (numberXPixels==0 || numberYPixels==0)
         g_log.notice() << "Could not read in the number of pixels!" << std::endl;
