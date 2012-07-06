@@ -193,7 +193,9 @@ void TOFSANSResolution::exec()
       const double dq_over_q = std::sqrt(dTheta2/(theta*theta)+dwl_over_wl*dwl_over_wl);
       
       PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
-      if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0)
+      // By using only events with a positive weight, we use only the data distribution and
+      // leave out the background events
+      if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0 && itev->weight()>0)
       {
         DxOut[iq] += q*dq_over_q*itev->weight();
         XNorm[iq] += itev->weight();
@@ -209,12 +211,10 @@ void TOFSANSResolution::exec()
   // Normalize according to the chosen weighting scheme
   for ( int i = 0; i<xLength-1; i++ )
   {
-    if (XNorm[i]>0)
-    {
-      DxOut[i] /= XNorm[i];
-      TOFY[i] /= XNorm[i];
-      ThetaY[i] /= XNorm[i];
-    }
+    if (XNorm[i]==0) continue;
+    DxOut[i] /= XNorm[i];
+    TOFY[i] /= XNorm[i];
+    ThetaY[i] /= XNorm[i];
   }
 }
 } // namespace Algorithms
