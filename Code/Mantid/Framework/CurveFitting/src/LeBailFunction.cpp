@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
+#include <gsl/gsl_sf_erf.h>
 
 #define DEFAULTPEAKWIDTHFACTOR 8.0
 
@@ -85,7 +86,7 @@ namespace CurveFitting
     double Tcross = getParameter("Tcross");
 
     // 2. Start to calculate alpha, beta, sigma2, gamma,
-    double n = 0.5*erfc(wcross*(Tcross-1/dh));
+    double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
 
     double alpha_e = Alph0 + Alph1*dh;
     double alpha_t = Alph0t - Alph1t/dh;
