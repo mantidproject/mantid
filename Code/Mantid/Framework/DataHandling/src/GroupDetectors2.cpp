@@ -12,6 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 
+
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <iomanip>
@@ -45,6 +46,7 @@ void GroupDetectors2::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using std::size_t;
 
 /// (Empty) Constructor
@@ -61,9 +63,9 @@ const double GroupDetectors2::READFILE = 0.15;
 
 void GroupDetectors2::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,
                                           boost::make_shared<CommonBinsValidator>()),"The name of the input 2D workspace");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
   std::vector<std::string> fileExts(2);
   fileExts[0] = ".map";
@@ -95,6 +97,15 @@ void GroupDetectors2::exec()
 {
   // Get the input workspace
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+  //Check if it is an event workspace
+  EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (eventW != NULL)
+  {
+    this->execEvent();
+    return;
+  }
+
   const size_t numInHists = inputWS->getNumberHistograms();
   // Bin boundaries need to be the same, so do the full check on whether they actually are
   if (!API::WorkspaceHelpers::commonBoundaries(inputWS))
@@ -146,6 +157,68 @@ void GroupDetectors2::exec()
   g_log.information() << name() << " algorithm has finished\n";
 
   setProperty("OutputWorkspace",outputWS);
+}
+
+void GroupDetectors2::execEvent()
+{
+    // Get the input workspace
+    const MatrixWorkspace_const_sptr matrixInputWS = getProperty("InputWorkspace");
+    EventWorkspace_const_sptr inputWS= boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+
+
+    const size_t numInHists = inputWS->getNumberHistograms();
+    progress( m_FracCompl = CHECKBINS );
+    interruption_point();
+
+    // some values loaded into this vector can be negative so this needs to be a signed type
+    std::vector<int64_t> unGroupedInds;
+    //the ungrouped list could be very big but might be none at all
+    unGroupedInds.reserve(numInHists);
+    for( size_t i = 0; i < numInHists ; i++ )
+    {
+      unGroupedInds.push_back(i);
+    }
+
+    // read in the input parameters to make that map, if KeepUngroupedSpectra was set we'll need a list of the ungrouped spectrra too
+    getGroups(inputWS, unGroupedInds);
+
+    // converting the list into a set gets rid of repeated values, here the multiple GroupDetectors2::USED become one USED at the start
+    const std::set<int64_t> unGroupedSet(unGroupedInds.begin(), unGroupedInds.end());
+
+    // Check what the user asked to be done with ungrouped spectra
+    const bool keepAll = getProperty("KeepUngroupedSpectra");
+    // ignore the one USED value in set or ignore all the ungrouped if the user doesn't want them
+    const size_t numUnGrouped = keepAll ? unGroupedSet.size()-1 : 0;
+
+    //Make a brand new EventWorkspace
+    EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        WorkspaceFactory::Instance().create("EventWorkspace",  m_GroupSpecInds.size()+ numUnGrouped,
+                                                  inputWS->readX(0).size(), inputWS->blocksize()));
+    //Copy geometry over.
+    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+
+    // prepare to move the requested histograms into groups, first estimate how long for progress reporting. +1 in the demonator gets rid of any divide by zero risk
+    double prog4Copy=( (1.0 - m_FracCompl)/(static_cast<double>(numInHists-unGroupedSet.size())+1.) )*
+      (keepAll ? static_cast<double>(numInHists-unGroupedSet.size())/static_cast<double>(numInHists): 1.);
+
+    // Build a new map
+    const size_t outIndex = formGroupsEvent(inputWS, outputWS, prog4Copy);
+
+    // If we're keeping ungrouped spectra
+    if (keepAll)
+    {
+      // copy them into the output workspace
+      moveOthersEvent(unGroupedSet, inputWS, outputWS, outIndex);
+    }
+
+    //Set all X bins on the output
+    cow_ptr<MantidVec> XValues;
+    XValues.access() = inputWS->readX(0);
+    outputWS->setAllX(XValues);
+
+    g_log.information() << name() << " algorithm has finished\n";
+
+    setProperty("OutputWorkspace",outputWS);
 }
 
 /** Make a map containing spectra indexes to group, the indexes could have come from
@@ -614,14 +687,10 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
   int bhv = 0;
   if ( behaviour == "Average" ) bhv = 1;
 
-  std::vector<int> grpSize;
   API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create(
     "Workspace2D", static_cast<int>(m_GroupSpecInds.size()), 1, 1);
 
   g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
-
-  //Input instrument
-  Geometry::Instrument_const_sptr instr = inputWS->getInstrument();
 
   // where we are copying spectra to, we start copying to the start of the output workspace
   size_t outIndex = 0;
@@ -712,6 +781,106 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
   g_log.debug() << name() << " created " << outIndex << " new grouped spectra\n";
   return outIndex;
 }
+
+
+/**
+*  Move the user selected spectra in the input workspace into groups in the output workspace
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param prog4Copy :: the amount of algorithm progress to attribute to moving a single spectra
+*  @return number of new grouped spectra
+*/
+size_t GroupDetectors2::formGroupsEvent( DataObjects::EventWorkspace_const_sptr inputWS, DataObjects::EventWorkspace_sptr  outputWS,
+            const double prog4Copy)
+{
+  // get "Behaviour" string
+  const std::string behaviour = getProperty("Behaviour");
+  int bhv = 0;
+  if ( behaviour == "Average" ) bhv = 1;
+
+  API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create(
+    "Workspace2D", static_cast<int>(m_GroupSpecInds.size()), 1, 1);
+
+  g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
+
+
+  // where we are copying spectra to, we start copying to the start of the output workspace
+  size_t outIndex = 0;
+  // Only used for averaging behaviour. We may have a 1:1 map where a Divide would be waste as it would be just dividing by 1
+  bool requireDivide(false);
+  for ( storage_map::const_iterator it = m_GroupSpecInds.begin(); it != m_GroupSpecInds.end() ; ++it )
+  {
+    // This is the grouped spectrum
+    EventList & outEL = outputWS->getEventList(outIndex);
+
+    // The spectrum number of the group is the key
+    outEL.setSpectrumNo(it->first);
+    // Start fresh with no detector IDs
+    outEL.clearDetectorIDs();
+
+    // the Y values and errors from spectra being grouped are combined in the output spectrum
+    // Keep track of number of detectors required for masking
+    size_t nonMaskedSpectra(0);
+    beh->dataX(outIndex)[0] = 0.0;
+    beh->dataE(outIndex)[0] = 0.0;
+    for( std::vector<size_t>::const_iterator wsIter = it->second.begin(); wsIter != it->second.end(); ++wsIter)
+    {
+      const size_t originalWI = *wsIter;
+
+      const EventList & fromEL=inputWS->getEventList(originalWI);
+      //Add the event lists with the operator
+      outEL += fromEL;
+
+
+      // detectors to add to the output spectrum
+      outEL.addDetectorIDs(fromEL.getDetectorIDs() );
+      try
+      {
+        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
+        if( !det->isMasked() ) ++nonMaskedSpectra;
+      }
+      catch(Exception::NotFoundError&)
+      {
+        // If a detector cannot be found, it cannot be masked
+        ++nonMaskedSpectra;
+      }
+    }
+    if( nonMaskedSpectra == 0 ) ++nonMaskedSpectra; // Avoid possible divide by zero
+    if(!requireDivide) requireDivide = (nonMaskedSpectra > 1);
+    beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
+
+    // make regular progress reports and check for cancelling the algorithm
+    if ( outIndex % INTERVAL == 0 )
+    {
+      m_FracCompl += INTERVAL*prog4Copy;
+      if ( m_FracCompl > 1.0 )
+        m_FracCompl = 1.0;
+      progress(m_FracCompl);
+      interruption_point();
+    }
+    outIndex ++;
+  }
+
+  // Refresh the spectraDetectorMap
+  outputWS->doneAddingEventLists();
+
+  if ( bhv == 1 && requireDivide )
+  {
+    g_log.debug() << "Running Divide algorithm to perform averaging.\n";
+    Mantid::API::IAlgorithm_sptr divide = createSubAlgorithm("Divide");
+    divide->initialize();
+    divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
+    divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);
+    divide->setProperty<API::MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+    divide->execute();
+  }
+
+
+  g_log.debug() << name() << " created " << outIndex << " new grouped spectra\n";
+  return outIndex;
+}
+
+
 /**
 *  Only to be used if the KeepUnGrouped property is true, moves the spectra that were not selected
 *  to be in a group to the end of the output spectrum
@@ -720,7 +889,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param outIndex :: the next spectra index available after the grouped spectra
 */
-void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS,
          size_t outIndex)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
@@ -768,6 +937,63 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::Mat
 
   g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra\n";
 }
+
+
+/**
+*  Only to be used if the KeepUnGrouped property is true, moves the spectra that were not selected
+*  to be in a group to the end of the output spectrum
+*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a group
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param outIndex :: the next spectra index available after the grouped spectra
+*/
+void GroupDetectors2::moveOthersEvent(const std::set<int64_t> &unGroupedSet, DataObjects::EventWorkspace_const_sptr inputWS,
+                                      DataObjects::EventWorkspace_sptr outputWS,size_t outIndex)
+{
+  g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
+  double prog4Copy = (1. - 1.*static_cast<double>(m_FracCompl))/static_cast<double>(unGroupedSet.size());
+
+  std::set<int64_t>::const_iterator copyFrIt = unGroupedSet.begin();
+  // go thorugh all the spectra in the input workspace
+  for ( ; copyFrIt != unGroupedSet.end(); ++copyFrIt )
+  {
+    if( *copyFrIt == USED ) continue; //Marked as not to be used
+    size_t sourceIndex = static_cast<size_t>(*copyFrIt);
+
+    // The input spectrum we'll copy
+    const EventList & inputSpec = inputWS->getEventList(sourceIndex);
+
+    // Destination of the copying
+    EventList & outputSpec=outputWS->getEventList(outIndex);
+
+    // Copy the data
+    outputSpec+=inputSpec;
+
+    // Spectrum numbers etc.
+    outputSpec.setSpectrumNo(inputSpec.getSpectrumNo());
+    outputSpec.clearDetectorIDs();
+    outputSpec.addDetectorIDs( inputSpec.getDetectorIDs() );
+
+    // go to the next free index in the output workspace
+    outIndex ++;
+    // make regular progress reports and check for cancelling the algorithm
+    if ( outIndex % INTERVAL == 0 )
+    {
+      m_FracCompl += INTERVAL*prog4Copy;
+      if ( m_FracCompl > 1.0 )
+      {
+        m_FracCompl = 1.0;
+      }
+      progress(m_FracCompl);
+      interruption_point();
+    }
+  }
+  // Refresh the spectraDetectorMap
+  outputWS->doneAddingEventLists();
+
+  g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra\n";
+}
+
 //RangeHelper
 /** Expands any ranges in the input string of non-negative integers, eg. "1 3-5 4" -> "1 3 4 5 4"
 *  @param line :: a line of input that is interpreted and expanded

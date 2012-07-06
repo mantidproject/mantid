@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include <climits>
+#include "MantidDataObjects/EventWorkspace.h"
 #include <map>
 #ifdef HAS_UNORDERED_MAP_H
 #include <tr1/unordered_map>
@@ -151,6 +152,7 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
   // Implement abstract Algorithm methods
   void init();
   void exec();
+  void execEvent();
   
   /// read in the input parameters and see what findout what will be to grouped
   void getGroups(API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
@@ -170,13 +172,19 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
                    std::vector<size_t> &output, std::vector<int64_t> &unUsedSpec, std::string seperator="#");
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
-  double fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists);
+  double fileReadProg(DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, DataHandling::GroupDetectors2::storage_map::size_type numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
   size_t formGroups(API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
         const double prog4Copy);
+  /// Copy the and combine the event lists that the user requested from the input into the output workspace
+  size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS, DataObjects::EventWorkspace_sptr outputWS,
+        const double prog4Copy);
+
   /// Copy the data data in ungrouped histograms from the input workspace to the output
   void moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, size_t outIndex);
+  /// Copy the data data in ungrouped event lists from the input workspace to the output
+  void moveOthersEvent(const std::set<int64_t> &unGroupedSet, DataObjects::EventWorkspace_const_sptr inputWS, DataObjects::EventWorkspace_sptr outputWS, size_t outIndex);
 
   /// flag values
   enum {
