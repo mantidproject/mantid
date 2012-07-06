@@ -89,7 +89,7 @@ void SassenaFFT::exec()
   API::AnalysisDataService::Instance().add( sqwName, sqw );
 
   //Do we apply the detailed balance condition exp(E/(2*kT)) ?
-  if( this->getProperty("LoadMonitors") )
+  if( this->getProperty("Detailed Balance") )
   {
     double kT = this->getProperty("Temp");
     kT /= 11.604;  // units of meV
