@@ -81,11 +81,7 @@ public:
     // 2. Get workspace
     int64_t nHist = 1;
     int64_t nBins = vecX.size();
-    bool isHist = false;
     std::set<int64_t> maskedWSIndices;
-    double xvalue = 1.0;
-    double yvalue = 0.0;
-    double evalue = 1.0;
 
     API::MatrixWorkspace_sptr dataws =
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(
