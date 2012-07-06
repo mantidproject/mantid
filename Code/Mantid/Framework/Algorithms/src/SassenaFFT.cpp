@@ -50,7 +50,7 @@ void SassenaFFT::init()
 {
   this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("InputWorkspace","",Kernel::Direction::InOut), "The name of the input group workspace");
   // properties for the detailed balance condition
-  this->declareProperty(new Kernel::PropertyWithValue<bool>("Detailed Balance", false, Kernel::Direction::Input),"Do we apply detailed balance condition (optional, default False)?");
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("DetailedBalance", false, Kernel::Direction::Input),"Do we apply detailed balance condition (optional, default False)?");
   this->declareProperty("Temp",300.0,"Multiply structure factor by exp(E/(2*kT)");
   this->setPropertySettings("Temp", new Kernel::VisibleWhenProperty("Detailed Balance", Kernel::IS_EQUAL_TO, "1"));
 }
@@ -89,7 +89,7 @@ void SassenaFFT::exec()
   API::AnalysisDataService::Instance().add( sqwName, sqw );
 
   //Do we apply the detailed balance condition exp(E/(2*kT)) ?
-  if( this->getProperty("Detailed Balance") )
+  if( this->getProperty("DetailedBalance") )
   {
     double kT = this->getProperty("Temp");
     kT /= 11.604;  // units of meV
