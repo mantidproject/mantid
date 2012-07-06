@@ -35,25 +35,34 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport StripVanadiumPeaks2 : public API::Algorithm
+  class DLLExport StripVanadiumPeaks2: public API::Algorithm
   {
-  public:
-    StripVanadiumPeaks2();
-    ~StripVanadiumPeaks2();
-    
-    /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "StripVanadiumPeaks"; }
-    /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 2; }
-  /// Algorithm's category for identification
-  virtual const std::string category() const { return "CorrectionFunctions;Optimization\\PeakFinding;Diffraction"; }
+    public:
+      StripVanadiumPeaks2();
+      ~StripVanadiumPeaks2();
 
-  private:
-    void initDocs();
-    void init();
-    void exec();
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const
+      {
+        return "StripVanadiumPeaks";
+      }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const
+      {
+        return 2;
+      }
+      /// Algorithm's category for identification
+      virtual const std::string category() const
+      {
+        return "CorrectionFunctions;Optimization\\PeakFinding;Diffraction";
+      }
 
-  };
+    private:
+      void initDocs();
+      void init();
+      void exec();
+
+    };
 
 
 } // namespace Algorithms
