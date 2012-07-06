@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/File.h>
@@ -303,6 +304,14 @@ public:
       delete log;
     }
 
+    void testCreatesCurrentPeriodLog()
+    {
+      //Check it with a few expected period numbers.
+      doTestCurrentPeriodLog(1);
+      doTestCurrentPeriodLog(2);
+      doTestCurrentPeriodLog(3);
+    }
+
     void testNoICPevent()
     {
       if ( icp_file.exists() ) icp_file.remove();
@@ -368,6 +377,22 @@ public:
 
 //*/
 private:
+
+    /// Helper method to run common test code for checking period logs.
+    void doTestCurrentPeriodLog(const int& expected_period)
+    {
+      auto* log  = new TimeSeriesProperty<std::string>("ICPLog");
+      LogParser logparser(log);
+      Property* prop = logparser.createCurrentPeriodLog(expected_period);
+      PropertyWithValue<int>* prop_with_value = dynamic_cast<PropertyWithValue<int>* >(prop);
+
+      int value;
+      TS_ASSERT(prop_with_value != NULL);
+      Mantid::Kernel::toValue<int>(prop_with_value->value(), value);
+      TS_ASSERT_EQUALS(expected_period, value);
+      delete prop;
+      delete log;
+    }
 
     void mkICP()
     {

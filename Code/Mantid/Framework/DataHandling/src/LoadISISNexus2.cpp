@@ -515,7 +515,9 @@ namespace Mantid
       {
         Kernel::Property *log = local_workspace->run().getProperty("icp_event");
         LogParser parser(log);
-        local_workspace->mutableRun().addProperty(parser.createPeriodLog(static_cast<int>(period)));
+        const int period_number = static_cast<int>(period);
+        local_workspace->mutableRun().addProperty(parser.createPeriodLog(period_number));
+        local_workspace->mutableRun().addProperty(parser.createCurrentPeriodLog(period_number));
         Property* periods = parser.createAllPeriodsLog();
         if(!local_workspace->mutableRun().hasProperty(periods->name()))
         {

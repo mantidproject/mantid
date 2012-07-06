@@ -89,8 +89,10 @@ namespace Mantid
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);
-	     /// creates time series property showing times when when a particular period was active.
-	  Kernel::Property* createPeriodLog(int period)const;
+	    /// creates time series property showing times when when a particular period was active.
+      Kernel::Property* createPeriodLog(int period)const;
+      /// create a period log for the current period.
+      Kernel::Property* createCurrentPeriodLog(const int& period) const;
 
       /// The name and path of the input file
       std::string m_filename;

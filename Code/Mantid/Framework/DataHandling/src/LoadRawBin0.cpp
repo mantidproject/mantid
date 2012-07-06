@@ -127,8 +127,13 @@ void LoadRawBin0::exec()
   if (bLoadlogFiles)
   {
     runLoadLog(m_filename,localWorkspace);
-    Property* log = createPeriodLog(1);
-    if (log) run.addLogData(log);
+    const int period_number = 1;
+    Property* log = createPeriodLog(period_number);
+    if (log) 
+    {
+      run.addLogData(log);
+      run.addLogData(createCurrentPeriodLog(period_number));
+    }
   }
   // Set the total proton charge for this run
   setProtonCharge(run);
@@ -150,12 +155,15 @@ void LoadRawBin0::exec()
         prevPeriod << "PERIOD " << (period);
         Run& runObj = localWorkspace->mutableRun();
         runObj.removeLogData(prevPeriod.str());
+        runObj.removeLogData("current_period");
         //add current period data
-        Property* log = createPeriodLog(period+1);
+        const int period_number = period + 1;
+        Property* log = createPeriodLog(period_number);
         if (log) 
-	{
-	  runObj.addLogData(log);
-	}
+        {
+          runObj.addLogData(log);
+          runObj.addLogData(createCurrentPeriodLog(period_number));
+        }
       }
 
     }

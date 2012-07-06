@@ -79,6 +79,9 @@ namespace Mantid
       /// Ctreates a TimeSeriesProperty<bool> showing times when a particular period was active
       Kernel::Property* createPeriodLog(int period)const;
 
+      /// Creates a log value for the current period.
+      Kernel::Property* createCurrentPeriodLog(const int& period) const;
+
       /// Ctreates a TimeSeriesProperty<int> with all data periods
       Kernel::Property* createAllPeriodsLog()const;
 

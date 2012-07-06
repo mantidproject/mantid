@@ -87,7 +87,7 @@ public:
 	
 	LoadRawBin0 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "CSP79590.raw");
+    loader5.setPropertyValue("Filename", "CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     //loader5.setPropertyValue("SpectrumList", "0,1,2,3");
     
@@ -111,12 +111,13 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
+    int periodNumber = 0;
+    const int nHistograms = 4;
     for (;itr1!=wsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*itr1)));
-      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 4 )
-
+      doTestMultiPeriodWorkspace(outsptr, nHistograms, ++periodNumber);
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
     MatrixWorkspace_sptr  outsptr1;
@@ -139,6 +140,26 @@ public:
   }
   
 private:
+
+    /// Helper method to run common set of tests on a workspace in a multi-period group.
+  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace, const size_t& nHistograms, int expected_period)
+  {
+    // Check the number of histograms.
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), nHistograms);
+    // Check the current period property.
+    const Mantid::API::Run& run = workspace->run();
+    Property* prop = run.getLogData("current_period");
+    PropertyWithValue<int>* current_period_property = dynamic_cast<PropertyWithValue<int>* >(prop); 
+    TS_ASSERT(current_period_property != NULL);
+    int actual_period;
+    Mantid::Kernel::toValue<int>(current_period_property->value(), actual_period);
+    TS_ASSERT_EQUALS(expected_period, actual_period);
+    // Check the period n property.
+    std::stringstream stream;
+    stream << "period " << actual_period;
+    TSM_ASSERT_THROWS_NOTHING("period number series could not be found.", run.getLogData(stream.str()));
+  }
+
   LoadRawBin0 loader;
   std::string inputFile;
   std::string outputSpace;

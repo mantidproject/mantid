@@ -22,7 +22,7 @@ class LoadISISNexusTest : public CxxTest::TestSuite
 private:
 
   // Helper method to fetch the log property entry corresponding to period.
-  Property* fetchPeriod(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
+  Property* fetchPeriodLog(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
   {
     std::stringstream period_number_stream;
     period_number_stream << expectedPeriodNumber;
@@ -31,16 +31,26 @@ private:
     return p;
   }
 
+  // Helper method to fetch the log property entry corresponding to the current period.
+  Property* fetchCurrentPeriodLog(MatrixWorkspace_sptr workspace)
+  {
+    Property* p= workspace->run().getLogData("current_period");
+    return p;
+  }
+
   // Helper method to check that the log data contains a specific period number entry.
   void checkPeriodLogData(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
   {
     Property* p = NULL; 
-    TS_ASSERT_THROWS_NOTHING(p = fetchPeriod(workspace, expectedPeriodNumber));
+    TS_ASSERT_THROWS_NOTHING(p = fetchPeriodLog(workspace, expectedPeriodNumber));
     TS_ASSERT(p != NULL)
-    TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry", fetchPeriod(workspace, expectedPeriodNumber-1), Mantid::Kernel::Exception::NotFoundError);
-    TSM_ASSERT_THROWS("Shouldn't have a period greater than the expected entry", fetchPeriod(workspace, expectedPeriodNumber+1), Mantid::Kernel::Exception::NotFoundError);
+    TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry", fetchPeriodLog(workspace, expectedPeriodNumber-1), Mantid::Kernel::Exception::NotFoundError);
+    TSM_ASSERT_THROWS("Shouldn't have a period greater than the expected entry", fetchPeriodLog(workspace, expectedPeriodNumber+1), Mantid::Kernel::Exception::NotFoundError);
     Mantid::Kernel::TimeSeriesProperty<bool>* period_property = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool>*>(p);
     TS_ASSERT(period_property);
+    // Check that the logs also contain a current_period property.
+    Property* current_period_log = fetchCurrentPeriodLog(workspace);
+    TS_ASSERT_EQUALS(expectedPeriodNumber, atoi(current_period_log->value().c_str()));
   }
 
 public:
@@ -68,7 +78,7 @@ public:
         TS_ASSERT_EQUALS(ws->getSpectrum(1234)->getDetectorIDs().size(), 1);
 
         const std::vector< Property* >& logs = ws->run().getLogData();
-        TS_ASSERT_EQUALS(logs.size(), 60);
+        TS_ASSERT_EQUALS(logs.size(), 61);
 
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->run().getLogData("icp_event"));
         TS_ASSERT(slog);

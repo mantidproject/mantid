@@ -112,8 +112,13 @@ void LoadRawSpectrum0::initDocs()
 			if(bLoadlogFiles)
 			{
 				runLoadLog(m_filename,localWorkspace);
-				Property* log = createPeriodLog(1);
-				if (log) run.addLogData(log);
+        const int period_number = 1;
+				Property* log = createPeriodLog(period_number);
+				if (log)
+        {
+          run.addLogData(log);
+          run.addLogData(createCurrentPeriodLog(period_number));
+        }
 			}
 			// Set the total proton charge for this run
 			setProtonCharge(run);
@@ -136,11 +141,14 @@ void LoadRawSpectrum0::initDocs()
 						prevPeriod << "PERIOD " << (period);
 						Run& runObj = localWorkspace->mutableRun();
 						runObj.removeLogData(prevPeriod.str());
+            runObj.removeLogData("current_period");
 						//add current period data
-						Property* log = createPeriodLog(static_cast<int>(period+1));
+            int period_number = static_cast<int>(period+1);
+						Property* log = createPeriodLog(period_number);
 						if (log) 
 						{ 
 						  runObj.addLogData(log);
+              runObj.addLogData(createCurrentPeriodLog(period_number));
 						}
 					}
 					//skip all spectra except the first one in each period

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include <fstream>  // used to get ifstream
 #include <sstream>
 #include <algorithm>
@@ -303,6 +304,16 @@ namespace Mantid
         p->addValue(it->first, (it->second == period) );
 
       return p;
+    }
+
+    /**
+    Create a log vale for the current period.
+    @param period: The period number to create the log entry for.
+    */
+    Kernel::Property* LogParser::createCurrentPeriodLog(const int& period) const
+    {
+      Kernel::PropertyWithValue<int>* currentPeriodProperty = new Kernel::PropertyWithValue<int>("current_period", period);
+      return currentPeriodProperty;
     }
 
     /// Ctreates a TimeSeriesProperty<int> with all data periods
