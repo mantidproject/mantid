@@ -57,10 +57,11 @@ void Abragam::setActiveParameter(size_t i,double value)
     setParameter(j,fabs(value),false);  // Make sigma positive
   else if (parameterName(j) == "Phi")
   {
-    double a = fmod(value, 2*M_PI); // Put angle in range of 0 to 360 degrees
-    if( a<0 ) a += 2*M_PI; 
-    setParameter(j,a,false);
-  }
+    // Put angle in range of (-180 to 180] degrees
+    double a = fmod(value, 2*M_PI); 
+    if( a<=-M_PI ) a += 2*M_PI; 
+    if( a>M_PI ) a-= 2*M_PI;
+    setParameter(j,a,false);  }
   else
     setParameter(j,value,false);
 }
