@@ -2012,6 +2012,27 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
 
 
 /**
+  Round all of the components of all vectors to the nearest integer.  This 
+  is useful when the vectors in the list represent Miller indices.  Since
+  the PeaksWorkspace records the Miller indices as sets of three doubles,
+  there is no guarantee that the Miller indices will be integers.
+
+  @param hkl_list   Vector of V3D objects whose components will be rounded. 
+
+ */
+void IndexingUtils::RoundHKLs( std::vector<V3D> & hkl_list )
+{
+  for ( size_t entry = 0; entry < hkl_list.size(); entry++ )
+  {
+    for ( size_t i = 0; i < 3; i++ )
+    {
+      hkl_list[entry][i] = (double)( round(hkl_list[entry][i]) );
+    }
+  }
+}
+
+
+/**
   Check whether or not the components of the specified vector are within
   the specified tolerance of integer values, other than (0,0,0).
 

@@ -168,6 +168,10 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                  double                      len_tol,
                                  double                      ang_tol );
 
+  /// Round all the components of a list of V3D objects, to the nearest integer
+  static void RoundHKLs( std::vector<Kernel::V3D> & hkl_list );
+
+
   /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
   static bool ValidIndex( const Kernel::V3D  & hkl,
                                 double         tolerance );
