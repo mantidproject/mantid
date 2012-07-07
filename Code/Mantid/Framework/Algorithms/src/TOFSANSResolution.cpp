@@ -1,6 +1,5 @@
 /*WIKI* 
-
-
+Compute the Q resolution for a given I(Q) for a TOF SANS instrument.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -94,14 +93,6 @@ void TOFSANSResolution::exec()
   R2 /= 1000.0;
   wl_resolution = getProperty("DeltaT");
 
-  // Although we want the 'ReducedWorkspace' to be an event workspace for this algorithm to do
-  // anything, we don't want the algorithm to 'fail' if it isn't
-  if (!reducedEventWS)
-  {
-    g_log.warning() << "An Event Workspace is needed to compute dQ. Calculation skipped." << std::endl;
-    return;
-  }
-
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");
 
@@ -136,13 +127,13 @@ void TOFSANSResolution::exec()
   const int numberOfSpectra = static_cast<int>(reducedWS->getNumberHistograms());
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
-  PARALLEL_FOR2(reducedEventWS, iqWS)
+  PARALLEL_FOR2(reducedWS, iqWS)
   for (int i = 0; i < numberOfSpectra; i++)
   {
     PARALLEL_START_INTERUPT_REGION
     IDetector_const_sptr det;
     try {
-      det = reducedEventWS->getDetector(i);
+      det = reducedWS->getDetector(i);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
       // Catch if no detector. Next line tests whether this happened - test placed
@@ -157,23 +148,17 @@ void TOFSANSResolution::exec()
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = reducedEventWS->detectorTwoTheta(det);
+    const double theta = reducedWS->detectorTwoTheta(det);
     const double factor = 4.0 * M_PI * sin( theta/2.0 );
 
-    EventList& el = reducedEventWS->getEventList(i);
-    el.switchTo(WEIGHTED);
-
-    std::vector<WeightedEvent>::iterator itev;
-    std::vector<WeightedEvent>::iterator itev_end = el.getWeightedEvents().end();
-
-    for (itev = el.getWeightedEvents().begin(); itev != itev_end; ++itev)
+    const MantidVec& XIn = reducedWS->readX(i);
+    const MantidVec& YIn = reducedWS->readY(i);
+    for ( int j = 0; j < xLength-1; j++)
     {
-      if ( boost::math::isnan(itev->weight()) ) continue;
-      if (std::abs(itev->weight()) == std::numeric_limits<double>::infinity()) continue;
-      if ( !isEmpty(min_wl) && itev->tof() < min_wl ) continue;
-      if ( !isEmpty(max_wl) && itev->tof() > max_wl ) continue;
-
-      const double q = factor/itev->tof();
+      const double wl = (XIn[j+1]+XIn[j])/2.0;
+      if ( !isEmpty(min_wl) && wl < min_wl ) continue;
+      if ( !isEmpty(max_wl) && wl > max_wl ) continue;
+      const double q = factor/wl;
       int iq = 0;
 
       // Bin assignment depends on whether we have log or linear bins
@@ -189,18 +174,18 @@ void TOFSANSResolution::exec()
       const double dTheta2 = ( 3.0*R1*R1/(L1*L1) + 3.0*R2*R2*src_to_pixel*src_to_pixel/(L1*L1*L2*L2)
             + 2.0*(pixel_size_x*pixel_size_x+pixel_size_y*pixel_size_y)/(L2*L2) )/12.0;
 
-      const double dwl_over_wl = 3.9560*getTOFResolution(itev->tof())/(1000.0*(L1+L2)*itev->tof());
+      const double dwl_over_wl = 3.9560*getTOFResolution(wl)/(1000.0*(L1+L2)*wl);
       const double dq_over_q = std::sqrt(dTheta2/(theta*theta)+dwl_over_wl*dwl_over_wl);
-      
+
       PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
       // By using only events with a positive weight, we use only the data distribution and
       // leave out the background events
-      if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0 && itev->weight()>0)
+      if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0 && YIn[j]>0)
       {
-        DxOut[iq] += q*dq_over_q*itev->weight();
-        XNorm[iq] += itev->weight();
-        TOFY[iq] += q*std::fabs(dwl_over_wl)*itev->weight();
-        ThetaY[iq] += q*std::sqrt(dTheta2)/theta*itev->weight();
+        DxOut[iq] += q*dq_over_q*YIn[j];
+        XNorm[iq] += YIn[j];
+        TOFY[iq] += q*std::fabs(dwl_over_wl)*YIn[j];
+        ThetaY[iq] += q*std::sqrt(dTheta2)/theta*YIn[j];
       }
     }
 
