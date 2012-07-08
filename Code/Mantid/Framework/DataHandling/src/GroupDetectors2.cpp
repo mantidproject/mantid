@@ -91,6 +91,8 @@ void GroupDetectors2::init()
   using Mantid::Kernel::StringListValidator;
   declareProperty("Behaviour", "Sum", boost::make_shared<StringListValidator>(groupTypes),
                   "Whether to sum or average the values when grouping detectors.");
+  // Are we preserving event workspaces?
+  declareProperty("PreserveEvents", false, "If true, an event workspace will be returned");
 }
 
 void GroupDetectors2::exec()
@@ -99,8 +101,9 @@ void GroupDetectors2::exec()
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   //Check if it is an event workspace
+  const bool preserveEvents = getProperty("PreserveEvents");
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL)
+  if (eventW != NULL && preserveEvents)
   {
     this->execEvent();
     return;
