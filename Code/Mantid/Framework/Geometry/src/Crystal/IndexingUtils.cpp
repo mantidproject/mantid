@@ -2080,9 +2080,9 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
                        the hkl values that are valid Miller indices.
 */
 int IndexingUtils::NumberOfValidIndexes( 
-                             const std::vector<Kernel::V3D>  & hkls,
-                             double                            tolerance,
-                             double                          & average_error )
+                                      const std::vector<V3D>  & hkls,
+                                            double              tolerance,
+                                            double            & average_error )
 {
 
   double h_error;
@@ -2113,10 +2113,9 @@ int IndexingUtils::NumberOfValidIndexes(
 }
 
   /// Find the average indexing error for UB with the specified q's and hkls
-double IndexingUtils::IndexingError(
-                               const Kernel::DblMatrix         & UB,
-                               const std::vector<Kernel::V3D>  & hkls,
-                               const std::vector<Kernel::V3D>  & q_vectors )
+double IndexingUtils::IndexingError( const DblMatrix         & UB,
+                                     const std::vector<V3D>  & hkls,
+                                     const std::vector<V3D>  & q_vectors )
 {
   DblMatrix UB_inverse( UB );
   if ( CheckUB( UB ) )
