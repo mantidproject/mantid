@@ -112,6 +112,17 @@ namespace Geometry
 
 
   /**
+   *  Get a copy of the transform that maps the original HKL values to new 
+   *  HKL values corresponding to the conventional cell.
+   *
+   *  @return  a 3x3 matrix with the HKL tranformation.
+   */
+  Kernel::DblMatrix ConventionalCell::GetHKL_Tran() const
+  {
+    return Kernel::DblMatrix( hkl_tran );
+  }
+
+  /**
    *  Get the sum of the sides, |a|+|b|+|c| of the conventional cell.
    *
    *  @return The sum of the sides of the conventional cell.
@@ -170,9 +181,11 @@ namespace Geometry
 
     original_UB = Kernel::DblMatrix( UB );
 
-    Kernel::DblMatrix cell_tran = form_i.GetTransformation();
-    cell_tran.Invert();
-    adjusted_UB = UB * cell_tran;    
+    hkl_tran = form_i.GetTransformation();
+
+    Kernel::DblMatrix UB_tran( hkl_tran );
+    UB_tran.Invert();
+    adjusted_UB = UB * UB_tran;    
 
     if ( cell_type == ReducedCell::ORTHORHOMBIC() )
     {

@@ -69,7 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FormNumber", 25) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FormNumber", 35) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Apply",true) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Tolerance",0.12) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -78,7 +78,7 @@ public:
     int num_indexed = alg.getProperty("NumIndexed"); 
     TS_ASSERT_EQUALS( num_indexed, 43 );
     double average_error = alg.getProperty("AverageError");
-    TS_ASSERT_DELTA( average_error, 0.0119856, .0001 );
+    TS_ASSERT_DELTA( average_error, 0.00972862, .0001 );
 
     AnalysisDataService::Instance().remove(WSName);
   }

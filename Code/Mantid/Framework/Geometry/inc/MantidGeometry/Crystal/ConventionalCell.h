@@ -74,6 +74,9 @@ namespace Geometry
       /// get the transformed orientation matrix for the conventional cell
       Kernel::DblMatrix GetNewUB() const;
 
+      /// get the transform to change HKL to new conventional cell HKL
+      Kernel::DblMatrix GetHKL_Tran() const;
+
       /// get the sum of the sides of the conventional unit cell
       double            GetSumOfSides() const;
 
@@ -94,6 +97,7 @@ namespace Geometry
       std::string       centering;
       Kernel::DblMatrix original_UB;
       Kernel::DblMatrix adjusted_UB;
+      Kernel::DblMatrix hkl_tran;
   };
 
 } // namespace Mantid
