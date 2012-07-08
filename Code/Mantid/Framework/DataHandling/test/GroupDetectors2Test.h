@@ -525,6 +525,7 @@ public:
       alg2.setPropertyValue("OutputWorkspace","GDEventsOut");
       alg2.setPropertyValue("WorkspaceIndexList", "2-4");
       alg2.setPropertyValue("Behaviour", "Average");
+      alg2.setProperty("PreserveEvents", true);
 
       alg2.execute();
       TS_ASSERT(alg2.isExecuted());
