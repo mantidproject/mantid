@@ -368,7 +368,7 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
  */
 bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>& inputWorkspaces)
 {
-  Unit_sptr unit;
+  std::string xUnitID;
   std::string YUnit;
   bool dist(false);
 
@@ -392,7 +392,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
     // Check a few things are the same for all input workspaces
     if ( i == 0 )
     {
-      unit = ws->getAxis(0)->unit();
+      xUnitID = ws->getAxis(0)->unit()->unitID();
       YUnit = ws->YUnit();
       dist = ws->isDistribution();
       instrument = ws->getInstrument()->getName();
@@ -400,7 +400,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
     else
     {
       std::string errors;
-      if (ws->getAxis(0)->unit() != unit)               errors += "different X units; ";
+      if (ws->getAxis(0)->unit()->unitID() != xUnitID)               errors += "different X units; ";
       if (ws->YUnit() != YUnit)                         errors += "different Y units; ";
       if (ws->isDistribution()   != dist)               errors += "not all distribution or all histogram type; ";
       if (ws->getInstrument()->getName() != instrument) errors += "different instrument names; ";
@@ -431,7 +431,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
   std::list<MatrixWorkspace_sptr> inWS;
 
   size_t numSpec(0);
-  Unit_sptr unit;
+  std::string xUnitID;
   std::string YUnit;
   bool dist(false);
   // Going to check that name of instrument matches - think that's the best possible at the moment
@@ -466,7 +466,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
     if ( i == 0 )
     {
       numSpec = ws->getNumberHistograms();
-      unit = ws->getAxis(0)->unit();
+      xUnitID = ws->getAxis(0)->unit()->unitID();
       YUnit = ws->YUnit();
       dist = ws->isDistribution();
       instrument = ws->getInstrument()->getName();
@@ -475,7 +475,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
     {
       std::string errors;
       if (ws->getNumberHistograms() != numSpec)         errors += "different number of histograms; ";
-      if (ws->getAxis(0)->unit() != unit)               errors += "different X units; ";
+      if (ws->getAxis(0)->unit()->unitID() != xUnitID)               errors += "different X units; ";
       if (ws->YUnit() != YUnit)                         errors += "different Y units; ";
       if (ws->isDistribution()   != dist)               errors += "not all distribution or all histogram type; ";
       if (ws->getInstrument()->getName() != instrument) errors += "different instrument names; ";
