@@ -31,6 +31,7 @@ Integrate and calculate error of integration of each peak from single crystal da
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/MemoryManager.h"
+#include <boost/thread.hpp>
 
 namespace Mantid
 {
@@ -114,7 +115,7 @@ namespace Mantid
         peaksW = inPeaksW->clone();
 
 
-      double qspan = 0.06;
+      double qspan = 0.12;
       bool slices = getProperty("FitSlices");
       IC = getProperty("IkedaCarpenterTOF");
       bool matchRun = getProperty("MatchingRunNo");
@@ -128,7 +129,7 @@ namespace Mantid
         }
         else
         {
-          qspan = 0.03;
+          qspan = 0.12;
         }
         
       }
@@ -207,7 +208,7 @@ namespace Mantid
         int TOFPeak=0, TOFmin=0, TOFmax=0;
         if (slices)
         {
-          TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan , peak);
+          TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan ,peaksW);
 
           MantidVec& X = outputW->dataX(i);
           TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
@@ -259,8 +260,8 @@ namespace Mantid
         if(TOFmax <= TOFmin)continue;
         const int n = TOFmax-TOFmin+1;
         double pktime = 0.0;
-        for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
 
+        for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
         if(n >= 8 && IC)//Number of fitting parameters large enough if Ikeda-Carpenter fit
         {
           for (iTOF=TOFmin; iTOF <= TOFmax; iTOF++) 
@@ -341,7 +342,7 @@ namespace Mantid
 
         peak.setIntensity(I);
         peak.setSigmaIntensity(sigI);
-  
+
         prog.report();
         PARALLEL_END_INTERUPT_REGION
 
@@ -612,13 +613,14 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
   haveMask = false;
 
 }
-int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan
-                                    ,DataObjects::Peak & peak)
+int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan,
+                                     PeaksWorkspace_sptr &Peaks)
 {
   UNUSED_ARG( ipeak);
   UNUSED_ARG( det_name);
   UNUSED_ARG( x0);
   UNUSED_ARG( y0);
+  API::IPeak& peak = Peaks->getPeak( ipeak);
   // Number of slices
   int TOFmax = 0;
   //Get some stuff from the input workspace
@@ -695,7 +697,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       tab_str << "LogTable" << ipeak;
 
       slice_alg->setPropertyValue("OutputWorkspace", tab_str.str());
-      slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", getProperty("InPeaksWorkspace"));
+      slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", Peaks);
       slice_alg->setProperty("PeakIndex", ipeak);
       slice_alg->setProperty("PeakQspan", qspan);
       slice_alg->executeAsSubAlg();
