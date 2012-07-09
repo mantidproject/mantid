@@ -56,6 +56,7 @@ public:
     lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
     lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
     lbfit.setProperty("WorkspaceIndex", 0);
+    lbfit.setProperty("OutputBackgroundWorkspace", "BackgroundWS");
 
     lbfit.execute();
 

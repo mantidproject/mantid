@@ -60,6 +60,8 @@ namespace CurveFitting
 
     double getPeakParameter(size_t index, std::string parname) const;
 
+    double getPeakFWHM(size_t peakindex) const;
+
   protected:
 
     virtual void function1D(double* out, const double* xValues, const size_t nData)const;

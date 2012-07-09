@@ -409,6 +409,21 @@ namespace CurveFitting
     return value;
   }
 
+  /*
+   * Return FWHM of the peak specified
+   */
+  double LeBailFunction::getPeakFWHM(size_t peakindex) const
+  {
+    if (peakindex >= mPeaks.size())
+    {
+      g_log.error() << "LeBailFunction() cannot get peak indexed " << peakindex << ".  Number of peaks = " << mPeaks.size() << std::endl;
+      throw std::invalid_argument("LeBailFunction getPeakFWHM() cannot return peak indexed out of range. ");
+    }
+
+    return mPeaks[peakindex]->fwhm();
+
+  }
+
 
 } // namespace Mantid
 } // namespace CurveFitting
