@@ -7,12 +7,17 @@ if is_supported_f2py_platform():
 
 class QLines(PythonAlgorithm):
  
+	def category(self):
+		return "Workflow\\MIDAS;PythonAlgorithms"
+
 	def PyInit(self):
+		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File (*.nxs) or Workspace')
 		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='Program',DefaultValue='QL',Validator=ListValidator(['QL','QSe']),Description = 'Name of program to run')
-		self.declareProperty(Name='ResType',DefaultValue='Res',Validator=ListValidator(['Res','Data']),Description = 'Format of Resolution file')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
+		self.declareProperty(Name='ResInputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of res input - File (*_res.nxs) or Workspace')
+		self.declareProperty(Name='ResType',DefaultValue='Res',Validator=ListValidator(['Res','Data']),Description = 'Format of Resolution file')
 		self.declareProperty(Name='ResNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Resolution run number')
 		self.declareProperty(Name='BackgroundOption',DefaultValue='Sloping',Validator=ListValidator(['Sloping','Flat','Zero']),Description = 'Form of background to fit')
 		self.declareProperty(Name='ElasticOption',DefaultValue=True,Description = 'Include elastic peak in fit')
@@ -32,6 +37,7 @@ class QLines(PythonAlgorithm):
 		run_f2py_compatibility_test()
 		
 		self.log().information('QLines input')
+		inType = self.getPropertyValue('InputType')
 		instr = self.getPropertyValue('Instrument')
 		if instr == 'IRIS':
 			prefix = 'irs'
@@ -39,8 +45,9 @@ class QLines(PythonAlgorithm):
 			prefix = 'osi'
 		ana = self.getPropertyValue('Analyser')
 		prog = self.getPropertyValue('Program')
-		rtype = self.getPropertyValue('ResType')
 		sam = self.getPropertyValue('SamNumber')
+		rinType = self.getPropertyValue('ResInputType')
+		rtype = self.getPropertyValue('ResType')
 		res = self.getPropertyValue('ResNumber')
 		elastic = self.getProperty('ElasticOption')
 		bgd = self.getPropertyValue('BackgroundOption')
@@ -80,7 +87,7 @@ class QLines(PythonAlgorithm):
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')
-		Main.QLStart(prog,sname,rname,rtype,rsname,erange,nbins,fitOp,wfile,verbOp,plotOp,saveOp)
+		Main.QLStart(prog,inType,sname,rinType,rname,rtype,rsname,erange,nbins,fitOp,wfile,verbOp,plotOp,saveOp)
 #def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
 
 mantid.registerPyAlgorithm(QLines())         # Register algorithm with Mantid

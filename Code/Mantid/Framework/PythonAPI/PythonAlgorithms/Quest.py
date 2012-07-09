@@ -11,9 +11,11 @@ class Quest(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File (*.nxs) or Workspace')
 		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
+		self.declareProperty(Name='ResInputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of res input - File (*_res.nxs) or Workspace')
 		self.declareProperty(Name='ResNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Resolution run number')
 		self.declareProperty(Name='ElasticOption',DefaultValue=True,Description = 'Include elastic peak in fit')
 		self.declareProperty(Name='BackgroundOption',DefaultValue='Sloping',Validator=ListValidator(['Sloping','Flat','Zero']),Description = 'Form of background to fit')
@@ -30,6 +32,7 @@ class Quest(PythonAlgorithm):
 		run_f2py_compatibility_test()
 		
 		self.log().information('Quest input')
+		inType = self.getPropertyValue('InputType')
 		instr = self.getPropertyValue('Instrument')
 		if instr == 'IRIS':
 			prefix = 'irs'
@@ -37,6 +40,7 @@ class Quest(PythonAlgorithm):
 			prefix = 'osi'
 		ana = self.getPropertyValue('Analyser')
 		sam = self.getPropertyValue('SamNumber')
+		rinType = self.getPropertyValue('ResInputType')
 		res = self.getPropertyValue('ResNumber')
 		elastic = self.getProperty('ElasticOption')
 		bgd = self.getPropertyValue('BackgroundOption')
@@ -47,6 +51,7 @@ class Quest(PythonAlgorithm):
 		nbet = self.getPropertyValue('NumberBeta')
 		nsig = self.getPropertyValue('NumberSigma')
 		nbs = [nbet, nsig]
+		nbs = [ 30,50]
 
 		sname = prefix+sam+'_'+ana
 		rname = prefix+res+'_'+ana
@@ -65,6 +70,6 @@ class Quest(PythonAlgorithm):
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')
-		Main.QuestStart(sname,rname,nbs,erange,nbins,fitOp,verbOp,plotOp,saveOp)
+		Main.QuestStart(inType,sname,rinType,rname,nbs,erange,nbins,fitOp,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(Quest())         # Register algorithm with Mantid

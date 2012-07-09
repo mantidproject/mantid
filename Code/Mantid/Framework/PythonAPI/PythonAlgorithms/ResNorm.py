@@ -11,9 +11,11 @@ class ResNorm(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File (*.nxs) or Workspace')
 		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='VanNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
+		self.declareProperty(Name='ResInputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of res input - File (*_res.nxs) or Workspace')
 		self.declareProperty(Name='ResNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Resolution run number')
 		self.declareProperty(Name='EnergyMin', DefaultValue=-0.2,Description = 'Minimum energy for fit. Default=-0.2')
 		self.declareProperty(Name='EnergyMax', DefaultValue=0.2,Description = 'Maximum energy for fit. Default=0.2')
@@ -26,6 +28,7 @@ class ResNorm(PythonAlgorithm):
 		run_f2py_compatibility_test()
 		
 		self.log().information('ResNorm input')
+		inType = self.getPropertyValue('InputType')
 		instr = self.getPropertyValue('Instrument')
 		if instr == 'IRIS':
 			prefix = 'irs'
@@ -33,11 +36,11 @@ class ResNorm(PythonAlgorithm):
 			prefix = 'osi'
 		ana = self.getPropertyValue('Analyser')
 		van = self.getPropertyValue('VanNumber')
+		rinType = self.getPropertyValue('ResInputType')
 		res = self.getPropertyValue('ResNumber')
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
 		nbin = self.getPropertyValue('VanBinning')
-		nbins = [nbin]
 
 		vname = prefix+van+'_'+ana
 		rname = prefix+res+'_'+ana
@@ -45,6 +48,6 @@ class ResNorm(PythonAlgorithm):
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')
-		Main.ResNormStart(vname,rname,erange,nbins,verbOp,plotOp,saveOp)
+		Main.ResNormStart(inType,vname,rinType,rname,erange,nbin,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(ResNorm())         # Register algorithm with Mantid

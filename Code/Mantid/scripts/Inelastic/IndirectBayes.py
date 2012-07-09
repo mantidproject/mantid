@@ -149,18 +149,29 @@ def CheckErange(erange,nbins):
 
 # QLines programs
 	
-def QLStart(program,sam,res,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
+def QLStart(program,inType,sam,rinType,res,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
 	if rtype == 'Res':
 		rext = 'res'
 	if rtype == 'Data':
 		rext = 'red'
 	workdir = config['defaultsave.directory']
 	sname = sam + '_red'
-	spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-	LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+	if inType == 'File':
+		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+		Smessage = 'Sample from File : '+spath
+	else:
+		Smessage = 'Sample from Workspace : '+sname
 	rname = res + '_' + rext
-	rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-	LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+	if rinType == 'File':
+		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
+		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+		Rmessage = 'Resolution from File : '+rpath
+	else:
+		Rmessage = 'Resolution from Workspace : '+rname
+	if Verbose:
+		logger.notice(Smessage)
+		logger.notice(Rmessage)
 	if fitOp[3] == 1:
 		path = os.path.join(workdir, rsname+'_ResNorm_Paras.nxs')	# path name for resnnrm nxs file
 		LoadNexusProcessed(Filename=path, OutputWorkspace='ResNorm')
@@ -637,16 +648,27 @@ def CheckBetSig(nbs):
 		sys.exit(error)
 	return Nbet,Nsig
 
-def QuestStart(sam,res,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
+def QuestStart(inType,sam,rinType,res,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	sname = sam + '_red'
-	spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-	LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+	if inType == 'File':
+		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+		Smessage = 'Sample from File : '+spath
+	else:
+		Smessage = 'Sample from Workspace : '+sname
 	nsam = mtd[sname].getNumberHistograms()                      # no. of hist/groups in sam
 	rname = res + '_res'
-	rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-	LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+	if rinType == 'File':
+		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
+		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+		Rmessage = 'Resolution from File : '+rpath
+	else:
+		Rmessage = 'Resolution from Workspace : '+rname
+	if Verbose:
+		logger.notice(Smessage)
+		logger.notice(Rmessage)
 	QuestRun(sname,rname,nbs,erange,nbins,fitOp,Verbose,Plot,Save)
 
 def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
@@ -775,14 +797,25 @@ def QuestPlot(inputWS,Plot):
 
 # ResNorm programs
 
-def ResNormStart(van,res,erange,nbins,Verbose,Plot,Save):
+def ResNormStart(inType,van,rinType,res,erange,nbins,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
 	vname = van + '_red'
-	vpath = os.path.join(workdir, vname+'.nxs')		           # path name for van nxs file
-	LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
+	if inType == 'File':
+		vpath = os.path.join(workdir, vname+'.nxs')		           # path name for van nxs file
+		LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
+		Vmessage = 'Vanadium from File : '+vpath
+	else:
+		Vmessage = 'Vanadium from Workspace : '+vname
 	rname = res + '_res'
-	rpath = os.path.join(workdir, rname+'.nxs')                # path name for res nxs file
-	LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+	if rinType == 'File':
+		rpath = os.path.join(workdir, rname+'.nxs')                # path name for res nxs file
+		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+		Rmessage = 'Resolution from File : '+rpath
+	else:
+		Rmessage = 'Resolution from Workspace : '+rname
+	if Verbose:
+		logger.notice(Vmessage)
+		logger.notice(Rmessage)
 	ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save)
 
 def ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save):
@@ -887,10 +920,16 @@ def ResNormPlot(inputWS,Plot):
 
 # Jump programs
 
-def JumpStart(sname,jump,prog,fw,Verbose,Plot,Save):
+def JumpStart(inType,sname,jump,prog,fw,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
-	path = os.path.join(workdir, sname+'_Parameters.nxs')					# path name for nxs file
-	LoadNexusProcessed(Filename=path, OutputWorkspace=sname+'_Parameters')
+	if inType == 'File':
+		path = os.path.join(workdir, sname+'_Parameters.nxs')					# path name for nxs file
+		LoadNexusProcessed(Filename=path, OutputWorkspace=sname+'_Parameters')
+		message = 'Input from File : '+path
+	else:
+		message = 'Input from Workspace : '+sname
+	if Verbose:
+		logger.notice(message)
 	JumpRun(sname,jump,prog,fw,Verbose,Plot,Save)
 
 def JumpRun(sname,jump,prog,fw,Verbose,Plot,Save):
