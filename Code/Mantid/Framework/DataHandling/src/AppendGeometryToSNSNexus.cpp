@@ -116,7 +116,7 @@ namespace DataHandling
                   g_log.notice() << "Copied " << m_filename << " to " << destinationFile.path() << "." << std::endl ;
                   m_filename = destinationFile.path();
               }
-              catch (Poco::FileAccessDeniedException & e)
+              catch (Poco::FileAccessDeniedException &)
               {
                   throw std::runtime_error("A Problem occurred in making a copy of the NeXus file. Failed to copy "
                                            + originalFile.path() + " to " + destinationFile.path()

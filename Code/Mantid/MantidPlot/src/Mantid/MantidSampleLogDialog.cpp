@@ -5,6 +5,7 @@
 #include "MantidUI.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
@@ -205,11 +206,13 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
   }
 
   //used in numeric time series below, the default filter value
-  switch (item->data(1, Qt::UserRole).toInt())
+  int key = item->data(1, Qt::UserRole).toInt();
+  switch (key)
   {
     case numeric :
     case string :
     case stringTSeries :
+    case numericArray :
       return;
       break;
 
@@ -254,8 +257,8 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
 {
   //used in numeric time series below, the default filter value
   int filter = 0;
-
-  switch (item->data(1, Qt::UserRole).toInt())
+  int key = item->data(1, Qt::UserRole).toInt();
+  switch (key)
   {
     case numeric :
     case string :
@@ -271,6 +274,8 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
     case stringTSeries :
       m_mantidUI->importStrSeriesLog(item->text(0),
                                      item->data(0, Qt::UserRole).toString());
+      break;
+    case numericArray :
       break;
     default :
       throw std::invalid_argument("Error importing log entry, wrong data type");
@@ -419,6 +424,16 @@ void MantidSampleLogDialog::init()
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numeric)); //Save the "role" as numeric.
       treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
       treeItem->setText(2, QString::fromStdString((*pItr)->value()));
+    }
+    else if( dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
+      dynamic_cast<Mantid::Kernel::ArrayProperty<double> *>(*pItr))
+    {
+      treeItem->setText(1, "numeric array");
+      treeItem->setData(1, Qt::UserRole, static_cast<int>(numericArray)); //Save the "role" as numeric array.
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+      std::ostringstream msg;
+      msg << "(" << (*pItr)->size() << " entries)";
+      treeItem->setText(2, QString::fromStdString( msg.str()) );
     }
 
     //Add tree item

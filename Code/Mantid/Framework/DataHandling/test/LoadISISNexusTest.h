@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/LogFilter.h"
@@ -78,7 +79,7 @@ public:
         TS_ASSERT_EQUALS(ws->getSpectrum(1234)->getDetectorIDs().size(), 1);
 
         const std::vector< Property* >& logs = ws->run().getLogData();
-        TS_ASSERT_EQUALS(logs.size(), 61);
+        TS_ASSERT_EQUALS(logs.size(), 62);
 
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->run().getLogData("icp_event"));
         TS_ASSERT(slog);
@@ -243,6 +244,17 @@ public:
         checkPeriodLogData(ws1, 1);
         // Check that workspace 2 has the correct period data, and no other period log data
         checkPeriodLogData(ws2, 2);
+        // Check the multiperiod proton charge extraction
+        const Run& run = ws1->run();
+        ArrayProperty<double>* protonChargeProperty = dynamic_cast<ArrayProperty<double>* >( run.getLogData("proton_charge_by_period") );
+        double chargeSum = 0;
+        for(size_t i = 0; i < grpWs->size(); ++i)
+        {
+          chargeSum += protonChargeProperty->operator()()[i];
+        }
+        PropertyWithValue<double>* totalChargeProperty = dynamic_cast<PropertyWithValue<double>* >( run.getLogData("gd_prtn_chrg"));
+        double totalCharge = atof(totalChargeProperty->value().c_str());
+        TSM_ASSERT_DELTA("Something is badly wrong if the sum accross the periods does not correspond to the total charge.", totalCharge, chargeSum, 0.000001);
         AnalysisDataService::Instance().remove(wsName);
     }
 };
