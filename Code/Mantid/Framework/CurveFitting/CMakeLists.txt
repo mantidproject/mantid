@@ -154,6 +154,7 @@ set ( TEST_FILES
 	test/ConvolutionTest.h
 	test/DeltaFunctionTest.h
 	test/DiffSphereTest.h
+	test/EndErfcTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
 	test/ExpDecayTest.h
