@@ -61,7 +61,7 @@ namespace Algorithms
    */
   void GetTimeSeriesLogInformation::init()
   {
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputEventWorkspace", "", Direction::InOut),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputEventWorkspace", "Anonymous", Direction::InOut),
         "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
 
     std::vector<std::string> funcoptions;
