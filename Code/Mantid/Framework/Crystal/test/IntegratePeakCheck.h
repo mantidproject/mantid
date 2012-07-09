@@ -39,7 +39,9 @@
 #include "MantidAPI/IPeak.h"
 #include <math.h>
 #include <cstdlib>
-
+#include <iostream>
+#include <boost/thread.hpp>
+#include <boost/ref.hpp>
 #include <map>
 #include "MantidKernel/Quat.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -50,6 +52,238 @@ using namespace API;
 using namespace Mantid::Crystal;
 using namespace std;
 
+/*class task
+{
+   int decile;
+
+  PeaksWorkspace_sptr Peaks;
+  MatrixWorkspace_sptr wsBin;
+
+   task( int decile, PeaksWorkspace_sptr &Peaks, MatrixWorkspace_sptr &wsBin)
+   {
+     this->decile = decile;
+     this->Peaks = Peaks;
+     this->wsBin = wsBin;
+   }
+   bool CalcIntensitySigma(TableWorkspace_sptr tabl, double &intensity, double&intensity_err, int peak)
+     {
+       if( tabl->rowCount() <= 0)
+       {
+         intensity=0;
+         intensity_err = 0;
+         return true;
+       }
+
+       int BackgroundCol =2;
+       int TotIntensityCol = 11;
+       int BackgroundErrCol =12;
+       int TotBackgroundCol =16;
+       int NBackgroundCol = 17;
+       int NCellCol       =9;
+       int StartRowCol    =18;
+       int EndRowCol    =19;
+       int StartColCol    =20;
+       int EndColCol    =21;
+
+       if( tabl->rowCount() ==1)
+           {
+
+            double SampTotBackground =tabl->cell<double>(0,TotBackgroundCol);
+             double SampNBackground = tabl->cell<double>(0, NBackgroundCol);
+             double FitBackground=tabl->cell<double>(0,BackgroundCol);
+             double Background = min<double>(FitBackground,SampTotBackground/SampNBackground);
+             std::cout<<"("<<peak<<","<<0<<","<<FitBackground
+                 <<","<<SampTotBackground/SampNBackground<<","<<Background
+                 <<","<<tabl->cell<double>(0,TotIntensityCol)
+                 <<","<<tabl->cell<double>(0,NCellCol)
+                 <<","<<tabl->cell<double>(0,StartRowCol)
+                 <<","<<tabl->cell<double>(0,EndRowCol)
+                 <<","<<tabl->cell<double>(0,StartColCol)
+                 <<","<<tabl->cell<double>(0,EndColCol)<<")"<<std::endl;
+             return false;
+           }
+
+
+       int MaxIntensRow = -1;
+       double MaxIntensity =-1;
+       double MaxBackgroundDiff = -1;
+       std::vector<double>DiffList;
+       std::vector<double>IntensityList;
+       std::vector<double>weightList;
+       std::vector<double>bkErrList;
+       std::vector<double>BackgroundList;
+       int NCells=0;
+       double TotIntensity=0;
+       for( size_t row =0; row < tabl->rowCount(); row++)
+       {
+         NCells+=(tabl->cell<double>(row, NCellCol));
+         double Intensity =(tabl->cell<double>(row, TotIntensityCol));
+         TotIntensity+=Intensity;
+
+         double SampTotBackground =tabl->cell<double>(row,TotBackgroundCol);
+         double SampNBackground = tabl->cell<double>(row, NBackgroundCol);
+
+         double FitBackgroundErr =tabl->cell<double>(row,BackgroundErrCol);
+         double FitBackground=tabl->cell<double>(row,BackgroundCol);
+         double diff =SampTotBackground/SampNBackground-FitBackground;
+         DiffList.push_back(diff);
+         if( diff < 0 )
+         {
+           double adjBack =FitBackground+2*diff;
+           if (adjBack <0)
+                adjBack =0;
+           BackgroundList.push_back( adjBack );
+           bkErrList.push_back( sqrt(5*FitBackgroundErr*FitBackgroundErr+4*SampTotBackground/SampNBackground/SampNBackground));
+
+         }
+         else
+         {
+           BackgroundList.push_back( SampTotBackground/SampNBackground);
+           bkErrList.push_back(sqrt(SampTotBackground/SampNBackground/SampNBackground));
+         }
+         if ( -diff > MaxBackgroundDiff)
+         MaxBackgroundDiff = -diff;
+
+         if (Intensity > MaxIntensity)
+         {
+           MaxIntensRow = row;
+           MaxIntensity = Intensity;
+         }
+       }
+       double diff2wtMult = 20/MaxBackgroundDiff;
+       double offMaxSlice2wtMult;
+       int nRows = tabl->rowCount();
+       if (MaxIntensRow*2 < nRows)
+           offMaxSlice2wtMult =10/(nRows-1-MaxIntensRow);
+       else
+          offMaxSlice2wtMult = 10/MaxIntensRow;
+       double Num=0;
+       double NumErr=0;
+       double Den =0;
+       double wt = 1;
+       //if( show)
+       //  std::cout<<"diff2stMult and offmaxSlice2wtMult="<<diff2wtMult<<","<<offMaxSlice2wtMult<<std::endl;
+       for(int r=0;r < nRows; r++)
+       try{
+         wt = 1;
+         if ( DiffList[r] < 0)
+                wt -= diff2wtMult*DiffList[r];
+         //if(show)std::cout<<"row,wt,BackgroundError,Num="<<r<<","<<wt;
+         double wt1=0;
+         if( r<MaxIntensRow)
+         {
+           wt1=10 - offMaxSlice2wtMult*(MaxIntensRow-r);
+           if( wt1 > 0)
+              wt +=wt1;
+
+         }
+         else
+         {
+           wt1=10 - offMaxSlice2wtMult*(r-MaxIntensRow);
+           if( wt1 >0)
+               wt +=wt1;
+
+         }
+         //if(show)std::cout<<","<<wt;
+         // #wieght low intensity time slices more too
+         wt += 15*tabl->cell<double>( r, TotIntensityCol)/MaxIntensity;
+
+         //if(show)std::cout<<","<<wt;
+         Num +=BackgroundList[r]/wt;
+         Den +=1/wt;
+         NumErr +=bkErrList[r]/wt;
+       //  if( show)
+       //    std::cout<<"::"<<bkErrList[r]<<","<<Num<<std::endl;
+
+       }catch( std::exception &s)
+       {
+         std::cout<<"Exception wt,row,BackgroundList size="<<wt<<","<<r<<","<<BackgroundList.size()<<std::endl;
+         std::cout<<"Exception message="<< s.what()<<std::endl;
+         return false;
+       }catch( char * message)
+       {
+         std::cout<<"Exception wt,row,BackgroundList size="<<wt<<","<<r<<","<<BackgroundList.size()<<std::endl;
+              std::cout<<"Exception message="<< message<<std::endl;
+          return false;
+       }catch(...)
+       {
+         std::cout<<"Exception wt,row,BackgroundList size="<<wt<<","<<r<<","<<BackgroundList.size()<<std::endl;
+              std::cout<<"No Exception message="<< std::endl;
+              return false;
+       }
+
+       double avBack = Num/Den;
+       double avBackErr = NumErr/Den;
+      // if( show)
+      //   std::cout<<"av backerr,TotIntensity,NCells="<<avBackErr<<","<<TotIntensity<<","<<NCells<<std::endl;
+       double totVar = TotIntensity + avBackErr*avBackErr*NCells*NCells;
+
+       intensity = TotIntensity-avBack*NCells;
+       intensity_err =( sqrt( totVar));
+       //cols 14 & 14
+       for( int row =0;row <nRows;row++)
+       {
+
+         std::cout<<"("<<peak<<","<<row<<","<<tabl->cell<double>(row,BackgroundCol)
+             <<","<<tabl->cell<double>(row,TotBackgroundCol)/tabl->cell<double>(row,NBackgroundCol)<<","<<avBack
+             <<","<<tabl->cell<double>(row,TotIntensityCol)
+             <<","<<tabl->cell<double>(row,NCellCol)
+             <<","<<tabl->cell<double>(row,StartRowCol)
+             <<","<<tabl->cell<double>(row,EndRowCol)
+             <<","<<tabl->cell<double>(row,StartColCol)
+             <<","<<tabl->cell<double>(row,EndColCol)<<")"<<std::endl;
+         double RowIntensity = tabl->cell<double>(row, TotIntensityCol);
+         double RowNCells = tabl->cell<double>(row, NCellCol);
+         tabl->cell<double>(row,14)= RowIntensity - avBack*RowNCells;
+         tabl->cell<double>(row,15)= sqrt(RowIntensity+ avBackErr*avBackErr*RowNCells*RowNCells);
+       }
+       return true;
+     }
+   void operator()()
+   {
+  int NPeaks = Peaks->getNumberPeaks();
+  int nPerDecile = NPeaks/10;
+  int peakStart = decile*nPerDecile;
+  int peakEnd = min<int>((decile+1)*nPerDecile,NPeaks);
+  int runNum = wsBin->getRunNumber();
+  double dq = .2;
+  for( int pk =peakStart ; pk<peakEnd; pk++)
+     {
+       //std::cout<<"Peak "<<pk<<std::endl;
+
+       IPeak & peak =Peaks->getPeak(pk);
+       if( peak.getRunNumber() != runNum)
+         continue;
+       boost::shared_ptr<Algorithm> intSlice = AlgorithmFactory::Instance().create("IntegratePeakTimeSlices",1);
+       intSlice->initialize();
+       intSlice->setProperty("InputWorkspace", wsBin);
+       intSlice->setPropertyValue("OutputWorkspace","LogInfo");
+       intSlice->setProperty("Peaks", Peaks);
+       intSlice->setProperty("PeakIndex", pk);
+       intSlice->setProperty("PeakQspan", dq);
+       intSlice->setProperty("CalculateVariances", true);
+       intSlice->execute();
+       intSlice->setPropertyValue("OutputWorkspace","LogInfo");
+       TableWorkspace_sptr tabl =intSlice->getProperty("OutputWorkspace");
+       double intensity, intensity_err;
+       bool Res =CalcIntensitySigma(tabl, intensity, intensity_err, pk);
+       //std::cout<<"Old,Calc1,newCalc1 res=("<<peak.getIntensity()<<","<<peak.getSigmaIntensity()<<")";
+       if( Res)
+         {
+            peak.setIntensity( intensity);
+            peak.setSigmaIntensity( intensity_err);
+         }else
+         {
+           peak.setIntensity(     (double)intSlice->getProperty("Intensity"));
+           peak.setSigmaIntensity((double)intSlice->getProperty("SigmaIntensity"));
+         }
+      // std::cout<<"("<<(double)intSlice->getProperty("Intensity")<<","<<(double)intSlice->getProperty("SigmaIntensity")<<")";
+      // std::cout<<"("<<peak.getIntensity()<<","<<peak.getSigmaIntensity()<<")"<<std::endl;
+     }
+   }
+
+};
+*/
 class IntegratePeakCheck: public CxxTest::TestSuite
 {
 public:
@@ -141,14 +375,14 @@ public:
          return b;
    }
 
-  void test_abc()
+  void tesst_abc()
   {
     for( int i=0; i<1;i++)
       trest_abc();
   }
   void trest_abc()
   {
-    int NRC = 80;//30;
+   int NRC = 80;//30;
     int NTimes = 40;
     int PeakRow =22;// 12;
     int PeakCol = 27;//17;
@@ -252,7 +486,7 @@ public:
 //-------------------- end testing for nearest neighborhood ---------------------------
 
     //Now set up data in workspace2D
-    double dQ = 0;
+   double dQ = 0;
     double Q0 = calcQ(bankR, instP, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
 
 
@@ -468,7 +702,7 @@ ISAWIntensityError     59.4822     69.8998     78.9547      87.073     78.9547  
 
 
        */
-    } catch (char * s)
+  } catch (char * s)
     {
       std::cout << "Error= " << s << std::endl;
     } catch (std::exception &es)
@@ -478,10 +712,167 @@ ISAWIntensityError     59.4822     69.8998     78.9547      87.073     78.9547  
     {
       std::cout << "Some Error Happened" << std::endl;
     }
+
   }
 
+  void test_int()
+  {
+    boost::shared_ptr<Algorithm> loadPeaks = AlgorithmFactory::Instance().create("LoadIsawPeaks",1);
+    loadPeaks->initialize();
+    loadPeaks->setProperty("Filename","/usr2/DATA/Projects/TOPAZ/T5637_44/ISAW_EV_TESTS/IntPk.integrate"");
+    loadPeaks->setPropertyValue("OutputWorkspace", "Peaks");
+    loadPeaks->execute();
+    loadPeaks->setPropertyValue("OutputWorkspace", "Peaks");
+    PeaksWorkspace_sptr Peaks = loadPeaks->getProperty("OutputWorkspace");
 
 
+    int runNum =5637;
+    boost::shared_ptr< Algorithm >loadData =AlgorithmFactory::Instance().create("Load",1);
+    loadData->initialize();
+    loadData->setProperty("Filename","/usr2/DATA/TOPAZ/TOPAZ_5637_event.nxs");
+    loadData->setPropertyValue("OutputWorkspace","TOPAZ_event");
+    loadData->execute();
+    loadData->setPropertyValue("OutputWorkspace","TOPAZ_event");
+    boost::shared_ptr<EventWorkspace> ws =  AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>("TOPAZ_event");
+
+
+    boost::shared_ptr< Algorithm> rebin = AlgorithmFactory::Instance().create("Rebin",1);
+    rebin->initialize();
+    rebin->setProperty("InputWorkspace", ws);
+    rebin->setPropertyValue("OutputWorkspace","Hist5637DS");
+    rebin->setProperty("Params","400,-.002,16000");
+    rebin->setProperty("PreserveEvents",true);
+    rebin->execute();
+    rebin->setPropertyValue("OutputWorkspace","Hist5637DS");
+    MatrixWorkspace_sptr wsBin= rebin->getProperty("OutputWorkspace");
+
+    double dq =.2;
+
+    for( int pk =0 ; pk< Peaks->getNumberPeaks(); pk++)
+    {
+      //std::cout<<"Peak "<<pk<<std::endl;
+
+      IPeak & peak =Peaks->getPeak(pk);
+      if( peak.getRunNumber() != runNum)
+        continue;
+      boost::shared_ptr<Algorithm> intSlice0 = AlgorithmFactory::Instance().create("IntegratePeakTimeSlices",1);
+      boost::shared_ptr<IntegratePeakTimeSlices>intSlice =
+          boost::dynamic_pointer_cast<IntegratePeakTimeSlices>(intSlice0);
+      intSlice->initialize();
+      intSlice->setProperty("InputWorkspace", wsBin);
+      intSlice->setPropertyValue("OutputWorkspace","LogInfo");
+      intSlice->setProperty("Peaks", Peaks);
+      intSlice->setProperty("PeakIndex", pk);
+      intSlice->setProperty("PeakQspan", dq);
+      intSlice->setProperty("CalculateVariances", true);
+      intSlice->execute();//Xcute must handle table workspace in analysis data service . did not speed up that much
+      intSlice->setPropertyValue("OutputWorkspace","LogInfo");
+      TableWorkspace_sptr tabl =intSlice->getProperty("OutputWorkspace");
+      double intensity, intensity_err;
+      bool Res =CalcIntensitySigma(tabl, intensity, intensity_err, pk);
+      //std::cout<<"Old,Calc1,newCalc1 res=("<<peak.getIntensity()<<","<<peak.getSigmaIntensity()<<")";
+      if( Res)
+        {
+           peak.setIntensity( intensity);
+           peak.setSigmaIntensity( intensity_err);
+        }else
+        {
+          peak.setIntensity(     (double)intSlice->getProperty("Intensity"));
+          peak.setSigmaIntensity((double)intSlice->getProperty("SigmaIntensity"));
+        }
+     // std::cout<<"("<<(double)intSlice->getProperty("Intensity")<<","<<(double)intSlice->getProperty("SigmaIntensity")<<")";
+     // std::cout<<"("<<peak.getIntensity()<<","<<peak.getSigmaIntensity()<<")"<<std::endl;
+    }
+    boost::shared_ptr<Algorithm> savePeaks = AlgorithmFactory::Instance().create("SaveIsawPeaks",1);
+               savePeaks->initialize();
+               savePeaks->setProperty("Filename","/usr2/DATA/Projects/TOPAZ/T5637_44/ISAW_EV_TESTS/IntPka.integrate");
+               savePeaks->setProperty("InputWorkspace", Peaks);
+               savePeaks->setProperty("AppendFile",false);
+               savePeaks->execute();
+
+
+
+
+
+  }
+/*  void test_int()
+    {
+      boost::shared_ptr<Algorithm> loadPeaks = AlgorithmFactory::Instance().create("LoadIsawPeaks",1);
+      loadPeaks->initialize();
+      loadPeaks->setProperty("Filename","/usr2/DATA/Projects/TOPAZ/T5637_44/ISAW_EV_TESTS/PredSapphire_0.2_IsawEV_Rhombohedral.integrate");
+      loadPeaks->setPropertyValue("OutputWorkspace", "Peaks");
+      loadPeaks->execute();
+      loadPeaks->setPropertyValue("OutputWorkspace", "Peaks");
+      PeaksWorkspace_sptr Peaks = loadPeaks->getProperty("OutputWorkspace");
+
+
+      int runNum =5644;
+      boost::shared_ptr< Algorithm >loadData =AlgorithmFactory::Instance().create("Load",1);
+      loadData->initialize();
+      loadData->setProperty("Filename","/usr2/DATA/TOPAZ/TOPAZ_5644_event.nxs");
+      loadData->setPropertyValue("OutputWorkspace","TOPAZ_event");
+      loadData->execute();
+      loadData->setPropertyValue("OutputWorkspace","TOPAZ_event");
+      boost::shared_ptr<EventWorkspace> ws =  AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>("TOPAZ_event");
+
+
+      boost::shared_ptr< Algorithm> rebin = AlgorithmFactory::Instance().create("Rebin",1);
+      rebin->initialize();
+      rebin->setProperty("InputWorkspace", ws);
+      rebin->setPropertyValue("OutputWorkspace","Hist5637DS");
+      rebin->setProperty("Params","400,-.002,16000");
+      rebin->setProperty("PreserveEvents",true);
+      rebin->execute();
+      rebin->setPropertyValue("OutputWorkspace","Hist5637DS");
+      MatrixWorkspace_sptr wsBin= rebin->getProperty("OutputWorkspace");
+
+      double dq =.2;
+
+      int NDeciles = Peaks->getNumberPeaks()/10;
+      if(10*NDeciles+1 < Peaks->getNumberPeaks() ) NDeciles++;
+      boost::thread task1( 0,(Peaks),(wsBin));
+      boost::thread task2( 1,(Peaks), (wsBin));
+      boost::thread task3( 2,(Peaks), (wsBin));
+      int nextDecile = 3;
+      bool done = nextDecile >= NDeciles;
+    while (!done)
+    {
+      (task1.join());
+      {
+        boost::thread task(nextDecile, (Peaks), (wsBin));
+        nextDecile++;
+        task1.swap(task);
+      }
+      task2.join();
+      if( nextDecile < NDeciles)
+      {
+        boost::thread task(nextDecile, (Peaks), (wsBin));
+        nextDecile++;
+        task2.swap(task);
+      }
+      task3.join();
+      if ( nextDecile < NDeciles)
+      {
+        boost::thread task(nextDecile, (Peaks),(wsBin));
+        nextDecile++;
+        task3.swap(task);
+      }
+      bool done = nextDecile >= NDeciles;
+
+    }
+      boost::shared_ptr<Algorithm> savePeaks = AlgorithmFactory::Instance().create("SaveIsawPeaks",1);
+                 savePeaks->initialize();
+                 savePeaks->setProperty("Filename","/usr2/DATA/Projects/TOPAZ/T5637_44/ISAW_EV_TESTS/IntPka.integrate");
+                 savePeaks->setProperty("InputWorkspace", Peaks);
+                 savePeaks->setProperty("AppendFile",false);
+                 savePeaks->execute();
+
+
+
+
+
+    }
+*/
 
 private:
   bool usePoisson;
@@ -623,7 +1014,7 @@ private:
   /**
    * Creates a 2D workspace for testing purposes
    */
-  Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int Npanels, int NRC, double sideLength,
+ Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int Npanels, int NRC, double sideLength,
       int NTimes)
   {
     // Workspace2D_sptr wsPtr = WorkspaceFactory::Instance().create("Workspace2D", NPanels;
@@ -646,5 +1037,182 @@ private:
     return wsPtr;
   }
 
+
+  bool CalcIntensitySigma(TableWorkspace_sptr tabl, double &intensity, double&intensity_err, int peak)
+   { bool show = false;
+   std::cout<<"Peak "<< peak<<std::endl;
+     if( tabl->rowCount() <= 0)
+     {
+       intensity=0;
+       intensity_err = 0;
+       return true;
+     }
+
+     int BackgroundCol =2;
+     int TotIntensityCol = 11;
+     int BackgroundErrCol =12;
+     int TotBackgroundCol =16;
+     int NBackgroundCol = 17;
+     int NCellCol       =9;
+     int StartRowCol    =18;
+     int EndRowCol    =19;
+     int StartColCol    =20;
+     int EndColCol    =21;
+
+     if( tabl->rowCount() ==1)
+         {
+
+          double SampTotBackground =tabl->cell<double>(0,TotBackgroundCol);
+           double SampNBackground = tabl->cell<double>(0, NBackgroundCol);
+           double FitBackground=tabl->cell<double>(0,BackgroundCol);
+           double Background = min<double>(FitBackground,SampTotBackground/SampNBackground);
+           if( show)
+           std::cout<<"("<<peak<<","<<0<<","<<FitBackground
+               <<","<<SampTotBackground/SampNBackground<<","<<Background
+               <<","<<tabl->cell<double>(0,TotIntensityCol)
+               <<","<<tabl->cell<double>(0,NCellCol)
+               <<","<<tabl->cell<double>(0,StartRowCol)
+               <<","<<tabl->cell<double>(0,EndRowCol)
+               <<","<<tabl->cell<double>(0,StartColCol)
+               <<","<<tabl->cell<double>(0,EndColCol)<<")"<<std::endl;
+           return false;
+         }
+
+
+     int MaxIntensRow = -1;
+     double MaxIntensity =-1;
+     double MaxBackgroundDiff = -1;
+     std::vector<double>DiffList;
+     std::vector<double>IntensityList;
+     std::vector<double>weightList;
+     std::vector<double>bkErrList;
+     std::vector<double>BackgroundList;
+     int NCells=0;
+     double TotIntensity=0;
+     for( size_t row =0; row < tabl->rowCount(); row++)
+     {
+       NCells+=(tabl->cell<double>(row, NCellCol));
+       double Intensity =(tabl->cell<double>(row, TotIntensityCol));
+       TotIntensity+=Intensity;
+
+       double SampTotBackground =tabl->cell<double>(row,TotBackgroundCol);
+       double SampNBackground = tabl->cell<double>(row, NBackgroundCol);
+
+       double FitBackgroundErr =tabl->cell<double>(row,BackgroundErrCol);
+       double FitBackground=tabl->cell<double>(row,BackgroundCol);
+       double diff =SampTotBackground/SampNBackground-FitBackground;
+       DiffList.push_back(diff);
+       if( diff < 0 )
+       {
+         double adjBack =FitBackground+2*diff;
+         if (adjBack <0)
+              adjBack =0;
+         BackgroundList.push_back( adjBack );
+         bkErrList.push_back( sqrt(5*FitBackgroundErr*FitBackgroundErr+4*SampTotBackground/SampNBackground/SampNBackground));
+
+       }
+       else
+       {
+         BackgroundList.push_back( SampTotBackground/SampNBackground);
+         bkErrList.push_back(sqrt(SampTotBackground/SampNBackground/SampNBackground));
+       }
+       if ( -diff > MaxBackgroundDiff)
+       MaxBackgroundDiff = -diff;
+
+       if (Intensity > MaxIntensity)
+       {
+         MaxIntensRow = row;
+         MaxIntensity = Intensity;
+       }
+     }
+     double diff2wtMult = 20/MaxBackgroundDiff;
+     double offMaxSlice2wtMult;
+     int nRows = tabl->rowCount();
+     if (MaxIntensRow*2 < nRows)
+         offMaxSlice2wtMult =10/(nRows-1-MaxIntensRow);
+     else
+        offMaxSlice2wtMult = 10/MaxIntensRow;
+     double Num=0;
+     double NumErr=0;
+     double Den =0;
+     double wt = 1;
+     //if( show)
+     //  std::cout<<"diff2stMult and offmaxSlice2wtMult="<<diff2wtMult<<","<<offMaxSlice2wtMult<<std::endl;
+     for(int r=0;r < nRows; r++)
+     try{
+       wt = 1;
+       if ( DiffList[r] < 0)
+              wt -= diff2wtMult*DiffList[r];
+       //if(show)std::cout<<"row,wt,BackgroundError,Num="<<r<<","<<wt;
+       double wt1=0;
+       if( r<MaxIntensRow)
+       {
+         wt1=10 - offMaxSlice2wtMult*(MaxIntensRow-r);
+         if( wt1 > 0)
+            wt +=wt1;
+
+       }
+       else
+       {
+         wt1=10 - offMaxSlice2wtMult*(r-MaxIntensRow);
+         if( wt1 >0)
+             wt +=wt1;
+
+       }
+       //if(show)std::cout<<","<<wt;
+       // #wieght low intensity time slices more too
+       wt += 15*tabl->cell<double>( r, TotIntensityCol)/MaxIntensity;
+
+       //if(show)std::cout<<","<<wt;
+       Num +=BackgroundList[r]/wt;
+       Den +=1/wt;
+       NumErr +=bkErrList[r]/wt;
+     //  if( show)
+     //    std::cout<<"::"<<bkErrList[r]<<","<<Num<<std::endl;
+
+     }catch( std::exception &s)
+     {
+       std::cout<<"Exception wt,row,BackgroundList size="<<wt<<","<<r<<","<<BackgroundList.size()<<std::endl;
+       std::cout<<"Exception message="<< s.what()<<std::endl;
+       return false;
+     }catch( char * message)
+     {
+       std::cout<<"Exception wt,row,BackgroundList size="<<wt<<","<<r<<","<<BackgroundList.size()<<std::endl;
+            std::cout<<"Exception message="<< message<<std::endl;
+        return false;
+     }catch(...)
+     {
+       std::cout<<"Exception wt,row,BackgroundList size="<<wt<<","<<r<<","<<BackgroundList.size()<<std::endl;
+            std::cout<<"No Exception message="<< std::endl;
+            return false;
+     }
+
+     double avBack = Num/Den;
+     double avBackErr = NumErr/Den;
+    // if( show)
+    //   std::cout<<"av backerr,TotIntensity,NCells="<<avBackErr<<","<<TotIntensity<<","<<NCells<<std::endl;
+     double totVar = TotIntensity + avBackErr*avBackErr*NCells*NCells;
+
+     intensity = TotIntensity-avBack*NCells;
+     intensity_err =( sqrt( totVar));
+     //cols 14 & 14
+     for( int row =0;row <nRows;row++)
+     {
+       if( show)
+       std::cout<<"("<<peak<<","<<row<<","<<tabl->cell<double>(row,BackgroundCol)
+           <<","<<tabl->cell<double>(row,TotBackgroundCol)/tabl->cell<double>(row,NBackgroundCol)<<","<<avBack
+           <<","<<tabl->cell<double>(row,TotIntensityCol)
+           <<","<<tabl->cell<double>(row,NCellCol)
+           <<","<<tabl->cell<double>(row,StartRowCol)
+           <<","<<tabl->cell<double>(row,EndRowCol)
+           <<","<<tabl->cell<double>(row,StartColCol)
+           <<","<<tabl->cell<double>(row,EndColCol)<<")"<<std::endl;
+       double RowIntensity = tabl->cell<double>(row, TotIntensityCol);
+       double RowNCells = tabl->cell<double>(row, NCellCol);
+       tabl->cell<double>(row,14)= RowIntensity - avBack*RowNCells;
+       tabl->cell<double>(row,15)= sqrt(RowIntensity+ avBackErr*avBackErr*RowNCells*RowNCells);
+     }
+     return true;
+   }
 };
 #endif /* INTEGRATEPEAKCHECK_H_ */
