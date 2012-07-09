@@ -113,6 +113,7 @@ set ( TEST_PY_FILES
   test/python/PythonAlgorithmTraitsTest.py
   test/python/PythonAlgorithmWorkspacePropertyTest.py
   test/python/ReferenceFrameTest.py
+  test/python/RetrieveRunInfoTest.py
   test/python/RunTest.py
   test/python/SimpleAPITest.py
   test/python/SimpleAPILoadTest.py
