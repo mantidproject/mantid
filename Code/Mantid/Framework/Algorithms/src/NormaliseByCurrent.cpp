@@ -1,13 +1,12 @@
 /*WIKI* 
 
+Normalises a workspace according to the good proton charge figure taken from the Input Workspace log data, which is stored in the workspace's [[Sample]] object). Every data point (and its error) is divided by that number.
 
-Normalises a workspace according to the good proton charge figure taken from the RAW file, which is stored in the workspace's [[Sample]] object). Every data point (and its error) is divided by that number.
-
-Note that units are not fully dealt with at the moment - the output will have identical units to the input workspace (i.e. will not reflect that fact that it should show "/ uA.hour").
+== ISIS Calculation Details ==
+The good proton charge '''gd_ptrn_chrg''' is an summed value that applies across all periods. It is therefore suitable to run NormaliseByProtonCharge for single-period workspaces, but gives incorrect normalisation for multi-period workspaces. If the algorithm detects the presences of a multi-period workspace, it calculates the normalisation slightly differently. It uses the '''current_period''' log property to index into the '''proton_charge_by_period''' log data array property.
 
 === EventWorkspaces ===
 If the input workspace is an [[EventWorkspace]], then the output will be as well. Weighted events are used to scale by the current (see the [[Divide]] algorithm, which is a subalgorithm being used).
-
 
 *WIKI*/
 //----------------------------------------------------------------------
