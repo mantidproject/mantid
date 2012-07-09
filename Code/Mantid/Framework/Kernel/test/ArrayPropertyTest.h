@@ -60,6 +60,25 @@ public:
     TS_ASSERT( ! sp.operator()()[2].compare("yyy") )
   }
 
+  void testSize()
+  {
+    TS_ASSERT_EQUALS(0, iProp->size());
+    TS_ASSERT_EQUALS(0, dProp->size());
+    TS_ASSERT_EQUALS(0, sProp->size());
+
+    // Make something bigger and test that.
+    Property* a = new ArrayProperty<int>("int_property", "1, 2, 3");
+    TS_ASSERT_EQUALS(3, a->size());
+    delete a;
+
+    // Test vector of vector.
+    std::vector<std::vector<int> > input;
+    input.push_back(std::vector<int>(10)); // Make it 10 elements long, but should only be the size of the parent vector that is counted.
+    Property* b = new ArrayProperty<std::vector<int> >("vec_property", input);
+    TS_ASSERT_EQUALS(1, b->size());
+    delete b;
+  }
+
   void testConstructorByString()
   {
 	  ArrayProperty<int> i("i","1,2,3");
