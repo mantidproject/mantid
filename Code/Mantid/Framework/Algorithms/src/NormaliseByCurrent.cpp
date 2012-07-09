@@ -97,8 +97,8 @@ double NormaliseByCurrent::extractCharge(MatrixWorkspace_sptr inputWS) const
       g_log.error() << "The proton charge is not set for the run attached to this workspace\n";
       throw;
     }
-    return charge;
   }
+  return charge;
 }
 
 void NormaliseByCurrent::exec()

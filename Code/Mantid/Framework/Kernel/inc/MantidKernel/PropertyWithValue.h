@@ -109,7 +109,7 @@ std::string toString(const std::vector<std::vector<T> >& value)
 
 /// Specialisation for any type, should be appropriate for properties with a single value.
 template <typename T>
-int findSize(const T& value)
+int findSize(const T&)
 {
   return 1;
 }
