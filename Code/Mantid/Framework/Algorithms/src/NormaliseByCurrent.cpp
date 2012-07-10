@@ -74,7 +74,7 @@ double NormaliseByCurrent::extractCharge(MatrixWorkspace_sptr inputWS) const
     g_log.warning() << "No nperiods property. If this is multi-period data, then you will be normalising against the wrong current.\n";
   } 
   // Handle multiperiod data.
-  if(nPeriods > 0)
+  if(nPeriods > 1)
   {
     // Fetch the period property
     Property* currentPeriodNumberProperty = run.getLogData("current_period");

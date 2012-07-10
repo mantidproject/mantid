@@ -151,6 +151,30 @@ public:
     doTest(ws, "period1", 0.2, 0.3); // 2/10, 3/10.
   }
 
+  void testTreatAsSinglePeriodWithOnlyOneInNPERIODS_Log()
+  {
+    const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
+
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    ws->setYUnit("Counts");
+    addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we would be normalising by a charge of 2.0
+    ws->mutableRun().setProtonCharge(10); // This is what will be used when the period information is deemed unavailable
+    ws->mutableRun().getLogData("nperiods")->setValue("1"); // nperiods now indicates SINGLE-period data.
+    doTest(ws, "period1", 0.2, 0.3); // 2/10, 3/10.
+  }
+
+  void testTreatAsMultiPeriodWithMoreThanOneInNPERIODS_Log()
+  {
+    const std::string protonChargeByPeriod = "2.0, 4.0";
+
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    ws->setYUnit("Counts");
+    addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we would be normalising by a charge of 2.0
+    ws->mutableRun().setProtonCharge(10); // This is what will be used when the period information is deemed unavailable
+    ws->mutableRun().getLogData("nperiods")->setValue("2"); // nperiods now indicates MULTI-period data.
+    doTest(ws, "period1", 1, 1.5); // 2/2, 3/2.
+  }
+
   void testThrowsWithoutCURRENT_PERIOD_Log()
   {
     const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
