@@ -66,11 +66,11 @@ Workspace_sptr EQSANSReduce::loadInputData()
 
   std::string inputData = getPropertyValue("Filename");
   const std::string inputWSName = getPropertyValue("InputWorkspace");
-  if (inputWSName.size() > 0 && inputData.size() > 0)
+  if (!inputWSName.empty() && !inputData.empty())
     throw std::runtime_error("EQSANSReduce: Either the Filename property or InputWorkspace property must be provided, NOT BOTH");
-  else if (inputWSName.size() > 0)
+  else if (!inputWSName.empty())
     inputWS = load(inputWSName);
-  else if (inputData.size() > 0)
+  else if (!inputData.empty())
     inputWS = load(inputData);
   else
     throw std::runtime_error("EQSANSReduce: Either the Filename property or InputWorkspace property must be provided");
@@ -90,7 +90,7 @@ void EQSANSReduce::performReduction(Workspace_sptr workspace)
   // For testing the live reduction, we may need to load some
   // logs from another file
   const std::string logFile = getPropertyValue("LogDataFile");
-  if (logFile.size()>0)
+  if (!logFile.empty())
   {
     IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs");
     alg->setLogging(false);
