@@ -242,7 +242,7 @@ namespace CurveFitting
       g_log.debug() << "DB327 " << xValues[n] << "\t\t" << out[n] << std::endl;
 
     // 3. Clean
-    delete tempout;
+    delete[] tempout;
 
     return;
   }

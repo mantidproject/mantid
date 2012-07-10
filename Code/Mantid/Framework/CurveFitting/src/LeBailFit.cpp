@@ -460,9 +460,9 @@ namespace CurveFitting
     }
 
     // -1. Clean
-    delete xvalues;
-    delete tempout;
-    delete sumYs;
+    delete[] xvalues;
+    delete[] tempout;
+    delete[] sumYs;
 
     return;
   }
