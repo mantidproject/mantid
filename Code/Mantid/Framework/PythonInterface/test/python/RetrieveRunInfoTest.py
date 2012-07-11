@@ -6,7 +6,7 @@ mtd.initialise()
 from mantid.kernel import *
 from mantid.api import *
 from mantid import config
-
+from mantid.simpleapi import DeleteWorkspace
 from testhelpers import run_algorithm
 
 class RetrieveRunInfoTest(unittest.TestCase):
@@ -96,7 +96,7 @@ class RetrieveRunInfoTest(unittest.TestCase):
         self.assertEqual(output_ws.columnCount(), 5) # Five log props.
         self.assertEqual(output_ws.rowCount(), 3) # Three runs.
         
-        mtd.deleteWorkspace(Workspace = 'test')
+        DeleteWorkspace(Workspace = 'test')
         
 if __name__ == '__main__':
     unittest.main()
