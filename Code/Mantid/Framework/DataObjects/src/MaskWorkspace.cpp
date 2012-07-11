@@ -111,7 +111,11 @@ namespace DataObjects
     bool MaskWorkspace::isMasked(const detid_t detectorID) const
     {
       if (!m_hasInstrument)
-        throw std::runtime_error("There is no instrument associated with the workspace");
+      {
+        std::stringstream msg;
+        msg << "There is no instrument associated with workspace \'" << this->getName() << "\'";
+        throw std::runtime_error(msg.str());
+      }
 
       // return true if the value isn't zero
       if (this->getValue(detectorID, 0.) != LIVE_VALUE)
