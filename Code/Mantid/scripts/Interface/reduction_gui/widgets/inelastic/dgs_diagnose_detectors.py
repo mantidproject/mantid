@@ -12,8 +12,8 @@ class DiagnoseDetectorsWidget(BaseWidget):
     ## Widget name
     name = "Diagnose Detectors"
     
-    def __init__(self, parent=None, state=None, settings=None):
-        super(DiagnoseDetectorsWidget, self).__init__(parent, state, settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(DiagnoseDetectorsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
         class DiagDetsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_diagnose_detectors.Ui_DiagDetsFrame): 
             def __init__(self, parent=None):

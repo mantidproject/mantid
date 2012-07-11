@@ -12,8 +12,8 @@ class SampleSetupWidget(BaseWidget):
     ## Widget name
     name = "Sample Setup"
     
-    def __init__(self, parent=None, state=None, settings=None):
-        super(SampleSetupWidget, self).__init__(parent, state, settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(SampleSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
         
         class SamSetFrame(QtGui.QFrame, ui.inelastic.ui_dgs_sample_setup.Ui_Frame): 
             def __init__(self, parent=None):

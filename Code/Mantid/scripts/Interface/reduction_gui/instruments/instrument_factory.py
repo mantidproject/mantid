@@ -15,11 +15,14 @@ from dgs_interface_dev import DgsInterface
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface},
-                   "SNS":  {"EQSANS": EQSANSInterface,
+                   "SNS":  {"ARCS": DgsInterface,
+                            "CNCS": DgsInterface,
+                            "EQSANS": EQSANSInterface,
+                            "HYSPEC": DgsInterface,
                             "REFL": REFLInterface,
                             "REFLSF": REFLSFInterface,
                             "REFM": REFMInterface,
-                            "SEQ": DgsInterface,
+                            "SEQUOIA": DgsInterface,
                             "Example": ExampleInterface}
                   }               
 

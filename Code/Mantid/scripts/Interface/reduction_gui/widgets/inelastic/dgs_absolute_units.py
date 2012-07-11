@@ -12,8 +12,8 @@ class AbsoluteUnitsWidget(BaseWidget):
     ## Widget name
     name = "Absolute Units"
     
-    def __init__(self, parent=None, state=None, settings=None):
-        super(AbsoluteUnitsWidget, self).__init__(parent, state, settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(AbsoluteUnitsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
         class AbsUnitsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_absolute_units.Ui_AbsUnitsFrame): 
             def __init__(self, parent=None):

@@ -18,13 +18,16 @@ class DgsInterface(InstrumentInterface):
         self.scripter = DgsReductionScripter()        
 
         # Sample run setup
-        self.attach(SampleSetupWidget(settings = self._settings))#, data_type = self.data_type))
+        self.attach(SampleSetupWidget(settings = self._settings, 
+                                      data_type = self.data_type))
         
         # Data corrections
         self.attach(DataCorrectionsWidget(settings = self._settings))
         
         # Diagnose detectors
-        self.attach(DiagnoseDetectorsWidget(settings = self._settings))
+        self.attach(DiagnoseDetectorsWidget(settings = self._settings, 
+                                            data_type = self.data_type))
         
         # Absolute units normalisation
-        self.attach(AbsoluteUnitsWidget(settings = self._settings))
+        self.attach(AbsoluteUnitsWidget(settings = self._settings,
+                                        data_type = self.data_type))
