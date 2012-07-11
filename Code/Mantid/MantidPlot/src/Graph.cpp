@@ -138,8 +138,6 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   drawArrowOn=false;
   ignoreResize = false;
   drawAxesBackbone = true;
-  d_auto_scale = true;
-  //d_auto_scale = false;
   autoScaleFonts = false;
   d_antialiasing = false;
   d_scale_on_print = true;
@@ -1032,8 +1030,25 @@ void Graph::updateSecondaryAxis(int axis)
   d_user_step[axis] = d_user_step[a];
 }
 
+void Graph::enableAutoscaling(bool yes)
+{
+  for (int i = 0; i < QwtPlot::axisCnt; i++)
+  {
+    if (yes)
+    {
+      d_plot->setAxisAutoScale(i);
+    }
+    else
+    {
+      // We need this hack due to the fact that in Qwt 5.0 we can't
+      // disable autoscaling in an easier way, like for example: setAxisAutoScale(axisId, false)
+      d_plot->setAxisScaleDiv(i, *d_plot->axisScaleDiv(i));
+    }
+  }
+}
+
 void Graph::setAutoScale()
-{	
+{
   for (int i = 0; i < QwtPlot::axisCnt; i++)
   {
     if ( !m_fixed_axes.contains(i) )
@@ -3468,23 +3483,11 @@ void Graph::updatePlot()
 {
   if ( isWaterfallPlot() ) updateDataCurves();
 
-  if (d_auto_scale && !zoomOn() && d_active_tool==NULL){
-    for (int i = 0; i < QwtPlot::axisCnt; i++)
-      d_plot->setAxisAutoScale(i);
-  }
-  d_plot->replot();
   updateScale();
 }
 
 void Graph::updateScale()
 {
-  if (!d_auto_scale)
-  {
-    //We need this hack due to the fact that in Qwt 5.0 we can't
-    //disable autoscaling in an easier way, like for example: setAxisAutoScale(axisId, false)
-    for (int i = 0; i < QwtPlot::axisCnt; i++)
-      d_plot->setAxisScaleDiv(i, *d_plot->axisScaleDiv(i));
-  }
   d_plot->replot();
   updateMarkersBoundingRect();
   updateSecondaryAxis(QwtPlot::xTop);

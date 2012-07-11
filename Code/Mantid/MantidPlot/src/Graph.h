@@ -695,7 +695,7 @@ public slots:
   void notifyChanges();
 
   void updateSecondaryAxis(int axis);
-  void enableAutoscaling(bool yes){d_auto_scale = yes;};
+  void enableAutoscaling(bool yes);
 
   bool autoscaleFonts(){return autoScaleFonts;};
   void setAutoscaleFonts(bool yes){autoScaleFonts = yes;};
@@ -848,8 +848,8 @@ private:
   LegendWidget *d_selected_text;
   //! Pointer to the current legend
   LegendWidget *d_legend;
-  //! Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
-  bool d_auto_scale;
+  // Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
+  // Qtiplot variable that we don't use (use qwtplot axis behaviour directly): bool d_auto_scale;
   static Mantid::Kernel::Logger &g_log;
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
