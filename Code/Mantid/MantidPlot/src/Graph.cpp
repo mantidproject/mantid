@@ -1049,20 +1049,13 @@ void Graph::enableAutoscaling(bool yes)
 
 void Graph::setAutoScale()
 {
-  for (int i = 0; i < QwtPlot::axisCnt; i++)
-  {
-    if ( !m_fixed_axes.contains(i) )
-    {
-      d_plot->setAxisAutoScale(i);
-    }
-  }
-  d_plot->replot();
+  enableAutoscaling(true);
   
   updateScale();
   
   for (int i = 0; i < QwtPlot::axisCnt; i++)
   {
-    if ( !m_fixed_axes.contains(i) && isLog(QwtPlot::Axis(i)) )
+    if ( isLog(QwtPlot::Axis(i)) )
     {
       niceLogScales(QwtPlot::Axis(i));
     }
@@ -1070,10 +1063,10 @@ void Graph::setAutoScale()
   emit modifiedGraph();
 }
 
-void Graph::setFixedScale(int axis)
-{
-  m_fixed_axes.insert(axis);
-}
+//void Graph::setFixedScale(int axis)
+//{
+//  m_fixed_axes.insert(axis);
+//}
 
 void Graph::initScaleLimits()
 {//We call this function the first time we add curves to a plot in order to avoid curves with cut symbols.
